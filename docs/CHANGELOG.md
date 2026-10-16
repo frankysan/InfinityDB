@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Hacking Area now cites the correct N5.3 page and explains
+  when a Hacker, a Comms Attack target, or a delayed
+  Camouflaged Marker can generate separate ARO opportunities.
 - Suppressive Fire now distinguishes its Long Skill declaration
   from the State's B3 ARO and explains the G: Jumper exception
   when a different Proxy is activated.

@@ -2255,6 +2255,18 @@ Repeaters and Deployable Repeaters, with additional rules for interacting throug
 enemy Repeaters. It can create ARO/target relationships without LoF and outside
 the Hacker's own ZoC.
 
+**Reactive declaration windows (N5.3 pp. 55, 57):** Hacking
+Area can give a reactive Hacker an ARO against an Active Hacker
+outside ordinary LoF/ZoC, but another Trooper does not gain an
+ARO against the Active Hacker's initial Idle solely by being a
+possible target of a later Program. If subsequently targeted by
+a Comms Attack, that Trooper can declare Reset. A Camouflaged
+Marker acting inside a Hacker's Hacking Area can instead cause
+the Hacker to delay its ARO; in the official example, the
+Hacker can declare an ARO only if that Marker reveals itself
+during the second Short Skill. Neither Hacking Area presence
+nor a delayed declaration overrides the Program's Requirements.
+
 Hacking Area is therefore not a fixed range value that belongs on a Hacker's
 canonical Unit Profile. InfinityDB may document which entities extend or use the
 area, but an actual live Hacking Area requires game positions, Repeater state,

@@ -1323,6 +1323,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         itself cancel the first Proxy's Suppressive Fire.
         Pinned-source tests and 6/6 responsive browser
         checks passed; ordinary State cancellation remains.
+      - [x] Correct Hacking Area's primary N5.3 source from
+        p. 56 to its actual p. 55 heading. Verify the p. 57
+        separate reactive windows for an Active Hacker and
+        the delay/reveal condition for a Camouflaged Marker.
+        Source-pinned tests and repeated responsive browser
+        checks cover the selected examples; the rest remains open.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

@@ -671,6 +671,39 @@ passed 6/6 headless browser checks at 1440/390/320 px.
 This is bounded acceptance; the frozen 367-record inventory
 and final whole-corpus 1.0 gate remain open.
 
+## Hacking Area citation and split ARO windows (2026-10-16)
+
+Pinned English N5.3 p. 55 defines Hacking Area and its
+ARO eligibility, not p. 56 as previously cited. Page 56
+instead contains HoloMask/Repeater equipment rules. The
+source citation on the owning Hacking Area rule was corrected
+to p. 55, preserving the archived Wiki provenance. Page
+57 now has a separate citation for its two worked examples.
+
+In the p. 57 Active Hacker example, the enemy Hacker can
+declare an ARO through Hacking Area while the Active Hacker
+is outside ordinary LoF and ZoC. Enemy Heavy Infantry
+outside both has no ARO to the first Idle, but receives a
+Reset ARO when the second Short Skill targets it with
+a Comms Attack. In the Camouflaged example, an enemy
+Hacker can delay an ARO against a Marker inside Hacking
+Area, declaring a reaction in that example only when
+the Marker reveals itself with the second Short Skill.
+A potential target or hidden identity alone does not
+confer unrestricted permission to react or hack.
+
+The existing Hacking Area derivation, Repeater links,
+enemy-Repeater limitations, and HoloMask exceptions
+remain unchanged. Two curated and SHA-256-pinned PDF
+tests confirm the citation and bounded procedures.
+A fresh rules DB rendered the published page at
+1440/390/320 px. The initial browser run missed body text
+at 390 px despite HTTP 200; three subsequent complete
+runs passed all widths (9/9 cases), so that intermittent
+condition is not treated as a confirmed product defect.
+The original 367-record audit remains frozen, and full
+1.0 corpus acceptance is still open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

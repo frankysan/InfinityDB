@@ -2612,3 +2612,27 @@ ignored local/audits/suppressive-fire-aro/.
 The frozen 367-record audit is unchanged. This is a
 selected conditional activation review, not whole-corpus
 1.0 acceptance.
+
+## 1.0 Hacking Area reactive windows
+
+**Verified 2026-10-16 against SHA-256-pinned English N5.3
+pp. 55-57.** Curated regression coverage pins the owning
+Hacking Area rule to the correct p. 55 source heading,
+preserves its archived Wiki citation, and checks separate
+ARO opportunities for an enemy Hacker and a later targeted
+Trooper, plus delayed ARO restrictions for Camouflaged Markers.
+A pinned-PDF test verifies both worked source examples.
+
+The published Hacking Area page was tested from a fresh
+rules database in headless Chrome at 1440, 390 and 320 px.
+The first attempt displayed incomplete content at 390 px
+despite HTTP 200; diagnostic reruns were all successful:
+**three complete repeats, 9/9 checks passed** for rule
+content, links, no JavaScript errors and no horizontal
+overflow. The intermittent initial failure is recorded
+but not confirmed as a reproducible UI regression.
+Private verifier, evidence and rebuilt database are under
+ignored local/audits/hacking-area-aro/.
+
+This is bounded source-to-page verification, not acceptance
+of all conditional ARO rules or the frozen 367-record corpus.

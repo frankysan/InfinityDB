@@ -24017,15 +24017,22 @@
                 ],
                 "clarifications": [
                     "An enemy acting inside the [[skill:hacker]]'s Hacking Area can provoke an [[trait:aro|ARO]] even without Line of Fire or proximity to the [[skill:hacker]]. During the [[trait:aro|ARO]] Checks, measure up to [[distance:8:inch]] from any point along the Active Trooper's path, and from that Trooper's [[equipment:repeater:plural]], to determine whether the Active Trooper is in the reactive [[skill:hacker]]'s Hacking Area. An [[trait:aro|ARO]] must still satisfy the declared Program's Requirements.",
-                    "A [[state:holomask|HoloMask]] appearance cannot grant real [[skill:hacker]] status or a working [[equipment:repeater]]. If an [[trait:aro|ARO]] or Program uses a fake [[skill:hacker]] or [[equipment:repeater]] that does not exist on the real Unit Profile, its Requirements fail at Resolution and the Trooper performs [[skill:idle]] instead."
+                    "A [[state:holomask|HoloMask]] appearance cannot grant real [[skill:hacker]] status or a working [[equipment:repeater]]. If an [[trait:aro|ARO]] or Program uses a fake [[skill:hacker]] or [[equipment:repeater]] that does not exist on the real Unit Profile, its Requirements fail at Resolution and the Trooper performs [[skill:idle]] instead.",
+                    "N5.3 p. 57 example: When the Active [[skill:hacker|Hacker]] declares [[skill:idle|Idle]] outside enemy LoF and [[trait:zone-of-control-zc|Zone of Control]] but inside an enemy [[skill:hacker|Hacker]]'s Hacking Area via [[equipment:repeater:plural]], the enemy [[skill:hacker|Hacker]] may declare an [[trait:aro|ARO]]. A different enemy Trooper outside both LoF and ZoC cannot react to that initial [[skill:idle|Idle]] merely because it is a potential Hacking Program target. If the Active [[skill:hacker|Hacker]] then targets that Trooper with a Comms Attack, the affected Trooper gains its own [[skill:reset|Reset]] [[trait:aro|ARO]] against that Attack.",
+                    "N5.3 p. 57 Camouflaged example: A [[state:camouflaged|Camouflaged]] Marker declaring [[skill:idle|Idle]] inside an enemy [[skill:hacker|Hacker]]'s Hacking Area can cause the enemy [[skill:hacker|Hacker]] to delay its [[trait:aro|ARO]]. In this example, the enemy [[skill:hacker|Hacker]] can subsequently declare an [[trait:aro|ARO]] only if the Marker reveals itself during the second Short Skill. Hacking Area awareness alone does not turn an unrevealed Marker into a valid Hacking Program target."
                 ],
                 "category": "basic-rule"
             },
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 56,
+                    "page": 55,
                     "section": "Hacking Area"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 57,
+                    "section": "Hacking Area and Camouflaged ARO examples"
                 },
                 {
                     "sourceId": "wiki-hacking-area-oldid-3974",

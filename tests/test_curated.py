@@ -1591,6 +1591,72 @@ def test_n5_suppressive_fire_proxy_and_reactive_burst_match_pinned_pdf() -> None
         assert fragment in state, fragment
 
 
+def test_n5_hacking_area_aro_windows_and_marker_delay() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in document["records"]}
+    area = records["rule:hacking-area"]
+    facts = area["facts"]
+    assert facts["category"] == "basic-rule"
+    assert area["citations"][:2] == [
+        {"sourceId": "n5-core-v5.3-pdf", "page": 55,
+         "section": "Hacking Area"},
+        {"sourceId": "n5-core-v5.3-pdf", "page": 57,
+         "section": "Hacking Area and Camouflaged ARO examples"},
+    ]
+    assert area["citations"][2]["sourceId"] == "wiki-hacking-area-oldid-3974"
+    assert "Line of Fire is not required" in facts["effects"][0]
+    assert "enemy [[equipment:repeater]]" in facts["restrictions"][0]
+    assert "performs [[skill:idle]] instead" in facts["restrictions"][0]
+    assert len(facts["clarifications"]) == 4
+    active, marker = facts["clarifications"][2:]
+    assert "inside an enemy [[skill:hacker|Hacker]]'s Hacking Area" in active
+    assert "may declare an [[trait:aro|ARO]]" in active
+    assert "cannot react to that initial [[skill:idle|Idle]]" in active
+    assert "the affected Trooper gains its own [[skill:reset|Reset]]" in active
+    assert "[[state:camouflaged|Camouflaged]] Marker" in marker
+    assert "delay its [[trait:aro|ARO]]" in marker
+    assert "only if the Marker reveals itself during the second Short Skill" in marker
+    assert "does not turn an unrevealed Marker into a valid" in marker
+
+
+def test_n5_hacking_area_source_heading_and_aro_examples_match_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    manifest = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == manifest["corePdfSha256"]
+    with pdf.open(source) as book:
+        definition = " ".join(book[54].get_text().split())
+        next_page = " ".join(book[55].get_text().split())
+        examples = " ".join(book[56].get_text().split())
+    for clause in (
+        "HACKING AREA This term refers to the Area of Effect",
+        "HACKING AREA IN ARO",
+        "while remaining outside that Hacker",
+        "measurements show that the Active Trooper is within the Hacking Area",
+        "HOLOMASK AND HACKING AREA",
+    ):
+        assert clause in definition, clause
+    assert "REPEATER AUTOMATIC EQUIPMENT" in next_page
+    for clause in (
+        "During his Active Turn, a Hacker decides to declare Idle",
+        "The Enemy Heavy Infantry (HI) cannot declare an ARO",
+        "they can declare an ARO, choosing to declare a Reset",
+        "EXAMPLE OF CAMOUFLAGED STATE AND ARO THROUGH A REPEATER",
+        "can delay their ARO in case the Camouflaged Marker is a Hacker",
+        "only if the Camouflaged Marker reveals themselves",
+    ):
+        assert clause in examples, clause
+
+
 def test_n5_alert_is_optional_automatic_conclusion_not_an_aro() -> None:
     document = load_curated_document(
         Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
