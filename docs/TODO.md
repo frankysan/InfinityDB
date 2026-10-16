@@ -1255,6 +1255,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         declarations against N5.3 pp. 88/113, retaining the base
         Long Skill types and documenting trajectory, LoF, Impetuous
         use and the Jet Propulsion exception.
+      - [x] Reconcile Guard, Neurocinetics, and Total Reaction as
+        separate reactive combat exceptions (N5.3 pp. 95/104/116):
+        preserve Optional vs Obligatory, LoF/ZoC requirements,
+        active/reactive Burst constraints, and single-target ARO
+        scope. Add direct citations and source-pinned tests.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

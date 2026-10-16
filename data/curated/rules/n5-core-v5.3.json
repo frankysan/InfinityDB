@@ -16643,6 +16643,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 95,
+                    "section": "Guard"
+                },
+                {
                     "sourceId": "wiki-guard-oldid-3952",
                     "heading": "Guard"
                 }
@@ -16698,6 +16703,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 104,
+                    "section": "Neurocinetics"
+                },
                 {
                     "sourceId": "wiki-neurocinetics-oldid-3111",
                     "heading": "Neurocinetics"

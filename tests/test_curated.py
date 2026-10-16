@@ -1680,6 +1680,43 @@ def test_n5_conditional_movement_clauses_match_pinned_pdf() -> None:
         assert fragment.casefold() in jump.casefold(), fragment
 
 
+def test_guard_neurocinetics_total_reaction_n53_citations() -> None:
+    path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    records = {r["id"]: r for r in load_curated_document(path)["records"]}
+    for skill, page, mode in (
+        ("guard", 95, "optional"),
+        ("neurocinetics", 104, "obligatory"),
+        ("total-reaction", 116, "optional"),
+    ):
+        record = records[f"skill:{skill}"]
+        assert record["facts"]["typeIds"] == ["automatic"]
+        assert record["labelIds"] == [mode]
+        assert record["citations"][0]["sourceId"] == "n5-core-v5.3-pdf"
+        assert record["citations"][0]["page"] == page
+
+
+def test_reactive_combat_automatic_conditions_match_n53_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    config = json.loads((root / "config/validation/weaponry-family-clauses.json").read_text("utf8"))
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == config["corePdfSha256"]
+    cases = (
+        (95, "GUARD", "Optional", "Silhouette contact"),
+        (104, "NEUROCINETICS", "Obligatory", "against a single target"),
+        (116, "TOTAL REACTION", "Optional", "Troopers activated by the Order"),
+    )
+    with pdf.open(source) as book:
+        for page, title, mode, clause in cases:
+            body = " ".join(book[page - 1].get_text().split())
+            assert f"{title} AUTOMATIC SKILL {mode}" in body
+            assert clause in body
+
+
 def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

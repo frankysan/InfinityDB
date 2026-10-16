@@ -370,6 +370,29 @@ Pinned PDF and curated tests plus a 6/6 responsive browser check
 provide bounded evidence for these two exceptions. The frozen
 367-record inventory and other 1.0 acceptance tasks remain open.
 
+## Reactive combat Automatic Skill provenance (2026-10-16)
+
+Three source-verified Automatic Skill exceptions remain distinct:
+Guard (N5.3 p. 95, Optional) permits CC Attack without
+Silhouette contact when the target is in LoF and ZoC.
+Neurocinetics (p. 104, Obligatory) reduces BS Weapon Burst to 1
+in the Active Turn, permits full Burst against one target in
+the Reactive Turn, and applies Burst modifiers only then.
+Total Reaction (p. 116, Optional) permits full Burst, including
+Burst modifiers, specifically during BS Attack AROs against one
+of the Troopers activated by the Order.
+
+The existing curated mechanics and types agree with these clauses.
+Direct pinned N5.3 citations were added to Guard and Neurocinetics,
+preserving the previously recorded Wiki revisions. Total Reaction
+already had both primary and Wiki citations. Source-pinned and
+curated tests now guard each classification and heading.
+
+This bounded verification does not establish any combined effect
+between these Skills, remove the separate Aerial restriction
+on Guard, or close all reactive/Automatic exceptions. The
+original 367-record explanation audit remains frozen.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

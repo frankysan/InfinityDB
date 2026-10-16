@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Guard and Neurocinetics now link directly to their N5.3 definitions,
+  alongside their historical Wiki citations.
 - Climbing Plus and Super-Jump now explain conditional Short Skill
   declarations, trajectory and 360-degree LoF, Impetuous use,
   and the Jet Propulsion limitation.

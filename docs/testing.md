@@ -2367,3 +2367,25 @@ The public Skill pages passed 6/6 headless Chrome cases at
 1440, 390 and 320 px with no console errors or overflow.
 Private evidence is in ignored local/audits/conditional-mobility-browser/.
 This does not complete the frozen 367-record audit or whole-corpus 1.0 gate.
+
+## 1.0 reactive combat Automatic Skill provenance
+
+**Verified 2026-10-16 against the pinned N5.3 English PDF.**
+Guard (p. 95, Optional), Neurocinetics (p. 104, Obligatory),
+and Total Reaction (p. 116, Optional) have distinct trigger and
+action restrictions. Pinned-source tests assert their original
+headings and key restrictions; curated tests assert the source
+pages, category labels and retained Wiki provenance.
+
+Guard and Neurocinetics gained direct PDF citations. Neither
+the underlying Skill mechanics nor the original 367-record
+explanation-audit inventory changed. The rules database was
+rebuilt and three published Skill pages were checked in headless
+Chrome at 1440, 390 and 320 px: **9/9 cases passed**, showing
+Automatic category badges without page errors or horizontal
+overflow. Private evidence remains under ignored
+local/audits/reactive-combat-browser/.
+
+This is a selected provenance and browser check. It does not
+cover combined Burst effects, every ARO eligibility condition,
+or the final 1.0 whole-corpus acceptance gate.
