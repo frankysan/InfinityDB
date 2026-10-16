@@ -2767,3 +2767,64 @@ def test_deployed_repeater_equipment_page_links_both_delivery_routes(
     assert ("uses-effects-of", "equipment:repeater") in outgoing
     assert ("enables-use-of", "skill:place-deployable") not in outgoing
     assert ("enables-use-of", "skill:bs-attack") not in outgoing
+
+
+
+def test_fastpanda_and_wildparrot_api_preserve_distinct_deployed_effects(
+    source_discrepancy_app: Callable,
+) -> None:
+    panda = _weapon_detail(
+        source_discrepancy_app, "fastpanda", catalog="equipment"
+    )
+    panda_rule = _weapon_rules(panda)["equipment:fastpanda"]
+    assert len(panda["profiles"]) == 1
+    panda_profile = panda["profiles"][0]
+    assert panda_profile["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+    assert {"Disposable (1)", "Indiscriminate", "Perimeter",
+            "Deployable", "Zone of Control"} <= set(panda_profile["traits"])
+    assert "Boost" not in panda_profile["traits"]
+    assert "Intuitive Attack" not in panda_profile["traits"]
+    assert "Placement needs no Roll" in panda_rule["summary"]
+    assert "Hacking Area extension cease" in panda_rule["summary"]
+    panda_refs = {
+        token["target"] for token in panda_rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "equipment:repeater", "rule:hacking-area",
+        "skill:place-deployable", "trait:indiscriminate",
+        "trait:perimeter", "trait:boost",
+    } <= panda_refs
+    assert {56, 82, 175, 186} <= {
+        c["page"] for c in panda_rule["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+
+    wild = _weapon_detail(source_discrepancy_app, "wildparrot")
+    wild_rule = _weapon_rules(wild)["weapon:wildparrot"]
+    assert len(wild["profiles"]) == 1
+    wild_profile = wild["profiles"][0]
+    assert wild_profile["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+    assert wild_profile["ammunition"] == "E/M"
+    assert wild_profile["saving"] == "BTS/2"
+    assert wild_profile["saving_num"] == "2"
+    assert "Intuitive Attack" in wild_profile["traits"]
+    assert "Disposable (1)" in wild_profile["traits"]
+    assert "Non-Lethal" not in wild_profile["traits"]
+    assert "Boost" not in wild_profile["traits"]
+    assert "failure places no Token" in wild_rule["summary"]
+    assert "cannot trigger during its own placement Order" in wild_rule["summary"]
+    assert "source discrepancy" in wild_rule["facts"]["sourceNotes"][0]
+    assert {49, 74, 82, 175} <= {
+        c["page"] for c in wild_rule["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    wild_refs = {
+        token["target"] for token in wild_rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "weapon:mines", "trait:boost", "trait:perimeter",
+        "trait:disposable-x", "skill:intuitive-attack",
+    } <= wild_refs
+    assert "equipment:repeater" not in wild_refs

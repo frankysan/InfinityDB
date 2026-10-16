@@ -5230,7 +5230,7 @@
             "id": "weapon:wildparrot",
             "kind": "weapon",
             "name": "WildParrot",
-            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]].\n\nThe [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact. A path wide enough for the WildParrot's Silhouette must remain passable; an impassable barrier or gap too small for it blocks the placement.\n\nOnce deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker.\n\nUnlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls).",
+            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]].\n\nThe [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact. A path wide enough for the WildParrot's Silhouette must remain passable; an impassable barrier or gap too small for it blocks the placement.\n\nOnce deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker.\n\nUnlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls).\n\n**Placement Roll:** Ordinary [[skill:place-deployable|Place Deployable]] needs no Roll. A legal [[skill:intuitive-attack|Intuitive Attack]] instead uses an unmodified WIP Roll; failure places no Token but consumes the [[trait:disposable-x|Disposable (1)]] use. The existing camouflage-placement restrictions and exceptions still apply.\n\n**Timing and object:** A WildParrot becomes active at the Order's Conclusion and cannot trigger during its own placement Order. Its visible S1 Token or Model has ARM 0, BTS 0 and STR 1; it remains stationary until triggered or destroyed. The [[trait:deployable|Deployable]] removal rule applies.",
             "facts": {
                 "variantRuleReferences": {
                     "wildparrot": [
@@ -5289,6 +5289,21 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack failed WIP"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable Perimeter activation"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Disposable and Deployable removal"
+                },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 74,
@@ -14704,7 +14719,7 @@
             "kind": "equipment",
             "name": "FastPanda",
             "labelIds": [],
-            "summary": "Self-propelled Equipment with the [[trait:deployable]] Trait that places a [[equipment:repeater]] anywhere completely inside the user's Zone of Control.",
+            "summary": "FastPanda is [[trait:disposable-x|Disposable (1)]] [[trait:deployable|Deployable]] [[trait:perimeter|Perimeter]] Equipment with [[trait:indiscriminate|Indiscriminate]]. Declare [[skill:place-deployable|Place Deployable]] to place it fully inside the user's [[trait:zone-of-control-zc|Zone of Control]], not merely anywhere nearby.\n\nA passable route wide enough for its S1 Silhouette must connect the user to the location. Placement needs no Roll; the FastPanda becomes a stationary independent object (ARM 0, BTS 0, STR 1, S 1) at the Order's Conclusion and is usable from subsequent Orders and [[trait:aro|AROs]].\n\nThe deployed FastPanda contains a [[equipment:repeater|Repeater]] extending allied [[rule:hacking-area|Hacking Areas]]. Enemy [[equipment:repeater|Repeater]] use and [[equipment:firewall|Firewall]] effects follow those canonical rules.\n\nWhen the FastPanda is destroyed, its [[equipment:repeater|Repeater]] and Hacking Area extension cease. Unlike [[trait:boost|Boost]], it does not travel toward enemies or detonate when they act.",
             "composition": {
                 "role": "definition"
             },
@@ -14734,6 +14749,26 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Perimeter deployment and activation"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Repeater and Hacking Area"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Deployable removal and Disposable uses"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "FastPanda chart profile"
+                },
                 {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "FastPanda",

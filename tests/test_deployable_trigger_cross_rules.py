@@ -518,3 +518,86 @@ def test_deployed_repeater_and_disco_ball_lifecycle_has_pinned_sources(
     with pdf.open(SOURCE) as doc:
         normalized = _normalized_text(doc[page - 1].get_text())
     assert _normalized_text(excerpt) in normalized, (page, excerpt)
+
+
+
+def test_fastpanda_and_wildparrot_remain_distinct_deployed_objects() -> None:
+    records = _records()
+    fast = records["equipment:fastpanda"]
+    wild = records["weapon:wildparrot"]
+
+    fast_summary = fast["summary"]
+    assert "[[trait:disposable-x|Disposable (1)]]" in fast_summary
+    assert "[[trait:indiscriminate|Indiscriminate]]" in fast_summary
+    assert "[[trait:perimeter|Perimeter]]" in fast_summary
+    assert "[[skill:place-deployable|Place Deployable]]" in fast_summary
+    assert "A passable route wide enough for its S1 Silhouette" in fast_summary
+    assert "Placement needs no Roll" in fast_summary
+    assert "at the Order's Conclusion" in fast_summary
+    assert "ARM 0, BTS 0, STR 1, S 1" in fast_summary
+    assert "[[equipment:repeater|Repeater]]" in fast_summary
+    assert "[[rule:hacking-area|Hacking Areas]]" in fast_summary
+    assert "Hacking Area extension cease" in fast_summary
+    assert "does not travel toward enemies or detonate" in fast_summary
+    assert fast["relations"] == [
+        {"type": "uses-effects-of", "recordId": "equipment:repeater"}
+    ]
+    assert {56, 82, 175, 186} <= {
+        c.get("page") for c in fast["citations"]
+        if c["sourceId"] == "n5-core-v5.3-pdf"
+    }
+
+    wild_summary = wild["summary"]
+    assert "using [[skill:place-deployable]] or" in wild_summary
+    assert "[[skill:intuitive-attack|Intuitive Attack]]" in wild_summary
+    assert "A legal [[skill:intuitive-attack|Intuitive Attack]]" in wild_summary
+    assert "failure places no Token" in wild_summary
+    assert "[[trait:disposable-x|Disposable (1)]]" in wild_summary
+    assert "Order's Conclusion" in wild_summary
+    assert "cannot trigger during its own placement Order" in wild_summary
+    assert "Its visible S1 Token or Model has ARM 0, BTS 0 and STR 1" in wild_summary
+    assert "[[weapon:mines|E/M Mines]]" in wild_summary
+    assert "WildParrots do not have that Trait" in wild_summary
+    assert "Non-Lethal" in wild["facts"]["sourceNotes"][0]
+    assert "absent from the current imported Army Trait list" in (
+        wild["facts"]["sourceNotes"][0]
+    )
+    assert {49, 74, 82, 175} <= {
+        c.get("page") for c in wild["citations"]
+        if c["sourceId"] == "n5-core-v5.3-pdf"
+    }
+    assert ("uses-effects-of", "equipment:repeater") not in {
+        (r["type"], r["recordId"]) for r in wild["relations"]
+    }
+    assert ("modifies-use-of", "weapon:mines") in {
+        (r["type"], r["recordId"]) for r in wild["relations"]
+    }
+    assert max(map(len, fast_summary.split("\n\n"))) <= 350
+    assert max(map(len, wild_summary.split("\n\n"))) <= 350
+
+
+@pytest.mark.parametrize(
+    ("page", "excerpt"),
+    (
+        (49, "If the WIP Roll is failed, the Deployable Weapon is not placed"),
+        (56, "Repeaters extend the Hacking Area of all Hackers"),
+        (69, "Some examples of Perimeter Weapons are CrazyKoalas, MadTraps"),
+        (74, "WildParrot Token or Model is placed instead of a Camouflage Marker"),
+        (74, "Intuitive Attack, Disposable"),
+        (74, "FASTPANDA"),
+        (82, "The Weapon or piece of Equipment will be placed at the Conclusion"),
+        (82, "The path cannot be blocked by an impassable obstacle"),
+        (175, "one is expended every time you declare"),
+        (186, "INDISCRIMINATE, PERIMETER"),
+    ),
+)
+def test_fastpanda_wildparrot_mechanics_match_pinned_core(
+    page: int, excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    if not SOURCE.exists():
+        pytest.skip("Pinned N5.3 source PDF unavailable in checkout")
+    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(SOURCE) as doc:
+        found = _normalized_text(doc[page - 1].get_text())
+    assert _normalized_text(excerpt) in found, (page, excerpt)

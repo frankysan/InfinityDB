@@ -984,6 +984,62 @@ automated page acceptance, not a human visual review.
 The tests do not simulate Orders, Hacking Program
 targeting, or destruction events on a live game state.
 
+### RR-WPN-DEPLOYED-002 - FastPanda and WildParrot object lifecycle
+
+**Scope:** pinned English N5.3 pp. 49, 56, 69, 74,
+82, 175 and 186, archived English Wiki revisions
+FastPanda 3437 and WildParrot 3610, and the pinned
+Army snapshot. ITS mission content excluded.
+
+**FastPanda:** Army and the archived Wiki agree on the
+equipment profile: Disposable (1), Indiscriminate,
+Perimeter, Deployable, Zone of Control, with ARM 0,
+BTS 0, STR 1 and S 1. Place Deployable and Perimeter
+permit a destination completely inside the user's
+Zone of Control, but only if an S1-sized path is
+passable (N5.3 p. 82). There is no Roll for ordinary
+placement; the static equipment activates at
+Conclusion. It contains a Repeater, which extends
+allied Hacking Areas while present; removing the
+object removes that extension. It does not gain
+Boost movement/triggering or Intuitive Attack from
+other Perimeter devices. Indiscriminate remains a
+separate canonical Trait.
+
+**WildParrot:** The N5.3 p. 74 and archived Wiki
+identify a Disposable (1), S1 Perimeter weapon
+deployed with Place Deployable or eligible Intuitive
+Attack. The latter uses an unmodified WIP Roll;
+failure consumes the use without placing a Token
+(p. 49). Conclusion-step activation means the
+new object cannot trigger in its own placement
+Order (p. 82). The visible ARM 0/BTS 0/STR 1
+Token uses its E/M, BTS/2, two-Saving-Roll profile
+and the E/M Mines procedure, never Boost movement.
+Destroying the object invokes Deployable removal
+(p. 175). These facts must not be generalized to
+FastPanda.
+
+**Unresolved source conflict:** N5.3 p. 74 and Wiki
+revision 3610 print the WildParrot Non-Lethal Trait;
+Army's pinned profile omits it. The existing source
+note and imported profile are preserved without an
+inferred source-precedence decision.
+
+The previously approved unlinked FastPanda
+"Zone of Control" surface is now an explicit canonical
+reference. Its obsolete maintained-text review hash
+was retired; other review decisions remain unchanged.
+The changes are explanatory curation and source
+citations, not new mechanics or Army normalization.
+
+Automated headless Chrome acceptance passed **60/60
+assertions** across FastPanda and WildParrot at
+1440, 390 and 320 px, including the linked summaries,
+no JavaScript errors, and no horizontal overflow.
+This is not a human visual review or runtime
+simulation of Hacking or Mine detonation.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones

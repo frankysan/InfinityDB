@@ -773,6 +773,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       without copying mechanics onto the launcher. See
       RR-WPN-DEPLOYED-001. Headless Chrome passed 78/78
       assertions across desktop and mobile widths.
+    - [x] Review the independent FastPanda and WildParrot object
+      lifecycles. FastPanda's one-use Indiscriminate Perimeter
+      placement deploys a static Repeater (not Boost) after
+      Conclusion; WildParrot has one E/M Mine use, legal
+      Intuitive Attack WIP/failure handling, a visible S1
+      Token, and no trigger during the placement Order.
+      Keep the printed WildParrot Non-Lethal vs Army omission
+      unresolved. Browser checks passed 60/60 at
+      1440, 390 and 320 px. See RR-WPN-DEPLOYED-002.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve

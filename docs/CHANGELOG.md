@@ -12,6 +12,12 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- FastPanda and WildParrot now distinguish Perimeter placement
+  from later Repeater or E/M Mine effects, with visible object
+  Attributes and Conclusion-step timing. WildParrot explains
+  failed Intuitive Attack consumption; its Non-Lethal source
+  discrepancy remains explicitly unresolved.
+
 - Deployable Repeater now distinguishes ordinary Place Deployable
   placement from Pitcher delivery, explains the resulting Token's
   Hacking Area effects, and links canonical Repeater targeting
