@@ -88,7 +88,7 @@ def test_markdown_report_does_not_assert_semantic_completeness() -> None:
     assert 'Not verified in the browser' in text
 
 
-def test_checked_in_policy_has_83_distinct_reviewed_source_clauses() -> None:
+def test_checked_in_policy_has_88_distinct_reviewed_source_clauses() -> None:
     path = Path(__file__).resolve().parents[1] / (
         'config/validation/weaponry-family-clauses.json'
     )
@@ -97,13 +97,13 @@ def test_checked_in_policy_has_83_distinct_reviewed_source_clauses() -> None:
     assert [family['name'] for family in policy['families']] == [
         'Perimeter Weapons', 'Mines', 'Armed Turret', 'D-Charges',
         'Disco Baller', 'Drop Bears', 'Mine Dispenser',
-         'Sepsitor', 'SymbioBomb', 'WildParrot', 'Pitcher', 'Mixed Weapons',
+         'Sepsitor', 'SymbioBomb', 'WildParrot', 'Pitcher', 'Mixed Weapons', 'Weaponry',
     ]
     assert [len(family['clauses']) for family in policy['families']] == [
-        7, 14, 8, 9, 8, 6, 2, 5, 6, 3, 7, 8,
+        7, 14, 8, 9, 8, 6, 2, 5, 6, 3, 7, 8, 5,
     ]
-    assert len({clause['id'] for f in policy['families'] for clause in f['clauses']}) == 83
-    assert sum(len(f.get('requiredRelations', [])) for f in policy['families']) == 16
+    assert len({clause['id'] for f in policy['families'] for clause in f['clauses']}) == 88
+    assert sum(len(f.get('requiredRelations', [])) for f in policy['families']) == 17
     assert all(
         clause['semanticReview']['status'] == 'represented'
         for family in policy['families'] for clause in family['clauses']
@@ -140,7 +140,7 @@ def test_checked_in_semantic_review_separates_full_and_partial_coverage() -> Non
     statuses = [clause['semanticReview']['status']
                 for family in raw['families'] for clause in family['clauses']]
     assert {status: statuses.count(status) for status in set(statuses)} == {
-        'represented': 83,
+        'represented': 88,
     }
 
 
@@ -391,7 +391,7 @@ def test_checked_in_required_relations_exist_in_current_curated_data() -> None:
         (r['from'], r['type'], r['to'])
         for family in policy['families'] for r in family.get('requiredRelations', [])
     }
-    assert len(required) == 16
+    assert len(required) == 17
     assert required <= actual
     assert {
         ('weapon:pitcher', 'uses-effects-of', 'equipment:deployable-repeater'),

@@ -3003,7 +3003,7 @@ def test_mixed_weapons_shared_modes_and_source_provenance(
     assert "[[attribute:bs|BS]] Attribute" in summary
     assert "printed Range MODs" in summary
     assert "different Attribute" in summary
-    assert "**Trench-Hammer exception:**" in summary
+    assert "**PH-based BS Modes:**" in summary
     assert "[[trait:bs-weapon-ph|BS Weapon (PH)]]" in summary
     assert "[[weapon:kobra-pistol|Kobra Pistol]]" in summary
     assert max(map(len, summary.split("\n\n"))) <= 350
@@ -3018,6 +3018,7 @@ def test_mixed_weapons_shared_modes_and_source_provenance(
         ("uses-effects-of", "skill:bs-attack"),
         ("uses-effects-of", "skill:cc-attack"),
         ("uses-effects-of", "trait:cc"),
+        ("uses-effects-of", "rule:modifiers-explained"),
     }
     assert {
         (r["type"], r["record"]["id"])
@@ -3038,3 +3039,92 @@ def test_mixed_weapons_shared_modes_and_source_provenance(
         "weapon:kobra-pistol-cc"
     ]
     assert len(kobra["profiles"][1]["rules"][0]["facts"]["sourceNotes"]) == 2
+
+
+
+def test_modifiers_explained_player_reference_and_mixed_weapon_navigation(
+    mixed_weapons_app: Callable,
+) -> None:
+    source = _weapon_detail(
+        mixed_weapons_app, "modifiers-explained", catalog="rules"
+    )
+    rule = source["rules"][0]
+    assert rule["id"] == "rule:modifiers-explained"
+    assert rule["name"] == "Modifiers Explained (MODs)"
+    summary = rule["summary"]
+    assert isinstance(summary, str)
+    for fragment in (
+        "round brackets", "**only while using that entry**",
+        "Positive MODs benefit the user", "Negative MODs apply to enemies",
+        "Automatic Skills or Equipment", "**only during Face to Face Rolls**",
+        "**ReRoll:**", "reroll **one die**", "Active Turn",
+        "[[rule:special-dice|+1 SD]]",
+    ):
+        assert fragment in summary, fragment
+    assert {c["page"] for c in rule["citations"]
+            if c["source_id"] == "n5-core-v5.3-pdf"} == {68, 75}
+    assert rule["facts"]["category"] == "basic-rule"
+    assert len(rule["facts"]["restrictions"]) == 2
+    assert len(rule["facts"]["clarifications"]) == 2
+    for slug in ("trench-hammer", "kobra-pistol", "vorpal-cc-weapon"):
+        payload = _weapon_detail(mixed_weapons_app, slug)
+        family = _weapon_rules(payload)["weapon:mixed-weapons"]
+        linked_modifiers = [
+            token for token in family["summary_tokens"]
+            if token.get("target") == "rule:modifiers-explained"
+        ]
+        assert len(linked_modifiers) == 1
+        assert linked_modifiers[0]["public_reference"] == {
+            "catalog": "rules", "id": "modifiers-explained"
+        }
+        assert any(
+            edge["direction"] == "outbound"
+            and edge["type"] == "uses-effects-of"
+            and edge["record"]["id"] == "rule:modifiers-explained"
+            for edge in family["display_relations"]
+        )
+    vorpal = _weapon_detail(mixed_weapons_app, "vorpal-cc-weapon")
+    assert [p["mode"] for p in vorpal["profiles"]] == [
+        "BS Mode", "CC Mode"
+    ]
+    bs, cc = vorpal["profiles"]
+    assert (bs["ammunition"], bs["saving"], bs["saving_num"]) == (
+        "N", "ARM=0", "1"
+    )
+    assert "BS Weapon (PH)" in bs["traits"]
+    assert (cc["ammunition"], cc["saving"], cc["saving_num"]) == (
+        "N", "ARM=0", "1"
+    )
+    assert "CC" in cc["traits"]
+    assert all("State: Dead" in p["traits"] for p in vorpal["profiles"])
+    assert "Vorpal" in family["summary"]
+
+
+def test_modifiers_explained_pinned_page75_scope() -> None:
+    import hashlib
+
+    pytest.importorskip("pymupdf")
+    import pymupdf
+
+    pdf = Path(__file__).resolve().parents[1] / (
+        "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    )
+    if not pdf.exists():
+        pytest.skip("Pinned official N5.3 PDF unavailable")
+    expected = json.loads(
+        (pdf.parents[3] / "config/validation/weaponry-family-clauses.json")
+        .read_text(encoding="utf8")
+    )["corePdfSha256"]
+    assert hashlib.sha256(pdf.read_bytes()).hexdigest() == expected
+    with pymupdf.open(pdf) as document:
+        page_text = document[74].get_text()
+    assert isinstance(page_text, str)
+    text = " ".join(page_text.split()).casefold()
+    for excerpt in (
+        "Negative MODs for Automatic Skills and Equipment",
+        "Negative MODs for other Skills, Weapons, and Equipment",
+        "only apply during Face to Face Rolls",
+        "allow the user to reroll one die from the Roll",
+        "the maximum Burst (B) value of any Attack is 6",
+    ):
+        assert excerpt.casefold() in text, excerpt

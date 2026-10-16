@@ -834,9 +834,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       four typed relationships and both Army identities; retire
       the superseded Trench-Hammer shared-only disposition.
       See RR-WPN-FAMILY-005.
+    - [x] Publish the shared N5.3 pp. 68/75 Modifiers Explained
+      reference for bracketed-only-on-use MODs, positive/negative
+      recipient rules, Automatic versus Face to Face penalties,
+      and one-die ReRoll; reuse the separate Special Dice rule.
+      Link it from Mixed Weapons and include the printed Vorpal
+      CC Weapon BS/CC modes and BS Weapon (PH) exception. Keep
+      imported profiles and Kobra source disagreements intact,
+      retire Vorpal's superseded shared-only disposition, and
+      pin five more source clauses and one relationship.
+      See RR-WPN-FAMILY-006.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
-      API/browser relationships. The 83 selected clauses and sixteen
+      API/browser relationships. The 88 selected clauses and seventeen
       typed edges are not an exhaustive N5.3 pp. 68-74 inventory.
     - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
       reconcile core versus ITS-season applicability before curating rulings. Its

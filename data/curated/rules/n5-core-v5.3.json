@@ -4815,7 +4815,7 @@
             "id": "weapon:mixed-weapons",
             "kind": "weapon",
             "name": "Mixed Weapons",
-            "summary": "Mixed Weapons have **two different attack Modes**, chosen separately; the Modes do not combine their printed Ammunition, Burst, PS, Saving Rolls or Traits.\n\n**[[trait:cc|CC]] Weapon Mode:** Uses the Trooper's [[attribute:cc|CC]] Attribute, has the [[trait:cc|CC]] Trait and counts as a [[trait:cc|CC]] Weapon for all purposes.\n\n**BS Weapon Mode:** Uses the Trooper's [[attribute:bs|BS]] Attribute and the printed Range MODs, and counts as a BS Weapon for all purposes. If its Traits specify a different Attribute, use that instead.\n\n**Trench-Hammer exception:** Its BS Mode has [[trait:bs-weapon-ph|BS Weapon (PH)]], so the attack uses PH rather than BS. [[weapon:kobra-pistol|Kobra Pistol]] uses BS for its BS Mode. Each Mode keeps its separate printed attack profile.",
+            "summary": "Mixed Weapons have **two different attack Modes**, chosen separately; the Modes do not combine their printed Ammunition, Burst, PS, Saving Rolls or Traits.\n\n**[[trait:cc|CC]] Weapon Mode:** Uses the Trooper's [[attribute:cc|CC]] Attribute, has the [[trait:cc|CC]] Trait and counts as a [[trait:cc|CC]] Weapon for all purposes.\n\n**BS Weapon Mode:** Uses the Trooper's [[attribute:bs|BS]] Attribute and the printed Range MODs, and counts as a BS Weapon for all purposes. If its Traits specify a different Attribute, use that instead.\n\n**PH-based BS Modes:** [[trait:bs-weapon-ph|BS Weapon (PH)]] changes the [[skill:bs-attack|BS attack]] Attribute to PH for Trench-Hammer and the Vorpal variant; [[weapon:kobra-pistol|Kobra Pistol]] instead uses BS. The [[rule:modifiers-explained|MODs rules]] apply to the chosen Mode, whose printed profile alone determines its effects.",
             "composition": {
                 "role": "definition"
             },
@@ -4830,6 +4830,10 @@
                 {
                     "entity": "weapon",
                     "id": "kobra-pistol"
+                },
+                {
+                    "entity": "weapon",
+                    "id": "vorpal-cc-weapon"
                 }
             ],
             "scope": {
@@ -4851,6 +4855,10 @@
                 {
                     "type": "uses-effects-of",
                     "recordId": "trait:cc"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "rule:modifiers-explained"
                 }
             ],
             "citations": [
@@ -23753,6 +23761,53 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:modifiers-explained",
+            "kind": "rule",
+            "name": "Modifiers Explained (MODs)",
+            "aliases": [
+                "Modifiers Explained",
+                "Modifiers",
+                "MODs"
+            ],
+            "summary": "A Modifier (**MOD**) is a bonus (+) or penalty (-) applied under the rules governing the relevant Skill, Weapon or Equipment. A value in **round brackets** after a Skill, Weapon or Equipment applies **only while using that entry**; it does not change the Trooper's Attribute for unrelated actions.\n\n**Who receives the MOD:** Positive MODs benefit the user. Negative MODs apply to enemies.\n\nNegative MODs from Automatic Skills or Equipment (for example [[skill:mimetism|Mimetism]]) apply as their own rules specify; negative MODs from other Skills, Weapons and Equipment (for example [[skill:dodge|Dodge]] (-3) or [[skill:cc-attack|CC Attack]] (-3)) apply **only during Face to Face Rolls**.\n\n**ReRoll:** ReRoll printed in round brackets permits the user to reroll **one die** from the Roll, only when using that Skill, Weapon or Equipment. It is not permission to reroll every die or a general reroll of unrelated actions.\n\n**Burst and Special Dice:** As a general rule, MODs to [[trait:burst-b|Burst (B)]] apply only in the Active Turn, and an Attack cannot exceed B6. A [[rule:special-dice|+1 SD]] is different from +1B: the extra die is selected and discarded without increasing Burst. See the canonical Special Dice rule for its conditions and exceptions.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "restrictions": [
+                    "The modifier in brackets applies only when the named Skill, Weapon or Equipment is being used; a replacement Attribute applies to that use, not generally.",
+                    "A negative MOD from a Skill, Weapon or Equipment that is not Automatic applies only in a [[rule:face-to-face-rolls|Face to Face Roll]]. Automatic negative MODs follow their own rules."
+                ],
+                "clarifications": [
+                    "For example, [[trait:bs-weapon-ph|BS Weapon (PH)]] changes the Attribute for an eligible [[skill:bs-attack|BS Attack]], not other actions. [[weapon:mixed-weapons|Mixed Weapons]] choose their attack Mode before applying that Mode's MODs.",
+                    "A named ReRoll is one die from the relevant Roll, not a Command Token reroll or a general change to the reroll rules."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 68,
+                    "section": "Weaponry: Important modifiers"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained (MODs)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-16"
             }
         },
         {

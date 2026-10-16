@@ -500,14 +500,6 @@
       "reason": "Official N5.3 pp. 67/176, imported Army and archived English/Spanish Wiki agree: Blast PS 7 and Hit PS 6, both B2 with Normal Ammunition and one ARM plus one BTS Saving Roll; only Blast has a Circular Impact Template. Neither mode has Suppressive Fire. A Critical adds one ARM roll only. Existing Plasma Weapon Property, Combined Saving Roll and Impact Template references suffice; do not inherit Plasma Rifle's Suppressive Fire."
     },
     {
-      "slug": "vorpal-cc-weapon",
-      "name": "Vorpal CC Weapon",
-      "chartPage": 177,
-      "profileSha256": "a945831f0a43d919d91efdb31d061b032e4b02668f461876da89ce16d2c6939f",
-      "reviewedOn": "2026-10-15",
-      "reason": "Official N5.3 p. 177, Army and EN/ES Wiki Weapon Charts agree: BS and CC modes both have PS 8, B1, Normal Ammunition, ARM=0 and one Saving Roll, with State: Dead and [*] source notation. BS mode uses BS Weapon (PH) and +3 at 8 inches; CC mode uses CC without a ranged profile. Canonical Normal Ammunition, Dead State, BS Weapon (PH), CC and Mixed Weapons describe the mechanics. Do not rename the printed N Ammunition as a newly invented Vorpal or Monofilament ammunition."
-    },
-    {
       "slug": "multi-red-fury",
       "name": "MULTI Red Fury",
       "chartPage": 183,

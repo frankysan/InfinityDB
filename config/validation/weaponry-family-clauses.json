@@ -1236,7 +1236,8 @@
       "page": 68,
       "armyExamples": [
         "Trench-Hammer",
-        "Kobra Pistol"
+        "Kobra Pistol",
+        "Vorpal CC Weapon"
       ],
       "clauses": [
         {
@@ -1371,6 +1372,87 @@
           "from": "weapon:kobra-pistol",
           "type": "uses-effects-of",
           "to": "weapon:mixed-weapons"
+        },
+        {
+          "from": "weapon:mixed-weapons",
+          "type": "uses-effects-of",
+          "to": "rule:modifiers-explained"
+        }
+      ]
+    },
+    {
+      "name": "Weaponry",
+      "page": 68,
+      "armyExamples": [
+        "Trench-Hammer",
+        "Kobra Pistol",
+        "Vorpal CC Weapon"
+      ],
+      "clauses": [
+        {
+          "id": "weaponry-bracketed-scope",
+          "anchor": "Any MOD or value in round brackets next to a Special Skill, Weapon, or",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "A value in **round brackets**"
+          }
+        },
+        {
+          "id": "weaponry-applies-when-used",
+          "anchor": "only applies when using the Skill, Weapon, or Equipment.",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "**only while using that entry**"
+          }
+        },
+        {
+          "id": "weaponry-positive-mods",
+          "anchor": "Positive MODs only apply to the user.",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "Positive MODs benefit the user"
+          }
+        },
+        {
+          "id": "weaponry-negative-mods",
+          "anchor": "Negative MODs only apply to enemies.",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "Negative MODs apply to enemies"
+          }
+        },
+        {
+          "id": "weaponry-reroll-one-die",
+          "anchor": "allow the user to reroll one die from the Roll",
+          "relatedCuratedIds": [
+            "rule:modifiers-explained"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Maintained canonical Modifiers Explained rule explicitly explains the N5.3 p.68 clause.",
+            "curatedId": "rule:modifiers-explained",
+            "summaryAnchor": "reroll **one die**"
+          }
         }
       ]
     }

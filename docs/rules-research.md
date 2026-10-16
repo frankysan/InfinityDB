@@ -737,6 +737,47 @@ anchors, their current curated summary anchors, and four
 typed relationship edges. No Army source data, underlying
 gameplay logic or source precedence decision changed.
 
+### RR-WPN-FAMILY-006 - Weaponry MOD scope and Vorpal mixed modes
+
+**Source:** pinned English N5.3 p. 68 (Weaponry Important) and
+p. 75 (Modifiers Explained), with Vorpal CC Weapon's BS/CC
+profiles printed on p. 177. The source-hash-pinned family
+audit now checks **88 selected clauses across thirteen sections**
+and **seventeen selected typed relations**, all present. Five
+new page-68 clauses cover bracketed MOD scope, both recipients
+and one-die ReRoll. This remains selective clause evidence,
+not a full N5.3 Weaponry approval.
+
+A MOD or replacement Attribute in round brackets applies only
+when using the named Skill, Weapon or Equipment. Positive
+MODs benefit its user and negative MODs affect enemies.
+Page 75 further distinguishes negative MODs from Automatic
+Skills/Equipment (which follow their own rules) from those
+of other Skills/Weapons/Equipment (only in Face to Face Rolls).
+A bracketed ReRoll permits rerolling **one die** from that
+use, not every die nor a general reroll ability. The canonical
+`rule:modifiers-explained` links to the existing
+`rule:special-dice` for +1 SD limitations, avoiding
+duplicating its separate review and unresolved Fireteam
+wording conflict.
+
+The shared `weapon:mixed-weapons` rule now also applies to
+Vorpal CC Weapon, whose printed BS Mode uses
+BS Weapon (PH), Normal Ammunition and one ARM=0 Saving
+Roll with State: Dead; CC Mode uses CC with the same
+printed Ammunition/Saving baseline. Trench-Hammer remains
+PH-based in BS Mode; Kobra Pistol uses BS and retains
+its independently documented CC-mode DA/Anti-materiel
+publication disputes. The new Modifiers rule is accessible
+from all three Weapon pages. Vorpal's previous hash-pinned
+shared-only decision is superseded by the family reference;
+the other 64 shared-only reviews remain unchanged.
+
+No imported Army profile, ammunition resolution, or
+source-precedence decision was modified. The audit validates
+only explicitly selected clauses and typed links.
+Private browser evidence is kept under ignored local/audits/.
+
 ### RR-WPN-DEPLOYABLE-EXCEPTIONS-001 - Trigger declarations versus exempt movement
 
 **Scope:** official N5.3 EN pp. 38, 69, 72, 79-80, 82, 112.

@@ -12,6 +12,11 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Modifiers Explained now covers bracketed-only-on-use MODs,
+  positive/negative recipients and one-die ReRoll, with a
+  link to existing Special Dice rules. Mixed Weapons also
+  links Vorpal CC Weapon and its PH-based BS Mode without
+  changing imported profiles.
 - Mixed Weapons now have one shared N5.3 source-backed rule
   linked from Trench-Hammer and Kobra Pistol. The reference
   explains distinct BS/CC modes and Trench-Hammer's PH-based
