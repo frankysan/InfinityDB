@@ -351,6 +351,65 @@ def test_run_stage_streams_output_and_reports_failure(
     assert "Result: FAIL" in output
 
 
+def test_rules_stage_runs_interaction_audit_before_database_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+        )
+
+    assert result.status == "PASS"
+    assert commands[0] == (
+        sys.executable, "-m", "tools.audit_rules_interactions",
+        "--check-output", "docs/rules-interaction-checklist.md",
+        "--require-release", "1.0.0",
+    )
+    assert commands[1] == (sys.executable, "-m", "infinity_db", "build-rules")
+
+
+def test_rules_stage_stops_before_build_when_review_audit_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("Interaction-review coverage mismatch; missing=['test']\n")
+
+        def wait(self) -> int:
+            return 2
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+        )
+
+    assert result.status == "FAIL"
+    assert result.returncode == 2
+    assert len(commands) == 1
+    assert commands[0][2] == "tools.audit_rules_interactions"
+
+
 def test_build_source_without_build_stage_is_configuration_error(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

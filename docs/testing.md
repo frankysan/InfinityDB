@@ -27,7 +27,8 @@ The runner exposes six stages:
 - `docs` — Markdownlint (Markdown);
 - `type` — Pyright;
 - `build` — Army data/database build validation;
-- `rules` — curated rules validation/database build.
+- `rules` ? interaction-review coverage and generated-checklist validation, followed by
+  curated rules validation/database build.
 
 Named profiles are:
 

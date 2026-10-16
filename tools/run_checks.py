@@ -288,7 +288,6 @@ def git_value(*args: str) -> str:
 def run_stage(stage: Stage, reporter: Reporter) -> StageResult:
     reporter.write()
     reporter.write(f"[{stage.name.upper()}]")
-    reporter.write(f"Command: {format_command(stage.command)}")
     reporter.write()
 
     started = time.perf_counter()
@@ -299,29 +298,40 @@ def run_stage(stage: Stage, reporter: Reporter) -> StageResult:
         if not pythonpath
         else str(MODULE_ROOT) + (os.pathsep + pythonpath)
     )
-    try:
-        process = subprocess.Popen(
-            stage.command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            errors="replace",
-            bufsize=1,
-            cwd=REPO_ROOT,
-            env=env,
-        )
-    except OSError as exc:
-        duration = time.perf_counter() - started
-        reporter.write(f"ERROR: could not start command: {exc}")
+    commands = (
+        (sys.executable, "-m", "tools.audit_rules_interactions",
+         "--check-output", "docs/rules-interaction-checklist.md",
+         "--require-release", "1.0.0"),
+        stage.command,
+    ) if stage.name == "rules" else (stage.command,)
+    for command in commands:
+        reporter.write(f"Command: {format_command(command)}")
         reporter.write()
-        reporter.write("Result: ERROR")
-        reporter.write(f"Duration: {duration:.2f} s")
-        return StageResult(stage.name, "ERROR", None, duration)
+        try:
+            process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                errors="replace",
+                bufsize=1,
+                cwd=REPO_ROOT,
+                env=env,
+            )
+        except OSError as exc:
+            duration = time.perf_counter() - started
+            reporter.write(f"ERROR: could not start command: {exc}")
+            reporter.write()
+            reporter.write("Result: ERROR")
+            reporter.write(f"Duration: {duration:.2f} s")
+            return StageResult(stage.name, "ERROR", None, duration)
 
-    assert process.stdout is not None
-    for line in process.stdout:
-        reporter.write(line, end="")
-    returncode = process.wait()
+        assert process.stdout is not None
+        for line in process.stdout:
+            reporter.write(line, end="")
+        returncode = process.wait()
+        if returncode != 0:
+            break
     duration = time.perf_counter() - started
     status = "PASS" if returncode == 0 else "FAIL"
     reporter.write()
