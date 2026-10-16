@@ -1276,6 +1276,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         no previous ARO, unopposed versus Face to Face
         Dodge and no general ARO grant. Source tests and
         3/3 responsive browser checks passed.
+      - [x] Verify Reload, Baggage, and Place Deployable ARO
+        eligibility and timing against N5.3 pp. 82-83/120:
+        reactive LoF/ZoC requirements, Perimeter placement,
+        Conclusion activation, Order-limited Reload recovery
+        versus automatic States Phase recovery. Preserve
+        reviewed mechanics and FAQ; pinned source tests and
+        responsive browser acceptance passed (6/6).
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

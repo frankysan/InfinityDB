@@ -4605,6 +4605,25 @@ independent game rule inferred from shared wording.
 The canonical records keep their distinct identities and relations: Baggage enables Reload and both
 can cancel Unloaded State where their requirements and restrictions are satisfied.
 
+**ARO versus phase timing (N5.3 pp. 83, 120):** Reload is a
+Short Skill/ARO and still requires ordinary reaction eligibility,
+a valid expended or Unloaded item, and a suitable non-Null
+Baggage holder inside whose Zone of Control the user stands.
+Its effect reaches one allied Trooper per Order. Baggage separately
+grants automatic recovery during the States Phase, without a
+Reload ARO declaration. This later recovery must not be mistaken
+for an extra Reload declaration or used to retroactively restore
+deployed weapons in an earlier Order.
+
+**Reactive placement (N5.3 p. 82):** Place Deployable requires LoF
+to the Active Trooper in the Reactive Turn. The combination of
+Deployable and Perimeter changes placement from Silhouette
+contact to a valid location entirely in Zone of Control with a
+passable path; it does not waive that reactive LoF requirement.
+The placed item arrives at the Conclusion of the Order and can
+only operate in later Orders/AROs. The existing FAQ occupied-spot
+exception remains independent of the original declaration.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Baggage>, reviewed 2026-09-23

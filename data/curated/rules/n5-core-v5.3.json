@@ -12688,6 +12688,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 120,
+                    "section": "Baggage"
+                },
+                {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Baggage",
                     "heading": "Baggage"
@@ -13735,6 +13740,10 @@
                     "A Deployable Weapon cannot be placed with an enemy Camouflaged Marker inside its Trigger Area unless the documented exception applies.",
                     "Specifically, the ordinary restriction can be bypassed if a valid non-camouflaged enemy is also inside that Trigger Area, or with [[skill:intuitive-attack|Intuitive Attack]]. An item's [[trait:indiscriminate|Indiscriminate]] Trait provides its own exception.",
                     "If another Trooper occupies the declared placement at the Conclusion of the Order, the user may select another legal location. If no legal location remains, the [[trait:deployable|Deployable]] is lost (N5 FAQ v0.1)."
+                ],
+                "clarifications": [
+                    "In the Reactive Turn, declaring this Skill requires LoF to the Active Trooper, even when the item also has [[trait:perimeter|Perimeter]]. The [[trait:perimeter|Perimeter]] exception changes where an eligible item may be placed (inside the user's [[trait:zone-of-control-zc|Zone of Control]] with a valid passable path); it does not remove this reactive LoF requirement.",
+                    "The new item enters the table at the Conclusion of the Order; only the placing Trooper can be reacted to during that Order. The placed item becomes active for subsequent Orders and [[trait:aro|AROs]], not retroactively during the placement Order."
                 ]
             },
             "labelIds": [
@@ -13793,6 +13802,10 @@
                     "Only one Allied Trooper can receive this effect per Order.",
                     "Recovering Disposable uses does not affect Weapons or Equipment already deployed on the table.",
                     "[[trait:non-reloadable|Non-Reloadable]] Weapons or Equipment cannot cancel [[state:unloaded]] or regain expended uses through Reload."
+                ],
+                "clarifications": [
+                    "Reload is a [[trait:aro|ARO]] as well as a Short Skill, but the user's [[trait:zone-of-control-zc|Zone of Control]] position relative to an eligible allied [[equipment:baggage|Baggage]] holder and the expended/[[state:unloaded|Unloaded]] item requirements still apply. Declaring it does not bypass ordinary [[trait:aro|ARO]] eligibility.",
+                    "The [[equipment:baggage|Baggage]] rule separately grants automatic recovery to eligible allied Troopers in its [[trait:zone-of-control-zc|Zone of Control]] at its separate automatic recovery timing. This does not require declaring Reload as an [[trait:aro|ARO]], and is distinct from Reload's one-affected-Trooper-per-Order limitation."
                 ]
             },
             "labelIds": [
@@ -13805,6 +13818,16 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 83,
+                    "section": "Reload"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 120,
+                    "section": "Baggage"
+                },
                 {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Reload",

@@ -2456,3 +2456,26 @@ ignored local/audits/look-out-aro-browser/.
 This is bounded ARO procedure acceptance. The original
 367-record inventory is unchanged, and other conditional
 AROs and the whole-corpus gate remain open.
+
+## 1.0 Reload and Place Deployable ARO timing
+
+**Verified 2026-10-16 against pinned English N5.3 pp. 82-83
+and 120.** Curated tests assert the Short Skill/ARO identity
+of Reload and Place Deployable, their retained historical
+citations, Baggage eligibility and separate States Phase
+recovery, reactive LoF, the Perimeter placement exception,
+Conclusion timing and the unchanged occupied-spot FAQ ruling.
+A SHA-256-pinned PDF regression validates the actual headings
+and these eligibility and activation clauses.
+
+A freshly rebuilt rules database was used to verify Reload
+and Place Deployable in headless Chrome at 1440, 390 and
+320 px. **6/6 browser cases passed**, including visible
+Short Skill and ARO badges, new explanation text, no JavaScript
+page errors and no horizontal overflow. Private verifier,
+database, screenshot and results are stored under ignored
+local/audits/reload-deployable-aros/.
+
+The frozen 367-record inventory is unchanged. This closes a
+bounded source/metadata review, not other exceptional ARO
+permissions, other numerical variants, or whole-corpus 1.0.

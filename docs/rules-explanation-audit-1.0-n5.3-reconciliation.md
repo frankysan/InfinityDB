@@ -470,6 +470,38 @@ at 1440/390/320 px pass. The frozen 367-record audit
 is not changed or marked complete. Other conditional
 ARO permissions and numerical variants remain open.
 
+## Reload, Baggage and Place Deployable ARO timing (2026-10-16)
+
+Pinned English N5.3 p. 83 defines Reload as Short Skill/ARO.
+The user needs an expended/Unloaded item, remains subject to
+ordinary ARO eligibility, and must be inside an eligible
+allied Baggage holder's Zone of Control. Its effect is limited
+to one allied Trooper per Order and does not restore already
+deployed items. Baggage p. 120 supplies a separate automatic
+recovery effect in the States Phase; that is not a new
+Reload declaration in the current Order.
+
+Place Deployable p. 82 permits Short Skill/ARO placement but
+requires LoF to the Active Trooper during the Reactive Turn.
+When an item also has Perimeter, the source permits placement
+fully inside ZoC with a passable path instead of Silhouette
+contact. The exception changes placement geometry, not ARO
+eligibility. The item is placed at the Conclusion of the Order,
+with activation and its own reactions only in later Orders.
+The existing FAQ ruling about an occupied placement location
+remains separate and unchanged.
+
+The existing categories, constraints, interaction relations and
+underlying mechanics already matched the official source.
+Added primary N5.3 citations to Reload (p. 83) and Baggage
+(p. 120) and clarifications to Reload and Place Deployable,
+preserving historical Wiki and FAQ provenance. Regression tests
+check category, constraints, source clauses and complementary
+timing. The published Reload and Place Deployable Skill pages
+passed 6/6 responsive browser checks at 1440/390/320 px.
+The frozen historical 367-record inventory is unchanged.
+This is selected ARO/timing acceptance, not whole-corpus 1.0.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

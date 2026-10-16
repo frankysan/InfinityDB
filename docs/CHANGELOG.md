@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Reload and Place Deployable explanations now distinguish
+  reactive declaration requirements from Baggage's automatic
+  recovery and deployable activation in subsequent Orders.
 - Look Out! now explains its special allied Dodge (PH-3)
   ARO, ally selection, roll opposition and scope, with
   a direct citation to N5.3.

@@ -2662,6 +2662,100 @@ def test_n5_look_out_aro_procedure_matches_pinned_pdf() -> None:
         assert clause in page, clause
 
 
+def test_n5_reload_place_deployable_aro_rules_preserve_timing() -> None:
+    root = Path(__file__).resolve().parents[1]
+    document = load_curated_document(root / "data/curated/rules/n5-core-v5.3.json")
+    records = {r["id"]: r for r in document["records"]}
+    reload = records["skill:reload"]
+    deploy = records["skill:place-deployable"]
+    baggage = records["equipment:baggage"]
+    for record in (reload, deploy):
+        assert record["facts"]["typeIds"] == ["short-skill", "aro"]
+        assert record["labelIds"] == ["attack"]
+        assert any(c["sourceId"].startswith("wiki-") for c in record["citations"])
+
+    assert reload["citations"][0] == {
+        "sourceId": "n5-core-v5.3-pdf", "page": 83, "section": "Reload"
+    }
+    assert {"sourceId": "n5-core-v5.3-pdf", "page": 120,
+            "section": "Baggage"} in reload["citations"]
+    assert baggage["citations"][0] == {
+        "sourceId": "n5-core-v5.3-pdf", "page": 120, "section": "Baggage"
+    }
+    assert "both be in non-Null States" in reload["facts"]["requirements"][0]
+    assert "holder's Zone of Control" in reload["facts"]["requirements"][0]
+    assert any("one Allied Trooper" in rule for rule in reload["facts"]["restrictions"])
+    assert any("already deployed" in rule for rule in reload["facts"]["restrictions"])
+    assert any("ordinary [[trait:aro|ARO]] eligibility" in line
+               for line in reload["facts"]["clarifications"])
+    assert any("separate automatic recovery timing" in line
+               and "[[equipment:baggage|Baggage]]" in line
+               for line in reload["facts"]["clarifications"])
+    assert "States Phase" in baggage["facts"]["effects"][1]
+    assert {"type": "enables-use-of", "recordId": "skill:reload"} in (
+        baggage["relations"]
+    )
+
+    assert any(c["sourceId"] == "n5-core-v5.3-pdf" and c["page"] == 82
+               for c in deploy["citations"])
+    assert "LoF to the Active Trooper" in deploy["facts"]["requirements"][1]
+    assert "Silhouette contact" in deploy["facts"]["effects"][1]
+    assert "Conclusion of the Order" in deploy["facts"]["effects"][2]
+    assert any("Perimeter" in note and "LoF requirement" in note
+               for note in deploy["facts"]["clarifications"])
+    assert any("only the placing Trooper" in note
+               and "subsequent Orders" in note for note in deploy["facts"]["clarifications"])
+    assert any("Trigger Area" in item for item in deploy["facts"]["restrictions"])
+    assert any("occupies" in item and "N5 FAQ" in item
+               for item in deploy["facts"]["restrictions"])
+
+
+def test_n5_reload_place_deployable_aro_clauses_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    config = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == config["corePdfSha256"]
+    with pdf.open(source) as document:
+        deploy = " ".join(document[81].get_text().split())
+        reload = " ".join(document[82].get_text().split())
+        baggage = " ".join(document[119].get_text().split())
+    for phrase in (
+        "PLACE DEPLOYABLE SHORT SKILL / ARO",
+        "In the Reactive Turn, LoF to the Active Trooper is required",
+        "In the Reactive Turn, the Trooper must deploy it in Silhouette contact",
+        "placed at the Conclusion of the Order",
+        "enemy may only react against the Trooper that declares the Skill",
+        "activated and can be used in subsequent Orders/AROs",
+        "totally inside the Zone of Control",
+        "path cannot be blocked by an impassable obstacle",
+    ):
+        assert phrase in deploy, phrase
+    for phrase in (
+        "RELOAD SHORT SKILL /ARO",
+        "Trooper must be inside the Zone of Control",
+        "Trooper with Baggage must be in a non-Null State",
+        "Trooper is in Unloaded State",
+        "single Allied Trooper per Order",
+        "already deployed on the gaming table",
+    ):
+        assert phrase in reload, phrase
+    for phrase in (
+        "BAGGAGE AUTOMATIC EQUIPMENT",
+        "An Allied Trooper in a Non-Null state",
+        "perform the Reload Common Skill",
+        "In the States Phase, each Allied Trooper",
+        "automatically cancel their Unloaded State",
+    ):
+        assert phrase in baggage, phrase
+
+
 def test_checked_in_n5_collection_keeps_new_common_skill_facts_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
