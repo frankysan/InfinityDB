@@ -12,6 +12,11 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Deactivator now distinguishes same-Order Mine and
+  Cybermine triggers, Boost contact attacks and Armed
+  Turret reactions, including concealed Marker
+  ineligibility and each item's existing conditions.
+
 - Deactivator now explains eligible enemy deployed targets,
   Range-only WIP removal, the same-Order trigger exception,
   and how removal ends persistent Dazer, Repeater and

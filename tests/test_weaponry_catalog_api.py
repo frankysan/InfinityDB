@@ -2925,3 +2925,45 @@ def test_deactivator_api_separates_enemy_removal_and_allied_reactivation(
     }
     assert ("ignores-modifiers-from", "skill:mimetism") in outbound
     assert ("enables-use-of", "skill:activate-disco-ball") not in outbound
+
+
+
+def test_deactivator_api_keeps_same_order_device_trigger_families_separate(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "deactivator", catalog="equipment"
+    )
+    record = _weapon_rules(payload)["equipment:deactivator"]
+    summary = record["summary"]
+    assert "**Template triggers:**" in summary
+    assert "A revealed [[weapon:mines|Mine]] may still trigger" in summary
+    assert "[[weapon:cybermine|Cybermines]]" in summary
+    assert "**Contact-seeking devices:**" in summary
+    assert "Exempt Markers do not trigger it" in summary
+    assert "**Automated turret reactions:**" in summary
+    assert "active enemy **Model**, never a Marker" in summary
+    assert "does **not** prevent an eligible device from triggering" in summary
+
+    refs = {
+        token["target"] for token in record["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "weapon:mines", "weapon:cybermine", "weapon:armed-turret",
+        "trait:boost", "skill:reset", "skill:dodge", "skill:bs-attack",
+        "skill:cc-attack", "state:camouflaged",
+        "rule:face-to-face-rolls",
+    } <= refs
+    assert {69, 70, 72, 121} <= {
+        c["page"] for c in record["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    outgoing = {
+        (edge["type"], edge["record"]["id"])
+        for edge in record.get("display_relations", [])
+        if edge["direction"] == "outbound"
+    }
+    assert outgoing == {("ignores-modifiers-from", "skill:mimetism")}
+    assert len(payload["profiles"]) == 1
+    assert "BS Weapon (WIP)" in payload["profiles"][0]["traits"]

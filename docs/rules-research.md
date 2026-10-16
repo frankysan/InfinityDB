@@ -1138,6 +1138,72 @@ on all equipment cards. No new typed causal edges,
 source profile overrides, or game-state simulation
 were added.
 
+### RR-WPN-DEPLOYED-005 - Deactivator versus automatic weapon attacks
+
+**Scope:** pinned English N5.3 pp. 69-70, 72 and 121,
+the reviewed Mine, Cybermine, Boost and Armed Turret
+references, and the current Deactivator record.
+ITS content excluded.
+
+**General rule:** Deactivator p. 121 permits targeting
+a deployed enemy Weapon/Equipment with the Deployable
+Trait in LoF/ZoC, but **not a Camouflage Marker**.
+A successful Normal WIP Roll removes the item yet
+**does not prevent it from triggering in the same
+Order**. This is a timing exception, not permission
+to ignore an item's normal attack conditions, not a
+claim that every target necessarily attacks, and not
+a new simultaneous-resolution procedure.
+
+**Mines and Cybermines:** A Mine concealed as a
+CAMO(-3) Marker cannot itself be a Deactivator
+target; a revealed MINE(-3) Token may be targeted.
+Mine triggering still requires a qualifying
+enemy Model/Marker within its Small Teardrop
+Template Trigger Area and a template that affects
+no allies, including Unconscious allies (p. 72).
+Cybermines reuse those trigger conditions,
+but their evasion is Reset at -3 WIP, not
+the ordinary Mine Dodge attempt. Deactivator
+does not erase a legally established trigger.
+
+**Crazykoalas and MadTraps:** Both use the Boost
+Trait and their own attack profiles. Boost p. 69
+requires an eligible enemy Model to declare or
+perform an Order/ARO in ZoC and a passable route
+for the device to reach Silhouette contact.
+CAMO/IMP Markers remain exempt. Only successful
+Normal Dodge avoids a triggered Boost attack;
+these requirements survive a successful
+Deactivator Roll in the same Order.
+
+**Armed Turrets:** N5.3 p. 70 permits their
+BS/CC declarations against an active enemy
+Model, never a Marker, within LoF or Silhouette
+contact. This is not a Mine template trigger
+or Boost detonation. The Deactivator same-Order
+exception does not erase a legal turret
+declaration, nor grant a turret extra attacks
+outside its published conditions.
+
+These distinctions now appear as canonical
+links in the Deactivator reference with direct
+source citations. Its established enemy-removal
+rules and typed Mimetism relationship are
+unchanged. The Armed Turret silhouette and
+E/Mitter Saving Rolls source conflicts remain
+separate and unresolved. No Army profiles,
+same-Order engine, or new source-precedence
+decision changed.
+
+Source-pinned and curated/API regressions check the
+distinct conditions. Headless Chrome passed **99/99
+assertions** across Deactivator, AP Mine, Cybermine,
+Boost and Armed Turret pages at 1440, 390 and 320 px,
+with no JavaScript errors or horizontal overflow.
+This does not simulate simultaneous actions or replace
+human visual review.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones

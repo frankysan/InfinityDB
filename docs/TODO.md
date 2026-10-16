@@ -799,6 +799,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       FastPanda, Deployable Repeater or Deployable Cover
       ends its respective continuing effect; keep allied
       Activate Disco Ball separate. See RR-WPN-DEPLOYED-004.
+    - [x] Review the Deactivator same-Order exception separately
+      for Mines/Cybermines, Crazykoala/MadTrap Boost and Armed
+      Turrets. Concealed Mine CAMO Markers are ineligible
+      Deactivator targets; revealed Mines still require legal
+      template and allied-safety conditions; Cybermines
+      are evaded by Reset. Boost needs a valid enemy Model
+      and passable route, whereas Armed Turrets have
+      distinct active-Model LoF/contact attack eligibility.
+      Preserve current-Order triggering without implying
+      guaranteed hits or new priority rules. Headless
+      browser checks passed 99/99 at 1440, 390 and
+      320 px. See RR-WPN-DEPLOYED-005.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve

@@ -756,3 +756,77 @@ def test_deactivator_and_allied_activation_pinned_source_clauses(
     with pdf.open(SOURCE) as document:
         text = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(excerpt) in text, (page, excerpt)
+
+
+
+def test_deactivator_same_order_devices_keep_distinct_trigger_rules() -> None:
+    records = _records()
+    reference = records["equipment:deactivator"]
+    text = reference["summary"]
+    assert "does **not** prevent an eligible device from triggering" in text
+    assert "**Template triggers:**" in text
+    assert "A [[state:camouflaged|CAMO]] Marker is not a Deactivator target" in text
+    assert "A revealed [[weapon:mines|Mine]] may still trigger this Order" in text
+    assert "enemy Model/Marker without affecting an ally" in text
+    assert "[[weapon:cybermine|Cybermines]] share this trigger condition" in text
+    assert "[[skill:reset|Reset]], not [[skill:dodge|Dodge]]" in text
+    assert "**Contact-seeking devices:** [[trait:boost|Boost]]" in text
+    assert "Crazykoalas/MadTraps" in text
+    assert "eligible enemy **Model**" in text
+    assert "passable route to Silhouette contact" in text
+    assert "Exempt Markers do not trigger it" in text
+    assert "[[rule:face-to-face-rolls|Normal Dodge Roll]]" in text
+    assert "**Automated turret reactions:**" in text
+    assert "[[weapon:armed-turret|Armed Turret]]" in text
+    assert "[[skill:bs-attack|BS Attack]] or [[skill:cc-attack|CC Attack]]" in text
+    assert "active enemy **Model**, never a Marker" in text
+    assert "within LoF or in Silhouette contact" in text
+    assert "This is not [[weapon:mines|Mine]] or [[trait:boost|Boost]] detonation" in text
+    assert max(map(len, text.split("\n\n"))) <= 350
+
+    core_pages = {
+        c["page"] for c in reference["citations"]
+        if c["sourceId"] == "n5-core-v5.3-pdf"
+    }
+    assert {69, 70, 72, 121} <= core_pages
+    assert "enemy Model or Marker" in records["weapon:mines"]["summary"]
+    assert "even if that ally is Unconscious" not in text
+    assert "[[skill:reset]]" in records["weapon:cybermine"]["summary"]
+    assert "Only a successful [[skill:dodge]]" in records["trait:boost"]["summary"]
+    assert "against an active enemy **Model**, not a Marker" in (
+        records["weapon:armed-turret"]["summary"]
+    )
+    assert reference["relations"] == [
+        {"type": "ignores-modifiers-from", "recordId": "skill:mimetism"}
+    ]
+
+
+@pytest.mark.parametrize(
+    ("page", "excerpt"),
+    (
+        (121, "Passing the WIP Roll does not prevent the enemy"),
+        (121, "from triggering during the current Order"),
+        (121, "but never Camouflage Markers"),
+        (69, "triggered when an enemy Model declares or performs an Order"),
+        (69, "The weapon will not trigger if the path"),
+        (69, "not triggered by Camouflage Markers"),
+        (69, "The only way to avoid this attack is a successful Normal"),
+        (70, "an active Enemy Model"),
+        (70, "but not a Marker"),
+        (70, "within its LoF or in Silhouette contact"),
+        (72, "enemy Model or Marker declares or executes a Skill or ARO"),
+        (72, "A Mine never triggers if the Small Teardrop Template would affect an ally"),
+        (72, "they can only be evaded with a Reset, rather than a Dodge"),
+        (72, "Replace the Camouflage Marker"),
+    ),
+)
+def test_deactivator_hostile_device_clauses_in_pinned_n53_pdf(
+    page: int, excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    if not SOURCE.exists():
+        pytest.skip("Pinned N5.3 English PDF unavailable")
+    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(SOURCE) as document:
+        page_text = _normalized_text(document[page - 1].get_text())
+    assert _normalized_text(excerpt) in page_text, (page, excerpt)

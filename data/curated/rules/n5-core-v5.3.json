@@ -14492,7 +14492,7 @@
             "labelIds": [
                 "attack"
             ],
-            "summary": "**Enemy removal:** A Deactivator can select an enemy deployed [[trait:deployable|Deployable]] Weapon or Equipment in the user's LoF or [[trait:zone-of-control-zc|Zone of Control]], but never a [[state:camouflaged|Camouflage Marker]]. This is a Short Skill (Attack), not [[skill:place-deployable|Place Deployable]].\n\n**Resolution:** Make a WIP [[rule:face-to-face-rolls|Normal Roll]], applying Range MODs only, not [[skill:mimetism|Mimetism]] or Cover. Success removes the enemy item from the table, but does **not** prevent an eligible device from triggering during that same Order.\n\n**Ongoing effects:** Removing [[equipment:dazer|Dazer]] ends its persistent area effect; removing [[equipment:fastpanda|FastPanda]] or [[equipment:deployable-repeater|Deployable Repeater]] ends that item's [[equipment:repeater|Repeater]] extension. Removing [[equipment:deployable-cover|Deployable Cover]] removes its scenery-based Cover effect.\n\n**Separate allied action:** [[skill:activate-disco-ball|Activate Disco Ball]] uses Deactivator Equipment to reactivate an **allied** Ball with WIP +3 and Range MODs. It does not remove the Ball and does not change Deactivator's enemy-only targeting rule.",
+            "summary": "**Enemy removal:** A Deactivator can select an enemy deployed [[trait:deployable|Deployable]] Weapon or Equipment in the user's LoF or [[trait:zone-of-control-zc|Zone of Control]], but never a [[state:camouflaged|Camouflage Marker]]. This is a Short Skill (Attack), not [[skill:place-deployable|Place Deployable]].\n\n**Resolution:** Make a WIP [[rule:face-to-face-rolls|Normal Roll]], applying Range MODs only, not [[skill:mimetism|Mimetism]] or Cover. Success removes the enemy item from the table, but does **not** prevent an eligible device from triggering during that same Order.\n\n**Ongoing effects:** Removing [[equipment:dazer|Dazer]] ends its persistent area effect; removing [[equipment:fastpanda|FastPanda]] or [[equipment:deployable-repeater|Deployable Repeater]] ends that item's [[equipment:repeater|Repeater]] extension. Removing [[equipment:deployable-cover|Deployable Cover]] removes its scenery-based Cover effect.\n\n**Template triggers:** A [[state:camouflaged|CAMO]] Marker is not a Deactivator target. A revealed [[weapon:mines|Mine]] may still trigger this Order if its template reaches an enemy Model/Marker without affecting an ally. [[weapon:cybermine|Cybermines]] share this trigger condition; evasion uses [[skill:reset|Reset]], not [[skill:dodge|Dodge]].\n\n**Contact-seeking devices:** [[trait:boost|Boost]] (Crazykoalas/MadTraps) requires an eligible enemy **Model** declaring an Order/[[trait:aro|ARO]] in its [[trait:zone-of-control-zc|ZoC]] and a passable route to Silhouette contact. Exempt Markers do not trigger it; only a successful [[rule:face-to-face-rolls|Normal Dodge Roll]] avoids it.\n\n**Automated turret reactions:** An [[weapon:armed-turret|Armed Turret]] may declare [[skill:bs-attack|BS Attack]] or [[skill:cc-attack|CC Attack]] against an active enemy **Model**, never a Marker, within LoF or in Silhouette contact. This is not [[weapon:mines|Mine]] or [[trait:boost|Boost]] detonation.\n\n**Separate allied action:** [[skill:activate-disco-ball|Activate Disco Ball]] uses Deactivator Equipment to reactivate an **allied** Ball with WIP +3 and Range MODs. It does not remove the Ball and does not change Deactivator's enemy-only targeting rule.",
             "composition": {
                 "role": "definition"
             },
@@ -14528,6 +14528,21 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 69,
+                    "section": "Boost: triggering Models, passable path and marker exemptions"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 70,
+                    "section": "Armed Turret: active enemy Model attack conditions"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Mines and Cybermines: triggering, allied safety and Reset"
+                },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 121,
