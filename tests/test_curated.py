@@ -1520,6 +1520,77 @@ def test_n5_speculative_attack_aro_procedure_matches_pinned_pdf() -> None:
         assert clause in page, clause
 
 
+def test_n5_suppressive_fire_aro_scope_and_g_jumper_exception() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {r["id"]: r for r in document["records"]}
+    skill = records["skill:suppressive-fire"]
+    state = records["state:suppressive-fire"]
+    facts = skill["facts"]
+    assert facts["typeIds"] == ["long-skill"]
+    assert skill["labelIds"] == ["attack"]
+    assert skill["citations"][:2] == [
+        {"sourceId": "n5-core-v5.3-pdf", "page": 85, "section": "Suppressive Fire"},
+        {"sourceId": "n5-core-v5.3-pdf", "page": 171,
+         "section": "Suppressive Fire State"},
+    ]
+    assert skill["citations"][2]["sourceId"] == "wiki-en-20260926-200832"
+    assert facts["requirements"] == [
+        "The user must select a Weapon with the "
+        "[[trait:suppressive-fire|Suppressive Fire]] Trait."
+    ]
+    assert "[[state:suppressive-fire]]" in facts["effects"][0]
+    assert "[[skill:g-jumper|G: Jumper]]" in facts["effects"][1]
+    assert "another Proxy is activated" in facts["effects"][1]
+    assert len(facts["clarifications"]) == 2
+    assert "Long Skill, not an [[trait:aro|ARO]]" in facts["clarifications"][0]
+    assert "Burst 3" in facts["clarifications"][0]
+    assert "one target" in facts["clarifications"][0]
+    assert "other cancellation conditions" in facts["clarifications"][1]
+    assert {"type": "enters-state", "recordId": "state:suppressive-fire"} in (
+        skill["relations"]
+    )
+    assert "full B3 against one target" in state["facts"]["effects"][1]
+    assert "other than [[skill:bs-attack|BS Attack]]" in (
+        state["facts"]["clarifications"][0]
+    )
+
+
+def test_n5_suppressive_fire_proxy_and_reactive_burst_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    manifest = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == manifest["corePdfSha256"]
+    with pdf.open(source) as document:
+        declaration = " ".join(document[84].get_text().split())
+        state = " ".join(document[170].get_text().split())
+    for fragment in (
+        "SUPPRESSIVE FIRE LONG SKILL Attack",
+        "The user must select a weapon with the Suppressive Fire Trait",
+        "G: Jumper and Suppressive Fire",
+        "that Proxy stays in Suppressive Fire State",
+        "even if another Proxy is activated",
+    ):
+        assert fragment in declaration, fragment
+    for fragment in (
+        "SF Mode profile replaces the selected weapon",
+        "react in ARO with the full B3 value",
+        "full Burst must always be directed against a single target",
+        "declares any ARO other than a BS Attack using the SF Mode profile",
+        "The Trooper declares an Order",
+        "Trooper joins any Fireteam",
+    ):
+        assert fragment in state, fragment
+
+
 def test_n5_alert_is_optional_automatic_conclusion_not_an_aro() -> None:
     document = load_curated_document(
         Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"

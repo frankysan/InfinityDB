@@ -2590,3 +2590,25 @@ local/audits/speculative-aro-rules.db.
 The selected ARO procedure is source-reviewed; neither
 the frozen 367-record inventory nor remaining whole-corpus
 1.0 acceptance tasks are marked complete.
+
+## 1.0 Suppressive Fire G: Jumper ARO boundary
+
+**Verified 2026-10-16 against SHA-256-pinned N5.3 English
+pp. 85 and 171.** A curated test checks the Long Skill
+classification, historical Wiki and primary PDF citations,
+G: Jumper exception and the existing State's B3 BS Attack
+ARO limit and cancellation rule. A source-pinned regression
+checks the explicit Proxy exception and reactive Burst
+conditions.
+
+With a newly rebuilt rules database, the published
+Suppressive Fire Skill and State pages passed **6/6
+headless Chrome checks** at 1440, 390 and 320 px, including
+the new explanation, existing State restrictions, no
+JavaScript page errors and no horizontal overflow.
+Private verifier/results/screenshot/database are under
+ignored local/audits/suppressive-fire-aro/.
+
+The frozen 367-record audit is unchanged. This is a
+selected conditional activation review, not whole-corpus
+1.0 acceptance.

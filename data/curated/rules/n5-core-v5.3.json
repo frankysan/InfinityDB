@@ -14019,14 +14019,29 @@
                     "The user must select a Weapon with the [[trait:suppressive-fire|Suppressive Fire]] Trait."
                 ],
                 "effects": [
-                    "The user enters [[state:suppressive-fire]] using the selected Weapon."
+                    "The user enters [[state:suppressive-fire]] using the selected Weapon.",
+                    "For [[skill:g-jumper|G: Jumper]], a Proxy in [[state:suppressive-fire|Suppressive Fire]] remains in that condition if another Proxy is activated. Activating the other Proxy alone does not cancel the first Proxy's condition (N5.3 p. 85)."
                 ],
-                "restrictions": []
+                "restrictions": [],
+                "clarifications": [
+                    "Declaring [[skill:suppressive-fire|Suppressive Fire]] is a Long Skill, not an [[trait:aro|ARO]]. The resulting [[state:suppressive-fire|Suppressive Fire]] condition separately permits a [[skill:bs-attack|BS Attack]] [[trait:aro|ARO]] using the selected weapon's SF Mode at Burst 3, directed entirely against one target even when several enemies activate together.",
+                    "The [[state:suppressive-fire|Suppressive Fire]] condition normally ends if its user declares an Order or an [[trait:aro|ARO]] other than [[skill:bs-attack|BS Attack]] with SF Mode. The [[skill:g-jumper|G: Jumper]] exception preserves a Proxy's condition when another Proxy activates, but does not override other cancellation conditions."
+                ]
             },
             "labelIds": [
                 "attack"
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 85,
+                    "section": "Suppressive Fire"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 171,
+                    "section": "Suppressive Fire State"
+                },
                 {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Suppressive_Fire",

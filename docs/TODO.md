@@ -1316,6 +1316,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Confirm the behind-cover Dodge (-3) Face to Face
         example, preserving Long Skill and existing MODs.
         Source tests and 3/3 responsive browser checks pass.
+      - [x] Verify Suppressive Fire Long Skill versus State ARO
+        scope and G: Jumper Proxy exception against N5.3
+        pp. 85/171. The State permits single-target B3 BS
+        Attack AROs; activating a different Proxy does not
+        itself cancel the first Proxy's Suppressive Fire.
+        Pinned-source tests and 6/6 responsive browser
+        checks passed; ordinary State cancellation remains.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

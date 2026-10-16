@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Suppressive Fire now distinguishes its Long Skill declaration
+  from the State's B3 ARO and explains the G: Jumper exception
+  when a different Proxy is activated.
 - Speculative Attack now explains the Circular Template ARO
   sequence and why an out-of-LoF target can Dodge the
   incoming template before the attack Roll is resolved.

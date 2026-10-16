@@ -642,6 +642,35 @@ restrictions and Wiki citation. Two pinned-source/curated
 tests and 3/3 responsive browser checks passed. The frozen
 367-record inventory and whole-corpus 1.0 gate remain open.
 
+## Suppressive Fire State and G: Jumper activation (2026-10-16)
+
+English N5.3 p. 85 defines the Suppressive Fire Long Skill
+as the action that enters the State. Its G: Jumper clause
+explicitly preserves a Proxy's Suppressive Fire when another
+Proxy activates. The normal automatic cancellation triggered
+by the original Trooper's declaration of an Order does not
+mean that a separate Proxy's activation removes the State.
+
+N5.3 p. 171 separately defines the State's reactive benefit:
+the chosen weapon uses SF Mode and may fire Burst 3 during
+a valid BS Attack ARO, directed at only one target even
+against multiple activated enemies. A different ARO, use
+of an ineligible weapon, and the other named cancellation
+conditions still terminate the State. The State does not
+grant an unrestricted ARO or change the underlying weapon
+PS and Ammunition.
+
+The curated State already modeled the B3, single-target,
+and cancellation restrictions. Added the missing G: Jumper
+exception and the declaration-versus-ARO distinction to
+the owning Long Skill record, plus pinned English N5.3
+pp. 85/171 citations. Existing Wiki provenance, metadata
+types, and relations remain intact. Two focused source and
+curation tests passed. Both published Skill/State pages
+passed 6/6 headless browser checks at 1440/390/320 px.
+This is bounded acceptance; the frozen 367-record inventory
+and final whole-corpus 1.0 gate remain open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an
