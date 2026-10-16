@@ -744,6 +744,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       detonation restriction. Automated browser checks passed
       66/66 assertions across desktop and mobile widths.
       See RR-WPN-PLACEMENT-001.
+    - [x] Confirm Mine Dispenser inherits the BS Mode procedure
+      of Drop Bears, not its PH Weapon Trait, Deployable Mode
+      or Intuitive Attack. Failed BS Rolls place no Token but
+      still expend their declared Disposable uses; Double Shot
+      consumes both remaining uses when selected. The launched
+      Mine Token remains visible and follows the CAMO/valid-enemy
+      placement exception and no-same-Order-detonation timing.
+      Preserve the bracketed Mine subtype and imported profile.
+      Automated browser checks pass 57/57 at desktop/mobile widths.
+      See RR-WPN-PLACEMENT-002.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve

@@ -12,6 +12,11 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Mine Dispenser now explains inherited Drop Bears BS Mode
+  restrictions, the shared CAMO placement exception, and
+  failed-roll Disposable consumption without granting Drop
+  Bears' separate Deployable or Intuitive Attack options.
+
 - Drop Bears now explain why direct placement requires no Roll,
   Intuitive Attack placement uses WIP and consumes a charge on
   failure, and throwing uses a PH-based Roll with the same

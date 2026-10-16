@@ -2609,3 +2609,50 @@ def test_drop_bears_current_roll_failure_and_activation_rules_are_published(
     assert "Throwing Weapon" in profiles["BS Mode"]["traits"]  # imported alias preserved
     assert profiles["Deployable Mode"]["ammunition"] == "Shock"
     assert "weapon:mines" not in _weapon_rules(payload)
+
+
+
+def test_mine_dispenser_only_inherits_drop_bears_bs_placement(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, "mine-dispenser")
+    assert set(_weapon_rules(payload)) == {"weapon:mine-dispenser"}
+    record = _weapon_rules(payload)["weapon:mine-dispenser"]
+    summary = record["summary"]
+    assert "**Failed shot and charges:**" in summary
+    assert "places no Mine Token for that Roll" in summary
+    assert "even if the Rolls fail" in summary
+    assert "**BS Mode inheritance only:**" in summary
+    assert "no-Roll [[skill:place-deployable|Place Deployable]] action" in summary
+    assert "or [[skill:intuitive-attack|Intuitive Attack]]" in summary
+    assert "not [[trait:bs-weapon-ph|BS Weapon (PH)]]" in summary
+    assert {49, 71, 72, 82, 175, 181} <= {
+        c["page"] for c in record["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    refs = {
+        token["target"]
+        for token in record["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "weapon:drop-bears", "weapon:mines",
+        "trait:double-shot", "trait:disposable-x",
+        "skill:place-deployable", "skill:intuitive-attack",
+    } <= refs
+    outbound = {
+        (rel["type"], rel["record"]["id"])
+        for rel in record["display_relations"]
+        if rel["direction"] == "outbound"
+    }
+    assert ("modifies-use-of", "weapon:drop-bears") in outbound
+    assert ("enables-use-of", "skill:intuitive-attack") not in outbound
+    assert ("enables-use-of", "skill:place-deployable") not in outbound
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert profile["mode"] in ("", None)
+    assert "Double Shot" in profile["traits"]
+    assert "Disposable (2)" in profile["traits"]
+    assert "Intuitive Attack" not in profile["traits"]
+    assert "BS Weapon (PH)" not in profile["traits"]
+    assert "Deployable" not in profile["traits"]

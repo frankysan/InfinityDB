@@ -832,6 +832,50 @@ or a simulation of live tabletop targeting.
 The multi-mode rule is a **player-facing explanation**,
 not a new official Weapon Property or game mechanic.
 
+### RR-WPN-PLACEMENT-002 - Mine Dispenser inherits BS Mode only
+
+**Scope:** pinned English N5.3 pp. 49, 71-72, 82 and 175,
+Weapon Chart p. 181; ITS content excluded.
+
+Mine Dispenser uses Drop Bears' **BS Mode placement procedure**
+(N5.3 p. 72), not its Deployable Mode. The launcher makes
+BS-based Targetless attacks, **not** the PH-based BS Weapon
+profile of Drop Bears. Successful delivery places a visible
+Mine Token of the bracketed Mine subtype from the unit
+profile. Placement occurs at the Order's Conclusion;
+the new Token cannot detonate during that Order. The same
+CAMO Marker restriction and valid non-camouflaged enemy
+exception govern placement (pp. 71-72).
+
+A **failed individual BS Roll** places no Token for that Roll
+but consumes the declared Disposable use, per the canonical
+Disposable (X) Trait (p. 175). The Mine Dispenser's own
+**Disposable (2)** and **Double Shot** apply: the optional
++1 Burst requires both remaining uses and spends both,
+even when both attack Rolls fail. A failed Roll does not
+retroactively cancel another successful Roll in the Burst.
+
+The inherited BS Mode procedure does **not** grant the
+ordinary no-Roll Place Deployable action, Drop Bears'
+separate Deployable Mode, Intuitive Attack, PH-based
+throws or its Shock Mine subtype. Neither an invented
+extra attack profile nor additional source mechanics are
+published. The non-operative imported savingNum=1
+discrepancy remains preserved separately.
+
+The reference links the existing Drop Bears, Mines,
+Disposable, Double Shot, BS Attack and placement rules.
+Source-pinned checks and the current weapon-detail API
+test verify these distinctions; current Army profiles
+are unchanged. Headless Chrome passed **57/57 checks**
+at 1440, 390 and 320 px on Mine Dispenser and Drop
+Bears, including profile counts, explained rules and
+absence of horizontal overflow. This is automated
+presentation evidence, not a human visual review.
+The batch does not declare complete Weaponry
+source coverage or override unresolved cross-source
+profiles.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones

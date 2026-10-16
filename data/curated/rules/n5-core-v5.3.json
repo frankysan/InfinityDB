@@ -5024,7 +5024,7 @@
           "id": "weapon:mine-dispenser",
           "kind": "weapon",
           "name": "Mine Dispenser",
-          "summary": "The Mine Dispenser is a [[skill:bs-attack|BS Attack]] Weapon that fires [[weapon:mines|Mines]], not an attack with its own damaging Ammunition or Saving Roll. The deployed Mine type is specified in brackets after the Weapon name on the Trooper's Unit Profile; use that Mine's printed effects rather than inventing a default type.\n\nIt uses the **BS Mode** placement rules of [[weapon:drop-bears|Drop Bears]], but uses the user's BS Attribute, not [[trait:bs-weapon-ph|BS Weapon (PH)]]. A successful shot places a visible MINE (-3) Token in the Conclusion step. As for [[weapon:drop-bears|Drop Bears]] BS Mode, the Token cannot detonate during the Order in which it was fired.\n\nLike [[weapon:drop-bears|Drop Bears]] BS Mode, placement is restricted if an enemy [[skill:camouflage|Camouflage]] Marker is within the intended Trigger Area, unless a valid non-camouflaged enemy is there too. After placement the Token follows the relevant [[weapon:mines|Mines]] rules and the selected Mine type's own Ammunition and effects.\n\nThe launcher has [[trait:targetless|Targetless]], [[trait:speculative-attack|Speculative Attack]], [[trait:double-shot|Double Shot]] and [[trait:disposable-x|Disposable (2)]]. During the Active Turn, the optional +1 Burst consumes both remaining charges; with only one charge left, a legal Burst 1 use remains possible.",
+          "summary": "The Mine Dispenser is a [[skill:bs-attack|BS Attack]] Weapon that fires [[weapon:mines|Mines]], not an attack with its own damaging Ammunition or Saving Roll. The deployed Mine type is specified in brackets after the Weapon name on the Trooper's Unit Profile; use that Mine's printed effects rather than inventing a default type.\n\nIt uses the **BS Mode** placement rules of [[weapon:drop-bears|Drop Bears]], but uses the user's BS Attribute, not [[trait:bs-weapon-ph|BS Weapon (PH)]]. A successful shot places a visible MINE (-3) Token in the Conclusion step. As for [[weapon:drop-bears|Drop Bears]] BS Mode, the Token cannot detonate during the Order in which it was fired.\n\n**Failed shot and charges:** A failed [[skill:bs-attack|BS Attack]] Roll places no Mine Token for that Roll, but still consumes its declared [[trait:disposable-x|Disposable (2)]] use. The [[trait:double-shot|Double Shot]] option consumes both uses when selected with both charges remaining, even if the Rolls fail.\n\nLike [[weapon:drop-bears|Drop Bears]] BS Mode, placement is restricted if an enemy [[skill:camouflage|Camouflage]] Marker is within the intended Trigger Area, unless a valid non-camouflaged enemy is there too. After placement the Token follows the relevant [[weapon:mines|Mines]] rules and the selected Mine type's own Ammunition and effects.\n\n**BS Mode inheritance only:** The Mine Dispenser does not gain the [[trait:deployable|Deployable]] Mode, no-Roll [[skill:place-deployable|Place Deployable]] action, or [[skill:intuitive-attack|Intuitive Attack]] from [[weapon:drop-bears|Drop Bears]]. \n\nThe shot deploys a visible Token with the BS Mode [[state:camouflaged|CAMO]] Marker restriction. It is not placed as a [[skill:camouflage|CAMO]] Marker.\n\nThe launcher has [[trait:targetless|Targetless]], [[trait:speculative-attack|Speculative Attack]], [[trait:double-shot|Double Shot]] and [[trait:disposable-x|Disposable (2)]]. During the Active Turn, the optional +1 Burst consumes both remaining charges; with only one charge left, a legal Burst 1 use remains possible.",
           "facts": {
             "sourceNotes": [
               "Army stores savingNum=1 while the N5.3 Weapon Chart prints no Saving Roll for the Mine Dispenser launcher. Its saving Attribute and Ammunition are also blank; do not treat the imported non-operative number as a roll against a Trooper.",
@@ -5089,6 +5089,21 @@
               "sourceId": "n5-core-v5.3-pdf",
               "page": 71,
               "section": "Drop Bears BS Mode"
+            },
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 175,
+              "section": "Disposable (X) and Double Shot"
+            },
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 49,
+              "section": "Intuitive Attack: requirements"
+            },
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 82,
+              "section": "Place Deployable: requirements"
             },
             {
               "sourceId": "n5-core-v5.3-pdf",

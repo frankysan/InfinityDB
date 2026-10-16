@@ -266,3 +266,67 @@ def test_drop_bears_source_clauses_if_pinned_pdf_available(
     with pdf.open(SOURCE) as document:
         page_text = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(source_excerpt) in page_text, (page, source_excerpt)
+
+
+
+def test_mine_dispenser_inherits_only_drop_bears_bs_placement_semantics() -> None:
+    records = _records()
+    dispenser = records["weapon:mine-dispenser"]
+    drop = records["weapon:drop-bears"]
+    summary = dispenser["summary"]
+
+    assert "uses the **BS Mode** placement rules" in summary
+    assert "uses the user's BS Attribute, not [[trait:bs-weapon-ph|BS Weapon (PH)]]" in summary
+    assert "**Failed shot and charges:**" in summary
+    assert "places no Mine Token for that Roll" in summary
+    assert "still consumes its declared [[trait:disposable-x|Disposable (2)]] use" in summary
+    assert "consumes both uses when selected with both charges remaining" in summary
+    assert "even if the Rolls fail" in summary
+    assert "does not gain the [[trait:deployable|Deployable]] Mode" in summary
+    assert "no-Roll [[skill:place-deployable|Place Deployable]] action" in summary
+    assert "or [[skill:intuitive-attack|Intuitive Attack]]" in summary
+    assert "It is not placed as a [[skill:camouflage|CAMO]] Marker" in summary
+    assert "a valid non-camouflaged enemy is there too" in summary
+    assert "cannot detonate during the Order in which it was fired" in summary
+    assert "use that Mine's printed effects" in summary
+    assert "uses" in drop["summary"] and "Deployable" in drop["summary"]
+    assert {49, 71, 72, 82, 175, 181} <= {
+        c["page"] for c in dispenser["citations"]
+        if c["sourceId"] == "n5-core-v5.3-pdf"
+    }
+    edges = {(r["type"], r["recordId"]) for r in dispenser["relations"]}
+    assert ("modifies-use-of", "weapon:drop-bears") in edges
+    assert ("uses-effects-of", "weapon:mines") in edges
+    assert ("uses-effects-of", "trait:double-shot") in edges
+    assert ("uses-effects-of", "trait:disposable-x") in edges
+    assert ("enables-use-of", "skill:speculative-attack") in edges
+    assert ("enables-use-of", "skill:place-deployable") not in edges
+    assert ("enables-use-of", "skill:intuitive-attack") not in edges
+    assert ("uses-effects-of", "trait:bs-weapon-ph") not in edges
+
+
+@pytest.mark.parametrize(
+    ("page", "source_excerpt"),
+    (
+        (71, "In BS Weapon Mode, Drop Bears cannot be placed where there"),
+        (71, "If you pass the Roll, the Drop Bear is successfully deployed"),
+        (71, "A Drop Bear cannot detonate during the Order it is used in BS Mode"),
+        (72, "same rules as Drop Bears in BS Mode"),
+        (72, "The type of Mines in the Mine Dispenser are listed in brackets"),
+        (175, "one is expended every time you declare"),
+        (175, "regardless of the success or failure of the Roll involved"),
+        (175, "if both uses remain unspent"),
+        (49, "must employ a BS Weapon with the Intuitive Attack Trait"),
+        (82, "Allows the user to place a single Token or Model"),
+    ),
+)
+def test_mine_dispenser_mode_inheritance_matches_pinned_pdf(
+    page: int, source_excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    if not SOURCE.exists():
+        pytest.skip("Pinned N5.3 source PDF unavailable")
+    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(SOURCE) as doc:
+        text = _normalized_text(doc[page - 1].get_text())
+    assert _normalized_text(source_excerpt) in text, (page, source_excerpt)
