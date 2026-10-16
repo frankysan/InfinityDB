@@ -3726,9 +3726,9 @@ def test_impersonation_discover_has_correct_mods_and_retry_limit(
     restrictions = " ".join(discover["facts"]["restrictions"])
     assert "Discover's own Range bands" in restrictions
     assert "Cover and [[skill:mimetism|Mimetism]]" in restrictions
-    assert "same Marker in one Order" in restrictions
+    assert "twice during one Order" in " ".join(discover["facts"]["requirements"])
     assert "until the next Player Turn" in restrictions
-    assert "counts as a different Marker" in restrictions
+    assert "treated as a different Marker" in restrictions
 
     assert "no additional -3 WIP penalty" in imp2["summary"]
     assert "ordinary" in imp2["summary"]

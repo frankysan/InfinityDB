@@ -2479,3 +2479,26 @@ local/audits/reload-deployable-aros/.
 The frozen 367-record inventory is unchanged. This closes a
 bounded source/metadata review, not other exceptional ARO
 permissions, other numerical variants, or whole-corpus 1.0.
+
+## 1.0 Discover marker retry and ARO reveal procedure
+
+**Verified 2026-10-16 against pinned N5.3 English p. 77.**
+Curated regression coverage checks mandatory LoF, the one
+attempt per target per Order restriction, failed same-Marker
+lockout until next Player Turn, separate attempts by other
+Troopers, reset of Marker identity following revelation and
+re-entry, and the Discover + Attack ARO reveal exception.
+A SHA-256-pinned PDF test checks the original source wording.
+Discover retains its Basic Short Skill/ARO type, existing
+source citations, and reveal relationships.
+
+With a newly rebuilt rules database, the Discover Skill page
+was tested in headless Chrome at 1440, 390 and 320 px:
+**3/3 checks passed** for visible categories and new rule
+explanations, no JavaScript errors, and no document overflow.
+Private verifier, database, results and screenshot are under
+ignored local/audits/discover-aro-review/.
+
+This is selected rule correction and browser acceptance,
+not completion of all ARO exceptions, numerical Army variants,
+or the frozen 367-record audit inventory.

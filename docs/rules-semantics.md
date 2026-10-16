@@ -1755,6 +1755,21 @@ InfinityDB therefore authors `modifies-rolls-for` from Look Out to Dodge and
 navigation so Dodge and Mimetism expose those interactions without reciprocal curated rows.
 The exact PH-3 and Speculative Attack -6 values remain in the owning Skill facts.
 
+**Discover is a Basic Short Skill/ARO with target-specific limits
+(N5.3 p. 77):** The declaring Trooper must have LoF to the
+target Marker and cannot declare Discover twice against the
+same target in one Order. On a failed Roll, that Trooper may
+not retry the same Marker until the next Player Turn; another
+Trooper may still try it, and the original Trooper may target
+a different Marker. A revealed Trooper later re-entering
+Camouflaged or Impersonation Marker State counts as a new Marker.
+Discover + Attack is legal because Discover is a Basic Short
+Skill. If the Camouflaged target reveals itself by declaring
+an ARO, no Discover Roll is needed before resolving the
+declared Attack; otherwise Discover must succeed first.
+These are target-specific declaration and resolution rules,
+not a general exception to LoF or ARO entitlement.
+
 **Look Out! is a scoped allied ARO permission (N5.3 p. 81):**
 The reacting user needs LoF to the active enemy. After
 Look Out! is declared, the Reactive Player selects other

@@ -502,6 +502,35 @@ passed 6/6 responsive browser checks at 1440/390/320 px.
 The frozen historical 367-record inventory is unchanged.
 This is selected ARO/timing acceptance, not whole-corpus 1.0.
 
+## Discover retry and ARO reveal sequence (2026-10-16)
+
+Pinned English N5.3 p. 77 defines Discover as a Basic Short
+Skill/ARO with a mandatory LoF to the target. The same
+Trooper cannot declare Discover against the same target
+twice in one Order. After failing to Discover a Marker,
+that Trooper cannot retry the **same Marker** until the
+next Player Turn, regardless of whether it represented
+Camouflage or Impersonation. An allied Trooper may try
+independently; the original Trooper may target a different
+Marker. Once a revealed Trooper enters a Marker State again,
+it counts as a different Marker for this restriction.
+
+The earlier curated wording incorrectly qualified the failure
+lockout as if it applied only to IMP-1/IMP-2 Markers, and
+did not explicitly state the LoF requirement. The corrected
+facts now use the general Marker rule and explain the
+Discover + Attack procedure: if the Camouflaged target
+declares a revealing ARO, the Discover Roll is unnecessary;
+otherwise the Roll must succeed before resolving the
+Attack. The owning p. 77 PDF citation, older Wiki source,
+Basic Short Skill/ARO classification and reveal relations
+are preserved. No other Skill mechanics changed.
+
+Pinned-source and curated regression tests plus 3/3
+responsive browser checks at 1440/390/320 px passed.
+The frozen 367-record historical inventory remains
+unchanged, and whole-corpus 1.0 acceptance is still open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

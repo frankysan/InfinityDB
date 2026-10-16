@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Discover now makes its LoF requirement and same-Marker
+  retry restriction explicit, including how a revealing ARO
+  affects a combined Discover + Attack Order.
 - Reload and Place Deployable explanations now distinguish
   reactive declaration requirements from Baggage's automatic
   recovery and deployable activation in subsequent Orders.

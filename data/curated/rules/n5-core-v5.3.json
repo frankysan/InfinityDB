@@ -2620,7 +2620,8 @@
                     "aro"
                 ],
                 "requirements": [
-                    "The user must meet the target and visibility requirements for the Marker."
+                    "The user must be able to draw LoF to the target Marker.",
+                    "The same target cannot be declared for [[skill:discover|Discover]] twice during one Order."
                 ],
                 "effects": [
                     "The user makes the required WIP Roll to reveal an eligible Marker."
@@ -2628,7 +2629,11 @@
                 "restrictions": [
                     "The Marker State and other rules determine the Roll MODs and result.",
                     "The Discover WIP Roll uses Discover's own Range bands and all applicable [[skill:bs-attack|BS Attack]] MODs, including Cover and [[skill:mimetism|Mimetism]]; a Marker-specific penalty can also apply.",
-                    "Discover cannot be declared twice against the same Marker in one Order. A failed Roll against an [[state:impersonation-1|IMP-1]] or [[state:impersonation-2|IMP-2]] Marker prevents that Trooper from retrying against the same Marker until the next Player Turn. After a revealed Trooper regains an IMP Marker, it counts as a different Marker."
+                    "If a Trooper fails a WIP Roll to Discover a Marker, that Trooper cannot attempt to Discover the same Marker again until the next Player Turn. A different allied Trooper may still try that Marker, and the original Trooper may try a different Marker. A revealed Trooper that later re-enters [[state:camouflaged|Camouflaged]], [[state:impersonation-1|Impersonation-1]], or [[state:impersonation-2|Impersonation-2]] again is treated as a different Marker."
+                ],
+                "clarifications": [
+                    "As a Basic Short Skill, [[skill:discover|Discover]] may be combined with another Basic Short Skill or Short Skill in the same Order, including an Attack. This does not remove the requirement to succeed at Discover before resolving an Attack against a target that remains a [[state:camouflaged|Camouflaged]] Marker.",
+                    "If the Camouflaged target declares an [[trait:aro|ARO]] that reveals it, the Discover Roll is not needed before resolving the declared Attack. The Active Trooper may also Discover one target and Attack a different target in the same Order."
                 ]
             },
             "labelIds": [],
@@ -2674,7 +2679,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-10-16"
             },
             "variantSemantics": {
                 "inheritance": "family"

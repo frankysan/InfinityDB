@@ -2217,6 +2217,72 @@ def test_n5_declaration_source_headings_match_pinned_pdf() -> None:
             assert re.search(pattern, document[page - 1].get_text(), re.I), page
 
 
+def test_n5_discover_marker_retry_and_attack_sequence() -> None:
+    root = Path(__file__).resolve().parents[1]
+    document = load_curated_document(root / "data/curated/rules/n5-core-v5.3.json")
+    records = {record["id"]: record for record in document["records"]}
+    discover = records["skill:discover"]
+    facts = discover["facts"]
+    assert facts["typeIds"] == ["basic-short-skill", "aro"]
+    assert discover["citations"][0] == {
+        "sourceId": "n5-core-v5.3-pdf", "page": 77, "section": "Discover"
+    }
+    assert len(facts["requirements"]) == 2
+    assert "draw LoF to the target Marker" in facts["requirements"][0]
+    assert "same target" in facts["requirements"][1]
+    assert "twice during one Order" in facts["requirements"][1]
+    assert "Discover a Marker" in facts["restrictions"][2]
+    assert "next Player Turn" in facts["restrictions"][2]
+    assert "A different allied Trooper" in facts["restrictions"][2]
+    assert "original Trooper may try a different Marker" in facts["restrictions"][2]
+    assert "[[state:camouflaged|Camouflaged]]" in facts["restrictions"][2]
+    assert "[[state:impersonation-1|Impersonation-1]]" in facts["restrictions"][2]
+    assert "[[state:impersonation-2|Impersonation-2]]" in facts["restrictions"][2]
+    assert any("another Basic Short Skill or Short Skill" in x
+               for x in facts["clarifications"])
+    assert any("before resolving an Attack" in x
+               for x in facts["clarifications"])
+    assert any("declares an [[trait:aro|ARO]]" in x
+               and "not needed" in x for x in facts["clarifications"])
+    assert any("a different target" in x for x in facts["clarifications"])
+    assert {"type": "reveals-state", "recordId": "state:camouflaged"} in (
+        discover["relations"]
+    )
+
+
+def test_n5_discover_retry_and_aro_exception_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    config = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == config["corePdfSha256"]
+    with pdf.open(source) as document:
+        page = " ".join(document[76].get_text().split())
+    for clause in (
+        "DISCOVER BASIC SHORT SKILL / ARO",
+        "The user must be able to draw LoF to the target",
+        "cannot be used against the same Target twice",
+        "fails a WIP Roll to Discover a Marker",
+        "same Marker until the next Player Turn",
+        "attempt to Discover a different Marker",
+        "re-entered Camouflaged State or Impersonation-1 or 2 State",
+        "as in a BS Attack (Cover, Range, Mimetism",
+        "Discover is a Basic Short Skill",
+        "If the Camouflaged target declares an ARO",
+        "no need to perform the Discover Roll",
+        "does not declare an ARO",
+        "need to pass the Discover Roll before resolving any Attack",
+        "Discover one target and Attack a different target",
+    ):
+        assert clause in page, clause
+
+
 def test_n5_short_skill_pages_match_source_headings() -> None:
     document = load_curated_document(
         Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"

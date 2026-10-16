@@ -1283,6 +1283,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         versus automatic States Phase recovery. Preserve
         reviewed mechanics and FAQ; pinned source tests and
         responsive browser acceptance passed (6/6).
+      - [x] Reconcile Discover declaration and failed-Marker
+        retry restrictions against N5.3 p. 77: mandatory LoF,
+        one Discover attempt per target per Order, failed-roll
+        lockout for any same Marker until next Player Turn,
+        independent attempts by other Troopers or on different
+        Markers, and Discover + Attack when an enemy reveals
+        by ARO. Source tests and 3/3 browser checks passed.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.
