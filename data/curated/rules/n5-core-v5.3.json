@@ -13308,6 +13308,12 @@
                 ],
                 "restrictions": [
                     "TAGs, Remotes, Vehicles, Troopers with [[equipment:motorcycle:plural]], Troopers with [[skill:aerial]], and Troopers in [[state:targeted]] cannot declare Cautious Movement."
+                ],
+                "clarifications": [
+                    "Without [[skill:stealth|Stealth]], [[skill:cautious-movement|Cautious Movement]] grants no enemy [[trait:aro|AROs]] only when **both** the starting and ending positions are outside the LoF and [[trait:zone-of-control-zc|Zone of Control]] of every enemy Model and Marker. If either endpoint is inside enemy LoF or [[trait:zone-of-control-zc|Zone of Control]], ordinary [[trait:aro|ARO]] eligibility applies.",
+                    "For a Hackable Trooper in Model form, both endpoints must additionally be outside the [[rule:hacking-area|Hacking Area]] of every enemy [[skill:hacker|Hacker]] to suppress [[trait:aro|AROs]]. A [[skill:non-hackable|non-Hackable]] Trooper in Model form does not grant [[trait:aro|AROs]] merely by starting or ending inside an enemy [[rule:hacking-area|Hacking Area]]; other LoF and [[trait:zone-of-control-zc|Zone of Control]] conditions still apply.",
+                    "With [[skill:stealth|Stealth]] in the Active Turn, the user may declare [[skill:cautious-movement|Cautious Movement]] within enemy [[trait:zone-of-control-zc|Zones of Control]] or [[rule:hacking-area|Hacking Areas]], but the declaration still grants [[trait:aro|AROs]] to enemies with LoF to the user. The [[skill:stealth|Stealth]] protection is ineffective against enemies with [[skill:combat-instinct|Combat Instinct]] or [[skill:sixth-sense|Sixth Sense]] and does not suppress [[trait:deployable|Deployable]] triggering.",
+                    "An enemy Trooper in [[state:hidden-deployment|Hidden Deployment]] is neither a Model nor a Marker; it cannot claim LoF or [[trait:zone-of-control-zc|Zone of Control]]-based [[trait:aro|ARO]] eligibility against Cautious Movement solely from that hidden position."
                 ]
             },
             "labelIds": [
@@ -13321,6 +13327,16 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 32,
+                    "section": "Cautious Movement"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 112,
+                    "section": "Stealth: Cautious Movement"
+                },
                 {
                     "sourceId": "wiki-cautious-movement-oldid-3931",
                     "heading": "Cautious Movement"

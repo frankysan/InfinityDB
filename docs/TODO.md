@@ -1290,6 +1290,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         independent attempts by other Troopers or on different
         Markers, and Discover + Attack when an enemy reveals
         by ARO. Source tests and 3/3 browser checks passed.
+      - [x] Reconcile Cautious Movement ARO suppression (N5.3
+        pp. 32/112): ordinary start/end LoF and ZoC checks,
+        Hackable Model-only enemy Hacking Area restriction,
+        non-Hackable and Hidden Deployment distinctions, and
+        Stealth's exception without granting reactions through
+        LoF. Source-pinned tests and responsive browser checks
+        passed (3/3); original 367-record inventory unchanged.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

@@ -4958,3 +4958,23 @@ legend). InfinityDB exposes both rule owners, preserving the source-marker
 conflict. This does not establish why Army chose the marker or adjudicate an
 upstream data correction. N5 v5.3 printed pp. 72, 176, 181; PDF SHA-256
 `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.
+
+## 1.0 Cautious Movement and ARO suppression
+
+**N5.3 pp. 32 and 112:** Cautious Movement remains a Long Skill,
+not an ARO. Ordinarily it prevents reactions only when both start
+and end positions are outside all enemy Model/Marker LoF and ZoC.
+For Hackable Troopers in Model form, those positions must also be
+outside enemy Hacking Areas; a non-Hackable Trooper's presence
+inside a Hacking Area alone does not generate AROs. Hidden
+Deployment Troopers are neither Models nor Markers for this
+LoF/ZoC trigger.
+
+Stealth allows the Active Trooper to declare Cautious Movement
+within enemy ZoC and Hacking Areas without granting those
+reactions, but enemies with LoF may still react. Combat Instinct
+and Sixth Sense counter Stealth; Deployable triggers are also
+independent. The exceptions concern **eligibility to react**,
+not changing Cautious Movement's category or waiving other
+reaction requirements. The owning Skill and linked source pages
+provide the player-facing explanation.

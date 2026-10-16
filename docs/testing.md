@@ -2502,3 +2502,25 @@ ignored local/audits/discover-aro-review/.
 This is selected rule correction and browser acceptance,
 not completion of all ARO exceptions, numerical Army variants,
 or the frozen 367-record audit inventory.
+
+## 1.0 Cautious Movement ARO-suppression conditions
+
+**Verified 2026-10-16 against SHA-256-pinned English N5.3
+pp. 32 and 112.** A curated regression tests the Long Skill
+classification, existing movement restrictions, new primary
+PDF references, ordinary LoF/ZoC endpoint checks, the Hackable
+Model and non-Hackable Hacking Area distinction, Stealth
+exceptions, Hidden Deployment exclusion and unchanged
+Stealth-to-Cautious Movement relation. A pinned-PDF test
+checks the exact source heading and relevant clauses.
+
+A newly rebuilt rules database was used in headless Chrome
+at 1440, 390 and 320 px: **3/3 Cautious Movement page checks
+passed** for the visible Long Skill category, the new source
+explanations, no JavaScript exceptions and no document overflow.
+The private verifier, result JSON, database and screenshot
+are under ignored local/audits/cautious-movement-aro/.
+
+This is bounded source-to-page acceptance. The frozen
+367-record inventory and remaining conditional ARO and
+Army-variant acceptance tasks remain open.

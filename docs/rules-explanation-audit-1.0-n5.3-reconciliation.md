@@ -531,6 +531,35 @@ responsive browser checks at 1440/390/320 px passed.
 The frozen 367-record historical inventory remains
 unchanged, and whole-corpus 1.0 acceptance is still open.
 
+## Cautious Movement and Stealth ARO suppression (2026-10-16)
+
+The pinned N5.3 English rulebook (p. 32) defines Cautious
+Movement as a Long Skill, with its ordinary no-ARO effect
+depending on the beginning **and** ending positions being
+outside the LoF and ZoC of all enemy Models and Markers.
+A Hackable Trooper in Model form must additionally avoid
+enemy Hacker Hacking Areas at both endpoints; a non-Hackable
+Trooper does not grant AROs from that Hacking Area condition
+alone. Hidden Deployment units are neither Models nor Markers
+for this LoF/ZoC reaction rule. These are conditional
+endpoints, not unconditional reaction immunity.
+
+N5.3 p. 112 separately permits a Stealth user in the Active
+Turn to declare Cautious Movement within enemy ZoC/Hacking
+Areas, still granting reactions to enemies with LoF.
+Combat Instinct and Sixth Sense negate Stealth protection,
+and Deployable equipment follows independent triggering
+rules. The curated Cautious Movement record retains its
+Long Skill classification, existing restrictions and
+historical Wiki reference. It gained explicit primary
+PDF provenance and four source-scoped explanations; no
+new mechanics, relation types, or ARO engine were added.
+
+Two pinned-source/curation tests passed. Its published page
+also passed 3/3 headless browser checks at 1440/390/320 px.
+The original 367-record audit remains frozen and does not
+become accepted on the strength of this bounded verification.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

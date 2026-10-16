@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Cautious Movement now explains when it suppresses AROs,
+  including Hackable Troopers, Stealth, Hidden Deployment,
+  and the importance of both movement endpoints.
 - Discover now makes its LoF requirement and same-Marker
   retry restriction explicit, including how a revealing ARO
   affects a combined Discover + Attack Order.

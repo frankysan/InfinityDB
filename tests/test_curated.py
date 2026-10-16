@@ -1601,6 +1601,87 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     assert "plus [[distance:4:inch]]" in super_jump["effects"][1]
 
 
+def test_n5_cautious_movement_aro_suppression_has_scoped_exceptions() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in document["records"]}
+    cautious = records["skill:cautious-movement"]
+    stealth = records["skill:stealth"]
+    assert cautious["facts"]["typeIds"] == ["long-skill"]
+    assert cautious["labelIds"] == ["movement", "no-roll"]
+    assert cautious["citations"][:2] == [
+        {"sourceId": "n5-core-v5.3-pdf", "page": 32,
+         "section": "Cautious Movement"},
+        {"sourceId": "n5-core-v5.3-pdf", "page": 112,
+         "section": "Stealth: Cautious Movement"},
+    ]
+    assert cautious["citations"][2]["sourceId"] == "wiki-cautious-movement-oldid-3931"
+    facts = cautious["facts"]
+    assert "first MOV value" in facts["effects"][0]
+    for term in ("TAGs", "Remotes", "Vehicles", "motorcycle",
+                 "[[skill:aerial]]", "[[state:targeted]]"):
+        assert term.lower() in facts["restrictions"][0].lower()
+    notes = facts["clarifications"]
+    assert len(notes) == 4
+    assert "**both**" in notes[0]
+    assert "every enemy Model and Marker" in notes[0]
+    assert "[[trait:zone-of-control-zc|Zone of Control]]" in notes[0]
+    assert "[[trait:aro|ARO]] eligibility" in notes[0]
+    assert "Hackable Trooper in Model form" in notes[1]
+    assert "[[skill:non-hackable|non-Hackable]]" in notes[1]
+    assert "[[rule:hacking-area|Hacking Area]]" in notes[1]
+    assert "[[skill:stealth|Stealth]]" in notes[2]
+    assert "enemies with LoF" in notes[2]
+    assert "[[skill:sixth-sense|Sixth Sense]]" in notes[2]
+    assert "[[skill:combat-instinct|Combat Instinct]]" in notes[2]
+    assert "[[trait:deployable|Deployable]]" in notes[2]
+    assert "[[state:hidden-deployment|Hidden Deployment]]" in notes[3]
+    assert "neither a Model nor a Marker" in notes[3]
+    assert {"type": "enables-use-of", "recordId": "skill:cautious-movement"} in (
+        stealth["relations"]
+    )
+
+
+def test_n5_cautious_movement_aro_conditions_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    config = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == config["corePdfSha256"]
+    with pdf.open(source) as book:
+        cautious = " ".join(book[31].get_text().split())
+        stealth = " ".join(book[111].get_text().split())
+    for clause in (
+        "CAUTIOUS MOVEMENT LONG SKILL Movement, No LoF, No Roll",
+        "move up to the first value of his MOV Attribute",
+        "outside the LoF and ZoC of all enemy Models and Markers",
+        "Hackable Trooper in Model form",
+        "outside the Hacking Area of any enemy Hackers",
+        "non-Hackable Trooper is in Model form",
+        "does not cause the Trooper to generate AROs",
+        "Troopers in Hidden Deployment are neither Models nor Markers",
+        "TAGs, Remotes, Vehicles",
+        "Troopers in Targeted State",
+    ):
+        assert clause in cautious, clause
+    for clause in (
+        "STEALTH AUTOMATIC SKILL Optional",
+        "declare Cautious Movement inside the Zone of Control",
+        "Hacking Zones of enemy Models and Markers",
+        "only grant AROs to enemies that have LoF to them",
+        "Stealth is not effective against Troopers with the Combat Instinct",
+        "Sixth Sense Special Skills",
+    ):
+        assert clause in stealth, clause
+
+
 def test_n5_conditional_climb_jump_declarations_keep_base_types() -> None:
     document = load_curated_document(
         Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
