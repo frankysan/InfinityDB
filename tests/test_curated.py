@@ -1454,6 +1454,72 @@ def test_n5_cyberplug_aro_examples_match_pinned_pdf() -> None:
         assert fragment in examples, fragment
 
 
+def test_n5_speculative_attack_template_aro_sequence() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {r["id"]: r for r in document["records"]}
+    record = records["skill:speculative-attack"]
+    facts = record["facts"]
+    assert facts["typeIds"] == ["long-skill"]
+    assert record["labelIds"] == ["bs-attack"]
+    assert record["citations"][0] == {
+        "sourceId": "n5-core-v5.3-pdf",
+        "page": 48,
+        "section": "Speculative Attack",
+    }
+    assert record["citations"][1]["sourceId"] == "wiki-en-20260926-200832"
+    assert "trajectory" in facts["requirements"][1]
+    assert "Burst 1" in facts["effects"][0]
+    assert "-6 MOD" in facts["restrictions"][0]
+    assert "vertical surface" in facts["restrictions"][1]
+    assert len(facts["clarifications"]) == 3
+    template, reactions, example = facts["clarifications"]
+    assert "Main Target" in template and "impact point" in template
+    assert "Neither the target nor the impact point requires LoF" in template
+    assert "identify their eligible [[trait:aro|AROs]]" in reactions
+    assert "Only then measure the distance" in reactions
+    assert "behind Total Cover" in reactions
+    assert "target behind a wall" in example
+    assert "[[skill:dodge|Dodge]] suffers -3" in example
+    assert "[[rule:face-to-face-rolls|Face to Face Roll]]" in example
+    assert "[[skill:mimetism|Mimetism]]" in example
+    assert {"type": "ignores-modifiers-from", "recordId": "skill:mimetism"} in (
+        record["relations"]
+    )
+
+
+def test_n5_speculative_attack_aro_procedure_matches_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    manifest = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == manifest["corePdfSha256"]
+    with pdf.open(source) as book:
+        page = " ".join(book[47].get_text().split())
+    for clause in (
+        "SPECULATIVE ATTACK LONG SKILL BS Attack",
+        "possible to draw a trajectory between the Trooper and the impact point",
+        "Main Target must be inside the Area of Effect",
+        "both the target of the attack and the impact point",
+        "Then, a check is made to ascertain which other Troopers are affected",
+        "to determine all AROs",
+        "Measure the distance between the Trooper and the impact point",
+        "The Blink declares his ARO",
+        "he may declare Dodge",
+        "A Face to Face Roll ensues",
+        "-3 to Dodge a Template without LoF to the attacker",
+        "-6 for Speculative Attack",
+    ):
+        assert clause in page, clause
+
+
 def test_n5_alert_is_optional_automatic_conclusion_not_an_aro() -> None:
     document = load_curated_document(
         Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"

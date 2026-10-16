@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Speculative Attack now explains the Circular Template ARO
+  sequence and why an out-of-LoF target can Dodge the
+  incoming template before the attack Roll is resolved.
 - Peripheral (Cyberplug) now explains why a Connected Controller
   may be attacked while performing Idle and how its own ARO
   changes Connected/Autonomous reactions.

@@ -616,6 +616,32 @@ Two source/curation regressions and responsive browser
 checks provide bounded verification. The frozen 367-record
 inventory and the whole-corpus acceptance gate remain open.
 
+## Speculative Attack Circular Template ARO sequence (2026-10-16)
+
+Pinned English N5.3 p. 48 establishes four procedural steps:
+designate the Main Target; choose a legal Circular Template
+impact point affecting it; determine all other affected Troopers
+and their ARO eligibility; then measure range, apply MODs and
+make the Rolls. The Main Target and point may be outside
+the shooter's LoF, but valid trajectory, impact position,
+Burst 1 and the printed MOD restrictions remain mandatory.
+
+The official example confirms that a target behind a wall
+may declare Dodge against a template that affects it, with
+a -3 Dodge MOD for lacking LoF to the attacker. That Dodge
+opposes the Speculative Attack Roll Face to Face. The attacker
+uses Range and Speculative Attack -6, not target Mimetism or
+Cover MODs. The rule does not grant reactions to unaffected
+Troopers or waive ordinary eligibility for unrelated actions.
+
+The existing curated Long Skill and modifier relations already
+matched this outcome but omitted the template-to-ARO order.
+Added three clarifications and N5.3 p. 48 primary provenance,
+preserving the original reviewed requirements, effects,
+restrictions and Wiki citation. Two pinned-source/curated
+tests and 3/3 responsive browser checks passed. The frozen
+367-record inventory and whole-corpus 1.0 gate remain open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

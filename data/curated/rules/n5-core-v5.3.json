@@ -13963,12 +13963,22 @@
                 "restrictions": [
                     "Apply the Speculative Attack -6 MOD and Range MODs; other negative MODs such as [[skill:mimetism]], Partial Cover, and [[term:visibility-zone|Visibility Zones]] are not applied.",
                     "A Circular Template impact point cannot be placed on a vertical surface or in the air."
+                ],
+                "clarifications": [
+                    "For [[skill:speculative-attack|Speculative Attack]] with a Circular [[trait:impact-template|Impact Template]], designate the Main Target, then place the template at a legal impact point that includes the Main Target in its Area of Effect. Neither the target nor the impact point requires LoF, but the trajectory and placement restrictions still apply.",
+                    "After placing the Circular Template, determine which Troopers are affected to identify their eligible [[trait:aro|AROs]]. Only then measure the distance to the impact point, apply MODs and resolve Rolls. A Trooper affected behind Total Cover from the attacker may still react to the incoming template.",
+                    "In the N5.3 p. 48 example, the target behind a wall declares [[skill:dodge|Dodge]] against the template. That [[skill:dodge|Dodge]] suffers -3 because the target lacks LoF to the attacker, and the eligible reaction opposes the [[skill:speculative-attack|Speculative Attack]] Roll as a [[rule:face-to-face-rolls|Face to Face Roll]]. The attacker applies the Range MOD and [[trait:speculative-attack|Speculative Attack]] -6, but not the target's [[skill:mimetism|Mimetism]] or Cover penalty."
                 ]
             },
             "labelIds": [
                 "bs-attack"
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 48,
+                    "section": "Speculative Attack"
+                },
                 {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Speculative_Attack",

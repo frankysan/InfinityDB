@@ -1309,6 +1309,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         the Controller may react itself while both Cyberplugs operate
         autonomously. Add pinned-source tests and responsive UI
         acceptance (3/3). Preserve existing REA-017 subtype coverage.
+      - [x] Verify Speculative Attack's Circular Template
+        ARO sequence against N5.3 p. 48: Main Target,
+        legal impact point, affected Troopers and their
+        reactions before range measurement and Rolls.
+        Confirm the behind-cover Dodge (-3) Face to Face
+        example, preserving Long Skill and existing MODs.
+        Source tests and 3/3 responsive browser checks pass.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

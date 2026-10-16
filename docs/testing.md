@@ -2568,3 +2568,25 @@ local/audits/cyberplug-aro-audit.db.
 The original REA-017 foundation and frozen 367-record audit
 are unchanged. This is selected ARO clarification, not a new
 rules engine or whole-corpus 1.0 acceptance.
+
+## 1.0 Speculative Attack Circular Template ARO order
+
+**Verified 2026-10-16 against SHA-256-pinned English N5.3
+p. 48.** Two regressions verify Long Skill classification,
+primary and historical Wiki citations, unchanged modifiers,
+the Main Target and legal impact point, the check for affected
+Troopers before AROs and distance measurement, and the
+behind-cover Dodge (-3) Face to Face example.
+
+A fresh rules database powered browser checks of the
+published Speculative Attack Skill page at 1440, 390
+and 320 px. **3/3 headless Chrome checks passed** for
+the Long Skill badge, new explanatory text, no JavaScript
+errors, and no horizontal overflow. Private verifier,
+results, screenshot and rebuilt DB remain in ignored
+local/audits/speculative-aro-browser/ and
+local/audits/speculative-aro-rules.db.
+
+The selected ARO procedure is source-reviewed; neither
+the frozen 367-record inventory nor remaining whole-corpus
+1.0 acceptance tasks are marked complete.
