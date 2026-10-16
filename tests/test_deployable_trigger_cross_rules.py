@@ -330,3 +330,103 @@ def test_mine_dispenser_mode_inheritance_matches_pinned_pdf(
     with pdf.open(SOURCE) as doc:
         text = _normalized_text(doc[page - 1].get_text())
     assert _normalized_text(source_excerpt) in text, (page, source_excerpt)
+
+
+
+def test_pitcher_and_disco_delivery_lifecycle_keeps_objects_separate() -> None:
+    records = _records()
+    pitcher = records["weapon:pitcher"]
+    disco = records["weapon:disco-baller"]
+    activation = records["skill:activate-disco-ball"]
+    repeater = records["equipment:deployable-repeater"]
+
+    p = pitcher["summary"]
+    assert "A failed BS Roll places no [[equipment:deployable-repeater|Repeater]] Token" in p
+    assert "still spends one [[trait:disposable-x|Disposable (2)]] use" in p
+    assert "a separate [[equipment:deployable-repeater|Deployable Repeater]]" in p
+    assert "ARM 0, BTS 0, STR 1 and S 1" in p
+    assert "not the [[skill:place-deployable|Place Deployable]] Skill" in p
+    assert "at the Order's Conclusion" in p
+    assert "never on a vertical surface" in p
+    assert "If none remains, the Equipment is lost" in p
+    assert "without requiring a Saving Roll" not in p
+    assert "[[skill:place-deployable]]" in repeater["summary"]
+    assert {
+        ("n5-faq-v0.1-en-pdf", 2), ("n5-faq-v0.1-en-pdf", 3),
+        ("n5-core-v5.3-pdf", 73), ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-pdf", 186), ("n5-core-v5.3-pdf", 187),
+    } <= {(c["sourceId"], c.get("page")) for c in pitcher["citations"]}
+
+    d = disco["summary"]
+    assert "A failed launcher BS Roll places no Disco Ball" in d
+    assert "still expends its declared [[trait:disposable-x|Disposable]] use" in d
+    assert "both are spent even if the Rolls fail" in d
+    assert "The deployed Disco Ball has its own ARM, BTS, STR and S values" in d
+    assert "not placed on a vertical surface" in d
+    assert "if none exists, that deployment is lost" in d
+    assert "A failed activation WIP Roll does not restore the Eclipse Template" in d
+    assert "not another launcher charge" in d
+    assert "when the Ball is destroyed" in d
+    assert "The source gives the Disco Ball ARM 0, BTS 0, STR 1 and S 1" in d
+    assert "WIP +3" in activation["summary"]
+    assert "Disposable" not in activation["summary"]
+    assert {
+        ("n5-faq-v0.1-en-pdf", 2), ("n5-faq-v0.1-en-pdf", 3),
+        ("n5-core-v5.3-pdf", 71), ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-pdf", 186),
+    } <= {(c["sourceId"], c.get("page")) for c in disco["citations"]}
+
+    assert not any(
+        x["type"] == "enables-use-of"
+        and x["recordId"] == "skill:place-deployable"
+        for x in pitcher.get("relations", []) + disco.get("relations", [])
+    )
+
+
+@pytest.mark.parametrize(
+    ("page", "excerpt"),
+    (
+        (2, "The Token must be fully supported by the surface"),
+        (2, "it cannot be placed on a vertical surface"),
+        (3, "if this is not possible, the Deployable will be lost"),
+        (3, "This also applies to weapons that place a Deployable Weapon"),
+        (3, "such as Disco Ballers, Pitchers, and Drop Bears (BS Mode)"),
+    ),
+)
+def test_fired_deployable_faq_covers_both_launchers(
+    page: int, excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    faq = ROOT / "data/pdf/faq/n5-faqs-v0-1-en.pdf"
+    if not faq.exists():
+        pytest.skip("Pinned N5 FAQ v0.1 unavailable")
+    assert hashlib.sha256(faq.read_bytes()).hexdigest() == (
+        "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa"
+    )
+    with pdf.open(faq) as document:
+        found = _normalized_text(document[page - 1].get_text())
+    assert _normalized_text(excerpt) in found, (page, excerpt)
+
+
+@pytest.mark.parametrize(
+    ("page", "excerpt"),
+    (
+        (71, "If you pass the Roll, a Disco Ball is successfully"),
+        (71, "At the start of the States Phase, the Disco Ball deactivates"),
+        (71, "Only allied Disco Balls can be Activated this way"),
+        (73, "A successful BS Roll allows players to place a Deployable Repeater"),
+        (175, "one is expended every time you declare"),
+        (175, "This Burst MOD can only be applied if both uses"),
+        (186, "DEPLOYABLE"),
+    ),
+)
+def test_delivery_lifecycle_is_printed_in_pinned_core(
+    page: int, excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    if not SOURCE.exists():
+        pytest.skip("Pinned N5.3 source PDF unavailable")
+    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(SOURCE) as document:
+        found = _normalized_text(document[page - 1].get_text())
+    assert _normalized_text(excerpt) in found, (page, excerpt)

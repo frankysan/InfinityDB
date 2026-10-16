@@ -754,6 +754,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Preserve the bracketed Mine subtype and imported profile.
       Automated browser checks pass 57/57 at desktop/mobile widths.
       See RR-WPN-PLACEMENT-002.
+    - [x] Review Pitcher and Disco Baller as delivery weapons versus
+      separate deployed objects: successful BS delivery, failed-Roll
+      Disposable consumption, independent object Attributes/effects,
+      Conclusion-step placement, and the FAQ's non-vertical-surface
+      and occupied-landing exceptions. Disco Baller reactivation is
+      a separate Deactivator/WIP Skill, not another launcher use.
+      Preserve source profile modes and established relationship owners.
+      Browser checks passed 75/75 at desktop and mobile widths.
+      See RR-WPN-DELIVERY-001.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve

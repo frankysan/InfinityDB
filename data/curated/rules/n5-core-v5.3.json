@@ -4939,7 +4939,7 @@
           "id": "weapon:pitcher",
           "kind": "weapon",
           "name": "Pitcher",
-          "summary": "The Pitcher uses [[skill:bs-attack|BS Attack]] and [[trait:targetless|Targetless]] to fire at a chosen location. A successful BS Roll places a [[equipment:deployable-repeater|Deployable Repeater]] Token labelled [[equipment:repeater|REPEATER]] at the point of impact. The Token provides [[equipment:repeater|Repeater]] effects, not damage.\n\nThe launcher has Burst 1, [[trait:disposable-x|Disposable (2)]], [[trait:speculative-attack|Speculative Attack]], [[trait:indiscriminate|Indiscriminate]] and [[trait:non-lethal|Non-Lethal]]. Use the linked [[skill:speculative-attack|Speculative Attack]] rules for attacks without LoF. The Pitcher profile lists no PS, Ammunition or Saving Roll.\n\nFiring a Pitcher is not the [[skill:place-deployable|Place Deployable]] Skill. The reviewed FAQ explains that when another Trooper occupies the intended placement before Conclusion, a different legal position can be chosen. If none is legal, the deployed Equipment is lost.",
+          "summary": "The Pitcher uses [[skill:bs-attack|BS Attack]] and [[trait:targetless|Targetless]] to fire at a chosen location. A successful BS Roll places a [[equipment:deployable-repeater|Deployable Repeater]] Token labelled [[equipment:repeater|REPEATER]] at the point of impact. The Token provides [[equipment:repeater|Repeater]] effects, not damage.\n\nThe launcher has Burst 1, [[trait:disposable-x|Disposable (2)]], [[trait:speculative-attack|Speculative Attack]], [[trait:indiscriminate|Indiscriminate]] and [[trait:non-lethal|Non-Lethal]]. Use the linked [[skill:speculative-attack|Speculative Attack]] rules for attacks without LoF. The Pitcher profile lists no PS, Ammunition or Saving Roll.\n\nA failed BS Roll places no [[equipment:deployable-repeater|Repeater]] Token, but still spends one [[trait:disposable-x|Disposable (2)]] use. A successful Roll delivers a separate [[equipment:deployable-repeater|Deployable Repeater]], not a hit requiring a Saving Roll. That [[trait:deployable|Deployable]] has ARM 0, BTS 0, STR 1 and S 1.\n\n**Placement and timing:** Pitcher fires a [[skill:bs-attack|BS Attack]], not the [[skill:place-deployable|Place Deployable]] Skill. A successful delivery places its Token at the Order's Conclusion. The Token must be fully supported by its surface, never on a vertical surface.\n\nThe N5 FAQ also covers delivery by fired weapons: if another Trooper occupies the intended location before Conclusion, choose another legal position. If none remains, the Equipment is lost.",
           "facts": {
             "sourceNotes": [
               "The September 2026 N5.3 chart, pinned Army snapshot and English Wiki's N5.2-updated Pitcher chart share the revised range bands. The Wiki retains the older chart as historical text; it is not the current weapon profile."
@@ -4996,6 +4996,21 @@
           "citations": [
             {
               "sourceId": "n5-core-v5.3-pdf",
+              "page": 175,
+              "section": "Disposable (X)"
+            },
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 186,
+              "section": "Weapon Chart: Deployable Repeater object profile"
+            },
+            {
+              "sourceId": "n5-faq-v0.1-en-pdf",
+              "page": 3,
+              "section": "Fired Deployable: occupied placement before Conclusion"
+            },
+            {
+              "sourceId": "n5-core-v5.3-pdf",
               "page": 73,
               "section": "Pitcher"
             },
@@ -5012,7 +5027,7 @@
             {
               "sourceId": "n5-faq-v0.1-en-pdf",
               "page": 2,
-              "section": "Place Deployable position occupied before Conclusion"
+              "section": "Fired Deployable: supported placement; no vertical surfaces"
             }
           ],
           "review": {
@@ -7221,7 +7236,7 @@
             "id": "weapon:disco-baller",
             "kind": "weapon",
             "name": "Disco Baller",
-            "summary": "Disco Baller has [[trait:targetless|Targetless]] and [[trait:speculative-attack|Speculative Attack]]. Choose a location and make a non-Face to Face [[rule:face-to-face-rolls|Normal BS Roll]]. On success, place a Disco Ball Model or Token there in the Conclusion Step, with a circular [[ammunition:eclipse|Eclipse]] Template centered on it.\n\nAt the start of the States Phase the Disco Ball deactivates and its Eclipse Template is removed; the deployed Ball remains until it is destroyed or the game ends. The source gives the Disco Ball ARM 0, BTS 0, STR 1 and S 1.\n\nA Trooper equipped with a [[equipment:deactivator|Deactivator]] may use the [[skill:activate-disco-ball|Activate Disco Ball]] Short Skill on an allied Ball in LoF or [[trait:zone-of-control-zc|Zone of Control]], never an enemy Ball.\n\nMake a WIP +3 [[rule:face-to-face-rolls|Normal Roll]] with the [[equipment:deactivator|Deactivator]]'s Range MODs. On success, restore the Eclipse Template in the Conclusion Step; remove it again at the next States Phase or when the Ball is destroyed.\n\nThe Weapon Chart lists [[trait:disposable-x|Disposable (2)]] and [[trait:double-shot|Double Shot]] for the launcher. Its use count and attack profile are separate from the deployed Disco Ball's profile.",
+            "summary": "Disco Baller has [[trait:targetless|Targetless]] and [[trait:speculative-attack|Speculative Attack]]. Choose a location and make a non-Face to Face [[rule:face-to-face-rolls|Normal BS Roll]]. On success, place a Disco Ball Model or Token there in the Conclusion Step, with a circular [[ammunition:eclipse|Eclipse]] Template centered on it.\n\nAt the start of the States Phase the Disco Ball deactivates and its Eclipse Template is removed; the deployed Ball remains until it is destroyed or the game ends. The source gives the Disco Ball ARM 0, BTS 0, STR 1 and S 1.\n\nA Trooper equipped with a [[equipment:deactivator|Deactivator]] may use the [[skill:activate-disco-ball|Activate Disco Ball]] Short Skill on an allied Ball in LoF or [[trait:zone-of-control-zc|Zone of Control]], never an enemy Ball.\n\nMake a WIP +3 [[rule:face-to-face-rolls|Normal Roll]] with the [[equipment:deactivator|Deactivator]]'s Range MODs. On success, restore the Eclipse Template in the Conclusion Step; remove it again at the next States Phase or when the Ball is destroyed.\n\nThe Weapon Chart lists [[trait:disposable-x|Disposable (2)]] and [[trait:double-shot|Double Shot]] for the launcher. Its use count and attack profile are separate from the deployed Disco Ball's profile.\n\n**Delivery and charges:** A failed launcher BS Roll places no Disco Ball but still expends its declared [[trait:disposable-x|Disposable]] use. If [[trait:double-shot|Double Shot]] adds +1 Burst while both charges remain, both are spent even if the Rolls fail.\n\nThe deployed Disco Ball has its own ARM, BTS, STR and S values; it does not inherit the launcher's charges.\n\n**Placement FAQ:** A fired Disco Ball must be fully supported on its landing surface, not placed on a vertical surface. If another Trooper occupies the chosen spot before the Conclusion step, choose another legal spot; if none exists, that deployment is lost.\n\n**Later activation:** The [[skill:activate-disco-ball|Activate Disco Ball]] Skill uses a [[equipment:deactivator|Deactivator]], not another launcher charge. A failed activation WIP Roll does not restore the Eclipse Template; a destroyed Ball cannot be reactivated.",
             "facts": {},
             "composition": {
                 "role": "definition"
@@ -7272,6 +7287,21 @@
                 }
             ],
             "citations": [
+                {
+                  "sourceId": "n5-core-v5.3-pdf",
+                  "page": 175,
+                  "section": "Disposable (X) and Double Shot"
+                },
+                {
+                  "sourceId": "n5-faq-v0.1-en-pdf",
+                  "page": 2,
+                  "section": "Firing a Deployable onto a vertical surface"
+                },
+                {
+                  "sourceId": "n5-faq-v0.1-en-pdf",
+                  "page": 3,
+                  "section": "Fired Deployable: occupied placement before Conclusion"
+                },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 71,

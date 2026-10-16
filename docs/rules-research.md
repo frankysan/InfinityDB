@@ -876,6 +876,66 @@ The batch does not declare complete Weaponry
 source coverage or override unresolved cross-source
 profiles.
 
+### RR-WPN-DELIVERY-001 - Fired delivery versus deployed object lifecycle
+
+**Project domain:** Weaponry. **Scope:** pinned English N5.3
+pp. 71, 73, 175, 186-187, and N5 FAQ v0.1 English pp. 2-3.
+ITS scenario content excluded.
+
+The core rules distinguish a *delivery BS Attack* from the
+subsequently deployed game element:
+
+- **Pitcher:** The launcher expends a Disposable (2) use on a
+  declared attack, whether the BS Roll succeeds or fails.
+  A successful Roll produces a separate Deployable Repeater
+  Token at the impact location. The deployed object's
+  ARM 0, BTS 0, STR 1 and S 1 are from the object
+  profile (N5.3 p. 186), not the launcher's attack
+  profile (p. 187). This is neither a damaging hit
+  nor the user's Place Deployable Skill.
+- **Disco Baller:** Failed delivery Rolls spend the declared
+  launcher use but place no Disco Ball. Double Shot's
+  optional +1 Burst expends both unspent Disposable (2)
+  uses if selected (p. 175). Successful delivery places
+  a Ball with independent ARM 0, BTS 0, STR 1 and S 1
+  (pp. 71, 186) and centers an Eclipse Template on it.
+  The Template deactivates at the States Phase; destroying
+  the Ball removes it. Later allied reactivation instead
+  uses the Deactivator and a WIP +3 Skill (p. 71),
+  independently of the launcher's remaining shots.
+
+**FAQ placement:** FAQ v0.1 p. 2 requires fired
+Deployables to be fully supported, not on vertical
+surfaces. FAQ p. 3 explicitly extends the Place
+Deployable occupied-position correction to Pitcher,
+Disco Baller and Drop Bears (BS Mode): after another
+Trooper occupies the intended position before the
+Conclusion step, select another legal location or
+lose the item if none is legal. This is not permission
+to invoke the Place Deployable Skill when firing.
+
+The curated summaries now state these outcomes with
+links to the existing Disposable, Double Shot,
+Repeater, Eclipse, Deactivator and activation owners.
+The older Pitcher FAQ p. 2 citation was labeled as
+the occupancy ruling; its label is corrected, and
+FAQ p. 3 is cited independently. Previously approved
+plain-text mentions of "States Phase" retain their
+review rationale; the two occurrence hashes were
+updated for their changed passage context. No
+imported Army profiles or upstream source facts
+were normalized.
+
+Source-pinned tests and live weapon-detail API
+regressions distinguish launcher charge/profile
+semantics from deployed objects. Headless Chrome
+passed **75/75 assertions** across Pitcher, Disco Baller
+and Activate Disco Ball at 1440, 390 and 320 px,
+including distinct object profiles, absence of
+JavaScript errors and horizontal overflow. This is
+automated behavior evidence, **not** a human visual
+review or a tabletop state-resolution simulation.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones

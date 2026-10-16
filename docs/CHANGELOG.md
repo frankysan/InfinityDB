@@ -12,6 +12,11 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Pitcher and Disco Baller now explain launcher charge consumption,
+  deployed-object Attributes, legal landing locations and
+  occupied-position corrections. Disco Ball reactivation remains
+  a separate Deactivator action, not another launcher shot.
+
 - Mine Dispenser now explains inherited Drop Bears BS Mode
   restrictions, the shared CAMO placement exception, and
   failed-roll Disposable consumption without granting Drop

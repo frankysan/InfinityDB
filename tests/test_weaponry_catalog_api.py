@@ -2656,3 +2656,75 @@ def test_mine_dispenser_only_inherits_drop_bears_bs_placement(
     assert "Intuitive Attack" not in profile["traits"]
     assert "BS Weapon (PH)" not in profile["traits"]
     assert "Deployable" not in profile["traits"]
+
+
+
+@pytest.mark.parametrize(
+    ("slug", "expected_rules", "expected_cites"),
+    (
+        ("pitcher", "weapon:pitcher", {2, 3}),
+        ("disco-baller", "weapon:disco-baller", {2, 3}),
+    ),
+)
+def test_delivery_weapons_keep_launcher_and_deployed_object_distinct(
+    source_discrepancy_app: Callable,
+    slug: str,
+    expected_rules: str,
+    expected_cites: set[int],
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, slug)
+    rules = _weapon_rules(payload)
+    assert expected_rules in rules
+    rule = rules[expected_rules]
+    summary = rule["summary"]
+    assert "vertical surface" in summary
+    assert "Conclusion" in summary
+    assert "lost" in summary
+    assert expected_cites <= {
+        c["page"] for c in rule["citations"]
+        if c["source_id"] == "n5-faq-v0.1-en-pdf"
+    }
+    refs = {
+        token["target"]
+        for token in rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert "trait:disposable-x" in refs
+    outgoing = {
+        (rel["type"],rel["record"]["id"])
+        for rel in rule["display_relations"]
+        if rel["direction"] == "outbound"
+    }
+    assert ("enables-use-of", "skill:place-deployable") not in outgoing
+    assert len(payload["profiles"]) == (1 if slug == "pitcher" else 2)
+    if slug == "pitcher":
+        assert "A failed BS Roll places no" in summary
+        assert "ARM 0, BTS 0, STR 1 and S 1" in summary
+        assert ("uses-effects-of", "equipment:deployable-repeater") in outgoing
+        assert "equipment:deployable-repeater" in refs
+        assert payload["profiles"][0]["saving"] == "-"
+    else:
+        assert "A failed launcher BS Roll places no Disco Ball" in summary
+        assert "both are spent even if the Rolls fail" in summary
+        assert "not another launcher charge" in summary
+        assert "skill:activate-disco-ball" in refs
+        modes = {p["mode"] for p in payload["profiles"]}
+        assert modes == {None, "Disco Ball"}
+        ball = next(p for p in payload["profiles"] if p["mode"] == "Disco Ball")
+        assert ball["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+
+
+def test_activate_disco_ball_does_not_reuse_launcher_charges(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "activate-disco-ball", catalog="skills"
+    )
+    record = _weapon_rules(payload)["skill:activate-disco-ball"]
+    assert "WIP +3" in record["summary"]
+    assert "Deactivator" in record["summary"]
+    assert "Disposable" not in record["summary"]
+    assert any(
+        r["record"]["id"] == "equipment:deactivator"
+        for r in record["display_relations"]
+    )
