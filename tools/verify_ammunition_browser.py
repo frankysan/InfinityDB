@@ -40,14 +40,19 @@ def verify(
     headed: bool = False,
     catalog: str = "ammunition",
     expected_names: dict[str, str] | None = None,
+    expected_record_ids: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Check all catalog links and their player-visible detail content."""
-    if catalog not in {"ammunition", "labels"}:
+    if catalog not in {"ammunition", "labels", "rules"}:
         raise ValueError(f"Unsupported reference catalog: {catalog}")
     expected = source_names() if expected_names is None else expected_names
-    required = {"ammunition": 11, "labels": 24}[catalog]
+    required = {"ammunition": 11, "labels": 24, "rules": 21}[catalog]
     if len(expected) != required:
         raise ValueError(f"Expected {required} reviewed {catalog} entries; found {len(expected)}")
+    if catalog == "rules" and (
+        expected_record_ids is None or set(expected_record_ids) != set(expected)
+    ):
+        raise ValueError("General Rules require a complete slug-to-record-ID mapping")
     try:
         playwright = importlib.import_module("playwright.sync_api")
     except ImportError as exc:
@@ -91,11 +96,14 @@ def verify(
                         try:
                             link = page.locator(f'#catalog-list a[href="/{catalog}/{slug}"]')
                             link.click()
-                            selector = (
-                                f"#rule-ammunition-{slug}"
-                                if catalog == "ammunition"
-                                else "#item-content .reference-detail-section .detail-copy"
-                            )
+                            if catalog == "ammunition":
+                                selector = f"#rule-ammunition-{slug}"
+                            elif catalog == "rules":
+                                assert expected_record_ids is not None
+                                record_id = expected_record_ids[slug]
+                                selector = f"#rule-{record_id.replace(':', '-')}"
+                            else:
+                                selector = "#item-content .reference-detail-section .detail-copy"
                             page.locator(selector).wait_for(state="visible")
                             actual_name = page.locator("#item-name").evaluate(
                                 "(element) => element.firstChild.textContent"
@@ -104,7 +112,7 @@ def verify(
                                 raise AssertionError(
                                     f"Heading mismatch: {actual_name!r} != {name!r}"
                                 )
-                            if catalog == "ammunition":
+                            if catalog in {"ammunition", "rules"}:
                                 citations = page.locator("#item-content .detail-source")
                                 if not citations.first.is_visible():
                                     raise AssertionError("Source citations are not visible")

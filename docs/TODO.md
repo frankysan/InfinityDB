@@ -1831,10 +1831,20 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     provenance, API list/details, maintained descriptions, Used by link
     structure and normal served detail templates. This confirms
     storage/API/template parity, not a full semantic/source audit.
-  - [ ] Run the 24-Label Chromium catalog-to-definition verifier at
-    1440/390/320 px (**72 checks**). Verify visible definition content,
-    catalog navigation, no JS errors or narrow-layout overflow; retain
-    its report in ignored `local/audits` before closing acceptance.
+  - [x] Complete the 24-Label Chromium catalog-to-definition verifier:
+    **72/72 passed** across 1440/390/320 px, reported 2026-10-19.
+    This verifies visible definitions, catalog navigation, JavaScript
+    behavior and narrow-layout overflow on the served development app;
+    retain the report under ignored `local/audits`.
+  - [x] Reconcile all 21 current General Rules selected by the
+    application-domain category contract through curated IDs (including
+    qualified Peripheral IDs), published rules storage, API list/detail
+    semantics, canonical citations and normal served detail templates.
+    This closes a bounded parity check, not full semantic review.
+  - [ ] Run the 21-entry General Rules Chromium catalog-to-detail audit
+    at 1440/390/320 px (**63 checks**) and verify exact rule-card IDs,
+    visible citations, page headings and responsive layout. Retain
+    evidence under ignored `local/audits`.
   - [x] Integrate the fail-closed source-field occupancy audit as an
     **opt-in** release-check mode (`--source-occupancy-gate`) before the
     normal rules checks; missing or newly populated raw source fields block

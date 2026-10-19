@@ -16,6 +16,7 @@ from infinity_db.application_domains import (
     application_domain,
     public_rule_domain,
     public_rule_record_domain,
+    record_matches_domain,
     semantic_record_domain,
 )
 from infinity_db.curated import load_curated_directory
@@ -24,6 +25,7 @@ from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
 )
+from infinity_db.domain_slugs import route_slug_from_qualified_typed_domain_id
 from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
@@ -31,6 +33,7 @@ from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.web import create_app
 from tools.verify_ammunition_browser import WIDTHS, source_names, verify
+from tools.verify_general_rules_browser import source_rules
 from tools.verify_labels_browser import source_names as label_source_names
 
 
@@ -583,6 +586,113 @@ def test_all_published_labels_preserve_curated_vocabulary_and_public_routes() ->
         encoding="utf-8"
     )
     assert "definitionSection(item)" in script
+    assert "content.hidden = false;" in script
+
+
+def test_all_current_general_rules_preserve_category_scoped_publication() -> None:
+    """Audit all published General Rules, including qualified source IDs."""
+
+    root = Path(__file__).parents[1]
+    domain = application_domain("rules")
+    sources = {
+        record["id"]: (document["collection"]["id"], record)
+        for _, document in load_curated_directory(root / "data/curated")
+        if document["collection"]["status"] == "current"
+        for record in document["records"]
+        if record_matches_domain(domain, record)
+    }
+    assert len(sources) == 21
+    slugs = {
+        route_slug_from_qualified_typed_domain_id(
+            record_id, expected_domain="rule", context="General Rule source identity"
+        ): record_id
+        for record_id in sources
+    }
+    assert len(slugs) == len(sources)
+    assert slugs["peripheral-type-servant"] == "rule:peripheral-type:servant"
+    assert source_rules(root) == {
+        slug: (record_id, sources[record_id][1]["name"])
+        for slug, record_id in slugs.items()
+    }
+    with pytest.raises(ValueError, match="General Rules require a complete"):
+        verify(
+            "http://127.0.0.1:8000",
+            catalog="rules",
+            expected_names={
+                slug: sources[record_id][1]["name"]
+                for slug, record_id in slugs.items()
+            },
+        )
+
+    rules_path = root / "data/generated/rules.db"
+    with sqlite3.connect(rules_path) as connection:
+        rows = list(connection.execute(
+            "SELECT r.collection_id, r.id, r.name, r.summary, r.facts_json "
+            "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+            "WHERE c.status = 'current' AND r.kind = 'rule'"
+        ))
+    published = {
+        record_id: (collection_id, name, summary, json.loads(facts_json or "{}"))
+        for collection_id, record_id, name, summary, facts_json in rows
+        if record_matches_domain(
+            domain, {"kind": "rule", "facts": json.loads(facts_json or "{}")}
+        )
+    }
+    assert set(published) == set(sources)
+    for record_id, (collection_id, record) in sources.items():
+        assert published[record_id] == (
+            collection_id, record["name"], record["summary"], record.get("facts", {})
+        ), record_id
+
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    get = partial(_published_get, app)
+    status, body = get("/api/rules")
+    assert status == "200 OK"
+    listed = json.loads(body)["items"]
+    assert {item["slug"] for item in listed} == set(slugs)
+    assert len(listed) == len(slugs)
+    status, body = get("/rules")
+    assert status == "200 OK"
+    assert b'data-catalog="rules"' in body
+    assert b"/static/reference-catalog.js" in body
+
+    for slug, record_id in sorted(slugs.items()):
+        _, source = sources[record_id]
+        item = next(item for item in listed if item["slug"] == slug)
+        assert (item["id"], item["name"], item["description"]) == (
+            slug, source["name"], source["summary"]
+        ), record_id
+        status, body = get(f"/api/rules/{slug}")
+        assert status == "200 OK", record_id
+        detail = json.loads(body)
+        assert (detail["slug"], detail["name"], detail["description"]) == (
+            slug, source["name"], source["summary"]
+        ), record_id
+        assert detail["category"] == source["facts"]["category"], record_id
+        assert len(detail["rules"]) == 1, record_id
+        record = detail["rules"][0]
+        assert (record["id"], record["summary"]) == (
+            record_id, source["summary"]
+        ), record_id
+        assert record.get("facts", {}) == source.get("facts", {}), record_id
+        assert record["citations"], record_id
+        assert {citation["source_id"] for citation in record["citations"]} >= {
+            citation["sourceId"] for citation in source["citations"]
+        }, record_id
+        assert len({peer["slug"] for peer in detail.get("category_peers", [])}) == len(
+            detail.get("category_peers", [])
+        ), record_id
+
+        status, body = get(f"/rules/{slug}")
+        assert status == "200 OK", record_id
+        assert b'data-catalog="rules"' in body
+        assert b"/static/reference-detail.js" in body
+        assert b'id="item-content"' in body
+
+    script = (root / "src/infinity_db/web/static/reference-detail.js").read_text(
+        encoding="utf-8"
+    )
+    assert "rulesReferenceSection(item.rules)" in script
     assert "content.hidden = false;" in script
 
 

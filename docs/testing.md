@@ -401,7 +401,7 @@ remain open.
 
 ## 1.0 Labels vocabulary source/API/browser-contract parity
 
-**Added 2026-10-19; Chromium acceptance pending.** The hermetic
+**Accepted 2026-10-19.** The hermetic
 `tests/test_application_rule_references.py` suite checks all **24 current
 Labels** against the curated collections' `labels` arrays (which are
 **not** `records`), matching the published `rules.db.labels` rows,
@@ -422,9 +422,42 @@ development server, run in PowerShell from the repository root:
 .\.venv\Scripts\python.exe -m tools.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/audits/labels-browser.json
 ```
 
-A green hermetic test is not browser acceptance or cross-source
-semantic validation. Keep the Chromium report under ignored
-`local/audits` and leave the overall 1.0 completeness gate open.
+**Browser result reported 2026-10-19:** `Labels browser navigation:
+72/72 passed`, covering all 24 definitions at three viewport widths.
+Keep the browser report under ignored `local/audits`. This does not
+establish independent cross-source semantic correctness; the complete
+1.0 source-to-browser gate remains open.
+
+## 1.0 General Rules category-scoped source/API/browser-contract parity
+
+**Added 2026-10-19; Chromium acceptance pending.** The hermetic
+`tests/test_application_rule_references.py` suite now checks all
+**21 current General Rules** selected by the published domain's exact
+`rule`-kind and reviewed category list, rather than indiscriminately
+treating every `rule` record as a General Rule. It reconciles canonical
+IDs (including qualified peripheral IDs), flattened collision-free public
+slugs, source names/summaries/facts, current collection and generated
+`rules.db` records, the public list/detail API, source citations, and
+normal served detail templates. Category peers are also checked for
+duplicate slugs. This is bounded storage/API/template parity, not an
+independent audit of rule semantics.
+
+The optional Chromium verifier reuses the reviewed Ammunition/Labels
+catalog navigation harness while checking the **exact rule-card ID**
+for each canonical General Rule (including qualified source IDs).
+It covers all 21 published entries at 1440, 390 and 320 px
+(**63 checks**), with visible citations, correct page headings,
+no JavaScript errors, no stuck loading state, and no document-level
+horizontal overflow. From the repository root, with the current
+development server running at `http://127.0.0.1:8000`:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_general_rules_browser --base-url http://127.0.0.1:8000 --output local/audits/general-rules-browser.json
+```
+
+Until that real Chromium run completes, General Rules browser
+acceptance remains open. Keep the report under ignored `local/audits`.
+The full 1.0 cross-source and browser completeness gates remain open.
 
 ## 1.0 source evidence baseline
 
