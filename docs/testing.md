@@ -371,6 +371,15 @@ revision and publication identity: the current published rules database has
 four N5 core scenarios and a distinct ITS Season 18 Battleground pilot.
 The aggregate five memberships must **not** be described as five core missions
 or counted as evidence of 1.0 scenario browser completeness.
+
+Each category now also includes an optional `routeHint` (browser/API discovery
+surfaces and presentation mode) derived from the published application-domain
+registry. For example, profile/loadout rows point to nested Unit detail routes,
+while Attributes use the embedded Glossary. These are *candidate starting
+points*, not mappings of every source record or verified player-facing evidence;
+`apiReadPath`, `browserEntryPoint`, and all fact/relationship/presentation
+review fields remain pending. Where domain ownership or publication is ambiguous,
+the route hint is null rather than a guessed destination.
 Generate ignored review artifacts from the repository root:
 
 ```powershell

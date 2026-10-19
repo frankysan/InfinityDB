@@ -1811,6 +1811,10 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     category from source citation through maintained representation and generated storage to a
     usable normal browser surface; schema coverage, passing validators, and an API route alone
     are insufficient evidence. Re-review exclusions against the canonical completeness definition.
+  - [x] Add source-category route-discovery hints to the baseline inventory using
+    canonical application-domain capabilities and nested Unit/embedded Glossary
+    conventions. Validate candidate browser routes and API route vocabulary without
+    marking any source-to-browser completeness or per-record navigation as reviewed.
   - [x] Integrate the fail-closed source-field occupancy audit as an
     **opt-in** release-check mode (`--source-occupancy-gate`) before the
     normal rules checks; missing or newly populated raw source fields block

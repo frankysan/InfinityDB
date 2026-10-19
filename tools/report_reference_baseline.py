@@ -17,6 +17,8 @@ from pathlib import Path, PureWindowsPath
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
+from infinity_db.application_domains import application_domain, semantic_record_domain
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPORT_FORMAT = "InfinityDB 1.0 reference evidence baseline"
 REPORT_VERSION = 2
@@ -107,6 +109,46 @@ def _artifact_evidence(
     }
 
 
+def _route_hint(key: str) -> dict[str, str] | None:
+    """Locate an existing discovery surface, without asserting per-row coverage."""
+
+    if key in {"army:profiles", "army:loadouts"}:
+        return {
+            "mode": "nested-unit",
+            "browser": "/units/:id",
+            "api": "/api/units/:id",
+        }
+
+    if key.startswith("army:catalog:"):
+        domain_slug = key.removeprefix("army:catalog:")
+    elif key in {"army:armies", "army:units", "army:fireteams"}:
+        domain_slug = key.removeprefix("army:")
+    elif key.startswith("rules:"):
+        domain = semantic_record_domain(key.removeprefix("rules:"))
+        if domain is None:
+            return None
+        domain_slug = domain.slug
+    else:
+        return None
+
+    try:
+        domain = application_domain(domain_slug)
+    except ValueError:
+        return None
+    if not domain.published:
+        return None
+    if domain.route is None:
+        if domain.glossary:
+            return {"mode": "embedded-glossary", "browser": "/glossary", "api": "/api/glossary"}
+        return None
+    mode = "nested-scoped" if domain.scoped else domain.presentation
+    return {
+        "mode": mode,
+        "browser": domain.route,
+        "api": f"/api/{domain.slug}",
+    }
+
+
 def _row(
     key: str,
     source: str,
@@ -125,6 +167,7 @@ def _row(
         "generatedStorage": database,
         "publishedRows": count,
         "rowsWithCitations": citations,
+        "routeHint": _route_hint(key),
         "apiReadPath": None,
         "browserEntryPoint": None,
         "rulesContext": None,
@@ -419,17 +462,28 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "## Published category inventory (verification pending)",
         "",
+        "Route hints identify possible *starting surfaces* from the current "
+        "application-domain registry. They are not source-to-API parity or "
+        "browser-acceptance evidence: nested Unit data, embedded Glossary "
+        "vocabularies, scoped references and curated Weapons may not have "
+        "one direct page per source row.",
+        "",
         "| Source/category | Canonical identity | Maintained input | Storage | Rows | "
-        "Cited | API / browser / rules context |",
-        "| --- | --- | --- | --- | ---: | ---: | --- |",
+        "Cited | Candidate browser / API | Review |",
+        "| --- | --- | --- | --- | ---: | ---: | --- | --- |",
     ])
     for item in report["inventory"]:
         cited = item["rowsWithCitations"]
+        hint = item["routeHint"]
+        candidate = (
+            f"`{hint['browser']}` / `{hint['api']}` ({hint['mode']}; unverified)"
+            if hint else "not identified"
+        )
         lines.append(
             f"| `{item['id']}` | `{item['canonicalIdentity']}` | "
             f"{item['maintainedInput']} | `{item['generatedStorage']}` | "
             f"{item['publishedRows']} | {cited if cited is not None else '—'} | "
-            "not audited |"
+            f"{candidate} | pending source/API/browser review |"
         )
     lines.extend(["", "## Outstanding 1.0 evidence", ""])
     lines.extend(f"- [ ] {item}." for item in report["remainingEvidence"])

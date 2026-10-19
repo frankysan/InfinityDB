@@ -11,6 +11,7 @@ from tools.report_reference_baseline import (
     ReferenceBaselineError,
     _artifact_evidence,
     _revision_oldid,
+    _route_hint,
     _source_location,
     build_baseline,
     main,
@@ -75,6 +76,48 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
     assert sum(report["sourceVerificationCounts"].values()) == len(report["sourceGroups"])
     assert all(item["rowsWithCitations"] <= item["publishedRows"]
                for item in report["inventory"] if item["rowsWithCitations"] is not None)
+
+
+def test_route_hints_reuse_published_surfaces_without_claiming_coverage() -> None:
+    from infinity_db.web.presentation import PresentationHandler
+    from infinity_db.web.routes import metric_route
+
+    report = build_baseline(ARMY_DB, RULES_DB)
+    entries = {item["id"]: item for item in report["inventory"]}
+    assert entries["army:armies"]["routeHint"] == {
+        "mode": "overview", "browser": "/armies", "api": "/api/armies",
+    }
+    assert entries["army:profiles"]["routeHint"] == {
+        "mode": "nested-unit", "browser": "/units/:id", "api": "/api/units/:id",
+    }
+    assert entries["rules:weapon"]["routeHint"] == {
+        "mode": "catalog", "browser": "/weapons", "api": "/api/weapons",
+    }
+    assert entries["rules:attribute"]["routeHint"] == {
+        "mode": "embedded-glossary", "browser": "/glossary", "api": "/api/glossary",
+    }
+    assert entries["rules:rule"]["routeHint"] is None
+    assert _route_hint("army:catalog:unknown") is None
+
+    presentation = PresentationHandler(
+        source_data_changed_on=None,
+        snapshot_downloaded_on=None,
+        snapshot_revision="audit-test",
+    )
+    for entry in entries.values():
+        hint = entry["routeHint"]
+        if hint is None:
+            continue
+        browser = hint["browser"].replace(":id", "test-identity")
+        api = hint["api"].replace(":id", "test-identity")
+        assert metric_route(browser, ()) != "/other", (entry["id"], browser)
+        assert metric_route(api, ()) != "/other", (entry["id"], api)
+        assert presentation.handle(browser, "") is not None, (entry["id"], browser)
+        # Discovery is not proof that each published source fact is presented.
+        assert entry["browserEntryPoint"] is None
+        assert entry["apiReadPath"] is None
+        assert entry["presentationCoverage"] == "not-reviewed"
+        assert entry["scopeDecision"] == "pending"
 
 
 def test_unavailable_sources_and_pinned_url_revisions_are_not_conflated(
@@ -157,4 +200,6 @@ def test_baseline_cli_writes_stable_local_reports(tmp_path: Path) -> None:
     assert "| `its-18` | `2026.09.01` | 0 | `scenario:battleground` |" in markdown
     assert "| `n5-core` | `5.3` | 0 | `scenario:annihilation` |" in markdown
     assert "not a core-only scenario count" in markdown
+    assert "Candidate browser / API" in markdown
+    assert "pending source/API/browser review" in markdown
     assert "## Outstanding 1.0 evidence" in markdown
