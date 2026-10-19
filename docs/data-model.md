@@ -649,9 +649,11 @@ or typed rules relationships.
 For Traits, `config/catalogs/trait-wiki-references.json` maintains exact canonical
 `trait:*` identities, names and reviewed official Wiki heading URLs. The Trait detail API
 adds `wiki` only when both the ID and name match a published curated Trait; raw Army
-Trait aliases and unreviewed source labels do not acquire inferred links. The
-existing detail-page source-link presentation consumes this field. These links
-are navigation metadata and do not supersede pinned rules citations.
+Trait aliases and unreviewed source labels do not acquire inferred links.
+Trait detail pages expose the reviewed `wiki` field through a player-visible
+Official Infinity Wiki link, separate from the developer-only source metadata.
+Other catalog pages retain their existing developer-only source presentation.
+These links are navigation metadata and do not supersede pinned rules citations.
 
 ### Declaration categories and exact source variants
 

@@ -2725,3 +2725,54 @@ local audit outputs; the underlying saved HTML and SHA-256 were not
 available through the repository probe. The source audit is complete
 for the tested snapshot; actual browser navigation from the public
 Trait detail pages remains unverified.
+
+### Player-facing Trait link browser acceptance
+
+The source audit does not exercise the browser. Inspection found that the
+previous Trait Wiki link was placed exclusively in the developer-only
+`#item-meta` element, and so ordinary users could not see it.
+`traits-detail.html` now provides a separate, initially hidden
+`#trait-wiki-link` in player-facing content. `catalog-detail.js`
+sets its reviewed URL and reveals it when `wiki` is available; the
+developer-only source metadata on other catalog pages is unchanged.
+
+`tools/verify_trait_wiki_browser.py` is an optional browser acceptance
+check. With a running local InfinityDB application and an existing official
+Traits HTML snapshot, it visits all 33 `/traits/{slug}` routes in a clean
+Chromium context with Developer Mode off; each page must render the visible
+source link, open a new tab with the exact curated fragment, and scroll to
+the corresponding heading. The official Wiki is fulfilled from the saved
+HTML and other external traffic is blocked. Its source audit must first
+match all maintained links. This check does not prove live third-party
+reachability or the behavior of a later Wiki revision.
+
+Run against the current checkout, not an older isolated Docker/Caddy
+test stack. In a separate PowerShell window at the repository root start
+the development server (its default port is 8000):
+
+```powershell
+.\.venv\Scripts\python.exe -m infinity_db serve --host 127.0.0.1 --port 8000
+```
+
+Then run the verifier from the repository root in another PowerShell window.
+The browser dependency is optional and is not part of the canonical project
+test suite:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install playwright
+.\.venv\Scripts\python.exe -m playwright install chromium
+.\.venv\Scripts\python.exe -m tools.verify_trait_wiki_browser --base-url http://127.0.0.1:8000 --wiki-html local/audits/traits-current.html --output local/audits/trait-wiki-browser.json
+```
+
+If all routes report HTTP 404, the verifier is reaching the wrong/stale
+service rather than exposing a problem with the Wiki heading fragments.
+The preflight now verifies `/traits/boost` returns HTTP 200 with the
+current `#trait-wiki-link` template before testing any of the 33 links.
+The repository's presentation handler separately serves all 33 routes
+in regression tests. An existing listener at port 8080 is not assumed
+to reflect the current working tree.
+
+Keep the HTML, browser report, snapshot hash, and a browser-run date under
+ignored `local/audits`. The new hermetic tests validate the link's HTML/JS
+contract and the browser fixture, **not** actual browser navigation.
+Chromium acceptance has not yet been executed for these changes.

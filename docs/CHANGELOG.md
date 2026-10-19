@@ -12,7 +12,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- All 33 canonical Trait pages now expose maintained official Infinity
+- All 33 canonical Trait pages now expose player-visible official Infinity
   Wiki heading links, including encoded headings such as BS Weapon (PH),
   Disposable (X), Suppressive Fire (SF), and Zone of Control (ZoC).
 - Army source items now appear in their proper Unit categories:

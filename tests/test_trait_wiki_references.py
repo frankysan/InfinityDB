@@ -11,6 +11,7 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.trait_wiki_references import load_trait_wiki_references
 from tools.audit_trait_wiki_anchors import audit_html
 from tools.audit_trait_wiki_anchors import main as audit_anchors_main
+from tools.verify_trait_wiki_browser import _browser_html, _validate_trait_page_response
 
 
 def _document(url: str, *, name: str = "Non-Lethal") -> dict:
@@ -290,6 +291,64 @@ def test_trait_wiki_anchor_cli_inventories_unmapped_without_publishing(
         "headingIds": ["ARM_.3D_0"],
         "status": "review-candidate",
     }]
+
+
+def test_trait_page_exposes_a_player_visible_source_link() -> None:
+    root = Path(__file__).resolve().parents[1]
+    template = (root / "src/infinity_db/web/static/traits-detail.html").read_text(
+        encoding="utf-8"
+    )
+    javascript = (root / "src/infinity_db/web/static/catalog-detail.js").read_text(
+        encoding="utf-8"
+    )
+    assert 'id="trait-wiki-link"' in template
+    assert 'target="_blank" rel="noopener noreferrer" hidden' in template
+    assert '<p class="intro-copy"><a id="trait-wiki-link"' in template
+    assert 'const traitWikiLink = document.getElementById("trait-wiki-link");' in javascript
+    assert 'traitWikiLink.hidden = !item.wiki;' in javascript
+    assert 'if (item.wiki) traitWikiLink.href = item.wiki;' in javascript
+
+
+def test_trait_browser_verifier_rejects_wrong_or_stale_target() -> None:
+    with pytest.raises(RuntimeError, match="HTTP 404 for /traits/boost"):
+        _validate_trait_page_response(404, "not found", "http://localhost:8080")
+
+    with pytest.raises(RuntimeError, match="does not serve the current Trait detail template"):
+        _validate_trait_page_response(
+            200,
+            '<body data-catalog="traits"><p id="item-meta"></p></body>',
+            "http://localhost:8080",
+        )
+
+    _validate_trait_page_response(
+        200,
+        '<body data-catalog="traits"><a id="trait-wiki-link"></a></body>',
+        "http://localhost:8080",
+    )
+
+
+def test_current_trait_routes_are_served_by_presentation_handler() -> None:
+    from infinity_db.web.presentation import PresentationHandler
+
+    presentation = PresentationHandler(
+        source_data_changed_on=None,
+        snapshot_downloaded_on=None,
+        snapshot_revision="test",
+    )
+    for trait_id in load_trait_wiki_references():
+        slug = trait_id.removeprefix("trait:")
+        response = presentation.handle(f"/traits/{slug}", "")
+        assert response is not None, slug
+        assert response.status.value == 200, slug
+        assert b'id="trait-wiki-link"' in response.body, slug
+
+
+def test_browser_fixture_adds_scroll_space_without_changing_headings() -> None:
+    original = '<html><body><h3 id="ARM_.3D_0">ARM = 0</h3></body></html>'
+    instrumented = _browser_html(original)
+    assert instrumented.count('<h3 id="ARM_.3D_0">ARM = 0</h3>') == 1
+    assert instrumented.index('height:2000px') < instrumented.index("</body>")
+    assert instrumented.endswith("</html>")
 
 
 def test_trait_wiki_mapping_rejects_unreviewed_ids_and_shapes(tmp_path: Path) -> None:

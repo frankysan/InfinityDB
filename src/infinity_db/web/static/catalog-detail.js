@@ -16,6 +16,7 @@ const catalog = document.body.dataset.catalog;
 const itemId = window.location.pathname.split("/").pop();
 const name = document.getElementById("item-name");
 const meta = document.getElementById("item-meta");
+const traitWikiLink = document.getElementById("trait-wiki-link");
 const status = document.getElementById("item-status");
 const content = document.getElementById("item-content");
 const rangeModifierClasses = {
@@ -590,6 +591,10 @@ function render(item) {
   displayedItem = item;
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
+  if (traitWikiLink) {
+    traitWikiLink.hidden = !item.wiki;
+    if (item.wiki) traitWikiLink.href = item.wiki;
+  }
   if (meta) {
     const categories = (item.categories || []).map((category) => category.name).join(", ");
     if (item.wiki) {

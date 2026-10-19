@@ -1716,8 +1716,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     **33/33 exact headings matched** (35 headings parsed), reported
     2026-10-19. The source HTML and its SHA-256 were not supplied through
     the repository probe; capture provenance remains in the local audit files.
-  - [ ] Verify click navigation from all 33 Trait detail pages in a browser,
-    including scroll-to-heading behavior and newly encoded fragments.
+  - [x] Fix player-facing visibility: the 33 linked URLs were previously
+    rendered only inside developer-only metadata. Trait details now provide
+    a separate visible "Official Infinity Wiki" link in normal mode,
+    preserving the developer metadata and its existing behavior.
+  - [x] Add optional local Chromium acceptance tooling that visits all 33
+    Trait pages with Developer Mode disabled, clicks the visible link,
+    and verifies the correct heading/hash and browser scroll position
+    against the saved Wiki HTML (external navigation mocked).
+  - [x] Investigate initial 0/33 Chromium result: all 33 Trait page requests
+    returned HTTP 404 at the supplied test base URL. The current source
+    presentation handler serves all 33 registered routes successfully.
+    Add preflight diagnostics for wrong/stale target servers and document
+    the dedicated local development server at port 8000.
+  - [ ] Run the 33-page Chromium verifier against the current local
+    development server and saved official Wiki HTML; inspect any failures
+    before closing browser acceptance. Verify live external navigation
+    separately if the official site changes its markup or redirect handling.
   - **Completion:** mapped links reach the reviewed official page/heading from normal Trait help;
     unavailable mappings remain deliberate. Source-link checking is explicit research activity,
     while automated mapping/resolution tests remain offline.
