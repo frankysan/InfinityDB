@@ -2223,6 +2223,20 @@ not the overall 1.0 release gate. A new Army source version may populate any
 candidate and must be reaudited before tagging; the current report's zero
 confirmed gap families does not independently prove browser completeness.
 
+For subsequent Army snapshot reviews, the source-presentation audit has an opt-in
+fail-closed occupancy gate:
+
+```powershell
+.\.venv\Scripts\python.exe tools/audit_source_presentation.py data/generated/infinity.db --require-no-occupied-gaps --output local/audits/source-presentation.json
+```
+
+This gate passes only when a checksum-matched raw source database is available
+and none of the statically unrepresented fields has a populated value. It fails
+if the raw pair is missing or any candidate becomes populated; inspect
+`rawEvidence.potentialGapBatches` in the JSON report before deciding whether
+the newly populated source semantics require application, API or browser work.
+This does not replace the full 1.0 source and browser completeness review.
+
 ## 1.0 selected declaration-category source and browser reconciliation
 
 **Verified 2026-10-16 on dev/v1.0.0.** BS Attack (p. 39), CC Attack

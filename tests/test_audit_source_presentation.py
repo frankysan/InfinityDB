@@ -198,3 +198,44 @@ def test_source_presentation_cli_writes_report(
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["formatVersion"] == 2
     assert payload["summary"]["deferredOutOfScopeCount"] == 2
+
+
+def test_source_presentation_cli_gate_rejects_populated_candidates(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    database = _runtime_database(tmp_path)
+    output = tmp_path / "gaps.json"
+
+    assert audit.main([
+        str(database), "--require-no-occupied-gaps", "--output", str(output)
+    ]) == 1
+    assert "Source-field gate: FAIL (24 occupied unrepresented fields" in (
+        capsys.readouterr().out
+    )
+    assert json.loads(output.read_text(encoding="utf-8"))["rawEvidence"][
+        "potentialGapBatches"
+    ]
+
+
+def test_source_presentation_cli_gate_rejects_missing_raw_evidence(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    database = _runtime_database(tmp_path)
+    raw_database_path(database).unlink()
+
+    assert audit.main([str(database), "--require-no-occupied-gaps"]) == 1
+    assert "paired raw source database unavailable" in capsys.readouterr().out
+
+
+def test_source_presentation_cli_gate_accepts_empty_candidates(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    database = _runtime_database(tmp_path)
+    monkeypatch.setattr(audit, "_occupied_field_count", lambda *_: 0)
+
+    assert audit.main([str(database), "--require-no-occupied-gaps"]) == 0
+    output = capsys.readouterr().out
+    assert "Source occupancy: 0 of 39" in output
+    assert "Source-field gate: PASS" in output

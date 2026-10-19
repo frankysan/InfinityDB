@@ -582,6 +582,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=FORMAT)
     parser.add_argument("database", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--require-no-occupied-gaps",
+        action="store_true",
+        help=(
+            "Fail if unrepresented source fields are populated "
+            "or raw evidence is missing."
+        ),
+    )
     args = parser.parse_args(argv)
     report = audit_database(args.database)
     if args.output:
@@ -604,6 +612,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         "unrepresented fields populated"
         if occupied is not None else "Source occupancy: paired raw database unavailable"
     )
+    if args.require_no_occupied_gaps:
+        if occupied is None:
+            print("Source-field gate: FAIL (paired raw source database unavailable)")
+            return 1
+        if occupied:
+            print(
+                f"Source-field gate: FAIL ({occupied} occupied unrepresented fields; "
+                "review rawEvidence.potentialGapBatches)"
+            )
+            return 1
+        print("Source-field gate: PASS (no occupied unrepresented fields)")
     return 0
 
 
