@@ -62,6 +62,7 @@ jobs:
           required = [
               ("catalogs", "weapon-categories.json"),
               ("catalogs", "weapon-overrides.json"),
+              ("catalogs", "trait-wiki-references.json"),
               ("identity", "source-identities.json"),
               ("validation", "source-anomalies.json"),
           ]

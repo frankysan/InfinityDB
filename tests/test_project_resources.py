@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
 
 from infinity_army_data.project_resources import (
@@ -8,6 +9,24 @@ from infinity_army_data.project_resources import (
     maintained_documentation_path,
     maintained_manifest_path,
 )
+
+
+def test_catalog_configs_are_included_in_installed_wheel() -> None:
+    root = Path(__file__).resolve().parents[1]
+    pyproject = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    packaged = pyproject["tool"]["setuptools"]["data-files"][
+        "share/infinity-db/config/catalogs"
+    ]
+    source = {
+        path.relative_to(root).as_posix()
+        for path in (root / "config" / "catalogs").glob("*.json")
+    }
+
+    assert len(packaged) == len(set(packaged)), "Duplicate packaged catalog config"
+    assert set(packaged) == source, {
+        "missing_from_wheel": sorted(source - set(packaged)),
+        "missing_from_source": sorted(set(packaged) - source),
+    }
 
 
 def test_maintained_config_prefers_source_checkout(tmp_path: Path) -> None:
