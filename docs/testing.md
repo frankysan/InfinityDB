@@ -362,6 +362,42 @@ failed migrations retain the previous committed format, non-empty unversioned st
 an older collector rejects a newer store without modifying retained history. The production rollback
 procedure separately preserves the named history volume across a release with no collector.
 
+## 1.0 Ammunition whole-catalog source/API/browser-contract parity
+
+**Added 2026-10-19; live Chromium acceptance pending.** The hermetic
+`tests/test_application_rule_references.py` suite now checks the **entire
+11-record Ammunition set**, not only selected Ammunition examples. It
+reconciles canonical curated IDs, source names and summaries, published
+`rules.db` identities, public API catalog membership, each detail payload,
+typed rule facts, source citation IDs, and successful HTTP delivery of the normal player catalog
+and detail templates. It also guards the detail-page JavaScript contract that
+renders canonical rules into player-visible content, rather than developer-only
+metadata. This is storage/API/template parity, **not proof of browser-rendered
+content or of each source statement's semantic correctness**.
+
+An optional Chromium acceptance tool visits all eleven records from the
+normal Ammunition catalog at **1440, 390 and 320 px**. Each click must
+load a visible matching rule card and source citations without JavaScript
+errors, a stuck loading state or document-level horizontal overflow.
+Run it against the current checkout's development server; avoid older
+Docker/Caddy test listeners.
+
+```powershell
+.\.venv\Scripts\python.exe -m infinity_db serve --host 127.0.0.1 --port 8000
+```
+
+In a separate PowerShell window from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_ammunition_browser --base-url http://127.0.0.1:8000 --output local/audits/ammunition-browser.json
+```
+
+Expected after real browser acceptance: `Ammunition browser navigation:
+33/33 passed`. Playwright/Chromium must already be installed. Save the
+report under ignored `local/audits`; do not infer acceptance from the
+hermetic tests. The current whole-corpus source-to-browser 1.0 release gate
+remains open.
+
 ## 1.0 source evidence baseline
 
 The offline `tools/report_reference_baseline.py` command inventories the published Army

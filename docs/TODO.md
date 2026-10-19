@@ -1815,6 +1815,15 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     canonical application-domain capabilities and nested Unit/embedded Glossary
     conventions. Validate candidate browser routes and API route vocabulary without
     marking any source-to-browser completeness or per-record navigation as reviewed.
+  - [x] Reconcile all eleven canonical Ammunition records from maintained
+    source identities through published rules storage, API list/details,
+    summary/typed-fact/citation parity and normal served detail templates. This
+    closes a bounded storage/API/template check, not live browser acceptance
+    or full rule-semantic source review.
+  - [ ] Run the optional 11-item Ammunition Chromium catalog-to-detail audit
+    at 1440/390/320 px and retain its evidence under ignored `local/audits`.
+    Confirm rendered rule cards, visible citations, navigation and narrow
+    layout rather than inferring those facts from successful HTTP routes.
   - [x] Integrate the fail-closed source-field occupancy audit as an
     **opt-in** release-check mode (`--source-occupancy-gate`) before the
     normal rules checks; missing or newly populated raw source fields block

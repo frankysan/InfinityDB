@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from pathlib import Path
+from wsgiref.util import setup_testing_defaults
 
 from infinity_army_data.metadata import decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
@@ -24,6 +25,8 @@ from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
+from infinity_db.web import create_app
+from tools.verify_ammunition_browser import WIDTHS, source_names
 
 
 def _reference_database(tmp_path: Path) -> Database:
@@ -398,6 +401,103 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
     assert RulesRecordCatalog(None, "ammunition").list_items() == []
     assert RulesRecordCatalog(None, "rules").list_items() == []
     assert LabelCatalog(None).list_items() == []
+
+def test_all_published_ammunition_records_reach_normal_browser_routes() -> None:
+    """Cross-check every curated Ammunition identity through storage and WSGI."""
+
+    root = Path(__file__).parents[1]
+    curated_records = {
+        record["id"]: record
+        for _, document in load_curated_directory(root / "data/curated")
+        for record in document["records"]
+        if record["kind"] == "ammunition"
+    }
+    assert len(curated_records) == 11
+    assert source_names(root) == {
+        identity.removeprefix("ammunition:"): source["name"]
+        for identity, source in curated_records.items()
+    }
+    assert WIDTHS == (1440, 390, 320)
+
+    rules_path = root / "data/generated/rules.db"
+    with sqlite3.connect(rules_path) as connection:
+        stored_ids = {
+            record_id
+            for (record_id,) in connection.execute(
+                "SELECT id FROM records WHERE kind = 'ammunition'"
+            )
+        }
+    assert stored_ids == set(curated_records)
+
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+
+    def get(path: str) -> tuple[str, bytes]:
+        environ: dict = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
+        statuses: list[str] = []
+
+        def respond(status: str, _headers: list, _exc_info: object = None) -> None:
+            statuses.append(status)
+
+        response = app(environ, respond)
+        try:
+            body = b"".join(response)
+        finally:
+            close = getattr(response, "close", None)
+            if close is not None:
+                close()
+        assert len(statuses) == 1, path
+        return statuses[0], body
+
+    status, body = get("/api/ammunition")
+    assert status == "200 OK"
+    listed = json.loads(body)["items"]
+    assert {f"ammunition:{item['slug']}" for item in listed} == set(curated_records)
+    assert len(listed) == len(curated_records)
+
+    status, body = get("/ammunition")
+    assert status == "200 OK"
+    assert b'data-catalog="ammunition"' in body
+    assert b"/static/reference-catalog.js" in body
+
+    for identity, source in sorted(curated_records.items()):
+        slug = identity.removeprefix("ammunition:")
+        list_item = next(item for item in listed if item["slug"] == slug)
+        assert list_item["name"] == source["name"], identity
+        assert list_item["description"] == source["summary"], identity
+
+        status, body = get(f"/api/ammunition/{slug}")
+        assert status == "200 OK", identity
+        detail = json.loads(body)
+        assert (detail["slug"], detail["name"], detail["description"]) == (
+            slug, source["name"], source["summary"]
+        )
+        assert len(detail["rules"]) == 1, identity
+        rule = detail["rules"][0]
+        assert (rule["id"], rule["summary"]) == (identity, source["summary"])
+        assert rule.get("facts", {}) == source.get("facts", {}), identity
+        assert rule["citations"], identity
+        assert {citation["source_id"] for citation in rule["citations"]} >= {
+            citation["sourceId"] for citation in source["citations"]
+        }, identity
+
+        status, body = get(f"/ammunition/{slug}")
+        assert status == "200 OK", identity
+        assert b'data-catalog="ammunition"' in body
+        assert b"/static/reference-detail.js" in body
+        assert b'id="item-content"' in body
+        assert b'class="intro-copy developer-only"' in body
+
+    # The real player content is placed in item-content; only metadata uses
+    # developer-only styling. A browser interaction check is still required.
+    javascript = (root / "src/infinity_db/web/static/reference-detail.js").read_text(
+        encoding="utf-8"
+    )
+    assert "getCatalogItem(catalog, itemId, pageController.signal)" in javascript
+    assert "rulesReferenceSection(item.rules)" in javascript
+    assert "content.hidden = false;" in javascript
+
 
 def test_rules_relation_references_project_source_variants_to_public_routes(
     tmp_path: Path,
