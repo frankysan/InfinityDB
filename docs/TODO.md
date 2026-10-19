@@ -1634,14 +1634,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       PS MOD values and uses Burst MOD; Booty results 12/16/18/20
       distinguish TAG from other Troop Types. Preserve raw Army fields
       and present the branches on separate lines without changing results.
+    - [x] Revalidate the Martial Arts/Booty presentation correction:
+      **9/9 passed** across 1440/390/320 px, reported 2026-10-19.
+      The later typed-branch revision below requires its own check.
+    - [x] Add fail-closed typed TAG/other-Troop-Type branches for
+      Booty results 12/16/18/20 as additive Skill API fields. Preserve
+      each original Army result string, use structured conditions for
+      display, and test branch ordering, scope and malformed source
+      syntax without inventing selected gameplay results.
     - [ ] Re-run the structured Skill chart Chromium verifier after the
-      Martial Arts/Booty presentation correction (9 pages across
-      1440/390/320 px). The prior 9/9 accepted layout predates this edit.
+      typed Booty branch projection (9 pages at 1440/390/320 px).
+      The earlier 9/9 acceptance does not cover this revision.
     - [ ] Independently verify every chart outcome, conditional branch,
       and footnote against the final pinned official N5.3 PDF/Wiki
-      revisions. Extend typed outcome support first, then render
-      canonical links from the same rows; no random-result selection
-      or persistent session overlay is required for 1.0.
+      revisions. Extend typed outcome support before adding canonical
+      Skill, Equipment, Weapon or Attribute links; no random-result
+      selection or persistent session overlay is required for 1.0.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and

@@ -12,6 +12,7 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_db.database.repository import Database
+from infinity_db.structured_chart_outcomes import project_booty_rows
 from infinity_db.web import create_app
 from tools.verify_structured_skill_charts_browser import CHARTS, source_charts
 
@@ -71,7 +72,10 @@ def test_all_published_structured_skill_charts_preserve_army_rows_and_api() -> N
                     f"SELECT {source_columns} FROM {chart['table']} ORDER BY {chart['order']}"
                 )
             ]
-            assert rows == stored, slug
+            assert [
+                {key: value for key, value in row.items() if key != "conditional_outcomes"}
+                for row in rows
+            ] == stored, slug
             if slug == "martial-arts":
                 assert [str(row["level"]) for row in rows] == [
                     "1", "2", "3", "4", "5"
@@ -116,7 +120,8 @@ def test_all_published_structured_skill_charts_preserve_army_rows_and_api() -> N
     assert "structuredReferenceSection(skill.structured_reference)" in javascript
     assert 'if (reference.kind === "martial-arts")' in javascript
     assert 'if (reference.kind === "random-chart")' in javascript
-    assert "randomChartOutcome(row.result)" in javascript
+    assert "randomChartOutcome(row)" in javascript
+    assert "row.conditional_outcomes" in javascript
     assert 'className = "chart-outcome-branches"' in javascript
     assert 'const hasPsMod = reference.rows.some(' in javascript
     assert '{ label: "Burst MOD", role: "metric" }' in javascript
@@ -148,6 +153,35 @@ def test_army_chart_source_fields_preserve_n5_reference_distinctions() -> None:
     assert all(
         " / Other Troop Types: " in result for result in conditional.values()
     ), conditional
+
+    projected = project_booty_rows(booty)
+    assert all("conditional_outcomes" not in row for row in booty)
+    assert {row["roll"] for row in projected if "conditional_outcomes" in row} == {
+        "12", "16", "18", "20"
+    }
+    for row in projected:
+        if "conditional_outcomes" not in row:
+            continue
+        branches = row["conditional_outcomes"]
+        assert [branch["scope"] for branch in branches] == [
+            "tag", "other-troop-types"
+        ]
+        assert [branch["label"] for branch in branches] == ["TAG", "Other Troop Types"]
+        assert " / ".join(
+            f"{branch['label']}: {branch['result']}" for branch in branches
+        ) == row["result"]
+
+
+def test_conditional_booty_parser_fails_closed_for_unreviewed_source_syntax() -> None:
+    for malformed in (
+        "TAG: Immunity (AP)",
+        "Other Troop Types: +2 ARM",
+        "TAG: / Other Troop Types: +2 ARM",
+        "TAG: Immunity (AP) / Other Troop Types: ",
+        "TAG: Immunity (AP) / Other Troop Types: +2 ARM / Unknown: X",
+    ):
+        with pytest.raises(ValueError):
+            project_booty_rows([{"id": 12, "roll": "12", "result": malformed}])
 
 
 def test_roll_range_audit_detects_gaps_overlaps_and_invalid_notation() -> None:

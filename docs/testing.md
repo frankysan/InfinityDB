@@ -599,18 +599,29 @@ source-distinction regression for review. The official
 [Booty](https://infinitythewiki.com/Booty) chart has separate
 TAG/other-Troop-Type results for rolls 12, 16, 18 and 20; the renderer
 now separates those source-preserved branches onto distinct lines.
-The API values are unchanged. These are bounded official-Wiki
-comparisons, **not** independent final pinned N5.3 PDF or chart-footnote
-acceptance.
+The original Army result values were unchanged by this presentation
+correction. These are bounded official-Wiki comparisons, **not**
+independent final pinned N5.3 PDF or chart-footnote acceptance.
 
-**Re-run Chromium after the presentation revision.** The browser
-verifier now expects the four-column Martial Arts chart, the
-separated Booty branches, and all original table data at
-1440/390/320 px. Do not treat the prior 9/9 run as acceptance of
-the changed renderer. Semantic typing of chart outcomes,
-context-sensitive effects and canonical cross-links remain open.
-No random-result selection or session state has been implemented.
-Keep browser evidence under ignored `local/audits`.
+**The corrected Martial Arts/Booty presentation was subsequently
+verified by the user (9/9).** The current revision adds a source-preserving
+typed projection specifically for the four Booty TAG/other-Troop-Type
+outcomes. Each original Army `result` string remains intact and the
+Skill API additionally exposes `conditional_outcomes` entries with
+`scope`, `label` and `result`. The renderer now consumes that
+structured data instead of splitting free text in JavaScript.
+Unrecognized conditional syntax is rejected rather than silently
+flattened into one effect. The source comparison is grounded in the
+official [N5.3 Booty chart](https://infinitythewiki.com/Booty), but
+does not supersede the pinned release PDF/footnote audit.
+
+**Re-run Chromium for this new typed-branch revision:** the
+browser verifier expects all original source values and the four
+typed, visually separated Booty branches at 1440/390/320 px.
+The prior 9/9 run is not acceptance of this API/renderer change.
+MetaChemistry's combined outcomes still need typed references and
+independent semantic review. No random roll selection or session
+state has been introduced. Keep evidence under ignored `local/audits`.
 
 ## 1.0 source evidence baseline
 

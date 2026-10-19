@@ -12,6 +12,7 @@ from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.hacking_program_catalog import hacking_program_declaration_categories
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.skill_config import load_skill_source_config
+from infinity_db.structured_chart_outcomes import project_booty_rows
 
 UNCLASSIFIED_CATEGORY = {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
 DECLARATION_KIND = "declaration-category"
@@ -348,7 +349,7 @@ class SkillCatalog:
             rows = self.database.list_martial_arts_levels()
             return {"kind": "martial-arts", "title": "Martial Arts chart", "rows": rows}
         if slug == "booty":
-            rows = self.database.list_booty_results()
+            rows = project_booty_rows(self.database.list_booty_results())
             return {"kind": "random-chart", "title": "Booty chart", "rows": rows}
         if slug == "metachemistry":
             rows = self.database.list_metachemistry_results()

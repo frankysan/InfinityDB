@@ -63,14 +63,13 @@ function referenceCell(value, role) {
   return cell;
 }
 
-function randomChartOutcome(result) {
-  const separator = " / Other Troop Types: ";
-  if (typeof result !== "string" || !result.startsWith("TAG: ") || !result.includes(separator)) {
-    return result;
-  }
+function randomChartOutcome(row) {
+  if (!row.conditional_outcomes?.length) return row.result;
   const branches = document.createElement("span");
   branches.className = "chart-outcome-branches";
-  branches.textContent = result.replace(separator, "\nOther Troop Types: ");
+  branches.textContent = row.conditional_outcomes
+    .map((branch) => `${branch.label}: ${branch.result}`)
+    .join("\n");
   return branches;
 }
 
@@ -196,7 +195,7 @@ function structuredReferenceSection(reference) {
         { label: "Roll", role: "metric" },
         { label: "Result", role: "descriptor" },
       ],
-      reference.rows.map((row) => [row.roll, randomChartOutcome(row.result)]),
+      reference.rows.map((row) => [row.roll, randomChartOutcome(row)]),
     );
   }
   return null;

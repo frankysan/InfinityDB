@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.database.repository import Database
+from infinity_db.structured_chart_outcomes import project_booty_rows
 
 ROOT = Path(__file__).resolve().parents[1]
 WIDTHS = (1440, 390, 320)
@@ -51,7 +52,10 @@ def source_charts(database: Database) -> dict[str, dict[str, Any]]:
         slug: {
             "kind": chart["kind"],
             "title": chart["title"],
-            "rows": getattr(database, chart["list_method"])(),
+            "rows": (
+                project_booty_rows(database.list_booty_results())
+                if slug == "booty" else getattr(database, chart["list_method"])()
+            ),
         }
         for slug, chart in CHARTS.items()
     }
@@ -147,11 +151,12 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                             expected_rows = [
                                 [
                                     (
-                                        str(row[field]).replace(
-                                            " / Other Troop Types: ",
-                                            "\nOther Troop Types: ",
+                                        "\n".join(
+                                            f"{branch['label']}: {branch['result']}"
+                                            for branch in row["conditional_outcomes"]
                                         )
                                         if slug == "booty" and field == "result"
+                                        and row.get("conditional_outcomes")
                                         else str(row[field])
                                     )
                                     if row[field] not in (None, "") else "—"
