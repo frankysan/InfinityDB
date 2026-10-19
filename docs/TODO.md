@@ -1700,6 +1700,10 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     wrong-target headings fail closed; synthetic fixtures cover both formats
     of MediaWiki heading markup. Running the audit against actual Wiki HTML
     and browser navigation remains open.
+  - [x] Extend the HTML audit with exact fragment candidates for the eleven
+    unmapped canonical Traits, an input SHA-256, and robust heading-text
+    extraction that excludes edit controls. Candidates remain unapproved until
+    checked against saved official HTML and real browser navigation.
   - [ ] Confirm browser navigation for the 22 mapped headings and verify exact
     Wiki fragment/redirect identities for ARM = 0, BS Weapon (PH), BS Weapon
     (WIP), BTS = 0, Burst (B), Burst: Single Target, Disposable (X),

@@ -157,6 +157,57 @@ def test_trait_wiki_anchor_audit_accepts_legacy_escaped_fragment() -> None:
     assert not result["failures"]
 
 
+def test_trait_wiki_anchor_audit_ignores_edit_controls_and_void_tags() -> None:
+    html = (
+        '<h3 id="Suppressive_Fire_.28SF.29">'
+        '<span class="mw-headline" id="Suppressive_Fire_.28SF.29">'
+        'Suppressive <img src="symbol.svg">Fire (SF)</span>'
+        '<span class="mw-editsection">[<a href="/edit">edit</a>]</span></h3>'
+    )
+    report = audit_html(html, {
+        "trait:suppressive-fire": {
+            "name": "Suppressive Fire (SF)",
+            "url": "https://infinitythewiki.com/Traits#Suppressive_Fire_.28SF.29",
+        }
+    })
+    assert report["matchedCount"] == 1
+    assert report["failures"] == []
+
+
+def test_unmapped_trait_candidates_use_exact_html_ids_without_guessing() -> None:
+    html = (
+        '<h3 id="Boost">Boost</h3>'
+        '<h3 id="ARM_.3D_0">ARM = 0</h3>'
+        '<h3 id="Duplicate_A">Duplicate</h3>'
+        '<h3 id="Duplicate_B">Duplicate</h3>'
+    )
+    report = audit_html(html, {
+        "trait:boost": {
+            "name": "Boost", "url": "https://infinitythewiki.com/Traits#Boost",
+        }
+    }, {
+        "trait:boost": "Boost",
+        "trait:arm-0": "ARM = 0",
+        "trait:duplicate": "Duplicate",
+        "trait:missing": "Missing",
+    })
+    assert report["matchedCount"] == 1
+    assert report["unmappedReview"] == [
+        {
+            "traitId": "trait:arm-0", "name": "ARM = 0",
+            "headingIds": ["ARM_.3D_0"], "status": "review-candidate",
+        },
+        {
+            "traitId": "trait:duplicate", "name": "Duplicate",
+            "headingIds": ["Duplicate_A", "Duplicate_B"], "status": "ambiguous-heading",
+        },
+        {
+            "traitId": "trait:missing", "name": "Missing",
+            "headingIds": [], "status": "missing-heading",
+        },
+    ]
+
+
 def test_trait_wiki_anchor_audit_fails_closed_with_json_report(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -176,6 +227,47 @@ def test_trait_wiki_anchor_audit_fails_closed_with_json_report(
     assert json.loads(output.read_text(encoding="utf-8"))["failures"][0][
         "status"
     ] == "missing-fragment"
+
+
+def test_trait_wiki_anchor_cli_inventories_unmapped_without_publishing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    import hashlib
+
+    from infinity_db import curated
+    from tools import audit_trait_wiki_anchors as audit
+
+    html = '<h3 id="Boost">Boost</h3><h3 id="ARM_.3D_0">ARM = 0</h3>'
+    path = tmp_path / "wiki.html"
+    path.write_text(html, encoding="utf-8")
+    output = tmp_path / "report.json"
+    monkeypatch.setattr(audit, "load_trait_wiki_references", lambda: {
+        "trait:boost": {
+            "name": "Boost",
+            "url": "https://infinitythewiki.com/Traits#Boost",
+        }
+    })
+    monkeypatch.setattr(curated, "load_curated_directory", lambda _: [(
+        Path("test.json"),
+        {"records": [
+            {"kind": "trait", "id": "trait:boost", "name": "Boost"},
+            {"kind": "trait", "id": "trait:arm-0", "name": "ARM = 0"},
+        ]},
+    )])
+    assert audit_anchors_main([
+        str(path), "--inventory-unmapped", "--output", str(output)
+    ]) == 0
+    assert "trait:arm-0: review-candidate" in capsys.readouterr().out
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["sourceSha256"] == hashlib.sha256(html.encode("utf-8")).hexdigest()
+    assert report["unmappedReview"] == [{
+        "traitId": "trait:arm-0",
+        "name": "ARM = 0",
+        "headingIds": ["ARM_.3D_0"],
+        "status": "review-candidate",
+    }]
 
 
 def test_trait_wiki_mapping_rejects_unreviewed_ids_and_shapes(tmp_path: Path) -> None:

@@ -2696,16 +2696,22 @@ the historical Suppressive Fire redirect contains legacy `.28SF.29` encoding).
 official `https://infinitythewiki.com/Traits` page. It checks every mapped
 fragment against the page's actual heading `id` and its rendered text,
 reporting missing fragments and wrong-heading matches separately. The
-audit runs **offline**, writes optional JSON evidence, and returns a nonzero
-exit status for any mismatch. Its hermetic regression tests cover legacy
-`mw-headline` spans, headings with direct IDs, nested markup and failure
-handling; they are not evidence that the live Wiki accepts the links.
+audit runs **offline**, writes optional JSON evidence (including the exact
+HTML file SHA-256), and returns a nonzero exit status for any mismatch.
+`--inventory-unmapped` separately lists heading IDs exactly as they appear
+in the supplied HTML for canonical Traits without a maintained URL; unique
+matches are **review candidates**, never automatically published destinations.
+Missing or duplicate headings are flagged for manual investigation. The parser
+excludes MediaWiki edit controls and handles void markup within headings.
+Its hermetic regression tests cover legacy `mw-headline` spans, headings
+with direct IDs, nested markup, candidate reporting and failure handling;
+they are not evidence that the live Wiki accepts the links.
 
 To run the source check explicitly from the repository root in PowerShell:
 
 ```powershell
 Invoke-WebRequest -Uri "https://infinitythewiki.com/Traits" -OutFile "local/audits/traits-current.html"
-.\.venv\Scripts\python.exe tools/audit_trait_wiki_anchors.py local/audits/traits-current.html --output local/audits/trait-wiki-anchors.json
+.\.venv\Scripts\python.exe tools/audit_trait_wiki_anchors.py local/audits/traits-current.html --inventory-unmapped --output local/audits/trait-wiki-anchors.json
 ```
 
 Keep the HTML and report under ignored `local/audits`, with a capture date
