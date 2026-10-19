@@ -463,7 +463,7 @@ cross-source and browser completeness gates remain open.
 
 ## 1.0 States whole-catalog source/API/browser-contract parity
 
-**Added 2026-10-19; Chromium acceptance pending.** The hermetic
+**Accepted 2026-10-19.** The hermetic
 `tests/test_state_catalog.py` suite now reconciles all **24 current
 States** (the separate `state` record kind) against curated collection
 identities and facts, the published `rules.db` State rows, complete
@@ -485,8 +485,44 @@ repository root in PowerShell:
 .\.venv\Scripts\python.exe -m tools.verify_states_browser --base-url http://127.0.0.1:8000 --output local/audits/states-browser.json
 ```
 
-Retain the real browser report under ignored `local/audits`. The 1.0
-whole-corpus source-to-browser and rules-semantic gates remain open.
+**Browser result reported 2026-10-19:** `States browser navigation:
+72/72 passed`, covering all 24 States at three viewport widths.
+Retain the report under ignored `local/audits`. The 1.0 whole-corpus
+source-to-browser and rules-semantic gates remain open.
+
+## 1.0 Hacking Programs cross-source publication parity
+
+**Added 2026-10-19; Chromium acceptance pending.** Hacking Programs use
+the published **Army database** as the source of profile values, targets,
+declaration types, associated baseline Devices and Upgrade-extra provenance.
+The **12 current curated Hacking Program** records contribute reviewed rules
+semantics, citations and interactions. Neither input alone is a complete
+source-of-truth for the whole detail page.
+
+The new hermetic `tests/test_hacking_program_publication.py` checks all
+12 published Programs: Army table/profile preservation; deterministic,
+collision-free public slugs; a one-to-one match with curated and generated
+rules records; name/summary/typed-fact/citation parity; API list and detail
+values (including targets, modifiers, PS, Burst, declaration-category
+conversion, Device associations and Upgrade IDs); and normally served
+catalog/detail templates. It is assigned to the `model` test section.
+This establishes bounded input/storage/API/template parity, **not**
+independent CB rules-semantic or browser-rendering acceptance.
+
+A separate Chromium acceptance checks all 12 entries through catalog
+clicks at 1440, 390 and 320 px (**36 checks**). It verifies each
+reviewed rule card, page heading, visible profile field values,
+baseline Devices section, citations, no JavaScript exceptions or stuck
+loading state, and no document-level horizontal overflow.
+With the development server running on port 8000, execute from the
+repository root:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --base-url http://127.0.0.1:8000 --output local/audits/hacking-programs-browser.json
+```
+
+Retain the report under ignored `local/audits`. The 1.0 whole-corpus
+source-to-browser and cross-source semantics gates remain open.
 
 ## 1.0 source evidence baseline
 

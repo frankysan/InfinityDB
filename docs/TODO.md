@@ -1851,10 +1851,21 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     list/detail facts and citation identities, and normally served
     catalog/detail pages. This verifies storage/API/template parity,
     not real browser interaction or full rules semantics.
-  - [ ] Run the 24-State Chromium catalog-to-detail audit at
-    1440/390/320 px (**72 checks**) for exact state rule-card IDs,
-    visible citations, correct page headings and responsive layout.
-    Retain evidence in ignored `local/audits`.
+  - [x] Complete the 24-State Chromium catalog-to-detail audit:
+    **72/72 passed** across 1440/390/320 px, reported 2026-10-19.
+    Exact State rule-card IDs, visible citations, headings and
+    responsive layout passed on the served development app; retain
+    evidence under ignored `local/audits`.
+  - [x] Reconcile the 12 published Hacking Programs against both
+    source authorities: Army profile/declaration/target/Device/Upgrade
+    data and curated semantic records/citations. Verify exact published
+    storage, API list/details and player-facing templates, including
+    profile fields and preserved application slugs. This is a bounded
+    parity check, not independent rules interpretation.
+  - [ ] Run the 12-Program Chromium catalog-to-detail check at
+    1440/390/320 px (**36 checks**): player-visible Army profile fields,
+    reviewed rule cards, baseline Devices, citations and responsive
+    layout. Retain evidence under ignored `local/audits`.
   - [x] Integrate the fail-closed source-field occupancy audit as an
     **opt-in** release-check mode (`--source-occupancy-gate`) before the
     normal rules checks; missing or newly populated raw source fields block
