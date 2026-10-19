@@ -2723,8 +2723,8 @@ date, source revision, and SHA-256 recorded in the associated review.
 The 22/22 inventory and subsequent 33/33 result were supplied from the
 local audit outputs; the underlying saved HTML and SHA-256 were not
 available through the repository probe. The source audit is complete
-for the tested snapshot; actual browser navigation from the public
-Trait detail pages remains unverified.
+for the tested snapshot. A separate local Chromium run subsequently passed
+all 33 Trait page navigation checks against that saved Wiki HTML snapshot.
 
 ### Player-facing Trait link browser acceptance
 
@@ -2772,7 +2772,14 @@ The repository's presentation handler separately serves all 33 routes
 in regression tests. An existing listener at port 8080 is not assumed
 to reflect the current working tree.
 
-Keep the HTML, browser report, snapshot hash, and a browser-run date under
-ignored `local/audits`. The new hermetic tests validate the link's HTML/JS
-contract and the browser fixture, **not** actual browser navigation.
-Chromium acceptance has not yet been executed for these changes.
+**Accepted 2026-10-19:** The local Chromium verifier passed **33/33**
+Trait page navigation checks against the current development server with
+the saved official Wiki HTML substituted for external requests. This
+verifies that the player-facing links open the exact configured anchors
+and scroll to the expected headings in the isolated browser environment.
+It does not establish live external Wiki availability or later revisions.
+
+Keep the HTML, browser report, snapshot hash, and browser-run date under
+ignored `local/audits`. The hermetic regression tests separately validate
+the link's HTML/JS contract and the browser fixture; the 33/33 acceptance
+result was reported from the local Chromium run.

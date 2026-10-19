@@ -1680,7 +1680,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - **Completion:** players can compare weapon profiles and reach Ammunition/Traits and deployed
     object statistics without selecting a carrier first; reverse uses preserve Army/loadout context.
 
-- [ ] **Data processing + Web backend + Web frontend:** Add a curated Infinity Wiki URL mapping
+- [x] **Data processing + Web backend + Web frontend:** Add a curated Infinity Wiki URL mapping
   for traits when authoritative links are available.
   - [x] Publish two exact, validated official Wiki heading links for Continuous
     Damage and Non-Lethal from a maintained canonical Trait-ID/name map,
@@ -1698,8 +1698,8 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [x] Add a read-only audit of saved official Traits-page HTML against exact
     configured fragment IDs and expected heading text. Missing fragments and
     wrong-target headings fail closed; synthetic fixtures cover both formats
-    of MediaWiki heading markup. The later source-HTML verification passed;
-    browser navigation remains open.
+    of MediaWiki heading markup. Source-HTML and isolated Chromium
+    navigation verification subsequently passed.
   - [x] Extend the HTML audit with exact fragment candidates for the eleven
     unmapped canonical Traits, an input SHA-256, and robust heading-text
     extraction that excludes edit controls. Candidates remain unapproved until
@@ -1729,10 +1729,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     presentation handler serves all 33 registered routes successfully.
     Add preflight diagnostics for wrong/stale target servers and document
     the dedicated local development server at port 8000.
-  - [ ] Run the 33-page Chromium verifier against the current local
-    development server and saved official Wiki HTML; inspect any failures
-    before closing browser acceptance. Verify live external navigation
-    separately if the official site changes its markup or redirect handling.
+  - [x] Run the 33-page Chromium verifier against the current local
+    development server and saved official Wiki HTML: **33/33 passed**,
+    reported 2026-10-19. The initial 0/33 test targeted the wrong/stale
+    service; using the current app resolved the HTTP 404 responses.
+    The browser check uses a saved official Wiki snapshot instead of
+    external network navigation. Recheck live navigation if the official
+    site changes its markup or redirect handling.
   - **Completion:** mapped links reach the reviewed official page/heading from normal Trait help;
     unavailable mappings remain deliberate. Source-link checking is explicit research activity,
     while automated mapping/resolution tests remain offline.
