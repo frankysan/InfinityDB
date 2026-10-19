@@ -2,13 +2,33 @@
   "format": "InfinityDB trait Wiki references",
   "version": 1,
   "entries": {
+    "trait:boost": {
+      "name": "Boost",
+      "url": "https://infinitythewiki.com/Traits#Boost"
+    },
     "trait:continuous-damage": {
       "name": "Continuous Damage",
       "url": "https://infinitythewiki.com/Traits#Continuous_Damage"
     },
+    "trait:deployable": {
+      "name": "Deployable",
+      "url": "https://infinitythewiki.com/Traits#Deployable"
+    },
+    "trait:double-shot": {
+      "name": "Double Shot",
+      "url": "https://infinitythewiki.com/Traits#Double_Shot"
+    },
     "trait:non-lethal": {
       "name": "Non-Lethal",
       "url": "https://infinitythewiki.com/Traits#Non-Lethal"
+    },
+    "trait:perimeter": {
+      "name": "Perimeter",
+      "url": "https://infinitythewiki.com/Traits#Perimeter"
+    },
+    "trait:reflective": {
+      "name": "Reflective",
+      "url": "https://infinitythewiki.com/Traits#Reflective"
     }
   }
 }

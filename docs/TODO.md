@@ -1685,6 +1685,10 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [x] Publish two exact, validated official Wiki heading links for Continuous
     Damage and Non-Lethal from a maintained canonical Trait-ID/name map,
     without guessing destinations for other source labels.
+  - [x] Expand reviewed links to Boost, Deployable, Double Shot, Perimeter
+    and Reflective using the official English Traits headings. Verify that all
+    seven linked IDs and names match the current curated 33-Trait corpus;
+    preserve unmapped Traits, historical source aliases and source citations.
   - [ ] Inventory Traits with missing or ambiguous official targets and author validated maintained
     mappings, reusing existing source-link resolution where applicable. Keep renamed/alias labels
     separate from destination identity; do not generate URLs from display names or invent a page

@@ -760,6 +760,16 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     non_lethal = catalog.get_trait("non-lethal")
     assert non_lethal is not None
     assert non_lethal["wiki"] == "https://infinitythewiki.com/Traits#Non-Lethal"
+    for slug, fragment in {
+        "boost": "Boost",
+        "deployable": "Deployable",
+        "double-shot": "Double_Shot",
+        "perimeter": "Perimeter",
+        "reflective": "Reflective",
+    }.items():
+        mapped = catalog.get_trait(slug)
+        assert mapped is not None
+        assert mapped["wiki"] == f"https://infinitythewiki.com/Traits#{fragment}"
     suppressive = catalog.get_trait("suppressive-fire")
     assert suppressive is not None
     assert "wiki" not in suppressive

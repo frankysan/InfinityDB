@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from infinity_db.curated import load_curated_directory
 from infinity_db.trait_wiki_references import load_trait_wiki_references
 
 
@@ -26,10 +27,35 @@ def _document(url: str, *, name: str = "Non-Lethal") -> dict:
 def test_reviewed_trait_wiki_destinations_are_explicit() -> None:
     mapping = load_trait_wiki_references()
 
-    assert set(mapping) == {"trait:continuous-damage", "trait:non-lethal"}
+    assert set(mapping) == {
+        "trait:boost",
+        "trait:continuous-damage",
+        "trait:deployable",
+        "trait:double-shot",
+        "trait:non-lethal",
+        "trait:perimeter",
+        "trait:reflective",
+    }
     assert mapping["trait:continuous-damage"] == {
         "name": "Continuous Damage",
         "url": "https://infinitythewiki.com/Traits#Continuous_Damage",
+    }
+
+
+def test_reviewed_trait_wiki_links_match_current_canonical_records() -> None:
+    root = Path(__file__).resolve().parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    traits = {
+        record["id"]: record["name"]
+        for _, document in documents
+        for record in document["records"]
+        if record["kind"] == "trait"
+    }
+
+    mapping = load_trait_wiki_references()
+    assert len(traits) == 33
+    assert {record_id: traits[record_id] for record_id in mapping} == {
+        record_id: entry["name"] for record_id, entry in mapping.items()
     }
 
 
