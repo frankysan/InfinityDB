@@ -279,9 +279,21 @@ def build_baseline(
                     f"rules record kind {item['kind']}", "data/curated/rules/",
                     "rules.db::records", item["count"], citations=item["cited"],
                 ))
-            scenario_count = rules.execute(
-                "SELECT COUNT(*) FROM scenario_memberships"
-            ).fetchone()[0]
+            scenario_memberships = [
+                {
+                    "collectionId": row["collection_id"],
+                    "collectionRevision": row["collection_revision"],
+                    "position": row["position"],
+                    "scenarioId": row["scenario_id"],
+                    "publicationCollectionId": row["publication_collection_id"],
+                }
+                for row in rules.execute(
+                    "SELECT collection_id, collection_revision, position, "
+                    "scenario_id, publication_collection_id "
+                    "FROM scenario_memberships "
+                    "ORDER BY collection_id, collection_revision, position"
+                )
+            ]
         except sqlite3.DatabaseError as exc:
             raise ReferenceBaselineError(f"Published catalog is unreadable: {exc}") from exc
 
@@ -305,7 +317,8 @@ def build_baseline(
         "sourceGroups": sources,
         "sourceVerificationCounts": dict(sorted(verification_counts.items())),
         "sourceInventory": source_inventory,
-        "scenarioMembershipCount": scenario_count,
+        "scenarioMembershipCount": len(scenario_memberships),
+        "scenarioMemberships": scenario_memberships,
         "inventory": evidence_rows,
         "remainingEvidence": [
             "Confirm source archive hashes, publication identities, and PDF/wiki local inputs",
@@ -344,17 +357,36 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"`{item['id']}` ({item['status']})"
             for item in report["rulesPublication"]["collections"]
         ) + ".",
-        f"- Published scenario collection memberships: {report['scenarioMembershipCount']}.",
+        f"- Published scenario collection memberships: {report['scenarioMembershipCount']} "
+        "(all collections; not just core missions).",
         "- Source evidence statuses: " + ", ".join(
             f"{count} {status}"
             for status, count in report["sourceVerificationCounts"].items()
         ) + ".",
         "",
+        "## Published scenario memberships by collection",
+        "",
+        "These are source-scoped membership facts, **not a core-only scenario count "
+        "or a browser-completeness verdict**. ITS memberships remain separate "
+        "from the N5 core mission scope.",
+        "",
+        "| Collection | Revision | Position | Scenario ID | Source collection |",
+        "| --- | --- | ---: | --- | --- |",
+    ]
+    for membership in report["scenarioMemberships"]:
+        lines.append(
+            f"| `{membership['collectionId']}` | "
+            f"`{membership['collectionRevision']}` | "
+            f"{membership['position']} | `{membership['scenarioId']}` | "
+            f"`{membership['publicationCollectionId']}` |"
+        )
+    lines.extend([
+        "",
         "## Source artifacts referenced by rules publication",
         "",
         "| Kind | Version | Curated rows | Source identity | Evidence |",
         "| --- | --- | ---: | --- | --- |",
-    ]
+    ])
     for source in report["sourceGroups"]:
         versions = source["versions"]
         version_label = versions[0] if len(versions) == 1 else f"{len(versions)} versions"

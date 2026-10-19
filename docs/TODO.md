@@ -1836,8 +1836,8 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     views checks row/cell geometry and overflow at 320, 390, 400, 600 and 768 px;
     this resolves the presentation defect, not the broader 1.0 browser gate.
   - [x] Complete the maintained 1.0 interaction-review target, regenerate the
-    checklist, and verify the release-scoped audit gate passes. All 186 supporting
-    identities are now reviewed, including the shared Flamethrower and
+    checklist, and verify the release-scoped audit gate passes. All 191 supporting
+    identities in the current generated checklist are reviewed, including the shared Flamethrower and
     Marksman Rifle families, the MULTI Marksman mode reference, the
     Pitcher and Mine Dispenser support weapons, all eleven Ammunition
     records, and the four N5.3 core Scenarios. The final Supplies review confirms pickup,

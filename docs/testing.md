@@ -366,7 +366,12 @@ procedure separately preserves the named history volume across a release with no
 
 The offline `tools/report_reference_baseline.py` command inventories the published Army
 source snapshot identity, rules collections and source citations, and row counts by
-canonical family. Generate ignored review artifacts from the repository root:
+canonical family. Scenario membership evidence is separated by source collection,
+revision and publication identity: the current published rules database has
+four N5 core scenarios and a distinct ITS Season 18 Battleground pilot.
+The aggregate five memberships must **not** be described as five core missions
+or counted as evidence of 1.0 scenario browser completeness.
+Generate ignored review artifacts from the repository root:
 
 ```powershell
 python tools/report_reference_baseline.py --json-output reports/1.0-baseline.json --markdown-output docs/audits/1.0-baseline.md
@@ -1746,12 +1751,13 @@ content/navigation checks at 1440/390/320 px on Stealth, Deployable,
 Boost, Sixth Sense, Combat Instinct, Peripheral and Cautious Movement,
 with no JavaScript exceptions or horizontal overflow. Browser script,
 screenshots and result JSON remain ignored under `local/audits/`.
-Separate known issue: existing `weapon:mines` references generate
-`/weapons/mines`, whose API request `/api/weapons/mines` returns 404
-because this curated family has no corresponding Army catalog item.
-An explicit 1.0 navigation acceptance task owns the resolution. The
-new Stealth example deliberately uses unlinked ordinary Mine prose
-and linked Deployable mechanics instead of adding another broken URL.
+At this point the Mines family route was flagged for investigation,
+so the new Stealth example used ordinary Mine prose and linked
+Deployable mechanics. The subsequent Weapon-family routing audit
+(below) confirmed that the generated `weapon:mines` destination was
+already `/weapons/ap-mine#rule-weapon-mines`, not the invalid
+`/weapons/mines` guess. The actual Glossary discovery defect was
+corrected and browser-verified separately.
 
 ## 1.0 curated Weapon-family and Glossary routing acceptance
 
@@ -2212,10 +2218,14 @@ horizontal overflow were detected. Visual inspection found that long
 composite-option names were clipped inside a narrow card despite fitting at
 document level; the mobile table body/name now wraps without truncating the
 source label, and a served-CSS regression protects this presentation.
-Separately, dense normal Unit profile/loadout subrows can still overlap in
-320 px layouts (observed on Scylla); that independent readability issue is
-tracked for the remaining 1.0 browser gate rather than counted as one of the
-39 absent source fields. Evidence, scripts and screenshots are ignored under
+A separate dense Unit profile/loadout subrow overlap was also observed
+at 320 px on Scylla during this review. That presentation defect was
+subsequently corrected: normal profile Attributes, Skills, Equipment
+and Includes stack at very narrow widths, and loadout names wrap above
+Points/SWC. Follow-up served-browser inspection covered 320, 390, 400,
+600 and 768 px. The layout correction is independent of the 39 absent
+source fields and does not close the overall 1.0 browser gate.
+Evidence, scripts and screenshots remain ignored under
 `local/audits/gate-1.0/source-fields-browser/`.
 
 This closes the **39-field review for the current pinned source set only**,

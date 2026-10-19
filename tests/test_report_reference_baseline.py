@@ -32,6 +32,27 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
     # The published rules database includes four core missions and one
     # separately scoped ITS Season 18 Battleground pilot.
     assert report["scenarioMembershipCount"] == 5
+    assert report["scenarioMemberships"] == [
+        {
+            "collectionId": "its-18",
+            "collectionRevision": "2026.09.01",
+            "position": 0,
+            "scenarioId": "scenario:battleground",
+            "publicationCollectionId": "its-season-18-2026.09.01",
+        },
+        *[
+            {
+                "collectionId": "n5-core",
+                "collectionRevision": "5.3",
+                "position": position,
+                "scenarioId": f"scenario:{slug}",
+                "publicationCollectionId": "n5-core-v5.3",
+            }
+            for position, slug in enumerate((
+                "annihilation", "domination", "supplies", "firefight"
+            ))
+        ],
+    ]
     with sqlite3.connect(RULES_DB) as db:
         assert db.execute(
             "SELECT collection_id, COUNT(*) FROM scenario_memberships "
@@ -128,5 +149,12 @@ def test_baseline_cli_writes_stable_local_reports(tmp_path: Path) -> None:
     first = json_output.read_bytes()
     assert main(args) == 0
     assert json_output.read_bytes() == first
-    assert json.loads(first)["formatVersion"] == 2
-    assert "## Outstanding 1.0 evidence" in markdown_output.read_text(encoding="utf-8")
+    saved = json.loads(first)
+    assert saved["formatVersion"] == 2
+    assert len(saved["scenarioMemberships"]) == saved["scenarioMembershipCount"] == 5
+    markdown = markdown_output.read_text(encoding="utf-8")
+    assert "## Published scenario memberships by collection" in markdown
+    assert "| `its-18` | `2026.09.01` | 0 | `scenario:battleground` |" in markdown
+    assert "| `n5-core` | `5.3` | 0 | `scenario:annihilation` |" in markdown
+    assert "not a core-only scenario count" in markdown
+    assert "## Outstanding 1.0 evidence" in markdown
