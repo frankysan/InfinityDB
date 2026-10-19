@@ -41,18 +41,24 @@ def verify(
     catalog: str = "ammunition",
     expected_names: dict[str, str] | None = None,
     expected_record_ids: dict[str, str] | None = None,
+    expected_wiki_urls: dict[str, str] | None = None,
+    allowed_raw_trait_slugs: set[str] | None = None,
 ) -> dict[str, Any]:
     """Check all catalog links and their player-visible detail content."""
-    if catalog not in {"ammunition", "labels", "rules", "states"}:
+    if catalog not in {"ammunition", "labels", "rules", "states", "traits"}:
         raise ValueError(f"Unsupported reference catalog: {catalog}")
     expected = source_names() if expected_names is None else expected_names
-    required = {"ammunition": 11, "labels": 24, "rules": 21, "states": 24}[catalog]
+    required = {"ammunition": 11, "labels": 24, "rules": 21, "states": 24, "traits": 33}[catalog]
     if len(expected) != required:
         raise ValueError(f"Expected {required} reviewed {catalog} entries; found {len(expected)}")
     if catalog == "rules" and (
         expected_record_ids is None or set(expected_record_ids) != set(expected)
     ):
         raise ValueError("General Rules require a complete slug-to-record-ID mapping")
+    if catalog == "traits" and (
+        expected_wiki_urls is None or set(expected_wiki_urls) != set(expected)
+    ):
+        raise ValueError("Traits require a complete reviewed Wiki destination mapping")
     try:
         playwright = importlib.import_module("playwright.sync_api")
     except ImportError as exc:
@@ -84,10 +90,15 @@ def verify(
                         "(anchors) => anchors.map((anchor) => anchor.getAttribute('href'))"
                     ))
                     expected_hrefs = {f"/{catalog}/{slug}" for slug in expected}
-                    if hrefs != expected_hrefs:
+                    extra_hrefs = hrefs - expected_hrefs
+                    allowed_hrefs = (
+                        {f"/traits/{slug}" for slug in (allowed_raw_trait_slugs or set())}
+                        if catalog == "traits" else set()
+                    )
+                    if expected_hrefs - hrefs or extra_hrefs - allowed_hrefs:
                         raise AssertionError(
                             f"Catalog links differ: missing={sorted(expected_hrefs - hrefs)} "
-                            f"extra={sorted(hrefs - expected_hrefs)}"
+                            f"unexpected={sorted(extra_hrefs - allowed_hrefs)}"
                         )
                     for slug, name in sorted(expected.items()):
                         observation: dict[str, Any] = {
@@ -96,8 +107,12 @@ def verify(
                         try:
                             link = page.locator(f'#catalog-list a[href="/{catalog}/{slug}"]')
                             link.click()
-                            if catalog in {"ammunition", "states"}:
-                                rule_kind = "state" if catalog == "states" else "ammunition"
+                            if catalog in {"ammunition", "states", "traits"}:
+                                rule_kind = {
+                                    "ammunition": "ammunition",
+                                    "states": "state",
+                                    "traits": "trait",
+                                }[catalog]
                                 selector = f"#rule-{rule_kind}-{slug}"
                             elif catalog == "rules":
                                 assert expected_record_ids is not None
@@ -113,10 +128,20 @@ def verify(
                                 raise AssertionError(
                                     f"Heading mismatch: {actual_name!r} != {name!r}"
                                 )
-                            if catalog in {"ammunition", "rules", "states"}:
+                            if catalog in {"ammunition", "rules", "states", "traits"}:
                                 citations = page.locator("#item-content .detail-source")
                                 if not citations.first.is_visible():
                                     raise AssertionError("Source citations are not visible")
+                                if catalog == "traits":
+                                    assert expected_wiki_urls is not None
+                                    source_link = page.locator("#trait-wiki-link")
+                                    if not source_link.is_visible():
+                                        raise AssertionError("Official Wiki link is not visible")
+                                    href = source_link.get_attribute("href")
+                                    if href != expected_wiki_urls[slug]:
+                                        raise AssertionError("Unexpected Wiki destination")
+                                    if source_link.get_attribute("rel") != "noopener noreferrer":
+                                        raise AssertionError("Wiki link lacks noopener noreferrer")
                             elif not page.locator(selector).inner_text().strip():
                                 raise AssertionError("Label definition is empty")
                             if page.locator("#item-status").is_visible():

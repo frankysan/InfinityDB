@@ -3,15 +3,23 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from pathlib import Path
+from typing import Any
+from wsgiref.util import setup_testing_defaults
 
 import pytest
 
 from infinity_db.curated import load_curated_directory
+from infinity_db.database.repository import Database
 from infinity_db.trait_wiki_references import load_trait_wiki_references
+from infinity_db.web import create_app
 from tools.audit_trait_wiki_anchors import audit_html
 from tools.audit_trait_wiki_anchors import main as audit_anchors_main
+from tools.verify_ammunition_browser import WIDTHS
+from tools.verify_ammunition_browser import verify as verify_catalog_browser
 from tools.verify_trait_wiki_browser import _browser_html, _validate_trait_page_response
+from tools.verify_traits_catalog_browser import source_traits
 
 
 def _document(url: str, *, name: str = "Non-Lethal") -> dict:
@@ -325,6 +333,126 @@ def test_trait_browser_verifier_rejects_wrong_or_stale_target() -> None:
         '<body data-catalog="traits"><a id="trait-wiki-link"></a></body>',
         "http://localhost:8080",
     )
+
+
+def test_published_traits_reconcile_curated_rules_army_usage_and_public_api() -> None:
+    """Audit all canonical Traits without misclassifying raw Army properties."""
+
+    root = Path(__file__).resolve().parents[1]
+    army_db = root / "data/generated/infinity.db"
+    rules_db = root / "data/generated/rules.db"
+    curated = {
+        record["id"]: (document["collection"]["id"], record)
+        for _, document in load_curated_directory(root / "data/curated")
+        if document["collection"]["status"] == "current"
+        for record in document["records"]
+        if record["kind"] == "trait"
+    }
+    mapping = load_trait_wiki_references()
+    assert len(curated) == 33
+    assert set(mapping) == set(curated)
+    assert source_traits(root) == {
+        identity.removeprefix("trait:"): source["name"]
+        for identity, (_, source) in curated.items()
+    }
+    assert WIDTHS == (1440, 390, 320)
+    with pytest.raises(ValueError, match="Traits require a complete reviewed Wiki"):
+        verify_catalog_browser(
+            "http://127.0.0.1:8000",
+            catalog="traits",
+            expected_names=source_traits(root),
+        )
+
+    with sqlite3.connect(rules_db) as connection:
+        published = list(connection.execute(
+            "SELECT r.collection_id, r.id, r.name, r.summary, r.facts_json "
+            "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+            "WHERE c.status = 'current' AND r.kind = 'trait'"
+        ))
+    assert {record_id for _, record_id, *_ in published} == set(curated)
+    for collection_id, record_id, name, summary, facts in published:
+        expected_collection, source = curated[record_id]
+        assert (collection_id, name, summary, json.loads(facts or "{}")) == (
+            expected_collection, source["name"], source["summary"], source.get("facts", {})
+        ), record_id
+
+    app = create_app(army_db, rules_database_path=rules_db)
+
+    def get(path: str) -> tuple[str, bytes]:
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
+        statuses: list[str] = []
+
+        def respond(status: str, _headers: list, _exc_info: object = None) -> None:
+            statuses.append(status)
+
+        response = app(environ, respond)
+        try:
+            content = b"".join(response)
+        finally:
+            close = getattr(response, "close", None)
+            if close is not None:
+                close()
+        assert len(statuses) == 1, path
+        return statuses[0], content
+
+    status, body = get("/api/traits")
+    assert status == "200 OK"
+    items = json.loads(body)["items"]
+    by_slug = {item["slug"]: item for item in items}
+    assert len(by_slug) == len(items)
+    canonical_slugs = {record_id.removeprefix("trait:") for record_id in curated}
+    assert canonical_slugs <= set(by_slug)
+
+    # Any noncanonical entry must be a real unresolved Army property.
+    raw_slugs = {item["slug"] for item in Database(army_db).list_traits()}
+    assert set(by_slug) - canonical_slugs <= raw_slugs
+
+    status, body = get("/traits")
+    assert status == "200 OK"
+    assert b'data-catalog="traits"' in body
+    assert b"/static/catalog-list.js" in body
+
+    for record_id, (_, source) in sorted(curated.items()):
+        slug = record_id.removeprefix("trait:")
+        item = by_slug[slug]
+        assert (item["id"], item["name"], item["description"]) == (
+            slug, source["name"], source["summary"]
+        ), record_id
+        assert isinstance(item["use_count"], int) and item["use_count"] >= 0
+
+        status, body = get(f"/api/traits/{slug}")
+        assert status == "200 OK", record_id
+        detail = json.loads(body)
+        assert (detail["id"], detail["slug"], detail["name"], detail["description"]) == (
+            slug, slug, source["name"], source["summary"]
+        ), record_id
+        assert detail["use_count"] == item["use_count"], record_id
+        assert detail["wiki"] == mapping[record_id]["url"], record_id
+        assert len(detail["rules"]) == 1, record_id
+        rule = detail["rules"][0]
+        assert (rule["id"], rule["summary"], rule.get("facts") or {}) == (
+            record_id, source["summary"], source.get("facts") or {}
+        ), record_id
+        assert rule["citations"], record_id
+        assert {citation["source_id"] for citation in rule["citations"]} >= {
+            citation["sourceId"] for citation in source["citations"]
+        }, record_id
+        assert all(
+            variant["catalog"] in {"skills", "equipment", "weapons"}
+            and isinstance(variant["units"], list)
+            for variant in detail["variants"]
+        ), record_id
+        usage_keys = [(variant["catalog"], variant["item_id"]) for variant in detail["variants"]]
+        assert len(usage_keys) == len(set(usage_keys)), record_id
+
+        status, body = get(f"/traits/{slug}")
+        assert status == "200 OK", record_id
+        assert b'data-catalog="traits"' in body
+        assert b"/static/catalog-detail.js" in body
+        assert b'id="trait-wiki-link"' in body
+        assert b'id="item-content"' in body
 
 
 def test_current_trait_routes_are_served_by_presentation_handler() -> None:

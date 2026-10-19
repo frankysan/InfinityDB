@@ -1862,10 +1862,23 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     storage, API list/details and player-facing templates, including
     profile fields and preserved application slugs. This is a bounded
     parity check, not independent rules interpretation.
-  - [ ] Run the 12-Program Chromium catalog-to-detail check at
-    1440/390/320 px (**36 checks**): player-visible Army profile fields,
-    reviewed rule cards, baseline Devices, citations and responsive
-    layout. Retain evidence under ignored `local/audits`.
+  - [x] Complete the 12-Program Chromium catalog-to-detail audit:
+    **36/36 passed** across 1440/390/320 px, reported 2026-10-19.
+    Player-visible Army profile values, reviewed rules cards, baseline
+    Devices, source citations and responsive layout passed on the
+    served development app; retain evidence under ignored `local/audits`.
+  - [x] Reconcile all 33 canonical Traits from current curated source
+    through published `rules.db`, normal catalog/detail API, typed
+    rules facts and citations, official Wiki destinations, and player
+    detail templates. Check extra catalog entries against raw Army
+    properties rather than labeling them as canonical Traits. This is
+    bounded source/storage/API/template parity; it does not repeat
+    the independently reviewed Wiki-fragment audit.
+  - [ ] Run the canonical Trait catalog-to-detail Chromium check across
+    1440/390/320 px (**99 checks**) for exact rule cards, player-visible
+    Wiki destinations and citations, correct headings and responsive
+    layout. Retain evidence under ignored `local/audits`; the prior
+    33/33 Wiki navigation acceptance alone does not establish this.
   - [x] Integrate the fail-closed source-field occupancy audit as an
     **opt-in** release-check mode (`--source-occupancy-gate`) before the
     normal rules checks; missing or newly populated raw source fields block

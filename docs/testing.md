@@ -492,7 +492,7 @@ source-to-browser and rules-semantic gates remain open.
 
 ## 1.0 Hacking Programs cross-source publication parity
 
-**Added 2026-10-19; Chromium acceptance pending.** Hacking Programs use
+**Accepted 2026-10-19.** Hacking Programs use
 the published **Army database** as the source of profile values, targets,
 declaration types, associated baseline Devices and Upgrade-extra provenance.
 The **12 current curated Hacking Program** records contribute reviewed rules
@@ -521,8 +521,42 @@ repository root:
 .\.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --base-url http://127.0.0.1:8000 --output local/audits/hacking-programs-browser.json
 ```
 
-Retain the report under ignored `local/audits`. The 1.0 whole-corpus
-source-to-browser and cross-source semantics gates remain open.
+**Browser result reported 2026-10-19:** `Hacking Programs browser
+navigation: 36/36 passed`, covering all 12 Programs at the three
+viewport widths. Retain the report under ignored `local/audits`.
+This does not establish independent CB rules-semantic correctness;
+the full 1.0 cross-source and browser completeness gates remain open.
+
+## 1.0 Trait whole-catalog publication parity
+
+**Added 2026-10-19; catalog Chromium acceptance pending.** The hermetic
+`tests/test_trait_wiki_references.py` suite now reconciles all **33
+canonical Traits** across current curated source, published `rules.db`,
+public Trait catalog/detail API, player-visible detail templates,
+source summaries, typed rule facts, citation identities, use counts
+and exact reviewed Wiki URLs. Additional source-derived Army properties
+are not silently treated as canonical Traits: any extra catalog slug
+must originate in the raw Army property bucket. The existing **33/33
+Trait Wiki navigation check** verifies source-observed anchors in
+saved official Wiki HTML, but does not verify the complete normal Trait
+catalog interaction across responsive viewports.
+
+Run the optional `tools.verify_traits_catalog_browser` verifier
+against the current checkout's development server on port 8000.
+It follows all 33 canonical catalog links at 1440, 390 and 320 px
+(**99 checks**), requiring the correct canonical rule card, visible
+citation and official Wiki link, matching heading, no JavaScript errors
+or stuck loading state, and no document-level horizontal overflow.
+Source-backed unresolved Army-property entries may coexist in the
+catalog but cannot substitute for canonical Trait links.
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_traits_catalog_browser --base-url http://127.0.0.1:8000 --output local/audits/traits-catalog-browser.json
+```
+
+Retain the real browser report under ignored `local/audits`.
+This does not establish independent cross-source rule semantics or
+close the entire 1.0 source-to-browser acceptance gate.
 
 ## 1.0 source evidence baseline
 
