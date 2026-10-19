@@ -1811,6 +1811,10 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     category from source citation through maintained representation and generated storage to a
     usable normal browser surface; schema coverage, passing validators, and an API route alone
     are insufficient evidence. Re-review exclusions against the canonical completeness definition.
+  - [x] Integrate the fail-closed source-field occupancy audit as an
+    **opt-in** release-check mode (`--source-occupancy-gate`) before the
+    normal rules checks; missing or newly populated raw source fields block
+    the 1.0 rehearsal without changing ordinary CI.
   - [x] Review the 39 schema-level `unrepresented_player_information` fields
     against paired, pinned raw Army storage: **0 fields have populated values**.
     All seven composite Unit-option relationship/extras tables have zero rows,

@@ -223,6 +223,8 @@ def test_mine_family_rules_apply_to_correct_army_weapon_profiles() -> None:
             expected.add('weapon:chest-mine')
         if slug == 'drop-bears':
             expected.add('weapon:drop-bears')
+        if slug == 'mine-dispenser':
+            expected.add('weapon:mine-dispenser')
         assert actual == expected, slug
 
     chest = composed.enrich_catalog_item('weapons', {

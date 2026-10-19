@@ -382,6 +382,100 @@ def test_rules_stage_runs_interaction_audit_before_database_build(
     assert commands[1] == (sys.executable, "-m", "infinity_db", "build-rules")
 
 
+def test_source_occupancy_gate_requires_rules_stage(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    result = run_checks.main(["--stage", "lint", "--source-occupancy-gate"])
+
+    assert result == run_checks.EXIT_RUNNER_ERROR
+    assert "--source-occupancy-gate requires the rules stage" in capsys.readouterr().err
+
+
+def test_opt_in_source_occupancy_gate_runs_before_rules_review_and_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+            source_occupancy_gate=True,
+        )
+
+    assert result.status == "PASS"
+    assert commands == [
+        (
+            sys.executable, "-m", "tools.audit_source_presentation",
+            "data/generated/infinity.db", "--require-no-occupied-gaps",
+        ),
+        (
+            sys.executable, "-m", "tools.audit_rules_interactions",
+            "--check-output", "docs/rules-interaction-checklist.md",
+            "--require-release", "1.0.0",
+        ),
+        (sys.executable, "-m", "infinity_db", "build-rules"),
+    ]
+
+
+def test_source_occupancy_cli_flag_reaches_rules_stage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    invoked: list[tuple[str, bool]] = []
+
+    def fake_run_stage(stage, reporter, *, source_occupancy_gate=False):
+        invoked.append((stage.name, source_occupancy_gate))
+        return run_checks.StageResult(stage.name, "PASS", 0, 0.0)
+
+    monkeypatch.setattr(run_checks, "run_stage", fake_run_stage)
+    assert run_checks.main(["--stage", "rules", "--source-occupancy-gate"]) == 0
+    assert invoked == [("rules", True)]
+
+    invoked.clear()
+    assert run_checks.main(["--stage", "rules"]) == 0
+    assert invoked == [("rules", False)]
+
+
+def test_source_occupancy_failure_blocks_rules_review_and_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("Source-field gate: FAIL (paired raw source database unavailable)\n")
+
+        def wait(self) -> int:
+            return 1
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+            source_occupancy_gate=True,
+        )
+
+    assert result.status == "FAIL"
+    assert result.returncode == 1
+    assert len(commands) == 1
+    assert commands[0][2] == "tools.audit_source_presentation"
+
+
 def test_rules_stage_stops_before_build_when_review_audit_fails(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

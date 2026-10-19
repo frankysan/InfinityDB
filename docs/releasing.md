@@ -176,12 +176,20 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 - [ ] Rebuild and validate any release runtime database whose source/curated inputs changed,
   then ensure `data/generated/infinity.db` and `data/generated/rules.db` are the intended
   tracked release artifacts.
+- [ ] For 1.0, require source-field occupancy verification against the release-matched
+  `data/generated/infinity.db` and its paired `infinity.raw.db`. Use
+  `python tools/run_checks.py --all --source-occupancy-gate` for the local
+  release-candidate validation. The opt-in gate fails closed when the raw
+  source pair is missing or any statically unrepresented player field is
+  populated; re-audit changed inputs instead of suppressing a failure.
+  Ordinary development and CI `--all` runs remain unchanged.
 - [ ] Run `python tools/verify_deployment_assets.py` and require the tracked Army database,
   rules database, processed SVG publication, and publication snapshot provenance to pass as one
   release set.
 - [ ] Install the pinned Markdownlint dependency with
   `npm ci --ignore-scripts --no-audit --no-fund` (Node.js 22+), then run the complete local
-  validation suite with `python tools/run_checks.py --all`, including the `docs` stage.
+  validation suite with `python tools/run_checks.py --all` (for 1.0, include
+  `--source-occupancy-gate` as described above), including the `docs` stage.
 - [ ] When the release is intended for a local/full-asset deployment, validate the
   complete published asset set with the `required` asset mode as documented in
   `docs/testing.md`.

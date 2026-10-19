@@ -2235,7 +2235,16 @@ and none of the statically unrepresented fields has a populated value. It fails
 if the raw pair is missing or any candidate becomes populated; inspect
 `rawEvidence.potentialGapBatches` in the JSON report before deciding whether
 the newly populated source semantics require application, API or browser work.
-This does not replace the full 1.0 source and browser completeness review.
+
+The normal check runner has an opt-in 1.0 release mode:
+`python tools/run_checks.py --all --source-occupancy-gate`. It checks the
+tracked release Army database and its raw sibling **before** the rules
+interaction-review/build stage, failing that stage if the occupancy audit
+fails. For focused rehearsal, use `--stage rules --source-occupancy-gate`.
+This flag requires the rules stage and does not change the normal `--all`
+workflow or hosted CI. Rebuild the published Army pair from the final pinned
+snapshot before using this release gate. It does **not** replace the complete
+1.0 source-to-storage-to-browser audit.
 
 ## 1.0 selected declaration-category source and browser reconciliation
 

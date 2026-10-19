@@ -177,6 +177,14 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--source-occupancy-gate",
+        action="store_true",
+        help=(
+            "Before the rules stage, require a verified paired Army raw database "
+            "with no populated unrepresented source fields (1.0 release review)."
+        ),
+    )
+    parser.add_argument(
         "--fail-fast",
         action="store_true",
         help="Stop after the first failed or errored stage.",
@@ -285,7 +293,9 @@ def git_value(*args: str) -> str:
     return value if completed.returncode == 0 and value else "unknown"
 
 
-def run_stage(stage: Stage, reporter: Reporter) -> StageResult:
+def run_stage(
+    stage: Stage, reporter: Reporter, *, source_occupancy_gate: bool = False
+) -> StageResult:
     reporter.write()
     reporter.write(f"[{stage.name.upper()}]")
     reporter.write()
@@ -298,12 +308,19 @@ def run_stage(stage: Stage, reporter: Reporter) -> StageResult:
         if not pythonpath
         else str(MODULE_ROOT) + (os.pathsep + pythonpath)
     )
-    commands = (
-        (sys.executable, "-m", "tools.audit_rules_interactions",
-         "--check-output", "docs/rules-interaction-checklist.md",
-         "--require-release", "1.0.0"),
-        stage.command,
-    ) if stage.name == "rules" else (stage.command,)
+    commands: list[tuple[str, ...]] = []
+    if stage.name == "rules":
+        if source_occupancy_gate:
+            commands.append((
+                sys.executable, "-m", "tools.audit_source_presentation",
+                "data/generated/infinity.db", "--require-no-occupied-gaps",
+            ))
+        commands.append((
+            sys.executable, "-m", "tools.audit_rules_interactions",
+            "--check-output", "docs/rules-interaction-checklist.md",
+            "--require-release", "1.0.0",
+        ))
+    commands.append(stage.command)
     for command in commands:
         reporter.write(f"Command: {format_command(command)}")
         reporter.write()
@@ -378,6 +395,8 @@ def main(argv: list[str] | None = None) -> int:
             build_parser().error("--test-workers requires the test stage")
         if args.test_section and "test" not in stage_names:
             build_parser().error("--test-section requires the test stage")
+        if args.source_occupancy_gate and "rules" not in stage_names:
+            build_parser().error("--source-occupancy-gate requires the rules stage")
         test_workers = (
             args.test_workers
             if args.test_workers is not None
@@ -436,7 +455,10 @@ def main(argv: list[str] | None = None) -> int:
                 )
             results: list[StageResult] = []
             for stage in stages:
-                result = run_stage(stage, reporter)
+                result = run_stage(
+                    stage, reporter,
+                    source_occupancy_gate=args.source_occupancy_gate and stage.name == "rules",
+                )
                 results.append(result)
                 if args.fail_fast and result.status != "PASS":
                     break

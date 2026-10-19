@@ -2391,7 +2391,8 @@ def test_remaining_multimode_shared_reviews_preserve_exact_profiles(
     ] == expected
     assert all(a["citations"] for p in profiles for a in p["ammunition_effects"])
     assert set(_weapon_rules(payload)) == (
-        {"weapon:mixed-weapons"} if slug == "trench-hammer" else set()
+        {"weapon:mixed-weapons"}
+        if slug in {"trench-hammer", "vorpal-cc-weapon"} else set()
     )
     if slug == "trench-hammer":
         assert all("Disposable (3)" not in p["traits"] for p in profiles)

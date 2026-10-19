@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -28,7 +29,14 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
     assert report["armySnapshot"]["archiveVerification"] == "not-supplied"
     assert len(report["armySnapshot"]["archiveSha256"]) == 64
     assert len(report["rulesPublication"]["publishedDatabaseSha256"]) == 64
-    assert report["scenarioMembershipCount"] == 4
+    # The published rules database includes four core missions and one
+    # separately scoped ITS Season 18 Battleground pilot.
+    assert report["scenarioMembershipCount"] == 5
+    with sqlite3.connect(RULES_DB) as db:
+        assert db.execute(
+            "SELECT collection_id, COUNT(*) FROM scenario_memberships "
+            "GROUP BY collection_id ORDER BY collection_id"
+        ).fetchall() == [("its-18", 1), ("n5-core", 4)]
     assert "rules:scenario" in {item["id"] for item in report["inventory"]}
     assert "army:profiles" in {item["id"] for item in report["inventory"]}
     assert all(item["scopeDecision"] == "pending" for item in report["inventory"])
