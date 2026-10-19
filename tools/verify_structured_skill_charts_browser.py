@@ -22,7 +22,7 @@ CHARTS: dict[str, dict[str, Any]] = {
         "kind": "martial-arts",
         "title": "Martial Arts chart",
         "list_method": "list_martial_arts_levels",
-        "visible_columns": ("level", "attack_mod", "opponent_mod", "ps_mod", "burst_mod"),
+        "visible_columns": ("level", "attack_mod", "opponent_mod", "burst_mod"),
     },
     "booty": {
         "table": "application_booty_results",
@@ -133,7 +133,7 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                                 )
                             headings = chart.locator("thead th").all_text_contents()
                             expected_headers = (
-                                ["Level", "Attack MOD", "Opponent MOD", "PS MOD", "B MOD"]
+                                ["Level", "Attack MOD", "Opponent MOD", "Burst MOD"]
                                 if slug == "martial-arts" else ["Roll", "Result"]
                             )
                             if headings != expected_headers:
@@ -145,14 +145,36 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                             rows = expected[slug]["rows"]
                             visible = definition["visible_columns"]
                             expected_rows = [
-                                [str(row[field]) if row[field] not in (None, "") else "—"
-                                 for field in visible]
+                                [
+                                    (
+                                        str(row[field]).replace(
+                                            " / Other Troop Types: ",
+                                            "\nOther Troop Types: ",
+                                        )
+                                        if slug == "booty" and field == "result"
+                                        else str(row[field])
+                                    )
+                                    if row[field] not in (None, "") else "—"
+                                    for field in visible
+                                ]
                                 for row in rows
                             ]
                             if actual != expected_rows:
                                 raise AssertionError(
                                     f"Chart data mismatch: {actual!r} != {expected_rows!r}"
                                 )
+                            if slug == "booty":
+                                branches = chart.locator(".chart-outcome-branches")
+                                if branches.count() != 4:
+                                    raise AssertionError("Expected four explicit Booty branches")
+                                for branch in branches.all():
+                                    style = branch.evaluate(
+                                        "(element) => getComputedStyle(element).whiteSpace"
+                                    )
+                                    if style != "pre-line":
+                                        raise AssertionError(
+                                            "Booty TAG/other Troop Type branches are not separated"
+                                        )
                             if page.locator("#skill-status").is_visible():
                                 raise AssertionError("Loading/error state remains visible")
                             if page.evaluate(

@@ -116,7 +116,38 @@ def test_all_published_structured_skill_charts_preserve_army_rows_and_api() -> N
     assert "structuredReferenceSection(skill.structured_reference)" in javascript
     assert 'if (reference.kind === "martial-arts")' in javascript
     assert 'if (reference.kind === "random-chart")' in javascript
-    assert "reference.rows.map((row) => [row.roll, row.result])" in javascript
+    assert "randomChartOutcome(row.result)" in javascript
+    assert 'className = "chart-outcome-branches"' in javascript
+    assert 'const hasPsMod = reference.rows.some(' in javascript
+    assert '{ label: "Burst MOD", role: "metric" }' in javascript
+    stylesheet = (ROOT / "src/infinity_db/web/static/components.css").read_text(
+        encoding="utf-8"
+    )
+    assert ".chart-outcome-branches {\n  white-space: pre-line;" in stylesheet
+
+
+def test_army_chart_source_fields_preserve_n5_reference_distinctions() -> None:
+    """Guard reviewed N5 chart distinctions without inventing new game effects."""
+
+    database = Database(ARMY_DB)
+    martial_arts = database.list_martial_arts_levels()
+    # The N5 Martial Arts chart has Attack, Opponent, and Burst modifiers.
+    # The source's extra PS MOD column is not a current rules benefit.
+    assert all(row["ps_mod"] in (None, "", "-") for row in martial_arts), martial_arts
+
+    booty = database.list_booty_results()
+    conditional = {
+        str(row["roll"]): str(row["result"])
+        for row in booty
+        if "TAG:" in str(row["result"])
+    }
+    # These four results have different effects for TAGs and other
+    # Troop Types; flattening them would change the game outcome.
+    assert set(conditional) == {"12", "16", "18", "20"}, conditional
+    assert all("Other Troop Types:" in result for result in conditional.values())
+    assert all(
+        " / Other Troop Types: " in result for result in conditional.values()
+    ), conditional
 
 
 def test_roll_range_audit_detects_gaps_overlaps_and_invalid_notation() -> None:

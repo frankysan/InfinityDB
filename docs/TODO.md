@@ -1624,13 +1624,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Skill API projections. Both random charts cover D20 values 1–20
       without gaps or overlaps. This checks **published-input parity**,
       not independent official chart/footnote accuracy.
-    - [ ] Run the 3-page structured Skill chart Chromium acceptance
-      across 1440/390/320 px (**9 checks**), asserting that rendered
-      headings and every cell match the local generated snapshot.
-      Retain evidence under ignored `local/audits`.
-    - [ ] Validate published lookup outcomes and conditional branches against
-      the cited official source. Extend typed outcome support first, then
-      render canonical links from the same rows; no random-result selection
+    - [x] Complete 3-page structured Skill chart Chromium acceptance:
+      **9/9 passed** across 1440/390/320 px, reported 2026-10-19.
+      Every rendered chart cell/heading matched the served API and
+      local generated Army snapshot, including responsive layout;
+      retain evidence under ignored `local/audits`.
+    - [x] Reconcile two bounded player-facing chart distinctions against
+      the official Wiki: the current Martial Arts table has no populated
+      PS MOD values and uses Burst MOD; Booty results 12/16/18/20
+      distinguish TAG from other Troop Types. Preserve raw Army fields
+      and present the branches on separate lines without changing results.
+    - [ ] Re-run the structured Skill chart Chromium verifier after the
+      Martial Arts/Booty presentation correction (9 pages across
+      1440/390/320 px). The prior 9/9 accepted layout predates this edit.
+    - [ ] Independently verify every chart outcome, conditional branch,
+      and footnote against the final pinned official N5.3 PDF/Wiki
+      revisions. Extend typed outcome support first, then render
+      canonical links from the same rows; no random-result selection
       or persistent session overlay is required for 1.0.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter

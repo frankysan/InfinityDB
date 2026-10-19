@@ -562,7 +562,7 @@ close the entire 1.0 source-to-browser acceptance gate.
 
 ## 1.0 Martial Arts, Booty and MetaChemistry structured-chart parity
 
-**Added 2026-10-19; Chromium acceptance pending.** These references are already
+**Accepted 2026-10-19.** These references are already
 available through normal Skill detail pages, using Army-owned structured
 rows rather than separate curated copies. The hermetic
 `tests/test_structured_skill_charts_publication.py` suite now checks the
@@ -586,11 +586,31 @@ the current checkout's development server:
 .\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
 ```
 
-This confirms **published-input parity**, not the independent source
-PDF/chart-footnote audit. Semantic typing of chart outcomes,
-context-sensitive conditional results and canonical cross-links remain
-separate open work. No random-result selection or session state has
-been implemented. Keep Chromium evidence under ignored `local/audits`.
+**Original browser result reported 2026-10-19:** `Structured Skill charts
+browser: 9/9 passed` at 1440/390/320 px for the prior renderer.
+
+**Presentation revision after that acceptance:** the official
+[Martial Arts](https://infinitythewiki.com/Martial_Arts) chart
+lists Attack/Opponent/Burst MOD without a PS MOD column. All five
+current published Army PS MOD values are unpopulated, so the player
+chart now hides that column while retaining its source field; a
+future populated PS MOD value would remain displayed and fail the
+source-distinction regression for review. The official
+[Booty](https://infinitythewiki.com/Booty) chart has separate
+TAG/other-Troop-Type results for rolls 12, 16, 18 and 20; the renderer
+now separates those source-preserved branches onto distinct lines.
+The API values are unchanged. These are bounded official-Wiki
+comparisons, **not** independent final pinned N5.3 PDF or chart-footnote
+acceptance.
+
+**Re-run Chromium after the presentation revision.** The browser
+verifier now expects the four-column Martial Arts chart, the
+separated Booty branches, and all original table data at
+1440/390/320 px. Do not treat the prior 9/9 run as acceptance of
+the changed renderer. Semantic typing of chart outcomes,
+context-sensitive effects and canonical cross-links remain open.
+No random-result selection or session state has been implemented.
+Keep browser evidence under ignored `local/audits`.
 
 ## 1.0 source evidence baseline
 

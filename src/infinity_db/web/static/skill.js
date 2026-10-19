@@ -63,6 +63,17 @@ function referenceCell(value, role) {
   return cell;
 }
 
+function randomChartOutcome(result) {
+  const separator = " / Other Troop Types: ";
+  if (typeof result !== "string" || !result.startsWith("TAG: ") || !result.includes(separator)) {
+    return result;
+  }
+  const branches = document.createElement("span");
+  branches.className = "chart-outcome-branches";
+  branches.textContent = result.replace(separator, "\nOther Troop Types: ");
+  return branches;
+}
+
 function structuredTable(titleText, columns, rows) {
   const section = document.createElement("section");
   section.className = "detail-group";
@@ -158,17 +169,23 @@ function structuredReferenceSection(reference) {
     );
   }
   if (reference.kind === "martial-arts") {
+    // Current N5 rows have no PS MOD; retain it if a future Army source fills this field.
+    const hasPsMod = reference.rows.some(
+      (row) => row.ps_mod !== null && row.ps_mod !== undefined
+        && row.ps_mod !== "" && row.ps_mod !== "-",
+    );
     return structuredTable(
       reference.title,
       [
         { label: "Level", role: "metric" },
         { label: "Attack MOD", role: "metric" },
         { label: "Opponent MOD", role: "metric" },
-        { label: "PS MOD", role: "metric" },
-        { label: "B MOD", role: "metric" },
+        ...(hasPsMod ? [{ label: "PS MOD", role: "metric" }] : []),
+        { label: "Burst MOD", role: "metric" },
       ],
       reference.rows.map((row) => [
-        row.level, row.attack_mod, row.opponent_mod, row.ps_mod, row.burst_mod,
+        row.level, row.attack_mod, row.opponent_mod,
+        ...(hasPsMod ? [row.ps_mod] : []), row.burst_mod,
       ]),
     );
   }
@@ -179,7 +196,7 @@ function structuredReferenceSection(reference) {
         { label: "Roll", role: "metric" },
         { label: "Result", role: "descriptor" },
       ],
-      reference.rows.map((row) => [row.roll, row.result]),
+      reference.rows.map((row) => [row.roll, randomChartOutcome(row.result)]),
     );
   }
   return null;

@@ -2792,6 +2792,11 @@ input::placeholder {
   width: 100%;
 }
 
+/* Preserve distinct TAG / other Troop Type outcomes in Booty chart cells. */
+.chart-outcome-branches {
+  white-space: pre-line;
+}
+
 .data-table--profile .table-column--descriptor {
   width: 100%;
 }
