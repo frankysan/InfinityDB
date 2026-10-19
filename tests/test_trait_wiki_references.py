@@ -28,13 +28,28 @@ def test_reviewed_trait_wiki_destinations_are_explicit() -> None:
     mapping = load_trait_wiki_references()
 
     assert set(mapping) == {
+        "trait:anti-materiel",
+        "trait:aro",
+        "trait:bioweapon",
         "trait:boost",
+        "trait:cc",
+        "trait:concealed",
         "trait:continuous-damage",
         "trait:deployable",
+        "trait:direct-template",
         "trait:double-shot",
+        "trait:impact-template",
+        "trait:improvised",
+        "trait:indiscriminate",
+        "trait:intuitive-attack",
         "trait:non-lethal",
+        "trait:non-reloadable",
         "trait:perimeter",
+        "trait:prior-deployment",
         "trait:reflective",
+        "trait:speculative-attack",
+        "trait:state",
+        "trait:targetless",
     }
     assert mapping["trait:continuous-damage"] == {
         "name": "Continuous Damage",
@@ -56,6 +71,20 @@ def test_reviewed_trait_wiki_links_match_current_canonical_records() -> None:
     assert len(traits) == 33
     assert {record_id: traits[record_id] for record_id in mapping} == {
         record_id: entry["name"] for record_id, entry in mapping.items()
+    }
+    # These official headings still need exact punctuation-sensitive URL verification.
+    assert set(traits) - set(mapping) == {
+        "trait:arm-0",
+        "trait:bs-weapon-ph",
+        "trait:bs-weapon-wip",
+        "trait:bts-0",
+        "trait:burst-b",
+        "trait:burst-single-target",
+        "trait:disposable-x",
+        "trait:silent-x",
+        "trait:suppressive-fire",
+        "trait:target-attribute",
+        "trait:zone-of-control-zc",
     }
 
 

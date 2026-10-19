@@ -2,9 +2,29 @@
   "format": "InfinityDB trait Wiki references",
   "version": 1,
   "entries": {
+    "trait:anti-materiel": {
+      "name": "Anti-materiel",
+      "url": "https://infinitythewiki.com/Traits#Anti-materiel"
+    },
+    "trait:aro": {
+      "name": "ARO",
+      "url": "https://infinitythewiki.com/Traits#ARO"
+    },
+    "trait:bioweapon": {
+      "name": "BioWeapon",
+      "url": "https://infinitythewiki.com/Traits#BioWeapon"
+    },
     "trait:boost": {
       "name": "Boost",
       "url": "https://infinitythewiki.com/Traits#Boost"
+    },
+    "trait:cc": {
+      "name": "CC",
+      "url": "https://infinitythewiki.com/Traits#CC"
+    },
+    "trait:concealed": {
+      "name": "Concealed",
+      "url": "https://infinitythewiki.com/Traits#Concealed"
     },
     "trait:continuous-damage": {
       "name": "Continuous Damage",
@@ -14,21 +34,61 @@
       "name": "Deployable",
       "url": "https://infinitythewiki.com/Traits#Deployable"
     },
+    "trait:direct-template": {
+      "name": "Direct Template",
+      "url": "https://infinitythewiki.com/Traits#Direct_Template"
+    },
     "trait:double-shot": {
       "name": "Double Shot",
       "url": "https://infinitythewiki.com/Traits#Double_Shot"
+    },
+    "trait:impact-template": {
+      "name": "Impact Template",
+      "url": "https://infinitythewiki.com/Traits#Impact_Template"
+    },
+    "trait:improvised": {
+      "name": "Improvised",
+      "url": "https://infinitythewiki.com/Traits#Improvised"
+    },
+    "trait:indiscriminate": {
+      "name": "Indiscriminate",
+      "url": "https://infinitythewiki.com/Traits#Indiscriminate"
+    },
+    "trait:intuitive-attack": {
+      "name": "Intuitive Attack",
+      "url": "https://infinitythewiki.com/Traits#Intuitive_Attack"
     },
     "trait:non-lethal": {
       "name": "Non-Lethal",
       "url": "https://infinitythewiki.com/Traits#Non-Lethal"
     },
+    "trait:non-reloadable": {
+      "name": "Non-Reloadable",
+      "url": "https://infinitythewiki.com/Traits#Non-Reloadable"
+    },
     "trait:perimeter": {
       "name": "Perimeter",
       "url": "https://infinitythewiki.com/Traits#Perimeter"
     },
+    "trait:prior-deployment": {
+      "name": "Prior Deployment",
+      "url": "https://infinitythewiki.com/Traits#Prior_Deployment"
+    },
     "trait:reflective": {
       "name": "Reflective",
       "url": "https://infinitythewiki.com/Traits#Reflective"
+    },
+    "trait:speculative-attack": {
+      "name": "Speculative Attack",
+      "url": "https://infinitythewiki.com/Traits#Speculative_Attack"
+    },
+    "trait:state": {
+      "name": "State",
+      "url": "https://infinitythewiki.com/Traits#State"
+    },
+    "trait:targetless": {
+      "name": "Targetless",
+      "url": "https://infinitythewiki.com/Traits#Targetless"
     }
   }
 }

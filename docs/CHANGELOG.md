@@ -12,9 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Seven reviewed Trait pages now link directly to their official
-  Infinity Wiki headings, including Continuous Damage, Deployable,
-  Double Shot, Perimeter and Non-Lethal.
+- Twenty-two reviewed Trait pages now link to their named official
+  Infinity Wiki sections, including Anti-materiel, Continuous Damage,
+  Direct Template, Deployable and Non-Lethal.
 - Army source items now appear in their proper Unit categories:
   Equipment, Training and loadout Attribute overrides.
   Source-only markers no longer generate non-existent Skill links.

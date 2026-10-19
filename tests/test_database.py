@@ -80,6 +80,7 @@ from infinity_db.rules_database import (
 )
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
+from infinity_db.trait_wiki_references import load_trait_wiki_references
 from infinity_db.unit_filter_config import load_unit_filter_config
 from infinity_db.unit_presentation import enrich_unit_filter_presentation
 
@@ -770,6 +771,11 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
         mapped = catalog.get_trait(slug)
         assert mapped is not None
         assert mapped["wiki"] == f"https://infinitythewiki.com/Traits#{fragment}"
+    for record_id, reviewed in load_trait_wiki_references().items():
+        mapped = catalog.get_trait(record_id.removeprefix("trait:"))
+        assert mapped is not None
+        assert mapped["name"] == reviewed["name"]
+        assert mapped["wiki"] == reviewed["url"]
     suppressive = catalog.get_trait("suppressive-fire")
     assert suppressive is not None
     assert "wiki" not in suppressive

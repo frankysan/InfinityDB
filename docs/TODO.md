@@ -1689,10 +1689,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     and Reflective using the official English Traits headings. Verify that all
     seven linked IDs and names match the current curated 33-Trait corpus;
     preserve unmapped Traits, historical source aliases and source citations.
-  - [ ] Inventory Traits with missing or ambiguous official targets and author validated maintained
-    mappings, reusing existing source-link resolution where applicable. Keep renamed/alias labels
-    separate from destination identity; do not generate URLs from display names or invent a page
-    when only a heading exists.
+  - [x] Reconcile all 33 canonical Trait names with the N5.3 English Wiki
+    Traits page. Add fifteen direct heading references without complicated
+    punctuation, bringing maintained mappings to 22/33; validate every mapped
+    ID/name against the current curated corpus and the Trait API. The eleven
+    remaining named headings use punctuation-sensitive fragment syntax and
+    are intentionally unmapped pending exact anchor verification.
+  - [ ] Confirm browser navigation for the 22 mapped headings and verify exact
+    Wiki fragment/redirect identities for ARM = 0, BS Weapon (PH), BS Weapon
+    (WIP), BTS = 0, Burst (B), Burst: Single Target, Disposable (X),
+    Silent (X), Suppressive Fire (SF), Target (Attribute), and
+    Zone of Control (ZoC). Do not infer the punctuation-sensitive URLs from
+    display names; keep them unmapped until reviewed.
   - **Completion:** mapped links reach the reviewed official page/heading from normal Trait help;
     unavailable mappings remain deliberate. Source-link checking is explicit research activity,
     while automated mapping/resolution tests remain offline.
