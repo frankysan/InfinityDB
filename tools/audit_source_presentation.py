@@ -453,6 +453,37 @@ def _unrepresented_field_occupancy(
     return result
 
 
+def _potential_gap_batches(fields: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Group unrepresented source fields by table, prioritizing populated evidence."""
+    by_table: dict[str, dict[str, Any]] = {}
+    for field in fields:
+        batch = by_table.setdefault(
+            field["table"],
+            {"table": field["table"], "sourceRowCount": field["sourceRowCount"], "fields": []},
+        )
+        batch["fields"].append({
+            "field": field["field"],
+            "occupiedCount": field["occupiedCount"],
+        })
+
+    batches = list(by_table.values())
+    for batch in batches:
+        batch["occupiedFieldCount"] = sum(
+            field["occupiedCount"] > 0 for field in batch["fields"]
+        )
+        batch["occupiedValueCount"] = sum(
+            field["occupiedCount"] for field in batch["fields"]
+        )
+    return sorted(
+        batches,
+        key=lambda batch: (
+            -batch["occupiedFieldCount"],
+            -batch["occupiedValueCount"],
+            batch["table"],
+        ),
+    )
+
+
 def _raw_evidence(path: Path) -> dict[str, Any]:
     raw_path = raw_database_path(path)
     if not raw_path.is_file():
@@ -465,11 +496,16 @@ def _raw_evidence(path: Path) -> dict[str, Any]:
     try:
         tables = _table_names(connection)
         unrepresented = _unrepresented_field_occupancy(connection)
+        batches = _potential_gap_batches(unrepresented)
         return {
             "status": "available",
             "unrepresentedFieldOccupancy": unrepresented,
+            "potentialGapBatches": batches,
             "occupiedUnrepresentedFieldCount": sum(
                 item["occupiedCount"] > 0 for item in unrepresented
+            ),
+            "occupiedUnrepresentedTableCount": sum(
+                batch["occupiedFieldCount"] > 0 for batch in batches
             ),
             "path": str(raw_path),
             "fireteamCount": _count(connection, "fireteams"),
@@ -529,6 +565,9 @@ def audit_database(path: Path) -> dict[str, Any]:
             "fieldStatusCounts": counts,
             "occupiedUnrepresentedFieldCount": raw_evidence.get(
                 "occupiedUnrepresentedFieldCount"
+            ),
+            "occupiedUnrepresentedTableCount": raw_evidence.get(
+                "occupiedUnrepresentedTableCount"
             ),
         },
         "inventory": inventory,

@@ -82,6 +82,51 @@ def test_source_presentation_audit_distinguishes_empty_source_from_missing_ui(
     assert ("unit_option_equipment", "item_id") in occupied
     assert ("profiles", "notes") not in occupied
 
+    batches = evidence["potentialGapBatches"]
+    assert sum(batch["occupiedFieldCount"] > 0 for batch in batches) == (
+        report["summary"]["occupiedUnrepresentedTableCount"]
+    )
+    assert sum(batch["occupiedFieldCount"] for batch in batches) == 24
+    assert batches == sorted(
+        batches,
+        key=lambda batch: (
+            -batch["occupiedFieldCount"],
+            -batch["occupiedValueCount"],
+            batch["table"],
+        ),
+    )
+    skills = next(batch for batch in batches if batch["table"] == "unit_option_skills")
+    assert skills["occupiedFieldCount"] > 0
+    notes = next(batch for batch in batches if batch["table"] == "profiles")
+    assert notes["occupiedFieldCount"] == 0
+
+
+def test_potential_gap_batches_keep_empty_fields_and_group_source_rows() -> None:
+    batches = audit._potential_gap_batches([
+        {"table": "empty", "field": "notes", "sourceRowCount": 9, "occupiedCount": 0},
+        {"table": "used", "field": "id", "sourceRowCount": 3, "occupiedCount": 2},
+        {"table": "used", "field": "extra", "sourceRowCount": 3, "occupiedCount": 1},
+    ])
+    assert batches == [
+        {
+            "table": "used",
+            "sourceRowCount": 3,
+            "fields": [
+                {"field": "id", "occupiedCount": 2},
+                {"field": "extra", "occupiedCount": 1},
+            ],
+            "occupiedFieldCount": 2,
+            "occupiedValueCount": 3,
+        },
+        {
+            "table": "empty",
+            "sourceRowCount": 9,
+            "fields": [{"field": "notes", "occupiedCount": 0}],
+            "occupiedFieldCount": 0,
+            "occupiedValueCount": 0,
+        },
+    ]
+
 
 def test_source_presentation_occupancy_distinguishes_zero_empty_and_value() -> None:
     connection = sqlite3.connect(":memory:")
