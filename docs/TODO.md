@@ -1698,8 +1698,8 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [x] Add a read-only audit of saved official Traits-page HTML against exact
     configured fragment IDs and expected heading text. Missing fragments and
     wrong-target headings fail closed; synthetic fixtures cover both formats
-    of MediaWiki heading markup. Running the audit against actual Wiki HTML
-    and browser navigation remains open.
+    of MediaWiki heading markup. The later source-HTML verification passed;
+    browser navigation remains open.
   - [x] Extend the HTML audit with exact fragment candidates for the eleven
     unmapped canonical Traits, an input SHA-256, and robust heading-text
     extraction that excludes edit controls. Candidates remain unapproved until
@@ -1711,11 +1711,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     IDs verbatim (including MediaWiki .28/.29 and .3D encoding) rather
     than constructing URL fragments from display names. All 33 canonical
     Trait identities now have maintained Wiki links and API regression
-    coverage; the new 33/33 source audit and browser check remain open.
-  - [ ] Re-run the saved/live official Traits HTML audit expecting 33/33
-    exact headings with no unmapped candidates, preserving the source
-    SHA-256 and review date. Verify click navigation from all 33 Trait
-    detail pages in a browser, including scroll-to-heading behavior.
+    coverage.
+  - [x] Re-run the saved official Traits HTML audit against all 33 mappings:
+    **33/33 exact headings matched** (35 headings parsed), reported
+    2026-10-19. The source HTML and its SHA-256 were not supplied through
+    the repository probe; capture provenance remains in the local audit files.
+  - [ ] Verify click navigation from all 33 Trait detail pages in a browser,
+    including scroll-to-heading behavior and newly encoded fragments.
   - **Completion:** mapped links reach the reviewed official page/heading from normal Trait help;
     unavailable mappings remain deliberate. Source-link checking is explicit research activity,
     while automated mapping/resolution tests remain offline.

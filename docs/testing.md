@@ -2685,16 +2685,16 @@ Synthetic regression passed; whole-corpus browser acceptance is open.
 
 ## 1.0 Trait Wiki heading-fragment acceptance harness
 
-**Updated 2026-10-19; full live browser acceptance pending.** A local
-saved official Wiki HTML audit reported **22/22 existing links matched**
-across 35 parsed headings, plus one exact heading-ID candidate for each
-of the 11 previously unmapped canonical Traits. Those 11 fragment IDs
-have been added verbatim to the maintained map; all 33 curated Traits
-now have links. The original audit predates the additional mappings,
-so a **33/33 source recheck is still pending**. Matching the actual
-heading IDs also does not prove that the detail-page links correctly
-scroll to those sections in a browser. Legacy MediaWiki encoding matters:
-Suppressive Fire (SF) uses `.28SF.29`, not a display-name-derived fragment.
+**Updated 2026-10-19; browser acceptance pending.** The local saved
+official Wiki HTML audit first reported **22/22 existing links matched**
+across 35 parsed headings and one unambiguous heading ID for each of the
+11 previously unmapped canonical Traits. After those exact fragments were
+added to the maintained map, a follow-up local audit reported **33/33
+matched (35 headings parsed)**. This completes source-heading verification
+for that HTML snapshot, but does not demonstrate that the links on the
+public Trait detail pages scroll correctly in a browser. Legacy MediaWiki
+encoding matters: Suppressive Fire (SF) uses `.28SF.29`, not a
+display-name-derived fragment.
 
 `tools/audit_trait_wiki_anchors.py` reads a saved HTML response from the
 official `https://infinitythewiki.com/Traits` page. It checks every mapped
@@ -2719,10 +2719,9 @@ Invoke-WebRequest -Uri "https://infinitythewiki.com/Traits" -OutFile "local/audi
 ```
 
 Keep the HTML and report under ignored `local/audits`, with a capture
-date and source revision recorded in the associated review. The follow-up
-source check should show **33/33 matched**, 35 headings (if the same HTML
-snapshot is used), and an empty `unmappedReview` array. The initial 22/22
-result and 11 heading candidates were supplied from the local audit output;
-the saved HTML and SHA-256 were not available through the repository probe.
-Even a green anchor audit is not a substitute for actual browser navigation
-from the public Trait detail pages.
+date, source revision, and SHA-256 recorded in the associated review.
+The 22/22 inventory and subsequent 33/33 result were supplied from the
+local audit outputs; the underlying saved HTML and SHA-256 were not
+available through the repository probe. The source audit is complete
+for the tested snapshot; actual browser navigation from the public
+Trait detail pages remains unverified.
