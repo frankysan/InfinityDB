@@ -430,7 +430,7 @@ establish independent cross-source semantic correctness; the complete
 
 ## 1.0 General Rules category-scoped source/API/browser-contract parity
 
-**Added 2026-10-19; Chromium acceptance pending.** The hermetic
+**Accepted 2026-10-19.** The hermetic
 `tests/test_application_rule_references.py` suite now checks all
 **21 current General Rules** selected by the published domain's exact
 `rule`-kind and reviewed category list, rather than indiscriminately
@@ -455,9 +455,38 @@ development server running at `http://127.0.0.1:8000`:
 .\.venv\Scripts\python.exe -m tools.verify_general_rules_browser --base-url http://127.0.0.1:8000 --output local/audits/general-rules-browser.json
 ```
 
-Until that real Chromium run completes, General Rules browser
-acceptance remains open. Keep the report under ignored `local/audits`.
-The full 1.0 cross-source and browser completeness gates remain open.
+**Browser result reported 2026-10-19:** `General Rules browser
+navigation: 63/63 passed`, covering all 21 published entries at
+three viewport widths. Keep the report under ignored `local/audits`.
+This is not independent rules-semantic review; the full 1.0
+cross-source and browser completeness gates remain open.
+
+## 1.0 States whole-catalog source/API/browser-contract parity
+
+**Added 2026-10-19; Chromium acceptance pending.** The hermetic
+`tests/test_state_catalog.py` suite now reconciles all **24 current
+States** (the separate `state` record kind) against curated collection
+identities and facts, the published `rules.db` State rows, complete
+public list/detail API membership, source-citation IDs, and normally
+served State catalog and detail templates. Source-only identity checks
+are not evidence of correct interactive rendering or independent
+cross-source semantic review.
+
+An optional Chromium check exercises all 24 States through actual
+catalog-to-detail links at 1440, 390 and 320 px (**72 checks**). It
+expects the canonical State rule-card ID, matching heading, visible
+citations, no JavaScript errors, no stuck loading state and no
+document-level horizontal overflow.
+
+With the development server running on port 8000, run from the
+repository root in PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_states_browser --base-url http://127.0.0.1:8000 --output local/audits/states-browser.json
+```
+
+Retain the real browser report under ignored `local/audits`. The 1.0
+whole-corpus source-to-browser and rules-semantic gates remain open.
 
 ## 1.0 source evidence baseline
 

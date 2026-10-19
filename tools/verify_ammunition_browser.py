@@ -43,10 +43,10 @@ def verify(
     expected_record_ids: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Check all catalog links and their player-visible detail content."""
-    if catalog not in {"ammunition", "labels", "rules"}:
+    if catalog not in {"ammunition", "labels", "rules", "states"}:
         raise ValueError(f"Unsupported reference catalog: {catalog}")
     expected = source_names() if expected_names is None else expected_names
-    required = {"ammunition": 11, "labels": 24, "rules": 21}[catalog]
+    required = {"ammunition": 11, "labels": 24, "rules": 21, "states": 24}[catalog]
     if len(expected) != required:
         raise ValueError(f"Expected {required} reviewed {catalog} entries; found {len(expected)}")
     if catalog == "rules" and (
@@ -96,8 +96,9 @@ def verify(
                         try:
                             link = page.locator(f'#catalog-list a[href="/{catalog}/{slug}"]')
                             link.click()
-                            if catalog == "ammunition":
-                                selector = f"#rule-ammunition-{slug}"
+                            if catalog in {"ammunition", "states"}:
+                                rule_kind = "state" if catalog == "states" else "ammunition"
+                                selector = f"#rule-{rule_kind}-{slug}"
                             elif catalog == "rules":
                                 assert expected_record_ids is not None
                                 record_id = expected_record_ids[slug]
@@ -112,7 +113,7 @@ def verify(
                                 raise AssertionError(
                                     f"Heading mismatch: {actual_name!r} != {name!r}"
                                 )
-                            if catalog in {"ammunition", "rules"}:
+                            if catalog in {"ammunition", "rules", "states"}:
                                 citations = page.locator("#item-content .detail-source")
                                 if not citations.first.is_visible():
                                     raise AssertionError("Source citations are not visible")

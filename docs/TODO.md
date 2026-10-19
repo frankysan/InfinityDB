@@ -1841,10 +1841,20 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     qualified Peripheral IDs), published rules storage, API list/detail
     semantics, canonical citations and normal served detail templates.
     This closes a bounded parity check, not full semantic review.
-  - [ ] Run the 21-entry General Rules Chromium catalog-to-detail audit
-    at 1440/390/320 px (**63 checks**) and verify exact rule-card IDs,
-    visible citations, page headings and responsive layout. Retain
-    evidence under ignored `local/audits`.
+  - [x] Complete the 21-entry General Rules Chromium catalog-to-detail audit:
+    **63/63 passed** across 1440/390/320 px, reported 2026-10-19.
+    Exact rule-card IDs, visible citations, navigation and responsive
+    layout passed on the served development app; retain evidence under
+    ignored `local/audits`.
+  - [x] Reconcile all 24 current curated States from their canonical
+    rule identities through the published `rules.db` rows, exact API
+    list/detail facts and citation identities, and normally served
+    catalog/detail pages. This verifies storage/API/template parity,
+    not real browser interaction or full rules semantics.
+  - [ ] Run the 24-State Chromium catalog-to-detail audit at
+    1440/390/320 px (**72 checks**) for exact state rule-card IDs,
+    visible citations, correct page headings and responsive layout.
+    Retain evidence in ignored `local/audits`.
   - [x] Integrate the fail-closed source-field occupancy audit as an
     **opt-in** release-check mode (`--source-occupancy-gate`) before the
     normal rules checks; missing or newly populated raw source fields block
