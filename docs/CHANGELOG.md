@@ -12,9 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Twenty-two reviewed Trait pages now link to their named official
-  Infinity Wiki sections, including Anti-materiel, Continuous Damage,
-  Direct Template, Deployable and Non-Lethal.
+- All 33 canonical Trait pages now expose maintained official Infinity
+  Wiki heading links, including encoded headings such as BS Weapon (PH),
+  Disposable (X), Suppressive Fire (SF), and Zone of Control (ZoC).
 - Army source items now appear in their proper Unit categories:
   Equipment, Training and loadout Attribute overrides.
   Source-only markers no longer generate non-existent Skill links.

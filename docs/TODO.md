@@ -1704,12 +1704,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     unmapped canonical Traits, an input SHA-256, and robust heading-text
     extraction that excludes edit controls. Candidates remain unapproved until
     checked against saved official HTML and real browser navigation.
-  - [ ] Confirm browser navigation for the 22 mapped headings and verify exact
-    Wiki fragment/redirect identities for ARM = 0, BS Weapon (PH), BS Weapon
-    (WIP), BTS = 0, Burst (B), Burst: Single Target, Disposable (X),
-    Silent (X), Suppressive Fire (SF), Target (Attribute), and
-    Zone of Control (ZoC). Do not infer the punctuation-sensitive URLs from
-    display names; keep them unmapped until reviewed.
+  - [x] Reconcile all eleven punctuation-sensitive Traits using the exact
+    heading IDs reported by the saved official Wiki HTML audit. The previous
+    22 links matched 22/22 (35 headings parsed), and the remaining eleven
+    each had one unambiguous heading candidate. Publish those observed
+    IDs verbatim (including MediaWiki .28/.29 and .3D encoding) rather
+    than constructing URL fragments from display names. All 33 canonical
+    Trait identities now have maintained Wiki links and API regression
+    coverage; the new 33/33 source audit and browser check remain open.
+  - [ ] Re-run the saved/live official Traits HTML audit expecting 33/33
+    exact headings with no unmapped candidates, preserving the source
+    SHA-256 and review date. Verify click navigation from all 33 Trait
+    detail pages in a browser, including scroll-to-heading behavior.
   - **Completion:** mapped links reach the reviewed official page/heading from normal Trait help;
     unavailable mappings remain deliberate. Source-link checking is explicit research activity,
     while automated mapping/resolution tests remain offline.

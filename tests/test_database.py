@@ -778,7 +778,9 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
         assert mapped["wiki"] == reviewed["url"]
     suppressive = catalog.get_trait("suppressive-fire")
     assert suppressive is not None
-    assert "wiki" not in suppressive
+    assert suppressive["wiki"] == (
+        "https://infinitythewiki.com/Traits#Suppressive_Fire_.28SF.29"
+    )
 
 
 def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(

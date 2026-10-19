@@ -31,14 +31,21 @@ def test_reviewed_trait_wiki_destinations_are_explicit() -> None:
 
     assert set(mapping) == {
         "trait:anti-materiel",
+        "trait:arm-0",
         "trait:aro",
         "trait:bioweapon",
         "trait:boost",
+        "trait:bs-weapon-ph",
+        "trait:bs-weapon-wip",
+        "trait:bts-0",
+        "trait:burst-b",
+        "trait:burst-single-target",
         "trait:cc",
         "trait:concealed",
         "trait:continuous-damage",
         "trait:deployable",
         "trait:direct-template",
+        "trait:disposable-x",
         "trait:double-shot",
         "trait:impact-template",
         "trait:improvised",
@@ -49,9 +56,13 @@ def test_reviewed_trait_wiki_destinations_are_explicit() -> None:
         "trait:perimeter",
         "trait:prior-deployment",
         "trait:reflective",
+        "trait:silent-x",
         "trait:speculative-attack",
         "trait:state",
+        "trait:suppressive-fire",
+        "trait:target-attribute",
         "trait:targetless",
+        "trait:zone-of-control-zc",
     }
     assert mapping["trait:continuous-damage"] == {
         "name": "Continuous Damage",
@@ -74,20 +85,31 @@ def test_reviewed_trait_wiki_links_match_current_canonical_records() -> None:
     assert {record_id: traits[record_id] for record_id in mapping} == {
         record_id: entry["name"] for record_id, entry in mapping.items()
     }
-    # These official headings still need exact punctuation-sensitive URL verification.
-    assert set(traits) - set(mapping) == {
-        "trait:arm-0",
-        "trait:bs-weapon-ph",
-        "trait:bs-weapon-wip",
-        "trait:bts-0",
-        "trait:burst-b",
-        "trait:burst-single-target",
-        "trait:disposable-x",
-        "trait:silent-x",
-        "trait:suppressive-fire",
-        "trait:target-attribute",
-        "trait:zone-of-control-zc",
+    # All 33 curated Traits now have source-observed fragment mappings.
+    assert set(traits) == set(mapping)
+
+
+def test_punctuation_sensitive_trait_fragments_match_reviewed_html_inventory() -> None:
+    # Exact heading IDs from a saved official /Traits HTML audit (35 headings).
+    # These are source-observed fragments, not display-name transformations.
+    observed = {
+        "trait:arm-0": "ARM_.3D_0",
+        "trait:bs-weapon-ph": "BS_Weapon_.28PH.29",
+        "trait:bs-weapon-wip": "BS_Weapon_.28WIP.29",
+        "trait:bts-0": "BTS_.3D_0",
+        "trait:burst-b": "Burst_.28B.29",
+        "trait:burst-single-target": "Burst:_Single_Target",
+        "trait:disposable-x": "Disposable_.28X.29",
+        "trait:silent-x": "Silent_.28X.29",
+        "trait:suppressive-fire": "Suppressive_Fire_.28SF.29",
+        "trait:target-attribute": "Target_.28Attribute.29",
+        "trait:zone-of-control-zc": "Zone_of_Control_.28ZoC.29",
     }
+    mapping = load_trait_wiki_references()
+    assert {
+        record_id: mapping[record_id]["url"].split("#", 1)[1]
+        for record_id in observed
+    } == observed
 
 
 @pytest.mark.parametrize(
