@@ -529,7 +529,7 @@ the full 1.0 cross-source and browser completeness gates remain open.
 
 ## 1.0 Trait whole-catalog publication parity
 
-**Added 2026-10-19; catalog Chromium acceptance pending.** The hermetic
+**Accepted 2026-10-19.** The hermetic
 `tests/test_trait_wiki_references.py` suite now reconciles all **33
 canonical Traits** across current curated source, published `rules.db`,
 public Trait catalog/detail API, player-visible detail templates,
@@ -554,9 +554,43 @@ catalog but cannot substitute for canonical Trait links.
 .\.venv\Scripts\python.exe -m tools.verify_traits_catalog_browser --base-url http://127.0.0.1:8000 --output local/audits/traits-catalog-browser.json
 ```
 
-Retain the real browser report under ignored `local/audits`.
+**Browser result reported 2026-10-19:** `Traits catalog browser
+navigation: 99/99 passed`, covering all 33 canonical Trait cards at
+three viewport widths. Retain the report under ignored `local/audits`.
 This does not establish independent cross-source rule semantics or
 close the entire 1.0 source-to-browser acceptance gate.
+
+## 1.0 Martial Arts, Booty and MetaChemistry structured-chart parity
+
+**Added 2026-10-19; Chromium acceptance pending.** These references are already
+available through normal Skill detail pages, using Army-owned structured
+rows rather than separate curated copies. The hermetic
+`tests/test_structured_skill_charts_publication.py` suite now checks the
+complete published Martial Arts Levels 1–5, Booty and MetaChemistry tables.
+It reconciles every generated Army table row, the repository's structured
+getters and the `/api/skills/{slug}` detail's `structured_reference`
+projection, including exact row ordering and field values. Both random
+charts cover each D20 result **1–20 exactly once**, with no gaps or
+overlaps. Unsupported roll notation and invalid ranges fail the
+regression. The test is included in the `model` test section.
+
+Optional Chromium acceptance checks all three Skill pages at 1440,
+390 and 320 px (**9 page checks**). It enters through the normal
+Skills catalog, compares the served API chart against the local
+generated database, then checks the actual rendered table's headings
+and every cell. It also checks page headings, JavaScript errors, stuck
+loading states and document-level horizontal overflow. Run against
+the current checkout's development server:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
+```
+
+This confirms **published-input parity**, not the independent source
+PDF/chart-footnote audit. Semantic typing of chart outcomes,
+context-sensitive conditional results and canonical cross-links remain
+separate open work. No random-result selection or session state has
+been implemented. Keep Chromium evidence under ignored `local/audits`.
 
 ## 1.0 source evidence baseline
 

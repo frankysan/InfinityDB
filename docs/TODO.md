@@ -1619,9 +1619,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     as deployment/session overlays, preserve conditional branches (for example TAG
     versus other Troop Types), and cross-link resolvable outcomes to canonical Skills,
     Equipment, Weapons, and Attributes without rewriting Unit profiles.
-    - [ ] Validate every published lookup row/range and conditional outcome against its cited
-      source. Extend typed outcome support first, then render canonical links from the same rows;
-      no random-result selection or persistent session overlay is required for 1.0.
+    - [x] Verify every published Martial Arts (Levels 1–5), Booty, and
+      MetaChemistry row against the generated Army source tables and normal
+      Skill API projections. Both random charts cover D20 values 1–20
+      without gaps or overlaps. This checks **published-input parity**,
+      not independent official chart/footnote accuracy.
+    - [ ] Run the 3-page structured Skill chart Chromium acceptance
+      across 1440/390/320 px (**9 checks**), asserting that rendered
+      headings and every cell match the local generated snapshot.
+      Retain evidence under ignored `local/audits`.
+    - [ ] Validate published lookup outcomes and conditional branches against
+      the cited official source. Extend typed outcome support first, then
+      render canonical links from the same rows; no random-result selection
+      or persistent session overlay is required for 1.0.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
@@ -1874,11 +1884,12 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     properties rather than labeling them as canonical Traits. This is
     bounded source/storage/API/template parity; it does not repeat
     the independently reviewed Wiki-fragment audit.
-  - [ ] Run the canonical Trait catalog-to-detail Chromium check across
-    1440/390/320 px (**99 checks**) for exact rule cards, player-visible
-    Wiki destinations and citations, correct headings and responsive
-    layout. Retain evidence under ignored `local/audits`; the prior
-    33/33 Wiki navigation acceptance alone does not establish this.
+  - [x] Complete canonical Trait catalog-to-detail Chromium acceptance:
+    **99/99 passed** at 1440/390/320 px, reported 2026-10-19.
+    Verified the 33 player-facing Trait cards, visible canonical Wiki
+    destinations, citations, headings and responsive layout. Retain
+    evidence under ignored `local/audits`; the separately completed
+    33/33 Wiki-fragment navigation audit remains distinct.
   - [x] Integrate the fail-closed source-field occupancy audit as an
     **opt-in** release-check mode (`--source-occupancy-gate`) before the
     normal rules checks; missing or newly populated raw source fields block
