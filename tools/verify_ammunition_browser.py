@@ -34,10 +34,20 @@ def _record_page_error(errors: list[str], error: Any) -> None:
     errors.append(str(error))
 
 
-def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
-    expected = source_names()
-    if len(expected) != 11:
-        raise ValueError(f"Expected 11 reviewed Ammunition records; found {len(expected)}")
+def verify(
+    base_url: str,
+    *,
+    headed: bool = False,
+    catalog: str = "ammunition",
+    expected_names: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Check all catalog links and their player-visible detail content."""
+    if catalog not in {"ammunition", "labels"}:
+        raise ValueError(f"Unsupported reference catalog: {catalog}")
+    expected = source_names() if expected_names is None else expected_names
+    required = {"ammunition": 11, "labels": 24}[catalog]
+    if len(expected) != required:
+        raise ValueError(f"Expected {required} reviewed {catalog} entries; found {len(expected)}")
     try:
         playwright = importlib.import_module("playwright.sync_api")
     except ImportError as exc:
@@ -54,21 +64,21 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
             for width in WIDTHS:
                 context = browser.new_context(viewport={"width": width, "height": 844})
                 try:
-                    response = context.request.get(f"{base}/ammunition", timeout=15000)
-                    if response.status != 200 or 'data-catalog="ammunition"' not in response.text():
+                    response = context.request.get(f"{base}/{catalog}", timeout=15000)
+                    if response.status != 200 or f'data-catalog="{catalog}"' not in response.text():
                         raise RuntimeError(
-                            f"{base}/ammunition is not served by the current InfinityDB app "
+                            f"{base}/{catalog} is not served by the current InfinityDB app "
                             f"(HTTP {response.status}); check --base-url and restart the app"
                         )
                     page = context.new_page()
                     errors: list[str] = []
                     page.on("pageerror", partial(_record_page_error, errors))
-                    page.goto(f"{base}/ammunition", wait_until="domcontentloaded")
+                    page.goto(f"{base}/{catalog}", wait_until="domcontentloaded")
                     page.locator("#catalog-list a").first.wait_for(state="visible")
                     hrefs = set(page.locator("#catalog-list a").evaluate_all(
                         "(anchors) => anchors.map((anchor) => anchor.getAttribute('href'))"
                     ))
-                    expected_hrefs = {f"/ammunition/{slug}" for slug in expected}
+                    expected_hrefs = {f"/{catalog}/{slug}" for slug in expected}
                     if hrefs != expected_hrefs:
                         raise AssertionError(
                             f"Catalog links differ: missing={sorted(expected_hrefs - hrefs)} "
@@ -79,9 +89,14 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                             "width": width, "slug": slug, "expectedName": name
                         }
                         try:
-                            link = page.locator(f'#catalog-list a[href="/ammunition/{slug}"]')
+                            link = page.locator(f'#catalog-list a[href="/{catalog}/{slug}"]')
                             link.click()
-                            page.locator(f"#rule-ammunition-{slug}").wait_for(state="visible")
+                            selector = (
+                                f"#rule-ammunition-{slug}"
+                                if catalog == "ammunition"
+                                else "#item-content .reference-detail-section .detail-copy"
+                            )
+                            page.locator(selector).wait_for(state="visible")
                             actual_name = page.locator("#item-name").evaluate(
                                 "(element) => element.firstChild.textContent"
                             )
@@ -89,8 +104,12 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                                 raise AssertionError(
                                     f"Heading mismatch: {actual_name!r} != {name!r}"
                                 )
-                            if not page.locator("#item-content .detail-source").first.is_visible():
-                                raise AssertionError("Source citations are not visible")
+                            if catalog == "ammunition":
+                                citations = page.locator("#item-content .detail-source")
+                                if not citations.first.is_visible():
+                                    raise AssertionError("Source citations are not visible")
+                            elif not page.locator(selector).inner_text().strip():
+                                raise AssertionError("Label definition is empty")
                             if page.locator("#item-status").is_visible():
                                 raise AssertionError("Loading/error panel is still visible")
                             overflow = page.evaluate(
@@ -106,14 +125,14 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                         observations.append(observation)
                         # Re-open the same public catalog to keep the navigation
                         # context deterministic even after an assertion failure.
-                        page.goto(f"{base}/ammunition", wait_until="domcontentloaded")
+                        page.goto(f"{base}/{catalog}", wait_until="domcontentloaded")
                         page.locator("#catalog-list a").first.wait_for(state="visible")
                 finally:
                     context.close()
         finally:
             browser.close()
     return {
-        "format": "InfinityDB Ammunition browser acceptance",
+        "format": f"InfinityDB {catalog.title()} browser acceptance",
         "baseUrl": base,
         "sourceRecordCount": len(expected),
         "widths": list(WIDTHS),

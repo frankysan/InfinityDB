@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from collections.abc import Callable, Iterable
+from functools import partial
 from pathlib import Path
 from wsgiref.util import setup_testing_defaults
+
+import pytest
 
 from infinity_army_data.metadata import decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
@@ -26,7 +30,8 @@ from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.web import create_app
-from tools.verify_ammunition_browser import WIDTHS, source_names
+from tools.verify_ammunition_browser import WIDTHS, source_names, verify
+from tools.verify_labels_browser import source_names as label_source_names
 
 
 def _reference_database(tmp_path: Path) -> Database:
@@ -402,6 +407,28 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
     assert RulesRecordCatalog(None, "rules").list_items() == []
     assert LabelCatalog(None).list_items() == []
 
+def _published_get(
+    app: Callable[..., Iterable[bytes]], path: str
+) -> tuple[str, bytes]:
+    environ: dict = {}
+    setup_testing_defaults(environ)
+    environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
+    statuses: list[str] = []
+
+    def respond(status: str, _headers: list, _exc_info: object = None) -> None:
+        statuses.append(status)
+
+    response = app(environ, respond)
+    try:
+        body = b"".join(response)
+    finally:
+        close = getattr(response, "close", None)
+        if close is not None:
+            close()
+    assert len(statuses) == 1, path
+    return statuses[0], body
+
+
 def test_all_published_ammunition_records_reach_normal_browser_routes() -> None:
     """Cross-check every curated Ammunition identity through storage and WSGI."""
 
@@ -431,25 +458,7 @@ def test_all_published_ammunition_records_reach_normal_browser_routes() -> None:
 
     app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
 
-    def get(path: str) -> tuple[str, bytes]:
-        environ: dict = {}
-        setup_testing_defaults(environ)
-        environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
-        statuses: list[str] = []
-
-        def respond(status: str, _headers: list, _exc_info: object = None) -> None:
-            statuses.append(status)
-
-        response = app(environ, respond)
-        try:
-            body = b"".join(response)
-        finally:
-            close = getattr(response, "close", None)
-            if close is not None:
-                close()
-        assert len(statuses) == 1, path
-        return statuses[0], body
-
+    get = partial(_published_get, app)
     status, body = get("/api/ammunition")
     assert status == "200 OK"
     listed = json.loads(body)["items"]
@@ -497,6 +506,84 @@ def test_all_published_ammunition_records_reach_normal_browser_routes() -> None:
     assert "getCatalogItem(catalog, itemId, pageController.signal)" in javascript
     assert "rulesReferenceSection(item.rules)" in javascript
     assert "content.hidden = false;" in javascript
+
+
+def test_all_published_labels_preserve_curated_vocabulary_and_public_routes() -> None:
+    """Verify the current Label vocabulary, not the unrelated rules-record table."""
+
+    root = Path(__file__).parents[1]
+    source_rows = {
+        (document["collection"]["id"], label["id"], label["name"], label["description"])
+        for _, document in load_curated_directory(root / "data/curated")
+        if document["collection"]["status"] == "current"
+        for label in document["labels"]
+    }
+    expected: dict[str, tuple[str, str]] = {}
+    sources_by_id: dict[str, set[str]] = {}
+    for collection_id, label_id, name, description in source_rows:
+        if label_id in expected:
+            assert expected[label_id] == (name, description), label_id
+        expected[label_id] = (name, description)
+        sources_by_id.setdefault(label_id, set()).add(collection_id)
+    assert len(expected) == 24
+    assert label_source_names(root) == {
+        label_id: name for label_id, (name, _) in expected.items()
+    }
+    assert WIDTHS == (1440, 390, 320)
+    with pytest.raises(ValueError, match="Unsupported reference catalog"):
+        verify("http://127.0.0.1:8000", catalog="invalid")
+    with pytest.raises(ValueError, match="Expected 24 reviewed labels entries"):
+        verify("http://127.0.0.1:8000", catalog="labels", expected_names={})
+
+    rules_path = root / "data/generated/rules.db"
+    with sqlite3.connect(rules_path) as connection:
+        stored_rows = set(connection.execute(
+            "SELECT l.collection_id, l.id, l.name, l.description FROM labels AS l "
+            "JOIN collections AS c ON c.id = l.collection_id "
+            "WHERE c.status = 'current'"
+        ))
+    assert stored_rows == source_rows
+
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    get = partial(_published_get, app)
+    status, body = get("/api/labels")
+    assert status == "200 OK"
+    items = json.loads(body)["items"]
+    assert len(items) == len(expected)
+    assert {item["slug"] for item in items} == set(expected)
+    assert all(item["id"] == item["slug"] for item in items)
+
+    status, body = get("/labels")
+    assert status == "200 OK"
+    assert b'data-catalog="labels"' in body
+    assert b"/static/reference-catalog.js" in body
+
+    for label_id, (name, description) in sorted(expected.items()):
+        listed = next(item for item in items if item["slug"] == label_id)
+        assert (listed["name"], listed["description"]) == (name, description), label_id
+        status, body = get(f"/api/labels/{label_id}")
+        assert status == "200 OK", label_id
+        detail = json.loads(body)
+        assert (detail["id"], detail["slug"], detail["name"], detail["description"]) == (
+            label_id, label_id, name, description
+        )
+        assert detail["collection"]["id"] in sources_by_id[label_id], label_id
+        assert isinstance(detail["description_tokens"], list), label_id
+        used_by = detail["used_by"]
+        assert len({item["href"] for item in used_by}) == len(used_by), label_id
+        assert all(item["href"].startswith("/") for item in used_by), label_id
+
+        status, body = get(f"/labels/{label_id}")
+        assert status == "200 OK", label_id
+        assert b'data-catalog="labels"' in body
+        assert b"/static/reference-detail.js" in body
+        assert b'id="item-content"' in body
+
+    script = (root / "src/infinity_db/web/static/reference-detail.js").read_text(
+        encoding="utf-8"
+    )
+    assert "definitionSection(item)" in script
+    assert "content.hidden = false;" in script
 
 
 def test_rules_relation_references_project_source_variants_to_public_routes(

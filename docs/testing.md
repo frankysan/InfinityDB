@@ -364,7 +364,7 @@ procedure separately preserves the named history volume across a release with no
 
 ## 1.0 Ammunition whole-catalog source/API/browser-contract parity
 
-**Added 2026-10-19; live Chromium acceptance pending.** The hermetic
+**Accepted 2026-10-19.** The hermetic
 `tests/test_application_rule_references.py` suite now checks the **entire
 11-record Ammunition set**, not only selected Ammunition examples. It
 reconciles canonical curated IDs, source names and summaries, published
@@ -392,11 +392,39 @@ In a separate PowerShell window from the repository root:
 .\.venv\Scripts\python.exe -m tools.verify_ammunition_browser --base-url http://127.0.0.1:8000 --output local/audits/ammunition-browser.json
 ```
 
-Expected after real browser acceptance: `Ammunition browser navigation:
-33/33 passed`. Playwright/Chromium must already be installed. Save the
-report under ignored `local/audits`; do not infer acceptance from the
-hermetic tests. The current whole-corpus source-to-browser 1.0 release gate
-remains open.
+**Browser result reported 2026-10-19:** `Ammunition browser navigation:
+33/33 passed`. This covers all eleven entries at three viewport widths
+against the then-current served development app. Playwright/Chromium is
+required for reruns. Retain the report under ignored `local/audits`.
+The whole-corpus 1.0 source-to-browser and cross-source semantic gates
+remain open.
+
+## 1.0 Labels vocabulary source/API/browser-contract parity
+
+**Added 2026-10-19; Chromium acceptance pending.** The hermetic
+`tests/test_application_rule_references.py` suite checks all **24 current
+Labels** against the curated collections' `labels` arrays (which are
+**not** `records`), matching the published `rules.db.labels` rows,
+collection provenance, public list/detail API identities, names, full
+descriptions, and successful delivery of player-facing detail templates.
+The detail API also supplies maintained-text tokens and deduplicated
+`used_by` links. Labels use a visible Definition section, not an
+Ammunition rules card or per-Label citation list.
+
+The Chromium checker reuses the Ammunition catalog navigation harness,
+with a Label-specific visible-definition check. It visits all 24 catalog
+entries at 1440, 390 and 320 px (**72 checks**); verifies correct headings,
+nonempty player-visible definitions, no stuck loading state, JavaScript
+errors, or page-level horizontal overflow. Against the current local
+development server, run in PowerShell from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/audits/labels-browser.json
+```
+
+A green hermetic test is not browser acceptance or cross-source
+semantic validation. Keep the Chromium report under ignored
+`local/audits` and leave the overall 1.0 completeness gate open.
 
 ## 1.0 source evidence baseline
 

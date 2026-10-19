@@ -1820,10 +1820,21 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     summary/typed-fact/citation parity and normal served detail templates. This
     closes a bounded storage/API/template check, not live browser acceptance
     or full rule-semantic source review.
-  - [ ] Run the optional 11-item Ammunition Chromium catalog-to-detail audit
-    at 1440/390/320 px and retain its evidence under ignored `local/audits`.
-    Confirm rendered rule cards, visible citations, navigation and narrow
-    layout rather than inferring those facts from successful HTTP routes.
+  - [x] Complete the Ammunition Chromium catalog-to-detail audit:
+    **33/33 passed** across all eleven records at 1440/390/320 px,
+    reported 2026-10-19. This verifies normal-browser navigation,
+    rendered rule cards, visible citations, JavaScript behavior and
+    narrow-layout overflow for the current served revision; retain the
+    captured report under ignored `local/audits`.
+  - [x] Reconcile all 24 current curated Labels from their distinct
+    vocabulary arrays through published `rules.db.labels`, current collection
+    provenance, API list/details, maintained descriptions, Used by link
+    structure and normal served detail templates. This confirms
+    storage/API/template parity, not a full semantic/source audit.
+  - [ ] Run the 24-Label Chromium catalog-to-definition verifier at
+    1440/390/320 px (**72 checks**). Verify visible definition content,
+    catalog navigation, no JS errors or narrow-layout overflow; retain
+    its report in ignored `local/audits` before closing acceptance.
   - [x] Integrate the fail-closed source-field occupancy audit as an
     **opt-in** release-check mode (`--source-occupancy-gate`) before the
     normal rules checks; missing or newly populated raw source fields block
