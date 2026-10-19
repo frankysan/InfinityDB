@@ -646,6 +646,13 @@ Cross-domain discovery may additionally use reviewed `facts.relatedCategories` c
 This adds navigation only: it does not change the record's canonical kind/domain, primary category,
 or typed rules relationships.
 
+For Traits, `config/catalogs/trait-wiki-references.json` maintains exact canonical
+`trait:*` identities, names and reviewed official Wiki heading URLs. The Trait detail API
+adds `wiki` only when both the ID and name match a published curated Trait; raw Army
+Trait aliases and unreviewed source labels do not acquire inferred links. The
+existing detail-page source-link presentation consumes this field. These links
+are navigation metadata and do not supersede pinned rules citations.
+
 ### Declaration categories and exact source variants
 
 Declaration/action categories are composition metadata rather than standalone public rule records.

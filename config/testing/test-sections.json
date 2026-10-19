@@ -60,6 +60,7 @@
         "test_scenario_map_svg",
         "test_skill_config",
         "test_state_catalog",
+        "test_trait_wiki_references",
         "test_weapon_config",
         "test_weapon_properties"
       ]

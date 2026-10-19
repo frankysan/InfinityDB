@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Continuous Damage and Non-Lethal Trait pages now link directly to
+  their reviewed official Infinity Wiki headings.
 - Army source items now appear in their proper Unit categories:
   Equipment, Training and loadout Attribute overrides.
   Source-only markers no longer generate non-existent Skill links.

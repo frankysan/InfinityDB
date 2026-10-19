@@ -1,0 +1,14 @@
+{
+  "format": "InfinityDB trait Wiki references",
+  "version": 1,
+  "entries": {
+    "trait:continuous-damage": {
+      "name": "Continuous Damage",
+      "url": "https://infinitythewiki.com/Traits#Continuous_Damage"
+    },
+    "trait:non-lethal": {
+      "name": "Non-Lethal",
+      "url": "https://infinitythewiki.com/Traits#Non-Lethal"
+    }
+  }
+}

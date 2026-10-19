@@ -1682,6 +1682,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
 
 - [ ] **Data processing + Web backend + Web frontend:** Add a curated Infinity Wiki URL mapping
   for traits when authoritative links are available.
+  - [x] Publish two exact, validated official Wiki heading links for Continuous
+    Damage and Non-Lethal from a maintained canonical Trait-ID/name map,
+    without guessing destinations for other source labels.
   - [ ] Inventory Traits with missing or ambiguous official targets and author validated maintained
     mappings, reusing existing source-link resolution where applicable. Keep renamed/alias labels
     separate from destination identity; do not generate URLs from display names or invent a page

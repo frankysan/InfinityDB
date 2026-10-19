@@ -756,6 +756,13 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     assert detail["name"] == "Continuous Damage"
     assert detail["rules"][0]["id"] == "trait:continuous-damage"
     assert detail["rules"][0]["citations"][0]["heading"] == "Continuous Damage"
+    assert detail["wiki"] == "https://infinitythewiki.com/Traits#Continuous_Damage"
+    non_lethal = catalog.get_trait("non-lethal")
+    assert non_lethal is not None
+    assert non_lethal["wiki"] == "https://infinitythewiki.com/Traits#Non-Lethal"
+    suppressive = catalog.get_trait("suppressive-fire")
+    assert suppressive is not None
+    assert "wiki" not in suppressive
 
 
 def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
@@ -935,6 +942,7 @@ def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
     assert detail is not None
     assert detail["slug"] == "continuous-damage"
     assert detail["name"] == "Persistent Damage"
+    assert "wiki" not in detail
 
 
 def test_uncurated_trait_reference_uses_catalog_slug_instead_of_guessing(
