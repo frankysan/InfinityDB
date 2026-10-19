@@ -1695,6 +1695,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     ID/name against the current curated corpus and the Trait API. The eleven
     remaining named headings use punctuation-sensitive fragment syntax and
     are intentionally unmapped pending exact anchor verification.
+  - [x] Add a read-only audit of saved official Traits-page HTML against exact
+    configured fragment IDs and expected heading text. Missing fragments and
+    wrong-target headings fail closed; synthetic fixtures cover both formats
+    of MediaWiki heading markup. Running the audit against actual Wiki HTML
+    and browser navigation remains open.
   - [ ] Confirm browser navigation for the 22 mapped headings and verify exact
     Wiki fragment/redirect identities for ARM = 0, BS Weapon (PH), BS Weapon
     (WIP), BTS = 0, Burst (B), Burst: Single Target, Disposable (X),

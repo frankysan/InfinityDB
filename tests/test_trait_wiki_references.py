@@ -9,6 +9,8 @@ import pytest
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.trait_wiki_references import load_trait_wiki_references
+from tools.audit_trait_wiki_anchors import audit_html
+from tools.audit_trait_wiki_anchors import main as audit_anchors_main
 
 
 def _document(url: str, *, name: str = "Non-Lethal") -> dict:
@@ -108,6 +110,72 @@ def test_trait_wiki_mapping_rejects_unreviewed_destinations(
 
     with pytest.raises(ValueError, match="Unreviewed trait Wiki destination"):
         load_trait_wiki_references(path)
+
+
+def test_trait_wiki_anchor_audit_matches_exact_heading_ids() -> None:
+    html = """
+        <h3><span class="mw-headline" id="Continuous_Damage">
+          Continuous <a href="/Category">Damage</a></span></h3>
+        <h3 id="Non-Lethal">Non-Lethal</h3>
+    """
+    refs = {
+        "trait:continuous-damage": {
+            "name": "Continuous Damage",
+            "url": "https://infinitythewiki.com/Traits#Continuous_Damage",
+        },
+        "trait:non-lethal": {
+            "name": "Non-Lethal",
+            "url": "https://infinitythewiki.com/Traits#Non-Lethal",
+        },
+    }
+    result = audit_html(html, refs)
+    assert result["matchedCount"] == 2
+    assert result["headingCount"] == 2
+    assert result["failures"] == []
+
+    refs["trait:non-lethal"]["url"] += "_incorrect"
+    refs["trait:continuous-damage"]["name"] = "Unrelated"
+    result = audit_html(html, refs)
+    assert result["matchedCount"] == 0
+    assert {failure["status"] for failure in result["failures"]} == {
+        "missing-fragment", "wrong-heading"
+    }
+
+
+def test_trait_wiki_anchor_audit_accepts_legacy_escaped_fragment() -> None:
+    html = (
+        '<h3><span class="mw-headline" id="Suppressive_Fire_.28SF.29">'
+        'Suppressive Fire (SF)</span></h3>'
+    )
+    result = audit_html(html, {
+        "trait:suppressive-fire": {
+            "name": "Suppressive Fire (SF)",
+            "url": "https://infinitythewiki.com/Traits#Suppressive_Fire_.28SF.29",
+        }
+    })
+    assert result["matchedCount"] == 1
+    assert not result["failures"]
+
+
+def test_trait_wiki_anchor_audit_fails_closed_with_json_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from tools import audit_trait_wiki_anchors as audit
+
+    html_path = tmp_path / "traits.html"
+    output = tmp_path / "anchors.json"
+    html_path.write_text('<h3 id="Other">Other</h3>', encoding="utf-8")
+    monkeypatch.setattr(audit, "load_trait_wiki_references", lambda: {
+        "trait:non-lethal": {
+            "name": "Non-Lethal",
+            "url": "https://infinitythewiki.com/Traits#Non-Lethal",
+        }
+    })
+    assert audit_anchors_main([str(html_path), "--output", str(output)]) == 1
+    assert "0/1 matched" in capsys.readouterr().out
+    assert json.loads(output.read_text(encoding="utf-8"))["failures"][0][
+        "status"
+    ] == "missing-fragment"
 
 
 def test_trait_wiki_mapping_rejects_unreviewed_ids_and_shapes(tmp_path: Path) -> None:

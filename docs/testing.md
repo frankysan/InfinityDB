@@ -2682,3 +2682,34 @@ Native Bangbomb Equipment takes precedence over its duplicate source
 occurrence, while raw Army items remain intact. Source classification
 is maintained in config/catalogs/skill-source-classifications.json.
 Synthetic regression passed; whole-corpus browser acceptance is open.
+
+## 1.0 Trait Wiki heading-fragment acceptance harness
+
+**Added 2026-10-19; live acceptance pending.** The existing 22 maintained
+Trait Wiki links have been checked against canonical curated Trait names,
+but that does not prove that URL fragments match the current official HTML
+or scroll to the right heading. Official Wiki redirect sources illustrate
+why simple display-name-to-fragment conversion is insufficient (for example,
+the historical Suppressive Fire redirect contains legacy `.28SF.29` encoding).
+
+`tools/audit_trait_wiki_anchors.py` reads a saved HTML response from the
+official `https://infinitythewiki.com/Traits` page. It checks every mapped
+fragment against the page's actual heading `id` and its rendered text,
+reporting missing fragments and wrong-heading matches separately. The
+audit runs **offline**, writes optional JSON evidence, and returns a nonzero
+exit status for any mismatch. Its hermetic regression tests cover legacy
+`mw-headline` spans, headings with direct IDs, nested markup and failure
+handling; they are not evidence that the live Wiki accepts the links.
+
+To run the source check explicitly from the repository root in PowerShell:
+
+```powershell
+Invoke-WebRequest -Uri "https://infinitythewiki.com/Traits" -OutFile "local/audits/traits-current.html"
+.\.venv\Scripts\python.exe tools/audit_trait_wiki_anchors.py local/audits/traits-current.html --output local/audits/trait-wiki-anchors.json
+```
+
+Keep the HTML and report under ignored `local/audits`, with a capture date
+and source revision recorded in the associated review. Even a green anchor
+audit is not a substitute for actual browser navigation from the public
+Trait detail pages. No live-HTML audit or real browser acceptance has been
+claimed by this change.
