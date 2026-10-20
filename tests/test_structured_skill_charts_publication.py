@@ -232,6 +232,56 @@ def test_structured_charts_publish_cited_canonical_skill_rules() -> None:
         ), slug
 
 
+def test_chart_skill_provenance_and_deployment_faq_are_version_pinned() -> None:
+    """Require three canonical PDF owners and the separately scoped FAQ.
+
+    The FAQ is a general Deployment Phase ruling, not an invented
+    chart-specific exception. Its historical source and current selection
+    must survive with explicit date/revision applicability.
+    """
+
+    from infinity_db.rules_database import RulesDatabase
+
+    rules = RulesDatabase(RULES_DB)
+    pdf_pages = {"booty": 86, "martial-arts": 100, "metachemistry": 101}
+    for slug, page in pdf_pages.items():
+        record = rules.composed_record(f"skill:{slug}")
+        assert record is not None, slug
+        assert record["review"]["status"] == "reviewed", slug
+        assert any(
+            citation["source_id"] == "n5-core-v5.3-pdf"
+            and citation["page"] == page
+            for citation in record["citations"]
+        ), slug
+
+    current = rules.faq_rulings_for_topic(
+        "rule:deployment-phase",
+        rules_revision="5.3",
+        as_of="2026-09-01",
+    )
+    matching = [
+        item for item in current
+        if item["id"] == "faq-ruling:deployment-phase-reposition-after-measurement"
+    ]
+    assert len(matching) == 1
+    faq = matching[0]
+    assert "Roll or measurement" in faq["answer"]
+    assert "Fireteam Coherency Check" in faq["answer"]
+    assert faq["original_publication"]["sourceId"] == "n5-faq-v0.0-en-pdf"
+    assert faq["original_publication"]["page"] == 1
+    assert faq["selected_citation"] == {
+        "sourceId": "n5-faq-v0.1-en-pdf", "page": 1
+    }
+    assert rules.faq_rulings_for_topic(
+        "rule:deployment-phase", rules_revision="5.2",
+        as_of="2026-09-01",
+    ) == []
+    assert rules.faq_rulings_for_topic(
+        "rule:deployment-phase", rules_revision="5.3",
+        as_of="2026-08-31",
+    ) == []
+
+
 def test_army_chart_source_fields_preserve_n5_reference_distinctions() -> None:
     """Guard reviewed N5 chart distinctions without inventing new game effects."""
 

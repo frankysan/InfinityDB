@@ -1700,14 +1700,36 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       branches, both Martial Arts Special Dice levels and the printed
       Army/Wiki whitespace distinctions. The prior API parity checks
       alone did not establish this separate source comparison.
-    - [ ] Independently reconcile the complete chart footnotes,
-      deployment timing, variant effects and FAQ against the final
-      pinned official **N5.3 PDF** and versioned Wiki revisions.
-      In particular, preserve the distinction between +1 SD and
-      +1B and the optional, additive Booty/MetaChemistry results.
-      This Wiki row comparison is not final PDF/semantic signoff.
-      Do not add random-result selection or persistent session state
-      for 1.0.
+    - [x] Pin the three chart-owning reviewed Skill definitions to
+      N5.3 English PDF citations (Booty p. 86, Martial Arts p. 100,
+      MetaChemistry p. 101) and the separately curated Deployment
+      repositioning FAQ. Validate its v0.0 original / v0.1 selected
+      citations and explicit 5.3 effective date; do not convert the
+      shared FAQ into a new chart-specific rule.
+    - [x] Directly inspect the pinned 196-page English N5.3 PDF
+      (SHA-256: 53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f):
+      Booty on printed pp. 86-87, Martial Arts on pp. 100-101,
+      and MetaChemistry on p. 101. Confirm the complete five-level
+      Martial Arts modifiers, including L3 +1 SD, L4 +1B, and L5
+      +1B plus +1 SD. The +1 SD footnote does not increase weapon
+      Burst or consume additional Disposable uses; when Burst is
+      split, the extra die belongs to one target, and discard
+      selection follows the stated Face to Face timing and Active
+      Player priority. These are not interchangeable bonuses.
+    - [x] Reconcile PDF chart conditions and printed results with
+      the previously matched Army/Wiki rows: Booty is an optional
+      roll after Model placement and adds gear without replacement;
+      its four TAG/other-Troop-Type splits remain conditional.
+      MetaChemistry permits one optional roll immediately after
+      Model placement, adding a MOD or Special Skill; its five
+      compound results (16-20) retain both components and typed
+      parameters. Do not simulate rolls or persist game state.
+    - [ ] Complete independent historical Wiki revision and FAQ
+      comparison against the exact chart publication timeline.
+      The Deployment repositioning FAQ is general, not a new
+      Booty/MetaChemistry exception. Keep PDF, Wiki, FAQ and
+      announcement publication dates distinct, and record any
+      historical discrepancy rather than inferring supersession.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and

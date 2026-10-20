@@ -799,6 +799,44 @@ all conditional interactions still require explicit release audit.
 No source data, source-parameter text, or UI was changed in this
 comparison; existing Chromium acceptance remains applicable.
 
+## 1.0 structured chart ownership and deployment FAQ provenance
+
+**Added 2026-10-20; bounded source-provenance acceptance.** After the
+33-row independent Wiki comparison, the hermetic chart regression
+also requires one reviewed canonical Skill owner for each chart
+with the expected **English N5.3 PDF citation**: Booty p. 86,
+Martial Arts p. 100, and MetaChemistry p. 101. Those citations
+match the original inspected source manifest S1; the current
+regression checks published citation identity/page but does
+**not** reopen or hash the ignored local PDF bytes.
+
+The shared repositioning clarification is already curated as
+`faq-ruling:deployment-phase-reposition-after-measurement`.
+The regression selects it only for `rule:deployment-phase` with
+N5.3 / effective 2026-09-01 context, asserts the official FAQ
+v0.0 English p. 1 origin and v0.1 English p. 1 selected source,
+and requires it to be unavailable in the preceding 5.2 and
+pre-effective 5.3 contexts. The ruling establishes that a Roll or
+measurement fixes an element's position during main Deployment;
+it is general Deployment Phase context, not a special Booty or
+MetaChemistry exception. This is consistent with the revised
+[Booty](https://infinitythewiki.com/Booty),
+[MetaChemistry](https://infinitythewiki.com/MetaChemistry),
+and [Initiative and Deployment](https://infinitythewiki.com/Initiative_and_Deployment)
+Wiki pages, which display the carried-forward FAQ with its
+**v0.0 origin** separately from the site's N5.3/v0.1 banner.
+
+The official [September 1, 2026 N5.3 announcement](https://infinityuniverse.com/en/news/infinity-rules-update-5-3)
+lists an updated rulebook and FAQ, but its changelog is not proof
+that every chart cell or footnote is unchanged. The exact S1
+English N5.3 PDF and S2 FAQ are recorded in
+[the audited source manifest](rules-explanation-audit-1.0-sources.md).
+The original research inspected these sources. **In this follow-up,
+the external N5.3 PDF download could not be independently reopened**;
+therefore no new full PDF page/footnote verification, version-history
+comparison, or gameplay-semantic signoff is claimed. The previously
+accepted browser renderer is unchanged in this slice.
+
 ## 1.0 source evidence baseline
 
 The offline `tools/report_reference_baseline.py` command inventories the published Army
