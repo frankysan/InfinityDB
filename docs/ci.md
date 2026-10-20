@@ -37,7 +37,8 @@ The current matrix is:
 
 Every leg installs `.[dev,symbols]`, uses the controlled `tests/fixtures/deployment-smoke` Army
 source for build validation, and requires the tracked graphical publication. The primary Ubuntu
-3.11 leg owns Ruff, Markdownlint and Pyright; other matrix legs focus on runtime/build portability.
+3.11 leg owns Ruff, Markdownlint, offline Markdown path/heading validation
+and Pyright; other matrix legs focus on runtime/build portability.
 For the `--all` leg, CI sets up Node.js 24 and explicitly runs
 `npm ci --ignore-scripts --no-audit --no-fund` against the tracked `package-lock.json` before the
 check runner starts. The `docs` stage uses this local installation without acquiring dependencies
@@ -54,7 +55,7 @@ Source-check logs include the twenty slowest pytest durations and skipped-test r
 hosted performance problems can be traced to individual tests or fixture setup.
 
 The manually dispatched `Full-asset checks` workflow also runs `--all`, so it performs the same
-pinned npm installation and documentation linting. The installed-wheel and deployment-smoke jobs
+pinned npm installation and both documentation checks. The installed-wheel and deployment-smoke jobs
 do not require Markdown tooling or ship Node.js dependencies.
 
 ## Cross-platform deterministic outputs

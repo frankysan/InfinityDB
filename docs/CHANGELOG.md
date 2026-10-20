@@ -408,9 +408,11 @@ are not retroactively relabeled.
 - **Web frontend:** Wrap narrow shared detail breadcrumbs without hiding
   the reference tag; verified Visibility Zone and Ammunition/Immunity
   cross-reference navigation with pointer, keyboard and touch.
-- **Project infrastructure:** Add a lockfile-pinned Markdownlint documentation stage to the
-  project check runner and required `--all` CI workflows. Documentation validation runs without
-  automatic dependency downloads; Node.js tooling remains development-only.
+- **Project infrastructure:** Add lockfile-pinned Markdownlint and offline
+  relative Markdown file/heading-link validation to the project check runner's
+  documentation stage and required `--all` CI workflows. Documentation checks
+  do not fetch external URLs or install dependencies; Node.js tooling
+  remains development-only.
 - **Web backend + Web frontend:** Include curated Weapon definitions in
   Glossary using opt-in Army links for canonical family/variant destinations.
   Preserve standalone Army Weapon routes and omit source-mode-specific

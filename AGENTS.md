@@ -39,7 +39,8 @@ Use `tools/run_checks.py` as the standard entry point for repository checks. It
 invokes pytest, Ruff, Pyright type checking, Army data-build validation, and
 curated rules-database validation through the same Python interpreter that launched
 it. The separate `docs` stage invokes Markdownlint through a lockfile-pinned local
-npm dependency. All stages share check selection/reporting across local development
+npm dependency and then checks relative Markdown file/heading links offline
+using the project Python. All stages share check selection/reporting across local development
 and agent handoffs. Examples:
 
 ```text

@@ -3,7 +3,8 @@
 **Project domain:** Project infrastructure
 
 **Status:** Temporary working document, not a canonical reference or a release deliverable.
-**Audited baseline:** `dev/v1.0.0` at `ab028309a68d3755b6e615d455db01b7dac811b6`, 2026-10-20; working tree clean before this cleanup.
+**Initial audit baseline:** `dev/v1.0.0` at `ab028309a68d3755b6e615d455db01b7dac811b6`, 2026-10-20.
+**Closeout-pass baseline:** `dev/v1.0.0` at `bced9f73318d5674b5f631821ba617bdfcaa30ce`; Batches 1–5 already committed and working tree clean before the closeout pass.
 **Scope:** Documentation structure and selected repository/code/configuration claims. This is *not* the mandatory exhaustive, page-by-page pre-release audit.
 
 This tracked temporary document exists to coordinate bounded edits. The connected workspace
@@ -156,6 +157,20 @@ Prefer targeted fixes rather than merging these.
 - [ ] **Release closeout:** Verify complete documentation corpus against current
   code, tests, package, CI and player-facing routes; settle frozen evidence
   retention, and retire this temporary working document.
+  - [x] First-pass evidence disposition: retain the frozen 1.0 audit and its
+    three appendices while the source-to-browser gate remains open, preserving
+    REA IDs, exact source hashes/revisions and unresolved official conflicts.
+    Make the main audit's 2026-10-09 findings explicitly historical rather
+    than treating resolved cases as current blockers.
+  - [x] Reconcile selected current-state statements against release metadata,
+    app-domain ownership, docs-stage code/CI, and TODO; correct the REA-020
+    acceptance wording and update docs-stage references.
+  - [ ] At actual 1.0 preparation, re-audit the complete tracked Markdown
+    corpus (not merely the 28 checked link targets), source/API/browser
+    claims, pending REA and exact source dispositions, and the final
+    player-facing release summary. Retire this working document only after
+    moving any unresolved documentation tasks to `docs/TODO.md` and
+    preserving unique sources in their canonical owners.
 
 ### Batch validation log
 
@@ -240,8 +255,33 @@ Prefer targeted fixes rather than merging these.
   the offline link scan (**28 maintained files, 0 errors**).
   No full project suite, live browser acceptance, or external
   URL verification was performed.
-- **Next:** Release closeout still requires a thorough comparison of
-  documentation with the final code/data/API/browser publication,
-  decisions on frozen 1.0 audit appendices and any remaining
-  implemented-research entries, a final changelog player-summary
-  review, and eventual retirement of this temporary working file.
+- **Closeout pass 1, 2026-10-20:** The five earlier cleanup batches were
+  committed at the current base `bced9f73318d5674b5f631821ba617bdfcaa30ce`.
+  Verified the frozen main rules audit and its inventory, bilingual N5.3
+  reconciliation and source manifest retain distinct REA IDs, original
+  counts, exact source hashes/revisions and publication conflicts.
+  **Decision:** keep all four until the 1.0 source-to-browser release
+  review is finished and any durable evidence is migrated; do not treat
+  original October 9 findings/remediation priorities as current defects.
+  Clarified the main audit's historical scope, preserved its stable
+  headings/citations, and expanded the `docs/README.md` ownership note.
+- Reconciled `RR-WPN-FAMILY-001` as retained hash-pinned source evidence
+  with implemented Weapon/Trait consumers rather than a wholly open
+  research task; corrected the REA-020 Fireteam comment in `docs/TODO.md`
+  to distinguish resolved scoped rule guidance from the still-open
+  full 1.0 acceptance. Updated `AGENTS.md`, `docs/ci.md` and the
+  `Unreleased` changelog's documentation-check entry to reflect
+  **Markdownlint plus offline local file/heading link checks**.
+  Cross-checked current release metadata (`pyproject.toml` 0.10.1),
+  public README/milestone, app-domain registry, CI and package-facing
+  documentation without changing application/runtime code.
+- **Validation:** `docs` — PASS (Markdownlint 32 files, 0 issues;
+  offline links 28 files, 0 errors); `tests/test_release_notes.py`
+  — 18 passed; `tests/test_doc_links.py` — 4 passed.
+  No full project tests or live browser/source publication acceptance.
+- **Remaining:** The release-mandated exhaustive whole-repository Markdown
+  and browser-copy/source completeness audit is **not complete**.
+  A final REA disposition and source-hash migration, further research
+  ownership review, current player-summary reconciliation, and disposal
+  of this temporary working file remain conditional on final 1.0
+  evidence; do not equate this cleanup with a release gate pass.

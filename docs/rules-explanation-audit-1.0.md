@@ -17,40 +17,54 @@ current release candidate. Later implementation notes record selected correction
 the original findings remain evidence for the still-open 1.0 review. Current release
 status and remaining acceptance belong in [the backlog](TODO.md#current-milestone).
 
+**Reading this frozen audit:** The executive summary, proposed batches and
+statement of potential blockers below describe the **2026-10-09 baseline**, not
+the current severity/status of those findings. For example, later curated and
+browser work has addressed the initial recovery, Intuitive Attack, and
+Immunity-card defects, while some independent source-publication discrepancies
+remain unresolved. Do not re-open a completed finding merely because its
+original assessment is preserved here. Treat the [finding inventory](rules-explanation-audit-1.0-inventory.md)
+as historical evidence, [source manifest](rules-explanation-audit-1.0-sources.md)
+as versioned provenance, and `docs/TODO.md` and the maintained
+`rules-semantics.md` as the current work/status and semantic authorities.
+This does not certify the final 1.0 release gate.
+
 ## Executive summary
 
-The existing curation does **not yet meet the 1.0 rules interaction explanation
-standard**. Its identities, source separation, and many recent explanations are
-sound, but several older summaries omit conditions that change gameplay. A
-relationship marked reviewed is often a navigation decision rather than a
-complete explanation. Passing the existing interaction audit therefore does not
-establish rules correctness or explanation completeness.
+At the examined commits, the existing curation did **not meet the 1.0 rules
+interaction explanation standard**. Its identities, source separation, and
+many recent explanations were sound, but several older summaries omitted
+conditions that change gameplay. A
+reviewed relationship often recorded a navigation decision rather than a
+complete explanation. Passing the interaction audit alone did not establish
+rules correctness or explanation completeness.
 
-The most urgent examples are Engineer's incorrect STR-only requirement for
-State cancellation (REA-001), Doctor's omitted recovery gate and failure result
-(REA-002), Intuitive Attack's apparent second attack roll (REA-003), Continuous
-Damage's missing extra-Critical-roll exception (REA-004), and the missing
-BS Weapon (WIP) restrictions (REA-005). Controlled Jump omits immediate ARO
-application and opposing-program cancellation (REA-006). These findings arise
+The highest-priority examples identified at that baseline included Engineer's
+incorrect STR-only requirement for State cancellation (REA-001), Doctor's
+omitted recovery gate and failure result (REA-002), Intuitive Attack's apparent
+second attack roll (REA-003), Continuous Damage's missing extra-Critical-roll
+exception (REA-004), missing BS Weapon (WIP) restrictions (REA-005), and
+Controlled Jump's omitted immediate ARO application and opposing-program
+cancellation (REA-006). These findings arose
 from actual authored text compared with identified official clauses, rather than
 from counting absent graph edges.
 
-Other material gaps concern simultaneous recovery, cumulative State MODs,
-Marker cancellation, Peripheral subtype exceptions, Fireteam integrity and
-Special Dice, Supportware, and placement restrictions. Simple individually
-correct cards do not always explain what happens when read together. Existing
+Other baseline findings concerned simultaneous recovery, cumulative State
+MODs, Marker cancellation, Peripheral subtype exceptions, Fireteam
+integrity and Special Dice, Supportware, and placement restrictions.
+Individually correct cards did not always explain what happened together. Existing
 Army tables already supply Martial Arts values and Hacking Program statlines;
 their absence from curated facts is **not** reported as missing numeric data.
 
 The Flash Pulse benchmark's outcome is verified against English N5.3 printed
 pp. 95-96 and 186, exact archived English Wiki revisions, and Spanish Wiki
 wording. It correctly retains BTS, Non-Lethal, and failed-roll Stunned. However,
-the curated Immunity family omits the ordinary ARM/BTS protection against
-State/Wound/Attribute Traits, leaving the reason for the exception incomplete
-(REA-010). Spanish Weapon Chart revision 3987 still lists two rolls and omits
-State: Stunned; the English chart and Army list one roll and the Trait. The
-the official Spanish N5.3 PDF p. 196 agrees with English on one
-Saving Roll and both Traits. The unresolved discrepancy is specifically the
+the curated Immunity family at the examined commit omitted the ordinary
+ARM/BTS protection against State/Wound/Attribute Traits, leaving the reason
+for the exception incomplete (REA-010). Spanish Weapon Chart revision 3987
+lists two rolls and omits State: Stunned; the English chart and Army list
+one roll and the Trait. The official Spanish N5.3 PDF p. 196 agrees with
+English on one Saving Roll and both Traits. The discrepancy is specifically the
 Spanish Wiki chart versus the two published N5.3 PDFs (REA-027).
 
 Kobra Pistol's DA/two-roll interpretation is supported while Anti-materiel
@@ -62,12 +76,14 @@ It also contains a conflicting six-dice Fireteam reminder (REA-041), even
 though its general Special Dice rule agrees with English. Neither disagreement
 authorizes silently rewriting source data.
 
-Reproducibility is also limited: the exact September 18 Wiki ZIP named by both
-collections is missing locally. Seventy-four record citations, across 72
-records, depend on it. Later ZIPs and exact archived revisions were used as
-**separate comparison evidence**, not replacements (REA-029). FAQ v0.1 is
-available locally but has no curated publication; its ITS headings require
-scope adjudication before applying rulings to core scenarios (REA-030).
+The examined source set also had a reproducibility limitation: the exact
+September 18 Wiki ZIP named by both collections was missing locally.
+Seventy-four citations across 72 records depended on it. Later ZIPs and
+exact archived revisions were used as **separate comparison evidence**,
+not replacements (REA-029). The [source manifest](rules-explanation-audit-1.0-sources.md)
+documents the subsequent deliberate Wiki-source migration. FAQ v0.1
+was available locally, but its ITS headings required scope adjudication
+before applying rulings to core scenarios (REA-030).
 
 All **367 records** were screened. The original **217 selected clause reviews**
 and **150 screening-only records** reconcile exactly to the unchanged inputs.
@@ -81,11 +97,11 @@ and now registers **44 findings: 31 High, 12 Medium, 1 Low, and 0 Critical**.
 The precise review-tier totals are recorded in the inventory. It does not certify every Weapon profile,
 Spanish publication, Wiki member, or browser surface.
 
-Start with a focused **recovery and Intuitive Attack correction batch**:
-REA-001, REA-002, REA-003, REA-009, and REA-022. These have direct English PDF
-evidence and can largely be addressed using existing prose fields and links.
-Resolve source conflicts separately; retain the positive patterns below. The
-remediation plan is a proposal, not accepted replacement semantics.
+The original proposed first batch covered **recovery and Intuitive Attack**:
+REA-001, REA-002, REA-003, REA-009, and REA-022. These had direct English PDF
+evidence and could largely be addressed using existing prose fields and links.
+Source conflicts required separate decisions. This historic remediation plan
+is not the current backlog or accepted replacement semantics.
 
 **Follow-up qualification:** REA-038 adds a source-decision gate for the friendly
 target qualifier. No universal Allied-only restriction was established, but

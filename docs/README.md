@@ -42,8 +42,12 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   cross-source reconciliation procedure; an index, not a verified completeness ledger.
 - [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
   source/interaction assessment with implementation follow-ups and remaining
-  source conflicts. Its linked inventory is a **frozen baseline**, not current
-  review completion; use `TODO.md` for open and closed work.
+  source conflicts. Its linked inventory, N5.3 reconciliation and source manifest
+  retain unique finding IDs, exact source hashes/revisions and unresolved
+  publication discrepancies; they remain **frozen baseline evidence**, not a
+  current defects list or proof of 1.0 completion. Keep these linked appendices
+  until the final source reconciliation and citation migration is accepted;
+  use `TODO.md` for current work and `rules-semantics.md` for reviewed meaning.
 - `rules-interaction-checklist.md` — generated cross-release interaction-review ledger. Regenerate
   it with `tools/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
   original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`

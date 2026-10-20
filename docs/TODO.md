@@ -1863,7 +1863,9 @@ results, not a substitute for final source-to-browser completeness:
   invented `/weapons/mines` Army route.
 - **Fireteams:** 167/167 checks for scoped Army selection, Wildcards,
   formations, chart/member links, browser history and narrow table scrolling.
-  This does not implement a Fireteam builder or settle REA-020.
+  This does not implement a Fireteam builder or certify the complete
+  1.0 Fireteam source-to-browser gate; REA-020's scoped rules-reference
+  remediation was separately marked resolved on 2026-10-14.
 - **Core scenarios:** 805/805 checks across four scenarios, six Army
   Points selections, URL history, themes, unit conversion, navigation and
   error recovery. Source reconciliation and the Domination 350-point SWC

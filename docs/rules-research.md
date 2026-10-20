@@ -2,9 +2,11 @@
 
 **Project domain:** Data processing
 
-This document holds verified rules findings that may become useful to InfinityDB
-but do not yet have a confirmed processing, validation, query, presentation, or
-data-model consumer.
+This document primarily holds verified rules findings that may become useful
+to InfinityDB but do not yet have a confirmed processing, validation, query,
+presentation, or data-model consumer. Previously researched entries that
+have acquired a consumer may retain a **short stable-ID redirect** to their
+canonical rules-semantic owner; they are not still-open research.
 
 It is deliberately not a speculation backlog. Every entry needs an authoritative
 source and a concise statement of what is known. Once an application becomes
@@ -134,8 +136,14 @@ source-provenance or 1.0 completeness review.
 
 ### RR-WPN-FAMILY-001 — Mines and Perimeter Weapons are distinct rules families
 
-**Scope:** current N5 core, Weaponry pp. 69 and 72; `rules.db` and Army snapshot
-from `InfinityDB-work-021d3921c61f.zip` (with the reviewed Boost curation).
+**Scope:** source review of N5 core Weaponry pp. 69 and 72; `rules.db` and
+Army snapshot from `InfinityDB-work-021d3921c61f.zip` (with reviewed Boost
+curation). This entry retains **historical, hash-pinned family-clause evidence**
+and a record of subsequent consumers; it is not an unimplemented family
+feature or a substitute for current curated semantics. The current
+Weapon/Deployable reference owner is `docs/rules-semantics.md` plus the
+reviewed Weapon and Trait records. Keep the historical source hashes and
+scope limitations below until a separate provenance migration is verified.
 
 The Perimeter Weapons prose defines placement within the user's Zone of Control,
 while its separate Boost subsection specifies triggering, movement/contact,
