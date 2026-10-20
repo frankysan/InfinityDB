@@ -1342,6 +1342,60 @@ def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> Non
     }
 
 
+def test_rules_database_preserves_reviewed_numeric_mod_extra_maps(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    specifications = {
+        "skill:mimetism": ("opponent", ["bs-attack-requiring-lof", "discover"], 6, "-3", -3),
+        "skill:berserk": ("skill-holder", ["berserk-cc-attack"], 1, "+3", 3),
+        "skill:dodge": ("skill-holder", ["dodge-ph-roll"], 2, "+6", 6),
+    }
+    for _path, document in documents:
+        for record in document["records"]:
+            if record["id"] not in specifications:
+                continue
+            target, scopes, extra_id, raw_value, value = specifications[record["id"]]
+            record["variantSemantics"]["occurrenceParameters"] = [
+                {"source": "army-extra", "kind": "numeric-mod",
+                 "owner": "skill-holder", "target": target, "appliesTo": scopes,
+                 "extraValues": [
+                     {"extraId": extra_id, "extraType": "TEXT",
+                      "rawValue": raw_value, "modifier": value},
+                 ]}
+            ]
+            if record["id"] == "skill:dodge":
+                record["variantSemantics"]["occurrenceParameters"].append(
+                    {"source": "army-extra", "kind": "distance", "positiveSign": "omit"}
+                )
+    output = tmp_path / "numeric-mod-rules.db"
+    export_rules_database(documents, output)
+    rules = RulesDatabase(output)
+    mods = rules.skill_numeric_mod_semantics()
+    assert set(mods) == {"mimetism", "berserk", "dodge"}
+    for record_id, (target, scopes, extra_id, raw_value, value) in specifications.items():
+        slug = record_id.split(":", 1)[1]
+        assert mods[slug] == {
+            "source": "army-extra", "kind": "numeric-mod",
+            "owner": "skill-holder", "target": target,
+            "applies_to": scopes,
+            "extra_values": [
+                {"extra_id": extra_id, "extra_type": "TEXT",
+                 "raw_value": raw_value, "modifier": value},
+            ],
+        }
+        record = rules.composed_record(record_id)
+        assert record is not None
+        assert mods[slug] in record["variant_semantics"]["occurrence_parameters"]
+    # Old browser-facing distance lookup must not accidentally publish MODs.
+    assert rules.skill_parameter_semantics() == {
+        "super-jump": {"kind": "distance", "positive_sign": "omit"},
+        "forward-deployment": {"kind": "distance", "positive_sign": "force"},
+        "dodge": {"kind": "distance", "positive_sign": "omit"},
+    }
+
+
 def test_rules_database_returns_reviewed_source_variant_semantics(
     current_rules_database: RulesDatabase,
 ) -> None:

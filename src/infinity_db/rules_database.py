@@ -667,6 +667,19 @@ def _variant_semantics(value: str | None) -> dict[str, Any] | None:
         }
         if "positiveSign" in parameter:
             item["positive_sign"] = parameter["positiveSign"]
+        if parameter["kind"] == "numeric-mod":
+            item["owner"] = parameter["owner"]
+            item["target"] = parameter["target"]
+            item["applies_to"] = list(parameter["appliesTo"])
+            item["extra_values"] = [
+                {
+                    "extra_id": entry["extraId"],
+                    "extra_type": entry["extraType"],
+                    "raw_value": entry["rawValue"],
+                    "modifier": entry["modifier"],
+                }
+                for entry in parameter["extraValues"]
+            ]
         parameters.append(item)
     result: dict[str, Any] = {"inheritance": raw["inheritance"]}
     if parameters:
@@ -1444,6 +1457,36 @@ class RulesDatabase:
                         f"Skill {skill_ref!r} has conflicting curated parameter semantics"
                     )
                 result[skill_ref] = value
+            return result
+
+    def skill_numeric_mod_semantics(self) -> dict[ArmyLinkRef, dict[str, Any]]:
+        """Return explicit, reviewed numeric-MOD extra maps; never parse Army labels."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.external_id AS skill_ref, r.variant_json "
+                "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = 'skill' AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND l.entity = 'skill' "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id"
+            ).fetchall()
+            result: dict[ArmyLinkRef, dict[str, Any]] = {}
+            for row in rows:
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict):
+                    continue
+                for parameter in variant.get("occurrence_parameters", []):
+                    if parameter.get("kind") != "numeric-mod":
+                        continue
+                    skill_ref = _army_link_ref(row["skill_ref"])
+                    existing = result.get(skill_ref)
+                    if existing is not None and existing != parameter:
+                        raise ValueError(
+                            f"Skill {skill_ref!r} has conflicting numeric-MOD semantics"
+                        )
+                    result[skill_ref] = dict(parameter)
             return result
 
     def catalog_source_variant_semantics(self, entity: str) -> dict[ArmyLinkRef, dict[str, Any]]:

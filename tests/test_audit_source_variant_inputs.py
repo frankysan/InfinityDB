@@ -5,6 +5,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
+from infinity_db.curated import load_curated_directory
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from tools.audit_source_variant_inputs import inventory_source_variants
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -141,6 +145,98 @@ def test_n53_numeric_skill_modifiers_preserve_exact_source_meaning() -> None:
     assert dodge["status"] == "unresolved-occurrence-parameter"
     # The currently supported curated occurrence-parameter contract is
     # distance only: source TEXT values must not auto-promote to a typed MOD.
+
+
+def test_numeric_mod_signatures_require_exact_reviewed_ids_and_values(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Only explicitly mapped source extras become countable variants."""
+    monkeypatch.setattr(
+        RulesDatabase, "skill_numeric_mod_semantics",
+        lambda self: {
+            "mimetism": {
+                "kind": "numeric-mod", "owner": "skill-holder", "target": "opponent",
+                "applies_to": ["bs-attack-requiring-lof", "discover"],
+                "extra_values": [
+                    {"extra_id": 6, "extra_type": "TEXT", "raw_value": "-3", "modifier": -3},
+                    {"extra_id": 7, "extra_type": "TEXT", "raw_value": "-6", "modifier": -6},
+                ],
+            },
+            "dodge": {
+                "kind": "numeric-mod", "owner": "skill-holder", "target": "skill-holder",
+                "applies_to": ["dodge-ph-roll"],
+                "extra_values": [
+                    {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
+                    {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
+                ],
+            },
+        },
+    )
+    skills = {item["id"]: item for item in _inventory()["catalogs"]["skills"]["items"]}
+    mimetism = skills[28]
+    assert mimetism["status"] == "reviewed-numeric-parameter"
+    assert all(entry["reviewed"] for entry in mimetism["extraSignatures"])
+    assert skills[40]["status"] == "unresolved-occurrence-parameter"
+    assert skills[40]["reviewedNumericMod"] is not None
+    assert any(not entry["reviewed"] for entry in skills[40]["extraSignatures"])
+    # The tested mapping cannot accidentally certify unrelated source extras.
+    assert skills[25]["status"] == "unresolved-occurrence-parameter"
+
+
+def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
+    tmp_path: Path,
+) -> None:
+    """The edited curated source, not stale generated rules.db, governs eligibility."""
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        load_curated_directory(ROOT / "data/curated"), output, finalize=False,
+    )
+    rules = RulesDatabase(output)
+    parameters = rules.skill_numeric_mod_semantics()
+    assert set(parameters) == {"mimetism", "berserk", "dodge"}
+    assert {
+        ref: {
+            (value["extra_id"], value["extra_type"], value["raw_value"], value["modifier"])
+            for value in parameters[ref]["extra_values"]
+        }
+        for ref in parameters
+    } == {
+        "mimetism": {(6, "TEXT", "-3", -3), (7, "TEXT", "-6", -6)},
+        "berserk": {(1, "TEXT", "+3", 3), (2, "TEXT", "+6", 6)},
+        "dodge": {(1, "TEXT", "+3", 3), (2, "TEXT", "+6", 6)},
+    }
+    assert parameters["mimetism"]["target"] == "opponent"
+    assert parameters["mimetism"]["applies_to"] == [
+        "bs-attack-requiring-lof", "discover",
+    ]
+    assert parameters["berserk"]["applies_to"] == ["berserk-cc-attack"]
+    assert parameters["dodge"]["applies_to"] == ["dodge-ph-roll"]
+    # Mimetism is fully resolved. Dodge has DISTANCE and other potential
+    # extra signatures: reviewed PH MODs do not certify those combinations.
+    report = inventory_source_variants(
+        ROOT / "data/generated/infinity.db",
+        ROOT / "data/generated/infinity.raw.db", output,
+    )["catalogs"]["skills"]
+    sources = {item["id"]: item for item in report["items"]}
+    assert report["summary"]["statuses"] == {
+        "family-only": 44,
+        "reviewed-distance-parameter": 1,
+        "reviewed-exact-source": 10,
+        "reviewed-numeric-parameter": 2,
+        "unresolved-occurrence-parameter": 39,
+    }
+    assert sources[28]["status"] == "reviewed-numeric-parameter"
+    assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
+    assert sources[24]["reviewedNumericMod"] is not None
+    assert sources[24]["status"] == "reviewed-numeric-parameter"
+    assert sources[40]["status"] == "unresolved-occurrence-parameter"
+    assert any(not s["reviewed"] for s in sources[40]["extraSignatures"])
+    assert sources[25]["status"] == "unresolved-occurrence-parameter"
+    # Existing distance-only projection remains independent of numeric MODs.
+    assert rules.skill_parameter_semantics() == {
+        "super-jump": {"kind": "distance", "positive_sign": "omit"},
+        "forward-deployment": {"kind": "distance", "positive_sign": "force"},
+    }
 
 
 def test_source_inventory_is_deterministic() -> None:

@@ -1014,6 +1014,77 @@ def test_skill_parameter_semantics_are_validated(tmp_path: Path) -> None:
         load_curated_document(path)
 
 
+def test_numeric_mod_occurrence_parameter_schema_is_explicit_and_compatible(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    record = next(item for item in document["records"] if item["kind"] == "skill")
+    record["armyLinks"] = [{"entity": "skill", "id": "example"}]
+    numeric = {
+        "source": "army-extra",
+        "kind": "numeric-mod",
+        "owner": "skill-holder",
+        "target": "opponent",
+        "appliesTo": ["bs-attack-requiring-lof", "discover"],
+        "extraValues": [
+            {"extraId": 6, "extraType": "TEXT", "rawValue": "-3", "modifier": -3},
+            {"extraId": 7, "extraType": "TEXT", "rawValue": "-6", "modifier": -6},
+        ],
+    }
+    distance = {"source": "army-extra", "kind": "distance", "positiveSign": "omit"}
+    record["variantSemantics"] = {
+        "inheritance": "family", "occurrenceParameters": [numeric, distance]
+    }
+    path = tmp_path / "numeric-mod.json"
+
+    def check() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    check()
+    for replacement, message in [
+        ({"owner": "anyone"}, "owner"),
+        ({"target": "both"}, "target"),
+        ({"appliesTo": ["unknown"]}, "appliesTo"),
+        ({"appliesTo": ["discover", "discover"]}, "appliesTo"),
+        ({"target": "skill-holder"}, "target conflicts"),
+        ({"positiveSign": "force"}, "require exactly"),
+        ({"extraValues": []}, "extraValues"),
+        ({"extraValues": [
+            {"extraId": 6, "extraType": "DISTANCE", "rawValue": "-3", "modifier": -3}
+        ]}, "extraType/rawValue"),
+        ({"extraValues": [
+            {"extraId": 6, "extraType": "TEXT", "rawValue": "-3", "modifier": 3}
+        ]}, "extraType/rawValue"),
+        ({"extraValues": [
+            {"extraId": 6, "extraType": "TEXT", "rawValue": "-3", "modifier": -3},
+            {"extraId": 6, "extraType": "TEXT", "rawValue": "-6", "modifier": -6},
+        ]}, "duplicate/invalid extraId"),
+    ]:
+        candidate = deepcopy(numeric)
+        candidate.update(replacement)
+        record["variantSemantics"]["occurrenceParameters"][0] = candidate
+        path.write_text(json.dumps(document), encoding="utf-8")
+        with pytest.raises(ValueError, match=message):
+            load_curated_document(path)
+
+    record["variantSemantics"]["occurrenceParameters"][0] = {
+        "source": "army-extra",
+        "kind": "numeric-mod",
+        "owner": "skill-holder",
+        "target": "skill-holder",
+        "appliesTo": ["dodge-ph-roll"],
+        "extraValues": [
+            {"extraId": 1, "extraType": "TEXT", "rawValue": "+3", "modifier": 3}
+        ],
+    }
+    check()
+    record["variantSemantics"]["occurrenceParameters"].append(deepcopy(distance))
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="duplicate parameter"):
+        load_curated_document(path)
+
+
 def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: Path) -> None:
     document = valid_document()
     document["records"] = [

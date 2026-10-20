@@ -1767,7 +1767,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       applicability and Dodge's distinct situational penalties;
       retain unresolved typed-MOD index status until the grammar supports
       reviewed applicability, target and mixed parameter scopes.
-    - [ ] Reconcile the 41 Skill and 14 Equipment source IDs with
+    - [x] Add validated family-Skill numeric-MOD occurrence semantics:
+      source-bound extra IDs/values, owner, target, and action scopes,
+      with coexisting distance metadata, an independent rules DB
+      query and fail-closed inventory-signature matching. Preserve
+      the legacy distance-only API and test the parser, projections
+      and exact-versus-unknown extra behavior.
+    - [x] Author source-bound Mimetism, Berserk and Dodge numeric-MOD
+      mappings in the N5.3 core collection and check them against a
+      freshly generated rules DB and pinned Army source extras.
+      Mimetism and Berserk are now fully reviewed numeric source
+      variants; the 41 unresolved Skill IDs fall to 39 on rebuild.
+    - [ ] Review and encode Dodge's separate DISTANCE and other
+      unmatched extras before certifying *combined* Dodge variants.
+      Keep conditional -3 PH penalties and Dodge (ARM+3) distinct
+      from its reviewed +3/+6 PH-roll modifiers.
+    - [ ] Reconcile the remaining Skill and Equipment source IDs with
       unresolved occurrence parameters, including mixed TEXT/DISTANCE
       and named variants with extra MODs. Preserve raw signatures
       and exclude unreviewed specific combinations from index counts;

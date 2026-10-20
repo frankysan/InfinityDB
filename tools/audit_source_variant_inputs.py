@@ -29,6 +29,7 @@ def inventory_source_variants(
         "equipment": rules.catalog_source_variant_semantics("equipment"),
     }
     distance_parameters = rules.skill_parameter_semantics()
+    numeric_mods = rules.skill_numeric_mod_semantics()
     report: dict[str, Any] = {"catalogs": {}}
 
     application_uri = application_path.resolve().as_uri() + "?mode=ro"
@@ -96,18 +97,38 @@ def inventory_source_variants(
                     distance_parameters.get(source_id)
                     or (distance_parameters.get(slug) if slug else None)
                 ) if catalog == "skills" else None
+                numeric = (
+                    numeric_mods.get(source_id)
+                    or (numeric_mods.get(slug) if slug else None)
+                ) if catalog == "skills" else None
+                reviewed_values = {
+                    (item["extra_id"], item["extra_type"], item["raw_value"])
+                    for item in numeric["extra_values"]
+                } if numeric else set()
+
+                def reviewed_signature(
+                    items: list[tuple[int, int, str, str]],
+                    allowed_values: set[tuple[int, str, str]] = reviewed_values,
+                    distance_allowed: bool = distance is not None,
+                ) -> bool:
+                    return bool(items) and all(
+                        (extra_id, extra_type, extra_name) in allowed_values
+                        or (extra_type == "DISTANCE" and distance_allowed)
+                        for _position, extra_id, extra_type, extra_name in items
+                    )
+
+                unresolved = (
+                    bool(raw_values)
+                    or any(not reviewed_signature(items) for items in extras.values() if items)
+                )
                 if source is None:
                     status = "not-in-published-catalog"
                 elif not extras:
                     status = "catalog-only"
                 elif extra_types or raw_values:
-                    if (
-                        catalog == "skills"
-                        and source_variant is None
-                        and distance is not None
-                        and extra_types == ["DISTANCE"]
-                        and not raw_values
-                    ):
+                    if not unresolved and numeric is not None:
+                        status = "reviewed-numeric-parameter"
+                    elif not unresolved and distance is not None:
                         status = "reviewed-distance-parameter"
                     else:
                         status = "unresolved-occurrence-parameter"
@@ -124,11 +145,13 @@ def inventory_source_variants(
                         "status": status,
                         "reviewedVariant": source_variant,
                         "reviewedDistance": distance,
+                        "reviewedNumericMod": numeric,
                         "occurrences": len(extras),
                         "extraTypes": extra_types,
                         "extraSignatures": [
                             {
                                 "extras": [list(v[1:]) for v in signature],
+                                "reviewed": reviewed_signature(list(signature)),
                                 "count": sum(
                                     tuple(items) == signature
                                     for items in extras.values()

@@ -44,7 +44,11 @@ ARMY_LINK_SLUG_DOMAINS = {
 CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
 VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
 VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
-VARIANT_PARAMETER_KINDS = frozenset({"distance"})
+VARIANT_PARAMETER_KINDS = frozenset({"distance", "numeric-mod"})
+VARIANT_MOD_TARGETS = frozenset({"skill-holder", "opponent"})
+VARIANT_MOD_APPLICATIONS = frozenset(
+    {"bs-attack-requiring-lof", "discover", "berserk-cc-attack", "dodge-ph-roll"}
+)
 SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
 
@@ -85,17 +89,90 @@ def _validate_variant_semantics(
                 f"{parameter_context}: unsupported parameter kind {kind!r}; "
                 f"expected one of {sorted(VARIANT_PARAMETER_KINDS)}"
             )
-        expected_fields = {"source", "kind", "positiveSign"}
-        if set(parameter) != expected_fields:
-            raise ValueError(
-                f"{parameter_context}: distance parameters must contain only "
-                "'source', 'kind', and 'positiveSign'"
-            )
-        if parameter["positiveSign"] not in {"preserve", "omit", "force"}:
-            raise ValueError(
-                f"{parameter_context}: 'positiveSign' must be one of "
-                "'preserve', 'omit', or 'force'"
-            )
+        if kind == "distance":
+            expected_fields = {"source", "kind", "positiveSign"}
+            if set(parameter) != expected_fields:
+                raise ValueError(
+                    f"{parameter_context}: distance parameters must contain only "
+                    "'source', 'kind', and 'positiveSign'"
+                )
+            if parameter["positiveSign"] not in {"preserve", "omit", "force"}:
+                raise ValueError(
+                    f"{parameter_context}: 'positiveSign' must be one of "
+                    "'preserve', 'omit', or 'force'"
+                )
+        else:
+            if (
+                inheritance != "family"
+                or len(army_links) != 1
+                or not isinstance(army_links[0], dict)
+                or army_links[0].get("entity") != "skill"
+            ):
+                raise ValueError(
+                    f"{parameter_context}: numeric-mod currently requires a family Skill link"
+                )
+            expected_fields = {
+                "source", "kind", "owner", "target", "appliesTo", "extraValues"
+            }
+            if set(parameter) != expected_fields:
+                raise ValueError(
+                    f"{parameter_context}: numeric-mod parameters require exactly "
+                    f"{sorted(expected_fields)}"
+                )
+            if parameter["owner"] != "skill-holder":
+                raise ValueError(f"{parameter_context}: owner must be 'skill-holder'")
+            if parameter["target"] not in VARIANT_MOD_TARGETS:
+                raise ValueError(
+                    f"{parameter_context}: invalid numeric-mod target"
+                )
+            applies_to = parameter["appliesTo"]
+            if (
+                not isinstance(applies_to, list)
+                or not applies_to
+                or any(
+                    not isinstance(scope, str) or scope not in VARIANT_MOD_APPLICATIONS
+                    for scope in applies_to
+                )
+                or len(set(applies_to)) != len(applies_to)
+            ):
+                raise ValueError(f"{parameter_context}: invalid appliesTo scopes")
+            if (
+                parameter["target"] == "opponent"
+                and set(applies_to) != {"bs-attack-requiring-lof", "discover"}
+            ) or (
+                parameter["target"] == "skill-holder"
+                and not set(applies_to) <= {"berserk-cc-attack", "dodge-ph-roll"}
+            ):
+                raise ValueError(
+                    f"{parameter_context}: target conflicts with appliesTo scope"
+                )
+            values = parameter["extraValues"]
+            if not isinstance(values, list) or not values:
+                raise ValueError(f"{parameter_context}: extraValues must be nonempty")
+            seen_extra_ids: set[int] = set()
+            for entry in values:
+                if not isinstance(entry, dict) or set(entry) != {
+                    "extraId", "extraType", "rawValue", "modifier"
+                }:
+                    raise ValueError(f"{parameter_context}: invalid extraValues entry")
+                extra_id, modifier = entry["extraId"], entry["modifier"]
+                if type(extra_id) is not int or extra_id < 1 or extra_id in seen_extra_ids:
+                    raise ValueError(f"{parameter_context}: duplicate/invalid extraId")
+                seen_extra_ids.add(extra_id)
+                if type(modifier) is not int or not (-12 <= modifier <= 12) or modifier == 0:
+                    raise ValueError(f"{parameter_context}: invalid numeric modifier")
+                if (
+                    entry["extraType"] != "TEXT"
+                    or entry["rawValue"] != f"{modifier:+d}"
+                ):
+                    raise ValueError(
+                        f"{parameter_context}: extraType/rawValue must match modifier"
+                    )
+                if (
+                    (parameter["target"] == "opponent" and modifier >= 0)
+                    or (parameter["target"] == "skill-holder" and modifier <= 0)
+                ):
+                    raise ValueError(f"{parameter_context}: modifier sign conflicts with target")
         key = (source, kind)
         if key in seen_parameters:
             raise ValueError(f"{parameter_context}: duplicate parameter {key!r}")

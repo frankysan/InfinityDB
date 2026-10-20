@@ -11936,6 +11936,11 @@
                 {
                     "sourceId": "wiki-mimetism-oldid-3102",
                     "heading": "Mimetism"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 102,
+                    "heading": "Mimetism"
                 }
             ],
             "review": {
@@ -11943,7 +11948,33 @@
                 "reviewedOn": "2026-09-23"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "numeric-mod",
+                        "owner": "skill-holder",
+                        "target": "opponent",
+                        "appliesTo": [
+                            "bs-attack-requiring-lof",
+                            "discover"
+                        ],
+                        "extraValues": [
+                            {
+                                "extraId": 6,
+                                "extraType": "TEXT",
+                                "rawValue": "-3",
+                                "modifier": -3
+                            },
+                            {
+                                "extraId": 7,
+                                "extraType": "TEXT",
+                                "rawValue": "-6",
+                                "modifier": -6
+                            }
+                        ]
+                    }
+                ]
             },
             "relations": [
                 {
@@ -13169,7 +13200,32 @@
                 "reviewedOn": "2026-09-23"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "numeric-mod",
+                        "owner": "skill-holder",
+                        "target": "skill-holder",
+                        "appliesTo": [
+                            "dodge-ph-roll"
+                        ],
+                        "extraValues": [
+                            {
+                                "extraId": 1,
+                                "extraType": "TEXT",
+                                "rawValue": "+3",
+                                "modifier": 3
+                            },
+                            {
+                                "extraId": 2,
+                                "extraType": "TEXT",
+                                "rawValue": "+6",
+                                "modifier": 6
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {
@@ -16702,6 +16758,11 @@
                 {
                     "sourceId": "wiki-berserk-oldid-3236",
                     "heading": "Berserk"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 86,
+                    "heading": "Berserk"
                 }
             ],
             "review": {
@@ -16719,7 +16780,32 @@
                 }
             ],
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "numeric-mod",
+                        "owner": "skill-holder",
+                        "target": "skill-holder",
+                        "appliesTo": [
+                            "berserk-cc-attack"
+                        ],
+                        "extraValues": [
+                            {
+                                "extraId": 1,
+                                "extraType": "TEXT",
+                                "rawValue": "+3",
+                                "modifier": 3
+                            },
+                            {
+                                "extraId": 2,
+                                "extraType": "TEXT",
+                                "rawValue": "+6",
+                                "modifier": 6
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

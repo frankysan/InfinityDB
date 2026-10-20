@@ -493,16 +493,37 @@ seven `TEXT: +6` relationships (`extra_id=2`) and separate
 Dodge's own situational -3 PH conditions, and successful Dodge
 movement (p. 79) must remain separate.
 
-`tests/test_audit_source_variant_inputs.py` now pins these
+`tests/test_audit_source_variant_inputs.py` pins these
 source-signature facts and guards against conflating the three
-rules. This is **PDF-level semantic evidence**, not a published
-typed-MOD occurrence grammar: the current
-`variantSemantics.occurrenceParameters` contract supports only
-distance. The audit therefore intentionally keeps all three
-sources classified as `unresolved-occurrence-parameter` for
-variant-specific usage-index purposes. Adding reviewed typed
-MODs, including applicability/target/scope and coexisting
-distance parameters, remains an explicit follow-up.
+rules. The curated grammar now **accepts explicit reviewed**
+`variantSemantics.occurrenceParameters` `numeric-mod` entries
+alongside the existing distance type. A numeric-MOD entry binds
+source-extra IDs, exact `TEXT` values and signed numeric values
+to a specific Skill family, modifier owner, target and applicable
+actions; see `data/curated/README.md` for the validated grammar.
+`RulesDatabase.skill_numeric_mod_semantics()` exposes this typed
+metadata separately from the existing distance-only display API.
+The inventory verifies *every* extra in a combined occurrence
+before classifying it as reviewed, so an unreviewed Dodge
+distance remains unresolved even when its PH MOD is mapped.
+
+**The curated N5.3 collection now declares reviewed numeric-MOD
+mappings for Mimetism, Berserk and Dodge**, pinned to their exact
+Army `TEXT` extra IDs/values and the distinct N5.3 applicability
+described above (Mimetism and Berserk also cite PDF pp. 102 and
+86 respectively). The integration regression exports a fresh
+`rules.db` from this source, then verifies its direct Army
+occurrence signatures. With the newly built rules database,
+Mimetism and Berserk are fully `reviewed-numeric-parameter`;
+the Skill inventory has **2 reviewed-numeric** and **39 unresolved**
+source IDs rather than the previous 41 unresolved. Dodge remains
+`unresolved-occurrence-parameter` *as a source ID*, because its
+`DISTANCE` and/or other unmatched extras are not certified by
+the positive PH-roll MOD map alone. The existing pinned generated
+`data/generated/rules.db` has not been overwritten; its baseline
+inventory counts reflect the older build until normal regeneration.
+The schema does not permit arbitrary text-to-number interpretation,
+unreviewed compound parameter signatures, or game simulation.
 
 Do **not** parse a variant from a display string, strip punctuation, infer a
 parameter from a shared family name, or count an unresolved variant as a

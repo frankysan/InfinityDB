@@ -844,14 +844,54 @@ published reference routes. Other source profiles and facts remain unchanged.
 Supplements inherit Army routing from their definition and therefore do not declare
 their own `armyLinks`.
 
-Rule-derived occurrence-parameter display behavior lives under
-`variantSemantics.occurrenceParameters`. The currently standardized parameter is an
-Army extra with `kind: "distance"` and `positiveSign: "preserve|omit|force"`. This
-does not decide whether an Army extra is a distance: imported
-`extras.type == "DISTANCE"` remains authoritative for that source semantic. Reviewed
-exact-source Attribute replacements are kept on `sourceVariant`, not as generic
-occurrence parameters. Other MOD/value forms remain opaque until their semantics are
-reviewed.
+Reviewed occurrence-parameter metadata lives under
+`variantSemantics.occurrenceParameters`. A distance parameter uses
+`{"source":"army-extra","kind":"distance","positiveSign":"preserve|omit|force"}`.
+The imported `extras.type == "DISTANCE"` remains authoritative for distance
+classification; display formatting continues to use the distance-only
+`skill_parameter_semantics()` query.
+
+An opt-in, source-bound numeric Skill modifier uses the following **non-executable**
+contract (not a general parser for `TEXT` extras):
+
+```json
+{
+  "source": "army-extra",
+  "kind": "numeric-mod",
+  "owner": "skill-holder",
+  "target": "opponent",
+  "appliesTo": ["bs-attack-requiring-lof", "discover"],
+  "extraValues": [
+    {"extraId": 6, "extraType": "TEXT", "rawValue": "-3", "modifier": -3}
+  ]
+}
+```
+
+Numeric modifiers currently require a family Skill Army link and a reviewed
+mapping of every recognized `extraId`, exact `extraType` and `rawValue`.
+Allowed targets are `skill-holder` and `opponent`; allowed applications
+are `bs-attack-requiring-lof`, `discover`, `berserk-cc-attack`, and
+`dodge-ph-roll`. An opponent-target modifier must apply to the two
+Mimetism scopes; a skill-holder modifier may apply to a Berserk CC Attack
+or Dodge PH Roll. Each mapped source modifier is a nonzero signed integer
+within -12 to +12. Unknown extra signatures, other gameplay scopes and
+unreviewed combinations stay unresolved. A single Skill family can specify
+both numeric-MOD and distance entries; the index must verify every
+co-occurring extra before calling a combined variant reviewed. Generic
+situational Dodge penalties and Dodge (ARM+3) are **not** equivalent to a
+Dodge PH-roll occurrence MOD. The new query
+`RulesDatabase.skill_numeric_mod_semantics()` preserves the full curated
+typed map without exposing it through the legacy distance-only browser
+projection. Schema support alone does not certify any current Army
+occurrence: the source-inventory audit must match the current reviewed
+extra IDs, types and values, and reject unmapped co-occurring extras.
+The N5.3 core collection currently reviews Mimetism (-3/-6),
+Berserk (+3/+6) and Dodge PH-roll (+3/+6), but Dodge's additional
+distance/unmatched extras remain separate and unresolved until reviewed.
+
+Reviewed exact-source Attribute replacements are kept on
+`sourceVariant`, not as generic occurrence parameters. Other MOD/value
+forms remain opaque until their semantics are reviewed.
 
 Skill and State records always carry a `labelIds` array, but it may be empty when the reviewed
 rule does not assign any maintained rules Label. Do not invent a Label merely to satisfy
