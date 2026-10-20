@@ -1479,6 +1479,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Reuse current scoped definitions/supplements, then identify any missing applicability
       validation or presentation contract using one concept shared by core and scenario material.
       Prove that scope is visible and unrelated scenario/season overlays do not leak into core help.
+      - [x] Verify published Core/ITS scenario detail APIs against the dated FAQ
+        query boundary: the Ancillary FAQ appears for Annihilation only when its
+        explicit scenario context is provided; Domination, Supplies, Firefight,
+        and ITS 18 Battleground do not inherit it. Confirm scenario definitions
+        remain unchanged and the client sends the selected scenario/season
+        context. This is API/script validation, not final browser acceptance.
+      - [ ] Review remaining shared scenario concepts, collection-specific
+        supplements and normal browser presentation for the complete 1.0 scope.
   - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
     annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
     and `Request Reinforcements`, link the capability they create to the annex

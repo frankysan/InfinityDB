@@ -1015,3 +1015,68 @@ def test_battleground_its18_is_never_returned_from_core_or_another_season(
         assert [item["slug"] for item in json.loads(body)["items"]] == [
             "annihilation", "domination", "supplies", "firefight",
         ]
+
+
+@pytest.mark.parametrize(
+    ("slug", "collection", "revision", "expected_rulings"),
+    [
+        ("annihilation", "n5-core", "5.3", ["faq-ruling:undeployed-ancillary-not-killed"]),
+        ("domination", "n5-core", "5.3", []),
+        ("supplies", "n5-core", "5.3", []),
+        ("firefight", "n5-core", "5.3", []),
+        ("battleground", "its-18", "2026.09.01", []),
+    ],
+)
+def test_published_scenarios_keep_faq_applicability_separate_from_core_rules(
+    scenario_app: Application,
+    slug: str,
+    collection: str,
+    revision: str,
+    expected_rulings: list[str],
+) -> None:
+    detail_query = f"army_points=300&collection={collection}&revision={revision}"
+    status, _, body = request(
+        scenario_app, f"/api/scenarios/{slug}", query=detail_query,
+    )
+    assert status == 200
+    detail = json.loads(body)
+    assert detail["publication"]["collection_id"] == collection
+    assert detail["publication"]["revision"] == revision
+
+    faq_query = (
+        f"topic_id=scenario:{slug}&scenario_id=scenario:{slug}"
+        "&rules_revision=5.3&as_of=2026-09-01"
+    )
+    if collection != "n5-core":
+        faq_query += f"&season_id={collection}&season_revision={revision}"
+    status, _, body = request(scenario_app, "/api/faq-rulings", query=faq_query)
+    assert status == 200
+    faq = json.loads(body)
+    assert [entry["id"] for entry in faq["items"]] == expected_rulings
+
+    # FAQ applicability must not rewrite source-scoped scenario definitions.
+    assert "faq_rulings" not in detail
+    for ruling in faq["items"]:
+        assert ruling["matched_applicability"]
+        assert any(
+            f"scenario:{slug}" in match.get("scenarioIds", [])
+            for match in ruling["matched_applicability"]
+        )
+
+
+def test_scenario_faq_requires_explicit_matching_context_and_client_supplies_it(
+    scenario_app: Application,
+) -> None:
+    base = "topic_id=scenario:annihilation&rules_revision=5.3&as_of=2026-09-01"
+    for extra in ("", "&scenario_id=scenario:domination"):
+        status, _, body = request(
+            scenario_app, "/api/faq-rulings", query=base + extra,
+        )
+        assert status == 200
+        assert json.loads(body)["items"] == []
+
+    status, _, javascript = request(scenario_app, "/static/scenario.js")
+    assert status == 200
+    assert b"fetchReviewedFaqRulings(`scenario:${slug}`" in javascript
+    assert b"scenarioId: `scenario:${slug}`" in javascript
+    assert b"seasonRevision: selectedPublication.collection" in javascript

@@ -232,6 +232,10 @@ API regressions under `tests/test_weaponry_catalog_api.py`.
 These tests must not replace the source reconciliation tasks:
 the open REA dependencies remain listed in `docs/TODO.md`.
 
+## Scenario-specific FAQ publication scope
+
+A maintained Scenario API regression checks the Annihilation-only FAQ against Core and ITS missions. The base Scenario response stays separate from dated FAQ rulings, and the served client supplies explicit scenario and season context. This does not replace rules-source adjudication or live browser acceptance.
+
 ## Source Unit notes and composite-option publication
 
 `tests/test_unit_source_options_notes.py` compares **all** source-attributed

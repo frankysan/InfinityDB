@@ -194,6 +194,7 @@ Prefer targeted fixes rather than merging these.
   - [x] Add regression coverage for normal-route disclosure of a bounded
     selection of unresolved official source conflicts, preserving the
     adjudication and live-browser gates separately.
+  - [x] Add cross-surface Scenario/FAQ scope tests across the four Core missions and the ITS Battleground pilot; correct the published FAQ ruling count.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -502,3 +503,5 @@ Prefer targeted fixes rather than merging these.
   **0 errors, 0 warnings**; `docs` — Markdownlint
   **32 files, 0 issues**, offline links **30 files, 0 errors**.
   No full-suite or live-browser release-candidate acceptance was run.
+- **Closeout pass 11, 2026-10-20:** Added six Scenario/FAQ API scope tests for four Core missions and ITS Battleground. Annihilation's Ancillary FAQ requires explicit matching context; unrelated scenarios receive no overlay. Base scenario definitions and client collection/season context remain separate. Corrected the current FAQ publication count to 28 (9 v0.1-origin, 19 carried forward). Full source adjudication and live browser acceptance remain open.
+- **Validation:** Scenario API 78 passed; FAQ 60 passed; Ruff and Pyright passed; docs 32/0 and links 30/0. Full suite and Chromium not run.

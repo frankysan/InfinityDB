@@ -901,8 +901,8 @@ that projection. The API requires `topic_id`, `rules_revision`, and
 `as_of`, with optional paired `season_id`/`season_revision` and
 `scenario_id`; it never defaults to the newest publication.
 
-Twenty-seven reviewed FAQ entries are now published from
-`data/curated/rules/n5-faq-v0.1.json`: eight first recorded in v0.1 and
+Twenty-eight reviewed FAQ entries are now published from
+`data/curated/rules/n5-faq-v0.1.json`: nine first recorded in v0.1 and
 nineteen **carried forward from v0.0**. Each carried ruling retains original
 English v0.0 source/version/page separately from the currently selected
 English v0.1 page, and a corroborating Spanish v0.1 citation. The
