@@ -369,6 +369,97 @@ Exact structural equality is useful evidence but does not by itself justify sema
 source context says two records mean different things. Conversely, equivalent payloads may be shared
 when the contextual relationships remain explicit.
 
+### Rule-variant usage index — accepted design direction (not implemented)
+
+**Project domains:** Data processing, Web backend, Web frontend
+
+The planned cross-Army index answers **which Units can field a reviewed
+Skill/Equipment variant**. It is a read-only projection of existing identity,
+payload and occurrence relationships, not a second source of Skill definitions,
+a loadout builder, or a record of randomized game results. The index is not
+generated or served yet; see `docs/TODO.md`.
+
+**Rule identity and variant identity.** The primary grouping key is the
+published canonical rules identity (for example `skill:martial-arts`),
+resolved through reviewed source-to-application catalog membership and the
+corresponding rules reference. A variant key additionally records explicitly
+reviewed, typed differences: Level, MOD, named parameter, and any applicable
+source-scoped restrictions. The typed signature is deterministic and
+source-bound; distinct modifiers such as `+1 SD` and `+1B` cannot be merged.
+A shared family does not imply that all of its variants are equivalent. Retain
+the source catalog ID, raw variant/extras and rule citations as provenance.
+Do **not** parse a variant from a display string, strip punctuation, infer a
+parameter from a shared family name, or count an unresolved variant as a
+verified specific one. Missing/ambiguous variant semantics remain explicitly
+unresolved and are excluded from **variant-specific** totals, while their
+reviewed family membership may still be reported separately.
+
+**Occurrence provenance.** Resolve an actual Army membership through
+`application_army_sources`, `army_units`, and
+`logical_unit_sources`; only a concrete list occurrence is evidence that the
+Unit can be selected in that application Army. Keep the original
+`(source_army_id, source_unit_id)` and `availability_kind`. For each
+direct source Skill/Equipment relationship retain its owning layer and full
+source key:
+
+- profile: `(army_id, unit_id, group_id, profile_id)`;
+- loadout: `(army_id, unit_id, group_id, option_id)`;
+- Unit-wide option: `(unit_id, option_id)`, attributed to an application Army
+  **only** where actual list membership and compatible context establish it.
+
+Preserve the source relationship's `occurrence_id`, position, quantity,
+extras and raw value for evidence, with the appropriate
+`profile_payload_occurrences` or `loadout_payload_occurrences` join.
+The reusable payload's item position identifies its relationship *within*
+that payload. Neither the item position, numeric payload ID nor source
+`occurrence_id` is a portable cross-snapshot semantic identifier. Use the
+existing logical-Unit-scoped payload hash to identify equivalent payload
+content **within the pinned source/build context**, while retaining distinct
+Army/profile/group/option paths and contextual AVA, Points and SWC.
+
+**Counting policy.** Publish clearly named measures rather than one
+unspecified “occurrences” count:
+
+- **Unique Units (global):** count distinct `logical_unit_id` for the exact
+  reviewed rule/variant, across all eligible concrete Armies.
+- **Unique Units per Army:** count distinct
+  `(application_army_id, logical_unit_id)` for that rule/variant. A Unit
+  legitimately available in two Armies counts once **in each Army**, but
+  only once in the global count.
+- **Distinct profile/loadout contexts:** count the corresponding
+  `(application_army_id, logical_unit_id, owner_kind, payload_identity,
+  exact_variant_signature)` once within each owner kind; report profile and
+  loadout counts separately. Multiple rows/positions or source
+  representations pointing to the same semantic payload do not inflate
+  these totals. Each context still exposes *all* original source paths,
+  group IDs and option-specific AVA/Points/SWC for drilldown.
+- **Source relationship rows:** a separate provenance/debug measure, never
+  the player-facing Unit denominator. Multiple same-variant rows may be
+  preserved here even when they yield one Unit/context membership.
+
+Variant membership is formed as a **set**, not a sum across profile Skills,
+loadout Skills, Army-specific copies, or source IDs merged into one canonical
+catalog family. Profile and loadout scopes remain distinct because a
+loadout-only variant does not apply to every loadout, and Unit-wide options
+are not implicitly assigned to every profile. Includes and Peripherals
+require separately validated, explicitly labelled inheritance/relationship
+paths; do not expand or multiply them into direct usage. Metadata-only
+catalog definitions, chart outcomes available only after a Booty or
+MetaChemistry roll, disabled/unavailable alternatives without concrete
+membership, and broader declared faction membership alone are **not**
+direct occurrences. An included target must not be silently promoted to a
+selectable standalone option.
+
+The generated index must retain pinned Army snapshot/build provenance and
+rules-source/revision provenance. A source update, unresolved application
+catalog mapping, contradictory variant parameter or unsupported relationship
+shape must fail closed or remain flagged, not silently change totals. Public
+links must resolve the canonical rule/variant and the actual Unit, Army and
+compatible profile/loadout context; identifiers in this section describe
+join semantics, not new public routes. Validate duplicate-source, reused
+payload, repeated-row, cross-Army, shared-family/different-Level,
+profile-versus-loadout and unresolved-variant fixtures before publishing.
+
 ### Application catalog identities and slugs
 
 Skills, Equipment, Weapons, and other application domains may group multiple source IDs/labels into

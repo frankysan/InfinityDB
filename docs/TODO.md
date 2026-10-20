@@ -1738,9 +1738,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Define the occurrence key and counting policy before aggregation so shared payloads,
-      duplicate source Unit representations, and Army-specific variants do not inflate totals or
-      lose context. Link results to the applicable Unit/profile/loadout and exact rule variant.
+    - [x] Define the source occurrence keys, typed variant identity, and separate
+      global/per-Army Unit, payload-context and raw-source counts in
+      `docs/data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented`.
+      Reused payloads and duplicate source Unit representations must not
+      inflate Unit totals; retain every Army/group/profile/loadout path.
+      No database/API index is implemented by this contract alone.
+    - [ ] Reconcile the exact Level/MOD/parameter variants against pinned
+      reviewed rules and actual Army source extras; fail closed when family
+      membership is known but a specific variant cannot be verified.
+    - [ ] Materialize the read-only index and public context links, then test
+      duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
+      included/Peripheral, and ambiguous-variant cases before publication.
   - [ ] Model the finite V5.3 Restrictions Chart as explicit cross-domain
     relationships (Troop Type/Training/Equipment/Skill -> restricted action or
     Lieutenant eligibility) and expose it as contextual help/generated reference.
