@@ -1218,6 +1218,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       validation, numeric/slug lookup, standalone weapon rule reference
       and zero Unit usage. Other unused historical metadata remains unpublished;
       a comprehensive metadata inventory is not a 1.0 blocker.
+    - [x] Protect the current public disclosure of unresolved
+      Armed Turret Silhouette, Dodge (ARM+3), Special Dice and
+      Fireteam Level 3 printed-source conflicts with maintained
+      route/API/citation/source-note regression checks. These
+      validate player-facing publication, not external errata,
+      final browser acceptance or disputed gameplay adjudication.
     - [ ] **Cross-source applicability:** Resolve material source
       conflicts and FAQ scope before dependent curation. Use the
       [source manifest](rules-explanation-audit-1.0-sources.md) and

@@ -191,6 +191,9 @@ Prefer targeted fixes rather than merging these.
   - [x] Promote source Unit notes and composite Unit options to maintained
     source-to-API parity tests, preserving source contexts and exact
     included-loadout relationships while leaving browser acceptance separate.
+  - [x] Add regression coverage for normal-route disclosure of a bounded
+    selection of unresolved official source conflicts, preserving the
+    adjudication and live-browser gates separately.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -478,3 +481,24 @@ Prefer targeted fixes rather than merging these.
   `docs` — Markdownlint **32 files, 0 issues**, and offline
   Markdown links **30 files, 0 errors**. No full project suite,
   new Chromium run, or final raw-source gate was performed.
+- **Closeout pass 10, 2026-10-20:** Added maintained web regression
+  `tests/test_source_conflict_publication.py` and registered it
+  under the web section. The five tests cover the published
+  Armed Turret S1/S2, Dodge ARM+3, Special Dice Spanish reminder
+  and Morat Fireteam Level 3 printed-source conflicts: normal
+  API/page routes, preserved unresolved source notes, matching
+  structured text-token rows, English/Spanish citations, and
+  retained client source-note rendering paths. This protects
+  the **disclosure of disputes**, not a source-precedence ruling
+  or live Chromium acceptance. Flash Pulse and the separately
+  mode-scoped Kobra CC dispute already have dedicated weapon
+  API regressions; no duplicate rules decision or curated edit.
+  Updated `docs/testing.md` and `docs/TODO.md`, leaving
+  external REA errata and final 1.0 completeness open.
+- **Validation:** `tests/test_source_conflict_publication.py`
+  — **5 passed**; `tests/test_test_sections.py` —
+  **2 passed**; existing `tests/test_weaponry_catalog_api.py` —
+  **185 passed**; Ruff on the new module — PASS; Pyright —
+  **0 errors, 0 warnings**; `docs` — Markdownlint
+  **32 files, 0 issues**, offline links **30 files, 0 errors**.
+  No full-suite or live-browser release-candidate acceptance was run.

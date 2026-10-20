@@ -81,6 +81,7 @@
         "test_non_skill_army_presentation",
         "test_unit_source_options_notes",
         "test_support_weapon_deployable_references",
+        "test_source_conflict_publication",
         "test_release_notes",
         "test_runtime_import_boundary",
         "test_scenario_api",

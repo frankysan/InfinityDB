@@ -210,6 +210,28 @@ development checkout but does **not** carry a release-candidate source
 hash or certify a future build. Rerun it against the actual candidate
 before final 1.0 browser acceptance.
 
+## Unresolved N5.3 source-conflict publication
+
+`tests/test_source_conflict_publication.py` protects the **published
+player-facing disclosure boundary** for four reviewed but still
+externally unresolved N5.3 disputes: Armed Turret Silhouette S1/S2,
+Dodge (ARM+3) PDF versus Wiki wording, the Special Dice/Fireteam
+Spanish reminder, and the separate printed Morat Fireteam Level 3
+example. The regression checks normal API and page routes for
+Armed Turret, Dodge, Special Dice and Fireteams, retaining the
+reviewed source notes, structured text tokens and both official
+N5.3 language-edition citations. It also checks the maintained
+browser scripts still consume source notes through the normal
+player-facing renderer.
+
+This is **tracked-publication/API and served-script validation**,
+not fresh Chromium DOM acceptance or an official correction.
+Kobra Pistol's distinct CC-mode Anti-materiel dispute and Flash
+Pulse's Spanish Wiki conflict have existing mode-scoped/weapon
+API regressions under `tests/test_weaponry_catalog_api.py`.
+These tests must not replace the source reconciliation tasks:
+the open REA dependencies remain listed in `docs/TODO.md`.
+
 ## Source Unit notes and composite-option publication
 
 `tests/test_unit_source_options_notes.py` compares **all** source-attributed
