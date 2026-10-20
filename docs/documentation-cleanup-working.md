@@ -173,6 +173,9 @@ Prefer targeted fixes rather than merging these.
     collection and executable catalog/API contracts: four N5.3 Core missions
     plus the current ITS Season 18 Battleground pilot. Correct outdated
     core-only statements without widening mandatory 1.0 scope.
+  - [x] Distinguish published FAQ v0.1 review and API functionality from
+    remaining FAQ source/applicability review; separate in-scope N5 reference
+    completeness from optional full ITS season/historical publication.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -331,3 +334,21 @@ Prefer targeted fixes rather than merging these.
   `docs` — Markdownlint **32 files, 0 issues** and offline links
   **30 files, 0 errors**. The complete 1.0 source-to-browser and
   live Chromium release audits remain separate open work.
+- **Closeout pass 4, 2026-10-20:** Reconciled two contradictory FAQ
+  publication statements against `n5-faq-v0.1.json` (current curated
+  FAQ collection, 27 reviewed rulings), `faq_rulings.py`, and
+  `RulesDatabase.faq_rulings_for_topic`. `docs/data-model.md` no longer
+  labels the entire FAQ layer "not yet published"; it retains the
+  limitations of the explicit date/rules-revision context API.
+  `docs/TODO.md` now marks registration of the FAQ collection as
+  complete, while preserving a separate unchecked source-hash,
+  remaining-FAQ coverage and core/ITS applicability audit.
+  Corrected the generic "future 1.0 work" statement to explicitly
+  exclude a full ITS season/history library from the mandatory 1.0
+  gate. Existing separate ITS Battleground publication is unaffected.
+- **Validation:** `tests/test_faq_ruling_references.py` — **60 passed**;
+  `tests/test_curated.py` — **227 passed**;
+  `tests/test_rules_database.py` — **136 passed**;
+  `docs` — Markdownlint **32 files, 0 issues** and offline links
+  **30 files, 0 errors**. No application code or curated data changed;
+  full suite, browser and external source-content audit remain open.

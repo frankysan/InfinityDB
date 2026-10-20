@@ -855,11 +855,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 90 selected clauses and seventeen
       typed edges are not an exhaustive N5.3 pp. 68-74 inventory.
-    - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
-      reconcile core versus ITS-season applicability before curating rulings. Its
-      content hash and the core PDF/history ZIP hashes are available in the local
-      source-evidence report; the separately versioned Reinforcements Extra remains
+    - [x] Register FAQ v0.1 as the separate current
+      `n5-faq-v0.1` curated collection, with source identities, explicit
+      applicability and reviewed, independently cited FAQ rulings.
+      The currently published subset contains 27 records, rather than
+      treating the document as an unimplemented authoring pilot.
+    - [ ] Complete the remaining FAQ v0.1 source-hash/coverage and
+      applicability review against the final pinned inputs. Distinguish
+      core-relevant answers from ITS-season-only scope before adding
+      further rulings; keep locally available FAQ/core PDF/history ZIP
+      hash evidence separately versioned. The Reinforcements Extra remains
       unavailable and must not be inferred from the related Wiki page.
+      Do not make full ITS-season publication a 1.0 requirement.
   - [ ] Reconcile `data/curated/rules-interactions/reviews.json` and `catalog-scope.json` with the
     pinned input set. Historical review/defer release labels are evidence, not the active roadmap:
     reassess pending items against the 1.0 gate and record explicit scope decisions rather than

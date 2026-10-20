@@ -800,7 +800,7 @@ A semantic record has a stable typed ID such as `skill:move`, `state:targeted`, 
   composition; and
 - applicability/review/source provenance remains explicit.
 
-### Dated FAQ/errata layer (authoring foundation, not yet published)
+### Dated FAQ/errata layer (published reviewed subset)
 
 FAQ rulings use independent `faq-ruling:*` semantic identities. The base
 Rule/Skill/State definition is not rewritten when a later FAQ clarifies it.
@@ -874,9 +874,14 @@ a separately established document publication date. The divergent
 Fireteam-type-after-member-loss examples in English and Spanish FAQ
 v0.1 remain pending rather than being silently reconciled.
 
-Historical collection replay, full ITS season-revision publication
-verification, remaining FAQ inventory coverage, and dynamic date/season
-selection in the browser remain future 1.0 work.
+Historical FAQ collection replay, remaining FAQ inventory coverage,
+and user-selectable date/season applicability in the browser remain
+unfinished. Assess their 1.0 priority against material gaps in the
+supported current-reference experience; the existing explicit-context
+FAQ API is not equivalent to a general historical publication browser.
+Full ITS season-revision coverage and historical mission libraries are
+outside the 1.0 completeness gate. The separately published Season 18
+Battleground pilot does not make the remaining ITS catalog a requirement.
 The generic supplement mechanism must not auto-attach a ruling to
 a core topic by name or by a newer collection date.
 
