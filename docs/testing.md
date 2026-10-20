@@ -757,6 +757,48 @@ The previous 9/9 browser acceptance does not cover this revision.
 Independent final-pinned N5.3 variant semantics and footnotes remain
 open for 1.0; no random-result selection or game-state engine exists.
 
+## 1.0 independent N5.3 Wiki chart-value reconciliation
+
+**Added 2026-10-20.** Earlier structured Skill chart tests only
+proved generated Army storage-to-API-to-browser parity. The new
+`test_current_army_charts_match_reviewed_n5_wiki_reference_rows`
+independently pins the complete published values against three
+official N5.3 Wiki charts: **16 Booty rows**, **12 MetaChemistry
+rows** and **5 Martial Arts levels**. This guards against
+source-to-source drift that storage/API parity would not detect.
+A companion regression requires all three served Skill details to
+publish their canonical reviewed rule record and nonempty source
+citations alongside the corresponding chart. Reference pages:
+
+- [Booty](https://infinitythewiki.com/Booty) — all ranges,
+  four TAG-versus-other-Troop-Type outcomes, and the MOV/ARM results.
+- [MetaChemistry](https://infinitythewiki.com/MetaChemistry) — all
+  ranges and five combined outcomes, including Immunity parameters.
+- [Martial Arts](https://infinitythewiki.com/Martial_Arts) — all
+  three modifier columns and Levels 1–5, including +1 SD at
+  Levels 3 and 5, distinct from +1B.
+
+The test retains the **Army's exact source spelling** rather than
+silently correcting it: for example `+1SD` versus the Wiki's
+`+1 SD`, `+1B` versus `+1 B`. The Wiki also clarifies
+that Booty is an optional Deployment roll **after placing** its
+Trooper in Model form and adds gear without replacing existing gear;
+MetaChemistry is an optional roll **immediately after placing**
+and adds Special Skills without replacing existing ones.
+The Martial Arts +1 SD rule adds and discards a die **without
+increasing Burst** or spending another Disposable use, and applies
+in both turns. Those explanations are already owned by the
+canonical reviewed Skills and Special Dice rules, so they are not
+duplicated as a separate rules-mechanics engine in chart data.
+
+**Evidence limit:** This verifies the reviewed Wiki-rendered
+chart rows, not a complete edition-pinned N5.3 PDF and FAQ
+footnote or revision-history reconciliation. Wiki page caches can
+lag the current notice; final PDF page/version provenance and
+all conditional interactions still require explicit release audit.
+No source data, source-parameter text, or UI was changed in this
+comparison; existing Chromium acceptance remains applicable.
+
 ## 1.0 source evidence baseline
 
 The offline `tools/report_reference_baseline.py` command inventories the published Army

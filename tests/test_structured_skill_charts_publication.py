@@ -149,6 +149,89 @@ def test_all_published_structured_skill_charts_preserve_army_rows_and_api() -> N
     assert ".chart-outcome-component {\n  display: inline-block;" in stylesheet
 
 
+def test_current_army_charts_match_reviewed_n5_wiki_reference_rows() -> None:
+    """Independently pin entire N5.3 Wiki chart rows, not just source occupancy.
+
+    Reference pages: infinitythewiki.com/{Booty,MetaChemistry,Martial_Arts}.
+    Source notation is pinned exactly: Army prints +1SD and +1B
+    without the spaces shown in the official Wiki. These represent the
+    same named modifiers, not alternate gameplay mechanics.
+    """
+
+    database = Database(ARMY_DB)
+    booty = {str(row["roll"]): row["result"] for row in database.list_booty_results()}
+    expected_booty = {
+        "1-2": "+1 ARM",
+        "3-4": "Light Flamethrower",
+        "5-6": "Grenades",
+        "7-8": "DA CC Weapon",
+        "9": "Multispectral Visor L1",
+        "10": "EXP CC Weapon",
+        "11": "Adhesive Launcher Rifle",
+        "12": "TAG: Immunity (AP) / Other Troop Types: + 2 ARM",
+        "13": "Panzerfaust",
+        "14": "Monofilament CC Weapon",
+        "15": "MOV 8-4",
+        "16": "TAG: BS Attack (Shock) / Other Troop Types: MULTI Rifle",
+        "17": "MULTI Sniper Rifle",
+        "18": "TAG: Immunity (ARM) / Other Troop Types: +4 ARM",
+        "19": "Mimetism (-6)",
+        "20": "TAG: BS Attack (+1B) / Other Troop Types: HMG",
+    }
+    assert booty == expected_booty
+
+    metachemistry = {
+        str(row["roll"]): row["result"]
+        for row in database.list_metachemistry_results()
+    }
+    assert metachemistry == {
+        "1-3": "+3 PH",
+        "4-5": "Super-Jump",
+        "6-7": "Regeneration",
+        "8-10": "Climbing Plus",
+        "11-12": "MOV: 8-4",
+        "13-14": "+6 BTS",
+        "15": "No Wound Incapacitation",
+        "16": "+1 ARM + Immunity (ARM)",
+        "17": "Dogged + Immunity (Enhanced)",
+        "18": "MOV: 6-4 + Super-Jump",
+        "19": "MOV: 8-4 + Climbing Plus",
+        "20": "+3 PH + Regeneration",
+    }
+
+    martial = {
+        str(row["level"]): (
+            row["attack_mod"], row["opponent_mod"], row["burst_mod"]
+        )
+        for row in database.list_martial_arts_levels()
+    }
+    assert martial == {
+        "1": ("0", "-3", "0"),
+        "2": ("+3", "-3", "0"),
+        "3": ("+3", "-3", "+1SD"),
+        "4": ("+3", "-3", "+1B"),
+        "5": ("+3", "-3", "+1B, +1SD"),
+    }
+
+
+def test_structured_charts_publish_cited_canonical_skill_rules() -> None:
+    """Chart pages must expose the reviewed rules, not only imported Army rows."""
+
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    for slug in ("booty", "metachemistry", "martial-arts"):
+        status, body = _get(app, f"/api/skills/{slug}")
+        assert status == "200 OK", slug
+        detail = json.loads(body)
+        owners = [
+            item for item in detail["rules"] if item["id"] == f"skill:{slug}"
+        ]
+        assert len(owners) == 1, slug
+        assert owners[0]["citations"], slug
+        assert all(
+            citation["source_id"] for citation in owners[0]["citations"]
+        ), slug
+
+
 def test_army_chart_source_fields_preserve_n5_reference_distinctions() -> None:
     """Guard reviewed N5 chart distinctions without inventing new game effects."""
 

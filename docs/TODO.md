@@ -1689,15 +1689,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       printed labels/variants and conditional scopes; use only exact,
       unique reviewed family names and routes. Missing/duplicate
       targets remain unlinked.
-    - [ ] Re-run the structured Skill Chromium audit after adding the
-      Booty family/alias links (9 page checks at 1440/390/320 px),
-      covering all **16 Booty references**, their actual labels and
-      live destinations. Earlier 9/9 acceptance predates this change.
-    - [ ] Independently verify all chart outcomes, conditional branches
-      and footnotes against the final pinned official N5.3 PDF/Wiki
-      revisions. Typed family links do not establish exact source
-      variant semantics or game-state effects; do not add random-result
-      selection or persistent session state for 1.0.
+    - [x] Revalidate all 16 Booty family/alias links in Chromium:
+      **9/9 passed** at 1440/390/320 px, reported 2026-10-20.
+      Checked printed link labels, the live destinations and original
+      chart values; retain evidence under ignored `local/audits`.
+    - [x] Independently compare the complete published Army table rows
+      against the N5.3 official Wiki charts: **16 Booty, 12
+      MetaChemistry and 5 Martial Arts** rows match. Add a fail-closed
+      source-value regression covering all 33 rows, including TAG-only
+      branches, both Martial Arts Special Dice levels and the printed
+      Army/Wiki whitespace distinctions. The prior API parity checks
+      alone did not establish this separate source comparison.
+    - [ ] Independently reconcile the complete chart footnotes,
+      deployment timing, variant effects and FAQ against the final
+      pinned official **N5.3 PDF** and versioned Wiki revisions.
+      In particular, preserve the distinction between +1 SD and
+      +1B and the optional, additive Booty/MetaChemistry results.
+      This Wiki row comparison is not final PDF/semantic signoff.
+      Do not add random-result selection or persistent session state
+      for 1.0.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
