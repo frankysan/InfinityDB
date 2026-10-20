@@ -188,6 +188,9 @@ Prefer targeted fixes rather than merging these.
   - [x] Promote the seven-case non-Skill Army Chromium acceptance procedure
     to an optional maintained verifier; retain historical browser results
     separately and require new evidence on the actual release candidate.
+  - [x] Promote source Unit notes and composite Unit options to maintained
+    source-to-API parity tests, preserving source contexts and exact
+    included-loadout relationships while leaving browser acceptance separate.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -452,3 +455,26 @@ Prefer targeted fixes rather than merging these.
   Ruff — passed for both modified Python files; Pyright —
   0 errors, 0 warnings. Final docs check and working-tree review
   recorded separately before handoff.
+- **Closeout pass 9, 2026-10-20:** Confirmed the maintained optional
+  Chromium verifier's new ignored `current.json` report contains
+  **21/21 passing cases** across seven Units and all three widths.
+  This is current development-server evidence, not final release-candidate
+  certification. Added `tests/test_unit_source_options_notes.py`
+  and registered it under the maintained web section. Its two tests
+  compare **30 source Unit notes on 28 logical Units** and **18
+  composite options on seven logical Units** in tracked `infinity.db`
+  against normal Unit detail APIs. They enforce note text/representative
+  attribution, source option identity, Points/SWC, miniature counts,
+  ordered Order details and exact Army-local included-loadout IDs and
+  quantities, rather than treating any presentation as sufficient.
+  Updated `docs/testing.md` and `docs/TODO.md`; the ignored raw
+  archive, wider 1.0 source-to-browser gate and final Chromium
+  candidate run remain separate release obligations.
+- **Checks:** `tests/test_unit_source_options_notes.py` —
+  **2 passed** (including exact inclusion-set parity);
+  `tests/test_non_skill_army_presentation.py` — **10 passed**;
+  `tests/test_test_sections.py` — **2 passed**;
+  Ruff on the new module — PASS; Pyright — **0 errors, 0 warnings**;
+  `docs` — Markdownlint **32 files, 0 issues**, and offline
+  Markdown links **30 files, 0 errors**. No full project suite,
+  new Chromium run, or final raw-source gate was performed.

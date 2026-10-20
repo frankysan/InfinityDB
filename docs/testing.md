@@ -184,9 +184,11 @@ contains `unit-content` and the `unit.js` bootstrap; a rendered
 `general-profile` appears only after JavaScript executes. The separate
 ignored `local/audits/non-skill-army-browser/results.json` recorded
 **21/21 Chromium checks** across 1440/390/320 px for those seven
-Units. That is historical, checkout-specific responsive/navigation
-evidence, not a browser test rerun by CI or proof of whole-catalog
-source-to-browser completeness.
+Units. A second report, `local/audits/non-skill-army-browser/current.json`,
+records **21/21 passing cases on 2026-10-20** using the maintained
+verifier; the user confirmed that run. Both reports are bounded
+checkout-specific browser evidence, not CI browser tests or proof of
+whole-catalog source-to-browser completeness.
 
 The maintained optional verifier `tools.verify_non_skill_army_browser`
 repeats the seven real-browser cases at those three widths. It checks
@@ -203,9 +205,31 @@ root in PowerShell:
 ```
 
 The optional verifier requires Playwright with Chromium installed and
-is not part of routine source checks. A new 21/21 result against the
-actual release candidate is required before citing current browser
-acceptance; the historical JSON report does not provide it.
+is not part of routine source checks. The 2026-10-20 pass verifies its
+development checkout but does **not** carry a release-candidate source
+hash or certify a future build. Rerun it against the actual candidate
+before final 1.0 browser acceptance.
+
+## Source Unit notes and composite-option publication
+
+`tests/test_unit_source_options_notes.py` compares **all** source-attributed
+Unit notes and composite options in the tracked published `infinity.db`
+against normal Unit detail API responses. The pinned release baseline has
+**30 source Unit notes on 28 logical Units** and **18 composite Unit options
+on seven logical Units**. Every source note must preserve its source
+Unit ID, text, representative identity and attributed Army metadata.
+Every source composite option must appear under its logical Unit,
+preserving source option identity, name, Points/SWC, miniature count,
+ordered Order contributions, and *exact* Army-scoped included-loadout
+payload IDs and quantities. The check fails on missing or extra
+inclusions rather than treating any displayed composite bundle as
+sufficient.
+
+This is **tracked-database-to-API parity**, not direct reinspection of
+the ignored raw Army archive and not a live Chromium acceptance run.
+The original responsive/browser investigation remains dated evidence;
+the final 1.0 gate still requires validation against the final source
+pair, served revision and normal player-visible pages.
 
 ## Maintained snapshot-note validation
 

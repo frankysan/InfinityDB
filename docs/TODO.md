@@ -1996,10 +1996,19 @@ individual verifiers remain the repeatable acceptance procedures.
     and BTS=3; verify seven normal Unit bootstraps and their detail
     APIs without relying on Git-ignored evidence. A maintained optional
     `tools.verify_non_skill_army_browser` now repeats the seven
-    Chromium Unit cases at 1440/390/320 px. The earlier 21/21
-    browser result remains dated historical acceptance; rerun the
-    verifier against the final candidate before claiming current
-    source-to-browser certification.
+    Chromium Unit cases at 1440/390/320 px. A new local
+    `local/audits/non-skill-army-browser/current.json` records **21/21
+    passed** on the current development server, confirmed 2026-10-20.
+    This is bounded seven-Unit browser evidence, not whole-catalog
+    certification; rerun against the final release candidate.
+  - [x] Pin the represented composite Unit-option and source-note
+    publication as maintained regressions: 18 composite options across
+    seven logical Units, including exact source identity, Points/SWC,
+    miniature count, Orders, and included loadout/Army contexts;
+    30 source Unit notes across 28 logical Units, preserving source
+    attribution. Normal Unit APIs must match their tracked database
+    rows. This does not replace live Chromium or the release-matched
+    raw-source occupancy gate.
   - [x] Resolve dense Unit profile/loadout subrow readability at 320 px.
     Army profile Attributes, Skills, Equipment and Includes now use full-width
     stacked rows on very narrow screens, while loadout names take a full row
