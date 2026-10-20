@@ -232,6 +232,21 @@ API regressions under `tests/test_weaponry_catalog_api.py`.
 These tests must not replace the source reconciliation tasks:
 the open REA dependencies remain listed in `docs/TODO.md`.
 
+## Published cross-domain rule relation destinations
+
+`tests/test_public_relation_destinations.py` traverses the maintained
+current rules database across Ammunition, Equipment, Hacking Programs,
+General Rules, Skills, States, Traits and Weapons. It applies the same
+relation-link enrichment as the web backend, then checks every distinct
+**catalog-backed** destination against its normal public detail API.
+The test records the owning rule IDs when a target fails, rather than
+assuming a structurally valid relation is navigable.
+
+Intentionally non-public source variants, embedded Glossary anchors and
+local rule-card fragments are outside this bounded API-route check.
+The test does not adjudicate rule semantics, prove every source relation
+exists, or replace final Chromium navigation acceptance.
+
 ## Scenario-specific FAQ publication scope
 
 A maintained Scenario API regression checks the Annihilation-only FAQ against Core and ITS missions. The base Scenario response stays separate from dated FAQ rulings, and the served client supplies explicit scenario and season context. This does not replace rules-source adjudication or live browser acceptance.

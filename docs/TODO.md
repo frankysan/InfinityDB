@@ -1918,6 +1918,12 @@ individual verifiers remain the repeatable acceptance procedures.
     canonical application-domain capabilities and nested Unit/embedded Glossary
     conventions. Validate candidate browser routes and API route vocabulary without
     marking any source-to-browser completeness or per-record navigation as reviewed.
+  - [x] Protect catalog-backed cross-domain rule relation destinations
+    with a maintained regression over the published rules graph, verifying
+    normal API routes for generated catalog links without inventing
+    destinations for intentionally unlinked variants. Embedded Glossary
+    anchors, local card fragments, source completeness and browser
+    navigation remain separate final acceptance checks.
   - [x] Reconcile all eleven canonical Ammunition records from maintained
     source identities through published rules storage, API list/details,
     summary/typed-fact/citation parity and normal served detail templates. This
