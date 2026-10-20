@@ -50,11 +50,14 @@ profiles retain their existing Python/data-only stage sets.
 The documentation stage first runs the lockfile-pinned `markdownlint-cli2` dependency
 with the project's `.markdownlint.json` rules, excluding local material,
 dependencies and reports. It then runs `tools.check_doc_links` with the
-same Python interpreter as the check runner to verify relative Markdown file
-paths and heading anchors in the maintained root, `docs/`, and `data/`
-reference files. The link checker does not access external URLs, validate
-application routes or substitute for browser acceptance; it checks ordinary
-inline links and reference definitions, not arbitrary embedded HTML.
+same Python interpreter as the check runner to validate relative Markdown
+paths and heading anchors across **all Git-tracked Markdown files**, including
+nested references, plus new `docs/*.md` drafts before staging. Without Git
+metadata it falls back to the main root, `docs/`, and `data/` references.
+The link checker excludes ignored private files, does not access external
+URLs, validate application routes or substitute for browser acceptance;
+it checks ordinary inline links and reference definitions, not arbitrary
+embedded HTML. Its file count can differ from Markdownlint's glob selection.
 Install the Markdownlint dependency **explicitly** before `docs` or `--all`:
 
 ```powershell

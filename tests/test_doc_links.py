@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+from subprocess import CompletedProcess
+
+import pytest
 
 from tools.check_doc_links import _anchors, check_links, default_paths
 
@@ -65,10 +68,48 @@ def test_broken_paths_fragments_and_escape_are_reported(tmp_path: Path) -> None:
     assert "link leaves repository: ../../outside.md" in errors[2]
 
 
+def test_default_paths_include_tracked_nested_markdown_but_not_ignored(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "extras").mkdir()
+    (tmp_path / "local").mkdir()
+    (tmp_path / "docs/README.md").write_text("# Docs\n", encoding="utf-8")
+    (tmp_path / "extras/README.md").write_text("# Extra\n", encoding="utf-8")
+    (tmp_path / "local/ignored.md").write_text(
+        "[broken](missing.md)\n", encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        "tools.check_doc_links.subprocess.run",
+        lambda *args, **kwargs: CompletedProcess(
+            args=[], returncode=0,
+            stdout=b"docs/README.md\0extras/README.md\0",
+        ),
+    )
+    paths = default_paths(tmp_path)
+    assert paths == [tmp_path / "docs/README.md", tmp_path / "extras/README.md"]
+    assert check_links(paths, tmp_path) == []
+
+
+def test_default_paths_work_without_git(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs/new.md").write_text("# New\n", encoding="utf-8")
+
+    def unavailable(*args: object, **kwargs: object) -> None:
+        raise FileNotFoundError("git unavailable")
+
+    monkeypatch.setattr("tools.check_doc_links.subprocess.run", unavailable)
+    assert default_paths(tmp_path) == [tmp_path / "docs/new.md"]
+
+
 def test_current_documentation_local_links_are_valid() -> None:
     root = Path(__file__).resolve().parents[1]
     paths = default_paths(root)
     assert root / "docs" / "README.md" in paths
     assert root / "data" / "curated" / "README.md" in paths
+    assert root / "data" / "curated" / "snapshot-notes" / "README.md" in paths
+    assert root / "THIRD_PARTY_NOTICES.md" in paths
     assert not any("local" in path.parts for path in paths)
     assert check_links(paths, root) == []

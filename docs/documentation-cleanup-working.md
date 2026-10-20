@@ -165,8 +165,12 @@ Prefer targeted fixes rather than merging these.
   - [x] Reconcile selected current-state statements against release metadata,
     app-domain ownership, docs-stage code/CI, and TODO; correct the REA-020
     acceptance wording and update docs-stage references.
-  - [ ] At actual 1.0 preparation, re-audit the complete tracked Markdown
-    corpus (not merely the 28 checked link targets), source/API/browser
+  - [x] Expand offline link validation from the original hand-picked Markdown
+    locations to all Git-tracked Markdown, including nested references, while
+    retaining coverage of untracked docs drafts and a source-archive fallback.
+    This validates links/anchors, **not** the text's current semantic accuracy.
+  - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
+    for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
     player-facing release summary. Retire this working document only after
     moving any unresolved documentation tasks to `docs/TODO.md` and
@@ -285,3 +289,18 @@ Prefer targeted fixes rather than merging these.
   ownership review, current player-summary reconciliation, and disposal
   of this temporary working file remain conditional on final 1.0
   evidence; do not equate this cleanup with a release gate pass.
+- **Closeout pass 2, 2026-10-20:** After the separate raw-Army CI
+  fixture fix was committed and the user confirmed CI green,
+  expanded `tools/check_doc_links.py` to scan all Git-tracked Markdown
+  via read-only `git ls-files`, rather than selected directory roots.
+  New untracked `docs/*.md` files are included before staging; an
+  archive without Git falls back to canonical reference locations.
+  Git-ignored `AGENTS.local.md` is no longer a required input.
+  Updated the testing contract and added two fixture tests for nested
+  tracked docs, ignored local data and the no-Git fallback.
+- **Validation:** `tests/test_doc_links.py` — 6 passed; Ruff passed for
+  the tool and test module. The `docs` stage passed Markdownlint
+  (32 files, 0 issues) and the expanded offline links scan
+  (30 files, 0 errors). This still does not verify source-to-browser
+  content completeness, resolve remaining 1.0 REA cases, or authorize
+  retirement of this temporary checklist.

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
+import subprocess
 import sys
 import unicodedata
 from collections import Counter
@@ -107,10 +109,39 @@ def check_links(paths: list[Path], root: Path) -> list[str]:
 
 
 def default_paths(root: Path) -> list[Path]:
-    paths = [root / "README.md", root / "AGENTS.md", root / "AGENTS.local.md"]
-    paths += sorted((root / "docs").glob("*.md"))
-    paths += [root / "data/README.md", root / "data/curated/README.md"]
-    return [path for path in paths if path.is_file()]
+    """Cover tracked Markdown, including nested documentation outside docs/."""
+    candidates: set[Path] = set()
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "--cached", "-z", "--", "*.md"],
+            capture_output=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        # Also usable from a source archive without Git metadata.
+        pass
+    else:
+        candidates.update(
+            root / os.fsdecode(name)
+            for name in result.stdout.split(b"\0")
+            if name
+        )
+
+    # Include new working documents before they are first staged, and keep
+    # source-archive validation useful when Git metadata is not available.
+    candidates.update((root / "docs").glob("*.md"))
+    candidates.update(
+        root / relative
+        for relative in (
+            "README.md",
+            "AGENTS.md",
+            "THIRD_PARTY_NOTICES.md",
+            "data/README.md",
+            "data/curated/README.md",
+            "data/curated/snapshot-notes/README.md",
+        )
+    )
+    return sorted(path for path in candidates if path.is_file())
 
 
 def main(argv: list[str] | None = None) -> int:
