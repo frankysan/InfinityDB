@@ -1749,9 +1749,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Levels and the N5.3 chart MODs. Pin all five source variants and
       reject unreviewed source extras in the direct profile/loadout/
       Unit-option rows (`tests/test_martial_arts_variant_provenance.py`).
-    - [ ] Reconcile remaining exact Level/MOD/named/parameter variants
-      against pinned rules and actual Army extras; fail closed when
-      family membership is known but the specific variant is unresolved.
+    - [x] Reconcile Strategos L1-L2, BS=11/12, CC=21, and reviewed
+      TinBot named variants against N5.3 source IDs, current Army
+      occurrences and source extras. Pin the source-only distinction
+      for unused TinBot: Neurocinetics/Albedo (188/193) and preserve
+      MOD extras on used TinBot variants in
+      `tests/test_other_source_variant_provenance.py`.
+    - [ ] Reconcile all other Level/MOD/named/parameter families and
+      unknown source extras before aggregating specific variants;
+      fail closed when family membership is known but the exact
+      specific variant is unresolved.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

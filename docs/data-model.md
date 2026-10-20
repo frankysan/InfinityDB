@@ -404,6 +404,34 @@ tables as well as `infinity.db` catalog/usage projections and
 not a generated occurrence index or a guarantee for other source
 Skill families.
 
+**Additional verified exact-source families:** Strategos source Skill IDs
+`69`/`70` are discrete Levels 1/2 (N5.3 p. 113); BS Attack
+`278`/`279` replace BS with 12/11 (p. 39), and CC Attack `274`
+replaces CC with 21 (p. 51). The reviewed source variant maps and
+current direct Army occurrences agree; these source Skills have no
+separate occurrence extras in the pinned snapshot. Source family identity
+is not an additional Level or an Attribute replacement.
+
+The reviewed TinBot Equipment family has six exact-source named
+variants (N5.3 p. 127 and preserved Wiki provenance):
+`169` Firewall, `188` Neurocinetics, `193` Albedo,
+`244` Discover, `247` ECM Guided and `248` Repeater. The
+current Army application catalog contains **only 169, 244, 247 and 248**
+of those six named variants; `188` and `193` retain reviewed definitions but
+have **no direct source occurrence in this pinned snapshot**. Do not
+promote their rules definitions into current Unit-use counts. Unlike
+Level/Attribute replacement source Skills, TinBot variants can carry
+distinct occurrence-level extras such as listed MODs. N5.3 p. 127 calls its example `TinBot: Guided (-6)`,
+while the reviewed source-specific variant is named `ECM Guided`;
+keep that label distinction visible rather than deriving a new
+source identity or conflating the two names automatically. Preserve each
+actual source extra's ID/type/value and direct owner context. No MOD
+may be inferred just from the `named` variant label, and TinBot's
+Fireteam-sharing behavior does not create direct Skill/Equipment
+occurrences for every eligible Fireteam member. The reconciliations are
+enforced by `tests/test_other_source_variant_provenance.py`; they
+do not implement or populate the eventual usage index.
+
 Do **not** parse a variant from a display string, strip punctuation, infer a
 parameter from a shared family name, or count an unresolved variant as a
 verified specific one. Missing/ambiguous variant semantics remain explicitly
