@@ -15,8 +15,9 @@ are not retroactively relabeled.
 - Martial Arts now displays only applicable chart modifiers; Booty
   chart outcomes for TAGs and other Troop Types appear on separate
   lines and retain distinct typed conditions instead of a combined
-  sentence. Nine source-matched Booty Weapon outcomes now link to
-  their published Weapon definitions; the HMG alias remains unlinked.
+  sentence. Booty Weapon outcomes link to their published definitions,
+  including the verified HMG abbreviation, with parameterized Skill
+  and Equipment outcomes linking to their canonical families.
   MetaChemistry's five combined chart outcomes display separately
   identified components, including links to verified Skill definitions,
   without changing the original source results.

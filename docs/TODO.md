@@ -1678,16 +1678,26 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       valid outcomes, including conditional MULTI Rifle, without changing
       source strings or the TAG/other-Troop-Type distinction. Ambiguous
       or absent names fail closed rather than guessing slugs.
-    - [ ] Run the updated structured Skill Chromium audit after Booty
-      Weapon links (9 pages at 1440/390/320 px), verifying all nine
-      link labels, destinations, conditional branches and chart values.
-      Prior 9/9 acceptance predates the new Weapon links.
-    - [ ] Independently verify every chart outcome, conditional branch,
-      and footnote against the final pinned official N5.3 PDF/Wiki
-      revisions. Resolve HMG's source alias, Multispectral Visor L1,
-      Mimetism (-6), BS Attack variants and any remaining chart references
-      only after exact domain/variant identity review; no random-result
-      selection or persistent session overlay is required for 1.0.
+    - [x] Verify the nine Booty Weapon links in Chromium:
+      **9/9 passed** across 1440/390/320 px, reported 2026-10-20.
+      The nine exact-name Weapon destinations and source rows remained
+      correct; retain evidence in ignored `local/audits`.
+    - [x] Reconcile Booty HMG with the canonical Heavy Machine Gun
+      Weapon and the six parameterized outcomes with their reviewed
+      families: Multispectral Visor L1, Mimetism (-6), BS Attack
+      (Shock)/(+1B), and TAG-only Immunity (AP)/(ARM). Preserve the
+      printed labels/variants and conditional scopes; use only exact,
+      unique reviewed family names and routes. Missing/duplicate
+      targets remain unlinked.
+    - [ ] Re-run the structured Skill Chromium audit after adding the
+      Booty family/alias links (9 page checks at 1440/390/320 px),
+      covering all **16 Booty references**, their actual labels and
+      live destinations. Earlier 9/9 acceptance predates this change.
+    - [ ] Independently verify all chart outcomes, conditional branches
+      and footnotes against the final pinned official N5.3 PDF/Wiki
+      revisions. Typed family links do not establish exact source
+      variant semantics or game-state effects; do not add random-result
+      selection or persistent session state for 1.0.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and

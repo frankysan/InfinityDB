@@ -681,7 +681,7 @@ references are still open.
 
 ## 1.0 Booty Weapon outcomes — exact public-reference audit
 
-**Added 2026-10-20; Chromium acceptance pending.** Of the ten Weapon
+**Accepted 2026-10-20 (9/9 Chromium).** Of the ten Weapon
 names printed in the Booty chart, **nine** resolve by exact, unique
 name to published Army-backed Weapon catalog records and successful
 `/api/weapons/{slug}` detail routes: Light Flamethrower, Grenades,
@@ -714,10 +714,48 @@ rendered links, live destinations and unchanged chart values at
 .\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
 ```
 
-**Re-run browser acceptance after this change.** The previously
-accepted 9/9 checks did not include the Booty Weapon links. Retain
-evidence under ignored `local/audits`; independently verified N5.3
-rules-footnote and alias/variant reconciliation remain open.
+**Browser result reported 2026-10-20:** `Structured Skill charts
+browser: 9/9 passed` for the exact-name Booty Weapon links across
+1440/390/320 px. Retain evidence under ignored `local/audits`.
+This does not validate later alias/variant changes.
+
+### Booty alias and variant family references
+
+**Added 2026-10-20; new Chromium acceptance pending.** The Booty
+label `HMG` is the shorthand for the normal **Heavy Machine Gun**
+entry on the official
+[Weapon Chart](https://infinitythewiki.com/Weapon_Chart);
+the historical official N3 Human Sphere source explicitly names
+`Heavy Machine Gun (HMG)`. This is resolved only to the unique
+published `/weapons/heavy-machine-gun`, never AP/MULTI variants.
+
+Six other reviewed Booty outcomes now carry additive canonical
+family references plus exact source parameters: `Multispectral Visor
+L1` links to the Equipment family at `/equipment/multispectral-visor`;
+`Mimetism (-6)` links to `/skills/mimetism`; the two
+`BS Attack (Shock)`/`BS Attack (+1B)` results link to
+`/skills/bs-attack`; and TAG-only `Immunity (AP)`/`Immunity (ARM)`
+link to `/skills/immunity`. None is represented as a separate
+variant-specific route or a derived gameplay effect. The generated
+`outcome_variant` captures the printed level/MOD/name, while the
+original `result` and conditional branch scopes remain unchanged.
+Missing or ambiguous canonical names fail closed, and the HMG
+reference exposes `reference_name: "Heavy Machine Gun"`.
+
+The hermetic chart audit reconciles all seven source spellings and
+their uniquely published catalog routes and reviews; it separately
+tests duplicate and missing family definitions. The shared Chromium
+verifier now checks **16 Booty link occurrences**: nine previously
+verified exact-name Weapons, HMG, and six parameterized outcomes,
+including their real live destination routes. Re-run:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
+```
+
+The previous 9/9 browser acceptance does not cover this revision.
+Independent final-pinned N5.3 variant semantics and footnotes remain
+open for 1.0; no random-result selection or game-state engine exists.
 
 ## 1.0 source evidence baseline
 

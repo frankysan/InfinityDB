@@ -13,6 +13,7 @@ import pytest
 
 from infinity_db.database.repository import Database
 from infinity_db.structured_chart_outcomes import (
+    link_booty_family_outcomes,
     link_booty_weapon_outcomes,
     link_metachemistry_skill_components,
     project_booty_rows,
@@ -249,6 +250,128 @@ def test_metachemistry_compounds_are_typed_and_source_preserving() -> None:
         assert " + ".join(part["text"] for part in parts) == row["result"]
 
 
+def test_booty_remaining_catalog_families_are_exact_and_routable() -> None:
+    """Verify HMG's expansion and parameterized outcome owner identities."""
+
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    expected = {
+        "weapons": {"Heavy Machine Gun": "heavy-machine-gun"},
+        "equipment": {"Multispectral Visor": "multispectral-visor"},
+        "skills": {"Mimetism": "mimetism", "BS Attack": "bs-attack"},
+    }
+    source = " / ".join(
+        row["result"] for row in Database(ARMY_DB).list_booty_results()
+    )
+    for literal in (
+        "HMG", "Multispectral Visor L1", "Mimetism (-6)",
+        "BS Attack (Shock)", "BS Attack (+1B)",
+    ):
+        assert literal in source
+    for catalog, names in expected.items():
+        status, body = _get(app, f"/api/{catalog}")
+        assert status == "200 OK"
+        items = json.loads(body)["items"]
+        for name, slug in names.items():
+            matches = [
+                item for item in items
+                if item["name"].casefold() == name.casefold()
+            ]
+            assert len(matches) == 1, (catalog, name, matches)
+            assert matches[0]["slug"] == slug, (catalog, name)
+            status, detail_body = _get(app, f"/api/{catalog}/{slug}")
+            assert status == "200 OK", (catalog, name)
+            detail = json.loads(detail_body)
+            assert (detail["slug"], detail["name"]) == (slug, name)
+            if catalog == "skills":
+                assert any(
+                    rule["id"] == f"skill:{slug}"
+                    for rule in detail.get("rules", [])
+                ), slug
+
+
+def test_booty_reviewed_family_links_preserve_source_variants() -> None:
+    """Assert all reviewed Booty aliases/variants resolve to canonical families."""
+
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    status, body = _get(app, "/api/skills/booty")
+    assert status == "200 OK"
+    reference = json.loads(body)["structured_reference"]
+    source = source_charts(Database(ARMY_DB))["booty"]
+    assert source_only_chart(reference) == source
+
+    outcomes = [
+        branch
+        for row in reference["rows"]
+        for branch in (row.get("conditional_outcomes") or [row])
+    ]
+    expected = {
+        "HMG": ("weapons", "heavy-machine-gun", None),
+        "Multispectral Visor L1": ("equipment", "multispectral-visor", ("level", "1")),
+        "Mimetism (-6)": ("skills", "mimetism", ("modifier", "-6")),
+        "BS Attack (Shock)": ("skills", "bs-attack", ("named", "Shock")),
+        "BS Attack (+1B)": ("skills", "bs-attack", ("burst-modifier", "+1B")),
+        "Immunity (AP)": ("skills", "immunity", ("named", "AP")),
+        "Immunity (ARM)": ("skills", "immunity", ("named", "ARM")),
+    }
+    for printed, (catalog, slug, variant) in expected.items():
+        matches = [item for item in outcomes if item["result"] == printed]
+        assert len(matches) == 1, printed
+        item = matches[0]
+        assert item["public_reference"] == {"catalog": catalog, "id": slug}, printed
+        if variant is None:
+            assert item["reference_name"] == "Heavy Machine Gun"
+            assert "outcome_variant" not in item
+        else:
+            assert item["outcome_variant"] == {
+                "kind": variant[0], "value": variant[1]
+            }, printed
+            assert "reference_name" not in item
+    assert sum(item.get("reference_name") == "Heavy Machine Gun" for item in outcomes) == 1
+    assert sum("outcome_variant" in item for item in outcomes) == 6
+
+
+def test_booty_family_links_fail_closed_on_ambiguous_publication() -> None:
+    """Reject unresolved or multiply claimed targets without mutating source."""
+
+    original = [
+        {"roll": "20", "result": "HMG"},
+        {"roll": "9", "result": "Multispectral Visor L1"},
+        {"roll": "19", "result": "Mimetism (-6)"},
+    ]
+    catalogs = {
+        "weapons": [{"name": "Heavy Machine Gun", "slug": "heavy-machine-gun"}],
+        "equipment": [{"name": "Multispectral Visor", "slug": "multispectral-visor"}],
+        "skills": [{"name": "Mimetism", "slug": "mimetism"}],
+    }
+    reviewed = [
+        {"kind": "equipment", "id": "equipment:multispectral-visor",
+         "name": "Multispectral Visor"},
+        {"kind": "skill", "id": "skill:mimetism", "name": "Mimetism",
+         "facts": {"category": "special-skill"}},
+    ]
+    linked = link_booty_family_outcomes(
+        original, public_catalogs=catalogs, reviewed_records=reviewed
+    )
+    assert all("public_reference" in item for item in linked)
+    assert all("public_reference" not in item for item in original)
+    for name in ("weapons", "equipment", "skills"):
+        duplicate = {key: list(value) for key, value in catalogs.items()}
+        duplicate[name] = duplicate[name] * 2
+        unresolved = link_booty_family_outcomes(
+            original, public_catalogs=duplicate, reviewed_records=reviewed
+        )
+        index = {"weapons": 0, "equipment": 1, "skills": 2}[name]
+        assert "public_reference" not in unresolved[index], name
+    for removed in ("equipment", "skill"):
+        unresolved = link_booty_family_outcomes(
+            original,
+            public_catalogs=catalogs,
+            reviewed_records=[item for item in reviewed if item["kind"] != removed],
+        )
+        index = 1 if removed == "equipment" else 2
+        assert "public_reference" not in unresolved[index], removed
+
+
 def test_booty_weapon_names_have_exact_published_catalog_destinations() -> None:
     """Discover only exact Weapon names printed on the N5 Booty chart."""
 
@@ -301,14 +424,10 @@ def test_booty_weapon_names_have_exact_published_catalog_destinations() -> None:
                 name = branch["result"]
                 if name in expected - missing:
                     linked[name] = branch["public_reference"]
-                else:
-                    assert "public_reference" not in branch, (row["roll"], name)
         else:
             name = row["result"]
             if name in expected - missing:
                 linked[name] = row["public_reference"]
-            else:
-                assert "public_reference" not in row, (row["roll"], name)
     assert set(linked) == expected - missing
     weapon_by_name = {item["name"].casefold(): item for item in items}
     for name, reference in linked.items():

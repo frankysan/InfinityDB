@@ -13,6 +13,7 @@ from infinity_db.hacking_program_catalog import hacking_program_declaration_cate
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.skill_config import load_skill_source_config
 from infinity_db.structured_chart_outcomes import (
+    link_booty_family_outcomes,
     link_booty_weapon_outcomes,
     link_metachemistry_skill_components,
     project_booty_rows,
@@ -360,6 +361,21 @@ class SkillCatalog:
                 for weapon in weapons:
                     attach_public_catalog_slug(self.database, "weapons", weapon)
                 rows = link_booty_weapon_outcomes(rows, public_weapons=weapons)
+                equipment = deepcopy(self.database.list_catalog_items("equipment"))
+                for item in equipment:
+                    attach_public_catalog_slug(self.database, "equipment", item)
+                rows = link_booty_family_outcomes(
+                    rows,
+                    public_catalogs={
+                        "weapons": weapons,
+                        "equipment": equipment,
+                        "skills": self.list_skills(),
+                    },
+                    reviewed_records=[
+                        *self._skill_records(),
+                        *self.rules_database.composed_records_by_kind("equipment"),
+                    ],
+                )
             return {"kind": "random-chart", "title": "Booty chart", "rows": rows}
         if slug == "metachemistry":
             rows = project_metachemistry_rows(self.database.list_metachemistry_results())

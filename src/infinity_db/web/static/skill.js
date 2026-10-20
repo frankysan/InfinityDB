@@ -64,7 +64,7 @@ function referenceCell(value, role) {
 }
 
 function chartOutcomeLink(text, reference) {
-  if (!reference?.id || !["skills", "weapons"].includes(reference.catalog)) {
+  if (!reference?.id || !["skills", "weapons", "equipment"].includes(reference.catalog)) {
     return document.createTextNode(text);
   }
   const link = document.createElement("a");

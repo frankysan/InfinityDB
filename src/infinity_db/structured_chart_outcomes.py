@@ -198,6 +198,97 @@ def link_booty_weapon_outcomes(
     return result
 
 
+# Reviewed Booty source spellings and their canonical *family* identities.
+# HMG is the official abbreviation for Heavy Machine Gun; the other
+# entries preserve the printed level/MOD/parameter without asserting a
+# separate variant-specific page or derived in-game effect.
+_BOOTY_FAMILY_OUTCOMES: dict[str, tuple[str, str, dict[str, str] | None]] = {
+    "HMG": ("weapons", "Heavy Machine Gun", None),
+    "Multispectral Visor L1": (
+        "equipment", "Multispectral Visor", {"kind": "level", "value": "1"}
+    ),
+    "Mimetism (-6)": ("skills", "Mimetism", {"kind": "modifier", "value": "-6"}),
+    "BS Attack (Shock)": ("skills", "BS Attack", {"kind": "named", "value": "Shock"}),
+    "BS Attack (+1B)": (
+        "skills", "BS Attack", {"kind": "burst-modifier", "value": "+1B"}
+    ),
+    "Immunity (AP)": ("skills", "Immunity", {"kind": "named", "value": "AP"}),
+    "Immunity (ARM)": ("skills", "Immunity", {"kind": "named", "value": "ARM"}),
+}
+
+
+def link_booty_family_outcomes(
+    rows: list[dict[str, Any]],
+    *,
+    public_catalogs: dict[str, list[dict[str, Any]]],
+    reviewed_records: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Attach verified family links, never inferred parameter-specific mechanics.
+
+    Only explicitly reviewed source spellings can match. Every target must have
+    exactly one published name and, for Skill/Equipment, one reviewed rule family.
+    If identities become ambiguous or disappear, the original text remains.
+    """
+
+    names_by_catalog: dict[str, dict[str, list[str]]] = {}
+    for catalog in ("weapons", "equipment", "skills"):
+        names: dict[str, list[str]] = {}
+        for item in public_catalogs.get(catalog, []):
+            name, slug = item.get("name"), item.get("slug")
+            if isinstance(name, str) and isinstance(slug, str) and slug:
+                names.setdefault(name.casefold(), []).append(slug)
+        names_by_catalog[catalog] = names
+
+    rule_names: dict[tuple[str, str], list[str]] = {}
+    for record in reviewed_records:
+        kind, name = record.get("kind"), record.get("name")
+        if kind not in {"skill", "equipment"} or not isinstance(name, str):
+            continue
+        if (record.get("variant_semantics") or {}).get("inheritance") == "source":
+            continue
+        if kind == "skill" and record.get("facts", {}).get("category") not in {
+            "common-skill", "special-skill"
+        }:
+            continue
+        identity = record.get("id")
+        if isinstance(identity, str):
+            rule_names.setdefault((kind, name.casefold()), []).append(identity)
+
+    def resolve(outcome: dict[str, Any]) -> dict[str, Any]:
+        value = outcome.get("result")
+        match = _BOOTY_FAMILY_OUTCOMES.get(value) if isinstance(value, str) else None
+        if match is None:
+            return outcome
+        catalog, name, variant = match
+        slugs = names_by_catalog[catalog].get(name.casefold(), [])
+        if len(slugs) != 1:
+            return outcome
+        slug = slugs[0]
+        if catalog != "weapons":
+            kind = "skill" if catalog == "skills" else "equipment"
+            if rule_names.get((kind, name.casefold())) != [f"{kind}:{slug}"]:
+                return outcome
+        updated = outcome.copy()
+        updated["public_reference"] = {"catalog": catalog, "id": slug}
+        if variant is not None:
+            updated["outcome_variant"] = variant.copy()
+        if value != name and variant is None:
+            updated["reference_name"] = name
+        return updated
+
+    result: list[dict[str, Any]] = []
+    for original in rows:
+        row = original.copy()
+        if "conditional_outcomes" in row:
+            row["conditional_outcomes"] = [
+                resolve(branch) for branch in row["conditional_outcomes"]
+            ]
+        else:
+            row = resolve(row)
+        result.append(row)
+    return result
+
+
 def project_booty_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Expose two explicit Booty branches without replacing the Army result text.
 
