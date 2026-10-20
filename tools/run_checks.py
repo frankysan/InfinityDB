@@ -321,6 +321,8 @@ def run_stage(
             "--require-release", "1.0.0",
         ))
     commands.append(stage.command)
+    if stage.name == "docs":
+        commands.append((sys.executable, "-m", "tools.check_doc_links"))
     for command in commands:
         reporter.write(f"Command: {format_command(command)}")
         reporter.write()

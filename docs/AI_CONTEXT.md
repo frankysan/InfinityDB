@@ -49,18 +49,12 @@ release/audit narrative belongs in the changelog and Git history.
   `combined_saving_roll` annotations: one ARM and one BTS roll, plus one
   additional ARM roll for a Critical. Do not infer this from display punctuation
   or transfer it to base `ammunition:*` facts. See `docs/data-model.md`.
-- The N5.3 Immunity exception boundary lives on `skill:immunity` as validated,
-  non-executable `facts.immunityInteraction`; do not apply it automatically to
-  combined components, Weapon profiles, or Critical outcomes. Three conditioned
-  examples are rule-derived: AP+DA/AP+Exp versus Immunity (ARM), and AP+DA
-  versus Immunity (AP), which ignores AP while retaining DA and its two rolls.
-  These are **not** a general component-level Immunity evaluator. A printed
-  Immunity (BTS) versus Flash Pulse example preserves Non-Lethal and the
-  failed-Saving-Roll Stunned effect; it is recorded under `reviewedWeaponCases`
-  and is not generalized to other BTS weapons. A separate pinned,
-  explicit Vulnerability (Viral) example is **weapon-name-scoped** and prevents
-  Immunity (Enhanced) for that attack; it does not imply component parsing or
-  automatic target-specific outcomes. See `docs/rules-semantics.md` RS-AW-IMM-001.
+- `skill:immunity` owns the non-executable, source-scoped Immunity
+  exceptions and reviewed cases. **Do not generalize** derived AP+DA/AP+Exp
+  examples, the conditional Flash Pulse/Non-Lethal/Stunned case, or the
+  weapon-name-scoped Viral Vulnerability case into a target evaluator.
+  `docs/rules-semantics.md` RS-AW-IMM-001 owns exact rolls, provenance
+  and scope; curated `facts.immunityInteraction` owns typed publication.
 - For any material player-facing rules interaction, the curated explanation must
   identify its applicable conditions, ordinary mechanism, modifying rule,
   explicit exception, conditional outcome, and evidence. A correct outcome or
@@ -68,44 +62,25 @@ release/audit narrative belongs in the changelog and Git history.
   deductions and leave conflicts explicit. This is a curation/review standard,
   not an executable interaction resolver. See `data/curated/README.md` and
   `docs/web-design-guidelines.md` for the canonical contracts.
-- Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
-  geometry-schema v1 target only the four N5.3 core scenarios. All four core scenario records now
-  own their geometry configurations; renderer tests consume those maintained definitions and must
-  not maintain a second map-geometry corpus. Semantic point markers retain a `markerType`, whose canonical
-  marker metadata may include a physical diameter. N5.3 Domination
-  makes the Console diameter rules-relevant by requiring a Console A Marker or same-diameter scenery;
-  the ITS token table supplies the explicit 40 mm value. Scenario placement distances are edge-to-edge
-  unless a source explicitly names a center/reference point; marker footprint therefore participates in
-  “X inches from” placement. Map measurement annotations are reference-based: the renderer derives
-  rectangle dimensions, area-size labels, and element-to-table-edge clearances from semantic geometry
-  rather than maintaining duplicate numeric measurements. The map API supports `distance_unit=in|cm`;
-  inline SVG labels carry canonical inch data attributes and follow the existing in/cm preference
-  without a geometry refetch. Table dimensions switch too, but marker diameters remain physical mm.
-  Geometry v1 permits asymmetric and multiple Deployment Zone regions and keeps semantic style/marker identities open; SVG renderer
-  v1 separately fails closed when it lacks a supported presentation style or canonical marker metadata.
-  ITS variation informs extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See
-  `docs/data-model.md`.
-- Scenario authoring v2 composes shared, explicitly identified Rules/Skills and typed components.
-  Export resolves them into self-contained payloads in `rules.db`; runtime must not read curation
-  files. Same names do not select/merge definitions. `scope.scenarios` is an explicit activation
-  boundary; default core composition excludes scoped records, and scoped records cannot have Army
-  links. The shared Specialist baseline uses full Skill-ID arrays plus explicit inclusion deltas;
-  rendering consumes resolved qualifiers, not an authoring mini-language. Preserve its Non Specialist
-  qualification exception, Annihilation's reviewed-resolution note for the corrected 350-point
-  survival bands, and Domination's needs-verification 350-point SWC note. Supplies has no
-  placement source issue: its outer Supply Boxes are 8 inches from the table edges at every supported
-  game size; the 12-inch mark in the large-table illustration is a guide ruler, not the box offset.
-  Stable scenario-set
-  identity/revision and source publication revision are separate runtime concepts. Current
-  `ScenarioCatalog` detail reads require an explicit supported Army Points value; do not invent a
-  default configuration in backend composition. The browser defaults a state-less scenario detail
-  visit to 300 Army Points, immediately writes that choice through the common versioned `s=` share-state
-  codec, and lets explicit valid shared/legacy state win. Maps render through the canonical SVG endpoint backed by the selected
-  maintained geometry. The browser inlines the generated SVG to inherit semantic map colors from
-  the current theme; its standalone `<style>` must be removed on injection because of the app CSP,
-  with browser styling provided by the external page CSS. Map labels scale with table width without
-  changing canonical geometry. Do not recreate scenario geometry or scoring semantics in JavaScript.
-  See the scenario model in `docs/data-model.md`.
+- Scenario geometry and scoring are maintained semantics, not SVG pixels
+  or browser formulas. The four N5.3 core scenarios own their geometry;
+  tests and the SVG renderer must consume that single corpus. Marker
+  footprints, source-defined edge/center measurement references and
+  physical mm diameters affect placement; displayed inches/centimeters
+  and annotations derive from the geometry. Unknown marker styles fail
+  closed. ITS-only maps/editor remain post-1.0.
+- Scenario authoring composes exact shared Rules/Skills and typed components
+  into self-contained `rules.db` output. Scoped records do not leak into
+  core rules or acquire Army links. Browser and API use the selected
+  versioned scenario identity; backend detail requires explicit Army
+  Points, while an unshared browser visit defaults to 300 via the common
+  `s=` codec. Source disagreements remain explicit: Domination's
+  350-point SWC note is unresolved; Supplies' outer boxes are **8 inches**
+  from edges, not the diagram's 12-inch guide line.
+- Scenario SVG uses canonical geometry and semantic colors. On inlining,
+  remove the SVG's embedded `<style>` for CSP and use page CSS; never
+  recalculate geometry or scoring in JavaScript. For precise
+  marker, Specialist and source-review contracts, see `docs/data-model.md`.
 
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.

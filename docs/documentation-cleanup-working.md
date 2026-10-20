@@ -1,0 +1,247 @@
+# Documentation cleanup working audit (temporary)
+
+**Project domain:** Project infrastructure
+
+**Status:** Temporary working document, not a canonical reference or a release deliverable.
+**Audited baseline:** `dev/v1.0.0` at `ab028309a68d3755b6e615d455db01b7dac811b6`, 2026-10-20; working tree clean before this cleanup.
+**Scope:** Documentation structure and selected repository/code/configuration claims. This is *not* the mandatory exhaustive, page-by-page pre-release audit.
+
+This tracked temporary document exists to coordinate bounded edits. The connected workspace
+tool cannot create ignored `local/audits/` files; this is a working-tree placeholder,
+not a new permanent documentation owner. Before finishing the overall cleanup, transfer
+any outstanding tasks to the canonical owners, preserve distinct source evidence, and
+remove this document. Do not commit it as permanent public project documentation.
+
+## Guardrails
+
+- The ownership map in `docs/README.md` remains authoritative. Keep architecture,
+  data semantics, curated schema, browser design, CI, operations and release contracts
+  in their respective owner documents; avoid a second specification here.
+- Distinguish **current implementation**, **accepted design direction**, **open work**
+  and **frozen historical evidence**. Do not convert old test results or source
+  disagreements into current acceptance claims.
+- Preserve source identities, PDF pages, exact Wiki revisions, REA/RS/RR IDs and
+  meaningful unresolved conflicts. Move unique evidence before retiring an audit.
+- `docs/CHANGELOG.md` is parsed by `src/infinity_db/web/release_notes.py` and
+  packaged by `pyproject.toml`; preserve its heading/section grammar.
+- `docs/rules-interaction-checklist.md` is generated and verified by
+  `tools/audit_rules_interactions.py`; never hand-edit or remove it.
+- Keep new private evidence in ignored `local/audits/`; old ignored
+  `docs/audits/` and `reports/` remain supported for compatibility.
+- Make small changes, run the relevant standard checks, review diffs and Git status,
+  and leave all edits unstaged/uncommitted.
+
+## Findings, by priority
+
+### P0 — Canonical testing guide contains dated audit history
+
+**File:** `docs/testing.md` (~3,288 lines). The first ~365 lines provide useful
+check-runner, pytest, assets, benchmarks and reporting contracts. A large later
+portion accumulates dated 1.0 test/Chromium results, individual REA cases, historical
+counts and private evidence paths.
+
+**Action:** Keep repeatable command contracts, reusable test slices and the
+distinction between hermetic/optional browser acceptance. Condense or retire
+run-specific narratives only after ensuring any unique rule/source finding remains
+in curated data, rules semantics/research, or the frozen audit. Do not treat an
+earlier browser run as ongoing release acceptance.
+
+### P0 — Unreleased changelog is too detailed
+
+**File:** `docs/CHANGELOG.md` (~1,546 lines; Unreleased ~627 lines).
+Many related Weapon/Deployable/rules changes are repeated as separate implementation
+or test-history entries.
+
+**Action:** Consolidate *outcomes* for players/operators into coherent entries,
+retaining explicit compatibility/upgrade consequences and the parser's grammar.
+No release-version history rewrite without separate approval.
+
+### P1 — Backlog contains completed implementation diaries
+
+**File:** `docs/TODO.md` (~2,436 lines; ~243 checked and 155 unchecked
+items in the audited snapshot).
+
+**Action:** Keep checked prerequisites only while their parent remains open.
+When a parent is closed, promote unique decisions to canonical documents, remove
+completed standalone task narration, and leave actionable dependencies/acceptance
+for open work. Keep 1.0 and post-1.0 scopes distinct.
+
+### P1 — Rules research and reviewed semantics overlap
+
+**Files:** `docs/rules-research.md` (~2,118 lines) and
+`docs/rules-semantics.md` (~5,017 lines).
+
+**Observed examples:** `RR-AW-IMM-002` and `RR-AW-IMM-003` already describe
+implemented `skill:immunity` cases and refer to `RS-AW-IMM-001`.
+`RR-WPN-FAMILY-001` blends source evidence with current runtime/browser
+implementation detail.
+
+**Action:** Review each case for promotion, short cross-reference, or historical
+retirement. Keep evidence and conflicts, but do not maintain the same current
+contract in research and semantics.
+
+### P1 — Frozen rules audit and appendices need eventual closeout
+
+**Files:** `docs/rules-explanation-audit-1.0.md` and its three appendices
+(~4,378 lines total). These reference explicit older commits, contain frozen
+denominators, detailed provenance and follow-up decisions.
+
+**Action:** Retain until current 1.0 review is reconciled. At closeout, preserve
+unique source manifests/conflicts and any stable identifiers needed by other
+documents. Remove obsolete audit process diaries through Git history only after
+link and provenance review.
+
+### P2 — Agent context duplicates reference contracts
+
+**File:** `docs/AI_CONTEXT.md` (~353 lines).
+Retain non-obvious cross-layer invariants and links; replace routine restatement
+of data-model, browser, symbols, release and check contracts with owner links.
+
+### P0 — Private evidence location is inconsistent
+
+**Files:** `docs/README.md` and `AGENTS.md` prefer `local/`;
+`docs/releasing.md` around line 147 says raw evidence belongs under
+`docs/audits/`; `docs/TODO.md` around line 91 offers
+`reports/` or `docs/audits/` without the current canonical path.
+
+**Action:** Align new private audit evidence on `local/audits/`, preserving
+legacy paths for compatibility. Avoid treating Git ignore rules as access controls.
+
+### P2 — Markdown checks do not enforce reference integrity
+
+**Current:** The `docs` stage invokes Markdownlint. It does not establish
+local link/anchor correctness, documentation ownership or current-value parity.
+
+**Action:** Add a small offline integrity check for changed path/anchor references
+and selected canonical/version/workflow claims, registered through the existing
+check runner. No new network dependency.
+
+## Documents to retain as distinct canonical owners
+
+`docs/README.md`, `docs/architecture.md`, `docs/data-model.md`,
+`docs/application-domains.md`, `docs/project-domains.md`,
+`docs/web-design-guidelines.md`, `data/README.md`,
+`data/curated/README.md`, `docs/ci.md`, `docs/deployment.md`,
+`docs/server-migration.md`, and `docs/releasing.md`.
+Prefer targeted fixes rather than merging these.
+
+## Execution log
+
+- [x] Inventory docs and inspect representative code/configuration links; identify
+  high-value consolidation candidates and existing doc owners.
+- [x] **Batch 1:** Normalize private-audit guidance in `docs/releasing.md`
+  and `docs/TODO.md`. Consolidate the dated Ammunition, Labels and General
+  Rules acceptance subsections of `docs/testing.md` into one reusable
+  verification contract, preserving their exact commands, observed coverage
+  and historical success results while reducing repeated narrative.
+- [x] **Batch 2:** Consolidate the States, Hacking Programs and Traits
+  source/API/browser verification sections in `docs/testing.md` into a
+  reusable test/verifier index, retaining their distinct source owners and
+  old acceptance results explicitly as dated evidence.
+- [x] **Batch 3 (first pass):** Consolidate repeated `Unreleased`
+  Weapon-review, rules-reference acceptance and player-summary entries;
+  preserve player-facing outcomes, source disputes, parser structure and
+  all released-version notes. Remaining high-level summary polish is
+  part of the final release-note review.
+- [x] **Batch 4 (first pass):** Remove the fully completed standalone
+  Trait Wiki-link implementation diary after checking canonical documentation
+  and regression coverage. Condense completed cross-surface browser acceptance
+  details to a dated, scoped evidence summary, preserving the final 1.0 gate
+  and all its remaining unchecked requirements.
+- [x] **Batch 5 (first pass):** Replace two already-implemented Immunity
+  research entries with stable-ID forwarding notes to their semantic owner;
+  reduce duplicate agent-context detail; and add an offline local Markdown
+  path/heading validator to the standard documentation stage with tests.
+  Further research promotion remains part of release closeout.
+- [ ] **Release closeout:** Verify complete documentation corpus against current
+  code, tests, package, CI and player-facing routes; settle frozen evidence
+  retention, and retire this temporary working document.
+
+### Batch validation log
+
+- **Batch 1, 2026-10-20:** `docs/testing.md` condensed three adjacent
+  catalog-specific sections into one; `docs/releasing.md` and `docs/TODO.md`
+  now prefer `local/audits/` for new private audit evidence. No code, curated
+  data, generated checklist, changelog or release-facing behavior changed.
+- **Checks:** `tools/run_checks.py --stage docs` — PASS, 32 Markdown files,
+  0 issues; `tools/run_checks.py --stage test tests/test_application_rule_references.py`
+  — PASS, 15 tests. No Chromium browser acceptance or full suite attempted;
+  those are not implied by the old dated pass counts.
+- **Batch 2, 2026-10-20:** Collapsed 99 lines of separate State,
+  Hacking Program and Trait verification narratives to 49 lines of common
+  procedure with domain-specific source/contracts and all three exact
+  browser verifier commands. Preserved published population checks (24
+  States, 12 Programs, 33 Traits), 2026-10-19 browser results (72/72,
+  36/36, 99/99), and the distinction between the separate 33/33 saved-Wiki
+  Trait-anchor check and normal Trait catalog navigation. No other source
+  evidence or reference document was moved.
+- **Focused tests:** `tests/test_state_catalog.py` — 4 passed;
+  `tests/test_hacking_program_publication.py` — 1 passed;
+  `tests/test_trait_wiki_references.py` — 22 passed. No live browser
+  acceptance or full project suite was run.
+- **Batch 3, 2026-10-20:** Reduced `docs/CHANGELOG.md` by 90 lines
+  (1,546 to 1,456) across three `Unreleased` hunks only. Grouped a
+  deployable/Mines/Deactivator-heavy portion of the Player summary into
+  five outcome-oriented entries; six incremental shared-Weapon source
+  review entries into one; and nine REA implementation/acceptance notes
+  into three player-visible rule-reference improvements. Kept the source
+  disagreements (Katyusha, Eclipse, AP Thunderbolt, archived Saving
+  Rolls, Flash Pulse), remaining non-Allied eligibility question and
+  exact variant/parameter boundaries. Removed obsolete intermediate
+  remaining-review counts without changing underlying rules evidence.
+- **Checks:** `tests/test_release_notes.py` — 18 passed;
+  `docs` Markdownlint — 32 files, 0 issues. The `Unreleased`
+  heading and all Added/Changed/Fixed headings remain valid; first
+  released version is still `0.10.1` dated 2026-10-10. No application
+  runtime, player-route or release packaging changes were made.
+- **Batch 4, 2026-10-20:** Reduced `docs/TODO.md` from 2,437 to
+  2,344 lines (93 lines). Removed one fully completed, standalone
+  Trait-to-Wiki mapping implementation diary after verifying the
+  permanent contract in `docs/data-model.md`, the exact mapping
+  `config/catalogs/trait-wiki-references.json`, and maintained
+  `tests/test_trait_wiki_references.py`. The distinct 33/33 saved
+  Wiki-anchor and current-development-server browser acceptance remain
+  documented with their limits under `docs/testing.md`.
+  Condensed the four completed browser acceptance slices and nested
+  Weapon-family navigation into bounded historical evidence:
+  93/93, 51/51 source paths, 49 Glossary concepts, 42/42 navigation,
+  167/167 Fireteams, 805/805 core scenarios, and 469/469
+  Visibility Zone/Ammunition/Immunity. Kept the canonical Mines
+  route, responsive checks, source limitations and unresolved
+  REA-020/Domination dependencies; retained the open final 1.0
+  acceptance parent and every unchecked requirement.
+- **Checks:** `docs` Markdownlint — PASS, 32 files/0 issues;
+  `tests/test_trait_wiki_references.py` — PASS, 22 tests. No
+  fresh browser acceptance or full project test suite attempted.
+- **Batch 5, 2026-10-20:** Reviewed and condensed implemented Immunity
+  research entries `RR-AW-IMM-002/003` into stable-heading forwarding
+  notes; `docs/rules-semantics.md` RS-AW-IMM-001 and curated
+  `skill:immunity` already own the explicit/derived cases and
+  unresolved source conflicts. The research IDs, their original
+  source revision identities, and caveats remain discoverable.
+  `docs/AI_CONTEXT.md` was reduced from 353 to 328 lines by
+  forwarding detailed Immunity and scenario mechanics to their
+  canonical owners while retaining non-obvious boundaries.
+- **Documentation integrity:** Added `tools/check_doc_links.py`
+  (ordinary inline/reference Markdown links, relative files and
+  GitHub-style heading anchors, including duplicate headings; no
+  network requests or application-route checking), registered
+  `tests/test_doc_links.py`, and appended this check to the existing
+  `docs` stage after Markdownlint using the check-runner Python.
+  Fixed the initial checker bug affecting the two hyphens
+  produced by punctuation removal around an em dash; existing
+  Immunity anchor links were correct and unchanged.
+  `docs/testing.md` now documents the stage's full contract.
+- **Checks:** 4 doc-link tests, 33 check-runner tests and 2
+  test-registration tests passed (**39 focused tests**).
+  Ruff passed for changed Python sources/tests;
+  Pyright reported **0 errors/0 warnings**; the `docs`
+  stage passed Markdownlint (**32 files, 0 issues**) and
+  the offline link scan (**28 maintained files, 0 errors**).
+  No full project suite, live browser acceptance, or external
+  URL verification was performed.
+- **Next:** Release closeout still requires a thorough comparison of
+  documentation with the final code/data/API/browser publication,
+  decisions on frozen 1.0 audit appendices and any remaining
+  implemented-research entries, a final changelog player-summary
+  review, and eventual retirement of this temporary working file.

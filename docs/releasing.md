@@ -144,9 +144,10 @@ During the audit:
 
 The audit is complete only when stale documentation discovered during the review has
 been corrected in the release preparation, or is explicitly retained and labelled as
-historical context. Raw evidence belongs under `docs/audits/`. Do not create a permanent
-release-specific audit document by default: promote lasting conclusions into the canonical
-document owner, record release outcomes in `CHANGELOG.md`, and let Git history preserve the
+historical context. Keep new private/raw audit evidence under ignored `local/audits/`;
+existing ignored `docs/audits/` and `reports/` paths remain supported for
+compatibility. Do not create a permanent release-specific audit document by default:
+promote lasting conclusions into the canonical document owner, record release outcomes in `CHANGELOG.md`, and let Git history preserve the
 review narrative. Keep a tracked audit/closeout file only when it contains unique rationale that
 will actively guide later work.
 

@@ -351,6 +351,35 @@ def test_run_stage_streams_output_and_reports_failure(
     assert "Result: FAIL" in output
 
 
+def test_docs_stage_runs_markdownlint_before_local_link_validation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("docs", ("npm", "run", "lint:docs")),
+            reporter,
+        )
+
+    assert result.status == "PASS"
+    assert commands == [
+        ("npm", "run", "lint:docs"),
+        (sys.executable, "-m", "tools.check_doc_links"),
+    ]
+
+
 def test_rules_stage_runs_interaction_audit_before_database_build(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

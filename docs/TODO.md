@@ -87,9 +87,10 @@ a populated JSON collection alone does not complete a player-facing task.
 
 For each implementation slice, record the source/version being covered, remaining decisions,
 affected canonical documents, and evidence needed to close it. Extend existing validators and
-audit tools before introducing another coverage system. Keep generated evidence in ignored
-`reports/` or `docs/audits/`; keep maintained semantic decisions in validated curated data or
-configuration. Use [the standard checks](testing.md) for the affected contracts, and add manual
+audit tools before introducing another coverage system. Keep new private evidence under
+ignored `local/audits/` (legacy ignored `reports/` and `docs/audits/` remain supported);
+keep maintained semantic decisions in validated curated data or configuration.
+Use [the standard checks](testing.md) for the affected contracts, and add manual
 browser acceptance for new visual/interaction surfaces. Promote durable contracts to their
 canonical owners as implementation lands; keep remaining design extensions explicitly labelled
 as unimplemented and distinguish them from the published core-scenario foundation.
@@ -1847,126 +1848,33 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - **Completion:** players can compare weapon profiles and reach Ammunition/Traits and deployed
     object statistics without selecting a carrier first; reverse uses preserve Army/loadout context.
 
-- [x] **Data processing + Web backend + Web frontend:** Add a curated Infinity Wiki URL mapping
-  for traits when authoritative links are available.
-  - [x] Publish two exact, validated official Wiki heading links for Continuous
-    Damage and Non-Lethal from a maintained canonical Trait-ID/name map,
-    without guessing destinations for other source labels.
-  - [x] Expand reviewed links to Boost, Deployable, Double Shot, Perimeter
-    and Reflective using the official English Traits headings. Verify that all
-    seven linked IDs and names match the current curated 33-Trait corpus;
-    preserve unmapped Traits, historical source aliases and source citations.
-  - [x] Reconcile all 33 canonical Trait names with the N5.3 English Wiki
-    Traits page. Add fifteen direct heading references without complicated
-    punctuation, bringing maintained mappings to 22/33; validate every mapped
-    ID/name against the current curated corpus and the Trait API. The eleven
-    remaining named headings use punctuation-sensitive fragment syntax and
-    are intentionally unmapped pending exact anchor verification.
-  - [x] Add a read-only audit of saved official Traits-page HTML against exact
-    configured fragment IDs and expected heading text. Missing fragments and
-    wrong-target headings fail closed; synthetic fixtures cover both formats
-    of MediaWiki heading markup. Source-HTML and isolated Chromium
-    navigation verification subsequently passed.
-  - [x] Extend the HTML audit with exact fragment candidates for the eleven
-    unmapped canonical Traits, an input SHA-256, and robust heading-text
-    extraction that excludes edit controls. Candidates remain unapproved until
-    checked against saved official HTML and real browser navigation.
-  - [x] Reconcile all eleven punctuation-sensitive Traits using the exact
-    heading IDs reported by the saved official Wiki HTML audit. The previous
-    22 links matched 22/22 (35 headings parsed), and the remaining eleven
-    each had one unambiguous heading candidate. Publish those observed
-    IDs verbatim (including MediaWiki .28/.29 and .3D encoding) rather
-    than constructing URL fragments from display names. All 33 canonical
-    Trait identities now have maintained Wiki links and API regression
-    coverage.
-  - [x] Re-run the saved official Traits HTML audit against all 33 mappings:
-    **33/33 exact headings matched** (35 headings parsed), reported
-    2026-10-19. The source HTML and its SHA-256 were not supplied through
-    the repository probe; capture provenance remains in the local audit files.
-  - [x] Fix player-facing visibility: the 33 linked URLs were previously
-    rendered only inside developer-only metadata. Trait details now provide
-    a separate visible "Official Infinity Wiki" link in normal mode,
-    preserving the developer metadata and its existing behavior.
-  - [x] Add optional local Chromium acceptance tooling that visits all 33
-    Trait pages with Developer Mode disabled, clicks the visible link,
-    and verifies the correct heading/hash and browser scroll position
-    against the saved Wiki HTML (external navigation mocked).
-  - [x] Investigate initial 0/33 Chromium result: all 33 Trait page requests
-    returned HTTP 404 at the supplied test base URL. The current source
-    presentation handler serves all 33 registered routes successfully.
-    Add preflight diagnostics for wrong/stale target servers and document
-    the dedicated local development server at port 8000.
-  - [x] Run the 33-page Chromium verifier against the current local
-    development server and saved official Wiki HTML: **33/33 passed**,
-    reported 2026-10-19. The initial 0/33 test targeted the wrong/stale
-    service; using the current app resolved the HTTP 404 responses.
-    The browser check uses a saved official Wiki snapshot instead of
-    external network navigation. Recheck live navigation if the official
-    site changes its markup or redirect handling.
-  - **Completion:** mapped links reach the reviewed official page/heading from normal Trait help;
-    unavailable mappings remain deliberate. Source-link checking is explicit research activity,
-    while automated mapping/resolution tests remain offline.
-
 ### Final 1.0 acceptance
 
-The 0.10.1 offline checks and later REA-017/026 scoped Chrome reviews do not
-prove the four cross-surface browser interactions below. These incomplete
-acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
+Earlier 0.10.1 offline and REA-scoped checks did not constitute full
+browser acceptance. The following **bounded Chromium slices were completed
+on 2026-10-19** at 1440/390/320 px; they are historical checkout-specific
+results, not a substitute for final source-to-browser completeness:
 
-- [x] **Web frontend - reference-card browser acceptance:** IMP-2,
-  Stealth, Deployable Cover, TinBot and Kobra CC were exercised in Chromium
-  at 1440, 390 and 320 px against a freshly generated rules database.
-  **93/93** real browser checks passed for published text, keyboard-focusable
-  rule navigation, the Kobra CC Attribute link into Glossary, cited-source
-  links opening their intended URLs in new tabs, and absence of JavaScript
-  errors and horizontal overflow. The 320 px screenshots were reviewed for
-  readability. External source responses were mocked; live third-party
-  availability and the other final 1.0 interaction areas remain separate.
-  - [x] **Web backend + Web frontend - shared weapon-family navigation:**
-    Verified the canonical `weapon:mines` destination is already
-    `/weapons/ap-mine#rule-weapon-mines`; `/weapons/mines` is an unsupported
-    *Army catalog* slug, not the generated link. Audited all 51 current
-    curated Weapon definitions: 51/51 resolve to existing Army Weapon
-    pages containing their corresponding rules cards. Fixed the actual
-    discovery gap: the Glossary bulk query lacked opt-in Army links and
-    silently omitted those definitions. The Glossary now includes 49
-    routable non-source-variant Weapon concepts; source-specific mode
-    definitions remain scoped to their Weapon. Chromium passed 42/42
-    Glossary-to-family, local-card and cross-page navigation checks at
-    1440/390/320 px. No synthetic Mines product or duplicate rules route.
-- [x] **Web frontend - Fireteam browser acceptance:** Chromium verified the
-  general formation and ongoing-integrity reference, Army selection,
-  Wildcard eligibility projection, chart limits and member requirements,
-  canonical FT Master and Unit navigation, shareable scoped URLs,
-  back/forward scope changes and returning to the unscoped overview.
-  **167/167** checks passed at 1440, 390 and 320 px, including switching
-  Wildcards off/on, loading a saved Army URL directly, and scrolling
-  contained member tables horizontally at 320 px. No JavaScript errors
-  or page-level overflow. This is browser acceptance, not a Fireteam
-  list builder or a resolution of separately tracked REA-020 mechanics.
-- [x] **Web frontend - core-scenario browser acceptance:** All four core
-  Scenarios were exercised against current curated rules at 1440, 390 and
-  320 px. **805/805** browser checks passed across the six supported Army
-  Points values, rapid selection, scoped rules links, history navigation,
-  light/dark themes, inch/cm SVG labels and table measurements, keyboard
-  and touch interaction (including first-tap preview/second-tap follow),
-  and controlled loading/empty/API error/recovery states. No JavaScript
-  errors or page-level overflow; narrow maps were visually reviewed.
-  This closes browser acceptance only. The separate six-size scenario
-  source-inventory review, scoped concepts and unresolved Domination
-  350-point SWC discrepancy remain explicitly open.
-- [x] **Web frontend - Visibility Zone and Ammunition/Immunity acceptance:**
-  Chromium verified Visibility Zone previews, canonical Glossary anchors,
-  Ammunition/Immunity rule cross-links and their destinations with pointer,
-  keyboard and touch. **469/469** content, preview, focus, navigation and
-  layout checks passed at 1440, 390 and 320 px. First touch previews and
-  second touch follows; tooltip text and horizontal bounds remained readable.
-  Reviewed selected narrow layouts and confirmed no JavaScript errors.
-  - [x] Corrected the shared 320 px breadcrumb overflow, previously 6 px on
-    Normal, DA, Shock, Smoke and Eclipse Ammunition. Shared small-screen
-    breadcrumb wrapping/gap now keeps the "Rules reference" tag visible,
-    rather than clipping it or hiding it. Other reference pages were checked.
-    A focused served-CSS regression guards the layout contract.
+- **Reference cards and Weapon navigation:** 93/93 checks across IMP-2,
+  Stealth, Deployable Cover, TinBot and Kobra CC; 51/51 reviewed Weapon
+  definitions resolved to existing Army pages, 49 non-source-variant
+  Weapon concepts appeared in the Glossary, and 42/42 navigation checks
+  passed. Mines links use `/weapons/ap-mine#rule-weapon-mines`, not an
+  invented `/weapons/mines` Army route.
+- **Fireteams:** 167/167 checks for scoped Army selection, Wildcards,
+  formations, chart/member links, browser history and narrow table scrolling.
+  This does not implement a Fireteam builder or settle REA-020.
+- **Core scenarios:** 805/805 checks across four scenarios, six Army
+  Points selections, URL history, themes, unit conversion, navigation and
+  error recovery. Source reconciliation and the Domination 350-point SWC
+  discrepancy remain independent open work.
+- **Visibility Zone, Ammunition and Immunity:** 469/469 link, preview,
+  focus, touch and layout checks; the 320 px breadcrumb overflow was
+  corrected and protected by a served-CSS regression.
+
+External source responses were mocked where required; live third-party
+reachability was not demonstrated. The canonical testing guide and
+individual verifiers remain the repeatable acceptance procedures.
 
 - [ ] **Data processing + Web backend + Web frontend + Project infrastructure:**
   Execute the final 1.0 source-to-storage-to-browser completeness gate defined by

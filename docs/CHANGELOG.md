@@ -87,80 +87,35 @@ are not retroactively relabeled.
   tooltips when moving between pages.
 - Visibility Zone help now distinguishes additive Range, Cover, Skill and
   Equipment MODs from the non-stacking, most-restrictive Zone MOD.
-- Mines now explicitly measure their Trigger Area from the edge of
-  the Mine's base and exclude Total Cover from the template's Blast Focus.
-- Modifiers Explained now covers bracketed-only-on-use MODs,
-  positive/negative recipients and one-die ReRoll, with a
-  link to existing Special Dice rules. Mixed Weapons also
-  links Vorpal CC Weapon and its PH-based BS Mode without
-  changing imported profiles.
-- Mixed Weapons now have one shared N5.3 source-backed rule
-  linked from Trench-Hammer and Kobra Pistol. The reference
-  explains distinct BS/CC modes and Trench-Hammer's PH-based
-  BS exception; existing Kobra source disputes remain visible.
-- Mine pages now show the weapon-specific profile before the long
-  shared Mines rules; Cybermine and PARA Mine-specific cards
-  also precede the family text. Cybermine displays absent
-  ammunition as "--" rather than the imported numeric 0.
-  Chest Mine BS/CC modes and source profiles are unchanged.
-- Deactivator now distinguishes same-Order Mine and
-  Cybermine triggers, Boost contact attacks and Armed
-  Turret reactions, including concealed Marker
-  ineligibility and each item's existing conditions.
-- Deactivator now explains eligible enemy deployed targets,
-  Range-only WIP removal, the same-Order trigger exception,
-  and how removal ends persistent Dazer, Repeater and
-  Deployable Cover effects. Allied Disco Ball activation
-  remains a separate Skill.
-- Dazer now distinguishes ordinary placement from the
-  persistent Difficult Terrain area it generates, including
-  Conclusion activation and destruction/deactivation.
-  The published S0/S1 Silhouette disagreement remains visible.
-- FastPanda and WildParrot now distinguish Perimeter placement
-  from later Repeater or E/M Mine effects, with visible object
-  Attributes and Conclusion-step timing. WildParrot explains
-  failed Intuitive Attack consumption; its Non-Lethal source
-  discrepancy remains explicitly unresolved.
-- Deployable Repeater now distinguishes ordinary Place Deployable
-  placement from Pitcher delivery, explains the resulting Token's
-  Hacking Area effects, and links canonical Repeater targeting
-  and removal rules. Disco Ball lifecycle tests confirm that
-  deactivation preserves the Ball while destruction removes it.
-- Pitcher and Disco Baller now explain launcher charge consumption,
-  deployed-object Attributes, legal landing locations and
-  occupied-position corrections. Disco Ball reactivation remains
-  a separate Deactivator action, not another launcher shot.
-- Mine Dispenser now explains inherited Drop Bears BS Mode
-  restrictions, the shared CAMO placement exception, and
-  failed-roll Disposable consumption without granting Drop
-  Bears' separate Deployable or Intuitive Attack options.
-- Drop Bears now explain why direct placement requires no Roll,
-  Intuitive Attack placement uses WIP and consumes a charge on
-  failure, and throwing uses a PH-based Roll with the same
-  shared Disposable pool. Activation remains at the Order's
-  Conclusion; imported weapon profiles are unchanged.
-- Boost now distinguishes placing a device near a CAMO Marker from
-  triggering it later. The clarification covers the non-Camouflaged
-  enemy placement exception, legal Intuitive Attack eligibility,
-  activation timing and the different Mine trigger rules.
-- Mines now explain why a qualifying Dodge declaration may trigger
-  them, while subsequent Dodge or failed-Guts movement cannot;
-  canonical Dodge, Guts Roll and Stealth references remain linked.
-- SymbioBomb now explicitly identifies its three printed Traits:
-  Assignable (Transmutation), Comms Attack and Optional. Its published
-  Pheroware behavior is unchanged.
-- Armed Turret now explains Disposable (1), Non-Reloadable, and
-  Perimeter placement inside the deploying Trooper's Zone of Control,
-  with a direct Place Deployable reference. Source disputes remain.
-- Mines now distinguish a concealing CAMO Marker (S2) from the revealed
-  Mine object, whose S0/S1 values conflict across published sources.
-  The distinction does not change any Weapon profile or Chest Mine rules.
-- Silhouette help now explains the valid S0 and SX templates alongside
-  the existing S1-S8 comparison diagrams, without treating their absence
-  from the illustrations as a missing rule.
-- AP Thunderbolt, AP+EXP CC Weapon and Stun Pistol now disclose conflicting
-  Wiki chart values beside the current N5.3/Army weapon rules; the imported
-  profiles and gameplay effects remain unchanged.
+- Mine references now explain edge-of-base Trigger Area measurement,
+  Blast Focus and Total Cover, declaration-triggered Dodge versus later
+  Dodge/Guts movement, and the differences between concealed CAMO
+  Markers and revealed Mines. Mine-specific profiles appear before
+  shared rules; Cybermine, PARA Mine and Chest Mine retain their distinct
+  profiles and modes. Cybermine's absent ammunition now displays "--".
+- Deactivator now distinguishes eligible enemy deployed targets,
+  Range-only WIP removal and same-Order Mine/Cybermine activation from
+  Boost contact attacks, Armed Turret reactions and concealed Markers.
+  Removing an object ends its persistent Dazer/Repeater/Deployable
+  Cover effects; activating an allied Disco Ball remains separate.
+- Deployed-object references clarify Dazer placement and persistent
+  Difficult Terrain; FastPanda/WildParrot Perimeter effects and timing;
+  Deployable Repeater versus Pitcher delivery; launcher charges, landing
+  and occupied-position rules for Pitcher/Disco Baller; and Mine
+  Dispenser's inherited Drop Bears BS Mode versus Drop Bears' own
+  placement, Intuitive Attack and PH throwing. Boost now distinguishes
+  legal placement near CAMO Markers from later contact triggers.
+  Effects activate at their applicable Order/Conclusion timing.
+- Modifiers Explained now distinguishes bracketed Skill MODs,
+  recipients and one-die ReRoll. Mixed Weapons links the shared
+  N5.3 BS/CC modes from Trench-Hammer, Kobra Pistol and Vorpal CC
+  Weapon, including PH-based BS exceptions without changing profiles.
+- SymbioBomb now lists its three printed Traits; Armed Turret clarifies
+  its Disposable/Non-Reloadable Perimeter placement and reactions.
+  Silhouette help includes S0/SX alongside S1-S8 diagrams. Published
+  Dazer and Mine Silhouette conflicts, plus AP Thunderbolt,
+  AP+EXP CC Weapon and Stun Pistol source-chart discrepancies,
+  remain visible without modifying imported gameplay profiles.
 - The Scenario browser now offers a collection selector for N5 Core and
   published ITS missions. Season 18 starts with Battleground, including
   its end-of-game Sectors, size-dependent map, 2/3/5-point scoring and
@@ -404,44 +359,22 @@ are not retroactively relabeled.
 
 ### Changed
 
-- **Data processing:** Verify Katyusha MRL and Jammer as shared-effects-only
-  Weapon references. Katyusha's `+3` range modifier is already established
-  by RR-SRC-N53-003; preserve the PDF omission. Jammer's Comms Attack,
-  No LoF and Isolated references resolve as Labels/State rather than
-  Trait slugs. Pending source reviews decrease to 11 without changing
-  Army profiles or adding duplicate mechanics.
-- **Data processing:** Review four Grenade Launchers and Portable
-  Autocannon as hash-pinned shared-effects-only cases. Canonical
-  Ammunition, Impact Template, Speculative Attack and AP+EXP rules
-  already explain their effects. Preserve Eclipse's non-operative
-  imported Saving Roll number. Pending Weapon reviews fall to 13.
-- **Data processing:** Review E/M Carbine, AP+T2 CC Weapon,
-  Monofilament CC Weapon, and Light/Heavy Riotstoppers as
-  profile-hash-pinned shared-effects-only references. Existing
-  Ammunition, Trait and Weapon Property rules describe their effects,
-  without introducing duplicate Weapon cards. Retain source
-  discrepancies for AP+EXP CC Weapon and Stun Pistol: archived
-  Spanish Wiki Saving Roll counts differ from official N5.3/Army.
-  Remaining source reviews decrease to 18.
-- **Data processing:** Accept five additional source-verified,
-  profile-hash-pinned shared-only Weapons: Tactical Bow, Ohotnik,
-  T2 CC Weapon, AP+DA CC Weapon and AP+Shock CC Weapon. Reuse
-  canonical Ammunition, Trait and Weapon Property explanations,
-  preserving one-versus-two Saving Roll differences. Pending Weapon
-  source reviews fall to 23 without adding duplicate rule cards.
-- **Data processing:** Review Red Fury, AP Red Fury and Thunderbolt as
-  source-pinned shared-effect profiles, using existing Shock, AP, Normal
-  Ammunition and Suppressive Fire references. Retain AP Thunderbolt as
-  a pending source discrepancy: official N5.3 and Army print AP,
-  while archived English and Spanish Wiki charts print N. Remaining
-  Weapon source reviews decrease to 28 with no gameplay-data changes.
-- **Data processing:** Reconcile Weapon definition gaps against a freshly built
-  rules database and N5.3 source-chart evidence. Explicitly accept Breaker Rifle,
-  Viral Combi Rifle, Viral Rifle, Viral Pistol and Viral Tactical Bow as
-  hash-pinned, shared-effects-only references: current AP/Normal Ammunition,
-  BioWeapon, Silent, Suppressive Fire and Weapon Properties already cover their
-  mechanics. Remaining source reviews decrease to 31; Weapon profiles and
-  player-facing behavior are unchanged.
+- **Data processing:** Reviewed additional Weapon definitions against N5.3
+  sources and reused canonical Ammunition, Weapon Property, Trait,
+  Template, Speculative Attack and Suppressive Fire explanations rather
+  than duplicating their mechanics. This covers Katyusha MRL, Jammer,
+  four Grenade Launchers, Portable Autocannon, E/M Carbine, AP+T2 and
+  Monofilament CC Weapons, Light/Heavy Riotstoppers, Tactical Bow,
+  Ohotnik, T2/AP+DA/AP+Shock CC Weapons, Red Fury/AP Red Fury,
+  Thunderbolt, Breaker Rifle, and the Viral Combi Rifle, Rifle,
+  Pistol and Tactical Bow. Existing Army profiles are unchanged.
+  Source differences remain visible: Katyusha's +3 range MOD is
+  absent from the referenced PDF, the Eclipse Launcher retains a
+  non-operative imported Saving Roll figure, AP Thunderbolt is AP in
+  Army/N5.3 but N in archived Wiki charts, and archived Spanish Wiki
+  Saving Roll counts for AP+EXP CC Weapon and Stun Pistol conflict with
+  the current official sources. Individual one-/two-roll distinctions
+  remain governed by their underlying rules.
 - **Data processing:** Introduce validated dated FAQ ruling authoring fields
   for exact applicability, original provenance, reviewed source selection,
   conflicts and explicit supersession references. Rules export now rejects
@@ -486,49 +419,26 @@ are not retroactively relabeled.
   examples and English/Spanish N5.3/FAQ citations for independent
   Deployable triggers, mixed Controller/Peripheral activation, and
   Marker announcements. Keep existing ARO and counter-Skill mechanics.
-- **Data processing + Web frontend:** Complete REA-010 Immunity reference
-  acceptance with linked Trait-protection examples, Monofilament
-  one-/two-roll wording, and bilingual N5.3 source verification.
-  Preserve conditional Immunity cases, evidence labels, imported weapons,
-  and the existing Flash Pulse source-conflict disclosure.
-- **Data processing + Web frontend:** Complete REA-009 State/recovery
-  timing reference acceptance with bilingual N5.3 p. 15 sources,
-  an explicit positive-before-negative resolution example, and links
-  from Doctor, Engineer and IMM-A to the shared Order rules. Preserve
-  existing State transitions, source data and game mechanics.
-- **Data processing + Web frontend:** Complete REA-007 Request
-  Speedball reference acceptance with a source-backed PH 15 worked
-  example and regression coverage for the reciprocal Controlled Jump
-  FAQ exception. Preserve the original PH values, placement rules,
-  Combat Jump relation, and versioned provenance.
-- **Data processing + Web frontend:** Complete REA-006 Controlled Jump
-  reference acceptance with three worked timing, opposing-Program and
-  Token-scope examples, bilingual N5.3 source citations, and linked
-  Combat Jump/Speedball references. Retain all existing Supportware,
-  scenario modifier and FAQ mechanics.
-- **Data processing + Web frontend:** Complete REA-005 BS Weapon (WIP)
-  reference acceptance with source-linked ordinary attack, Shock Skill
-  versus Ammunition, and Guided examples, including Spanish N5.3 p. 39.
-  Preserve source profiles, canonical attack relationships, and deferred
-  exact-variant restriction edges.
-- **Data processing + Web frontend:** Complete REA-004 Continuous Damage
-  reference acceptance with ordinary-hit/Critical-only roll examples,
-  conditional Immunity variants, and English/Spanish N5.3 citations.
-  Preserve the underlying Trait, weapon data, and deferred graph edges.
-- **Data processing + Web frontend:** Complete REA-003 Intuitive Attack
-  reference acceptance with three source-linked examples and bilingual
-  N5.3 citations. Preserve B1/WIP Attack resolution and existing placement
-  mechanics without adding a second BS Roll or changing imported data.
-- **Data processing + Web frontend:** Complete REA-002 Doctor
-  reference acceptance with N5.3-cited examples for ordinary VITA
-  recovery, Stunned, No Wound Incapacitation, and Technorganic.
-  Preserve Doctor variant mechanics and pending non-Allied eligibility
-  review; no recovery engine or imported Army profiles changed.
-- **Data processing + Web frontend:** Complete REA-001 Engineer
-  reference acceptance with source-backed VITA Targeted and
-  VITA/STR Stunned examples, plus linked N5.3 source citations. Preserve
-  existing recovery, failure, self-use and delegated target rules;
-  non-Allied direct use remains separately unresolved under REA-038.
+- **Data processing + Web frontend:** Expanded source-linked Immunity,
+  State resolution and recovery explanations. Reviewed examples cover
+  Monofilament's one-/two-roll cases, conditional Immunity protections,
+  the disclosed Flash Pulse source conflict, positive-before-negative
+  effects in an Order, and Doctor/Engineer interactions with Stunned,
+  Targeted, No Wound Incapacitation and Technorganic Troopers.
+  Existing State transitions, Doctor/Engineer variants, self-use and
+  delegated targets are unchanged; direct non-Allied eligibility
+  remains an open source question.
+- **Data processing + Web frontend:** Added N5.3 worked examples for
+  Request Speedball's PH 15 Token placement and Controlled Jump's
+  timing, opposing Programs and Token scope, including their reciprocal
+  FAQ exception and Combat Jump references. Existing placement,
+  Supportware and scenario modifiers are unchanged.
+- **Data processing + Web frontend:** Clarified BS Weapon (WIP),
+  Continuous Damage and Intuitive Attack with bilingual N5.3 examples:
+  ordinary, Shock and Guided attacks; ordinary hits versus Criticals
+  and conditional Immunity; and single B1/WIP resolution without a
+  second BS Roll. Source profiles remain unchanged, with exact-variant
+  restriction links still subject to separate review.
 - **Data processing + Web frontend:** Publish a checked Level 3 Morat
   Fireteam example alongside the cumulative bonus table, with separate
   bilingual source notes for the contradictory Level 4 bonus in the

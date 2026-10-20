@@ -39,33 +39,29 @@ Record:
 Keep unresolved interpretations explicitly unresolved. Do not use this file to
 turn an inference into a source-native rule.
 
+### Promoted Immunity findings (research ID redirects)
+
+The following historical research IDs have **implemented, non-executable**
+consumers. Their authoritative semantics, explicit-versus-derived evidence,
+source discrepancies and remaining scope limitations are maintained under
+[RS-AW-IMM-001](rules-semantics.md#rs-aw-imm-001--immunity-changes-covered-effects-not-the-attack-identity)
+and the reviewed `skill:immunity` record. Keep these IDs as navigation
+aliases; do not maintain a second interaction specification here.
+
 ### RR-AW-IMM-002 — Component-specific Immunity: reviewed AP+DA case
 
-**Scope:** N5.3 Immunity (AP) applied to an ARM-based AP+DA attack.
-
-The pinned [Immunity](https://infinitythewiki.com/index.php?title=Immunity&oldid=3643)
-rule treats its named Ammunition as Normal; the pinned
-[Combined Ammunition](https://infinitythewiki.com/index.php?title=Combined_Ammunition&oldid=3000)
-rule preserves the effects of each constituent type. Together, they support
-**AP+DA → N+DA, effectively DA** when Immunity (AP) negates only AP: the
-ARM-halving effect is removed, while DA still requires **two full-ARM Saving
-Rolls**, or **three** on a Critical. This interpretation was clarified during
-the 2026-10-09 project review and is **derived from the general rules**, not
-an example explicitly printed on the cited pages. It is recorded as a reviewed,
-non-executable case in `skill:immunity` and RS-AW-IMM-001.
-
-This exact example does not settle other named-component Immunities or other
-Combined Ammunition pairs, and should not be turned into a general calculation
-or generalized from weapon-name-specific Vulnerability examples. Historical
-N4/N3 interactions are not authoritative N5 precedents.
+**Promoted.** Derived Immunity (AP) versus AP+DA (not an official printed
+case). The owning semantic record preserves Wiki Immunity `oldid=3643`,
+Combined Ammunition `oldid=3000`, exact scope and open exceptions;
+no generic component calculator is implied.
 
 ### RR-AW-IMM-003 — Printed Immunity (BTS) versus Flash Pulse example
 
-**Scope:** N5.3 Wiki [Immunity Example 4](https://infinitythewiki.com/index.php?title=Immunity&oldid=3643), with the N5.3 [Weapon Chart](https://infinitythewiki.com/index.php?title=Weapon_Chart&oldid=4083) for Flash Pulse's STUN/BTS and Trait profile.
-
-**Explicit printed example:** Immunity (BTS) treats a Flash Pulse hit as Normal Ammunition; **Non-Lethal still prevents Wounds**, and **State: Stunned still applies after a failed Saving Roll**. The example confirms that neutralizing covered Ammunition does not erase these exceptional weapon Traits. Its failed-roll condition is material: the example does not apply Stunned on every hit.
-
-This is weapon-scoped, not a general Immunity (BTS) algorithm for all BTS weapons or for combined components. The curated `skill:immunity` reference records this exact example in `reviewedWeaponCases`, and `weapon:flash-pulse` links the same canonical Traits and State. Further weapon-specific interactions remain open.
+**Promoted.** Printed Immunity (BTS)/Flash Pulse interaction, Wiki Immunity
+`oldid=3643` Example 4 and Weapon Chart `oldid=4083`. The owning
+semantic record preserves Non-Lethal, conditional Stunned, and the Spanish
+Wiki/PDF conflict. `skill:immunity.facts.reviewedWeaponCases` is the
+specific consumer, not a general BTS algorithm.
 
 ## Official publication-change notices
 

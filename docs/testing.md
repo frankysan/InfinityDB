@@ -3,7 +3,8 @@
 **Project domain:** Project infrastructure
 
 `tools/run_checks.py` is the canonical local validation entry point. It keeps pytest, Ruff,
-Markdownlint, Pyright, Army database-build validation, rules-database validation, asset policy,
+Markdownlint, offline documentation link checks, Pyright, Army database-build validation,
+rules-database validation, asset policy,
 worker selection, and optional reporting under one command contract.
 
 The type-check stage explicitly passes the runner's interpreter to Pyright for dependency
@@ -24,7 +25,7 @@ The runner exposes six stages:
 
 - `test` — pytest;
 - `lint` — Ruff;
-- `docs` — Markdownlint (Markdown);
+- `docs` — Markdownlint plus offline local Markdown path/heading checks;
 - `type` — Pyright;
 - `build` — Army data/database build validation;
 - `rules` - interaction-review coverage and generated-checklist validation, followed by
@@ -46,19 +47,28 @@ python tools\run_checks.py --all
 `--profile all` is equivalent to `--all` and includes `docs`. The `code` and `data`
 profiles retain their existing Python/data-only stage sets.
 
-The documentation stage uses the exact, lockfile-pinned `markdownlint-cli2` development dependency
-with the project's `.markdownlint.json` rules. It scans repository Markdown while excluding ignored
-local material, dependencies and reports. Install it **explicitly** before running `docs` or `--all`:
+The documentation stage first runs the lockfile-pinned `markdownlint-cli2` dependency
+with the project's `.markdownlint.json` rules, excluding local material,
+dependencies and reports. It then runs `tools.check_doc_links` with the
+same Python interpreter as the check runner to verify relative Markdown file
+paths and heading anchors in the maintained root, `docs/`, and `data/`
+reference files. The link checker does not access external URLs, validate
+application routes or substitute for browser acceptance; it checks ordinary
+inline links and reference definitions, not arbitrary embedded HTML.
+Install the Markdownlint dependency **explicitly** before `docs` or `--all`:
 
 ```powershell
 npm ci --ignore-scripts --no-audit --no-fund
 .\.venv\Scripts\python.exe tools/run_checks.py --stage docs
 ```
 
-Node.js 22 or newer is required (CI uses Node.js 24). `npm run lint:docs` is an equivalent
-direct command. The stage invokes the installed command via `npm run`, not `npx`; checks neither
-install dependencies nor fetch packages automatically. Bootstrap downloads happen only with the
-separate `npm ci` step. Missing npm or dependencies cause an explicit check failure. No Node.js
+Node.js 22 or newer is required (CI uses Node.js 24). `npm run lint:docs`
+runs **Markdownlint only**; use `--stage docs` for both checks or invoke
+`python -m tools.check_doc_links` directly for the offline link audit.
+The stage invokes the pinned installed tool via `npm run`, not `npx`;
+checks neither install dependencies nor fetch packages automatically.
+Bootstrap downloads happen only with the separate `npm ci` step.
+Missing npm or dependencies cause an explicit check failure. No Node.js
 build step is part of the application's runtime or packaging.
 
 Requested stages continue after a failure by default so one run can report the complete failure set.
@@ -362,203 +372,97 @@ failed migrations retain the previous committed format, non-empty unversioned st
 an older collector rejects a newer store without modifying retained history. The production rollback
 procedure separately preserves the named history volume across a release with no collector.
 
-## 1.0 Ammunition whole-catalog source/API/browser-contract parity
+## 1.0 reference-catalog parity and browser verification
 
-**Accepted 2026-10-19.** The hermetic
-`tests/test_application_rule_references.py` suite now checks the **entire
-11-record Ammunition set**, not only selected Ammunition examples. It
-reconciles canonical curated IDs, source names and summaries, published
-`rules.db` identities, public API catalog membership, each detail payload,
-typed rule facts, source citation IDs, and successful HTTP delivery of the normal player catalog
-and detail templates. It also guards the detail-page JavaScript contract that
-renders canonical rules into player-visible content, rather than developer-only
-metadata. This is storage/API/template parity, **not proof of browser-rendered
-content or of each source statement's semantic correctness**.
+`tests/test_application_rule_references.py` checks curated definitions,
+generated rules storage, public list/detail API responses, and normally
+served player templates. The covered catalog contracts differ:
 
-An optional Chromium acceptance tool visits all eleven records from the
-normal Ammunition catalog at **1440, 390 and 320 px**. Each click must
-load a visible matching rule card and source citations without JavaScript
-errors, a stuck loading state or document-level horizontal overflow.
-Run it against the current checkout's development server; avoid older
-Docker/Caddy test listeners.
+- **Ammunition:** the 11-record reviewed baseline matches canonical IDs,
+  names/summaries, typed facts, source citations and visible rules cards.
+- **Labels:** the 24-record reviewed baseline is derived from curated
+  `labels` arrays, not `records`. It preserves descriptions, maintained-text
+  links and deduplicated `used_by` entries; the UI shows a Definition section
+  rather than an Ammunition card or per-Label citations.
+- **General Rules:** the 21-record reviewed baseline uses `rule` records
+  filtered by reviewed General Rules categories, not all rules. It validates
+  unique public slugs (including qualified Peripheral IDs), generated identities,
+  source facts/citations and their exact rule-card IDs.
+
+These are **source-to-storage/API/template parity** checks, not independent
+rules correctness or rendered-browser acceptance. Rerun optional Chromium
+navigation checks against the **current checkout's development server**, not a
+stale Docker/Caddy listener. Each verifier checks its whole catalog at
+1440, 390 and 320 px for correct visible details, load completion, console
+errors and document-level horizontal overflow.
+
+Start the local server in one PowerShell window:
 
 ```powershell
 .\.venv\Scripts\python.exe -m infinity_db serve --host 127.0.0.1 --port 8000
 ```
 
-In a separate PowerShell window from the repository root:
+Run the needed verifier from a second repository-root PowerShell window:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.verify_ammunition_browser --base-url http://127.0.0.1:8000 --output local/audits/ammunition-browser.json
-```
-
-**Browser result reported 2026-10-19:** `Ammunition browser navigation:
-33/33 passed`. This covers all eleven entries at three viewport widths
-against the then-current served development app. Playwright/Chromium is
-required for reruns. Retain the report under ignored `local/audits`.
-The whole-corpus 1.0 source-to-browser and cross-source semantic gates
-remain open.
-
-## 1.0 Labels vocabulary source/API/browser-contract parity
-
-**Accepted 2026-10-19.** The hermetic
-`tests/test_application_rule_references.py` suite checks all **24 current
-Labels** against the curated collections' `labels` arrays (which are
-**not** `records`), matching the published `rules.db.labels` rows,
-collection provenance, public list/detail API identities, names, full
-descriptions, and successful delivery of player-facing detail templates.
-The detail API also supplies maintained-text tokens and deduplicated
-`used_by` links. Labels use a visible Definition section, not an
-Ammunition rules card or per-Label citation list.
-
-The Chromium checker reuses the Ammunition catalog navigation harness,
-with a Label-specific visible-definition check. It visits all 24 catalog
-entries at 1440, 390 and 320 px (**72 checks**); verifies correct headings,
-nonempty player-visible definitions, no stuck loading state, JavaScript
-errors, or page-level horizontal overflow. Against the current local
-development server, run in PowerShell from the repository root:
-
-```powershell
 .\.venv\Scripts\python.exe -m tools.verify_labels_browser --base-url http://127.0.0.1:8000 --output local/audits/labels-browser.json
-```
-
-**Browser result reported 2026-10-19:** `Labels browser navigation:
-72/72 passed`, covering all 24 definitions at three viewport widths.
-Keep the browser report under ignored `local/audits`. This does not
-establish independent cross-source semantic correctness; the complete
-1.0 source-to-browser gate remains open.
-
-## 1.0 General Rules category-scoped source/API/browser-contract parity
-
-**Accepted 2026-10-19.** The hermetic
-`tests/test_application_rule_references.py` suite now checks all
-**21 current General Rules** selected by the published domain's exact
-`rule`-kind and reviewed category list, rather than indiscriminately
-treating every `rule` record as a General Rule. It reconciles canonical
-IDs (including qualified peripheral IDs), flattened collision-free public
-slugs, source names/summaries/facts, current collection and generated
-`rules.db` records, the public list/detail API, source citations, and
-normal served detail templates. Category peers are also checked for
-duplicate slugs. This is bounded storage/API/template parity, not an
-independent audit of rule semantics.
-
-The optional Chromium verifier reuses the reviewed Ammunition/Labels
-catalog navigation harness while checking the **exact rule-card ID**
-for each canonical General Rule (including qualified source IDs).
-It covers all 21 published entries at 1440, 390 and 320 px
-(**63 checks**), with visible citations, correct page headings,
-no JavaScript errors, no stuck loading state, and no document-level
-horizontal overflow. From the repository root, with the current
-development server running at `http://127.0.0.1:8000`:
-
-```powershell
 .\.venv\Scripts\python.exe -m tools.verify_general_rules_browser --base-url http://127.0.0.1:8000 --output local/audits/general-rules-browser.json
 ```
 
-**Browser result reported 2026-10-19:** `General Rules browser
-navigation: 63/63 passed`, covering all 21 published entries at
-three viewport widths. Keep the report under ignored `local/audits`.
-This is not independent rules-semantic review; the full 1.0
-cross-source and browser completeness gates remain open.
+**Historical acceptance, 2026-10-19:** Ammunition 33/33, Labels 72/72,
+and General Rules 63/63 browser checks passed against that day's development
+server. These results are evidence for those specific runs, **not** continuing
+release acceptance. The complete 1.0 cross-source and browser-completeness gates
+remain open; retain future browser reports in ignored `local/audits/`.
 
-## 1.0 States whole-catalog source/API/browser-contract parity
+## 1.0 State, Hacking Program and Trait publication verification
 
-**Accepted 2026-10-19.** The hermetic
-`tests/test_state_catalog.py` suite now reconciles all **24 current
-States** (the separate `state` record kind) against curated collection
-identities and facts, the published `rules.db` State rows, complete
-public list/detail API membership, source-citation IDs, and normally
-served State catalog and detail templates. Source-only identity checks
-are not evidence of correct interactive rendering or independent
-cross-source semantic review.
+The focused hermetic suites validate exact source identities, generated
+storage, public list/detail API contracts and normally served templates:
 
-An optional Chromium check exercises all 24 States through actual
-catalog-to-detail links at 1440, 390 and 320 px (**72 checks**). It
-expects the canonical State rule-card ID, matching heading, visible
-citations, no JavaScript errors, no stuck loading state and no
-document-level horizontal overflow.
+- **States:** `tests/test_state_catalog.py` covers all 24 separate
+  `state`-kind records, canonical names/facts, citations, published
+  `rules.db` entries and catalog/detail delivery.
+- **Hacking Programs:** `tests/test_hacking_program_publication.py`
+  covers 12 published entries. Army owns profile values, targets,
+  declaration categories, baseline Hacking Devices, Upgrade extras,
+  modifiers, PS and Burst; reviewed curated records own rule semantics,
+  citations and interactions. The tests reconcile both sources with
+  unique public slugs, generated rule records, API values and templates.
+  Neither source alone defines the complete player page.
+- **Traits:** `tests/test_trait_wiki_references.py` covers all 33 canonical
+  reviewed Traits, including typed facts, citations, use counts, current
+  `rules.db`, published catalog/detail identities and exact reviewed
+  Wiki destinations. Raw Army properties are a separate source-derived
+  bucket: extra catalog slugs must be backed by that bucket and must
+  never replace the canonical Trait entries.
 
-With the development server running on port 8000, run from the
-repository root in PowerShell:
+Optional Chromium verifiers follow actual catalog-to-detail navigation
+at 1440, 390 and 320 px. They check matching headings, canonical rule
+cards, visible citations, JavaScript errors, incomplete loading and
+document-level horizontal overflow. Hacking Programs also check profile
+fields and baseline Devices; Traits check their official Wiki links and
+exclude raw-property substitutes. The separate Trait Wiki-anchor test
+against saved official HTML (33/33) is **not** a substitute for catalog
+navigation and does not establish live Wiki availability.
+
+With the current checkout's development server running on
+`http://127.0.0.1:8000` (startup command above), run the needed
+verifier from the repository root in PowerShell:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.verify_states_browser --base-url http://127.0.0.1:8000 --output local/audits/states-browser.json
-```
-
-**Browser result reported 2026-10-19:** `States browser navigation:
-72/72 passed`, covering all 24 States at three viewport widths.
-Retain the report under ignored `local/audits`. The 1.0 whole-corpus
-source-to-browser and rules-semantic gates remain open.
-
-## 1.0 Hacking Programs cross-source publication parity
-
-**Accepted 2026-10-19.** Hacking Programs use
-the published **Army database** as the source of profile values, targets,
-declaration types, associated baseline Devices and Upgrade-extra provenance.
-The **12 current curated Hacking Program** records contribute reviewed rules
-semantics, citations and interactions. Neither input alone is a complete
-source-of-truth for the whole detail page.
-
-The new hermetic `tests/test_hacking_program_publication.py` checks all
-12 published Programs: Army table/profile preservation; deterministic,
-collision-free public slugs; a one-to-one match with curated and generated
-rules records; name/summary/typed-fact/citation parity; API list and detail
-values (including targets, modifiers, PS, Burst, declaration-category
-conversion, Device associations and Upgrade IDs); and normally served
-catalog/detail templates. It is assigned to the `model` test section.
-This establishes bounded input/storage/API/template parity, **not**
-independent CB rules-semantic or browser-rendering acceptance.
-
-A separate Chromium acceptance checks all 12 entries through catalog
-clicks at 1440, 390 and 320 px (**36 checks**). It verifies each
-reviewed rule card, page heading, visible profile field values,
-baseline Devices section, citations, no JavaScript exceptions or stuck
-loading state, and no document-level horizontal overflow.
-With the development server running on port 8000, execute from the
-repository root:
-
-```powershell
 .\.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --base-url http://127.0.0.1:8000 --output local/audits/hacking-programs-browser.json
-```
-
-**Browser result reported 2026-10-19:** `Hacking Programs browser
-navigation: 36/36 passed`, covering all 12 Programs at the three
-viewport widths. Retain the report under ignored `local/audits`.
-This does not establish independent CB rules-semantic correctness;
-the full 1.0 cross-source and browser completeness gates remain open.
-
-## 1.0 Trait whole-catalog publication parity
-
-**Accepted 2026-10-19.** The hermetic
-`tests/test_trait_wiki_references.py` suite now reconciles all **33
-canonical Traits** across current curated source, published `rules.db`,
-public Trait catalog/detail API, player-visible detail templates,
-source summaries, typed rule facts, citation identities, use counts
-and exact reviewed Wiki URLs. Additional source-derived Army properties
-are not silently treated as canonical Traits: any extra catalog slug
-must originate in the raw Army property bucket. The existing **33/33
-Trait Wiki navigation check** verifies source-observed anchors in
-saved official Wiki HTML, but does not verify the complete normal Trait
-catalog interaction across responsive viewports.
-
-Run the optional `tools.verify_traits_catalog_browser` verifier
-against the current checkout's development server on port 8000.
-It follows all 33 canonical catalog links at 1440, 390 and 320 px
-(**99 checks**), requiring the correct canonical rule card, visible
-citation and official Wiki link, matching heading, no JavaScript errors
-or stuck loading state, and no document-level horizontal overflow.
-Source-backed unresolved Army-property entries may coexist in the
-catalog but cannot substitute for canonical Trait links.
-
-```powershell
 .\.venv\Scripts\python.exe -m tools.verify_traits_catalog_browser --base-url http://127.0.0.1:8000 --output local/audits/traits-catalog-browser.json
 ```
 
-**Browser result reported 2026-10-19:** `Traits catalog browser
-navigation: 99/99 passed`, covering all 33 canonical Trait cards at
-three viewport widths. Retain the report under ignored `local/audits`.
-This does not establish independent cross-source rule semantics or
-close the entire 1.0 source-to-browser acceptance gate.
+**Historical browser acceptance, 2026-10-19:** States 72/72,
+Hacking Programs 36/36 and canonical Trait catalog entries 99/99
+passed on the then-current development server. These are bounded
+results for those runs, not independent rules-semantic review or
+continuing 1.0 completeness acceptance. Store new evidence under
+ignored `local/audits/`; rerun against the actual target checkout.
 
 ## 1.0 Martial Arts, Booty and MetaChemistry structured-chart parity
 
