@@ -47,6 +47,7 @@
         "test_interim_reference_consistency",
         "test_logical_unit_identity",
         "test_maintained_text",
+        "test_martial_arts_variant_provenance",
         "test_peripheral_identities",
         "test_peripheral_relationships",
         "test_relation_constraints",

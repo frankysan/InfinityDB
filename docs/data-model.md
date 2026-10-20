@@ -388,6 +388,22 @@ source-scoped restrictions. The typed signature is deterministic and
 source-bound; distinct modifiers such as `+1 SD` and `+1B` cannot be merged.
 A shared family does not imply that all of its variants are equivalent. Retain
 the source catalog ID, raw variant/extras and rule citations as provenance.
+
+**First verified exact-source pilot (Martial Arts L1-L5):** Army Skill source
+IDs `19`, `20`, `21`, `22`, `23` share one published application Skill
+but each resolves to `skill:martial-arts-l1` through
+`skill:martial-arts-l5`, respectively. Each reviewed N5.3 record has
+`variantSemantics.sourceVariant = {"kind": "level", "value": N}`, a
+`variant-of` link to `skill:martial-arts`, and N5.3 p. 100 provenance.
+The separate Army Martial Arts chart confirms L3 `+1 SD`, L4 `+1B`
+and L5 both. Current direct source relationships in the pinned Army
+snapshot do not attach additional extras to these five Skills; the
+repository checks this against the source-only `infinity.raw.db`
+tables as well as `infinity.db` catalog/usage projections and
+`rules.db` variants. This is a **source/semantic regression contract**,
+not a generated occurrence index or a guarantee for other source
+Skill families.
+
 Do **not** parse a variant from a display string, strip punctuation, infer a
 parameter from a shared family name, or count an unresolved variant as a
 verified specific one. Missing/ambiguous variant semantics remain explicitly

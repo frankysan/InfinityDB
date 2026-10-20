@@ -1744,9 +1744,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Reused payloads and duplicate source Unit representations must not
       inflate Unit totals; retain every Army/group/profile/loadout path.
       No database/API index is implemented by this contract alone.
-    - [ ] Reconcile the exact Level/MOD/parameter variants against pinned
-      reviewed rules and actual Army source extras; fail closed when family
-      membership is known but a specific variant cannot be verified.
+    - [x] Reconcile Martial Arts L1-L5 against exact Army source Skill
+      IDs 19-23, canonical application family identity, reviewed typed
+      Levels and the N5.3 chart MODs. Pin all five source variants and
+      reject unreviewed source extras in the direct profile/loadout/
+      Unit-option rows (`tests/test_martial_arts_variant_provenance.py`).
+    - [ ] Reconcile remaining exact Level/MOD/named/parameter variants
+      against pinned rules and actual Army extras; fail closed when
+      family membership is known but the specific variant is unresolved.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.
