@@ -242,10 +242,20 @@ relation-link enrichment as the web backend, then checks every distinct
 The test records the owning rule IDs when a target fails, rather than
 assuming a structurally valid relation is navigable.
 
-Intentionally non-public source variants, embedded Glossary anchors and
-local rule-card fragments are outside this bounded API-route check.
-The test does not adjudicate rule semantics, prove every source relation
-exists, or replace final Chromium navigation acceptance.
+Additional checks in the same test module verify that published
+**embedded Glossary** entries target their deterministic client-created
+article IDs and that Glossary links to **Weapon-family rule fragments**
+resolve to actual rule cards in their host Weapon detail API. The first
+check is of published embedded entries; the current published
+`display_relations` graph contains no embedded Glossary link targets,
+so it would be incorrect to claim such graph edges were exercised.
+The renderer and page-script contracts are checked, but actual
+client-rendered DOM navigation is not.
+
+Intentionally unlinked source variants and **same-page local rule-card
+fragments** remain outside this expanded check. It does not adjudicate
+rule semantics, prove every expected relation exists, or replace
+final Chromium navigation acceptance.
 
 ## Scenario-specific FAQ publication scope
 

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import json
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 from wsgiref.util import setup_testing_defaults
 
 from infinity_db.database import Database
@@ -13,7 +15,7 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 
 
-def _get(app: Any, path: str) -> str:
+def _get(app: Any, path: str) -> tuple[str, bytes]:
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
     environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
@@ -26,13 +28,13 @@ def _get(app: Any, path: str) -> str:
 
     response = app(environ, start_response)
     try:
-        b"".join(response)
+        body = b"".join(response)
     finally:
         close = getattr(response, "close", None)
         if close is not None:
             close()
     assert len(statuses) == 1
-    return statuses[0]
+    return statuses[0], body
 
 
 def test_published_cross_domain_relation_catalog_destinations_resolve() -> None:
@@ -64,7 +66,63 @@ def test_published_cross_domain_relation_catalog_destinations_resolve() -> None:
     assert len(targets) >= 40, len(targets)
     failures = {}
     for (catalog, slug), owners in sorted(targets.items()):
-        status = _get(app, f"/api/{catalog}/{slug}")
+        status, _ = _get(app, f"/api/{catalog}/{slug}")
         if status != "200 OK":
             failures[f"/api/{catalog}/{slug}"] = sorted(owners)
     assert not failures, failures
+
+
+def test_embedded_glossary_entries_target_their_client_generated_anchors() -> None:
+    root = Path(__file__).resolve().parents[1]
+    army_path = root / "data/generated/infinity.db"
+    rules_path = root / "data/generated/rules.db"
+    app = create_app(army_path, rules_database_path=rules_path)
+    status, body = _get(app, "/api/glossary")
+    assert status == "200 OK"
+    entries = [
+        entry for entry in json.loads(body)["items"]
+        if entry.get("embedded")
+    ]
+    assert len(entries) >= 10, len(entries)
+    assert len({entry["id"] for entry in entries}) == len(entries)
+    for entry in entries:
+        assert entry["href"] == "/glossary#" + entry["id"].replace(":", "-"), entry
+
+    status, page = _get(app, "/glossary")
+    assert status == "200 OK"
+    assert b"glossary.js" in page
+    status, script = _get(app, "/static/glossary.js")
+    assert status == "200 OK"
+    assert b'item.id.replaceAll(":", "-")' in script
+    assert b"article.id = anchorId(item)" in script
+
+
+def test_glossary_weapon_family_fragments_have_a_real_host_rule_card() -> None:
+    root = Path(__file__).resolve().parents[1]
+    army_path = root / "data/generated/infinity.db"
+    rules_path = root / "data/generated/rules.db"
+    app = create_app(army_path, rules_database_path=rules_path)
+    status, body = _get(app, "/api/glossary")
+    assert status == "200 OK"
+    anchored = [
+        item for item in json.loads(body)["items"]
+        if item["href"].startswith("/weapons/") and "#rule-" in item["href"]
+    ]
+    assert anchored, "No hosted Weapon family rule cards found"
+    for item in anchored:
+        url = urlsplit(item["href"])
+        status, body = _get(app, "/api" + url.path)
+        assert status == "200 OK", item["href"]
+        hosted = json.loads(body)
+        target = url.fragment
+        anchors = {
+            "rule-" + record["id"].replace(":", "-")
+            for record in hosted["rules"]
+        }
+        assert target in anchors, (item["id"], item["href"], sorted(anchors))
+        assert _get(app, url.path)[0] == "200 OK"
+
+    status, script = _get(app, "/static/rules-reference.js")
+    assert status == "200 OK"
+    assert b'if (rule.id) article.id = `rule-${rule.id.replaceAll(":", "-")}`' in script
+

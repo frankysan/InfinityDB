@@ -196,8 +196,10 @@ Prefer targeted fixes rather than merging these.
     adjudication and live-browser gates separately.
   - [x] Add cross-surface Scenario/FAQ scope tests across the four Core missions and the ITS Battleground pilot; correct the published FAQ ruling count.
   - [x] Add a whole-published-graph API destination regression for
-    catalog-backed cross-domain rule links; keep other link modes and
-    completeness/Chromium requirements explicitly open.
+    catalog-backed cross-domain rule links.
+  - [x] Verify published embedded Glossary hashes and Weapon-hosted
+    rule-card fragments against actual published identities; keep
+    same-page local fragments and Chromium acceptance separately open.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -510,3 +512,19 @@ Prefer targeted fixes rather than merging these.
 - **Validation:** Scenario API 78 passed; FAQ 60 passed; Ruff and Pyright passed; docs 32/0 and links 30/0. Full suite and Chromium not run.
 - **Closeout pass 12, 2026-10-20:** Added tracked cross-domain rule-link destination tests against current composed rules and the normal detail APIs. Catalog routes are checked without inventing links for source-only variants. Glossary and in-card anchors and full browser acceptance remain separate.
 - **Checks:** relation destination test: 1 passed; test registration: 2 passed; Ruff passed; Pyright 0 errors/0 warnings; Markdownlint 32 files/0 issues and local links 30 files/0 errors. Full suite and Chromium were not run.
+- **Closeout pass 13, 2026-10-20:** Extended the previously committed
+  `tests/test_public_relation_destinations.py` with embedded Glossary
+  hash/anchor checks and actual Weapon-family hosted rule fragments.
+  The initial hypothesis that published `display_relations` contain
+  embedded Glossary links was false: **there are none currently**.
+  The regression instead verifies existing embedded Glossary entry
+  identities against the client anchor construction. Weapon-family
+  fragment destinations resolve to actual hosted rule cards. These
+  are published API and served-script checks, not live Chromium.
+  Same-page local rule fragments and final release-candidate browser
+  navigation remain open.
+- **Validation:** `tests/test_public_relation_destinations.py` —
+  **3 passed**; Ruff — PASS; Pyright — **0 errors, 0 warnings**;
+  `docs` — Markdownlint **32 files, 0 issues**, and local
+  Markdown links **30 files, 0 errors**. No full-suite or
+  live Chromium release-candidate run performed.

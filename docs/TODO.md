@@ -1922,9 +1922,15 @@ individual verifiers remain the repeatable acceptance procedures.
   - [x] Protect catalog-backed cross-domain rule relation destinations
     with a maintained regression over the published rules graph, verifying
     normal API routes for generated catalog links without inventing
-    destinations for intentionally unlinked variants. Embedded Glossary
-    anchors, local card fragments, source completeness and browser
-    navigation remain separate final acceptance checks.
+    destinations for intentionally unlinked variants.
+  - [x] Check published embedded Glossary entries against their
+    deterministic article anchors and Weapon-family Glossary links
+    against actual hosted rule-card records. These are API/script
+    contracts, not live DOM navigation; no embedded Glossary
+    `display_relations` are currently emitted by the published graph.
+  - [ ] Verify same-page local rule-card fragments and final
+    client-rendered navigation in the release-candidate browser;
+    the above tests do not establish whole-source relation completeness.
   - [x] Reconcile all eleven canonical Ammunition records from maintained
     source identities through published rules storage, API list/details,
     summary/typed-fact/citation parity and normal served detail templates. This
