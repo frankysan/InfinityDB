@@ -613,5 +613,23 @@ Prefer targeted fixes rather than merging these.
   unconfirmed until another live run; do not mark browser acceptance
   complete.
 - **Validation:** Atomic-card verifier tests **11 passed**; Ruff on
-  verifier and its test module **PASS**. A fresh Chromium pass
-  remains outstanding.
+  verifier and its test module **PASS**. The subsequent developer-run
+  Chromium report recorded **57/57 passed** on the local development
+  app (1440, 390, 320 px; confirmed 2026-10-20). This closes the
+  bounded Weapon fragment browser audit, not final release-candidate
+  source completeness.
+- **Closeout pass 20, 2026-10-20:** Expanded the maintained cross-domain
+  rule-relation destination regression beyond detail API existence:
+  every currently published catalog-backed relation target must also
+  serve an HTML detail page with its actual frontend renderer contract.
+  Dedicated Skills and Hacking Programs pages intentionally differ
+  from generic `data-catalog` templates. The composed rules
+  `display_relations` graph currently emits no explicit `href`
+  targets; those are not claimed as covered graph edges. The
+  independently published Glossary-to-Weapon family fragments
+  remain covered by their existing API and 57/57 Chromium checks.
+  This is current route/bootstrap parity, not full source-to-browser
+  completeness or live rendering of every rule relation.
+- **Validation:** `tests/test_public_relation_destinations.py` —
+  **4 passed** after extending the structured route checks
+  (60.58 seconds).

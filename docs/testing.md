@@ -238,9 +238,13 @@ the open REA dependencies remain listed in `docs/TODO.md`.
 current rules database across Ammunition, Equipment, Hacking Programs,
 General Rules, Skills, States, Traits and Weapons. It applies the same
 relation-link enrichment as the web backend, then checks every distinct
-**catalog-backed** destination against its normal public detail API.
-The test records the owning rule IDs when a target fails, rather than
-assuming a structurally valid relation is navigable.
+**catalog-backed** destination against both its normal public detail API
+and the matching served HTML detail-page contract. Skills and Hacking
+Programs have dedicated detail scripts; other catalogs use the normal
+`data-catalog` template marker. The test records owning rule IDs on
+failures rather than assuming a structurally valid relation reaches a
+usable page. This verifies route/template reachability, not client-side
+rendering or source completeness.
 
 Additional checks in the same test module verify that published
 **embedded Glossary** entries target their deterministic client-created
@@ -249,8 +253,10 @@ resolve to actual rule cards in their host Weapon detail API. The first
 check is of published embedded entries; the current published
 `display_relations` graph contains no embedded Glossary link targets,
 so it would be incorrect to claim such graph edges were exercised.
-The renderer and page-script contracts are checked, but actual
-client-rendered DOM navigation is not.
+That composed `display_relations` graph also currently emits no
+explicit `href` references; Weapon-family/Glossary fragment targets
+are checked separately below. The renderer and page-script contracts
+are checked, but actual client-rendered DOM navigation is not.
 
 A further check enumerates every published Weapon slug from
 `/api/weapons` and inspects each complete detail API payload.
@@ -294,7 +300,9 @@ JavaScript/API/network errors and horizontal overflow; loading
 failures include the last visible page state. The AP Mine/Mines source target must be hosted,
 but is not required to appear as a self-link on the Weapon page.
 Its JSON report belongs under ignored `local/audits`; the command
-exits nonzero on failures.
+exits nonzero on failures. The current development-browser run on
+2026-10-20 passed **57/57** across 1440, 390 and 320 px. This is
+bounded development-server evidence, not final-release verification.
 
 This is client-side link and anchor acceptance for the current served
 app, not proof that every intended source relation exists or that

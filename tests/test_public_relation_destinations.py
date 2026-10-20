@@ -60,15 +60,31 @@ def test_published_cross_domain_relation_catalog_destinations_resolve() -> None:
                 continue  # Structural variants are not rendered as links.
             reference = relation["record"].get("public_reference", {})
             if "catalog" not in reference:
-                continue  # Embedded and deliberately unlinked source variants.
+                continue  # Embedded or deliberately unlinked source variants.
             targets[(reference["catalog"], reference["id"])].add(owner["id"])
 
     assert len(targets) >= 40, len(targets)
     failures = {}
     for (catalog, slug), owners in sorted(targets.items()):
-        status, _ = _get(app, f"/api/{catalog}/{slug}")
+        api_path = f"/api/{catalog}/{slug}"
+        detail_path = f"/{catalog}/{slug}"
+        status, _ = _get(app, api_path)
         if status != "200 OK":
-            failures[f"/api/{catalog}/{slug}"] = sorted(owners)
+            failures[api_path] = sorted(owners)
+        # A valid JSON endpoint alone does not make a player-facing link
+        # usable; the normal detail route must serve the matching catalog.
+        page_status, page = _get(app, detail_path)
+        # Skills and Hacking Programs have dedicated detail renderers;
+        # other domains bind their generic renderer via body data-catalog.
+        dedicated_scripts = {
+            "skills": b"/static/skill.js",
+            "hacking-programs": b"/static/hacking-program-detail.js",
+        }
+        marker = dedicated_scripts.get(
+            catalog, f'data-catalog="{catalog}"'.encode()
+        )
+        if page_status != "200 OK" or marker not in page:
+            failures[detail_path] = sorted(owners)
     assert not failures, failures
 
 

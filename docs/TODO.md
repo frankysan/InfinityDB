@@ -1921,8 +1921,12 @@ individual verifiers remain the repeatable acceptance procedures.
     marking any source-to-browser completeness or per-record navigation as reviewed.
   - [x] Protect catalog-backed cross-domain rule relation destinations
     with a maintained regression over the published rules graph, verifying
-    normal API routes for generated catalog links without inventing
-    destinations for intentionally unlinked variants.
+    normal detail APIs **and matching served HTML detail routes** for
+    generated catalog links without inventing destinations for intentionally
+    unlinked variants. Dedicated Skill and Hacking Program templates use
+    their own renderer signatures. The graph currently emits no explicit
+    `href` relations; Glossary/Weapon fragment links are independently
+    audited. This is route/template coverage, not live DOM rendering.
   - [x] Check published embedded Glossary entries against their
     deterministic article anchors and Weapon-family Glossary links
     against actual hosted rule-card records. These are API/script
@@ -1943,17 +1947,13 @@ individual verifiers remain the repeatable acceptance procedures.
     same-page links, direct deep links, and Glossary cross-page
     hash links at three widths. Hermetic discovery tests do not
     count as a live Chromium pass.
-  - [ ] Re-run the corrected Weapon fragment Chromium verifier.
-    The first two executions on 2026-10-20 each reported **51/57**.
-    Fresh-page deep-link isolation improved the third execution to
-    **55/57**; the remaining 320 px Cybermine and Kobra Pistol failures
-    occurred during same-page fragment clicks. The previous verifier
-    waited for a card and then counted it in separate browser operations,
-    which could observe two different DOM generations as optional Unit
-    data re-renders the page. The current verifier now waits for
-    card uniqueness and visibility in a single browser evaluation,
-    retaining failure on missing or duplicate cards. A new live
-    Chromium result is required before closing this gate.
+  - [x] Complete development-browser Weapon fragment acceptance:
+    **57/57 passed** at 1440/390/320 px on 2026-10-20 after isolating
+    cold-load deep links from same-page clicks and making rule-card
+    uniqueness/visibility checks atomic across asynchronous re-renders.
+    The report is retained in ignored
+    `local/audits/weapon-rule-fragments-browser.json`. This verifies the
+    served development app, not final release-candidate completeness.
   - [ ] Run the verifier on the final release candidate and expand
     source-to-browser completeness beyond the bounded reference samples.
   - [x] Reconcile all eleven canonical Ammunition records from maintained
