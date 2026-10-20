@@ -176,6 +176,10 @@ Prefer targeted fixes rather than merging these.
   - [x] Distinguish published FAQ v0.1 review and API functionality from
     remaining FAQ source/applicability review; separate in-scope N5 reference
     completeness from optional full ITS season/historical publication.
+  - [x] Clarify source-only variant inventory baselines, separating
+    tracked release rules.db (41 unresolved Skill source IDs) from
+    current curated rules rebuilt for review (38 unresolved), with
+    the optional raw-archive test and CI limitations stated explicitly.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -352,3 +356,29 @@ Prefer targeted fixes rather than merging these.
   `docs` — Markdownlint **32 files, 0 issues** and offline links
   **30 files, 0 errors**. No application code or curated data changed;
   full suite, browser and external source-content audit remain open.
+- **Closeout pass 5, 2026-10-20:** Reconciled
+  `docs/data-model.md`'s source-parameter inventory with the
+  actual `tools/audit_source_variant_inputs.py` and three raw-archive
+  test modules. Pinned Army source contains 96 Skill IDs (33,153
+  direct relationship rows) and 34 Equipment IDs (5,427 direct
+  relationship rows). The **tracked release rules.db** leaves 41
+  Skill and 14 Equipment IDs unresolved; a **temporary rules.db
+  rebuilt from current curated source** recognizes the reviewed
+  Mimetism, Berserk and Dodge extras, leaving 38 Skill IDs
+  unresolved. No public cross-Army Unit usage index is implemented.
+  Clarified these two inventories and the regeneration prerequisite
+  in `docs/data-model.md` and `docs/TODO.md`.
+- **CI limitation:** `infinity.raw.db` is Git-ignored, so the
+  three source-occurrence suites skip on clean hosted CI; only
+  a local run with paired raw/application storage certifies
+  the pinned raw signature counts. The existing source-only
+  regression contract and its failing-on-malformed-archive
+  behavior remain unchanged.
+- **Checks:** `tests/test_audit_source_variant_inputs.py`
+  — **7 passed**; `tests/test_other_source_variant_provenance.py`
+  — **4 passed**; `tests/test_martial_arts_variant_provenance.py`
+  — **2 passed**; `docs` — Markdownlint **32 files, 0 issues**
+  and offline links **30 files, 0 errors**. No runtime
+  database regeneration, code, or curated source edits.
+  The remaining source signatures and full 1.0 release
+  completeness gate are still open.

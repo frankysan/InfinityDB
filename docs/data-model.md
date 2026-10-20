@@ -432,15 +432,23 @@ occurrences for every eligible Fireteam member. The reconciliations are
 enforced by `tests/test_other_source_variant_provenance.py`; they
 do not implement or populate the eventual usage index.
 
-**Remaining source-parameter inventory (pinned current Army snapshot):**
-`tools/audit_source_variant_inputs.py` produces a deterministic, read-only
-JSON inventory from `infinity.db`, `infinity.raw.db` and `rules.db`
-(`python -m tools.audit_source_variant_inputs`). It inspects exact source
-IDs, direct profile/loadout/Unit-option relationship rows, ordered extra
-IDs/types/values, raw occurrence values and current reviewed source variants.
-It does **not** calculate Unit usage. The baseline contains **96 Skill**
-source identities across **33,153 direct rows** and **34 Equipment**
-source identities across **5,427 direct rows**:
+**Remaining source-parameter inventory (pinned Army source and tracked
+release database):** `tools/audit_source_variant_inputs.py` produces a
+deterministic, read-only JSON inventory from `infinity.db`,
+`infinity.raw.db` and `rules.db`
+(`python -m tools.audit_source_variant_inputs`). It inspects exact
+source IDs, direct profile/loadout/Unit-option relationship rows,
+ordered extra IDs/types/values, raw occurrence values and reviewed
+source-variant mappings. It does **not** calculate Unit usage.
+
+The following baseline uses the **tracked** `data/generated/rules.db`
+alongside the paired pinned Army application/raw databases. It is
+intentionally different from regenerating `rules.db` from the latest
+curated definitions below: the tracked artifact has not yet incorporated
+all reviewed Mimetism/Berserk/Dodge occurrence-parameter mappings.
+This tracked-artifact baseline contains **96 Skill** source identities
+across **33,153 direct rows** and **34 Equipment** source identities
+across **5,427 direct rows**:
 
 - Skills: 10 reviewed exact-source IDs without occurrence extras;
   44 family-only IDs; 1 reviewed distance-parameter source
@@ -468,12 +476,17 @@ a reviewed combined variant. In particular, Booty/MetaChemistry
 `ReRoll`, Mimetism `-3/-6`, TinBot `-3/-6`, and Hacking
 Device `UPGRADE` source text must not be promoted to typed
 variant keys on string parsing alone. The audit retains separate
-signatures for each extra combination and detects future source
-drift via `tests/test_audit_source_variant_inputs.py`. It is a
-snapshot-characterization gate, not a source completeness or
-historical correctness claim. Further parameter reviews should
-extend explicit typed semantics and tests, not relax these
-unknown/exclusion boundaries.
+signatures for each extra combination and detects source
+drift via `tests/test_audit_source_variant_inputs.py` **when the
+paired, Git-ignored raw Army archive is available**. This source-only
+provenance suite explicitly skips in clean CI; ordinary CI success
+does not revalidate these occurrence counts. See
+[the raw-archive test contract](testing.md#full-army-source-archive-provenance-tests)
+and [CI policy](ci.md#source-checks). This is a
+snapshot-characterization gate, not a source completeness,
+historical correctness or usage-index claim. Further parameter
+reviews should extend explicit typed semantics and tests, not
+relax these unknown/exclusion boundaries.
 
 **Numeric Skill MOD evidence (first bounded review):** The local English N5.3
 PDF confirms that Mimetism's bracketed `-3`/`-6` is a negative
@@ -536,14 +549,18 @@ the 2,382 source occurrences contains multiple extras. The
 new `RulesDatabase.skill_reviewed_extra_semantics()` query
 exposes this reviewed typed evidence separately from the legacy
 distance-only display query and `skill_numeric_mod_semantics()`.
-With a **freshly generated** rules database, source ID `40`
-is now `reviewed-extra-parameter`; the Skill inventory contains
-**2 reviewed-numeric, 1 reviewed-extra, and 38 unresolved**
-source IDs (formerly 39 unresolved). The pinned generated
-`data/generated/rules.db` is deliberately not overwritten by
-the audit, so its older snapshot counts remain until a normal
-regeneration. Certification is per observed source signature,
-not a new player-visible variant index or a game-state simulator.
+With a **freshly generated** rules database, source ID `40` is now `reviewed-extra-parameter`; the
+**fresh-curation** Skill inventory contains **2 reviewed-numeric,
+1 reviewed-extra, and 38 unresolved** source IDs (down from
+39 after the numeric-MOD review, and 41 in the tracked baseline
+above). The pinned generated `data/generated/rules.db` is
+deliberately not overwritten by the audit, so its older
+snapshot counts remain until a normal release-artifact
+regeneration. The 38-ID result is covered by the focused
+source-provenance test using a temporary rebuilt rules database;
+it is not yet a claim about the tracked runtime artifact.
+Certification is per observed source signature, not a new
+player-visible variant index or a game-state simulator.
 
 Do **not** parse a variant from a display string, strip punctuation, infer a
 parameter from a shared family name, or count an unresolved variant as a

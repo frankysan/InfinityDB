@@ -1795,12 +1795,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Preserve the separate situational -3 PH penalty and PDF/Wiki
       discrepancy for ARM+3. On fresh rules regeneration, the unresolved
       Skill-ID count falls from 39 to 38.
-    - [ ] Reconcile the remaining 38 Skill and 14 Equipment source IDs
-      with unresolved occurrence parameters, including other mixed
-      TEXT/DISTANCE sources and named Equipment variants with extra MODs.
-      Preserve raw signatures and exclude unreviewed specific
-      combinations from index counts; fail closed rather than parsing
-      numeric-looking display strings.
+    - [ ] Reconcile the remaining **38 Skill** source IDs with unresolved
+      occurrence parameters **after rebuilding rules.db from current
+      curation**, and 14 Equipment source IDs. The tracked release
+      rules.db still reports 41 unresolved Skill IDs; regenerate and
+      revalidate the paired release artifacts before claiming those
+      three reviews are shipped. Source-only occurrence verification
+      requires the ignored raw Army archive and is skipped in clean CI.
+      Review other mixed TEXT/DISTANCE sources and named Equipment
+      variants with extra MODs; preserve raw signatures and exclude
+      unreviewed specific combinations from index counts. Fail closed
+      rather than parsing numeric-looking display strings.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.
