@@ -1761,6 +1761,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       unresolved parameters (`tools/audit_source_variant_inputs.py`;
       pinned counts/tests in `tests/test_audit_source_variant_inputs.py`).
       The inventory does not assert that all extras have reviewed semantics.
+    - [x] Pin N5.3 PDF-level semantics and current Army extra signatures
+      for Mimetism (-3/-6), Berserk (+3/+6 examples), and Dodge
+      (+3/+6 examples alongside DISTANCE). Document owner/opponent
+      applicability and Dodge's distinct situational penalties;
+      retain unresolved typed-MOD index status until the grammar supports
+      reviewed applicability, target and mixed parameter scopes.
     - [ ] Reconcile the 41 Skill and 14 Equipment source IDs with
       unresolved occurrence parameters, including mixed TEXT/DISTANCE
       and named variants with extra MODs. Preserve raw signatures

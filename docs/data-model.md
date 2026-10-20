@@ -475,6 +475,35 @@ historical correctness claim. Further parameter reviews should
 extend explicit typed semantics and tests, not relax these
 unknown/exclusion boundaries.
 
+**Numeric Skill MOD evidence (first bounded review):** The local English N5.3
+PDF confirms that Mimetism's bracketed `-3`/`-6` is a negative
+modifier to **enemy** BS Attacks requiring LoF and Discover (p. 102),
+not to the Mimetism user's own roll or to CC Attacks. The pinned Army
+source Skill ID `28` has exactly 1,612 direct relationships with
+`extra_id=6` (`TEXT: -3`) and 392 with `extra_id=7`
+(`TEXT: -6`), with 2,004 relationships total. Berserk source
+Skill `24` includes 243 direct `TEXT: +3` relationships
+(`extra_id=1`) and three `TEXT: +6` relationships
+(`extra_id=2`); its bracketed positive MOD applies to the owner's
+Berserk CC Attack (p. 86), which also explicitly permits applicable
++1 SD during its Long Skill. Dodge source Skill `40` includes
+613 direct `TEXT: +3` relationships (`extra_id=1`),
+seven `TEXT: +6` relationships (`extra_id=2`) and separate
+`DISTANCE` extras; generic negative Skill MOD behavior (p. 23),
+Dodge's own situational -3 PH conditions, and successful Dodge
+movement (p. 79) must remain separate.
+
+`tests/test_audit_source_variant_inputs.py` now pins these
+source-signature facts and guards against conflating the three
+rules. This is **PDF-level semantic evidence**, not a published
+typed-MOD occurrence grammar: the current
+`variantSemantics.occurrenceParameters` contract supports only
+distance. The audit therefore intentionally keeps all three
+sources classified as `unresolved-occurrence-parameter` for
+variant-specific usage-index purposes. Adding reviewed typed
+MODs, including applicability/target/scope and coexisting
+distance parameters, remains an explicit follow-up.
+
 Do **not** parse a variant from a display string, strip punctuation, infer a
 parameter from a shared family name, or count an unresolved variant as a
 verified specific one. Missing/ambiguous variant semantics remain explicitly

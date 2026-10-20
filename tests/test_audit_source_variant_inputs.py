@@ -100,6 +100,49 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     assert equipment[248]["status"] == "reviewed-exact-source"
 
 
+def _single_extra_counts(item: dict) -> dict[tuple[int, str, str], int]:
+    return {
+        tuple(signature["extras"][0]): signature["count"]
+        for signature in item["extraSignatures"]
+        if len(signature["extras"]) == 1
+    }
+
+
+def test_n53_numeric_skill_modifiers_preserve_exact_source_meaning() -> None:
+    """Pinned Army extras against N5.3 pp. 23, 79, 86, and 102."""
+    skills = {
+        item["id"]: item for item in _inventory()["catalogs"]["skills"]["items"]
+    }
+    mimetism = skills[28]
+    # N5.3 p. 102: these target enemy LoF-dependent BS Attacks/Discover,
+    # never the owner's roll or CC Attacks. TEXT is the upstream type.
+    assert _single_extra_counts(mimetism) == {
+        (6, "TEXT", "-3"): 1612,
+        (7, "TEXT", "-6"): 392,
+    }
+    assert mimetism["occurrences"] == 2004
+    assert mimetism["status"] == "unresolved-occurrence-parameter"
+
+    berserk = skills[24]
+    # N5.3 p. 86: bracketed positive MODs affect the owner's Berserk
+    # CC Attack. They do not become a generic modifier on every CC roll.
+    berserk_extras = _single_extra_counts(berserk)
+    assert berserk_extras[(1, "TEXT", "+3")] == 243
+    assert berserk_extras[(2, "TEXT", "+6")] == 3
+    assert berserk["status"] == "unresolved-occurrence-parameter"
+
+    dodge = skills[40]
+    # N5.3 pp. 23, 79: a Dodge Skill's bracketed MOD is distinct from
+    # situational -3 PH penalties; movement distances are another axis.
+    dodge_extras = _single_extra_counts(dodge)
+    assert dodge_extras[(1, "TEXT", "+3")] == 613
+    assert dodge_extras[(2, "TEXT", "+6")] == 7
+    assert dodge["extraTypes"] == ["DISTANCE", "TEXT"]
+    assert dodge["status"] == "unresolved-occurrence-parameter"
+    # The currently supported curated occurrence-parameter contract is
+    # distance only: source TEXT values must not auto-promote to a typed MOD.
+
+
 def test_source_inventory_is_deterministic() -> None:
     first = _inventory()
     assert json.dumps(first, sort_keys=True) == json.dumps(_inventory(), sort_keys=True)
