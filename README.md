@@ -81,9 +81,12 @@ its application metrics.
   embedded Attributes, scoped Game terms and searchable Weapon Properties (such as Viral,
   Plasma and combined Ammunition). Weapon Properties link to their underlying canonical
   rules instead of redefining the effects.
-- Includes a browsable core **Scenarios** reference with explicit Army Points selection, structured
-  setup/objectives/scoring, scenario Rules and Skills, source-verification notes, and deterministic
-  deployment maps generated from the same maintained geometry as the scenario data.
+- Includes a browsable **Scenarios** reference with four N5.3 Core missions
+  and a separately selectable ITS Season 18 Battleground pilot. Explicit
+  Army Points selection, structured setup/objectives/scoring, scenario Rules
+  and Skills, source-verification notes and deterministic maps all derive
+  from maintained scenario definitions. The wider ITS library remains
+  outside the 1.0 completeness requirement.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
 - Supports System, Light, and Dark themes from Settings; System follows the operating-system

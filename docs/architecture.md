@@ -145,7 +145,7 @@ remains configuration-explicit; in the browser an absent selection defaults to 3
 immediately written through the common versioned share-state token, while explicit valid shared state
 wins. The map is rendered from the same maintained geometry through the SVG API. Scenarios participate in primary
 navigation and the landing page, while global search and Glossary participation remain deliberately
-disabled because the bounded core set is already directly discoverable.
+disabled because the bounded published collections are directly discoverable through the Scenario picker.
 
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review
 covered the four N5.3 core scenarios, the final ITS Season 17 set, and the current ITS Season 18 set.
@@ -166,8 +166,11 @@ new player-defined scenarios and edits of existing ones. It will compose local
 copies/overlays, not mutate authoritative source publications or `rules.db`.
 Its serialization follows the stateless-sharing direction below and its custom
 rule semantics follow `docs/data-model.md`.
-InfinityDB 1.0 includes a deterministic SVG projection for the four N5.3 core scenarios; geometry
-schema v1 only needs to represent those core maps. Point markers retain semantic marker identity;
+The implemented deterministic SVG projection covers all four N5.3 Core
+scenarios and the separately published ITS Season 18 Battleground pilot.
+Only the Core maps are required for the 1.0 completeness gate; the shared
+geometry schema and renderer can also handle this reviewed ITS sector layout.
+Point markers retain semantic marker identity;
 known marker types resolve through canonical marker metadata, including physical diameter where that
 affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
@@ -191,11 +194,13 @@ its center point, unless the source explicitly says otherwise.
 Semantic style and marker identities are open at the geometry boundary rather than coupled to the current
 SVG palette; renderer v1 separately validates the styles and canonical marker metadata it can faithfully
 project and fails closed for unsupported presentation. Geometry also permits asymmetric and multiple
-Deployment Zone regions without encoding a one-zone-per-side rule. Reviewed ITS variation constrains the
-extension points, but ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog entities will be referenced by typed
-identity rather than duplicated locally. Core and ITS scenarios share this boundary; tournament
-pairing, rankings, and mutable match state remain outside
-it.
+Deployment Zone regions without encoding a one-zone-per-side rule.
+Reviewed ITS variation constrains the extension points. Battleground already
+uses the shared model; additional unsupported ITS geometry, the full mission
+library and an interactive map editor remain post-1.0. Existing catalog
+entities are referenced by typed identity rather than duplicated locally.
+Core and ITS scenarios share this boundary; tournament pairing, rankings
+and mutable match state remain outside it.
 
 The detailed accepted scenario model belongs to
 [the data model](data-model.md#scenario-model-implemented-core-and-future-extensions). Source comparison and rationale remain in

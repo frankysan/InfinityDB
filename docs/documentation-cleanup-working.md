@@ -169,6 +169,10 @@ Prefer targeted fixes rather than merging these.
     locations to all Git-tracked Markdown, including nested references, while
     retaining coverage of untracked docs drafts and a source-archive fallback.
     This validates links/anchors, **not** the text's current semantic accuracy.
+  - [x] Reconcile the scenario publication claims with the current curated
+    collection and executable catalog/API contracts: four N5.3 Core missions
+    plus the current ITS Season 18 Battleground pilot. Correct outdated
+    core-only statements without widening mandatory 1.0 scope.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -304,3 +308,26 @@ Prefer targeted fixes rather than merging these.
   (30 files, 0 errors). This still does not verify source-to-browser
   content completeness, resolve remaining 1.0 REA cases, or authorize
   retirement of this temporary checklist.
+- **Closeout pass 3, 2026-10-20:** Found a concrete stale publication
+  statement in `docs/data-model.md`: its old text claimed only
+  `n5-core@5.3` was available and an explicit ITS 18 selection
+  returned no missions. Reviewed current curated
+  `n5-its-season-18-2026.09.01.json` publication through the
+  `ScenarioCatalog`, its API test fixture and actual
+  `scenarios.js` collection selector. The modeled current sets
+  are **four Core missions** and **one ITS 18: Overheat Battleground**
+  at `its-18@2026.09.01`. Battleground supports six Army Points
+  sizes, three end-of-game Sectors and official source citations
+  on printed ITS pp. 121–123. Explicit collection selection
+  never falls back to Core, and the default remains Core-only.
+- Updated the current-state sections of `docs/data-model.md`,
+  `docs/application-domains.md`, `docs/architecture.md`,
+  `docs/AI_CONTEXT.md`, and `README.md`. This is a **factual
+  publication correction**, not an expansion of the mandatory 1.0
+  scope: other ITS missions, tournament tooling and the scenario
+  editor remain outside that gate.
+- **Checks:** `tests/test_scenario_catalog.py` — **43 passed**;
+  `tests/test_scenario_api.py` — **72 passed**;
+  `docs` — Markdownlint **32 files, 0 issues** and offline links
+  **30 files, 0 errors**. The complete 1.0 source-to-browser and
+  live Chromium release audits remain separate open work.

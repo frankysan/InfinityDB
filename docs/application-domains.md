@@ -129,9 +129,14 @@ concrete player-facing browsing/use case rather than merely a new data type.
 
 ### Scenario domain
 
-**Current bounded player-facing domain.** `scenarios` is a published top-level catalog/detail domain
-owning `scenario:*` records. It participates in primary navigation and the landing page; global search
-and Glossary participation are deliberately disabled for the bounded core set. Scenario slug
+**Current bounded player-facing domain.** `scenarios` is a published top-level
+catalog/detail domain owning `scenario:*` records. It participates in primary
+navigation and the landing page; global search and Glossary participation
+are deliberately disabled for the directly discoverable collections.
+The catalog defaults to the four N5.3 Core missions and can explicitly
+select the published ITS Season 18 Battleground pilot through
+`its-18@2026.09.01`; this is not the full ITS mission library or a 1.0
+completion requirement. Scenario slug
 normalization remains the typed `scenario:<slug>` contract used by the maintained scenario layer.
 Rules export keeps stable scenario collection identity, collection revision, ordered membership,
 source publication revision, and deterministic content identity separate. `RulesDatabase` owns central

@@ -68,7 +68,9 @@ release/audit narrative belongs in the changelog and Git history.
   footprints, source-defined edge/center measurement references and
   physical mm diameters affect placement; displayed inches/centimeters
   and annotations derive from the geometry. Unknown marker styles fail
-  closed. ITS-only maps/editor remain post-1.0.
+  closed. A reviewed ITS Season 18 Battleground map already uses this
+  shared geometry; a full ITS map library and interactive editor remain
+  post-1.0 and are not part of the mandatory Core-scenario gate.
 - Scenario authoring composes exact shared Rules/Skills and typed components
   into self-contained `rules.db` output. Scoped records do not leak into
   core rules or acquire Army links. Browser and API use the selected
