@@ -49,7 +49,11 @@ Git-ignored and absent in clean CI. Three source-variant provenance test
 modules require it and explicitly skip there; they still run against the
 full paired archive locally. A clean hosted pass does not independently
 certify pinned source-only occurrence counts. A present but malformed
-archive remains a test failure.
+archive remains a test failure. Synthetic source-to-presentation
+regression fixtures deliberately populate some unrepresented fields to
+verify detection; their counts do not establish current Army-source
+occupancy. The separate 1.0 source-occupancy release gate must run locally
+against the pinned application/raw database pair.
 
 Windows hosted CI uses `--test-workers 2` to bound process/resource use while running the complete
 suite. Automatic worker selection previously proved unstable on that runner class; serial execution

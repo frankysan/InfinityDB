@@ -736,6 +736,44 @@ snapshot, and separately reports **how many source values are actually populated
 Newly populated fields must be reviewed before a data-completeness claim; absence
 in one pinned snapshot does not justify permanently excluding their semantics.
 
+### Source-field occupancy and publication limits
+
+`tools/audit_source_presentation.py` assigns a presentation/scope policy to
+every normalized source field, while its paired-raw-database inspection checks
+whether potential gaps actually contain values. The 2026-10-15 pinned
+Army-source assessment covered **70 source tables and 441 fields**. Of these,
+**39 fields** were still classified as
+`unrepresented_player_information`, but **none contained populated values**
+in that source generation. The seven direct composite Unit-option
+Skills/Equipment/Weapons/Characteristics relationship and extras tables had
+no rows; neither the 4,748 source profile groups nor the 5,020 source
+profiles supplied notes. These are **snapshot occupancy observations**, not
+evidence that future source data will always be empty or that their meaning
+can be dropped from the normalization model.
+
+The current published application nevertheless has **18 composite
+Unit-option occurrences** on seven distinct Unit identities, including
+linked loadouts/Orders, and **30 source Unit-note occurrences** on 28
+logical Units. These use *other* represented tables. Do not conflate
+an empty direct Unit-option Skill/Equipment table with an absent
+composite Unit option, or empty Profile notes with missing source Unit
+notes. The separate source audit also records two explicit post-1.0
+scope decisions: Spec-Ops/Team-Ops option charts belong to
+list/session configuration; raw `loadout_options.disabled` and `minis`
+flags have no established immutable player-reference interpretation.
+Neither decision authorizes silently dropping those source fields.
+
+Before 1.0 release acceptance, rerun the audit against the **release-matched
+`infinity.db` and `infinity.raw.db` pair** using the opt-in
+`--source-occupancy-gate` through the normal checks runner; see
+[release validation](releasing.md#4-run-local-release-validation).
+It fails if raw evidence is missing, the database pair is inconsistent,
+or any unrepresented field becomes populated. The synthetic fixtures in
+`tests/test_audit_source_presentation.py` intentionally populate some
+potential gaps to verify detection; their occupied counts are **not**
+current Army-source counts. Required clean CI omits the raw archive and
+cannot alone certify this source-to-presentation completeness gate.
+
 ### Selection and dependency constraints
 
 Reviewed source selectors and same-Unit profile/loadout dependencies are materialized only when their

@@ -1974,9 +1974,13 @@ individual verifiers remain the repeatable acceptance procedures.
     normal rules checks; missing or newly populated raw source fields block
     the 1.0 rehearsal without changing ordinary CI.
   - [x] Review the 39 schema-level `unrepresented_player_information` fields
-    against paired, pinned raw Army storage: **0 fields have populated values**.
-    All seven composite Unit-option relationship/extras tables have zero rows,
-    and neither 4,748 profile groups nor 5,020 profiles supplies a note.
+    against paired, pinned raw Army storage (2026-10-15 evidence):
+    **0 fields have populated values in that snapshot**.
+    All seven direct composite Unit-option relationship/extras tables have zero
+    rows, and neither 4,748 profile groups nor 5,020 profiles supplies a note.
+    These remain potential gaps if future source inputs populate them; the
+    durable classification and evidence boundary belong in
+    [the data model](data-model.md#source-field-occupancy-and-publication-limits).
     Independently verified the populated *different* source structures:
     **18** composite-option occurrences on **7** Unit identities, including
     linked loadouts and Orders, and **30** Unit-note occurrences on **28**

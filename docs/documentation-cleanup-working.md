@@ -180,6 +180,7 @@ Prefer targeted fixes rather than merging these.
     tracked release rules.db (41 unresolved Skill source IDs) from
     current curated rules rebuilt for review (38 unresolved), with
     the optional raw-archive test and CI limitations stated explicitly.
+  - [x] Reconcile pinned source-field occupancy against represented Unit options/notes; keep the release-only raw-source gate and its limitations explicit.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -382,3 +383,25 @@ Prefer targeted fixes rather than merging these.
   database regeneration, code, or curated source edits.
   The remaining source signatures and full 1.0 release
   completeness gate are still open.
+- **Closeout pass 6, 2026-10-20:** Compared the current
+  `tools/audit_source_presentation.py` policy and
+  `tests/test_audit_source_presentation.py` to the pinned
+  2026-10-15 private source-presentation report. It covered
+  70 source tables, 441 fields, 39 potentially unrepresented
+  fields, and **zero observed populated fields** in that
+  pinned application/raw export. Seven direct composite-option
+  relationship/extras source tables had no rows; Profile and
+  Profile-group notes were empty. These are not the separately
+  represented 18 composite-option occurrences (seven Units)
+  or 30 Unit notes (28 logical Units). The two out-of-scope
+  families retain explicit reasons rather than being treated
+  as missing reference facts. Clarified those distinctions
+  in `docs/data-model.md` and `docs/TODO.md`, and explained
+  synthetic-versus-source evidence in `docs/ci.md`.
+- **Checks:** `tests/test_audit_source_presentation.py`
+  — 11 passed; `tests/test_run_checks.py` — 33 passed;
+  Markdownlint — 32 files, 0 issues; offline docs links —
+  30 files, 0 errors. The 1.0 release-only occupancy gate
+  itself was **not executed** against a freshly regenerated
+  release-candidate pair; this bounded documentation audit
+  does not certify final source completeness.
