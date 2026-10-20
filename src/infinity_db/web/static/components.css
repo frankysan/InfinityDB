@@ -2797,6 +2797,11 @@ input::placeholder {
   white-space: pre-line;
 }
 
+/* Keep compound MetaChemistry effect names legible while allowing wrapping. */
+.chart-outcome-component {
+  display: inline-block;
+}
+
 .data-table--profile .table-column--descriptor {
   width: 100%;
 }

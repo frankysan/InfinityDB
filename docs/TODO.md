@@ -1642,13 +1642,27 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       each original Army result string, use structured conditions for
       display, and test branch ordering, scope and malformed source
       syntax without inventing selected gameplay results.
-    - [ ] Re-run the structured Skill chart Chromium verifier after the
-      typed Booty branch projection (9 pages at 1440/390/320 px).
-      The earlier 9/9 acceptance does not cover this revision.
+    - [x] Revalidate typed Booty branch projection in Chromium:
+      **9/9 passed** across 1440/390/320 px, reported 2026-10-19.
+      Confirmed visible TAG/other-Troop-Type branches with the served
+      API and source results unchanged; retain evidence in ignored
+      `local/audits`.
+    - [x] Add source-preserving typed components for all five
+      combined MetaChemistry outcomes (rolls 16–20). Distinguish
+      attribute MODs, MOV values, Skill names and parameterized
+      Immunity while keeping the original result string. Reject
+      changed or unrecognized combinations rather than silently
+      flattening their effects. The whole-corpus regression requires
+      all five reviewed rows; partial synthetic fixtures remain
+      supported. No rules-link identity is inferred.
+    - [ ] Re-run the 3-page structured Skill chart Chromium verifier
+      after the MetaChemistry component projection (9 pages at
+      1440/390/320 px), checking all five rendered combinations.
+      The prior accepted 9/9 run predates this revision.
     - [ ] Independently verify every chart outcome, conditional branch,
       and footnote against the final pinned official N5.3 PDF/Wiki
-      revisions. Extend typed outcome support before adding canonical
-      Skill, Equipment, Weapon or Attribute links; no random-result
+      revisions. Resolve canonical Skill, Equipment, Weapon and
+      Attribute links only after identity review; no random-result
       selection or persistent session overlay is required for 1.0.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter

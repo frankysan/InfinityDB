@@ -64,6 +64,18 @@ function referenceCell(value, role) {
 }
 
 function randomChartOutcome(row) {
+  if (row.outcome_components?.length) {
+    const parts = document.createElement("span");
+    parts.className = "chart-outcome-components";
+    for (const [index, component] of row.outcome_components.entries()) {
+      if (index) parts.append(" + ");
+      const element = document.createElement("span");
+      element.className = "chart-outcome-component";
+      element.textContent = component.text;
+      parts.append(element);
+    }
+    return parts;
+  }
   if (!row.conditional_outcomes?.length) return row.result;
   const branches = document.createElement("span");
   branches.className = "chart-outcome-branches";

@@ -615,13 +615,52 @@ flattened into one effect. The source comparison is grounded in the
 official [N5.3 Booty chart](https://infinitythewiki.com/Booty), but
 does not supersede the pinned release PDF/footnote audit.
 
-**Re-run Chromium for this new typed-branch revision:** the
-browser verifier expects all original source values and the four
-typed, visually separated Booty branches at 1440/390/320 px.
-The prior 9/9 run is not acceptance of this API/renderer change.
-MetaChemistry's combined outcomes still need typed references and
-independent semantic review. No random roll selection or session
-state has been introduced. Keep evidence under ignored `local/audits`.
+**Typed-branch browser acceptance reported 2026-10-19:**
+`Structured Skill charts browser: 9/9 passed` at 1440/390/320 px,
+including the four typed, visually separated Booty branches. This
+applies to the prior typed-Booty revision; any later MetaChemistry
+renderer change requires fresh browser acceptance. Independent
+semantic review and canonical outcome references remain open.
+No random roll selection or session state has been introduced.
+Keep evidence under ignored `local/audits`.
+
+## 1.0 MetaChemistry combined outcomes — typed publication
+
+**Added 2026-10-19; browser acceptance pending.** The pinned Army
+MetaChemistry rows 16–20 match the published N5.3
+[MetaChemistry chart](https://infinitythewiki.com/MetaChemistry).
+These five outcomes combine two separately named effects: an
+Attribute MOD or MOV value and/or a Special Skill, sometimes with an
+Immunity parameter. The new source-preserving
+`project_metachemistry_rows` adds `outcome_components` to the
+existing Skill detail API's structured chart, with each component
+carrying `kind` and `text`, plus source-derived details such as
+`attribute`/`modifier`, `value`, or Skill `name`/`parameter`.
+The Army `result` field and database storage are unchanged.
+
+Only the five reviewed combinations are recognized. Unexpected
+source format, duplicate compound rolls, or an unknown component
+fails closed. The complete published source regression requires all
+five specific compound rows; the projector itself also accepts
+partial synthetic fixtures. These components describe the written
+outcomes; they are **not** selected gameplay effects, resolved
+Skill variant IDs, independent mechanics, or a guarantee that the
+official chart footnotes have all been reconciled.
+
+The Skill frontend renders each component separately, retaining
+the original textual result. The existing Chromium verifier checks
+all three Skill pages at 1440/390/320 px and now also checks all
+five MetaChemistry combinations and their exact two-component
+rendering. Run it against the current development server:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
+```
+
+The previously verified 9/9 run applied to the prior typed-Booty
+revision; **repeat browser acceptance** before accepting this
+MetaChemistry UI revision. Independent pinned N5.3 source-footnote
+reconciliation and verified canonical links remain open.
 
 ## 1.0 source evidence baseline
 

@@ -12,7 +12,10 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_db.database.repository import Database
-from infinity_db.structured_chart_outcomes import project_booty_rows
+from infinity_db.structured_chart_outcomes import (
+    project_booty_rows,
+    project_metachemistry_rows,
+)
 from infinity_db.web import create_app
 from tools.verify_structured_skill_charts_browser import CHARTS, source_charts
 
@@ -73,7 +76,10 @@ def test_all_published_structured_skill_charts_preserve_army_rows_and_api() -> N
                 )
             ]
             assert [
-                {key: value for key, value in row.items() if key != "conditional_outcomes"}
+                {
+                    key: value for key, value in row.items()
+                    if key not in {"conditional_outcomes", "outcome_components"}
+                }
                 for row in rows
             ] == stored, slug
             if slug == "martial-arts":
@@ -129,6 +135,9 @@ def test_all_published_structured_skill_charts_preserve_army_rows_and_api() -> N
         encoding="utf-8"
     )
     assert ".chart-outcome-branches {\n  white-space: pre-line;" in stylesheet
+    assert 'row.outcome_components' in javascript
+    assert 'className = "chart-outcome-component"' in javascript
+    assert ".chart-outcome-component {\n  display: inline-block;" in stylesheet
 
 
 def test_army_chart_source_fields_preserve_n5_reference_distinctions() -> None:
@@ -182,6 +191,77 @@ def test_conditional_booty_parser_fails_closed_for_unreviewed_source_syntax() ->
     ):
         with pytest.raises(ValueError):
             project_booty_rows([{"id": 12, "roll": "12", "result": malformed}])
+
+
+def test_metachemistry_compound_source_outcomes_match_reviewed_n5_chart() -> None:
+    expected = {
+        "16": "+1 ARM + Immunity (ARM)",
+        "17": "Dogged + Immunity (Enhanced)",
+        "18": "MOV: 6-4 + Super-Jump",
+        "19": "MOV: 8-4 + Climbing Plus",
+        "20": "+3 PH + Regeneration",
+    }
+    rows = Database(ARMY_DB).list_metachemistry_results()
+    assert {row["roll"]: row["result"] for row in rows if row["roll"] in expected} == expected
+
+
+def test_metachemistry_compounds_are_typed_and_source_preserving() -> None:
+    raw = Database(ARMY_DB).list_metachemistry_results()
+    projected = project_metachemistry_rows(raw)
+    assert all("outcome_components" not in row for row in raw)
+    components = {
+        row["roll"]: row["outcome_components"]
+        for row in projected
+        if "outcome_components" in row
+    }
+    assert set(components) == {"16", "17", "18", "19", "20"}
+    assert {
+        roll: [part["kind"] for part in parts]
+        for roll, parts in components.items()
+    } == {
+        "16": ["attribute-modifier", "special-skill"],
+        "17": ["special-skill", "special-skill"],
+        "18": ["movement-value", "special-skill"],
+        "19": ["movement-value", "special-skill"],
+        "20": ["attribute-modifier", "special-skill"],
+    }
+    assert components["16"][0]["attribute"] == "ARM"
+    assert components["16"][0]["modifier"] == 1
+    assert components["16"][1]["name"] == "Immunity"
+    assert components["16"][1]["parameter"] == "ARM"
+    assert components["17"][1]["parameter"] == "Enhanced"
+    assert components["18"][0]["value"] == "6-4"
+    assert components["19"][0]["value"] == "8-4"
+    assert components["20"][0]["attribute"] == "PH"
+    assert components["20"][0]["modifier"] == 3
+    for row in projected:
+        parts = row.get("outcome_components")
+        if parts is None:
+            continue
+        assert " + ".join(part["text"] for part in parts) == row["result"]
+
+
+def test_metachemistry_compound_parser_rejects_unreviewed_formats() -> None:
+    rows = Database(ARMY_DB).list_metachemistry_results()
+    for malformed in (
+        "MOV: 6-4 + Mystery",
+        "MOV: 6-4",
+        "MOV: 6-4 + Super-Jump + Regeneration",
+        "MOV: 6-4 + ",
+        "Dogged + Immunity",
+    ):
+        modified = [
+            {**row, "result": malformed} if row["roll"] == "18" else row
+            for row in rows
+        ]
+        with pytest.raises(ValueError):
+            project_metachemistry_rows(modified)
+    # Partial fixture charts are supported; the full publication test
+    # separately requires the exact five source-owned compound rolls.
+    partial = [row for row in rows if row["roll"] not in {"16", "17", "18", "19", "20"}]
+    assert project_metachemistry_rows(partial) == partial
+    with pytest.raises(ValueError, match="Duplicate MetaChemistry compound"):
+        project_metachemistry_rows([*rows, next(row for row in rows if row["roll"] == "20")])
 
 
 def test_roll_range_audit_detects_gaps_overlaps_and_invalid_notation() -> None:

@@ -11,7 +11,10 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.database.repository import Database
-from infinity_db.structured_chart_outcomes import project_booty_rows
+from infinity_db.structured_chart_outcomes import (
+    project_booty_rows,
+    project_metachemistry_rows,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 WIDTHS = (1440, 390, 320)
@@ -54,7 +57,10 @@ def source_charts(database: Database) -> dict[str, dict[str, Any]]:
             "title": chart["title"],
             "rows": (
                 project_booty_rows(database.list_booty_results())
-                if slug == "booty" else getattr(database, chart["list_method"])()
+                if slug == "booty" else (
+                    project_metachemistry_rows(database.list_metachemistry_results())
+                    if slug == "metachemistry" else getattr(database, chart["list_method"])()
+                )
             ),
         }
         for slug, chart in CHARTS.items()
@@ -168,6 +174,22 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                                 raise AssertionError(
                                     f"Chart data mismatch: {actual!r} != {expected_rows!r}"
                                 )
+                            if slug == "metachemistry":
+                                compounds = chart.locator(".chart-outcome-components")
+                                if compounds.count() != 5:
+                                    raise AssertionError(
+                                        "Expected five typed MetaChemistry combinations"
+                                    )
+                                for compound in compounds.all():
+                                    parts = compound.locator(".chart-outcome-component")
+                                    if parts.count() != 2:
+                                        raise AssertionError(
+                                            "MetaChemistry compound must retain two components"
+                                        )
+                                    if (compound.text_content() or "").count(" + ") != 1:
+                                        raise AssertionError(
+                                            "MetaChemistry compound separator is missing"
+                                        )
                             if slug == "booty":
                                 branches = chart.locator(".chart-outcome-branches")
                                 if branches.count() != 4:

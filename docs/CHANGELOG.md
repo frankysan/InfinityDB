@@ -15,7 +15,9 @@ are not retroactively relabeled.
 - Martial Arts now displays only applicable chart modifiers; Booty
   chart outcomes for TAGs and other Troop Types appear on separate
   lines and retain distinct typed conditions instead of a combined
-  sentence.
+  sentence. MetaChemistry's five combined chart outcomes now also
+  display separately identified components without changing the
+  original source results.
 - All 33 canonical Trait pages now expose player-visible official Infinity
   Wiki heading links, including encoded headings such as BS Weapon (PH),
   Disposable (X), Suppressive Fire (SF), and Zone of Control (ZoC).
