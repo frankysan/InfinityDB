@@ -432,6 +432,49 @@ occurrences for every eligible Fireteam member. The reconciliations are
 enforced by `tests/test_other_source_variant_provenance.py`; they
 do not implement or populate the eventual usage index.
 
+**Remaining source-parameter inventory (pinned current Army snapshot):**
+`tools/audit_source_variant_inputs.py` produces a deterministic, read-only
+JSON inventory from `infinity.db`, `infinity.raw.db` and `rules.db`
+(`python -m tools.audit_source_variant_inputs`). It inspects exact source
+IDs, direct profile/loadout/Unit-option relationship rows, ordered extra
+IDs/types/values, raw occurrence values and current reviewed source variants.
+It does **not** calculate Unit usage. The baseline contains **96 Skill**
+source identities across **33,153 direct rows** and **34 Equipment**
+source identities across **5,427 direct rows**:
+
+- Skills: 10 reviewed exact-source IDs without occurrence extras;
+  44 family-only IDs; 1 reviewed distance-parameter source
+  (Forward Deployment, `161`); and 41 IDs with at least one
+  occurrence parameter requiring further reconciliation.
+- Equipment: 1 reviewed exact-source ID without occurrence extras;
+  19 family-only IDs; and 14 IDs with unresolved occurrence parameters.
+  Four currently published Equipment source IDs have reviewed
+  exact-source variant definitions, but three of those have extras
+  that remain **separately unresolved** as typed usage-index parameters.
+- `TEXT` extras occur across 39 Skill source IDs and 14 Equipment
+  source IDs. `DISTANCE` occurs across 5 Skill source IDs;
+  Forward Deployment `161` is the only source with exclusively
+  `DISTANCE` extras and matching reviewed distance semantics.
+  Dodge `40` and Super-Jump `74` mix `TEXT` with `DISTANCE`;
+  Jump `263` and Climb `271` lack the same explicit parameter
+  review. Treat every such case as **unresolved for this index**,
+  notwithstanding other reviewed player-facing behavior.
+
+These statuses are conservative **per-source-ID audit flags**.
+A flagged source may also have valid, unparameterized occurrences,
+and reviewed family rules remain available. An exact reviewed
+source variant with an unreviewed occurrence extra is *not*
+a reviewed combined variant. In particular, Booty/MetaChemistry
+`ReRoll`, Mimetism `-3/-6`, TinBot `-3/-6`, and Hacking
+Device `UPGRADE` source text must not be promoted to typed
+variant keys on string parsing alone. The audit retains separate
+signatures for each extra combination and detects future source
+drift via `tests/test_audit_source_variant_inputs.py`. It is a
+snapshot-characterization gate, not a source completeness or
+historical correctness claim. Further parameter reviews should
+extend explicit typed semantics and tests, not relax these
+unknown/exclusion boundaries.
+
 Do **not** parse a variant from a display string, strip punctuation, infer a
 parameter from a shared family name, or count an unresolved variant as a
 verified specific one. Missing/ambiguous variant semantics remain explicitly

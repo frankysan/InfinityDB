@@ -1755,10 +1755,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       for unused TinBot: Neurocinetics/Albedo (188/193) and preserve
       MOD extras on used TinBot variants in
       `tests/test_other_source_variant_provenance.py`.
-    - [ ] Reconcile all other Level/MOD/named/parameter families and
-      unknown source extras before aggregating specific variants;
-      fail closed when family membership is known but the exact
-      specific variant is unresolved.
+    - [x] Inventory every currently published Skill/Equipment source ID
+      and direct occurrence extra, distinguishing reviewed exact source
+      variants, unparameterized family uses, reviewed distances and
+      unresolved parameters (`tools/audit_source_variant_inputs.py`;
+      pinned counts/tests in `tests/test_audit_source_variant_inputs.py`).
+      The inventory does not assert that all extras have reviewed semantics.
+    - [ ] Reconcile the 41 Skill and 14 Equipment source IDs with
+      unresolved occurrence parameters, including mixed TEXT/DISTANCE
+      and named variants with extra MODs. Preserve raw signatures
+      and exclude unreviewed specific combinations from index counts;
+      fail closed rather than parsing numeric-looking display strings.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.
