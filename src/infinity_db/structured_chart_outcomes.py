@@ -76,6 +76,66 @@ def project_metachemistry_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any
     return projected
 
 
+def link_metachemistry_skill_components(
+    rows: list[dict[str, Any]],
+    *,
+    reviewed_records: list[dict[str, Any]],
+    public_skills: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Attach only unique reviewed Skill-family destinations to typed components.
+
+    This is a discovery link, not a claim that a parameterized effect is
+    identical to the base Skill or that the effect is active on any Trooper.
+    """
+
+    by_name: dict[str, list[dict[str, Any]]] = {}
+    for record in reviewed_records:
+        if (
+            record.get("kind") != "skill"
+            or record.get("facts", {}).get("category")
+            not in {"common-skill", "special-skill"}
+            or (record.get("variant_semantics") or {}).get("inheritance") == "source"
+        ):
+            continue
+        name = record.get("name")
+        if isinstance(name, str):
+            by_name.setdefault(name.casefold(), []).append(record)
+
+    published: dict[str, list[dict[str, Any]]] = {}
+    for skill in public_skills:
+        name = skill.get("name")
+        if isinstance(name, str):
+            published.setdefault(name.casefold(), []).append(skill)
+
+    result: list[dict[str, Any]] = []
+    for source_row in rows:
+        row = source_row.copy()
+        if "outcome_components" in row:
+            components: list[dict[str, Any]] = []
+            for original in row["outcome_components"]:
+                component = original.copy()
+                if component.get("kind") == "special-skill":
+                    key = str(component["name"]).casefold()
+                    reviewed = by_name.get(key, [])
+                    matches = published.get(key, [])
+                    if len(reviewed) == len(matches) == 1:
+                        record_id = reviewed[0].get("id")
+                        public_slug = matches[0].get("slug")
+                        if (
+                            isinstance(record_id, str)
+                            and record_id.startswith("skill:")
+                            and public_slug == record_id.removeprefix("skill:")
+                        ):
+                            component["public_reference"] = {
+                                "catalog": "skills",
+                                "id": public_slug,
+                            }
+                components.append(component)
+            row["outcome_components"] = components
+        result.append(row)
+    return result
+
+
 def project_booty_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Expose two explicit Booty branches without replacing the Army result text.
 

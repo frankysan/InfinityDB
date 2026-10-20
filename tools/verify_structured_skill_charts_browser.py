@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from typing import Any
@@ -67,6 +68,15 @@ def source_charts(database: Database) -> dict[str, dict[str, Any]]:
     }
 
 
+def source_only_chart(reference: dict[str, Any]) -> dict[str, Any]:
+    """Remove additive navigational links for exact Army source comparisons."""
+    result = deepcopy(reference)
+    for row in result["rows"]:
+        for component in row.get("outcome_components", []):
+            component.pop("public_reference", None)
+    return result
+
+
 def _page_error(errors: list[str], error: Any) -> None:
     errors.append(str(error))
 
@@ -122,7 +132,7 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                                     f"Skill API unavailable: {slug} HTTP {response.status}"
                                 )
                             skill = response.json()
-                            if skill.get("structured_reference") != expected[slug]:
+                            if source_only_chart(skill["structured_reference"]) != expected[slug]:
                                 raise AssertionError(
                                     f"Served Skill chart differs from local snapshot: {slug}"
                                 )
@@ -189,6 +199,29 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                                     if (compound.text_content() or "").count(" + ") != 1:
                                         raise AssertionError(
                                             "MetaChemistry compound separator is missing"
+                                        )
+                                hrefs = chart.locator(
+                                    ".chart-outcome-component a"
+                                ).evaluate_all(
+                                    "(links) => links.map((link) => link.getAttribute('href'))"
+                                )
+                                expected_hrefs = [
+                                    "/skills/immunity",
+                                    "/skills/dogged",
+                                    "/skills/immunity",
+                                    "/skills/super-jump",
+                                    "/skills/climbing-plus",
+                                    "/skills/regeneration",
+                                ]
+                                if sorted(hrefs) != sorted(expected_hrefs):
+                                    raise AssertionError(
+                                        f"Unexpected MetaChemistry Skill links: {hrefs!r}"
+                                    )
+                                for href in set(expected_hrefs):
+                                    target = context.request.get(f"{base}{href}")
+                                    if target.status != 200:
+                                        raise AssertionError(
+                                            f"Linked Skill is not routable: {href}"
                                         )
                             if slug == "booty":
                                 branches = chart.locator(".chart-outcome-branches")

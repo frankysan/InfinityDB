@@ -626,7 +626,7 @@ Keep evidence under ignored `local/audits`.
 
 ## 1.0 MetaChemistry combined outcomes — typed publication
 
-**Added 2026-10-19; browser acceptance pending.** The pinned Army
+**Browser accepted 2026-10-20 (9/9).** The pinned Army
 MetaChemistry rows 16–20 match the published N5.3
 [MetaChemistry chart](https://infinitythewiki.com/MetaChemistry).
 These five outcomes combine two separately named effects: an
@@ -657,10 +657,27 @@ rendering. Run it against the current development server:
 .\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
 ```
 
-The previously verified 9/9 run applied to the prior typed-Booty
-revision; **repeat browser acceptance** before accepting this
-MetaChemistry UI revision. Independent pinned N5.3 source-footnote
-reconciliation and verified canonical links remain open.
+**Browser result reported 2026-10-20:** `Structured Skill charts browser:
+9/9 passed` for the MetaChemistry component renderer across
+1440/390/320 px.
+
+**Subsequent Skill-link revision — Chromium acceptance pending:**
+MetaChemistry now adds `public_reference: {"catalog":"skills","id":slug}`
+only when an outcome's Skill name matches exactly one reviewed
+current Skill definition and one published public Skill slug. Five
+canonical families resolve: Immunity, Dogged, Super-Jump, Climbing
+Plus and Regeneration. Immunity (ARM) and Immunity (Enhanced)
+retain their parameter labels but link to the **Immunity family**
+page, not to an inferred parameter-specific route. Attribute
+modifiers and MOV values remain plain typed text, not guessed links.
+The source-preserving contract and duplicate/unavailable-name
+guards have focused regression coverage. The updated Chromium
+verifier checks all six link occurrences, that their public pages
+return HTTP 200, and all existing source/chart assertions at
+1440/390/320 px. Repeat its documented command after this change;
+the earlier 9/9 result does not validate the new links. Independent
+pinned N5.3 source-footnote reconciliation and remaining canonical
+outcome references are still open.
 
 ## 1.0 source evidence baseline
 

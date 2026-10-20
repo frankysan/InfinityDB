@@ -1655,15 +1655,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       flattening their effects. The whole-corpus regression requires
       all five reviewed rows; partial synthetic fixtures remain
       supported. No rules-link identity is inferred.
-    - [ ] Re-run the 3-page structured Skill chart Chromium verifier
-      after the MetaChemistry component projection (9 pages at
-      1440/390/320 px), checking all five rendered combinations.
-      The prior accepted 9/9 run predates this revision.
+    - [x] Revalidate the MetaChemistry component projection in
+      Chromium: **9/9 passed** at 1440/390/320 px, reported
+      2026-10-20. All five two-part outcomes retained their values,
+      layout and source correspondence; retain evidence under ignored
+      `local/audits`.
+    - [x] Resolve all five MetaChemistry compound Skill names against
+      unique reviewed, published Skill-family identities and expose
+      additive public links. Both Immunity outcomes retain their
+      ARM/Enhanced parameters while linking to the common Immunity
+      definition, not a guessed variant route. Leave ARM/PH modifiers
+      and MOV values as typed text without fabricated destinations.
+      Ambiguous or absent definitions remain unlinked.
+    - [ ] Re-run the 3-page structured Skill Chromium audit after
+      adding MetaChemistry canonical Skill links (9 checks across
+      1440/390/320 px); verify all six displayed links and source
+      component values. The prior 9/9 acceptance predates this edit.
     - [ ] Independently verify every chart outcome, conditional branch,
       and footnote against the final pinned official N5.3 PDF/Wiki
-      revisions. Resolve canonical Skill, Equipment, Weapon and
-      Attribute links only after identity review; no random-result
-      selection or persistent session overlay is required for 1.0.
+      revisions. Resolve remaining Booty/MetaChemistry Equipment,
+      Weapon and Attribute references only after identity review;
+      no random-result selection or persistent session overlay is
+      required for 1.0.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and

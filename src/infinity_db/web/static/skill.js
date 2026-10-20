@@ -71,7 +71,15 @@ function randomChartOutcome(row) {
       if (index) parts.append(" + ");
       const element = document.createElement("span");
       element.className = "chart-outcome-component";
-      element.textContent = component.text;
+      const reference = component.public_reference;
+      if (reference?.catalog === "skills" && reference.id) {
+        const link = document.createElement("a");
+        link.href = `/skills/${encodeURIComponent(reference.id)}`;
+        link.textContent = component.text;
+        element.append(link);
+      } else {
+        element.textContent = component.text;
+      }
       parts.append(element);
     }
     return parts;

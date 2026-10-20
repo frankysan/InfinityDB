@@ -13,11 +13,16 @@ import pytest
 
 from infinity_db.database.repository import Database
 from infinity_db.structured_chart_outcomes import (
+    link_metachemistry_skill_components,
     project_booty_rows,
     project_metachemistry_rows,
 )
 from infinity_db.web import create_app
-from tools.verify_structured_skill_charts_browser import CHARTS, source_charts
+from tools.verify_structured_skill_charts_browser import (
+    CHARTS,
+    source_charts,
+    source_only_chart,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/infinity.db"
@@ -111,7 +116,7 @@ def test_all_published_structured_skill_charts_preserve_army_rows_and_api() -> N
         assert detail["slug"] == slug
         assert detail["name"] == by_slug[slug]["name"]
         structured = detail["structured_reference"]
-        assert structured == expected[slug], slug
+        assert source_only_chart(structured) == expected[slug], slug
         assert structured["kind"] == chart["kind"], slug
         assert structured["title"] == chart["title"], slug
 
@@ -239,6 +244,98 @@ def test_metachemistry_compounds_are_typed_and_source_preserving() -> None:
         if parts is None:
             continue
         assert " + ".join(part["text"] for part in parts) == row["result"]
+
+
+def test_metachemistry_skill_components_have_unambiguous_public_definitions() -> None:
+    """Link only canonical Skill families present in the current public catalog."""
+
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    status, body = _get(app, "/api/skills")
+    assert status == "200 OK"
+    expected = {
+        "Immunity": "immunity",
+        "Dogged": "dogged",
+        "Super-Jump": "super-jump",
+        "Climbing Plus": "climbing-plus",
+        "Regeneration": "regeneration",
+    }
+    items = json.loads(body)["items"]
+    for name, slug in expected.items():
+        candidates = [
+            item for item in items
+            if item["name"].casefold() == name.casefold()
+        ]
+        assert len(candidates) == 1, (name, candidates)
+        assert candidates[0]["slug"] == slug, name
+        status, body = _get(app, f"/api/skills/{slug}")
+        assert status == "200 OK", slug
+        detail = json.loads(body)
+        assert detail["slug"] == slug
+        assert detail["name"].casefold() == name.casefold()
+        assert any(
+            rule["id"] == f"skill:{slug}"
+            for rule in detail.get("rules", [])
+        ), slug
+
+    status, body = _get(app, "/api/skills/metachemistry")
+    assert status == "200 OK"
+    rows = json.loads(body)["structured_reference"]["rows"]
+    linked_names: set[str] = set()
+    for row in rows:
+        for component in row.get("outcome_components", []):
+            if component["kind"] != "special-skill":
+                assert "public_reference" not in component
+                continue
+            name = component["name"]
+            assert component["public_reference"] == {
+                "catalog": "skills", "id": expected[name]
+            }, (row["roll"], name)
+            linked_names.add(name)
+    assert linked_names == set(expected)
+    assert next(row for row in rows if row["roll"] == "16")[
+        "outcome_components"
+    ][1]["parameter"] == "ARM"
+    assert next(row for row in rows if row["roll"] == "17")[
+        "outcome_components"
+    ][1]["parameter"] == "Enhanced"
+
+
+def test_metachemistry_skill_links_fail_closed_on_ambiguous_definitions() -> None:
+    original = [{
+        "roll": "18",
+        "result": "MOV: 6-4 + Super-Jump",
+        "outcome_components": [
+            {"kind": "movement-value", "text": "MOV: 6-4", "value": "6-4"},
+            {"kind": "special-skill", "text": "Super-Jump", "name": "Super-Jump"},
+        ],
+    }]
+    reviewed = [{
+        "kind": "skill",
+        "id": "skill:super-jump",
+        "name": "Super-Jump",
+        "facts": {"category": "special-skill"},
+    }]
+    published = [{"name": "Super-Jump", "slug": "super-jump"}]
+    linked = link_metachemistry_skill_components(
+        original, reviewed_records=reviewed, public_skills=published
+    )
+    assert linked[0]["outcome_components"][1]["public_reference"] == {
+        "catalog": "skills", "id": "super-jump"
+    }
+    assert "public_reference" not in original[0]["outcome_components"][1]
+    assert "public_reference" not in linked[0]["outcome_components"][0]
+
+    for records, skills in (
+        ([], published),
+        (reviewed, []),
+        (reviewed * 2, published),
+        (reviewed, published * 2),
+        (reviewed, [{"name": "Super-Jump", "slug": "wrong-route"}]),
+    ):
+        unresolved = link_metachemistry_skill_components(
+            original, reviewed_records=records, public_skills=skills
+        )
+        assert "public_reference" not in unresolved[0]["outcome_components"][1]
 
 
 def test_metachemistry_compound_parser_rejects_unreviewed_formats() -> None:

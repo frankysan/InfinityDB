@@ -13,6 +13,7 @@ from infinity_db.hacking_program_catalog import hacking_program_declaration_cate
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.skill_config import load_skill_source_config
 from infinity_db.structured_chart_outcomes import (
+    link_metachemistry_skill_components,
     project_booty_rows,
     project_metachemistry_rows,
 )
@@ -356,6 +357,12 @@ class SkillCatalog:
             return {"kind": "random-chart", "title": "Booty chart", "rows": rows}
         if slug == "metachemistry":
             rows = project_metachemistry_rows(self.database.list_metachemistry_results())
+            if self.rules_database is not None:
+                rows = link_metachemistry_skill_components(
+                    rows,
+                    reviewed_records=self._skill_records(),
+                    public_skills=self.list_skills(),
+                )
             return {"kind": "random-chart", "title": "MetaChemistry chart", "rows": rows}
         return None
 
