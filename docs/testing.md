@@ -955,6 +955,20 @@ Generate ignored review artifacts from the repository root:
 python tools/report_reference_baseline.py --json-output reports/1.0-baseline.json --markdown-output docs/audits/1.0-baseline.md
 ```
 
+To ensure the **running development/release server** uses the exact Army and
+rules database bytes inventoried from this checkout, add
+`--verify-server http://127.0.0.1:8000` (substitute the actual server origin).
+The check queries the served `/api/version` response and requires its
+`snapshot_revision` to equal the SHA-256 of
+`"<Army database SHA-256>:<rules database SHA-256>"`, the runtime's
+existing snapshot identity. On mismatch it exits nonzero **before writing
+baseline outputs**; a successful run records `servedSnapshot` in JSON.
+The server option is opt-in and never starts, deploys, or modifies a server.
+It checks database-pair identity only: static assets, processed symbols,
+PDFs, Wiki revisions, browser correctness and full source completeness
+require their independent checks. Rerun against the final candidate
+and deployment, not only a local development server.
+
 Optionally pass `--army-archive <path>` to verify the exact Army ZIP SHA-256 against
 the one embedded in `infinity.db`. Missing ignored PDFs/wiki snapshots are explicitly
 reported rather than downloaded or assumed present. The report keeps each URL-pinned

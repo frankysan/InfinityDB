@@ -11,11 +11,14 @@ import argparse
 import hashlib
 import json
 import sqlite3
+import sys
 from collections.abc import Sequence
 from contextlib import closing
 from pathlib import Path, PureWindowsPath
 from typing import Any
+from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlsplit
+from urllib.request import Request, urlopen
 
 from infinity_db.application_domains import application_domain, semantic_record_domain
 
@@ -340,13 +343,20 @@ def build_baseline(
         except sqlite3.DatabaseError as exc:
             raise ReferenceBaselineError(f"Published catalog is unreadable: {exc}") from exc
 
+    # The runtime publishes SHA256("<army database sha>:<rules database sha>").
+    # Preserve the exact pair used by the release evidence, rather than merely
+    # comparing source archive or individual database hashes independently.
+    army_sha = _sha256(army_database)
+    rules_sha = _sha256(rules_database)
+    runtime_revision = hashlib.sha256(f"{army_sha}:{rules_sha}".encode()).hexdigest()
     return {
         "format": REPORT_FORMAT,
         "formatVersion": REPORT_VERSION,
         "status": "initial-evidence-only-not-a-completeness-verdict",
+        "runtimeSnapshotRevision": runtime_revision,
         "armySnapshot": {
             "archiveSha256": archive_sha,
-            "publishedDatabaseSha256": _sha256(army_database),
+            "publishedDatabaseSha256": army_sha,
             "archiveVerification": archive_status,
             "sourceFileCount": raw_army.get("sourceFileCount"),
             "sourceVersions": raw_army.get("sourceVersions"),
@@ -354,7 +364,7 @@ def build_baseline(
             "snapshotDownloadedOn": raw_army.get("snapshotDownloadedOn"),
         },
         "rulesPublication": {
-            "publishedDatabaseSha256": _sha256(rules_database),
+            "publishedDatabaseSha256": rules_sha,
             "metadata": rules_meta, "collections": collections,
         },
         "sourceGroups": sources,
@@ -372,6 +382,54 @@ def build_baseline(
             "and interaction audits",
             "Classify every concrete gap with a scope decision and owning 1.0 task",
         ],
+    }
+
+
+def verify_served_revision(report: dict[str, Any], base_url: str) -> dict[str, str]:
+    """Require the running server to publish exactly the inventoried database pair.
+
+    This validates the immutable database bytes used by the app; it does not
+    verify external source artifacts, rules semantics, or browser rendering.
+    """
+    parsed = urlsplit(base_url)
+    if (
+        parsed.scheme not in {"http", "https"}
+        or not parsed.netloc
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.path not in {"", "/"}
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ReferenceBaselineError(
+            "Server base URL must be an HTTP(S) origin without credentials, path or query"
+        )
+    version_url = base_url.rstrip("/") + "/api/version"
+    try:
+        request = Request(version_url, headers={"Accept": "application/json"})
+        with urlopen(request, timeout=10) as response:
+            if response.status != 200:
+                raise ReferenceBaselineError(
+                    f"Runtime version endpoint returned HTTP {response.status}"
+                )
+            payload = json.load(response)
+    except (HTTPError, URLError, TimeoutError, OSError, ValueError) as exc:
+        raise ReferenceBaselineError(f"Could not verify runtime version: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ReferenceBaselineError("Runtime version endpoint did not return an object")
+    actual = payload.get("snapshot_revision")
+    expected = report["runtimeSnapshotRevision"]
+    if not isinstance(actual, str) or actual != expected:
+        raise ReferenceBaselineError(
+            f"Runtime snapshot revision does not match inventoried databases: "
+            f"expected {expected}, received {actual!r}"
+        )
+    return {
+        "versionUrl": version_url,
+        "snapshotRevision": actual,
+        "appVersion": str(payload.get("version", "")),
+        "staticRevision": str(payload.get("static_revision", "")),
+        "status": "exact-database-pair-match-not-source-completeness",
     }
 
 
@@ -393,6 +451,13 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Published Army database SHA-256: `{snapshot['publishedDatabaseSha256']}`.",
         f"- Published rules database SHA-256: "
         f"`{report['rulesPublication']['publishedDatabaseSha256']}`.",
+        f"- Combined runtime snapshot revision: `{report['runtimeSnapshotRevision']}` "
+        "(exact published Army + rules database bytes; not source completeness).",
+        *(
+            [f"- Served runtime: {report['servedSnapshot']['status']} "
+             f"at `{report['servedSnapshot']['versionUrl']}`."]
+            if report.get("servedSnapshot") else []
+        ),
         f"- Army source data changed: {snapshot['sourceDataChangedOn']}; "
         f"snapshot acquired: {snapshot['snapshotDownloadedOn']} "
         "(separate from publication dates).",
@@ -503,12 +568,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/infinity.db")
     parser.add_argument("--rules-db", type=Path, default=PROJECT_ROOT / "data/generated/rules.db")
     parser.add_argument("--army-archive", type=Path, help="Verify exact ZIP bytes against Army pin")
+    parser.add_argument(
+        "--verify-server", metavar="BASE_URL",
+        help="Check that the server uses this exact Army/rules database pair",
+    )
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     args = parser.parse_args(argv)
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,
     )
+    if args.verify_server:
+        try:
+            report["servedSnapshot"] = verify_served_revision(report, args.verify_server)
+        except ReferenceBaselineError as exc:
+            print(f"Release snapshot mismatch: {exc}", file=sys.stderr)
+            return 1
     for path, content in (
         (args.json_output, json.dumps(report, indent=2, sort_keys=True) + "\n"),
         (args.markdown_output, render_markdown(report)),

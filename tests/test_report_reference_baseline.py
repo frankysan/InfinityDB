@@ -3,7 +3,9 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+from io import BytesIO
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -16,6 +18,7 @@ from tools.report_reference_baseline import (
     build_baseline,
     main,
     render_markdown,
+    verify_served_revision,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +33,13 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
     assert report["armySnapshot"]["archiveVerification"] == "not-supplied"
     assert len(report["armySnapshot"]["archiveSha256"]) == 64
     assert len(report["rulesPublication"]["publishedDatabaseSha256"]) == 64
+    combined = (
+        report["armySnapshot"]["publishedDatabaseSha256"] + ":"
+        + report["rulesPublication"]["publishedDatabaseSha256"]
+    )
+    assert report["runtimeSnapshotRevision"] == hashlib.sha256(
+        combined.encode()
+    ).hexdigest()
     # The published rules database includes four core missions and one
     # separately scoped ITS Season 18 Battleground pilot.
     assert report["scenarioMembershipCount"] == 5
@@ -178,6 +188,104 @@ def test_baseline_requires_published_databases_and_verified_supplied_army_zip(
     archive.write_bytes(b"incorrect source bytes")
     with pytest.raises(ReferenceBaselineError, match="differs from published metadata"):
         build_baseline(ARMY_DB, RULES_DB, army_archive=archive)
+
+
+class _VersionResponse(BytesIO):
+    status = 200
+
+
+def test_served_revision_matches_exact_inventoried_database_pair() -> None:
+    from infinity_db.web import create_app
+
+    report = build_baseline(ARMY_DB, RULES_DB)
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    assert report["runtimeSnapshotRevision"] == app.snapshot_revision
+
+    payload = {
+        "snapshot_revision": report["runtimeSnapshotRevision"],
+        "version": "1.0.0",
+        "static_revision": "abc",
+    }
+    with patch(
+        "tools.report_reference_baseline.urlopen",
+        return_value=_VersionResponse(json.dumps(payload).encode()),
+    ) as opened:
+        observed = verify_served_revision(report, "http://127.0.0.1:8000")
+    assert observed["status"] == "exact-database-pair-match-not-source-completeness"
+    assert observed["snapshotRevision"] == app.snapshot_revision
+    assert opened.call_args.args[0].full_url == "http://127.0.0.1:8000/api/version"
+    assert opened.call_args.kwargs == {"timeout": 10}
+
+
+def test_served_revision_rejects_stale_and_invalid_runtime() -> None:
+    report = {"runtimeSnapshotRevision": "a" * 64}
+    stale = {"snapshot_revision": "b" * 64}
+    with patch(
+        "tools.report_reference_baseline.urlopen",
+        return_value=_VersionResponse(json.dumps(stale).encode()),
+    ):
+        with pytest.raises(ReferenceBaselineError, match="does not match"):
+            verify_served_revision(report, "http://localhost:8000/")
+    for base in (
+        "file:///data/generated/infinity.db",
+        "http://user:pass@localhost:8000",
+        "http://localhost:8000/api",
+        "http://localhost:8000?skip=1",
+    ):
+        with pytest.raises(ReferenceBaselineError, match="Server base URL"):
+            verify_served_revision(report, base)
+    with patch(
+        "tools.report_reference_baseline.urlopen",
+        return_value=_VersionResponse(b"[]"),
+    ):
+        with pytest.raises(ReferenceBaselineError, match="did not return an object"):
+            verify_served_revision(report, "http://localhost:8000")
+
+
+def test_baseline_cli_rejects_stale_server_before_writing_outputs(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "baseline.json"
+    payload = {"snapshot_revision": "0" * 64}
+    with patch(
+        "tools.report_reference_baseline.urlopen",
+        return_value=_VersionResponse(json.dumps(payload).encode()),
+    ):
+        assert main([
+            "--verify-server", "http://127.0.0.1:8000",
+            "--json-output", str(path),
+        ]) == 1
+    assert not path.exists()
+
+
+def test_baseline_cli_records_served_pair_in_json_and_markdown(tmp_path: Path) -> None:
+    report = build_baseline(ARMY_DB, RULES_DB)
+    payload = {
+        "snapshot_revision": report["runtimeSnapshotRevision"],
+        "version": "1.0.0",
+        "static_revision": "static-test",
+    }
+    json_path = tmp_path / "baseline.json"
+    markdown_path = tmp_path / "baseline.md"
+    with patch(
+        "tools.report_reference_baseline.urlopen",
+        return_value=_VersionResponse(json.dumps(payload).encode()),
+    ):
+        assert main([
+            "--verify-server", "http://localhost:8000",
+            "--json-output", str(json_path),
+            "--markdown-output", str(markdown_path),
+        ]) == 0
+    saved = json.loads(json_path.read_text(encoding="utf-8"))
+    assert saved["servedSnapshot"]["status"] == (
+        "exact-database-pair-match-not-source-completeness"
+    )
+    assert saved["servedSnapshot"]["snapshotRevision"] == report[
+        "runtimeSnapshotRevision"
+    ]
+    assert "Served runtime: exact-database-pair-match" in markdown_path.read_text(
+        encoding="utf-8"
+    )
 
 
 def test_baseline_cli_writes_stable_local_reports(tmp_path: Path) -> None:

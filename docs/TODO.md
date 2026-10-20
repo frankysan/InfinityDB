@@ -1915,6 +1915,13 @@ individual verifiers remain the repeatable acceptance procedures.
     category from source citation through maintained representation and generated storage to a
     usable normal browser surface; schema coverage, passing validators, and an API route alone
     are insufficient evidence. Re-review exclusions against the canonical completeness definition.
+  - [x] Add an optional baseline-to-server publication identity check:
+    compute the exact Army/rules database-pair snapshot revision used by the
+    runtime and fail closed if served `/api/version` differs. This checks
+    publication identity only, not source or semantic completeness.
+  - [ ] Repeat that exact database-pair comparison on the final 1.0
+    candidate and deployment, alongside separate source/archive,
+    symbol and full source-to-browser gates.
   - [x] Add source-category route-discovery hints to the baseline inventory using
     canonical application-domain capabilities and nested Unit/embedded Glossary
     conventions. Validate candidate browser routes and API route vocabulary without

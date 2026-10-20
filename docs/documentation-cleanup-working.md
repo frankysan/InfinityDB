@@ -633,3 +633,17 @@ Prefer targeted fixes rather than merging these.
 - **Validation:** `tests/test_public_relation_destinations.py` —
   **4 passed** after extending the structured route checks
   (60.58 seconds).
+- **Closeout pass 21, 2026-10-20:** Added an opt-in
+  `--verify-server` release-evidence check to the source baseline
+  inventory. It computes the runtime's exact SHA-256-derived combined
+  revision from the inventoried Army and rules database bytes, then
+  checks the served `/api/version` revision against that same
+  identity. Stale or mismatched publication fails before report
+  output; successful results record the endpoint and matched
+  revision in JSON/Markdown. This is database-pair consistency
+  evidence only: source artifact verification, symbols, semantic
+  coverage and final-release browser acceptance remain separate.
+- **Validation:** `tests/test_report_reference_baseline.py` —
+  **11 passed** including exact runtime-revision parity, stale-server
+  rejection and CLI evidence outputs; Ruff on tool and test module
+  **PASS**. The server check still requires an explicit live run.

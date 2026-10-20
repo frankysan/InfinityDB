@@ -257,7 +257,11 @@ For releases that are deployed to the hosted InfinityDB instance:
 - [ ] Deploy the tagged self-contained release using the workflow in `docs/deployment.md`;
   production must not rebuild or substitute runtime databases after the tag is validated.
 - [ ] Verify the deployed application reports the intended release version and source
-  snapshot.
+  snapshot. For 1.0, use the opt-in
+  `tools.report_reference_baseline --verify-server <server-origin>` check
+  against the exact retained candidate Army/rules databases to reject
+  stale or substituted database-pair publication. This check does not
+  validate symbol/PDF/Wiki inputs or rules completeness.
 - [ ] Smoke-test the release's principal changed user-facing paths in the deployed
   application.
 - [ ] Confirm required database/schema rebuilds and published assets are actually the
