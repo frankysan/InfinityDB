@@ -1928,9 +1928,14 @@ individual verifiers remain the repeatable acceptance procedures.
     against actual hosted rule-card records. These are API/script
     contracts, not live DOM navigation; no embedded Glossary
     `display_relations` are currently emitted by the published graph.
-  - [ ] Verify same-page local rule-card fragments and final
-    client-rendered navigation in the release-candidate browser;
-    the above tests do not establish whole-source relation completeness.
+  - [x] Verify same-page rule-card fragment targets for seven
+    published Mine-family Weapon details: every emitted local
+    `#rule-…` reference must have a hosted rule card, with the
+    Mines-family link pinned against an empty-coverage regression.
+    This is API/renderer-contract coverage, not live DOM navigation.
+  - [ ] Verify final client-rendered fragment navigation on the
+    release candidate and expand source-to-browser completeness
+    beyond the bounded reference samples.
   - [x] Reconcile all eleven canonical Ammunition records from maintained
     source identities through published rules storage, API list/details,
     summary/typed-fact/citation parity and normal served detail templates. This

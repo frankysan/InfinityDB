@@ -252,10 +252,18 @@ so it would be incorrect to claim such graph edges were exercised.
 The renderer and page-script contracts are checked, but actual
 client-rendered DOM navigation is not.
 
-Intentionally unlinked source variants and **same-page local rule-card
-fragments** remain outside this expanded check. It does not adjudicate
-rule semantics, prove every expected relation exists, or replace
-final Chromium navigation acceptance.
+A further bounded check inspects the full published Weapon detail
+payload for seven Mine-family pages, including Cybermine. Every
+same-page `#rule-…` reference from relations or maintained-text tokens
+must resolve to a rule card actually included in that Weapon's
+`rules` array. The source-pinned `#rule-weapon-mines` link is required
+to prevent a vacuous pass, and the served page route is checked.
+The shared renderer creates those IDs from the same rule identities.
+
+Intentionally unlinked source variants remain unlinked. This
+does not adjudicate rules, establish every expected relation,
+verify *all* Weapon pages, or replace live Chromium fragment
+navigation at final 1.0 release acceptance.
 
 ## Scenario-specific FAQ publication scope
 

@@ -126,3 +126,47 @@ def test_glossary_weapon_family_fragments_have_a_real_host_rule_card() -> None:
     assert status == "200 OK"
     assert b'if (rule.id) article.id = `rule-${rule.id.replaceAll(":", "-")}`' in script
 
+
+def _local_rule_fragments(value: Any) -> list[str]:
+    """Collect local rule-card links from API relation and text tokens."""
+    if isinstance(value, dict):
+        reference = value.get("public_reference")
+        found = (
+            [reference["href"]]
+            if isinstance(reference, dict)
+            and isinstance(reference.get("href"), str)
+            and reference["href"].startswith("#rule-")
+            else []
+        )
+        return found + [
+            href for child in value.values()
+            for href in _local_rule_fragments(child)
+        ]
+    if isinstance(value, list):
+        return [href for child in value for href in _local_rule_fragments(child)]
+    return []
+
+
+def test_weapon_detail_local_fragments_match_hosted_cards() -> None:
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+    observed: set[str] = set()
+    for slug in (
+        "ap-mine", "e-m-mine", "monofilament-mine",
+        "para-mine", "shock-mine", "viral-mine", "cybermine",
+    ):
+        status, body = _get(app, f"/api/weapons/{slug}")
+        assert status == "200 OK", slug
+        payload = json.loads(body)
+        rules = payload.get("rules", [])
+        hosted = {"#rule-" + rule["id"].replace(":", "-") for rule in rules}
+        assert len(hosted) == len(rules), slug
+        links = set(_local_rule_fragments(payload))
+        assert links <= hosted, (slug, sorted(links - hosted))
+        observed.update(links)
+        assert _get(app, f"/weapons/{slug}")[0] == "200 OK"
+    assert "#rule-weapon-mines" in observed, sorted(observed)
+

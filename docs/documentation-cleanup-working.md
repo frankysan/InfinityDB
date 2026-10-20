@@ -198,8 +198,10 @@ Prefer targeted fixes rather than merging these.
   - [x] Add a whole-published-graph API destination regression for
     catalog-backed cross-domain rule links.
   - [x] Verify published embedded Glossary hashes and Weapon-hosted
-    rule-card fragments against actual published identities; keep
-    same-page local fragments and Chromium acceptance separately open.
+    rule-card fragments against actual published identities.
+  - [x] Check same-page rule-card links for seven published Mine-family
+    Weapon pages against their hosted rule records, preserving
+    final Chromium fragment navigation as separate acceptance.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -528,3 +530,17 @@ Prefer targeted fixes rather than merging these.
   `docs` — Markdownlint **32 files, 0 issues**, and local
   Markdown links **30 files, 0 errors**. No full-suite or
   live Chromium release-candidate run performed.
+- **Closeout pass 14, 2026-10-20:** Added same-page fragment
+  parity coverage for seven published Mine-family Weapon detail
+  APIs. Every emitted `#rule-` reference from nested relations
+  or maintained-text tokens must point to a rule card included
+  on that page; the known `#rule-weapon-mines` target is pinned
+  to avoid a vacuous pass. Updated the testing/TODO boundary:
+  this is server API and deterministic renderer coverage,
+  not client DOM navigation or final whole-catalog acceptance.
+- **Validation:** `tests/test_public_relation_destinations.py` —
+  **4 passed**; `tests/test_weaponry_catalog_api.py` —
+  **185 passed**; Ruff — PASS; Pyright — **0 errors,
+  0 warnings**; Markdownlint — **32 files, 0 issues**;
+  offline links — **30 files, 0 errors**. Full project suite
+  and live Chromium were not run.
