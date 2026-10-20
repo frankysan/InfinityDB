@@ -83,6 +83,86 @@ version ID`, `publication date`, `acquisition date`, `exact revision/commit`,
 For a source announcement, record each independent changelog section as a
 separate scoped claim; never treat ITS-only changes as core N5 rules.
 
+## Reviewed 1.0 structured Skill chart provenance
+
+**Scope:** Martial Arts, Booty and MetaChemistry only; this is a completed
+source comparison, not a general N5 history-completeness claim. The English
+N5.3 rules PDF (`data/pdf/rules/n5-rules-v5-3-en.pdf`, SHA-256
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`)
+is the current core-rules baseline. The independently retained English Wiki
+revision archive is `data/wiki/WIKI-en-history 20260928-165727.zip`
+(SHA-256 `d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`).
+Its `_history/index.json` supplies revision timestamps and exact
+`_history/oldid/*.html` members. The archive's **2026-09-28 acquisition date**
+is not the date of the Wiki rule text.
+
+The latest revisions represented in that archive are:
+
+- **[Booty, oldid 3852](https://infinitythewiki.com/index.php?title=Booty&oldid=3852)**
+  (2025-10-28 16:18:36 UTC; archived member SHA-256
+  `6d3cb26f768299ba7329ec55fd61f798b8d7abd83320f410ad97c403ea4360eb`).
+  Reviewed N5-era revisions: 3061, 3099, 3447, 3848, 3852.
+- **[Martial Arts, oldid 3707](https://infinitythewiki.com/index.php?title=Martial_Arts&oldid=3707)**
+  (2025-06-20 15:00:31 UTC; archived member SHA-256
+  `5634bc1537910e90afa0b99364791923860e5d3dbd3d4bef411632e05518bc3c`).
+  Reviewed N5-era revisions: 3098, 3216, 3444, 3705, 3707.
+- **[MetaChemistry, oldid 3855](https://infinitythewiki.com/index.php?title=MetaChemistry&oldid=3855)**
+  (2025-10-28 16:20:37 UTC; archived member SHA-256
+  `a4c068f202cbe786cf7df49778eab864055b93ccaa283ec9fdec6045dca83dd4`).
+  Reviewed N5-era revisions: 3100, 3101, 3855.
+
+The **16 Booty outcomes, 5 Martial Arts levels and 12 MetaChemistry outcomes**
+retain their game-relevant values throughout these inspected N5-era Wiki
+revisions, in the archived latest pages, and in the N5.3 PDF
+(Booty printed pp. 86-87, Martial Arts pp. 100-101, MetaChemistry p. 101).
+Army's compact `+1SD` notation and the Wiki/PDF `+1 SD` denote the
+same bonus, but **+1 SD and +1B remain different rules**. Martial Arts L3
+grants the former, L4 the latter, and L5 both; the PDF's additional-die,
+discard, target-allocation and Disposable-use qualifications apply.
+Booty and MetaChemistry are optional, additive Deployment Skills, not
+replacements for existing equipment/Skills. Booty resolves after Model
+placement; MetaChemistry specifies **immediately** after placement and
+**one roll**. Booty results 12/16/18/20 retain TAG-specific branches,
+and MetaChemistry results 16-20 retain both typed components/parameters.
+
+**Changes to context, not chart values:** Martial Arts revision 3705
+(2025-06-20) introduced the clarifying Sibylla advice about assigning
+the extra die when Burst is distributed; 3707 corrected example
+formatting around `+1 B`. Booty revision 3848 and MetaChemistry
+revision 3855 (2025-10-28) expose the October 2025 Deployment
+repositioning FAQ alongside their otherwise unchanged charts. Booty
+revision 3852 relabels the FAQ heading. Do not interpret an embedded
+FAQ block as a new chart-specific rule or as evidence that the chart
+itself was revised on the FAQ's publication date.
+
+The general Deployment repositioning ruling appears in **N5 FAQ v0.0**
+(published 2025-10-15; English PDF `data/pdf/faq/n5-faqs-v0-0-en.pdf`,
+SHA-256 `a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043`)
+and is carried forward without a substantive change to the ruling in
+**N5 FAQ v0.1** (selected from 2026-09-01; English PDF
+`data/pdf/faq/n5-faqs-v0-1-en.pdf`, SHA-256
+`7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa`).
+Both cite **printed p. 1, file page 2**. The rule constrains repositioning
+after a Roll or measurement of the affected game elements, with the
+Fireteam Coherency Check as an example. Neither FAQ establishes a
+separate Booty/MetaChemistry roll mechanic. The archived Wiki's embedded
+FAQ still names **v0.0.0 (October 2025)**; it must not be cited as the
+later v0.1 publication even when the ruling agrees.
+
+The FAQ's BS Attack clarification also says that `+1 SD` does not
+normally apply to Long Skills. N5.3's **Berserk** rule on printed p. 86
+explicitly permits `(+1 SD)` during that Long Skill. Preserve the
+specific Berserk exception; do not interpret the general FAQ sentence
+as removing Martial Arts' distinct CC modifiers.
+
+This comparison does not infer that the Wiki revisions were edited for
+the 2026-09-01 N5.3 update. No selected archived page has a revision
+dated after 2025. The dated N5.3 announcement, rules PDF, FAQ update,
+Wiki revision timestamps and September archive acquisition are separate
+events. The existing Army-chart tests pin published source rows, not
+complete historical Wiki content; this research does not change the
+Army import or introduce game-session roll selection.
+
 ## Reviewed 1.0 Weapon Trait evidence boundary
 
 The read-only `tools/audit_weapon_trait_cross_sources.py` retains nine historically

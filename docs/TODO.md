@@ -1724,12 +1724,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Model placement, adding a MOD or Special Skill; its five
       compound results (16-20) retain both components and typed
       parameters. Do not simulate rolls or persist game state.
-    - [ ] Complete independent historical Wiki revision and FAQ
-      comparison against the exact chart publication timeline.
-      The Deployment repositioning FAQ is general, not a new
-      Booty/MetaChemistry exception. Keep PDF, Wiki, FAQ and
-      announcement publication dates distinct, and record any
-      historical discrepancy rather than inferring supersession.
+    - [x] Reconcile the archived N5-era Wiki revision histories
+      for Booty, Martial Arts and MetaChemistry and both English
+      FAQ PDFs against the exact N5.3 chart and footnote baseline.
+      Pin latest Wiki oldids, timestamps, archive/member SHA-256
+      values, unchanged chart semantics, the June 2025 Martial Arts
+      advice/example edits, and October 2025 FAQ embedding in
+      `docs/n5-source-history.md`. Preserve the general FAQ scope,
+      its v0.0 origin/v0.1 carry-forward and the specific Berserk
+      +1 SD Long Skill exception. Do not infer a 2026 Wiki edit
+      from the September 2026 PDF/FAQ or archive acquisition.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
