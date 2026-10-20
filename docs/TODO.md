@@ -1810,12 +1810,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       discrepancy for ARM+3. On fresh rules regeneration, the unresolved
       Skill-ID count falls from 39 to 38.
     - [ ] Reconcile the remaining **38 Skill** source IDs with unresolved
-      occurrence parameters **after rebuilding rules.db from current
-      curation**, and 14 Equipment source IDs. The tracked release
-      rules.db still reports 41 unresolved Skill IDs; regenerate and
-      revalidate the paired release artifacts before claiming those
-      three reviews are shipped. Source-only occurrence verification
-      requires the ignored raw Army archive and is skipped in clean CI.
+      occurrence parameters and 14 Equipment source IDs. The tracked
+      rules.db now includes the reviewed Mimetism/Berserk/Dodge mappings;
+      `tests/test_audit_source_variant_inputs.py` pins this baseline
+      and independently checks a fresh curated rules export. Revalidate
+      the release-matched source pair before final certification.
+      Source-only occurrence verification requires the ignored raw
+      Army archive and is skipped in clean CI.
       Review other mixed TEXT/DISTANCE sources and named Equipment
       variants with extra MODs; preserve raw signatures and exclude
       unreviewed specific combinations from index counts. Fail closed

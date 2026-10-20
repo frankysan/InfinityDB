@@ -432,8 +432,8 @@ occurrences for every eligible Fireteam member. The reconciliations are
 enforced by `tests/test_other_source_variant_provenance.py`; they
 do not implement or populate the eventual usage index.
 
-**Remaining source-parameter inventory (pinned Army source and tracked
-release database):** `tools/audit_source_variant_inputs.py` produces a
+**Remaining source-parameter inventory (pinned Army source and current
+generated rules database):** `tools/audit_source_variant_inputs.py` produces a
 deterministic, read-only JSON inventory from `infinity.db`,
 `infinity.raw.db` and `rules.db`
 (`python -m tools.audit_source_variant_inputs`). It inspects exact
@@ -441,19 +441,20 @@ source IDs, direct profile/loadout/Unit-option relationship rows,
 ordered extra IDs/types/values, raw occurrence values and reviewed
 source-variant mappings. It does **not** calculate Unit usage.
 
-The following baseline uses the **tracked** `data/generated/rules.db`
-alongside the paired pinned Army application/raw databases. It is
-intentionally different from regenerating `rules.db` from the latest
-curated definitions below: the tracked artifact has not yet incorporated
-all reviewed Mimetism/Berserk/Dodge occurrence-parameter mappings.
-This tracked-artifact baseline contains **96 Skill** source identities
-across **33,153 direct rows** and **34 Equipment** source identities
-across **5,427 direct rows**:
+The following baseline uses the current **tracked**
+`data/generated/rules.db` alongside the paired pinned Army
+application/raw databases. The tracked artifact now includes the
+reviewed Mimetism, Berserk and Dodge occurrence-parameter mappings.
+This baseline contains **96 Skill** source identities across
+**33,153 direct rows** and **34 Equipment** source identities across
+**5,427 direct rows**:
 
 - Skills: 10 reviewed exact-source IDs without occurrence extras;
   44 family-only IDs; 1 reviewed distance-parameter source
-  (Forward Deployment, `161`); and 41 IDs with at least one
-  occurrence parameter requiring further reconciliation.
+  (Forward Deployment, `161`); 2 reviewed numeric-parameter
+  sources (Mimetism `28` and Berserk `24`); 1 reviewed
+  extra-parameter source (Dodge `40`); and **38** IDs with
+  unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
   19 family-only IDs; and 14 IDs with unresolved occurrence parameters.
   Four currently published Equipment source IDs have reviewed
@@ -464,9 +465,9 @@ across **5,427 direct rows**:
   Forward Deployment `161` is the only source with exclusively
   `DISTANCE` extras and matching reviewed distance semantics.
   Dodge `40` and Super-Jump `74` mix `TEXT` with `DISTANCE`;
-  Jump `263` and Climb `271` lack the same explicit parameter
-  review. Treat every such case as **unresolved for this index**,
-  notwithstanding other reviewed player-facing behavior.
+  Dodge's exact observed signatures are reviewed; Super-Jump, Jump
+  `263`, and Climb `271` are not certified at the same level.
+  Do not infer coverage from source type or player-facing prose.
 
 These statuses are conservative **per-source-ID audit flags**.
 A flagged source may also have valid, unparameterized occurrences,
@@ -549,16 +550,14 @@ the 2,382 source occurrences contains multiple extras. The
 new `RulesDatabase.skill_reviewed_extra_semantics()` query
 exposes this reviewed typed evidence separately from the legacy
 distance-only display query and `skill_numeric_mod_semantics()`.
-With a **freshly generated** rules database, source ID `40` is now `reviewed-extra-parameter`; the
-**fresh-curation** Skill inventory contains **2 reviewed-numeric,
-1 reviewed-extra, and 38 unresolved** source IDs (down from
-39 after the numeric-MOD review, and 41 in the tracked baseline
-above). The pinned generated `data/generated/rules.db` is
-deliberately not overwritten by the audit, so its older
-snapshot counts remain until a normal release-artifact
-regeneration. The 38-ID result is covered by the focused
-source-provenance test using a temporary rebuilt rules database;
-it is not yet a claim about the tracked runtime artifact.
+Source ID `40` is now `reviewed-extra-parameter` in the
+tracked `rules.db` and in a freshly exported database from
+curated sources. Both inventories report **2 reviewed-numeric,
+1 reviewed-extra, and 38 unresolved** Skill source IDs.
+The inventory is read-only and does not overwrite either database.
+`tests/test_audit_source_variant_inputs.py` checks the tracked
+artifact and independently exports current curation into a
+temporary rules database to verify the exact source signatures.
 Certification is per observed source signature, not a new
 player-visible variant index or a game-state simulator.
 

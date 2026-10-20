@@ -37,7 +37,9 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "family-only": 44,
             "reviewed-distance-parameter": 1,
             "reviewed-exact-source": 10,
-            "unresolved-occurrence-parameter": 41,
+            "reviewed-numeric-parameter": 2,
+            "reviewed-extra-parameter": 1,
+            "unresolved-occurrence-parameter": 38,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -63,6 +65,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "family-only",
             "reviewed-distance-parameter",
             "reviewed-exact-source",
+            "reviewed-numeric-parameter",
+            "reviewed-extra-parameter",
             "unresolved-occurrence-parameter",
         }
 
@@ -72,13 +76,18 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     skills = {item["id"]: item for item in report["skills"]["items"]}
     equipment = {item["id"]: item for item in report["equipment"]["items"]}
 
-    # The source type is TEXT, even for a numeral-looking MOD. It is
-    # evidence, not reviewed +SD/Burst/Level semantics for an index.
-    for source_id in (24, 25, 28, 40, 55, 74, 1000):
+    # A TEXT extra is not automatically a reviewed modifier. Three
+    # source IDs now have exact typed mappings; the others remain open.
+    for source_id in (25, 55, 74, 1000):
         item = skills[source_id]
         assert item["status"] == "unresolved-occurrence-parameter"
         assert "TEXT" in item["extraTypes"]
         assert item["extraSignatures"]
+    assert skills[24]["status"] == "reviewed-numeric-parameter"
+    assert skills[28]["status"] == "reviewed-numeric-parameter"
+    assert skills[40]["status"] == "reviewed-extra-parameter"
+    for source_id in (24, 28, 40):
+        assert all(part["reviewed"] for part in skills[source_id]["extraSignatures"])
     for source_id in (100, 101, 169, 244, 247):
         item = equipment[source_id]
         assert item["status"] == "unresolved-occurrence-parameter"
@@ -127,7 +136,7 @@ def test_n53_numeric_skill_modifiers_preserve_exact_source_meaning() -> None:
         (7, "TEXT", "-6"): 392,
     }
     assert mimetism["occurrences"] == 2004
-    assert mimetism["status"] == "unresolved-occurrence-parameter"
+    assert mimetism["status"] == "reviewed-numeric-parameter"
 
     berserk = skills[24]
     # N5.3 p. 86: bracketed positive MODs affect the owner's Berserk
@@ -135,7 +144,7 @@ def test_n53_numeric_skill_modifiers_preserve_exact_source_meaning() -> None:
     berserk_extras = _single_extra_counts(berserk)
     assert berserk_extras[(1, "TEXT", "+3")] == 243
     assert berserk_extras[(2, "TEXT", "+6")] == 3
-    assert berserk["status"] == "unresolved-occurrence-parameter"
+    assert berserk["status"] == "reviewed-numeric-parameter"
 
     dodge = skills[40]
     # N5.3 pp. 23, 79: a Dodge Skill's bracketed MOD is distinct from
@@ -144,9 +153,9 @@ def test_n53_numeric_skill_modifiers_preserve_exact_source_meaning() -> None:
     assert dodge_extras[(1, "TEXT", "+3")] == 613
     assert dodge_extras[(2, "TEXT", "+6")] == 7
     assert dodge["extraTypes"] == ["DISTANCE", "TEXT"]
-    assert dodge["status"] == "unresolved-occurrence-parameter"
-    # The currently supported curated occurrence-parameter contract is
-    # distance only: source TEXT values must not auto-promote to a typed MOD.
+    assert dodge["status"] == "reviewed-extra-parameter"
+    # Dodge has explicitly reviewed PH/MOV/extra signatures. Do not infer
+    # generic MOD meaning from other source TEXT labels.
 
 
 def test_numeric_mod_signatures_require_exact_reviewed_ids_and_values(
@@ -174,10 +183,14 @@ def test_numeric_mod_signatures_require_exact_reviewed_ids_and_values(
             },
         },
     )
+    # Deliberately withhold the reviewed typed-extra map: partial numeric
+    # coverage must not certify Dodge's unrelated PH/MOV/SD/ARM signatures.
+    monkeypatch.setattr(RulesDatabase, "skill_reviewed_extra_semantics", lambda self: {})
     skills = {item["id"]: item for item in _inventory()["catalogs"]["skills"]["items"]}
     mimetism = skills[28]
     assert mimetism["status"] == "reviewed-numeric-parameter"
     assert all(entry["reviewed"] for entry in mimetism["extraSignatures"])
+    assert skills[24]["status"] == "unresolved-occurrence-parameter"
     assert skills[40]["status"] == "unresolved-occurrence-parameter"
     assert skills[40]["reviewedNumericMod"] is not None
     assert any(not entry["reviewed"] for entry in skills[40]["extraSignatures"])
