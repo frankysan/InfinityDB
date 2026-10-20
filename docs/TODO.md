@@ -1932,7 +1932,12 @@ individual verifiers remain the repeatable acceptance procedures.
     published Mine-family Weapon details: every emitted local
     `#rule-…` reference must have a hosted rule card, with the
     Mines-family link pinned against an empty-coverage regression.
-    This is API/renderer-contract coverage, not live DOM navigation.
+  - [x] Expand the same-page fragment parity regression to every
+    currently published Weapon catalog detail API, rejecting duplicate
+    public slugs, duplicate hosted rule-card anchors, and dangling
+    local `#rule-…` references. Retain the Mines-family non-vacuity
+    assertion; this remains API/renderer-contract coverage, not live
+    DOM navigation or source-completeness certification.
   - [ ] Verify final client-rendered fragment navigation on the
     release candidate and expand source-to-browser completeness
     beyond the bounded reference samples.

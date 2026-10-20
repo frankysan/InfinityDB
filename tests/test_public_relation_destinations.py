@@ -147,17 +147,22 @@ def _local_rule_fragments(value: Any) -> list[str]:
     return []
 
 
-def test_weapon_detail_local_fragments_match_hosted_cards() -> None:
+def test_all_published_weapon_local_fragments_match_hosted_cards() -> None:
     root = Path(__file__).resolve().parents[1]
     app = create_app(
         root / "data/generated/infinity.db",
         rules_database_path=root / "data/generated/rules.db",
     )
+    status, body = _get(app, "/api/weapons")
+    assert status == "200 OK"
+    items = json.loads(body)["items"]
+    slugs = {item["slug"] for item in items}
+    assert len(slugs) == len(items), "Public Weapon catalog has duplicate slugs"
+    assert len(slugs) >= 50, "Public Weapon catalog unexpectedly sparse"
+
     observed: set[str] = set()
-    for slug in (
-        "ap-mine", "e-m-mine", "monofilament-mine",
-        "para-mine", "shock-mine", "viral-mine", "cybermine",
-    ):
+    linked_pages: set[str] = set()
+    for slug in sorted(slugs):
         status, body = _get(app, f"/api/weapons/{slug}")
         assert status == "200 OK", slug
         payload = json.loads(body)
@@ -166,7 +171,11 @@ def test_weapon_detail_local_fragments_match_hosted_cards() -> None:
         assert len(hosted) == len(rules), slug
         links = set(_local_rule_fragments(payload))
         assert links <= hosted, (slug, sorted(links - hosted))
+        if links:
+            linked_pages.add(slug)
+            assert _get(app, f"/weapons/{slug}")[0] == "200 OK"
         observed.update(links)
-        assert _get(app, f"/weapons/{slug}")[0] == "200 OK"
+
+    assert "ap-mine" in linked_pages, sorted(linked_pages)
     assert "#rule-weapon-mines" in observed, sorted(observed)
 

@@ -544,3 +544,15 @@ Prefer targeted fixes rather than merging these.
   0 warnings**; Markdownlint — **32 files, 0 issues**;
   offline links — **30 files, 0 errors**. Full project suite
   and live Chromium were not run.
+- **Closeout pass 15, 2026-10-20:** Expanded the existing
+  same-page Weapon rule-fragment regression from seven Mine-family
+  examples to every slug in the current published Weapon catalog.
+  The test rejects duplicate catalog slugs and hosted card IDs,
+  checks local links in every Weapon detail payload, and verifies
+  a served page route for each Weapon emitting local fragments.
+  The AP Mine / Mines source-known anchor remains a non-vacuity pin.
+  This is not browser-rendered DOM navigation or an adjudication
+  of missing source relations.
+- **Validation:** `tests/test_public_relation_destinations.py` —
+  **4 passed** after the expansion (60.33 seconds). Full-suite
+  and live Chromium acceptance remain unrun for this change.

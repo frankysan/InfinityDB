@@ -252,18 +252,21 @@ so it would be incorrect to claim such graph edges were exercised.
 The renderer and page-script contracts are checked, but actual
 client-rendered DOM navigation is not.
 
-A further bounded check inspects the full published Weapon detail
-payload for seven Mine-family pages, including Cybermine. Every
-same-page `#rule-…` reference from relations or maintained-text tokens
-must resolve to a rule card actually included in that Weapon's
-`rules` array. The source-pinned `#rule-weapon-mines` link is required
-to prevent a vacuous pass, and the served page route is checked.
-The shared renderer creates those IDs from the same rule identities.
+A further check enumerates every published Weapon slug from
+`/api/weapons` and inspects each complete detail API payload.
+Every same-page `#rule-…` reference from relations or
+maintained-text tokens must resolve to a rule card included in that
+Weapon's `rules` array. Duplicate public slugs and duplicate hosted
+rule-card anchors fail. Pages with local fragments must also serve
+their normal Weapon detail route. The known
+`#rule-weapon-mines` reference and its AP Mine page are pinned
+against a vacuous pass. The shared renderer derives those article IDs
+from the same rule identities.
 
 Intentionally unlinked source variants remain unlinked. This
-does not adjudicate rules, establish every expected relation,
-verify *all* Weapon pages, or replace live Chromium fragment
-navigation at final 1.0 release acceptance.
+does not adjudicate rules, establish every *expected* relation,
+inspect live DOM anchors, or replace final release-candidate
+Chromium fragment navigation at 1.0 acceptance.
 
 ## Scenario-specific FAQ publication scope
 
