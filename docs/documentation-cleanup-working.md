@@ -180,7 +180,11 @@ Prefer targeted fixes rather than merging these.
     tracked release rules.db (41 unresolved Skill source IDs) from
     current curated rules rebuilt for review (38 unresolved), with
     the optional raw-archive test and CI limitations stated explicitly.
-  - [x] Reconcile pinned source-field occupancy against represented Unit options/notes; keep the release-only raw-source gate and its limitations explicit.
+  - [x] Reconcile pinned source-field occupancy against represented Unit
+    options/notes; keep the release-only raw-source gate explicit.
+  - [x] Promote the completed non-Skill Army browser study's durable
+    source-to-API and page-bootstrap checks from ignored local scripts into
+    maintained tests, without claiming client-rendered Chromium coverage.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -405,3 +409,26 @@ Prefer targeted fixes rather than merging these.
   itself was **not executed** against a freshly regenerated
   release-candidate pair; this bounded documentation audit
   does not certify final source completeness.
+- **Closeout pass 7, 2026-10-20:** Promoted permanent checks from the
+  ignored `local/audits/verify_non_skill_army_browser.py` study.
+  The new `tests/test_non_skill_army_presentation.py`, registered
+  in the web test section, uses only tracked `infinity.db` and
+  `rules.db`. It verifies **72 distinct Unit/source identity pairs**
+  drawn from Army source Skill IDs 254/273/266/258/282/280:
+  Gizmokit/MediKit/Bangbomb → Equipment, Regular → Training,
+  Infinity Team Ops → source markers, and BTS=3 → Attribute
+  overrides. All pairs must remain correctly classified in the
+  normal Unit API, not the player-facing Skills bucket.
+  Seven representative Unit HTTP routes and their general-profile
+  APIs are also checked, including Raoul Spector; known Equipment
+  routes must resolve. The initial failed test correctly exposed
+  the test's mistaken assumption that `.general-profile` was
+  server-rendered; Unit detail DOM content is populated by `unit.js`,
+  so the test was corrected to check the served bootstrap and API
+  instead. Historical **21/21 Chromium** checks at 1440/390/320 px
+  remain separate evidence, not tests run by hosted CI.
+- **Validation:** New tracked suite — **8 passed**; section
+  registration — **2 passed**; Ruff for new test — PASS; Pyright
+  — 0 errors, 0 warnings. Updated `docs/testing.md` and
+  `docs/TODO.md` without marking the full 1.0 source-to-browser
+  release gate complete.

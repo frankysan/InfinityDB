@@ -1990,6 +1990,13 @@ individual verifiers remain the repeatable acceptance procedures.
     source occupancy separately; the pinned Army ZIP was also checked
     directly (59 JSON documents, no populated flagged fields). Re-run against
     changed release inputs before claiming the final 1.0 gate.
+  - [x] Promote the non-Skill Army source classification baseline to
+    maintained regression coverage: 72 distinct Unit/source pairs
+    across Gizmokit, MediKit, Bangbomb, Regular, Infinity Team Ops
+    and BTS=3; verify seven normal Unit bootstraps and their detail
+    APIs without relying on Git-ignored evidence. The earlier 21/21
+    Chromium cases remain dated historical acceptance, not current
+    whole-catalog source-to-browser certification.
   - [x] Resolve dense Unit profile/loadout subrow readability at 320 px.
     Army profile Attributes, Skills, Equipment and Includes now use full-width
     stacked rows on very narrow screens, while loadout names take a full row

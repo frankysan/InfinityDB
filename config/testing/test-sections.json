@@ -78,6 +78,7 @@
         "test_benchmark_runtime",
         "test_flamethrower_reference",
         "test_marksman_rifle_reference",
+        "test_non_skill_army_presentation",
         "test_support_weapon_deployable_references",
         "test_release_notes",
         "test_runtime_import_boundary",

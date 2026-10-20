@@ -165,6 +165,29 @@ then run these modules explicitly.
 A clean CI pass does **not** claim to have verified the full source-only
 occurrence counts.
 
+## Non-Skill Army source classification and Unit presentation
+
+`tests/test_non_skill_army_presentation.py` is a maintained, hermetic
+source-to-API regression against the tracked published `infinity.db`
+and `rules.db`. It checks **all 72 distinct Unit/source pairs** in the
+pinned snapshot for six Army Skill-source identities deliberately presented
+outside the player-facing Skill category: Gizmokit, MediKit and Bangbomb
+are Equipment; Regular is Training; Infinity Team Ops is a source marker;
+and BTS=3 is an Attribute override. Each occurrence must reach its
+correct canonical `shared_items` or contextual `specific_items` bucket;
+none may be falsely presented as a Skill.
+
+Seven representative Unit details additionally check the normal HTTP
+bootstrap, their general-profile API data and Equipment route
+availability. Unit details are **client-rendered**: the initial HTML only
+contains `unit-content` and the `unit.js` bootstrap; a rendered
+`general-profile` appears only after JavaScript executes. The separate
+ignored `local/audits/non-skill-army-browser/results.json` recorded
+**21/21 Chromium checks** across 1440/390/320 px for those seven
+Units. That is historical, checkout-specific responsive/navigation
+evidence, not a browser test rerun by CI or proof of whole-catalog
+source-to-browser completeness.
+
 ## Maintained snapshot-note validation
 
 The routine pytest suite recursively validates every maintained JSON snapshot note under
