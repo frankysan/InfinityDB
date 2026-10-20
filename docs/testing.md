@@ -268,6 +268,39 @@ does not adjudicate rules, establish every *expected* relation,
 inspect live DOM anchors, or replace final release-candidate
 Chromium fragment navigation at 1.0 acceptance.
 
+### Weapon fragment Chromium verifier
+
+With the development app running, execute this optional full-width and
+mobile-width browser check from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_rule_fragment_browser --base-url http://127.0.0.1:8000 --output local/audits/weapon-rule-fragments-browser.json
+```
+
+The verifier discovers candidate Weapon pages with local rule references
+from the *served* Weapon catalog/details APIs and discovers Weapon rule
+fragment links from the served Glossary API. At 1440, 390 and 320 px, it
+follows catalog links through the soft-navigation path, checks every
+API-referenced local rule target as a rendered card even when its
+reference is not displayed as a link, follows every actually rendered
+same-page rule fragment link, opens a direct deep link in a **fresh
+browser page** (including pages without a clickable self-link), and
+follows Glossary-to-Weapon hash links. This isolates cold-load behavior
+from the preceding in-page hash/navigation state. Card uniqueness
+and visibility are checked atomically within a single browser
+evaluation to tolerate DOM replacement during optional Unit updates,
+without allowing missing or duplicate cards. It reports page
+JavaScript/API/network errors and horizontal overflow; loading
+failures include the last visible page state. The AP Mine/Mines source target must be hosted,
+but is not required to appear as a self-link on the Weapon page.
+Its JSON report belongs under ignored `local/audits`; the command
+exits nonzero on failures.
+
+This is client-side link and anchor acceptance for the current served
+app, not proof that every intended source relation exists or that
+the final pinned release inputs are complete. The verifier must be
+re-run against the eventual 1.0 release candidate.
+
 ## Scenario-specific FAQ publication scope
 
 A maintained Scenario API regression checks the Annihilation-only FAQ against Core and ITS missions. The base Scenario response stays separate from dated FAQ rulings, and the served client supplies explicit scenario and season context. This does not replace rules-source adjudication or live browser acceptance.

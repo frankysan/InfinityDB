@@ -1938,9 +1938,24 @@ individual verifiers remain the repeatable acceptance procedures.
     local `#rule-…` references. Retain the Mines-family non-vacuity
     assertion; this remains API/renderer-contract coverage, not live
     DOM navigation or source-completeness certification.
-  - [ ] Verify final client-rendered fragment navigation on the
-    release candidate and expand source-to-browser completeness
-    beyond the bounded reference samples.
+  - [x] Add a repeatable optional Chromium verifier for real
+    Weapon rule-fragment clicks, including catalog soft navigation,
+    same-page links, direct deep links, and Glossary cross-page
+    hash links at three widths. Hermetic discovery tests do not
+    count as a live Chromium pass.
+  - [ ] Re-run the corrected Weapon fragment Chromium verifier.
+    The first two executions on 2026-10-20 each reported **51/57**.
+    Fresh-page deep-link isolation improved the third execution to
+    **55/57**; the remaining 320 px Cybermine and Kobra Pistol failures
+    occurred during same-page fragment clicks. The previous verifier
+    waited for a card and then counted it in separate browser operations,
+    which could observe two different DOM generations as optional Unit
+    data re-renders the page. The current verifier now waits for
+    card uniqueness and visibility in a single browser evaluation,
+    retaining failure on missing or duplicate cards. A new live
+    Chromium result is required before closing this gate.
+  - [ ] Run the verifier on the final release candidate and expand
+    source-to-browser completeness beyond the bounded reference samples.
   - [x] Reconcile all eleven canonical Ammunition records from maintained
     source identities through published rules storage, API list/details,
     summary/typed-fact/citation parity and normal served detail templates. This

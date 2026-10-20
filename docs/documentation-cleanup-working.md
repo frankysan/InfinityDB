@@ -556,3 +556,62 @@ Prefer targeted fixes rather than merging these.
 - **Validation:** `tests/test_public_relation_destinations.py` —
   **4 passed** after the expansion (60.33 seconds). Full-suite
   and live Chromium acceptance remain unrun for this change.
+- **Closeout pass 16, 2026-10-20:** Added optional
+  `tools.verify_rule_fragment_browser` for served Weapon and Glossary
+  fragment navigation in Chromium at desktop and mobile widths.
+  Checks catalog soft navigation, rendered same-page links, direct
+  deep links, actual target visibility, JavaScript errors, and page
+  overflow. Candidate identities are discovered from current API
+  publication, with AP Mine's Mines link as a non-vacuity pin.
+  This verifier has not yet been executed against a running server;
+  final release-candidate browser acceptance remains open.
+- **Validation:** New hermetic discovery tests **4 passed**,
+  section registration **2 passed**, Ruff **PASS**, Pyright
+  **0 errors/0 warnings**, Markdownlint **32 files/0 issues**,
+  offline links **30 files/0 errors**. Full suite and live
+  Chromium were not run.
+- **Closeout pass 17, 2026-10-20:** Investigated the first actual
+  Weapon fragment Chromium run (**51/57 passed**). All three AP Mine
+  failures came from the verifier demanding a rendered clickable
+  self-link even though the published source references its hosted
+  Mines rule card; all three Glossary-to-AP-Mine deep links passed.
+  Cybermine had one transient missing-card observation, while PARA
+  Mine timed out at two widths; those causes remain unconfirmed.
+  Corrected the verifier to check every API-referenced source card
+  without requiring a corresponding visible self-link, wait for
+  asynchronously rendered target cards and capture current URL,
+  page status, JavaScript errors and API/network failures on errors.
+  Browser results remain **unverified** until the updated verifier
+  is executed; do not record a 57/57 pass based on these edits.
+- **Validation:** Corrected verifier hermetic tests **7 passed**,
+  test-section registration **2 passed**; Ruff on both touched Python
+  files **PASS**; Pyright **0 errors/0 warnings**; Markdownlint
+  **32 files/0 issues** and offline Markdown links **30 files/0 errors**.
+  Full suite and new live Chromium execution were not run.
+- **Closeout pass 18, 2026-10-20:** The second Chromium execution
+  again reported **51/57**, with failures solely in the deep-link
+  replay step after successful Weapon catalog navigation and in-page
+  rule-fragment checks. The verifier had reused the same page, with
+  existing hash/navigation state, for `page.goto()` to the same
+  Weapon's hash URL. Changed direct-link checks to use independent
+  fresh pages and include a source-backed direct link even when no
+  clickable self-link exists. Added explicit phase labels on failed
+  Weapon observations; kept actual browser acceptance pending.
+- **Validation:** Verifier unit tests **10 passed**, Ruff on verifier
+  and test module **PASS**, Pyright **0 errors/0 warnings**. The live
+  browser result remains **51/57** until a fresh execution.
+- **Closeout pass 19, 2026-10-20:** Fresh-page deep-link isolation
+  improved Chromium acceptance to **55/57**. Both remaining failures
+  (Cybermine and Kobra Pistol, 320 px) were within rendered
+  same-page fragment clicks after successful initial card checks,
+  not cold-load deep links. The verifier had a two-step
+  visible-card wait followed by a separately timed DOM count; a
+  late optional-Unit re-render could replace the article between
+  these operations. Consolidated cardinality and visible-state
+  checks into one browser evaluation with a bounded wait and
+  explicit missing-card diagnostics. The suspected race remains
+  unconfirmed until another live run; do not mark browser acceptance
+  complete.
+- **Validation:** Atomic-card verifier tests **11 passed**; Ruff on
+  verifier and its test module **PASS**. A fresh Chromium pass
+  remains outstanding.
