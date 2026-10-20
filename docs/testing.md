@@ -661,7 +661,7 @@ rendering. Run it against the current development server:
 9/9 passed` for the MetaChemistry component renderer across
 1440/390/320 px.
 
-**Subsequent Skill-link revision — Chromium acceptance pending:**
+**Skill-link revision — browser accepted 2026-10-20 (9/9):**
 MetaChemistry now adds `public_reference: {"catalog":"skills","id":slug}`
 only when an outcome's Skill name matches exactly one reviewed
 current Skill definition and one published public Skill slug. Five
@@ -674,10 +674,50 @@ The source-preserving contract and duplicate/unavailable-name
 guards have focused regression coverage. The updated Chromium
 verifier checks all six link occurrences, that their public pages
 return HTTP 200, and all existing source/chart assertions at
-1440/390/320 px. Repeat its documented command after this change;
-the earlier 9/9 result does not validate the new links. Independent
-pinned N5.3 source-footnote reconciliation and remaining canonical
-outcome references are still open.
+1440/390/320 px. The user reported **9/9 passed**
+on 2026-10-20 for these link checks. Independent pinned N5.3
+source-footnote reconciliation and remaining canonical outcome
+references are still open.
+
+## 1.0 Booty Weapon outcomes — exact public-reference audit
+
+**Added 2026-10-20; Chromium acceptance pending.** Of the ten Weapon
+names printed in the Booty chart, **nine** resolve by exact, unique
+name to published Army-backed Weapon catalog records and successful
+`/api/weapons/{slug}` detail routes: Light Flamethrower, Grenades,
+DA CC Weapon, EXP CC Weapon, Adhesive Launcher Rifle, Panzerfaust,
+Monofilament CC Weapon, MULTI Rifle and MULTI Sniper Rifle. The tenth,
+**HMG**, has **no exact name match** in the published catalog;
+no inferred alias or guessed destination has been attached.
+The source labels correspond to the archived official
+[Booty chart](https://infinitythewiki.com/Booty) (`oldid=3852`),
+but the pinned final N5.3 chart and variant semantics remain subject
+to separate release evidence review.
+
+The Skill API now adds optional `public_reference` values for those
+nine Weapon outcomes only, including MULTI Rifle in the
+`other-troop-types` branch of roll 16. The original `result`
+strings, conditional scopes, and untouched alternative TAG outcomes
+are retained. The renderer turns only resolved references into
+normal `/weapons/{slug}` links; it does not link plain Attribute
+modifiers, HMG, Multispectral Visor L1, Mimetism (-6), or
+BS Attack parameter variants without reviewed canonical identity.
+
+`tests/test_structured_skill_charts_publication.py` tests all ten
+source labels, the nine published detail routes, API links, preserved
+conditional branches, and fail-closed behavior for unknown and
+ambiguous names. The shared Chromium checker now verifies the nine
+rendered links, live destinations and unchanged chart values at
+1440/390/320 px. Run against the current development server:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
+```
+
+**Re-run browser acceptance after this change.** The previously
+accepted 9/9 checks did not include the Booty Weapon links. Retain
+evidence under ignored `local/audits`; independently verified N5.3
+rules-footnote and alias/variant reconciliation remain open.
 
 ## 1.0 source evidence baseline
 

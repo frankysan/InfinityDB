@@ -63,6 +63,16 @@ function referenceCell(value, role) {
   return cell;
 }
 
+function chartOutcomeLink(text, reference) {
+  if (!reference?.id || !["skills", "weapons"].includes(reference.catalog)) {
+    return document.createTextNode(text);
+  }
+  const link = document.createElement("a");
+  link.href = `/${reference.catalog}/${encodeURIComponent(reference.id)}`;
+  link.textContent = text;
+  return link;
+}
+
 function randomChartOutcome(row) {
   if (row.outcome_components?.length) {
     const parts = document.createElement("span");
@@ -71,25 +81,23 @@ function randomChartOutcome(row) {
       if (index) parts.append(" + ");
       const element = document.createElement("span");
       element.className = "chart-outcome-component";
-      const reference = component.public_reference;
-      if (reference?.catalog === "skills" && reference.id) {
-        const link = document.createElement("a");
-        link.href = `/skills/${encodeURIComponent(reference.id)}`;
-        link.textContent = component.text;
-        element.append(link);
-      } else {
-        element.textContent = component.text;
-      }
+      element.append(chartOutcomeLink(component.text, component.public_reference));
       parts.append(element);
     }
     return parts;
   }
-  if (!row.conditional_outcomes?.length) return row.result;
+  if (!row.conditional_outcomes?.length) {
+    return chartOutcomeLink(row.result, row.public_reference);
+  }
   const branches = document.createElement("span");
   branches.className = "chart-outcome-branches";
-  branches.textContent = row.conditional_outcomes
-    .map((branch) => `${branch.label}: ${branch.result}`)
-    .join("\n");
+  for (const [index, branch] of row.conditional_outcomes.entries()) {
+    if (index) branches.append("\n");
+    branches.append(
+      `${branch.label}: `,
+      chartOutcomeLink(branch.result, branch.public_reference),
+    );
+  }
   return branches;
 }
 

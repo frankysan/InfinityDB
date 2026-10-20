@@ -136,6 +136,68 @@ def link_metachemistry_skill_components(
     return result
 
 
+# Exact Weapon labels present in the reviewed Booty table. The public
+# Weapon catalog must independently provide a unique matching identity.
+_BOOTY_WEAPON_NAMES = frozenset({
+    "Light Flamethrower",
+    "Grenades",
+    "DA CC Weapon",
+    "EXP CC Weapon",
+    "Adhesive Launcher Rifle",
+    "Panzerfaust",
+    "Monofilament CC Weapon",
+    "MULTI Rifle",
+    "MULTI Sniper Rifle",
+    "HMG",
+})
+
+
+def link_booty_weapon_outcomes(
+    rows: list[dict[str, Any]],
+    *,
+    public_weapons: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Link only exact, uniquely published Weapon names from reviewed Booty rows.
+
+    Keep conditional TAG/non-TAG semantics, source outcomes, and unresolved
+    aliases unchanged; do not interpret the randomly selected result.
+    """
+
+    published: dict[str, list[str]] = {}
+    for item in public_weapons:
+        name, slug = item.get("name"), item.get("slug")
+        if isinstance(name, str) and isinstance(slug, str) and slug:
+            published.setdefault(name.casefold(), []).append(slug)
+
+    def reference(value: str) -> dict[str, str] | None:
+        if value not in _BOOTY_WEAPON_NAMES:
+            return None
+        slugs = published.get(value.casefold(), [])
+        if len(slugs) != 1:
+            return None
+        return {"catalog": "weapons", "id": slugs[0]}
+
+    result: list[dict[str, Any]] = []
+    for original in rows:
+        row = original.copy()
+        branches = original.get("conditional_outcomes")
+        if branches:
+            projected = []
+            for branch in branches:
+                copy = branch.copy()
+                link = reference(branch["result"])
+                if link is not None:
+                    copy["public_reference"] = link
+                projected.append(copy)
+            row["conditional_outcomes"] = projected
+        else:
+            link = reference(row["result"])
+            if link is not None:
+                row["public_reference"] = link
+        result.append(row)
+    return result
+
+
 def project_booty_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Expose two explicit Booty branches without replacing the Army result text.
 

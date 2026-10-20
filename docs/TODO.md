@@ -1667,16 +1667,27 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       definition, not a guessed variant route. Leave ARM/PH modifiers
       and MOV values as typed text without fabricated destinations.
       Ambiguous or absent definitions remain unlinked.
-    - [ ] Re-run the 3-page structured Skill Chromium audit after
-      adding MetaChemistry canonical Skill links (9 checks across
-      1440/390/320 px); verify all six displayed links and source
-      component values. The prior 9/9 acceptance predates this edit.
+    - [x] Revalidate MetaChemistry canonical Skill links in Chromium:
+      **9/9 passed** at 1440/390/320 px, reported 2026-10-20.
+      Verified all six Skill link occurrences, live destinations and
+      source component values; retain ignored browser evidence.
+    - [x] Audit all ten Booty Weapon labels against published canonical
+      Weapon names and public API destinations. Nine resolve by
+      unambiguous exact match; HMG has **no exact published name** and
+      remains plain text (alias reconciliation required). Link the nine
+      valid outcomes, including conditional MULTI Rifle, without changing
+      source strings or the TAG/other-Troop-Type distinction. Ambiguous
+      or absent names fail closed rather than guessing slugs.
+    - [ ] Run the updated structured Skill Chromium audit after Booty
+      Weapon links (9 pages at 1440/390/320 px), verifying all nine
+      link labels, destinations, conditional branches and chart values.
+      Prior 9/9 acceptance predates the new Weapon links.
     - [ ] Independently verify every chart outcome, conditional branch,
       and footnote against the final pinned official N5.3 PDF/Wiki
-      revisions. Resolve remaining Booty/MetaChemistry Equipment,
-      Weapon and Attribute references only after identity review;
-      no random-result selection or persistent session overlay is
-      required for 1.0.
+      revisions. Resolve HMG's source alias, Multispectral Visor L1,
+      Mimetism (-6), BS Attack variants and any remaining chart references
+      only after exact domain/variant identity review; no random-result
+      selection or persistent session overlay is required for 1.0.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and

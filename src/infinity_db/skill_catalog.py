@@ -13,6 +13,7 @@ from infinity_db.hacking_program_catalog import hacking_program_declaration_cate
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.skill_config import load_skill_source_config
 from infinity_db.structured_chart_outcomes import (
+    link_booty_weapon_outcomes,
     link_metachemistry_skill_components,
     project_booty_rows,
     project_metachemistry_rows,
@@ -354,6 +355,11 @@ class SkillCatalog:
             return {"kind": "martial-arts", "title": "Martial Arts chart", "rows": rows}
         if slug == "booty":
             rows = project_booty_rows(self.database.list_booty_results())
+            if self.rules_database is not None:
+                weapons = deepcopy(self.database.list_catalog_items("weapons"))
+                for weapon in weapons:
+                    attach_public_catalog_slug(self.database, "weapons", weapon)
+                rows = link_booty_weapon_outcomes(rows, public_weapons=weapons)
             return {"kind": "random-chart", "title": "Booty chart", "rows": rows}
         if slug == "metachemistry":
             rows = project_metachemistry_rows(self.database.list_metachemistry_results())

@@ -13,6 +13,7 @@ import pytest
 
 from infinity_db.database.repository import Database
 from infinity_db.structured_chart_outcomes import (
+    link_booty_weapon_outcomes,
     link_metachemistry_skill_components,
     project_booty_rows,
     project_metachemistry_rows,
@@ -133,6 +134,8 @@ def test_all_published_structured_skill_charts_preserve_army_rows_and_api() -> N
     assert 'if (reference.kind === "random-chart")' in javascript
     assert "randomChartOutcome(row)" in javascript
     assert "row.conditional_outcomes" in javascript
+    assert "chartOutcomeLink(row.result, row.public_reference)" in javascript
+    assert "chartOutcomeLink(branch.result, branch.public_reference)" in javascript
     assert 'className = "chart-outcome-branches"' in javascript
     assert 'const hasPsMod = reference.rows.some(' in javascript
     assert '{ label: "Burst MOD", role: "metric" }' in javascript
@@ -244,6 +247,100 @@ def test_metachemistry_compounds_are_typed_and_source_preserving() -> None:
         if parts is None:
             continue
         assert " + ".join(part["text"] for part in parts) == row["result"]
+
+
+def test_booty_weapon_names_have_exact_published_catalog_destinations() -> None:
+    """Discover only exact Weapon names printed on the N5 Booty chart."""
+
+    chart = Database(ARMY_DB).list_booty_results()
+    outcomes = {str(row["result"]) for row in chart}
+    expected = {
+        "Light Flamethrower",
+        "Grenades",
+        "DA CC Weapon",
+        "EXP CC Weapon",
+        "Adhesive Launcher Rifle",
+        "Panzerfaust",
+        "Monofilament CC Weapon",
+        "MULTI Rifle",
+        "MULTI Sniper Rifle",
+        "HMG",
+    }
+    source_text = " / ".join(sorted(outcomes))
+    assert all(name in source_text for name in expected)
+
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    status, body = _get(app, "/api/weapons")
+    assert status == "200 OK"
+    items = json.loads(body)["items"]
+    missing: set[str] = set()
+    for weapon in sorted(expected):
+        matches = [
+            item for item in items
+            if item["name"].casefold() == weapon.casefold()
+        ]
+        if not matches:
+            missing.add(weapon)
+            continue
+        assert len(matches) == 1, (weapon, matches)
+        slug = matches[0]["slug"]
+        status, detail_body = _get(app, f"/api/weapons/{slug}")
+        assert status == "200 OK", (weapon, slug)
+        assert json.loads(detail_body)["slug"] == slug
+    # Source chart spells this "HMG"; the published Weapon catalog does not.
+    # Keep it unresolved rather than assuming a different catalog name is identical.
+    assert missing == {"HMG"}, sorted(missing)
+
+    status, body = _get(app, "/api/skills/booty")
+    assert status == "200 OK"
+    rows = json.loads(body)["structured_reference"]["rows"]
+    linked: dict[str, dict[str, str]] = {}
+    for row in rows:
+        if "conditional_outcomes" in row:
+            for branch in row["conditional_outcomes"]:
+                name = branch["result"]
+                if name in expected - missing:
+                    linked[name] = branch["public_reference"]
+                else:
+                    assert "public_reference" not in branch, (row["roll"], name)
+        else:
+            name = row["result"]
+            if name in expected - missing:
+                linked[name] = row["public_reference"]
+            else:
+                assert "public_reference" not in row, (row["roll"], name)
+    assert set(linked) == expected - missing
+    weapon_by_name = {item["name"].casefold(): item for item in items}
+    for name, reference in linked.items():
+        assert reference == {
+            "catalog": "weapons",
+            "id": weapon_by_name[name.casefold()]["slug"],
+        }, name
+
+
+def test_booty_weapon_links_fail_closed_on_unknown_or_duplicate_names() -> None:
+    original = [{
+        "roll": "3-4", "result": "Light Flamethrower",
+    }, {
+        "roll": "20",
+        "result": "TAG: BS Attack (+1 B) / Other Troop Types: HMG",
+        "conditional_outcomes": [
+            {"scope": "tag", "label": "TAG", "result": "BS Attack (+1 B)"},
+            {"scope": "other-troop-types", "label": "Other Troop Types", "result": "HMG"},
+        ],
+    }]
+    published = [{"name": "Light Flamethrower", "slug": "light-flamethrower"}]
+    linked = link_booty_weapon_outcomes(original, public_weapons=published)
+    assert linked[0]["public_reference"] == {
+        "catalog": "weapons", "id": "light-flamethrower"
+    }
+    assert "public_reference" not in linked[1]["conditional_outcomes"][0]
+    assert "public_reference" not in linked[1]["conditional_outcomes"][1]
+    assert "public_reference" not in original[0]
+    assert "public_reference" not in original[1]["conditional_outcomes"][1]
+    for weapons in ([], published * 2):
+        unresolved = link_booty_weapon_outcomes(original, public_weapons=weapons)
+        assert "public_reference" not in unresolved[0]
 
 
 def test_metachemistry_skill_components_have_unambiguous_public_definitions() -> None:

@@ -11,6 +11,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
+from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
 from infinity_db.structured_chart_outcomes import (
     project_booty_rows,
@@ -72,8 +73,11 @@ def source_only_chart(reference: dict[str, Any]) -> dict[str, Any]:
     """Remove additive navigational links for exact Army source comparisons."""
     result = deepcopy(reference)
     for row in result["rows"]:
+        row.pop("public_reference", None)
         for component in row.get("outcome_components", []):
             component.pop("public_reference", None)
+        for branch in row.get("conditional_outcomes", []):
+            branch.pop("public_reference", None)
     return result
 
 
@@ -82,7 +86,27 @@ def _page_error(errors: list[str], error: Any) -> None:
 
 
 def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
-    expected = source_charts(Database(ROOT / "data/generated/infinity.db"))
+    database = Database(ROOT / "data/generated/infinity.db")
+    expected = source_charts(database)
+    source_weapon_names = {
+        "Light Flamethrower", "Grenades", "DA CC Weapon", "EXP CC Weapon",
+        "Adhesive Launcher Rifle", "Panzerfaust", "Monofilament CC Weapon",
+        "MULTI Rifle", "MULTI Sniper Rifle",
+    }
+    published_weapon_items = database.list_catalog_items("weapons")
+    weapon_links: dict[str, str] = {}
+    for item in published_weapon_items:
+        if item["name"] not in source_weapon_names:
+            continue
+        attach_public_catalog_slug(database, "weapons", item)
+        name = item["name"]
+        if name in weapon_links:
+            raise ValueError(f"Ambiguous published Booty Weapon name: {name}")
+        weapon_links[name] = f"/weapons/{item['slug']}"
+    if set(weapon_links) != source_weapon_names:
+        raise ValueError(
+            f"Booty Weapon destinations missing: {source_weapon_names - set(weapon_links)}"
+        )
     if set(expected) != set(CHARTS) or any(not value["rows"] for value in expected.values()):
         raise ValueError("Cannot verify incomplete published structured Skill charts")
     try:
@@ -224,6 +248,30 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                                             f"Linked Skill is not routable: {href}"
                                         )
                             if slug == "booty":
+                                found_links = chart.locator(
+                                    'a[href^="/weapons/"]'
+                                ).evaluate_all(
+                                    "(anchors) => anchors.map((anchor) => ({"
+                                    "name: anchor.textContent, "
+                                    "href: anchor.getAttribute('href')"
+                                    "}))"
+                                )
+                                actual_links = {
+                                    item["name"]: item["href"] for item in found_links
+                                }
+                                if (
+                                    len(found_links) != len(weapon_links)
+                                    or actual_links != weapon_links
+                                ):
+                                    raise AssertionError(
+                                        f"Booty Weapon links mismatch: {found_links!r}"
+                                    )
+                                for href in actual_links.values():
+                                    response = context.request.get(f"{base}{href}")
+                                    if response.status != 200:
+                                        raise AssertionError(
+                                            f"Booty Weapon route failed: {href}"
+                                        )
                                 branches = chart.locator(".chart-outcome-branches")
                                 if branches.count() != 4:
                                     raise AssertionError("Expected four explicit Booty branches")
