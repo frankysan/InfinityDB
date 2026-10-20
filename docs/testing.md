@@ -188,6 +188,25 @@ Units. That is historical, checkout-specific responsive/navigation
 evidence, not a browser test rerun by CI or proof of whole-catalog
 source-to-browser completeness.
 
+The maintained optional verifier `tools.verify_non_skill_army_browser`
+repeats the seven real-browser cases at those three widths. It checks
+the client-rendered general profile, published API buckets, the correct
+Equipment/Training/Attribute-override table rows, valid Equipment
+destinations, the absence of mistaken Skill links, JavaScript errors,
+and document-level overflow. The published Unit API inventory test remains
+the separate 72-pair source-to-API gate. With the development server
+running for the **same checkout and databases**, run from the repository
+root in PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_non_skill_army_browser --base-url http://127.0.0.1:8000 --output local/audits/non-skill-army-browser/current.json
+```
+
+The optional verifier requires Playwright with Chromium installed and
+is not part of routine source checks. A new 21/21 result against the
+actual release candidate is required before citing current browser
+acceptance; the historical JSON report does not provide it.
+
 ## Maintained snapshot-note validation
 
 The routine pytest suite recursively validates every maintained JSON snapshot note under

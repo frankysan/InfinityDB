@@ -1994,9 +1994,12 @@ individual verifiers remain the repeatable acceptance procedures.
     maintained regression coverage: 72 distinct Unit/source pairs
     across Gizmokit, MediKit, Bangbomb, Regular, Infinity Team Ops
     and BTS=3; verify seven normal Unit bootstraps and their detail
-    APIs without relying on Git-ignored evidence. The earlier 21/21
-    Chromium cases remain dated historical acceptance, not current
-    whole-catalog source-to-browser certification.
+    APIs without relying on Git-ignored evidence. A maintained optional
+    `tools.verify_non_skill_army_browser` now repeats the seven
+    Chromium Unit cases at 1440/390/320 px. The earlier 21/21
+    browser result remains dated historical acceptance; rerun the
+    verifier against the final candidate before claiming current
+    source-to-browser certification.
   - [x] Resolve dense Unit profile/loadout subrow readability at 320 px.
     Army profile Attributes, Skills, Equipment and Includes now use full-width
     stacked rows on very narrow screens, while loadout names take a full row

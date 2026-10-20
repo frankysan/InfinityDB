@@ -185,6 +185,9 @@ Prefer targeted fixes rather than merging these.
   - [x] Promote the completed non-Skill Army browser study's durable
     source-to-API and page-bootstrap checks from ignored local scripts into
     maintained tests, without claiming client-rendered Chromium coverage.
+  - [x] Promote the seven-case non-Skill Army Chromium acceptance procedure
+    to an optional maintained verifier; retain historical browser results
+    separately and require new evidence on the actual release candidate.
   - [ ] At actual 1.0 preparation, review the tracked Markdown corpus
     for factual accuracy (not merely valid links/anchors), source/API/browser
     claims, pending REA and exact source dispositions, and the final
@@ -432,3 +435,20 @@ Prefer targeted fixes rather than merging these.
   — 0 errors, 0 warnings. Updated `docs/testing.md` and
   `docs/TODO.md` without marking the full 1.0 source-to-browser
   release gate complete.
+- **Closeout pass 8, 2026-10-20:** Added the maintained optional
+  `tools/verify_non_skill_army_browser.py`, replacing dependence on
+  ignored `local/audits/verify_non_skill_army_browser.py` for future
+  repeatable Chromium acceptance. The verifier exercises seven published
+  Unit cases at 1440/390/320 px against a supplied current development
+  server, checks API classification, client-rendered detail rows, valid
+  Equipment destinations, missing bogus Skill links, JavaScript errors
+  and horizontal overflow. Output is optional and intended for
+  `local/audits/`; it is **not** part of routine CI and no new live
+  browser run was performed in this pass. Added two hermetic tests
+  for manifest/API-fixture parity and general/Army-local bucket
+  extraction; maintained API suite is now 10 tests. Updated the
+  operator command in `docs/testing.md` and the bounded TODO note.
+- **Checks:** `tests/test_non_skill_army_presentation.py` — 10 passed;
+  Ruff — passed for both modified Python files; Pyright —
+  0 errors, 0 warnings. Final docs check and working-tree review
+  recorded separately before handoff.

@@ -15,6 +15,7 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_db.web import create_app
+from tools.verify_non_skill_army_browser import CASES, WIDTHS, projected_buckets
 
 ROOT = Path(__file__).resolve().parents[1]
 APPLICATION_DB = ROOT / "data/generated/infinity.db"
@@ -146,3 +147,30 @@ def test_non_skill_sources_have_normal_unit_bootstrap_and_detail_api(
     ), (slug, source_slug)
     if destination:
         assert _get(application, destination)[0] == 200
+
+
+def test_browser_case_manifest_tracks_the_pinned_api_samples() -> None:
+    assert WIDTHS == (1440, 390, 320)
+    assert len(CASES) == len(REPRESENTATIVE_UNITS)
+    for case, (slug, source_id, destination) in zip(CASES, REPRESENTATIVE_UNITS, strict=True):
+        source_slug, category = SOURCE_BUCKETS[source_id]
+        assert (case.slug, case.source_slug, case.category, case.href) == (
+            slug, source_slug, category, destination,
+        )
+        assert case.minimum_rows >= 1
+
+
+def test_browser_verifier_collects_general_and_army_local_source_buckets() -> None:
+    unit = {
+        "general_profiles": [{"shared_items": {
+            "equipment": [{"slug": "medikit"}],
+        }}],
+        "armies": [{"profiles": [{"specific_items": {
+            "training": [{"slug": "regular"}],
+        }}], "loadouts": [{"specific_items": {
+            "equipment": [{"slug": "medikit"}],
+        }}]}],
+    }
+    assert projected_buckets(unit, "medikit") == {"equipment"}
+    assert projected_buckets(unit, "regular") == {"training"}
+    assert projected_buckets(unit, "unpublished") == set()
