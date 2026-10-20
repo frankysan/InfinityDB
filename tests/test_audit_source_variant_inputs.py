@@ -11,6 +11,8 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from tools.audit_source_variant_inputs import inventory_source_variants
 
+pytestmark = pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+
 ROOT = Path(__file__).resolve().parents[1]
 
 

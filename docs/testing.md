@@ -144,6 +144,24 @@ widths, preserve the selected-template/S2 relative scale, and close normally whe
 moves away or the touch/click interaction is dismissed. Record completion in `docs/TODO.md`; do not
 replace this acceptance check with screenshot-only or DOM-only evidence.
 
+## Full Army source-archive provenance tests
+
+`tests/test_audit_source_variant_inputs.py`,
+`tests/test_other_source_variant_provenance.py` and
+`tests/test_martial_arts_variant_provenance.py` pin direct Skill/Equipment
+occurrences, their source-extra signatures and exact Army source IDs. They
+require the ignored development archive `data/generated/infinity.raw.db`
+alongside the tracked published application/rules databases. The shared
+pytest prerequisite skips only these raw-dependent modules when that
+archive is absent in a clean CI checkout; an existing but malformed
+archive fails its schema check rather than being silently accepted.
+A local full-source audit must use a paired, current Army database export
+from the pinned Army snapshot (or validate an existing pair with
+`infinity-db database-health data/generated/infinity.db --require-raw`),
+then run these modules explicitly.
+A clean CI pass does **not** claim to have verified the full source-only
+occurrence counts.
+
 ## Maintained snapshot-note validation
 
 The routine pytest suite recursively validates every maintained JSON snapshot note under

@@ -17,6 +17,8 @@ from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 
+pytestmark = pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/infinity.db"
 RAW_DB = ROOT / "data/generated/infinity.raw.db"

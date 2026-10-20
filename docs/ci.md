@@ -44,6 +44,13 @@ For the `--all` leg, CI sets up Node.js 24 and explicitly runs
 check runner starts. The `docs` stage uses this local installation without acquiring dependencies
 at execution time; other matrix legs do not require npm.
 
+The full Army occurrence archive `data/generated/infinity.raw.db` is
+Git-ignored and absent in clean CI. Three source-variant provenance test
+modules require it and explicitly skip there; they still run against the
+full paired archive locally. A clean hosted pass does not independently
+certify pinned source-only occurrence counts. A present but malformed
+archive remains a test failure.
+
 Windows hosted CI uses `--test-workers 2` to bound process/resource use while running the complete
 suite. Automatic worker selection previously proved unstable on that runner class; serial execution
 subsequently exceeded the 15-minute job limit as coverage grew. Windows now has a bounded 30-minute
