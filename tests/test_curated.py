@@ -1085,6 +1085,90 @@ def test_numeric_mod_occurrence_parameter_schema_is_explicit_and_compatible(
         load_curated_document(path)
 
 
+def test_reviewed_dodge_extra_parameter_rejects_unscoped_or_mismatched_values(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    record = next(item for item in document["records"] if item["kind"] == "skill")
+    record["id"] = "skill:dodge"
+    record["armyLinks"] = [{"entity": "skill", "id": "dodge"}]
+    examples = [
+        {"extraId": 6, "extraType": "TEXT", "rawValue": "-3",
+         "effect": {"kind": "opponent-roll-mod", "appliesTo": "dodge-face-to-face",
+                    "modifier": -3}},
+        {"extraId": 27, "extraType": "TEXT", "rawValue": "PH=11",
+         "effect": {"kind": "roll-attribute-replacement", "appliesTo": "dodge-ph-roll",
+                    "attribute": "PH", "value": 11}},
+        {"extraId": 11, "extraType": "DISTANCE", "rawValue": "+2.5",
+         "effect": {"kind": "movement-bonus",
+                    "appliesTo": "successful-dodge-movement", "centimeters": 2.5}},
+        {"extraId": 308, "extraType": "TEXT", "rawValue": "+1SD",
+         "effect": {"kind": "special-die", "appliesTo": "dodge-roll", "count": 1}},
+        {"extraId": 379, "extraType": "TEXT", "rawValue": "ARM +3",
+         "effect": {"kind": "saving-attribute-mod",
+                    "appliesTo": "arm-saving-roll-after-dodge",
+                    "attribute": "ARM", "modifier": 3}},
+    ]
+    template = {
+        "source": "army-extra", "kind": "reviewed-extra", "extraValues": examples,
+    }
+    record["variantSemantics"] = {
+        "inheritance": "family", "occurrenceParameters": [deepcopy(template)],
+    }
+    path = tmp_path / "reviewed-dodge-extras.json"
+
+    def validate() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    validate()
+    record["armyLinks"] = [{"entity": "skill", "id": "mimetism"}]
+    with pytest.raises(ValueError, match="Dodge family"):
+        validate()
+    record["armyLinks"] = [{"entity": "skill", "id": "dodge"}]
+    for index, changes, message in [
+        (0, {"rawValue": "+3"}, "extraType/rawValue"),
+        (0, {"extraType": "DISTANCE"}, "extraType/rawValue"),
+        (0, {"effect": {"kind": "opponent-roll-mod",
+                        "appliesTo": "dodge-ph-roll", "modifier": -3}},
+         "invalid opponent-roll-mod"),
+        (1, {"effect": {"kind": "roll-attribute-replacement",
+                        "appliesTo": "dodge-ph-roll", "attribute": "BS", "value": 11}},
+         "invalid roll-attribute-replacement"),
+        (2, {"effect": {"kind": "movement-bonus",
+                        "appliesTo": "successful-dodge-movement",
+                        "centimeters": 3.5}}, "invalid game distance"),
+        (3, {"effect": {"kind": "special-die",
+                        "appliesTo": "dodge-roll", "count": 2}}, "invalid special-die"),
+        (4, {"effect": {"kind": "saving-attribute-mod",
+                        "appliesTo": "arm-saving-roll-after-dodge",
+                        "attribute": "PH", "modifier": 3}}, "invalid saving-attribute-mod"),
+        (4, {"effect": {"kind": "unknown"}}, "unsupported reviewed effect"),
+        (4, {"extraId": 6}, "duplicate extraId"),
+    ]:
+        invalid = deepcopy(template)
+        invalid["extraValues"][index].update(changes)
+        record["variantSemantics"]["occurrenceParameters"] = [invalid]
+        with pytest.raises(ValueError, match=message):
+            validate()
+
+    record["variantSemantics"]["occurrenceParameters"] = [
+        {
+            "source": "army-extra",
+            "kind": "numeric-mod",
+            "owner": "skill-holder",
+            "target": "skill-holder",
+            "appliesTo": ["dodge-ph-roll"],
+            "extraValues": [
+                {"extraId": 6, "extraType": "TEXT", "rawValue": "+3", "modifier": 3}
+            ],
+        },
+        deepcopy(template),
+    ]
+    with pytest.raises(ValueError, match="duplicate occurrence extraId"):
+        validate()
+
+
 def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: Path) -> None:
     document = valid_document()
     document["records"] = [

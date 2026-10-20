@@ -223,20 +223,60 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 1,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 2,
-        "unresolved-occurrence-parameter": 39,
+        "reviewed-extra-parameter": 1,
+        "unresolved-occurrence-parameter": 38,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
     assert sources[24]["reviewedNumericMod"] is not None
     assert sources[24]["status"] == "reviewed-numeric-parameter"
-    assert sources[40]["status"] == "unresolved-occurrence-parameter"
-    assert any(not s["reviewed"] for s in sources[40]["extraSignatures"])
+    assert sources[40]["status"] == "reviewed-extra-parameter"
+    assert all(s["reviewed"] for s in sources[40]["extraSignatures"])
     assert sources[25]["status"] == "unresolved-occurrence-parameter"
     # Existing distance-only projection remains independent of numeric MODs.
     assert rules.skill_parameter_semantics() == {
         "super-jump": {"kind": "distance", "positive_sign": "omit"},
         "forward-deployment": {"kind": "distance", "positive_sign": "force"},
     }
+
+
+def test_dodge_source_signatures_are_exact_and_independent(tmp_path: Path) -> None:
+    """Pin every distinct Army Dodge extra; none may inherit another's semantics."""
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        load_curated_directory(ROOT / "data/curated"), output, finalize=False,
+    )
+    inventory = inventory_source_variants(
+        ROOT / "data/generated/infinity.db",
+        ROOT / "data/generated/infinity.raw.db",
+        output,
+    )["catalogs"]["skills"]["items"]
+    dodge = next(item for item in inventory if item["id"] == 40)
+    signatures = dodge["extraSignatures"]
+    assert all(len(signature["extras"]) == 1 for signature in signatures)
+    assert {
+        tuple(signature["extras"][0]): signature["count"]
+        for signature in signatures
+    } == {
+        (1, "TEXT", "+3"): 613,
+        (2, "TEXT", "+6"): 7,
+        (6, "TEXT", "-3"): 30,
+        (7, "TEXT", "-6"): 1,
+        (11, "DISTANCE", "+2.5"): 633,
+        (23, "DISTANCE", "+5"): 808,
+        (27, "TEXT", "PH=11"): 151,
+        (32, "TEXT", "PH=10"): 3,
+        (46, "TEXT", "PH=9"): 110,
+        (52, "TEXT", "PH=13"): 5,
+        (250, "TEXT", "PH=12"): 6,
+        (260, "DISTANCE", "+7.5"): 4,
+        (308, "TEXT", "+1SD"): 9,
+        (379, "TEXT", "ARM +3"): 2,
+    }
+    assert dodge["occurrences"] == 2382
+    # A source-ID-wide status must not promote the remaining exact signatures.
+    assert dodge["status"] == "reviewed-extra-parameter"
+    assert all(signature["reviewed"] for signature in signatures)
 
 
 def test_source_inventory_is_deterministic() -> None:

@@ -1396,6 +1396,69 @@ def test_rules_database_preserves_reviewed_numeric_mod_extra_maps(
     }
 
 
+def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
+    current_rules_database: RulesDatabase,
+) -> None:
+    mappings = current_rules_database.skill_reviewed_extra_semantics()
+    assert set(mappings) == {"dodge"}
+    param = mappings["dodge"]
+    assert param["kind"] == "reviewed-extra"
+    assert param["source"] == "army-extra"
+    effects = {entry["extra_id"]: entry for entry in param["extra_values"]}
+    assert set(effects) == {6, 7, 11, 23, 27, 32, 46, 52, 250, 260, 308, 379}
+    assert {
+        entry["raw_value"]: entry["effect"]["modifier"]
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "opponent-roll-mod"
+    } == {"-3": -3, "-6": -6}
+    assert all(
+        entry["effect"]["applies_to"] == "dodge-face-to-face"
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "opponent-roll-mod"
+    )
+    assert {
+        entry["raw_value"]: entry["effect"]["value"]
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "roll-attribute-replacement"
+    } == {"PH=9": 9, "PH=10": 10, "PH=11": 11, "PH=12": 12, "PH=13": 13}
+    assert {
+        entry["raw_value"]: entry["effect"]["centimeters"]
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "movement-bonus"
+    } == {"+2.5": 2.5, "+5": 5, "+7.5": 7.5}
+    assert all(
+        entry["extra_type"] == "DISTANCE"
+        and entry["effect"]["applies_to"] == "successful-dodge-movement"
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "movement-bonus"
+    )
+    assert effects[308]["raw_value"] == "+1SD"
+    assert effects[308]["effect"] == {
+        "kind": "special-die", "applies_to": "dodge-roll", "count": 1,
+    }
+    assert effects[379]["raw_value"] == "ARM +3"
+    assert effects[379]["effect"] == {
+        "kind": "saving-attribute-mod",
+        "applies_to": "arm-saving-roll-after-dodge",
+        "attribute": "ARM",
+        "modifier": 3,
+    }
+    assert all(
+        entry["extra_type"]
+        == ("DISTANCE" if entry["effect"]["kind"] == "movement-bonus" else "TEXT")
+        for entry in effects.values()
+    )
+    dodge = current_rules_database.composed_record("skill:dodge")
+    assert dodge is not None
+    assert param in dodge["variant_semantics"]["occurrence_parameters"]
+    # The separate legacy API must not absorb the new source-extra effects.
+    assert "dodge" not in current_rules_database.skill_parameter_semantics()
+    assert current_rules_database.skill_numeric_mod_semantics()["dodge"]["extra_values"] == [
+        {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
+        {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
+    ]
+
+
 def test_rules_database_returns_reviewed_source_variant_semantics(
     current_rules_database: RulesDatabase,
 ) -> None:

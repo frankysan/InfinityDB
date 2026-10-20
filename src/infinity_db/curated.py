@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -44,13 +45,109 @@ ARMY_LINK_SLUG_DOMAINS = {
 CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
 VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
 VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
-VARIANT_PARAMETER_KINDS = frozenset({"distance", "numeric-mod"})
+VARIANT_PARAMETER_KINDS = frozenset({"distance", "numeric-mod", "reviewed-extra"})
 VARIANT_MOD_TARGETS = frozenset({"skill-holder", "opponent"})
 VARIANT_MOD_APPLICATIONS = frozenset(
     {"bs-attack-requiring-lof", "discover", "berserk-cc-attack", "dodge-ph-roll"}
 )
 SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
+
+
+def _validate_reviewed_extra_parameter(
+    parameter: dict[str, Any],
+    context: str,
+    inheritance: str,
+    army_links: list[object],
+) -> None:
+    """Bound the first typed-effect vocabulary to reviewed Dodge source extras."""
+    if (
+        inheritance != "family"
+        or len(army_links) != 1
+        or not isinstance(army_links[0], dict)
+        or army_links[0].get("entity") != "skill"
+        or army_links[0].get("id") != "dodge"
+    ):
+        raise ValueError(f"{context}: reviewed-extra currently requires the Dodge family")
+    if set(parameter) != {"source", "kind", "extraValues"}:
+        raise ValueError(f"{context}: reviewed-extra requires source, kind and extraValues")
+    values = parameter["extraValues"]
+    if not isinstance(values, list) or not values:
+        raise ValueError(f"{context}: extraValues must be nonempty")
+    seen_ids: set[int] = set()
+    for index, entry in enumerate(values):
+        prefix = f"{context}.extraValues[{index}]"
+        if not isinstance(entry, dict) or set(entry) != {
+            "extraId", "extraType", "rawValue", "effect"
+        }:
+            raise ValueError(f"{prefix}: invalid extraValues entry")
+        extra_id = entry["extraId"]
+        if type(extra_id) is not int or extra_id <= 0 or extra_id in seen_ids:
+            raise ValueError(f"{prefix}: invalid or duplicate extraId")
+        seen_ids.add(extra_id)
+        raw = entry["rawValue"]
+        effect = entry["effect"]
+        if not isinstance(raw, str) or not isinstance(effect, dict):
+            raise ValueError(f"{prefix}: rawValue and effect must be typed")
+        kind = effect.get("kind")
+        if kind == "opponent-roll-mod":
+            if set(effect) != {"kind", "appliesTo", "modifier"} or (
+                effect["appliesTo"] != "dodge-face-to-face"
+                or type(effect["modifier"]) is not int
+                or effect["modifier"] not in range(-12, 0)
+            ):
+                raise ValueError(f"{prefix}: invalid opponent-roll-mod")
+            expected_raw = f"{effect['modifier']:+d}"
+            expected_type = "TEXT"
+        elif kind == "roll-attribute-replacement":
+            if set(effect) != {"kind", "appliesTo", "attribute", "value"} or (
+                effect["appliesTo"] != "dodge-ph-roll"
+                or effect["attribute"] != "PH"
+                or type(effect["value"]) is not int
+                or not 1 <= effect["value"] <= 20
+            ):
+                raise ValueError(f"{prefix}: invalid roll-attribute-replacement")
+            expected_raw = f"PH={effect['value']}"
+            expected_type = "TEXT"
+        elif kind == "movement-bonus":
+            if set(effect) != {"kind", "appliesTo", "centimeters"} or (
+                effect["appliesTo"] != "successful-dodge-movement"
+                or type(effect["centimeters"]) not in (int, float)
+            ):
+                raise ValueError(f"{prefix}: invalid movement-bonus")
+            try:
+                cm = Decimal(str(effect["centimeters"]))
+            except InvalidOperation as exc:
+                raise ValueError(f"{prefix}: invalid centimeters") from exc
+            if not cm.is_finite() or not 0 < cm <= 30 or cm % Decimal("2.5") != 0:
+                raise ValueError(f"{prefix}: invalid game distance")
+            expected_raw = f"+{cm.normalize():f}"
+            expected_type = "DISTANCE"
+        elif kind == "special-die":
+            if set(effect) != {"kind", "appliesTo", "count"} or (
+                effect["appliesTo"] != "dodge-roll"
+                or type(effect["count"]) is not int
+                or effect["count"] != 1
+            ):
+                raise ValueError(f"{prefix}: invalid special-die")
+            expected_raw = "+1SD"
+            expected_type = "TEXT"
+        elif kind == "saving-attribute-mod":
+            if set(effect) != {"kind", "appliesTo", "attribute", "modifier"} or (
+                effect["appliesTo"] != "arm-saving-roll-after-dodge"
+                or effect["attribute"] != "ARM"
+                or type(effect["modifier"]) is not int
+                or effect["modifier"] != 3
+            ):
+                raise ValueError(f"{prefix}: invalid saving-attribute-mod")
+            expected_raw = "ARM +3"
+            expected_type = "TEXT"
+        else:
+            raise ValueError(f"{prefix}: unsupported reviewed effect {kind!r}")
+        if entry["extraType"] != expected_type or raw != expected_raw:
+            raise ValueError(
+                f"{prefix}: extraType/rawValue conflicts with reviewed effect"
+            )
 
 
 def _validate_variant_semantics(
@@ -73,6 +170,7 @@ def _validate_variant_semantics(
     if not isinstance(parameters, list):
         raise ValueError(f"{context}: 'occurrenceParameters' must be an array")
     seen_parameters: set[tuple[str, str]] = set()
+    seen_extra_ids: set[int] = set()
     for index, parameter in enumerate(parameters):
         parameter_context = f"{context}.occurrenceParameters[{index}]"
         if not isinstance(parameter, dict):
@@ -89,7 +187,11 @@ def _validate_variant_semantics(
                 f"{parameter_context}: unsupported parameter kind {kind!r}; "
                 f"expected one of {sorted(VARIANT_PARAMETER_KINDS)}"
             )
-        if kind == "distance":
+        if kind == "reviewed-extra":
+            _validate_reviewed_extra_parameter(
+                parameter, parameter_context, inheritance, army_links
+            )
+        elif kind == "distance":
             expected_fields = {"source", "kind", "positiveSign"}
             if set(parameter) != expected_fields:
                 raise ValueError(
@@ -149,16 +251,16 @@ def _validate_variant_semantics(
             values = parameter["extraValues"]
             if not isinstance(values, list) or not values:
                 raise ValueError(f"{parameter_context}: extraValues must be nonempty")
-            seen_extra_ids: set[int] = set()
+            seen_numeric_ids: set[int] = set()
             for entry in values:
                 if not isinstance(entry, dict) or set(entry) != {
                     "extraId", "extraType", "rawValue", "modifier"
                 }:
                     raise ValueError(f"{parameter_context}: invalid extraValues entry")
                 extra_id, modifier = entry["extraId"], entry["modifier"]
-                if type(extra_id) is not int or extra_id < 1 or extra_id in seen_extra_ids:
+                if type(extra_id) is not int or extra_id < 1 or extra_id in seen_numeric_ids:
                     raise ValueError(f"{parameter_context}: duplicate/invalid extraId")
-                seen_extra_ids.add(extra_id)
+                seen_numeric_ids.add(extra_id)
                 if type(modifier) is not int or not (-12 <= modifier <= 12) or modifier == 0:
                     raise ValueError(f"{parameter_context}: invalid numeric modifier")
                 if (
@@ -173,6 +275,14 @@ def _validate_variant_semantics(
                     or (parameter["target"] == "skill-holder" and modifier <= 0)
                 ):
                     raise ValueError(f"{parameter_context}: modifier sign conflicts with target")
+        if kind in {"numeric-mod", "reviewed-extra"}:
+            for entry in parameter["extraValues"]:
+                extra_id = entry["extraId"]
+                if extra_id in seen_extra_ids:
+                    raise ValueError(
+                        f"{parameter_context}: duplicate occurrence extraId {extra_id}"
+                    )
+                seen_extra_ids.add(extra_id)
         key = (source, kind)
         if key in seen_parameters:
             raise ValueError(f"{parameter_context}: duplicate parameter {key!r}")

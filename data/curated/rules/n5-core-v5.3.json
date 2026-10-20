@@ -13224,6 +13224,138 @@
                                 "modifier": 6
                             }
                         ]
+                    },
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 6,
+                                "extraType": "TEXT",
+                                "rawValue": "-3",
+                                "effect": {
+                                    "kind": "opponent-roll-mod",
+                                    "appliesTo": "dodge-face-to-face",
+                                    "modifier": -3
+                                }
+                            },
+                            {
+                                "extraId": 7,
+                                "extraType": "TEXT",
+                                "rawValue": "-6",
+                                "effect": {
+                                    "kind": "opponent-roll-mod",
+                                    "appliesTo": "dodge-face-to-face",
+                                    "modifier": -6
+                                }
+                            },
+                            {
+                                "extraId": 11,
+                                "extraType": "DISTANCE",
+                                "rawValue": "+2.5",
+                                "effect": {
+                                    "kind": "movement-bonus",
+                                    "appliesTo": "successful-dodge-movement",
+                                    "centimeters": 2.5
+                                }
+                            },
+                            {
+                                "extraId": 23,
+                                "extraType": "DISTANCE",
+                                "rawValue": "+5",
+                                "effect": {
+                                    "kind": "movement-bonus",
+                                    "appliesTo": "successful-dodge-movement",
+                                    "centimeters": 5
+                                }
+                            },
+                            {
+                                "extraId": 27,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=11",
+                                "effect": {
+                                    "kind": "roll-attribute-replacement",
+                                    "appliesTo": "dodge-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 11
+                                }
+                            },
+                            {
+                                "extraId": 32,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=10",
+                                "effect": {
+                                    "kind": "roll-attribute-replacement",
+                                    "appliesTo": "dodge-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 10
+                                }
+                            },
+                            {
+                                "extraId": 46,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=9",
+                                "effect": {
+                                    "kind": "roll-attribute-replacement",
+                                    "appliesTo": "dodge-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 9
+                                }
+                            },
+                            {
+                                "extraId": 52,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=13",
+                                "effect": {
+                                    "kind": "roll-attribute-replacement",
+                                    "appliesTo": "dodge-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 13
+                                }
+                            },
+                            {
+                                "extraId": 250,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=12",
+                                "effect": {
+                                    "kind": "roll-attribute-replacement",
+                                    "appliesTo": "dodge-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 12
+                                }
+                            },
+                            {
+                                "extraId": 260,
+                                "extraType": "DISTANCE",
+                                "rawValue": "+7.5",
+                                "effect": {
+                                    "kind": "movement-bonus",
+                                    "appliesTo": "successful-dodge-movement",
+                                    "centimeters": 7.5
+                                }
+                            },
+                            {
+                                "extraId": 308,
+                                "extraType": "TEXT",
+                                "rawValue": "+1SD",
+                                "effect": {
+                                    "kind": "special-die",
+                                    "appliesTo": "dodge-roll",
+                                    "count": 1
+                                }
+                            },
+                            {
+                                "extraId": 379,
+                                "extraType": "TEXT",
+                                "rawValue": "ARM +3",
+                                "effect": {
+                                    "kind": "saving-attribute-mod",
+                                    "appliesTo": "arm-saving-roll-after-dodge",
+                                    "attribute": "ARM",
+                                    "modifier": 3
+                                }
+                            }
+                        ]
                     }
                 ]
             }

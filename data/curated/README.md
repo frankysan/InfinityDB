@@ -885,9 +885,47 @@ typed map without exposing it through the legacy distance-only browser
 projection. Schema support alone does not certify any current Army
 occurrence: the source-inventory audit must match the current reviewed
 extra IDs, types and values, and reject unmapped co-occurring extras.
-The N5.3 core collection currently reviews Mimetism (-3/-6),
-Berserk (+3/+6) and Dodge PH-roll (+3/+6), but Dodge's additional
-distance/unmatched extras remain separate and unresolved until reviewed.
+The N5.3 core collection reviews Mimetism (-3/-6), Berserk (+3/+6),
+and Dodge PH-roll (+3/+6) as `numeric-mod` entries.
+
+The **`reviewed-extra`** kind adds explicit, per-source-ID typed effects
+without broadening numeric MODs or the distance-only browser projection.
+Its first supported family is exactly `skill:dodge`. Each entry requires
+`extraId`, `extraType`, `rawValue`, and a discriminated `effect`:
+
+```json
+{
+  "source": "army-extra",
+  "kind": "reviewed-extra",
+  "extraValues": [
+    {
+      "extraId": 11,
+      "extraType": "DISTANCE",
+      "rawValue": "+2.5",
+      "effect": {
+        "kind": "movement-bonus",
+        "appliesTo": "successful-dodge-movement",
+        "centimeters": 2.5
+      }
+    }
+  ]
+}
+```
+
+The bounded Dodge effects are `opponent-roll-mod` (negative opponent
+Face to Face MOD), `roll-attribute-replacement` (PH value for Dodge),
+`movement-bonus` (positive centimeters, measured using 2.5 cm per
+inch), `special-die` (one extra die on a Dodge Roll), and
+`saving-attribute-mod` (+3 ARM to Saving Rolls after declaring Dodge).
+The latter follows the English/Spanish N5.3 PDFs; their conflict
+with the archived Wiki remains separately documented on the Dodge rule.
+The source's exact spelling (`+1SD`, `ARM +3`, etc.) is retained.
+Unknown IDs, mismatched raw types/values, invalid action scopes and
+duplicate IDs across `numeric-mod` and `reviewed-extra` are rejected.
+`RulesDatabase.skill_reviewed_extra_semantics()` exposes the typed
+mapping to future index generation without creating a gameplay engine.
+No unreviewed Army source extra becomes a specific variant merely
+because its value resembles a known parameter.
 
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value

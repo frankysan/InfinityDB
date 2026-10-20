@@ -503,27 +503,47 @@ to a specific Skill family, modifier owner, target and applicable
 actions; see `data/curated/README.md` for the validated grammar.
 `RulesDatabase.skill_numeric_mod_semantics()` exposes this typed
 metadata separately from the existing distance-only display API.
-The inventory verifies *every* extra in a combined occurrence
-before classifying it as reviewed, so an unreviewed Dodge
-distance remains unresolved even when its PH MOD is mapped.
+The inventory verifies *every* extra signature against exact
+source IDs/types/values before classifying it as reviewed; even a
+reviewed family definition does not automatically certify an
+unmapped extra. A future occurrence with multiple extras must
+have **every** component reviewed before becoming countable.
 
-**The curated N5.3 collection now declares reviewed numeric-MOD
-mappings for Mimetism, Berserk and Dodge**, pinned to their exact
-Army `TEXT` extra IDs/values and the distinct N5.3 applicability
-described above (Mimetism and Berserk also cite PDF pp. 102 and
-86 respectively). The integration regression exports a fresh
-`rules.db` from this source, then verifies its direct Army
-occurrence signatures. With the newly built rules database,
-Mimetism and Berserk are fully `reviewed-numeric-parameter`;
-the Skill inventory has **2 reviewed-numeric** and **39 unresolved**
-source IDs rather than the previous 41 unresolved. Dodge remains
-`unresolved-occurrence-parameter` *as a source ID*, because its
-`DISTANCE` and/or other unmatched extras are not certified by
-the positive PH-roll MOD map alone. The existing pinned generated
-`data/generated/rules.db` has not been overwritten; its baseline
-inventory counts reflect the older build until normal regeneration.
-The schema does not permit arbitrary text-to-number interpretation,
-unreviewed compound parameter signatures, or game simulation.
+**Reviewed Dodge source-variant reconciliation:** The N5.3 curated
+Skill ID `40` now has 14 distinct, **single-extra** signatures
+across **2,382** direct Army source relationships. The existing
+`numeric-mod` entry owns `+3` (613 uses) and `+6` (7 uses)
+on its PH Roll. A separate, exact-source `reviewed-extra` map
+now distinguishes:
+
+- `TEXT: -3/-6` (source extra IDs 6/7; 30/1 uses): a
+  **negative MOD to the opponent** in a Dodge Face to Face Roll,
+  not the Dodge user's situational -3 PH penalty;
+- `DISTANCE: +2.5/+5/+7.5` cm (IDs 11/23/260; 633/808/4
+  uses): a successful Dodge's movement bonus, equivalent to
+  +1/+2/+3 inches under the project's 2.5-cm conversion;
+- `TEXT: PH=9/10/11/12/13` (IDs 46/32/27/250/52;
+  110/3/151/6/5 uses): the PH Attribute used **for Dodge**
+  rather than an additional +PH MOD;
+- `TEXT: +1SD` (ID 308; 9 uses): one extra Dodge Roll die
+  under N5.3 p. 75; no increase in Burst or additional Disposable use;
+- `TEXT: ARM +3` (ID 379; 2 uses): +3 ARM for Saving Rolls
+  after declaring Dodge, not +3 PH. Follow the English and Spanish
+  N5.3 PDF text; preserve the separately documented Wiki conflict.
+
+The test baseline rejects invented composite signatures: none of
+the 2,382 source occurrences contains multiple extras. The
+new `RulesDatabase.skill_reviewed_extra_semantics()` query
+exposes this reviewed typed evidence separately from the legacy
+distance-only display query and `skill_numeric_mod_semantics()`.
+With a **freshly generated** rules database, source ID `40`
+is now `reviewed-extra-parameter`; the Skill inventory contains
+**2 reviewed-numeric, 1 reviewed-extra, and 38 unresolved**
+source IDs (formerly 39 unresolved). The pinned generated
+`data/generated/rules.db` is deliberately not overwritten by
+the audit, so its older snapshot counts remain until a normal
+regeneration. Certification is per observed source signature,
+not a new player-visible variant index or a game-state simulator.
 
 Do **not** parse a variant from a display string, strip punctuation, infer a
 parameter from a shared family name, or count an unresolved variant as a

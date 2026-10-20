@@ -1778,15 +1778,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       freshly generated rules DB and pinned Army source extras.
       Mimetism and Berserk are now fully reviewed numeric source
       variants; the 41 unresolved Skill IDs fall to 39 on rebuild.
-    - [ ] Review and encode Dodge's separate DISTANCE and other
-      unmatched extras before certifying *combined* Dodge variants.
-      Keep conditional -3 PH penalties and Dodge (ARM+3) distinct
-      from its reviewed +3/+6 PH-roll modifiers.
-    - [ ] Reconcile the remaining Skill and Equipment source IDs with
-      unresolved occurrence parameters, including mixed TEXT/DISTANCE
-      and named variants with extra MODs. Preserve raw signatures
-      and exclude unreviewed specific combinations from index counts;
-      fail closed rather than parsing numeric-looking display strings.
+    - [x] Reconcile all 14 Dodge Skill source extra signatures across
+      2,382 direct Army occurrences. Pin exact TEXT/DISTANCE source
+      IDs, PH replacements, opponent Face to Face penalties, additional
+      movement, +1 SD, and Dodge (ARM+3) as typed, scope-bound effects.
+      Confirm that the pinned snapshot contains *only single-extra*
+      Dodge occurrences; reject unknown or conflicting future signatures.
+      Preserve the separate situational -3 PH penalty and PDF/Wiki
+      discrepancy for ARM+3. On fresh rules regeneration, the unresolved
+      Skill-ID count falls from 39 to 38.
+    - [ ] Reconcile the remaining 38 Skill and 14 Equipment source IDs
+      with unresolved occurrence parameters, including other mixed
+      TEXT/DISTANCE sources and named Equipment variants with extra MODs.
+      Preserve raw signatures and exclude unreviewed specific
+      combinations from index counts; fail closed rather than parsing
+      numeric-looking display strings.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

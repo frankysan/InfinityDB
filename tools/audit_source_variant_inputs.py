@@ -30,6 +30,7 @@ def inventory_source_variants(
     }
     distance_parameters = rules.skill_parameter_semantics()
     numeric_mods = rules.skill_numeric_mod_semantics()
+    reviewed_extras = rules.skill_reviewed_extra_semantics()
     report: dict[str, Any] = {"catalogs": {}}
 
     application_uri = application_path.resolve().as_uri() + "?mode=ro"
@@ -101,10 +102,15 @@ def inventory_source_variants(
                     numeric_mods.get(source_id)
                     or (numeric_mods.get(slug) if slug else None)
                 ) if catalog == "skills" else None
+                typed = (
+                    reviewed_extras.get(source_id)
+                    or (reviewed_extras.get(slug) if slug else None)
+                ) if catalog == "skills" else None
                 reviewed_values = {
                     (item["extra_id"], item["extra_type"], item["raw_value"])
-                    for item in numeric["extra_values"]
-                } if numeric else set()
+                    for semantics in (numeric, typed) if semantics is not None
+                    for item in semantics["extra_values"]
+                }
 
                 def reviewed_signature(
                     items: list[tuple[int, int, str, str]],
@@ -126,7 +132,9 @@ def inventory_source_variants(
                 elif not extras:
                     status = "catalog-only"
                 elif extra_types or raw_values:
-                    if not unresolved and numeric is not None:
+                    if not unresolved and typed is not None:
+                        status = "reviewed-extra-parameter"
+                    elif not unresolved and numeric is not None:
                         status = "reviewed-numeric-parameter"
                     elif not unresolved and distance is not None:
                         status = "reviewed-distance-parameter"
@@ -146,6 +154,7 @@ def inventory_source_variants(
                         "reviewedVariant": source_variant,
                         "reviewedDistance": distance,
                         "reviewedNumericMod": numeric,
+                        "reviewedExtra": typed,
                         "occurrences": len(extras),
                         "extraTypes": extra_types,
                         "extraSignatures": [
