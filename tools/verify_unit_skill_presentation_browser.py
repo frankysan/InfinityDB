@@ -10,15 +10,19 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+import re
 from dataclasses import dataclass
+from decimal import Decimal
 from functools import partial
 from pathlib import Path
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from tools.verify_non_skill_army_browser import CASES, WIDTHS
 
 DEFAULT_SLUGS = tuple(case.slug for case in CASES)
+OPTIONAL_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
+_DISTANCE_NUMBER = re.compile(r"[+-]?\d+(?:\.\d+)?")
 BUCKETS = (
     ("skills", "Skills", "skills"),
     ("equipment", "Equipment", "equipment"),
@@ -37,8 +41,33 @@ class ItemExpectation:
     extras: tuple[str, ...]
 
 
-def expected_items(items: dict[str, Any]) -> dict[str, list[ItemExpectation]]:
-    """Project API shared/specific items onto rows visible in normal mode."""
+def _distance_extra(name: str, semantics: dict[str, Any] | None, unit: str) -> str:
+    """Independently expect JS's fixed 2.5 cm/in conversion and positive-sign policy."""
+    positive_sign = (semantics or {}).get("positive_sign", "preserve")
+
+    def convert(match: re.Match[str]) -> str:
+        number = match.group(0)
+        value = Decimal(number)
+        if unit == "in":
+            value /= Decimal("2.5")
+        explicit_plus = positive_sign == "force" or (
+            positive_sign != "omit" and number.startswith("+")
+        )
+        sign = "+" if explicit_plus and value >= 0 else ""
+        number_text = format(value, "f")
+        formatted = (
+            number_text.rstrip("0").rstrip(".")
+            if "." in number_text else number_text
+        )
+        return f'{sign}{formatted}{chr(34) if unit == "in" else " cm"}'
+
+    return _DISTANCE_NUMBER.sub(convert, name)
+
+
+def expected_items(
+    items: dict[str, Any], distance_unit: str = "in",
+) -> dict[str, list[ItemExpectation]]:
+    """Project API shared/specific items onto rows visible in the chosen units."""
     result: dict[str, list[ItemExpectation]] = {}
     for bucket, label, catalog in BUCKETS:
         expected: list[ItemExpectation] = []
@@ -52,9 +81,14 @@ def expected_items(items: dict[str, Any]) -> dict[str, list[ItemExpectation]]:
                     href=href,
                     quantity=item.get("quantity"),
                     extras=tuple(
-                        str(extra.get("name") or "Extra")
+                        _distance_extra(
+                            str(extra.get("name") or "Extra"),
+                            item.get("parameter_semantics"),
+                            distance_unit,
+                        )
+                        if extra.get("is_distance")
+                        else str(extra.get("name") or "Extra")
                         for extra in item.get("extras") or []
-                        if not extra.get("is_distance")
                     ),
                 )
             )
@@ -78,23 +112,29 @@ def _matches_row(row: dict[str, Any], item: ItemExpectation) -> bool:
                 str(link["href"]).startswith("/skills/") for link in row["links"]
             ) else [row["text"]]
         )
-    for text in matching:
-        if item.name.casefold() not in str(text).casefold():
-            continue
-        if item.quantity is not None and int(item.quantity) != 1:
-            if f"×{item.quantity}" not in text:
-                continue
-        if all(extra.casefold() in str(text).casefold() for extra in item.extras):
+    decorated = item.name
+    if item.extras:
+        decorated += f" ({', '.join(item.extras)})"
+    if item.quantity is not None and int(item.quantity) != 1:
+        decorated += f" ×{item.quantity}"
+    for rendered in matching:
+        label = str(rendered).strip()
+        if item.href is not None:
+            # Developer-only source annotations can follow the player label.
+            if label == decorated or label.startswith(f"{decorated} ("):
+                return True
+        elif decorated.casefold() in label.casefold():
             return True
     return False
 
 
 def assert_rendered_items(
     rows: list[dict[str, Any]], items: dict[str, Any], context: str,
+    distance_unit: str = "in",
 ) -> int:
     """Require the right row header and rendered item for every visible API entry."""
     matches = 0
-    projected = expected_items(items)
+    projected = expected_items(items, distance_unit)
     for bucket, label, _ in BUCKETS:
         expected = projected.get(bucket, [])
         if not expected and any(
@@ -151,7 +191,31 @@ DOM_SNAPSHOT = """() => {
 }"""
 
 
-def assert_unit_dom(unit: dict[str, Any], dom: dict[str, Any], slug: str) -> dict[str, int]:
+def _visible_distance_extras(unit: dict[str, Any]) -> int:
+    """Count parameterized Extras only in player-visible API item buckets."""
+    contexts = [
+        entry["shared_items"] for entry in unit["general_profiles"]
+        if entry.get("presentation_visible") is not False
+    ]
+    contexts.extend(
+        entry.get("specific_items") or {}
+        for army in unit["armies"] if army.get("presentation_visible")
+        for kind in ("profiles", "loadouts")
+        for entry in army[kind]
+    )
+    return sum(
+        bool(extra.get("is_distance"))
+        for context in contexts
+        for bucket, _, _ in BUCKETS
+        for item in context.get(bucket) or []
+        for extra in item.get("extras") or []
+    )
+
+
+def assert_unit_dom(
+    unit: dict[str, Any], dom: dict[str, Any], slug: str,
+    distance_unit: str = "in",
+) -> dict[str, int]:
     """Compare visible General and Army-local API projections with scoped DOM rows."""
     general = [
         entry for entry in unit["general_profiles"]
@@ -161,10 +225,14 @@ def assert_unit_dom(unit: dict[str, Any], dom: dict[str, Any], slug: str) -> dic
         raise AssertionError(
             f"{slug}: General Profile DOM count {len(dom['general'])} != {len(general)}"
         )
-    counts = {"shared": 0, "profiles": 0, "loadouts": 0}
+    counts = {
+        "shared": 0, "profiles": 0, "loadouts": 0,
+        "distanceExtras": _visible_distance_extras(unit),
+    }
     for index, entry in enumerate(general):
         counts["shared"] += assert_rendered_items(
-            dom["general"][index], entry["shared_items"], f"{slug}/general#{index}"
+            dom["general"][index], entry["shared_items"], f"{slug}/general#{index}",
+            distance_unit,
         )
     rendered_armies = dom["armies"]
     consumed: set[int] = set()
@@ -196,6 +264,7 @@ def assert_unit_dom(unit: dict[str, Any], dom: dict[str, Any], slug: str) -> dic
                     rendered[kind][offset],
                     context.get("specific_items") or {},
                     f"{slug}/{army['name']}/{kind}#{offset}",
+                    distance_unit,
                 )
     if len(consumed) != len(rendered_armies):
         raise AssertionError(f"{slug}: unexpected Army sections in DOM")
@@ -217,19 +286,48 @@ def assert_unit_dom(unit: dict[str, Any], dom: dict[str, Any], slug: str) -> dic
     return counts
 
 
+def _settings_script(optional_filters: dict[str, bool], distance_unit: str) -> str:
+    """Set isolated session preferences before the client imports preferences.js."""
+    if set(optional_filters) - set(OPTIONAL_FLAGS):
+        raise ValueError("Unknown optional Unit filter")
+    if distance_unit not in ("in", "cm"):
+        raise ValueError("Distance unit must be 'in' or 'cm'")
+    settings = {
+        f"infinity-db-{flag}": str(optional_filters.get(flag, True)).lower()
+        for flag in OPTIONAL_FLAGS
+    }
+    settings["infinity-db-distance-unit"] = distance_unit
+    return (
+        "for (const [key, value] of Object.entries("
+        + json.dumps(settings, sort_keys=True)
+        + ")) window.sessionStorage.setItem(key, value);"
+    )
+
+
+def _unit_api_url(base: str, slug: str, optional_filters: dict[str, bool]) -> str:
+    params = urlencode({
+        flag: "1" if optional_filters.get(flag, True) else "0"
+        for flag in OPTIONAL_FLAGS
+    })
+    return f"{base}/api/units/{quote(slug, safe='')}?{params}"
+
+
 def _page_error(errors: list[str], error: Any) -> None:
     errors.append(str(error))
 
 
 def verify(
     base_url: str, *, slugs: tuple[str, ...] = DEFAULT_SLUGS, headed: bool = False,
-    channel: str | None = None,
+    channel: str | None = None, optional_filters: dict[str, bool] | None = None,
+    distance_unit: str = "in",
 ) -> dict[str, Any]:
     try:
         playwright = importlib.import_module("playwright.sync_api")
     except ImportError as exc:
         raise RuntimeError("Install Playwright and Chromium for browser acceptance") from exc
     base = base_url.rstrip("/")
+    filters = optional_filters or {}
+    init_script = _settings_script(filters, distance_unit)
     results: list[dict[str, Any]] = []
     with playwright.sync_playwright() as driver:
         browser = driver.chromium.launch(
@@ -239,6 +337,7 @@ def verify(
         try:
             for width in WIDTHS:
                 context = browser.new_context(viewport={"width": width, "height": 900})
+                context.add_init_script(script=init_script)
                 try:
                     for slug in slugs:
                         outcome: dict[str, Any] = {
@@ -256,18 +355,32 @@ def verify(
                                 raise AssertionError("Unit page HTTP response not 200")
                             page.locator("#unit-content").wait_for(state="visible")
                             api = context.request.get(
-                                f"{base}/api/units/{slug}", timeout=15000,
+                                _unit_api_url(base, slug, filters), timeout=15000,
                             )
                             if api.status != 200:
                                 raise AssertionError(f"Unit API HTTP {api.status}")
-                            page.locator(".general-profile").first.wait_for(
-                                state="attached", timeout=10000,
-                            )
+                            if any(
+                                entry.get("presentation_visible") is not False
+                                for entry in api.json()["general_profiles"]
+                            ):
+                                page.locator(".general-profile").first.wait_for(
+                                    state="attached", timeout=10000,
+                                )
                             page.locator(".army-profile").evaluate_all(
                                 "(elements) => elements.forEach(el => el.open = true)"
                             )
+                            unit = api.json()
+                            outcome["visibleArmies"] = sum(
+                                bool(army.get("presentation_visible"))
+                                for army in unit["armies"]
+                            )
+                            outcome["visibleGeneralProfiles"] = sum(
+                                general.get("presentation_visible") is not False
+                                for general in unit["general_profiles"]
+                            )
                             outcome["counts"] = assert_unit_dom(
-                                api.json(), page.evaluate(DOM_SNAPSHOT), slug
+                                unit, page.evaluate(DOM_SNAPSHOT), slug,
+                                distance_unit,
                             )
                             if errors:
                                 raise AssertionError(f"Browser JS errors: {errors!r}")
@@ -284,6 +397,8 @@ def verify(
     return {
         "format": "InfinityDB Unit Skill presentation browser acceptance",
         "baseUrl": base,
+        "optionalFilters": {flag: filters.get(flag, True) for flag in OPTIONAL_FLAGS},
+        "distanceUnit": distance_unit,
         "passed": sum(r["status"] == "passed" for r in results),
         "total": len(slugs) * len(WIDTHS),
         "results": results,
@@ -297,10 +412,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--channel", help="Installed Chromium channel, e.g. chrome")
+    parser.add_argument(
+        "--exclude-optional", choices=OPTIONAL_FLAGS, action="append",
+        help="Exclude an optional availability category; repeat to combine",
+    )
+    parser.add_argument("--distance-unit", choices=("in", "cm"), default="in")
     args = parser.parse_args(argv)
     report = verify(
         args.base_url, slugs=tuple(args.slugs) if args.slugs else DEFAULT_SLUGS,
         headed=args.headed, channel=args.channel,
+        optional_filters={flag: False for flag in args.exclude_optional or []},
+        distance_unit=args.distance_unit,
     )
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

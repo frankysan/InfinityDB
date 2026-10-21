@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sqlite3
 from copy import deepcopy
 from pathlib import Path
 from socketserver import ThreadingMixIn
@@ -15,6 +16,10 @@ from tools.verify_non_skill_army_browser import CASES, WIDTHS
 from tools.verify_unit_skill_presentation_browser import (
     DEFAULT_SLUGS,
     DOM_SNAPSHOT,
+    OPTIONAL_FLAGS,
+    _distance_extra,
+    _settings_script,
+    _unit_api_url,
     assert_rendered_items,
     assert_unit_dom,
     expected_items,
@@ -132,10 +137,87 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
         assert result["passed"] == result["total"] == len(WIDTHS) * len(DEFAULT_SLUGS), (
             result
         )
+        scenarios: tuple[tuple[tuple[str, ...], dict[str, bool]], ...] = (
+            (("tohaa-team-ops",), {"teamops": False}),
+            (
+                ("raoul-spector-mercenary-operative", "tohaa-team-ops"),
+                dict.fromkeys(OPTIONAL_FLAGS, False),
+            ),
+        )
+        for filtered_slugs, flags in scenarios:
+            filtered = verify(
+                f"http://127.0.0.1:{server.server_port}",
+                slugs=filtered_slugs, optional_filters=flags, channel="chrome",
+            )
+            assert filtered["passed"] == filtered["total"] == (
+                len(WIDTHS) * len(filtered_slugs)
+            ), filtered
+            baseline_visibility = {
+                (entry["unit"], entry["width"]): (
+                    entry["visibleArmies"], entry["visibleGeneralProfiles"]
+                )
+                for entry in result["results"]
+            }
+            assert any(
+                (
+                    entry["visibleArmies"], entry["visibleGeneralProfiles"]
+                ) != baseline_visibility[(entry["unit"], entry["width"])]
+                for entry in filtered["results"]
+            ), ("Optional filters did not change any visible content", filtered)
+
+        with sqlite3.connect(root / "data/generated/infinity.db") as db:
+            distance_slugs = tuple(row[0] for row in db.execute(
+                "SELECT DISTINCT lu.slug FROM profile_payload_skill_extras AS x "
+                "JOIN extras AS e ON e.id = x.extra_id AND e.type = 'DISTANCE' "
+                "JOIN profile_payloads AS p ON p.id = x.profile_payload_id "
+                "JOIN logical_units AS lu ON lu.id = p.logical_unit_id "
+                "WHERE lu.slug IS NOT NULL "
+                "UNION "
+                "SELECT DISTINCT lu.slug FROM loadout_payload_skill_extras AS x "
+                "JOIN extras AS e ON e.id = x.extra_id AND e.type = 'DISTANCE' "
+                "JOIN loadout_payloads AS p ON p.id = x.loadout_payload_id "
+                "JOIN logical_units AS lu ON lu.id = p.logical_unit_id "
+                "WHERE lu.slug IS NOT NULL ORDER BY slug LIMIT 2"
+            ))
+        assert len(distance_slugs) == 2, distance_slugs
+        for distance_unit in ("in", "cm"):
+            distances = verify(
+                f"http://127.0.0.1:{server.server_port}",
+                slugs=distance_slugs, channel="chrome",
+                distance_unit=distance_unit,
+            )
+            assert distances["passed"] == distances["total"] == (
+                len(WIDTHS) * len(distance_slugs)
+            ), distances
+            assert sum(
+                result.get("counts", {}).get("distanceExtras", 0)
+                for result in distances["results"]
+            ) > 0, distances
     finally:
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+def test_optional_filter_preferences_and_api_urls_are_consistent() -> None:
+    script = _settings_script(
+        {"mercs": False, "reinforcement": False}, "cm",
+    )
+    assert '"infinity-db-mercs": "false"' in script
+    assert '"infinity-db-specops": "true"' in script
+    assert '"infinity-db-reinforcement": "false"' in script
+    assert '"infinity-db-distance-unit": "cm"' in script
+    assert _unit_api_url(
+        "http://127.0.0.1:8080", "test-unit",
+        {"mercs": False, "reinforcement": False},
+    ) == (
+        "http://127.0.0.1:8080/api/units/test-unit?"
+        "mercs=0&specops=1&teamops=1&reinforcement=0"
+    )
+    with pytest.raises(ValueError, match="Unknown optional"):
+        _settings_script({"invalid": False}, "in")
+    with pytest.raises(ValueError, match="Distance unit"):
+        _settings_script({}, "feet")
 
 
 def test_browser_manifest_is_pinned_and_covers_three_viewports() -> None:
@@ -158,9 +240,32 @@ def test_expected_items_omits_api_only_markers_and_distance_extra_text() -> None
         "source_markers": [_item("Team marker", "team-marker")],
     })
     assert set(projected) == {"equipment", "skills"}
-    assert projected["skills"][0].extras == ("AP",)
+    assert projected["skills"][0].extras == ('3.2"', "AP")
+    assert expected_items({
+        "skills": [{
+            **_item("Forward Observer", "forward-observer"),
+            "extras": [{"name": "8", "is_distance": True}],
+        }],
+    }, "cm")["skills"][0].extras == ("8 cm",)
     assert projected["equipment"][0].href == "/equipment/medikit"
     assert projected["equipment"][0].quantity == 2
+
+
+@pytest.mark.parametrize(
+    ("source", "semantics", "unit", "expected"),
+    [
+        ("+7.5", None, "in", '+3"'),
+        ("+7.5", {"positive_sign": "omit"}, "in", '3"'),
+        ("7.5", {"positive_sign": "force"}, "in", '+3"'),
+        ("-5", {"positive_sign": "force"}, "in", '-2"'),
+        ("+7.5", {"positive_sign": "omit"}, "cm", "7.5 cm"),
+        ("+7.5", {"positive_sign": "force"}, "cm", "+7.5 cm"),
+    ],
+)
+def test_distance_extra_signed_formatting(
+    source: str, semantics: dict | None, unit: str, expected: str,
+) -> None:
+    assert _distance_extra(source, semantics, unit) == expected
 
 
 def test_rendered_row_requires_correct_bucket_link_quantity_and_extra() -> None:
@@ -181,10 +286,31 @@ def test_rendered_row_requires_correct_bucket_link_quantity_and_extra() -> None:
             assert_rendered_items(bad_rows, expected, "example")
 
 
+def test_rendered_distance_extra_must_match_selected_unit() -> None:
+    items = {"skills": [{
+        **_item("Super-Jump", "super-jump"),
+        "extras": [{"name": "+7.5", "is_distance": True}],
+        "parameter_semantics": {"positive_sign": "omit"},
+    }]}
+    assert assert_rendered_items(
+        [_row("Skills", 'Super-Jump (3")', href="/skills/super-jump")],
+        items, "inches",
+    ) == 1
+    assert assert_rendered_items(
+        [_row("Skills", "Super-Jump (7.5 cm)", href="/skills/super-jump")],
+        items, "centimeters", "cm",
+    ) == 1
+    with pytest.raises(AssertionError, match="missing skills item"):
+        assert_rendered_items(
+            [_row("Skills", 'Super-Jump (+3")', href="/skills/super-jump")],
+            items, "wrong sign",
+        )
+
+
 def test_browser_dom_checks_scoped_shared_and_army_local_rows() -> None:
     unit, dom = _unit()
     assert assert_unit_dom(unit, dom, "unit") == {
-        "shared": 2, "profiles": 2, "loadouts": 2,
+        "shared": 2, "profiles": 2, "loadouts": 2, "distanceExtras": 0,
     }
 
 

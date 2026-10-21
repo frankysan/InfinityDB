@@ -213,6 +213,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     remain in the normal test suite. Broader optional-filter scenarios,
     distance formatting, all-Unit completeness and deployment browser
     acceptance remain open.
+  - [x] Extend Unit Chromium acceptance to session-backed optional
+    availability filtering and exact distance Extra formatting.
+    Default, Team-Ops-disabled, and all-optional-disabled cases
+    compare against identically filtered API data at three widths,
+    requiring a real visibility change in both filtered scenarios.
+    Two source-backed Units with actual visible DISTANCE Extras run
+    under inches and centimeters with literal 2.5 cm/in conversion
+    and Skill positive-sign semantics. **42/42 local browser pages**
+    passed; hermetic tests reject wrong signs, wrong quantities,
+    missing category rows and invalid flag/unit inputs. Other
+    availability combinations, broader Skill parameters, full-catalog
+    pages and deployed-server acceptance remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

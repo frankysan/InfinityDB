@@ -832,3 +832,22 @@ Prefer targeted fixes rather than merging these.
   **PASS**; Pyright **0 errors/0 warnings**; Markdownlint
   **32 files/0 issues**, offline links **30 files/0 errors**.
   The full suite and deployed-server browser acceptance were not run.
+- **Closeout pass 34, 2026-10-21:** Expanded normal Unit browser
+  verification through the real session-storage optional Unit flags,
+  with API comparisons using identical `mercs/specops/teamops/reinforcement`
+  query values. Both filtered scenarios also prove non-vacuous
+  changes to visible Armies or General Profiles. The pinned Chromium
+  matrix passed the original 21 pages, 3 with Team-Ops disabled
+  and 6 with all optional categories disabled. Added independent literal DISTANCE Extra formatting
+  checks using the 2.5 cm/in rule and Skill positive-sign semantics.
+  Two archive-backed, visibly parameterized Unit examples passed
+  in both inches and centimeters at three widths (12 more pages).
+  The test suite now requires nonempty real DISTANCE Extra evidence
+  and rejects wrong signs and incorrect label text. **42/42 Chromium
+  pages passed** locally; no deployed-server or full-catalog assertion.
+  **Validation:** 22 browser regression tests, 5 Unit API parity tests,
+  10 non-Skill API tests and 2 test-registration checks passed
+  (**39 focused tests**); Ruff passed for both changed Python modules,
+  Pyright reported 0 errors/0 warnings, Markdownlint reported 32
+  files/0 issues and offline links passed for 30 files.
+  The full project suite was not run.

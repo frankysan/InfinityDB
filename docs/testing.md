@@ -1077,27 +1077,36 @@ The normal Unit detail **browser acceptance** is available through
 `tools.verify_unit_skill_presentation_browser`. It compares each rendered
 General Profile and each army-local profile/loadout section with the normal
 `/api/units/<slug>` response: exact row category, item name, linked
-Skill/Equipment/Weapon destination, quantity and non-distance Extras.
+Skill/Equipment/Weapon destination, quantity and rendered Extras.
 It checks absent/extra rows as well as missing items, keeps Training
 and attribute overrides unlinked, and ensures API-only source markers
 never gain Skill links. It also rejects missing sections, JavaScript
-errors and document-level horizontal overflow. Distance Extras with
-unit-aware formatting are checked for item presence and links rather
-than literal raw text. Its seven pinned representative Units run at
-1440, 390 and 320 px (21 page checks); normal pytest exercises the
-full matrix when local Chrome and Playwright are available, otherwise
-the Chromium test skips while hermetic expectation tests still run.
-An isolated local-server run on the pinned application/rules databases
-passed **21/21 pages** on 2026-10-21. To check an already running
-release-candidate server explicitly and save ignored evidence:
+errors and document-level horizontal overflow. Distance Extras are
+independently checked against the configured 2.5 cm/in conversion and
+Skill positive-sign policy, including literal inches/centimeters.
+The default matrix covers seven pinned representative Units at 1440,
+390 and 320 px (**21 pages**). Additional isolated session-preference
+scenarios exercise Team-Ops off (**3 pages**) and all four optional
+categories off (**6 pages**), comparing the DOM against API queries
+with exactly the same flags. Both filtered scenarios must also
+cause an observable change in visible Armies or General Profiles,
+so a no-op preference cannot pass. Two source-backed Units with
+actual visible distance Extras are tested in both inches and centimeters
+at all three widths (**12 pages**). The pinned local server passed **42/42
+page checks** on 2026-10-21. Pytest runs the full matrix when Chrome and
+Playwright are available, otherwise skips Chromium while hermetic
+tests remain active. To check an already running release-candidate
+server explicitly and save ignored evidence:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
 ```
 
-This is bounded representative **browser** acceptance, not exhaustive
-source-to-browser parity for all Units, optional availability settings,
-parameterized Skill semantics, or all visual layout variants.
+Use `--exclude-optional teamops` (repeat for multiple flags) and
+`--distance-unit cm` to check those variants against a running server.
+This remains bounded representative **browser** acceptance, not
+full-catalog completeness, all optional-flag combinations, all
+parameterized Skill semantics, or every visual layout variant.
 
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
