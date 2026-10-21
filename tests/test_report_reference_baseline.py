@@ -20,6 +20,7 @@ from tools.report_reference_baseline import (
     _source_location,
     _verify_army_archive_sources,
     _verify_published_characteristics_orders,
+    _verify_published_peripherals_includes,
     _verify_published_profile_extras,
     _verify_published_profile_references,
     build_baseline,
@@ -203,6 +204,8 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
                                 "move": [15, 10], "cc": 16, "w": 1,
                                 "str": False,
                                 "chars": [51, 52],
+                                "peripheral": [{"id": 74, "order": 2, "q": 3}],
+                                "includes": [{"group": 7, "option": 9, "q": 2}],
                                 "skills": [
                                     {"id": 11, "q": 1, "order": 2, "extra": [41, 42]},
                                     {"id": 12, "q": 2, "order": 1},
@@ -215,6 +218,8 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
                                 "points": 17, "swc": "0.5",
                                 "minis": 1, "disabled": False,
                                 "chars": [53],
+                                "peripheral": [{"id": 75, "q": 1}],
+                                "includes": [{"group": 7, "option": 9, "q": 1}],
                                 "orders": [
                                     {"type": "regular", "list": 1, "total": 2},
                                     {"type": "irregular", "list": 0, "total": 1},
@@ -237,6 +242,75 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
             })
         )
     return archive
+
+
+def test_published_peripherals_and_includes_reject_drift(tmp_path: Path) -> None:
+    sources, _ = load_sources(_synthetic_army_archive(tmp_path))
+    with sqlite3.connect(":memory:") as db:
+        db.execute(
+            "CREATE TABLE loadout_payload_occurrences "
+            "(army_id, unit_id, group_id, option_id, loadout_payload_id)"
+        )
+        db.execute(
+            "INSERT INTO loadout_payload_occurrences VALUES (101, 10, 7, 9, 50)"
+        )
+        db.execute(
+            "CREATE TABLE profile_peripherals "
+            "(army_id, unit_id, group_id, profile_id, position, item_id, "
+            "display_order, quantity)"
+        )
+        db.execute(
+            "CREATE TABLE option_peripherals "
+            "(army_id, unit_id, group_id, option_id, position, item_id, "
+            "display_order, quantity)"
+        )
+        for kind, identity in (("profile", "profile_id"), ("loadout", "option_id")):
+            db.execute(
+                f"CREATE TABLE {kind}_occurrence_includes "
+                f"(army_id, unit_id, group_id, {identity}, position, "
+                "target_loadout_payload_id, quantity)"
+            )
+        db.execute(
+            "INSERT INTO profile_peripherals VALUES (101, 10, 7, 1, 1, 74, 2, 3)"
+        )
+        db.execute(
+            "INSERT INTO option_peripherals VALUES (101, 10, 7, 9, 1, 75, NULL, 1)"
+        )
+        db.execute(
+            "INSERT INTO profile_occurrence_includes VALUES (101, 10, 7, 1, 1, 50, 2)"
+        )
+        db.execute(
+            "INSERT INTO loadout_occurrence_includes VALUES (101, 10, 7, 9, 1, 50, 1)"
+        )
+        expected = {
+            "profile.peripherals": 1, "loadout.peripherals": 1,
+            "profile.includes": 1, "loadout.includes": 1,
+        }
+        assert _verify_published_peripherals_includes(db, sources) == expected
+
+        db.execute("UPDATE profile_peripherals SET item_id = 999")
+        with pytest.raises(ReferenceBaselineError, match="relationship differs"):
+            _verify_published_peripherals_includes(db, sources)
+        db.execute("UPDATE profile_peripherals SET item_id = 74")
+        db.execute("UPDATE option_peripherals SET quantity = 5")
+        with pytest.raises(ReferenceBaselineError, match="relationship differs"):
+            _verify_published_peripherals_includes(db, sources)
+        db.execute("UPDATE option_peripherals SET quantity = 1")
+        db.execute("UPDATE profile_occurrence_includes SET target_loadout_payload_id = 99")
+        with pytest.raises(ReferenceBaselineError, match="relationship differs"):
+            _verify_published_peripherals_includes(db, sources)
+        db.execute("UPDATE profile_occurrence_includes SET target_loadout_payload_id = 50")
+        db.execute("UPDATE loadout_occurrence_includes SET position = 2")
+        with pytest.raises(ReferenceBaselineError, match="occurrence positions differ"):
+            _verify_published_peripherals_includes(db, sources)
+        db.execute("UPDATE loadout_occurrence_includes SET position = 1")
+        db.execute("DELETE FROM profile_peripherals")
+        with pytest.raises(ReferenceBaselineError, match="occurrence positions differ"):
+            _verify_published_peripherals_includes(db, sources)
+        db.execute("INSERT INTO profile_peripherals VALUES (101, 10, 7, 1, 1, 74, 2, 3)")
+        db.execute("INSERT INTO profile_peripherals VALUES (101, 10, 7, 1, 1, 74, 2, 3)")
+        with pytest.raises(ReferenceBaselineError, match="duplicate"):
+            _verify_published_peripherals_includes(db, sources)
 
 
 def test_published_characteristics_and_orders_reject_drift(tmp_path: Path) -> None:
@@ -586,6 +660,12 @@ def test_pinned_army_archive_nested_publication_when_available() -> None:
     # No loadout Characteristics exist in this pinned source. The parity
     # check still rejects unexpectedly published rows for this category.
     assert characteristics_orders["loadout.characteristics"] == 0
+    peripherals_includes = evidence["matchedPublishedPeripheralsIncludes"]
+    assert set(peripherals_includes) == {
+        "profile.peripherals", "loadout.peripherals",
+        "profile.includes", "loadout.includes",
+    }
+    assert sum(peripherals_includes.values()) > 0, peripherals_includes
 
 
 def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
@@ -609,6 +689,9 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
             "loadout.characteristics": 37,
             "loadout.orders": 26,
         },
+        "matchedPublishedPeripheralsIncludes": {
+            "profile.peripherals": 13, "loadout.includes": 27,
+        },
     }
     markdown = render_markdown(report)
     assert "59 archive JSON documents (including metadata.json)" in markdown
@@ -622,6 +705,7 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
     assert "loadout.weapons=17, profile.skills=12" in markdown
     assert "loadout.characteristics=37, loadout.orders=26" in markdown
     assert "profile.characteristics=41" in markdown
+    assert "loadout.includes=27, profile.peripherals=13" in markdown
 
 
 def test_baseline_requires_published_databases_and_verified_supplied_army_zip(

@@ -373,6 +373,105 @@ def _verify_published_characteristics_orders(
     return result
 
 
+def _verify_published_peripherals_includes(
+    army: sqlite3.Connection,
+    sources: list[SourceDocument],
+) -> dict[str, int]:
+    """Verify contextual Peripheral occurrences and resolved Include targets.
+
+    Peripheral IDs remain army-local source IDs. Include targets are the
+    canonical payload IDs of the referenced (army, unit, group, option).
+    This does not certify raw unknown fields or application-level identities.
+    """
+    expected: dict[str, list[tuple[Any, ...]]] = {
+        "profile.peripherals": [],
+        "loadout.peripherals": [],
+        "profile.includes": [],
+        "loadout.includes": [],
+    }
+    target_payloads = {
+        tuple(row[:4]): row[4]
+        for row in army.execute(
+            "SELECT army_id, unit_id, group_id, option_id, loadout_payload_id "
+            "FROM loadout_payload_occurrences"
+        )
+    }
+    for source in sources:
+        for unit in source.data["units"]:
+            for group in unit.get("profileGroups") or []:
+                prefix = (source.faction_id, unit["id"], group["id"])
+                for kind, members in (
+                    ("profile", group.get("profiles") or []),
+                    ("loadout", group.get("options") or []),
+                ):
+                    for member in members:
+                        parent = (*prefix, member["id"])
+                        for position, item in enumerate(
+                            member.get("peripheral") or [], start=1
+                        ):
+                            fields = item if isinstance(item, dict) else {}
+                            expected[f"{kind}.peripherals"].append((
+                                *parent, position, fields.get("id"),
+                                fields.get("order"), fields.get("q"),
+                            ))
+                        for position, item in enumerate(
+                            member.get("includes") or [], start=1
+                        ):
+                            fields = item if isinstance(item, dict) else {}
+                            target = (*prefix[:2], fields.get("group"), fields.get("option"))
+                            if target not in target_payloads:
+                                raise ReferenceBaselineError(
+                                    f"{kind}.includes: no published target for {target!r} "
+                                    f"from {parent!r} position {position}"
+                                )
+                            expected[f"{kind}.includes"].append((
+                                *parent, position, target_payloads[target],
+                                fields.get("q"),
+                            ))
+
+    query_specs = {
+        "profile.peripherals": (
+            "SELECT army_id, unit_id, group_id, profile_id, position, "
+            "item_id, display_order, quantity FROM profile_peripherals"
+        ),
+        "loadout.peripherals": (
+            "SELECT army_id, unit_id, group_id, option_id, position, "
+            "item_id, display_order, quantity FROM option_peripherals"
+        ),
+        "profile.includes": (
+            "SELECT army_id, unit_id, group_id, profile_id, position, "
+            "target_loadout_payload_id, quantity FROM profile_occurrence_includes"
+        ),
+        "loadout.includes": (
+            "SELECT army_id, unit_id, group_id, option_id, position, "
+            "target_loadout_payload_id, quantity FROM loadout_occurrence_includes"
+        ),
+    }
+    counts: dict[str, int] = {}
+    for kind, sql in query_specs.items():
+        source_rows = expected[kind]
+        stored_rows = [tuple(row) for row in army.execute(sql)]
+        source_map = {row[:5]: row[5:] for row in source_rows}
+        stored_map = {row[:5]: row[5:] for row in stored_rows}
+        if len(source_map) != len(source_rows) or len(stored_map) != len(stored_rows):
+            raise ReferenceBaselineError(f"{kind}: duplicate occurrence positions")
+        missing = sorted(source_map.keys() - stored_map.keys())
+        extra = sorted(stored_map.keys() - source_map.keys())
+        if missing or extra:
+            raise ReferenceBaselineError(
+                f"{kind}: source/published occurrence positions differ: "
+                f"missing={missing[:10]!r}, extra={extra[:10]!r}"
+            )
+        for key in sorted(source_map):
+            if source_map[key] != stored_map[key]:
+                raise ReferenceBaselineError(
+                    f"{kind}: source/published relationship differs at {key!r}: "
+                    f"source={source_map[key]!r}, published={stored_map[key]!r}"
+                )
+        counts[kind] = len(source_rows)
+    return counts
+
+
 def _verify_army_archive_sources(
     archive: Path, metadata: dict[str, Any], army: sqlite3.Connection,
     raw_army: sqlite3.Connection | None = None,
@@ -696,6 +795,9 @@ def build_baseline(
                 archive_evidence["matchedPublishedCharacteristicsOrders"] = (
                     _verify_published_characteristics_orders(army, sources)
                 )
+                archive_evidence["matchedPublishedPeripheralsIncludes"] = (
+                    _verify_published_peripherals_includes(army, sources)
+                )
             archive_status = "hash-verified-source-identities"
 
         # Each URL revision is a separate source identity. Only a genuinely shared
@@ -1001,6 +1103,23 @@ def render_markdown(report: dict[str, Any]) -> str:
              "raw fields and browser representation unreviewed)."]
             if (snapshot.get("sourceIdentityEvidence") or {}).get(
                 "matchedPublishedCharacteristicsOrders"
+            )
+            else []
+        ),
+        *(
+            ["- Published contextual Peripherals and Includes: "
+             + ", ".join(
+                 f"{name}={count}"
+                 for name, count in sorted(
+                     snapshot["sourceIdentityEvidence"][
+                         "matchedPublishedPeripheralsIncludes"
+                     ].items()
+                 )
+             )
+             + " (army-local peripheral IDs and canonical include target payloads; "
+             "raw fields and browser output unreviewed)."]
+            if (snapshot.get("sourceIdentityEvidence") or {}).get(
+                "matchedPublishedPeripheralsIncludes"
             )
             else []
         ),

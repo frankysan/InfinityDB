@@ -160,8 +160,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Characteristics, no loadout Characteristics, and 15,195 loadout Orders.
     The zero category is compared explicitly; synthetic nonempty fixtures
     verify changes, missing rows, duplicates and positional drift.
-    Raw/unmodeled Order content, Peripherals, Includes, API serialization
-    and browser presentation remain open.
+    Raw/unmodeled Order content, API serialization and browser
+    presentation remain open.
+  - [x] Compare contextual profile/loadout Peripheral source IDs,
+    display-order and quantity occurrences against published source rows,
+    and resolve Include group/option targets to canonical loadout payload
+    IDs before comparing published Includes. Synthetic mutation tests
+    reject changed targets, quantities, positions, missing and duplicate
+    occurrences; pinned-archive integration passed. Derived Peripheral
+    entity identity, Unit-option Includes and client rendering remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

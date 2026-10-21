@@ -1012,9 +1012,17 @@ loadout Orders**. The zero count is an explicitly checked source/storage
 absence, not skipped coverage; synthetic nonempty loadout Characteristics
 exercise detection of discrepancies. Unknown Order fields and non-object
 Order entries may be preserved as raw data and are not fully certified
-by this typed check. Peripheral/Include
-relationships, live API serialization, normal-browser display and
-rules semantics remain separate gates.
+by this typed check. The optional audit also verifies contextual
+profile/loadout Peripheral occurrences against published
+`profile_peripherals` and `option_peripherals` source rows, preserving
+army-local source IDs, positions, display order and quantities. For
+profile/loadout Includes it resolves the source group/option coordinates
+through `loadout_payload_occurrences` and verifies the canonical target
+payload, occurrence position and quantity against the published
+`profile_occurrence_includes` and `loadout_occurrence_includes`.
+This does **not** certify derived application Peripheral entity identity,
+global Unit-option relationships, raw/unmodeled field preservation,
+API serialization, normal-browser display or rules semantics.
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:

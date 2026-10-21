@@ -719,3 +719,15 @@ Prefer targeted fixes rather than merging these.
   verifier category; the synthetic fixture exercises the nonempty case.
   Raw unmodeled Order fields, other nested relations and client
   rendering remain unreviewed.
+- **Closeout pass 28, 2026-10-21:** Extended the pinned Army
+  source-to-publication inventory to contextual profile and loadout
+  Peripherals and Includes. Peripheral occurrences retain source
+  army-local IDs, positions, display order and quantity in published
+  `profile_peripherals`/`option_peripherals`. Include source
+  group/option targets are resolved via the published loadout
+  occurrence-to-payload mapping before comparison with canonical
+  profile/loadout Include materializations. Mismatches, missing rows,
+  duplicate positions and reordering fail. Synthetic mutation tests
+  and real pinned-archive integration passed; this does not verify
+  derived Peripheral entity identity, Unit-option Includes, raw
+  unmodeled fields or player-facing API/browser rendering.
