@@ -23,6 +23,8 @@ from urllib.request import Request, urlopen
 
 from infinity_army_data.merge import load_sources
 from infinity_db.application_domains import application_domain, semantic_record_domain
+from infinity_db.database.paths import raw_database_path
+from infinity_db.database.publication import validate_database_pair
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPORT_FORMAT = "InfinityDB 1.0 reference evidence baseline"
@@ -75,8 +77,71 @@ def _source_location(root: Path, relative: str | None) -> str:
     return "available" if (root / candidate).is_file() else "missing-local-artifact"
 
 
+_NESTED_SOURCE_FIELDS = {
+    "profile_groups": (
+        ("army_id", "unit_id", "group_id"),
+        ("position", "category_id", "isc", "notes"),
+    ),
+    "profiles": (
+        ("army_id", "unit_id", "group_id", "profile_id"),
+        (
+            "position", "name", "logo", "type_id", "move_1", "move_2",
+            "cc", "bs", "ph", "wip", "arm", "bts", "vitality",
+            "silhouette", "ava", "is_structure", "notes",
+        ),
+    ),
+    "loadout_options": (
+        ("army_id", "unit_id", "group_id", "option_id"),
+        ("position", "name", "points", "swc", "minis", "disabled"),
+    ),
+}
+
+
+def _verify_nested_source_rows(
+    army: sqlite3.Connection, table: str, expected: list[tuple[Any, ...]]
+) -> int:
+    """Verify source-native keys, positions and scalar facts without reconstruction."""
+    identity_columns, value_columns = _NESTED_SOURCE_FIELDS[table]
+    columns = (*identity_columns, *value_columns)
+    actual: dict[tuple[Any, ...], tuple[Any, ...]] = {}
+    for row in army.execute(f"SELECT {', '.join(columns)} FROM {table}"):
+        key = tuple(row[:len(identity_columns)])
+        if key in actual:
+            raise ReferenceBaselineError(f"{table}: duplicate published identity {key!r}")
+        actual[key] = tuple(row[len(identity_columns):])
+
+    original: dict[tuple[Any, ...], tuple[Any, ...]] = {}
+    for row in expected:
+        key = row[:len(identity_columns)]
+        if key in original:
+            raise ReferenceBaselineError(f"{table}: duplicate source identity {key!r}")
+        original[key] = row[len(identity_columns):]
+
+    missing = sorted(original.keys() - actual.keys())
+    extra = sorted(actual.keys() - original.keys())
+    if missing or extra:
+        raise ReferenceBaselineError(
+            f"{table} source identities differ from published storage: "
+            f"missing={missing[:10]!r}, extra={extra[:10]!r}"
+        )
+    for key in sorted(original):
+        if original[key] != actual[key]:
+            columns_changed = [
+                name for name, expected_value, actual_value
+                in zip(value_columns, original[key], actual[key], strict=True)
+                if expected_value != actual_value
+            ]
+            raise ReferenceBaselineError(
+                f"{table} source facts differ at {key!r}: "
+                f"fields={columns_changed!r}, expected={original[key]!r}, "
+                f"actual={actual[key]!r}"
+            )
+    return len(original)
+
+
 def _verify_army_archive_sources(
-    archive: Path, metadata: dict[str, Any], army: sqlite3.Connection
+    archive: Path, metadata: dict[str, Any], army: sqlite3.Connection,
+    raw_army: sqlite3.Connection | None = None,
 ) -> dict[str, Any]:
     """Match individual raw Army source identities to the published list rows.
 
@@ -125,6 +190,9 @@ def _verify_army_archive_sources(
             f"extra={sorted(stored_ids - source_ids)!r}"
         )
     expected_memberships: list[tuple[int, int, int]] = []
+    expected_nested: dict[str, list[tuple[Any, ...]]] = {
+        table: [] for table in _NESTED_SOURCE_FIELDS
+    }
     for source in sources:
         fields = {
             "version": source.data["version"],
@@ -148,6 +216,54 @@ def _verify_army_archive_sources(
                 )
             unit_ids.add(unit_id)
             expected_memberships.append((source.faction_id, unit_id, position))
+            for group_position, group in enumerate(
+                unit.get("profileGroups") or [], start=1
+            ):
+                group_id = group.get("id")
+                if type(group_id) is not int:
+                    raise ReferenceBaselineError(
+                        f"Army {source.faction_id} Unit {unit_id} has "
+                        f"invalid profile group identity {group_id!r}"
+                    )
+                parent = (source.faction_id, unit_id, group_id)
+                expected_nested["profile_groups"].append((
+                    *parent, group_position, group.get("category"),
+                    group.get("isc"), group.get("notes"),
+                ))
+                for profile_position, profile in enumerate(
+                    group.get("profiles") or [], start=1
+                ):
+                    profile_id = profile.get("id")
+                    if type(profile_id) is not int:
+                        raise ReferenceBaselineError(
+                            f"Army {source.faction_id} Unit {unit_id} group {group_id} "
+                            f"has invalid profile identity {profile_id!r}"
+                        )
+                    move = profile.get("move") or []
+                    expected_nested["profiles"].append((
+                        *parent, profile_id, profile_position,
+                        profile.get("name"), profile.get("logo"), profile.get("type"),
+                        move[0] if len(move) > 0 else None,
+                        move[1] if len(move) > 1 else None,
+                        profile.get("cc"), profile.get("bs"), profile.get("ph"),
+                        profile.get("wip"), profile.get("arm"), profile.get("bts"),
+                        profile.get("w"), profile.get("s"), profile.get("ava"),
+                        profile.get("str"), profile.get("notes"),
+                    ))
+                for option_position, option in enumerate(
+                    group.get("options") or [], start=1
+                ):
+                    option_id = option.get("id")
+                    if type(option_id) is not int:
+                        raise ReferenceBaselineError(
+                            f"Army {source.faction_id} Unit {unit_id} group {group_id} "
+                            f"has invalid loadout identity {option_id!r}"
+                        )
+                    expected_nested["loadout_options"].append((
+                        *parent, option_id, option_position,
+                        option.get("name"), option.get("points"), option.get("swc"),
+                        option.get("minis"), option.get("disabled"),
+                    ))
     published_memberships = [
         (int(row[0]), int(row[1]), int(row[2]))
         for row in army.execute(
@@ -165,6 +281,13 @@ def _verify_army_archive_sources(
             f"missing={sorted(expected_set - published_set)[:10]!r}, "
             f"extra={sorted(published_set - expected_set)[:10]!r}"
         )
+    nested_counts = {
+        table: _verify_nested_source_rows(
+            army if table == "profile_groups" else (raw_army or army),
+            table, rows,
+        )
+        for table, rows in expected_nested.items()
+    }
     return {
         "status": "source-identities-match-published-army-lists",
         "archiveJsonDocuments": len(sources) + len(skipped),
@@ -173,6 +296,12 @@ def _verify_army_archive_sources(
         "matchedArmyListIds": len(source_ids),
         "matchedSourceProvenanceRows": len(sources),
         "matchedUnitMembershipOccurrences": len(expected_memberships),
+        "matchedNestedSourceRows": nested_counts,
+        "nestedStorage": {
+            "profile_groups": "published-infinity.db",
+            "profiles": "paired-infinity.raw.db",
+            "loadout_options": "paired-infinity.raw.db",
+        },
     }
 
 
@@ -312,7 +441,17 @@ def build_baseline(
                 raise ReferenceBaselineError(f"Army archive is unavailable: {army_archive}")
             if _sha256(army_archive) != archive_sha:
                 raise ReferenceBaselineError("Army archive SHA-256 differs from published metadata")
-            archive_evidence = _verify_army_archive_sources(army_archive, raw_army, army)
+            raw_path = raw_database_path(army_database)
+            try:
+                validate_database_pair(army_database, raw_path=raw_path)
+            except ValueError as exc:
+                raise ReferenceBaselineError(
+                    f"Published Army/raw source database pair is invalid: {exc}"
+                ) from exc
+            with closing(_connect(raw_path)) as raw_connection:
+                archive_evidence = _verify_army_archive_sources(
+                    army_archive, raw_army, army, raw_connection,
+                )
             archive_status = "hash-verified-source-identities"
 
         # Each URL revision is a separate source identity. Only a genuinely shared
@@ -565,6 +704,18 @@ def render_markdown(report: dict[str, Any]) -> str:
              f"{snapshot['sourceIdentityEvidence']['matchedUnitMembershipOccurrences']} "
              "ordered Unit membership occurrences."]
             if snapshot.get("sourceIdentityEvidence") else []
+        ),
+        *(
+            [f"- Nested Army source row parity: "
+             f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['profile_groups']} "
+             "profile groups in published infinity.db; "
+             f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['profiles']} "
+             "profiles and "
+             f"{snapshot['sourceIdentityEvidence']['matchedNestedSourceRows']['loadout_options']} "
+             "loadouts in export-paired infinity.raw.db. "
+             "Derived runtime payloads and browser presentation remain unverified."]
+            if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedNestedSourceRows")
+            else []
         ),
         f"- Published Army database SHA-256: `{snapshot['publishedDatabaseSha256']}`.",
         f"- Published rules database SHA-256: "

@@ -668,3 +668,22 @@ Prefer targeted fixes rather than merging these.
   duplicate source Unit identities. This records bounded
   source-to-storage parity, not source-field completeness, and
   must be rerun using the actual final release inputs.
+- **Closeout pass 24, 2026-10-21:** Expanded the optional pinned Army
+  archive parity check through all source profile-group identities,
+  direct scalar facts, ordered profiles and loadout options. The
+  first real-archive test exposed the intentional database split:
+  profile groups are published in `infinity.db`, but the source-native
+  profiles and loadout tables live in export-paired `infinity.raw.db`.
+  The verifier now requires the valid database export pair, compares
+  the correct tables and retains mismatch evidence for identities,
+  positions, core profile stats and loadout costs. The new regression
+  exercises both nonempty synthetic source data and the locally
+  available pinned ZIP; no comparison of derived runtime profile
+  payloads or nested references is claimed.
+- **Validation:** `tests/test_report_reference_baseline.py` —
+  **18 passed**, including the real pinned archive and the exact
+  export-paired raw database. Ruff on tool and test module **PASS**;
+  Pyright **0 errors/0 warnings**; Markdownlint **32 files/0 issues**,
+  offline documentation links **30 files/0 errors**. The full suite,
+  fresh served-browser checks and final release-candidate acceptance
+  remain outstanding.

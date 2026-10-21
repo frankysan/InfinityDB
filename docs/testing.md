@@ -980,9 +980,20 @@ count mismatches. The September 29 archive has **59 JSON documents**:
 58 Army-list source files plus one `metadata.json` document; these counts
 must not be conflated. The optional check records `sourceIdentityEvidence`
 including the source-provenance and Unit-occurrence counts. It fails closed
-on source identity, provenance or Unit-membership mismatches, but it does not
-validate the rest of the source fields, player-facing presentation, or rules
-completeness. Example for the present input:
+on source identity, provenance or Unit-membership mismatches. It also
+requires the validated application/raw database export pair and verifies
+all source profile-group identities, positions, categories and text fields
+against published `infinity.db::profile_groups`. Every nested source
+profile's identity, position and core attribute fields, and each loadout's
+identity, position, name, Points, SWC, miniature count and disabled flag,
+are compared with `infinity.raw.db::profiles` and
+`infinity.raw.db::loadout_options` respectively. These two tables
+are intentionally **not** in the published application database; the
+check does not prove their derived player-facing payloads, nested
+Skill/Weapon references, other source facts, or rules completeness.
+An optional integration regression exercises the exact pinned ZIP
+when it exists locally and skips when it is absent. Example for
+the present input:
 
 ```powershell
 .\.venv\Scripts\python.exe tools/report_reference_baseline.py --army-archive "data/raw/JSON 20260929-114335.zip" --verify-server http://127.0.0.1:8000 --json-output local/audits/1.0-baseline-pair.json --markdown-output local/audits/1.0-baseline-pair.md

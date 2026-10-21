@@ -12,6 +12,7 @@ import pytest
 
 from infinity_army_data.merge import load_sources
 from tools.report_reference_baseline import (
+    _NESTED_SOURCE_FIELDS,
     ReferenceBaselineError,
     _artifact_evidence,
     _revision_oldid,
@@ -189,7 +190,25 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
         output.writestr(
             "101-first.json", json.dumps({
                 "version": "7.26246.158",
-                "units": [{"id": 10}, {"id": 11}],
+                "units": [
+                    {
+                        "id": 10,
+                        "profileGroups": [{
+                            "id": 7, "category": 5, "isc": "Main",
+                            "profiles": [{
+                                "id": 1, "name": "Test Unit", "type": 2,
+                                "move": [15, 10], "cc": 16, "w": 1,
+                                "str": False,
+                            }],
+                            "options": [{
+                                "id": 9, "name": "Test Loadout",
+                                "points": 17, "swc": "0.5",
+                                "minis": 1, "disabled": False,
+                            }],
+                        }],
+                    },
+                    {"id": 11},
+                ],
                 "reinforcements": 201,
             })
         )
@@ -208,7 +227,7 @@ def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path)
         "sourceFileCount": 2,
         "sourceVersions": {"7.26246.158": 1, "7.26246.159": 1},
     }
-    with sqlite3.connect(":memory:") as db:
+    with sqlite3.connect(":memory:") as db, sqlite3.connect(":memory:") as raw_db:
         db.execute(
             "CREATE TABLE army_lists (id INTEGER PRIMARY KEY, version TEXT, "
             "kind TEXT, source_file TEXT, source_sha256 TEXT)"
@@ -216,6 +235,9 @@ def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path)
         db.execute(
             "CREATE TABLE army_units (army_id INTEGER, unit_id INTEGER, position INTEGER)"
         )
+        for table, (identities, values) in _NESTED_SOURCE_FIELDS.items():
+            target = db if table == "profile_groups" else raw_db
+            target.execute(f"CREATE TABLE {table} ({', '.join((*identities, *values))})")
         sources, _ = load_sources(archive)
         db.executemany(
             "INSERT INTO army_lists VALUES (?, ?, ?, ?, ?)",
@@ -232,7 +254,33 @@ def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path)
             "INSERT INTO army_units VALUES (?, ?, ?)",
             [(101, 10, 1), (101, 11, 2), (201, 11, 1)],
         )
-        evidence = _verify_army_archive_sources(archive, metadata, db)
+        profile_values = {
+            "army_id": 101, "unit_id": 10, "group_id": 7,
+            "profile_id": 1, "position": 1, "name": "Test Unit",
+            "type_id": 2, "move_1": 15, "move_2": 10,
+            "cc": 16, "vitality": 1, "is_structure": 0,
+        }
+        rows = {
+            "profile_groups": {
+                "army_id": 101, "unit_id": 10, "group_id": 7,
+                "position": 1, "category_id": 5, "isc": "Main",
+            },
+            "profiles": profile_values,
+            "loadout_options": {
+                "army_id": 101, "unit_id": 10, "group_id": 7,
+                "option_id": 9, "position": 1,
+                "name": "Test Loadout", "points": 17, "swc": "0.5",
+                "minis": 1, "disabled": 0,
+            },
+        }
+        for table, row in rows.items():
+            identities, values = _NESTED_SOURCE_FIELDS[table]
+            target = db if table == "profile_groups" else raw_db
+            target.execute(
+                f"INSERT INTO {table} VALUES ({', '.join('?' for _ in (*identities, *values))})",
+                tuple(row.get(field) for field in (*identities, *values)),
+            )
+        evidence = _verify_army_archive_sources(archive, metadata, db, raw_db)
         assert evidence == {
             "status": "source-identities-match-published-army-lists",
             "archiveJsonDocuments": 3,
@@ -241,7 +289,31 @@ def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path)
             "matchedArmyListIds": 2,
             "matchedSourceProvenanceRows": 2,
             "matchedUnitMembershipOccurrences": 3,
+            "matchedNestedSourceRows": {
+                "profile_groups": 1, "profiles": 1, "loadout_options": 1,
+            },
+            "nestedStorage": {
+                "profile_groups": "published-infinity.db",
+                "profiles": "paired-infinity.raw.db",
+                "loadout_options": "paired-infinity.raw.db",
+            },
         }
+        raw_db.execute("UPDATE profiles SET cc = 99 WHERE army_id = 101")
+        with pytest.raises(ReferenceBaselineError, match="profiles source facts differ"):
+            _verify_army_archive_sources(archive, metadata, db, raw_db)
+        raw_db.execute("UPDATE profiles SET cc = 16 WHERE army_id = 101")
+        raw_db.execute("UPDATE loadout_options SET points = 99 WHERE army_id = 101")
+        with pytest.raises(
+            ReferenceBaselineError, match="loadout_options source facts differ"
+        ):
+            _verify_army_archive_sources(archive, metadata, db, raw_db)
+        raw_db.execute("UPDATE loadout_options SET points = 17 WHERE army_id = 101")
+        db.execute("UPDATE profile_groups SET position = 2 WHERE army_id = 101")
+        with pytest.raises(
+            ReferenceBaselineError, match="profile_groups source facts differ"
+        ):
+            _verify_army_archive_sources(archive, metadata, db, raw_db)
+        db.execute("UPDATE profile_groups SET position = 1 WHERE army_id = 101")
         with pytest.raises(ReferenceBaselineError, match="source count differs"):
             _verify_army_archive_sources(
                 archive, {**metadata, "sourceFileCount": 3}, db
@@ -317,6 +389,19 @@ def test_army_archive_rejects_invalid_or_duplicate_unit_ids(
             )
 
 
+def test_pinned_army_archive_nested_publication_when_available() -> None:
+    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    if not archive.is_file():
+        pytest.skip("Optional pinned Army source archive is not available")
+    report = build_baseline(ARMY_DB, RULES_DB, army_archive=archive)
+    evidence = report["armySnapshot"]["sourceIdentityEvidence"]
+    assert evidence["matchedArmyListIds"] == 58
+    assert evidence["matchedUnitMembershipOccurrences"] > 0
+    assert evidence["matchedNestedSourceRows"]["profile_groups"] > 0
+    assert evidence["matchedNestedSourceRows"]["profiles"] > 0
+    assert evidence["matchedNestedSourceRows"]["loadout_options"] > 0
+
+
 def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
     report = build_baseline(ARMY_DB, RULES_DB)
     report["armySnapshot"]["sourceIdentityEvidence"] = {
@@ -324,12 +409,18 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
         "matchedArmyListIds": 58,
         "matchedSourceProvenanceRows": 58,
         "matchedUnitMembershipOccurrences": 12345,
+        "matchedNestedSourceRows": {
+            "profile_groups": 4748, "profiles": 5020, "loadout_options": 9000,
+        },
     }
     markdown = render_markdown(report)
     assert "59 archive JSON documents (including metadata.json)" in markdown
     assert "58 matched published Army-list IDs" in markdown
     assert "58 matched per-file provenance records" in markdown
     assert "12345 ordered Unit membership occurrences" in markdown
+    assert "4748 profile groups in published infinity.db" in markdown
+    assert "5020 profiles and 9000 loadouts" in markdown
+    assert "export-paired infinity.raw.db" in markdown
 
 
 def test_baseline_requires_published_databases_and_verified_supplied_army_zip(

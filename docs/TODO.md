@@ -133,8 +133,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     and all ordered Unit memberships are now compared to the published
     `army_lists` and `army_units` rows. Synthetic fixtures reject
     divergent IDs, versions, provenance, document counts and Unit positions.
-    A fresh check against the real ZIP and final server is still required
+    A fresh check against the final ZIP and server is still required
     before 1.0 acceptance; this is not full source-field completeness.
+  - [x] Extend archive-to-storage comparisons to all profile-group,
+    profile and loadout identities/positions and direct scalar facts.
+    The verifier reads profile groups from the published application
+    database, profiles/loadouts from its validated paired raw database,
+    and rejects mismatches. The pinned local ZIP integration test passes.
+    This is not a check of derived player-facing profile/loadout
+    payloads or nested Skills/Weapons/Equipment relationships.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and
