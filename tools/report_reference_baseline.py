@@ -21,7 +21,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlsplit
 from urllib.request import Request, urlopen
 
-from infinity_army_data.merge import SourceDocument, load_sources
+from infinity_army_data.merge import SourceDocument, load_sources, merge_sources
 from infinity_db.application_domains import application_domain, semantic_record_domain
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
@@ -472,6 +472,105 @@ def _verify_published_peripherals_includes(
     return counts
 
 
+def _verify_published_unit_options(
+    army: sqlite3.Connection,
+    sources: list[SourceDocument],
+) -> dict[str, int]:
+    """Match global Unit options and each army-expanded Include target."""
+    try:
+        master = merge_sources(sources)
+    except ValueError as exc:
+        raise ReferenceBaselineError(f"Global Unit source identity drift: {exc}") from exc
+    expected_options: dict[tuple[int, ...], tuple[Any, ...]] = {}
+    expected_includes: dict[tuple[int, ...], tuple[Any, ...]] = {}
+    target_armies: dict[tuple[int, int, int], list[tuple[int, int]]] = {}
+    for row in army.execute(
+        "SELECT army_id, unit_id, group_id, option_id, loadout_payload_id "
+        "FROM loadout_payload_occurrences"
+    ):
+        target_armies.setdefault((row[1], row[2], row[3]), []).append(
+            (row[0], row[4])
+        )
+    for targets in target_armies.values():
+        targets.sort()
+
+    source_include_count = 0
+    for unit in master["units"].values():
+        shared = unit["shared"]
+        unit_id = shared["id"]
+        for position, option in enumerate(shared.get("options") or [], start=1):
+            option_id = option["id"]
+            key = (unit_id, option_id)
+            if key in expected_options:
+                raise ReferenceBaselineError(f"Duplicate global Unit option: {key!r}")
+            expected_options[key] = (
+                position, option.get("name"), option.get("points"),
+                option.get("swc"), option.get("minis"), option.get("disabled"),
+            )
+            for include_position, value in enumerate(
+                option.get("includes") or [], start=1
+            ):
+                source_include_count += 1
+                include = value if isinstance(value, dict) else {}
+                group_id = include.get("group")
+                included_option = include.get("option")
+                if type(group_id) is not int or type(included_option) is not int:
+                    raise ReferenceBaselineError(
+                        f"Global Unit option {key!r} include {include_position} "
+                        "has invalid source target coordinates"
+                    )
+                target_key = (unit_id, group_id, included_option)
+                targets = target_armies.get(target_key)
+                if not targets:
+                    raise ReferenceBaselineError(
+                        f"Global Unit option {key!r} include {include_position} "
+                        f"has no published loadout targets for {target_key!r}"
+                    )
+                for target_army, payload_id in targets:
+                    include_key = (*key, include_position, target_army)
+                    expected_includes[include_key] = (
+                        payload_id, include.get("q")
+                    )
+
+    actual_options = [
+        tuple(row) for row in army.execute(
+            "SELECT unit_id, option_id, position, name, points, swc, minis, disabled "
+            "FROM unit_options"
+        )
+    ]
+    actual_includes = [
+        tuple(row) for row in army.execute(
+            "SELECT unit_id, option_id, position, target_army_id, "
+            "target_loadout_payload_id, quantity FROM unit_option_include_targets"
+        )
+    ]
+    for label, expected, observed, key_size in (
+        ("unit_options", expected_options, actual_options, 2),
+        ("unit_option_include_targets", expected_includes, actual_includes, 4),
+    ):
+        actual_map = {row[:key_size]: row[key_size:] for row in observed}
+        if len(actual_map) != len(observed):
+            raise ReferenceBaselineError(f"{label}: duplicate published identities")
+        missing = sorted(expected.keys() - actual_map.keys())
+        extra = sorted(actual_map.keys() - expected.keys())
+        if missing or extra:
+            raise ReferenceBaselineError(
+                f"{label}: source/published identities differ: "
+                f"missing={missing[:10]!r}, extra={extra[:10]!r}"
+            )
+        for key in sorted(expected):
+            if expected[key] != actual_map[key]:
+                raise ReferenceBaselineError(
+                    f"{label}: source/published facts differ at {key!r}: "
+                    f"source={expected[key]!r}, published={actual_map[key]!r}"
+                )
+    return {
+        "globalOptions": len(expected_options),
+        "sourceIncludeOccurrences": source_include_count,
+        "publishedExpandedIncludeTargets": len(expected_includes),
+    }
+
+
 def _verify_army_archive_sources(
     archive: Path, metadata: dict[str, Any], army: sqlite3.Connection,
     raw_army: sqlite3.Connection | None = None,
@@ -798,6 +897,9 @@ def build_baseline(
                 archive_evidence["matchedPublishedPeripheralsIncludes"] = (
                     _verify_published_peripherals_includes(army, sources)
                 )
+                archive_evidence["matchedPublishedGlobalUnitOptions"] = (
+                    _verify_published_unit_options(army, sources)
+                )
             archive_status = "hash-verified-source-identities"
 
         # Each URL revision is a separate source identity. Only a genuinely shared
@@ -1120,6 +1222,20 @@ def render_markdown(report: dict[str, Any]) -> str:
              "raw fields and browser output unreviewed)."]
             if (snapshot.get("sourceIdentityEvidence") or {}).get(
                 "matchedPublishedPeripheralsIncludes"
+            )
+            else []
+        ),
+        *(
+            [(
+                "- Global Unit-option parity: {globalOptions} options, "
+                "{sourceIncludeOccurrences} source Includes, "
+                "{publishedExpandedIncludeTargets} army-expanded published targets "
+                "(not global-option nested item arrays or browser rendering)."
+             ).format_map(
+                 snapshot["sourceIdentityEvidence"]["matchedPublishedGlobalUnitOptions"]
+             )]
+            if (snapshot.get("sourceIdentityEvidence") or {}).get(
+                "matchedPublishedGlobalUnitOptions"
             )
             else []
         ),

@@ -168,7 +168,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     IDs before comparing published Includes. Synthetic mutation tests
     reject changed targets, quantities, positions, missing and duplicate
     occurrences; pinned-archive integration passed. Derived Peripheral
-    entity identity, Unit-option Includes and client rendering remain open.
+    entity identity and client rendering remain open.
+  - [x] Verify source-shared global Unit-option identity, ordering,
+    name/cost/minis/disabled fields and army-expanded canonical Include
+    targets against `unit_options` and `unit_option_include_targets`.
+    Pinned ZIP integration and nonempty two-Army synthetic mutation
+    tests pass. Global-option nested item arrays, compatible/habilities
+    fields, raw Peripherals, API output and browser rendering remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

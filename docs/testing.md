@@ -1020,9 +1020,21 @@ profile/loadout Includes it resolves the source group/option coordinates
 through `loadout_payload_occurrences` and verifies the canonical target
 payload, occurrence position and quantity against the published
 `profile_occurrence_includes` and `loadout_occurrence_includes`.
-This does **not** certify derived application Peripheral entity identity,
-global Unit-option relationships, raw/unmodeled field preservation,
-API serialization, normal-browser display or rules semantics.
+The audit also reconstructs the source-shared global Unit options
+from all pinned Army lists, rejecting cross-army changes to shared fields.
+It checks each global option's source ID, position, name, Points, SWC,
+miniature count, and disabled flag against published `unit_options`.
+Each source Unit-option Include is expanded across every matching
+army-specific `loadout_payload_occurrences` target and compared with
+`unit_option_include_targets` (source position, target Army and
+canonical payload, quantity). The report distinguishes original
+Includes from their expanded published target count. Missing or
+duplicate targets and altered fields fail closed.
+This does **not** certify global-option Skill/Equipment/Weapon arrays,
+Characteristics, Orders, compatibility flags, raw Peripheral
+references (no unambiguous army-local namespace), derived Peripheral
+entity identities, unknown raw fields, API serialization, normal-browser
+display or rules semantics.
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:

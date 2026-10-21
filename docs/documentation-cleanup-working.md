@@ -731,3 +731,23 @@ Prefer targeted fixes rather than merging these.
   and real pinned-archive integration passed; this does not verify
   derived Peripheral entity identity, Unit-option Includes, raw
   unmodeled fields or player-facing API/browser rendering.
+- **Closeout pass 29, 2026-10-21:** Extended the pinned Army ZIP
+  archive-to-publication baseline to shared global Unit options.
+  Uses the lossless source merge to check cross-army shared Unit
+  identity; verifies option IDs, positions and core scalar fields in
+  published `unit_options`; and expands source Unit-option Includes
+  across every matching army-specific canonical loadout payload.
+  Compares the expanded identity, target and quantity against
+  `unit_option_include_targets`, including missing/duplicate target
+  detection. The pinned archive passed; a nonempty two-target fixture
+  rejects changed option costs, target payload drift, omitted expansion
+  and duplicate target rows. The pinned source has nonzero global
+  Unit-option Include occurrences; the integration test requires this
+  and checks that all expected published target expansions exist.
+  Nested global option item arrays, compatibility flags, raw
+  Peripherals and normal API/browser publication remain separate gates.
+- **Validation:** `tests/test_report_reference_baseline.py` —
+  **22 passed** including the actual pinned ZIP; Ruff on the tool
+  and tests **PASS**, Pyright **0 errors/0 warnings**, Markdownlint
+  **32 files/0 issues**, offline docs links **30 files/0 errors**.
+  The full suite and browser/source-to-API parity were not run.

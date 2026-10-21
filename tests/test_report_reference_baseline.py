@@ -23,6 +23,7 @@ from tools.report_reference_baseline import (
     _verify_published_peripherals_includes,
     _verify_published_profile_extras,
     _verify_published_profile_references,
+    _verify_published_unit_options,
     build_baseline,
     main,
     render_markdown,
@@ -197,6 +198,12 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
                 "units": [
                     {
                         "id": 10,
+                        "options": [{
+                            "id": 99, "name": "Shared global option",
+                            "points": 12, "swc": "0.5", "minis": 1,
+                            "disabled": False,
+                            "includes": [{"group": 7, "option": 9, "q": 2}],
+                        }],
                         "profileGroups": [{
                             "id": 7, "category": 5, "isc": "Main",
                             "profiles": [{
@@ -242,6 +249,93 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
             })
         )
     return archive
+
+
+def test_global_unit_option_include_expansion_rejects_drift(tmp_path: Path) -> None:
+    sources, _ = load_sources(_synthetic_army_archive(tmp_path))
+    with sqlite3.connect(":memory:") as db:
+        db.execute(
+            "CREATE TABLE unit_options "
+            "(unit_id, option_id, position, name, points, swc, minis, disabled)"
+        )
+        db.execute(
+            "INSERT INTO unit_options VALUES "
+            "(10, 99, 1, 'Shared global option', 12, '0.5', 1, 0)"
+        )
+        db.execute(
+            "CREATE TABLE loadout_payload_occurrences "
+            "(army_id, unit_id, group_id, option_id, loadout_payload_id)"
+        )
+        db.executemany(
+            "INSERT INTO loadout_payload_occurrences VALUES (?, ?, ?, ?, ?)",
+            [(101, 10, 7, 9, 50), (201, 10, 7, 9, 60)],
+        )
+        db.execute(
+            "CREATE TABLE unit_option_include_targets "
+            "(unit_id, option_id, position, target_army_id, "
+            "target_loadout_payload_id, quantity)"
+        )
+        db.executemany(
+            "INSERT INTO unit_option_include_targets VALUES (?, ?, ?, ?, ?, ?)",
+            [(10, 99, 1, 101, 50, 2), (10, 99, 1, 201, 60, 2)],
+        )
+        assert _verify_published_unit_options(db, sources) == {
+            "globalOptions": 1,
+            "sourceIncludeOccurrences": 1,
+            "publishedExpandedIncludeTargets": 2,
+        }
+        db.execute("UPDATE unit_options SET points = 42")
+        with pytest.raises(
+            ReferenceBaselineError, match="unit_options: source/published facts differ"
+        ):
+            _verify_published_unit_options(db, sources)
+        db.execute("UPDATE unit_options SET points = 12")
+        db.execute("UPDATE unit_options SET position = 2")
+        with pytest.raises(
+            ReferenceBaselineError, match="unit_options: source/published facts differ"
+        ):
+            _verify_published_unit_options(db, sources)
+        db.execute("UPDATE unit_options SET position = 1")
+        db.execute(
+            "UPDATE unit_option_include_targets SET quantity = 7 "
+            "WHERE target_army_id = 201"
+        )
+        with pytest.raises(
+            ReferenceBaselineError,
+            match="unit_option_include_targets: source/published facts differ",
+        ):
+            _verify_published_unit_options(db, sources)
+        db.execute(
+            "UPDATE unit_option_include_targets SET quantity = 2 "
+            "WHERE target_army_id = 201"
+        )
+        db.execute(
+            "UPDATE unit_option_include_targets SET target_loadout_payload_id = 61 "
+            "WHERE target_army_id = 201"
+        )
+        with pytest.raises(
+            ReferenceBaselineError,
+            match="unit_option_include_targets: source/published facts differ",
+        ):
+            _verify_published_unit_options(db, sources)
+        db.execute(
+            "UPDATE unit_option_include_targets SET target_loadout_payload_id = 60 "
+            "WHERE target_army_id = 201"
+        )
+        db.execute("DELETE FROM unit_option_include_targets WHERE target_army_id = 201")
+        with pytest.raises(
+            ReferenceBaselineError,
+            match="unit_option_include_targets: source/published identities differ",
+        ):
+            _verify_published_unit_options(db, sources)
+        db.execute(
+            "INSERT INTO unit_option_include_targets VALUES (10, 99, 1, 201, 60, 2)"
+        )
+        db.execute(
+            "INSERT INTO unit_option_include_targets VALUES (10, 99, 1, 201, 60, 2)"
+        )
+        with pytest.raises(ReferenceBaselineError, match="duplicate published identities"):
+            _verify_published_unit_options(db, sources)
 
 
 def test_published_peripherals_and_includes_reject_drift(tmp_path: Path) -> None:
@@ -666,6 +760,12 @@ def test_pinned_army_archive_nested_publication_when_available() -> None:
         "profile.includes", "loadout.includes",
     }
     assert sum(peripherals_includes.values()) > 0, peripherals_includes
+    global_options = evidence["matchedPublishedGlobalUnitOptions"]
+    assert global_options["globalOptions"] > 0
+    assert global_options["sourceIncludeOccurrences"] > 0, global_options
+    assert global_options["publishedExpandedIncludeTargets"] >= (
+        global_options["sourceIncludeOccurrences"]
+    )
 
 
 def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
@@ -692,6 +792,11 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
         "matchedPublishedPeripheralsIncludes": {
             "profile.peripherals": 13, "loadout.includes": 27,
         },
+        "matchedPublishedGlobalUnitOptions": {
+            "globalOptions": 34,
+            "sourceIncludeOccurrences": 5,
+            "publishedExpandedIncludeTargets": 9,
+        },
     }
     markdown = render_markdown(report)
     assert "59 archive JSON documents (including metadata.json)" in markdown
@@ -706,6 +811,8 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
     assert "loadout.characteristics=37, loadout.orders=26" in markdown
     assert "profile.characteristics=41" in markdown
     assert "loadout.includes=27, profile.peripherals=13" in markdown
+    assert "Global Unit-option parity: 34 options, 5 source Includes" in markdown
+    assert "9 army-expanded published targets" in markdown
 
 
 def test_baseline_requires_published_databases_and_verified_supplied_army_zip(
