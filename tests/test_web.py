@@ -817,6 +817,8 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'["Notes", true, "table-column--descriptor"]' in script
     assert b'fto.className = "developer-only table-column--descriptor";' in script
     assert b'note.className = "developer-only table-column--descriptor";' in script
+    assert b'if (!wildcard) appendVerifiedFtoSummary(name, member);' in script
+    assert b'member.resolution !== "army"' in script
     assert b'table.className = "data-table--reference";' in script
     assert b'name.className = "table-column--primary";' in script
     assert (

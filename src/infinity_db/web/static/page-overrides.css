@@ -286,7 +286,8 @@ html:not([data-developer-mode="true"])
 }
 
 .fireteam-member-note,
-.fireteam-member-developer {
+.fireteam-member-developer,
+.fireteam-member-fto-summary {
   display: block;
   margin-top: 5px;
   color: var(--color-text-secondary);

@@ -212,17 +212,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           implying legal Army-list membership. A pinned-source Chromium case
           verifies named parent links and share-state routes at 1440/390 px.
           This is a read-only reference, not roster legality validation.
-        - [ ] Review **Fireteam FTO eligibility** separately before exposing
-          the existing developer-only FTO Profiles column. It contains
-          member-specific, Army-local source markers and matching loadout
-          occurrences, not a generic Unit-wide entitlement. Classify the
-          `audit_fireteam_semantics.py` resolved, context-mismatch, and
-          no-matching-option cases; show only verified player-useful
-          eligibility (with Unit/profile links where unambiguous) and keep
-          unresolved or diagnostic provenance labeled. Preserve the Notes
-          column's developer-only policy unless an actual player-facing
-          rule gap requires reviewed publication. Test API-to-Fireteam
-          browser parity, desktop/mobile layout and wildcards before closure.
+        - [x] Expose **verified Army-local Fireteam FTO profiles** in normal
+          member rows without treating FTO as a generic Unit-wide entitlement.
+          The player-facing label requires a source Army member resolution,
+          source Unit and Unit link, an explicit FTO marker and matching
+          published loadout occurrences. The existing FTO Profiles and Notes
+          diagnostic columns remain developer-only; context mismatches and
+          no-matching-option cases do not gain inferred eligibility.
+          Injected Wildcard rows do not repeat the FTO summary, since
+          general Wildcard eligibility is a separate chart relationship.
+          The pinned `audit_fireteam_semantics.py` regression verifies
+          resolved/unresolved categories; a normal Chromium Fireteam chart
+          asserts API-to-visible-FTO parity, Unit links, no Wildcard
+          promotion and no viewport overflow at 1440/390 px.
+          Player-facing FTO labels do not validate complete roster legality.
         - [ ] Confirm whether the normal **Army overview** needs explicit
           Reinforcement parent/section relationships beyond Unit Explorer's
           now-accessible source-backed links; validate any new links with

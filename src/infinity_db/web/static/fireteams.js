@@ -170,6 +170,20 @@ function appendFtoDetails(cell, member) {
   }
 }
 
+function appendVerifiedFtoSummary(cell, member) {
+  // FTO eligibility is scoped to this Army-local member and its matching
+  // loadout occurrences. Unresolved chart annotations are not entitlements.
+  if (member.resolution !== "army" || member.source_unit_id == null
+      || !member.unit || !member.fto_marker || !(member.loadouts || []).length) return;
+  const marker = member.fto_marker === "generic" ? "FTO" : `FTO-${member.fto_marker}`;
+  const summary = document.createElement("span");
+  summary.className = "fireteam-member-fto-summary";
+  const names = member.loadouts.map((loadout) => loadout.name).filter(Boolean);
+  if (!names.length) return;
+  summary.textContent = `${marker} profile${names.length === 1 ? "" : "s"}: ${names.join("; ")}`;
+  cell.append(summary);
+}
+
 function renderTeam(team) {
   const article = document.createElement("article");
   article.className = "surface surface--subtle surface--raised fireteam-card";
@@ -228,6 +242,7 @@ function renderTeam(team) {
     name.className = "table-column--primary";
     name.append(memberName(member));
     if (wildcard) name.append(badge("Wildcard"));
+    if (!wildcard) appendVerifiedFtoSummary(name, member);
     const requirements = document.createElement("td");
     requirements.className = "table-column--descriptor fireteam-member-requirements";
     appendMemberDetails(requirements, member);
