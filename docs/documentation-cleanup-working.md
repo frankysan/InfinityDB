@@ -788,3 +788,23 @@ Prefer targeted fixes rather than merging these.
   Markdownlint **32 files/0 issues** and offline
   documentation links **30 files/0 errors**.
   Full suite and live Chromium were not run.
+- **Closeout pass 32, 2026-10-21:** Extended the pinned multi-source Unit
+  API regression to Skill classification provenance. Reconstructs
+  source shared Skills, including the single-loadout promotion, before
+  comparing the API's reviewed Skill, Equipment, Training, attribute
+  override and source-marker projections. Independently verifies the
+  shared and army-specific profile/loadout categories preserve source
+  identity, quantity and Extras; native Equipment wins when a projected
+  Skill has an identical display identity. Nonempty synthetic cases
+  exercise all four special categories and reject missing buckets,
+  changed quantities and altered Extras. This covers a bounded
+  cross-Army cohort, not all player-facing Skill transformations,
+  raw malformed parameter semantics or browser display.
+- **Validation:** 20 tests passed across
+  `tests/test_unit_source_api_parity.py` (5),
+  `tests/test_unit_source_options_notes.py` (2),
+  `tests/test_non_skill_army_presentation.py` (10) and
+  `tests/test_skill_config.py` (3).
+  Ruff **PASS**, Pyright **0 errors/0 warnings**,
+  Markdownlint **32 files/0 issues**, documentation links
+  **30 files/0 errors**. Full suite and live Chromium not run.

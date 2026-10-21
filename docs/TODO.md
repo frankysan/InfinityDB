@@ -192,6 +192,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     distinct-source-ID merges into one army-local profile/loadout;
     do not claim that path as covered. Full merged variant/API and
     browser completeness remain open.
+  - [x] Validate bounded cross-Army Skill presentation provenance from
+    untouched source API buckets through General Profile shared Skills
+    and army-specific profile/loadout Skill presentation. Verify ordered
+    IDs, quantities and Extras after the maintained equipment/training/
+    attribute-override/source-marker classification; preserve native
+    Equipment in duplicate display cases. Synthetic mutation fixtures
+    cover all four non-Skill classifications and fail on missing rows,
+    quantity drift or altered Extra IDs. Full classification coverage
+    and rendered browser parity remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

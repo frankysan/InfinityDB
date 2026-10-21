@@ -1055,12 +1055,21 @@ representative MOV/attribute statistics, BS/ARM/VITA difference labels,
 shared Weapons and loadout-specific Weapon deltas. Shared source
 Equipment must survive the Skill-to-Equipment reclassification overlay,
 and nonshared Equipment must remain in each army-specific presentation.
+For this merged cohort, the regression also independently reconstructs
+source shared Skills (including the sole-loadout rule) and source-specific
+Skills before presentation classification. It verifies that normal Unit
+JSON retains the original Skill IDs, quantities and Extras in the reviewed
+`skills`, `equipment`, `training`, `attribute_overrides` and
+`source_markers` buckets. A native Equipment row takes precedence
+when a projected Skill has the same display identity and variants.
+Nonempty synthetic cases cover all four non-Skill classifications and
+fail on missing categories, altered quantities or Extra IDs.
 The current pinned archive has no eligible case where distinct source Unit
 IDs collapse into a single army-local profile/loadout; this test does
 not claim to exercise that scenario. The regression requires a
 nonempty multi-Army sample with differing stats and shared/specific
-item evidence. It is not full-catalog parity, every transformed
-Skill bucket, or browser acceptance. The existing
+item evidence. It is not full-catalog Skill classification coverage,
+all combined-source variants, or browser acceptance. The existing
 `test_unit_source_options_notes.py` already checks source-to-API
 parity for global Unit options, Orders and expanded Includes.
 
