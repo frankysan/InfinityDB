@@ -136,3 +136,123 @@ def test_pinned_weapon_modes_rules_links_and_citations(
         ), (slug, width)
     finally:
         page.close()
+
+@pytest.fixture(scope="module")
+def multi_profile_weapons(origin: str) -> list[dict[str, Any]]:
+    """Discover all multi-profile Weapons from the published API."""
+    import json
+    from urllib.request import urlopen
+
+    def get(path: str) -> dict[str, Any]:
+        with urlopen(f"{origin}{path}", timeout=15) as response:
+            assert response.status == 200, path
+            return json.load(response)
+
+    details = []
+    for item in get("/api/weapons")["items"]:
+        detail = get(f"/api/weapons/{item['slug']}")
+        profiles = [
+            profile for variant in detail.get("weapon_variants", [])
+            for profile in variant.get("profiles", [])
+        ]
+        assert len(profiles) == len(detail["profiles"]), item["slug"]
+        if len(profiles) > 1:
+            details.append(detail)
+    assert len(details) >= 2, "Pinned catalog unexpectedly lacks multi-profile Weapons"
+    return details
+
+
+def _saving_display(profile: dict[str, Any]) -> str:
+    saving = profile.get("saving")
+    if saving is None or str(saving).strip() in ("", "-", "--"):
+        return "--"
+    return " × ".join(
+        str(value) for value in (saving, profile.get("saving_num"))
+        if value is not None and value != ""
+    )
+
+
+def _stat_display(value: Any) -> str:
+    return "—" if value is None or value == "" else str(value)
+
+
+def _ammunition_display(profile: dict[str, Any]) -> str:
+    if profile.get("ammunition") == 0:
+        return "--"
+    if isinstance(profile.get("ammunition_parts"), list):
+        return "".join(part["text"] for part in profile["ammunition_parts"])
+    return _stat_display(profile.get("ammunition"))
+
+
+def test_all_published_multi_profile_weapon_statlines_render_on_mobile(
+    origin: str, chrome: Any, multi_profile_weapons: list[dict[str, Any]],
+) -> None:
+    """All published multi-profile source rows must reach their own rendered card."""
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for weapon in multi_profile_weapons:
+            slug = weapon["slug"]
+            expected = [
+                [
+                    profile.get("mode") or profile.get("name") or variant["name"],
+                    _ammunition_display(profile),
+                    _stat_display(profile.get("burst")),
+                    _stat_display(profile.get("damage")),
+                    _saving_display(profile),
+                    profile.get("profile") or "",
+                ]
+                for variant in weapon["weapon_variants"]
+                for profile in variant["profiles"]
+            ]
+            page.goto(f"{origin}/weapons/{slug}", wait_until="domcontentloaded")
+            page.locator("#item-content").wait_for(state="visible", timeout=15000)
+            actual = page.locator(".weapon-variant .weapon-profile").evaluate_all(
+                """(cards) => cards.map((card) => {
+                  const cell = (label) => card.querySelector(
+                    '.weapon-statline tbody td[data-label="' + label + '"]'
+                  )?.textContent ?? '';
+                  const profileRow = [...card.querySelectorAll('.weapon-data-row')].find(
+                    row => row.querySelector('.weapon-data-heading')?.textContent === 'Profile'
+                  );
+                  return [
+                    card.querySelector('h4')?.textContent ?? '',
+                    cell('Ammunition'), cell('B'), cell('PS'), cell('Saving'),
+                    profileRow?.querySelector('.weapon-data-value')?.textContent ?? ''
+                  ];
+                })"""
+            )
+            assert actual == expected, (slug, actual, expected)
+            source_profiles = [
+                profile for variant in weapon["weapon_variants"]
+                for profile in variant["profiles"]
+            ]
+            for card, profile in zip(
+                page.locator(".weapon-variant .weapon-profile").all(),
+                source_profiles,
+                strict=True,
+            ):
+                parts = profile.get("ammunition_parts")
+                if not isinstance(parts, list):
+                    continue
+                expected_links = []
+                for part in parts:
+                    reference = part.get("public_reference") or {}
+                    href = reference.get("href")
+                    if not href and reference.get("catalog") and reference.get("id"):
+                        href = f"/{reference['catalog']}/{reference['id']}"
+                    if href:
+                        expected_links.append((part["text"], href))
+                links = card.locator('.weapon-statline td[data-label="Ammunition"] a')
+                actual_links = [
+                    (link.text_content(), link.get_attribute("href"))
+                    for link in links.all()
+                ]
+                assert actual_links == expected_links, (slug, profile["mode"])
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+            ), slug
+        assert not errors, errors
+    finally:
+        page.close()

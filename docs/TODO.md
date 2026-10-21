@@ -499,6 +499,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Reconcile representative single/multi-mode, combined-ammunition, Combined Saving Roll,
       and conditional/sentinel profiles through storage, API, and browser output. Verify the
       complete published profile set against the inventory, not only representative examples.
+      - [x] In normal Chromium at 390 px, discover every **multi-profile Weapon**
+        from the published catalog API and compare all rendered mode titles,
+        Ammunition text/component links, B, PS, Saving notation and optional
+        object-profile text against the same API. The dynamic
+        `test_all_published_multi_profile_weapon_statlines_render_on_mobile`
+        also checks catalog/detail profile cardinality, JavaScript errors
+        and page overflow. This is published API-to-browser parity, not
+        independent PDF/source-chart reconciliation or single-profile
+        whole-catalog acceptance.
   - [ ] Add a generated Deployables profile reference from Weapon/Equipment
     metadata plus curated corrections: ARM/BTS/STR/S for the deployed object,
     originating item/rule, and reverse Unit/loadout uses. Keep deployed-object
