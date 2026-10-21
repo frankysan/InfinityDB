@@ -751,3 +751,23 @@ Prefer targeted fixes rather than merging these.
   and tests **PASS**, Pyright **0 errors/0 warnings**, Markdownlint
   **32 files/0 issues**, offline docs links **30 files/0 errors**.
   The full suite and browser/source-to-API parity were not run.
+- **Closeout pass 30, 2026-10-21:** Added the maintained
+  `tests/test_unit_source_api_parity.py` regression in the web test
+  section. It requests normal Unit detail JSON for published logical
+  Units with a unique source Unit and Army membership, then matches
+  identifiable profile/loadout source coordinates to reusable published
+  payloads. All six Skill/Equipment/Weapon groups compare ordered
+  source IDs, quantities and ordered Extras; candidate and comparison
+  thresholds prevent vacuous success. Ambiguous logical merges or
+  duplicate source item tuples are not misclassified as API loss.
+  Existing Unit-option source API tests already cover global cost,
+  Orders and Includes. This is bounded JSON parity, not a proof of
+  all-Unit API completeness or browser visibility.
+- **Validation:** 15 focused tests passed across
+  `tests/test_unit_source_api_parity.py` (1),
+  `tests/test_unit_source_options_notes.py` (2),
+  `tests/test_non_skill_army_presentation.py` (10), and
+  `tests/test_test_sections.py` (2). Ruff on the new test **PASS**,
+  Pyright **0 errors/0 warnings**, Markdownlint **32 files/0 issues**,
+  documentation links **30 files/0 errors**. The full suite and live
+  Chromium were not run.

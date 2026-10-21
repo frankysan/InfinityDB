@@ -1035,6 +1035,24 @@ Characteristics, Orders, compatibility flags, raw Peripheral
 references (no unambiguous army-local namespace), derived Peripheral
 entity identities, unknown raw fields, API serialization, normal-browser
 display or rules semantics.
+
+A separate maintained `tests/test_unit_source_api_parity.py` checks
+**published payload-to-Unit-API parity** for an intentionally bounded
+cohort of logical Units with a single source Unit and Army membership.
+It reads the tracked application database, requests normal
+`/api/units/<slug>` responses, matches individually identifiable
+profile/loadout occurrences by source group and profile/option ID, and
+compares ordered Skill/Equipment/Weapon IDs, quantities and ordered Extra IDs
+against the six published reusable payload relationships. The regression
+requires at least 12 candidate Units, 24 matched contexts, nonempty
+coverage in all six categories and actual Extra evidence. Ambiguous
+contexts and item duplicates intentionally coalesced by the logical
+presentation layer are excluded from strict cardinality comparison.
+This is not full-catalog parity, a check of every transformed bucket,
+or browser acceptance. The existing `test_unit_source_options_notes.py`
+already checks source-to-API parity for global Unit options, Orders and
+expanded Includes.
+
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:

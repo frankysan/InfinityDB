@@ -175,6 +175,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Pinned ZIP integration and nonempty two-Army synthetic mutation
     tests pass. Global-option nested item arrays, compatible/habilities
     fields, raw Peripherals, API output and browser rendering remain open.
+  - [x] Add a bounded merge-aware published-payload-to-Unit-API
+    regression for source-unique logical Units. Verify exact ordered
+    profile/loadout Skill, Equipment and Weapon IDs, quantities and
+    Extra IDs in the normal JSON response. Require nonempty evidence
+    across all six categories, at least 12 Units and 24 source-matched
+    contexts; skip ambiguous logical coalescing rather than claiming
+    missing data. Existing source-option API regressions cover global
+    Orders/Includes. Full-source API parity, transformed buckets and
+    browser visibility remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and
