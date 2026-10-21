@@ -387,7 +387,10 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert b'href="/changes" aria-current="page"' in body
     assert b'id="changes-unreleased"' in body
     assert b"<h2>Unreleased</h2>" in body
-    assert b"Weapon profiles now offer expandable, linked explanations" in body
+    assert (
+        b"Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties"
+        in body
+    )
     assert b'id="changes-0-10-1"' in body
     assert b"<h2>Version 0.10.1</h2>" in body
     assert b'id="changes-0-10-0"' in body
