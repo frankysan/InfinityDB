@@ -182,6 +182,10 @@ DOM_SNAPSHOT = """() => {
       name: section.querySelector('summary')?.textContent?.trim() || '',
       profiles: segments(section, '.profile-details-table'),
       loadouts: segments(section, '.loadout-table'),
+      composite: segments(section, '.composite-option-table'),
+      anchors: [...section.querySelectorAll('.loadout-anchor[id]')].map(
+        (item) => item.id
+      ),
     })),
     skillHrefs: [...document.querySelectorAll('a[href^="/skills/"]')].map(
       (a) => a.getAttribute('href')
@@ -212,6 +216,74 @@ def _visible_distance_extras(unit: dict[str, Any]) -> int:
     )
 
 
+def assert_relationship_rows(
+    rows: list[dict[str, Any]], source: dict[str, Any],
+    anchor_scope: str, anchors: set[str], context: str,
+) -> dict[str, int]:
+    """Validate contextual relations in the correct row and Army, not page-wide."""
+    result = {"includes": 0, "peripherals": 0, "controllerTargets": 0}
+    expected_includes = source.get("includes") or []
+    expected_peripherals = source.get("peripherals") or []
+    expected_access = source.get("peripheral_access") or []
+    for label, has_items in (
+        ("Includes", bool(expected_includes)),
+        ("Peripherals", bool(expected_peripherals)),
+        ("Controller access", bool(expected_access)),
+    ):
+        matching = [row for row in rows if row["heading"].strip().startswith(label)]
+        if bool(matching) != has_items:
+            raise AssertionError(f"{context}: unexpected or missing {label} row")
+        if has_items and len(matching) != 1:
+            raise AssertionError(f"{context}: duplicate {label} row")
+    if expected_includes:
+        row = next(row for row in rows if row["heading"].strip().startswith("Includes"))
+        for item in expected_includes:
+            anchor = f"loadout-{anchor_scope}-{item['loadout_payload_id']}"
+            href = f"#{anchor}"
+            qty = item.get("quantity")
+            suffix = f" ×{qty}" if qty is not None and int(qty) != 1 else ""
+            title = f"{item.get('name') or 'Loadout'}{suffix}"
+            if not any(
+                link["href"] == href and link["text"] == title
+                for link in row["links"]
+            ):
+                raise AssertionError(f"{context}: missing Include link {href} ({title})")
+            if anchor not in anchors:
+                raise AssertionError(f"{context}: Include target missing {anchor}")
+            result["includes"] += 1
+    if expected_peripherals:
+        row = next(row for row in rows if row["heading"].strip().startswith("Peripherals"))
+        for item in expected_peripherals:
+            qty = item.get("quantity")
+            suffix = f" ×{qty}" if qty is not None and int(qty) != 1 else ""
+            label = item.get("type_label") or item.get("type_id")
+            type_suffix = f" ({label})" if label else ""
+            title = f"{item.get('name') or 'Peripheral'}{suffix}{type_suffix}"
+            if title not in row["text"]:
+                raise AssertionError(f"{context}: missing Peripheral {title}")
+            result["peripherals"] += 1
+    if expected_access:
+        row = next(
+            row for row in rows if row["heading"].strip().startswith("Controller access")
+        )
+        for access in expected_access:
+            label = access.get("type_label") or str(access.get("type_id"))
+            if f"{label}:" not in row["text"]:
+                raise AssertionError(f"{context}: missing Controller access type {label}")
+            for target in access.get("targets") or []:
+                route = quote(str(target.get("slug") or target["id"]), safe="")
+                name = target.get("name") or f"Unit #{target['id']}"
+                if not any(
+                    link["href"] == f"/units/{route}" and link["text"] == name
+                    for link in row["links"]
+                ):
+                    raise AssertionError(
+                        f"{context}: missing Controller target link /units/{route}"
+                    )
+                result["controllerTargets"] += 1
+    return result
+
+
 def assert_unit_dom(
     unit: dict[str, Any], dom: dict[str, Any], slug: str,
     distance_unit: str = "in",
@@ -228,6 +300,7 @@ def assert_unit_dom(
     counts = {
         "shared": 0, "profiles": 0, "loadouts": 0,
         "distanceExtras": _visible_distance_extras(unit),
+        "includes": 0, "peripherals": 0, "controllerTargets": 0,
     }
     for index, entry in enumerate(general):
         counts["shared"] += assert_rendered_items(
@@ -253,6 +326,10 @@ def assert_unit_dom(
             )
         index, rendered = candidates[0]
         consumed.add(index)
+        anchor_scope = "-".join([
+            str(army["id"]), *(str(flag) for flag in army.get("availability_flags") or [])
+        ])
+        anchors = set(rendered.get("anchors") or [])
         for kind in ("profiles", "loadouts"):
             if len(rendered[kind]) != len(army[kind]):
                 raise AssertionError(
@@ -260,12 +337,32 @@ def assert_unit_dom(
                     f"{len(rendered[kind])} != API {len(army[kind])}"
                 )
             for offset, context in enumerate(army[kind]):
+                context_label = f"{slug}/{army['name']}/{kind}#{offset}"
                 counts[kind] += assert_rendered_items(
                     rendered[kind][offset],
                     context.get("specific_items") or {},
-                    f"{slug}/{army['name']}/{kind}#{offset}",
-                    distance_unit,
+                    context_label, distance_unit,
                 )
+                relations = assert_relationship_rows(
+                    rendered[kind][offset], context, anchor_scope,
+                    anchors, context_label,
+                )
+                for key, value in relations.items():
+                    counts[key] += value
+        options = army.get("composite_options") or []
+        composite = rendered.get("composite") or []
+        if len(composite) != len(options):
+            raise AssertionError(
+                f"{slug}/{army['name']}: composite option DOM count "
+                f"{len(composite)} != API {len(options)}"
+            )
+        for offset, (rows, option) in enumerate(zip(composite, options, strict=True)):
+            label = f"{slug}/{army['name']}/composite#{offset}"
+            relations = assert_relationship_rows(
+                rows, option, anchor_scope, anchors, label,
+            )
+            for key, value in relations.items():
+                counts[key] += value
     if len(consumed) != len(rendered_armies):
         raise AssertionError(f"{slug}: unexpected Army sections in DOM")
     for general_or_army in [

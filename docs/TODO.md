@@ -175,6 +175,33 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       - [ ] Reconcile normal Unit/Army/Fireteam browser reachability and applicability
         for these relationships (including Reinforcement pool context); classify any
         missing, misleading or deliberately deferred behavior with source evidence.
+        - [x] Extend normal Unit Chromium acceptance to Army-scoped profile/loadout
+          and composite-option Includes. Four distinct source-backed Units at 1440
+          and 390 px passed **8/8 pages**, verifying **232 Include links** against
+          the same Army's actual loadout anchors, plus correct row placement.
+          Empty and malformed link/quantity/Controller-access cases are checked
+          separately in hermetic regressions. This is bounded browser parity,
+          not all-Unit or gameplay-list validation.
+        - [ ] **Publish source-only Peripheral attachment labels for ordinary Unit
+          reference.** The pinned Army publication contains **818**
+          `option_peripherals` occurrences but zero
+          `application_peripheral_sources`, `application_peripheral_entities`,
+          and Controller-access rows. The Unit API currently inner-joins the
+          empty materialized catalog, so these attachments are omitted from the
+          normal Unit browser. The original `peripherals` source-definition
+          table exists only in the paired raw database, **not** in the runtime
+          database; simply joining it from the Unit API produces HTTP 503.
+          Design a deterministic source-definition projection into published
+          storage, preserve Army-local source identity/name/quantity and existing
+          reviewed mappings, and show source labels without inventing a
+          Peripheral type or Controller assignment. Cover importer/publication,
+          API, normal browser and mismatch/unknown-source cases before closing.
+        - [ ] Confirm the user-facing scope of Reinforcement parent/pool
+          relationships and Fireteam FTO source details: the current Unit
+          parentage section and Fireteam FTO column are developer-only.
+          Distinguish deliberately deferred roster-building or diagnostic
+          data from necessary N5 player reference, and test any accepted
+          player-facing exposure and cross-page links before closing.
     - [ ] Obtain independent human visual acceptance if required for the 1.0
       release; agent-reviewed screenshots and automated browser assertions
       are evidence, not a human sign-off.

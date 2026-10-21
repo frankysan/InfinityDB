@@ -22,6 +22,7 @@ from tools.verify_unit_skill_presentation_browser import (
     _distance_extra,
     _settings_script,
     _unit_api_url,
+    assert_relationship_rows,
     assert_rendered_items,
     assert_unit_dom,
     expected_items,
@@ -61,7 +62,7 @@ def _unit() -> tuple[dict, dict]:
             }},
         ],
         "armies": [{
-            "name": "Example Army", "availability_badges": [{"label": "Mercenary"}],
+            "id": 101, "name": "Example Army", "availability_badges": [{"label": "Mercenary"}],
             "presentation_visible": True,
             "profiles": [{
                 "specific_items": {
@@ -208,6 +209,111 @@ def _source_backed_optional_case(
         f"No source-backed {flag} Unit with an observable filter effect "
         f"among {len(candidates)} candidates"
     )
+
+
+def _relationship_cohort(database_path: Path) -> tuple[str, ...]:
+    """Pick occupied, source-backed relation paths absent from the Skill cohort."""
+    queries = (
+        "SELECT lu.slug FROM profile_occurrence_includes AS x "
+        "JOIN logical_unit_sources AS s ON s.source_unit_id = x.unit_id "
+        "JOIN logical_units AS lu ON lu.id = s.logical_unit_id",
+        "SELECT lu.slug FROM loadout_occurrence_includes AS x "
+        "JOIN logical_unit_sources AS s ON s.source_unit_id = x.unit_id "
+        "JOIN logical_units AS lu ON lu.id = s.logical_unit_id",
+        "SELECT lu.slug FROM unit_option_include_targets AS x "
+        "JOIN logical_unit_sources AS s ON s.source_unit_id = x.unit_id "
+        "JOIN logical_units AS lu ON lu.id = s.logical_unit_id",
+        "SELECT lu.slug FROM option_peripherals AS x "
+        "JOIN logical_unit_sources AS s ON s.source_unit_id = x.unit_id "
+        "JOIN logical_units AS lu ON lu.id = s.logical_unit_id",
+    )
+    selected: list[str] = []
+    with sqlite3.connect(database_path) as db:
+        for query in queries:
+            candidates = [
+                str(row[0]) for row in db.execute(
+                    f"{query} WHERE lu.slug IS NOT NULL ORDER BY lu.slug"
+                )
+            ]
+            assert candidates, f"Unoccupied contextual relationship: {query}"
+            slug = next((slug for slug in candidates if slug not in selected), None)
+            assert slug, f"No distinct candidate for {query}"
+            selected.append(slug)
+    return tuple(selected)
+
+
+def test_source_backed_relationship_cohort_is_distinct() -> None:
+    root = Path(__file__).resolve().parents[1]
+    cohort = _relationship_cohort(root / "data/generated/infinity.db")
+    assert len(cohort) == len(set(cohort)) == 4
+
+
+def test_live_chromium_contextual_relationship_cohort() -> None:
+    """Check actual source-present Includes, Peripherals and access links."""
+    pytest.importorskip("playwright.sync_api")
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+
+    class ThreadedServer(ThreadingMixIn, WSGIServer):
+        daemon_threads = True
+
+    class QuietHandler(WSGIRequestHandler):
+        def log_message(self, format: str, *args: object) -> None:
+            pass
+
+    server = make_server(
+        "127.0.0.1", 0, app, server_class=ThreadedServer,
+        handler_class=QuietHandler,
+    )
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        slugs = _relationship_cohort(root / "data/generated/infinity.db")
+        try:
+            evidence = verify(
+                f"http://127.0.0.1:{server.server_port}",
+                slugs=slugs, widths=(1440, 390), channel="chrome",
+            )
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or (
+                "chrome" in str(exc).lower() and "not found" in str(exc).lower()
+            ):
+                pytest.skip(f"Chromium browser unavailable: {exc}")
+            raise
+        assert evidence["passed"] == evidence["total"] == 2 * len(slugs), (
+            slugs,
+            [item for item in evidence["results"] if item["status"] != "passed"],
+        )
+        totals = {
+            key: sum(item["counts"][key] for item in evidence["results"])
+            for key in ("includes", "peripherals", "controllerTargets")
+        }
+        assert totals["includes"] > 0, (slugs, totals)
+        with sqlite3.connect(root / "data/generated/infinity.db") as db:
+            peripheral_counts = {
+                table: db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+                for table in (
+                    "option_peripherals", "application_peripheral_sources",
+                    "application_peripheral_entities",
+                    "application_peripheral_controller_access",
+                )
+            }
+        assert peripheral_counts["option_peripherals"] == 818
+        assert peripheral_counts["application_peripheral_sources"] == 0
+        assert peripheral_counts["application_peripheral_entities"] == 0
+        assert totals["peripherals"] == 0, (slugs, totals, peripheral_counts)
+        # Raw Peripheral occurrences cannot be resolved without publishing
+        # source definitions or reviewed canonical mappings; classify as an
+        # open publication gap rather than guessing their type in this gate.
+        # Controller-access rows are also empty in the pinned publication.
+        assert peripheral_counts["application_peripheral_controller_access"] == 0
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
 
 
 def test_optional_mode_source_selectors_are_nonempty() -> None:
@@ -498,10 +604,46 @@ def test_rendered_distance_extra_must_match_selected_unit() -> None:
         )
 
 
+def test_contextual_relationship_rows_fail_closed_on_missing_links_and_targets() -> None:
+    source = {
+        "includes": [{
+            "loadout_payload_id": 42, "name": "Heavy Option", "quantity": 2,
+        }],
+        "peripherals": [{
+            "name": "Servant", "quantity": 2, "type_label": "Peripheral (Servant)",
+        }],
+        "peripheral_access": [{
+            "type_label": "Peripheral (Servant)",
+            "targets": [{"id": 8, "slug": "servant", "name": "Servant Unit"}],
+        }],
+    }
+    rows = [
+        _row("Includes", "Heavy Option ×2", href="#loadout-101-42"),
+        _row("Peripherals", "Servant ×2 (Peripheral (Servant))"),
+        _row("Controller access", "Peripheral (Servant): Servant Unit", href="/units/servant"),
+    ]
+    rows[2]["links"][0]["text"] = "Servant Unit"
+    assert assert_relationship_rows(
+        rows, source, "101", {"loadout-101-42"}, "fixture",
+    ) == {"includes": 1, "peripherals": 1, "controllerTargets": 1}
+    for altered_rows, anchors, error in (
+        (rows, set(), "Include target missing"),
+        ([_row("Includes", "Heavy Option ×2", href="#loadout-999-42"), *rows[1:]],
+         {"loadout-101-42"}, "missing Include link"),
+        ([rows[0], _row("Peripherals", "Other"), rows[2]],
+         {"loadout-101-42"}, "missing Peripheral"),
+        ([rows[0], rows[1], _row("Controller access", "Other")],
+         {"loadout-101-42"}, "missing Controller access type"),
+    ):
+        with pytest.raises(AssertionError, match=error):
+            assert_relationship_rows(altered_rows, source, "101", anchors, "fixture")
+
+
 def test_browser_dom_checks_scoped_shared_and_army_local_rows() -> None:
     unit, dom = _unit()
     assert assert_unit_dom(unit, dom, "unit") == {
         "shared": 2, "profiles": 2, "loadouts": 2, "distanceExtras": 0,
+        "includes": 0, "peripherals": 0, "controllerTargets": 0,
     }
 
 
