@@ -108,12 +108,62 @@ def _verify_army_archive_sources(
             f"{versions!r} != {metadata.get('sourceVersions')!r}"
         )
     source_ids = {s.faction_id for s in sources}
-    stored_ids = {int(row[0]) for row in army.execute("SELECT id FROM army_lists")}
+    stored = {
+        int(row[0]): {
+            "version": row[1], "kind": row[2],
+            "source_file": row[3], "source_sha256": row[4],
+        }
+        for row in army.execute(
+            "SELECT id, version, kind, source_file, source_sha256 FROM army_lists"
+        )
+    }
+    stored_ids = set(stored)
     if source_ids != stored_ids:
         raise ReferenceBaselineError(
             f"Published Army list identities differ from the source archive: "
             f"missing={sorted(source_ids - stored_ids)!r}, "
             f"extra={sorted(stored_ids - source_ids)!r}"
+        )
+    expected_memberships: list[tuple[int, int, int]] = []
+    for source in sources:
+        fields = {
+            "version": source.data["version"],
+            "kind": "army" if "reinforcements" in source.data else "reinforcement",
+            "source_file": source.filename,
+            "source_sha256": source.sha256,
+        }
+        if stored[source.faction_id] != fields:
+            raise ReferenceBaselineError(
+                f"Army {source.faction_id} published source provenance differs "
+                f"from the archived source: expected {fields!r}, "
+                f"actual {stored[source.faction_id]!r}"
+            )
+        unit_ids: set[int] = set()
+        for position, unit in enumerate(source.data["units"], start=1):
+            unit_id = unit.get("id") if isinstance(unit, dict) else None
+            if type(unit_id) is not int or unit_id in unit_ids:
+                raise ReferenceBaselineError(
+                    f"Army {source.faction_id} has invalid or duplicate "
+                    f"source Unit ID at position {position}: {unit_id!r}"
+                )
+            unit_ids.add(unit_id)
+            expected_memberships.append((source.faction_id, unit_id, position))
+    published_memberships = [
+        (int(row[0]), int(row[1]), int(row[2]))
+        for row in army.execute(
+            "SELECT army_id, unit_id, position FROM army_units "
+            "ORDER BY army_id, position, unit_id"
+        )
+    ]
+    expected_memberships.sort()
+    published_memberships.sort()
+    if expected_memberships != published_memberships:
+        expected_set = set(expected_memberships)
+        published_set = set(published_memberships)
+        raise ReferenceBaselineError(
+            "Published Army Unit memberships/positions differ from raw source: "
+            f"missing={sorted(expected_set - published_set)[:10]!r}, "
+            f"extra={sorted(published_set - expected_set)[:10]!r}"
         )
     return {
         "status": "source-identities-match-published-army-lists",
@@ -121,6 +171,8 @@ def _verify_army_archive_sources(
         "sourceFileCount": len(sources),
         "sourceVersions": versions,
         "matchedArmyListIds": len(source_ids),
+        "matchedSourceProvenanceRows": len(sources),
+        "matchedUnitMembershipOccurrences": len(expected_memberships),
     }
 
 
@@ -507,7 +559,11 @@ def render_markdown(report: dict[str, Any]) -> str:
              f"{snapshot['sourceIdentityEvidence']['archiveJsonDocuments']} archive JSON documents "
              f"(including metadata.json), "
              f"{snapshot['sourceIdentityEvidence']['matchedArmyListIds']} matched "
-             "published Army-list IDs with matching version counts."]
+             "published Army-list IDs with matching version counts, "
+             f"{snapshot['sourceIdentityEvidence']['matchedSourceProvenanceRows']} "
+             "matched per-file provenance records and "
+             f"{snapshot['sourceIdentityEvidence']['matchedUnitMembershipOccurrences']} "
+             "ordered Unit membership occurrences."]
             if snapshot.get("sourceIdentityEvidence") else []
         ),
         f"- Published Army database SHA-256: `{snapshot['publishedDatabaseSha256']}`.",

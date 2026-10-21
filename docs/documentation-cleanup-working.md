@@ -659,3 +659,12 @@ Prefer targeted fixes rather than merging these.
   This is source identity coverage only, not field-level data or
   final browser completeness. The actual pinned ZIP still requires
   an explicit verification rerun.
+- **Closeout pass 23, 2026-10-21:** Strengthened the optional
+  archive-to-publication gate to compare per-source filename, SHA-256,
+  version, Army/reinforcement classification and each ordered Unit
+  membership from the pinned ZIP with `army_lists` and `army_units`
+  in the published database. It rejects altered provenance, missing
+  or extra Unit occurrences, changed positions and malformed or
+  duplicate source Unit identities. This records bounded
+  source-to-storage parity, not source-field completeness, and
+  must be rerun using the actual final release inputs.

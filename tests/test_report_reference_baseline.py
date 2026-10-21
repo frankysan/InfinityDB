@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 import pytest
 
+from infinity_army_data.merge import load_sources
 from tools.report_reference_baseline import (
     ReferenceBaselineError,
     _artifact_evidence,
@@ -186,10 +187,17 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
     with zipfile.ZipFile(archive, "w") as output:
         output.writestr("metadata.json", '{"source":"fixture"}')
         output.writestr(
-            "101-first.json", json.dumps({"version": "7.26246.158", "units": []})
+            "101-first.json", json.dumps({
+                "version": "7.26246.158",
+                "units": [{"id": 10}, {"id": 11}],
+                "reinforcements": 201,
+            })
         )
         output.writestr(
-            "201-second.json", json.dumps({"version": "7.26246.159", "units": []})
+            "201-second.json", json.dumps({
+                "version": "7.26246.159",
+                "units": [{"id": 11}],
+            })
         )
     return archive
 
@@ -201,8 +209,29 @@ def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path)
         "sourceVersions": {"7.26246.158": 1, "7.26246.159": 1},
     }
     with sqlite3.connect(":memory:") as db:
-        db.execute("CREATE TABLE army_lists (id INTEGER PRIMARY KEY)")
-        db.executemany("INSERT INTO army_lists (id) VALUES (?)", [(101,), (201,)])
+        db.execute(
+            "CREATE TABLE army_lists (id INTEGER PRIMARY KEY, version TEXT, "
+            "kind TEXT, source_file TEXT, source_sha256 TEXT)"
+        )
+        db.execute(
+            "CREATE TABLE army_units (army_id INTEGER, unit_id INTEGER, position INTEGER)"
+        )
+        sources, _ = load_sources(archive)
+        db.executemany(
+            "INSERT INTO army_lists VALUES (?, ?, ?, ?, ?)",
+            [
+                (
+                    source.faction_id, source.data["version"],
+                    "army" if "reinforcements" in source.data else "reinforcement",
+                    source.filename, source.sha256,
+                )
+                for source in sources
+            ],
+        )
+        db.executemany(
+            "INSERT INTO army_units VALUES (?, ?, ?)",
+            [(101, 10, 1), (101, 11, 2), (201, 11, 1)],
+        )
         evidence = _verify_army_archive_sources(archive, metadata, db)
         assert evidence == {
             "status": "source-identities-match-published-army-lists",
@@ -210,6 +239,8 @@ def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path)
             "sourceFileCount": 2,
             "sourceVersions": metadata["sourceVersions"],
             "matchedArmyListIds": 2,
+            "matchedSourceProvenanceRows": 2,
+            "matchedUnitMembershipOccurrences": 3,
         }
         with pytest.raises(ReferenceBaselineError, match="source count differs"):
             _verify_army_archive_sources(
@@ -219,6 +250,17 @@ def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path)
             _verify_army_archive_sources(
                 archive, {**metadata, "sourceVersions": {"unknown": 2}}, db
             )
+        db.execute("UPDATE army_lists SET source_sha256 = ? WHERE id = 201", ("bad",))
+        with pytest.raises(ReferenceBaselineError, match="source provenance differs"):
+            _verify_army_archive_sources(archive, metadata, db)
+        db.execute(
+            "UPDATE army_lists SET source_sha256 = ? WHERE id = 201",
+            (next(source.sha256 for source in sources if source.faction_id == 201),),
+        )
+        db.execute("UPDATE army_units SET position = 3 WHERE army_id = 101 AND unit_id = 11")
+        with pytest.raises(ReferenceBaselineError, match="memberships/positions differ"):
+            _verify_army_archive_sources(archive, metadata, db)
+        db.execute("UPDATE army_units SET position = 2 WHERE army_id = 101 AND unit_id = 11")
         db.execute("DELETE FROM army_lists WHERE id = 201")
         db.execute("INSERT INTO army_lists (id) VALUES (999)")
         with pytest.raises(ReferenceBaselineError, match="list identities differ"):
@@ -241,15 +283,53 @@ def test_army_archive_source_identity_rejects_unexpected_json(
             )
 
 
+@pytest.mark.parametrize(
+    "units",
+    [
+        [{"id": 10}, {"id": 10}],
+        [{"id": "10"}],
+        [{"id": True}],
+    ],
+)
+def test_army_archive_rejects_invalid_or_duplicate_unit_ids(
+    tmp_path: Path, units: list[dict[str, object]],
+) -> None:
+    archive = tmp_path / "army.zip"
+    with zipfile.ZipFile(archive, "w") as output:
+        output.writestr("metadata.json", "{}")
+        output.writestr(
+            "101-first.json", json.dumps({"version": "v1", "units": units})
+        )
+    sources, _ = load_sources(archive)
+    source = sources[0]
+    with sqlite3.connect(":memory:") as db:
+        db.execute(
+            "CREATE TABLE army_lists (id INTEGER PRIMARY KEY, version TEXT, "
+            "kind TEXT, source_file TEXT, source_sha256 TEXT)"
+        )
+        db.execute(
+            "INSERT INTO army_lists VALUES (?, ?, ?, ?, ?)",
+            (101, "v1", "reinforcement", source.filename, source.sha256),
+        )
+        with pytest.raises(ReferenceBaselineError, match="invalid or duplicate"):
+            _verify_army_archive_sources(
+                archive, {"sourceFileCount": 1, "sourceVersions": {"v1": 1}}, db
+            )
+
+
 def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
     report = build_baseline(ARMY_DB, RULES_DB)
     report["armySnapshot"]["sourceIdentityEvidence"] = {
         "archiveJsonDocuments": 59,
         "matchedArmyListIds": 58,
+        "matchedSourceProvenanceRows": 58,
+        "matchedUnitMembershipOccurrences": 12345,
     }
     markdown = render_markdown(report)
     assert "59 archive JSON documents (including metadata.json)" in markdown
     assert "58 matched published Army-list IDs" in markdown
+    assert "58 matched per-file provenance records" in markdown
+    assert "12345 ordered Unit membership occurrences" in markdown
 
 
 def test_baseline_requires_published_databases_and_verified_supplied_army_zip(
