@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+import zipfile
 from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
@@ -15,6 +16,7 @@ from tools.report_reference_baseline import (
     _revision_oldid,
     _route_hint,
     _source_location,
+    _verify_army_archive_sources,
     build_baseline,
     main,
     render_markdown,
@@ -177,6 +179,77 @@ def test_url_pin_is_not_offline_content_verification(tmp_path: Path) -> None:
     assert pinned["declaredHashMatches"] is None
     assert _artifact_evidence(tmp_path, None, "https://example.org", set())[
         "verificationStatus"] == "url-without-revision-pin"
+
+
+def _synthetic_army_archive(tmp_path: Path) -> Path:
+    archive = tmp_path / "army.zip"
+    with zipfile.ZipFile(archive, "w") as output:
+        output.writestr("metadata.json", '{"source":"fixture"}')
+        output.writestr(
+            "101-first.json", json.dumps({"version": "7.26246.158", "units": []})
+        )
+        output.writestr(
+            "201-second.json", json.dumps({"version": "7.26246.159", "units": []})
+        )
+    return archive
+
+
+def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path) -> None:
+    archive = _synthetic_army_archive(tmp_path)
+    metadata = {
+        "sourceFileCount": 2,
+        "sourceVersions": {"7.26246.158": 1, "7.26246.159": 1},
+    }
+    with sqlite3.connect(":memory:") as db:
+        db.execute("CREATE TABLE army_lists (id INTEGER PRIMARY KEY)")
+        db.executemany("INSERT INTO army_lists (id) VALUES (?)", [(101,), (201,)])
+        evidence = _verify_army_archive_sources(archive, metadata, db)
+        assert evidence == {
+            "status": "source-identities-match-published-army-lists",
+            "archiveJsonDocuments": 3,
+            "sourceFileCount": 2,
+            "sourceVersions": metadata["sourceVersions"],
+            "matchedArmyListIds": 2,
+        }
+        with pytest.raises(ReferenceBaselineError, match="source count differs"):
+            _verify_army_archive_sources(
+                archive, {**metadata, "sourceFileCount": 3}, db
+            )
+        with pytest.raises(ReferenceBaselineError, match="source versions differ"):
+            _verify_army_archive_sources(
+                archive, {**metadata, "sourceVersions": {"unknown": 2}}, db
+            )
+        db.execute("DELETE FROM army_lists WHERE id = 201")
+        db.execute("INSERT INTO army_lists (id) VALUES (999)")
+        with pytest.raises(ReferenceBaselineError, match="list identities differ"):
+            _verify_army_archive_sources(archive, metadata, db)
+
+
+def test_army_archive_source_identity_rejects_unexpected_json(
+    tmp_path: Path,
+) -> None:
+    archive = tmp_path / "army.zip"
+    with zipfile.ZipFile(archive, "w") as output:
+        output.writestr("other.json", "{}")
+        output.writestr("101-first.json", '{"version":"v1","units":[]}')
+    with sqlite3.connect(":memory:") as db:
+        db.execute("CREATE TABLE army_lists (id INTEGER PRIMARY KEY)")
+        db.execute("INSERT INTO army_lists (id) VALUES (101)")
+        with pytest.raises(ReferenceBaselineError, match="metadata.json"):
+            _verify_army_archive_sources(
+                archive, {"sourceFileCount": 1, "sourceVersions": {"v1": 1}}, db
+            )
+
+
+def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
+    report = build_baseline(ARMY_DB, RULES_DB)
+    report["armySnapshot"]["sourceIdentityEvidence"] = {
+        "archiveJsonDocuments": 59,
+        "matchedArmyListIds": 58,
+    }
+    markdown = render_markdown(report)
+    assert "59 archive JSON documents (including metadata.json)" in markdown
+    assert "58 matched published Army-list IDs" in markdown
 
 
 def test_baseline_requires_published_databases_and_verified_supplied_army_zip(

@@ -970,7 +970,20 @@ require their independent checks. Rerun against the final candidate
 and deployment, not only a local development server.
 
 Optionally pass `--army-archive <path>` to verify the exact Army ZIP SHA-256 against
-the one embedded in `infinity.db`. Missing ignored PDFs/wiki snapshots are explicitly
+the one embedded in `infinity.db`. With the pinned source ZIP available, the
+baseline also checks each source faction/list ID against `infinity.db::army_lists`,
+matches the exact source-version counts, and rejects an unexpected JSON document
+or source-file count. The September 29 archive has **59 JSON documents**:
+58 Army-list source files plus one `metadata.json` document; these counts
+must not be conflated. The optional check records `sourceIdentityEvidence`
+and fails closed on an identity/version mismatch, without claiming
+field-level parity or rules completeness. Example for the present input:
+
+```powershell
+.\.venv\Scripts\python.exe tools/report_reference_baseline.py --army-archive "data/raw/JSON 20260929-114335.zip" --verify-server http://127.0.0.1:8000 --json-output local/audits/1.0-baseline-pair.json --markdown-output local/audits/1.0-baseline-pair.md
+```
+
+Missing ignored PDFs/wiki snapshots are explicitly
 reported rather than downloaded or assumed present. The report keeps each URL-pinned
 Wiki `oldid=` revision separate from the shared local Wiki archive. If a local source
 file exists, its actual SHA-256 is included and compared to the curated hash when

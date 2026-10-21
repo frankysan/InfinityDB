@@ -12,6 +12,7 @@ import hashlib
 import json
 import sqlite3
 import sys
+from collections import Counter
 from collections.abc import Sequence
 from contextlib import closing
 from pathlib import Path, PureWindowsPath
@@ -20,6 +21,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlsplit
 from urllib.request import Request, urlopen
 
+from infinity_army_data.merge import load_sources
 from infinity_db.application_domains import application_domain, semantic_record_domain
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -71,6 +73,55 @@ def _source_location(root: Path, relative: str | None) -> str:
     ):
         return "unsafe-declared-path"
     return "available" if (root / candidate).is_file() else "missing-local-artifact"
+
+
+def _verify_army_archive_sources(
+    archive: Path, metadata: dict[str, Any], army: sqlite3.Connection
+) -> dict[str, Any]:
+    """Match individual raw Army source identities to the published list rows.
+
+    The enclosing caller verifies the archive SHA-256 first. This check only
+    certifies IDs, source version counts and document cardinality, not the
+    contents of every source field.
+    """
+    try:
+        sources, skipped = load_sources(archive)
+    except (OSError, ValueError) as exc:
+        raise ReferenceBaselineError(f"Army archive cannot be parsed: {exc}") from exc
+
+    if sorted(skipped) != ["metadata.json"]:
+        raise ReferenceBaselineError(
+            f"Army archive expected one metadata.json document, got {sorted(skipped)!r}"
+        )
+    declared_count = metadata.get("sourceFileCount")
+    if type(declared_count) is not int or len(sources) != declared_count:
+        raise ReferenceBaselineError(
+            f"Army source count differs from published metadata: "
+            f"{len(sources)} != {declared_count!r}"
+        )
+    versions = dict(sorted(Counter(str(s.data.get("version")) for s in sources).items()))
+    if any(s.data.get("version") is None for s in sources):
+        raise ReferenceBaselineError("Army source archive contains a missing version")
+    if versions != metadata.get("sourceVersions"):
+        raise ReferenceBaselineError(
+            f"Army source versions differ from published metadata: "
+            f"{versions!r} != {metadata.get('sourceVersions')!r}"
+        )
+    source_ids = {s.faction_id for s in sources}
+    stored_ids = {int(row[0]) for row in army.execute("SELECT id FROM army_lists")}
+    if source_ids != stored_ids:
+        raise ReferenceBaselineError(
+            f"Published Army list identities differ from the source archive: "
+            f"missing={sorted(source_ids - stored_ids)!r}, "
+            f"extra={sorted(stored_ids - source_ids)!r}"
+        )
+    return {
+        "status": "source-identities-match-published-army-lists",
+        "archiveJsonDocuments": len(sources) + len(skipped),
+        "sourceFileCount": len(sources),
+        "sourceVersions": versions,
+        "matchedArmyListIds": len(source_ids),
+    }
 
 
 def _revision_oldid(url: str | None) -> str | None:
@@ -201,6 +252,7 @@ def build_baseline(
         archive_sha = raw_army.get("snapshotArchiveSha256")
         if not isinstance(archive_sha, str) or len(archive_sha) != 64:
             raise ReferenceBaselineError("Army publication lacks a pinned archive SHA-256")
+        archive_evidence: dict[str, Any] | None = None
         if army_archive is None:
             archive_status = "not-supplied"
         else:
@@ -208,7 +260,8 @@ def build_baseline(
                 raise ReferenceBaselineError(f"Army archive is unavailable: {army_archive}")
             if _sha256(army_archive) != archive_sha:
                 raise ReferenceBaselineError("Army archive SHA-256 differs from published metadata")
-            archive_status = "hash-verified"
+            archive_evidence = _verify_army_archive_sources(army_archive, raw_army, army)
+            archive_status = "hash-verified-source-identities"
 
         # Each URL revision is a separate source identity. Only a genuinely shared
         # local archive should be aggregated across curated collections.
@@ -358,6 +411,7 @@ def build_baseline(
             "archiveSha256": archive_sha,
             "publishedDatabaseSha256": army_sha,
             "archiveVerification": archive_status,
+            "sourceIdentityEvidence": archive_evidence,
             "sourceFileCount": raw_army.get("sourceFileCount"),
             "sourceVersions": raw_army.get("sourceVersions"),
             "sourceDataChangedOn": raw_army.get("sourceDataChangedOn"),
@@ -448,6 +502,14 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"versions `{json.dumps(snapshot['sourceVersions'], sort_keys=True)}`; "
         f"archive SHA-256 `{snapshot['archiveSha256']}` "
         f"({snapshot['archiveVerification']}).",
+        *(
+            [f"- Verified Army source identities: "
+             f"{snapshot['sourceIdentityEvidence']['archiveJsonDocuments']} archive JSON documents "
+             f"(including metadata.json), "
+             f"{snapshot['sourceIdentityEvidence']['matchedArmyListIds']} matched "
+             "published Army-list IDs with matching version counts."]
+            if snapshot.get("sourceIdentityEvidence") else []
+        ),
         f"- Published Army database SHA-256: `{snapshot['publishedDatabaseSha256']}`.",
         f"- Published rules database SHA-256: "
         f"`{report['rulesPublication']['publishedDatabaseSha256']}`.",

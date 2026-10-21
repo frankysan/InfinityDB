@@ -647,3 +647,15 @@ Prefer targeted fixes rather than merging these.
   **11 passed** including exact runtime-revision parity, stale-server
   rejection and CLI evidence outputs; Ruff on tool and test module
   **PASS**. The server check still requires an explicit live run.
+- **Closeout pass 22, 2026-10-20:** Extended the opt-in pinned Army
+  ZIP verification from whole-file SHA-256 identity to explicit
+  publication cardinality, source-version distributions and source
+  faction/list ID parity against `infinity.db::army_lists`. The
+  59-JSON-document source archive contains 58 faction/list files
+  plus one independent `metadata.json`; the published
+  `sourceFileCount=58` is therefore expected, not a discrepancy.
+  The verifier fails closed on unexpected extra JSON documents,
+  missing source versions or source-list identity drift.
+  This is source identity coverage only, not field-level data or
+  final browser completeness. The actual pinned ZIP still requires
+  an explicit verification rerun.

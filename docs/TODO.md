@@ -125,6 +125,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     the validated September 26 capture, correcting three changed member paths.
     All cited headings and September 28 archived page revision IDs were verified;
     retain the missing original as a historical evidence limitation.
+  - [x] Extend the optional pinned Army ZIP baseline check beyond
+    whole-archive SHA-256: verify all source-list IDs against published
+    `army_lists`, version counts against publication metadata, and
+    58 source documents plus the separate archive `metadata.json`.
+    Synthetic fixtures enforce failure on divergent IDs, versions and
+    document counts; a fresh check with the real ZIP and final server
+    remains required before 1.0 acceptance.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and
