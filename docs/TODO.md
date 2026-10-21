@@ -543,6 +543,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Inventory deployed objects independently of their carriers. Reuse existing
       `facts.specialProfile` support where it fits; extend validated metadata/corrections only for
       confirmed gaps. Resolve or visibly retain the Armed Turret discrepancy with both citations.
+      - [x] Reconcile the **14 auxiliary object profiles** already extracted
+        from the N5.3 Weapon Chart with normal Chromium pages at 1440/390 px:
+        11 Weapon-domain profiles plus three Equipment-domain profiles (Dazer,
+        Deployable Repeater and FastPanda). Verify the Army-sourced
+        ARM/BTS/STR/S values and mode identity against the published catalog
+        API, without assigning chart S0/S1 precedence. Separately verify the
+        curated Armed Turret Trooper profile, its S2/S1 source note and other
+        printed-source caveat. The two browser cases in
+        `test_verify_weapon_source_cards_browser.py` cover these existing
+        reference surfaces, **not** distinct deployed-object identities.
+      - [ ] Enumerate additional deployed objects beyond the 14 four-attribute
+        chart entries, including Equipment and objects lacking a standard
+        profile. Classify carried item, delivery mode and deployed object
+        separately; identify source-backed object identities, provenance,
+        unavailable values and unresolved conflicts before defining any
+        canonical object/profile projection or reverse-use links.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.

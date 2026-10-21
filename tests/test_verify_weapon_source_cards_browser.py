@@ -1,4 +1,4 @@
-"""Pinned Chromium acceptance for two reviewed N5.3 Weapon source cards."""
+"""Chromium acceptance for Weapon and Equipment profiles and source conflicts."""
 
 from __future__ import annotations
 
@@ -538,6 +538,182 @@ def test_mine_object_silhouette_sources_remain_disclosed(
         assert "No official correction or source precedence has been confirmed" in content
     finally:
         page.close()
+
+# The auxiliary Weapon Chart object names are not necessarily the item carried by
+# a Trooper (notably Disco Ball/Disco Baller). Keep their source identity and
+# deployed object's mode separate. The tuple pins Army's S, not source precedence.
+AUXILIARY_OBJECTS = (
+    ("AP Mine", None, 1, 181),
+    ("Cybermine", None, 0, 181),
+    ("Drop Bears", "Deployable Mode", 0, 181),
+    ("E/M Mine", None, 1, 181),
+    ("Monofilament Mine", None, 1, 181),
+    ("PARA Mine", None, 1, 181),
+    ("Shock Mine", None, 1, 181),
+    ("Viral Mine", None, 1, 181),
+    ("WildParrot", None, 1, 181),
+    ("Crazykoala", None, 1, 186),
+    ("Dazer", None, 0, 186),
+    ("Deployable Repeater", None, 1, 186),
+    ("Disco Baller", "Disco Ball", 1, 186),
+    ("FastPanda", None, 1, 186),
+)
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+def test_all_chart_auxiliary_objects_have_catalog_profile_in_normal_browser(
+    origin: str, chrome: Any, published_weapons: list[dict[str, Any]], width: int,
+) -> None:
+    """The 14 pinned chart objects are reachable without picking a carrier Unit.
+
+    This validates Army profile preservation, not precedence when official
+    publications conflict (six Mines and Dazer).
+    """
+    import re
+
+    assert len(AUXILIARY_OBJECTS) == 14
+    by_name = {weapon["name"].casefold(): weapon for weapon in published_weapons}
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for name, mode, army_s, pdf_page in AUXILIARY_OBJECTS:
+            if name in {"Dazer", "Deployable Repeater", "FastPanda"}:
+                # These object identities are Equipment, not Weapon carriers.
+                assert name.casefold() not in by_name
+                slug = name.casefold().replace(" ", "-")
+                response = page.request.get(f"{origin}/api/equipment/{slug}")
+                assert response.status == 200
+                equipment = response.json()
+                assert any(rule["id"] == f"equipment:{slug}" for rule in equipment["rules"])
+                page.goto(f"{origin}/equipment/{slug}", wait_until="domcontentloaded")
+                rule_card = page.locator(f'[id="rule-equipment-{slug}"]')
+                rule_card.wait_for(state="visible", timeout=15000)
+                content = rule_card.inner_text()
+                if name == "Dazer":
+                    note = rule_card.locator(".rules-source-note").first
+                    assert "S0" in note.inner_text() and "S1" in note.inner_text()
+                    assert "ARM 0, BTS 0 and STR 1" in content
+                elif name == "Deployable Repeater":
+                    assert "ARM 0, BTS 0, STR 1 and S 1" in content
+                else:
+                    assert "ARM 0, BTS 0, STR 1, S 1" in content
+                matching = [
+                    profile for profile in equipment.get("profiles", [])
+                    if profile.get("mode") == mode
+                ]
+                assert len(matching) == 1, (name, mode)
+                (profile,) = matching
+                source_text = profile["profile"]
+                assert source_text
+                attributes = {
+                    key: int(value)
+                    for key, value in re.findall(
+                        r"\b(ARM|BTS|STR|S)\s*=\s*(\d+)\b", source_text
+                    )
+                }
+                assert attributes == {"ARM": 0, "BTS": 0, "STR": 1, "S": army_s}
+                cards = page.locator(".weapon-variant .weapon-profile").filter(
+                    has=page.get_by_role(
+                        "heading", name=mode or profile["name"], exact=True
+                    )
+                )
+                assert cards.count() == 1, (name, mode)
+                assert source_text in cards.first.inner_text()
+                assert page.evaluate(
+                    "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+                ), (name, width)
+                continue
+            weapon = by_name[name.casefold()]
+            source_profiles = [
+                p for variant in weapon["weapon_variants"]
+                for p in variant["profiles"]
+                if p["mode"] == mode
+            ]
+            assert len(source_profiles) == 1, (name, mode, pdf_page)
+            (profile,) = source_profiles
+            source_text = profile["profile"]
+            assert isinstance(source_text, str) and source_text, (name, mode)
+            attributes = {
+                key: int(value)
+                for key, value in re.findall(r"\b(ARM|BTS|STR|S)\s*=\s*(\d+)\b", source_text)
+            }
+            assert attributes == {"ARM": 0, "BTS": 0, "STR": 1, "S": army_s}, name
+
+            page.goto(
+                f"{origin}/weapons/{weapon['slug']}",
+                wait_until="domcontentloaded",
+            )
+            page.locator("#item-content").wait_for(state="visible", timeout=15000)
+            cards = page.locator(".weapon-variant .weapon-profile")
+            candidates = cards.filter(
+                has=page.get_by_role(
+                    "heading", name=mode or profile["name"], exact=True,
+                )
+            )
+            assert candidates.count() == 1, (name, mode)
+            card = candidates.first
+            profile_rows = card.locator(".weapon-data-row").filter(
+                has=page.get_by_role("heading", name="Profile", exact=True)
+            )
+            assert profile_rows.count() == 1, (name, mode)
+            assert source_text in profile_rows.first.inner_text(), (name, source_text)
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+            ), (name, width)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+def test_armed_turret_curated_object_profile_keeps_source_conflict_visible(
+    origin: str, chrome: Any, width: int,
+) -> None:
+    """Armed Turret has a curated Trooper profile, not a Weapon Chart object row."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.request.get(f"{origin}/api/weapons/armed-turret")
+        assert response.status == 200
+        weapon = response.json()
+        profile = weapon["special_profile"]
+        assert dict(profile["stats"])["S"] == "2"
+        assert dict(profile["stats"])["ARM"] == "2"
+        assert dict(profile["stats"])["BTS"] == "3"
+        assert dict(profile["stats"])["STR"] == "1"
+
+        page.goto(f"{origin}/weapons/armed-turret", wait_until="domcontentloaded")
+        card = page.locator(".special-weapon-profile")
+        card.wait_for(state="visible", timeout=15000)
+        observed = card.evaluate(
+            """(element) => [...element.querySelectorAll('thead th')].map(
+              (th, index) => [
+                th.textContent,
+                element.querySelectorAll('tbody td')[index]?.textContent
+              ]
+            )"""
+        )
+        assert observed == profile["stats"]
+        assert "360º Visor" in card.inner_text()
+        assert "Total Reaction" in card.inner_text()
+        assert profile["cc_weapon"] in card.inner_text()
+
+        rule = page.locator('[id="rule-weapon-armed-turret"]')
+        rule.wait_for(state="visible", timeout=15000)
+        notes = rule.locator(".rules-source-note").all_inner_texts()
+        assert len(notes) >= 2
+        assert "S1" in notes[0] and "S2" in notes[0]
+        assert "Unresolved Silhouette conflict" in notes[0]
+        assert "one Saving Roll" in notes[1]
+        assert not errors, errors
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        ), width
+    finally:
+        page.close()
+
 
 
 
