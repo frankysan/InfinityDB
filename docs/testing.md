@@ -1085,25 +1085,30 @@ errors and document-level horizontal overflow. Distance Extras are
 independently checked against the configured 2.5 cm/in conversion and
 Skill positive-sign policy, including literal inches/centimeters.
 The default matrix covers seven pinned representative Units at 1440,
-390 and 320 px (**21 pages**). Additional isolated session-preference
-scenarios exercise Team-Ops off (**3 pages**) and all four optional
-categories off (**6 pages**), comparing the DOM against API queries
-with exactly the same flags. Both filtered scenarios must also
-cause an observable change in visible Armies or General Profiles,
-so a no-op preference cannot pass. Two source-backed Units with
-actual visible distance Extras are tested in both inches and centimeters
-at all three widths (**12 pages**). The pinned local server passed **42/42
-page checks** on 2026-10-21. Pytest runs the full matrix when Chrome and
-Playwright are available, otherwise skips Chromium while hermetic
-tests remain active. To check an already running release-candidate
-server explicitly and save ignored evidence:
+390 and 320 px (**21 pages**). Three further source-backed, distinct
+Units are selected deterministically by richness of their profile
+payloads, loadouts and Army memberships (at least 2 profiles, 4
+loadouts and 2 Armies) and verified at 1440/768/390/320 px
+(**12 more pages**). Additional isolated session-preference scenarios
+exercise Team-Ops off (**3 pages**), Mercenaries off (**3 pages**),
+Mercenaries and Team-Ops off together (**6 pages**), and all four
+optional categories off (**6 pages**). Their DOM comparisons use
+identically filtered API queries, and each scenario must change
+visible Armies or General Profiles. Two source-backed Units with
+visible distance Extras are tested in inches and centimeters at
+three widths (**12 pages**). The pinned local server passed **63/63
+page checks** on 2026-10-21. Pytest runs the full matrix when Chrome
+and Playwright are available; otherwise Chromium skips while
+hermetic tests remain active. To check an already running
+release-candidate server and save ignored evidence:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
 ```
 
-Use `--exclude-optional teamops` (repeat for multiple flags) and
-`--distance-unit cm` to check those variants against a running server.
+Use `--exclude-optional teamops` (repeat for multiple flags),
+`--distance-unit cm`, and `--width 768` (repeat for multiple widths)
+to check variants against a running server.
 This remains bounded representative **browser** acceptance, not
 full-catalog completeness, all optional-flag combinations, all
 parameterized Skill semantics, or every visual layout variant.

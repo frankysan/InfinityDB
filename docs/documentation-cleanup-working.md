@@ -851,3 +851,24 @@ Prefer targeted fixes rather than merging these.
   Pyright reported 0 errors/0 warnings, Markdownlint reported 32
   files/0 issues and offline links passed for 30 files.
   The full project suite was not run.
+- **Closeout pass 35, 2026-10-21:** Expanded normal Unit-detail Chromium
+  acceptance beyond the seven pinned non-Skill examples using three
+  additional source-backed, distinct complex logical Units selected
+  deterministically by profile, loadout and Army count. Checked these
+  at 1440/768/390/320 px (12 pages). Added isolated Mercenary-disabled
+  (3 pages) and Mercenary-plus-Team-Ops-disabled (6 pages) sessions,
+  requiring nonempty visibility changes and parity with corresponding
+  API flags. Together with the default (21), Team-Ops-disabled (3),
+  all-optionals-disabled (6), and inch/cm distance cases (12), the
+  local Chromium run passed **63/63 page checks**. The verifier now
+  supports repeated `--width` arguments and records concise failed
+  page diagnostics. A 20/21 default-matrix run did not reproduce on
+  subsequent runs; its cause remains unconfirmed. Full-catalog,
+  Spec-Ops/Reinforcement-only, and deployed-server checks remain open.
+- **Validation:** 40 focused tests passed: Unit Skill Chromium
+  acceptance (23 tests including 63 actual browser pages), Unit API
+  source parity (5), non-Skill presentation (10), and test-section
+  registration (2). Ruff for the two changed Python modules **PASS**;
+  Pyright **0 errors/0 warnings**; Markdownlint **32 files/0 issues**
+  and offline docs links **30 files/0 errors**. Full suite and
+  deployed-server browser verification were not run.

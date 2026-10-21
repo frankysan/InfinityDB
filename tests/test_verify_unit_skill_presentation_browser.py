@@ -100,6 +100,54 @@ def _unit() -> tuple[dict, dict]:
     return unit, dom
 
 
+def _complex_unit_cases(database_path: Path) -> tuple[str, ...]:
+    """Select stable, source-backed rich layouts without hand-picked slugs."""
+    with sqlite3.connect(database_path) as db:
+        ranked = db.execute(
+            "WITH profile_counts AS ("
+            "  SELECT lus.logical_unit_id, COUNT(DISTINCT p.profile_payload_id) AS n "
+            "  FROM logical_unit_sources AS lus "
+            "  JOIN profile_payload_occurrences AS p ON p.unit_id = lus.source_unit_id "
+            "  GROUP BY lus.logical_unit_id"
+            "), loadout_counts AS ("
+            "  SELECT lus.logical_unit_id, COUNT(DISTINCT l.loadout_payload_id) AS n "
+            "  FROM logical_unit_sources AS lus "
+            "  JOIN loadout_payload_occurrences AS l ON l.unit_id = lus.source_unit_id "
+            "  GROUP BY lus.logical_unit_id"
+            "), army_counts AS ("
+            "  SELECT lus.logical_unit_id, COUNT(DISTINCT a.application_army_id) AS n "
+            "  FROM logical_unit_sources AS lus "
+            "  JOIN army_units AS au ON au.unit_id = lus.source_unit_id "
+            "  JOIN application_army_sources AS a ON a.source_army_id = au.army_id "
+            "  GROUP BY lus.logical_unit_id"
+            ") SELECT u.slug, p.n, l.n, a.n FROM logical_units AS u "
+            "JOIN profile_counts AS p ON p.logical_unit_id = u.id "
+            "JOIN loadout_counts AS l ON l.logical_unit_id = u.id "
+            "JOIN army_counts AS a ON a.logical_unit_id = u.id "
+            "WHERE u.slug IS NOT NULL AND p.n >= 2 AND l.n >= 4 AND a.n >= 2 "
+            "ORDER BY u.slug"
+        ).fetchall()
+    ranked = [row for row in ranked if row[0] not in DEFAULT_SLUGS]
+    assert ranked, "No additional multi-profile, multi-loadout, multi-Army Units"
+    selected: list[str] = []
+    for column in (1, 2, 3):
+        eligible = sorted(
+            ranked, key=lambda row: (-row[column], row[0]),
+        )
+        slug = next((row[0] for row in eligible if row[0] not in selected), None)
+        if slug:
+            selected.append(slug)
+    assert len(selected) == 3, (selected, ranked[:5])
+    return tuple(selected)
+
+
+def test_complex_unit_cohort_has_nonempty_published_profile_variants() -> None:
+    root = Path(__file__).resolve().parents[1]
+    slugs = _complex_unit_cases(root / "data/generated/infinity.db")
+    assert len(slugs) == len(set(slugs)) == 3
+    assert all(slug not in ("", None) for slug in slugs)
+
+
 def test_live_chromium_unit_detail_matrix_when_available() -> None:
     """Run the complete seven-Unit, three-width matrix when Chrome is installed."""
     pytest.importorskip("playwright.sync_api")
@@ -135,10 +183,26 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
                 pytest.skip(f"Chromium browser unavailable: {exc}")
             raise
         assert result["passed"] == result["total"] == len(WIDTHS) * len(DEFAULT_SLUGS), (
-            result
+            [entry for entry in result["results"] if entry["status"] != "passed"]
         )
+        rich_slugs = _complex_unit_cases(root / "data/generated/infinity.db")
+        rich_widths = (*WIDTHS, 768)
+        rich = verify(
+            f"http://127.0.0.1:{server.server_port}",
+            slugs=rich_slugs, channel="chrome", widths=rich_widths,
+        )
+        assert rich["passed"] == rich["total"] == len(rich_widths) * len(rich_slugs), (
+            rich_slugs,
+            [entry for entry in rich["results"] if entry["status"] != "passed"],
+        )
+
         scenarios: tuple[tuple[tuple[str, ...], dict[str, bool]], ...] = (
             (("tohaa-team-ops",), {"teamops": False}),
+            (("raoul-spector-mercenary-operative",), {"mercs": False}),
+            (
+                ("tohaa-team-ops", "raoul-spector-mercenary-operative"),
+                {"mercs": False, "teamops": False},
+            ),
             (
                 ("raoul-spector-mercenary-operative", "tohaa-team-ops"),
                 dict.fromkeys(OPTIONAL_FLAGS, False),
@@ -218,6 +282,10 @@ def test_optional_filter_preferences_and_api_urls_are_consistent() -> None:
         _settings_script({"invalid": False}, "in")
     with pytest.raises(ValueError, match="Distance unit"):
         _settings_script({}, "feet")
+    with pytest.raises(ValueError, match="Viewport widths"):
+        verify("http://127.0.0.1:8000", widths=(0,))
+    with pytest.raises(ValueError, match="Viewport widths"):
+        verify("http://127.0.0.1:8000", widths=())
 
 
 def test_browser_manifest_is_pinned_and_covers_three_viewports() -> None:

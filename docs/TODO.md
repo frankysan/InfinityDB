@@ -225,6 +225,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     missing category rows and invalid flag/unit inputs. Other
     availability combinations, broader Skill parameters, full-catalog
     pages and deployed-server acceptance remain open.
+  - [x] Expand the Unit-detail Chromium gate to three additional
+    automatically selected, **distinct** complex Units (multiple
+    profiles, loadouts and Armies), including a 768px tablet viewport.
+    Add Mercenary-off and mixed Mercenary/Team-Ops-off cases with
+    non-vacuous visibility changes and exact matching filtered API.
+    Preserve baseline, all-optional-disabled and two-unit distance
+    cases: **63/63 local Chromium pages passed**. Retain compact
+    per-page failure diagnostics after one intermittent default-matrix
+    failure did not reproduce. Spec-Ops/Reinforcement-only variants,
+    exhaustive Units, and deployed-server acceptance remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

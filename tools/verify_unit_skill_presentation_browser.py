@@ -319,8 +319,10 @@ def _page_error(errors: list[str], error: Any) -> None:
 def verify(
     base_url: str, *, slugs: tuple[str, ...] = DEFAULT_SLUGS, headed: bool = False,
     channel: str | None = None, optional_filters: dict[str, bool] | None = None,
-    distance_unit: str = "in",
+    distance_unit: str = "in", widths: tuple[int, ...] = WIDTHS,
 ) -> dict[str, Any]:
+    if not widths or any(width < 240 or width > 3840 for width in widths):
+        raise ValueError("Viewport widths must be between 240 and 3840 px")
     try:
         playwright = importlib.import_module("playwright.sync_api")
     except ImportError as exc:
@@ -335,7 +337,7 @@ def verify(
             **({"channel": channel} if channel else {}),
         )
         try:
-            for width in WIDTHS:
+            for width in widths:
                 context = browser.new_context(viewport={"width": width, "height": 900})
                 context.add_init_script(script=init_script)
                 try:
@@ -400,7 +402,8 @@ def verify(
         "optionalFilters": {flag: filters.get(flag, True) for flag in OPTIONAL_FLAGS},
         "distanceUnit": distance_unit,
         "passed": sum(r["status"] == "passed" for r in results),
-        "total": len(slugs) * len(WIDTHS),
+        "total": len(slugs) * len(widths),
+        "widths": list(widths),
         "results": results,
     }
 
@@ -417,12 +420,17 @@ def main(argv: list[str] | None = None) -> int:
         help="Exclude an optional availability category; repeat to combine",
     )
     parser.add_argument("--distance-unit", choices=("in", "cm"), default="in")
+    parser.add_argument(
+        "--width", type=int, action="append",
+        help="Viewport width in px; repeat for multiple widths",
+    )
     args = parser.parse_args(argv)
     report = verify(
         args.base_url, slugs=tuple(args.slugs) if args.slugs else DEFAULT_SLUGS,
         headed=args.headed, channel=args.channel,
         optional_filters={flag: False for flag in args.exclude_optional or []},
         distance_unit=args.distance_unit,
+        widths=tuple(args.width) if args.width else WIDTHS,
     )
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
