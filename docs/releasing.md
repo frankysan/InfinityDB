@@ -76,6 +76,15 @@ The 1.0 release gate requires:
 - [ ] Resolve any known defect that materially misrepresents a player's unit, profile,
   weapon, skill, equipment, army relationship, or rule information.
 
+**Unresolved official rulings are not release blockers.** A known discrepancy
+may remain open when users can clearly identify the relevant sources/versions,
+the nature of the disagreement, the value or interpretation InfinityDB presents,
+and its uncertainty or applicability limit. The release gate requires accurate,
+usable disclosure; it does not require an external publisher to issue an erratum
+or choose between conflicting publications. Missing or misleading disclosure and
+independently confirmed implementation errors remain release-blocking defects.
+Track requests for official corrections as non-blocking follow-up work in TODO.
+
 Immediately before 1.0, perform a final source-by-source completeness audit. Record
 where each discovered player-relevant information type is represented, verify every
 in-scope type has a usable web presentation and required rules context, review every
