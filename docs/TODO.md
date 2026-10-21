@@ -595,6 +595,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
             nonstandard Scenery Elements and objects without Army profiles,
             with exact source evidence; then design and validate object
             identity, missing-data semantics and reverse-use presentation.
+            - [x] Add a second audit-only reviewed classification manifest,
+              `config/validation/deployed-object-candidate-reviews.json`,
+              pinned to exact English N5.3 citations and curated facts:
+              Deployable Cover is an S3 Scenery Element with ARM/BTS/STR
+              unreported; Armed Turret retains its curated ARM 2/BTS 3/STR
+              1/S2 profile and unresolved S1 summary conflict; Deactivator
+              is a tool acting on deployed objects, not a deployed object;
+              SymbioBomb is an assignable single-use Weapon, not a
+              standalone deployed-object profile. Validator regression
+              rejects classification/shape changes, lost citations and
+              unsupported values. Remaining candidates stay unclassified.
+            - [ ] Review the remaining candidate set for source-backed
+              placed models, tokens, scenery, nonstandard equipment and
+              false positives. Then decide the minimal canonical
+              object/variant identity and unavailable-value contract;
+              do not infer Unit/loadout ownership from equipment prose.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.

@@ -1137,12 +1137,32 @@ The audit resolves exact catalog names/modes and validates cited N5.3 pages
 and maintained rules text. It does **not** publish new object IDs, infer Unit
 carriers, grant any mode to another item, or resolve the Mine Dispenser subtype.
 
-The separately reviewed Armed Turret, Deployable Cover and Pitcher cases remain
-included. Other curated Weapon/Equipment summaries containing deployment-related
-words form a **manual review queue**, not confirmed objects. Army profile text
-stays source-native even when four conventional attributes can be parsed;
-incomplete/nonstandard values stay unparsed. The audit requires no third-party
-PDFs at runtime; it retains disputed Silhouettes without selecting precedence.
+A second audit-only review batch,
+`config/validation/deployed-object-candidate-reviews.json`, now classifies
+four nonstandard or non-object cases against maintained source evidence and
+exact English N5.3 citations:
+
+- **Deployable Cover** (p. 122): placed Scenery Element with verified **S3**
+  and Cutting Foam/Vitroferro variants, but no reviewed conventional
+  ARM/BTS/STR object profile. Missing attributes are retained as unreported.
+- **Armed Turret** (pp. 70, 74, 195): deployed object with an independently
+  curated Trooper-style profile, ARM 2/BTS 3/STR 1/S2. Its documented S1
+  quick-reference conflict is not silently resolved.
+- **Deactivator** (p. 121): a user-held tool/Skill that targets deployed
+  objects, not itself a deployed object.
+- **SymbioBomb** (p. 74): assignable single-use Weapon, not a separately
+  profiled deployed battlefield object.
+
+The validator rejects mismatched profile shapes, lost source clauses/citations
+and invented missing-attribute values. Reviewed candidate decisions and
+remaining candidate mentions are reported separately. The existing Pitcher
+delivery case remains distinct. Other curated Weapon/Equipment summaries
+containing deployment-related words form an **unreviewed manual queue**, not
+confirmed objects. Army profile text stays source-native even when four
+conventional attributes can be parsed; incomplete/nonstandard values stay
+unparsed. The audit requires no third-party PDFs at runtime; disputed
+Silhouettes retain their original provenance, without assigning precedence
+or introducing Unit/carrier identities.
 
 For the older Wiki Weapon Chart name inventory, use the read-only
 explicit-alias audit. It preserves repeated alternative tables and reports

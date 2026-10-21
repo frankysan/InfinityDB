@@ -117,10 +117,82 @@ def validate_delivery_reviews(
     return accepted
 
 
+def validate_candidate_reviews(
+    manifest: dict[str, Any],
+    records: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Fail closed on reviewed nonstandard/profile-less object classifications."""
+    if manifest.get("formatVersion") != 1:
+        raise ValueError("Unsupported deployed-object candidate review format")
+    shapes_for_classification = {
+        "deployed-scenery-s-only": "s-only-scenery",
+        "deployed-object-curated-trooper-profile": "curated-special-profile",
+        "user-tool-not-deployed-object": "none",
+        "assignable-single-use-not-deployed-object": "none",
+    }
+    reviewed = []
+    seen: set[str] = set()
+    for entry in manifest["reviews"]:
+        record_id = entry["recordId"]
+        if record_id in seen:
+            raise ValueError(f"Duplicate candidate decision: {record_id}")
+        seen.add(record_id)
+        record = records.get(record_id)
+        if record is None or (record.get("composition") or {}).get("role") != "definition":
+            raise ValueError(f"Missing candidate definition: {record_id}")
+        classification = entry["classification"]
+        shape = entry["profileShape"]
+        if shapes_for_classification.get(classification) != shape:
+            raise ValueError(f"Unsupported candidate classification/shape: {record_id}")
+        if entry["summaryEvidence"] not in record.get("summary", ""):
+            raise ValueError(f"Candidate summary evidence drift: {record_id}")
+        facts = record.get("facts") or {}
+        detail = "\n".join(
+            str(fragment)
+            for key in ("requirements", "effects", "restrictions", "sourceNotes")
+            for fragment in facts.get(key, [])
+        )
+        if any(fragment not in detail for fragment in entry["factsEvidence"]):
+            raise ValueError(f"Candidate detailed evidence drift: {record_id}")
+        pages = {
+            cite["page"] for cite in record.get("citations", [])
+            if cite.get("sourceId") == "n5-core-v5.3-pdf" and cite.get("page") is not None
+        }
+        if not entry["sourcePages"] or not set(entry["sourcePages"]) <= pages:
+            raise ValueError(f"Candidate N5.3 citation drift: {record_id}")
+        attributes = entry["knownAttributes"]
+        unknown = entry["unreportedAttributes"]
+        if len(unknown) != len(set(unknown)) or set(attributes) & set(unknown):
+            raise ValueError(f"Duplicate or conflicting candidate attribute claims: {record_id}")
+        if not set(attributes) | set(unknown) <= {"ARM", "BTS", "STR", "S"}:
+            raise ValueError(f"Unexpected candidate attribute: {record_id}")
+        special = facts.get("specialProfile")
+        if shape == "curated-special-profile":
+            if not isinstance(special, dict):
+                raise ValueError(f"Missing curated object profile: {record_id}")
+            source_stats = dict(special["stats"])
+            if any(source_stats.get(name) != value for name, value in attributes.items()):
+                raise ValueError(f"Curated object profile drift: {record_id}")
+            if set(attributes) != {"ARM", "BTS", "STR", "S"} or unknown:
+                raise ValueError(f"Unreviewed special-profile attribute shape: {record_id}")
+        elif shape == "s-only-scenery":
+            if special is not None or attributes != {"S": "3"} or set(unknown) != {
+                "ARM", "BTS", "STR"
+            }:
+                raise ValueError(f"Unsupported scenery profile shape: {record_id}")
+            if "Silhouette S3" not in detail:
+                raise ValueError(f"Missing explicit scenery Silhouette: {record_id}")
+        elif special is not None or attributes or unknown:
+            raise ValueError(f"False missing-profile or non-object claim: {record_id}")
+        reviewed.append({**entry, "reviewStatus": "source-backed-audit-only"})
+    return reviewed
+
+
 def audit_inventory(
     army_db: Path,
     curated_source: Path,
     delivery_reviews: Path | None = None,
+    candidate_reviews: Path | None = None,
 ) -> dict[str, Any]:
     with sqlite3.connect(f"{army_db.resolve().as_uri()}?mode=ro", uri=True) as conn:
         conn.row_factory = sqlite3.Row
@@ -198,6 +270,14 @@ def audit_inventory(
             "citations": _citation_summary(record),
         })
 
+    decisions = (
+        validate_candidate_reviews(
+            json.loads(candidate_reviews.read_text(encoding="utf-8")), records
+        )
+        if candidate_reviews is not None else []
+    )
+    decided_ids = {decision["recordId"] for decision in decisions}
+
     return {
         "formatVersion": 1,
         "scope": "candidate-inventory-not-canonical-object-model",
@@ -218,6 +298,14 @@ def audit_inventory(
             )
             if delivery_reviews is not None else []
         ),
+        "candidateReviewSha256": (
+            hashlib.sha256(candidate_reviews.read_bytes()).hexdigest()
+            if candidate_reviews is not None else None
+        ),
+        "reviewedCandidateDecisions": decisions,
+        "remainingCuratedCandidateMentions": [
+            row for row in candidates if row["recordId"] not in decided_ids
+        ],
     }
 
 
@@ -232,10 +320,15 @@ def main() -> int:
         "--delivery-reviews", type=Path,
         default=Path("config/validation/deployed-object-delivery-reviews.json"),
     )
+    parser.add_argument(
+        "--candidate-reviews", type=Path,
+        default=Path("config/validation/deployed-object-candidate-reviews.json"),
+    )
     parser.add_argument("--json-output", type=Path)
     arguments = parser.parse_args()
     report = audit_inventory(
-        arguments.army_db, arguments.curated_source, arguments.delivery_reviews
+        arguments.army_db, arguments.curated_source,
+        arguments.delivery_reviews, arguments.candidate_reviews,
     )
     result = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     if arguments.json_output is not None:

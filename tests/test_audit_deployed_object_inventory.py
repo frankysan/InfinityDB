@@ -13,6 +13,7 @@ from tools.audit_deployed_object_inventory import (
     CHART_AUXILIARY,
     _profile_stats,
     audit_inventory,
+    validate_candidate_reviews,
     validate_delivery_reviews,
 )
 
@@ -126,8 +127,33 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         db_path,
         root / "data/curated/rules/n5-core-v5.3.json",
         root / "config/validation/deployed-object-delivery-reviews.json",
+        root / "config/validation/deployed-object-candidate-reviews.json",
     )
     assert len(result["reviewedDeliveryPaths"]) == 6
+    assert len(result["reviewedCandidateDecisions"]) == 4
+    assert len(result["candidateReviewSha256"]) == 64
+    by_id = {
+        entry["recordId"]: entry for entry in result["reviewedCandidateDecisions"]
+    }
+    assert set(by_id) == {
+        "equipment:deployable-cover", "weapon:armed-turret",
+        "equipment:deactivator", "weapon:symbiobomb",
+    }
+    assert by_id["equipment:deployable-cover"]["knownAttributes"] == {"S": "3"}
+    assert set(by_id["equipment:deployable-cover"]["unreportedAttributes"]) == {
+        "ARM", "BTS", "STR",
+    }
+    assert by_id["weapon:armed-turret"]["knownAttributes"] == {
+        "ARM": "2", "BTS": "3", "STR": "1", "S": "2",
+    }
+    assert by_id["equipment:deactivator"]["profileShape"] == "none"
+    assert by_id["weapon:symbiobomb"]["profileShape"] == "none"
+    assert {
+        candidate["recordId"] for candidate in result["remainingCuratedCandidateMentions"]
+    }.isdisjoint(by_id)
+    assert len(result["remainingCuratedCandidateMentions"]) < len(
+        result["curatedCandidateMentions"]
+    )
     assert len(result["deliveryReviewSha256"]) == 64
     assert len(result["chartProfiles"]) == 14
     assert all(
@@ -231,4 +257,46 @@ def test_delivery_reviews_require_pinned_curated_evidence_and_exact_source_modes
     )
     with pytest.raises(ValueError, match="Missing object rules owner"):
         validate_delivery_reviews(tampered, records, profiles)
+
+def test_candidate_review_shapes_are_pinned_and_fail_closed() -> None:
+    root = Path(__file__).resolve().parents[1]
+    reviews = json.loads(
+        (root / "config/validation/deployed-object-candidate-reviews.json")
+        .read_text(encoding="utf-8")
+    )
+    records = {
+        record["id"]: record
+        for record in json.loads(
+            (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+        )["records"]
+        if record["kind"] in {"weapon", "equipment"}
+    }
+    approved = validate_candidate_reviews(reviews, records)
+    assert len(approved) == 4
+    assert all(row["reviewStatus"] == "source-backed-audit-only" for row in approved)
+
+    def mutated(index: int, field: str, value: object) -> dict:
+        result = copy.deepcopy(reviews)
+        result["reviews"][index][field] = value
+        return result
+
+    cases = (
+        (0, "summaryEvidence", "No source supports this", "summary evidence"),
+        (0, "sourcePages", [999], "citation"),
+        (0, "factsEvidence", ["No evidence"], "detailed evidence"),
+        (0, "knownAttributes", {"S": "1"}, "scenery profile"),
+        (1, "knownAttributes", {"ARM": "2", "BTS": "3", "STR": "1", "S": "1"},
+         "profile drift"),
+        (2, "knownAttributes", {"S": "1"}, "missing-profile"),
+        (3, "classification", "invented-object", "classification"),
+    )
+    for index, field, value, message in cases:
+        with pytest.raises(ValueError, match=message):
+            validate_candidate_reviews(mutated(index, field, value), records)
+
+    duplicate = copy.deepcopy(reviews)
+    duplicate["reviews"].append(copy.deepcopy(duplicate["reviews"][0]))
+    with pytest.raises(ValueError, match="Duplicate"):
+        validate_candidate_reviews(duplicate, records)
+
 

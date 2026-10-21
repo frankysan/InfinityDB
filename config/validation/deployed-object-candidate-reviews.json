@@ -1,0 +1,51 @@
+{
+  "format": "InfinityDB deployed-object candidate decisions",
+  "formatVersion": 1,
+  "scope": "audit-only; no canonical object IDs, missing-value defaults, or roster relationships",
+  "reviews": [
+    {
+      "recordId": "equipment:deployable-cover",
+      "classification": "deployed-scenery-s-only",
+      "sourcePages": [122],
+      "summaryEvidence": "places a Scenery Element for Partial Cover",
+      "factsEvidence": ["The placed Scenery Element has Silhouette S3.", "Cutting Foam", "Vitroferro"],
+      "profileShape": "s-only-scenery",
+      "knownAttributes": {"S": "3"},
+      "unreportedAttributes": ["ARM", "BTS", "STR"],
+      "caveat": "S3 is an explicit scenery Silhouette, not evidence of conventional ARM/BTS/STR or a separate Army Weapon profile."
+    },
+    {
+      "recordId": "weapon:armed-turret",
+      "classification": "deployed-object-curated-trooper-profile",
+      "sourcePages": [70, 74, 195],
+      "summaryEvidence": "A stationary [[trait:deployable|Deployable]] Weapon",
+      "factsEvidence": ["Unresolved Silhouette conflict", "S1", "S2"],
+      "profileShape": "curated-special-profile",
+      "knownAttributes": {"ARM": "2", "BTS": "3", "STR": "1", "S": "2"},
+      "unreportedAttributes": [],
+      "caveat": "Detailed profile S2 is retained alongside the conflicting S1 summary; no official precedence is inferred."
+    },
+    {
+      "recordId": "equipment:deactivator",
+      "classification": "user-tool-not-deployed-object",
+      "sourcePages": [121],
+      "summaryEvidence": "This is a Short Skill (Attack), not [[skill:place-deployable|Place Deployable]].",
+      "factsEvidence": ["The target must be an enemy Weapon or piece of Equipment with the [[trait:deployable]] Trait"],
+      "profileShape": "none",
+      "knownAttributes": {},
+      "unreportedAttributes": [],
+      "caveat": "Deactivator targets deployed objects; it is not one of them, and its user is not their carrier."
+    },
+    {
+      "recordId": "weapon:symbiobomb",
+      "classification": "assignable-single-use-not-deployed-object",
+      "sourcePages": [74],
+      "summaryEvidence": "The assignment does not transfer the owner's Unit Profile entry.",
+      "factsEvidence": [],
+      "profileShape": "none",
+      "knownAttributes": {},
+      "unreportedAttributes": [],
+      "caveat": "An assigned single-use Weapon with Pheroware tactics, not an independent four-stat Model/Token profile or a deployed battlefield object."
+    }
+  ]
+}
