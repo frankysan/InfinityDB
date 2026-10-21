@@ -288,16 +288,6 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Prove that scope is visible and unrelated scenario/season overlays do not leak into core help.
       - [ ] Review remaining shared scenario concepts, collection-specific
         supplements and normal browser presentation for the complete 1.0 scope.
-  - [ ] Complete the **N5.3 Infinity Spec-Ops / Request SpecBall** reference
-    procedure (REA-040) as a scoped, player-facing rules slice. Review core rules
-    v5.3 p. 98 and the dated N5.3 update evidence for the request timing,
-    declaration, token/roll consequences and limitations; verify the currently
-    published Skill and any related reference before changing it. Curate only
-    source-supported facts, link the procedure from the relevant Skill and
-    ordinary rules navigation, and test storage/export, API, normal browser
-    access and source citations. Preserve the separate ITS Team-Ops permission
-    and ordinary Spec-Ops tournament restriction as season-scoped material;
-    no saved-list configurator or ITS scenario expansion is required.
   - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
     annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
     and `Request Reinforcements`, link the capability they create to the annex
