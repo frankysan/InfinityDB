@@ -261,6 +261,10 @@ def assert_relationship_rows(
             title = f"{item.get('name') or 'Peripheral'}{suffix}{type_suffix}"
             if title not in row["text"]:
                 raise AssertionError(f"{context}: missing Peripheral {title}")
+            if item.get("source_only") and not label and f"{title} (" in row["text"]:
+                raise AssertionError(
+                    f"{context}: source-only Peripheral gained an unreviewed type"
+                )
             result["peripherals"] += 1
     if expected_access:
         row = next(
@@ -452,7 +456,16 @@ def verify(
                             )
                             if response is None or response.status != 200:
                                 raise AssertionError("Unit page HTTP response not 200")
-                            page.locator("#unit-content").wait_for(state="visible")
+                            try:
+                                page.locator("#unit-content").wait_for(
+                                    state="visible", timeout=60000,
+                                )
+                            except Exception as exc:
+                                status = page.locator("#unit-status").text_content()
+                                raise AssertionError(
+                                    f"Unit content not visible: status={status!r}, "
+                                    f"JavaScript errors={errors!r}"
+                                ) from exc
                             api = context.request.get(
                                 _unit_api_url(base, slug, filters), timeout=15000,
                             )

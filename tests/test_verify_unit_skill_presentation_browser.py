@@ -296,20 +296,20 @@ def test_live_chromium_contextual_relationship_cohort() -> None:
             peripheral_counts = {
                 table: db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
                 for table in (
-                    "option_peripherals", "application_peripheral_sources",
-                    "application_peripheral_entities",
+                    "option_peripherals", "application_peripheral_source_labels",
+                    "application_peripheral_sources", "application_peripheral_entities",
                     "application_peripheral_controller_access",
                 )
             }
         assert peripheral_counts["option_peripherals"] == 818
+        assert peripheral_counts["application_peripheral_source_labels"] > 0
         assert peripheral_counts["application_peripheral_sources"] == 0
         assert peripheral_counts["application_peripheral_entities"] == 0
-        assert totals["peripherals"] == 0, (slugs, totals, peripheral_counts)
-        # Raw Peripheral occurrences cannot be resolved without publishing
-        # source definitions or reviewed canonical mappings; classify as an
-        # open publication gap rather than guessing their type in this gate.
-        # Controller-access rows are also empty in the pinned publication.
+        assert totals["peripherals"] > 0, (slugs, totals, peripheral_counts)
+        # The source-only publication must not fabricate reviewed Peripheral
+        # identities or Controller-access relationships.
         assert peripheral_counts["application_peripheral_controller_access"] == 0
+        assert totals["controllerTargets"] == 0
     finally:
         server.shutdown()
         server.server_close()
@@ -637,6 +637,22 @@ def test_contextual_relationship_rows_fail_closed_on_missing_links_and_targets()
     ):
         with pytest.raises(AssertionError, match=error):
             assert_relationship_rows(altered_rows, source, "101", anchors, "fixture")
+
+
+def test_source_only_peripheral_has_no_inferred_type_in_browser() -> None:
+    source = {
+        "peripherals": [
+            {"name": "Auxiliary", "quantity": 2, "type_id": None, "source_only": True}
+        ]
+    }
+    assert assert_relationship_rows(
+        [_row("Peripherals", "Auxiliary ×2")], source, "101", set(), "source-only"
+    )["peripherals"] == 1
+    with pytest.raises(AssertionError, match="unreviewed type"):
+        assert_relationship_rows(
+            [_row("Peripherals", "Auxiliary ×2 (—)")],
+            source, "101", set(), "source-only",
+        )
 
 
 def test_browser_dom_checks_scoped_shared_and_army_local_rows() -> None:

@@ -232,6 +232,49 @@ def canonical_database_template(tmp_path_factory: pytest.TempPathFactory) -> Pat
     return path
 
 
+def test_source_only_peripheral_attachments_roundtrip_published_database(
+    tmp_path: Path, normalized: dict,
+) -> None:
+    """Publish source facts without fabricating reviewed Peripheral identities."""
+    target = tmp_path / "army.db"
+    export_database(normalized, target)
+    with sqlite3.connect(target) as db, sqlite3.connect(raw_database_path(target)) as raw:
+        assert db.execute(
+            "SELECT COUNT(*) FROM sqlite_master WHERE name = 'peripherals'"
+        ).fetchone()[0] == 0
+        labels = db.execute(
+            "SELECT army_id, peripheral_id, source_name "
+            "FROM application_peripheral_source_labels ORDER BY army_id, peripheral_id"
+        ).fetchall()
+        assert labels
+        for army_id, peripheral_id, name in labels:
+            assert name and name == raw.execute(
+                "SELECT name FROM peripherals WHERE army_id = ? AND id = ?",
+                (army_id, peripheral_id),
+            ).fetchone()[0]
+        assert db.execute(
+            "SELECT COUNT(*) FROM application_peripheral_entities"
+        ).fetchone()[0] == 0
+
+    unit = Database(target).get_unit("alpha")
+    assert unit is not None
+    attached = [
+        item
+        for army in unit["armies"]
+        for kind in ("profiles", "loadouts")
+        for context in army[kind]
+        for item in context.get("peripherals") or []
+    ]
+    assert attached
+    assert all(
+        item["source_only"] is True
+        and item["name"] == "Drone"
+        and item["type_id"] is None
+        and item["id"].startswith("source-peripheral:")
+        for item in attached
+    )
+
+
 @pytest.fixture
 def canonical_database_path(
     tmp_path: Path, canonical_database_template: Path

@@ -124,8 +124,8 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     affected coverage review; normal checks must not acquire newer inputs implicitly.
     Include relevant dated official Corvus Belli rules-update posts as supplementary
     release-change evidence (not replacements for the versioned primary sources).
-    - [x] Refresh the **current Army/rules database-pair baseline** from the
-      exact September 29 pinned Army ZIP. The ignored
+    - [x] Archive the **pre-Peripheral-projection Army/rules database-pair baseline**
+      from the exact September 29 pinned Army ZIP. The ignored
       `local/audits/gate-1.0/reference-baseline-current-20261021.{json,md}`
       records 58 matched Army documents, 23 published categories and 122
       source groups; Army SHA-256
@@ -136,7 +136,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       `3079979bca345289fbc20f1ef3272ec0e706659f20718435b237867f847ef2fe`.
       The earlier `reference-baseline.{json,md}` is retained as historical
       evidence; neither report certifies gameplay or browser completeness.
-      Refresh again if the release-candidate databases or source pins change.
+      The Army database was subsequently rebuilt for the source-only
+      Peripheral publication (schema 26, compatibility 35; SHA-256
+      `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`).
+      That earlier baseline remains historical, not current candidate evidence.
+    - [ ] Refresh the release-candidate baseline and source occupancy gate once
+      the Army/rules database pair is frozen for 1.0. Do not reuse the
+      pre-Peripheral-projection publication SHA or paired runtime revision.
   - [ ] Reconcile each N5 update-post changelog item with its applicable versioned
     Army snapshot, rules/FAQ PDF, exact Wiki revision, and available historical N5
     versions. Record unmatched announcement claims and unknown release/snapshot
@@ -150,8 +156,8 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     not establish PDF, FAQ, or scenario completeness or prove browser usability; add the missing
     source review and presentation checks explicitly.
     - [x] Check **statically unrepresented Army source-field occupancy** against the
-      current paired raw/application database. The pinned September 29 Army publication
-      (`infinity.db` SHA-256 `ec77c5d1fd742bcefb3975dd223550fe3a51053d39fbdb34ce814e3ddd62e6c9`)
+      paired raw/application database. The September 29 Army snapshot
+      (reexported SHA-256 `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`)
       has **0 populated fields out of 39 unrepresented candidates** across 70 source
       tables/441 fields. This includes global Unit-option Skill/Equipment/Weapon references,
       Extras and Characteristics, and profile/group notes; no currently occupied missing
@@ -182,20 +188,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           Empty and malformed link/quantity/Controller-access cases are checked
           separately in hermetic regressions. This is bounded browser parity,
           not all-Unit or gameplay-list validation.
-        - [ ] **Publish source-only Peripheral attachment labels for ordinary Unit
-          reference.** The pinned Army publication contains **818**
-          `option_peripherals` occurrences but zero
-          `application_peripheral_sources`, `application_peripheral_entities`,
-          and Controller-access rows. The Unit API currently inner-joins the
-          empty materialized catalog, so these attachments are omitted from the
-          normal Unit browser. The original `peripherals` source-definition
-          table exists only in the paired raw database, **not** in the runtime
-          database; simply joining it from the Unit API produces HTTP 503.
-          Design a deterministic source-definition projection into published
-          storage, preserve Army-local source identity/name/quantity and existing
-          reviewed mappings, and show source labels without inventing a
-          Peripheral type or Controller assignment. Cover importer/publication,
-          API, normal browser and mismatch/unknown-source cases before closing.
+        - [x] **Publish source-only Peripheral attachment labels** without
+          inferring identity, type or Controller assignment. Deterministically
+          project attached Army-local `peripherals` names into the new
+          `application_peripheral_source_labels` runtime table; the raw
+          definition table remains excluded. The existing reviewed mappings
+          take precedence when present; unmapped profile/loadout attachments
+          retain their name, quantity and explicit source-local identity in
+          API and normal Unit rows (no placeholder Peripheral type). Missing
+          or drifted source definitions fail validation. Rebuilt the pinned
+          September 29 snapshot at compatibility version 35, Army SHA-256
+          `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`.
+          The source contains 818 `option_peripherals` occurrences; its
+          reviewed Peripheral entity/Controller tables remain empty.
+          Importer, API and real browser regressions cover the source-only
+          projection. This resolves *attachment display*, not the separate
+          source-by-source review of Peripheral rules and Controller semantics.
         - [ ] Confirm the user-facing scope of Reinforcement parent/pool
           relationships and Fireteam FTO source details: the current Unit
           parentage section and Fireteam FTO column are developer-only.

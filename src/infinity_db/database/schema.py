@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 25
+SCHEMA_VERSION = 26
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 34
+DATABASE_COMPATIBILITY_VERSION = 35
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -578,6 +578,11 @@ DERIVED_TABLES = {
         ref("entity_id", "application_peripheral_entities", "id"),
         ref("profile_id", "application_peripheral_profiles", "id"),
     ),
+    "application_peripheral_source_labels": table(
+        "army_id peripheral_id",
+        "source_name",
+        ref("army_id peripheral_id", "peripherals", "army_id id"),
+    ),
     "application_peripheral_unit_sources": table(
         "source_unit_id",
         "logical_unit_id type_id source_id source_name",
@@ -771,6 +776,11 @@ INDEXES = (
         "application_peripheral_sources_entity",
         "application_peripheral_sources",
         "entity_id, army_id, peripheral_id",
+    ),
+    (
+        "application_peripheral_source_labels_name",
+        "application_peripheral_source_labels",
+        "source_name, army_id, peripheral_id",
     ),
     (
         "application_peripheral_unit_sources_logical",

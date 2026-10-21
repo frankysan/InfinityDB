@@ -11,8 +11,8 @@ def test_availability_semantics_are_explicit_schema_fields() -> None:
     assert "source_role" in TABLES["units"].fields
     assert "display_army_id" in TABLES["units"].fields
     assert "availability_kind" in TABLES["army_units"].fields
-    assert SCHEMA_VERSION == 25
-    assert DATABASE_COMPATIBILITY_VERSION == 34
+    assert SCHEMA_VERSION == 26
+    assert DATABASE_COMPATIBILITY_VERSION == 35
 
 
 def test_logical_unit_identity_is_frontend_derived_schema() -> None:
@@ -42,6 +42,7 @@ def test_logical_unit_identity_is_frontend_derived_schema() -> None:
         "application_peripheral_entities",
         "application_peripheral_profiles",
         "application_peripheral_sources",
+        "application_peripheral_source_labels",
         "application_peripheral_unit_sources",
         "application_peripheral_controller_access",
         "application_peripheral_controller_targets",

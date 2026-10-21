@@ -449,7 +449,8 @@ function peripheralItems(items) {
     const quantity = item.quantity != null && Number(item.quantity) !== 1
       ? ` ×${item.quantity}`
       : "";
-    const label = `${item.name || "Peripheral"}${quantity} (${peripheralTypeLabel(item)})`;
+    const type = item.type_label || item.type_id;
+    const label = `${item.name || "Peripheral"}${quantity}${type ? ` (${type})` : ""}`;
     if (index) result.append(", ");
     result.append(document.createTextNode(label));
   });
