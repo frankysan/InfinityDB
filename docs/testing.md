@@ -1048,10 +1048,21 @@ requires at least 12 candidate Units, 24 matched contexts, nonempty
 coverage in all six categories and actual Extra evidence. Ambiguous
 contexts and item duplicates intentionally coalesced by the logical
 presentation layer are excluded from strict cardinality comparison.
-This is not full-catalog parity, a check of every transformed bucket,
-or browser acceptance. The existing `test_unit_source_options_notes.py`
-already checks source-to-API parity for global Unit options, Orders and
-expanded Includes.
+The same module also verifies the cross-Army General Profile merge
+projection for logical Units with **multiple distinct source Unit IDs**.
+It independently checks the contributing visible Army Profile count,
+representative MOV/attribute statistics, BS/ARM/VITA difference labels,
+shared Weapons and loadout-specific Weapon deltas. Shared source
+Equipment must survive the Skill-to-Equipment reclassification overlay,
+and nonshared Equipment must remain in each army-specific presentation.
+The current pinned archive has no eligible case where distinct source Unit
+IDs collapse into a single army-local profile/loadout; this test does
+not claim to exercise that scenario. The regression requires a
+nonempty multi-Army sample with differing stats and shared/specific
+item evidence. It is not full-catalog parity, every transformed
+Skill bucket, or browser acceptance. The existing
+`test_unit_source_options_notes.py` already checks source-to-API
+parity for global Unit options, Orders and expanded Includes.
 
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for

@@ -184,6 +184,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     missing data. Existing source-option API regressions cover global
     Orders/Includes. Full-source API parity, transformed buckets and
     browser visibility remain open.
+  - [x] Verify cross-Army General Profile merging for a bounded pinned
+    multi-source logical Unit cohort: contributing occurrence counts,
+    modal attributes, BS/ARM/VITA difference labels, shared Weapons and
+    army-specific Weapon deltas, plus Equipment retention across reviewed
+    Skill reclassification. The pinned publication has no eligible
+    distinct-source-ID merges into one army-local profile/loadout;
+    do not claim that path as covered. Full merged variant/API and
+    browser completeness remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

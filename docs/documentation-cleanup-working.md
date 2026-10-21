@@ -771,3 +771,20 @@ Prefer targeted fixes rather than merging these.
   Pyright **0 errors/0 warnings**, Markdownlint **32 files/0 issues**,
   documentation links **30 files/0 errors**. The full suite and live
   Chromium were not run.
+- **Closeout pass 31, 2026-10-21:** Extended the maintained Unit API
+  regression to cross-Army General Profiles for logical Units composed
+  from multiple source Unit IDs. The pinned dataset does not exercise
+  distinct-source-ID merges inside one army-local profile/loadout.
+  Checked actual contributing profile counts, representative statistics,
+  BS/ARM/VITA difference labels, shared and army-specific Weapon
+  projections, and Equipment retention through source-Skill
+  reclassification. Requires nonempty cross-Army differences; full
+  merged-variant API and browser coverage remain separate.
+- **Validation:** 15 tests passed across
+  `tests/test_unit_source_api_parity.py` (3),
+  `tests/test_unit_source_options_notes.py` (2), and
+  `tests/test_non_skill_army_presentation.py` (10).
+  Ruff **PASS**, Pyright **0 errors/0 warnings**,
+  Markdownlint **32 files/0 issues** and offline
+  documentation links **30 files/0 errors**.
+  Full suite and live Chromium were not run.

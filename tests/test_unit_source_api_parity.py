@@ -168,3 +168,183 @@ def test_source_unique_profile_loadout_references_reach_unit_api() -> None:
         for kind in ("profile", "loadout")
         for field, _ in REFERENCE_FIELDS
     ), checked
+
+
+def _presentation_item_key(item: dict[str, Any]) -> tuple[Any, ...]:
+    """Use the visible presentation identity, including canonical quantity."""
+    quantity = item.get("quantity")
+    if quantity is None or quantity == 1:
+        quantity = None
+    extras = tuple(sorted(
+        (extra["id"] for extra in item.get("extras", ())),
+        key=str,
+    ))
+    return (item["id"], quantity, extras)
+
+
+def _common_presentation_items(
+    contexts: list[dict[str, Any]], field: str,
+) -> list[tuple[Any, ...]]:
+    if not contexts:
+        return []
+    first = [_presentation_item_key(item) for item in contexts[0][field]]
+    return list(dict.fromkeys(
+        identity for identity in first
+        if all(
+            any(_presentation_item_key(item) == identity for item in other[field])
+            for other in contexts[1:]
+        )
+    ))
+
+
+def _modal_stat(profiles: list[dict[str, Any]], field: str) -> Any:
+    values = [p[field] for p in profiles if p.get(field) not in (None, "")]
+    return Counter(values).most_common(1)[0][0] if values else None
+
+
+def test_presentation_shared_identity_preserves_quantities_and_extra_variants() -> None:
+    def item(quantity: int | None, extras: list[int]) -> dict[str, Any]:
+        return {
+            "id": 31, "quantity": quantity,
+            "extras": [{"id": value} for value in extras],
+        }
+
+    first = {"weapons": [item(1, [43, 42]), item(2, [42]), item(1, [43, 42])]}
+    second = {"weapons": [item(None, [42, 43]), item(3, [42])]}
+    assert _common_presentation_items([first, second], "weapons") == [
+        (31, None, (42, 43))
+    ]
+    assert _presentation_item_key(item(2, [42])) == (31, 2, (42,))
+    assert _common_presentation_items([], "weapons") == []
+
+
+def test_multi_source_general_profiles_preserve_army_differences() -> None:
+    """Verify cross-Army shared/delta projection for multi-source logical Units."""
+    assert ARMY_DB.is_file() and RULES_DB.is_file()
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    checked_units = 0
+    checked_general = 0
+    checked_shared_weapons = 0
+    checked_specific_weapons = 0
+    checked_shared_equipment = 0
+    checked_specific_equipment = 0
+    checked_varied_statlines = 0
+    with sqlite3.connect(f"{ARMY_DB.resolve().as_uri()}?mode=ro", uri=True) as db:
+        candidates = db.execute(
+            "SELECT lu.slug FROM logical_units AS lu "
+            "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
+            "WHERE lu.slug IS NOT NULL "
+            "GROUP BY lu.id, lu.slug HAVING COUNT(DISTINCT lus.source_unit_id) > 1 "
+            "ORDER BY lu.slug"
+        ).fetchall()
+        assert candidates, "No multi-source logical Units in pinned publication"
+        for (slug,) in candidates:
+            unit = _api_unit(app, str(slug))
+            visible_armies = [
+                army for army in unit["armies"] if army["presentation_visible"]
+            ]
+            if len({army["id"] for army in visible_armies}) < 2:
+                continue
+            matched_for_unit = False
+            for general in unit["general_profiles"]:
+                identity = general["profile_identity"]
+                contributors = [
+                    (army, profile)
+                    for army in visible_armies
+                    for profile in army["profiles"]
+                    if profile["profile_identity"] == identity
+                ]
+                if len({army["id"] for army, _ in contributors}) < 2:
+                    continue
+                matched_for_unit = True
+                checked_general += 1
+                profiles = [profile for _, profile in contributors]
+                assert general["occurrence_count"] == len(profiles), (
+                    slug, identity, general["occurrence_count"], len(profiles)
+                )
+                for stat in (
+                    "move_1", "move_2", "cc", "bs", "ph", "wip",
+                    "arm", "bts", "vitality", "silhouette", "is_structure",
+                ):
+                    assert general["stats"][stat] == _modal_stat(profiles, stat), (
+                        slug, identity, stat, general["stats"][stat],
+                    )
+                for label, stat in (("BS", "bs"), ("ARM", "arm"), ("VITA", "vitality")):
+                    if any(p[stat] != profiles[0][stat] for p in profiles[1:]):
+                        assert label in general["different_stat_labels"], (
+                            slug, identity, label, general["different_stat_labels"]
+                        )
+                        checked_varied_statlines += 1
+                common_equipment = set(
+                    _common_presentation_items(profiles, "equipment")
+                )
+                displayed_equipment = {
+                    _presentation_item_key(item)
+                    for item in general["shared_items"]["equipment"]
+                }
+                # Reviewed Skill-to-Equipment reclassification may add
+                # equipment presentation items, but must not remove actual
+                # source Equipment shared across these profiles.
+                assert common_equipment <= displayed_equipment, (slug, identity)
+                checked_shared_equipment += len(common_equipment)
+                for _, profile in contributors:
+                    specific_equipment = {
+                        _presentation_item_key(item)
+                        for item in profile["specific_items"]["equipment"]
+                    }
+                    for item in profile["equipment"]:
+                        item_key = _presentation_item_key(item)
+                        if item_key not in displayed_equipment:
+                            assert item_key in specific_equipment, (
+                                slug, identity, item_key
+                            )
+                            checked_specific_equipment += 1
+                contexts = {
+                    (army["id"], profile["group_id"])
+                    for army, profile in contributors
+                }
+                matching_loadouts = [
+                    loadout for army in visible_armies
+                    for loadout in army["loadouts"]
+                    if (army["id"], loadout["group_id"]) in contexts
+                ]
+                expected = _common_presentation_items(matching_loadouts, "weapons")
+                actual = [
+                    _presentation_item_key(item)
+                    for item in general["shared_items"]["weapons"]
+                ]
+                assert actual == expected, (slug, identity, expected, actual)
+                checked_shared_weapons += len(expected)
+                shared = set(expected)
+                for loadout in matching_loadouts:
+                    expected_specific = [
+                        _presentation_item_key(item) for item in loadout["weapons"]
+                        if _presentation_item_key(item) not in shared
+                    ]
+                    actual_specific = [
+                        _presentation_item_key(item)
+                        for item in loadout["specific_items"]["weapons"]
+                    ]
+                    assert actual_specific == expected_specific, (
+                        slug, identity, loadout["name"],
+                        expected_specific, actual_specific,
+                    )
+                    checked_specific_weapons += len(expected_specific)
+            if matched_for_unit:
+                checked_units += 1
+            if (
+                checked_units >= 12 and checked_general >= 18
+                and checked_shared_weapons > 0
+                and checked_specific_weapons > 0
+                and checked_shared_equipment > 0
+                and checked_specific_equipment > 0
+                and checked_varied_statlines > 0
+            ):
+                break
+    assert checked_units >= 12, checked_units
+    assert checked_general >= 18, checked_general
+    assert checked_shared_weapons > 0, checked_shared_weapons
+    assert checked_specific_weapons > 0, checked_specific_weapons
+    assert checked_shared_equipment > 0, checked_shared_equipment
+    assert checked_specific_equipment > 0, checked_specific_equipment
+    assert checked_varied_statlines > 0, checked_varied_statlines
