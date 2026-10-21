@@ -2242,16 +2242,21 @@ def test_player_unit_tooltips_and_filter_context_use_game_language(app: Callable
     assert b"preview_tokens: item.summary_tokens" in unit_script
     assert b"copy.textContent = item.summary" not in unit_script
 
-    # Technical relationship explanations remain inside Developer-only sections.
-    for function, section, explanation in (
-        ("renderArmyRelationships", "army-relationships", "This source relationship"),
-        ("renderSelectionRelationships", "selection-relationships", "source-defined relationships"),
-    ):
-        block = unit_script.split(f"function {function}(".encode(), 1)[1].split(
-            b"\nfunction ", 1
-        )[0]
-        assert f'detail-group {section} developer-only'.encode() in block
-        assert explanation.encode() in block
+    # Reinforcement parentage is public, but broad faction memberships
+    # and technical selection relationships remain developer-only.
+    army_block = unit_script.split(b"function renderArmyRelationships(", 1)[1].split(
+        b"\nfunction ", 1
+    )[0]
+    assert b'if (!reinforcementRelations.length) section.classList.add("developer-only")' in (
+        army_block
+    )
+    assert b'diagnostic.className = "developer-only"' in army_block
+    assert b"This source relationship" in army_block
+    selection_block = unit_script.split(b"function renderSelectionRelationships(", 1)[1].split(
+        b"\nfunction ", 1
+    )[0]
+    assert b'detail-group selection-relationships developer-only' in selection_block
+    assert b"source-defined relationships" in selection_block
 
     status, _, units_script = request(app, "/static/units.js")
     assert status == 200
@@ -4443,14 +4448,19 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200
     assert b"function renderArmyRelationships(unit, armies)" in unit_js
-    assert b'heading("Army relationships")' in unit_js
-    assert b'section.className = "detail-group army-relationships developer-only";' in unit_js
+    assert b'"Reinforcement relationships" : "Army relationships"' in unit_js
+    assert b'section.className = "detail-group army-relationships";' in unit_js
+    assert b'if (!reinforcementRelations.length) section.classList.add("developer-only")' in (
+        unit_js
+    )
+    assert b'diagnostic.className = "developer-only";' in unit_js
     assert b'link.href = shareStateHref("/units", "units", { army_id: identifier });' in unit_js
     assert (
         b'link.href = shareStateHref("/units", "units", '
         b'{ declared_faction_id: membership.source_faction_id });' in unit_js
     )
-    assert b"broader source-declared faction membership separately" in unit_js
+    assert b"not a complete Army List validation" in unit_js
+    assert b"broader than current Army-list" in unit_js
     assert b"this faction identity has no current Army list" in unit_js
 
     status, _, units_js = request(app, "/static/units.js")

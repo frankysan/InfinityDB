@@ -204,12 +204,30 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           Importer, API and real browser regressions cover the source-only
           projection. This resolves *attachment display*, not the separate
           source-by-source review of Peripheral rules and Controller semantics.
-        - [ ] Confirm the user-facing scope of Reinforcement parent/pool
-          relationships and Fireteam FTO source details: the current Unit
-          parentage section and Fireteam FTO column are developer-only.
-          Distinguish deliberately deferred roster-building or diagnostic
-          data from necessary N5 player reference, and test any accepted
-          player-facing exposure and cross-page links before closing.
+        - [x] Expose source-backed **Reinforcement Section/parent links** in
+          ordinary Unit details. Link to each selected Army's Unit Explorer
+          view; restrict player-visible relationships to Army contexts that
+          pass the optional-unit presentation filter. Broader declared-faction
+          memberships and source IDs remain developer-only rather than
+          implying legal Army-list membership. A pinned-source Chromium case
+          verifies named parent links and share-state routes at 1440/390 px.
+          This is a read-only reference, not roster legality validation.
+        - [ ] Review **Fireteam FTO eligibility** separately before exposing
+          the existing developer-only FTO Profiles column. It contains
+          member-specific, Army-local source markers and matching loadout
+          occurrences, not a generic Unit-wide entitlement. Classify the
+          `audit_fireteam_semantics.py` resolved, context-mismatch, and
+          no-matching-option cases; show only verified player-useful
+          eligibility (with Unit/profile links where unambiguous) and keep
+          unresolved or diagnostic provenance labeled. Preserve the Notes
+          column's developer-only policy unless an actual player-facing
+          rule gap requires reviewed publication. Test API-to-Fireteam
+          browser parity, desktop/mobile layout and wildcards before closure.
+        - [ ] Confirm whether the normal **Army overview** needs explicit
+          Reinforcement parent/section relationships beyond Unit Explorer's
+          now-accessible source-backed links; validate any new links with
+          the corresponding Army API and normal browser. Do not build an
+          Army List editor or infer composition legality.
     - [ ] Obtain independent human visual acceptance if required for the 1.0
       release; agent-reviewed screenshots and automated browser assertions
       are evidence, not a human sign-off.

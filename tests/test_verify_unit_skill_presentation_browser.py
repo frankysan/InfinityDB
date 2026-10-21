@@ -242,6 +242,91 @@ def _relationship_cohort(database_path: Path) -> tuple[str, ...]:
     return tuple(selected)
 
 
+def test_reinforcement_parentage_is_visible_without_developer_mode() -> None:
+    """A real Reinforcement Unit must link to its source-backed parent Army."""
+    pytest.importorskip("playwright.sync_api")
+    from playwright.sync_api import sync_playwright
+
+    root = Path(__file__).resolve().parents[1]
+    database = root / "data/generated/infinity.db"
+    app = create_app(
+        database, rules_database_path=root / "data/generated/rules.db",
+    )
+
+    class ThreadedServer(ThreadingMixIn, WSGIServer):
+        daemon_threads = True
+
+    class QuietHandler(WSGIRequestHandler):
+        def log_message(self, format: str, *args: object) -> None:
+            pass
+
+    server = make_server(
+        "127.0.0.1", 0, app, server_class=ThreadedServer,
+        handler_class=QuietHandler,
+    )
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        base = f"http://127.0.0.1:{server.server_port}"
+        selected = None
+        for slug in _optional_source_candidates(database, "reinforcement"):
+            with urlopen(_unit_api_url(base, slug, {}), timeout=12) as response:
+                unit = json.load(response)
+            relations = [
+                army for army in unit["armies"]
+                if army.get("presentation_visible") and army.get("parent_armies")
+            ]
+            if relations:
+                selected = (slug, relations)
+                break
+        assert selected is not None, "No source-backed visible Reinforcement parentage"
+        slug, relations = selected
+        expected = {
+            army["name"] for army in relations
+        } | {
+            parent["name"] for army in relations for parent in army["parent_armies"]
+        }
+
+        with sync_playwright() as driver:
+            try:
+                browser = driver.chromium.launch(channel="chrome")
+            except Exception as exc:
+                if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                    pytest.skip(f"Chromium unavailable: {exc}")
+                raise
+            try:
+                for width in (1440, 390):
+                    page = browser.new_page(viewport={"width": width, "height": 900})
+                    try:
+                        page.goto(f"{base}/units/{slug}", wait_until="domcontentloaded")
+                        page.locator("#unit-content").wait_for(
+                            state="visible", timeout=60000,
+                        )
+                        section = page.locator(".army-relationships")
+                        assert section.is_visible(), (slug, width)
+                        assert "Reinforcement relationships" in section.inner_text()
+                        public_list = section.locator(".army-relationship-surface > ul")
+                        assert public_list.is_visible(), (slug, width)
+                        links = public_list.locator("a[href]")
+                        names = set(links.all_text_contents())
+                        assert expected <= names, (slug, width, expected - names)
+                        assert all(
+                            href.startswith("/units?s=v1.u.")
+                            for href in links.evaluate_all(
+                                "(links) => links.map(link => link.getAttribute('href'))"
+                            )
+                        )
+                        assert not section.locator(".developer-only").first.is_visible()
+                    finally:
+                        page.close()
+            finally:
+                browser.close()
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
 def test_source_backed_relationship_cohort_is_distinct() -> None:
     root = Path(__file__).resolve().parents[1]
     cohort = _relationship_cohort(root / "data/generated/infinity.db")

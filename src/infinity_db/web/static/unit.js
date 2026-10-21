@@ -681,7 +681,10 @@ function renderSourceNotes(unit, armies) {
 }
 
 function renderArmyRelationships(unit, armies) {
-  const uniqueArmies = [...new Map(armies.map((army) => [Number(army.id), army])).values()];
+  const uniqueArmies = [...new Map(
+    armies.filter((army) => army.presentation_visible !== false)
+      .map((army) => [Number(army.id), army]),
+  ).values()];
   const reinforcementRelations = uniqueArmies.filter((army) => (
     (army.parent_armies || []).length || (army.reinforcement_sections || []).length
   ));
@@ -689,8 +692,11 @@ function renderArmyRelationships(unit, armies) {
   if (!reinforcementRelations.length && !declaredFactions.length) return null;
 
   const section = document.createElement("section");
-  section.className = "detail-group army-relationships developer-only";
-  const title = heading("Army relationships");
+  section.className = "detail-group army-relationships";
+  if (!reinforcementRelations.length) section.classList.add("developer-only");
+  const title = heading(
+    reinforcementRelations.length ? "Reinforcement relationships" : "Army relationships",
+  );
   title.className = "detail-heading detail-heading--rule";
   section.append(title);
 
@@ -698,8 +704,8 @@ function renderArmyRelationships(unit, armies) {
   surface.className = "surface surface--clipped content-frame connected-unit-surface army-relationship-surface";
   const intro = document.createElement("p");
   intro.className = "army-relationship-intro";
-  intro.textContent = "Army availability is shown in the profile sections below. These links show "
-    + "Reinforcement parentage and broader source-declared faction membership separately.";
+  intro.textContent = "These links identify which Armies use each Reinforcement Section. "
+    + "They describe source availability, not a complete Army List validation.";
   surface.append(intro);
 
   if (reinforcementRelations.length) {
@@ -736,12 +742,14 @@ function renderArmyRelationships(unit, armies) {
   }
 
   if (declaredFactions.length) {
-    surface.append(subheading("Declared faction membership"));
+    const diagnostic = document.createElement("div");
+    diagnostic.className = "developer-only";
+    diagnostic.append(subheading("Declared faction membership"));
     const explanation = document.createElement("p");
     explanation.className = "army-relationship-note";
     explanation.textContent = "This source relationship is broader than current Army-list "
       + "availability. Follow a faction link to find other Units with the same declaration.";
-    surface.append(explanation);
+    diagnostic.append(explanation);
     const list = document.createElement("ul");
     list.className = "detail-list connected-unit-list";
     for (const membership of declaredFactions) {
@@ -760,7 +768,8 @@ function renderArmyRelationships(unit, armies) {
       item.append(provenance);
       list.append(item);
     }
-    surface.append(list);
+    diagnostic.append(list);
+    surface.append(diagnostic);
   }
 
   section.append(surface);
