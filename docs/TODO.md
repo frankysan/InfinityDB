@@ -124,14 +124,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     affected coverage review; normal checks must not acquire newer inputs implicitly.
     Include relevant dated official Corvus Belli rules-update posts as supplementary
     release-change evidence (not replacements for the versioned primary sources).
-    - [ ] Refresh the stored 1.0 reference-baseline report against the **current/final
-      Army and rules database pair**. The saved `local/audits/gate-1.0/reference-baseline.md`
-      cites rules SHA-256 `6d77db30e2d158517136b673e4619d765fea62a010a7f5835c8eef28a52046d9`,
-      whereas the current `rules.db` is
-      `3ab86945aaadf09c4104e3e08801531987957ffa866124f87c602609938cd3e3`.
-      Existing baseline tests pass, but that older report must not be treated
-      as current candidate/source-completeness evidence. Retain the new report
-      under ignored audit evidence; do not overwrite historical verification.
+    - [x] Refresh the **current Army/rules database-pair baseline** from the
+      exact September 29 pinned Army ZIP. The ignored
+      `local/audits/gate-1.0/reference-baseline-current-20261021.{json,md}`
+      records 58 matched Army documents, 23 published categories and 122
+      source groups; Army SHA-256
+      `ec77c5d1fd742bcefb3975dd223550fe3a51053d39fbdb34ce814e3ddd62e6c9`,
+      rules SHA-256
+      `3ab86945aaadf09c4104e3e08801531987957ffa866124f87c602609938cd3e3`,
+      paired runtime revision
+      `3079979bca345289fbc20f1ef3272ec0e706659f20718435b237867f847ef2fe`.
+      The earlier `reference-baseline.{json,md}` is retained as historical
+      evidence; neither report certifies gameplay or browser completeness.
+      Refresh again if the release-candidate databases or source pins change.
   - [ ] Reconcile each N5 update-post changelog item with its applicable versioned
     Army snapshot, rules/FAQ PDF, exact Wiki revision, and available historical N5
     versions. Record unmatched announcement claims and unknown release/snapshot
@@ -161,6 +166,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Fireteam availability. Distinguish an existing working projection from an uncovered
       source relationship or inaccessible player-facing context; add only confirmed
       deficiencies to the owning vertical slice.
+      - [x] Validate current published relationship integrity using independent logical-Unit,
+        faction/Army and Fireteam semantic audits, Peripheral materialization validation,
+        all three Army-scoped Include target tables, Fireteam FTO loadout source identities,
+        and Reinforcement parent references. The nonempty published graph passes
+        `test_pinned_army_derived_relationships_have_live_published_targets`.
+        This is a source/storage invariant, not proof of all player-facing contexts.
+      - [ ] Reconcile normal Unit/Army/Fireteam browser reachability and applicability
+        for these relationships (including Reinforcement pool context); classify any
+        missing, misleading or deliberately deferred behavior with source evidence.
     - [ ] Obtain independent human visual acceptance if required for the 1.0
       release; agent-reviewed screenshots and automated browser assertions
       are evidence, not a human sign-off.

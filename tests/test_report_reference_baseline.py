@@ -924,6 +924,83 @@ def test_baseline_cli_records_served_pair_in_json_and_markdown(tmp_path: Path) -
     )
 
 
+def test_pinned_army_derived_relationships_have_live_published_targets() -> None:
+    """Reconcile independent source/Army audits with foreign-key-like projections.
+
+    Existence checks do not prove player-facing rendering or correct game rules.
+    """
+    from infinity_db.database.peripheral_relationships import validate_peripheral_relationships
+    from tools.audit_army_faction_semantics import audit_database as audit_factions
+    from tools.audit_fireteam_semantics import audit_database as audit_fireteams
+    from tools.audit_unit_semantics import audit_database as audit_units
+
+    baseline = build_baseline(ARMY_DB, RULES_DB)
+    faction = audit_factions(ARMY_DB)
+    fireteams = audit_fireteams(ARMY_DB)
+    units = audit_units(ARMY_DB)
+
+    assert baseline["armySnapshot"]["publishedDatabaseSha256"] == hashlib.sha256(
+        ARMY_DB.read_bytes()
+    ).hexdigest()
+    assert baseline["rulesPublication"]["publishedDatabaseSha256"] == hashlib.sha256(
+        RULES_DB.read_bytes()
+    ).hexdigest()
+    assert faction["applicationModel"]["sourceDerivedIdentityEquivalent"] is True
+    assert faction["applicationModel"]["runtimeIdentityEquivalent"] is True
+    assert faction["summary"]["applicationReinforcementParentCount"] > 0
+    assert faction["summary"]["applicationReinforcementParentCount"] == (
+        fireteams["reinforcementContext"]["parentEdgeCount"]
+    )
+    assert units["summary"]["repeatedLogicalUnitCount"] > 0
+    assert fireteams["chartShape"]["teamCount"] > 0
+    assert fireteams["typeLimits"]["projectionMismatchCount"] == 0
+    assert fireteams["ftoEligibility"]["markerProjectionMismatchCount"] == 0
+
+    with sqlite3.connect(ARMY_DB.resolve().as_uri() + "?mode=ro", uri=True) as db:
+        validate_peripheral_relationships(db)
+        assert db.execute("SELECT COUNT(*) FROM option_peripherals").fetchone()[0] > 0
+        # Every published FTO option points to its original Army-local
+        # source occurrence and the same canonical reusable payload.
+        fto_rows = db.execute(
+            "SELECT COUNT(*) FROM application_fireteam_member_loadouts"
+        ).fetchone()[0]
+        missing_fto = db.execute(
+            "SELECT COUNT(*) FROM application_fireteam_member_loadouts AS f "
+            "WHERE NOT EXISTS ("
+            "SELECT 1 FROM loadout_payload_occurrences AS o "
+            "WHERE o.army_id = f.source_army_id "
+            "AND o.unit_id = f.source_unit_id "
+            "AND o.group_id = f.group_id "
+            "AND o.option_id = f.option_id "
+            "AND o.loadout_payload_id = f.loadout_payload_id)"
+        ).fetchone()[0]
+        assert fto_rows > 0
+        assert missing_fto == 0, missing_fto
+        # Include targets remain Army-scoped and resolve to actual source
+        # loadout occurrences, not merely a reusable payload ID.
+        for table, army_col in (
+            ("profile_occurrence_includes", "army_id"),
+            ("loadout_occurrence_includes", "army_id"),
+            ("unit_option_include_targets", "target_army_id"),
+        ):
+            total = db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+            missing = db.execute(
+                f"SELECT COUNT(*) FROM {table} AS i WHERE NOT EXISTS ("
+                "SELECT 1 FROM loadout_payload_occurrences AS o "
+                f"WHERE o.army_id = i.{army_col} "
+                "AND o.loadout_payload_id = i.target_loadout_payload_id)"
+            ).fetchone()[0]
+            assert total > 0, table
+            assert missing == 0, (table, missing)
+
+        assert db.execute(
+            "SELECT COUNT(*) FROM application_army_reinforcement_parents AS r "
+            "LEFT JOIN application_armies AS a ON a.id = r.parent_army_id "
+            "LEFT JOIN application_armies AS b ON b.id = r.reinforcement_army_id "
+            "WHERE a.id IS NULL OR b.id IS NULL OR b.role != 'reinforcement'"
+        ).fetchone()[0] == 0
+
+
 def test_baseline_cli_writes_stable_local_reports(tmp_path: Path) -> None:
     json_output = tmp_path / "baseline.json"
     markdown_output = tmp_path / "baseline.md"
