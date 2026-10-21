@@ -808,3 +808,27 @@ Prefer targeted fixes rather than merging these.
   Ruff **PASS**, Pyright **0 errors/0 warnings**,
   Markdownlint **32 files/0 issues**, documentation links
   **30 files/0 errors**. Full suite and live Chromium not run.
+- **Closeout pass 33, 2026-10-21:** Added a first maintained browser
+  acceptance gate for normal Unit detail Skill presentation.
+  `tools/verify_unit_skill_presentation_browser.py` compares
+  live scoped General Profile and army-local profile/loadout DOM rows
+  against their served Unit API source projections. Checks row labels,
+  item names, correct Skill/Equipment/Weapon links, quantities,
+  non-distance Extras, absence of spurious rows, unlinked Training
+  and attribute overrides, and absence of Skill links for API-only
+  source markers. Also checks JS errors, DOM cardinality and overflow
+  at 1440/390/320 px. Seven representative Units passed **21/21**
+  real Chromium pages against a temporary local application server.
+  The accompanying hermetic tests inject missing, altered and
+  cross-context data to ensure the gate fails closed. This does not
+  certify all Units, optional-filter variants, distance formatting
+  equivalence or the deployed server.
+- **Validation:** 31 focused tests passed across
+  `tests/test_verify_unit_skill_presentation_browser.py` (14,
+  including 21 actual Chromium pages),
+  `tests/test_non_skill_army_presentation.py` (10),
+  `tests/test_unit_source_api_parity.py` (5), and
+  `tests/test_test_sections.py` (2). Ruff for both new modules
+  **PASS**; Pyright **0 errors/0 warnings**; Markdownlint
+  **32 files/0 issues**, offline links **30 files/0 errors**.
+  The full suite and deployed-server browser acceptance were not run.

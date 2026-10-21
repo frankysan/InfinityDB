@@ -201,6 +201,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     cover all four non-Skill classifications and fail on missing rows,
     quantity drift or altered Extra IDs. Full classification coverage
     and rendered browser parity remain open.
+  - [x] Add a maintained normal Unit-detail Chromium acceptance matrix
+    for seven representative Units at 1440/390/320 px. Compare actual
+    shared General Profile and army-local profile/loadout DOM rows to
+    the served JSON's Skill/Equipment/Weapon categories, item names,
+    links, quantities and non-distance Extras. Detect missing/extra
+    rows, broken section attribution, wrongly linked Training/attribute
+    overrides, Skill links on intentionally hidden source markers,
+    JS errors and horizontal overflow. The complete **21/21** local
+    Chromium matrix passed; hermetic mutation/manifest regressions
+    remain in the normal test suite. Broader optional-filter scenarios,
+    distance formatting, all-Unit completeness and deployment browser
+    acceptance remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

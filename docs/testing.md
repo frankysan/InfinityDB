@@ -1073,6 +1073,32 @@ all combined-source variants, or browser acceptance. The existing
 `test_unit_source_options_notes.py` already checks source-to-API
 parity for global Unit options, Orders and expanded Includes.
 
+The normal Unit detail **browser acceptance** is available through
+`tools.verify_unit_skill_presentation_browser`. It compares each rendered
+General Profile and each army-local profile/loadout section with the normal
+`/api/units/<slug>` response: exact row category, item name, linked
+Skill/Equipment/Weapon destination, quantity and non-distance Extras.
+It checks absent/extra rows as well as missing items, keeps Training
+and attribute overrides unlinked, and ensures API-only source markers
+never gain Skill links. It also rejects missing sections, JavaScript
+errors and document-level horizontal overflow. Distance Extras with
+unit-aware formatting are checked for item presence and links rather
+than literal raw text. Its seven pinned representative Units run at
+1440, 390 and 320 px (21 page checks); normal pytest exercises the
+full matrix when local Chrome and Playwright are available, otherwise
+the Chromium test skips while hermetic expectation tests still run.
+An isolated local-server run on the pinned application/rules databases
+passed **21/21 pages** on 2026-10-21. To check an already running
+release-candidate server explicitly and save ignored evidence:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
+```
+
+This is bounded representative **browser** acceptance, not exhaustive
+source-to-browser parity for all Units, optional availability settings,
+parameterized Skill semantics, or all visual layout variants.
+
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:
