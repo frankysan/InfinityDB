@@ -85,11 +85,22 @@ class Application:
             snapshot_downloaded_on=self.snapshot_downloaded_on,
             snapshot_revision=self.snapshot_revision,
         )
-        self.deployed_objects = load_deployed_object_publication(
-            Path(database_path).with_name("deployed-objects.json"),
-            Path(database_path),
-            self.rules_database.path if self.rules_database is not None else None,
-        )
+        # The publication belongs to a co-located *release database pair*.
+        # An explicitly supplied rules database in another directory is an
+        # independent test/development source, not the release rules.db.
+        # Never auto-attach its neighbour's publication to that mixed pair.
+        rules_path = self.rules_database.path if self.rules_database is not None else None
+        if (
+            rules_path is not None
+            and rules_path.resolve().parent != self.database.path.resolve().parent
+        ):
+            self.deployed_objects = None
+        else:
+            self.deployed_objects = load_deployed_object_publication(
+                self.database.path.with_name("deployed-objects.json"),
+                self.database.path,
+                rules_path,
+            )
         self.api = ApiHandler(
             self.database,
             self.rules_database,

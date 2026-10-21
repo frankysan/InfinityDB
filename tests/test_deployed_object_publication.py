@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import json
 import shutil
+import sqlite3
 from pathlib import Path
 
 import pytest
@@ -92,3 +93,49 @@ def test_publication_rejects_identity_value_and_delivery_tampering(
     changed = copy.deepcopy(original)
     changed["objects"][0]["deliverySources"] = [{"recordId": "weapon:pitcher"}]
     rejected(changed, "reviewed delivery edge")
+
+
+def test_external_rules_database_does_not_inherit_adjacent_release_publication(
+    source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
+) -> None:
+    from infinity_db.web import create_app
+
+    release = tmp_path / "release"
+    release.mkdir()
+    army = release / "infinity.db"
+    rules = release / "rules.db"
+    shutil.copyfile(source_paths[0], army)
+    shutil.copyfile(source_paths[1], rules)
+    (release / "deployed-objects.json").write_bytes(
+        publication_bytes(build_publication(*source_paths))
+    )
+    external_rules = tmp_path / "independent" / "rules.db"
+    external_rules.parent.mkdir()
+    shutil.copyfile(source_paths[1], external_rules)
+
+    assert create_app(army, rules_database_path=rules).deployed_objects is not None
+    # An independently supplied rules source must never pick up that publication,
+    # even when its contents happen to match the release pair byte-for-byte.
+    assert create_app(army, rules_database_path=external_rules).deployed_objects is None
+
+
+def test_release_pair_still_fails_closed_on_same_directory_rules_drift(
+    source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
+) -> None:
+    from infinity_db.web import create_app
+
+    army = tmp_path / "infinity.db"
+    rules = tmp_path / "rules.db"
+    shutil.copyfile(source_paths[0], army)
+    shutil.copyfile(source_paths[1], rules)
+    (tmp_path / "deployed-objects.json").write_bytes(
+        publication_bytes(build_publication(*source_paths))
+    )
+    with sqlite3.connect(rules) as db:
+        db.execute(
+            "UPDATE sources SET title = title || ' ' "
+            "WHERE rowid = (SELECT rowid FROM sources LIMIT 1)"
+        )
+    with pytest.raises(ValueError, match="does not match release databases"):
+        create_app(army, rules_database_path=rules)
+

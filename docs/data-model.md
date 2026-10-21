@@ -82,7 +82,12 @@ publish its reviewed identities, attributes and delivery source links.
 `/api/deployed-objects/{id}` returns one exact reviewed identity.
 When it is absent (legacy or not-yet-built release), the API returns 503
 rather than reconstructing source assertions from raw tables; a mismatched
-artifact fails closed on startup.
+artifact fails closed on startup. Auto-discovery applies only to a
+**co-located Army/rules database pair**: an explicitly supplied rules database
+from another directory is an independent source, so the application does not
+attach a release publication from beside the Army database. The deployed-object
+API returns 503 in that mixed-source configuration. A mismatched publication
+beside a co-located release pair still fails closed on startup.
 
 **Release packaging of this new artifact is still pending.** The current
 Docker image does not copy it, and the tracked database pair alone is not
