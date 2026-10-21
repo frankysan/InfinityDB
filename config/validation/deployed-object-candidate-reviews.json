@@ -46,6 +46,139 @@
       "knownAttributes": {},
       "unreportedAttributes": [],
       "caveat": "An assigned single-use Weapon with Pheroware tactics, not an independent four-stat Model/Token profile or a deployed battlefield object."
+    },
+    {
+      "recordId": "weapon:wildparrot",
+      "classification": "deployed-object-army-source-profile",
+      "sourcePages": [
+        74
+      ],
+      "summaryEvidence": "visible WildParrot Token or Model",
+      "factsEvidence": [
+        "printed N5 v5.3 Weapon Chart specifies"
+      ],
+      "profileShape": "army-source-profile",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "WildParrot",
+        "mode": null
+      },
+      "knownAttributes": {
+        "ARM": "0",
+        "BTS": "0",
+        "STR": "1",
+        "S": "1"
+      },
+      "unreportedAttributes": [],
+      "caveat": "S1 visible deployed token/model, not a camouflaged marker or Boost device; retain Army-vs-chart Non-Lethal note."
+    },
+    {
+      "recordId": "equipment:dazer",
+      "classification": "deployed-object-army-source-profile",
+      "sourcePages": [
+        121,
+        186
+      ],
+      "summaryEvidence": "Silhouette sources disagree (see source note)",
+      "factsEvidence": [
+        "Unresolved Dazer Silhouette conflict"
+      ],
+      "profileShape": "army-source-profile",
+      "sourceProfile": {
+        "catalog": "equipment",
+        "name": "Dazer",
+        "mode": null
+      },
+      "knownAttributes": {
+        "ARM": "0",
+        "BTS": "0",
+        "STR": "1",
+        "S": "0"
+      },
+      "unreportedAttributes": [],
+      "caveat": "Army and detailed source give S0, summary chart S1; retain conflict without precedence."
+    },
+    {
+      "recordId": "equipment:fastpanda",
+      "classification": "deployed-object-army-source-profile",
+      "sourcePages": [
+        82,
+        186
+      ],
+      "summaryEvidence": "stationary independent object (ARM 0, BTS 0, STR 1, S 1)",
+      "factsEvidence": [
+        "The deployed FastPanda contains a"
+      ],
+      "profileShape": "army-source-profile",
+      "sourceProfile": {
+        "catalog": "equipment",
+        "name": "FastPanda",
+        "mode": null
+      },
+      "knownAttributes": {
+        "ARM": "0",
+        "BTS": "0",
+        "STR": "1",
+        "S": "1"
+      },
+      "unreportedAttributes": [],
+      "caveat": "Contains Repeater functionality but is not identical to the independent Deployable Repeater entry or a Boost device."
+    },
+    {
+      "recordId": "weapon:mines",
+      "classification": "variant-family-not-canonical-object",
+      "sourcePages": [
+        72
+      ],
+      "summaryEvidence": "Each named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits",
+      "factsEvidence": [
+        "Unresolved Mine object Silhouette source conflict"
+      ],
+      "profileShape": "none",
+      "knownAttributes": {},
+      "unreportedAttributes": [],
+      "caveat": "Shared Mines rules do not define a single object profile or a default Mine subtype. Camouflage Marker S2 is distinct from object S0/S1 conflict."
+    },
+    {
+      "recordId": "weapon:d-charges",
+      "classification": "immediate-charge-not-persistent-object",
+      "sourcePages": [
+        70
+      ],
+      "summaryEvidence": "detonates in the Resolution Step without a Roll",
+      "factsEvidence": [],
+      "profileShape": "none",
+      "knownAttributes": {},
+      "unreportedAttributes": [],
+      "caveat": "Demolition Mode places a charge resolved in the same Order; no independent persistent ARM/BTS/STR/S profile should be inferred."
+    },
+    {
+      "recordId": "equipment:cube",
+      "classification": "automatic-equipment-not-deployed-object",
+      "sourcePages": [
+        121
+      ],
+      "summaryEvidence": "Automatic Equipment represented by a Unit Profile symbol",
+      "factsEvidence": [],
+      "profileShape": "none",
+      "knownAttributes": {},
+      "unreportedAttributes": [],
+      "caveat": "Command Token rerolls do not create a battlefield Token/Model."
+    },
+    {
+      "recordId": "equipment:tinbot",
+      "classification": "non-targetable-state-token-not-deployed-object",
+      "sourcePages": [
+        127
+      ],
+      "summaryEvidence": "non-targetable State Token, not a blocking Model",
+      "factsEvidence": [
+        "TinBot Models and Tokens do not block Movement or LoF"
+      ],
+      "profileShape": "none",
+      "knownAttributes": {},
+      "unreportedAttributes": [],
+      "caveat": "Token is non-targetable and tied to owner; not a Deployable Weapon or independent destructible model."
     }
   ]
 }

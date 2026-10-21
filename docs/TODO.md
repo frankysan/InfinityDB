@@ -605,12 +605,32 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               SymbioBomb is an assignable single-use Weapon, not a
               standalone deployed-object profile. Validator regression
               rejects classification/shape changes, lost citations and
-              unsupported values. Remaining candidates stay unclassified.
-            - [ ] Review the remaining candidate set for source-backed
-              placed models, tokens, scenery, nonstandard equipment and
-              false positives. Then decide the minimal canonical
-              object/variant identity and unavailable-value contract;
-              do not infer Unit/loadout ownership from equipment prose.
+              unsupported values. Other candidates were reviewed separately
+              in the subsequent bounded keyword-queue closeout.
+            - [x] Close the bounded **curated-summary keyword queue**:
+              all 15 matching definitions are covered by reviewed
+              classifications or the five reviewed delivery origins.
+              WildParrot, Dazer, and FastPanda retain exact Army source
+              profiles; Mines is a family rather than one generic object;
+              D-Charges resolve immediately; Cube is automatic Equipment;
+              TinBot has a non-targetable State Token. The manifest pins
+              source pages and evidence, rejects profile drift, and
+              retains the Dazer S0/S1 disagreement. This does **not**
+              prove full-source/Unit/loadout completeness.
+            - [ ] Implement the minimal **deployed-object reference
+              contract** after source review. Separate stable object/
+              variant identity from the carrier's Weapon/Equipment
+              catalog record, exact Army source selector (ID and mode),
+              delivery method, and Unit/loadout ownership. Represent
+              ARM/BTS/STR/S individually as known, unreported, or
+              disputed with source provenance; do not coerce missing
+              values to 0 or assume all objects have four attributes.
+              Explicitly reviewed item/mode-to-object delivery edges
+              may have multiple origins; derive reverse usage only
+              from proven edges and actual Unit/loadout associations.
+              Preserve unresolved Mine subtype and S0/S1 disputes.
+              Validate API, browser navigation and missing/variant/shared
+              cases before closing the player-facing requirement.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.

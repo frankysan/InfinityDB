@@ -120,6 +120,7 @@ def validate_delivery_reviews(
 def validate_candidate_reviews(
     manifest: dict[str, Any],
     records: dict[str, dict[str, Any]],
+    source_profiles: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Fail closed on reviewed nonstandard/profile-less object classifications."""
     if manifest.get("formatVersion") != 1:
@@ -129,6 +130,11 @@ def validate_candidate_reviews(
         "deployed-object-curated-trooper-profile": "curated-special-profile",
         "user-tool-not-deployed-object": "none",
         "assignable-single-use-not-deployed-object": "none",
+        "deployed-object-army-source-profile": "army-source-profile",
+        "variant-family-not-canonical-object": "none",
+        "immediate-charge-not-persistent-object": "none",
+        "automatic-equipment-not-deployed-object": "none",
+        "non-targetable-state-token-not-deployed-object": "none",
     }
     reviewed = []
     seen: set[str] = set()
@@ -149,7 +155,7 @@ def validate_candidate_reviews(
         facts = record.get("facts") or {}
         detail = "\n".join(
             str(fragment)
-            for key in ("requirements", "effects", "restrictions", "sourceNotes")
+            for key in ("requirements", "effects", "restrictions", "clarifications", "sourceNotes")
             for fragment in facts.get(key, [])
         )
         if any(fragment not in detail for fragment in entry["factsEvidence"]):
@@ -175,6 +181,20 @@ def validate_candidate_reviews(
                 raise ValueError(f"Curated object profile drift: {record_id}")
             if set(attributes) != {"ARM", "BTS", "STR", "S"} or unknown:
                 raise ValueError(f"Unreviewed special-profile attribute shape: {record_id}")
+        elif shape == "army-source-profile":
+            selector = entry.get("sourceProfile")
+            if special is not None or not isinstance(selector, dict) or unknown:
+                raise ValueError(f"Invalid Army profile claim: {record_id}")
+            matching = [
+                row for row in (source_profiles or [])
+                if all(row.get(field) == selector.get(field)
+                       for field in ("catalog", "name", "mode"))
+            ]
+            if len(matching) != 1 or matching[0]["attributes"] is None:
+                raise ValueError(f"Missing exact Army source profile: {record_id}")
+            actual = {key: str(value) for key, value in matching[0]["attributes"].items()}
+            if attributes != actual:
+                raise ValueError(f"Army source profile drift: {record_id}")
         elif shape == "s-only-scenery":
             if special is not None or attributes != {"S": "3"} or set(unknown) != {
                 "ARM", "BTS", "STR"
@@ -184,6 +204,8 @@ def validate_candidate_reviews(
                 raise ValueError(f"Missing explicit scenery Silhouette: {record_id}")
         elif special is not None or attributes or unknown:
             raise ValueError(f"False missing-profile or non-object claim: {record_id}")
+        if shape != "army-source-profile" and entry.get("sourceProfile") is not None:
+            raise ValueError(f"Non-source candidate contains Army selector: {record_id}")
         reviewed.append({**entry, "reviewStatus": "source-backed-audit-only"})
     return reviewed
 
@@ -272,11 +294,20 @@ def audit_inventory(
 
     decisions = (
         validate_candidate_reviews(
-            json.loads(candidate_reviews.read_text(encoding="utf-8")), records
+            json.loads(candidate_reviews.read_text(encoding="utf-8")),
+            records, chart_profiles + additional_profiles,
         )
         if candidate_reviews is not None else []
     )
     decided_ids = {decision["recordId"] for decision in decisions}
+    reviewed_paths = (
+        validate_delivery_reviews(
+            json.loads(delivery_reviews.read_text(encoding="utf-8")),
+            records, chart_profiles + additional_profiles,
+        )
+        if delivery_reviews is not None else []
+    )
+    delivery_origins = {path["originRecordId"] for path in reviewed_paths}
 
     return {
         "formatVersion": 1,
@@ -291,20 +322,18 @@ def audit_inventory(
             hashlib.sha256(delivery_reviews.read_bytes()).hexdigest()
             if delivery_reviews is not None else None
         ),
-        "reviewedDeliveryPaths": (
-            validate_delivery_reviews(
-                json.loads(delivery_reviews.read_text(encoding="utf-8")),
-                records, chart_profiles + additional_profiles,
-            )
-            if delivery_reviews is not None else []
-        ),
+        "reviewedDeliveryPaths": reviewed_paths,
         "candidateReviewSha256": (
             hashlib.sha256(candidate_reviews.read_bytes()).hexdigest()
             if candidate_reviews is not None else None
         ),
         "reviewedCandidateDecisions": decisions,
+        "deliveryCoveredCandidateMentions": [
+            row for row in candidates if row["recordId"] in delivery_origins
+        ],
         "remainingCuratedCandidateMentions": [
-            row for row in candidates if row["recordId"] not in decided_ids
+            row for row in candidates
+            if row["recordId"] not in decided_ids | delivery_origins
         ],
     }
 

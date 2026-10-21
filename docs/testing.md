@@ -1153,16 +1153,25 @@ exact English N5.3 citations:
 - **SymbioBomb** (p. 74): assignable single-use Weapon, not a separately
   profiled deployed battlefield object.
 
-The validator rejects mismatched profile shapes, lost source clauses/citations
-and invented missing-attribute values. Reviewed candidate decisions and
-remaining candidate mentions are reported separately. The existing Pitcher
-delivery case remains distinct. Other curated Weapon/Equipment summaries
-containing deployment-related words form an **unreviewed manual queue**, not
-confirmed objects. Army profile text stays source-native even when four
-conventional attributes can be parsed; incomplete/nonstandard values stay
-unparsed. The audit requires no third-party PDFs at runtime; disputed
-Silhouettes retain their original provenance, without assigning precedence
-or introducing Unit/carrier identities.
+The remaining seven keyword candidates are separately reviewed and pinned:
+**WildParrot** (N5.3 p. 74), **Dazer** (pp. 121/186), and **FastPanda**
+(pp. 82/186) have exact Army-source object profiles; Dazer's S0/S1
+disagreement stays explicit. **Mines** (p. 72) is a shared rules family, not
+one generic object or Mine subtype. **D-Charges** (p. 70) resolve during
+the same Order and have no persistent four-stat object profile. **Cube**
+(p. 121) is automatic equipment; **TinBot** (p. 127) uses a non-targetable
+State Token rather than an independently targetable Deployable. The existing
+five reviewed delivery origin records count as covered candidates, not
+unreviewed objects.
+
+For this pinned curated-text keyword scan, all 15 matching definitions
+are now accounted for by reviewed classifications or delivery paths.
+This is **not** an exhaustive N5.3 game-object inventory; rules without
+those keywords, Army/Unit/loadout relationships, and edition changes require
+separate source reconciliation. The validator rejects mismatched profile
+shapes, exact Army profile selectors/attributes, lost source clauses/citations
+and invented missing-attribute values. Source text and alternative Silhouette
+values remain unchanged; no canonical object or carrier IDs are created.
 
 For the older Wiki Weapon Chart name inventory, use the read-only
 explicit-alias audit. It preserves repeated alternative tables and reports

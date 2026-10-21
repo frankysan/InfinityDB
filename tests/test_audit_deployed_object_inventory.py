@@ -130,7 +130,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         root / "config/validation/deployed-object-candidate-reviews.json",
     )
     assert len(result["reviewedDeliveryPaths"]) == 6
-    assert len(result["reviewedCandidateDecisions"]) == 4
+    assert len(result["reviewedCandidateDecisions"]) == 11
     assert len(result["candidateReviewSha256"]) == 64
     by_id = {
         entry["recordId"]: entry for entry in result["reviewedCandidateDecisions"]
@@ -138,6 +138,9 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
     assert set(by_id) == {
         "equipment:deployable-cover", "weapon:armed-turret",
         "equipment:deactivator", "weapon:symbiobomb",
+        "weapon:wildparrot", "equipment:dazer", "equipment:fastpanda",
+        "weapon:mines", "weapon:d-charges", "equipment:cube",
+        "equipment:tinbot",
     }
     assert by_id["equipment:deployable-cover"]["knownAttributes"] == {"S": "3"}
     assert set(by_id["equipment:deployable-cover"]["unreportedAttributes"]) == {
@@ -151,9 +154,16 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
     assert {
         candidate["recordId"] for candidate in result["remainingCuratedCandidateMentions"]
     }.isdisjoint(by_id)
-    assert len(result["remainingCuratedCandidateMentions"]) < len(
-        result["curatedCandidateMentions"]
-    )
+    assert len(result["curatedCandidateMentions"]) == 15
+    assert result["remainingCuratedCandidateMentions"] == []
+    assert {
+        entry["recordId"] for entry in result["deliveryCoveredCandidateMentions"]
+    } == {
+        "weapon:pitcher", "weapon:mine-dispenser", "weapon:drop-bears",
+        "weapon:disco-baller", "equipment:deployable-repeater",
+    }
+    assert by_id["equipment:dazer"]["knownAttributes"]["S"] == "0"
+    assert by_id["weapon:mines"]["profileShape"] == "none"
     assert len(result["deliveryReviewSha256"]) == 64
     assert len(result["chartProfiles"]) == 14
     assert all(
@@ -271,8 +281,18 @@ def test_candidate_review_shapes_are_pinned_and_fail_closed() -> None:
         )["records"]
         if record["kind"] in {"weapon", "equipment"}
     }
-    approved = validate_candidate_reviews(reviews, records)
-    assert len(approved) == 4
+    source_profiles = [
+        {
+            "catalog": "weapon" if name == "WildParrot" else "equipment",
+            "name": name, "mode": None,
+            "attributes": {"ARM": 0, "BTS": 0, "STR": 1, "S": silhouette},
+        }
+        for name, silhouette in (
+            ("WildParrot", 1), ("Dazer", 0), ("FastPanda", 1)
+        )
+    ]
+    approved = validate_candidate_reviews(reviews, records, source_profiles)
+    assert len(approved) == 11
     assert all(row["reviewStatus"] == "source-backed-audit-only" for row in approved)
 
     def mutated(index: int, field: str, value: object) -> dict:
@@ -289,14 +309,21 @@ def test_candidate_review_shapes_are_pinned_and_fail_closed() -> None:
          "profile drift"),
         (2, "knownAttributes", {"S": "1"}, "missing-profile"),
         (3, "classification", "invented-object", "classification"),
+        (4, "knownAttributes", {"ARM": "0", "BTS": "0", "STR": "1", "S": "0"},
+         "profile drift"),
+        (5, "sourceProfile", {"catalog": "equipment", "name": "Dazer", "mode": "BS Mode"},
+         "Missing exact Army source profile"),
+        (6, "sourcePages", [999], "citation drift"),
+        (7, "sourceProfile", {"catalog": "weapon", "name": "Mines", "mode": None},
+         "Non-source candidate"),
     )
     for index, field, value, message in cases:
         with pytest.raises(ValueError, match=message):
-            validate_candidate_reviews(mutated(index, field, value), records)
+            validate_candidate_reviews(mutated(index, field, value), records, source_profiles)
 
     duplicate = copy.deepcopy(reviews)
     duplicate["reviews"].append(copy.deepcopy(duplicate["reviews"][0]))
     with pytest.raises(ValueError, match="Duplicate"):
-        validate_candidate_reviews(duplicate, records)
+        validate_candidate_reviews(duplicate, records, source_profiles)
 
 
