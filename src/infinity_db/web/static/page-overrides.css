@@ -90,6 +90,11 @@
   margin: 14px 0 16px;
 }
 
+.army-overview-relationships {
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+
 .army-overview-card-footer {
   display: flex;
   align-items: center;

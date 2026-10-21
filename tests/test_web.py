@@ -612,6 +612,10 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b'target.scrollIntoView({ block: "center" });' in script
     assert b'shareStateHref("/units", "units", { army_id: armyValue(army) })' in script
     assert b"army.overview_group" in script
+    assert b"reinforcementRelationships(army, visibleArmies)" in script
+    assert b"army.parent_armies" in script
+    assert b"army.reinforcement_sections" in script
+    assert b'link.href = `#army-${armyValue(target)}`;' in script
     assert b"Out of catalog" in script
     assert b"Not playable in N5" in script
     assert b'identity.className = "army-overview-card-identity"' in script
