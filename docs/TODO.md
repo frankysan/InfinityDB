@@ -136,6 +136,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
     not establish PDF, FAQ, or scenario completeness or prove browser usability; add the missing
     source review and presentation checks explicitly.
+    - [ ] Inspect **all occupied, statically unrepresented Army source fields** against the
+      release-matched raw/application database pair. In particular, check global Unit-option
+      Skill/Equipment/Weapon references and Extras, Characteristics, and profile/profile-group
+      notes; `audit_source_presentation.py` currently classifies these as unrepresented,
+      which does not by itself establish that each field is populated. For every populated
+      player-relevant value, either trace its maintained identity through publication, API and
+      normal Unit browser presentation, or record a source-backed exclusion. Keep empty
+      fields explicitly verified rather than inventing UI for them. Reuse the release
+      `--source-occupancy-gate` instead of inventing a second field-coverage test.
+    - [ ] Cross-check the **derived Army relationships** that source-field occupancy alone
+      cannot certify: canonical Unit/profile/loadout identities, shared Unit-option Includes,
+      Peripheral/controller targets, Reinforcement parent/pool membership and Army-local
+      Fireteam availability. Distinguish an existing working projection from an uncovered
+      source relationship or inaccessible player-facing context; add only confirmed
+      deficiencies to the owning vertical slice.
     - [ ] Obtain independent human visual acceptance if required for the 1.0
       release; agent-reviewed screenshots and automated browser assertions
       are evidence, not a human sign-off.
@@ -177,6 +192,10 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     the concepts/source sections, dependency, missing contract or content, and completion evidence;
     material source conflicts need reviewed applicability and clear user-visible disclosure
     before dependent presentation is closed; a missing official ruling is not a release blocker.
+    Rank populated, player-relevant missing data or misleading rules ahead of optional
+    comparisons and presentation enhancements. For every batch, retain the explicit
+    blocker/dependency, source/version, expected browser entry point and validation gate;
+    do not turn unresolved source chronology into a presumed application defect.
   - **Completion:** every supported source/category has an explicit coverage disposition and every
     material in-scope gap has an owning open task. This establishes the baseline, not final acceptance.
 
@@ -269,6 +288,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Prove that scope is visible and unrelated scenario/season overlays do not leak into core help.
       - [ ] Review remaining shared scenario concepts, collection-specific
         supplements and normal browser presentation for the complete 1.0 scope.
+  - [ ] Complete the **N5.3 Infinity Spec-Ops / Request SpecBall** reference
+    procedure (REA-040) as a scoped, player-facing rules slice. Review core rules
+    v5.3 p. 98 and the dated N5.3 update evidence for the request timing,
+    declaration, token/roll consequences and limitations; verify the currently
+    published Skill and any related reference before changing it. Curate only
+    source-supported facts, link the procedure from the relevant Skill and
+    ordinary rules navigation, and test storage/export, API, normal browser
+    access and source citations. Preserve the separate ITS Team-Ops permission
+    and ordinary Spec-Ops tournament restriction as season-scoped material;
+    no saved-list configurator or ITS scenario expansion is required.
   - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
     annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
     and `Request Reinforcements`, link the capability they create to the annex
