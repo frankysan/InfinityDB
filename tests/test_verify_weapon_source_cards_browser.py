@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import json
+import sqlite3
+from collections import defaultdict
 from collections.abc import Iterator
 from pathlib import Path
 from socketserver import ThreadingMixIn
 from threading import Thread
 from typing import Any
+from urllib.request import urlopen
 from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
 import pytest
@@ -138,24 +142,29 @@ def test_pinned_weapon_modes_rules_links_and_citations(
         page.close()
 
 @pytest.fixture(scope="module")
-def multi_profile_weapons(origin: str) -> list[dict[str, Any]]:
-    """Discover all multi-profile Weapons from the published API."""
-    import json
-    from urllib.request import urlopen
-
+def published_weapons(origin: str) -> list[dict[str, Any]]:
+    """Read every published Weapon detail once for storage/API/browser checks."""
     def get(path: str) -> dict[str, Any]:
         with urlopen(f"{origin}{path}", timeout=15) as response:
             assert response.status == 200, path
             return json.load(response)
 
+    items = get("/api/weapons")["items"]
+    assert len(items) >= 50, "Pinned Weapon catalog unexpectedly sparse"
+    details = [get(f"/api/weapons/{item['slug']}") for item in items]
+    assert [detail["slug"] for detail in details] == [item["slug"] for item in items]
+    return details
+
+
+@pytest.fixture(scope="module")
+def multi_profile_weapons(published_weapons: list[dict[str, Any]]) -> list[dict[str, Any]]:
     details = []
-    for item in get("/api/weapons")["items"]:
-        detail = get(f"/api/weapons/{item['slug']}")
+    for detail in published_weapons:
         profiles = [
             profile for variant in detail.get("weapon_variants", [])
             for profile in variant.get("profiles", [])
         ]
-        assert len(profiles) == len(detail["profiles"]), item["slug"]
+        assert len(profiles) == len(detail["profiles"]), detail["slug"]
         if len(profiles) > 1:
             details.append(detail)
     assert len(details) >= 2, "Pinned catalog unexpectedly lacks multi-profile Weapons"
@@ -233,6 +242,10 @@ def test_all_published_multi_profile_weapon_statlines_render_on_mobile(
                 source_profiles,
                 strict=True,
             ):
+                expected_modifiers = _expected_range_modifiers(profile)
+                assert card.locator(".weapon-ranges tbody td").all_text_contents() == (
+                    expected_modifiers if any(expected_modifiers) else []
+                ), (slug, profile["mode"], expected_modifiers)
                 parts = profile.get("ammunition_parts")
                 if not isinstance(parts, list):
                     continue
@@ -256,3 +269,192 @@ def test_all_published_multi_profile_weapon_statlines_render_on_mobile(
         assert not errors, errors
     finally:
         page.close()
+
+def test_published_weapon_profiles_preserve_source_metadata(
+    published_weapons: list[dict[str, Any]],
+) -> None:
+    """Full published source-row parity; curated rules remain a separate layer."""
+    root = Path(__file__).resolve().parents[1]
+    source_rows: dict[tuple[int, str | None], list[dict[str, Any]]] = defaultdict(list)
+    with sqlite3.connect(
+        f"{(root / 'data/generated/infinity.db').resolve().as_uri()}?mode=ro",
+        uri=True,
+    ) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            "SELECT id, name, mode, type, ammunition, burst, damage, "
+            "saving, savingNum, profile, properties, distance "
+            "FROM metadata_weapons"
+        ).fetchall()
+    for row in rows:
+        source_rows[(row["id"], row["mode"])].append(dict(row))
+
+    checked = 0
+    profileless = []
+    for weapon in published_weapons:
+        flat = [
+            profile for variant in weapon["weapon_variants"]
+            for profile in variant["profiles"]
+        ]
+        assert flat == weapon["profiles"], weapon["slug"]
+        if not flat:
+            profileless.append(weapon["slug"])
+            continue
+        for profile in flat:
+            key = (profile["id"], profile["mode"])
+            candidates = source_rows.get(key, [])
+            assert candidates, (weapon["slug"], key)
+            comparable = {
+                "id": profile["id"],
+                "name": profile["name"],
+                "mode": profile["mode"],
+                "type": profile["type"],
+                "ammunition": profile["ammunition_source_id"],
+                "burst": profile["burst"],
+                "damage": profile["damage"],
+                "saving": profile["saving"],
+                "savingNum": profile["saving_num"],
+                "profile": profile["profile"],
+            }
+            matching = [
+                row for row in candidates
+                if all(row[column] == value for column, value in comparable.items())
+            ]
+            assert matching, (weapon["slug"], key, comparable, candidates)
+            source = matching[0]
+            for source_column, api_key, default in (
+                ("properties", "traits", []),
+                ("distance", "ranges", {}),
+            ):
+                raw = source[source_column]
+                decoded = json.loads(raw) if isinstance(raw, str) else (
+                    default if raw is None else raw
+                )
+                assert decoded == profile[api_key], (
+                    weapon["slug"], key, api_key, decoded, profile[api_key]
+                )
+            checked += 1
+    assert checked >= 100, checked
+    # SymbioBomb has a reviewed rules card but no standalone chart statline.
+    assert "symbiobomb" in profileless
+
+
+
+def _expected_range_modifiers(profile: dict[str, Any]) -> list[str]:
+    ranges = sorted(
+        (
+            band for band in (profile.get("ranges") or {}).values()
+            if isinstance(band, dict) and band.get("max") is not None
+        ),
+        key=lambda band: float(band["max"]),
+    )
+    modifiers = []
+    for maximum in (20, 40, 60, 80, 100, 120, 240):
+        matching = next(
+            (band for band in ranges if float(band["max"]) >= maximum),
+            None,
+        )
+        modifiers.append(
+            "" if matching is None and not ranges
+            else "--" if matching is None
+            else str(matching["mod"]) if matching.get("mod") is not None
+            else ""
+        )
+    return modifiers
+
+
+@pytest.mark.parametrize("shard", [0, 1, 2])
+def test_all_published_single_profile_weapon_cards_at_mobile_width(
+    origin: str, chrome: Any, published_weapons: list[dict[str, Any]], shard: int,
+) -> None:
+    """Shard the full published single-profile browser audit for bounded check runs."""
+    singles = [weapon for weapon in published_weapons if len(weapon["profiles"]) == 1]
+    assert len(singles) >= 20, len(singles)
+    selected = singles[shard::3]
+    assert selected
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for weapon in selected:
+            slug = weapon["slug"]
+            (variant,) = weapon["weapon_variants"]
+            (profile,) = variant["profiles"]
+            page.goto(f"{origin}/weapons/{slug}", wait_until="domcontentloaded")
+            page.locator("#item-content").wait_for(state="visible", timeout=15000)
+            cards = page.locator(".weapon-variant .weapon-profile")
+            assert cards.count() == 1, slug
+            card = cards.first
+            observed = card.evaluate(
+                """(card) => {
+                  const cell = label => card.querySelector(
+                    '.weapon-statline tbody td[data-label="' + label + '"]'
+                  )?.textContent ?? '';
+                  const profileRow = [...card.querySelectorAll('.weapon-data-row')].find(
+                    row => row.querySelector('.weapon-data-heading')?.textContent === 'Profile'
+                  );
+                  return [
+                    card.querySelector('h4')?.textContent ?? '',
+                    cell('Ammunition'), cell('B'), cell('PS'), cell('Saving'),
+                    profileRow?.querySelector('.weapon-data-value')?.textContent ?? ''
+                  ];
+                }"""
+            )
+            expected = [
+                profile.get("mode") or profile.get("name") or variant["name"],
+                _ammunition_display(profile),
+                _stat_display(profile.get("burst")),
+                _stat_display(profile.get("damage")),
+                _saving_display(profile),
+                profile.get("profile") or "",
+            ]
+            assert observed == expected, (slug, observed, expected)
+
+            source_modifiers = _expected_range_modifiers(profile)
+            rendered_range = card.locator(".weapon-ranges tbody td").all_text_contents()
+            assert rendered_range == (
+                source_modifiers if any(source_modifiers) else []
+            ), (slug, rendered_range, source_modifiers)
+
+            parts = profile.get("ammunition_parts")
+            if isinstance(parts, list):
+                expected_links = []
+                for part in parts:
+                    reference = part.get("public_reference") or {}
+                    href = reference.get("href")
+                    if not href and reference.get("catalog") and reference.get("id"):
+                        href = f"/{reference['catalog']}/{reference['id']}"
+                    if href:
+                        expected_links.append((part["text"], href))
+                actual_links = [
+                    (link.text_content(), link.get_attribute("href"))
+                    for link in card.locator(
+                        '.weapon-statline td[data-label="Ammunition"] a'
+                    ).all()
+                ]
+                assert actual_links == expected_links, (slug, actual_links, expected_links)
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+            ), slug
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+def test_profileless_symbiobomb_still_exposes_reviewed_rules(
+    origin: str, chrome: Any, published_weapons: list[dict[str, Any]],
+) -> None:
+    weapon = next(weapon for weapon in published_weapons if weapon["slug"] == "symbiobomb")
+    assert weapon["profiles"] == []
+    assert any(rule["id"] == "weapon:symbiobomb" for rule in weapon["rules"])
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    try:
+        page.goto(f"{origin}/weapons/symbiobomb", wait_until="domcontentloaded")
+        page.locator("#item-content").wait_for(state="visible", timeout=15000)
+        assert page.locator(".weapon-variant .weapon-profile").count() == 0
+        article = page.locator('[id="rule-weapon-symbiobomb"]')
+        article.wait_for(state="visible")
+        assert "SymbioBomb" in article.inner_text()
+    finally:
+        page.close()
+

@@ -501,13 +501,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       complete published profile set against the inventory, not only representative examples.
       - [x] In normal Chromium at 390 px, discover every **multi-profile Weapon**
         from the published catalog API and compare all rendered mode titles,
-        Ammunition text/component links, B, PS, Saving notation and optional
-        object-profile text against the same API. The dynamic
+        Ammunition text/component links, B, PS, Saving notation, range bands
+        and optional object-profile text against the same API. The dynamic
         `test_all_published_multi_profile_weapon_statlines_render_on_mobile`
         also checks catalog/detail profile cardinality, JavaScript errors
-        and page overflow. This is published API-to-browser parity, not
-        independent PDF/source-chart reconciliation or single-profile
-        whole-catalog acceptance.
+        and page overflow.
+      - [x] Extend the pinned published-Weapon audit across all catalog details:
+        `test_published_weapon_profiles_preserve_source_metadata` compares
+        every published profile to `metadata_weapons` fields, source Traits
+        and raw range bands without overwriting curated supplements.
+        The three-shard `test_all_published_single_profile_weapon_cards_at_mobile_width`
+        compares every single-profile card's title, stats, Ammunition links,
+        range bands and optional deployed-object profile at 390 px. The
+        profile-less SymbioBomb has a reviewed rule card without a standalone
+        Weapon Chart statline; browser acceptance verifies this separately.
+        This proves current published storage/API/mobile-browser parity only:
+        independent N5.3 PDF/source-chart comparison, excluded raw metadata
+        rows and broader desktop/theme/visual acceptance remain open.
   - [ ] Add a generated Deployables profile reference from Weapon/Equipment
     metadata plus curated corrections: ARM/BTS/STR/S for the deployed object,
     originating item/rule, and reverse Unit/loadout uses. Keep deployed-object
