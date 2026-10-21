@@ -238,9 +238,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Obtain independent human visual acceptance if required for the 1.0
       release; agent-reviewed screenshots and automated browser assertions
       are evidence, not a human sign-off.
-    - [ ] Browser-review the new D-Charges and Disco Baller cards (both source
-      modes, related reference links, mobile layout and citations); API coverage
-      does not substitute for this acceptance.
+    - [x] Browser-review D-Charges and Disco Baller source cards at 1440/390 px.
+      `test_verify_weapon_source_cards_browser.py` verifies both imported
+      Weapon modes/profile values against the published API, rendered linked
+      references and N5.3 citations, normal rule-card navigation, and page
+      overflow without JavaScript errors. This is bounded automated Chromium
+      acceptance, not independent human visual sign-off or exhaustive Weaponry
+      source coverage.
     - [ ] Continue extending the reviewed Weapon Properties inventory beyond
       Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced, four
       AP-based combinations and the reviewed N+E/M form. Review further

@@ -84,6 +84,7 @@
         "test_verify_unit_skill_presentation_browser",
         "test_verify_fireteam_fto_browser",
         "test_verify_army_overview_browser",
+        "test_verify_weapon_source_cards_browser",
         "test_verify_rule_fragment_browser",
         "test_support_weapon_deployable_references",
         "test_source_conflict_publication",
