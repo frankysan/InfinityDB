@@ -1094,13 +1094,20 @@ exercise Team-Ops off (**3 pages**), Mercenaries off (**3 pages**),
 Mercenaries and Team-Ops off together (**6 pages**), and all four
 optional categories off (**6 pages**). Their DOM comparisons use
 identically filtered API queries, and each scenario must change
-visible Armies or General Profiles. Two source-backed Units with
-visible distance Extras are tested in inches and centimeters at
-three widths (**12 pages**). The pinned local server passed **63/63
-page checks** on 2026-10-21. Pytest runs the full matrix when Chrome
-and Playwright are available; otherwise Chromium skips while
-hermetic tests remain active. To check an already running
-release-candidate server and save ignored evidence:
+visible Armies or General Profiles. Spec-Ops and Reinforcement cases
+are also selected separately through published source Unit identities
+and Army-list membership, then confirmed by the normal API to have
+visible, flag-specific availability. An unfiltered baseline (**6 pages**),
+each flag individually disabled (**3 + 3 pages**), and both flags
+disabled together (**6 pages**) must preserve exact DOM/API parity
+and remove at least one visible Army for each selected Unit.
+Two source-backed Units with visible distance Extras are tested
+in inches and centimeters at three widths (**12 pages**).
+The pinned local server passed **81/81 page checks** on 2026-10-21.
+Pytest runs the full matrix when Chrome and Playwright are available;
+otherwise Chromium skips while hermetic tests remain active. To
+check an already running release-candidate server and save
+ignored evidence:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json

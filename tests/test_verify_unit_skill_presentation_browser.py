@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from copy import deepcopy
 from pathlib import Path
 from socketserver import ThreadingMixIn
 from threading import Thread
+from urllib.request import urlopen
 from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
 import pytest
@@ -141,6 +143,82 @@ def _complex_unit_cases(database_path: Path) -> tuple[str, ...]:
     return tuple(selected)
 
 
+def _optional_source_candidates(
+    database_path: Path, flag: str,
+) -> tuple[str, ...]:
+    """Find test candidates through pinned source identity, not API-filter output."""
+    if flag not in ("specops", "reinforcement"):
+        raise ValueError(f"Unsupported source selector: {flag}")
+    with sqlite3.connect(database_path) as db:
+        if flag == "specops":
+            rows = db.execute(
+                "SELECT DISTINCT lu.slug FROM logical_units AS lu "
+                "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
+                "JOIN units AS u ON u.id = lus.source_unit_id "
+                "LEFT JOIN logical_unit_aliases AS alias ON alias.logical_unit_id = lu.id "
+                "WHERE lu.slug IS NOT NULL AND ("
+                "  LOWER(COALESCE(u.name, '')) LIKE '%spec%ops%' OR "
+                "  LOWER(COALESCE(u.slug, '')) LIKE '%spec%ops%' OR "
+                "  LOWER(lu.slug) LIKE '%spec%ops%' OR "
+                "  LOWER(COALESCE(alias.value, '')) LIKE '%spec%ops%'"
+                ") ORDER BY lu.slug"
+            )
+        else:
+            rows = db.execute(
+                "SELECT DISTINCT lu.slug FROM logical_units AS lu "
+                "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
+                "JOIN army_units AS au ON au.unit_id = lus.source_unit_id "
+                "JOIN army_lists AS al ON al.id = au.army_id "
+                "WHERE lu.slug IS NOT NULL AND al.kind = 'reinforcement' "
+                "ORDER BY lu.slug"
+            )
+        candidates = tuple(row[0] for row in rows)
+    assert candidates, f"No source-backed {flag} Unit candidate"
+    return candidates
+
+
+def _visible_army_count(unit: dict) -> int:
+    return sum(bool(army.get("presentation_visible")) for army in unit["armies"])
+
+
+def _source_backed_optional_case(
+    base_url: str, database_path: Path, flag: str,
+    *, excluded: tuple[str, ...] = (),
+) -> str:
+    """Pick a source-derived Unit with an observable, flag-specific visibility change."""
+    candidates = _optional_source_candidates(database_path, flag)
+    for slug in candidates:
+        if slug in excluded:
+            continue
+        with urlopen(_unit_api_url(base_url, slug, {}), timeout=12) as response:
+            baseline = json.load(response)
+        if not any(
+            army.get("presentation_visible")
+            and flag in army.get("availability_flags", ())
+            for army in baseline["armies"]
+        ):
+            continue
+        with urlopen(
+            _unit_api_url(base_url, slug, {flag: False}), timeout=12,
+        ) as response:
+            filtered = json.load(response)
+        if _visible_army_count(filtered) < _visible_army_count(baseline):
+            return slug
+    raise AssertionError(
+        f"No source-backed {flag} Unit with an observable filter effect "
+        f"among {len(candidates)} candidates"
+    )
+
+
+def test_optional_mode_source_selectors_are_nonempty() -> None:
+    root = Path(__file__).resolve().parents[1]
+    path = root / "data/generated/infinity.db"
+    assert _optional_source_candidates(path, "specops")
+    assert _optional_source_candidates(path, "reinforcement")
+    with pytest.raises(ValueError, match="Unsupported source selector"):
+        _optional_source_candidates(path, "teamops")
+
+
 def test_complex_unit_cohort_has_nonempty_published_profile_variants() -> None:
     root = Path(__file__).resolve().parents[1]
     slugs = _complex_unit_cases(root / "data/generated/infinity.db")
@@ -228,6 +306,51 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
                 ) != baseline_visibility[(entry["unit"], entry["width"])]
                 for entry in filtered["results"]
             ), ("Optional filters did not change any visible content", filtered)
+
+        # The source corpus, rather than a hardcoded display name or an
+        # already-filtered API response, selects these optional-mode cases.
+        source_db = root / "data/generated/infinity.db"
+        base_url = f"http://127.0.0.1:{server.server_port}"
+        specops_slug = _source_backed_optional_case(base_url, source_db, "specops")
+        reinforcement_slug = _source_backed_optional_case(
+            base_url, source_db, "reinforcement", excluded=(specops_slug,),
+        )
+        optional_slugs = (specops_slug, reinforcement_slug)
+        optional_baseline = verify(
+            base_url, slugs=optional_slugs, channel="chrome",
+        )
+        assert optional_baseline["passed"] == optional_baseline["total"] == (
+            len(WIDTHS) * len(optional_slugs)
+        ), [entry for entry in optional_baseline["results"] if entry["status"] != "passed"]
+        optional_baseline_visibility = {
+            (entry["unit"], entry["width"]): entry["visibleArmies"]
+            for entry in optional_baseline["results"]
+        }
+        for flag, slug in (
+            ("specops", specops_slug), ("reinforcement", reinforcement_slug),
+        ):
+            filtered = verify(
+                base_url, slugs=(slug,), channel="chrome",
+                optional_filters={flag: False},
+            )
+            assert filtered["passed"] == filtered["total"] == len(WIDTHS), filtered
+            assert all(
+                entry["visibleArmies"] < optional_baseline_visibility[
+                    (entry["unit"], entry["width"])
+                ]
+                for entry in filtered["results"]
+            ), (flag, slug, filtered)
+        mixed = verify(
+            base_url, slugs=optional_slugs, channel="chrome",
+            optional_filters={"specops": False, "reinforcement": False},
+        )
+        assert mixed["passed"] == mixed["total"] == len(WIDTHS) * 2, mixed
+        assert all(
+            entry["visibleArmies"] < optional_baseline_visibility[
+                (entry["unit"], entry["width"])
+            ]
+            for entry in mixed["results"]
+        ), mixed
 
         with sqlite3.connect(root / "data/generated/infinity.db") as db:
             distance_slugs = tuple(row[0] for row in db.execute(

@@ -872,3 +872,24 @@ Prefer targeted fixes rather than merging these.
   Pyright **0 errors/0 warnings**; Markdownlint **32 files/0 issues**
   and offline docs links **30 files/0 errors**. Full suite and
   deployed-server browser verification were not run.
+- **Closeout pass 36, 2026-10-21:** Closed the representative
+  Spec-Ops and Reinforcement-only Unit-detail browser gaps with
+  source-backed selectors. Spec-Ops candidates use persisted Unit
+  names/slugs/aliases, and Reinforcement candidates use published
+  Army-list membership; selection additionally requires a visible
+  matching flag and a demonstrable visibility reduction in the API
+  when only that flag is disabled. The selected distinct Units
+  passed default unfiltered browser parity (6 pages), Spec-Ops-off
+  (3), Reinforcement-off (3), and both-off (6) at 1440/390/320 px.
+  Together with the prior 63-page matrix, **81/81 local Chromium
+  pages passed**. The test fails closed when no source-backed
+  candidate with a real filter effect exists. Full-catalog and
+  deployed-server acceptance remain open.
+- **Validation:** 41 focused tests passed across the Unit-detail Chromium
+  acceptance suite (24 tests, including 81 actual browser pages),
+  Unit source API parity (5), non-Skill presentation (10), and
+  test-section registration (2). Ruff on the modified test module
+  **PASS**, Pyright **0 errors/0 warnings**, Markdownlint
+  **32 files/0 issues**, and offline documentation links
+  **30 files/0 errors**. The full suite and deployed-server
+  acceptance were not run.

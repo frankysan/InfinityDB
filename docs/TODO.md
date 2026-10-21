@@ -235,6 +235,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     per-page failure diagnostics after one intermittent default-matrix
     failure did not reproduce. Spec-Ops/Reinforcement-only variants,
     exhaustive Units, and deployed-server acceptance remain open.
+  - [x] Add actual source-backed Spec-Ops and Reinforcement-only
+    availability cases to the normal Unit-detail Chromium gate.
+    Candidates derive from persisted Unit names/aliases and
+    Reinforcement Army-list memberships, not already-filtered API
+    output; the API then confirms each case has a visibly affected
+    optional-mode Army. Check the unfiltered baseline, each flag
+    disabled individually, and both disabled together at three
+    viewport widths. Every filtered result must lose visible
+    Army content while matching its filtered API. **81/81 local
+    Chromium pages passed**. Exhaustive optional combinations,
+    the full catalog, and deployed release-candidate verification
+    remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and
