@@ -518,6 +518,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         This proves current published storage/API/mobile-browser parity only:
         independent N5.3 PDF/source-chart comparison, excluded raw metadata
         rows and broader desktop/theme/visual acceptance remain open.
+      - [x] Re-run a **local-only pinned N5.3 PDF source comparison** against
+        the current Army database in
+        `test_pinned_n53_pdf_chart_source_differences`: 171/171 main chart
+        rows aligned; Kobra Pistol (CC Mode) printed one Saving Roll versus
+        Army two; Katyusha MRL printed unsigned `3` versus reviewed `+3`;
+        14 auxiliary profiles include the seven already documented Mine/Dazer
+        Silhouette conflicts. The test preserves both source values and skips
+        where the ignored official PDF or optional PyMuPDF is unavailable.
+      - [x] Verify player-visible **source-conflict presentation** in Chromium:
+        Kobra's CC-only two-roll explanation and unresolved Anti-materiel
+        disclosure at 1440/390 px, Katyusha's reviewed `+3` range values,
+        and S0/S1 disclosure for all six named Mine objects at 390 px in
+        `test_verify_weapon_source_cards_browser.py`. Do not infer a
+        correction to the disputed S0/S1 object profiles.
+        These checks do not resolve the remaining Weapon/prose inventory or
+        independently review every printed Trait and object definition.
   - [ ] Add a generated Deployables profile reference from Weapon/Equipment
     metadata plus curated corrections: ARM/BTS/STR/S for the deployed object,
     originating item/rule, and reverse Unit/loadout uses. Keep deployed-object

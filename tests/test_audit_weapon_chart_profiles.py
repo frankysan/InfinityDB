@@ -4,6 +4,8 @@ import json
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from tools.audit_weapon_chart_profiles import (
     _printed_name_and_mode,
     _value,
@@ -432,3 +434,42 @@ def test_auxiliary_markdown_report_includes_field_provenance() -> None:
     markdown = markdown_report(report)
     assert "attribute discrepancies: **1**" in markdown
     assert "S: PDF 1 vs Army 0" in markdown
+
+
+def test_pinned_n53_pdf_chart_source_differences() -> None:
+    """Local-only end-to-end PDF comparison; clean CI omits this source."""
+    from tools.audit_weapon_chart_profiles import audit_chart
+
+    root = Path(__file__).resolve().parents[1]
+    pdf = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not pdf.is_file():
+        pytest.skip("Ignored N5.3 PDF unavailable")
+    pytest.importorskip("fitz")
+    report = audit_chart(pdf, root / "data/generated/infinity.db")
+    assert report["corePdfSha256"] == (
+        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    )
+    rows = report["comparison"]
+    assert (rows["chartRowsLocated"], rows["unambiguousRowsCompared"]) == (171, 171)
+    assert (rows["candidateDiscrepancies"], rows["rangeCandidates"]) == (1, 1)
+    assert rows["deferredRows"] == 0
+    assert len(report["auxiliaryProfiles"]) == 14
+    differences = [row for row in rows["compared"] if row["differences"]]
+    assert [(row["name"], row["mode"]) for row in differences] == [
+        ("Kobra Pistol", "CC Mode")
+    ]
+    assert differences[0]["differences"] == [
+        {"field": "savingRolls", "pdf": "1", "army": "2"}
+    ]
+    katyusha = next(row for row in rows["compared"] if row["name"] == "Katyusha MRL")
+    assert katyusha["rangeComparison"]["pdf"][1:3] == ["3", "3"]
+    assert katyusha["rangeComparison"]["army"][1:3] == ["+3", "+3"]
+    silhouette_conflicts = [
+        row for row in report["auxiliaryProfiles"]
+        if row["status"] == "candidate-discrepancy"
+    ]
+    assert {row["armyName"] for row in silhouette_conflicts} == {
+        "AP Mine", "E/M Mine", "Monofilament Mine", "PARA Mine",
+        "Shock Mine", "Viral Mine", "Dazer",
+    }
+

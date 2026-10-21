@@ -458,3 +458,87 @@ def test_profileless_symbiobomb_still_exposes_reviewed_rules(
     finally:
         page.close()
 
+
+@pytest.mark.parametrize("width", [1440, 390])
+def test_kobra_conflicting_sources_stay_visible_on_cc_mode_only(
+    origin: str, chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    try:
+        page.goto(f"{origin}/weapons/kobra-pistol", wait_until="domcontentloaded")
+        page.locator("#item-content").wait_for(state="visible", timeout=15000)
+        bs = page.locator(".weapon-profile").filter(
+            has=page.get_by_role("heading", name="BS Mode", exact=True)
+        )
+        cc = page.locator(".weapon-profile").filter(
+            has=page.get_by_role("heading", name="CC Mode", exact=True)
+        )
+        assert bs.count() == cc.count() == 1
+        assert bs.locator('[id="rule-weapon-kobra-pistol-cc"]').count() == 0
+        assert bs.locator('td[data-label="Ammunition"]').inner_text() == "Shock"
+        assert cc.locator('td[data-label="Saving"]').inner_text() == "ARM × 2"
+        card = cc.locator('[id="rule-weapon-kobra-pistol-cc"]')
+        card.wait_for(state="visible")
+        notes = card.locator(".rules-source-note").all_inner_texts()
+        assert len(notes) == 2
+        assert "Saving Rolls" in notes[0]
+        assert "publication conflict unresolved" in notes[1]
+        assert "Anti-materiel" in notes[1]
+        assert "p. 182" in card.inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        ), width
+    finally:
+        page.close()
+
+def test_katyusha_pdf_unsigned_mod_keeps_reviewed_plus_three_in_browser(
+    origin: str, chrome: Any,
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    review = json.loads(
+        (root / "config/validation/weapon-range-source-review.json")
+        .read_text(encoding="utf-8")
+    )
+    (candidate,) = review["candidates"]
+    assert candidate["name"] == "Katyusha MRL"
+    assert candidate["pdfUnsignedLabel"] == "3"
+    assert candidate["resolvedRangeMod"] == "+3"
+    assert candidate["classification"] == "confirmed-pdf-sign-omission"
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    try:
+        page.goto(f"{origin}/weapons/katyusha-mrl", wait_until="domcontentloaded")
+        page.locator("#item-content").wait_for(state="visible", timeout=15000)
+        actual = page.locator(
+            ".weapon-profile .weapon-ranges tbody td"
+        ).all_inner_texts()
+        assert actual == ["-3", "+3", "+3", "0", "0", "-6", "--"]
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("slug", (
+    "ap-mine", "e-m-mine", "monofilament-mine",
+    "para-mine", "shock-mine", "viral-mine",
+))
+def test_mine_object_silhouette_sources_remain_disclosed(
+    origin: str, chrome: Any, slug: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    try:
+        page.goto(f"{origin}/weapons/{slug}", wait_until="domcontentloaded")
+        rule = page.locator('[id="rule-weapon-mines"]')
+        rule.wait_for(state="visible", timeout=15000)
+        note = rule.locator(".rules-source-note").first
+        assert note.is_visible()
+        content = note.inner_text()
+        assert "S0" in content and "S1" in content
+        assert "No official correction or source precedence has been confirmed" in content
+    finally:
+        page.close()
+
+
+
+
