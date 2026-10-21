@@ -124,6 +124,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     affected coverage review; normal checks must not acquire newer inputs implicitly.
     Include relevant dated official Corvus Belli rules-update posts as supplementary
     release-change evidence (not replacements for the versioned primary sources).
+    - [ ] Refresh the stored 1.0 reference-baseline report against the **current/final
+      Army and rules database pair**. The saved `local/audits/gate-1.0/reference-baseline.md`
+      cites rules SHA-256 `6d77db30e2d158517136b673e4619d765fea62a010a7f5835c8eef28a52046d9`,
+      whereas the current `rules.db` is
+      `3ab86945aaadf09c4104e3e08801531987957ffa866124f87c602609938cd3e3`.
+      Existing baseline tests pass, but that older report must not be treated
+      as current candidate/source-completeness evidence. Retain the new report
+      under ignored audit evidence; do not overwrite historical verification.
   - [ ] Reconcile each N5 update-post changelog item with its applicable versioned
     Army snapshot, rules/FAQ PDF, exact Wiki revision, and available historical N5
     versions. Record unmatched announcement claims and unknown release/snapshot
@@ -136,15 +144,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
     not establish PDF, FAQ, or scenario completeness or prove browser usability; add the missing
     source review and presentation checks explicitly.
-    - [ ] Inspect **all occupied, statically unrepresented Army source fields** against the
-      release-matched raw/application database pair. In particular, check global Unit-option
-      Skill/Equipment/Weapon references and Extras, Characteristics, and profile/profile-group
-      notes; `audit_source_presentation.py` currently classifies these as unrepresented,
-      which does not by itself establish that each field is populated. For every populated
-      player-relevant value, either trace its maintained identity through publication, API and
-      normal Unit browser presentation, or record a source-backed exclusion. Keep empty
-      fields explicitly verified rather than inventing UI for them. Reuse the release
-      `--source-occupancy-gate` instead of inventing a second field-coverage test.
+    - [x] Check **statically unrepresented Army source-field occupancy** against the
+      current paired raw/application database. The pinned September 29 Army publication
+      (`infinity.db` SHA-256 `ec77c5d1fd742bcefb3975dd223550fe3a51053d39fbdb34ce814e3ddd62e6c9`)
+      has **0 populated fields out of 39 unrepresented candidates** across 70 source
+      tables/441 fields. This includes global Unit-option Skill/Equipment/Weapon references,
+      Extras and Characteristics, and profile/group notes; no currently occupied missing
+      UI fields were found. `test_pinned_published_army_has_no_occupied_unrepresented_source_fields`
+      guards the actual pair when the ignored raw database is available; clean CI skips
+      that local-only proof, so the release `--source-occupancy-gate` remains required.
+      A changed Army snapshot or export pair reopens this check. This does **not** certify
+      derived relationships or browser parity.
     - [ ] Cross-check the **derived Army relationships** that source-field occupancy alone
       cannot certify: canonical Unit/profile/loadout identities, shared Unit-option Includes,
       Peripheral/controller targets, Reinforcement parent/pool membership and Army-local

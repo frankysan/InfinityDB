@@ -57,6 +57,35 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
     assert _field(report, "peripherals", "mercs")["status"] == audit.REDUNDANT
 
 
+def test_pinned_published_army_has_no_occupied_unrepresented_source_fields() -> None:
+    """Validate actual published/raw source pairing, not just synthetic fixtures.
+
+    The raw database is intentionally ignored and absent in clean CI. A
+    release's explicit --source-occupancy-gate is still required there.
+    """
+    published = ROOT / "data/generated/infinity.db"
+    raw = raw_database_path(published)
+    if not raw.is_file():
+        pytest.skip("Ignored raw Army database is unavailable in clean CI")
+    report = audit.audit_database(published)
+    evidence = report["rawEvidence"]
+    assert evidence["status"] == "available"
+    assert evidence["normalizedTableCount"] == 70
+    assert len(evidence["unrepresentedFieldOccupancy"]) == 39
+    assert report["summary"]["occupiedUnrepresentedFieldCount"] == 0
+    assert report["summary"]["occupiedUnrepresentedTableCount"] == 0
+    assert all(
+        item["occupiedCount"] == 0
+        for item in evidence["unrepresentedFieldOccupancy"]
+    )
+    assert sum(
+        batch["occupiedValueCount"] for batch in evidence["potentialGapBatches"]
+    ) == 0
+    # This must inspect real source rows rather than an empty fixture.
+    assert report["applicationEvidence"]["unitOptionCount"] > 0
+    assert report["applicationEvidence"]["includeRelationshipCount"] > 0
+
+
 def test_source_presentation_audit_distinguishes_empty_source_from_missing_ui(
     tmp_path: Path,
 ) -> None:
