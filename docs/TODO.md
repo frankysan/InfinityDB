@@ -226,13 +226,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           asserts API-to-visible-FTO parity, Unit links, no Wildcard
           promotion and no viewport overflow at 1440/390 px.
           Player-facing FTO labels do not validate complete roster legality.
-        - [ ] Validate the normal **Army overview** Reinforcement parent/section
-          links against the published Army API and real Chromium at desktop/mobile
-          widths. The overview now links visible source-backed related Army cards
-          in both directions, omitting legacy and non-playable targets. Verify
-          shared sections, empty/missing references, fragment navigation, keyboard
-          focus and no overflow before closure. Do not build an Army List editor
-          or infer composition legality.
+        - [x] Validate normal **Army overview** Reinforcement parent/section
+          links against the published Army API in Chromium at 1440/390 px.
+          `test_verify_army_overview_browser.py` covers all published visible
+          Army cards and their source-backed links in both directions, shared
+          sections, keyboard-triggered fragments/focus, and horizontal overflow;
+          injected API cases cover missing, non-playable and legacy references.
+          The overview exposes navigation, not Army List composition legality.
+          This bounded acceptance does not close the broader source-to-browser
+          relationship review.
     - [ ] Obtain independent human visual acceptance if required for the 1.0
       release; agent-reviewed screenshots and automated browser assertions
       are evidence, not a human sign-off.
