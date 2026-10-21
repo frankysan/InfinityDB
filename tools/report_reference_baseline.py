@@ -296,6 +296,83 @@ def _verify_published_profile_extras(
     return result
 
 
+def _verify_published_characteristics_orders(
+    army: sqlite3.Connection,
+    sources: list[SourceDocument],
+) -> dict[str, int]:
+    """Check ordered Characteristics and modeled Order facts after payload reuse."""
+    expected: dict[str, list[tuple[Any, ...]]] = {
+        "profile.characteristics": [],
+        "loadout.characteristics": [],
+        "loadout.orders": [],
+    }
+    for source in sources:
+        for unit in source.data["units"]:
+            for group in unit.get("profileGroups") or []:
+                parent = (source.faction_id, unit["id"], group["id"])
+                for kind, rows in (
+                    ("profile", group.get("profiles") or []),
+                    ("loadout", group.get("options") or []),
+                ):
+                    for record in rows:
+                        key = (*parent, record["id"])
+                        for position, char_id in enumerate(
+                            record.get("chars") or [], start=1
+                        ):
+                            expected[f"{kind}.characteristics"].append(
+                                (*key, position, char_id)
+                            )
+                        if kind == "loadout":
+                            for position, value in enumerate(
+                                record.get("orders") or [], start=1
+                            ):
+                                order = value if isinstance(value, dict) else {}
+                                expected["loadout.orders"].append((
+                                    *key, position, order.get("type"),
+                                    order.get("list"), order.get("total"),
+                                ))
+
+    result: dict[str, int] = {}
+    for category, rows in expected.items():
+        kind, field = category.split(".")
+        identity = "profile_id" if kind == "profile" else "option_id"
+        selected = (
+            "r.characteristic_id"
+            if field == "characteristics"
+            else "r.order_type, r.list_count, r.total_count"
+        )
+        sql = (
+            f"SELECT o.army_id, o.unit_id, o.group_id, o.{identity}, "
+            f"r.position, {selected} "
+            f"FROM {kind}_payload_occurrences o "
+            f"JOIN {kind}_payload_{field} r "
+            f"ON r.{kind}_payload_id = o.{kind}_payload_id"
+        )
+        published = [tuple(row) for row in army.execute(sql)]
+        source_values = {row[:5]: row[5:] for row in rows}
+        published_values = {row[:5]: row[5:] for row in published}
+        if len(source_values) != len(rows) or len(published_values) != len(published):
+            raise ReferenceBaselineError(
+                f"{category}: duplicate source/published occurrence positions"
+            )
+        missing = sorted(source_values.keys() - published_values.keys())
+        extra = sorted(published_values.keys() - source_values.keys())
+        if missing or extra:
+            raise ReferenceBaselineError(
+                f"{category}: source/published occurrence positions differ: "
+                f"missing={missing[:10]!r}, extra={extra[:10]!r}"
+            )
+        for key in sorted(source_values):
+            if source_values[key] != published_values[key]:
+                raise ReferenceBaselineError(
+                    f"{category}: source/published facts differ at {key!r}: "
+                    f"source={source_values[key]!r}, "
+                    f"published={published_values[key]!r}"
+                )
+        result[category] = len(rows)
+    return result
+
+
 def _verify_army_archive_sources(
     archive: Path, metadata: dict[str, Any], army: sqlite3.Connection,
     raw_army: sqlite3.Connection | None = None,
@@ -616,6 +693,9 @@ def build_baseline(
                 archive_evidence["matchedPublishedExtras"] = (
                     _verify_published_profile_extras(army, sources)
                 )
+                archive_evidence["matchedPublishedCharacteristicsOrders"] = (
+                    _verify_published_characteristics_orders(army, sources)
+                )
             archive_status = "hash-verified-source-identities"
 
         # Each URL revision is a separate source identity. Only a genuinely shared
@@ -905,6 +985,23 @@ def render_markdown(report: dict[str, Any]) -> str:
              + " (exact source occurrence, extra position and extra ID; "
              "not a parameter-semantics or browser verification)."]
             if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedPublishedExtras")
+            else []
+        ),
+        *(
+            ["- Published profile/loadout Characteristics and Orders: "
+             + ", ".join(
+                 f"{name}={count}"
+                 for name, count in sorted(
+                     snapshot["sourceIdentityEvidence"][
+                         "matchedPublishedCharacteristicsOrders"
+                     ].items()
+                 )
+             )
+             + " (ordered characteristic IDs; modeled Order type/list/total; "
+             "raw fields and browser representation unreviewed)."]
+            if (snapshot.get("sourceIdentityEvidence") or {}).get(
+                "matchedPublishedCharacteristicsOrders"
+            )
             else []
         ),
         f"- Published Army database SHA-256: `{snapshot['publishedDatabaseSha256']}`.",

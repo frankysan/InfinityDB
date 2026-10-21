@@ -19,6 +19,7 @@ from tools.report_reference_baseline import (
     _route_hint,
     _source_location,
     _verify_army_archive_sources,
+    _verify_published_characteristics_orders,
     _verify_published_profile_extras,
     _verify_published_profile_references,
     build_baseline,
@@ -201,6 +202,7 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
                                 "id": 1, "name": "Test Unit", "type": 2,
                                 "move": [15, 10], "cc": 16, "w": 1,
                                 "str": False,
+                                "chars": [51, 52],
                                 "skills": [
                                     {"id": 11, "q": 1, "order": 2, "extra": [41, 42]},
                                     {"id": 12, "q": 2, "order": 1},
@@ -212,6 +214,11 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
                                 "id": 9, "name": "Test Loadout",
                                 "points": 17, "swc": "0.5",
                                 "minis": 1, "disabled": False,
+                                "chars": [53],
+                                "orders": [
+                                    {"type": "regular", "list": 1, "total": 2},
+                                    {"type": "irregular", "list": 0, "total": 1},
+                                ],
                                 "skills": [{"id": 11, "q": 1, "extra": [45]}],
                                 "equip": [{"id": 22, "order": 2, "extra": [46]}],
                                 "weapons": [{"id": 32, "extra": [47, 48]}],
@@ -230,6 +237,69 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
             })
         )
     return archive
+
+
+def test_published_characteristics_and_orders_reject_drift(tmp_path: Path) -> None:
+    sources, _ = load_sources(_synthetic_army_archive(tmp_path))
+    with sqlite3.connect(":memory:") as db:
+        for kind, identity in (("profile", "profile_id"), ("loadout", "option_id")):
+            db.execute(
+                f"CREATE TABLE {kind}_payload_occurrences "
+                f"(army_id, unit_id, group_id, {identity}, {kind}_payload_id)"
+            )
+            db.execute(
+                f"INSERT INTO {kind}_payload_occurrences VALUES (101, 10, 7, "
+                f"{1 if kind == 'profile' else 9}, 1)"
+            )
+            db.execute(
+                f"CREATE TABLE {kind}_payload_characteristics "
+                f"({kind}_payload_id, position, characteristic_id)"
+            )
+        db.execute(
+            "CREATE TABLE loadout_payload_orders "
+            "(loadout_payload_id, position, order_type, list_count, total_count)"
+        )
+        db.executemany(
+            "INSERT INTO profile_payload_characteristics VALUES (?, ?, ?)",
+            [(1, 1, 51), (1, 2, 52)],
+        )
+        db.execute("INSERT INTO loadout_payload_characteristics VALUES (1, 1, 53)")
+        db.executemany(
+            "INSERT INTO loadout_payload_orders VALUES (?, ?, ?, ?, ?)",
+            [(1, 1, "regular", 1, 2), (1, 2, "irregular", 0, 1)],
+        )
+        expected = {
+            "profile.characteristics": 2,
+            "loadout.characteristics": 1,
+            "loadout.orders": 2,
+        }
+        assert _verify_published_characteristics_orders(db, sources) == expected
+
+        db.execute(
+            "UPDATE profile_payload_characteristics SET characteristic_id = 99 "
+            "WHERE position = 2"
+        )
+        with pytest.raises(ReferenceBaselineError, match="source/published facts differ"):
+            _verify_published_characteristics_orders(db, sources)
+        db.execute(
+            "UPDATE profile_payload_characteristics SET characteristic_id = 52 "
+            "WHERE position = 2"
+        )
+        db.execute("UPDATE loadout_payload_orders SET total_count = 9 WHERE position = 1")
+        with pytest.raises(ReferenceBaselineError, match="source/published facts differ"):
+            _verify_published_characteristics_orders(db, sources)
+        db.execute("UPDATE loadout_payload_orders SET total_count = 2 WHERE position = 1")
+        db.execute("UPDATE loadout_payload_orders SET position = 3 WHERE position = 2")
+        with pytest.raises(ReferenceBaselineError, match="occurrence positions differ"):
+            _verify_published_characteristics_orders(db, sources)
+        db.execute("UPDATE loadout_payload_orders SET position = 2 WHERE position = 3")
+        db.execute("DELETE FROM loadout_payload_characteristics")
+        with pytest.raises(ReferenceBaselineError, match="occurrence positions differ"):
+            _verify_published_characteristics_orders(db, sources)
+        db.execute("INSERT INTO loadout_payload_characteristics VALUES (1, 1, 53)")
+        db.execute("INSERT INTO loadout_payload_characteristics VALUES (1, 1, 53)")
+        with pytest.raises(ReferenceBaselineError, match="duplicate"):
+            _verify_published_characteristics_orders(db, sources)
 
 
 def test_published_nested_reference_occurrences_reject_source_drift(
@@ -505,6 +575,17 @@ def test_pinned_army_archive_nested_publication_when_available() -> None:
     extras = evidence["matchedPublishedExtras"]
     assert set(extras) == set(published)
     assert sum(extras.values()) > 0, extras
+    characteristics_orders = evidence["matchedPublishedCharacteristicsOrders"]
+    assert set(characteristics_orders) == {
+        "profile.characteristics",
+        "loadout.characteristics",
+        "loadout.orders",
+    }
+    assert characteristics_orders["profile.characteristics"] == 15011
+    assert characteristics_orders["loadout.orders"] == 15195
+    # No loadout Characteristics exist in this pinned source. The parity
+    # check still rejects unexpectedly published rows for this category.
+    assert characteristics_orders["loadout.characteristics"] == 0
 
 
 def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
@@ -523,6 +604,11 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
         "matchedPublishedExtras": {
             "profile.skills": 12, "loadout.weapons": 17,
         },
+        "matchedPublishedCharacteristicsOrders": {
+            "profile.characteristics": 41,
+            "loadout.characteristics": 37,
+            "loadout.orders": 26,
+        },
     }
     markdown = render_markdown(report)
     assert "59 archive JSON documents (including metadata.json)" in markdown
@@ -534,6 +620,8 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
     assert "export-paired infinity.raw.db" in markdown
     assert "loadout.weapons=30, profile.skills=20" in markdown
     assert "loadout.weapons=17, profile.skills=12" in markdown
+    assert "loadout.characteristics=37, loadout.orders=26" in markdown
+    assert "profile.characteristics=41" in markdown
 
 
 def test_baseline_requires_published_databases_and_verified_supplied_army_zip(

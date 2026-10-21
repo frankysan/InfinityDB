@@ -154,6 +154,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Extra semantics and malformed/raw extra preservation remain unreviewed;
     other nested relations, API serialization and browser visibility remain
     separate gates.
+  - [x] Compare ordered profile/loadout Characteristic IDs and typed loadout
+    Order fields (type, list count, total count) against their published
+    reusable payload tables. The pinned archive contains 15,011 profile
+    Characteristics, no loadout Characteristics, and 15,195 loadout Orders.
+    The zero category is compared explicitly; synthetic nonempty fixtures
+    verify changes, missing rows, duplicates and positional drift.
+    Raw/unmodeled Order content, Peripherals, Includes, API serialization
+    and browser presentation remain open.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

@@ -706,3 +706,16 @@ Prefer targeted fixes rather than merging these.
   This is an identity/ordering check, not interpretation of extra
   modifiers or certification of malformed values preserved as raw
   source data.
+- **Closeout pass 27, 2026-10-21:** Extended the pinned Army ZIP
+  source-to-published-payload audit to ordered profile and loadout
+  Characteristic IDs plus typed loadout Order properties: type, list
+  count and total count. Matched parent source coordinates and positions
+  through reusable payload occurrences. Missing/additional/duplicate
+  rows, changed identities, ordering and Order counts fail; synthetic
+  mutation cases and real pinned-archive integration are maintained.
+  The current pinned snapshot has 15,011 profile Characteristics,
+  **zero** loadout Characteristics and 15,195 loadout Orders.
+  Zero is an observed, checked source/storage absence, not a missing
+  verifier category; the synthetic fixture exercises the nonempty case.
+  Raw unmodeled Order fields, other nested relations and client
+  rendering remain unreviewed.

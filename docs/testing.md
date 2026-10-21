@@ -1000,9 +1000,21 @@ source parent, reference occurrence, and extra position. Missing,
 duplicate, reordered, and changed extras fail closed. Non-array
 source `extra` values are intentionally preserved in parent raw data
 rather than normalized into extras rows; this check does not certify
-that raw preservation or the meaning of any extra. Characteristics,
-Orders, Peripheral/Include relationships, live API serialization,
-normal-browser display and rules semantics remain separate gates.
+that raw preservation or the meaning of any extra. The pinned
+archive is also compared with published `profile_payload_characteristics`,
+`loadout_payload_characteristics`, and `loadout_payload_orders` through
+their source-to-payload occurrence joins. Ordered Characteristic IDs and
+the modeled Order type, list count and total count must match exactly;
+missing, duplicated and changed positions or facts fail closed.
+For the September 29 pinned archive the verified counts are **15,011
+profile Characteristics**, **0 loadout Characteristics**, and **15,195
+loadout Orders**. The zero count is an explicitly checked source/storage
+absence, not skipped coverage; synthetic nonempty loadout Characteristics
+exercise detection of discrepancies. Unknown Order fields and non-object
+Order entries may be preserved as raw data and are not fully certified
+by this typed check. Peripheral/Include
+relationships, live API serialization, normal-browser display and
+rules semantics remain separate gates.
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:
