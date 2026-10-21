@@ -47,6 +47,7 @@ ASSETS = {
     "/static/units.js": ("units.js", "text/javascript; charset=utf-8"),
     "/static/share-state.js": ("share-state.js", "text/javascript; charset=utf-8"),
     "/static/armies.js": ("armies.js", "text/javascript; charset=utf-8"),
+    "/static/deployed-objects.js": ("deployed-objects.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
     "/static/api-transport.js": ("api-transport.js", "text/javascript; charset=utf-8"),
     "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
@@ -253,6 +254,12 @@ _FIXED_PAGES = {
     "/weapons": PageSpec(
         "weapons.html",
         (("InfinityDB", "/"), ("Weapons", None)),
+        "Rules reference",
+        "weapons",
+    ),
+    "/deployed-objects": PageSpec(
+        "deployed-objects.html",
+        (("InfinityDB", "/"), ("Weapons", "/weapons"), ("Deployed objects", None)),
         "Rules reference",
         "weapons",
     ),

@@ -11,6 +11,7 @@ from time import perf_counter
 
 from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
+from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web.api_handler import ApiHandler
 from infinity_db.web.metrics import RequestMetrics
@@ -84,11 +85,17 @@ class Application:
             snapshot_downloaded_on=self.snapshot_downloaded_on,
             snapshot_revision=self.snapshot_revision,
         )
+        self.deployed_objects = load_deployed_object_publication(
+            Path(database_path).with_name("deployed-objects.json"),
+            Path(database_path),
+            self.rules_database.path if self.rules_database is not None else None,
+        )
         self.api = ApiHandler(
             self.database,
             self.rules_database,
             static_revision=STATIC_ASSET_REVISION,
             snapshot_revision=self.snapshot_revision,
+            deployed_objects=self.deployed_objects,
         )
         # Preserve the existing Application service attributes while request ownership moves
         # behind the API handler. They remain internal compatibility aliases, not dispatch logic.

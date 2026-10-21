@@ -59,6 +59,7 @@ from infinity_db.unit_slugs import (
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import (
     AMMUNITION_API_PATH,
+    DEPLOYED_OBJECT_API_PATH,
     EQUIPMENT_API_PATH,
     HACKING_PROGRAM_API_PATH,
     LABEL_API_PATH,
@@ -455,11 +456,17 @@ class ApiHandler:
         *,
         static_revision: str,
         snapshot_revision: str,
+        deployed_objects: dict[str, Any] | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
         self.static_revision = static_revision
         self.snapshot_revision = snapshot_revision
+        self.deployed_objects = deployed_objects
+        self._deployed_by_id = (
+            {obj["id"]: obj for obj in deployed_objects["objects"]}
+            if deployed_objects is not None else {}
+        )
         self.trait_catalog = TraitCatalog(database, rules_database)
         self.state_catalog = StateCatalog(rules_database)
         self.skill_catalog = SkillCatalog(database, rules_database)
@@ -669,6 +676,31 @@ class ApiHandler:
                 LOGGER.exception("Could not read skill modifiers")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The skill modifiers are unavailable. Please try again."}
+        elif path == "/api/deployed-objects":
+            cache_control = API_CACHE_CONTROL
+            if self.deployed_objects is None:
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "Deployed-object references are not published for this release."
+                }
+            else:
+                payload = {
+                    "items": self.deployed_objects["objects"],
+                    "scope": self.deployed_objects["scope"],
+                    "unresolved_deliveries": self.deployed_objects["unresolvedDeliveries"],
+                }
+        elif match := DEPLOYED_OBJECT_API_PATH.fullmatch(path):
+            cache_control = API_CACHE_CONTROL
+            if self.deployed_objects is None:
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "Deployed-object references are not published for this release."
+                }
+            else:
+                payload = self._deployed_by_id.get(match.group("identifier"))
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Deployed-object reference not found"}
         elif path in {"/api/skills", "/api/equipment", "/api/weapons"}:
             cache_control = API_CACHE_CONTROL
             try:

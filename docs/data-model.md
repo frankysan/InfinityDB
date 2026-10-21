@@ -53,7 +53,7 @@ mode, but must attach to that one profile only, not to the parent Weapon/source
 variant or sibling modes. Mode qualifiers describe identity, not permission to
 resolve a disputed Trait automatically.
 
-### Deployed-object read-model pilot (not yet published)
+### Deployed-object read-model and artifact-gated browser reference
 
 `infinity_db.deployed_object_reference.project_deployed_references` consumes
 the validated N5.3 deployed-object audit and produces a **pure, read-only**
@@ -71,9 +71,24 @@ shared object reference; Mine Dispenser's unresolved loadout-specific Mine
 subtype remains explicitly unresolved. These edges establish **delivery
 origins only**, not Unit carriers, Army List legality or Unit/loadout usage.
 
-This read model is **not served by the API or browser yet**. Publication,
-reviewed provenance validation at build time, compatibility checks and true
-Unit/loadout reverse uses remain v1.0 tasks; do not describe the pilot as an
+The release-builder `tools.build_deployed_object_publication` compiles the
+validated review and current Army/rules database pair to deterministic
+`deployed-objects.json` once during release preparation. The runtime loader
+checks the artifact's Army and rules database SHA-256 hashes and structural
+attribute/identity provenance. It does **not** access the raw normalized Army
+snapshot, curated JSON, or review files on requests. When the artifact is
+present, `/api/deployed-objects` and the `/deployed-objects` browser page
+publish its reviewed identities, attributes and delivery source links.
+`/api/deployed-objects/{id}` returns one exact reviewed identity.
+When it is absent (legacy or not-yet-built release), the API returns 503
+rather than reconstructing source assertions from raw tables; a mismatched
+artifact fails closed on startup.
+
+**Release packaging of this new artifact is still pending.** The current
+Docker image does not copy it, and the tracked database pair alone is not
+proof of deployed-object publication. True Unit/loadout reverse uses, extra
+objects and full-source inventory remain v1.0 tasks. Do not describe these
+delivery origins as proof of Unit ownership, Army List legality or an
 exhaustive N5.3 deployed-object model.
 Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition
 composition. `config/catalogs/weapon-ammunition-references.json` pins exact Army

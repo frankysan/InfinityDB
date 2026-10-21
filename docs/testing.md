@@ -1173,6 +1173,34 @@ shapes, exact Army profile selectors/attributes, lost source clauses/citations
 and invented missing-attribute values. Source text and alternative Silhouette
 values remain unchanged; no canonical object or carrier IDs are created.
 
+### Deployed-object release publication (new, not yet packaged)
+
+The read-only inventory is for review; ordinary web requests must not read
+the raw curated source files. In a development/release checkout, after
+building both matching databases, compile the reviewed reference payload:
+
+```powershell
+.venv\Scripts\python.exe -m tools.build_deployed_object_publication
+.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+```
+
+The builder writes deterministic `data/generated/deployed-objects.json` with
+the source and rules review evidence and the **exact** current
+`infinity.db`/`rules.db` SHA-256 fingerprints. Changes to either database
+require regenerating and revalidating the publication. The corresponding
+`tests/test_deployed_object_publication.py` tests prove deterministic bytes
+and rejection of corrupt, duplicate, stale or unsupported values.
+`tests/test_verify_deployed_object_publication_browser.py` exercises the
+real API and Chromium at 1440/390 px with an isolated, freshly generated
+publication. There are 17 reviewed entries, not the entire game-object corpus;
+Mine Dispenser's subtype remains unresolved and Unit/loadout reverse uses
+are not inferred.
+
+The publication is **not yet included in the Docker/release artifact
+contract**, so passing the temporary-artifact browser test does not establish
+hosted availability. Complete packaging, source-pair drift checks and hosted
+acceptance before closing the 1.0 TODO item.
+
 For the older Wiki Weapon Chart name inventory, use the read-only
 explicit-alias audit. It preserves repeated alternative tables and reports
 unresolved identities independently from source-profile value differences.

@@ -642,12 +642,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 unreported ARM/BTS/STR. Mine Dispenser remains unresolved.
                 Tests assert shared-object delivery and no invented Units.
                 This code is **not yet published via API or browser**.
-              - [ ] Publish only validated object identities in the
-                runtime reference API and normal browser; add navigable
-                carrier/Equipment/Weapon source links, compatibility and
-                degraded-state coverage, then use real Army usage
-                occurrences for reverse Unit/loadout links. Keep disputed
-                source values and unresolved Mine subtype visible.
+              - [x] Add the **artifact-gated read-only API and normal browser
+                entry point** for the 17 reviewed objects:
+                `/api/deployed-objects`, exact `/api/deployed-objects/{id}`,
+                and `/deployed-objects` linked from Weapons and Equipment.
+                The isolated Chromium acceptance covers both 1440/390 px,
+                unresolved Mine Dispenser, known/unreported/disputed
+                attributes, source reference links, shared delivery paths
+                and keyboard fragment navigation. Missing publications
+                return 503; invalid or database-mismatched publications
+                fail closed. No Unit usage is inferred.
+              - [ ] **Generate and ship** the deterministic
+                `data/generated/deployed-objects.json` release publication
+                for the pinned `infinity.db`/`rules.db` pair.
+                `tools.build_deployed_object_publication` builds/verifies
+                it; validate drift, add the artifact to Docker/deployment
+                checks and rerun hosted acceptance. Development tests
+                generate a temporary artifact only, not a release file.
+              - [ ] Derive **reverse Unit/loadout uses** only from exact Army
+                usage occurrences and reviewed object/delivery edges.
+                Preserve unavailable values, conflicting Silhouettes and
+                the unresolved Mine Dispenser subtype; do not infer roster
+                ownership from rule prose.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.
