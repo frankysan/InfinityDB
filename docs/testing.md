@@ -994,9 +994,15 @@ Equipment and Weapon occurrence against the corresponding reusable
 `profile_payload_*` and `loadout_payload_*` rows in the published app
 database. It checks parent source coordinates, occurrence positions, source
 item IDs, display order and quantity; missing, duplicated and altered
-occurrences fail closed. It does **not** yet verify extra parameters,
-Characteristics, Orders, Peripheral/Include relationships, live API
-serialization, normal-browser display or rules semantics.
+occurrences fail closed. The audit also checks each ordered `extra`
+ID against the matching published `*_payload_*_extras` row, keyed by
+source parent, reference occurrence, and extra position. Missing,
+duplicate, reordered, and changed extras fail closed. Non-array
+source `extra` values are intentionally preserved in parent raw data
+rather than normalized into extras rows; this check does not certify
+that raw preservation or the meaning of any extra. Characteristics,
+Orders, Peripheral/Include relationships, live API serialization,
+normal-browser display and rules semantics remain separate gates.
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:

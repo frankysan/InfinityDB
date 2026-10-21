@@ -696,3 +696,13 @@ Prefer targeted fixes rather than merging these.
   pinned archive test requires nonempty matching evidence in all six
   categories. Does not verify extras/parameter values, Characteristics,
   Orders, Peripheral/Include relations, API output or browser display.
+- **Closeout pass 26, 2026-10-21:** Extended source-to-published
+  payload parity to all ordered `extra` references associated with
+  profile and loadout Skills, Equipment and Weapons. The verifier
+  compares exact source parent coordinates, reference occurrence,
+  extra position and extra ID across the reused payload tables,
+  rejecting missing/additional rows, duplicates, reordering and ID
+  drift. Pinned-archive integration verifies nonempty extra evidence.
+  This is an identity/ordering check, not interpretation of extra
+  modifiers or certification of malformed values preserved as raw
+  source data.

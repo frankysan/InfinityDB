@@ -216,6 +216,86 @@ def _verify_published_profile_references(
     return result
 
 
+def _verify_published_profile_extras(
+    army: sqlite3.Connection,
+    sources: list[SourceDocument],
+) -> dict[str, int]:
+    """Match ordered extra IDs through published reusable payload relationships."""
+    expected: dict[tuple[str, str], list[tuple[int, ...]]] = {
+        (kind, field): []
+        for kind in ("profile", "loadout")
+        for field in ("skills", "equipment", "weapons")
+    }
+    for source in sources:
+        for unit in source.data["units"]:
+            for group in unit.get("profileGroups") or []:
+                parent = (source.faction_id, unit["id"], group["id"])
+                for kind, rows in (
+                    ("profile", group.get("profiles") or []),
+                    ("loadout", group.get("options") or []),
+                ):
+                    for record in rows:
+                        identity = (*parent, record["id"])
+                        for field, source_field in (
+                            ("skills", "skills"),
+                            ("equipment", "equip"),
+                            ("weapons", "weapons"),
+                        ):
+                            for occurrence_position, reference in enumerate(
+                                record.get(source_field) or [], start=1
+                            ):
+                                extras = reference.get("extra")
+                                # Non-array extra values are preserved as raw
+                                # parent data by the normalizer, not emitted as rows.
+                                if not isinstance(extras, list):
+                                    continue
+                                for extra_position, extra_id in enumerate(extras, start=1):
+                                    expected[(kind, field)].append((
+                                        *identity, occurrence_position,
+                                        extra_position, extra_id,
+                                    ))
+
+    result: dict[str, int] = {}
+    suffixes = {
+        "skills": "skill_extras",
+        "equipment": "equipment_extras",
+        "weapons": "weapon_extras",
+    }
+    for (kind, field), rows in sorted(expected.items()):
+        occurrence_table = f"{kind}_payload_occurrences"
+        extras_table = f"{kind}_payload_{suffixes[field]}"
+        identity_col = "profile_id" if kind == "profile" else "option_id"
+        query = (
+            f"SELECT o.army_id, o.unit_id, o.group_id, o.{identity_col}, "
+            "e.occurrence_position, e.position, e.extra_id "
+            f"FROM {occurrence_table} o JOIN {extras_table} e "
+            f"ON e.{kind}_payload_id = o.{kind}_payload_id"
+        )
+        actual = [tuple(row) for row in army.execute(query)]
+        key_length = 6
+        source_by_key = {row[:key_length]: row[key_length:] for row in rows}
+        actual_by_key = {row[:key_length]: row[key_length:] for row in actual}
+        if len(source_by_key) != len(rows) or len(actual_by_key) != len(actual):
+            raise ReferenceBaselineError(
+                f"{kind}.{field}.extras: duplicate source or published extra position"
+            )
+        missing = sorted(source_by_key.keys() - actual_by_key.keys())
+        extra = sorted(actual_by_key.keys() - source_by_key.keys())
+        if missing or extra:
+            raise ReferenceBaselineError(
+                f"{kind}.{field}.extras: source/published extra positions differ: "
+                f"missing={missing[:10]!r}, extra={extra[:10]!r}"
+            )
+        for key in sorted(source_by_key):
+            if source_by_key[key] != actual_by_key[key]:
+                raise ReferenceBaselineError(
+                    f"{kind}.{field}.extras: published extra differs at {key!r}: "
+                    f"source={source_by_key[key]!r}, published={actual_by_key[key]!r}"
+                )
+        result[f"{kind}.{field}"] = len(rows)
+    return result
+
+
 def _verify_army_archive_sources(
     archive: Path, metadata: dict[str, Any], army: sqlite3.Connection,
     raw_army: sqlite3.Connection | None = None,
@@ -533,6 +613,9 @@ def build_baseline(
                 archive_evidence["matchedPublishedReferences"] = (
                     _verify_published_profile_references(army, sources)
                 )
+                archive_evidence["matchedPublishedExtras"] = (
+                    _verify_published_profile_extras(army, sources)
+                )
             archive_status = "hash-verified-source-identities"
 
         # Each URL revision is a separate source identity. Only a genuinely shared
@@ -809,6 +892,19 @@ def render_markdown(report: dict[str, Any]) -> str:
              + " (source ID, position, display order and quantity; "
              "not nested extras or browser rendering)."]
             if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedPublishedReferences")
+            else []
+        ),
+        *(
+            ["- Published profile/loadout reference extras: "
+             + ", ".join(
+                 f"{name}={count}"
+                 for name, count in sorted(
+                     snapshot["sourceIdentityEvidence"]["matchedPublishedExtras"].items()
+                 )
+             )
+             + " (exact source occurrence, extra position and extra ID; "
+             "not a parameter-semantics or browser verification)."]
+            if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedPublishedExtras")
             else []
         ),
         f"- Published Army database SHA-256: `{snapshot['publishedDatabaseSha256']}`.",

@@ -145,8 +145,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Weapon source occurrence identities, order, quantities and display-order
     fields against the published reusable profile/loadout payload tables.
     Require nonzero evidence in every category and reject changed or
-    missing references. Extra modifiers, other nested relationships,
-    API serialization and browser visibility remain separate gates.
+    missing references.
+  - [x] Reconcile each ordered source `extra` ID attached to the six
+    profile/loadout Skill, Equipment and Weapon reference categories
+    with the published `*_payload_*_extras` relationships. Assert
+    non-vacuous evidence across the pinned archive; regression fixtures
+    reject changed values, missing rows, duplicate positions and reordering.
+    Extra semantics and malformed/raw extra preservation remain unreviewed;
+    other nested relations, API serialization and browser visibility remain
+    separate gates.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and
