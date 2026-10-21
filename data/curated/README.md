@@ -427,7 +427,7 @@ retain their own scope, facts, citations, relations, and publication provenance 
 than being field-merged by load order. Related concepts use typed one-way `relations`;
 reverse navigation is derived by `rules.db`.
 
-### Dated FAQ ruling authoring contract (foundation)
+### Dated FAQ ruling authoring contract (published subset)
 
 `faq-ruling:<stable-slug>` is a canonical ruling identity, independent of
 the page on which it first appeared. FAQ material lives in its own versioned
@@ -506,12 +506,13 @@ The default read model does not replay superseded historical collections;
 historical publication selection and verification of ITS season revisions
 not yet present in the corpus remain future work.
 
-Twenty-seven source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
-Eight were introduced in FAQ v0.1: Hacking Device Firewall, undeployed
+Twenty-eight source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
+Nine were introduced in FAQ v0.1: Hacking Device Firewall, undeployed
 Peripherals (Ancillary) counted as Killed (initially Annihilation only),
 Skill declaration details, fired Deployables on vertical surfaces,
 Peripheral declarations, Camouflaged Markers in Total Cover, Special Dice
-in Coordinated Orders, and Fireteam minimums after creation.
+in Coordinated Orders, Fireteam minimums after creation, and Fireteam Type
+persistence after member loss.
 
 Nineteen more were **first recorded in official English FAQ v0.0**
 and carried into v0.1. The first eight cover: Prone entry restrictions; vaulting while Climbing or
@@ -545,10 +546,11 @@ The browser's explicit N5.3/v0.1 source snapshot uses
 uses the documented official announcement-era date, not a separately
 verified PDF publication day.
 
-**Pending source review:** The English and Spanish v0.1 Fireteam *type
-after member loss* examples do not align (the Spanish Haris example
-contains inconsistent member counts). Do not publish a consolidated
-answer for that example without resolving/documenting the discrepancy.
+**Published source discrepancy:** The Fireteam *type after member loss*
+ruling uses the consistent English HARIS three-to-two-member example.
+The Spanish v0.1 example has inconsistent member counts; its cited conflict
+is disclosed separately rather than changing the shared Type-persistence rule.
+An official correction remains outstanding; publication does not settle it.
 The main Deployment Phase question belongs to `rule:deployment-phase`,
 not a specialized Skill. The ITS FAQ source audit confirms Area of
 Interest, Crossing Lines and Akial Interference as Season 18 source

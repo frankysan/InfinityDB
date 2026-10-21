@@ -124,9 +124,9 @@ harness checks that rapidly changing Army Points returns to the loading panel,
 ignores superseded results (including stale errors), and displays only the latest
 configuration even when an aborted request still resolves. Responsive grid
 contracts are also checked in the web suite. Scenario browser visual review was
-user-confirmed on 2026-10-08; the separate real-browser keyboard/touch and
-loading/empty/error-state interaction checks remain open in the
-[1.0 browser acceptance](TODO.md#final-10-acceptance).
+user-confirmed on 2026-10-08; later bounded Chromium interaction acceptance is
+documented under [four-core-scenario acceptance](#10-four-core-scenario-browser-acceptance).
+Neither run replaces [final candidate acceptance](TODO.md#final-10-acceptance).
 
 ## Silhouette manual browser acceptance
 
@@ -656,280 +656,84 @@ ignored `local/audits/`; rerun against the actual target checkout.
 
 ## 1.0 Martial Arts, Booty and MetaChemistry structured-chart parity
 
-**Accepted 2026-10-19.** These references are already
-available through normal Skill detail pages, using Army-owned structured
-rows rather than separate curated copies. The hermetic
-`tests/test_structured_skill_charts_publication.py` suite now checks the
-complete published Martial Arts Levels 1–5, Booty and MetaChemistry tables.
-It reconciles every generated Army table row, the repository's structured
-getters and the `/api/skills/{slug}` detail's `structured_reference`
-projection, including exact row ordering and field values. Both random
-charts cover each D20 result **1–20 exactly once**, with no gaps or
-overlaps. Unsupported roll notation and invalid ranges fail the
-regression. The test is included in the `model` test section.
+`tests/test_structured_skill_charts_publication.py` reconciles every generated
+Army chart row, repository getter and Skill API `structured_reference` value.
+It checks Martial Arts Levels 1–5 and exact D20 coverage of Booty and
+MetaChemistry without gaps or overlaps. Typed conditional branches/components
+and reviewed public links have negative cases for missing or ambiguous identities.
+The tests belong to the `model` section.
 
-Optional Chromium acceptance checks all three Skill pages at 1440,
-390 and 320 px (**9 page checks**). It enters through the normal
-Skills catalog, compares the served API chart against the local
-generated database, then checks the actual rendered table's headings
-and every cell. It also checks page headings, JavaScript errors, stuck
-loading states and document-level horizontal overflow. Run against
-the current checkout's development server:
+The optional Chromium verifier enters all three pages through the Skills catalog
+at 1440/390/320 px, compares every rendered chart cell with the served API and
+local Army database, follows reviewed destinations and rejects JavaScript errors,
+incomplete loading and horizontal overflow. With the matching development server running:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
 ```
 
-**Original browser result reported 2026-10-19:** `Structured Skill charts
-browser: 9/9 passed` at 1440/390/320 px for the prior renderer.
-
-**Presentation revision after that acceptance:** the official
-[Martial Arts](https://infinitythewiki.com/Martial_Arts) chart
-lists Attack/Opponent/Burst MOD without a PS MOD column. All five
-current published Army PS MOD values are unpopulated, so the player
-chart now hides that column while retaining its source field; a
-future populated PS MOD value would remain displayed and fail the
-source-distinction regression for review. The official
-[Booty](https://infinitythewiki.com/Booty) chart has separate
-TAG/other-Troop-Type results for rolls 12, 16, 18 and 20; the renderer
-now separates those source-preserved branches onto distinct lines.
-The original Army result values were unchanged by this presentation
-correction. These are bounded official-Wiki comparisons, **not**
-independent final pinned N5.3 PDF or chart-footnote acceptance.
-
-**The corrected Martial Arts/Booty presentation was subsequently
-verified by the user (9/9).** The current revision adds a source-preserving
-typed projection specifically for the four Booty TAG/other-Troop-Type
-outcomes. Each original Army `result` string remains intact and the
-Skill API additionally exposes `conditional_outcomes` entries with
-`scope`, `label` and `result`. The renderer now consumes that
-structured data instead of splitting free text in JavaScript.
-Unrecognized conditional syntax is rejected rather than silently
-flattened into one effect. The source comparison is grounded in the
-official [N5.3 Booty chart](https://infinitythewiki.com/Booty), but
-does not supersede the pinned release PDF/footnote audit.
-
-**Typed-branch browser acceptance reported 2026-10-19:**
-`Structured Skill charts browser: 9/9 passed` at 1440/390/320 px,
-including the four typed, visually separated Booty branches. This
-applies to the prior typed-Booty revision; any later MetaChemistry
-renderer change requires fresh browser acceptance. Independent
-semantic review and canonical outcome references remain open.
-No random roll selection or session state has been introduced.
-Keep evidence under ignored `local/audits`.
+**Historical acceptance:** successive 9/9 runs on 2026-10-19/20 covered the
+presentation corrections, typed branches/components and final family/alias links.
+Rerun the current verifier against the final candidate; earlier renderer passes
+do not accept later code. The [data model](data-model.md#structured-skill-reference-charts)
+owns current publication behavior, and the
+[source-history review](n5-source-history.md#reviewed-10-structured-skill-chart-provenance)
+owns PDF pages, exact Wiki revisions/hashes and FAQ comparison.
 
 ## 1.0 MetaChemistry combined outcomes — typed publication
 
-**Browser accepted 2026-10-20 (9/9).** The pinned Army
-MetaChemistry rows 16–20 match the published N5.3
-[MetaChemistry chart](https://infinitythewiki.com/MetaChemistry).
-These five outcomes combine two separately named effects: an
-Attribute MOD or MOV value and/or a Special Skill, sometimes with an
-Immunity parameter. The new source-preserving
-`project_metachemistry_rows` adds `outcome_components` to the
-existing Skill detail API's structured chart, with each component
-carrying `kind` and `text`, plus source-derived details such as
-`attribute`/`modifier`, `value`, or Skill `name`/`parameter`.
-The Army `result` field and database storage are unchanged.
-
-Only the five reviewed combinations are recognized. Unexpected
-source format, duplicate compound rolls, or an unknown component
-fails closed. The complete published source regression requires all
-five specific compound rows; the projector itself also accepts
-partial synthetic fixtures. These components describe the written
-outcomes; they are **not** selected gameplay effects, resolved
-Skill variant IDs, independent mechanics, or a guarantee that the
-official chart footnotes have all been reconciled.
-
-The Skill frontend renders each component separately, retaining
-the original textual result. The existing Chromium verifier checks
-all three Skill pages at 1440/390/320 px and now also checks all
-five MetaChemistry combinations and their exact two-component
-rendering. Run it against the current development server:
-
-```powershell
-.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
-```
-
-**Browser result reported 2026-10-20:** `Structured Skill charts browser:
-9/9 passed` for the MetaChemistry component renderer across
-1440/390/320 px.
-
-**Skill-link revision — browser accepted 2026-10-20 (9/9):**
-MetaChemistry now adds `public_reference: {"catalog":"skills","id":slug}`
-only when an outcome's Skill name matches exactly one reviewed
-current Skill definition and one published public Skill slug. Five
-canonical families resolve: Immunity, Dogged, Super-Jump, Climbing
-Plus and Regeneration. Immunity (ARM) and Immunity (Enhanced)
-retain their parameter labels but link to the **Immunity family**
-page, not to an inferred parameter-specific route. Attribute
-modifiers and MOV values remain plain typed text, not guessed links.
-The source-preserving contract and duplicate/unavailable-name
-guards have focused regression coverage. The updated Chromium
-verifier checks all six link occurrences, that their public pages
-return HTTP 200, and all existing source/chart assertions at
-1440/390/320 px. The user reported **9/9 passed**
-on 2026-10-20 for these link checks. Independent pinned N5.3
-source-footnote reconciliation and remaining canonical outcome
-references are still open.
+The hermetic chart suite checks all five compound outcomes (16–20), preserving
+the source `result` and exact two-component values/parameters. It rejects unknown
+combinations and verifies six Skill-link occurrences to five canonical families,
+including parameter-preserving Immunity links. MOV and Attribute modifiers stay
+typed text. The same three-page Chromium command above checks components, links
+and unchanged source values; the 2026-10-20 9/9 result is dated development evidence.
 
 ## 1.0 Booty Weapon outcomes — exact public-reference audit
 
-**Accepted 2026-10-20 (9/9 Chromium).** Of the ten Weapon
-names printed in the Booty chart, **nine** resolve by exact, unique
-name to published Army-backed Weapon catalog records and successful
-`/api/weapons/{slug}` detail routes: Light Flamethrower, Grenades,
-DA CC Weapon, EXP CC Weapon, Adhesive Launcher Rifle, Panzerfaust,
-Monofilament CC Weapon, MULTI Rifle and MULTI Sniper Rifle. The tenth,
-**HMG**, has **no exact name match** in the published catalog;
-no inferred alias or guessed destination has been attached.
-The source labels correspond to the archived official
-[Booty chart](https://infinitythewiki.com/Booty) (`oldid=3852`),
-but the pinned final N5.3 chart and variant semantics remain subject
-to separate release evidence review.
-
-The Skill API now adds optional `public_reference` values for those
-nine Weapon outcomes only, including MULTI Rifle in the
-`other-troop-types` branch of roll 16. The original `result`
-strings, conditional scopes, and untouched alternative TAG outcomes
-are retained. The renderer turns only resolved references into
-normal `/weapons/{slug}` links; it does not link plain Attribute
-modifiers, HMG, Multispectral Visor L1, Mimetism (-6), or
-BS Attack parameter variants without reviewed canonical identity.
-
-`tests/test_structured_skill_charts_publication.py` tests all ten
-source labels, the nine published detail routes, API links, preserved
-conditional branches, and fail-closed behavior for unknown and
-ambiguous names. The shared Chromium checker now verifies the nine
-rendered links, live destinations and unchanged chart values at
-1440/390/320 px. Run against the current development server:
-
-```powershell
-.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
-```
-
-**Browser result reported 2026-10-20:** `Structured Skill charts
-browser: 9/9 passed` for the exact-name Booty Weapon links across
-1440/390/320 px. Retain evidence under ignored `local/audits`.
-This does not validate later alias/variant changes.
+The chart suite checks all ten Weapon labels. Nine resolve by exact unique
+catalog name; HMG resolves through the separately reviewed Heavy Machine Gun
+alias below. Source strings and TAG/other-Troop-Type branches remain intact.
+The original exact-name-only 9/9 browser run preceded the alias/family revision;
+use the current verifier for the complete published links.
 
 ### Booty alias and variant family references
 
-**Added 2026-10-20; new Chromium acceptance pending.** The Booty
-label `HMG` is the shorthand for the normal **Heavy Machine Gun**
-entry on the official
-[Weapon Chart](https://infinitythewiki.com/Weapon_Chart);
-the historical official N3 Human Sphere source explicitly names
-`Heavy Machine Gun (HMG)`. This is resolved only to the unique
-published `/weapons/heavy-machine-gun`, never AP/MULTI variants.
-
-Six other reviewed Booty outcomes now carry additive canonical
-family references plus exact source parameters: `Multispectral Visor
-L1` links to the Equipment family at `/equipment/multispectral-visor`;
-`Mimetism (-6)` links to `/skills/mimetism`; the two
-`BS Attack (Shock)`/`BS Attack (+1B)` results link to
-`/skills/bs-attack`; and TAG-only `Immunity (AP)`/`Immunity (ARM)`
-link to `/skills/immunity`. None is represented as a separate
-variant-specific route or a derived gameplay effect. The generated
-`outcome_variant` captures the printed level/MOD/name, while the
-original `result` and conditional branch scopes remain unchanged.
-Missing or ambiguous canonical names fail closed, and the HMG
-reference exposes `reference_name: "Heavy Machine Gun"`.
-
-The hermetic chart audit reconciles all seven source spellings and
-their uniquely published catalog routes and reviews; it separately
-tests duplicate and missing family definitions. The shared Chromium
-verifier now checks **16 Booty link occurrences**: nine previously
-verified exact-name Weapons, HMG, and six parameterized outcomes,
-including their real live destination routes. Re-run:
-
-```powershell
-.\.venv\Scripts\python.exe -m tools.verify_structured_skill_charts_browser --base-url http://127.0.0.1:8000 --output local/audits/structured-skill-charts-browser.json
-```
-
-The previous 9/9 browser acceptance does not cover this revision.
-Independent final-pinned N5.3 variant semantics and footnotes remain
-open for 1.0; no random-result selection or game-state engine exists.
+The current API/browser supports all **16 Booty link occurrences**: nine
+exact-name Weapons, HMG, and six parameterized Skill/Equipment outcomes.
+HMG resolves only to the normal Heavy Machine Gun; Multispectral Visor L1,
+Mimetism (-6), BS Attack (Shock)/(+1B), and TAG-only Immunity (AP)/(ARM)
+retain their printed parameters while linking to canonical families.
+Hermetic tests require unique reviewed destinations and preserve `outcome_variant`
+or HMG's `reference_name`. A later 2026-10-20 **9/9** Chromium run covered all
+16 occurrences and destinations; this revision is no longer browser-pending.
+Final release verification remains separate.
 
 ## 1.0 independent N5.3 Wiki chart-value reconciliation
 
-**Added 2026-10-20.** Earlier structured Skill chart tests only
-proved generated Army storage-to-API-to-browser parity. The new
-`test_current_army_charts_match_reviewed_n5_wiki_reference_rows`
-independently pins the complete published values against three
-official N5.3 Wiki charts: **16 Booty rows**, **12 MetaChemistry
-rows** and **5 Martial Arts levels**. This guards against
-source-to-source drift that storage/API parity would not detect.
-A companion regression requires all three served Skill details to
-publish their canonical reviewed rule record and nonempty source
-citations alongside the corresponding chart. Reference pages:
-
-- [Booty](https://infinitythewiki.com/Booty) — all ranges,
-  four TAG-versus-other-Troop-Type outcomes, and the MOV/ARM results.
-- [MetaChemistry](https://infinitythewiki.com/MetaChemistry) — all
-  ranges and five combined outcomes, including Immunity parameters.
-- [Martial Arts](https://infinitythewiki.com/Martial_Arts) — all
-  three modifier columns and Levels 1–5, including +1 SD at
-  Levels 3 and 5, distinct from +1B.
-
-The test retains the **Army's exact source spelling** rather than
-silently correcting it: for example `+1SD` versus the Wiki's
-`+1 SD`, `+1B` versus `+1 B`. The Wiki also clarifies
-that Booty is an optional Deployment roll **after placing** its
-Trooper in Model form and adds gear without replacing existing gear;
-MetaChemistry is an optional roll **immediately after placing**
-and adds Special Skills without replacing existing ones.
-The Martial Arts +1 SD rule adds and discards a die **without
-increasing Burst** or spending another Disposable use, and applies
-in both turns. Those explanations are already owned by the
-canonical reviewed Skills and Special Dice rules, so they are not
-duplicated as a separate rules-mechanics engine in chart data.
-
-**Evidence limit:** This verifies the reviewed Wiki-rendered
-chart rows, not a complete edition-pinned N5.3 PDF and FAQ
-footnote or revision-history reconciliation. Wiki page caches can
-lag the current notice; final PDF page/version provenance and
-all conditional interactions still require explicit release audit.
-No source data, source-parameter text, or UI was changed in this
-comparison; existing Chromium acceptance remains applicable.
+The chart regression independently pins all **16 Booty rows, 12 MetaChemistry
+rows and 5 Martial Arts levels** against the reviewed N5.3 Wiki charts, retaining
+Army source spelling such as `+1SD` versus `+1 SD`. It also requires a reviewed
+canonical Skill and nonempty citations on each served page. This is distinct
+from generated-storage/API parity; neither test reopens the external Wiki.
+The completed PDF and history comparison is retained in
+[source history](n5-source-history.md#reviewed-10-structured-skill-chart-provenance).
 
 ## 1.0 structured chart ownership and deployment FAQ provenance
 
-**Added 2026-10-20; bounded source-provenance acceptance.** After the
-33-row independent Wiki comparison, the hermetic chart regression
-also requires one reviewed canonical Skill owner for each chart
-with the expected **English N5.3 PDF citation**: Booty p. 86,
-Martial Arts p. 100, and MetaChemistry p. 101. Those citations
-match the original inspected source manifest S1; the current
-regression checks published citation identity/page but does
-**not** reopen or hash the ignored local PDF bytes.
+The maintained regression pins Booty p. 86, Martial Arts p. 100 and
+MetaChemistry p. 101 to the English N5.3 PDF source identity. It selects the
+separate `faq-ruling:deployment-phase-reposition-after-measurement` only for
+the reviewed N5.3/effective-date context, preserves v0.0 origin and v0.1 selected
+citations, and rejects preceding contexts. The current test checks citation
+identity/page, not the ignored PDF bytes.
 
-The shared repositioning clarification is already curated as
-`faq-ruling:deployment-phase-reposition-after-measurement`.
-The regression selects it only for `rule:deployment-phase` with
-N5.3 / effective 2026-09-01 context, asserts the official FAQ
-v0.0 English p. 1 origin and v0.1 English p. 1 selected source,
-and requires it to be unavailable in the preceding 5.2 and
-pre-effective 5.3 contexts. The ruling establishes that a Roll or
-measurement fixes an element's position during main Deployment;
-it is general Deployment Phase context, not a special Booty or
-MetaChemistry exception. This is consistent with the revised
-[Booty](https://infinitythewiki.com/Booty),
-[MetaChemistry](https://infinitythewiki.com/MetaChemistry),
-and [Initiative and Deployment](https://infinitythewiki.com/Initiative_and_Deployment)
-Wiki pages, which display the carried-forward FAQ with its
-**v0.0 origin** separately from the site's N5.3/v0.1 banner.
-
-The official [September 1, 2026 N5.3 announcement](https://infinityuniverse.com/en/news/infinity-rules-update-5-3)
-lists an updated rulebook and FAQ, but its changelog is not proof
-that every chart cell or footnote is unchanged. The exact S1
-English N5.3 PDF and S2 FAQ are recorded in
-[the audited source manifest](rules-explanation-audit-1.0-sources.md).
-The original research inspected these sources. **In this follow-up,
-the external N5.3 PDF download could not be independently reopened**;
-therefore no new full PDF page/footnote verification, version-history
-comparison, or gameplay-semantic signoff is claimed. The previously
-accepted browser renderer is unchanged in this slice.
+The later direct PDF inspection and archived Wiki/FAQ reconciliation are
+completed within the bounded chart scope in
+[source history](n5-source-history.md#reviewed-10-structured-skill-chart-provenance).
+The earlier failed attempt to reopen an external PDF is superseded by that
+inspection; it is not a remaining chart-source blocker. These checks do not
+certify the complete rules corpus, select random outcomes or persist game state.
 
 ## 1.0 source evidence baseline
 
@@ -1104,10 +908,16 @@ and remove at least one visible Army for each selected Unit.
 Two source-backed Units with visible distance Extras are tested
 in inches and centimeters at three widths (**12 pages**).
 The pinned local server passed **81/81 page checks** on 2026-10-21.
-Pytest runs the full matrix when Chrome and Playwright are available;
-otherwise Chromium skips while hermetic tests remain active. To
-check an already running release-candidate server and save
-ignored evidence:
+The full matrix is assembled by the pytest integration, not by the default CLI:
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test tests/test_verify_unit_skill_presentation_browser.py::test_live_chromium_unit_detail_matrix_when_available --test-workers 0 --assets off
+```
+
+It starts a temporary local server and runs when Chrome and Playwright are
+available; otherwise the browser test explicitly skips. A skip is not acceptance.
+The separate CLI defaults to seven Units × three widths (**21 pages**).
+To check an already running candidate server and save ignored evidence:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.verify_unit_skill_presentation_browser --base-url http://127.0.0.1:8000 --channel chrome --output local/audits/1.0-unit-skill-browser.json
@@ -1201,10 +1011,13 @@ pages, and **2/2** Spanish snapshot references across two pages. The
 shipped Army database's source archive hash was also matched with the
 pinned locally available Army ZIP by `tools/report_reference_baseline.py`.
 Detailed hashes and inventories remain under ignored `local/audits/`.
-The rules-enrichment audit still finds 83 gap records, including the
-outdated Repeater source citation and two unresolved Sepsitor-to-Cube
-relation targets; interaction review still has 15 pending supporting
-identities. Those findings are **not** cleared by valid citation bytes.
+The former 83-gap/15-pending result is superseded: Repeater/Cube links
+were reconciled and the maintained interaction ledger now has zero pending
+supporting identities. Re-run enrichment and interaction audits for the target
+database pair. Enrichment's historical release classifications and a missing
+standalone Weapon definition are not, by themselves, current 1.0 defect
+verdicts; reconcile the source-pinned shared-effect reviews and final coverage
+inventory. Valid citation bytes alone never establish semantic completeness.
 
 The report is evidence, **not** a judgment that curated interpretations or
 browser presentations are complete. PDF SHA-256 values without maintained pins
@@ -1226,6 +1039,14 @@ self-contained rules-database payloads. A small Node.js harness executes the com
 renderer with the two scenario Skills and the resolved Specialist list; it reuses the dev Node
 dependency and adds no JavaScript build step. Existing scenario tests still validate every game-size
 row, score condition, placement, source issue, and SVG output after reference expansion.
+
+## Reading the dated source and browser checks
+
+The sections below retain source-specific reproduction procedures and bounded
+historical results. Counts and descriptions of then-open work apply to their
+stated run, not automatically to the current checkout. Current behavior belongs
+to the data/semantic owners; [TODO](TODO.md) owns remaining work. Rerun affected
+procedures against the exact candidate and retain new execution logs privately.
 
 ## 1.0 Weapon Trait archived-Wiki cross-reference
 
@@ -2746,10 +2567,11 @@ reference pages across desktop 1440 px and narrow 390/320 px.
 version/date/link and one FAQ card per page, with no JavaScript
 exceptions or page-level horizontal overflow.
 
-The Fireteam type-after-loss FAQ example remains intentionally
-unpublished pending English/Spanish example reconciliation. This
-batch does not assert complete FAQ v0.0, ITS, or historical
-cross-post inventory coverage.
+At that batch's date the Fireteam Type example was unpublished. It has
+since been published using the consistent English HARIS example with a
+separate Spanish-count discrepancy, as described in the
+[current FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
+The batch alone does not establish complete FAQ/ITS historical coverage.
 
 ## 1.0 FAQ v0.0 carry-forward provenance and presentation
 
@@ -3481,7 +3303,7 @@ Synthetic regression passed; whole-corpus browser acceptance is open.
 
 ## 1.0 Trait Wiki heading-fragment acceptance harness
 
-**Updated 2026-10-19; browser acceptance pending.** The local saved
+**Source and bounded browser acceptance completed 2026-10-19.** The local saved
 official Wiki HTML audit first reported **22/22 existing links matched**
 across 35 parsed headings and one unambiguous heading ID for each of the
 11 previously unmapped canonical Traits. After those exact fragments were

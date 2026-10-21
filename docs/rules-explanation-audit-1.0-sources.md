@@ -14,7 +14,7 @@ and contained 367 records. These are frozen audit inputs, not current-candidate 
 
 ## Subsequent curated Wiki replacement (2026-10-13)
 
-The C/H curated collections now cite `wiki-en-20260926-200832`, acquired
+As of that replacement, the C/H collections cite `wiki-en-20260926-200832`, acquired
 2026-09-26T20:08:32+02:00. The available
 `data/wiki/WIKI-en 20260926-200832.zip` has SHA-256
 `c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987`

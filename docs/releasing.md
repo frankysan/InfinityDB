@@ -269,7 +269,11 @@ For releases that are deployed to the hosted InfinityDB instance:
   revision, release version and local static asset fingerprint **before and
   after** representative Unit-detail Chromium checks, aborting on any mismatch.
   Retain its JSON report under ignored `local/audits/` only after success.
-  This is bounded browser acceptance, not the 1.0 completeness verdict.
+  The default hosted Unit check is seven Units at three widths (21 pages).
+  The separate local 81-page matrix includes additional layouts, optional-unit
+  Settings and distance variants; see [testing](testing.md#10-source-evidence-baseline).
+  Neither replaces the 1.0 source-to-browser completeness verdict or acceptance
+  of the release's other changed surfaces.
 - [ ] Confirm required database/schema rebuilds and published assets are actually the
   release-matched versions.
 - [ ] Confirm rollback remains available before considering deployment acceptance

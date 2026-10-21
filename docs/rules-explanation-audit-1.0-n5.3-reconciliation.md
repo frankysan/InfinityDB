@@ -10,6 +10,14 @@ Research date: 2026-10-09; examined commit
 (S17) and Wiki history (S21) verification on 2026-10-09 updates the evidence
 without changing rule/data implementations.
 
+**Historical assessment:** The comparison tables and their status totals describe
+that examined baseline, with explicitly dated follow-ups below. They are not a
+current defects list: many listed explanations and references have since been
+published. Use [TODO](TODO.md#rules-and-reference-completeness) for remaining
+work and the canonical data/semantic documents for current behavior. Preserve
+the original source identities, counts and unresolved disagreements rather than
+reclassifying historical rows as current approvals.
+
 ## Denominator and interpretation
 
 The [English notice S11](https://infinityuniverse.com/en/news/infinity-rules-update-5-3)

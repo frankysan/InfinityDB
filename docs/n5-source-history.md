@@ -83,6 +83,23 @@ version ID`, `publication date`, `acquisition date`, `exact revision/commit`,
 For a source announcement, record each independent changelog section as a
 separate scoped claim; never treat ITS-only changes as core N5 rules.
 
+## Locally available Reinforcements PDFs
+
+**Availability check, 2026-10-21:** The local files below are present and readable,
+but their covers explicitly identify **N4**, not N5. Both contain five file pages.
+Their presence does not supply an edition-verified current N5 annex or close the
+Reinforcements task in [TODO](TODO.md#rules-and-reference-completeness).
+
+| Local research file | Exact SHA-256 | Reviewed identity |
+| --- | --- | --- |
+| `data/pdf/rules/reinforcement-rules-en.pdf` | `7c8c93c640e22ce33a8c71069a98f4daff0b1f430548db3c62c70a63252c2ba0` | English N4 Reinforcement Rules – Extra; cover, file page 1 |
+| `data/pdf/rules/reinforcement-rules-es.pdf` | `ef2d6c67486e37336900a9e54fcc357bfdef4a185dc559c6ba1279274e6f41bf` | Spanish N4 Reglas de Refuerzos – Extra; cover, file page 1 |
+
+No printed publication/version date was established by this availability check.
+PDF creation metadata is not a publication date. Preserve these as historical
+comparison inputs; verify the intended N5 source and applicability before curation.
+Do not infer current Commlink or Request Reinforcements mechanics from a filename.
+
 ## Reviewed 1.0 structured Skill chart provenance
 
 **Scope:** Martial Arts, Booty and MetaChemistry only; this is a completed
@@ -136,7 +153,8 @@ FAQ block as a new chart-specific rule or as evidence that the chart
 itself was revised on the FAQ's publication date.
 
 The general Deployment repositioning ruling appears in **N5 FAQ v0.0**
-(published 2025-10-15; English PDF `data/pdf/faq/n5-faqs-v0-0-en.pdf`,
+(version-associated update anchor 2025-10-15; exact PDF publication day unverified;
+English PDF `data/pdf/faq/n5-faqs-v0-0-en.pdf`,
 SHA-256 `a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043`)
 and is carried forward without a substantive change to the ruling in
 **N5 FAQ v0.1** (selected from 2026-09-01; English PDF
@@ -249,8 +267,8 @@ still needs verification. Preserve both source values.
 - **PT: Endgame/Eraser/Mirrorball:** the April 2025 announcement replaces
   `Technical Weapon` with `BS Weapon (WIP)`; the old term does not occur in the
   supplied N5.3 PDF, but is explicitly defined in N4 v1.1. Endgame also gains
-  `Double Shot`, missing from current Army properties; that separate difference
-  remains open for presentation.
+  `Double Shot`, missing from current Army properties; the published PT: Endgame
+  reference discloses that difference without rewriting the imported profile.
 - **Sepsitor Plus:** N5.3 p. 187 prints `[*]`, referring to the Sepsitor family
   prose on p. 73. Army's omission remains visible. A name-specific matching
   issue in Army is a *hypothesis*, not an observed implementation cause.
@@ -258,4 +276,5 @@ still needs verification. Preserve both source values.
 This review does **not** change imported source metadata, assume that an
 implicit effect is the same as an explicitly listed Trait, or establish
 complete special-weapon prose links. The remaining work stays in
-`docs/TODO.md`. Generated reports belong in ignored `docs/audits/`.
+`docs/TODO.md`. New generated evidence belongs in ignored `local/audits/`;
+legacy `docs/audits/` remains supported.

@@ -117,15 +117,16 @@ overview, explorer, scoped view, or embedded vocabulary, and capabilities such a
 search, glossary participation, detail pages, and publication are independent.
 
 Current published top-level domains are Armies, Units, Skills, Equipment, Weapons, Ammunition,
-Traits, States, Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Attributes and scoped Game
-terms are published embedded vocabularies. Global search and Glossary are cross-domain projections,
+Traits, States, Hacking Programs, Fireteams, Labels, General Rules, and Scenarios.
+Attributes, scoped Game terms and Weapon Properties are published embedded vocabularies.
+Global search and Glossary are cross-domain projections,
 not competing semantic owners.
 
 `docs/application-domains.md` owns the detailed domain/presentation contract.
 
 ### Scenario domain
 
-**Current bounded core-scenario surface.** All four core scenarios maintain typed setup, scoring,
+**Current bounded scenario surface.** All four core scenarios maintain typed setup, scoring,
 geometry, special rules, and end conditions. Authoring definition v2 composes
 shared Rules, separate scoped Skills, and typed setup/geometry/objective/ending components by explicit
 identity. Validation/export resolves those references and retains component provenance in the runtime

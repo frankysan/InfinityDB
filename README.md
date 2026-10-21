@@ -154,7 +154,8 @@ The current direction is deliberately incremental:
   in-scope source-to-browser coverage and final scenario acceptance.
   Incomplete cross-surface interaction tests from 0.10.1 now belong to
   [1.0 final acceptance](docs/TODO.md#final-10-acceptance).
-  ITS season/tournament content remains a later scenario-model extension.
+  The published ITS Season 18 Battleground pilot demonstrates the shared scenario
+  model; the remaining ITS library and tournament tooling stay post-1.0.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
 0.9 closed application gaps → 0.10 hardened and polished → 1.0 completes the reference.**

@@ -227,8 +227,8 @@ because the source does not attach them to a profile group.
 
 `src/infinity_db/application_domains.py` is the canonical capability registry. Published top-level
 application domains are Armies, Units, Skills, Equipment, Weapons, Ammunition, Traits, States,
-Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Embedded vocabularies are Attributes and
-Game terms.
+Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Embedded vocabularies are Attributes,
+Game terms and Weapon Properties.
 
 Browser state rules:
 

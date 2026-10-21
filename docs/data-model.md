@@ -58,7 +58,7 @@ metadata Ammunition IDs and names to canonical published base Ammunition referen
 The repository preserves the source metadata ID as `ammunition_source_id` in each
 Weapon profile; the catalog API attaches ordered `ammunition_parts` only when both
 that ID and its name match the reviewed map. A base type links to one reference;
-source-defined `AP+DA`, `AP+Exp`, `AP+Shock`, and `AP+T2` link their reviewed
+source-defined `AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`, and `N+E/M` link their reviewed
 components separately. Version 2 of the maintained mapping also records those
 ordered components as canonical `ammunition:*` IDs; the validator requires exact
 agreement with the linked display segments and literal `+` separators. The
@@ -667,6 +667,33 @@ usage until an actual source relationship exists. A curated weapon rule records
 the printed profile's provenance and the different English update-notice label.
 Do not infer a Breaker Sniper Rifle from that notice.
 
+### Structured Skill reference charts
+
+**Current.** Martial Arts, Booty and MetaChemistry use generated Army tables,
+projected through Skill detail `structured_reference`; curated Skill records
+own their rules explanations and citations. Original Army row values remain
+intact. Martial Arts hides the PS MOD column when every value is absent,
+while retaining the separate Burst and Special Dice meanings.
+
+Booty exposes typed `conditional_outcomes` for rolls 12, 16, 18 and 20,
+separating TAG and other-Troop-Type results. MetaChemistry exposes typed
+`outcome_components` for its five combined results (16–20), distinguishing
+Attribute modifiers, MOV values, Skills and parameters. Unsupported compound
+or conditional syntax fails closed instead of merging effects as free text.
+
+Reviewed outcomes carry additive canonical `public_reference` links only when
+the destination resolves uniquely. Booty's HMG uses the reviewed Heavy Machine
+Gun alias; parameterized Skill/Equipment outcomes retain their printed variants
+while linking to the owning family. MetaChemistry's six Skill occurrences link
+to five families, preserving Immunity (ARM)/(Enhanced). Attribute modifiers
+and MOV remain typed text. These are reference projections, not selected random
+results, permanent Unit-profile changes or an executable effects engine.
+
+Source/version, PDF pages, exact Wiki revisions and historical FAQ comparison
+belong to [the reviewed chart provenance](n5-source-history.md#reviewed-10-structured-skill-chart-provenance).
+Repeatable API/browser verification belongs to
+[testing](testing.md#10-martial-arts-booty-and-metachemistry-structured-chart-parity).
+
 ## Availability and membership
 
 InfinityDB distinguishes several relationships that source data often places near each other:
@@ -924,9 +951,10 @@ separate dated explanatory overlay. Existing Skill/Army data are unchanged.
 The Annihilation-only Ancillary ruling is intentionally a subset of the
 FAQ's general scenario-objective wording. The source label
 `2026-09-01` is the project-documented announcement-era anchor, not
-a separately established document publication date. The divergent
-Fireteam-type-after-member-loss examples in English and Spanish FAQ
-v0.1 remain pending rather than being silently reconciled.
+a separately established document publication date. The Fireteam Type ruling
+uses the consistent English HARIS three-to-two-member example. The contradictory
+Spanish v0.1 count is published as separate conflict evidence; an official
+correction remains open.
 
 Historical FAQ collection replay, remaining FAQ inventory coverage,
 and user-selectable date/season applicability in the browser remain
@@ -1253,7 +1281,10 @@ hybrid in `rules.db`. High-stability/queryable facts are relational, while neste
 whose shape legitimately varies by scenario remain validated typed payloads. Runtime code must never
 parse PDF prose, image geometry, or display HTML to recover scenario semantics.
 
-The planned semantic model separates these identities and scopes:
+Current publication separates Scenario identity, publication/revision and collection
+membership. The vocabulary below describes those implemented boundaries and the
+accepted direction for broader applicability/configuration; optional Reinforcements
+and collection-feature fields still require implementation before use:
 
 - **Scenario identity:** stable InfinityDB slug/name for the conceptual mission. Reuse across seasons
   does not duplicate the identity.
@@ -1267,7 +1298,11 @@ The planned semantic model separates these identities and scopes:
   minimum-VP/end thresholds, side configuration, and feature flags such as Reinforcements or
   collection-specific options. These values can vary by game-size row without changing identity.
 
-Each published scenario revision then composes typed scenario components:
+Published scenario revisions compose typed components. The following accepted
+design vocabulary includes implemented setup, geometry, objectives, Rules/Skills
+and endings alongside **future extensions** for unsupported radius/circle geometry,
+Classified Objective choices and collection-specific options. The current supported
+subset is described above; this list does not claim those extensions are implemented:
 
 - **Sides and roles:** symmetric Side A/B by default, with named asymmetric roles and role-assignment
   procedure when required. Objectives/rules may be scoped to a side or role.
@@ -1295,8 +1330,9 @@ Each published scenario revision then composes typed scenario components:
   explicit scenario overrides. Definition data records the condition; match-state evaluation remains
   outside the 1.0 catalog/reference responsibility.
 
-Publication should materialize relational indexes/foreign keys for identity, provenance, collection
-membership, slugs, canonical entity references, and other cross-scenario query needs. The validated
+Publication materializes relational indexes/foreign keys for identity, provenance, collection
+membership, slugs and canonical entity references. Add further indexes only for concrete
+cross-scenario query needs. The validated
 component payload remains the canonical ordered scenario structure consumed by the backend. Browser
 code receives composed presentation data and must not reinterpret score conditions, geometry, or
 source-specific feature semantics.

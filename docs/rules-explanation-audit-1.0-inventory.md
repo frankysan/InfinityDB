@@ -16,8 +16,9 @@ and the main audit's follow-up notes before treating a finding as open.
 ## Coverage totals
 
 - 367 records screened: originally 217 **D** + 150 **S**; follow-up adds 87
-  selected comparisons, yielding **304 D + 63 S**. Every record remains pending
-  full material-source/presentation acceptance; D is not an approval tier.
+  selected comparisons, yielding **304 D + 63 S**. At that baseline, every record
+  still required full material-source/presentation acceptance; D is not an approval tier.
+  Later acceptance is tracked separately and does not rewrite this denominator.
 - D means the cited material mechanics were compared, not that every source clause or browser path passed.
 - S is reviewed inventory/text structure without independent source adjudication. No existing record was left unenumerated.
 - 60 of the remaining 63 S records are declaration-category metadata; they are not 60 missing gameplay explanations.
