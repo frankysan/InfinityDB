@@ -21,7 +21,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlsplit
 from urllib.request import Request, urlopen
 
-from infinity_army_data.merge import load_sources
+from infinity_army_data.merge import SourceDocument, load_sources
 from infinity_db.application_domains import application_domain, semantic_record_domain
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
@@ -137,6 +137,83 @@ def _verify_nested_source_rows(
                 f"actual={actual[key]!r}"
             )
     return len(original)
+
+
+def _collect_source_profile_references(
+    expected: dict[tuple[str, str], list[tuple[Any, ...]]],
+    kind: str, parent: tuple[int, int, int, int], source: dict[str, Any],
+) -> None:
+    for field, source_field in (
+        ("skills", "skills"), ("equipment", "equip"), ("weapons", "weapons"),
+    ):
+        for position, reference in enumerate(source.get(source_field) or [], start=1):
+            if not isinstance(reference, dict):
+                raise ReferenceBaselineError(
+                    f"{kind}.{field} has non-object source occurrence at "
+                    f"{parent!r}, position {position}"
+                )
+            expected[(kind, field)].append((
+                *parent, position, reference.get("id"),
+                reference.get("order"), reference.get("q"),
+            ))
+
+
+def _verify_published_profile_references(
+    army: sqlite3.Connection,
+    sources: list[SourceDocument],
+) -> dict[str, int]:
+    """Check source reference occurrences against the actual reusable payload views."""
+    expected: dict[tuple[str, str], list[tuple[Any, ...]]] = {
+        (kind, field): []
+        for kind in ("profile", "loadout")
+        for field in ("skills", "equipment", "weapons")
+    }
+    for source in sources:
+        for unit in source.data["units"]:
+            for group in unit.get("profileGroups") or []:
+                parent = (source.faction_id, unit["id"], group["id"])
+                for profile in group.get("profiles") or []:
+                    _collect_source_profile_references(
+                        expected, "profile", (*parent, profile["id"]), profile,
+                    )
+                for loadout in group.get("options") or []:
+                    _collect_source_profile_references(
+                        expected, "loadout", (*parent, loadout["id"]), loadout,
+                    )
+    result: dict[str, int] = {}
+    for (kind, field), rows in sorted(expected.items()):
+        payload_type = "profile" if kind == "profile" else "loadout"
+        identity = "profile_id" if kind == "profile" else "option_id"
+        occurrence_table = f"{payload_type}_payload_occurrences"
+        reference_table = f"{payload_type}_payload_{field}"
+        query = (
+            f"SELECT o.army_id, o.unit_id, o.group_id, o.{identity}, "
+            "r.position, r.item_id, r.display_order, r.quantity "
+            f"FROM {occurrence_table} o JOIN {reference_table} r "
+            f"ON r.{payload_type}_payload_id = o.{payload_type}_payload_id"
+        )
+        actual = [tuple(row) for row in army.execute(query)]
+        source_by_key = {row[:5]: row[5:] for row in rows}
+        published_by_key = {row[:5]: row[5:] for row in actual}
+        if len(source_by_key) != len(rows) or len(published_by_key) != len(actual):
+            raise ReferenceBaselineError(
+                f"{kind}.{field}: duplicate source or published occurrence position"
+            )
+        missing = sorted(source_by_key.keys() - published_by_key.keys())
+        extra = sorted(published_by_key.keys() - source_by_key.keys())
+        if missing or extra:
+            raise ReferenceBaselineError(
+                f"{kind}.{field}: source/published reference identities differ: "
+                f"missing={missing[:10]!r}, extra={extra[:10]!r}"
+            )
+        for key in sorted(source_by_key):
+            if source_by_key[key] != published_by_key[key]:
+                raise ReferenceBaselineError(
+                    f"{kind}.{field}: published reference differs at {key!r}: "
+                    f"source={source_by_key[key]!r}, published={published_by_key[key]!r}"
+                )
+        result[f"{kind}.{field}"] = len(rows)
+    return result
 
 
 def _verify_army_archive_sources(
@@ -452,6 +529,10 @@ def build_baseline(
                 archive_evidence = _verify_army_archive_sources(
                     army_archive, raw_army, army, raw_connection,
                 )
+                sources, _ = load_sources(army_archive)
+                archive_evidence["matchedPublishedReferences"] = (
+                    _verify_published_profile_references(army, sources)
+                )
             archive_status = "hash-verified-source-identities"
 
         # Each URL revision is a separate source identity. Only a genuinely shared
@@ -715,6 +796,19 @@ def render_markdown(report: dict[str, Any]) -> str:
              "loadouts in export-paired infinity.raw.db. "
              "Derived runtime payloads and browser presentation remain unverified."]
             if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedNestedSourceRows")
+            else []
+        ),
+        *(
+            ["- Published profile/loadout Skill, Equipment and Weapon occurrences: "
+             + ", ".join(
+                 f"{name}={count}"
+                 for name, count in sorted(
+                     snapshot["sourceIdentityEvidence"]["matchedPublishedReferences"].items()
+                 )
+             )
+             + " (source ID, position, display order and quantity; "
+             "not nested extras or browser rendering)."]
+            if (snapshot.get("sourceIdentityEvidence") or {}).get("matchedPublishedReferences")
             else []
         ),
         f"- Published Army database SHA-256: `{snapshot['publishedDatabaseSha256']}`.",

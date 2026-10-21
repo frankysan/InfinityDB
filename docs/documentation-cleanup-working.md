@@ -687,3 +687,12 @@ Prefer targeted fixes rather than merging these.
   offline documentation links **30 files/0 errors**. The full suite,
   fresh served-browser checks and final release-candidate acceptance
   remain outstanding.
+- **Closeout pass 25, 2026-10-21:** Extended archive-to-publication
+  verification through the reusable profile and loadout payload
+  Skill/Equipment/Weapon occurrence rows. Every source parent coordinate,
+  occurrence position, referenced ID, display order and quantity is
+  compared with the published payload occurrence/relationship joins.
+  Duplicate, missing, additional and altered occurrences fail, and the
+  pinned archive test requires nonempty matching evidence in all six
+  categories. Does not verify extras/parameter values, Characteristics,
+  Orders, Peripheral/Include relations, API output or browser display.

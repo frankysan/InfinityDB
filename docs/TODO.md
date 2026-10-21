@@ -140,8 +140,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     The verifier reads profile groups from the published application
     database, profiles/loadouts from its validated paired raw database,
     and rejects mismatches. The pinned local ZIP integration test passes.
-    This is not a check of derived player-facing profile/loadout
-    payloads or nested Skills/Weapons/Equipment relationships.
+    This alone is not a check of the derived player-facing payloads.
+  - [x] Match all pinned Army profile/loadout Skill, Equipment and
+    Weapon source occurrence identities, order, quantities and display-order
+    fields against the published reusable profile/loadout payload tables.
+    Require nonzero evidence in every category and reject changed or
+    missing references. Extra modifiers, other nested relationships,
+    API serialization and browser visibility remain separate gates.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

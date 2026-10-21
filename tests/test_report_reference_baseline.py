@@ -19,6 +19,7 @@ from tools.report_reference_baseline import (
     _route_hint,
     _source_location,
     _verify_army_archive_sources,
+    _verify_published_profile_references,
     build_baseline,
     main,
     render_markdown,
@@ -199,11 +200,20 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
                                 "id": 1, "name": "Test Unit", "type": 2,
                                 "move": [15, 10], "cc": 16, "w": 1,
                                 "str": False,
+                                "skills": [
+                                    {"id": 11, "q": 1, "order": 2},
+                                    {"id": 12, "q": 2, "order": 1},
+                                ],
+                                "equip": [{"id": 21}],
+                                "weapons": [{"id": 31, "order": 3}],
                             }],
                             "options": [{
                                 "id": 9, "name": "Test Loadout",
                                 "points": 17, "swc": "0.5",
                                 "minis": 1, "disabled": False,
+                                "skills": [{"id": 11, "q": 1}],
+                                "equip": [{"id": 22, "order": 2}],
+                                "weapons": [{"id": 32}],
                             }],
                         }],
                     },
@@ -219,6 +229,53 @@ def _synthetic_army_archive(tmp_path: Path) -> Path:
             })
         )
     return archive
+
+
+def test_published_nested_reference_occurrences_reject_source_drift(
+    tmp_path: Path,
+) -> None:
+    sources, _ = load_sources(_synthetic_army_archive(tmp_path))
+    with sqlite3.connect(":memory:") as db:
+        for kind, reference_name in (
+            ("profile", "profile_id"),
+            ("loadout", "option_id"),
+        ):
+            db.execute(
+                f"CREATE TABLE {kind}_payload_occurrences "
+                f"(army_id, unit_id, group_id, {reference_name}, {kind}_payload_id)"
+            )
+            db.execute(
+                f"INSERT INTO {kind}_payload_occurrences VALUES (101, 10, 7, "
+                f"{1 if kind == 'profile' else 9}, 1)"
+            )
+            for field in ("skills", "equipment", "weapons"):
+                db.execute(
+                    f"CREATE TABLE {kind}_payload_{field} "
+                    f"({kind}_payload_id, position, item_id, display_order, quantity)"
+                )
+        values = {
+            "profile_payload_skills": [(1, 1, 11, 2, 1), (1, 2, 12, 1, 2)],
+            "profile_payload_equipment": [(1, 1, 21, None, None)],
+            "profile_payload_weapons": [(1, 1, 31, 3, None)],
+            "loadout_payload_skills": [(1, 1, 11, None, 1)],
+            "loadout_payload_equipment": [(1, 1, 22, 2, None)],
+            "loadout_payload_weapons": [(1, 1, 32, None, None)],
+        }
+        for table, rows in values.items():
+            db.executemany(f"INSERT INTO {table} VALUES (?, ?, ?, ?, ?)", rows)
+        assert _verify_published_profile_references(db, sources) == {
+            "profile.skills": 2, "profile.equipment": 1, "profile.weapons": 1,
+            "loadout.skills": 1, "loadout.equipment": 1, "loadout.weapons": 1,
+        }
+        db.execute("UPDATE profile_payload_skills SET quantity = 9 WHERE position = 2")
+        with pytest.raises(ReferenceBaselineError, match="published reference differs"):
+            _verify_published_profile_references(db, sources)
+        db.execute("UPDATE profile_payload_skills SET quantity = 2 WHERE position = 2")
+        db.execute("DELETE FROM loadout_payload_weapons")
+        with pytest.raises(
+            ReferenceBaselineError, match="source/published reference identities differ"
+        ):
+            _verify_published_profile_references(db, sources)
 
 
 def test_pinned_army_archive_source_identity_matches_publication(tmp_path: Path) -> None:
@@ -400,6 +457,12 @@ def test_pinned_army_archive_nested_publication_when_available() -> None:
     assert evidence["matchedNestedSourceRows"]["profile_groups"] > 0
     assert evidence["matchedNestedSourceRows"]["profiles"] > 0
     assert evidence["matchedNestedSourceRows"]["loadout_options"] > 0
+    published = evidence["matchedPublishedReferences"]
+    assert set(published) == {
+        "profile.skills", "profile.equipment", "profile.weapons",
+        "loadout.skills", "loadout.equipment", "loadout.weapons",
+    }
+    assert all(count > 0 for count in published.values()), published
 
 
 def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
@@ -412,6 +475,9 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
         "matchedNestedSourceRows": {
             "profile_groups": 4748, "profiles": 5020, "loadout_options": 9000,
         },
+        "matchedPublishedReferences": {
+            "profile.skills": 20, "loadout.weapons": 30,
+        },
     }
     markdown = render_markdown(report)
     assert "59 archive JSON documents (including metadata.json)" in markdown
@@ -421,6 +487,7 @@ def test_army_archive_identity_evidence_is_visible_in_markdown() -> None:
     assert "4748 profile groups in published infinity.db" in markdown
     assert "5020 profiles and 9000 loadouts" in markdown
     assert "export-paired infinity.raw.db" in markdown
+    assert "loadout.weapons=30, profile.skills=20" in markdown
 
 
 def test_baseline_requires_published_databases_and_verified_supplied_army_zip(

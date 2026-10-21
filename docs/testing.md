@@ -988,9 +988,15 @@ profile's identity, position and core attribute fields, and each loadout's
 identity, position, name, Points, SWC, miniature count and disabled flag,
 are compared with `infinity.raw.db::profiles` and
 `infinity.raw.db::loadout_options` respectively. These two tables
-are intentionally **not** in the published application database; the
-check does not prove their derived player-facing payloads, nested
-Skill/Weapon references, other source facts, or rules completeness.
+are intentionally **not** in the published application database.
+The optional audit also compares every source profile/loadout Skill,
+Equipment and Weapon occurrence against the corresponding reusable
+`profile_payload_*` and `loadout_payload_*` rows in the published app
+database. It checks parent source coordinates, occurrence positions, source
+item IDs, display order and quantity; missing, duplicated and altered
+occurrences fail closed. It does **not** yet verify extra parameters,
+Characteristics, Orders, Peripheral/Include relationships, live API
+serialization, normal-browser display or rules semantics.
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:
