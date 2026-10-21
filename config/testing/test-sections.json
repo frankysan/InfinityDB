@@ -9,6 +9,7 @@
         "test_audit_auxiliary_silhouette_provenance",
         "test_audit_army_faction_semantics",
         "test_audit_database_separation",
+        "test_audit_deployed_object_inventory",
         "test_audit_enrichment_coverage",
         "test_audit_fireteam_semantics",
         "test_audit_mine_variant_effects",

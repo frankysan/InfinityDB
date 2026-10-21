@@ -1,0 +1,179 @@
+"""Read-only 1.0 inventory of source profiles and potential deployed objects.
+
+An Army metadata row and a curated rule mention do not establish a deployed
+object's canonical identity, carrier, delivery mode or gameplay equivalence.
+This audit exposes evidence for manual review; it creates no runtime records.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import sqlite3
+from pathlib import Path
+from typing import Any
+
+# The 14 *printed* N5.3 supplementary chart profiles, keyed by the Army
+# catalog identity and exact source mode.  This is evidence, not object IDs.
+CHART_AUXILIARY: tuple[tuple[str, str | None, str, int], ...] = (
+    ("AP Mine", None, "weapon", 181),
+    ("Cybermine", None, "weapon", 181),
+    ("Drop Bears", "Deployable Mode", "weapon", 181),
+    ("E/M Mine", None, "weapon", 181),
+    ("Monofilament Mine", None, "weapon", 181),
+    ("PARA Mine", None, "weapon", 181),
+    ("Shock Mine", None, "weapon", 181),
+    ("Viral Mine", None, "weapon", 181),
+    ("WildParrot", None, "weapon", 181),
+    ("Crazykoala", None, "weapon", 186),
+    ("Dazer", None, "equipment", 186),
+    ("Deployable Repeater", None, "equipment", 186),
+    ("Disco Baller", "Disco Ball", "weapon", 186),
+    ("FastPanda", None, "equipment", 186),
+)
+
+# Manual source-backed classification of examples beyond those 14 profiles.
+# A delivery relationship is evidence for a future model, NOT a roster-use
+# relation or authorization to equate a launcher with its deployed object.
+REVIEW_CASES = (
+    ("weapon:armed-turret", "curated-special-profile"),
+    ("equipment:deployable-cover", "nonstandard-scenery"),
+    ("weapon:pitcher", "delivery-not-object"),
+)
+
+
+def _identity(row: dict[str, Any]) -> tuple[str, str | None, str]:
+    catalog = "equipment" if row["type"] == "EQUIPMENT" else "weapon"
+    return (row["name"].casefold(), row["mode"] or None, catalog)
+
+
+def _profile_stats(raw: str) -> dict[str, int] | None:
+    """Parse only complete conventional four-attribute object profiles."""
+    cells = re.findall(r"\b(ARM|BTS|STR|S)\s*=\s*(\d+)\b", raw)
+    if len(cells) != 4 or len(set(key for key, _ in cells)) != 4:
+        return None
+    return {key: int(value) for key, value in cells}
+
+
+def _citation_summary(record: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {"sourceId": cite["sourceId"], "page": cite.get("page"),
+         "member": cite.get("member")}
+        for cite in record.get("citations", [])
+    ]
+
+
+def audit_inventory(
+    army_db: Path,
+    curated_source: Path,
+) -> dict[str, Any]:
+    with sqlite3.connect(f"{army_db.resolve().as_uri()}?mode=ro", uri=True) as conn:
+        conn.row_factory = sqlite3.Row
+        source = [
+            dict(row) for row in conn.execute(
+                "SELECT position, id, type, name, mode, profile "
+                "FROM metadata_weapons ORDER BY position"
+            )
+            if isinstance(row["profile"], str) and row["profile"].strip()
+        ]
+    groups: dict[tuple[str, str | None, str], list[dict[str, Any]]] = {}
+    for row in source:
+        groups.setdefault(_identity(row), []).append(row)
+
+    chart_profiles: list[dict[str, Any]] = []
+    known_positions: set[int] = set()
+    for name, mode, catalog, page in CHART_AUXILIARY:
+        matches = groups.get((name.casefold(), mode, catalog), [])
+        if len(matches) != 1:
+            raise ValueError(f"Expected one source profile for {name} ({mode}): {len(matches)}")
+        row = matches[0]
+        known_positions.add(row["position"])
+        chart_profiles.append({
+            "sourceId": row["id"], "name": name, "mode": mode,
+            "catalog": catalog, "sourceProfile": row["profile"],
+            "attributes": _profile_stats(row["profile"]),
+            "pdfPage": page,
+        })
+
+    additional_profiles = [
+        {
+            "sourceId": row["id"], "name": row["name"],
+            "mode": row["mode"], "catalog": _identity(row)[2],
+            "sourceProfile": row["profile"],
+            "attributes": _profile_stats(row["profile"]),
+        }
+        for row in source if row["position"] not in known_positions
+    ]
+    document = json.loads(curated_source.read_text(encoding="utf-8"))
+    records = {
+        record["id"]: record
+        for record in document["records"]
+        if record.get("kind") in {"weapon", "equipment"}
+    }
+
+    reviewed_examples = []
+    for record_id, category in REVIEW_CASES:
+        record = records.get(record_id)
+        if record is None:
+            raise ValueError(f"Missing reviewed source record: {record_id}")
+        reviewed_examples.append({
+            "recordId": record_id, "category": category,
+            "hasCuratedSpecialProfile": isinstance(
+                (record.get("facts") or {}).get("specialProfile"), dict
+            ),
+            "citations": _citation_summary(record),
+        })
+
+    # Deliberately broad discovery queue: mere words cannot create object
+    # identities. Keep raw evidence for the next manual review batch.
+    candidates = []
+    for record_id, record in sorted(records.items()):
+        if (record.get("composition") or {}).get("role") != "definition":
+            continue
+        text = record.get("summary", "")
+        indicators = [
+            token for token in ("Deployable", "Token", "Scenery Element")
+            if token.casefold() in text.casefold()
+        ]
+        if not indicators:
+            continue
+        candidates.append({
+            "recordId": record_id, "indicators": indicators,
+            "reviewStatus": "identity-not-inferred",
+            "citations": _citation_summary(record),
+        })
+
+    return {
+        "formatVersion": 1,
+        "scope": "candidate-inventory-not-canonical-object-model",
+        "armyDatabaseSha256": hashlib.sha256(army_db.read_bytes()).hexdigest(),
+        "curatedSourceSha256": hashlib.sha256(curated_source.read_bytes()).hexdigest(),
+        "chartProfiles": chart_profiles,
+        "additionalSourceProfiles": additional_profiles,
+        "reviewedExamples": reviewed_examples,
+        "curatedCandidateMentions": candidates,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--army-db", type=Path, default=Path("data/generated/infinity.db"))
+    parser.add_argument(
+        "--curated-source", type=Path,
+        default=Path("data/curated/rules/n5-core-v5.3.json"),
+    )
+    parser.add_argument("--json-output", type=Path)
+    arguments = parser.parse_args()
+    report = audit_inventory(arguments.army_db, arguments.curated_source)
+    result = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+    if arguments.json_output is not None:
+        arguments.json_output.write_text(result, encoding="utf-8", newline="\n")
+    else:
+        print(result, end="")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

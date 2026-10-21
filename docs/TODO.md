@@ -559,6 +559,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         separately; identify source-backed object identities, provenance,
         unavailable values and unresolved conflicts before defining any
         canonical object/profile projection or reverse-use links.
+        - [x] Add the reproducible, read-only
+          `tools/audit_deployed_object_inventory.py` source inventory and
+          `tests/test_audit_deployed_object_inventory.py` regression. It
+          distinguishes the 14 printed profile identities by Army catalog
+          and exact mode, exposes further populated source-profile rows,
+          and retains cited curated examples: Armed Turret (distinct curated
+          profile), Deployable Cover (nonstandard scenery) and Pitcher
+          (delivery item, not the deployed Repeater). Candidate mentions
+          are explicitly **not** inferred object identities; no source
+          values or runtime relations are changed. The command and
+          limitations are documented in `docs/testing.md`.
+        - [ ] Review remaining source-only profiles and curated-text
+          candidates against the exact N5.3 clauses and Army snapshot;
+          record confirmed object identities, separate carriers/delivery
+          paths, shared objects, nonstandard/missing attributes, and
+          provenance in an accepted inventory before adding canonical
+          object storage, browser entry points or reverse-use links.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.

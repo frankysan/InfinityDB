@@ -1113,6 +1113,23 @@ overwrite imported Army data. The regression module exercises parsers using
 synthetic inputs and conditionally validates the pinned source matrix when
 those local source files are available.
 
+Before creating a distinct deployed-object/reverse-use model, generate the
+read-only source/profile and curated-rule *candidate* inventory:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_deployed_object_inventory --army-db data/generated/infinity.db --curated-source data/curated/rules/n5-core-v5.3.json --json-output local/audits/deployed-object-inventory.json
+```
+
+The report matches the 14 pinned supplementary Weapon Chart profiles using
+source name, catalog and exact mode, retains other populated Army profile rows
+without assigning object identity, and identifies independently reviewed Armed
+Turret, Deployable Cover and Pitcher examples. Curated Weapon/Equipment summaries
+containing deployment-related words are a **manual review queue**, not confirmed
+new objects. The Army profile's text is source-native even when four conventional
+attributes can be parsed; incomplete/nonstandard values stay unparsed. This audit
+requires no third-party PDFs at runtime and never decides conflicting Silhouettes
+or infers a carrier, delivery relation, or canonical deployed-object ID.
+
 For the older Wiki Weapon Chart name inventory, use the read-only
 explicit-alias audit. It preserves repeated alternative tables and reports
 unresolved identities independently from source-profile value differences.
