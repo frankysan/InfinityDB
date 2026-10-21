@@ -31,6 +31,7 @@
         "test_audit_weapon_traits_prose",
         "test_audit_weaponry_family_clauses",
         "test_deployable_trigger_cross_rules",
+        "test_deployed_object_reference",
         "test_availability",
         "test_availability_schema",
         "test_catalog_rules",

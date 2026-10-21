@@ -631,6 +631,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               Preserve unresolved Mine subtype and S0/S1 disputes.
               Validate API, browser navigation and missing/variant/shared
               cases before closing the player-facing requirement.
+              - [x] Implement and test the **pure source-backed read
+                projection** in `deployed_object_reference.py`:
+                17 distinct reviewed entries (15 Army profile identities,
+                Armed Turret and Deployable Cover), source-snapshot hashes,
+                exact Army ID/mode ownership, attribute-level known/
+                unreported/disputed provenance, and grouped reviewed
+                delivery origins. The six Mine/Silhouette, Dazer and Armed
+                Turret disputes retain alternatives; Cover lacks only
+                unreported ARM/BTS/STR. Mine Dispenser remains unresolved.
+                Tests assert shared-object delivery and no invented Units.
+                This code is **not yet published via API or browser**.
+              - [ ] Publish only validated object identities in the
+                runtime reference API and normal browser; add navigable
+                carrier/Equipment/Weapon source links, compatibility and
+                degraded-state coverage, then use real Army usage
+                occurrences for reverse Unit/loadout links. Keep disputed
+                source values and unresolved Mine subtype visible.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.

@@ -52,6 +52,29 @@ BS Mode and CC Mode). Curated source rules may target an exact source ID *and*
 mode, but must attach to that one profile only, not to the parent Weapon/source
 variant or sibling modes. Mode qualifiers describe identity, not permission to
 resolve a disputed Trait automatically.
+
+### Deployed-object read-model pilot (not yet published)
+
+`infinity_db.deployed_object_reference.project_deployed_references` consumes
+the validated N5.3 deployed-object audit and produces a **pure, read-only**
+reference projection. It currently covers 15 exact Army profiles plus the
+curated Armed Turret and Deployable Cover records. An Army reference key
+includes **catalog, source ID and mode**; reviewed-only object keys use their
+curated rule IDs. These are deterministic identities within the pinned source,
+not guarantees that upstream Army IDs never change between snapshots.
+The projection separately exposes raw source profile text and individual
+ARM/BTS/STR/S attribute states: `known`, `unreported`, or `disputed`.
+Every present value retains provenance; a disputed Silhouette retains both
+conflicting source values, and missing Scenery attributes remain `null`
+rather than becoming zero. Exact reviewed delivery paths point *toward* the
+shared object reference; Mine Dispenser's unresolved loadout-specific Mine
+subtype remains explicitly unresolved. These edges establish **delivery
+origins only**, not Unit carriers, Army List legality or Unit/loadout usage.
+
+This read model is **not served by the API or browser yet**. Publication,
+reviewed provenance validation at build time, compatibility checks and true
+Unit/loadout reverse uses remain v1.0 tasks; do not describe the pilot as an
+exhaustive N5.3 deployed-object model.
 Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition
 composition. `config/catalogs/weapon-ammunition-references.json` pins exact Army
 metadata Ammunition IDs and names to canonical published base Ammunition references.
