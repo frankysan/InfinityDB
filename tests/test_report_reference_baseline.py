@@ -930,12 +930,10 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
     Existence checks do not prove player-facing rendering or correct game rules.
     """
     from infinity_db.database.peripheral_relationships import validate_peripheral_relationships
-    from tools.audit_army_faction_semantics import audit_database as audit_factions
     from tools.audit_fireteam_semantics import audit_database as audit_fireteams
     from tools.audit_unit_semantics import audit_database as audit_units
 
     baseline = build_baseline(ARMY_DB, RULES_DB)
-    faction = audit_factions(ARMY_DB)
     fireteams = audit_fireteams(ARMY_DB)
     units = audit_units(ARMY_DB)
 
@@ -945,12 +943,7 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
     assert baseline["rulesPublication"]["publishedDatabaseSha256"] == hashlib.sha256(
         RULES_DB.read_bytes()
     ).hexdigest()
-    assert faction["applicationModel"]["sourceDerivedIdentityEquivalent"] is True
-    assert faction["applicationModel"]["runtimeIdentityEquivalent"] is True
-    assert faction["summary"]["applicationReinforcementParentCount"] > 0
-    assert faction["summary"]["applicationReinforcementParentCount"] == (
-        fireteams["reinforcementContext"]["parentEdgeCount"]
-    )
+    assert fireteams["reinforcementContext"]["parentEdgeCount"] > 0
     assert units["summary"]["repeatedLogicalUnitCount"] > 0
     assert fireteams["chartShape"]["teamCount"] > 0
     assert fireteams["typeLimits"]["projectionMismatchCount"] == 0
@@ -999,6 +992,39 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
             "LEFT JOIN application_armies AS b ON b.id = r.reinforcement_army_id "
             "WHERE a.id IS NULL OR b.id IS NULL OR b.role != 'reinforcement'"
         ).fetchone()[0] == 0
+        assert db.execute(
+            "SELECT COUNT(*) FROM application_army_reinforcement_parents"
+        ).fetchone()[0] == fireteams["reinforcementContext"]["parentEdgeCount"]
+
+
+def test_pinned_army_derived_relationships_match_raw_source_when_available() -> None:
+    """Source derivation requires the ignored, release-matched raw sibling."""
+    from infinity_db.database import raw_database_path
+    from tools.audit_army_faction_semantics import audit_database as audit_factions
+
+    if not raw_database_path(ARMY_DB).is_file():
+        pytest.skip("Full Army raw archive is ignored and unavailable in clean CI")
+    faction = audit_factions(ARMY_DB)
+    assert faction["applicationModel"]["sourceDerivedIdentityEquivalent"] is True
+    assert faction["applicationModel"]["runtimeIdentityEquivalent"] is True
+    assert faction["summary"]["applicationReinforcementParentCount"] > 0
+    with sqlite3.connect(ARMY_DB) as db:
+        assert faction["summary"]["applicationReinforcementParentCount"] == db.execute(
+            "SELECT COUNT(*) FROM application_army_reinforcement_parents"
+        ).fetchone()[0]
+
+
+def test_raw_source_relationship_audit_skips_clean_checkout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The source-only proof must not make clean CI require ignored data."""
+    from infinity_db import database
+
+    monkeypatch.setattr(
+        database, "raw_database_path", lambda _path: tmp_path / "missing.raw.db"
+    )
+    with pytest.raises(pytest.skip.Exception, match="ignored and unavailable"):
+        test_pinned_army_derived_relationships_match_raw_source_when_available()
 
 
 def test_baseline_cli_writes_stable_local_reports(tmp_path: Path) -> None:
