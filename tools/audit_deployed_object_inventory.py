@@ -65,9 +65,62 @@ def _citation_summary(record: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+def validate_delivery_reviews(
+    reviews: dict[str, Any],
+    records: dict[str, dict[str, Any]],
+    source_profiles: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Resolve reviewed source evidence, never create canonical object identities."""
+    if reviews.get("formatVersion") != 1:
+        raise ValueError("Unsupported deployed-object delivery review format")
+    profile_index: dict[tuple[str, str, str | None], list[dict[str, Any]]] = {}
+    for profile in source_profiles:
+        key = (profile["catalog"], profile["name"], profile["mode"])
+        profile_index.setdefault(key, []).append(profile)
+    accepted = []
+    seen: set[tuple[str, str]] = set()
+    for entry in reviews["reviewedDeliveryPaths"]:
+        origin = entry["originRecordId"]
+        key = (origin, entry["delivery"])
+        if key in seen:
+            raise ValueError(f"Duplicate delivered-object source path: {key}")
+        seen.add(key)
+        record = records.get(origin)
+        if record is None or entry["summaryEvidence"] not in record.get("summary", ""):
+            raise ValueError(f"Unverified delivery summary evidence: {key}")
+        citation_pages = {
+            cite["page"] for cite in record.get("citations", [])
+            if cite["sourceId"] == "n5-core-v5.3-pdf" and cite.get("page") is not None
+        }
+        if not set(entry["sourcePages"]) <= citation_pages:
+            raise ValueError(f"Unverified N5.3 delivery citations: {key}")
+
+        rules_owner = entry["objectRulesRecordId"]
+        if rules_owner is not None and rules_owner not in records:
+            raise ValueError(f"Missing object rules owner: {rules_owner}")
+        profile_source = entry["sourceProfile"]
+        matching: list[dict[str, Any]] = []
+        if profile_source is not None:
+            selector = (
+                profile_source["catalog"],
+                profile_source["name"],
+                profile_source["mode"],
+            )
+            matching = profile_index.get(selector, [])
+            if len(matching) != 1:
+                raise ValueError(f"Unresolved/ambiguous source profile: {key}: {selector}")
+        accepted.append({
+            **entry,
+            "sourceProfileEvidence": matching[0] if matching else None,
+            "reviewStatus": "source-backed-audit-only",
+        })
+    return accepted
+
+
 def audit_inventory(
     army_db: Path,
     curated_source: Path,
+    delivery_reviews: Path | None = None,
 ) -> dict[str, Any]:
     with sqlite3.connect(f"{army_db.resolve().as_uri()}?mode=ro", uri=True) as conn:
         conn.row_factory = sqlite3.Row
@@ -154,6 +207,17 @@ def audit_inventory(
         "additionalSourceProfiles": additional_profiles,
         "reviewedExamples": reviewed_examples,
         "curatedCandidateMentions": candidates,
+        "deliveryReviewSha256": (
+            hashlib.sha256(delivery_reviews.read_bytes()).hexdigest()
+            if delivery_reviews is not None else None
+        ),
+        "reviewedDeliveryPaths": (
+            validate_delivery_reviews(
+                json.loads(delivery_reviews.read_text(encoding="utf-8")),
+                records, chart_profiles + additional_profiles,
+            )
+            if delivery_reviews is not None else []
+        ),
     }
 
 
@@ -164,9 +228,15 @@ def main() -> int:
         "--curated-source", type=Path,
         default=Path("data/curated/rules/n5-core-v5.3.json"),
     )
+    parser.add_argument(
+        "--delivery-reviews", type=Path,
+        default=Path("config/validation/deployed-object-delivery-reviews.json"),
+    )
     parser.add_argument("--json-output", type=Path)
     arguments = parser.parse_args()
-    report = audit_inventory(arguments.army_db, arguments.curated_source)
+    report = audit_inventory(
+        arguments.army_db, arguments.curated_source, arguments.delivery_reviews
+    )
     result = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     if arguments.json_output is not None:
         arguments.json_output.write_text(result, encoding="utf-8", newline="\n")

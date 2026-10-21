@@ -1121,14 +1121,28 @@ read-only source/profile and curated-rule *candidate* inventory:
 ```
 
 The report matches the 14 pinned supplementary Weapon Chart profiles using
-source name, catalog and exact mode, retains other populated Army profile rows
-without assigning object identity, and identifies independently reviewed Armed
-Turret, Deployable Cover and Pitcher examples. Curated Weapon/Equipment summaries
-containing deployment-related words are a **manual review queue**, not confirmed
-new objects. The Army profile's text is source-native even when four conventional
-attributes can be parsed; incomplete/nonstandard values stay unparsed. This audit
-requires no third-party PDFs at runtime and never decides conflicting Silhouettes
-or infers a carrier, delivery relation, or canonical deployed-object ID.
+source name, catalog and exact mode. On the pinned Army database, the sole
+additional populated profile is **Madtraps** (Weapon source ID 150, mode-less;
+ARM 0, BTS 0, STR 1, S 1). N5.3 p. 69 names MadTraps among Perimeter Weapons
+and p. 187 lists its attack profile, but it is not one of the 14 separate
+four-attribute auxiliary chart entries. Do not discard it or treat that
+exclusion as a missing source value.
+
+`config/validation/deployed-object-delivery-reviews.json` now pins an
+**audit-only first batch** of six reviewed delivery paths. They distinguish
+Pitcher-fired and Place Deployable delivery of the same Deployable Repeater
+source profile; Disco Baller versus its Disco Ball mode/object; Drop Bears'
+thrown versus deployed mode; and Mine Dispenser's loadout-dependent Mine subtype.
+The audit resolves exact catalog names/modes and validates cited N5.3 pages
+and maintained rules text. It does **not** publish new object IDs, infer Unit
+carriers, grant any mode to another item, or resolve the Mine Dispenser subtype.
+
+The separately reviewed Armed Turret, Deployable Cover and Pitcher cases remain
+included. Other curated Weapon/Equipment summaries containing deployment-related
+words form a **manual review queue**, not confirmed objects. Army profile text
+stays source-native even when four conventional attributes can be parsed;
+incomplete/nonstandard values stay unparsed. The audit requires no third-party
+PDFs at runtime; it retains disputed Silhouettes without selecting precedence.
 
 For the older Wiki Weapon Chart name inventory, use the read-only
 explicit-alias audit. It preserves repeated alternative tables and reports

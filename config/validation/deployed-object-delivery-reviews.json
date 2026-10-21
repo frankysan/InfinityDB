@@ -1,0 +1,67 @@
+{
+  "format": "InfinityDB deployed-object delivery review",
+  "formatVersion": 1,
+  "scope": "audit-only; not a canonical object ID, roster legality, or runtime relation",
+  "reviewedDeliveryPaths": [
+    {
+      "originRecordId": "weapon:pitcher",
+      "delivery": "successful BS Attack shot",
+      "objectLabel": "Deployable Repeater",
+      "objectRulesRecordId": "equipment:deployable-repeater",
+      "sourceProfile": {"catalog": "equipment", "name": "Deployable Repeater", "mode": null},
+      "sourcePages": [73, 186],
+      "summaryEvidence": "A successful BS Roll places a",
+      "caveat": "Delivery is not the Place Deployable Skill; failed shots place no Token."
+    },
+    {
+      "originRecordId": "equipment:deployable-repeater",
+      "delivery": "Place Deployable Skill",
+      "objectLabel": "Deployable Repeater",
+      "objectRulesRecordId": "equipment:deployable-repeater",
+      "sourceProfile": {"catalog": "equipment", "name": "Deployable Repeater", "mode": null},
+      "sourcePages": [56, 73, 186],
+      "summaryEvidence": "Place Deployable",
+      "caveat": "Same source object profile as Pitcher delivery; no inference about Unit users."
+    },
+    {
+      "originRecordId": "weapon:disco-baller",
+      "delivery": "successful launcher BS Roll",
+      "objectLabel": "Disco Ball",
+      "objectRulesRecordId": null,
+      "sourceProfile": {"catalog": "weapon", "name": "Disco Baller", "mode": "Disco Ball"},
+      "sourcePages": [71, 186],
+      "summaryEvidence": "place a Disco Ball Model or Token",
+      "caveat": "Disco Ball is the deployed object/mode, not a second invented Weapon catalog identity."
+    },
+    {
+      "originRecordId": "weapon:drop-bears",
+      "delivery": "BS Mode throw",
+      "objectLabel": "Drop Bear Mine Token",
+      "objectRulesRecordId": "weapon:drop-bears",
+      "sourceProfile": {"catalog": "weapon", "name": "Drop Bears", "mode": "Deployable Mode"},
+      "sourcePages": [71, 181],
+      "summaryEvidence": "**BS Mode:** Throw the Drop Bear",
+      "caveat": "Delivery uses PH-based BS Attack; deployed object's Shock profile is distinct from the throw mode."
+    },
+    {
+      "originRecordId": "weapon:drop-bears",
+      "delivery": "Deployable Mode placement",
+      "objectLabel": "Drop Bear Mine Token",
+      "objectRulesRecordId": "weapon:drop-bears",
+      "sourceProfile": {"catalog": "weapon", "name": "Drop Bears", "mode": "Deployable Mode"},
+      "sourcePages": [71, 181],
+      "summaryEvidence": "Use [[skill:place-deployable|Place Deployable]] or [[skill:intuitive-attack|Intuitive Attack]]",
+      "caveat": "Two delivery modes share three Disposable uses; no-Roll placement does not apply to BS Mode."
+    },
+    {
+      "originRecordId": "weapon:mine-dispenser",
+      "delivery": "successful BS Attack shot",
+      "objectLabel": "loadout-specified Mine subtype",
+      "objectRulesRecordId": null,
+      "sourceProfile": null,
+      "sourcePages": [71, 72, 181],
+      "summaryEvidence": "The deployed Mine type is specified in brackets after the Weapon name",
+      "caveat": "Subtype requires the explicit Unit/loadout; never substitute a default Mine or inherit Drop Bears' Shock profile."
+    }
+  ]
+}

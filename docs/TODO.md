@@ -576,6 +576,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           paths, shared objects, nonstandard/missing attributes, and
           provenance in an accepted inventory before adding canonical
           object storage, browser entry points or reverse-use links.
+          - [x] Pin the **single additional populated Army source profile**:
+            Madtraps (Weapon source ID 150, ARM 0/BTS 0/STR 1/S 1).
+            The N5.3 main chart (p. 187) and Perimeter/Boost rules (p. 69)
+            are distinct from the 14 auxiliary object rows. Preserve its
+            Weapon identity and Boost/PARA mechanics; do not infer a generic
+            Mine/Perimeter equivalence.
+          - [x] Add the audit-only reviewed delivery contract
+            `config/validation/deployed-object-delivery-reviews.json`.
+            Six pinned source paths distinguish Pitcher and Place Deployable
+            routes to the shared Deployable Repeater profile; Disco Baller
+            from its Disco Ball mode/object; two Drop Bears deployment
+            modes; and Mine Dispenser's unresolved loadout-specific Mine
+            subtype. The inventory now validates exact mode selectors,
+            rule-text evidence, published N5.3 citation pages and rules
+            owners without creating canonical object IDs or Unit carriers.
+          - [ ] Classify remaining curated-text candidates, including
+            nonstandard Scenery Elements and objects without Army profiles,
+            with exact source evidence; then design and validate object
+            identity, missing-data semantics and reverse-use presentation.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.

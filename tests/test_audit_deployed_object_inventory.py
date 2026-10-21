@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import sqlite3
 from pathlib import Path
@@ -12,6 +13,7 @@ from tools.audit_deployed_object_inventory import (
     CHART_AUXILIARY,
     _profile_stats,
     audit_inventory,
+    validate_delivery_reviews,
 )
 
 
@@ -121,8 +123,12 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
     if not db_path.is_file():
         pytest.skip("Generated Army source database unavailable")
     result = audit_inventory(
-        db_path, root / "data/curated/rules/n5-core-v5.3.json"
+        db_path,
+        root / "data/curated/rules/n5-core-v5.3.json",
+        root / "config/validation/deployed-object-delivery-reviews.json",
     )
+    assert len(result["reviewedDeliveryPaths"]) == 6
+    assert len(result["deliveryReviewSha256"]) == 64
     assert len(result["chartProfiles"]) == 14
     assert all(
         row["attributes"] is not None for row in result["chartProfiles"]
@@ -141,3 +147,88 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         candidate["reviewStatus"] == "identity-not-inferred"
         for candidate in result["curatedCandidateMentions"]
     )
+    assert result["additionalSourceProfiles"] == [{
+        "sourceId": 150,
+        "name": "Madtraps",
+        "mode": None,
+        "catalog": "weapon",
+        "sourceProfile": "ARM=0, BTS=0, STR=1, S=1",
+        "attributes": {"ARM": 0, "BTS": 0, "STR": 1, "S": 1},
+    }]
+    paths = result["reviewedDeliveryPaths"]
+    pitcher = next(path for path in paths if path["originRecordId"] == "weapon:pitcher")
+    placed_repeater = next(
+        path for path in paths
+        if path["originRecordId"] == "equipment:deployable-repeater"
+    )
+    assert pitcher["sourceProfileEvidence"] == placed_repeater["sourceProfileEvidence"]
+    assert pitcher["objectRulesRecordId"] == "equipment:deployable-repeater"
+    assert pitcher["originRecordId"] != placed_repeater["originRecordId"]
+    ball = next(path for path in paths if path["originRecordId"] == "weapon:disco-baller")
+    assert ball["objectLabel"] == "Disco Ball"
+    assert ball["sourceProfileEvidence"]["mode"] == "Disco Ball"
+    bears = [path for path in paths if path["originRecordId"] == "weapon:drop-bears"]
+    assert len(bears) == 2
+    assert {path["delivery"] for path in bears} == {
+        "BS Mode throw", "Deployable Mode placement",
+    }
+    assert bears[0]["sourceProfileEvidence"] == bears[1]["sourceProfileEvidence"]
+    dispenser = next(
+        path for path in paths if path["originRecordId"] == "weapon:mine-dispenser"
+    )
+    assert dispenser["sourceProfileEvidence"] is None
+    assert dispenser["objectRulesRecordId"] is None
+
+
+def test_delivery_reviews_require_pinned_curated_evidence_and_exact_source_modes() -> None:
+    root = Path(__file__).resolve().parents[1]
+    reviews = json.loads(
+        (root / "config/validation/deployed-object-delivery-reviews.json")
+        .read_text(encoding="utf-8")
+    )
+    records = {
+        record["id"]: record
+        for record in json.loads(
+            (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+        )["records"]
+        if record["kind"] in {"weapon", "equipment"}
+    }
+    profiles = []
+    for review in reviews["reviewedDeliveryPaths"]:
+        profile = review["sourceProfile"]
+        if profile and profile not in profiles:
+            profiles.append(profile)
+    assert len(profiles) == 3
+    approved = validate_delivery_reviews(reviews, records, profiles)
+    assert len(approved) == 6
+    assert all(entry["reviewStatus"] == "source-backed-audit-only" for entry in approved)
+
+    tampered = copy.deepcopy(reviews)
+    tampered["reviewedDeliveryPaths"][0]["summaryEvidence"] = "Not in the source"
+    with pytest.raises(ValueError, match="summary evidence"):
+        validate_delivery_reviews(tampered, records, profiles)
+
+    tampered = copy.deepcopy(reviews)
+    tampered["reviewedDeliveryPaths"][0]["sourcePages"] = [999]
+    with pytest.raises(ValueError, match="citations"):
+        validate_delivery_reviews(tampered, records, profiles)
+
+    tampered = copy.deepcopy(reviews)
+    tampered["reviewedDeliveryPaths"][0]["sourceProfile"]["mode"] = "Unverified Mode"
+    with pytest.raises(ValueError, match="source profile"):
+        validate_delivery_reviews(tampered, records, profiles)
+
+    tampered = copy.deepcopy(reviews)
+    tampered["reviewedDeliveryPaths"].append(
+        copy.deepcopy(tampered["reviewedDeliveryPaths"][0])
+    )
+    with pytest.raises(ValueError, match="Duplicate"):
+        validate_delivery_reviews(tampered, records, profiles)
+
+    tampered = copy.deepcopy(reviews)
+    tampered["reviewedDeliveryPaths"][0]["objectRulesRecordId"] = (
+        "equipment:unverified"
+    )
+    with pytest.raises(ValueError, match="Missing object rules owner"):
+        validate_delivery_reviews(tampered, records, profiles)
+
