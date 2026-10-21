@@ -263,7 +263,13 @@ For releases that are deployed to the hosted InfinityDB instance:
   stale or substituted database-pair publication. This check does not
   validate symbol/PDF/Wiki inputs or rules completeness.
 - [ ] Smoke-test the release's principal changed user-facing paths in the deployed
-  application.
+  application. For 1.0, run `tools.verify_release_candidate_browser` against
+  the served candidate, explicitly specifying `--expected-version` and the
+  release-matched Army/rules database pair. It checks the exact database-pair
+  revision, release version and local static asset fingerprint **before and
+  after** representative Unit-detail Chromium checks, aborting on any mismatch.
+  Retain its JSON report under ignored `local/audits/` only after success.
+  This is bounded browser acceptance, not the 1.0 completeness verdict.
 - [ ] Confirm required database/schema rebuilds and published assets are actually the
   release-matched versions.
 - [ ] Confirm rollback remains available before considering deployment acceptance

@@ -135,6 +135,7 @@
         "test_run_checks",
         "test_snapshot_archive",
         "test_test_sections",
+        "test_verify_release_candidate_browser",
         "test_version"
       ]
     },

@@ -893,3 +893,26 @@ Prefer targeted fixes rather than merging these.
   **32 files/0 issues**, and offline documentation links
   **30 files/0 errors**. The full suite and deployed-server
   acceptance were not run.
+- **Closeout pass 37, 2026-10-21:** Introduced
+  `tools/verify_release_candidate_browser.py`, an explicit hosted
+  acceptance entrypoint for the exact tagged release candidate.
+  Combines the existing served byte-pair revision verifier with
+  explicit application version and static-asset fingerprint checks
+  before and after a representative Chromium Unit-detail matrix.
+  Rejects missing local release databases, wrong version/snapshot,
+  mismatched static assets, failed browser cases and mid-run changes;
+  does not write a successful JSON report after failure.
+  `tests/test_verify_release_candidate_browser.py` includes an
+  actual local WSGI version endpoint, a full real-Chromium local
+  preflight/browser/postflight smoke, and negative mismatch/partial
+  browser regressions. No deployed 1.0 candidate verification has
+  been claimed; the public hosted version endpoint was inaccessible
+  from the web path available in this session, and production is
+  not assumed to be at the v1.0 development revision.
+- **Validation:** 34 focused tests passed: 10 hosted acceptance tests
+  (including one actual local Chromium page), 22 reference baseline
+  tests and 2 test-registration tests. Ruff on both changed Python
+  modules **PASS**; Pyright **0 errors/0 warnings**; Markdownlint
+  **32 files/0 issues** and offline docs links **30 files/0 errors**.
+  The full project suite, hosted candidate browser acceptance, tag,
+  release deployment and rollback checks were not run.

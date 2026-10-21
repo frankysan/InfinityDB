@@ -247,6 +247,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Chromium pages passed**. Exhaustive optional combinations,
     the full catalog, and deployed release-candidate verification
     remain open.
+  - [x] Add a fail-closed hosted release-candidate browser verifier.
+    Require an explicit version, release-matched Army/rules byte-pair
+    snapshot revision and static-asset revision **before** Chromium
+    acceptance; recheck runtime identity afterward and reject partial
+    browser results or mid-run publication changes. No report is
+    written after a failed check. Live local-server and negative-path
+    regressions cover the verifier, but **the hosted 1.0 candidate
+    is not deployed/verified by this development check**.
+  - [ ] Run the exact-version hosted candidate gate and retain its
+    successful JSON evidence after the 1.0 release checkout, generated
+    database pair, static assets and served deployment all match.
+    The 81-page local matrix and hosted smoke test have different
+    scopes; also complete the full release checklist.
   - [x] Revalidate the current bilingual source-input baseline with the 1.0
     audit against newly built rules storage: all **113/113** pinned historical
     Wiki revisions, **82/82** English snapshot references across 70 pages and

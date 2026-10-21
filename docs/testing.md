@@ -1120,6 +1120,33 @@ This remains bounded representative **browser** acceptance, not
 full-catalog completeness, all optional-flag combinations, all
 parameterized Skill semantics, or every visual layout variant.
 
+For **deployed release-candidate acceptance**, use the separate
+`tools.verify_release_candidate_browser` entrypoint from the exact
+candidate checkout (whose tracked generated databases and static assets
+must match the deployment). It first validates the served
+`/api/version` fields against the supplied release version, the
+SHA-256 revision of the local Army/rules database pair, and the local
+static asset fingerprint. Only then does it run the representative
+Unit-detail Chromium matrix (seven pinned Units at 1440/390/320 px by
+default). It repeats the served identity checks after the browser run,
+and writes JSON evidence only after all stages pass. Example **for the
+future tagged 1.0.0 deployment**. The README still documents
+0.10.1 as the latest release; this command must not be used to claim
+that the hosted service already serves 1.0.0:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.verify_release_candidate_browser --base-url https://infinitydb.tsudao.com --expected-version 1.0.0 --channel chrome --json-output local/audits/1.0-hosted-unit-browser.json
+```
+
+Optional `--army-db`, `--rules-db`, repeated `--slug` and repeated
+`--width` arguments select a specific retained candidate and smaller
+browser cohort. This release gate must **not** be considered passed
+against an earlier deployed version or different database/static-asset
+build. Local-server/real-Chromium integration and rejection tests
+are not evidence of hosted release acceptance. The full local 81-page
+matrix remains a separate requirement; deployed representative checks
+do not imply full-catalog acceptance.
+
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:
