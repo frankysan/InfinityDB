@@ -575,7 +575,12 @@ def test_all_chart_auxiliary_objects_have_catalog_profile_in_normal_browser(
     by_name = {weapon["name"].casefold(): weapon for weapon in published_weapons}
     page = chrome.new_page(viewport={"width": width, "height": 900})
     errors: list[str] = []
+    failed_requests: list[str] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "requestfailed",
+        lambda request: failed_requests.append(f"{request.url}: {request.failure}"),
+    )
     try:
         for name, mode, army_s, pdf_page in AUXILIARY_OBJECTS:
             if name in {"Dazer", "Deployable Repeater", "FastPanda"}:
@@ -640,11 +645,24 @@ def test_all_chart_auxiliary_objects_have_catalog_profile_in_normal_browser(
             }
             assert attributes == {"ARM": 0, "BTS": 0, "STR": 1, "S": army_s}, name
 
-            page.goto(
-                f"{origin}/weapons/{weapon['slug']}",
-                wait_until="domcontentloaded",
-            )
-            page.locator("#item-content").wait_for(state="visible", timeout=15000)
+            url = f"{origin}/weapons/{weapon['slug']}"
+            failed_requests.clear()
+            page.goto(url, wait_until="domcontentloaded")
+            try:
+                page.locator("#item-content").wait_for(
+                    state="visible", timeout=45000
+                )
+            except Exception as exc:
+                # The async catalog loader can remain hidden if fetch/render
+                # fails. Preserve the exact object, status and network cause
+                # when a parallel Chromium run exceeds its render deadline.
+                status_text = page.locator("#item-status").inner_text()
+                raise AssertionError(
+                    f"{name} ({mode}) at {width}px: {url}; "
+                    f"catalog status={status_text!r}; "
+                    f"page errors={errors!r}; "
+                    f"failed requests={failed_requests!r}"
+                ) from exc
             cards = page.locator(".weapon-variant .weapon-profile")
             candidates = cards.filter(
                 has=page.get_by_role(
