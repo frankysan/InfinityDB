@@ -244,8 +244,7 @@ def _relationship_cohort(database_path: Path) -> tuple[str, ...]:
 
 def test_reinforcement_parentage_is_visible_without_developer_mode() -> None:
     """A real Reinforcement Unit must link to its source-backed parent Army."""
-    pytest.importorskip("playwright.sync_api")
-    from playwright.sync_api import sync_playwright
+    sync_playwright = pytest.importorskip("playwright.sync_api").sync_playwright
 
     root = Path(__file__).resolve().parents[1]
     database = root / "data/generated/infinity.db"
