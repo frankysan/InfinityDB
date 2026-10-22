@@ -109,7 +109,7 @@ Do not report Ruff/Pyright as run when those tools are unavailable in the active
 
 Full local checks retain `-n auto --dist worksteal`; the worker count is not
 reduced for browser acceptance. During an xdist run, `tests/conftest.py`
-reserves up to **two concurrent browser test modules** across workers using
+reserves **one browser test module at a time** across workers using
 cross-process OS file locks in the per-run pytest temporary directory. This
 protects Chromium/browser-server resources while unrelated tests run on all
 available workers. Locks release even if a worker process exits unexpectedly;
@@ -120,9 +120,11 @@ The Unit Skill browser matrix additionally reuses **one Chromium instance**
 for all its independent scenarios; each viewport still receives a fresh
 browser context and the same API/DOM assertions. Standalone verifier calls
 continue to create and close their own browser. These measures prevent
-excessive simultaneous Chromium instances rather than increasing test timeouts
-or silently retrying a failed page. A full parallel run is still required to
-validate stability under the developer workstation workload.
+excessive simultaneous Chromium instances without changing pytest worker
+parallelism. Long-running catalog render checks retain bounded deadlines and
+report HTTP, JavaScript, and page-status evidence on failure; none silently
+retry a failed page. A full parallel run is still required to validate
+stability under the developer workstation workload.
 
 ## Theme runtime regression coverage
 

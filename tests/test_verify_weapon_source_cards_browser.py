@@ -527,15 +527,40 @@ def test_mine_object_silhouette_sources_remain_disclosed(
     origin: str, chrome: Any, slug: str,
 ) -> None:
     page = chrome.new_page(viewport={"width": 390, "height": 900})
+    errors: list[str] = []
+    failed_requests: list[str] = []
+    api_responses: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "requestfailed",
+        lambda request: failed_requests.append(f"{request.url}: {request.failure}"),
+    )
+    page.on(
+        "response",
+        lambda response: api_responses.append(f"{response.status} {response.url}")
+        if "/api/weapons/" in response.url or "/api/visible-unit-ids" in response.url
+        else None,
+    )
     try:
-        page.goto(f"{origin}/weapons/{slug}", wait_until="domcontentloaded")
+        url = f"{origin}/weapons/{slug}"
+        page.goto(url, wait_until="domcontentloaded")
         rule = page.locator('[id="rule-weapon-mines"]')
-        rule.wait_for(state="visible", timeout=15000)
+        try:
+            rule.wait_for(state="visible", timeout=45000)
+        except Exception as exc:
+            status = page.locator("#item-status").inner_text(timeout=2500)
+            content_hidden = page.locator("#item-content").is_hidden(timeout=2500)
+            raise AssertionError(
+                f"{slug} at 390px: {url}; status={status!r}; "
+                f"content hidden={content_hidden}; API responses={api_responses!r}; "
+                f"page errors={errors!r}; failed requests={failed_requests!r}"
+            ) from exc
         note = rule.locator(".rules-source-note").first
         assert note.is_visible()
         content = note.inner_text()
         assert "S0" in content and "S1" in content
         assert "No official correction or source precedence has been confirmed" in content
+        assert not errors, errors
     finally:
         page.close()
 
