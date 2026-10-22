@@ -4,6 +4,72 @@
   "scope": "audit-only; not a canonical object ID, roster legality, or runtime relation",
   "reviewedDeliveryPaths": [
     {
+      "originRecordId": "weapon:cybermine",
+      "delivery": "Place Deployable Skill",
+      "objectLabel": "Cybermine",
+      "objectRulesRecordId": "weapon:cybermine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Cybermine",
+        "mode": null
+      },
+      "sourcePages": [
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "Use [[skill:place-deployable|Place Deployable]] for ordinary no-Roll placement",
+      "caveat": "Uses shared Mine deployment with a Camouflage Marker and activation at Order Conclusion. The Cybermine attack is a Comms Attack opposed by Reset at -3 WIP, not ordinary Dodge; printed deployed-object S0 versus Army S1 remains disputed."
+    },
+    {
+      "originRecordId": "weapon:cybermine",
+      "delivery": "Intuitive Attack WIP Roll for Camouflage Marker exception",
+      "objectLabel": "Cybermine",
+      "objectRulesRecordId": "weapon:cybermine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Cybermine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        181
+      ],
+      "summaryEvidence": "use [[skill:intuitive-attack|Intuitive Attack]] instead",
+      "caveat": "Required for an enemy CAMO Marker inside Trigger Area without a valid revealed enemy. Unmodified WIP; failure consumes a Disposable use and places no Mine. Distinct from the triggered Cybermine's Reset-only effect."
+    },
+    {
+      "originRecordId": "equipment:dazer",
+      "delivery": "Place Deployable Skill",
+      "objectLabel": "Dazer",
+      "objectRulesRecordId": "equipment:dazer",
+      "sourceProfile": {
+        "catalog": "equipment",
+        "name": "Dazer",
+        "mode": null
+      },
+      "sourcePages": [
+        82,
+        121,
+        186
+      ],
+      "summaryEvidence": "[[skill:place-deployable|Place Deployable]] places one Token in Silhouette contact without a Roll",
+      "caveat": "Ordinary Silhouette-contact placement, not Perimeter delivery. Dazer's ZoC determines its Difficult Terrain effect area after activation; retain the unresolved S0 Army/detail versus S1 chart conflict."
+    },
+    {
+      "originRecordId": "equipment:deployable-cover",
+      "delivery": "Place Deployable Skill with Perimeter positioning",
+      "objectLabel": "Deployable Cover",
+      "objectRulesRecordId": "equipment:deployable-cover",
+      "sourceProfile": null,
+      "sourcePages": [
+        122
+      ],
+      "summaryEvidence": "places a Scenery Element for Partial Cover",
+      "caveat": "Source-only S3 Scenery Element, not an Army four-stat profile. Position fully within the user's Zone of Control; declare only a Unit Profile-permitted Cutting Foam or Vitroferro variant. ARM/BTS/STR remain unreported."
+    },
+    {
       "originRecordId": "weapon:crazykoala",
       "delivery": "Place Deployable Skill with Perimeter positioning",
       "objectLabel": "Crazykoala",

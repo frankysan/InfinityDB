@@ -43,6 +43,47 @@ def test_pinned_publication_is_deterministic_and_source_complete(
     )
 
 
+def test_reviewed_delivery_uses_have_complete_source_context(
+    source_paths: tuple[Path, Path, Path, Path, Path],
+) -> None:
+    publication = build_publication(*source_paths)
+    for obj in publication["objects"]:
+        for use in obj["unitUses"]:
+            required_numbers = ("unitId", "sourceItemId", "sourcePosition")
+            required_names = ("unitName", "unitSlug", "contextName")
+            assert all(type(use.get(key)) is int for key in required_numbers), (
+                obj["name"], use
+            )
+            for key in required_names:
+                assert isinstance(use.get(key), str) and use[key], (
+                    obj["name"], key, repr(use.get(key)), use["kind"], use["unitId"],
+                )
+
+
+def test_missing_source_unit_names_use_normalized_logical_identity(
+    source_paths: tuple[Path, Path, Path, Path, Path],
+) -> None:
+    publication = build_publication(*source_paths)
+    found_missing_name = False
+    with sqlite3.connect(source_paths[0]) as db:
+        for obj in publication["objects"]:
+            for use in obj["unitUses"]:
+                source = db.execute(
+                    "SELECT u.name, lu.name FROM units AS u "
+                    "JOIN logical_unit_sources AS lus ON lus.source_unit_id = u.id "
+                    "JOIN logical_units AS lu ON lu.id = lus.logical_unit_id "
+                    "WHERE u.id = ?",
+                    (use["unitId"],),
+                ).fetchone()
+                assert source is not None
+                original_name, logical_name = source
+                expected = original_name or logical_name
+                assert use["unitName"] == expected, (obj["name"], use["unitId"])
+                if not original_name:
+                    found_missing_name = True
+    assert found_missing_name, "Pinned source has no missing Unit name to verify"
+
+
 def test_reviewed_delivery_uses_are_exact_army_occurrences_only(
     source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:

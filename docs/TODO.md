@@ -626,8 +626,8 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               Neither bounded scan proves full N5.3 object, delivery,
               Unit or loadout completeness.
             - [ ] **Reconcile uncovered delivery paths for existing objects.**
-              The pinned review now covers 8 of 17 published objects with
-              12 reviewed delivery paths; 9 remain without an approved
+              The pinned review now covers 11 of 17 published objects with
+              16 reviewed delivery paths; 6 remain without an approved
               delivery origin. Newly reviewed: WildParrot's ordinary
               Place Deployable and WIP-based Intuitive Attack paths,
               FastPanda's Perimeter placement and Armed Turret's
@@ -646,6 +646,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 Chromium acceptance now verify their source links and exact
                 Army-backed reverse uses; this does not certify remaining
                 unreviewed object deliveries or roster legality.
+              - [x] Review Dazer's ordinary Silhouette-contact Place
+                Deployable origin (N5.3 pp. 82, 121), with its separate
+                ZoC terrain effect and unresolved S0/S1 source conflict.
+                Review Deployable Cover's Place Deployable/Perimeter origin,
+                S3-only scenery profile, and Unit Profile-dependent
+                Cutting Foam/Vitroferro selection (p. 122); ARM/BTS/STR
+                remain unreported.
+              - [x] Review Cybermine's Place Deployable and exceptional
+                Intuitive Attack delivery paths (N5.3 pp. 49, 72, 82,
+                181). A failed Intuitive Attack consumes a use without
+                placing a Mine. The resulting deployed Cybermine is
+                distinct from its Comms Attack/Reset-only trigger effects.
+                Exact reverse Unit/loadout uses now fall back from a
+                missing imported Unit name to the existing logical-unit
+                name, without fabricating Army or profile ownership.
+              - [ ] The six remaining uncovered delivery origins are
+                AP, E/M, Monofilament, PARA, Shock and Viral Mines.
+                Review each exact Army source subtype and its authored
+                provenance separately; shared Mines mechanics and
+                aliases do not themselves establish subtype-specific
+                carrier ownership. Mine Dispenser still requires a
+                Unit/loadout-specific subtype.
             - [ ] Implement the minimal **deployed-object reference
               contract** after source review. Separate stable object/
               variant identity from the carrier's Weapon/Equipment

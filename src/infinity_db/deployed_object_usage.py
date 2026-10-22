@@ -37,6 +37,8 @@ def _occurrences(
 ) -> list[dict[str, Any]]:
     placeholders = ",".join("?" for _ in source_ids)
     rows: list[dict[str, Any]] = []
+    # Some imported source Unit names are NULL. Prefer the exact source value,
+    # then the existing normalized logical-unit name; never invent a carrier.
     for kind, owner, key, payload in (
         ("profile", "profile_payload_occurrences", "profile_payload_id", "profile_payloads"),
         ("loadout", "loadout_payload_occurrences", "loadout_payload_id", "loadout_payloads"),
@@ -47,7 +49,7 @@ def _occurrences(
             f"SELECT o.army_id, o.unit_id, o.group_id, o.{identity} AS identity_id, "
             "p.item_id AS source_item_id, p.position AS source_position, "
             "c.name AS context_name, a.name AS army_name, "
-            "u.name AS unit_name, lu.slug AS unit_slug "
+            "COALESCE(NULLIF(u.name, ''), lu.name) AS unit_name, lu.slug AS unit_slug "
             f"FROM {owner} AS o "
             f"JOIN {table} AS p ON p.{key} = o.{key} "
             f"JOIN {payload} AS c ON c.id = o.{key} "
@@ -76,7 +78,7 @@ def _occurrences(
     for row in db.execute(
         f"SELECT o.unit_id, o.option_id, o.item_id AS source_item_id, "
         "o.position AS source_position, c.name AS context_name, "
-        "u.name AS unit_name, lu.slug AS unit_slug "
+        "COALESCE(NULLIF(u.name, ''), lu.name) AS unit_name, lu.slug AS unit_slug "
         f"FROM unit_option_{catalog} AS o "
         "JOIN unit_options AS c "
         "ON c.unit_id = o.unit_id AND c.option_id = o.option_id "
@@ -108,7 +110,8 @@ def _occurrences(
             "i.position AS include_position, i.target_loadout_payload_id, "
             "p.item_id AS source_item_id, p.position AS source_position, "
             "c.name AS context_name, target.name AS target_name, "
-            "a.name AS army_name, u.name AS unit_name, lu.slug AS unit_slug "
+            "a.name AS army_name, "
+            "COALESCE(NULLIF(u.name, ''), lu.name) AS unit_name, lu.slug AS unit_slug "
             f"FROM {kind}_occurrence_includes AS i "
             f"JOIN {parent_table} AS parent "
             f"ON parent.army_id = i.army_id AND parent.unit_id = i.unit_id "
@@ -149,7 +152,8 @@ def _occurrences(
         "i.target_army_id, i.target_loadout_payload_id, "
         "p.item_id AS source_item_id, p.position AS source_position, "
         "c.name AS context_name, target.name AS target_name, "
-        "a.name AS target_army_name, u.name AS unit_name, lu.slug AS unit_slug "
+        "a.name AS target_army_name, "
+        "COALESCE(NULLIF(u.name, ''), lu.name) AS unit_name, lu.slug AS unit_slug "
         "FROM unit_option_include_targets AS i "
         "JOIN unit_options AS c "
         "ON c.unit_id = i.unit_id AND c.option_id = i.option_id "

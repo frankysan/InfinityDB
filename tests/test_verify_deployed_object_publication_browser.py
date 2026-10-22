@@ -86,6 +86,27 @@ def test_deployed_reference_api_has_reviewed_objects_and_no_invented_units(
     objects = {obj["name"]: obj for obj in result["items"]}
     assert objects["Deployable Cover"]["attributes"]["ARM"]["status"] == "unreported"
     assert objects["Dazer"]["attributes"]["S"]["status"] == "disputed"
+    assert objects["Deployable Cover"]["sourceProfile"] is None
+    for name, expected in (
+        ("Dazer", {
+            ("equipment:dazer", "Place Deployable Skill"),
+        }),
+        ("Deployable Cover", {
+            ("equipment:deployable-cover", "Place Deployable Skill with Perimeter positioning"),
+        }),
+        ("Cybermine", {
+            ("weapon:cybermine", "Place Deployable Skill"),
+            ("weapon:cybermine", "Intuitive Attack WIP Roll for Camouflage Marker exception"),
+        }),
+    ):
+        obj = objects[name]
+        assert {(edge["recordId"], edge["method"]) for edge in obj["deliverySources"]} == expected
+        assert all(
+            use["originRecordId"] in {edge[0] for edge in expected}
+            for use in obj["unitUses"]
+        )
+    assert objects["Cybermine"]["unitUses"]
+
     repeater = objects["Deployable Repeater"]
     assert {row["recordId"] for row in repeater["deliverySources"]} == {
         "weapon:pitcher", "equipment:deployable-repeater",
@@ -204,7 +225,11 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     )
                     assert "sources disagree" in dazer.inner_text()
                     assert "N5.3 PDF" in dazer.inner_text()
-                    assert dazer.locator('a[href^="/equipment/"]').count() == 1
+                    assert dazer.locator('a[href^="/equipment/"]').count() == 2
+                    assert dazer.locator('a[href="/equipment/dazer"]').count() == 1
+                    assert cover.locator(
+                        'a[href="/equipment/deployable-cover"]'
+                    ).count() == 2
 
                     repeater = page.locator(".deployed-object-entry").filter(
                         has=page.get_by_role(

@@ -5782,7 +5782,7 @@
             "id": "weapon:cybermine",
             "kind": "weapon",
             "name": "Cybermine",
-            "summary": "Cybermines use the shared [[weapon:mines|Mines]] placement and triggering mechanics, but have their own Comms Attack effects.\n\nThey can be avoided only with [[skill:reset]] at -3 WIP, not [[skill:dodge]].\n\nA hit forces two BTS Saving Rolls against PS 5. Failure of either causes [[state:stunned]], or [[state:immobilized-b|Immobilized-B]] instead for a Hackable Trooper or [[skill:hacker|Hacker]].",
+            "summary": "Cybermines use the shared [[weapon:mines|Mines]] placement and triggering mechanics, but have their own Comms Attack effects.\n\nUse [[skill:place-deployable|Place Deployable]] for ordinary no-Roll placement.\n\nIf an enemy [[skill:camouflage|Camouflage]] Marker is inside the Trigger Area without a valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]] instead: an unmodified WIP Roll, with a failed Roll placing no Mine and still consuming one Disposable use. Placement takes effect at the Order's Conclusion.\n\nThey can be avoided only with [[skill:reset]] at -3 WIP, not [[skill:dodge]].\n\nA hit forces two BTS Saving Rolls against PS 5. Failure of either causes [[state:stunned]], or [[state:immobilized-b|Immobilized-B]] instead for a Hackable Trooper or [[skill:hacker|Hacker]].",
             "facts": {},
             "composition": {
                 "role": "definition"
@@ -5825,6 +5825,21 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 72,
                     "section": "Cybermines"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack and Camouflage Marker placement exception"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable conclusion timing"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Cybermines Weapon Chart profile and Intuitive Attack Trait"
                 }
             ],
             "review": {
