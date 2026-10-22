@@ -1212,6 +1212,24 @@ regression test fails if a new match lacks a reviewed decision or delivery
 origin. Neither scan is **an exhaustive N5.3 game-object inventory**:
 different wording, sources outside maintained Weapon/Equipment definitions,
 Army/Unit/loadout semantics, and edition changes still need reconciliation.
+
+The second remaining inventory question is *delivery coverage for the objects
+already identified*, independently of keyword discovery. Run:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_deployed_object_delivery_coverage
+.venv\Scripts\python.exe -m tools.audit_deployed_object_delivery_coverage --json
+```
+
+The pinned review has 17 object identities, but only **3** have approved
+delivery origins: Deployable Repeater, Disco Ball and Drop Bears. The other
+**14** need source-context review. The report provides exact source-ID-based
+catalog aliases only as **candidates to investigate**: a source alias does not
+prove the item's delivery mechanics, its mode, or Unit/Army roster legality.
+The separately unresolved Mine Dispenser subtype is not assigned to any of
+those profiles. `tests/test_deployed_object_delivery_coverage.py` pins this
+gap and verifies that catalog aliases cannot become inferred delivery edges.
+
 The validator rejects mismatched profile shapes, exact Army profile
 selectors/attributes, lost source clauses/citations, and invented
 missing-attribute values. Source text and alternative Silhouette

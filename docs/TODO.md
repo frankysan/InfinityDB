@@ -625,6 +625,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               repeatable audit fails on future uncovered detailed mentions.
               Neither bounded scan proves full N5.3 object, delivery,
               Unit or loadout completeness.
+            - [ ] **Reconcile uncovered delivery paths for existing objects.**
+              The pinned 2026-10-22 review covers only 3 of 17
+              published object profiles (Deployable Repeater, Disco Ball,
+              Drop Bears); 14 still have no reviewed delivery origin.
+              `tools.audit_deployed_object_delivery_coverage` lists these
+              independently and identifies exact source-catalog aliases
+              for manual N5.3 review, without promoting aliases into
+              deployment methods or Army/Unit carriers. Some objects may
+              require special rather than ordinary delivery semantics.
+              Keep Mine Dispenser's unresolved subtype separate.
             - [ ] Implement the minimal **deployed-object reference
               contract** after source review. Separate stable object/
               variant identity from the carrier's Weapon/Equipment
