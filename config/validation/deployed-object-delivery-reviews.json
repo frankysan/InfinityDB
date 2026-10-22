@@ -4,6 +4,46 @@
   "scope": "audit-only; not a canonical object ID, roster legality, or runtime relation",
   "reviewedDeliveryPaths": [
     {
+      "originRecordId": "weapon:armed-turret",
+      "delivery": "Place Deployable Skill with Perimeter positioning",
+      "objectLabel": "Armed Turret",
+      "objectRulesRecordId": "weapon:armed-turret",
+      "sourceProfile": null,
+      "sourcePages": [70, 74],
+      "summaryEvidence": "It uses [[skill:place-deployable|Place Deployable]] with [[trait:perimeter|Perimeter]] positioning",
+      "caveat": "Curated Trooper-profile object, not an Army Weapon-chart profile. Perimeter places it inside the user's Zone of Control. S1/S2 chart/detail discrepancy remains unresolved."
+    },
+    {
+      "originRecordId": "weapon:wildparrot",
+      "delivery": "Place Deployable Skill with Perimeter positioning",
+      "objectLabel": "WildParrot",
+      "objectRulesRecordId": "weapon:wildparrot",
+      "sourceProfile": {"catalog": "weapon", "name": "WildParrot", "mode": null},
+      "sourcePages": [74, 82],
+      "summaryEvidence": "WildParrots are placed using [[skill:place-deployable]]",
+      "caveat": "No placement Roll; Perimeter positions the object inside the user's Zone of Control rather than in Silhouette contact. Activation begins at Order Conclusion."
+    },
+    {
+      "originRecordId": "weapon:wildparrot",
+      "delivery": "Intuitive Attack WIP Roll with Perimeter positioning",
+      "objectLabel": "WildParrot",
+      "objectRulesRecordId": "weapon:wildparrot",
+      "sourceProfile": {"catalog": "weapon", "name": "WildParrot", "mode": null},
+      "sourcePages": [49, 74],
+      "summaryEvidence": "A legal [[skill:intuitive-attack|Intuitive Attack]] instead uses an unmodified WIP Roll",
+      "caveat": "Unlike ordinary Place Deployable, an Intuitive Attack uses an unmodified WIP Roll; a failure places no object and consumes the Disposable (1) use."
+    },
+    {
+      "originRecordId": "equipment:fastpanda",
+      "delivery": "Place Deployable Skill with Perimeter positioning",
+      "objectLabel": "FastPanda",
+      "objectRulesRecordId": "equipment:fastpanda",
+      "sourceProfile": {"catalog": "equipment", "name": "FastPanda", "mode": null},
+      "sourcePages": [82, 186],
+      "summaryEvidence": "Declare [[skill:place-deployable|Place Deployable]] to place it fully inside",
+      "caveat": "Place Deployable requires no Roll; the stationary Repeater becomes active at Order Conclusion. Do not infer Boost behavior."
+    },
+    {
       "originRecordId": "weapon:pitcher",
       "delivery": "successful BS Attack shot",
       "objectLabel": "Deployable Repeater",

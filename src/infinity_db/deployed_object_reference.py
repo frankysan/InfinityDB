@@ -173,19 +173,31 @@ def project_deployed_references(report: dict[str, Any]) -> dict[str, Any]:
     }
     if len(by_source) != sum(row["sourceProfile"] is not None for row in refs):
         raise ValueError("Source modes must not merge independently")
+    by_rule = {
+        row["originRuleId"]: row for row in refs if row["originRuleId"] is not None
+    }
     unresolved = []
     for delivery in report["reviewedDeliveryPaths"]:
         source = delivery["sourceProfileEvidence"]
         if source is None:
-            unresolved.append({
-                "originRecordId": delivery["originRecordId"],
-                "delivery": delivery["delivery"],
-                "reason": "source-object-not-resolved",
-            })
-            continue
-        target = by_source.get(_source_key(source))
-        if target is None or target["sourceProfile"]["sourceId"] != source["sourceId"]:
-            raise ValueError("Reviewed delivery does not match a unique source object")
+            # A reviewed-only object (e.g. Armed Turret) has no Army
+            # four-attribute source selector. Its exact reviewed rule owner
+            # can identify it; unreviewed or unspecified targets stay unresolved.
+            owner = delivery["objectRulesRecordId"]
+            if owner is None:
+                unresolved.append({
+                    "originRecordId": delivery["originRecordId"],
+                    "delivery": delivery["delivery"],
+                    "reason": "source-object-not-resolved",
+                })
+                continue
+            target = by_rule.get(owner)
+            if target is None:
+                raise ValueError("Reviewed delivery lacks a reviewed-only object target")
+        else:
+            target = by_source.get(_source_key(source))
+            if target is None or target["sourceProfile"]["sourceId"] != source["sourceId"]:
+                raise ValueError("Reviewed delivery does not match a unique source object")
         edge = {
             "recordId": delivery["originRecordId"],
             "method": delivery["delivery"],

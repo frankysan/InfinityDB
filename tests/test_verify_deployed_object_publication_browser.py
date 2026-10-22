@@ -91,6 +91,20 @@ def test_deployed_reference_api_has_reviewed_objects_and_no_invented_units(
         "weapon:pitcher", "equipment:deployable-repeater",
     }
     assert "units" not in repeater and "carriers" not in repeater
+    assert {
+        edge["method"] for edge in objects["WildParrot"]["deliverySources"]
+    } == {
+        "Place Deployable Skill with Perimeter positioning",
+        "Intuitive Attack WIP Roll with Perimeter positioning",
+    }
+    assert objects["FastPanda"]["deliverySources"][0]["recordId"] == (
+        "equipment:fastpanda"
+    )
+    assert objects["Armed Turret"]["sourceProfile"] is None
+    assert objects["Armed Turret"]["attributes"]["S"]["status"] == "disputed"
+    assert objects["Armed Turret"]["deliverySources"][0]["recordId"] == (
+        "weapon:armed-turret"
+    )
     assert all(
         (use["originRecordId"], use["method"]) in {
             (edge["recordId"], edge["method"]) for edge in obj["deliverySources"]

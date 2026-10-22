@@ -1221,14 +1221,18 @@ already identified*, independently of keyword discovery. Run:
 .venv\Scripts\python.exe -m tools.audit_deployed_object_delivery_coverage --json
 ```
 
-The pinned review has 17 object identities, but only **3** have approved
-delivery origins: Deployable Repeater, Disco Ball and Drop Bears. The other
-**14** need source-context review. The report provides exact source-ID-based
+The pinned review has 17 object identities, of which **6** have
+**10 reviewed delivery paths**: Deployable Repeater, Disco Ball, Drop Bears,
+WildParrot, FastPanda and Armed Turret. The other **11** remain for review.
+WildParrot has separate Place Deployable and WIP-based Intuitive Attack
+methods (N5.3 pp. 49, 74, 82); FastPanda uses Perimeter placement
+(pp. 82, 186), and Armed Turret uses a reviewed-only curated Trooper profile
+rather than an invented Army four-stat profile (pp. 70, 74).
+Its S1/S2 conflict remains visible. The report provides exact source-ID-based
 catalog aliases only as **candidates to investigate**: a source alias does not
-prove the item's delivery mechanics, its mode, or Unit/Army roster legality.
-The separately unresolved Mine Dispenser subtype is not assigned to any of
-those profiles. `tests/test_deployed_object_delivery_coverage.py` pins this
-gap and verifies that catalog aliases cannot become inferred delivery edges.
+prove delivery mechanics, mode or Unit/Army roster legality. Mine Dispenser's
+subtype remains separately unresolved. `tests/test_deployed_object_delivery_coverage.py`
+pins the gap and verifies that aliases cannot become inferred delivery edges.
 
 The validator rejects mismatched profile shapes, exact Army profile
 selectors/attributes, lost source clauses/citations, and invented

@@ -38,7 +38,9 @@ are not retroactively relabeled.
 - **Data processing + Web backend + Web frontend + Deployment:** Add a standalone
   reference for 17 source-reviewed deployed objects with known, unreported and disputed
   attributes, source-backed delivery links and an explicit unresolved Mine Dispenser
-  subtype. Exact reviewed delivery sources link to their Army profile/loadout
+  subtype. Reviewed delivery includes WildParrot's two distinct placement methods,
+  FastPanda's Perimeter deployment and Armed Turret's reviewed-only object profile.
+  Exact reviewed delivery sources link to their Army profile/loadout
   occurrences, source-wide Unit options and one-level Include targets without
   guessing Army ownership. Release images ship the reference matched to their
   Army/rules databases.

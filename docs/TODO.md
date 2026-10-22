@@ -626,15 +626,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               Neither bounded scan proves full N5.3 object, delivery,
               Unit or loadout completeness.
             - [ ] **Reconcile uncovered delivery paths for existing objects.**
-              The pinned 2026-10-22 review covers only 3 of 17
-              published object profiles (Deployable Repeater, Disco Ball,
-              Drop Bears); 14 still have no reviewed delivery origin.
-              `tools.audit_deployed_object_delivery_coverage` lists these
-              independently and identifies exact source-catalog aliases
-              for manual N5.3 review, without promoting aliases into
-              deployment methods or Army/Unit carriers. Some objects may
-              require special rather than ordinary delivery semantics.
-              Keep Mine Dispenser's unresolved subtype separate.
+              The pinned review now covers 6 of 17 published objects with
+              10 reviewed delivery paths; 11 remain without an approved
+              delivery origin. Newly reviewed: WildParrot's ordinary
+              Place Deployable and WIP-based Intuitive Attack paths,
+              FastPanda's Perimeter placement and Armed Turret's
+              reviewed-only curated profile placement. The last retains
+              its disputed S1/S2 Silhouette and has no manufactured
+              Army four-stat profile. `tools.audit_deployed_object_delivery_coverage`
+              lists the outstanding objects and exact source-catalog aliases
+              for further N5.3 review, without promoting aliases into
+              methods or Army/Unit carriers. Investigate uncurated origins
+              such as CrazyKoala separately, and preserve Mine Dispenser's
+              unresolved subtype.
             - [ ] Implement the minimal **deployed-object reference
               contract** after source review. Separate stable object/
               variant identity from the carrier's Weapon/Equipment

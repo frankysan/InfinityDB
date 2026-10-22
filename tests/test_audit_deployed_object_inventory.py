@@ -129,7 +129,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",
     )
-    assert len(result["reviewedDeliveryPaths"]) == 6
+    assert len(result["reviewedDeliveryPaths"]) == 10
     assert len(result["reviewedCandidateDecisions"]) == 12
     assert len(result["candidateReviewSha256"]) == 64
     by_id = {
@@ -161,6 +161,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
     } == {
         "weapon:pitcher", "weapon:mine-dispenser", "weapon:drop-bears",
         "weapon:disco-baller", "equipment:deployable-repeater",
+        "weapon:armed-turret", "weapon:wildparrot", "equipment:fastpanda",
     }
     assert by_id["equipment:dazer"]["knownAttributes"]["S"] == "0"
     assert by_id["weapon:mines"]["profileShape"] == "none"
@@ -234,9 +235,9 @@ def test_delivery_reviews_require_pinned_curated_evidence_and_exact_source_modes
         profile = review["sourceProfile"]
         if profile and profile not in profiles:
             profiles.append(profile)
-    assert len(profiles) == 3
+    assert len(profiles) == 5
     approved = validate_delivery_reviews(reviews, records, profiles)
-    assert len(approved) == 6
+    assert len(approved) == 10
     assert all(entry["reviewStatus"] == "source-backed-audit-only" for entry in approved)
 
     tampered = copy.deepcopy(reviews)
@@ -250,7 +251,11 @@ def test_delivery_reviews_require_pinned_curated_evidence_and_exact_source_modes
         validate_delivery_reviews(tampered, records, profiles)
 
     tampered = copy.deepcopy(reviews)
-    tampered["reviewedDeliveryPaths"][0]["sourceProfile"]["mode"] = "Unverified Mode"
+    profile_edge = next(
+        entry for entry in tampered["reviewedDeliveryPaths"]
+        if entry["sourceProfile"] is not None
+    )
+    profile_edge["sourceProfile"]["mode"] = "Unverified Mode"
     with pytest.raises(ValueError, match="source profile"):
         validate_delivery_reviews(tampered, records, profiles)
 

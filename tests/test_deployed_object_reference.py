@@ -121,6 +121,17 @@ def test_shared_delivery_and_unresolved_mine_subtype_have_no_inferred_carriers(
     assert by_name["Disco Ball"]["deliverySources"][0]["recordId"] == (
         "weapon:disco-baller"
     )
+    assert {edge["method"] for edge in by_name["WildParrot"]["deliverySources"]} == {
+        "Place Deployable Skill with Perimeter positioning",
+        "Intuitive Attack WIP Roll with Perimeter positioning",
+    }
+    assert {
+        edge["recordId"] for edge in by_name["FastPanda"]["deliverySources"]
+    } == {"equipment:fastpanda"}
+    turret = by_name["Armed Turret"]
+    assert turret["sourceProfile"] is None
+    assert turret["deliverySources"][0]["recordId"] == "weapon:armed-turret"
+    assert turret["attributes"]["S"]["status"] == "disputed"
     assert result["unresolvedDeliveries"] == [{
         "originRecordId": "weapon:mine-dispenser",
         "delivery": "successful BS Attack shot",
@@ -142,11 +153,24 @@ def test_projection_fails_closed_on_unreviewed_source_identity(
         project_deployed_references(modified)
 
     modified = copy.deepcopy(pinned_inventory)
-    source = modified["reviewedDeliveryPaths"][0]["sourceProfileEvidence"]
-    modified["reviewedDeliveryPaths"][0]["sourceProfileEvidence"] = {
+    source_edge = next(
+        edge for edge in modified["reviewedDeliveryPaths"]
+        if edge["sourceProfileEvidence"] is not None
+    )
+    source = source_edge["sourceProfileEvidence"]
+    source_edge["sourceProfileEvidence"] = {
         **source, "sourceId": 100000,
     }
     with pytest.raises(ValueError, match="Reviewed delivery"):
+        project_deployed_references(modified)
+
+    modified = copy.deepcopy(pinned_inventory)
+    reviewed_only_edge = next(
+        edge for edge in modified["reviewedDeliveryPaths"]
+        if edge["originRecordId"] == "weapon:armed-turret"
+    )
+    reviewed_only_edge["objectRulesRecordId"] = "weapon:pitcher"
+    with pytest.raises(ValueError, match="reviewed-only object target"):
         project_deployed_references(modified)
 
     modified = copy.deepcopy(pinned_inventory)

@@ -105,12 +105,18 @@ as automatic Equipment rather than a deployed object; the resulting
 review manifest remains distinct from new object/delivery publication.
 The separate read-only `tools.audit_deployed_object_delivery_coverage`
 compares the 17 reviewed object identities against their *approved* delivery
-origins. Currently three identities have reviewed paths (Deployable Repeater,
-Disco Ball and Drop Bears); the other 14 form an explicit review queue.
-It reports exact Army source-catalog aliases of an object's source profile
-as investigation leads, **not** evidence of a delivery method, legal roster
-carrier or equivalence between distinct Weapon modes. Missing delivery
-edges are evidence gaps, not claims that an object cannot be deployed.
+origins. Six identities now have ten reviewed delivery paths: Deployable
+Repeater, Disco Ball, Drop Bears, WildParrot, FastPanda and Armed Turret.
+Eleven objects remain in the delivery review queue. WildParrot distinguishes
+ordinary Place Deployable from Intuitive Attack with a WIP Roll. Armed Turret
+has no separate Army auxiliary-profile selector: its approved delivery path
+targets the exact reviewed curated object by `originRuleId`, retaining its
+S1/S2 Silhouette conflict. Mine Dispenser has neither an exact reviewed
+target profile nor a reviewed-only object and remains unresolved.
+The audit reports exact Army source-catalog aliases as investigation leads,
+**not** evidence of a delivery method, legal roster carrier or equivalence
+between distinct Weapon modes. Missing delivery edges are evidence gaps,
+not claims that an object cannot be deployed.
 
 The release-builder `tools.build_deployed_object_publication` compiles the
 validated review and current Army/rules database pair to deterministic
