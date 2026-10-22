@@ -215,10 +215,8 @@ def test_mine_family_rules_apply_to_correct_army_weapon_profiles() -> None:
             'weapons', {'id': slug, 'slug': slug, 'variants': []})
         actual = {r['id'] for r in payload.get('rules', [])}
         expected = ({'weapon:mines'} if slug in mine_slugs else set())
-        if slug == 'cybermine':
-            expected.add('weapon:cybermine')
-        if slug == 'para-mine':
-            expected.add('weapon:para-mine')
+        if slug in mine_slugs:
+            expected.add(f'weapon:{slug}')
         if slug == 'chest-mine':
             expected.add('weapon:chest-mine')
         if slug == 'drop-bears':

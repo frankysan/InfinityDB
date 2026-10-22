@@ -145,7 +145,9 @@ def test_mine_dispenser_uses_drop_bears_bs_placement_not_damage(
         and c["member"] == "Mine_Dispenser" for c in rule["citations"]
     )
     assert "savingNum=1" in " ".join(rule["facts"]["sourceNotes"])
-    assert "Shock Mine subtype" in " ".join(rule["facts"]["sourceNotes"])
+    assert "[[weapon:shock-mine|Shock Mine]] subtype" in " ".join(
+        rule["facts"]["sourceNotes"]
+    )
     assert {
         "weapon:drop-bears", "weapon:mines", "trait:double-shot",
     } <= {
