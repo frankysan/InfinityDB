@@ -76,11 +76,18 @@ slugs through `application_domain_slugs` and exact
 corresponding item rows. Each `unitUses` occurrence preserves the Army,
 source Unit, group, profile or option ID, source catalog item ID/position,
 logical Unit slug and reviewed delivery method. It represents a source item
-listed in that Army profile/loadout, **not** a deployed object already on the
-table or an inferred Army List legality claim. Source-only Unit options,
-nested Includes and unresolved Mine Dispenser subtype are intentionally
-excluded pending specific source-context validation. Objects lacking exact
-matches are not claimed to have zero possible users.
+listed in a source profile/loadout, **not** a deployed object already on the
+table or a derived Army List legality claim. Direct source `unit_option_*`
+rows are separately classified as Unit-wide options, with `armyId` and
+`groupId` kept `null`. One-level reviewed delivery uses also traverse
+`profile_occurrence_includes`, `loadout_occurrence_includes` and
+`unit_option_include_targets` to exact included loadout payload rows.
+Include occurrences retain parent profile/option ID, Include position,
+target payload ID and target label. Unit-option Include targets expose
+`targetArmyId` as **target provenance**, not membership of the parent
+Unit option in that Army. Transitive Includes beyond one edge and unresolved
+Mine Dispenser subtypes remain unassigned. Objects lacking exact matches
+are not claimed to have zero possible users.
 
 The release-builder `tools.build_deployed_object_publication` compiles the
 validated review and current Army/rules database pair to deterministic
@@ -105,8 +112,9 @@ the tracked database pair and reviewed source files immediately before the
 Docker build. The image copies it beside both databases; its startup smoke
 test verifies source-pair hashes, 17 reviewed objects, the unresolved Mine
 Dispenser origin and the HTTP/browser entry points. Hosted release packaging passed on commit `9c9a09f` (2026-10-22);
-repeat against the final release candidate. Additional Unit-option/Includes
-usage contexts, extra objects and full-source inventory remain v1.0 tasks.
+repeat against the final release candidate. Transitive Includes,
+other as-yet-unverified usage contexts, extra objects and full-source
+inventory remain v1.0 tasks.
 Do not describe these delivery origins or partial reverse uses as proof of
 complete Unit ownership, Army List legality or an exhaustive N5.3 model.
 Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition

@@ -118,17 +118,17 @@ function armyUsesSection(object) {
   if (!uses.length) {
     const note = document.createElement("p");
     note.className = "detail-copy";
-    note.textContent = "No exact Army profile/loadout use has been established for this reviewed delivery. This does not mean no Unit can use the object.";
+    note.textContent = "No exact Unit usage has been established for this reviewed delivery. This does not mean no Unit can use the object.";
     return note;
   }
   const details = document.createElement("details");
   details.className = "deployed-object-unit-uses";
   const summary = document.createElement("summary");
-  summary.textContent = `Army profile/loadout uses (${uses.length} reviewed delivery occurrences)`;
+  summary.textContent = `Source-backed Unit uses (${uses.length} occurrences)`;
   details.append(summary);
   const description = document.createElement("p");
   description.className = "detail-copy";
-  description.textContent = "Listed source items occur in these exact Army profiles or loadouts. Unit-wide options, nested Includes and unresolved Mine subtypes are not inferred.";
+  description.textContent = "Source items are tied to the indicated Army profile/loadout, included loadout, or Unit-wide option. Unit-wide options have no inferred Army affiliation. Unresolved Mine subtypes are not assigned.";
   details.append(description);
   // Large Army datasets should not materialize every list item before users
   // choose to inspect the reverse provenance.
@@ -142,7 +142,14 @@ function armyUsesSection(object) {
       } else {
         item.append(use.unitName);
       }
-      item.append(` — ${use.armyName}; ${use.kind === "profile" ? "profile" : "loadout"} ${use.contextName}; ${use.originRecordId} (${use.method})`);
+      const context = use.kind === "unit-option"
+        ? `Unit-wide option ${use.contextName} (no Army specified)`
+        : use.kind === "unit-option-include"
+          ? `Unit-wide option ${use.contextName} includes ${use.targetName} (target variant: ${use.targetArmyName}; Unit option has no Army assignment)`
+          : use.kind.endsWith("-include")
+            ? `${use.armyName}; ${use.kind === "profile-include" ? "profile" : "loadout"} ${use.contextName} includes ${use.targetName}`
+            : `${use.armyName}; ${use.kind} ${use.contextName}`;
+      item.append(` — ${context}; ${use.originRecordId} (${use.method})`);
       list.append(item);
     }
     details.append(list);

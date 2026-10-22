@@ -39,8 +39,9 @@ are not retroactively relabeled.
   reference for 17 source-reviewed deployed objects with known, unreported and disputed
   attributes, source-backed delivery links and an explicit unresolved Mine Dispenser
   subtype. Exact reviewed delivery sources link to their Army profile/loadout
-  occurrences without guessing Unit ownership. Release images ship the reference
-  matched to their Army/rules databases.
+  occurrences, source-wide Unit options and one-level Include targets without
+  guessing Army ownership. Release images ship the reference matched to their
+  Army/rules databases.
 - **Data processing + Web backend + Web frontend:** Expand source-cited Weapon references
   across CC Weapons, Pistols, Rifles, Sniper Rifles, heavy and support weapons, Mines
   and deployed objects. Explain exact modes, placement, charges, templates and conditional

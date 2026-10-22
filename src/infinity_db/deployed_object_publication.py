@@ -118,16 +118,53 @@ def load_deployed_object_publication(
             if (
                 not isinstance(use, dict)
                 or (use.get("originRecordId"), use.get("method")) not in reviewed_edges
-                or use.get("kind") not in {"profile", "loadout"}
+                or use.get("kind") not in {
+                    "profile", "loadout", "unit-option",
+                    "profile-include", "loadout-include", "unit-option-include",
+                }
                 or any(type(use.get(key)) is not int for key in (
-                    "armyId", "unitId", "groupId", "sourceItemId", "sourcePosition"
+                    "unitId", "sourceItemId", "sourcePosition"
                 ))
                 or any(not isinstance(use.get(key), str) or not use[key]
-                       for key in ("armyName", "unitName", "unitSlug", "contextName"))
+                       for key in ("unitName", "unitSlug", "contextName"))
             ):
                 raise ValueError("Invalid or unreviewed deployed-object Unit usage")
-            identity_key = "profileId" if use["kind"] == "profile" else "optionId"
-            other_key = "optionId" if use["kind"] == "profile" else "profileId"
-            if type(use.get(identity_key)) is not int or use.get(other_key) is not None:
-                raise ValueError("Invalid deployed-object profile/loadout usage context")
+            if use["kind"] in {"unit-option", "unit-option-include"}:
+                if (
+                    use.get("armyId") is not None or use.get("armyName") is not None
+                    or use.get("groupId") is not None
+                    or use.get("profileId") is not None
+                    or type(use.get("optionId")) is not int
+                ):
+                    raise ValueError("Unit-wide option cannot invent Army or group ownership")
+                if use["kind"] == "unit-option-include" and (
+                    type(use.get("includePosition")) is not int
+                    or type(use.get("targetArmyId")) is not int
+                    or not isinstance(use.get("targetArmyName"), str)
+                    or not use["targetArmyName"]
+                    or type(use.get("targetLoadoutPayloadId")) is not int
+                    or not isinstance(use.get("targetName"), str)
+                    or not use["targetName"]
+                ):
+                    raise ValueError("Invalid Unit-option Include target provenance")
+            else:
+                kind = use["kind"].removesuffix("-include")
+                identity_key = "profileId" if kind == "profile" else "optionId"
+                other_key = "optionId" if kind == "profile" else "profileId"
+                if (
+                    type(use.get("armyId")) is not int
+                    or type(use.get("groupId")) is not int
+                    or not isinstance(use.get("armyName"), str)
+                    or not use["armyName"]
+                    or type(use.get(identity_key)) is not int
+                    or use.get(other_key) is not None
+                ):
+                    raise ValueError("Invalid deployed-object profile/loadout usage context")
+                if use["kind"].endswith("-include") and (
+                    type(use.get("includePosition")) is not int
+                    or type(use.get("targetLoadoutPayloadId")) is not int
+                    or not isinstance(use.get("targetName"), str)
+                    or not use["targetName"]
+                ):
+                    raise ValueError("Invalid deployed-object Include provenance")
     return document

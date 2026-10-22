@@ -142,6 +142,12 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
     published_app: tuple[Callable, str],
 ) -> None:
     app, origin = published_app
+    status, body = _request(app, "/api/deployed-objects")
+    assert status == 200
+    include_object = next(
+        obj for obj in json.loads(body)["items"]
+        if any(use["kind"] == "unit-option-include" for use in obj["unitUses"])
+    )
     sync_api = pytest.importorskip("playwright.sync_api")
     with sync_api.sync_playwright() as playwright:
         try:
@@ -191,6 +197,13 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     first.locator("summary").click()
                     assert first.locator("li").count() > 0
                     assert first.locator('a[href^="/units/"]').count() > 0
+                    included = page.locator(
+                        f'.deployed-object-entry[id="{include_object["id"]}"]'
+                    ).locator(".deployed-object-unit-uses")
+                    if not included.evaluate("(node) => node.open"):
+                        included.locator("summary").click()
+                    assert "includes" in included.inner_text()
+                    assert "no Army assignment" in included.inner_text()
                     assert not errors, errors
                     assert page.evaluate(
                         "() => document.documentElement.scrollWidth <= window.innerWidth + 1"

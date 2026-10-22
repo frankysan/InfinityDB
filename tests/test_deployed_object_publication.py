@@ -59,30 +59,127 @@ def test_reviewed_delivery_uses_are_exact_army_occurrences_only(
             for use in obj["unitUses"]:
                 uses_count += 1
                 assert (use["originRecordId"], use["method"]) in reviewed
-                assert use["kind"] in {"profile", "loadout"}
-                assert use["unitSlug"] and use["armyName"]
-                kind = use["kind"]
-                identity = "profileId" if kind == "profile" else "optionId"
-                other = "optionId" if kind == "profile" else "profileId"
-                assert use[identity] is not None and use[other] is None
-                matches = db.execute(
-                    f"SELECT COUNT(*) FROM {kind}_payload_occurrences AS o "
-                    f"JOIN {kind}_payload_"
-                    f"{'weapons' if use['originRecordId'].startswith('weapon:') else 'equipment'} "
-                    f"AS p ON p.{kind}_payload_id = o.{kind}_payload_id "
-                    f"WHERE o.army_id = ? AND o.unit_id = ? AND o.group_id = ? "
-                    f"AND o.{'profile_id' if kind == 'profile' else 'option_id'} = ? "
-                    "AND p.item_id = ? AND p.position = ?",
-                    (use["armyId"], use["unitId"], use["groupId"],
-                     use[identity], use["sourceItemId"], use["sourcePosition"]),
-                ).fetchone()[0]
+                assert use["kind"] in {
+                    "profile", "loadout", "unit-option",
+                    "profile-include", "loadout-include", "unit-option-include",
+                }
+                assert use["unitSlug"]
+                item_catalog = (
+                    "weapons" if use["originRecordId"].startswith("weapon:") else "equipment"
+                )
+                if use["kind"] in {"unit-option", "unit-option-include"}:
+                    assert use["armyId"] is None and use["groupId"] is None
+                    assert use["armyName"] is None and use["profileId"] is None
+                    if use["kind"] == "unit-option-include":
+                        matches = db.execute(
+                            "SELECT COUNT(*) FROM unit_option_include_targets AS i "
+                            f"JOIN loadout_payload_{item_catalog} AS p "
+                            "ON p.loadout_payload_id = i.target_loadout_payload_id "
+                            "WHERE i.unit_id = ? AND i.option_id = ? "
+                            "AND i.position = ? AND i.target_army_id = ? "
+                            "AND i.target_loadout_payload_id = ? "
+                            "AND p.item_id = ? AND p.position = ?",
+                            (use["unitId"], use["optionId"], use["includePosition"],
+                             use["targetArmyId"], use["targetLoadoutPayloadId"],
+                             use["sourceItemId"], use["sourcePosition"]),
+                        ).fetchone()[0]
+                    else:
+                        matches = db.execute(
+                            f"SELECT COUNT(*) FROM unit_option_{item_catalog} "
+                            "WHERE unit_id = ? AND option_id = ? "
+                            "AND item_id = ? AND position = ?",
+                            (use["unitId"], use["optionId"],
+                             use["sourceItemId"], use["sourcePosition"]),
+                        ).fetchone()[0]
+                else:
+                    assert use["armyName"]
+                    kind = use["kind"].removesuffix("-include")
+                    identity = "profileId" if kind == "profile" else "optionId"
+                    other = "optionId" if kind == "profile" else "profileId"
+                    assert use[identity] is not None and use[other] is None
+                    if use["kind"].endswith("-include"):
+                        identity_snake = "profile_id" if kind == "profile" else "option_id"
+                        matches = db.execute(
+                            f"SELECT COUNT(*) FROM {kind}_occurrence_includes AS i "
+                            f"JOIN loadout_payload_{item_catalog} AS p "
+                            "ON p.loadout_payload_id = i.target_loadout_payload_id "
+                            f"WHERE i.army_id = ? AND i.unit_id = ? "
+                            "AND i.group_id = ? "
+                            f"AND i.{identity_snake} = ? "
+                            "AND i.position = ? AND i.target_loadout_payload_id = ? "
+                            "AND p.item_id = ? AND p.position = ?",
+                            (use["armyId"], use["unitId"], use["groupId"],
+                             use[identity], use["includePosition"],
+                             use["targetLoadoutPayloadId"],
+                             use["sourceItemId"], use["sourcePosition"]),
+                        ).fetchone()[0]
+                    else:
+                        matches = db.execute(
+                            f"SELECT COUNT(*) FROM {kind}_payload_occurrences AS o "
+                            f"JOIN {kind}_payload_{item_catalog} AS p "
+                            f"ON p.{kind}_payload_id = o.{kind}_payload_id "
+                            f"WHERE o.army_id = ? AND o.unit_id = ? AND o.group_id = ? "
+                            f"AND o.{'profile_id' if kind == 'profile' else 'option_id'} = ? "
+                            "AND p.item_id = ? AND p.position = ?",
+                            (use["armyId"], use["unitId"], use["groupId"],
+                             use[identity], use["sourceItemId"], use["sourcePosition"]),
+                        ).fetchone()[0]
                 assert matches == 1, use
     assert uses_count > 0
+    assert any(
+        use["kind"] in {"profile-include", "loadout-include"}
+        for obj in publication["objects"] for use in obj["unitUses"]
+    )
+    assert any(
+        use["kind"] == "unit-option-include"
+        for obj in publication["objects"] for use in obj["unitUses"]
+    )
     # Reviewed source use does not resolve Mine Dispenser subtype or invent
     # ownership for curated objects without a reviewed delivery edge.
     assert publication["unresolvedDeliveries"][0]["originRecordId"] == (
         "weapon:mine-dispenser"
     )
+
+
+def test_unit_wide_occurrence_preserves_missing_army_context(
+    source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
+) -> None:
+    from infinity_db.deployed_object_usage import _occurrences, _source_ids
+
+    database_path = tmp_path / "unit-options.db"
+    shutil.copyfile(source_paths[0], database_path)
+    with sqlite3.connect(database_path) as db:
+        db.row_factory = sqlite3.Row
+        source_id = _source_ids(db, "weapon:pitcher")[0]
+        unit_id = db.execute("SELECT id FROM units ORDER BY id LIMIT 1").fetchone()[0]
+        option_id = db.execute(
+            "SELECT COALESCE(MAX(option_id), 0) + 1 FROM unit_options WHERE unit_id = ?",
+            (unit_id,),
+        ).fetchone()[0]
+        occurrence_id = db.execute(
+            "SELECT COALESCE(MAX(occurrence_id), 0) + 1 FROM unit_option_weapons"
+        ).fetchone()[0]
+        db.execute(
+            "INSERT INTO unit_options (unit_id, option_id, position, name) "
+            "VALUES (?, ?, 100, 'Synthetic source-wide option')",
+            (unit_id, option_id),
+        )
+        db.execute(
+            "INSERT INTO unit_option_weapons "
+            "(occurrence_id, unit_id, option_id, position, item_id) "
+            "VALUES (?, ?, ?, 100, ?)",
+            (occurrence_id, unit_id, option_id, source_id),
+        )
+        uses = _occurrences(db, "weapons", (source_id,))
+        match = [
+            use for use in uses if use["kind"] == "unit-option"
+            and use["unitId"] == unit_id and use["optionId"] == option_id
+        ]
+        assert len(match) == 1
+        assert match[0]["armyId"] is None
+        assert match[0]["armyName"] is None
+        assert match[0]["groupId"] is None
+        assert match[0]["sourceItemId"] == source_id
 
 
 def test_publication_missing_is_legacy_compatible_but_corrupt_fails_closed(
@@ -142,14 +239,31 @@ def test_publication_rejects_identity_value_and_delivery_tampering(
     rejected(changed, "unreviewed deployed-object Unit usage")
 
     changed = copy.deepcopy(original)
-    with_uses = next(obj for obj in changed["objects"] if obj["unitUses"])
-    with_uses["unitUses"][0]["optionId"] = 1 if (
-        with_uses["unitUses"][0]["kind"] == "profile"
-    ) else None
-    with_uses["unitUses"][0]["profileId"] = 1 if (
-        with_uses["unitUses"][0]["kind"] == "loadout"
-    ) else None
+    direct = next(
+        use for obj in changed["objects"] for use in obj["unitUses"]
+        if use["kind"] in {"profile", "loadout"}
+    )
+    if direct["kind"] == "profile":
+        direct["optionId"] = 1
+    else:
+        direct["profileId"] = 1
     rejected(changed, "profile/loadout usage context")
+
+    changed = copy.deepcopy(original)
+    included = next(
+        use for obj in changed["objects"] for use in obj["unitUses"]
+        if use["kind"].endswith("-include")
+    )
+    included["targetLoadoutPayloadId"] = None
+    rejected(changed, "Include")
+
+    changed = copy.deepcopy(original)
+    unit_option = next(
+        use for obj in changed["objects"] for use in obj["unitUses"]
+        if use["kind"] == "unit-option-include"
+    )
+    unit_option["armyId"] = unit_option["targetArmyId"]
+    rejected(changed, "Unit-wide option cannot invent Army")
 
 
 def test_external_rules_database_does_not_inherit_adjacent_release_publication(

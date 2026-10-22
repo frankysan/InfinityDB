@@ -651,7 +651,8 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 attributes, source reference links, shared delivery paths
                 and keyboard fragment navigation. Missing publications
                 return 503; invalid or database-mismatched publications
-                fail closed. No Unit usage is inferred.
+                fail closed. Unit uses require independently reviewed
+                delivery origins and exact Army source occurrences.
               - [x] **Validate hosted delivery** of the deterministic
                 `data/generated/deployed-objects.json` release publication
                 for the pinned `infinity.db`/`rules.db` pair. Deployment
@@ -663,14 +664,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 final tagged candidate as part of final 1.0 acceptance.
               - [ ] Complete **reverse Unit/loadout uses** from exact Army
                 occurrences and reviewed object/delivery edges.
-                The first pass derives direct Army profile/loadout source-item
-                occurrences from reviewed delivery origins, retains their Army,
-                Unit, group, profile/option and source IDs, and exposes them
-                under expandable object references. Still review/cover
-                source-only Unit options, nested Includes, and any other
-                context not proven by the first pass. Preserve unavailable
-                values, conflicting Silhouettes and the unresolved Mine
-                Dispenser subtype; do not infer roster ownership from rule prose.
+                Direct Army profile/loadout and source-wide Unit-option
+                occurrences are now separately typed, as are one-level
+                Includes from profiles, loadouts and Unit options.
+                Unit options retain null Army/group context; their Include
+                targets retain the resolved target Army only, not a
+                fabricated parent Army assignment. Source positions,
+                parent IDs, included payload IDs and reviewed delivery
+                methods remain available. Review transitive/nested Includes
+                and any additional source context before closing. Preserve
+                unavailable attributes, conflicting Silhouettes and the
+                unresolved Mine Dispenser subtype; do not infer ownership
+                from rule prose.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.
