@@ -606,7 +606,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 4
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 465
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 470
         assert connection.execute(
             "SELECT id, title FROM scenario_collections ORDER BY id"
         ).fetchall() == [
@@ -4102,7 +4102,7 @@ def test_rea024_bioweapon_condition_and_viral_mine_baseline(
     assert mines["facts"]["variantRuleReferences"]["viral-mine"] == [
         "ammunition:normal", "trait:bioweapon",
     ]
-    assert "**Viral Mine:**" in mines["summary"]
+    assert "**[[weapon:viral-mine|Viral Mine]]:**" in mines["summary"]
     assert "[[weapon-property:viral|shared Viral Weapon Property]]" in mines["summary"]
     assert "VITA-versus-STR" in mines["summary"]
     assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 181

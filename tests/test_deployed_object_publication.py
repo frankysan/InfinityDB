@@ -43,6 +43,39 @@ def test_pinned_publication_is_deterministic_and_source_complete(
     )
 
 
+def test_named_mines_use_only_their_exact_army_source_subtype(
+    source_paths: tuple[Path, Path, Path, Path, Path],
+) -> None:
+    publication = build_publication(*source_paths)
+    by_name = {obj["name"]: obj for obj in publication["objects"]}
+    for name in (
+        "AP Mine", "E/M Mine", "Monofilament Mine",
+        "PARA Mine", "Shock Mine", "Viral Mine",
+    ):
+        obj = by_name[name]
+        profile = obj["sourceProfile"]
+        assert profile is not None and profile["catalog"] == "weapon"
+        assert profile["name"] == name and profile["mode"] is None
+        slug = obj["originRuleId"] or next(
+            edge["recordId"] for edge in obj["deliverySources"]
+        )
+        assert obj["originRuleId"] is None
+        assert {edge["recordId"] for edge in obj["deliverySources"]} == {slug}
+        assert {edge["method"] for edge in obj["deliverySources"]} == {
+            "Place Deployable Skill",
+            "Intuitive Attack WIP Roll for Camouflage Marker exception",
+        }
+        assert obj["attributes"]["S"]["status"] == "disputed"
+        for use in obj["unitUses"]:
+            assert use["originRecordId"] == slug
+            assert use["sourceItemId"] == profile["sourceId"], (name, use)
+    assert publication["unresolvedDeliveries"] == [{
+        "originRecordId": "weapon:mine-dispenser",
+        "delivery": "successful BS Attack shot",
+        "reason": "source-object-not-resolved",
+    }]
+
+
 def test_reviewed_delivery_uses_have_complete_source_context(
     source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:

@@ -4,6 +4,234 @@
   "scope": "audit-only; not a canonical object ID, roster legality, or runtime relation",
   "reviewedDeliveryPaths": [
     {
+      "originRecordId": "weapon:ap-mine",
+      "delivery": "Place Deployable Skill",
+      "objectLabel": "AP Mine",
+      "objectRulesRecordId": "weapon:ap-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "AP Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "For delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker",
+      "caveat": "Ordinary no-Roll placement of a CAMO (-3) Marker at Order Conclusion. AP/ARM/2 with one Saving Roll is subtype-specific; imported Army S1 versus printed S0 remains disputed. Not evidence of Mine Dispenser ownership."
+    },
+    {
+      "originRecordId": "weapon:ap-mine",
+      "delivery": "Intuitive Attack WIP Roll for Camouflage Marker exception",
+      "objectLabel": "AP Mine",
+      "objectRulesRecordId": "weapon:ap-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "AP Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "With an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]",
+      "caveat": "Use only when an enemy Camouflage Marker inside Trigger Area requires Intuitive Attack and no valid revealed enemy permits ordinary placement; unmodified WIP, failure expends Disposable without placing a Mine. AP/ARM/2 with one Saving Roll."
+    },
+    {
+      "originRecordId": "weapon:e-m-mine",
+      "delivery": "Place Deployable Skill",
+      "objectLabel": "E/M Mine",
+      "objectRulesRecordId": "weapon:e-m-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "E/M Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "For delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker",
+      "caveat": "Ordinary no-Roll placement of a CAMO (-3) Marker at Order Conclusion. E/M/BTS/2 with two Saving Rolls and Non-Lethal is subtype-specific; imported Army S1 versus printed S0 remains disputed. Not evidence of Mine Dispenser ownership."
+    },
+    {
+      "originRecordId": "weapon:e-m-mine",
+      "delivery": "Intuitive Attack WIP Roll for Camouflage Marker exception",
+      "objectLabel": "E/M Mine",
+      "objectRulesRecordId": "weapon:e-m-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "E/M Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "With an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]",
+      "caveat": "Use only when an enemy Camouflage Marker inside Trigger Area requires Intuitive Attack and no valid revealed enemy permits ordinary placement; unmodified WIP, failure expends Disposable without placing a Mine. E/M/BTS/2 with two Saving Rolls and Non-Lethal."
+    },
+    {
+      "originRecordId": "weapon:monofilament-mine",
+      "delivery": "Place Deployable Skill",
+      "objectLabel": "Monofilament Mine",
+      "objectRulesRecordId": "weapon:monofilament-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Monofilament Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "For delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker",
+      "caveat": "Ordinary no-Roll placement of a CAMO (-3) Marker at Order Conclusion. N/ARM=0 with one Saving Roll and Dead State is subtype-specific; imported Army S1 versus printed S0 remains disputed. Not evidence of Mine Dispenser ownership."
+    },
+    {
+      "originRecordId": "weapon:monofilament-mine",
+      "delivery": "Intuitive Attack WIP Roll for Camouflage Marker exception",
+      "objectLabel": "Monofilament Mine",
+      "objectRulesRecordId": "weapon:monofilament-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Monofilament Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "With an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]",
+      "caveat": "Use only when an enemy Camouflage Marker inside Trigger Area requires Intuitive Attack and no valid revealed enemy permits ordinary placement; unmodified WIP, failure expends Disposable without placing a Mine. N/ARM=0 with one Saving Roll and Dead State."
+    },
+    {
+      "originRecordId": "weapon:para-mine",
+      "delivery": "Place Deployable Skill",
+      "objectLabel": "PARA Mine",
+      "objectRulesRecordId": "weapon:para-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "PARA Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "For delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker",
+      "caveat": "Ordinary no-Roll placement of a CAMO (-3) Marker at Order Conclusion. PARA/PH-6 with one Saving Roll and Immobilized-A is subtype-specific; imported Army S1 versus printed S0 remains disputed. Not evidence of Mine Dispenser ownership."
+    },
+    {
+      "originRecordId": "weapon:para-mine",
+      "delivery": "Intuitive Attack WIP Roll for Camouflage Marker exception",
+      "objectLabel": "PARA Mine",
+      "objectRulesRecordId": "weapon:para-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "PARA Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "With an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]",
+      "caveat": "Use only when an enemy Camouflage Marker inside Trigger Area requires Intuitive Attack and no valid revealed enemy permits ordinary placement; unmodified WIP, failure expends Disposable without placing a Mine. PARA/PH-6 with one Saving Roll and Immobilized-A."
+    },
+    {
+      "originRecordId": "weapon:shock-mine",
+      "delivery": "Place Deployable Skill",
+      "objectLabel": "Shock Mine",
+      "objectRulesRecordId": "weapon:shock-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Shock Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "For delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker",
+      "caveat": "Ordinary no-Roll placement of a CAMO (-3) Marker at Order Conclusion. Shock/ARM with one Saving Roll is subtype-specific; imported Army S1 versus printed S0 remains disputed. Not evidence of Mine Dispenser ownership."
+    },
+    {
+      "originRecordId": "weapon:shock-mine",
+      "delivery": "Intuitive Attack WIP Roll for Camouflage Marker exception",
+      "objectLabel": "Shock Mine",
+      "objectRulesRecordId": "weapon:shock-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Shock Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "With an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]",
+      "caveat": "Use only when an enemy Camouflage Marker inside Trigger Area requires Intuitive Attack and no valid revealed enemy permits ordinary placement; unmodified WIP, failure expends Disposable without placing a Mine. Shock/ARM with one Saving Roll."
+    },
+    {
+      "originRecordId": "weapon:viral-mine",
+      "delivery": "Place Deployable Skill",
+      "objectLabel": "Viral Mine",
+      "objectRulesRecordId": "weapon:viral-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Viral Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "For delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker",
+      "caveat": "Ordinary no-Roll placement of a CAMO (-3) Marker at Order Conclusion. printed N/BTS with one Saving Roll and BioWeapon (DA+Shock) is subtype-specific; imported Army S1 versus printed S0 remains disputed. Not evidence of Mine Dispenser ownership."
+    },
+    {
+      "originRecordId": "weapon:viral-mine",
+      "delivery": "Intuitive Attack WIP Roll for Camouflage Marker exception",
+      "objectLabel": "Viral Mine",
+      "objectRulesRecordId": "weapon:viral-mine",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Viral Mine",
+        "mode": null
+      },
+      "sourcePages": [
+        49,
+        72,
+        82,
+        181
+      ],
+      "summaryEvidence": "With an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]",
+      "caveat": "Use only when an enemy Camouflage Marker inside Trigger Area requires Intuitive Attack and no valid revealed enemy permits ordinary placement; unmodified WIP, failure expends Disposable without placing a Mine. printed N/BTS with one Saving Roll and BioWeapon (DA+Shock)."
+    },
+    {
       "originRecordId": "weapon:cybermine",
       "delivery": "Place Deployable Skill",
       "objectLabel": "Cybermine",

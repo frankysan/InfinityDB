@@ -2528,7 +2528,7 @@ def test_mines_camouflage_marker_s2_is_separate_from_object_silhouette(
     assert "not automatically to the revealed MINE (-3) Token" in summary
     assert "The object profile has a separate published Silhouette value" in summary
     note = record["facts"]["sourceNotes"][0]
-    assert "S0 for AP, E/M, Monofilament, PARA, Shock, and Viral" in note
+    assert "S0 for AP, E/M, Monofilament, PARA, Shock, and [[weapon:viral-mine|Viral Mine]]" in note
     assert "Army metadata gives S1" in note
     assert "No official correction or source precedence has been confirmed" in note
     assert {

@@ -931,6 +931,41 @@
       "note": "N5.3 pp. 69 and 187: Place Deployable with Perimeter positioning, then Boost; the printed PARA/PH-6/one-roll Non-Lethal effect is separate from Crazykoala Shock and WildParrot E/M. No automatic Mine mechanics or unreviewed carrier relationships."
     },
     {
+      "recordId": "weapon:ap-mine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-22",
+      "note": "N5.3 p. 181: AP Mine prints PS 7, B1, AP with one ARM/2 Saving Roll. Ordinary Place Deployable and conditional Intuitive Attack follow pp. 49/72/82. Army S1 vs printed object S0 remains disputed; no default Mine Dispenser subtype."
+    },
+    {
+      "recordId": "weapon:e-m-mine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-22",
+      "note": "N5.3 p. 181: E/M Mine prints PS 7, B1, E/M with two BTS/2 Saving Rolls and Non-Lethal. Source [**] refers to ammunition rules, not an exemption from shared Mine placement; retain S0/S1 conflict."
+    },
+    {
+      "recordId": "weapon:monofilament-mine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-22",
+      "note": "N5.3 p. 181: Monofilament Mine prints PS 8, B1, N with one ARM=0 Saving Roll and Dead State. Shares Mine delivery/trigger procedure without inheriting AP, Shock, PARA, E/M or Viral outcomes."
+    },
+    {
+      "recordId": "weapon:shock-mine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-22",
+      "note": "N5.3 p. 181: Shock Mine prints PS 7, B1, Shock with one ARM Saving Roll. Its ordinary Place Deployable and conditional Intuitive Attack are separate reviewed delivery paths; S0/S1 object conflict remains."
+    },
+    {
+      "recordId": "weapon:viral-mine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-22",
+      "note": "N5.3 p. 181: Viral Mine prints PS 7, B1, N/BTS/one Saving Roll and BioWeapon (DA+Shock), with target-specific outcomes referenced through the Viral Weapon Property. No invented Viral Ammo or extra printed Saving Roll."
+    },
+    {
       "recordId": "weapon:mines",
       "targetRelease": "1.0.0",
       "status": "reviewed",

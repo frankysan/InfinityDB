@@ -71,7 +71,7 @@ These foundations are implemented; final source-to-browser acceptance remains se
 - Reviewed exact source variants, including Mimetism, Berserk and Dodge mappings;
   the cross-army usage index remains unimplemented:
   [variant contract](data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
-- The 1.0 interaction-review ledger passes for 193 supporting identities with
+- The 1.0 interaction-review ledger passes for 198 supporting identities with
   zero pending entries. This is a separate gate from full clause/source review:
   [generated checklist](rules-interaction-checklist.md).
 - Source archive/storage/API parity checks, optional Chromium verifiers and an
@@ -625,10 +625,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               repeatable audit fails on future uncovered detailed mentions.
               Neither bounded scan proves full N5.3 object, delivery,
               Unit or loadout completeness.
-            - [ ] **Reconcile uncovered delivery paths for existing objects.**
-              The pinned review now covers 11 of 17 published objects with
-              16 reviewed delivery paths; 6 remain without an approved
-              delivery origin. Newly reviewed: WildParrot's ordinary
+            - [x] **Reconcile delivery paths for all 17 currently published
+              reviewed deployed objects.** The pinned review now covers
+              17 of 17 objects with 28 approved delivery paths and zero
+              uncovered objects in this bounded inventory. Newly reviewed:
+              WildParrot's ordinary
               Place Deployable and WIP-based Intuitive Attack paths,
               FastPanda's Perimeter placement and Armed Turret's
               reviewed-only curated profile placement. The last retains
@@ -661,12 +662,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 Exact reverse Unit/loadout uses now fall back from a
                 missing imported Unit name to the existing logical-unit
                 name, without fabricating Army or profile ownership.
-              - [ ] The six remaining uncovered delivery origins are
-                AP, E/M, Monofilament, PARA, Shock and Viral Mines.
-                Review each exact Army source subtype and its authored
-                provenance separately; shared Mines mechanics and
-                aliases do not themselves establish subtype-specific
-                carrier ownership. Mine Dispenser still requires a
+              - [x] Review AP, E/M, Monofilament, PARA, Shock and Viral
+                Mines as six separate Army source subtypes. Each has two
+                evidence-backed deliveries (ordinary Place Deployable
+                and conditional Intuitive Attack), N5.3 pp. 49, 72,
+                82 and 181. Five new narrowly scoped curated definitions
+                complement the existing PARA Mine definition and shared
+                Mines rules. All retain the printed S0 versus imported S1
+                discrepancy; no subtype inherits another's ammunition.
+                Publication regression tests require reverse Unit uses to
+                match each exact Army source ID. This closes the bounded
+                17-object delivery-origin gap, not exhaustive N5.3
+                coverage, roster legality or the unresolved Mine Dispenser
                 Unit/loadout-specific subtype.
             - [ ] Implement the minimal **deployed-object reference
               contract** after source review. Separate stable object/

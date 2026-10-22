@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **193/193** complete, **0** pending.
-- Current authored outgoing relations: **497**.
+- Supporting semantic identities: **198/198** complete, **0** pending.
+- Current authored outgoing relations: **510**.
 - Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
@@ -983,7 +983,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (61/61)
+#### Weapon (66/66)
 
 - [x] **AP + EXP CC Weapon** (`weapon:ap-exp-cc-weapon`) — reviewed: N5.3 English p. 177, Spanish p. 184 and pinned Army 227 agree on AP+EXP with three ARM/2 Saving Rolls; archived Spanish Wiki charts report two, a retained unresolved source conflict. AP and EXP remain separate canonical Ammunition effects, not independent attack modes.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -994,6 +994,9 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → CC (`trait:cc`)
 - [x] **AP Heavy Pistol** (`weapon:ap-heavy-pistol`) — reviewed: N5.3 p. 182: AP/ARM/2 with PS 6, B2, and one Saving Roll. Contrast Breaker Pistol BTS/2 without transferring defense attributes.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+- [x] **AP Mine** (`weapon:ap-mine`) — reviewed: N5.3 p. 181: AP Mine prints PS 7, B1, AP with one ARM/2 Saving Roll. Ordinary Place Deployable and conditional Intuitive Attack follow pp. 49/72/82. Army S1 vs printed object S0 remains disputed; no default Mine Dispenser subtype.
+  - `uses-effects-of` → Mines (`weapon:mines`)
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
 - [x] **AP Thunderbolt** (`weapon:ap-thunderbolt`) — reviewed: N5.3 English p. 186, Spanish p. 193 and pinned Army 230 specify AP Ammunition, PS 6, Burst 2, ARM/2. Archived English and Spanish Wiki chart entries instead name N Ammunition; discrepancy retained without inventing another effect.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1069,6 +1072,10 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → CC (`trait:cc`)
   - `causes-state` → Isolated State (`state:isolated`)
   - `causes-state` → Immobilized-B State (`state:immobilized-b`)
+- [x] **E/M Mine** (`weapon:e-m-mine`) — reviewed: N5.3 p. 181: E/M Mine prints PS 7, B1, E/M with two BTS/2 Saving Rolls and Non-Lethal. Source [**] refers to ammunition rules, not an exemption from shared Mine placement; retain S0/S1 conflict.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
 - [x] **E/Mitter** (`weapon:e-mitter`) — reviewed: N5.3 p. 186: printed E/M with two BTS/2 Saving Rolls and Non-Lethal; the ammunition reference controls target-specific effects. Source ranges/Burst retained.
   - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
   - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
@@ -1156,6 +1163,10 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → CC Attack (`skill:cc-attack`)
   - `uses-effects-of` → CC (`trait:cc`)
   - `uses-effects-of` → Modifiers Explained (MODs) (`rule:modifiers-explained`)
+- [x] **Monofilament Mine** (`weapon:monofilament-mine`) — reviewed: N5.3 p. 181: Monofilament Mine prints PS 8, B1, N with one ARM=0 Saving Roll and Dead State. Shares Mine delivery/trigger procedure without inheriting AP, Shock, PARA, E/M or Viral outcomes.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `causes-state` → Dead State (`state:dead`)
 - [x] **MULTI Heavy Machine Gun** (`weapon:multi-heavy-machine-gun`) — reviewed: N5.3 Weapon Chart p. 179: EXP Anti-materiel mode has B1, 3 ARM Saving Rolls; AP and Shock modes have B4 and Suppressive Fire, with ARM/2 and ARM respectively for one Saving Roll. All are PS 5 with identical ranges. Do not combine modes or transfer Traits.
   - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1240,6 +1251,9 @@ review. `declaration-category` projection records are excluded.
 - [x] **Shock CC Weapon** (`weapon:shock-cc-weapon`) — reviewed: N5.3 p.177: Shock uses the printed one ARM Saving Roll; conditional Shock effects belong to the linked Ammunition definition.
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `uses-effects-of` → CC (`trait:cc`)
+- [x] **Shock Mine** (`weapon:shock-mine`) — reviewed: N5.3 p. 181: Shock Mine prints PS 7, B1, Shock with one ARM Saving Roll. Its ordinary Place Deployable and conditional Intuitive Attack are separate reviewed delivery paths; S0/S1 object conflict remains.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
 - [x] **Silenced Pistol** (`weapon:silenced-pistol`) — reviewed: N5.3 pp. 67, 175, 182: combined AP+Shock yields one BTS/2 Saving Roll with conditional Shock effect; Silent (-6) affects enemy Face to Face Dodge only while user is in ZoC and outside LoF.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
@@ -1257,6 +1271,10 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `uses-effects-of` → CC (`trait:cc`)
+- [x] **Viral Mine** (`weapon:viral-mine`) — reviewed: N5.3 p. 181: Viral Mine prints PS 7, B1, N/BTS/one Saving Roll and BioWeapon (DA+Shock), with target-specific outcomes referenced through the Viral Weapon Property. No invented Viral Ammo or extra printed Saving Roll.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BioWeapon (`trait:bioweapon`)
 - [x] **VIRAL Sniper Rifle** (`weapon:viral-sniper-rifle`) — reviewed: N5.3 p. 185 prints N/BTS/one roll, PS 5/B2 and BioWeapon; archived BioWeapon Trait applies DA+Shock only to VITA. Two BTS rolls against VITA is a rule-derived consequence, not a printed second firing mode; against STR, one BTS roll remains. Shock and Immunity exceptions require their own conditions.
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
   - `uses-effects-of` → BioWeapon (`trait:bioweapon`)

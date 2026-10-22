@@ -5128,7 +5128,7 @@
           "facts": {
             "sourceNotes": [
               "Army stores savingNum=1 while the N5.3 Weapon Chart prints no Saving Roll for the Mine Dispenser launcher. Its saving Attribute and Ammunition are also blank; do not treat the imported non-operative number as a roll against a Trooper.",
-              "[[weapon:drop-bears|Drop Bears]] BS Mode supplies the published placement procedure, not [[weapon:drop-bears|Drop Bears]]' PH throw modifier or its Shock Mine subtype. The Mine Dispenser uses BS and each Trooper's explicitly specified bracketed Mine type."
+              "[[weapon:drop-bears|Drop Bears]] BS Mode supplies the published placement procedure, not [[weapon:drop-bears|Drop Bears]]' PH throw modifier or its [[weapon:shock-mine|Shock Mine]] subtype. The Mine Dispenser uses BS and each Trooper's explicitly specified bracketed Mine type."
             ]
           },
           "composition": {
@@ -5556,10 +5556,10 @@
             "id": "weapon:mines",
             "kind": "weapon",
             "name": "Mines",
-            "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3).\n\nWhile the Mine is represented by a [[skill:camouflage|CAMO]] Marker, **that Marker uses Silhouette S2** under [[state:camouflaged|Camouflaged State]] because it conceals a Weapon. This S2 applies to the Marker, **not automatically to the revealed MINE (-3) Token or the Mine object**. The object profile has a separate published Silhouette value.\n\nMines have 360º LoF. Their Trigger Area extends from the edge of the Mine's base by the radius of the Small Teardrop Template; areas in Total Cover from the Template's Blast Focus are excluded.\n\nWhen an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate.\n\n**Declaration versus movement:** Declaring [[skill:dodge|Dodge]] as an [[trait:aro|ARO]] can trigger a Mine if its usual Trigger Area and allied-safety conditions are met. The later [[skill:dodge|Dodge]] movement does **not** itself trigger [[trait:deployable|Deployable]] Weapons or Equipment or generate another [[trait:aro|ARO]].\n\nMovement resulting from a failed [[rule:guts-roll|Guts Roll]] is likewise exempt. [[skill:stealth|Stealth]] does not disable Mine triggering from an otherwise qualifying Skill declaration; this differs from its limits on ordinary enemy [[trait:aro|AROs]].\n\nEach named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts.\n\nA Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared.\n\n[[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.\n\n**Viral Mine:** Its printed [[ammunition:normal|N]] / BTS / one-Saving-Roll profile is the baseline. Its [[trait:bioweapon|BioWeapon]] has target-dependent effects; the [[weapon-property:viral|shared Viral Weapon Property]] explains the derived VITA-versus-STR outcome without changing the source profile.",
+            "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3).\n\nWhile the Mine is represented by a [[skill:camouflage|CAMO]] Marker, **that Marker uses Silhouette S2** under [[state:camouflaged|Camouflaged State]] because it conceals a Weapon. This S2 applies to the Marker, **not automatically to the revealed MINE (-3) Token or the Mine object**. The object profile has a separate published Silhouette value.\n\nMines have 360º LoF. Their Trigger Area extends from the edge of the Mine's base by the radius of the Small Teardrop Template; areas in Total Cover from the Template's Blast Focus are excluded.\n\nWhen an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate.\n\n**Declaration versus movement:** Declaring [[skill:dodge|Dodge]] as an [[trait:aro|ARO]] can trigger a Mine if its usual Trigger Area and allied-safety conditions are met. The later [[skill:dodge|Dodge]] movement does **not** itself trigger [[trait:deployable|Deployable]] Weapons or Equipment or generate another [[trait:aro|ARO]].\n\nMovement resulting from a failed [[rule:guts-roll|Guts Roll]] is likewise exempt. [[skill:stealth|Stealth]] does not disable Mine triggering from an otherwise qualifying Skill declaration; this differs from its limits on ordinary enemy [[trait:aro|AROs]].\n\nEach named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts.\n\nA Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared.\n\n[[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.\n\n**[[weapon:viral-mine|Viral Mine]]:** Its printed [[ammunition:normal|N]] / BTS / one-Saving-Roll profile is the baseline. Its [[trait:bioweapon|BioWeapon]] has target-dependent effects; the [[weapon-property:viral|shared Viral Weapon Property]] explains the derived VITA-versus-STR outcome without changing the source profile.",
             "facts": {
                 "sourceNotes": [
-                    "**Unresolved Mine object Silhouette source conflict:** English and Spanish N5.3 Weapon Charts print S0 for AP, E/M, Monofilament, PARA, Shock, and Viral Mine objects, while the pinned imported Army metadata gives S1. S0 is a valid template. The explicitly defined S2 of the concealing [[state:camouflaged|Camouflage]] Marker applies to that Marker only and does not settle the S0/S1 source discrepancy for the revealed Mine Token. No official correction or source precedence has been confirmed."
+                    "**Unresolved Mine object Silhouette source conflict:** English and Spanish N5.3 Weapon Charts print S0 for AP, E/M, Monofilament, PARA, Shock, and [[weapon:viral-mine|Viral Mine]] objects, while the pinned imported Army metadata gives S1. S0 is a valid template. The explicitly defined S2 of the concealing [[state:camouflaged|Camouflage]] Marker applies to that Marker only and does not settle the S0/S1 source discrepancy for the revealed Mine Token. No official correction or source precedence has been confirmed."
                 ],
                 "variantRuleReferences": {
                     "ap-mine": [
@@ -5715,10 +5715,327 @@
             }
         },
         {
+            "id": "weapon:ap-mine",
+            "kind": "weapon",
+            "name": "AP Mine",
+            "summary": "The printed AP Mine profile uses [[ammunition:ap|AP Ammunition]]: PS 7, B 1 and one ARM/2 Saving Roll. Its effects otherwise follow the shared [[weapon:mines|Mines]] rules.\n\nFor delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker at the Order's Conclusion. The shared [[weapon:mines|Mines]] rules govern placement and triggering.\n\nWith an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]: an unmodified WIP Roll. Failure places no Mine and consumes one Disposable use.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "ap-mine"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "weapon:mines"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack placement exception"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Mines family"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Weapon Chart: AP Mine"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-22"
+            }
+        },
+        {
+            "id": "weapon:e-m-mine",
+            "kind": "weapon",
+            "name": "E/M Mine",
+            "summary": "The printed E/M Mine profile uses [[ammunition:em|E/M Ammunition]]: PS 7, B 1 and two BTS/2 Saving Rolls. [[trait:non-lethal|Non-Lethal]] applies; the ammunition rules determine target-specific effects, not a generic wound.\n\nFor delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker at the Order's Conclusion. The shared [[weapon:mines|Mines]] rules govern placement and triggering.\n\nWith an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]: an unmodified WIP Roll. Failure places no Mine and consumes one Disposable use.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "e-m-mine"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "weapon:mines"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:em"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:non-lethal"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack placement exception"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Mines family"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Weapon Chart: E/M Mine"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-22"
+            }
+        },
+        {
+            "id": "weapon:monofilament-mine",
+            "kind": "weapon",
+            "name": "Monofilament Mine",
+            "summary": "The printed Monofilament Mine profile uses [[ammunition:normal|Normal (N) Ammunition]] with PS 8, B 1 and one ARM=0 Saving Roll. The printed [[state:dead|Dead State]] effect is distinct from other Mine profiles.\n\nFor delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker at the Order's Conclusion. The shared [[weapon:mines|Mines]] rules govern placement and triggering.\n\nWith an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]: an unmodified WIP Roll. Failure places no Mine and consumes one Disposable use.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "monofilament-mine"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "weapon:mines"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "causes-state",
+                    "recordId": "state:dead"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack placement exception"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Mines family"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Weapon Chart: Monofilament Mine"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-22"
+            }
+        },
+        {
+            "id": "weapon:shock-mine",
+            "kind": "weapon",
+            "name": "Shock Mine",
+            "summary": "The printed Shock Mine profile uses [[ammunition:shock|Shock Ammunition]]: PS 7, B 1 and one ARM Saving Roll. Its effects otherwise follow the shared [[weapon:mines|Mines]] rules.\n\nFor delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker at the Order's Conclusion. The shared [[weapon:mines|Mines]] rules govern placement and triggering.\n\nWith an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]: an unmodified WIP Roll. Failure places no Mine and consumes one Disposable use.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "shock-mine"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "weapon:mines"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack placement exception"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Mines family"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Weapon Chart: Shock Mine"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-22"
+            }
+        },
+        {
+            "id": "weapon:viral-mine",
+            "kind": "weapon",
+            "name": "Viral Mine",
+            "summary": "The printed Viral Mine profile uses [[ammunition:normal|Normal (N) Ammunition]], PS 7, B 1 and one BTS Saving Roll, plus [[trait:bioweapon|BioWeapon (DA+Shock)]]. The [[weapon-property:viral|Viral Weapon Property]] describes the target-dependent outcome, without changing the printed roll.\n\nFor delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker at the Order's Conclusion. The shared [[weapon:mines|Mines]] rules govern placement and triggering.\n\nWith an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]: an unmodified WIP Roll. Failure places no Mine and consumes one Disposable use.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "viral-mine"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "weapon:mines"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:bioweapon"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack placement exception"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Mines family"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Weapon Chart: Viral Mine"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-22"
+            }
+        },
+        {
             "id": "weapon:para-mine",
             "kind": "weapon",
             "name": "PARA Mine",
-            "summary": "This weapon uses the shared [[weapon:mines|Mines]] placement and triggering rules. Hits use [[ammunition:para|Paralysis (PARA) Ammunition]]: a PH-6 Saving Roll, with failure causing [[state:immobilized-a|Immobilized-A]], rather than Wounds.",
+            "summary": "This weapon uses the shared [[weapon:mines|Mines]] placement and triggering rules. Hits use [[ammunition:para|Paralysis (PARA) Ammunition]]: a PH-6 Saving Roll, with failure causing [[state:immobilized-a|Immobilized-A]], rather than Wounds.\n\nFor delivery, ordinary [[skill:place-deployable|Place Deployable]] places a [[skill:camouflage|CAMO]] (-3) Marker at the Order's Conclusion. The shared [[weapon:mines|Mines]] rules govern placement and triggering.\n\nWith an enemy [[skill:camouflage|Camouflage]] Marker inside the Trigger Area and no valid non-camouflaged enemy, use [[skill:intuitive-attack|Intuitive Attack]]: an unmodified WIP Roll. Failure places no Mine and consumes one Disposable use.",
             "facts": {
                 "sourceNotes": [
                     "The N5 v5.3 Weapon Chart and reviewed Wiki mark its profile [*], which the N5.3 legend defines as a reference to additional Weaponry rules. The imported Army profile instead has [**], which the N5.3 legend assigns to Ammunition rules. Both the Mine mechanics and PARA ammunition apply. The marker difference is an unresolved source-reference discrepancy; the Army profile is retained unchanged."
@@ -5761,6 +6078,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 181,
                     "section": "PARA Mines"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack delivery exception"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable ordinary placement"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",

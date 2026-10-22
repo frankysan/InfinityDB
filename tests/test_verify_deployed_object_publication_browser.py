@@ -253,6 +253,22 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                             device.inner_text()
                         )
                         assert device.locator(".deployed-object-unit-uses").count() == 1
+                    for name, slug in (
+                        ("AP Mine", "ap-mine"),
+                        ("E/M Mine", "e-m-mine"),
+                        ("Monofilament Mine", "monofilament-mine"),
+                        ("PARA Mine", "para-mine"),
+                        ("Shock Mine", "shock-mine"),
+                        ("Viral Mine", "viral-mine"),
+                    ):
+                        mine = page.locator(".deployed-object-entry").filter(
+                            has=page.get_by_role("heading", name=name, exact=True)
+                        )
+                        assert mine.count() == 1
+                        assert "sources disagree" in mine.inner_text()
+                        assert "Place Deployable Skill" in mine.inner_text()
+                        assert "Intuitive Attack WIP Roll" in mine.inner_text()
+                        assert mine.locator(f'a[href="/weapons/{slug}"]').count() == 2
                     assert "Mine Dispenser" in page.locator("#deployed-unresolved").inner_text()
                     usage = page.locator(".deployed-object-unit-uses")
                     assert usage.count() > 0

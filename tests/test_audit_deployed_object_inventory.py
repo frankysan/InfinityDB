@@ -129,7 +129,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",
     )
-    assert len(result["reviewedDeliveryPaths"]) == 16
+    assert len(result["reviewedDeliveryPaths"]) == 28
     assert len(result["reviewedCandidateDecisions"]) == 12
     assert len(result["candidateReviewSha256"]) == 64
     by_id = {
@@ -154,7 +154,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
     assert {
         candidate["recordId"] for candidate in result["remainingCuratedCandidateMentions"]
     }.isdisjoint(by_id)
-    assert len(result["curatedCandidateMentions"]) == 18
+    assert len(result["curatedCandidateMentions"]) == 24
     assert result["remainingCuratedCandidateMentions"] == []
     assert {
         entry["recordId"] for entry in result["deliveryCoveredCandidateMentions"]
@@ -164,6 +164,8 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         "weapon:armed-turret", "weapon:wildparrot", "equipment:fastpanda",
         "weapon:crazykoala", "weapon:madtraps",
         "weapon:cybermine", "equipment:dazer", "equipment:deployable-cover",
+        "weapon:ap-mine", "weapon:e-m-mine", "weapon:monofilament-mine",
+        "weapon:para-mine", "weapon:shock-mine", "weapon:viral-mine",
     }
     assert by_id["equipment:dazer"]["knownAttributes"]["S"] == "0"
     assert by_id["weapon:mines"]["profileShape"] == "none"
@@ -237,9 +239,9 @@ def test_delivery_reviews_require_pinned_curated_evidence_and_exact_source_modes
         profile = review["sourceProfile"]
         if profile and profile not in profiles:
             profiles.append(profile)
-    assert len(profiles) == 9
+    assert len(profiles) == 15
     approved = validate_delivery_reviews(reviews, records, profiles)
-    assert len(approved) == 16
+    assert len(approved) == 28
     assert all(entry["reviewStatus"] == "source-backed-audit-only" for entry in approved)
 
     tampered = copy.deepcopy(reviews)
