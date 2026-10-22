@@ -195,6 +195,7 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     assert usage.count() > 0
                     first = usage.first
                     first.locator("summary").click()
+                    first.locator("li").first.wait_for(state="visible", timeout=10000)
                     assert first.locator("li").count() > 0
                     assert first.locator('a[href^="/units/"]').count() > 0
                     included = page.locator(
@@ -202,6 +203,7 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     ).locator(".deployed-object-unit-uses")
                     if not included.evaluate("(node) => node.open"):
                         included.locator("summary").click()
+                    included.locator("li").first.wait_for(state="visible", timeout=10000)
                     assert "includes" in included.inner_text()
                     assert "no Army assignment" in included.inner_text()
                     assert not errors, errors

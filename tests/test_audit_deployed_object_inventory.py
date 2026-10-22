@@ -130,7 +130,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         root / "config/validation/deployed-object-candidate-reviews.json",
     )
     assert len(result["reviewedDeliveryPaths"]) == 6
-    assert len(result["reviewedCandidateDecisions"]) == 11
+    assert len(result["reviewedCandidateDecisions"]) == 12
     assert len(result["candidateReviewSha256"]) == 64
     by_id = {
         entry["recordId"]: entry for entry in result["reviewedCandidateDecisions"]
@@ -139,7 +139,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         "equipment:deployable-cover", "weapon:armed-turret",
         "equipment:deactivator", "weapon:symbiobomb",
         "weapon:wildparrot", "equipment:dazer", "equipment:fastpanda",
-        "weapon:mines", "weapon:d-charges", "equipment:cube",
+        "weapon:mines", "weapon:d-charges", "equipment:cube", "equipment:cube-2",
         "equipment:tinbot",
     }
     assert by_id["equipment:deployable-cover"]["knownAttributes"] == {"S": "3"}
@@ -292,7 +292,7 @@ def test_candidate_review_shapes_are_pinned_and_fail_closed() -> None:
         )
     ]
     approved = validate_candidate_reviews(reviews, records, source_profiles)
-    assert len(approved) == 11
+    assert len(approved) == 12
     assert all(row["reviewStatus"] == "source-backed-audit-only" for row in approved)
 
     def mutated(index: int, field: str, value: object) -> dict:

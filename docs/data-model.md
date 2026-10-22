@@ -96,7 +96,13 @@ same-context payloads and cycles are detected rather than silently accepted.
 Consequently no recursive relations are projected for this snapshot; any new
 matches require preserving the full Include path before publishing them.
 Unresolved Mine Dispenser subtypes remain unassigned. Objects lacking exact
-matches are not claimed to have zero possible users.
+matches are not claimed to have zero possible users. The read-only
+`tools.audit_deployed_object_detail_queue` scan covers deployable, token and
+scenery mentions in maintained Weapon/Equipment definition detail fields,
+not just summaries. Its only initially unreviewed detail-only finding,
+Cube 2.0's Command Token recovery reroll, is source-backed and classified
+as automatic Equipment rather than a deployed object; the resulting
+review manifest remains distinct from new object/delivery publication.
 
 The release-builder `tools.build_deployed_object_publication` compiles the
 validated review and current Army/rules database pair to deterministic

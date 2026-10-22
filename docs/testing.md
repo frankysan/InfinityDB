@@ -1180,7 +1180,7 @@ exact English N5.3 citations:
 - **SymbioBomb** (p. 74): assignable single-use Weapon, not a separately
   profiled deployed battlefield object.
 
-The remaining seven keyword candidates are separately reviewed and pinned:
+The remaining seven summary-keyword candidates are separately reviewed and pinned:
 **WildParrot** (N5.3 p. 74), **Dazer** (pp. 121/186), and **FastPanda**
 (pp. 82/186) have exact Army-source object profiles; Dazer's S0/S1
 disagreement stays explicit. **Mines** (p. 72) is a shared rules family, not
@@ -1191,13 +1191,30 @@ State Token rather than an independently targetable Deployable. The existing
 five reviewed delivery origin records count as covered candidates, not
 unreviewed objects.
 
-For this pinned curated-text keyword scan, all 15 matching definitions
-are now accounted for by reviewed classifications or delivery paths.
-This is **not** an exhaustive N5.3 game-object inventory; rules without
-those keywords, Army/Unit/loadout relationships, and edition changes require
-separate source reconciliation. The validator rejects mismatched profile
-shapes, exact Army profile selectors/attributes, lost source clauses/citations
-and invented missing-attribute values. Source text and alternative Silhouette
+For this pinned curated-summary keyword scan, all 15 matching definitions
+are accounted for by reviewed classifications or delivery paths. A second
+read-only audit also searches structured **Requirements, Effects,
+Restrictions, Clarifications, and source notes** for Deployable/Token/Scenery
+Element mentions that may be absent from summaries:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_deployed_object_detail_queue
+.venv\Scripts\python.exe -m tools.audit_deployed_object_detail_queue --json
+```
+
+This scan found one previously unreviewed detail-only record, **Cube 2.0**
+(N5.3 p. 121). Its Command Token recovery reroll concerns a spent game
+resource, not a separate deployed model. The decision is source-pinned in
+`config/validation/deployed-object-candidate-reviews.json` as automatic
+Equipment, with no manufactured object attributes. The full detailed-rule
+keyword queue now has no unreviewed Weapon/Equipment definition; its
+regression test fails if a new match lacks a reviewed decision or delivery
+origin. Neither scan is **an exhaustive N5.3 game-object inventory**:
+different wording, sources outside maintained Weapon/Equipment definitions,
+Army/Unit/loadout semantics, and edition changes still need reconciliation.
+The validator rejects mismatched profile shapes, exact Army profile
+selectors/attributes, lost source clauses/citations, and invented
+missing-attribute values. Source text and alternative Silhouette
 values remain unchanged; no canonical object or carrier IDs are created.
 
 ### Deployed-object release publication

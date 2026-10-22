@@ -615,8 +615,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               D-Charges resolve immediately; Cube is automatic Equipment;
               TinBot has a non-targetable State Token. The manifest pins
               source pages and evidence, rejects profile drift, and
-              retains the Dazer S0/S1 disagreement. This does **not**
-              prove full-source/Unit/loadout completeness.
+              retains the Dazer S0/S1 disagreement.
+            - [x] Close the additional **detailed-rule keyword queue**
+              across Weapon/Equipment definition Requirements, Effects,
+              Restrictions, Clarifications and source notes. Cube 2.0
+              (Command Token recovery reroll, N5.3 p. 121) was the one
+              previously unreviewed detail-only candidate; its automatic
+              Equipment/non-deployed-object status is now pinned. The
+              repeatable audit fails on future uncovered detailed mentions.
+              Neither bounded scan proves full N5.3 object, delivery,
+              Unit or loadout completeness.
             - [ ] Implement the minimal **deployed-object reference
               contract** after source review. Separate stable object/
               variant identity from the carrier's Weapon/Equipment

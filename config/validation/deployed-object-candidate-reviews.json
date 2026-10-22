@@ -166,6 +166,17 @@
       "caveat": "Command Token rerolls do not create a battlefield Token/Model."
     },
     {
+      "recordId": "equipment:cube-2",
+      "classification": "automatic-equipment-not-deployed-object",
+      "sourcePages": [121],
+      "summaryEvidence": "Automatic Equipment represented by a Unit Profile symbol",
+      "factsEvidence": ["Command Token", "Cube 2.0"],
+      "profileShape": "none",
+      "knownAttributes": {},
+      "unreportedAttributes": [],
+      "caveat": "Cube 2.0 permits a conditional recovery reroll with a Command Token. Neither the equipment symbol nor that resource expenditure creates a placed battlefield Token or independent object profile."
+    },
+    {
       "recordId": "equipment:tinbot",
       "classification": "non-targetable-state-token-not-deployed-object",
       "sourcePages": [
