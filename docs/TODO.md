@@ -671,8 +671,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 targets retain the resolved target Army only, not a
                 fabricated parent Army assignment. Source positions,
                 parent IDs, included payload IDs and reviewed delivery
-                methods remain available. Review transitive/nested Includes
-                and any additional source context before closing. Preserve
+                methods remain available. A pinned, full-depth audit of all
+                contextual Include roots against reviewed delivery-source
+                IDs found **no additional transitive uses**, ambiguous
+                intermediate targets or cycles (2026-10-22). The audit is
+                regression-tested for deeper matches, shared targets and
+                cycles; rerun on any new Army/review snapshot. Review other
+                unrepresented source contexts before closing. Preserve
                 unavailable attributes, conflicting Silhouettes and the
                 unresolved Mine Dispenser subtype; do not infer ownership
                 from rule prose.

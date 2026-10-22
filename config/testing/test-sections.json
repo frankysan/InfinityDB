@@ -33,6 +33,7 @@
         "test_deployable_trigger_cross_rules",
         "test_deployed_object_reference",
         "test_deployed_object_publication",
+        "test_deployed_object_transitive_includes",
         "test_availability",
         "test_availability_schema",
         "test_catalog_rules",

@@ -85,9 +85,18 @@ rows are separately classified as Unit-wide options, with `armyId` and
 Include occurrences retain parent profile/option ID, Include position,
 target payload ID and target label. Unit-option Include targets expose
 `targetArmyId` as **target provenance**, not membership of the parent
-Unit option in that Army. Transitive Includes beyond one edge and unresolved
-Mine Dispenser subtypes remain unassigned. Objects lacking exact matches
-are not claimed to have zero possible users.
+Unit option in that Army. The pinned-source regression audit in
+`tests/test_deployed_object_transitive_includes.py` traverses contextual
+Include chains to arbitrary depth, requiring a *unique* intermediate
+`loadout_payload_occurrences` row in the same Army and source Unit at
+every hop. On the pinned 2026-10-22 database and reviewed delivery origins,
+it finds **no additional transitive source-item uses, ambiguous intermediate
+targets or cycles**. Synthetic tests ensure new reachable uses, shared
+same-context payloads and cycles are detected rather than silently accepted.
+Consequently no recursive relations are projected for this snapshot; any new
+matches require preserving the full Include path before publishing them.
+Unresolved Mine Dispenser subtypes remain unassigned. Objects lacking exact
+matches are not claimed to have zero possible users.
 
 The release-builder `tools.build_deployed_object_publication` compiles the
 validated review and current Army/rules database pair to deterministic

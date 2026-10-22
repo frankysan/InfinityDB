@@ -1225,8 +1225,16 @@ publication. There are 17 reviewed entries, not the entire game-object corpus;
 Mine Dispenser's subtype remains unresolved. The reverse-usage projection
 includes only exact source occurrences linked to reviewed delivery origins.
 Unit-wide options retain an unknown Army context; one-level Include targets
-retain their source parent and target payload without inventing membership or
-recursively implying deeper Includes.
+retain their source parent and target payload without inventing membership.
+`tests/test_deployed_object_transitive_includes.py` checks every contextual
+Include root against current **reviewed** delivery-source IDs, recursively
+resolving intermediate payloads only through a unique Army/Unit occurrence.
+The pinned 2026-10-22 snapshot has no additional transitive matches, shared
+same-context intermediate targets or cycles. The synthetic fixture verifies
+that a future two-hop match, different Army/Unit occurrence, ambiguous
+same-context payload and cycle are handled explicitly. This is a source-drift
+gate, **not** a claim that other unreviewed delivery sources or missing objects
+cannot have additional uses.
 
 The release deployment command generates and verifies this ignored publication
 from the checked-out pinned database pair before building the Docker image.
