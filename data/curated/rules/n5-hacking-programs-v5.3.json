@@ -28,6 +28,17 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
+            "id": "n5-core-v5.3-es-pdf",
+            "kind": "pdf",
+            "title": "N5 Core Rules - Spanish",
+            "version": "5.3",
+            "publishedDate": "2026-09-01",
+            "localPath": "data/pdf/rules/esp-n5-update-5-3.pdf",
+            "pageCount": 204,
+            "authority": "primary",
+            "url": "https://experience.corvusbelli.com/en/infinity/resources"
+        },
+        {
             "id": "n5-faq-v0.1-en-pdf",
             "kind": "pdf",
             "title": "N5 FAQs — English",
@@ -39,13 +50,13 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
-            "id": "wiki-en-20260918-130233",
+            "id": "wiki-en-20260926-200832",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
-            "version": "20260918-130233",
-            "acquiredAt": "2026-09-18T13:02:33+02:00",
-            "localPath": "data/wiki/WIKI-en 20260918-130233.zip",
-            "sha256": "aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a",
+            "version": "20260926-200832",
+            "acquiredAt": "2026-09-26T20:08:32+02:00",
+            "localPath": "data/wiki/WIKI-en 20260926-200832.zip",
+            "sha256": "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987",
             "language": "en",
             "documentCount": 812,
             "url": "https://infinitythewiki.com/",
@@ -69,20 +80,26 @@
             },
             "facts": {
                 "requirements": [
-                    "The target is an allied REM from the same Army List and is inside the user's Hacking Area."
+                    "The target is an allied REM from the same Army List and is inside the user's [[rule:hacking-area|Hacking Area]]."
                 ],
                 "effects": [
                     "The target gains [[skill:marksmanship]]; after activation the sustained effect covers the entire game table."
                 ],
                 "restrictions": [
-                    "Normal Supportware exclusivity and cancellation rules apply."
+                    "Normal Supportware exclusivity and cancellation rules apply.",
+                    "The shared [[rule:supportware]] rule limits sustained Programs to one per [[skill:hacker]] and one per beneficiary, with cancellation when replaced or when the sustaining [[skill:hacker]] becomes [[state:isolated|Isolated]] or enters a [[term:null-state|Null State]]."
                 ]
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Assisted_Fire",
                     "heading": "Assisted Fire"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Supportware"
                 }
             ],
             "review": {
@@ -124,7 +141,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Carbonite",
                     "heading": "Carbonite"
                 }
@@ -161,7 +178,13 @@
                     "Declaring this Program as an ARO is optional; the [[skill:hacker]] may declare another eligible ARO instead.",
                     "If both players have this Program active, their Programs' effects cancel. This does not cancel independent MODs, such as Firefight's Designated Landing Area +3.",
                     "A player cannot have more than one Controlled Jump Program active.",
-                    "This Program does not affect Speedball Tokens placed with [[skill:request-speedball]], even though their placement uses [[skill:combat-jump]] rules. The FAQ limits this Program to Troopers."
+                    "This Program does not affect Speedball Tokens placed with [[skill:request-speedball]], even though their placement uses [[skill:combat-jump]] rules. The FAQ limits this Program to Troopers.",
+                    "The general [[rule:supportware]] limits also apply: the [[skill:hacker]] sustains only one active Supportware Program, and it ends if that [[skill:hacker]] becomes [[state:isolated|Isolated]] or enters a [[term:null-state|Null State]]."
+                ],
+                "clarifications": [
+                    "**Reactive landing example:** An enemy Trooper declares [[skill:combat-jump|Combat Jump]] across the table. The [[skill:hacker|Hacker]] may declare [[hacking-program:controlled-jump|Controlled Jump]] as an [[trait:aro|ARO]] even without the Trooper being Hackable or inside [[rule:hacking-area|Hacking Area]]. The Program starts immediately on declaration, so its -3 applies to the **same PH landing Roll**, before Resolution; it is not delayed until the next Order. The [[skill:hacker|Hacker]] may instead decline this Program and choose another eligible [[trait:aro|ARO]].",
+                    "**Both Programs active in Firefight:** If both players have [[hacking-program:controlled-jump|Controlled Jump]] active, **neither Program gives +3 or -3** to a [[skill:combat-jump|Combat Jump]] PH Roll: their effects cancel each other. This is a special rule for the opposing Programs, not a general rule that opposite MODs always cancel. In Firefight, **Designated Landing Area** still provides its independent +3 PH MOD to eligible [[skill:combat-jump|Combat Jumps]]; that scenario MOD is not canceled by the two Programs.",
+                    "**Troopers versus Speedball Tokens:** While active, this Program applies to allied and enemy [[skill:combat-jump|Combat Jump]] Troopers across the whole table, including Troopers without the Hackable Characteristic. A [[skill:request-speedball|Speedball]] is a Token, not a Trooper: although its PH 15 placement uses [[skill:combat-jump|Combat Jump]] rules, the FAQ expressly excludes these Tokens from [[hacking-program:controlled-jump|Controlled Jump]] +3/-3. This does not create an exception to the one-active-Program-per-player limit."
                 ]
             },
             "relations": [
@@ -182,7 +205,7 @@
                     "section": "Firefight — Designated Landing Area"
                 },
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Controlled_Jump",
                     "heading": "Controlled Jump"
                 },
@@ -190,6 +213,16 @@
                     "sourceId": "n5-faq-v0.1-en-pdf",
                     "page": 1,
                     "section": "Quantronic Combat (Hacking) — Controlled Jump and Speedballs"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Supportware"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 61,
+                    "section": "Salto Controlado"
                 }
             ],
             "review": {
@@ -220,7 +253,8 @@
                     "The [[skill:hacker]] is outside the Line of Fire of enemy Troopers and Markers."
                 ],
                 "effects": [
-                    "The [[skill:hacker]] enters [[state:impersonation-2]] and remains in it until revealed by that State's rules."
+                    "The [[skill:hacker]] enters [[state:impersonation-2]] and remains in it until revealed by that State's rules.",
+                    "While the [[skill:hacker]] remains in [[state:impersonation-2]], Cybermask's NFB Label prevents that [[skill:hacker|Hacker]] from using or applying other NFB Skills, Equipment, or Hacking Programs. The restriction applies to that [[skill:hacker|Hacker]], not to allied Troopers."
                 ]
             },
             "relations": [
@@ -231,7 +265,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Cybermask",
                     "heading": "Cybermask"
                 }
@@ -261,20 +295,26 @@
             },
             "facts": {
                 "requirements": [
-                    "The target is an allied REM from the same Army List and is inside the user's Hacking Area."
+                    "The target is an allied REM from the same Army List and is inside the user's [[rule:hacking-area|Hacking Area]]."
                 ],
                 "effects": [
                     "The target REM gains Burst 2 in ARO; after activation the sustained effect covers the entire game table."
                 ],
                 "restrictions": [
-                    "Normal Supportware exclusivity and cancellation rules apply."
+                    "Normal Supportware exclusivity and cancellation rules apply.",
+                    "The shared [[rule:supportware]] rule limits sustained Programs to one per [[skill:hacker]] and one per beneficiary, with cancellation when replaced or when the sustaining [[skill:hacker]] becomes [[state:isolated|Isolated]] or enters a [[term:null-state|Null State]]."
                 ]
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Enhanced_Reaction",
                     "heading": "Enhanced Reaction"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Supportware"
                 }
             ],
             "review": {
@@ -290,7 +330,7 @@
             "id": "hacking-program:fairy-dust",
             "kind": "hacking-program",
             "name": "Fairy Dust",
-            "summary": "Supportware that grants Firewall (-3) protection to one chosen Hackable Troop Type in the user's Army List.",
+            "summary": "Supportware that grants [[equipment:firewall]] (-3) protection to one chosen Hackable Troop Type in the user's Army List.",
             "composition": {
                 "role": "definition"
             },
@@ -305,17 +345,26 @@
                     "Choose HI, REM, TAG, or VH from the same Army List as the user."
                 ],
                 "effects": [
-                    "Every Trooper of the chosen type in that Army List benefits from Firewall (-3) against Comms Attacks."
+                    "Every Trooper of the chosen type in that Army List benefits from [[equipment:firewall|Firewall]] (-3) against Comms Attacks."
                 ],
                 "restrictions": [
-                    "Normal Supportware exclusivity and cancellation rules apply."
+                    "Normal Supportware exclusivity and cancellation rules apply.",
+                    "The shared [[rule:supportware]] rule applies. If any protected Trooper is chosen for new Supportware, [[hacking-program:fairy-dust]] is canceled for the entire chosen Troop Type, not merely that Trooper."
+                ],
+                "clarifications": [
+                    "For example, if [[hacking-program:enhanced-reaction]] targets one REM covered by Fairy Dust, the original Fairy Dust Program is removed and all other REMs lose its protection. See [[rule:supportware]]."
                 ]
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Fairy_Dust",
                     "heading": "Fairy Dust"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 60,
+                    "section": "Supportware use and cancellation example"
                 }
             ],
             "review": {
@@ -357,7 +406,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Oblivion",
                     "heading": "Oblivion"
                 }
@@ -400,7 +449,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Spotlight",
                     "heading": "Spotlight"
                 }
@@ -447,7 +496,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Total_Control",
                     "heading": "Total Control"
                 }
@@ -484,7 +533,7 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Trinity",
                     "heading": "Trinity"
                 }
@@ -516,7 +565,8 @@
                     "The [[skill:hacker]] is the Active Trooper."
                 ],
                 "effects": [
-                    "On a successful Normal WIP Roll, place a Circular Template [[term:white-noise-zone|White Noise Zone]] fully inside the user's Hacking Area until the start of the States Phase."
+                    "On a successful Normal WIP Roll, place a Circular Template [[term:white-noise-zone|White Noise Zone]] fully inside the user's Hacking Area until the start of the States Phase.",
+                    "While this Template remains on the table, White Noise's NFB Label prevents the [[skill:hacker]] who created it from using or applying other NFB Skills, Equipment, or Hacking Programs. This restriction ends when the Template is removed, and does not extend to other Troopers."
                 ],
                 "restrictions": [
                     "Troopers with [[equipment:multispectral-visor]] or [[skill:marksmanship]] cannot draw Line of Fire through the [[term:white-noise-zone|White Noise Zone]]."
@@ -524,7 +574,7 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "White_Noise",
                     "heading": "White Noise"
                 }
@@ -561,7 +611,7 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Zero_Pain",
                     "heading": "Zero Pain"
                 }

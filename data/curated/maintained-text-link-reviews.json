@@ -42,7 +42,7 @@
       "includeSimplePlurals": true,
       "caseInsensitive": true,
       "reviewedOn": "2026-09-29",
-      "note": "Trait-name pass. Plain generic rules vocabulary and cross-domain name collisions that are confidently not Trait references are fingerprinted below. The former Deployable, Direct Template, and Perimeter review-needed queue was manually source-reviewed on 2026-09-29; semantic Trait uses are linked and Direct Template attack-rule uses are retained as reviewed plain text.",
+      "note": "Trait-name pass. Plain generic rules vocabulary and cross-domain name collisions that are confidently not Trait references are fingerprinted below. The former Deployable, Direct Template, and Perimeter review-needed queue was manually source-reviewed on 2026-09-29; semantic Trait uses are linked and Direct Template attack-rule uses are retained as reviewed plain text. Delivery-card States Phase contexts were re-reviewed against unchanged semantics on 2026-10-16.",
       "reviewedPlainSurfaces": [
         {
           "text": "ARO",
@@ -94,7 +94,7 @@
             "0cdc61ab70ce0f1c03dcc23321b11c302e13aa0d662c0bd08ddcaff5660cc300",
             "3543eba899790df0f3d339c1fe1cefd144dd339b665f8cf8f93f690f76ff79f4",
             "480c7b9d5cc8ae22af412c76098cc1bd810a6ee069ff2456b9b98ece12998ece",
-            "53f5914a8c75e97e136fc0762364b41fa67f24e9e32bae83bfb4149b1a7c874e",
+            "130ba05b70a0678b38cebea3c9eab3004a5d80686029bfead3dd1d145f771738",
             "5bc40e12e924ef25f29dfbe7e6ae2c778a640302c46d57a36789bf7d53c3db00",
             "5cc707b528b8bbb0e44e8f4f5ab48de6a1bed01d51d3409e6f2589e80ad7cbcc",
             "6208521d51c7855216e998443fb02d0928d2660cf7c2f4ed64714b6ac7eb3c90",
@@ -200,6 +200,7 @@
             "6d1181d9869249f9c5e480505f0273e030bc50428f11502a6b3fe94b34fa8f13",
             "6e1bddfd5d15092a584441b5b7df015014d219a8c6e27c4e41479af1ca0dc786",
             "6e8b61fc4b1cc88012297f05c82e020a5083541a6d1918a64d90e7ddbb240be9",
+            "5e339b8be8a0a22270501d6d1acf4cb670f8cfed24cf50a9d5cefc931026222b",
             "76419d3845e46d59333dd1770406516cc3a3adbfe7496d9db2f5589e271f1ded",
             "7c29747fd0c3005a761f820daf97e8fbdc04528fe0d6f4b36a2b3bb1a56803bf",
             "7e98823d4d066c4da15fcf118de1dc17c0e6da5dc07a9ec6bd0bc2f26fb8bef8",
@@ -295,26 +296,31 @@
           "reason": "game-state-term-not-trait",
           "occurrenceSha256s": [
             "0c87b0dfcad56ba8c058464eaab5e31074826a98d69f97df2a61ec8b981e6a19",
+            "18cfca9115b1137c2d0c74b7a88de954a26b7caf9c208df79362d42f3eba8284",
             "236182e6944199d253215bb3cadf797a4b87b002a054cf154d5375759fb52ef1",
             "2acea02c97b23a54a948ad22e846994f238310ec15c6c4a33707b6d55d3ddfe9",
             "39662102328e00b55c3e9874e49ef156d021fe6e3e8158b42dcbcc7ad3dc0a5b",
             "3adc4059f098c6a2883667ebbca4a0e8e6f77b8fddd3827ee9bf84f8590c1031",
             "40257dba0408a4e1167f0980a4c4e10cab3691fa6be3fd83b62f354f45a00242",
             "4af2f2a01a78a12193394eed59efb5a2af471061f4666b2c689215502066d40b",
+            "4c93085b361795b330d1d7c1464f7f7ebb3383d43da94777c82d1d2205d64eea",
             "5328376343abcfe4d7053f7d22e6cd344745292113d159b56defeae29236c6e8",
+            "69655f3ff2e6006bc2dc1108a4379dd0afa49f922fcb69948fe6d7598cf9e301",
             "6eae98415ffbfe2caace9690f6aada86f0357c1482c778919e3fc6e2eaa01376",
             "85bf5c4e4cbc63090c91f9114f59784ba33dcfbb0fa1d2a5993741b166eb1388",
             "8fa91486deb2f6473e9a7f8c7021a84a9b020ad35bffaabd5ed97154ed65bda7",
             "9d621a6f4c580cf0955f44b823c557d2b15a8906372136c830f0714629008e12",
             "a32f3c69fe5f8442826da23e468f1a4012975643a787ecd8bf9e0a28cf4dca65",
             "ad0d73a2ee9fa6712458cf1322e2e4ae2a2cf08f43308748cbb8f93a3b8321be",
-            "18cfca9115b1137c2d0c74b7a88de954a26b7caf9c208df79362d42f3eba8284",
             "bb4e8b87cef264b963308bb1aabbd6449a882d4fc2093a38963a5d9fc8187e0d",
             "c331ba69c16400fc6cf0ee9b198a5050d6674bf19a15abb03afe7246aaa3b891",
             "db039624b23d70dd8ad35635d7b47d1a73aa46bbc1a91332f764fe68b522510c",
+            "e4b953f5754b207cad421389c666ad7131f369ab46b31b38b7e4a8e04aeb9e82",
+            "e768c9a04c22f493f03994ff59ef4e4dbac35281e4fcdf350f0d814ec2f3a081",
             "e8c7cf482df7fdc39e3f1d913a2537ba69f670bfcade48a91c322bd2b14af51b",
             "e9a1c18ae71b3f901d8983fc788309ae13d51474c88f93e03e16c682203ec9ea",
             "eb6d59b9761e0da30909a61d0bea9afff5b697721538a6a706f4452434f80283",
+            "ee8739ebfdc1e10ae1ab44531fc3b9278c4336ca9c2276bf28c1c1898b049192",
             "fcf8d0cc5165b85f13b1b322701a890474b59b670c0d0072b618f5e0696171a3",
             "ff17cf892d9be4cb96b30275f5f3b8a95b798f596ba8c2a986179eb1459a4694",
             "ffc782369d0c0b3776fe9d9c85069330b6999833d13f62a20a1b569d0e06058e",
@@ -354,7 +360,6 @@
             "5d4b279d9bc3bda514f5b03b3888a9ed3f6de187a69c708c123c2c71eaf18655",
             "6e45811c6f235e9a5f81b6ef5675805650a9116c6cfc4e6a031c17cc1fcec8b4",
             "72c2dfbc1797a3e41a2b7506106c7e24e9062d309f7962ab3eaadab58ee0dade",
-            "76cfb434b4caaba998cb494ca11401ba039d3d53cb63fcc61d4f8ccaafcd1d2a",
             "7a04a2eb09ef8c791c073e24aaa3ae0bf083a2356938fa9313d4e716a2acc4c5",
             "89a950f99c6edff1c8337f55c841822cb55fac2f31d0c2c02cd85235db9ba074",
             "92a68fc6f0ff24e99542a309707664dfb4a028ea3f61039dbb3d24c338244380",
@@ -367,8 +372,7 @@
             "c5efb7a44dcb2e754a1024ecfede6e8cf1ead6ab0e00b2e995ab08b6af898ca3",
             "c9bcd124501b0c82c32154f6b42ced8572a3e49688dd21a2873b6efce1593043",
             "d5d80a8522f82c6fc25349b507f0e7a7295e2e9cbfabb1ec6176721f0e737505",
-            "d94085a7c2ad24e5adb8bbe648da1b1bdca33e0ca7c57841a827008c7525dd74",
-            "fa7cd4a977dd52a6ed1d38053105d9836544e3ff96d7f58449837902f89b0b47"
+            "febbf1c76af43a515b7f84e14f3baf26350a59ab79f9bf7df5be5a23cd1cd170"
           ]
         },
         {
@@ -544,7 +548,8 @@
           "reason": "terrain-type-not-skill",
           "occurrenceSha256s": [
             "1416dd194f06fd428bea0c2e7efac8591ef386c15893c5abab99571d14cad95d",
-            "aa3184d7699ec2b87a5503b3b627a0b70fd5ab890565c7d44becd7f10cb2c16d"
+            "23e11912798ef9c60e1e8a77cbf0b997f29ba91aa2ab6e72f5f1408e088a77dd",
+            "f3c189370d3bbbd89dbe58e4fbd7d7c277d8028d03d6cfa6939796634f48df2a"
           ]
         },
         {
@@ -668,7 +673,16 @@
       "includeSimplePlurals": true,
       "caseInsensitive": true,
       "reviewedOn": "2026-09-29",
-      "note": "Completeness audit: current Weapon names/aliases and conservative plurals have no remaining plain references."
+      "note": "Reviewed current Weapon names/aliases and conservative plurals; a generic CC Weapon class mention is not the specific Army CC Weapon profile.",
+      "reviewedPlainSurfaces": [
+        {
+          "text": "CC Weapon",
+          "reason": "generic-weapon-class-not-specific-profile",
+          "occurrenceSha256s": [
+            "817a1749d2b162b4edfce5355b22e536e2774acc76d3b6ed65970e0999b2c907"
+          ]
+        }
+      ]
     },
     {
       "id": "batch-8-ammunition-names",

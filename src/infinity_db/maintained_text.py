@@ -14,12 +14,14 @@ MAINTAINED_REFERENCE_KINDS = frozenset(
         "skill",
         "equipment",
         "weapon",
+        "weapon-property",
         "ammunition",
         "trait",
         "state",
         "hacking-program",
         "attribute",
         "term",
+        "rule",
     }
 )
 DISPLAY_FORMS = frozenset({"plural"})

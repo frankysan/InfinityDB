@@ -14,6 +14,7 @@ from infinity_db.domain_slugs import (
     route_slug_from_qualified_typed_domain_id,
     route_slug_from_typed_domain_id,
 )
+from infinity_db.equipment_config import CURATED_ONLY_EQUIPMENT_SLUGS
 
 if TYPE_CHECKING:
     from infinity_db.database.repository import Database
@@ -102,7 +103,12 @@ def rule_record_public_reference(
                 return {"href": f"/{catalog}/{quote(slug, safe='')}#rule-{fragment}"}
             return {"catalog": catalog, "id": slug}
 
-        if has_army_link or kind != "skill":
+        if has_army_link or kind not in {"skill", "equipment"}:
+            return None
+        # Only explicitly source-independent Equipment has a standalone route.
+        if kind == "equipment" and record.get("id") not in {
+            f"equipment:{slug}" for slug in CURATED_ONLY_EQUIPMENT_SLUGS
+        }:
             return None
 
     record_id = record.get("id")

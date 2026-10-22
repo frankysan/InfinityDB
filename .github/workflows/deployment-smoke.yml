@@ -17,7 +17,17 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v7
 
-      - name: Build application image from tracked release artifacts
+      - name: Set up Python for deterministic publication build
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Generate and verify release-paired deployed-object publication
+        run: |
+          PYTHONPATH=src python -m tools.build_deployed_object_publication
+          PYTHONPATH=src python -m tools.build_deployed_object_publication --check
+
+      - name: Build application image from tracked databases and generated publication
         run: docker build --tag infinity-db:deployment-smoke .
 
       - name: Validate image and production startup

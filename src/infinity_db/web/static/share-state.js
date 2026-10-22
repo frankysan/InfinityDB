@@ -18,7 +18,7 @@ const SCHEMAS = Object.freeze({
   unit: Object.freeze({ scope: "d", fields: Object.freeze(["army_id"]) }),
   search: Object.freeze({ scope: "s", fields: Object.freeze(["q"]) }),
   glossary: Object.freeze({ scope: "g", fields: Object.freeze(["q"]) }),
-  scenario: Object.freeze({ scope: "n", fields: Object.freeze(["army_points"]) }),
+  scenario: Object.freeze({ scope: "n", fields: Object.freeze(["army_points", "collection", "revision"]) }),
 });
 
 function schema(name) {

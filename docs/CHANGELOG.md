@@ -1,11 +1,133 @@
 # Changelog
 
 All notable user- or operator-relevant changes to InfinityDB are documented here.
-Each release begins with a concise **Player summary** containing only changes visible or useful to
-players; the remaining sections preserve fuller user/operator release detail. Entries describe
+Each release with entries begins with a concise **Player summary** containing only changes visible
+or useful to players; an empty `Unreleased` heading is omitted from the browser page. The remaining
+sections preserve fuller user/operator release detail. Entries describe
 meaningful release outcomes rather than detailed implementation history. New or materially revised
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
+
+## [Unreleased]
+
+### Player summary
+
+- Find more linked N5.3 explanations for Weapons, deployed objects, Peripherals,
+  Hacking, Orders, Fireteams and Saving Rolls, with clearer conditions and exceptions.
+- Browse reviewed deployed-object profiles and their source links independently of the
+  carrying Weapon or Equipment; disputed and unavailable attributes remain visible.
+- Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties
+  such as Plasma, Viral, MULTI and combined Ammunition. Shared Weapon rules are also
+  discoverable through the Glossary.
+- Dated FAQ clarifications now appear beside the rules and scenarios they affect,
+  keeping their source versions and scenario restrictions visible.
+- The Scenario browser can select published ITS missions as well as N5 Core.
+  The first ITS Season 18 mission is Battleground, with size-specific maps and scoring.
+- Martial Arts, Booty and MetaChemistry charts are easier to read, with separate
+  conditional outcomes and links to reviewed Weapon, Skill and Equipment references.
+- Unit details put Equipment, Training and Attribute overrides in their proper
+  categories and remain readable on narrow screens.
+- All canonical Trait pages offer official Wiki heading links. Glossary deep links
+  and reference previews behave more reliably when moving between pages.
+- Rules references explain source disagreements alongside the supported interpretation,
+  including disputed Weapon profiles, Silhouettes, Dodge and Fireteam examples.
+- **What's changed** now shows upcoming-release notes when there are changes to show.
+
+### Added
+
+- **Data processing + Web backend + Web frontend + Deployment:** Add a standalone
+  reference for 17 source-reviewed deployed objects with known, unreported and disputed
+  attributes, source-backed delivery links and an explicit unresolved Mine Dispenser
+  subtype. Reviewed delivery includes WildParrot's two distinct placement methods,
+  FastPanda's Perimeter deployment and Armed Turret's reviewed-only object profile.
+  Exact reviewed delivery sources link to their Army profile/loadout
+  occurrences, source-wide Unit options and one-level Include targets without
+  guessing Army ownership. Release images ship the reference matched to their
+  Army/rules databases.
+- **Data processing + Web backend + Web frontend:** Expand source-cited Weapon references
+  across CC Weapons, Pistols, Rifles, Sniper Rifles, heavy and support weapons, Mines
+  and deployed objects. Explain exact modes, placement, charges, templates and conditional
+  effects through shared Ammunition and Trait rules. D-Charges, Disco Baller, SymbioBomb,
+  Pitcher, Mine Dispenser, Marksman Rifles and Flamethrowers retain their distinct profiles
+  and exceptions. Breaker Marksman Rifle is searchable even without current Unit usage.
+- **Data processing + Web backend + Web frontend:** Add searchable, linked Weapon Properties
+  with previews and their originating rules, including Plasma, Viral, Breaker, K1, MULTI,
+  Monofilament, Silenced, four AP combinations and N+E/M. Expandable Ammunition explanations
+  on Weapon profiles retain each mode's own Saving Rolls and Traits.
+- **Data processing + Web backend + Web frontend:** Add linked references for the Order
+  Expenditure Sequence, Coordinated Orders, Guts Rolls, Face to Face and Saving Rolls,
+  Special Dice, Hacking Area, Firewall, Supportware, Modifiers Explained and Mixed
+  Weapons. Explain targeting, timing, exceptions and recovery without calculating
+  game outcomes.
+- **Data processing + Web backend + Web frontend:** Publish 28 dated FAQ clarifications
+  beside their Equipment, Scenario, Skill, Trait, State, General Rule, Hacking Program
+  and Fireteam topics. Nineteen retain their original v0.0 provenance alongside current
+  English/Spanish v0.1 citations. General Deployment repositioning has its own rule page;
+  the Ancillary scoring clarification remains explicitly Annihilation-scoped.
+- **Data processing + Web backend + Web frontend:** Add exact scenario collection/revision
+  selection and the ITS Season 18 Battleground pilot, including its Sectors, size-dependent
+  maps, end-of-game scoring and special rules. Shared links retain collection and game size.
+- **Data processing + Web backend + Web frontend:** Publish Request SpecBall as a separate
+  linked N5.3 procedure covering eligibility, token drop, collection, Enhanced Profiles and
+  SpecBot handling, distinct from Request Speedball and ITS TEAM-OPS rules.
+- **Data processing + Web frontend:** Make S0 and SX Silhouette help discoverable alongside
+  the existing S1–S8 diagrams, preserving their distinct base and Prone-height rules.
+
+### Changed
+
+- **Data processing + Web backend + Web frontend:** Improve Martial Arts, Booty and
+  MetaChemistry charts without changing their source results. Hide inapplicable Martial Arts
+  modifiers, separate Booty's TAG/other-Troop-Type branches and MetaChemistry's compound
+  outcomes, and link reviewed Weapons and parameterized Skill/Equipment families, including HMG.
+- **Data processing + Web backend + Web frontend:** Expand Peripheral and subtype guidance,
+  Doctor/Engineer treatment and recovery examples, Immunity and simultaneous State effects,
+  Stealth, Controlled Jump/Speedball, Intuitive Attack, BS Weapon (WIP), Continuous
+  Damage and Negative Feedback lifetimes.
+  Preserve the distinction between ordinary rules, conditional exceptions and derived examples.
+- **Data processing + Web frontend:** Clarify Fireteam formation versus ongoing membership,
+  Team Leader versus shared actions, leaving/rejoining, TinBot sharing, Special Dice and
+  Disposable spending. Explain the Level 3 Morat example without granting Level 4 bonuses.
+- **Data processing + Web backend + Web frontend:** Keep reviewed publication disagreements
+  visible with citations: Flash Pulse's Spanish Wiki row; Kobra CC Anti-materiel and printed
+  Saving Rolls; Armed Turret E/Mitter rolls and S1/S2; Mine and Dazer Silhouettes;
+  AP Thunderbolt, AP+EXP CC Weapon and Stun Pistol charts; legacy Weapon Traits/footnotes;
+  T2's Saving Attribute; Dodge (ARM+3); Fireteam dice and member-count examples; and
+  Doctor/Engineer non-Allied direct-target eligibility. Imported Army profiles remain intact.
+
+### Fixed
+
+- **Data processing + Web backend + Web frontend:** Correct declaration categories and N5.3
+  citations for reviewed Short, Long, Deployment and Automatic Skills. Alert! is explained
+  as an automatic facing adjustment rather than a declared ARO. Clarify conditional
+  Climbing Plus/Super-Jump declarations, Guard/Aerial, Combat Instinct/Sixth Sense,
+  Look Out!, Reload/Place Deployable, Discover, Cautious Movement, Cyberplug,
+  Speculative Attack, Suppressive Fire and Hacking Area reaction windows. Correct
+  Repeater's Hacking Area citation and distinguish additive Range/Cover/Skill MODs
+  from the non-stacking, most-restrictive Visibility Zone MOD.
+- **Data processing + Web backend + Web frontend:** Present Army Skill-bucket Equipment,
+  Regular Training and loadout Attribute overrides in their correct Unit categories.
+  Source-only markers no longer create nonexistent Skill links.
+- **Data processing + Web frontend:** Clarify base Ammunition Saving Rolls, Criticals,
+  conditional State effects and Immunity exceptions, including PARA's missing-PH case,
+  Shock's VITA condition, T2's additional Critical roll, Stun/Guts and Smoke/Eclipse scenery.
+  Keep Combined Ammunition distinct from Combined Saving Rolls.
+- **Data processing + Web frontend:** Clarify Mine Trigger Area measurement, Total Cover,
+  concealed Markers versus revealed objects and exceptional movement. Put Mine-specific
+  profiles and references before shared rules; display Cybermine's absent Ammunition as "--".
+  Explain Deactivator removal and persistent deployed-object effects separately from Boost
+  contact attacks, Armed Turret reactions and allied Disco Ball activation.
+- **Data processing + Web frontend:** Show Domination's English-source 350-point 6 SWC
+  alongside the conflicting Spanish 7 SWC. Corroborate Annihilation's corrected 350-point
+  survival bands with Spanish N5.3; retain the distinct scoring and ending rules of all
+  four core scenarios.
+- **Web frontend:** Keep dense Unit attributes, loadouts and composite-option names readable
+  on narrow screens without clipping Points/SWC or Order symbols. Prevent narrow reference
+  breadcrumb clipping, keep Glossary headings below the navigation bar and stop detached
+  reference previews reopening after navigation.
+- **Web frontend:** Expose official Wiki heading links to ordinary users on all 33 canonical
+  Trait pages, including encoded headings and parameterized names.
+- **Web backend:** Include nonempty upcoming-release notes on **What's changed** when the
+  changelog uses its bracketed `Unreleased` heading, and omit empty development sections.
 
 ## [0.10.1] - 2026-10-10
 
@@ -60,9 +182,12 @@ are not retroactively relabeled.
 
 ### Fixed
 
-- **Data processing:** Correct IMP-2 Discover modifiers and Stealth's Deployable exception;
-  explain Deployable Cover's Vitroferro cap and eligibility, and TinBot owner requirements,
-  Fireteam sharing and non-stacking benefits. Kobra Pistol links the correct CC Attribute.
+- **Data processing:** Correct IMP-2 Discover modifiers and Stealth's Deployable exception.
+  Discover now explains its Range MODs and the retry limit after a failed attempt against an
+  Impersonation Marker. Deployable Cover explains Vitroferro's pre-PS cap,
+  eligibility and printed S3, Disposable (2), Indiscriminate and Perimeter properties.
+  TinBot retains owner requirements, Fireteam sharing and non-stacking benefits.
+  Kobra Pistol links the correct CC Attribute.
 - **Data processing + Web frontend:** Identify Fireteam Type counts as formation requirements,
   distinguish ongoing integrity and type persistence, and preserve the existing count data.
 - **Data processing:** Clarify Dodge and Reset roll/movement conditions, cumulative State

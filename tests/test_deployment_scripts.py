@@ -99,6 +99,33 @@ def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     assert "data/generated/rules.db binary" in attributes
 
 
+def test_deployed_object_publication_is_generated_and_verified_for_each_release_image() -> None:
+    dockerfile = _read("Dockerfile")
+    dockerignore = _read(".dockerignore")
+    gitignore = _read(".gitignore")
+    deploy = _read("scripts/deploy.sh")
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    smoke = _read("scripts/verify-container-image.sh")
+
+    assert "data/generated/*" in gitignore
+    assert "!data/generated/deployed-objects.json" not in gitignore
+    assert "!data/generated/deployed-objects.json" in dockerignore
+    assert (
+        "COPY --chown=appuser:appuser data/generated/deployed-objects.json "
+        "/app/data/deployed-objects.json"
+    ) in dockerfile
+    build = '"$python" -m tools.build_deployed_object_publication'
+    assert deploy.index(build + "\n") < deploy.index(build + " --check")
+    assert deploy.index(build + " --check") < deploy.index("docker compose build")
+    ci_build = "PYTHONPATH=src python -m tools.build_deployed_object_publication"
+    assert workflow.index(ci_build + "\n") < workflow.index(ci_build + " --check")
+    assert workflow.index(ci_build + " --check") < workflow.index("docker build")
+    assert '{"infinity.db", "rules.db", "deployed-objects.json"}' in smoke
+    assert "load_deployed_object_publication(" in smoke
+    assert '/api/deployed-objects' in smoke
+    assert 'http://127.0.0.1:8000/deployed-objects' in smoke
+
+
 def test_release_installer_deploys_tracked_runtime_databases_without_rebuilding() -> None:
     script = _read("scripts/install-or-update.sh")
     assert "infinity-db build" not in script
@@ -247,12 +274,20 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
             ]
         },
         "/api/skills/74": {"rules": ["Super-Jump"]},
+        "/api/deployed-objects": {
+            "items": [{} for _ in range(17)],
+            "unresolved_deliveries": [{}],
+        },
         "/api/version": {"version": "0.10.0", "snapshot_revision": "fixture"},
     }
 
     def urlopen(url: str, timeout: int) -> io.BytesIO:
         route = url.removeprefix("http://127.0.0.1:8000")
-        body = page if route == "/changes" else json.dumps(payloads[route])
+        body = (
+            page if route == "/changes"
+            else "Deployed objects" if route == "/deployed-objects"
+            else json.dumps(payloads[route])
+        )
         return io.BytesIO(body.encode("utf-8"))
 
     monkeypatch.setattr("urllib.request.urlopen", urlopen)

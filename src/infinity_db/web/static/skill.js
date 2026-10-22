@@ -1,6 +1,7 @@
 import { formatSkillDistanceExtra } from "./distance.js";
 import { optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
@@ -13,6 +14,8 @@ const meta = document.getElementById("skill-meta");
 const status = document.getElementById("skill-status");
 const content = document.getElementById("skill-content");
 let currentSkill;
+let displayedSkill;
+let faqItems = [];
 const pageController = new AbortController();
 
 function displayWikiUrl(url) {
@@ -58,6 +61,44 @@ function referenceCell(value, role) {
   if (value instanceof Node) cell.append(value);
   else cell.textContent = value === null || value === undefined || value === "" ? "—" : String(value);
   return cell;
+}
+
+function chartOutcomeLink(text, reference) {
+  if (!reference?.id || !["skills", "weapons", "equipment"].includes(reference.catalog)) {
+    return document.createTextNode(text);
+  }
+  const link = document.createElement("a");
+  link.href = `/${reference.catalog}/${encodeURIComponent(reference.id)}`;
+  link.textContent = text;
+  return link;
+}
+
+function randomChartOutcome(row) {
+  if (row.outcome_components?.length) {
+    const parts = document.createElement("span");
+    parts.className = "chart-outcome-components";
+    for (const [index, component] of row.outcome_components.entries()) {
+      if (index) parts.append(" + ");
+      const element = document.createElement("span");
+      element.className = "chart-outcome-component";
+      element.append(chartOutcomeLink(component.text, component.public_reference));
+      parts.append(element);
+    }
+    return parts;
+  }
+  if (!row.conditional_outcomes?.length) {
+    return chartOutcomeLink(row.result, row.public_reference);
+  }
+  const branches = document.createElement("span");
+  branches.className = "chart-outcome-branches";
+  for (const [index, branch] of row.conditional_outcomes.entries()) {
+    if (index) branches.append("\n");
+    branches.append(
+      `${branch.label}: `,
+      chartOutcomeLink(branch.result, branch.public_reference),
+    );
+  }
+  return branches;
 }
 
 function structuredTable(titleText, columns, rows) {
@@ -155,17 +196,23 @@ function structuredReferenceSection(reference) {
     );
   }
   if (reference.kind === "martial-arts") {
+    // Current N5 rows have no PS MOD; retain it if a future Army source fills this field.
+    const hasPsMod = reference.rows.some(
+      (row) => row.ps_mod !== null && row.ps_mod !== undefined
+        && row.ps_mod !== "" && row.ps_mod !== "-",
+    );
     return structuredTable(
       reference.title,
       [
         { label: "Level", role: "metric" },
         { label: "Attack MOD", role: "metric" },
         { label: "Opponent MOD", role: "metric" },
-        { label: "PS MOD", role: "metric" },
-        { label: "B MOD", role: "metric" },
+        ...(hasPsMod ? [{ label: "PS MOD", role: "metric" }] : []),
+        { label: "Burst MOD", role: "metric" },
       ],
       reference.rows.map((row) => [
-        row.level, row.attack_mod, row.opponent_mod, row.ps_mod, row.burst_mod,
+        row.level, row.attack_mod, row.opponent_mod,
+        ...(hasPsMod ? [row.ps_mod] : []), row.burst_mod,
       ]),
     );
   }
@@ -176,7 +223,7 @@ function structuredReferenceSection(reference) {
         { label: "Roll", role: "metric" },
         { label: "Result", role: "descriptor" },
       ],
-      reference.rows.map((row) => [row.roll, row.result]),
+      reference.rows.map((row) => [row.roll, randomChartOutcome(row)]),
     );
   }
   return null;
@@ -212,6 +259,7 @@ function variantSection(variant, parameterSemantics) {
 }
 
 function render(skill) {
+  displayedSkill = skill;
   document.title = `${skill.name} · InfinityDB`;
   name.firstChild.textContent = skill.name;
   const categories = (skill.categories || []).map((category) => category.name).join(", ");
@@ -241,6 +289,7 @@ function render(skill) {
   if (variantRules.length) children.push(rulesReferenceSection(variantRules, "Variant rules"));
   const structuredReference = structuredReferenceSection(skill.structured_reference);
   if (structuredReference) children.push(structuredReference);
+  if (faqItems.length) children.push(faqRulingsSection(faqItems));
   children.push(sections);
   sections.append(...variants.map((variant) => variantSection(variant, skill.parameter_semantics)));
   content.replaceChildren(...children);
@@ -263,6 +312,17 @@ if (!skillId) {
   getCatalogItem("skills", skillId, pageController.signal).then((skill) => {
     currentSkill = skill;
     render(skill);
+    const topicId = skill.rules?.find((rule) => rule.id?.startsWith("skill:"))?.id
+      || `skill:${skillId}`;
+    fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
+      .then((payload) => {
+        if (pageController.signal.aborted) return;
+        faqItems = payload.items || [];
+        if (faqItems.length && displayedSkill) render(displayedSkill);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+      });
     return visibleUnitIds(optionalUnitFilters(), pageController.signal)
       .then((ids) => render(withVisibleUnits(skill, ids)));
   }).catch((error) => {

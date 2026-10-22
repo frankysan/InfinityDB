@@ -3595,11 +3595,14 @@ class Database:
                     profile_item["characteristics"].append({"name": characteristic["name"]})
             profile_peripheral_rows = connection.execute(
                 "SELECT p.unit_id, p.army_id, p.group_id, p.profile_id, "
-                "a.entity_id, e.name, e.type_id, p.quantity "
+                "a.entity_id, COALESCE(e.name, s.source_name) AS name, "
+                "e.type_id, p.quantity, p.item_id "
                 "FROM profile_peripherals AS p "
-                "JOIN application_peripheral_sources AS a "
+                "JOIN application_peripheral_source_labels AS s "
+                "ON s.army_id = p.army_id AND s.peripheral_id = p.item_id "
+                "LEFT JOIN application_peripheral_sources AS a "
                 "ON a.army_id = p.army_id AND a.peripheral_id = p.item_id "
-                "JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
+                "LEFT JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
                 f"WHERE p.unit_id IN ({placeholders}) "
                 "ORDER BY p.army_id, p.group_id, p.profile_id, p.position, p.unit_id",
                 source_ids,
@@ -3620,10 +3623,17 @@ class Database:
                     append_unique_item(
                         profile_item.setdefault("peripherals", []),
                         {
-                            "id": peripheral["entity_id"],
+                            "id": peripheral["entity_id"] or (
+                                f"source-peripheral:{peripheral['army_id']}:"
+                                f"{peripheral['item_id']}"
+                            ),
                             "name": peripheral["name"],
                             "type_id": peripheral["type_id"],
                             "quantity": peripheral["quantity"],
+                            **(
+                                {"source_only": True}
+                                if peripheral["entity_id"] is None else {}
+                            ),
                         },
                     )
 
@@ -3861,11 +3871,14 @@ class Database:
                         )
             loadout_peripheral_rows = connection.execute(
                 "SELECT p.unit_id, p.army_id, p.group_id, p.option_id, "
-                "a.entity_id, e.name, e.type_id, p.quantity "
+                "a.entity_id, COALESCE(e.name, s.source_name) AS name, "
+                "e.type_id, p.quantity, p.item_id "
                 "FROM option_peripherals AS p "
-                "JOIN application_peripheral_sources AS a "
+                "JOIN application_peripheral_source_labels AS s "
+                "ON s.army_id = p.army_id AND s.peripheral_id = p.item_id "
+                "LEFT JOIN application_peripheral_sources AS a "
                 "ON a.army_id = p.army_id AND a.peripheral_id = p.item_id "
-                "JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
+                "LEFT JOIN application_peripheral_entities AS e ON e.id = a.entity_id "
                 f"WHERE p.unit_id IN ({placeholders}) "
                 "ORDER BY p.army_id, p.group_id, p.option_id, p.position, p.unit_id",
                 source_ids,
@@ -3886,10 +3899,17 @@ class Database:
                     append_unique_item(
                         loadout_item.setdefault("peripherals", []),
                         {
-                            "id": peripheral["entity_id"],
+                            "id": peripheral["entity_id"] or (
+                                f"source-peripheral:{peripheral['army_id']}:"
+                                f"{peripheral['item_id']}"
+                            ),
                             "name": peripheral["name"],
                             "type_id": peripheral["type_id"],
                             "quantity": peripheral["quantity"],
+                            **(
+                                {"source_only": True}
+                                if peripheral["entity_id"] is None else {}
+                            ),
                         },
                     )
 

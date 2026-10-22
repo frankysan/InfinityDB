@@ -33,6 +33,7 @@ import os
 from pathlib import Path
 
 from infinity_db.database import Database
+from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 
 expected_environment = {
@@ -48,7 +49,7 @@ if hasattr(os, "geteuid") and os.geteuid() == 0:
     raise SystemExit("Application image must not run as root")
 
 data_dir = Path("/app/data")
-expected_files = {"infinity.db", "rules.db"}
+expected_files = {"infinity.db", "rules.db", "deployed-objects.json"}
 actual_files = {path.name for path in data_dir.iterdir()}
 if actual_files != expected_files:
     raise SystemExit(
@@ -58,6 +59,13 @@ if actual_files != expected_files:
 
 Database(data_dir / "infinity.db").validate()
 RulesDatabase(data_dir / "rules.db").validate()
+publication = load_deployed_object_publication(
+    data_dir / "deployed-objects.json", data_dir / "infinity.db", data_dir / "rules.db"
+)
+if publication is None or len(publication["objects"]) != 17:
+    raise SystemExit("Release image has no complete reviewed deployed-object publication")
+if len(publication["unresolvedDeliveries"]) != 1:
+    raise SystemExit("Release image lost the unresolved deployed-object delivery")
 '
 
 if [ "$published_assets" -eq 1 ]; then
@@ -223,6 +231,14 @@ with urlopen("http://127.0.0.1:8000/api/skills/74", timeout=3) as response:
     skill = json.load(response)
 if not skill.get("rules"):
     raise SystemExit("/api/skills/74 did not include curated rules data")
+
+with urlopen("http://127.0.0.1:8000/api/deployed-objects", timeout=3) as response:
+    deployed = json.load(response)
+if len(deployed.get("items", [])) != 17 or len(deployed.get("unresolved_deliveries", [])) != 1:
+    raise SystemExit("/api/deployed-objects did not publish the reviewed release objects")
+with urlopen("http://127.0.0.1:8000/deployed-objects", timeout=3) as response:
+    if b"deployed" not in response.read().lower():
+        raise SystemExit("/deployed-objects browser entry point unavailable")
 
 with urlopen("http://127.0.0.1:8000/api/version", timeout=3) as response:
     version = json.load(response)

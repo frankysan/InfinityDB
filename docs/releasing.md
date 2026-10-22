@@ -76,6 +76,15 @@ The 1.0 release gate requires:
 - [ ] Resolve any known defect that materially misrepresents a player's unit, profile,
   weapon, skill, equipment, army relationship, or rule information.
 
+**Unresolved official rulings are not release blockers.** A known discrepancy
+may remain open when users can clearly identify the relevant sources/versions,
+the nature of the disagreement, the value or interpretation InfinityDB presents,
+and its uncertainty or applicability limit. The release gate requires accurate,
+usable disclosure; it does not require an external publisher to issue an erratum
+or choose between conflicting publications. Missing or misleading disclosure and
+independently confirmed implementation errors remain release-blocking defects.
+Track requests for official corrections as non-blocking follow-up work in TODO.
+
 Immediately before 1.0, perform a final source-by-source completeness audit. Record
 where each discovered player-relevant information type is represented, verify every
 in-scope type has a usable web presentation and required rules context, review every
@@ -144,14 +153,19 @@ During the audit:
 
 The audit is complete only when stale documentation discovered during the review has
 been corrected in the release preparation, or is explicitly retained and labelled as
-historical context. Raw evidence belongs under `docs/audits/`. Do not create a permanent
-release-specific audit document by default: promote lasting conclusions into the canonical
-document owner, record release outcomes in `CHANGELOG.md`, and let Git history preserve the
+historical context. Keep new private/raw audit evidence under ignored `local/audits/`;
+existing ignored `docs/audits/` and `reports/` paths remain supported for
+compatibility. Do not create a permanent release-specific audit document by default:
+promote lasting conclusions into the canonical document owner, record release outcomes in `CHANGELOG.md`, and let Git history preserve the
 review narrative. Keep a tracked audit/closeout file only when it contains unique rationale that
 will actively guide later work.
 
 ## 3. Prepare release notes and metadata
 
+- [ ] Cross-check `Unreleased` against substantive player/operator changes in Git
+  history since the previous release and the last changelog update. Restore
+  missing outcomes, but do not turn commits, tests or internal refactors into
+  individual release-note entries.
 - [ ] Review the complete `Unreleased` section of `docs/CHANGELOG.md` as one release:
   make its `Player summary` concise and player-visible only, merge overlapping detailed entries,
   remove implementation-only detail, and make upgrade consequences explicit.
@@ -172,10 +186,20 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 - [ ] Rebuild and validate any release runtime database whose source/curated inputs changed,
   then ensure `data/generated/infinity.db` and `data/generated/rules.db` are the intended
   tracked release artifacts.
+- [ ] For 1.0, require source-field occupancy verification against the release-matched
+  `data/generated/infinity.db` and its paired `infinity.raw.db`. Use
+  `python tools/run_checks.py --all --source-occupancy-gate` for the local
+  release-candidate validation. The opt-in gate fails closed when the raw
+  source pair is missing or any statically unrepresented player field is
+  populated; re-audit changed inputs instead of suppressing a failure.
+  Ordinary development and CI `--all` runs remain unchanged.
 - [ ] Run `python tools/verify_deployment_assets.py` and require the tracked Army database,
   rules database, processed SVG publication, and publication snapshot provenance to pass as one
   release set.
-- [ ] Run the complete local validation suite with `python tools/run_checks.py --all`.
+- [ ] Install the pinned Markdownlint dependency with
+  `npm ci --ignore-scripts --no-audit --no-fund` (Node.js 22+), then run the complete local
+  validation suite with `python tools/run_checks.py --all` (for 1.0, include
+  `--source-occupancy-gate` as described above), including the `docs` stage.
 - [ ] When the release is intended for a local/full-asset deployment, validate the
   complete published asset set with the `required` asset mode as documented in
   `docs/testing.md`.
@@ -242,9 +266,23 @@ For releases that are deployed to the hosted InfinityDB instance:
 - [ ] Deploy the tagged self-contained release using the workflow in `docs/deployment.md`;
   production must not rebuild or substitute runtime databases after the tag is validated.
 - [ ] Verify the deployed application reports the intended release version and source
-  snapshot.
+  snapshot. For 1.0, use the opt-in
+  `tools.report_reference_baseline --verify-server <server-origin>` check
+  against the exact retained candidate Army/rules databases to reject
+  stale or substituted database-pair publication. This check does not
+  validate symbol/PDF/Wiki inputs or rules completeness.
 - [ ] Smoke-test the release's principal changed user-facing paths in the deployed
-  application.
+  application. For 1.0, run `tools.verify_release_candidate_browser` against
+  the served candidate, explicitly specifying `--expected-version` and the
+  release-matched Army/rules database pair. It checks the exact database-pair
+  revision, release version and local static asset fingerprint **before and
+  after** representative Unit-detail Chromium checks, aborting on any mismatch.
+  Retain its JSON report under ignored `local/audits/` only after success.
+  The default hosted Unit check is seven Units at three widths (21 pages).
+  The separate local 81-page matrix includes additional layouts, optional-unit
+  Settings and distance variants; see [testing](testing.md#10-source-evidence-baseline).
+  Neither replaces the 1.0 source-to-browser completeness verdict or acceptance
+  of the release's other changed surfaces.
 - [ ] Confirm required database/schema rebuilds and published assets are actually the
   release-matched versions.
 - [ ] Confirm rollback remains available before considering deployment acceptance

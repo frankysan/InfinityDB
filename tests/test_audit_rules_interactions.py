@@ -20,9 +20,10 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 312
-    assert report["summary"]["authoredOutgoingRelationCount"] == 314
-    assert report["summary"]["futureInteractionCount"] == 113
+    assert report["summary"]["recordCount"] == 379
+    assert not any(item["id"].startswith("faq-ruling:") for item in report["items"])
+    assert report["summary"]["authoredOutgoingRelationCount"] == 510
+    assert report["summary"]["futureInteractionCount"] == 111
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,
         "complete": 209,
@@ -64,12 +65,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "percentComplete": 100.0,
     }
     assert report["summary"]["releases"]["1.0.0"] == {
-        "total": 44,
-        "complete": 29,
-        "pending": 15,
-        "reviewed": 29,
+        "total": 111,
+        "complete": 111,
+        "pending": 0,
+        "reviewed": 111,
         "inherited": 0,
-        "percentComplete": 65.9,
+        "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
@@ -116,9 +117,9 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 131
-    assert report["summary"]["supporting"]["complete"] == 116
-    assert report["summary"]["supporting"]["pending"] == 15
+    assert report["summary"]["supporting"]["total"] == 198
+    assert report["summary"]["supporting"]["complete"] == 198
+    assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
     equipment_items = [
@@ -274,20 +275,27 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         ("modifies-use-of", "skill:place-deployable")
     ]
     for record_id in {
-        "ammunition:ap",
-        "ammunition:da",
-        "ammunition:eclipse",
-        "ammunition:em",
-        "ammunition:exp",
-        "ammunition:normal",
+        "scenario:annihilation",
+        "scenario:domination",
+        "scenario:firefight",
+        "scenario:supplies",
         "ammunition:para",
         "ammunition:shock",
-        "ammunition:smoke",
         "ammunition:stun",
+        "ammunition:exp",
         "ammunition:t2",
+        "ammunition:ap",
+        "ammunition:em",
+        "ammunition:normal",
+        "ammunition:da",
+        "ammunition:smoke",
+        "ammunition:eclipse",
     }:
-        assert items[record_id]["status"] == "pending"
+        assert items[record_id]["status"] == "reviewed"
         assert items[record_id]["targetRelease"] == "1.0.0"
+    assert items["ammunition:eclipse"]["relations"] == [
+        ("uses-effects-of", "ammunition:smoke")
+    ]
 
     for record_id in {
         "rule:peripheral-type:control",
@@ -311,6 +319,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert set(items["skill:request-speedball"]["relations"]) == {
         ("uses-effects-of", "skill:combat-jump")
     }
+    assert ("uses-effects-of", "skill:combat-jump") in set(
+        items["skill:request-specball"]["relations"]
+    )
+    assert ("enables-use-of", "skill:request-specball") in set(
+        items["skill:infinity-spec-ops"]["relations"]
+    )
     assert ("cancels-state", "state:impersonation-1") in set(
         items["equipment:biometric-visor"]["relations"]
     )
@@ -368,7 +382,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:g-jumper", "state:isolated", None) in future_keys
     assert ("skill:g-jumper", "rule:null-state", None) in future_keys
     assert ("skill:infinity-spec-ops", "rule:spec-ops-chart", "uses-effects-of") in future_keys
-    assert ("skill:request-specball", "skill:combat-jump", "uses-effects-of") in future_keys
+    assert (
+        "skill:infinity-spec-ops", "skill:request-specball", "enables-use-of"
+    ) not in future_keys
+    assert ("skill:request-specball", "skill:combat-jump", "uses-effects-of") not in future_keys
     assert ("skill:morpho-scan", "attribute:vita", None) in future_keys
     assert ("skill:morpho-scan", "attribute:str", None) in future_keys
     assert ("skill:remdriver", "rule:troop-type:rem", "applies-effects-to") in future_keys
@@ -554,7 +571,37 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 116/131 complete, 15 pending" in output
+    assert "Supporting identities: 198/198 complete, 0 pending" in output
+
+
+def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> None:
+    assert main([
+        "--check-output", str(DEFAULT_CHECKLIST_PATH),
+        "--require-release", "1.0.0",
+    ]) == 0
+    output = capsys.readouterr().out
+    assert "Supporting identities: 198/198 complete, 0 pending" in output
+    assert "Pending identities:" not in output
+
+
+def test_rules_interaction_1_0_gate_reports_regressed_pending_item(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys,
+) -> None:
+    report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
+    pending = next(
+        item for item in report["items"] if item["id"] == "scenario:supplies"
+    )
+    pending["status"] = "pending"
+    report["summary"]["supporting"]["releases"]["1.0.0"]["pending"] = 1
+    monkeypatch.setattr(
+        "tools.audit_rules_interactions.audit_rules_interactions",
+        lambda *_args: report,
+    )
+    assert main(["--require-release", "1.0.0"]) == 1
+    output = capsys.readouterr().out
+    assert "1 supporting identities pending" in output
+    assert "Pending identities: scenario:supplies" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

@@ -238,6 +238,16 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
         published=True,
     ),
     ApplicationDomain(
+        "weapon-properties",
+        "Weapon Property",
+        "Weapon Properties",
+        "embedded",
+        "embedded",
+        search=True,
+        glossary=True,
+        published=True,
+    ),
+    ApplicationDomain(
         "terms",
         "Game term",
         "Game terms",

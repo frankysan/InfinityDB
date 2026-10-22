@@ -31,6 +31,7 @@ RUN pip install --no-cache-dir ".[server]" \
 
 COPY --chown=appuser:appuser data/generated/infinity.db /app/data/infinity.db
 COPY --chown=appuser:appuser data/generated/rules.db /app/data/rules.db
+COPY --chown=appuser:appuser data/generated/deployed-objects.json /app/data/deployed-objects.json
 
 USER appuser
 EXPOSE 8000

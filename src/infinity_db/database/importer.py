@@ -50,7 +50,10 @@ from .include_relationships import materialize_include_relationships
 from .loadout_payloads import materialize_loadout_payloads
 from .logical_unit_payloads import materialize_logical_unit_payloads
 from .paths import raw_database_path
-from .peripheral_relationships import materialize_peripheral_relationships
+from .peripheral_relationships import (
+    materialize_peripheral_relationships,
+    materialize_peripheral_source_labels,
+)
 from .profile_payloads import materialize_profile_payloads
 from .publication import (
     EXPORT_PAIR_SHA256_KEY,
@@ -482,6 +485,7 @@ def export_database(
                 materialize_loadout_payloads(connection)
                 materialize_application_fireteams(connection)
                 materialize_include_relationships(connection)
+                materialize_peripheral_source_labels(connection)
                 materialize_peripheral_relationships(connection, peripheral_identities)
                 materialize_relation_constraints(connection)
                 materialize_relation_group_dependencies(connection)

@@ -130,14 +130,14 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
 
     assert report["summary"] == {
         "surfaceCount": 42,
-        "runtimeTableCount": 81,
-        "runtimeFieldCount": 388,
+        "runtimeTableCount": 82,
+        "runtimeFieldCount": 391,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 388,
+        "issue:none:fieldCount": 391,
         "role:canonical_application:fieldCount": 151,
-        "role:contextual_application:fieldCount": 200,
+        "role:contextual_application:fieldCount": 203,
         "role:intentional_source_representation:fieldCount": 37,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
@@ -197,6 +197,10 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "application_peripheral_entities", "name")["role"] == CANONICAL
     assert (
         _field(report, "application_peripheral_sources", "peripheral_id")["role"]
+        == CONTEXTUAL
+    )
+    assert (
+        _field(report, "application_peripheral_source_labels", "source_name")["role"]
         == CONTEXTUAL
     )
     assert _field(report, "option_peripherals", "item_id")["role"] == CONTEXTUAL

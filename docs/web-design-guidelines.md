@@ -105,6 +105,21 @@ components from Saving Roll notation such as `ARM/2 × 2`. If the server has no
 reviewed component reference, leave the source name readable without fabricating
 a destination. The Ammunition detail page remains the canonical semantic owner.
 
+### Weapon Properties and their rules origins
+
+On reviewed Weapon profiles, show linked **Weapon Properties** separately from
+the source-provided Traits, Labels and States. Use the same inline rule-preview
+interaction (including touch) as other canonical references. Curated rules prose
+may use explicit `[[weapon-property:slug]]` links, resolved to the same
+Glossary entry and summary preview without creating separate rules ownership.
+Link to the embedded Glossary
+entry rather than duplicating a new rules detail page. Each Property entry
+must expose the actual rules-domain and source-section origins, with links
+to canonical rules wherever available; role labels distinguish baselines,
+conditional effects and combinations. Do not derive membership by parsing
+weapon names, Ammunition punctuation, or Saving Roll notation. Keep source
+profile statistics, modes and existing Ammunition explanations authoritative.
+
 ### Present reviewed Ammunition mechanics without calculating outcomes
 
 The eleven canonical Ammunition reference cards show the existing source-cited

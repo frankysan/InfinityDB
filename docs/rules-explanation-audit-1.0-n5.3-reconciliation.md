@@ -10,6 +10,14 @@ Research date: 2026-10-09; examined commit
 (S17) and Wiki history (S21) verification on 2026-10-09 updates the evidence
 without changing rule/data implementations.
 
+**Historical assessment:** The comparison tables and their status totals describe
+that examined baseline, with explicitly dated follow-ups below. They are not a
+current defects list: many listed explanations and references have since been
+published. Use [TODO](TODO.md#rules-and-reference-completeness) for remaining
+work and the canonical data/semantic documents for current behavior. Preserve
+the original source identities, counts and unresolved disagreements rather than
+reclassifying historical rows as current approvals.
+
 ## Denominator and interpretation
 
 The [English notice S11](https://infinityuniverse.com/en/news/infinity-rules-update-5-3)
@@ -60,7 +68,7 @@ that the rest of its card has adequate explanation; related gaps remain listed.
 | N53-06 / EN 6, ES 6 | Firewall category | S3 p. 55 says Equipment; S1 p. 55 says Automatic Equipment; S2 p. 1 ties Device benefit to being enabled | No adequate canonical Firewall owner; `skill:hacker`, Devices and Programs are insufficient substitutes | REA-018; Partially verified; category/source verified, contextual explanation missing |
 | N53-07 / EN 7, ES 7 | Kobra modes | S3 p. 68 differs from S1 p. 68; S1 p. 182 visually shows BS SHOCK and CC DA, yet CC one-save/no Anti-materiel. S6 221 has CC two saves/Anti-materiel | `weapon:kobra-pistol` preserves mode distinction and source uncertainty; DA interpretation and Anti-materiel need separate decisions | REA-028/031; Discrepancy; do not equate resolving DA saves with settling Anti-materiel |
 | N53-08 / EN 8, ES 8 | Trench-Hammer charges | S3 p. 68 has Disposable (3); S1 p. 68 and S6 177's BS/CC modes omit it | `weapon:trench-hammer` does not impose the old charge limit; selected modes agree | Verified; no new defect; full weapon/profile audit remains separate |
-| N53-09 / EN 9, ES 9 | Dodge armor modifier | S1 and S17 p. 75 agree on the unconditional ARM/BLI +3 when the Dodge is declared; Spanish Wiki S14/S21 revision 4012 retains a failed-PH condition | No complete modifier baseline; this is an ARM effect, not +3 to the Dodge PH roll | REA-026/042; Discrepancy is now Wiki-versus-both-PDFs, not English-versus-Spanish PDFs; source correction status unresolved |
+| N53-09 / EN 9, ES 9 | Dodge armor modifier | S1 and S17 p. 75 agree on the unconditional ARM/BLI +3 when the Dodge is declared; English Wiki 2026-09-26 and Spanish Wiki 2026-10-09 (S14/S21 revision 4012) both retain a failed-PH condition | Dodge now explains ARM Saving Roll +3 for profiles with this modifier; never +3 Dodge PH or all Dodges | REA-026/042; two-PDF versus two-Wiki-language conflict remains visible on the card; external source correction unresolved |
 | N53-10 / EN 10, ES 10 | PARA profile modifier | S1 p. 75 distinguishes the opponent's Face-to-Face penalty from the PH-6 PARA Saving Roll | `ammunition:para`, `skill:dodge` and PARA-weapon profile context need that distinction in the common modifier reference | REA-026; Partially verified; selected rule checked, explanation missing; never apply the profile penalty to every save |
 | N53-11 / EN 11, ES 11 | Speedball landing | S3 p. 84 PH 14 becomes S1 p. 84 PH 15; S2 retains Controlled Jump exclusion | `skill:request-speedball` has PH 15; landing clause correct | Verified; REA-007/026 separately retain FAQ context and uncompleted pickup/item lifecycle review |
 | N53-12 / EN 12, ES 12 | Aerial / Boost | S3 p. 86 lacks the exception; S1 p. 86 explicitly excludes triggering Boost | `skill:aerial` and `trait:boost` explain the exception instead of inferring ordinary approach behavior | Verified; preserve positive explanation pattern |
@@ -159,6 +167,588 @@ ITS season or add TEAM-OPS to the four supported core scenarios. The notice's
 season overview, mission additions and digital publication format are ITS
 publication context, not additional N5.3 rulebook bullets. Historical ITS,
 Reinforcements annex and Spanish FAQ remain outside completed source verification.
+
+## Declaration-category source-heading reconciliation (2026-10-16)
+
+This is a **selected source-to-metadata correction**, not the
+367-record explanation-audit signoff. N5.3 English pp. 39, 51, 77,
+79, 92 and 103 were checked against the actual heading and declaration
+line, not merely a page containing an example of the Skill:
+
+- **BS Attack:** Short Skill / ARO, p. 39. Both declaration identities
+  migrate from p40 to p39; the full Skill and BS=11/BS=12
+  variant records now cite the owning heading.
+- **CC Attack:** Short Skill / ARO, p. 51. Both declaration identities
+  migrate from p45 to p51; the full Skill and CC=21 variant
+  record now cite the owning heading.
+- **Discover:** Basic Short Skill / ARO, p. 77. Both declaration
+  identities migrate from p78 to p77; its full Skill citation
+  now points to the definition rather than the continuation example.
+- **Dodge:** Short Skill / ARO, p. 79; unchanged.
+- **Forward Observer:** Short Skill / ARO, p. 92; unchanged.
+- **Morpho-Scan:** Short Skill, p. 103, **not** Basic Short Skill
+  and **not** ARO. The former basic-short-skill:p103 identity is
+  replaced by short-skill:p103; the incorrect aro:p103 identity
+  is retired. The full Skill was already correctly typed and now
+  also cites the primary PDF. Its target's option to declare Reset
+  as an ARO does not make Morpho-Scan an ARO.
+
+The exact page is part of a declaration identity. The **frozen
+367-record inventory retains all eight original S-tier identities**
+as historical audit evidence; it is not rewritten or silently
+renumbered. The eight original ARO/Basic identities correspond to
+seven current records: five AROs, Discover's Basic Short Skill and
+Morpho-Scan's Short Skill. Other affected Short Skill page citations
+were corrected separately. The crosswalk above records the retired
+and successor IDs and the changed source pages. This does **not** promote those original inventory records to
+full material-mechanics acceptance or validate all 60 declaration
+metadata identities. BS=11/BS=12/CC=21 source values remain subject to
+their own Army-profile variant audit; a corrected BS/CC action citation
+is not evidence for a numerical replacement.
+
+Regression tests compare the complete current mappings with the
+N5.3 headings and verify downstream declaration projections. The
+remaining declaration families, exceptional ARO permissions and final
+browser/completeness gate must be evaluated independently.
+
+## Deployment and Long Skill source-heading reconciliation (2026-10-16)
+
+A second bounded audit inspected all six currently published Deployment
+mappings and all five original Long Skill mapping records against the
+heading declarations of the pinned English N5.3 rulebook. It corrects
+source provenance, not Skill mechanics or Army profile data.
+
+- Infiltration is a Deployment Skill at p. 97 (previously p. 89);
+  Impersonation at p. 96 (previously p. 93); Hidden Deployment at
+  p. 95 (previously p. 94).
+- Climb and Jump are separate Long Skill headings at pp. 32 and 34.
+  Their former shared p. 25 declaration identity was retired and
+  replaced by one page-scoped record per Skill.
+- Combat Jump remains Long Skill p. 89, while Parachutist is
+  Long Skill p. 105; the former combined p. 89 record was split.
+- Forward Deployment p. 92, Minelayer p. 102, Sapper p. 111,
+  Triangulated Fire p. 118 and Berserk p. 86 were checked and
+  retained. Sapper correctly has both Deployment and Long Skill
+  classifications.
+
+The seven affected full Skill records now cite their correct N5.3
+headings in addition to any existing source revisions. There are
+**61 current declaration-category records**, up from 59, because
+the two shared-source records were split. This is an additive
+current-data change, not a revision of the historical denominator:
+the **367-record original audit inventory stays frozen** and retains
+its original identifiers and S-tier dispositions. Climbing Plus
+and Super-Jump can modify how Climb and Jump are declared; these
+conditional enhancements are not modeled as universally available
+Basic Short Skill declarations here.
+
+Source-pinned regression tests check the twelve owning heading
+declarations and one-to-one source mappings; the rebuilt database
+and eight representative published Skill pages were also checked
+in responsive browsers. Automatic and remaining Short Skill
+category mappings, numerical Army replacement values, conditional
+permissibility, and whole-corpus acceptance remain open.
+
+## Five incorrect Automatic/Deployment mappings (2026-10-16)
+
+The pinned English N5.3 PDF explicitly labels five Skills as
+**Deployment Skill, Optional**, although the additional declaration
+metadata classified them as Automatic:
+
+- Booty: p. 86; removed from the shared Automatic p. 87 entry.
+- Decoy: p. 90; retired the lone Automatic p. 89 identity.
+- MetaChemistry: p. 101; removed from Automatic p. 98.
+- Remdriver: p. 110; removed from Automatic p. 110.
+- Strategic Deployment: p. 112; removed from Automatic p. 112.
+
+Each now has one page-specific Deployment declaration identity and
+a primary-source PDF citation on the owning Skill, preserving the
+earlier Wiki revision evidence. Its underlying Skill type and
+gameplay mechanics were already correct; this fixes the independent
+declaration-category projection only. Existing unrelated Automatic
+mappings in the shared records remain intact.
+
+This bounded correction increases the **current** declaration-category
+record count from 61 to 65, and the exported rules DB from 461 to 465.
+It does not modify or increase the frozen 367-record explanation-audit
+baseline or retroactively grant complete clause acceptance. The other
+Automatic/Short Skill page and ownership mappings still require
+individual source verification. The retained historical
+Automatic p. 93 mapping to Regular is also pending classification
+against the canonical Training rather than being removed without
+a source/consumer audit.
+
+A pinned-source test proves the five exact heading/declaration pairs,
+a curated test prevents reintroduction of the Automatic mappings,
+and browser checks verify all five public Skill category badges.
+
+## Automatic heading pages and Regular ownership (2026-10-16)
+
+Fourteen Automatic Skill mappings pointed to stale printed pages
+in the pinned English N5.3 PDF, even though their type was correct:
+
+- Surprise Attack p. 88 to 114; Chain of Command p. 90 to 87;
+  No Wound Incapacitation p. 91 to 104; G: Jumper p. 94 to 93.
+- Hacker p. 95 to 54; Immunity p. 96 to 95; Natural Born
+  Warrior p. 101 to 103; Remote Presence p. 102 to 110;
+  Sixth Sense p. 112 to 111.
+- Lieutenant p. 113 to 99; Super-Jump p. 114 to 113;
+  Regeneration p. 116 to 109; Terrain and Total Reaction
+  p. 118 to 116.
+
+Each mapping now cites the actual heading, reusing existing
+page groups where appropriate. Hacker gained a new p. 54 group;
+obsolete empty groups p. 94, p. 96 and p. 101 were removed.
+Owning Skill citations were added/corrected while preserving
+other-source references and distinct Immunity examples.
+
+The Automatic p. 93 record additionally linked Regular as if it
+were a Skill. Regular is actually a Training Characteristic,
+represented by the canonical training:regular record (N5.3 p. 11).
+The invalid link was removed without altering Training or Order
+semantics. The current declaration catalog has **28 Automatic
+groups and 63 declaration-category records**, and rules.db has
+**463 total records**. No gameplay mechanics were changed.
+
+This is source/projection reconciliation, not acceptance of all
+Automatic conditional activation effects. The original
+367-record audit inventory remains frozen. Remaining Short Skill,
+numeric Army replacement, and wider corpus acceptance work
+still needs independent evidence.
+
+## Short Skill headings and named Army replacement values (2026-10-16)
+
+The eleven current **Short Skill** declaration entries were checked
+against their actual headings in the pinned English N5.3 rules
+(pp. 39, 51, 79, 90-92, 103, 111, 121 and 123-124). The only
+incorrect source citation was Sensor, which was labelled p. 112 in
+both the page-scoped declaration and Skill definition. The actual
+Sensor/Short Skill heading is on **p. 111**. Both references have
+been corrected, retaining the previous Wiki revision.
+
+The separately curated BS=11, BS=12 and CC=21 records were also
+cross-checked against the **2026-09-29 11:43:35 Army snapshot**,
+JSON 20260929-114335.zip (SHA-256
+f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75).
+All three exact ID/name pairs appear in its official source Skill
+dictionaries and in concrete unit-option loadouts:
+
+- BS=11: source Skill ID 279, two loadout occurrences.
+- BS=12: source Skill ID 278, nine loadout occurrences.
+- CC=21: source Skill ID 274, six loadout occurrences.
+
+These are **17 faction-file occurrences**, not 17 distinct units or
+independent official named core-rule entries. Examples include
+Polaris Team (BS=11), Streloks (BS=12), and Swiss Guard (CC=21).
+The numerical values are source-defined by the **Army variant
+names**, while their action mechanics link back to the core
+BS Attack (p. 39) and CC Attack (p. 51) definitions. N5.3 p. 75
+provides general MOD/value notation context, not separate BS=11,
+BS=12 or CC=21 entries. No separate mechanics or source-invented
+modifier were introduced.
+
+Tests pin the variant identity/parent-action associations regardless
+of local archive availability. A source-provenance test validates
+the exact ignored archive checksum, dictionary entries, and 17
+loadout occurrences **when the private archive is installed**;
+it skips in environments without that local evidence. The frozen
+367-record historical inventory is unchanged. This closes the
+bounded Short Skill heading and three named source-identity checks,
+but **does not** close conditional declaration semantics or the
+full 1.0 whole-corpus gate.
+
+## Conditional movement declarations (2026-10-16)
+
+N5.3 p. 88 allows Climbing Plus to make Climb a Basic Short Skill
+only when declared first; p. 113 establishes the corresponding
+exception for Super-Jump and Jump. Both helper Skills remain
+Automatic, while Climb (p. 32) and Jump (p. 34) remain Long.
+There is no general category reclassification or universal ARO.
+
+The Climbing Plus record now cites the primary PDF alongside its
+Wiki revision and covers declared trajectory, 360-degree LoF,
+vertical underside base contact and Impetuous use. Super-Jump
+now expressly covers the second MOV value when Move follows,
+trajectory/LoF, Impetuous use, automatic Prone cancellation
+when Jump is declared and mid-air redirection limited to the
+named Jet Propulsion profile variant. Existing once-per-Order
+and no Partial Cover restrictions are preserved.
+
+Pinned PDF and curated tests plus a 6/6 responsive browser check
+provide bounded evidence for these two exceptions. The frozen
+367-record inventory and other 1.0 acceptance tasks remain open.
+
+## Reactive combat Automatic Skill provenance (2026-10-16)
+
+Three source-verified Automatic Skill exceptions remain distinct:
+Guard (N5.3 p. 95, Optional) permits CC Attack without
+Silhouette contact when the target is in LoF and ZoC.
+Neurocinetics (p. 104, Obligatory) reduces BS Weapon Burst to 1
+in the Active Turn, permits full Burst against one target in
+the Reactive Turn, and applies Burst modifiers only then.
+Total Reaction (p. 116, Optional) permits full Burst, including
+Burst modifiers, specifically during BS Attack AROs against one
+of the Troopers activated by the Order.
+
+The existing curated mechanics and types agree with these clauses.
+Direct pinned N5.3 citations were added to Guard and Neurocinetics,
+preserving the previously recorded Wiki revisions. Total Reaction
+already had both primary and Wiki citations. Source-pinned and
+curated tests now guard each classification and heading.
+
+This bounded verification does not establish any combined effect
+between these Skills, remove the separate Aerial restriction
+on Guard, or close all reactive/Automatic exceptions. The
+original 367-record explanation audit remains frozen.
+
+## Guard versus Aerial exception (2026-10-16)
+
+The pinned English N5.3 PDF establishes a three-source
+interaction: Guard (p. 95, Optional Automatic) permits CC Attack
+inside LoF and ZoC without Silhouette contact; Aerial (p. 86,
+Obligatory Automatic) explicitly prohibits Guard against an
+Aerial target unless it is Unconscious; Unconscious State
+(p. 172) disables Automatic Special Skills while active.
+Guard's permission to ignore contact does not override the
+separate Aerial prohibition. Against an Unconscious target,
+the prohibition is lifted but Guard still requires LoF and ZoC.
+
+The curated outcome and Aerial-owned restricts-use-of relation
+were already correct. Added p. 86 PDF provenance to Aerial and
+both exception and Unconscious citations to Guard. Linked
+clarifications explain the prohibition and limited exception.
+Historical Wiki sources, Skill types, existing relations and
+gameplay mechanics were preserved.
+
+Pinned PDF and curated tests cover the three clauses. Two
+Skill pages passed 6/6 responsive browser cases at 1440, 390
+and 320 px, with no page errors or overflow. This bounded
+exception acceptance does not close other ARO permissions,
+Automatic interactions, or the whole-corpus 1.0 gate.
+The historical 367-record inventory remains frozen.
+
+## Stealth counters and outside-LoF reaction scope (2026-10-16)
+
+Pinned English N5.3 p. 112 explicitly exempts Troopers with
+Combat Instinct and Sixth Sense from Stealth's reaction
+suppression. Combat Instinct p. 88 separately ignores Surprise
+Attack MODs, but does not grant special outside-LoF reaction
+permission. Sixth Sense p. 111 allows a 360-degree LoF arc and
+outside-LoF reaction **only for Attacks directed at the user**,
+not non-Attack movement. The general Zone of Control reaction
+trigger on p. 20 still requires a valid ARO and eligible action.
+
+The existing source-native inverse relations from Combat Instinct
+and Sixth Sense to Stealth remain unchanged. Combat Instinct
+gained primary N5.3 citations (pp. 88, 112, 20) while retaining
+its pinned Wiki revision; Sixth Sense gained the Stealth/ZoC
+citations alongside its existing FAQ and Wiki provenance.
+Player-facing clarifications now distinguish cancellation of
+Stealth protection from granting LoF or waiving reaction
+requirements. No rule mechanism or ARO engine was introduced.
+
+Source-pinned and curated regression tests passed; the three
+published Skill pages passed 9/9 headless Chrome cases at
+1440/390/320 px, checking rendered content and no script errors
+or overflow. This verifies the selected counter-Skill boundary,
+not every possible Stealth/mixed-activation exception. The
+frozen 367-record inventory remains unchanged.
+
+## Look Out! as an exceptional allied ARO (2026-10-16)
+
+N5.3 English p. 81 permits a Trooper with LoF to an enemy
+declaring or performing an Order to declare Look Out! as
+an ARO. The Reactive Player selects other allied Troopers
+immediately; those allies may make Dodge (PH-3) Rolls to
+adjust LoF/facing without displacement and are counted
+as having declared an ARO. The source example explicitly
+includes an ally outside the enemy's LoF and ZoC. They
+cannot already have declared another ARO. Their Dodge
+roll is normally unopposed, but may be Face to Face when
+subject to an Attack that Dodge can oppose.
+
+The prior curated explanation omitted selection timing,
+special ARO eligibility and roll opposition. The owning
+record now cites N5.3 p. 81 directly, preserving its Wiki
+revision, No Roll ARO category and Dodge-modifier relation.
+This grant is restricted to the specified Dodge action.
+
+Pinned PDF and curated tests plus 3/3 browser checks
+at 1440/390/320 px pass. The frozen 367-record audit
+is not changed or marked complete. Other conditional
+ARO permissions and numerical variants remain open.
+
+## Reload, Baggage and Place Deployable ARO timing (2026-10-16)
+
+Pinned English N5.3 p. 83 defines Reload as Short Skill/ARO.
+The user needs an expended/Unloaded item, remains subject to
+ordinary ARO eligibility, and must be inside an eligible
+allied Baggage holder's Zone of Control. Its effect is limited
+to one allied Trooper per Order and does not restore already
+deployed items. Baggage p. 120 supplies a separate automatic
+recovery effect in the States Phase; that is not a new
+Reload declaration in the current Order.
+
+Place Deployable p. 82 permits Short Skill/ARO placement but
+requires LoF to the Active Trooper during the Reactive Turn.
+When an item also has Perimeter, the source permits placement
+fully inside ZoC with a passable path instead of Silhouette
+contact. The exception changes placement geometry, not ARO
+eligibility. The item is placed at the Conclusion of the Order,
+with activation and its own reactions only in later Orders.
+The existing FAQ ruling about an occupied placement location
+remains separate and unchanged.
+
+The existing categories, constraints, interaction relations and
+underlying mechanics already matched the official source.
+Added primary N5.3 citations to Reload (p. 83) and Baggage
+(p. 120) and clarifications to Reload and Place Deployable,
+preserving historical Wiki and FAQ provenance. Regression tests
+check category, constraints, source clauses and complementary
+timing. The published Reload and Place Deployable Skill pages
+passed 6/6 responsive browser checks at 1440/390/320 px.
+The frozen historical 367-record inventory is unchanged.
+This is selected ARO/timing acceptance, not whole-corpus 1.0.
+
+## Discover retry and ARO reveal sequence (2026-10-16)
+
+Pinned English N5.3 p. 77 defines Discover as a Basic Short
+Skill/ARO with a mandatory LoF to the target. The same
+Trooper cannot declare Discover against the same target
+twice in one Order. After failing to Discover a Marker,
+that Trooper cannot retry the **same Marker** until the
+next Player Turn, regardless of whether it represented
+Camouflage or Impersonation. An allied Trooper may try
+independently; the original Trooper may target a different
+Marker. Once a revealed Trooper enters a Marker State again,
+it counts as a different Marker for this restriction.
+
+The earlier curated wording incorrectly qualified the failure
+lockout as if it applied only to IMP-1/IMP-2 Markers, and
+did not explicitly state the LoF requirement. The corrected
+facts now use the general Marker rule and explain the
+Discover + Attack procedure: if the Camouflaged target
+declares a revealing ARO, the Discover Roll is unnecessary;
+otherwise the Roll must succeed before resolving the
+Attack. The owning p. 77 PDF citation, older Wiki source,
+Basic Short Skill/ARO classification and reveal relations
+are preserved. No other Skill mechanics changed.
+
+Pinned-source and curated regression tests plus 3/3
+responsive browser checks at 1440/390/320 px passed.
+The frozen 367-record historical inventory remains
+unchanged, and whole-corpus 1.0 acceptance is still open.
+
+## Cautious Movement and Stealth ARO suppression (2026-10-16)
+
+The pinned N5.3 English rulebook (p. 32) defines Cautious
+Movement as a Long Skill, with its ordinary no-ARO effect
+depending on the beginning **and** ending positions being
+outside the LoF and ZoC of all enemy Models and Markers.
+A Hackable Trooper in Model form must additionally avoid
+enemy Hacker Hacking Areas at both endpoints; a non-Hackable
+Trooper does not grant AROs from that Hacking Area condition
+alone. Hidden Deployment units are neither Models nor Markers
+for this LoF/ZoC reaction rule. These are conditional
+endpoints, not unconditional reaction immunity.
+
+N5.3 p. 112 separately permits a Stealth user in the Active
+Turn to declare Cautious Movement within enemy ZoC/Hacking
+Areas, still granting reactions to enemies with LoF.
+Combat Instinct and Sixth Sense negate Stealth protection,
+and Deployable equipment follows independent triggering
+rules. The curated Cautious Movement record retains its
+Long Skill classification, existing restrictions and
+historical Wiki reference. It gained explicit primary
+PDF provenance and four source-scoped explanations; no
+new mechanics, relation types, or ARO engine were added.
+
+Two pinned-source/curation tests passed. Its published page
+also passed 3/3 headless browser checks at 1440/390/320 px.
+The original 367-record audit remains frozen and does not
+become accepted on the strength of this bounded verification.
+
+## Alert! and automatic Conclusion timing (2026-10-16)
+
+Pinned English N5.3 p. 77 identifies Alert! as an Optional,
+No Roll **Automatic Skill**, not an ARO. The current Trooper
+must not have been activated by an Order **or an ARO** in
+the same Order. The Trooper or an allied Trooper inside its
+ZoC must have been the target of an Attack. At Conclusion,
+**after Saving Rolls**, eligible Troopers may turn on the
+spot to change their LoF angle without displacement,
+additional Rolls or generating new AROs.
+
+The existing curated clarification incorrectly said Alert!
+requirements were checked "when it is declared"; the
+automatic rule is not declared. Its corrected explanation
+and requirement explicitly exclude previous AROs, preserve
+the original source-reviewed requirement and turn clauses,
+and separate this effect from the declared allied Dodge
+ARO of Look Out!. The record retains its Automatic type,
+Optional/No Roll labels and historical Wiki reference,
+while adding N5.3 p. 77 as direct provenance.
+
+Both curated and pinned-PDF tests passed. A newly built
+rules DB was checked in the browser at 1440, 390 and 320
+px: 3/3 Skill page checks passed for the Automatic badge,
+the new scope and timing clauses, and no page errors or
+horizontal overflow. This is bounded acceptance; the
+frozen 367-record inventory is unchanged and full 1.0
+corpus acceptance remains open.
+
+## Cyberplug Controller ARO split (2026-10-16)
+
+Pinned English N5.3 pp. 107-108 distinguish activating a
+Connected Peripheral (Cyberplug) from having the Controller
+perform an independent reaction. During an Active Turn, the
+Controller still activates but resolves the shared action as
+Idle; an enemy with a valid ARO can target that Controller,
+and an attack against the Idling Controller is a Normal Roll
+(p. 108, example 1). The Connected Peripheral's separate
+attack does not oppose an attack targeting the Controller.
+
+During the Reactive Turn, selecting a Connected Cyberplug
+causes the Controller to declare the ARO but perform Idle;
+the other Autonomous Cyberplug may react independently.
+Alternatively, the Controller performs its own ARO while
+both Cyberplugs operate as Autonomous, each subject to
+ordinary ARO eligibility (pp. 107-108, examples 2-3).
+Neither choice creates an ARO without a qualifying trigger.
+
+The prior REA-017 subtype model and relationships already
+represented this correctly. Two clarifications were added to
+the Cyberplug subtype; no activation engine, profile mode,
+Army source, or shared Peripheral rule was changed.
+Two source/curation regressions and responsive browser
+checks provide bounded verification. The frozen 367-record
+inventory and the whole-corpus acceptance gate remain open.
+
+## Speculative Attack Circular Template ARO sequence (2026-10-16)
+
+Pinned English N5.3 p. 48 establishes four procedural steps:
+designate the Main Target; choose a legal Circular Template
+impact point affecting it; determine all other affected Troopers
+and their ARO eligibility; then measure range, apply MODs and
+make the Rolls. The Main Target and point may be outside
+the shooter's LoF, but valid trajectory, impact position,
+Burst 1 and the printed MOD restrictions remain mandatory.
+
+The official example confirms that a target behind a wall
+may declare Dodge against a template that affects it, with
+a -3 Dodge MOD for lacking LoF to the attacker. That Dodge
+opposes the Speculative Attack Roll Face to Face. The attacker
+uses Range and Speculative Attack -6, not target Mimetism or
+Cover MODs. The rule does not grant reactions to unaffected
+Troopers or waive ordinary eligibility for unrelated actions.
+
+The existing curated Long Skill and modifier relations already
+matched this outcome but omitted the template-to-ARO order.
+Added three clarifications and N5.3 p. 48 primary provenance,
+preserving the original reviewed requirements, effects,
+restrictions and Wiki citation. Two pinned-source/curated
+tests and 3/3 responsive browser checks passed. The frozen
+367-record inventory and whole-corpus 1.0 gate remain open.
+
+## Suppressive Fire State and G: Jumper activation (2026-10-16)
+
+English N5.3 p. 85 defines the Suppressive Fire Long Skill
+as the action that enters the State. Its G: Jumper clause
+explicitly preserves a Proxy's Suppressive Fire when another
+Proxy activates. The normal automatic cancellation triggered
+by the original Trooper's declaration of an Order does not
+mean that a separate Proxy's activation removes the State.
+
+N5.3 p. 171 separately defines the State's reactive benefit:
+the chosen weapon uses SF Mode and may fire Burst 3 during
+a valid BS Attack ARO, directed at only one target even
+against multiple activated enemies. A different ARO, use
+of an ineligible weapon, and the other named cancellation
+conditions still terminate the State. The State does not
+grant an unrestricted ARO or change the underlying weapon
+PS and Ammunition.
+
+The curated State already modeled the B3, single-target,
+and cancellation restrictions. Added the missing G: Jumper
+exception and the declaration-versus-ARO distinction to
+the owning Long Skill record, plus pinned English N5.3
+pp. 85/171 citations. Existing Wiki provenance, metadata
+types, and relations remain intact. Two focused source and
+curation tests passed. Both published Skill/State pages
+passed 6/6 headless browser checks at 1440/390/320 px.
+This is bounded acceptance; the frozen 367-record inventory
+and final whole-corpus 1.0 gate remain open.
+
+## Hacking Area citation and split ARO windows (2026-10-16)
+
+Pinned English N5.3 p. 55 defines Hacking Area and its
+ARO eligibility, not p. 56 as previously cited. Page 56
+instead contains HoloMask/Repeater equipment rules. The
+source citation on the owning Hacking Area rule was corrected
+to p. 55, preserving the archived Wiki provenance. Page
+57 now has a separate citation for its two worked examples.
+
+In the p. 57 Active Hacker example, the enemy Hacker can
+declare an ARO through Hacking Area while the Active Hacker
+is outside ordinary LoF and ZoC. Enemy Heavy Infantry
+outside both has no ARO to the first Idle, but receives a
+Reset ARO when the second Short Skill targets it with
+a Comms Attack. In the Camouflaged example, an enemy
+Hacker can delay an ARO against a Marker inside Hacking
+Area, declaring a reaction in that example only when
+the Marker reveals itself with the second Short Skill.
+A potential target or hidden identity alone does not
+confer unrestricted permission to react or hack.
+
+The existing Hacking Area derivation, Repeater links,
+enemy-Repeater limitations, and HoloMask exceptions
+remain unchanged. Two curated and SHA-256-pinned PDF
+tests confirm the citation and bounded procedures.
+A fresh rules DB rendered the published page at
+1440/390/320 px. The initial browser run missed body text
+at 390 px despite HTTP 200; three subsequent complete
+runs passed all widths (9/9 cases), so that intermittent
+condition is not treated as a confirmed product defect.
+The original 367-record audit remains frozen, and full
+1.0 corpus acceptance is still open.
+
+## Army BTS=3 loadout-only replacement presentation (2026-10-16)
+
+The currently built Army Skill dictionary includes four
+`Attribute=value` source names: BS=11 (279), BS=12 (278),
+CC=21 (274), and BTS=3 (280). The first three are already
+curated as source-specific BS/CC Attack Skill variants.
+The fourth is **not an N5 Skill**. It is classified as
+`attribute-override` by
+`config/catalogs/skill-source-classifications.json`,
+and its absence from the rules-backed Skills catalog
+is correct.
+
+The built Army data associates BTS=3 with three distinct
+Corregidor Alguacil Gatta loadout payloads. Its shared
+Unit Profile has BTS 0; those loadouts carry the BTS=3
+source occurrence. Previously, the Unit page rendered
+each occurrence in the Skills row as a link to
+`/skills/bts-3`, although the catalog deliberately
+does not expose that Skill route.
+
+Unit presentation now consults the existing maintained
+source classifications and groups BTS=3 in a separate
+loadout **Attribute overrides** row, rendered as text.
+Raw Army occurrences, profile attributes, other loadout
+items, and the rules-backed Skills catalog remain intact.
+No Skill/ARO types or new rules mechanics are introduced.
+
+A synthetic regression verifies classification-driven
+separation and frontend nonlink presentation; existing
+tests continue to protect catalog exclusion. Browser
+acceptance on the real Gatta Unit page passed at
+1440/390/320 px (3/3), checking all three occurrences,
+no broken Skill links and no horizontal overflow.
+The count is derived from the currently built Army
+data, not an independent frozen Army archive.
+The original 367-record audit and final 1.0 acceptance
+gate remain open.
 
 ## Implementation and completion handoff
 

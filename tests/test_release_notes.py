@@ -15,11 +15,19 @@ from infinity_db.web.release_notes import (
 def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     releases = load_release_notes()
 
-    assert releases[0].version == "0.10.1"
-    assert releases[0].released_on == date(2026, 10, 10)
+    assert releases[0].version is None
+    assert releases[0].label == "Unreleased"
     assert releases[0].sections[0].heading == "Player summary"
-    assert any("scenarios" in item for item in releases[0].player_summary)
+    assert any("Weapon profiles now offer" in item for item in releases[0].player_summary)
     assert [section.heading for section in releases[0].detail_sections] == [
+        "Added", "Changed", "Fixed",
+    ]
+
+    current = releases[1]
+    assert current.version == "0.10.1"
+    assert current.released_on == date(2026, 10, 10)
+    assert any("scenarios" in item for item in current.player_summary)
+    assert [section.heading for section in current.detail_sections] == [
         "Added",
         "Changed",
         "Fixed",
@@ -34,6 +42,72 @@ def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
         "Fixed",
         "Upgrade notes",
     ]
+
+
+@pytest.mark.parametrize("heading", ["## Unreleased", "## [Unreleased]"])
+def test_release_notes_accepts_both_unreleased_headings(heading: str) -> None:
+    releases = parse_release_notes(
+        f"# Changelog\n\n{heading}\n\n### Player summary\n\n- Upcoming change.\n"
+    )
+    assert len(releases) == 1
+    assert releases[0].version is None
+    assert releases[0].player_summary == ("Upcoming change.",)
+
+
+@pytest.mark.parametrize("heading", ["## Unreleased", "## [Unreleased]"])
+@pytest.mark.parametrize(
+    "empty_content",
+    ["", "\n### Player summary\n", "\n### Player summary\n\n- No player-facing changes.\n"],
+)
+def test_empty_unreleased_is_omitted_from_release_history(
+    heading: str, empty_content: str,
+) -> None:
+    releases = parse_release_notes(
+        "# Changelog\n\n"
+        f"{heading}\n{empty_content}\n"
+        "## [0.10.1] - 2026-10-10\n\n"
+        "### Player summary\n\n- Historical update.\n"
+    )
+    assert len(releases) == 1
+    assert releases[0].version == "0.10.1"
+    rendered = render_release_notes_html(releases)
+    assert 'id="changes-unreleased"' not in rendered
+    assert 'id="changes-0-10-1"' in rendered
+    assert "Historical update." in rendered
+
+
+@pytest.mark.parametrize("heading", ["## Unreleased", "## [Unreleased]"])
+def test_changelog_with_only_empty_unreleased_has_no_rendered_releases(
+    heading: str,
+) -> None:
+    releases = parse_release_notes(f"# Changelog\n\n{heading}\n")
+    assert releases == ()
+    assert render_release_notes_html(releases) == ""
+
+
+def test_changelog_still_requires_a_release_heading() -> None:
+    with pytest.raises(ReleaseNotesError, match="no release headings"):
+        parse_release_notes("# Changelog\n\nNo releases yet.\n")
+
+
+def test_unreleased_operator_changes_remain_visible_with_no_player_changes() -> None:
+    releases = parse_release_notes(
+        "# Changelog\n\n## [Unreleased]\n\n"
+        "### Player summary\n\n- No player-facing changes.\n\n"
+        "### Changed\n\n- **Deployment:** Updated operator instructions.\n\n"
+        "## [0.10.1] - 2026-10-10\n\n"
+        "### Player summary\n\n- Historical update.\n"
+    )
+    assert len(releases) == 2
+    assert releases[0].version is None
+    rendered = render_release_notes_html(releases)
+    assert 'id="changes-unreleased"' in rendered
+    assert "Updated operator instructions." in rendered
+
+
+def test_published_releases_still_require_content() -> None:
+    with pytest.raises(ReleaseNotesError, match="no release-note sections"):
+        parse_release_notes("# Changelog\n\n## [0.10.1] - 2026-10-10\n")
 
 
 def test_release_notes_renderer_escapes_text_and_preserves_supported_inline_markup() -> None:

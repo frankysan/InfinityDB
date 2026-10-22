@@ -52,6 +52,19 @@ def _read_policy(path: Path, pdf_hash: str) -> dict[str, Any]:
                 or len(examples) != len(set(examples))
                 or not isinstance(clauses, list) or not clauses):
             raise WeaponryFamilyAuditError(f'Invalid Weaponry family contents: {name}')
+        edges = family.get('requiredRelations', [])
+        if (not isinstance(edges, list)
+                or any(not isinstance(edge, dict)
+                       or set(edge) != {'from', 'type', 'to'}
+                       or not all(isinstance(edge[k], str) and edge[k].strip()
+                                  for k in ('from', 'type', 'to'))
+                       for edge in edges)):
+            raise WeaponryFamilyAuditError(f'Invalid relation evidence: {name}')
+        identities = [
+            (edge['from'], edge['type'], edge['to']) for edge in edges
+        ]
+        if len(identities) != len(set(identities)):
+            raise WeaponryFamilyAuditError(f'Duplicate required relation: {name}')
         for clause in clauses:
             if not isinstance(clause, dict):
                 raise WeaponryFamilyAuditError('Invalid Weaponry clause')
@@ -83,8 +96,9 @@ def compare_family_clauses(
     policy: dict[str, Any], pages: dict[int, str],
     rules: list[tuple[str, str, str, str, str]],
     army: list[tuple[str, str]],
+    relations: list[tuple[str, str, str, str]] | None = None,
 ) -> list[dict[str, Any]]:
-    """Check PDF clauses, curated concept identities and selected Army examples.
+    """Check PDF clauses, curated concepts, typed edges and Army examples.
 
     Curated concept existence is NOT clause implementation or browser coverage.
     """
@@ -92,6 +106,7 @@ def compare_family_clauses(
     names = {(collection, _identity(name)) for collection, _, _, name, _ in rules}
     summaries = {(collection, record_id): summary
                  for collection, record_id, _, _, summary in rules}
+    relation_set = set(relations) if relations is not None else None
     army_names: dict[str, list[str]] = {}
     for name, mode in army:
         army_names.setdefault(_identity(name), []).append(mode)
@@ -128,6 +143,20 @@ def compare_family_clauses(
                     'anchor': review['summaryAnchor'],
                 } if review['status'] == 'represented' else None,
             })
+        required = family.get('requiredRelations', [])
+        if required and relation_set is None:
+            raise WeaponryFamilyAuditError(
+                f'Missing typed-relation input for {family["name"]}'
+            )
+        relation_checks = [
+            {
+                'from': edge['from'], 'type': edge['type'], 'to': edge['to'],
+                'present': (
+                    'n5-core-v5.3', edge['from'], edge['type'], edge['to']
+                ) in (relation_set or set()),
+            }
+            for edge in required
+        ]
         examples = [
             {'name': name, 'modes': sorted(army_names.get(_identity(name), [])),
              'found': _identity(name) in army_names}
@@ -137,7 +166,8 @@ def compare_family_clauses(
             'name': family['name'], 'page': page,
             'namedCuratedFamilyPresent': ('n5-core-v5.3', _identity(family['name'])) in names,
             'selectedArmyExamples': examples, 'clauses': family_rows,
-            'caveat': 'Source and concept identities only; not clause or UI completeness',
+            'requiredRelationChecks': relation_checks,
+            'caveat': 'Selected source, summary and typed-edge evidence; not completeness',
         })
     return result
 
@@ -158,9 +188,13 @@ def audit_family_clauses(
         rules = db.execute(
             'SELECT collection_id, id, kind, name, summary FROM records'
         ).fetchall()
+        relations = db.execute(
+            'SELECT collection_id, record_id, relation_type, related_record_id '
+            'FROM record_relations'
+        ).fetchall()
     with sqlite3.connect(f'file:{army_db.resolve().as_posix()}?mode=ro', uri=True) as db:
         army = db.execute("SELECT name, COALESCE(mode, '') FROM metadata_weapons").fetchall()
-    families = compare_family_clauses(policy, pages, rules, army)
+    families = compare_family_clauses(policy, pages, rules, army, relations)
     return {
         'format': 'InfinityDB N5 Weaponry family source-to-reference review',
         'formatVersion': 2, 'status': 'partial-family-evidence-not-rule-completeness',
@@ -170,20 +204,26 @@ def audit_family_clauses(
         'reviewedClauseCount': sum(len(f['clauses']) for f in families),
         'missingConceptCount': sum(len(c['missingCuratedConceptIds'])
                                    for f in families for c in f['clauses']),
+        'requiredRelationCount': sum(len(f['requiredRelationChecks']) for f in families),
+        'missingRequiredRelations': [
+            dict(family=f['name'], **edge)
+            for f in families for edge in f['requiredRelationChecks']
+            if not edge['present']
+        ],
         'semanticCoverageCounts': {
             status: sum(c['semanticCoverage'] == status
                         for f in families for c in f['clauses'])
             for status in ('represented', 'component-only', 'not-represented')
         },
         'limitations': [
-            'Reviewed source anchors cover selected Mines and Perimeter Weapons clauses only.',
+            'Reviewed source anchors cover selected Weaponry clauses, not every source sentence.',
             'Family variants, exceptions and additional sections require separate review.',
             'Represented means the reviewed clause is explicit in a cited curated summary.',
             'Component-only means related mechanics exist but the family-specific rule is missing.',
-            'Summary coverage does not establish outgoing relation or browser navigation coverage.',
+            'Only explicitly pinned typed edges are checked, not all possible relationships.',
             'A missing named family record does not imply the rules are absent elsewhere.',
             'Army identities are explicitly selected examples, not an exhaustive family census.',
-            'Relationships and browser behavior have not been adjudicated.',
+            'Complete relationship coverage and browser behavior have not been adjudicated.',
         ],
     }
 
@@ -198,6 +238,8 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- Review policy SHA-256: `{report['reviewSha256']}`",
         f"- Source clauses checked: **{report['reviewedClauseCount']}**.",
         f"- Unresolved curated concept identities: **{report['missingConceptCount']}**.",
+        f"- Pinned typed relations: **{report.get('requiredRelationCount', 0)}**; "
+        f"missing: **{len(report.get('missingRequiredRelations', []))}**.",
         '- Semantic summary coverage: ' + ', '.join(
             f'{status} **{count}**'
             for status, count in report['semanticCoverageCounts'].items()
@@ -212,6 +254,12 @@ def markdown_report(report: dict[str, Any]) -> str:
                 for row in family['selectedArmyExamples']
             ) + '.',
         ])
+        for edge in family.get('requiredRelationChecks', []):
+            status = 'present' if edge['present'] else 'MISSING'
+            lines.append(
+                f"- Typed relation {edge['from']} --{edge['type']}--> "
+                f"{edge['to']}: **{status}**."
+            )
         for clause in family['clauses']:
             lines.append(
                 f"- `{clause['id']}`: source anchor `{clause['sourceAnchor']}`; "

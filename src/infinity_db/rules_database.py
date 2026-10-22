@@ -225,6 +225,8 @@ def _create_schema(connection: sqlite3.Connection) -> None:
 
 
 def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
+    from infinity_db.faq_rulings import validate_faq_ruling_references
+
     collection_ids: set[str] = set()
     scenario_collection_titles: dict[str, tuple[str, Path]] = {}
     scenario_collection_revisions: dict[tuple[str, str], Path] = {}
@@ -317,12 +319,22 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                             f"{target_id!r} in {path} does not resolve"
                         )
 
+    validate_faq_ruling_references(documents, definitions_by_id)
+
+    # Weapon Properties are reviewed application vocabulary, not rules records.
+    # Validate these explicit references against their maintained registry,
+    # without silently creating additional canonical Ammunition definitions.
+    from infinity_db.weapon_properties import load_weapon_properties
+
+    current_property_ids = {
+        f"weapon-property:{entry['id']}" for entry in load_weapon_properties()
+    }
     for path, document in documents:
         if document["collection"]["status"] != "current":
             continue
         for text_context, text in maintained_text_fields(document):
             for target_id in maintained_text_targets(text, context=f"{path}:{text_context}"):
-                if target_id not in current_ids:
+                if target_id not in current_ids and target_id not in current_property_ids:
                     raise ValueError(
                         f"Maintained-text reference {target_id!r} in "
                         f"{path}:{text_context} does not resolve to a current semantic record"
@@ -655,6 +667,36 @@ def _variant_semantics(value: str | None) -> dict[str, Any] | None:
         }
         if "positiveSign" in parameter:
             item["positive_sign"] = parameter["positiveSign"]
+        if parameter["kind"] == "reviewed-extra":
+            item["extra_values"] = [
+                {
+                    "extra_id": entry["extraId"],
+                    "extra_type": entry["extraType"],
+                    "raw_value": entry["rawValue"],
+                    "effect": {
+                        **{
+                            key: value
+                            for key, value in entry["effect"].items()
+                            if key != "appliesTo"
+                        },
+                        "applies_to": entry["effect"]["appliesTo"],
+                    },
+                }
+                for entry in parameter["extraValues"]
+            ]
+        if parameter["kind"] == "numeric-mod":
+            item["owner"] = parameter["owner"]
+            item["target"] = parameter["target"]
+            item["applies_to"] = list(parameter["appliesTo"])
+            item["extra_values"] = [
+                {
+                    "extra_id": entry["extraId"],
+                    "extra_type": entry["extraType"],
+                    "raw_value": entry["rawValue"],
+                    "modifier": entry["modifier"],
+                }
+                for entry in parameter["extraValues"]
+            ]
         parameters.append(item)
     result: dict[str, Any] = {"inheritance": raw["inheritance"]}
     if parameters:
@@ -1108,9 +1150,10 @@ class RulesDatabase:
             return records[0]
 
     def composed_records_by_kind(
-        self, kind: str, *, scenario_id: str | None = None
+        self, kind: str, *, scenario_id: str | None = None,
+        include_army_links: bool = False,
     ) -> list[dict[str, Any]]:
-        """Return current semantic records of one kind with supplements attached."""
+        """Return current records of a kind, optionally including Army route links."""
         with self._connect() as connection:
             rows = connection.execute(
                 "SELECT r.* FROM records AS r JOIN collections AS c "
@@ -1121,6 +1164,8 @@ class RulesDatabase:
             ).fetchall()
             records = self._compose_records(self._records_from_rows(connection, rows))
             self._attach_reverse_relations(connection, records)
+            if include_army_links:
+                self._attach_current_army_links(connection, records)
             return records
 
     def scenario_publications(self, reference: str) -> list[dict[str, Any]]:
@@ -1431,6 +1476,66 @@ class RulesDatabase:
                 result[skill_ref] = value
             return result
 
+    def skill_numeric_mod_semantics(self) -> dict[ArmyLinkRef, dict[str, Any]]:
+        """Return explicit, reviewed numeric-MOD extra maps; never parse Army labels."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.external_id AS skill_ref, r.variant_json "
+                "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = 'skill' AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND l.entity = 'skill' "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id"
+            ).fetchall()
+            result: dict[ArmyLinkRef, dict[str, Any]] = {}
+            for row in rows:
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict):
+                    continue
+                for parameter in variant.get("occurrence_parameters", []):
+                    if parameter.get("kind") != "numeric-mod":
+                        continue
+                    skill_ref = _army_link_ref(row["skill_ref"])
+                    existing = result.get(skill_ref)
+                    if existing is not None and existing != parameter:
+                        raise ValueError(
+                            f"Skill {skill_ref!r} has conflicting numeric-MOD semantics"
+                        )
+                    result[skill_ref] = dict(parameter)
+            return result
+
+    def skill_reviewed_extra_semantics(self) -> dict[ArmyLinkRef, dict[str, Any]]:
+        """Return source-ID-bound typed extra effects, without interpreting raw labels."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.external_id AS skill_ref, r.variant_json "
+                "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = 'skill' AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND l.entity = 'skill' "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id"
+            ).fetchall()
+            result: dict[ArmyLinkRef, dict[str, Any]] = {}
+            for row in rows:
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict):
+                    continue
+                for parameter in variant.get("occurrence_parameters", []):
+                    if parameter.get("kind") != "reviewed-extra":
+                        continue
+                    skill_ref = _army_link_ref(row["skill_ref"])
+                    existing = result.get(skill_ref)
+                    if existing is not None and existing != parameter:
+                        raise ValueError(
+                            f"Skill {skill_ref!r} has conflicting reviewed-extra semantics"
+                        )
+                    result[skill_ref] = dict(parameter)
+            return result
+
     def catalog_source_variant_semantics(self, entity: str) -> dict[ArmyLinkRef, dict[str, Any]]:
         """Return reviewed exact-source variant semantics for one catalog domain."""
         if entity not in {"skill", "equipment", "weapon"}:
@@ -1625,6 +1730,43 @@ class RulesDatabase:
             }
             for item in self.declaration_categories("skill")
         ]
+
+    def faq_rulings_for_topic(
+        self,
+        topic_id: str,
+        *,
+        rules_revision: str,
+        as_of: str,
+        season_id: str | None = None,
+        season_revision: str | None = None,
+        scenario_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return reviewed FAQ clarifications scoped to the explicit game context."""
+        from infinity_db.faq_rulings import select_applicable_faq_rulings
+
+        records = self.records_by_kind("faq-ruling")
+        with self._connect() as connection:
+            for record in records:
+                selected = record["facts"]["selectedCitation"]
+                source = connection.execute(
+                    "SELECT id, title, version, published_date, url, language "
+                    "FROM sources WHERE collection_id = ? AND id = ?",
+                    (record["collection"]["id"], selected["sourceId"]),
+                ).fetchone()
+                if source is None:
+                    raise ValueError(
+                        f"FAQ ruling {record['id']!r} has no selected source"
+                    )
+                record["selected_source"] = dict(source)
+        return select_applicable_faq_rulings(
+            records,
+            topic_id=topic_id,
+            rules_revision=rules_revision,
+            as_of=as_of,
+            season_id=season_id,
+            season_revision=season_revision,
+            scenario_id=scenario_id,
+        )
 
     def records_by_kind(self, kind: str, *, current_only: bool = True) -> list[dict[str, Any]]:
         """Return curated records of one kind, preferring current collections."""

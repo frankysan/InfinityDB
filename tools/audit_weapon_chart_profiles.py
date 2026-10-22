@@ -209,12 +209,16 @@ def _printed_auxiliary_profiles(
                         if 95 <= x < 260 and re.fullmatch(r"ARM=\d+", word)})
     rows: list[dict[str, str | int]] = []
     for y in baselines:
-        # Overlapping PDF text runs can duplicate exactly the same word.
-        names = {(round(x, 1), word) for x, wy, word in words
-                 if 12 <= x < 90 and abs(wy - y) < 1}
+        # The printed name can wrap above/below the profile baseline.
+        # 6.1 pt captures both lines without crossing adjacent chart rows.
+        # Deduplicate overlapping PDF text runs by position and word.
+        names = {(round(x, 1), round(wy, 1), word) for x, wy, word in words
+                 if 12 <= x < 90 and abs(wy - y) <= 6.1}
         profile_words = {(round(x, 1), word) for x, wy, word in words
                          if 95 <= x < 267 and abs(wy - y) < 1}
-        name = " ".join(word for _, word in sorted(names))
+        name = " ".join(word for _, _, word in sorted(
+            names, key=lambda entry: (entry[1], entry[0])
+        ))
         fields = " ".join(word for _, word in sorted(profile_words))
         if all(f"{key}=" in fields for key in ("ARM", "BTS", "STR", "S")):
             rows.append({"page": page, "name": name, "profile": fields})
@@ -230,28 +234,52 @@ def _profile_attributes(value: str) -> dict[str, int]:
 def compare_auxiliary_profiles(
     rows: list[dict[str, str | int]], metadata: dict[str, list[dict[str, Any]]]
 ) -> list[dict[str, Any]]:
-    """Check extra chart object profiles independently of the five-field rows."""
-    result = []
+    """Compare object attributes independently of ordinary Weapon attack rows.
+
+    A printed Mine plural resolves to its Army singular identity. Named
+    modes such as Disco Ball resolve under the parent Weapon. Ambiguous and
+    unmatched rows remain reported instead of being silently discarded.
+    """
+    result: list[dict[str, Any]] = []
     for row in rows:
         name = str(row["name"])
-        # Only independently named *modes* are in this focused pass. Other
-        # object/equipment profile rows require their own domain audit.
-        options = [
-            item for group in metadata.values() for item in group
-            if item.get("mode") and _identity(item["mode"]) == _identity(name)
-        ]
-        if not options:
-            continue
         printed = _profile_attributes(str(row["profile"]))
+        parent, mode = _printed_name_and_mode(name)
+        options = [
+            item for item in _army_options(parent, metadata)
+            if _mode_identity(str(item.get("mode") or "")) == _mode_identity(mode)
+        ]
+        if not options and not mode:
+            options = [
+                item for group in metadata.values() for item in group
+                if item.get("mode")
+                and _mode_identity(str(item["mode"])) == _mode_identity(name)
+            ]
+        army: dict[str, int] = {}
+        differences: list[dict[str, int | str]] = []
         if len(options) == 1 and len(printed) == 4:
-            army = _profile_attributes(options[0].get("profile", ""))
-            status = "fields-match" if printed == army else "candidate-discrepancy"
+            army = _profile_attributes(str(options[0].get("profile", "")))
+            if len(army) == 4:
+                differences = [
+                    {"field": field, "pdf": printed[field], "army": army[field]}
+                    for field in ("ARM", "BTS", "STR", "S")
+                    if printed[field] != army[field]
+                ]
+                status = "candidate-discrepancy" if differences else "fields-match"
+            else:
+                status = "unresolved-auxiliary-profile"
         else:
-            army = {}
-            status = "unresolved-auxiliary-profile"
-        result.append({**row, "printedAttributes": printed,
-                       "armyAttributes": army, "status": status})
+            status = "unresolved-auxiliary-identity" if len(options) != 1 else (
+                "unresolved-auxiliary-profile"
+            )
+        result.append({
+            **row, "printedAttributes": printed, "armyAttributes": army,
+            "status": status, "differences": differences,
+            "armyName": options[0]["name"] if len(options) == 1 else None,
+            "armyMode": options[0].get("mode") if len(options) == 1 else None,
+        })
     return result
+
 
 
 def _printed_name_and_mode(name: str) -> tuple[str, str]:
@@ -450,6 +478,7 @@ def audit_chart(pdf: Path, army_db: Path) -> dict[str, Any]:
         "formatVersion": FORMAT_VERSION,
         "status": "partial-pdf-profile-evidence-not-completeness",
         "corePdfSha256": _sha256(pdf),
+        "armyDatabaseSha256": _sha256(army_db),
         "armyMetadataProfiles": count,
         "comparison": result,
         "auxiliaryProfiles": extra,
@@ -506,11 +535,29 @@ def markdown_report(report: dict[str, Any]) -> str:
             )
     if not result["rangeCandidates"]:
         lines.append("- None in the range subset.")
-    lines.extend(["", "## Supplementary object profiles", ""])
-    for row in report.get("auxiliaryProfiles", []):
+    auxiliary = report.get("auxiliaryProfiles", [])
+    matched = sum(r["status"] in {"fields-match", "candidate-discrepancy"}
+                  for r in auxiliary)
+    mismatches = sum(r["status"] == "candidate-discrepancy"
+                     for r in auxiliary)
+    lines.extend([
+        "", "## Supplementary object profiles", "",
+        f"- Printed object profiles: **{len(auxiliary)}**; matched Army identities: "
+        f"**{matched}**; attribute discrepancies: **{mismatches}**; "
+        f"unresolved identities/profiles: **{len(auxiliary) - matched}**.", "",
+    ])
+    for row in auxiliary:
+        identity = row.get("armyName") or "unresolved Army identity"
+        if row.get("armyMode"):
+            identity += f" ({row['armyMode']})"
+        detail = "; ".join(
+            f"{d['field']}: PDF {d['pdf']} vs Army {d['army']}"
+            for d in row.get("differences", [])
+        )
         lines.append(
-            f"- p. {row['page']}: **{row['name']}**: {row['status']} "
-            f"(printed {row['printedAttributes']}, Army {row['armyAttributes']})."
+            f"- p. {row['page']}: **{row['name']}** -> {identity}: "
+            f"**{row['status']}**"
+            + (f" ({detail})" if detail else "") + "."
         )
     lines.extend([
         "", "## Important limitations", "",
@@ -519,6 +566,9 @@ def markdown_report(report: dict[str, Any]) -> str:
         "- Colored PDF vector bars provide exact slot boundaries; printed numbers,",
         "  not colors, determine range MODs. Bare signed/unsigned distinctions are retained.",
         "- Ancillary object profiles and the Discover Skill are not standalone weapons.",
+        "- Only object profiles with four printed attributes are reconciled here;",
+        "  other equipment/object rules require a separate clause-level review.",
+        "- A PDF/Army mismatch is a source difference, not a correction to either profile.",
         "- Modes are selected by an explicit printed name or a unique mode-less",
         "  default; unresolved identities remain deferred.",
         "- Combined Plasma saving cells are read from both printed baselines.",

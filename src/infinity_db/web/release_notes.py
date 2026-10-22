@@ -79,8 +79,18 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
         current_items = []
 
     def flush_release() -> None:
-        nonlocal current_sections
+        nonlocal current_heading, current_sections
         if not started:
+            return
+        # A new release may leave Unreleased as a bare heading or an empty
+        # Player summary. Keep it in the changelog, but not on What's changed.
+        if (
+            current_version is None
+            and not current_sections
+            and not current_items
+            and current_heading in (None, "Player summary")
+        ):
+            current_heading = None
             return
         flush_section()
         if not current_sections:
@@ -89,11 +99,18 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
             raise ReleaseNotesError("Release must begin with a Player summary section")
         if any(section.heading == "Player summary" for section in current_sections[1:]):
             raise ReleaseNotesError("Release contains more than one Player summary section")
+        if (
+            current_version is None
+            and len(current_sections) == 1
+            and current_sections[0].items == ("No player-facing changes.",)
+        ):
+            current_sections = []
+            return
         releases.append(ReleaseNote(current_version, current_date, tuple(current_sections)))
         current_sections = []
 
     for line_number, line in enumerate(markdown.splitlines(), start=1):
-        if line == "## Unreleased":
+        if line in {"## Unreleased", "## [Unreleased]"}:
             flush_release()
             if started:
                 raise ReleaseNotesError("Unreleased must be the first release heading")
@@ -140,7 +157,7 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
         raise ReleaseNotesError(f"Unsupported changelog structure on line {line_number}: {line!r}")
 
     flush_release()
-    if not releases:
+    if not started:
         raise ReleaseNotesError("Changelog contains no release headings")
     return tuple(releases)
 

@@ -33,7 +33,14 @@ def test_stage_selection_uses_canonical_order() -> None:
 def test_all_profile_includes_code_and_data_stages() -> None:
     args = run_checks.build_parser().parse_args(["--profile", "all"])
 
-    assert run_checks.selected_stage_names(args) == ("test", "lint", "type", "build", "rules")
+    assert run_checks.selected_stage_names(args) == (
+        "test", "lint", "docs", "type", "build", "rules"
+    )
+
+
+def test_code_profile_remains_python_only() -> None:
+    args = run_checks.build_parser().parse_args(["--profile", "code"])
+    assert run_checks.selected_stage_names(args) == ("test", "lint", "type")
 
 
 def test_data_profile_builds_army_and_rules_databases() -> None:
@@ -44,7 +51,7 @@ def test_data_profile_builds_army_and_rules_databases() -> None:
 
 def test_stage_commands_use_current_python_and_forward_targets() -> None:
     stages = run_checks.stage_definitions(
-        ("test", "lint", "type", "build", "rules"),
+        ("test", "lint", "docs", "type", "build", "rules"),
         ["tests/test_cli.py"],
         build_source=Path("data/raw/example.zip"),
     )
@@ -69,33 +76,45 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         "check",
         "tests/test_cli.py",
     )
-    assert stages[2].command == (
+    assert Path(stages[2].command[0]).name.lower().startswith("npm")
+    assert stages[2].command[1:] == ("run", "lint:docs")
+    assert stages[3].command == (
         sys.executable,
         "-m",
         "pyright",
         "--pythonpath",
         sys.executable,
     )
-    assert stages[3].command == (
+    assert stages[4].command == (
         sys.executable,
         "-m",
         "infinity_db",
         "build",
         str(Path("data/raw/example.zip")),
         "--output-dir",
-        stages[3].command[6],
+        stages[4].command[6],
         "--compact",
     )
-    assert Path(stages[3].command[6]).parent != Path("data/generated")
-    assert stages[4].command == (
+    assert Path(stages[4].command[6]).parent != Path("data/generated")
+    assert stages[5].command == (
         sys.executable,
         "-m",
         "infinity_db",
         "build-rules",
         "--output",
-        stages[4].command[5],
+        stages[5].command[5],
     )
-    assert Path(stages[4].command[5]).parent != Path("data/generated")
+    assert Path(stages[5].command[5]).parent != Path("data/generated")
+
+
+def test_docs_stage_uses_locked_local_cli_and_ignores_pytest_targets() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("docs",), ["tests/test_run_checks.py"], build_source=None
+    )
+    assert stage.name == "docs"
+    assert Path(stage.command[0]).name.lower().startswith("npm")
+    assert stage.command[1:] == ("run", "lint:docs")
+    assert "npx" not in stage.command
 
 
 def test_test_stage_can_include_full_asset_tests() -> None:
@@ -330,6 +349,188 @@ def test_run_stage_streams_output_and_reports_failure(
     assert "first line" in output
     assert "second line" in output
     assert "Result: FAIL" in output
+
+
+def test_docs_stage_runs_markdownlint_before_local_link_validation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("docs", ("npm", "run", "lint:docs")),
+            reporter,
+        )
+
+    assert result.status == "PASS"
+    assert commands == [
+        ("npm", "run", "lint:docs"),
+        (sys.executable, "-m", "tools.check_doc_links"),
+    ]
+
+
+def test_rules_stage_runs_interaction_audit_before_database_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+        )
+
+    assert result.status == "PASS"
+    assert commands[0] == (
+        sys.executable, "-m", "tools.audit_rules_interactions",
+        "--check-output", "docs/rules-interaction-checklist.md",
+        "--require-release", "1.0.0",
+    )
+    assert commands[1] == (sys.executable, "-m", "infinity_db", "build-rules")
+
+
+def test_source_occupancy_gate_requires_rules_stage(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    result = run_checks.main(["--stage", "lint", "--source-occupancy-gate"])
+
+    assert result == run_checks.EXIT_RUNNER_ERROR
+    assert "--source-occupancy-gate requires the rules stage" in capsys.readouterr().err
+
+
+def test_opt_in_source_occupancy_gate_runs_before_rules_review_and_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+            source_occupancy_gate=True,
+        )
+
+    assert result.status == "PASS"
+    assert commands == [
+        (
+            sys.executable, "-m", "tools.audit_source_presentation",
+            "data/generated/infinity.db", "--require-no-occupied-gaps",
+        ),
+        (
+            sys.executable, "-m", "tools.audit_rules_interactions",
+            "--check-output", "docs/rules-interaction-checklist.md",
+            "--require-release", "1.0.0",
+        ),
+        (sys.executable, "-m", "infinity_db", "build-rules"),
+    ]
+
+
+def test_source_occupancy_cli_flag_reaches_rules_stage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    invoked: list[tuple[str, bool]] = []
+
+    def fake_run_stage(stage, reporter, *, source_occupancy_gate=False):
+        invoked.append((stage.name, source_occupancy_gate))
+        return run_checks.StageResult(stage.name, "PASS", 0, 0.0)
+
+    monkeypatch.setattr(run_checks, "run_stage", fake_run_stage)
+    assert run_checks.main(["--stage", "rules", "--source-occupancy-gate"]) == 0
+    assert invoked == [("rules", True)]
+
+    invoked.clear()
+    assert run_checks.main(["--stage", "rules"]) == 0
+    assert invoked == [("rules", False)]
+
+
+def test_source_occupancy_failure_blocks_rules_review_and_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("Source-field gate: FAIL (paired raw source database unavailable)\n")
+
+        def wait(self) -> int:
+            return 1
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+            source_occupancy_gate=True,
+        )
+
+    assert result.status == "FAIL"
+    assert result.returncode == 1
+    assert len(commands) == 1
+    assert commands[0][2] == "tools.audit_source_presentation"
+
+
+def test_rules_stage_stops_before_build_when_review_audit_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("Interaction-review coverage mismatch; missing=['test']\n")
+
+        def wait(self) -> int:
+            return 2
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+        )
+
+    assert result.status == "FAIL"
+    assert result.returncode == 2
+    assert len(commands) == 1
+    assert commands[0][2] == "tools.audit_rules_interactions"
 
 
 def test_build_source_without_build_stage_is_configuration_error(

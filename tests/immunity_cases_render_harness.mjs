@@ -68,6 +68,25 @@ assert.equal(groups.length, 1);
 const group = groups[0];
 const cases = descendants(group, (node) => node.tag === "li");
 assert.equal(cases.length, 5);
+// Every reviewed case uses the same semantic list-item structure with
+// a navigable title, an outcome, and its own source-evidence classification.
+for (const item of cases) {
+  assert.equal(descendants(item, (node) => node.tag === "strong").length, 1);
+  assert.equal(descendants(item, (node) => node.className === "detail-copy").length, 1);
+  assert.equal(descendants(item, (node) => node.className === "detail-source").length, 1);
+}
+const labels = cases.map((item) => descendants(item,
+  (node) => node.className === "detail-source")[0].textContent);
+assert.deepEqual(labels, [
+  "Explicit source example", "Explicit source example",
+  "Derived from reviewed general rules", "Derived from reviewed general rules",
+  "Derived from reviewed general rules",
+]);
+assert.match(cases[0].textContent, /non-Comms attacks/);
+for (const item of cases.slice(2)) {
+  assert.match(item.textContent, /Applies to the reviewed non-Comms attack only/);
+}
+assert.doesNotMatch(group.textContent, /Plasma Rifle|Immunity \(Enhanced\) vs Plasma/);
 const combined = cases.map((node) => node.textContent);
 assert.match(combined[0], /failed BTS Saving Roll still causes Stunned without Wounds/);
 assert.match(combined[0], /the Saving Roll remains BTS/);

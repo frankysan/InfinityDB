@@ -90,6 +90,11 @@
   margin: 14px 0 16px;
 }
 
+.army-overview-relationships {
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+
 .army-overview-card-footer {
   display: flex;
   align-items: center;
@@ -286,7 +291,8 @@ html:not([data-developer-mode="true"])
 }
 
 .fireteam-member-note,
-.fireteam-member-developer {
+.fireteam-member-developer,
+.fireteam-member-fto-summary {
   display: block;
   margin-top: 5px;
   color: var(--color-text-secondary);
@@ -581,9 +587,32 @@ html:not([data-developer-mode="true"])
   }
 }
 
+/* Reviewed FAQ source discrepancies */
+.faq-source-discrepancy {
+  margin-top: 12px;
+  font-size: var(--font-size-sm);
+}
+
+.faq-source-discrepancy summary {
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.faq-source-discrepancy .detail-source {
+  margin: 8px 0 0;
+}
+
 /* Scenario browser */
 .scenario-catalog {
   width: min(1040px, 100%);
+}
+
+.scenario-collection-controls {
+  padding: 20px 24px 0;
+}
+
+.scenario-collection-field {
+  width: min(100%, 400px);
 }
 
 .scenario-grid {

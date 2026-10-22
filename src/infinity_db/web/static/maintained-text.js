@@ -57,7 +57,7 @@ function closeTouchPreview() {
 
 function positionReferenceTooltip(link) {
   const tooltip = referenceTooltip(link);
-  if (!tooltip) {
+  if (!link.isConnected || !tooltip?.isConnected) {
     if (activeReference === link) activeReference = null;
     return;
   }

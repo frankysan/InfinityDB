@@ -12,6 +12,7 @@ from infinity_db.domain_references import (
 )
 from infinity_db.maintained_text import parse_maintained_text
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.weapon_properties import WeaponProperties
 
 
 def _pluralize(value: str) -> str:
@@ -41,6 +42,7 @@ class _Resolver:
         self.scenario_id = scenario_id
         self.local_rule_ids = local_rule_ids
         self.records: dict[str, dict[str, Any] | None] = {}
+        self._properties: dict[str, dict[str, Any]] | None = None
 
     def record(self, record_id: str) -> dict[str, Any]:
         if record_id not in self.records:
@@ -57,6 +59,30 @@ class _Resolver:
         for token in parse_maintained_text(value):
             if token["type"] != "reference":
                 resolved.append(token)
+                continue
+            if token["target"].startswith("weapon-property:"):
+                if self._properties is None:
+                    self._properties = {
+                        entry["id"]: entry
+                        for entry in WeaponProperties(self.rules_database).entries()
+                    }
+                property_entry = self._properties.get(token["target"])
+                if property_entry is None:
+                    raise ValueError(
+                        f"Maintained-text Weapon Property {token['target']!r} is not current"
+                    )
+                label = token.get("display_text") or property_entry["name"]
+                item = {
+                    "type": "reference",
+                    "target": token["target"],
+                    "label": label,
+                    "public_reference": property_entry["public_reference"],
+                }
+                if include_preview:
+                    item["preview_tokens"] = [
+                        {"type": "text", "text": property_entry["summary"]}
+                    ]
+                resolved.append(item)
                 continue
             record = self.record(token["target"])
             label = token.get("display_text") or record["name"]
@@ -183,6 +209,14 @@ def enrich_maintained_text_references(
         if isinstance(node, dict):
             if isinstance(node.get("id"), str) and isinstance(node.get("summary"), str):
                 _enrich_rule_record(node, resolver)
+            elif (
+                isinstance(node.get("record_id"), str)
+                and node["record_id"].startswith("ammunition:")
+                and isinstance(node.get("summary"), str)
+            ):
+                # Weapon profiles reuse canonical Ammunition text but publish
+                # its identity as record_id, not as an embedded rules record.
+                node["summary_tokens"] = resolver.tokens(node["summary"])
             for child in list(node.values()):
                 walk(child)
         elif isinstance(node, list):

@@ -32,7 +32,10 @@ DEFAULT_CHECKLIST_PATH = PROJECT_ROOT / "docs" / "rules-interaction-checklist.md
 DEFAULT_CATALOG_SCOPE_PATH = (
     PROJECT_ROOT / "data" / "curated" / "rules-interactions" / "catalog-scope.json"
 )
-EXCLUDED_RECORD_KINDS = frozenset({"declaration-category"})
+# FAQ rulings are dated, scoped explanatory overlays, not independent
+# source-native mechanics or outgoing graph edges. The FAQ contract and
+# applicable-topic links have their own validated publication/selection tests.
+EXCLUDED_RECORD_KINDS = frozenset({"declaration-category", "faq-ruling"})
 REVIEW_STATUSES = frozenset({"pending", "reviewed", "inherited"})
 FUTURE_STATUSES = frozenset({"deferred", "planned", "blocked"})
 COMPLETE_STATUSES = frozenset({"reviewed", "inherited"})
@@ -891,6 +894,12 @@ def main(argv: list[str] | None = None) -> int:
         f"future interactions: {report['summary']['futureInteractionCount']}"
     )
     if args.require_release is not None:
+        pending_ids = sorted(
+            item["id"]
+            for item in report["items"]
+            if item["targetRelease"] == args.require_release
+            and item["status"] == "pending"
+        )
         if args.require_release != primary["targetRelease"]:
             releases = report["summary"]["supporting"]["releases"]
             release = releases.get(args.require_release)
@@ -902,6 +911,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"Release {args.require_release} is not interaction-review complete: "
                     f"{release['pending']} supporting identities pending"
                 )
+                print("Pending identities: " + ", ".join(pending_ids))
                 return 1
         else:
             support_release = report["summary"]["supporting"]["releases"].get(
@@ -915,6 +925,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"{primary_pending} primary catalog items and "
                     f"{supporting_pending} supporting identities pending"
                 )
+                print("Pending identities: " + ", ".join(pending_ids))
                 return 1
     return 0
 

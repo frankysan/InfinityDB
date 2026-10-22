@@ -31,6 +31,7 @@ from infinity_db.database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
 )
+from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
@@ -384,6 +385,12 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert b"<strong>What&#x27;s changed</strong>" in body
     assert b"Player-visible highlights are shown first" in body
     assert b'href="/changes" aria-current="page"' in body
+    assert b'id="changes-unreleased"' in body
+    assert b"<h2>Unreleased</h2>" in body
+    assert (
+        b"Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties"
+        in body
+    )
     assert b'id="changes-0-10-1"' in body
     assert b"<h2>Version 0.10.1</h2>" in body
     assert b'id="changes-0-10-0"' in body
@@ -493,7 +500,12 @@ def test_silhouette_diagrams_use_shared_scale_and_player_surfaces(app: Callable)
         in renderer
     )
     assert b'reference: item.id === 2 && id !== 2' in renderer
-    assert b'if (!selected) return null' in renderer
+    assert b'if (!selected && id !== 0 && id !== "X") return null' in renderer
+    assert b'raw === "X" || raw === "SX"' in renderer
+    assert b"otherTemplates.textContent" in renderer
+    assert b"The rules also define S0 (25 mm base, 3 mm high) and SX" in renderer
+    assert b'if (id === 0 || id === "X")' in renderer
+    assert b'No supplied source SVG for S0/SX' in renderer
 
     expected_viewboxes = {
         1: (149.027, 155.329),
@@ -600,6 +612,10 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b'target.scrollIntoView({ block: "center" });' in script
     assert b'shareStateHref("/units", "units", { army_id: armyValue(army) })' in script
     assert b"army.overview_group" in script
+    assert b"reinforcementRelationships(army, visibleArmies)" in script
+    assert b"army.parent_armies" in script
+    assert b"army.reinforcement_sections" in script
+    assert b'link.href = `#army-${armyValue(target)}`;' in script
     assert b"Out of catalog" in script
     assert b"Not playable in N5" in script
     assert b'identity.className = "army-overview-card-identity"' in script
@@ -760,7 +776,15 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     levels = reference["levels"]["facts"]
     assert levels["cumulative"] is True
     assert [level["level"] for level in levels["levels"]] == [1, 2, 3, 4, 5]
-    assert levels["levels"][1]["bonuses"] == ["[[skill:bs-attack]] (+1 SD)"]
+    assert levels["levels"][1]["bonuses"] == [
+        "[[skill:bs-attack]] ([[rule:special-dice|+1 SD]])"
+    ]
+    sd_tokens = reference["levels"]["fact_tokens"]["levels"][1]["bonuses"][0]
+    assert any(
+        token.get("target") == "rule:special-dice"
+        and token.get("public_reference") == {"catalog": "rules", "id": "special-dice"}
+        for token in sd_tokens
+    )
     assert levels["levels"][4]["bonuses"] == ["[[skill:sixth-sense]]"]
     assert any(
         citation.get("source_url") and "Fireteam_Bonuses" in citation["source_url"]
@@ -797,6 +821,8 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'["Notes", true, "table-column--descriptor"]' in script
     assert b'fto.className = "developer-only table-column--descriptor";' in script
     assert b'note.className = "developer-only table-column--descriptor";' in script
+    assert b'if (!wildcard) appendVerifiedFtoSummary(name, member);' in script
+    assert b'member.resolution !== "army"' in script
     assert b'table.className = "data-table--reference";' in script
     assert b'name.className = "table-column--primary";' in script
     assert (
@@ -2222,16 +2248,21 @@ def test_player_unit_tooltips_and_filter_context_use_game_language(app: Callable
     assert b"preview_tokens: item.summary_tokens" in unit_script
     assert b"copy.textContent = item.summary" not in unit_script
 
-    # Technical relationship explanations remain inside Developer-only sections.
-    for function, section, explanation in (
-        ("renderArmyRelationships", "army-relationships", "This source relationship"),
-        ("renderSelectionRelationships", "selection-relationships", "source-defined relationships"),
-    ):
-        block = unit_script.split(f"function {function}(".encode(), 1)[1].split(
-            b"\nfunction ", 1
-        )[0]
-        assert f'detail-group {section} developer-only'.encode() in block
-        assert explanation.encode() in block
+    # Reinforcement parentage is public, but broad faction memberships
+    # and technical selection relationships remain developer-only.
+    army_block = unit_script.split(b"function renderArmyRelationships(", 1)[1].split(
+        b"\nfunction ", 1
+    )[0]
+    assert b'if (!reinforcementRelations.length) section.classList.add("developer-only")' in (
+        army_block
+    )
+    assert b'diagnostic.className = "developer-only"' in army_block
+    assert b"This source relationship" in army_block
+    selection_block = unit_script.split(b"function renderSelectionRelationships(", 1)[1].split(
+        b"\nfunction ", 1
+    )[0]
+    assert b'detail-group selection-relationships developer-only' in selection_block
+    assert b"source-defined relationships" in selection_block
 
     status, _, units_script = request(app, "/static/units.js")
     assert status == 200
@@ -3618,6 +3649,59 @@ def test_stylesheet_entrypoint_composes_owned_sources_in_order(app: Callable) ->
     assert body == bytes(expected)
 
 
+def test_narrow_reference_breadcrumb_retains_tag_without_overflow(
+    app: Callable,
+) -> None:
+    """The 320px reference header must shrink its breadcrumb, not clip the tag."""
+    status, _, body = request(app, "/static/components.css")
+    assert status == 200
+    css = body.decode("utf-8").replace("\r\n", "\n")
+    small_screen = css.split("@media (max-width: 400px) {")[-1]
+    small_screen = small_screen.split("@media (max-width: 600px) {", 1)[0]
+    assert ".breadcrumb {\n    min-width: 0;\n    flex-wrap: wrap;\n    gap: 8px;" in small_screen
+    assert ".catalog-tag {\n    flex-shrink: 0;" in small_screen
+
+
+def test_mobile_unit_composite_options_preserve_full_names(app: Callable) -> None:
+    """Mobile composite-option cards must wrap names rather than clipping them."""
+    status, _, body = request(app, "/static/components.css")
+    assert status == 200
+    css = body.decode("utf-8")
+    narrow = css.split("@media (max-width: 600px) {", 1)[1]
+    assert ".unit-detail .composite-option-table tbody {" in narrow
+    assert ".unit-detail .composite-option-table .profile-summary {" in narrow
+    assert (
+        ".unit-detail .composite-option-table .order-symbol-name {\n    flex-wrap: wrap;"
+        in narrow
+    )
+    assert "white-space: normal;\n    overflow-wrap: break-word;" in narrow
+
+
+def test_narrow_unit_army_profile_rows_preserve_readable_values(app: Callable) -> None:
+    """Army profile attributes and loadout names must not compete for narrow columns."""
+    status, _, body = request(app, "/static/components.css")
+    assert status == 200
+    css = body.decode("utf-8").replace("\r\n", "\n")
+    narrow = css.rsplit("@media (max-width: 400px) {", 1)[1]
+
+    assert ".unit-detail .army-profile .profile-details-table tbody," in narrow
+    assert ".unit-detail .army-profile .loadout-table tbody {" in narrow
+    assert "grid-template-columns: minmax(0, 1fr);" in narrow
+    assert (
+        ".unit-detail .army-profile .loadout-table .profile-summary {\n"
+        "    grid-template-columns: repeat(2, minmax(0, 1fr));"
+    ) in narrow
+    assert (
+        ".unit-detail .army-profile .loadout-table .profile-summary> :first-child {\n"
+        "    grid-column: 1 / -1;\n    width: auto;\n    white-space: normal;"
+    ) in narrow
+    assert_css_rule(
+        body,
+        ".unit-detail .army-profile .loadout-table .profile-item-label",
+        {"width": "auto"},
+    )
+
+
 def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
 
@@ -4260,6 +4344,85 @@ def test_unit_details_api_owns_general_profile_shared_item_semantics(
     assert b"profile.shared_items" in script
 
 
+def test_unit_loadout_attribute_override_is_not_linked_as_a_skill(
+    app: Callable,
+) -> None:
+    from infinity_db.skill_config import load_skill_source_config
+    from infinity_db.unit_presentation import _separate_loadout_attribute_overrides
+
+    slugs = {
+        str(item.skill_ref)
+        for item in load_skill_source_config()
+        if item.classification == "attribute-override"
+    }
+    assert "bts-3" in slugs
+    source_items = [
+        {"id": 280, "slug": "bts-3", "name": "BTS=3"},
+        {"id": 278, "slug": "bs-12", "name": "BS=12"},
+    ]
+    specific_items = {
+        "skills": list(source_items),
+        "equipment": [],
+        "weapons": [],
+    }
+    _separate_loadout_attribute_overrides(specific_items, slugs)
+    assert source_items[0]["name"] == "BTS=3"
+    assert specific_items["attribute_overrides"] == [source_items[0]]
+    assert specific_items["skills"] == [source_items[1]]
+
+    status, _, script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'document.createElement(catalog ? "a" : "span")' in script
+    assert b'appendClassifiedNonSkillRows(' in script
+    assert b'["attribute_overrides", "Attribute overrides", "Attribute"]' in script
+
+
+def test_non_skill_army_source_items_use_presentation_categories(app: Callable) -> None:
+    from infinity_db.skill_config import load_skill_source_config
+    from infinity_db.unit_presentation import _classify_skill_source_presentations
+
+    classifications = {
+        str(item.skill_ref): item.classification
+        for item in load_skill_source_config()
+    }
+    source_skills = [
+        {"id": 254, "slug": "gizmokit", "name": "Gizmokit"},
+        {"id": 273, "slug": "medikit", "name": "MediKit"},
+        {"id": 266, "slug": "bangbomb", "name": "Bangbomb"},
+        {"id": 258, "slug": "regular", "name": "Regular"},
+        {"id": 282, "slug": "infinity-team-ops", "name": "Infinity Team-Ops"},
+        {"id": 280, "slug": "bts-3", "name": "BTS=3"},
+        {"id": 278, "slug": "bs-12", "name": "BS=12"},
+    ]
+    native_bangbomb = {"id": 246, "slug": "bangbomb", "name": "Bangbomb"}
+    items = {
+        "skills": list(source_skills),
+        "equipment": [native_bangbomb],
+        "weapons": [],
+    }
+
+    _classify_skill_source_presentations(items, classifications)
+
+    assert [item["name"] for item in items["skills"]] == ["BS=12"]
+    assert [item["name"] for item in items["equipment"]] == [
+        "Bangbomb", "Gizmokit", "MediKit"
+    ]
+    assert items["equipment"][0] is native_bangbomb
+    assert all(item["source_classification"] == "equipment" for item in items["equipment"][1:])
+    assert [item["name"] for item in items["attribute_overrides"]] == ["BTS=3"]
+    assert [item["name"] for item in items["training"]] == ["Regular"]
+    assert [item["name"] for item in items["source_markers"]] == ["Infinity Team-Ops"]
+    assert len(source_skills) == 7  # input Army identities are preserved
+
+    status, _, script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'profileItems(classifiedItems, null, fallbackLabel)' in script
+    assert b'["training", "Training", "Training"]' in script
+    assert b'["attribute_overrides", "Attribute overrides", "Attribute"]' in script
+    # The source-only Team-Ops marker remains available in API data, not as a Skill link.
+    assert b'["source_markers"' not in script
+
+
 def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
@@ -4291,14 +4454,19 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200
     assert b"function renderArmyRelationships(unit, armies)" in unit_js
-    assert b'heading("Army relationships")' in unit_js
-    assert b'section.className = "detail-group army-relationships developer-only";' in unit_js
+    assert b'"Reinforcement relationships" : "Army relationships"' in unit_js
+    assert b'section.className = "detail-group army-relationships";' in unit_js
+    assert b'if (!reinforcementRelations.length) section.classList.add("developer-only")' in (
+        unit_js
+    )
+    assert b'diagnostic.className = "developer-only";' in unit_js
     assert b'link.href = shareStateHref("/units", "units", { army_id: identifier });' in unit_js
     assert (
         b'link.href = shareStateHref("/units", "units", '
         b'{ declared_faction_id: membership.source_faction_id });' in unit_js
     )
-    assert b"broader source-declared faction membership separately" in unit_js
+    assert b"not a complete Army List validation" in unit_js
+    assert b"broader than current Army-list" in unit_js
     assert b"this faction identity has no current Army list" in unit_js
 
     status, _, units_js = request(app, "/static/units.js")
@@ -4657,16 +4825,155 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     shock = json.loads(body)
     assert shock["slug"] == "shock"
     assert shock["rules"][0]["id"] == "ammunition:shock"
-    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260918-130233"
+    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260926-200832"
 
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 11
+    assert len(general_rules) == 21
+    assert general_rules["modifiers-explained"]["name"] == "Modifiers Explained (MODs)"
+    assert general_rules["deployment-phase"]["name"] == "Deployment Phase"
     assert general_rules["regular-order"]["name"] == "Regular Order"
     assert general_rules["irregular-order"]["name"] == "Irregular Order"
     assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
     assert general_rules["peripheral-type-servant"]["name"] == "Peripheral (Servant)"
+    for subtype in ("servant", "synchronized", "control", "ancillary", "cyberplug"):
+        status, _, body = request(rules_app, f"/api/rules/peripheral-type-{subtype}")
+        assert status == 200
+        rule = json.loads(body)["rules"][0]
+        assert rule["id"] == f"rule:peripheral-type:{subtype}"
+        assert rule["facts"]["effects"]
+        assert rule["fact_tokens"]["effects"]
+        assert any(
+            token.get("public_reference")
+            for clause in rule["fact_tokens"]["effects"]
+            for token in clause
+        )
+        status, _, _ = request(rules_app, f"/rules/peripheral-type-{subtype}")
+        assert status == 200
+    assert general_rules["hacking-area"]["name"] == "Hacking Area"
+    assert general_rules["supportware"]["name"] == "Supportware"
+    assert general_rules["special-dice"]["name"] == "Special Dice (+1 SD)"
+    assert general_rules["face-to-face-rolls"]["name"] == "Face to Face Rolls"
+    assert general_rules["saving-rolls"]["name"] == "Saving Rolls"
+    assert general_rules["guts-roll"]["name"] == "Guts Roll"
+    assert general_rules["order-expenditure-sequence"]["name"] == "Order Expenditure Sequence"
+    assert general_rules["coordinated-orders"]["name"] == "Coordinated Orders"
+
+    status, _, body = request(rules_app, "/api/rules/coordinated-orders")
+    assert status == 200
+    coordinated = json.loads(body)
+    assert coordinated["rules"][0]["id"] == "rule:coordinated-orders"
+    assert any(
+        token.get("target") == "rule:special-dice"
+        and token.get("public_reference") is not None
+        for clause in coordinated["rules"][0]["fact_tokens"]["clarifications"]
+        for token in clause
+    )
+    status, headers, _ = request(rules_app, "/rules/coordinated-orders")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+
+    status, _, body = request(rules_app, "/api/rules/order-expenditure-sequence")
+    assert status == 200
+    order = json.loads(body)
+    assert order["rules"][0]["id"] == "rule:order-expenditure-sequence"
+    assert any(
+        token.get("target") == "trait:disposable-x"
+        and token.get("public_reference") is not None
+        for clause in order["rules"][0]["fact_tokens"]["restrictions"]
+        for token in clause
+    )
+    status, headers, _ = request(rules_app, "/rules/order-expenditure-sequence")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+
+    status, _, body = request(rules_app, "/api/rules/guts-roll")
+    assert status == 200
+    guts = json.loads(body)
+    assert guts["rules"][0]["id"] == "rule:guts-roll"
+    assert any(
+        token.get("target") == "skill:courage"
+        and token.get("public_reference") is not None
+        for clause in guts["rules"][0]["fact_tokens"]["clarifications"]
+        for token in clause
+    )
+    status, headers, _ = request(rules_app, "/rules/guts-roll")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+
+    for slug, skill_ref in (
+        ("face-to-face-rolls", "skill:dodge"),
+        ("saving-rolls", "ammunition:para"),
+    ):
+        status, _, body = request(rules_app, f"/api/rules/{slug}")
+        assert status == 200
+        record = json.loads(body)
+        assert record["rules"][0]["id"] == f"rule:{slug}"
+        assert any(
+            token.get("target") == skill_ref and token.get("public_reference")
+            for clause in record["rules"][0]["fact_tokens"][
+                "clarifications" if slug == "face-to-face-rolls" else "restrictions"
+            ]
+            for token in clause
+        )
+        status, headers, _ = request(rules_app, f"/rules/{slug}")
+        assert status == 200
+        assert headers["content-type"].startswith("text/html")
+
+    for rule_slug, expected_reference in (
+        ("hacking-area", "equipment:repeater"),
+        ("supportware", "skill:hacker"),
+    ):
+        status, _, body = request(rules_app, f"/api/rules/{rule_slug}")
+        assert status == 200
+        rule = json.loads(body)
+        assert rule["rules"][0]["id"] == f"rule:{rule_slug}"
+        assert any(
+            token.get("target") == expected_reference
+            and token.get("public_reference") is not None
+            for token in rule["rules"][0]["summary_tokens"]
+        )
+
+    status, _, body = request(rules_app, "/api/rules/special-dice")
+    assert status == 200
+    special_dice = json.loads(body)
+    assert special_dice["slug"] == "special-dice"
+    assert special_dice["rules"][0]["id"] == "rule:special-dice"
+    assert any(
+        token.get("target") == "skill:berserk" and token.get("public_reference")
+        for tokens in special_dice["rules"][0]["fact_tokens"]["restrictions"]
+        for token in tokens
+    )
+    status, headers, body = request(rules_app, "/rules/special-dice")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+
+    status, _, body = request(rules_app, "/api/equipment")
+    assert status == 200
+    equipment_items = {item["slug"]: item for item in json.loads(body)["items"]}
+    assert equipment_items["firewall"]["name"] == "Firewall"
+    assert equipment_items["firewall"]["use_count"] == 0
+
+    status, _, body = request(rules_app, "/api/equipment/firewall")
+    assert status == 200
+    firewall = json.loads(body)
+    assert firewall["slug"] == "firewall"
+    assert firewall["rules"][0]["id"] == "equipment:firewall"
+    assert not firewall["variants"]
+    assert any("+3" in text for text in firewall["rules"][0]["facts"]["effects"])
+
+    rules_database = rules_app.rules_database
+    assert rules_database is not None
+    tinbot_variant = rules_database.composed_record("equipment:tinbot-firewall")
+    assert tinbot_variant is not None
+    assert rule_record_public_reference(rules_app.database, tinbot_variant) is None
+    assert rules_app.api.equipment_catalog.get_equipment("tinbot-firewall") is None
+
+    # Army-backed Equipment must not appear without its source catalog identity.
+    assert "repeater" not in equipment_items
+    assert rules_app.api.equipment_catalog.get_equipment("repeater") is None
+
     assert "fireteam-general" not in general_rules
     assert "profile-help-unit-profile" not in general_rules
 
@@ -4710,6 +5017,21 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     labels = {item["slug"]: item for item in json.loads(body)["items"]}
     assert len(labels) == 24
     assert labels["hackable"]["name"] == "Hackable"
+
+    status, _, body = request(rules_app, "/api/labels/negative-feedback")
+    assert status == 200
+    nfb = json.loads(body)
+    assert "same Trooper" in nfb["description"]
+    assert "cancels and overrides" in nfb["description"]
+    assert "Only one NFB effect" in nfb["description"]
+    assert {item["href"] for item in nfb["used_by"]} >= {
+        "/equipment/albedo",
+        "/equipment/holoprojector",
+        "/hacking-programs/cybermask",
+        "/hacking-programs/white-noise",
+        "/skills/impersonation",
+        "/skills/mimetism",
+    }
 
     status, _, body = request(rules_app, "/api/labels/non-reloadable")
     assert status == 200
@@ -5279,6 +5601,26 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
 
 
 
+def test_curated_weapon_families_are_discoverable_in_glossary(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    entries = {
+        entry["id"]: entry for entry in json.loads(body)["items"]
+        if entry["kind"] == "weapon"
+    }
+    assert entries["weapon:mines"]["href"] == "/weapons/ap-mine#rule-weapon-mines"
+    assert entries["weapon:para-mine"]["href"] == "/weapons/para-mine"
+    assert entries["weapon:wildparrot"]["href"] == "/weapons/wildparrot"
+    assert "weapon:pt-endgame" not in entries
+    assert all(entry["domain_slug"] == "weapons" for entry in entries.values())
+
+
 def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
     app: Callable, tmp_path: Path,
 ) -> None:
@@ -5339,6 +5681,60 @@ def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
         record = records[anchor.replace("term-", "term:", 1)]
         assert record["facts"]["scope"] == "visibility-condition"
         assert record["citations"][0]["page"] == 144
+
+    base = records["term:visibility-zone"]["summary"]
+    for fragment in (
+        "from, into, or through the area",
+        "[[skill:dodge|Dodge]] is excluded",
+        "[[term:low-visibility-zone|Low Visibility]] applies -3",
+        "[[term:poor-visibility-zone|Poor Visibility]] applies -6",
+        "[[term:zero-visibility-zone|Zero Visibility]] blocks Line of Fire",
+        "[[skill:bs-attack|BS Attack]] exception",
+        "[[term:white-noise-zone|White Noise]] restricts sight",
+        "**stack with applicable other MODs**",
+        "Range, Partial Cover, Special Skills, and Equipment",
+        "**never stack with other [[term:visibility-zone|Visibility Zone]] MODs**",
+        "most restrictive [[term:visibility-zone|Visibility Zone]] MOD",
+    ):
+        assert fragment in base, fragment
+
+def test_visibility_zone_five_term_explanations_match_pinned_n5_3_source() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned English N5.3 PDF unavailable")
+    review = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == review["corePdfSha256"]
+    with pdf.open(source) as document:
+        page = " ".join(document[143].get_text().split()).casefold()
+    for excerpt in (
+        "Low Visibility Zones apply a MOD of -3",
+        "Poor Visibility Zones apply a MOD of -6",
+        "LoF cannot be drawn into, through, or out of a Zero Visibility Zone",
+        "A White Noise Zone acts as a Zero Visibility Zone",
+        "This MOD for Visibility stacks with other MODs",
+        "Partial Cover, Range... but never with other Zone of Visibility MODs",
+        "Visibility Zone MODs never stack with other Visibility Zone MODs",
+        "always the most restrictive one",
+    ):
+        assert excerpt.casefold() in page, excerpt
+
+
+def test_mobile_glossary_hash_targets_clear_sticky_navigation(app: Callable) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b"@media (max-width: 920px)" in styles
+    assert b"The compact sticky navigation must not obscure glossary hash targets." in styles
+    assert b".glossary-entry {" in styles
+    assert b"scroll-margin-top: 6rem;" in styles
+
 
 def test_visibility_zone_inline_links_have_glossary_previews(
     app: Callable, tmp_path: Path,
@@ -5725,8 +6121,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         {
             "id": "automatic",
             "name": "Automatic",
-            "source": "Infinity Wiki snapshot (English) v20260918-130233",
-            "page": None,
+            "source": "N5 Core Rules v5.3",
+            "page": 77,
         }
     ]
     assert alert["variants"] == []
@@ -6020,6 +6416,7 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b'const viewportGutter = 12' in renderer
     assert b'tooltip.setAttribute("popover", "manual")' in renderer
     assert b'tooltip.showPopover()' in renderer
+    assert b'if (!link.isConnected || !tooltip?.isConnected)' in renderer
     assert b'tooltip.hidePopover()' in renderer
     assert b'link.addEventListener("pointerenter", (event) =>' in renderer
     assert b'link.addEventListener("pointerleave", (event) =>' in renderer
@@ -6042,6 +6439,16 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b'calc(100vw - 24px)' in styles
     assert b".maintained-review-needed" in styles
     assert b"var(--color-status-warning-surface)" in styles
+
+
+def test_detached_reference_preview_does_not_open_popover() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "maintained_reference_lifecycle_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "detached reference prevented popover reopening" in result.stdout
 
 
 def test_rules_summary_rendering_preserves_links_emphasis_and_source_notes() -> None:
@@ -6538,3 +6945,65 @@ def test_catalog_detail_reveals_async_rule_fragment_after_render(app: Callable) 
     assert b'requestAnimationFrame(revealHashTarget)' in script
     assert b'window.addEventListener("hashchange", revealHashTarget' in script
     assert b'content.contains(target)' in script
+
+
+def test_glossary_boost_exposes_distinct_placement_and_triggering_references(
+    app: Callable, tmp_path: Path,
+) -> None:
+    """Boost's linked comparison must reach canonical rules without inventing mechanics."""
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    boost = next(
+        item for item in json.loads(body)["items"]
+        if item["id"] == "trait:boost"
+    )
+    assert boost["href"] == "/traits/boost"
+    description = boost["description"]
+    assert "**Placing is not triggering:**" in description
+    assert "the Marker remains exempt from Boost" in description
+    assert "Boost alone does not grant that Skill" in description
+    assert "becomes active at its Conclusion" in description
+    assert "Models **or Markers**" in description
+    links = {
+        token["target"]
+        for token in boost["description_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "skill:place-deployable", "skill:intuitive-attack",
+        "trait:perimeter", "weapon:mines", "state:camouflaged",
+    } <= links
+    status, _, body = request(rules_app, "/traits/boost")
+    assert status == 200
+    assert b"<main" in body
+
+
+
+def test_mine_detail_profile_order_and_absent_ammunition_source_preservation(
+    app: Callable,
+) -> None:
+    """The browser fixes presentation without rewriting published Army fields."""
+    status, _, body = request(app, "/static/catalog-detail.js")
+    assert status == 200
+    text = body.decode("utf-8")
+    assert 'if (profile.ammunition === 0) {' in text
+    assert 'cell.textContent = "--";' in text
+    assert 'item.rules?.some((rule) => rule.id === "weapon:mines")' in text
+    assert '...(mineFamily && profiles ? [profiles] : [])' in text
+    assert '...(!mineFamily && profiles ? [profiles] : [])' in text
+    assert 'Number(a.id === "weapon:mines") - Number(b.id === "weapon:mines")' in text
+
+    root = Path(__file__).resolve().parents[1]
+    catalog_app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+    status, _, body = request(catalog_app, "/api/weapons/cybermine")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["profiles"][0]["ammunition"] == 0
+    assert payload["profiles"][0]["saving"] == "BTS"
+    assert payload["profiles"][0]["saving_num"] == "2"

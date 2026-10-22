@@ -117,15 +117,16 @@ overview, explorer, scoped view, or embedded vocabulary, and capabilities such a
 search, glossary participation, detail pages, and publication are independent.
 
 Current published top-level domains are Armies, Units, Skills, Equipment, Weapons, Ammunition,
-Traits, States, Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Attributes and scoped Game
-terms are published embedded vocabularies. Global search and Glossary are cross-domain projections,
+Traits, States, Hacking Programs, Fireteams, Labels, General Rules, and Scenarios.
+Attributes, scoped Game terms and Weapon Properties are published embedded vocabularies.
+Global search and Glossary are cross-domain projections,
 not competing semantic owners.
 
 `docs/application-domains.md` owns the detailed domain/presentation contract.
 
 ### Scenario domain
 
-**Current bounded core-scenario surface.** All four core scenarios maintain typed setup, scoring,
+**Current bounded scenario surface.** All four core scenarios maintain typed setup, scoring,
 geometry, special rules, and end conditions. Authoring definition v2 composes
 shared Rules, separate scoped Skills, and typed setup/geometry/objective/ending components by explicit
 identity. Validation/export resolves those references and retains component provenance in the runtime
@@ -137,7 +138,7 @@ renderer owns labels, links, list formatting, and ordinary Skill detail structur
 are excluded from default core help, and cannot grant permanent Army profile facts. Runtime reads
 consume the materialized `rules.db`, independently of curation files.
 
-[The data model](data-model.md#planned-scenario-model-10) owns the implemented contract. Dedicated
+[The data model](data-model.md#scenario-model-implemented-core-and-future-extensions) owns the implemented contract. Dedicated
 scenario collection/publication indexes and central revision-aware selection live in `rules.db`. The
 JSON API exposes the current list plus exact Army-Points detail projections, and `/scenarios` plus
 `/scenarios/<slug>` provide the corresponding player-facing catalog/detail surface. The backend
@@ -145,7 +146,7 @@ remains configuration-explicit; in the browser an absent selection defaults to 3
 immediately written through the common versioned share-state token, while explicit valid shared state
 wins. The map is rendered from the same maintained geometry through the SVG API. Scenarios participate in primary
 navigation and the landing page, while global search and Glossary participation remain deliberately
-disabled because the bounded core set is already directly discoverable.
+disabled because the bounded published collections are directly discoverable through the Scenario picker.
 
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review
 covered the four N5.3 core scenarios, the final ITS Season 17 set, and the current ITS Season 18 set.
@@ -166,8 +167,11 @@ new player-defined scenarios and edits of existing ones. It will compose local
 copies/overlays, not mutate authoritative source publications or `rules.db`.
 Its serialization follows the stateless-sharing direction below and its custom
 rule semantics follow `docs/data-model.md`.
-InfinityDB 1.0 includes a deterministic SVG projection for the four N5.3 core scenarios; geometry
-schema v1 only needs to represent those core maps. Point markers retain semantic marker identity;
+The implemented deterministic SVG projection covers all four N5.3 Core
+scenarios and the separately published ITS Season 18 Battleground pilot.
+Only the Core maps are required for the 1.0 completeness gate; the shared
+geometry schema and renderer can also handle this reviewed ITS sector layout.
+Point markers retain semantic marker identity;
 known marker types resolve through canonical marker metadata, including physical diameter where that
 affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
@@ -191,14 +195,16 @@ its center point, unless the source explicitly says otherwise.
 Semantic style and marker identities are open at the geometry boundary rather than coupled to the current
 SVG palette; renderer v1 separately validates the styles and canonical marker metadata it can faithfully
 project and fails closed for unsupported presentation. Geometry also permits asymmetric and multiple
-Deployment Zone regions without encoding a one-zone-per-side rule. Reviewed ITS variation constrains the
-extension points, but ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog entities will be referenced by typed
-identity rather than duplicated locally. Core and ITS scenarios share this boundary; tournament
-pairing, rankings, and mutable match state remain outside
-it.
+Deployment Zone regions without encoding a one-zone-per-side rule.
+Reviewed ITS variation constrains the extension points. Battleground already
+uses the shared model; additional unsupported ITS geometry, the full mission
+library and an interactive map editor remain post-1.0. Existing catalog
+entities are referenced by typed identity rather than duplicated locally.
+Core and ITS scenarios share this boundary; tournament pairing, rankings
+and mutable match state remain outside it.
 
 The detailed accepted scenario model belongs to
-[the data model](data-model.md#planned-scenario-model-10). Source comparison and rationale remain in
+[the data model](data-model.md#scenario-model-implemented-core-and-future-extensions). Source comparison and rationale remain in
 `docs/rules-semantics.md`; concrete implementation tasks remain in `docs/TODO.md`.
 
 ## Identifiers and routing

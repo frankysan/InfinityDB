@@ -1,11 +1,14 @@
 import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
+import { appendMaintainedText } from "./maintained-text.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { tableViewport } from "./view-components.js";
 import {
   gameplayVariantRules,
   levelEffectsSection,
+  rulesCitationNode,
   rulesReferenceSection,
 } from "./rules-reference.js";
 
@@ -13,6 +16,7 @@ const catalog = document.body.dataset.catalog;
 const itemId = window.location.pathname.split("/").pop();
 const name = document.getElementById("item-name");
 const meta = document.getElementById("item-meta");
+const traitWikiLink = document.getElementById("trait-wiki-link");
 const status = document.getElementById("item-status");
 const content = document.getElementById("item-content");
 const rangeModifierClasses = {
@@ -22,6 +26,8 @@ const rangeModifierClasses = {
   "-6": "range-modifier-minus-6",
 };
 let currentItem;
+let displayedItem;
+let faqItems = [];
 const pageController = new AbortController();
 
 function displayWikiUrl(url) {
@@ -79,6 +85,12 @@ function ruleReferenceHref(reference) {
 }
 
 function appendWeaponAmmunition(cell, profile, fallbackReference) {
+  // Army uses numeric 0 for an absent ammunition type (for example Cybermine).
+  // Preserve the API value, but display the Weapon Chart's empty-field notation.
+  if (profile.ammunition === 0) {
+    cell.textContent = "--";
+    return;
+  }
   if (Array.isArray(profile.ammunition_parts)) {
     // All parts come from reviewed metadata IDs, never parsed from display notation.
     for (const part of profile.ammunition_parts) {
@@ -103,6 +115,84 @@ function appendWeaponAmmunition(cell, profile, fallbackReference) {
   } else {
     cell.textContent = text(profile.ammunition);
   }
+}
+
+function weaponPropertyLinks(profile) {
+  if (!profile.weapon_properties?.length) return null;
+  const row = document.createElement("div");
+  row.className = "weapon-data-row";
+  const heading = document.createElement("h5");
+  heading.className = "weapon-data-heading";
+  heading.textContent = "Weapon Properties";
+  const value = document.createElement("p");
+  value.className = "weapon-data-value";
+  for (const [index, property] of profile.weapon_properties.entries()) {
+    if (index) value.append(" · ");
+    const href = ruleReferenceHref(property.public_reference);
+    if (href) {
+      appendMaintainedText(value, [{
+        type: "reference",
+        target: property.id,
+        label: property.name,
+        public_reference: property.public_reference,
+        preview_tokens: [{ type: "text", text: property.summary }],
+      }]);
+    } else {
+      value.append(property.name);
+    }
+  }
+  row.append(heading, value);
+  return row;
+}
+
+function weaponAmmunitionEffects(profile) {
+  const effects = profile.ammunition_effects;
+  if (!Array.isArray(effects) || !effects.length) return null;
+  // These descriptions and citations are copied from canonical Ammunition
+  // records by the API. Do not interpret combined rolls or target effects here.
+  const details = document.createElement("details");
+  details.className = "detail-fact-group weapon-ammunition-effects";
+  const heading = document.createElement("summary");
+  heading.textContent = "Ammunition effects (shared rules)";
+  const list = document.createElement("div");
+  list.className = "weapon-ammunition-effect-list";
+  for (const effect of effects) {
+    const item = document.createElement("div");
+    item.className = "weapon-ammunition-effect";
+    const title = document.createElement("h5");
+    const href = ruleReferenceHref(effect.public_reference);
+    if (href) {
+      // Use the standard reference preview/touch navigation contract.
+      appendMaintainedText(title, [{
+        type: "reference",
+        target: effect.record_id,
+        label: effect.name,
+        public_reference: effect.public_reference,
+        preview_tokens: effect.summary_tokens || [{ type: "text", text: effect.summary }],
+      }]);
+    } else {
+      title.textContent = effect.name;
+    }
+    const description = document.createElement("p");
+    description.className = "detail-copy";
+    appendMaintainedText(description, effect.summary_tokens, effect.summary);
+    item.append(title, description);
+    if (effect.citations?.length) {
+      const citations = document.createElement("p");
+      citations.className = "detail-source";
+      for (const [index, citation] of effect.citations.entries()) {
+        if (index) citations.append(" · ");
+        citations.append(rulesCitationNode(citation));
+      }
+      item.append(citations);
+    }
+    list.append(item);
+  }
+  const caveat = document.createElement("p");
+  caveat.className = "detail-source";
+  caveat.textContent = "Shared components only. Follow the printed Weapon profile and any specific rules for modes, Saving Rolls, target conditions, and exceptions.";
+  details.append(heading, list, caveat);
+  return details;
 }
 
 function groupWeaponProperties(references) {
@@ -316,6 +406,12 @@ function weaponVariants(variants) {
       statBody.append(statRow);
       statTable.append(statBody);
       card.append(tableViewport(statTable));
+      if (catalog === "weapons") {
+        const properties = weaponPropertyLinks(profile);
+        if (properties) card.append(properties);
+        const sharedEffects = weaponAmmunitionEffects(profile);
+        if (sharedEffects) card.append(sharedEffects);
+      }
 
       const modifiers = rangeBands.map((maximum) => rangeModifier(profile.ranges, maximum));
       if (modifiers.some(Boolean)) {
@@ -492,8 +588,13 @@ function hackingProgramsSection(programs) {
 }
 
 function render(item) {
+  displayedItem = item;
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
+  if (traitWikiLink) {
+    traitWikiLink.hidden = !item.wiki;
+    if (item.wiki) traitWikiLink.href = item.wiki;
+  }
   if (meta) {
     const categories = (item.categories || []).map((category) => category.name).join(", ");
     if (item.wiki) {
@@ -516,20 +617,30 @@ function render(item) {
   const sections = usageSections(item);
   const variantRules = gameplayVariantRules(item.variants);
   const levelEffects = levelEffectsSection(item.rules);
+  const profiles = catalog === "weapons" && item.weapon_variants?.length
+    ? weaponVariants(item.weapon_variants) : null;
+  // Named Mines need their specific Weapon Chart profile before the long
+  // shared family reference. Chest Mine does not use that family rule.
+  const mineFamily = catalog === "weapons"
+    && item.rules?.some((rule) => rule.id === "weapon:mines");
+  const rules = mineFamily
+    ? [...item.rules].sort((a, b) => Number(a.id === "weapon:mines") - Number(b.id === "weapon:mines"))
+    : item.rules;
   content.replaceChildren(
-    ...(item.rules?.length ? [rulesReferenceSection(item.rules)] : []),
+    ...(mineFamily && profiles ? [profiles] : []),
+    ...(rules?.length ? [rulesReferenceSection(rules)] : []),
     ...(levelEffects ? [levelEffects] : []),
     ...(variantRules.length ? [rulesReferenceSection(variantRules, "Variant rules")] : []),
     ...(catalog === "traits" && item.description && !item.rules?.length
       ? [traitDescription(item.description)] : []),
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),
-    ...(catalog === "weapons" && item.weapon_variants?.length
-      ? [weaponVariants(item.weapon_variants)] : []),
+    ...(!mineFamily && profiles ? [profiles] : []),
     ...(catalog === "equipment" && item.profiles?.length
       ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])] : []),
     ...(catalog === "equipment" && item.hacking_programs?.length
       ? [hackingProgramsSection(item.hacking_programs)] : []),
     ...(sections.length ? [catalog === "traits" ? traitUsageSectionGroup(item) : usageSectionGroup(sections)] : []),
+    ...(faqItems.length ? [faqRulingsSection(faqItems)] : []),
   );
   content.hidden = false;
   status.hidden = true;
@@ -562,6 +673,20 @@ window.addEventListener("distanceunitchange", () => {
 getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
   currentItem = item;
   render(item);
+  if (["equipment", "traits", "states"].includes(catalog)) {
+    const prefix = { equipment: "equipment", traits: "trait", states: "state" }[catalog];
+    const topicId = item.rules?.find((rule) => rule.id?.startsWith(`${prefix}:`))?.id
+      || `${prefix}:${itemId}`;
+    fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
+      .then((payload) => {
+        if (pageController.signal.aborted) return;
+        faqItems = payload.items || [];
+        if (faqItems.length && displayedItem) render(displayedItem);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+      });
+  }
   requestAnimationFrame(revealHashTarget);
   if (catalog === "states") return null;
   return visibleUnitIds(optionalUnitFilters(), pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));

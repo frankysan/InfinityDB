@@ -1,11 +1,16 @@
+import json
+import sqlite3
 from pathlib import Path
 from typing import Any
+from wsgiref.util import setup_testing_defaults
 
 import pytest
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.state_catalog import StateCatalog
+from infinity_db.web import create_app
+from tools.verify_states_browser import source_states
 
 
 def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: Path) -> None:
@@ -66,6 +71,107 @@ def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: P
     assert ("enters-state", "inbound", "skill:suppressive-fire") in suppressive_relations
     assert ("cancels-state", "inbound", "state:dead") in suppressive_relations
     assert ("cancels-state", "inbound", "state:retreat") in suppressive_relations
+
+
+def test_every_current_state_reaches_published_api_and_player_template() -> None:
+    """Check every canonical State's source/storage/API identity and cited facts."""
+
+    root = Path(__file__).parents[1]
+    source = {
+        record["id"]: (document["collection"]["id"], record)
+        for _, document in load_curated_directory(root / "data/curated")
+        if document["collection"]["status"] == "current"
+        for record in document["records"]
+        if record["kind"] == "state"
+    }
+    assert len(source) == 24
+    assert source_states(root) == {
+        record_id.removeprefix("state:"): record["name"]
+        for record_id, (_, record) in source.items()
+    }
+
+    rules_path = root / "data/generated/rules.db"
+    with sqlite3.connect(rules_path) as connection:
+        stored = list(connection.execute(
+            "SELECT r.collection_id, r.id, r.name, r.summary, r.facts_json "
+            "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+            "WHERE c.status = 'current' AND r.kind = 'state'"
+        ))
+    assert {record_id for _, record_id, *_ in stored} == set(source)
+    for collection_id, record_id, name, summary, facts in stored:
+        expected_collection, record = source[record_id]
+        assert (collection_id, name, summary, json.loads(facts or "{}")) == (
+            expected_collection, record["name"], record["summary"], record.get("facts", {})
+        ), record_id
+
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+
+    def get(path: str) -> tuple[str, bytes]:
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ,
+            lambda status, _headers, _exc_info=None: statuses.append(status),
+        )
+        try:
+            body = b"".join(response)
+        finally:
+            close = getattr(response, "close", None)
+            if close is not None:
+                close()
+        assert len(statuses) == 1, path
+        return statuses[0], body
+
+    status, body = get("/api/states")
+    assert status == "200 OK"
+    listed = json.loads(body)["items"]
+    assert len(listed) == 24
+    assert {f"state:{row['slug']}" for row in listed} == set(source)
+    assert len({row["slug"] for row in listed}) == len(listed)
+
+    status, body = get("/states")
+    assert status == "200 OK"
+    assert b'data-catalog="states"' in body
+    assert b"/static/catalog-list.js" in body
+
+    for record_id, (_, record) in sorted(source.items()):
+        slug = record_id.removeprefix("state:")
+        listed_item = next(row for row in listed if row["slug"] == slug)
+        assert (listed_item["name"], listed_item["description"]) == (
+            record["name"], record["summary"]
+        ), record_id
+
+        status, body = get(f"/api/states/{slug}")
+        assert status == "200 OK", record_id
+        detail = json.loads(body)
+        assert (detail["slug"], detail["name"], detail["description"]) == (
+            slug, record["name"], record["summary"]
+        ), record_id
+        assert len(detail["rules"]) == 1, record_id
+        rule = detail["rules"][0]
+        assert (rule["id"], rule["summary"]) == (
+            record_id, record["summary"]
+        ), record_id
+        assert rule.get("facts", {}) == record.get("facts", {}), record_id
+        assert rule["citations"], record_id
+        assert {citation["source_id"] for citation in rule["citations"]} >= {
+            citation["sourceId"] for citation in record["citations"]
+        }, record_id
+
+        status, body = get(f"/states/{slug}")
+        assert status == "200 OK", record_id
+        assert b'data-catalog="states"' in body
+        assert b"/static/catalog-detail.js" in body
+        assert b'id="item-content"' in body
+
+    script = (root / "src/infinity_db/web/static/catalog-detail.js").read_text(
+        encoding="utf-8"
+    )
+    assert "rulesReferenceSection(rules)" in script
+    assert "content.hidden = false;" in script
+    assert "if (catalog === \"states\") return null;" in script
 
 
 def test_state_catalog_caches_composed_records_and_isolates_detail_results(

@@ -13,10 +13,81 @@ from infinity_db.rules_database import export_rules_database
 from tools.audit_enrichment_coverage import (
     DEFAULT_CLASSIFICATION_PATH,
     EnrichmentCoverageAuditError,
+    _catalog_gap_classification,
+    _layered_family_root,
+    _load_classification_policy,
     _record_gap_codes,
+    _rules_index,
     audit_coverage,
     main,
 )
+
+
+def test_existing_mine_family_layers_are_not_ambiguous(tmp_path: Path) -> None:
+    records, _ = _rules_index(_fixture_rules(tmp_path))
+    for specific in ("weapon:cybermine", "weapon:para-mine"):
+        family = {specific, "weapon:mines"}
+        assert _layered_family_root(family, records) == specific
+        assert {
+            (link["type"], link["recordId"])
+            for link in records[specific]["relations"]
+        } >= {("uses-effects-of", "weapon:mines")}
+
+
+def test_family_layering_does_not_hide_unrelated_or_cyclic_mappings() -> None:
+    def record(*targets: str) -> dict:
+        return {
+            "kind": "weapon",
+            "relations": [
+                {"type": "uses-effects-of", "recordId": target}
+                for target in targets
+            ],
+        }
+
+    records = {
+        "weapon:shared": record(),
+        "weapon:variant-a": record("weapon:shared"),
+        "weapon:variant-b": record("weapon:shared"),
+    }
+    assert _layered_family_root(
+        {"weapon:shared", "weapon:variant-a"}, records
+    ) == "weapon:variant-a"
+    assert _layered_family_root(
+        {"weapon:shared", "weapon:variant-a", "weapon:variant-b"}, records
+    ) is None
+    assert _layered_family_root(
+        {"weapon:variant-a", "weapon:variant-b"}, records
+    ) is None
+    records["weapon:shared"] = record("weapon:variant-a")
+    assert _layered_family_root(
+        {"weapon:shared", "weapon:variant-a"}, records
+    ) is None
+
+
+def test_flash_pulse_historical_citation_is_explicitly_accepted(
+    tmp_path: Path,
+) -> None:
+    records, _ = _rules_index(_fixture_rules(tmp_path))
+    flash = records["weapon:flash-pulse"]
+    assert _record_gap_codes(flash) == ["stale_citation_source"]
+    assert any(
+        citation["source_id"] == "wiki-es-immunity-oldid-3677"
+        and citation["source_version"].startswith("N5.2")
+        for citation in flash["citations"]
+    )
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["source_version"] == "5.3"
+        for citation in flash["citations"]
+    )
+    policy = _load_classification_policy(DEFAULT_CLASSIFICATION_PATH)
+    matched: set[tuple[str, ...]] = set()
+    decision = _catalog_gap_classification(
+        policy, matched, "weapons", 72, "stale_citation_source"
+    )
+    assert decision["classification"] == "intentional-omission"
+    assert decision["source"] == "override"
+    assert "REA-027" in decision["reason"]
 
 
 def _fixture_database(tmp_path: Path) -> Path:
@@ -143,16 +214,16 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         classification_path=_fixture_classification_policy(tmp_path),
     )
 
-    assert report["summary"]["exposedCount"] == 154
-    assert report["summary"]["completeCount"] == 153
+    assert report["summary"]["exposedCount"] == 159
+    assert report["summary"]["completeCount"] == 158
     assert report["summary"]["gapCount"] == 1
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
-        "unresolved_related_item_link": 8,
+        "unresolved_related_item_link": 11,
     }
-    assert report["summary"]["classifiedGapCount"] == 9
-    assert report["summary"]["classificationCounts"] == {"release-blocker": 9}
-    assert report["summary"]["releaseBlockerCount"] == 9
+    assert report["summary"]["classifiedGapCount"] == 12
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 12}
+    assert report["summary"]["releaseBlockerCount"] == 12
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
@@ -160,11 +231,21 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert skills["CC Attack"]["gapCodes"] == []
     assert skills["Missing Skill"]["gapCodes"] == ["missing_rule_definition"]
     assert skills["Request Speedball"]["gapCodes"] == []
+    # Request SpecBall became a published Skill after the original fixture
+    # counts were recorded; retain explicit coverage instead of relaxing totals.
+    assert skills["Request SpecBall"]["gapCodes"] == []
     assert skills["Missing Skill"]["gapClassifications"][0]["classification"] == (
         "release-blocker"
     )
 
-    tinbot = report["domains"]["equipment"]["items"][0]
+    equipment = {str(item["id"]): item for item in report["domains"]["equipment"]["items"]}
+    for slug in ("cube", "cube-2", "firewall"):
+        assert equipment[slug]["familyRuleIds"] == [f"equipment:{slug}"]
+        assert equipment[slug]["gapCodes"] == []
+    tinbot = next(
+        item for item in report["domains"]["equipment"]["items"]
+        if item["name"] == "TinBot"
+    )
     assert tinbot["familyRuleIds"] == ["equipment:tinbot"]
     assert tinbot["exactSourceRuleIds"] == ["equipment:tinbot-firewall"]
     assert tinbot["mapping"]["exactSourceRecordIds"]["169"] == [
@@ -185,8 +266,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert states["Unconscious State"]["gapCodes"] == []
     assert states["Targeted State"]["gapCodes"] == []
 
-    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 8
-    assert report["summary"]["supportingRelationTargetCount"] == 10
+    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 11
+    assert report["summary"]["supportingRelationTargetCount"] == 11
     assert {
         item["targetRecordId"] for item in report["relationCoverage"]["unresolved"]
     } == {
@@ -195,6 +276,9 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         "equipment:medikit",
         "equipment:multispectral-visor",
         "equipment:360o-visor",
+        "equipment:deactivator",
+        "weapon:sepsitor",
+        "weapon:sepsitor-plus",
     }
     assert {
         item["recordId"] for item in report["relationCoverage"]["supporting"]
@@ -209,6 +293,7 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         "rule:special-lieutenant-order",
         "rule:tactical-order",
         "training:regular",
+        "ammunition:eclipse",
     }
 
 
@@ -314,9 +399,9 @@ def test_enrichment_coverage_allows_catalog_gap_classification(tmp_path: Path) -
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 8,
+        "release-blocker": 11,
     }
-    assert report["summary"]["releaseBlockerCount"] == 8
+    assert report["summary"]["releaseBlockerCount"] == 11
 
 
 def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> None:
@@ -353,9 +438,9 @@ def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> Non
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 8,
+        "release-blocker": 11,
     }
-    assert report["summary"]["releaseBlockerCount"] == 8
+    assert report["summary"]["releaseBlockerCount"] == 11
 
 
 def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:
@@ -380,3 +465,34 @@ def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Pat
             _fixture_rules(tmp_path),
             classification_path=classifications,
         )
+
+
+def test_repeater_current_citation_and_cube_public_equipment_resolution(
+    tmp_path: Path,
+) -> None:
+    rules_path = _fixture_rules(tmp_path)
+    records, _ = _rules_index(rules_path)
+    repeater = records["equipment:repeater"]
+    assert _record_gap_codes(repeater) == []
+    assert any(
+        cite["source_id"] == "wiki-en-20260926-200832"
+        and cite["member"] == "Hacking_Area"
+        for cite in repeater["citations"]
+    )
+    assert not any(
+        cite["source_id"] == "wiki-hacking-area-oldid-3974"
+        for cite in repeater["citations"]
+    )
+
+    database_path = Path(__file__).resolve().parents[1] / "data/generated/infinity.db"
+    report = audit_coverage(database_path, rules_path, include_complete=True)
+    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 0
+    assert report["summary"]["releaseBlockerCount"] == 0
+    equipment = {str(item["id"]): item for item in report["domains"]["equipment"]["items"]}
+    for slug in ("cube", "cube-2", "firewall"):
+        assert equipment[slug]["familyRuleIds"] == [f"equipment:{slug}"]
+    unresolved = report["relationCoverage"]["unresolved"]
+    assert not any(
+        item["targetRecordId"] in {"equipment:cube", "equipment:cube-2"}
+        for item in unresolved
+    )

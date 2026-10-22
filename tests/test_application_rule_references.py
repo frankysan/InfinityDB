@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from collections.abc import Callable, Iterable
+from functools import partial
 from pathlib import Path
+from wsgiref.util import setup_testing_defaults
+
+import pytest
 
 from infinity_army_data.metadata import decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
@@ -11,6 +16,7 @@ from infinity_db.application_domains import (
     application_domain,
     public_rule_domain,
     public_rule_record_domain,
+    record_matches_domain,
     semantic_record_domain,
 )
 from infinity_db.curated import load_curated_directory
@@ -19,10 +25,16 @@ from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
 )
+from infinity_db.domain_slugs import route_slug_from_qualified_typed_domain_id
+from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
+from infinity_db.web import create_app
+from tools.verify_ammunition_browser import WIDTHS, source_names, verify
+from tools.verify_general_rules_browser import source_rules
+from tools.verify_labels_browser import source_names as label_source_names
 
 
 def _reference_database(tmp_path: Path) -> Database:
@@ -337,18 +349,28 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
 
     general_rules = RulesRecordCatalog(rules_database, "rules")
     general_rule_items = general_rules.list_items()
-    assert len(general_rule_items) == 11
+    assert len(general_rule_items) == 21
     assert {item["slug"] for item in general_rule_items} == {
         "command-token-strategic-use",
+        "coordinated-orders",
+        "deployment-phase",
+        "face-to-face-rolls",
+        "guts-roll",
+        "hacking-area",
         "irregular-order",
         "loss-of-lieutenant",
+        "modifiers-explained",
+        "order-expenditure-sequence",
         "peripheral-type-ancillary",
         "peripheral-type-control",
         "peripheral-type-cyberplug",
         "peripheral-type-servant",
         "peripheral-type-synchronized",
         "regular-order",
+        "saving-rolls",
         "special-lieutenant-order",
+        "special-dice",
+        "supportware",
         "tactical-order",
     }
     assert general_rules.get_item("fireteam-general") is None
@@ -387,6 +409,292 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
     assert RulesRecordCatalog(None, "ammunition").list_items() == []
     assert RulesRecordCatalog(None, "rules").list_items() == []
     assert LabelCatalog(None).list_items() == []
+
+def _published_get(
+    app: Callable[..., Iterable[bytes]], path: str
+) -> tuple[str, bytes]:
+    environ: dict = {}
+    setup_testing_defaults(environ)
+    environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
+    statuses: list[str] = []
+
+    def respond(status: str, _headers: list, _exc_info: object = None) -> None:
+        statuses.append(status)
+
+    response = app(environ, respond)
+    try:
+        body = b"".join(response)
+    finally:
+        close = getattr(response, "close", None)
+        if close is not None:
+            close()
+    assert len(statuses) == 1, path
+    return statuses[0], body
+
+
+def test_all_published_ammunition_records_reach_normal_browser_routes() -> None:
+    """Cross-check every curated Ammunition identity through storage and WSGI."""
+
+    root = Path(__file__).parents[1]
+    curated_records = {
+        record["id"]: record
+        for _, document in load_curated_directory(root / "data/curated")
+        for record in document["records"]
+        if record["kind"] == "ammunition"
+    }
+    assert len(curated_records) == 11
+    assert source_names(root) == {
+        identity.removeprefix("ammunition:"): source["name"]
+        for identity, source in curated_records.items()
+    }
+    assert WIDTHS == (1440, 390, 320)
+
+    rules_path = root / "data/generated/rules.db"
+    with sqlite3.connect(rules_path) as connection:
+        stored_ids = {
+            record_id
+            for (record_id,) in connection.execute(
+                "SELECT id FROM records WHERE kind = 'ammunition'"
+            )
+        }
+    assert stored_ids == set(curated_records)
+
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+
+    get = partial(_published_get, app)
+    status, body = get("/api/ammunition")
+    assert status == "200 OK"
+    listed = json.loads(body)["items"]
+    assert {f"ammunition:{item['slug']}" for item in listed} == set(curated_records)
+    assert len(listed) == len(curated_records)
+
+    status, body = get("/ammunition")
+    assert status == "200 OK"
+    assert b'data-catalog="ammunition"' in body
+    assert b"/static/reference-catalog.js" in body
+
+    for identity, source in sorted(curated_records.items()):
+        slug = identity.removeprefix("ammunition:")
+        list_item = next(item for item in listed if item["slug"] == slug)
+        assert list_item["name"] == source["name"], identity
+        assert list_item["description"] == source["summary"], identity
+
+        status, body = get(f"/api/ammunition/{slug}")
+        assert status == "200 OK", identity
+        detail = json.loads(body)
+        assert (detail["slug"], detail["name"], detail["description"]) == (
+            slug, source["name"], source["summary"]
+        )
+        assert len(detail["rules"]) == 1, identity
+        rule = detail["rules"][0]
+        assert (rule["id"], rule["summary"]) == (identity, source["summary"])
+        assert rule.get("facts", {}) == source.get("facts", {}), identity
+        assert rule["citations"], identity
+        assert {citation["source_id"] for citation in rule["citations"]} >= {
+            citation["sourceId"] for citation in source["citations"]
+        }, identity
+
+        status, body = get(f"/ammunition/{slug}")
+        assert status == "200 OK", identity
+        assert b'data-catalog="ammunition"' in body
+        assert b"/static/reference-detail.js" in body
+        assert b'id="item-content"' in body
+        assert b'class="intro-copy developer-only"' in body
+
+    # The real player content is placed in item-content; only metadata uses
+    # developer-only styling. A browser interaction check is still required.
+    javascript = (root / "src/infinity_db/web/static/reference-detail.js").read_text(
+        encoding="utf-8"
+    )
+    assert "getCatalogItem(catalog, itemId, pageController.signal)" in javascript
+    assert "rulesReferenceSection(item.rules)" in javascript
+    assert "content.hidden = false;" in javascript
+
+
+def test_all_published_labels_preserve_curated_vocabulary_and_public_routes() -> None:
+    """Verify the current Label vocabulary, not the unrelated rules-record table."""
+
+    root = Path(__file__).parents[1]
+    source_rows = {
+        (document["collection"]["id"], label["id"], label["name"], label["description"])
+        for _, document in load_curated_directory(root / "data/curated")
+        if document["collection"]["status"] == "current"
+        for label in document["labels"]
+    }
+    expected: dict[str, tuple[str, str]] = {}
+    sources_by_id: dict[str, set[str]] = {}
+    for collection_id, label_id, name, description in source_rows:
+        if label_id in expected:
+            assert expected[label_id] == (name, description), label_id
+        expected[label_id] = (name, description)
+        sources_by_id.setdefault(label_id, set()).add(collection_id)
+    assert len(expected) == 24
+    assert label_source_names(root) == {
+        label_id: name for label_id, (name, _) in expected.items()
+    }
+    assert WIDTHS == (1440, 390, 320)
+    with pytest.raises(ValueError, match="Unsupported reference catalog"):
+        verify("http://127.0.0.1:8000", catalog="invalid")
+    with pytest.raises(ValueError, match="Expected 24 reviewed labels entries"):
+        verify("http://127.0.0.1:8000", catalog="labels", expected_names={})
+
+    rules_path = root / "data/generated/rules.db"
+    with sqlite3.connect(rules_path) as connection:
+        stored_rows = set(connection.execute(
+            "SELECT l.collection_id, l.id, l.name, l.description FROM labels AS l "
+            "JOIN collections AS c ON c.id = l.collection_id "
+            "WHERE c.status = 'current'"
+        ))
+    assert stored_rows == source_rows
+
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    get = partial(_published_get, app)
+    status, body = get("/api/labels")
+    assert status == "200 OK"
+    items = json.loads(body)["items"]
+    assert len(items) == len(expected)
+    assert {item["slug"] for item in items} == set(expected)
+    assert all(item["id"] == item["slug"] for item in items)
+
+    status, body = get("/labels")
+    assert status == "200 OK"
+    assert b'data-catalog="labels"' in body
+    assert b"/static/reference-catalog.js" in body
+
+    for label_id, (name, description) in sorted(expected.items()):
+        listed = next(item for item in items if item["slug"] == label_id)
+        assert (listed["name"], listed["description"]) == (name, description), label_id
+        status, body = get(f"/api/labels/{label_id}")
+        assert status == "200 OK", label_id
+        detail = json.loads(body)
+        assert (detail["id"], detail["slug"], detail["name"], detail["description"]) == (
+            label_id, label_id, name, description
+        )
+        assert detail["collection"]["id"] in sources_by_id[label_id], label_id
+        assert isinstance(detail["description_tokens"], list), label_id
+        used_by = detail["used_by"]
+        assert len({item["href"] for item in used_by}) == len(used_by), label_id
+        assert all(item["href"].startswith("/") for item in used_by), label_id
+
+        status, body = get(f"/labels/{label_id}")
+        assert status == "200 OK", label_id
+        assert b'data-catalog="labels"' in body
+        assert b"/static/reference-detail.js" in body
+        assert b'id="item-content"' in body
+
+    script = (root / "src/infinity_db/web/static/reference-detail.js").read_text(
+        encoding="utf-8"
+    )
+    assert "definitionSection(item)" in script
+    assert "content.hidden = false;" in script
+
+
+def test_all_current_general_rules_preserve_category_scoped_publication() -> None:
+    """Audit all published General Rules, including qualified source IDs."""
+
+    root = Path(__file__).parents[1]
+    domain = application_domain("rules")
+    sources = {
+        record["id"]: (document["collection"]["id"], record)
+        for _, document in load_curated_directory(root / "data/curated")
+        if document["collection"]["status"] == "current"
+        for record in document["records"]
+        if record_matches_domain(domain, record)
+    }
+    assert len(sources) == 21
+    slugs = {
+        route_slug_from_qualified_typed_domain_id(
+            record_id, expected_domain="rule", context="General Rule source identity"
+        ): record_id
+        for record_id in sources
+    }
+    assert len(slugs) == len(sources)
+    assert slugs["peripheral-type-servant"] == "rule:peripheral-type:servant"
+    assert source_rules(root) == {
+        slug: (record_id, sources[record_id][1]["name"])
+        for slug, record_id in slugs.items()
+    }
+    with pytest.raises(ValueError, match="General Rules require a complete"):
+        verify(
+            "http://127.0.0.1:8000",
+            catalog="rules",
+            expected_names={
+                slug: sources[record_id][1]["name"]
+                for slug, record_id in slugs.items()
+            },
+        )
+
+    rules_path = root / "data/generated/rules.db"
+    with sqlite3.connect(rules_path) as connection:
+        rows = list(connection.execute(
+            "SELECT r.collection_id, r.id, r.name, r.summary, r.facts_json "
+            "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+            "WHERE c.status = 'current' AND r.kind = 'rule'"
+        ))
+    published = {
+        record_id: (collection_id, name, summary, json.loads(facts_json or "{}"))
+        for collection_id, record_id, name, summary, facts_json in rows
+        if record_matches_domain(
+            domain, {"kind": "rule", "facts": json.loads(facts_json or "{}")}
+        )
+    }
+    assert set(published) == set(sources)
+    for record_id, (collection_id, record) in sources.items():
+        assert published[record_id] == (
+            collection_id, record["name"], record["summary"], record.get("facts", {})
+        ), record_id
+
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    get = partial(_published_get, app)
+    status, body = get("/api/rules")
+    assert status == "200 OK"
+    listed = json.loads(body)["items"]
+    assert {item["slug"] for item in listed} == set(slugs)
+    assert len(listed) == len(slugs)
+    status, body = get("/rules")
+    assert status == "200 OK"
+    assert b'data-catalog="rules"' in body
+    assert b"/static/reference-catalog.js" in body
+
+    for slug, record_id in sorted(slugs.items()):
+        _, source = sources[record_id]
+        item = next(item for item in listed if item["slug"] == slug)
+        assert (item["id"], item["name"], item["description"]) == (
+            slug, source["name"], source["summary"]
+        ), record_id
+        status, body = get(f"/api/rules/{slug}")
+        assert status == "200 OK", record_id
+        detail = json.loads(body)
+        assert (detail["slug"], detail["name"], detail["description"]) == (
+            slug, source["name"], source["summary"]
+        ), record_id
+        assert detail["category"] == source["facts"]["category"], record_id
+        assert len(detail["rules"]) == 1, record_id
+        record = detail["rules"][0]
+        assert (record["id"], record["summary"]) == (
+            record_id, source["summary"]
+        ), record_id
+        assert record.get("facts", {}) == source.get("facts", {}), record_id
+        assert record["citations"], record_id
+        assert {citation["source_id"] for citation in record["citations"]} >= {
+            citation["sourceId"] for citation in source["citations"]
+        }, record_id
+        assert len({peer["slug"] for peer in detail.get("category_peers", [])}) == len(
+            detail.get("category_peers", [])
+        ), record_id
+
+        status, body = get(f"/rules/{slug}")
+        assert status == "200 OK", record_id
+        assert b'data-catalog="rules"' in body
+        assert b"/static/reference-detail.js" in body
+        assert b'id="item-content"' in body
+
+    script = (root / "src/infinity_db/web/static/reference-detail.js").read_text(
+        encoding="utf-8"
+    )
+    assert "rulesReferenceSection(item.rules)" in script
+    assert "content.hidden = false;" in script
+
 
 def test_rules_relation_references_project_source_variants_to_public_routes(
     tmp_path: Path,
@@ -672,6 +980,43 @@ def test_hacking_program_catalog_remains_available_without_rules_database(
     assert carbonite is not None
     assert carbonite["description"] == "DA Ammo. State: IMM-B. Non-Lethal."
     assert "rules" not in carbonite
+
+
+def test_weapon_glossary_uses_opt_in_army_links_for_routable_definitions(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    rules = RulesDatabase(output)
+    database = _reference_database(tmp_path)
+
+    # The bulk query remains lightweight by default. The Glossary opts in
+    # only for weapon entries so their canonical Army host can be resolved.
+    original = rules.composed_records_by_kind("weapon")
+    assert not any(record.get("army_links") for record in original)
+    routed = rules.composed_records_by_kind("weapon", include_army_links=True)
+    mines = next(record for record in routed if record["id"] == "weapon:mines")
+    assert len(mines["army_links"]) == 7
+    assert rule_record_public_reference(database, mines) == {
+        "href": "/weapons/ap-mine#rule-weapon-mines"
+    }
+
+    glossary = GlossaryCatalog(database, rules)
+    entries = [entry for entry in glossary.entries() if entry["kind"] == "weapon"]
+    # Source-mode-specific definitions are not separate search identities.
+    assert len(entries) == sum(
+        (record.get("variant_semantics") or {}).get("inheritance") != "source"
+        for record in routed
+    )
+    assert len(entries) == len({entry["id"] for entry in entries})
+    by_id = {entry["id"]: entry for entry in entries}
+    assert by_id["weapon:mines"]["href"] == "/weapons/ap-mine#rule-weapon-mines"
+    assert by_id["weapon:para-mine"]["href"] == "/weapons/para-mine"
+    assert by_id["weapon:wildparrot"]["href"] == "/weapons/wildparrot"
+    assert "weapon:pt-endgame" not in by_id
+    assert all(entry["href"].startswith("/weapons/") for entry in entries)
+    assert all(not entry["embedded"] for entry in entries)
 
 
 def test_shared_weapon_family_reference_targets_its_card() -> None:

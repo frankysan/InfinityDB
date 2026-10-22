@@ -80,6 +80,7 @@ from infinity_db.rules_database import (
 )
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
+from infinity_db.trait_wiki_references import load_trait_wiki_references
 from infinity_db.unit_filter_config import load_unit_filter_config
 from infinity_db.unit_presentation import enrich_unit_filter_presentation
 
@@ -229,6 +230,49 @@ def canonical_database_template(tmp_path_factory: pytest.TempPathFactory) -> Pat
     path = directory / "army.sqlite3"
     export_database(_normalized_fixture_data(), path)
     return path
+
+
+def test_source_only_peripheral_attachments_roundtrip_published_database(
+    tmp_path: Path, normalized: dict,
+) -> None:
+    """Publish source facts without fabricating reviewed Peripheral identities."""
+    target = tmp_path / "army.db"
+    export_database(normalized, target)
+    with sqlite3.connect(target) as db, sqlite3.connect(raw_database_path(target)) as raw:
+        assert db.execute(
+            "SELECT COUNT(*) FROM sqlite_master WHERE name = 'peripherals'"
+        ).fetchone()[0] == 0
+        labels = db.execute(
+            "SELECT army_id, peripheral_id, source_name "
+            "FROM application_peripheral_source_labels ORDER BY army_id, peripheral_id"
+        ).fetchall()
+        assert labels
+        for army_id, peripheral_id, name in labels:
+            assert name and name == raw.execute(
+                "SELECT name FROM peripherals WHERE army_id = ? AND id = ?",
+                (army_id, peripheral_id),
+            ).fetchone()[0]
+        assert db.execute(
+            "SELECT COUNT(*) FROM application_peripheral_entities"
+        ).fetchone()[0] == 0
+
+    unit = Database(target).get_unit("alpha")
+    assert unit is not None
+    attached = [
+        item
+        for army in unit["armies"]
+        for kind in ("profiles", "loadouts")
+        for context in army[kind]
+        for item in context.get("peripherals") or []
+    ]
+    assert attached
+    assert all(
+        item["source_only"] is True
+        and item["name"] == "Drone"
+        and item["type_id"] is None
+        and item["id"].startswith("source-peripheral:")
+        for item in attached
+    )
 
 
 @pytest.fixture
@@ -756,6 +800,30 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
     assert detail["name"] == "Continuous Damage"
     assert detail["rules"][0]["id"] == "trait:continuous-damage"
     assert detail["rules"][0]["citations"][0]["heading"] == "Continuous Damage"
+    assert detail["wiki"] == "https://infinitythewiki.com/Traits#Continuous_Damage"
+    non_lethal = catalog.get_trait("non-lethal")
+    assert non_lethal is not None
+    assert non_lethal["wiki"] == "https://infinitythewiki.com/Traits#Non-Lethal"
+    for slug, fragment in {
+        "boost": "Boost",
+        "deployable": "Deployable",
+        "double-shot": "Double_Shot",
+        "perimeter": "Perimeter",
+        "reflective": "Reflective",
+    }.items():
+        mapped = catalog.get_trait(slug)
+        assert mapped is not None
+        assert mapped["wiki"] == f"https://infinitythewiki.com/Traits#{fragment}"
+    for record_id, reviewed in load_trait_wiki_references().items():
+        mapped = catalog.get_trait(record_id.removeprefix("trait:"))
+        assert mapped is not None
+        assert mapped["name"] == reviewed["name"]
+        assert mapped["wiki"] == reviewed["url"]
+    suppressive = catalog.get_trait("suppressive-fire")
+    assert suppressive is not None
+    assert suppressive["wiki"] == (
+        "https://infinitythewiki.com/Traits#Suppressive_Fire_.28SF.29"
+    )
 
 
 def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
@@ -935,6 +1003,7 @@ def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
     assert detail is not None
     assert detail["slug"] == "continuous-damage"
     assert detail["name"] == "Persistent Damage"
+    assert "wiki" not in detail
 
 
 def test_uncurated_trait_reference_uses_catalog_slug_instead_of_guessing(
@@ -3434,8 +3503,8 @@ def test_skill_catalog_uses_curated_declaration_categories(
     mixed = catalog.get_skill(278)
     assert mixed is not None
     assert mixed["categories"] == [
-        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
-        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
+        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 39},
+        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 39},
     ]
     bs_variants = {
         int(variant["skill_id"]): variant
@@ -3455,9 +3524,17 @@ def test_skill_catalog_uses_curated_declaration_categories(
     cc = catalog.get_skill(274)
     assert cc is not None
     assert cc["categories"] == [
-        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 45},
-        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 45},
+        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 51},
+        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 51},
     ]
+    # The raw declaration projection must not expose an invented Morpho-scan ARO.
+    morpho_declarations = [
+        (row["type_id"], row["page"])
+        for row in RulesDatabase(rules_path).declaration_categories("skill")
+        if row["army_ref"] == "morpho-scan"
+    ]
+    assert morpho_declarations == [("short-skill", 103)]
+
     cc_variant = next(
         variant for variant in cc["variants"] if int(variant["skill_id"]) == 274
     )
@@ -3622,7 +3699,7 @@ def test_skill_catalog_rules_view_excludes_known_non_skills_and_adds_rules_only_
         {
             "id": "automatic",
             "name": "Automatic",
-            "source": "Infinity Wiki snapshot (English) v20260918-130233",
+            "source": "Infinity Wiki snapshot (English) v20260926-200832",
             "page": None,
         }
     ]

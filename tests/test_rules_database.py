@@ -113,6 +113,431 @@ def test_published_variant_descriptions_use_game_language(
         assert "discrete rather than cumulative" in record["summary"]
 
 
+def test_shared_hacking_area_firewall_and_supportware_mechanics_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    hacking_area = current_rules_database.composed_record("rule:hacking-area")
+    firewall = current_rules_database.composed_record("equipment:firewall")
+    supportware = current_rules_database.composed_record("rule:supportware")
+    assert hacking_area is not None
+    assert firewall is not None
+    assert supportware is not None
+
+    assert "[[distance:8:inch]]" in " ".join(
+        hacking_area["facts"]["clarifications"]
+    )
+    assert "non-[[skill:hacker]]" in hacking_area["summary"]
+    assert "only one [[equipment:firewall]]" in firewall["summary"]
+    assert "+3 to Saving Rolls" in " ".join(firewall["facts"]["effects"])
+    assert "[[state:isolated|Isolated]]" in " ".join(
+        firewall["facts"]["restrictions"]
+    )
+    assert "entirely canceled" in " ".join(
+        supportware["facts"]["clarifications"]
+    )
+    assert {citation["source_id"] for citation in hacking_area["citations"]} >= {
+        "wiki-hacking-area-oldid-3974", "n5-core-v5.3-pdf"
+    }
+    assert {citation["source_id"] for citation in firewall["citations"]} >= {
+        "wiki-firewall-oldid-4097", "n5-faq-v0.1-en-pdf"
+    }
+
+    fairy_dust = current_rules_database.composed_record("hacking-program:fairy-dust")
+    assert fairy_dust is not None
+    assert "entire chosen Troop Type" in " ".join(
+        fairy_dust["facts"]["restrictions"]
+    )
+
+    hacking_restrictions = " ".join(hacking_area["facts"]["restrictions"])
+    hacking_clarifications = " ".join(hacking_area["facts"]["clarifications"])
+    assert "fails its Requirements" in hacking_restrictions
+    assert "[[skill:idle]]" in hacking_restrictions
+    assert "along the Active Trooper's path" in hacking_clarifications
+    assert "from that Trooper's [[equipment:repeater:plural]]" in (
+        hacking_clarifications
+    )
+    assert "must still satisfy" in hacking_clarifications
+
+    firewall_effects = " ".join(firewall["facts"]["effects"])
+    firewall_restrictions = " ".join(firewall["facts"]["restrictions"])
+    assert "-3 or -6" in firewall_effects
+    assert "regardless of whether" in firewall_effects
+    assert "MODs do not stack" in firewall_effects
+    assert "Device is disabled" in firewall_restrictions
+    assert "[[term:null-state|Null State]]" in firewall_restrictions
+
+    supportware_effects = " ".join(supportware["facts"]["effects"])
+    supportware_restrictions = " ".join(supportware["facts"]["restrictions"])
+    supportware_examples = " ".join(supportware["facts"]["clarifications"])
+    assert "only one Supportware Program" in supportware_effects
+    assert "only one active Supportware Program" in supportware_effects
+    assert "earlier Program protected a whole Troop Type" in (
+        supportware_restrictions
+    )
+    assert "[[state:isolated|Isolated]]" in supportware_restrictions
+    assert "[[term:null-state|Null State]]" in supportware_restrictions
+    assert "other REMs lose" in supportware_examples
+    assert "[[hacking-program:enhanced-reaction]]" in supportware_examples
+
+
+def test_special_dice_reference_and_source_exceptions_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    special_dice = current_rules_database.composed_record("rule:special-dice")
+    assert special_dice is not None
+    assert special_dice["facts"]["category"] == "basic-rule"
+    text = " ".join(
+        clause
+        for field in ("effects", "restrictions", "clarifications")
+        for clause in special_dice["facts"][field]
+    )
+    for required in (
+        "do not spend [[trait:disposable-x|Disposable]] uses",
+        "the Active Player selects first",
+        "assigned to a different target",
+        "[[skill:berserk]]",
+        "[[equipment:medikit|MediKit]]",
+        "[[equipment:gizmokit|GizmoKit]]",
+        "[[trait:bs-weapon-ph|PH]]",
+        "[[trait:bs-weapon-wip|WIP]]",
+        "[[skill:martial-arts]]",
+        "Coordinated Orders",
+    ):
+        assert required in text
+    assert {
+        (source["source_id"], source.get("page"))
+        for source in special_dice["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 75),
+        ("n5-core-v5.3-pdf", 100),
+        ("n5-core-v5.3-pdf", 136),
+        ("n5-faq-v0.1-en-pdf", 3),
+    }
+
+    assert sum(
+        "N5 v0.1 FAQ confirms" in clause
+        for clause in special_dice["facts"]["clarifications"]
+    ) == 1
+
+    for record_id in (
+        "rule:fireteam-level-bonuses",
+        "skill:martial-arts",
+        "skill:martial-arts-l3",
+        "skill:martial-arts-l5",
+        "skill:berserk",
+        "skill:bs-attack",
+        "trait:disposable-x",
+        "equipment:medikit",
+        "equipment:gizmokit",
+    ):
+        record = current_rules_database.composed_record(record_id)
+        assert record is not None, record_id
+        authored_text = json.dumps(record)
+        assert any(
+            reference in authored_text
+            for reference in (
+                "[[rule:special-dice|Special Dice]]",
+                "[[rule:special-dice|Special Die]]",
+            )
+        ), record_id
+
+
+def test_rea041_spanish_fireteam_dice_conflict_is_visible_without_changing_b6(
+    current_rules_database: RulesDatabase,
+) -> None:
+    special_dice = current_rules_database.composed_record("rule:special-dice")
+    fireteam = current_rules_database.composed_record("rule:fireteam-level-bonuses")
+    assert special_dice is not None and fireteam is not None
+
+    notes = special_dice["facts"]["sourceNotes"]
+    assert len(notes) == 2
+    assert "English N5.3 pp. 75/136" in notes[0]
+    assert "Spanish N5.3 p. 75" in notes[0]
+    assert "B6 Attack with one +1 SD" in notes[0]
+    assert "roll seven dice, discard one" in notes[0]
+    assert "Spanish N5.3 p. 140" in notes[1]
+    assert "conflicts with its own p. 75" in notes[1]
+    assert "pending a scoped official ruling" in notes[1]
+    assert "a separate Fireteam dice cap" in notes[1]
+
+    restrictions = " ".join(special_dice["facts"]["restrictions"])
+    assert "maximum Attack Burst remains B6" in restrictions
+    assert "extra SD dice do not count as Burst" in restrictions
+    source_note = fireteam["facts"]["sourceNotes"][0]
+    assert "**Unresolved Spanish Fireteam reminder:**" in source_note
+    assert "[[rule:special-dice|Special Dice (+1 SD)]]" in source_note
+    assert "unverified pending an official correction" in source_note
+    assert fireteam["facts"]["levels"][1]["bonuses"] == [
+        "[[skill:bs-attack]] ([[rule:special-dice|+1 SD]])"
+    ]
+    for record in (special_dice, fireteam):
+        assert {
+            (citation["source_id"], citation.get("page"))
+            for citation in record["citations"]
+            if citation["source_id"] == "n5-core-v5.3-es-pdf"
+        } >= {
+            ("n5-core-v5.3-es-pdf", 75),
+            ("n5-core-v5.3-es-pdf", 140),
+        }
+
+
+def test_rea034_published_morat_example_and_conflict_notice(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("rule:fireteam-level-bonuses")
+    assert record is not None
+    facts = record["facts"]
+    basis = facts["basis"]
+    assert "five-member CORE" in basis
+    assert "three Morat Vanguard" in basis
+    assert "**Level 3**" in basis
+    assert "[[rule:special-dice|+1 SD]]" in basis
+    assert "Level 4 **+1 BS**" in basis
+    assert facts["levels"][2]["bonuses"] == ["+3 [[skill:discover]]", "+1 [[skill:dodge]]"]
+    assert facts["levels"][3]["bonuses"] == ["+1 BS"]
+    assert "Unresolved Spanish Fireteam reminder" in facts["sourceNotes"][0]
+    note = facts["sourceNotes"][1]
+    assert "Unresolved printed Fireteam example" in note
+    assert "English N5.3 p. 138" in note
+    assert "Spanish N5.3 p. 142" in note
+    assert "**+1 BS/CD Attack**" in note
+    assert "table-based rule pending an official correction" in note
+    cited = {(ref["source_id"], ref.get("page")) for ref in record["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 138),
+        ("n5-core-v5.3-es-pdf", 139),
+        ("n5-core-v5.3-es-pdf", 142),
+    }
+
+
+def test_shared_face_to_face_and_saving_roll_baselines_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    face_to_face = current_rules_database.composed_record("rule:face-to-face-rolls")
+    saving = current_rules_database.composed_record("rule:saving-rolls")
+    assert face_to_face is not None
+    assert saving is not None
+    assert face_to_face["facts"]["category"] == "basic-rule"
+    assert saving["facts"]["category"] == "basic-rule"
+    assert "affect one another directly" in " ".join(face_to_face["facts"]["restrictions"])
+    assert "both players roll Criticals" in " ".join(face_to_face["facts"]["effects"])
+    assert "Order is still spent" in " ".join(face_to_face["facts"]["effects"])
+    assert "[[skill:dodge|Dodge]]" in " ".join(face_to_face["facts"]["clarifications"])
+    assert "PH-6" in " ".join(saving["facts"]["restrictions"])
+    assert "rolling 13 passes, while 14 fails" in " ".join(saving["facts"]["clarifications"])
+    assert "additional Saving Roll" in " ".join(saving["facts"]["effects"])
+    for rule in (face_to_face, saving):
+        assert {citation["source_id"] for citation in rule["citations"]} >= {
+            "n5-core-v5.3-pdf"
+        }
+    for skill_id in ("skill:bs-attack", "skill:cc-attack"):
+        skill = current_rules_database.composed_record(skill_id)
+        assert skill is not None
+        rendered = json.dumps(skill)
+        assert "[[rule:face-to-face-rolls|Face to Face Rolls]]" in rendered
+        assert "[[rule:saving-rolls|Saving Rolls]]" in rendered
+
+
+def test_guts_roll_reference_and_source_exceptions_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    guts = current_rules_database.composed_record("rule:guts-roll")
+    assert guts is not None
+    assert guts["facts"]["category"] == "basic-rule"
+    text = " ".join(
+        clause
+        for field in ("requirements", "effects", "restrictions", "clarifications")
+        for clause in guts["facts"][field]
+    )
+    for phrase in (
+        "single unopposed [[attribute:wip|WIP]] Roll",
+        "[[distance:2:inch]]",
+        "positions where they actually attacked",
+        "[[state:prone|Prone]]",
+        "[[skill:courage|Courage]]",
+        "[[skill:religious-troop|Religious Troop]]",
+        "[[ammunition:stun|Stun Ammunition]]",
+        "Operational Command Token during their Active Turn",
+    ):
+        assert phrase in text
+    assert ("n5-core-v5.3-pdf", 38) in {
+        (citation["source_id"], citation.get("page"))
+        for citation in guts["citations"]
+    }
+    assert {citation["source_id"] for citation in guts["citations"]} >= {
+        "wiki-guts-roll-oldid-4122",
+    }
+    for entity_id in (
+        "skill:courage", "skill:religious-troop", "skill:journalist",
+        "skill:climbing-plus", "state:prone", "state:suppressive-fire",
+        "ammunition:stun",
+    ):
+        record = current_rules_database.composed_record(entity_id)
+        assert record is not None, entity_id
+        assert "[[rule:guts-roll|Guts Roll]]" in json.dumps(record), entity_id
+
+
+def test_rea010_published_immunity_protection_and_source_examples(
+    current_rules_database: RulesDatabase,
+) -> None:
+    immunity = current_rules_database.composed_record("skill:immunity")
+    flash = current_rules_database.composed_record("weapon:flash-pulse")
+    continuous = current_rules_database.composed_record("trait:continuous-damage")
+    arm_zero = current_rules_database.composed_record("trait:arm-0")
+    bts_zero = current_rules_database.composed_record("trait:bts-0")
+    assert immunity is not None and flash is not None
+    assert continuous is not None and arm_zero is not None and bts_zero is not None
+    baseline = next(x for x in immunity["facts"]["effects"] if "non-Comms" in x)
+    for ref in (
+        "[[trait:continuous-damage|Continuous Damage]]", "[[trait:arm-0|ARM = 0]]",
+        "[[trait:bts-0|BTS = 0]]", "[[ammunition:normal|Normal]]",
+    ):
+        assert ref in baseline
+    assert "neither protection removes the ordinary Saving Roll" in baseline
+    mono, pulse = immunity["facts"]["clarifications"][:2]
+    assert "two ARM Saving Rolls" in mono
+    assert "[[skill:immunity|Immunity (Critical)]]" in mono
+    assert "[[weapon:flash-pulse|Flash Pulse]]" in pulse
+    assert "Saving Roll stays BTS, not ARM" in pulse
+    assert "[[state:stunned|Stunned]] only on a failed BTS roll" in pulse
+    assert "one BTS Saving Roll per hit" in flash["summary"]
+    assert "Non-Lethal" in flash["summary"]
+    assert "Stunned" in flash["summary"]
+    assert "[[skill:immunity]]" in continuous["summary"]
+    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 3
+    cited = {(c["source_id"], c.get("page")) for c in immunity["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 95), ("n5-core-v5.3-pdf", 96),
+        ("n5-core-v5.3-es-pdf", 99),
+    }
+
+
+def test_rea009_shared_timing_example_and_recovery_links_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    ids = (
+        "rule:order-expenditure-sequence", "skill:engineer", "skill:doctor",
+        "state:immobilized-a", "ammunition:para",
+    )
+    records = {rid: current_rules_database.composed_record(rid) for rid in ids}
+    assert all(record is not None for record in records.values())
+    order = records["rule:order-expenditure-sequence"]
+    assert order is not None
+    snippets = " ".join(order["facts"]["clarifications"])
+    assert "**Positive-before-negative resolution:**" in snippets
+    assert "**new** [[state:immobilized-a|IMM-A]]" in snippets
+    assert "original [[state:immobilized-a|IMM-A]] is not removed" in snippets
+    assert "passed Saving Roll leaves the Trooper free" in snippets
+    for rid in ids[1:4]:
+        rec = records[rid]
+        assert rec is not None
+        text = " ".join(
+            rec["facts"].get("restrictions", []) + rec["facts"].get("clarifications", [])
+        )
+        assert "[[rule:order-expenditure-sequence|Order Expenditure Sequence]]" in text
+    engineer = records["skill:engineer"]
+    doctor = records["skill:doctor"]
+    imm_a = records["state:immobilized-a"]
+    assert engineer and doctor and imm_a
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c.get("page") == 15
+               for c in engineer["citations"])
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c.get("page") == 15
+               for c in doctor["citations"])
+    for rid in ("rule:order-expenditure-sequence", "state:immobilized-a"):
+        rec = records[rid]
+        assert rec is not None
+        cited = {(c["source_id"], c.get("page")) for c in rec["citations"]}
+        assert cited >= {("n5-core-v5.3-pdf", 15), ("n5-core-v5.3-es-pdf", 15)}
+    para = records["ammunition:para"]
+    assert para is not None
+    assert para["facts"]["ammunitionResolution"]["stateEffects"] == [
+        {"stateId": "state:immobilized-a", "condition": "failed-saving-roll"}
+    ]
+
+
+def test_order_expenditure_sequence_mechanics_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    order = current_rules_database.composed_record("rule:order-expenditure-sequence")
+    assert order is not None
+    assert order["facts"]["category"] == "basic-rule"
+    text = " ".join(
+        clause
+        for field in ("effects", "restrictions", "clarifications")
+        for clause in order["facts"][field]
+    )
+    for fragment in (
+        "First [[trait:aro|ARO]] check",
+        "not eligible at the first check",
+        "full movement route",
+        "all Basic Short Skills",
+        "Long [[skill:jump|Jump]] or [[skill:climb|Climb]]",
+        "Declared [[trait:disposable-x|Disposable]] uses are still spent",
+        "[[skill:discover|Discover]]",
+        "[[skill:engineer|Engineer]]",
+        "[[state:immobilized-a|IMM-A]]",
+    ):
+        assert fragment in text
+    assert {
+        (citation["source_id"], citation.get("page"))
+        for citation in order["citations"]
+    } >= {("n5-core-v5.3-pdf", 14), ("n5-core-v5.3-pdf", 15)}
+
+    for identifier in (
+        "skill:idle", "skill:move", "skill:bs-attack", "skill:alert",
+        "rule:guts-roll", "trait:disposable-x",
+    ):
+        entry = current_rules_database.composed_record(identifier)
+        assert entry is not None, identifier
+        assert "[[rule:order-expenditure-sequence|Order Expenditure Sequence]]" in json.dumps(entry)
+
+
+def test_coordinated_orders_baseline_and_cross_references(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("rule:coordinated-orders")
+    assert record is not None
+    assert record["facts"]["category"] == "basic-rule"
+    prose = " ".join(
+        fragment
+        for section in ("requirements", "effects", "restrictions", "clarifications")
+        for fragment in record["facts"][section]
+    )
+    for expected in (
+        "one Command Token and one Regular Order",
+        "same Training (Regular or Irregular)",
+        "Spearhead uses half",
+        "Every other participating Trooper has Burst 1",
+        "different reactive Troopers may choose different targets",
+        "[[skill:idle|Idle]]",
+        "[[skill:cc-attack|CC Attack]]",
+        "[[skill:doctor|Doctor]]",
+        "[[equipment:medikit|MediKit]]",
+        "[[skill:engineer|Engineer]]",
+        "[[trait:targetless|Targetless]]",
+        "[[rule:special-dice|Special Dice (+1 SD)]]",
+        "[[state:hidden-deployment|Hidden Deployment]]",
+    ):
+        assert expected in prose
+    assert {
+        (citation["source_id"], citation.get("page"))
+        for citation in record["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 129),
+        ("n5-core-v5.3-pdf", 130),
+        ("n5-faq-v0.1-en-pdf", 3),
+    }
+    for linked in (
+        "rule:order-expenditure-sequence", "rule:special-dice",
+        "skill:bs-attack", "skill:cc-attack", "skill:doctor",
+        "skill:engineer", "equipment:medikit", "equipment:gizmokit",
+        "skill:hacker", "rule:fireteam-general",
+    ):
+        source = current_rules_database.composed_record(linked)
+        assert source is not None, linked
+        assert "[[rule:coordinated-orders|Coordinated Orders]]" in json.dumps(source), linked
+
+
 def test_escape_system_threshold_help_refers_to_the_unit_profile(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -163,9 +588,10 @@ def test_weapon_source_notes_remain_distinct_from_gameplay_summary(
     record = current_rules_database.composed_record(record_id)
     assert record is not None
     notes = record["facts"]["sourceNotes"]
-    assert len(notes) == 1
-    assert "Army" in notes[0]
-    assert notes[0] not in record["summary"]
+    assert len(notes) == (2 if record_id == "weapon:kobra-pistol-cc" else 1)
+    for note in notes:
+        assert "Army" in note
+        assert note not in record["summary"]
     assert record["citations"]
 
 
@@ -179,18 +605,24 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
     with sqlite3.connect(output) as connection:
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
-        assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 372
+        assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 4
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 470
         assert connection.execute(
-            "SELECT id, title FROM scenario_collections"
-        ).fetchone() == ("n5-core", "N5 Core Scenarios")
+            "SELECT id, title FROM scenario_collections ORDER BY id"
+        ).fetchall() == [
+            ("its-18", "ITS Season 18: Overheat"),
+            ("n5-core", "N5 Core Scenarios"),
+        ]
         assert connection.execute(
             "SELECT collection_id, revision, source_collection_id "
-            "FROM scenario_collection_revisions"
-        ).fetchone() == ("n5-core", "5.3", "n5-core-v5.3")
+            "FROM scenario_collection_revisions ORDER BY collection_id"
+        ).fetchall() == [
+            ("its-18", "2026.09.01", "its-season-18-2026.09.01"),
+            ("n5-core", "5.3", "n5-core-v5.3"),
+        ]
         assert connection.execute(
             "SELECT scenario_id, position FROM scenario_memberships "
-            "ORDER BY position"
+            "WHERE collection_id = 'n5-core' ORDER BY position"
         ).fetchall() == [
             ("scenario:annihilation", 0),
             ("scenario:domination", 1),
@@ -203,6 +635,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         ).fetchall()
         assert [row[0] for row in publication_rows] == [
             "scenario:annihilation",
+            "scenario:battleground",
             "scenario:domination",
             "scenario:firefight",
             "scenario:supplies",
@@ -220,11 +653,11 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         ).fetchone() == ("Labels", None)
         assert connection.execute(
             "SELECT local_path, sha256, acquired_at, language, document_count, url "
-            "FROM sources WHERE id = 'wiki-en-20260918-130233'"
+            "FROM sources WHERE id = 'wiki-en-20260926-200832'"
         ).fetchone() == (
-            "data/wiki/WIKI-en 20260918-130233.zip",
-            "aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a",
-            "2026-09-18T13:02:33+02:00",
+            "data/wiki/WIKI-en 20260926-200832.zip",
+            "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987",
+            "2026-09-26T20:08:32+02:00",
             "en",
             812,
             "https://infinitythewiki.com/",
@@ -398,6 +831,44 @@ def test_hacking_programs_reuse_canonical_current_labels(
     ]
 
 
+def test_negative_feedback_has_owner_scoped_effect_and_program_lifetimes(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """NFB is per Trooper; Programs retain their distinct cancellation conditions."""
+    label = next(
+        label
+        for label in current_rules_database.current_labels()
+        if label["id"] == "negative-feedback"
+    )
+    description = label["description"]
+    assert "cancels and overrides" in description
+    assert "same Trooper" in description
+    assert "Only one NFB effect" in description
+    assert "canceled or voluntarily deactivated" in description
+    assert "other Troopers are not affected" in description
+
+    cybermask = current_rules_database.composed_record("hacking-program:cybermask")
+    assert cybermask is not None
+    assert any(item["id"] == "negative-feedback" for item in cybermask["labels"])
+    cybermask_effects = " ".join(cybermask["facts"]["effects"])
+    assert "[[state:impersonation-2]]" in cybermask_effects
+    assert "NFB Label" in cybermask_effects
+    assert "while" in cybermask_effects.lower()
+    assert "other NFB" in cybermask_effects
+    assert "not to allied Troopers" in cybermask_effects
+
+    white_noise = current_rules_database.composed_record("hacking-program:white-noise")
+    assert white_noise is not None
+    assert any(item["id"] == "negative-feedback" for item in white_noise["labels"])
+    white_noise_effects = " ".join(white_noise["facts"]["effects"])
+    assert "successful Normal WIP Roll" in white_noise_effects
+    assert "until the start of the States Phase" in white_noise_effects
+    assert "While this Template remains on the table" in white_noise_effects
+    assert "This restriction ends when the Template is removed" in white_noise_effects
+    assert "does not extend to other Troopers" in white_noise_effects
+    assert "[[term:white-noise-zone|White Noise Zone]]" in white_noise_effects
+
+
 def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -425,12 +896,38 @@ def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
         citation["page"]
         for citation in program["citations"]
         if citation["source_id"] == "n5-core-v5.3-pdf"
-    } == {59, 155}
+    } == {56, 59, 155}
     assert any(
         relation["type"] == "modifies-rolls-for"
         and relation["record_id"] == "skill:combat-jump"
         for relation in program["relations"]
     )
+
+
+def test_rea006_controlled_jump_worked_examples_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    program = current_rules_database.composed_record("hacking-program:controlled-jump")
+    speedball = current_rules_database.composed_record("skill:request-speedball")
+    assert program is not None and speedball is not None
+    aro, opposing, tokens = program["facts"]["clarifications"]
+    assert "same PH landing Roll" in aro
+    assert "before Resolution" in aro
+    assert "another eligible [[trait:aro|ARO]]" in aro
+    assert "neither Program gives +3 or -3" in opposing
+    assert "not a general rule that opposite MODs always cancel" in opposing
+    assert "Designated Landing Area" in opposing
+    assert "that scenario MOD is not canceled" in opposing
+    assert "[[skill:request-speedball|Speedball]]" in tokens
+    assert "FAQ expressly excludes these Tokens" in tokens
+    assert "[[hacking-program:controlled-jump]] does not affect Speedballs" in speedball["summary"]
+    cited = {(c["source_id"], c.get("page")) for c in program["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 59),
+        ("n5-core-v5.3-pdf", 155),
+        ("n5-core-v5.3-es-pdf", 61),
+        ("n5-faq-v0.1-en-pdf", 1),
+    }
 
 
 def test_protheion_overkill_and_opponent_mod_are_published(
@@ -468,6 +965,43 @@ def test_protheion_overkill_and_opponent_mod_are_published(
     )
 
 
+def test_request_specball_is_published_and_linked_without_replacing_speedball(
+    current_rules_database: RulesDatabase,
+) -> None:
+    spec_ops = current_rules_database.composed_record("skill:infinity-spec-ops")
+    request = current_rules_database.composed_record("skill:request-specball")
+    speedball = current_rules_database.composed_record("skill:request-speedball")
+    assert spec_ops is not None and request is not None and speedball is not None
+    assert "[[skill:request-specball|Request SpecBall]]" in " ".join(
+        spec_ops["facts"]["effects"]
+    )
+    assert "Game Round 2 or 3" in request["summary"]
+    assert "[[skill:combat-jump|Combat Jump]]" in request["summary"]
+    assert "[[term:null-state|Null State]]" in " ".join(
+        request["facts"]["requirements"]
+    )
+    assert "[[term:state-token|State Tokens]]" in " ".join(
+        request["facts"]["effects"]
+    )
+    assert "do not block enemy Movement" in " ".join(
+        request["facts"]["effects"]
+    )
+    assert "At the end of the collecting Order" in " ".join(
+        request["facts"]["effects"]
+    )
+    assert any("TEAM-OPS" in note for note in request["facts"]["sourceNotes"])
+    assert any("Spanish N5.3" in note for note in request["facts"]["sourceNotes"])
+    assert ("uses-effects-of", "outbound", "Combat Jump") in {
+        (edge["type"], edge["direction"], edge["record"]["name"])
+        for edge in request["display_relations"]
+    }
+    assert ("enables-use-of", "outbound", "Request SpecBall") in {
+        (edge["type"], edge["direction"], edge["record"]["name"])
+        for edge in spec_ops["display_relations"]
+    }
+    assert "two Speedball Tokens" in speedball["summary"]
+
+
 def test_speedball_faq_exclusion_is_published_on_both_rule_cards(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -500,6 +1034,85 @@ def test_speedball_faq_exclusion_is_published_on_both_rule_cards(
         and relation["record_id"] == "skill:combat-jump"
         for relation in speedball["relations"]
     )
+
+
+def test_rea007_speedball_ph15_worked_example_is_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    speedball = current_rules_database.composed_record("skill:request-speedball")
+    program = current_rules_database.composed_record("hacking-program:controlled-jump")
+    assert speedball is not None and program is not None
+    assert len(speedball["facts"]["clarifications"]) == 1
+    example = speedball["facts"]["clarifications"][0]
+    assert "Each Token still uses its own PH 15 Roll" in example
+    assert "PH 18" in example and "PH 12" in example
+    assert "not every other possible modifier to placement" in example
+    assert "[[skill:combat-jump|Combat Jump]]" in example
+    assert "[[hacking-program:controlled-jump|Controlled Jump]]" in example
+    assert "**Troopers versus Speedball Tokens:**" in " ".join(
+        program["facts"]["clarifications"]
+    )
+    assert "does not affect Speedball Tokens" in " ".join(program["facts"]["restrictions"])
+    for record in (speedball, program):
+        assert any(
+            c["source_id"] == "n5-faq-v0.1-en-pdf" and c["page"] == 1
+            for c in record["citations"]
+        )
+
+
+def test_rea005_wip_attack_prohibitions_are_visible_without_new_variant_edges(
+    current_rules_database: RulesDatabase,
+) -> None:
+    trait = current_rules_database.composed_record("trait:bs-weapon-wip")
+    flash_pulse = current_rules_database.composed_record("weapon:flash-pulse")
+    assert trait is not None and flash_pulse is not None
+    ordinary, shock, guided = trait["facts"]["clarifications"]
+    assert "[[weapon:flash-pulse|Flash Pulse]]" in ordinary
+    assert "[[skill:bs-attack|BS Attack]] MODs to WIP" in ordinary
+    assert "cannot use the named [[skill:bs-attack|BS Attack (Shock)]]" in shock
+    assert "[[ammunition:shock|Shock Ammunition]] in general" in shock
+    assert "[[state:targeted|Targeted]]" in guided
+    assert "Guided's permission" in guided
+    assert "cannot be used" in guided
+    assert "[[trait:bs-weapon-wip|BS Weapon (WIP)]]" in flash_pulse["summary"]
+    assert [(r["type"], r["record_id"]) for r in trait["relations"]] == [
+        ("modifies-rolls-for", "skill:bs-attack")
+    ]
+    cited = {(c["source_id"], c.get("page")) for c in trait["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-pdf", 39),
+        ("n5-core-v5.3-es-pdf", 39),
+    }
+
+
+def test_rea004_continuous_damage_critical_and_immunity_examples_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    trait = current_rules_database.composed_record("trait:continuous-damage")
+    immunity = current_rules_database.composed_record("skill:immunity")
+    saving_rolls = current_rules_database.composed_record("rule:saving-rolls")
+    assert trait is not None and immunity is not None and saving_rolls is not None
+    assert "additional roll does not apply Continuous Damage" in trait["summary"]
+    hit, immune = trait["facts"]["clarifications"]
+    assert "[[rule:saving-rolls|Saving Roll]]" in hit
+    assert "**does not start a Continuous Damage chain**" in hit
+    assert "only the failed ordinary-hit branch triggers repetition" in hit
+    assert "[[skill:immunity|Immunity (Trait: Continuous Damage)]]" in immune
+    assert "[[skill:immunity|Immunity (Critical)]]" in immune
+    assert "covered non-Comms Attack" in immune
+    assert "Immunity (Trait) ignores the special effects" in " ".join(
+        immunity["facts"]["effects"]
+    )
+    assert "a Critical adds one additional Saving Roll" in " ".join(
+        saving_rolls["facts"]["effects"]
+    )
+    assert {(c["source_id"], c.get("page")) for c in trait["citations"]} >= {
+        ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-pdf", 95),
+        ("n5-core-v5.3-es-pdf", 182),
+        ("n5-core-v5.3-es-pdf", 99),
+    }
 
 
 def test_reviewed_trait_critical_and_wip_restrictions_are_published(
@@ -568,7 +1181,7 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     archived = next(
         citation
         for citation in camouflaged["citations"]
-        if citation["source_id"] == "wiki-en-20260918-130233"
+        if citation["source_id"] == "wiki-en-20260926-200832"
     )
     assert archived["member"] == "Camouflaged_State"
     assert archived["source_url"] == "https://infinitythewiki.com/"
@@ -692,6 +1305,31 @@ def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> 
     assert citation["section"] == "Armed Turret Profile"
 
 
+def test_rea037_published_turret_profile_preserves_s2_and_source_conflict(
+    current_rules_database: RulesDatabase,
+) -> None:
+    turret = current_rules_database.composed_record("weapon:armed-turret")
+    assert turret is not None
+    assert turret["facts"]["specialProfile"]["stats"][-1] == ["S", "2"]
+    note = turret["facts"]["sourceNotes"][0]
+    assert "**Unresolved Silhouette conflict:**" in note
+    assert "**S1**" in note and "**S2**" in note
+    assert "25 mm high versus 40 mm" in note
+    assert "official correction has not been established" in note
+    assert "[[trait:deployable|Deployable]] Weapon" in turret["summary"]
+    assert "one-roll Turret mode" in turret["facts"]["sourceNotes"][1]
+    assert "Unresolved Silhouette conflict" in turret["facts"]["sourceNotes"][0]
+    pages = {(ref["source_id"], ref.get("page")) for ref in turret["citations"]}
+    assert pages >= {
+        ("n5-core-v5.3-pdf", 18),
+        ("n5-core-v5.3-pdf", 70),
+        ("n5-core-v5.3-pdf", 74),
+        ("n5-core-v5.3-pdf", 195),
+        ("n5-core-v5.3-es-pdf", 74),
+        ("n5-core-v5.3-es-pdf", 203),
+    }
+
+
 def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
@@ -702,6 +1340,123 @@ def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> Non
         "super-jump": {"kind": "distance", "positive_sign": "omit"},
         "forward-deployment": {"kind": "distance", "positive_sign": "force"},
     }
+
+
+def test_rules_database_preserves_reviewed_numeric_mod_extra_maps(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    specifications = {
+        "skill:mimetism": ("opponent", ["bs-attack-requiring-lof", "discover"], 6, "-3", -3),
+        "skill:berserk": ("skill-holder", ["berserk-cc-attack"], 1, "+3", 3),
+        "skill:dodge": ("skill-holder", ["dodge-ph-roll"], 2, "+6", 6),
+    }
+    for _path, document in documents:
+        for record in document["records"]:
+            if record["id"] not in specifications:
+                continue
+            target, scopes, extra_id, raw_value, value = specifications[record["id"]]
+            record["variantSemantics"]["occurrenceParameters"] = [
+                {"source": "army-extra", "kind": "numeric-mod",
+                 "owner": "skill-holder", "target": target, "appliesTo": scopes,
+                 "extraValues": [
+                     {"extraId": extra_id, "extraType": "TEXT",
+                      "rawValue": raw_value, "modifier": value},
+                 ]}
+            ]
+            if record["id"] == "skill:dodge":
+                record["variantSemantics"]["occurrenceParameters"].append(
+                    {"source": "army-extra", "kind": "distance", "positiveSign": "omit"}
+                )
+    output = tmp_path / "numeric-mod-rules.db"
+    export_rules_database(documents, output)
+    rules = RulesDatabase(output)
+    mods = rules.skill_numeric_mod_semantics()
+    assert set(mods) == {"mimetism", "berserk", "dodge"}
+    for record_id, (target, scopes, extra_id, raw_value, value) in specifications.items():
+        slug = record_id.split(":", 1)[1]
+        assert mods[slug] == {
+            "source": "army-extra", "kind": "numeric-mod",
+            "owner": "skill-holder", "target": target,
+            "applies_to": scopes,
+            "extra_values": [
+                {"extra_id": extra_id, "extra_type": "TEXT",
+                 "raw_value": raw_value, "modifier": value},
+            ],
+        }
+        record = rules.composed_record(record_id)
+        assert record is not None
+        assert mods[slug] in record["variant_semantics"]["occurrence_parameters"]
+    # Old browser-facing distance lookup must not accidentally publish MODs.
+    assert rules.skill_parameter_semantics() == {
+        "super-jump": {"kind": "distance", "positive_sign": "omit"},
+        "forward-deployment": {"kind": "distance", "positive_sign": "force"},
+        "dodge": {"kind": "distance", "positive_sign": "omit"},
+    }
+
+
+def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
+    current_rules_database: RulesDatabase,
+) -> None:
+    mappings = current_rules_database.skill_reviewed_extra_semantics()
+    assert set(mappings) == {"dodge"}
+    param = mappings["dodge"]
+    assert param["kind"] == "reviewed-extra"
+    assert param["source"] == "army-extra"
+    effects = {entry["extra_id"]: entry for entry in param["extra_values"]}
+    assert set(effects) == {6, 7, 11, 23, 27, 32, 46, 52, 250, 260, 308, 379}
+    assert {
+        entry["raw_value"]: entry["effect"]["modifier"]
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "opponent-roll-mod"
+    } == {"-3": -3, "-6": -6}
+    assert all(
+        entry["effect"]["applies_to"] == "dodge-face-to-face"
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "opponent-roll-mod"
+    )
+    assert {
+        entry["raw_value"]: entry["effect"]["value"]
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "roll-attribute-replacement"
+    } == {"PH=9": 9, "PH=10": 10, "PH=11": 11, "PH=12": 12, "PH=13": 13}
+    assert {
+        entry["raw_value"]: entry["effect"]["centimeters"]
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "movement-bonus"
+    } == {"+2.5": 2.5, "+5": 5, "+7.5": 7.5}
+    assert all(
+        entry["extra_type"] == "DISTANCE"
+        and entry["effect"]["applies_to"] == "successful-dodge-movement"
+        for entry in effects.values()
+        if entry["effect"]["kind"] == "movement-bonus"
+    )
+    assert effects[308]["raw_value"] == "+1SD"
+    assert effects[308]["effect"] == {
+        "kind": "special-die", "applies_to": "dodge-roll", "count": 1,
+    }
+    assert effects[379]["raw_value"] == "ARM +3"
+    assert effects[379]["effect"] == {
+        "kind": "saving-attribute-mod",
+        "applies_to": "arm-saving-roll-after-dodge",
+        "attribute": "ARM",
+        "modifier": 3,
+    }
+    assert all(
+        entry["extra_type"]
+        == ("DISTANCE" if entry["effect"]["kind"] == "movement-bonus" else "TEXT")
+        for entry in effects.values()
+    )
+    dodge = current_rules_database.composed_record("skill:dodge")
+    assert dodge is not None
+    assert param in dodge["variant_semantics"]["occurrence_parameters"]
+    # The separate legacy API must not absorb the new source-extra effects.
+    assert "dodge" not in current_rules_database.skill_parameter_semantics()
+    assert current_rules_database.skill_numeric_mod_semantics()["dodge"]["extra_values"] == [
+        {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
+        {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
+    ]
 
 
 def test_rules_database_returns_reviewed_source_variant_semantics(
@@ -1023,6 +1778,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("reveals-state", "inbound", "skill:discover"),
         ("reveals-state", "inbound", "skill:sensor"),
         ("uses-effects-of", "inbound", "trait:concealed"),
+        ("uses-effects-of", "inbound", "weapon:mines"),
         ("cancels-state", "inbound", "skill:frenzy"),
         ("cancels-state", "inbound", "state:retreat"),
     }
@@ -1063,6 +1819,18 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("reveals-state", "inbound", "Discover", (("skill", "discover"),)),
         ("reveals-state", "inbound", "Sensor", (("skill", "sensor"),)),
         ("uses-effects-of", "inbound", "Concealed", ()),
+        (
+            "uses-effects-of", "inbound", "Mines",
+            (
+                ("weapon", "ap-mine"),
+                ("weapon", "e-m-mine"),
+                ("weapon", "monofilament-mine"),
+                ("weapon", "para-mine"),
+                ("weapon", "shock-mine"),
+                ("weapon", "viral-mine"),
+                ("weapon", "cybermine"),
+            ),
+        ),
         ("cancels-state", "inbound", "Frenzy", (("skill", "frenzy"),)),
         ("cancels-state", "inbound", "Retreat! State", ()),
     }
@@ -1165,6 +1933,61 @@ def test_skill_roll_modifier_interactions_are_bidirectional(
             (relation["type"], relation["direction"], relation["record"]["name"])
             for relation in target["display_relations"]
         }
+
+
+def test_peripheral_subtypes_explain_shared_and_distinct_operation(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
+    skill = database.composed_record("skill:peripheral")
+    assert skill is not None
+    baseline = " ".join(skill["facts"]["effects"] + skill["facts"]["restrictions"])
+    assert "count as one Trooper" in baseline
+    assert "same Short Skills or Long Skill" in baseline
+    assert "[[skill:idle|Idle]]" in baseline
+    assert "[[state:disconnected|Disconnected]]" in baseline
+    assert "[[rule:peripheral-type:ancillary|Ancillary Peripherals]]" in baseline
+
+    expected = {
+        "servant": ("Controller—not the Servant—makes the Roll", "one Model per Order"),
+        "synchronized": ("before any declared movement is measured", "Controller"),
+        "control": ("only the Controller and Spearhead perform it", "Spearhead"),
+        "ancillary": ("using [[skill:place-deployable|Place Deployable]]", "Fireteam membership"),
+        "cyberplug": ("Connected or Autonomous", "rather than becoming"),
+    }
+    for subtype, (effect, detail) in expected.items():
+        rule = database.composed_record(f"rule:peripheral-type:{subtype}")
+        assert rule is not None, subtype
+        assert rule["facts"]["category"] == "peripheral-type"
+        facts = rule["facts"]
+        assert facts["effects"], subtype
+        prose = " ".join(
+            item
+            for field in ("effects", "restrictions", "clarifications")
+            for item in facts.get(field, [])
+        )
+        assert effect in prose, subtype
+        assert detail in prose, subtype
+        assert any(
+            citation["source_id"] == "n5-core-v5.3-pdf"
+            and citation.get("page") in (106, 107, 108)
+            for citation in rule["citations"]
+        ), subtype
+
+    cyberplug = database.composed_record("rule:peripheral-type:cyberplug")
+    assert cyberplug is not None
+    cyberplug_facts = " ".join(
+        cyberplug["facts"][field][0]
+        for field in ("effects", "clarifications")
+    )
+    assert "[[skill:idle|Idle]]" in cyberplug_facts
+    assert "[[skill:doctor|Doctor]]" in cyberplug_facts
+    assert "[[skill:engineer|Engineer]]" in cyberplug_facts
+
+    for source in ("skill:doctor", "skill:engineer", "state:disconnected", "skill:cyberplug"):
+        record = database.composed_record(source)
+        assert record is not None, source
+        assert "[[rule:peripheral-type:cyberplug|Cyberplug" in str(record["facts"])
 
 
 def test_place_deployable_prerequisites_are_bidirectional(
@@ -1355,6 +2178,37 @@ def test_morale_behavior_interactions_are_bidirectional(
     }
 
 
+def test_rea042_published_dodge_arm_modifier_is_not_dodge_ph_bonus(
+    current_rules_database: RulesDatabase,
+) -> None:
+    dodge = current_rules_database.composed_record("skill:dodge")
+    assert dodge is not None
+    effects = " ".join(dodge["facts"]["effects"])
+    clarifications = " ".join(dodge["facts"]["clarifications"])
+    notes = dodge["facts"]["sourceNotes"]
+    assert "Dodge (ARM+3)" in effects
+    assert "Unit Profile lists this modifier" in effects
+    assert "[[attribute:arm|ARM]]" in effects
+    assert "[[rule:saving-rolls|ARM Saving Roll]]" in effects
+    assert "not conditional on failing" in effects
+    assert "does not add +3 to Dodge PH" in clarifications
+    assert "without the printed modifier" in clarifications
+    assert "still fail to evade one" in clarifications
+    assert "failed Dodge PH Roll" in notes[1]
+    assert "English p. 75" in notes[0]
+    assert "Spanish p. 75" in notes[0]
+    assert "PDF-based wording pending official clarification" in notes[1]
+    sources = {
+        (ref["source_id"], ref.get("page"), ref.get("member"))
+        for ref in dodge["citations"]
+    }
+    assert ("n5-core-v5.3-pdf", 75, None) in sources
+    assert ("n5-core-v5.3-es-pdf", 75, None) in sources
+    assert ("wiki-en-20260926-200832", None, "Template_Modifiers-explained") in sources
+    assert ("wiki-es-20261009-211304", None, "es/Plantilla_Modifiers-explained") in sources
+    assert "[[state:immobilized-a]]" in effects or "[[state:immobilized-a]]" in clarifications
+
+
 def test_silent_dodge_modifier_interaction_is_bidirectional(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -1405,6 +2259,51 @@ def test_disposable_causes_item_specific_unloaded_state(
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in unloaded["display_relations"]
     }
+
+
+def test_rea016_stealth_examples_and_citations_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    stealth = current_rules_database.composed_record("skill:stealth")
+    mines = current_rules_database.composed_record("weapon:mines")
+    boost = current_rules_database.composed_record("trait:boost")
+    sixth_sense = current_rules_database.composed_record("skill:sixth-sense")
+    combat_instinct = current_rules_database.composed_record("skill:combat-instinct")
+    peripheral = current_rules_database.composed_record("skill:peripheral")
+    assert all(x is not None for x in (
+        stealth, mines, boost, sixth_sense, combat_instinct, peripheral,
+    ))
+    assert stealth is not None and mines is not None and boost is not None
+    assert sixth_sense is not None and combat_instinct is not None
+    assert peripheral is not None
+    mine_case, mixed, marker = stealth["facts"]["clarifications"]
+    assert "Mine" in mine_case
+    assert "does **not** switch off [[trait:deployable|Deployable]]" in mine_case
+    assert "Trigger Area" in mines["summary"]
+    assert "cannot activate other [[trait:deployable|Deployable]]" in boost["summary"]
+    assert "[[skill:peripheral|Peripheral]]" in mixed
+    assert "other activated Trooper independently generates" in mixed
+    assert "reaction becomes [[skill:idle|Idle]]" in mixed
+    assert "An ARO generated" not in mixed
+    assert "must announce" in marker
+    assert "Marker form" in marker
+    assert "[[skill:stealth]] is not effective against the user." in " ".join(
+        sixth_sense["facts"]["effects"]
+    )
+    assert "[[skill:stealth]] is not effective against the user." in " ".join(
+        combat_instinct["facts"]["effects"]
+    )
+    assert "same Order" in " ".join(peripheral["facts"]["effects"])
+    citations = {(c["source_id"], c.get("page")) for c in stealth["citations"]}
+    assert citations >= {
+        ("n5-core-v5.3-pdf", 112),
+        ("n5-core-v5.3-es-pdf", 114),
+        ("n5-faq-v0.1-en-pdf", 2),
+        ("n5-faq-v0.1-es-pdf", 2),
+    }
+    assert [(r["type"], r["record_id"]) for r in stealth["relations"]] == [
+        ("enables-use-of", "skill:cautious-movement")
+    ]
 
 
 def test_stealth_counter_interactions_are_bidirectional(
@@ -2716,7 +3615,7 @@ def test_ammunition_conditional_state_links_are_bidirectional(
                 "A failed Roll puts the target directly into [[state:dead|Dead State]]",
                 "[[state:stunned|Stunned State]] may instead be canceled",
                 "replacement value does not apply to a subsequent Command Token reroll",
-                "Direct-use target allegiance remains under source review",
+                "Neither restriction is a general Allied-only requirement",
             ),
         ),
         (
@@ -2726,7 +3625,7 @@ def test_ammunition_conditional_state_links_are_bidirectional(
                 "a failed condition-cancellation Roll has no negative consequence",
                 "[[state:stunned|Stunned State]], Engineer applies to STR",
                 "cancellation first, then the new effect",
-                "Direct-use target allegiance remains under source review",
+                "Neither restriction is a general Allied-only requirement",
             ),
         ),
         (
@@ -2765,8 +3664,9 @@ def test_ammunition_conditional_state_links_are_bidirectional(
         (
             "trait:double-shot",
             (
-                "it requires both uses to remain",
-                "spends both when applied",
+                "both charges must remain unspent",
+                "using it expends both",
+                "a legal B1 use can still consume the remaining charge",
             ),
         ),
     ],
@@ -2790,6 +3690,129 @@ def test_recovery_and_intuitive_attack_explanations_survive_rules_export(
     assert any(citation["source_id"] == "n5-core-v5.3-pdf" for citation in record["citations"])
 
 
+def test_rea003_published_intuitive_attack_three_resolution_examples(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("skill:intuitive-attack")
+    trait = current_rules_database.composed_record("trait:intuitive-attack")
+    assert record is not None and trait is not None
+    effects = " ".join(record["facts"]["effects"])
+    assert "do not make a second attack Roll" in effects
+    assert "Critical only against that Main Target" in effects
+    examples = record["facts"]["clarifications"]
+    assert len(examples) == 3
+    assert "**[[state:camouflaged|CAMO]] Marker does not react:**" in examples[0]
+    assert "[[rule:saving-rolls|Saving Roll]]" in examples[0]
+    assert "**Opposing reactions and Criticals:**" in examples[1]
+    assert "its own eligible reaction" in examples[1]
+    assert "non-Critical successful Roll" in examples[1]
+    assert "**[[trait:deployable|Deployable]] placement:**" in examples[2]
+    assert "On failure" in examples[2] and "loses one use" in examples[2]
+    assert "this specific [[skill:intuitive-attack|Intuitive Attack]] requirement" in examples[2]
+    cited = {(c["source_id"], c.get("page")) for c in record["citations"]}
+    assert cited >= {("n5-core-v5.3-pdf", 49), ("n5-core-v5.3-es-pdf", 48)}
+    assert "[[skill:intuitive-attack:plural]]" in trait["summary"]
+
+
+def test_rea002_published_doctor_recovery_and_exception_boundaries(
+    current_rules_database: RulesDatabase,
+) -> None:
+    doctor = current_rules_database.composed_record("skill:doctor")
+    nwi = current_rules_database.composed_record("skill:no-wound-incapacitation")
+    technorganic = current_rules_database.composed_record("skill:technorganic")
+    stunned = current_rules_database.composed_record("state:stunned")
+    assert doctor is not None and nwi is not None
+    assert technorganic is not None and stunned is not None
+    facts = doctor["facts"]
+    requirements = " ".join(facts["requirements"])
+    assert "VITA" in requirements and "[[state:unconscious|Unconscious State]]" in requirements
+    assert "A failed Roll puts the target directly" in " ".join(facts["effects"])
+    examples = facts["clarifications"][-4:]
+    assert "**Ordinary recovery example:**" in examples[0]
+    assert "**[[state:stunned|Stunned]] exception:**" in examples[1]
+    assert "No Wound Incapacitation" in examples[2]
+    assert "[[skill:technorganic|Technorganic]]" in examples[3]
+    assert "Once that Trooper is no longer" in examples[3]
+    assert "[[skill:doctor]] or [[skill:engineer]]" not in " ".join(examples)
+    assert "[[skill:doctor]]" in " ".join(nwi["facts"]["effects"])
+    assert "[[skill:doctor]]" in " ".join(technorganic["facts"]["effects"])
+    assert "[[skill:doctor]] can cancel" in " ".join(stunned["facts"]["effects"])
+    assert {citation["page"] for citation in doctor["citations"] if (
+        citation["source_id"] == "n5-core-v5.3-pdf" and "page" in citation
+    )} >= {90, 104, 116, 170}
+
+
+def test_rea001_engineer_examples_are_published_as_player_clarifications(
+    current_rules_database: RulesDatabase,
+) -> None:
+    engineer = current_rules_database.composed_record("skill:engineer")
+    targeted = current_rules_database.composed_record("state:targeted")
+    stunned = current_rules_database.composed_record("state:stunned")
+    assert engineer is not None and targeted is not None and stunned is not None
+    clarifications = " ".join(engineer["facts"]["clarifications"])
+    assert "allied VITA Trooper" in clarifications
+    assert "[[state:targeted|Targeted State]]" in clarifications
+    assert "failure does not inflict a Wound" in clarifications
+    assert "[[skill:doctor|Doctor]]" in clarifications
+    assert "This condition-specific rule" in clarifications
+    assert "[[skill:engineer]] WIP Roll" in " ".join(targeted["facts"]["effects"])
+    assert "[[skill:doctor]] can cancel" in " ".join(stunned["facts"]["effects"])
+    assert "[[skill:engineer]] can cancel" in " ".join(stunned["facts"]["effects"])
+    pages = {
+        c["page"] for c in engineer["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert pages >= {91, 170, 171}
+
+
+@pytest.mark.parametrize(
+    ("skill_id", "kit_id", "source_page"),
+    [("skill:doctor", "equipment:medikit", 90),
+     ("skill:engineer", "equipment:gizmokit", 91)],
+)
+def test_rea038_direct_recovery_contact_does_not_inherit_allied_gate(
+    current_rules_database: RulesDatabase,
+    skill_id: str,
+    kit_id: str,
+    source_page: int,
+) -> None:
+    direct = current_rules_database.composed_record(skill_id)
+    kit = current_rules_database.composed_record(kit_id)
+    servant = current_rules_database.composed_record("rule:peripheral-type:servant")
+    cyberplug = current_rules_database.composed_record("rule:peripheral-type:cyberplug")
+    assert direct is not None and kit is not None
+    assert servant is not None and cyberplug is not None
+
+    requirements = " ".join(direct["facts"]["requirements"])
+    restrictions = " ".join(direct["facts"]["restrictions"])
+    clarifications = " ".join(direct["facts"]["clarifications"])
+    notes = direct["facts"]["sourceNotes"]
+    assert "Silhouette contact with the target" in requirements
+    assert "Allied" not in requirements
+    assert "[[state:engaged|Engaged State]] cannot declare this Skill" in restrictions
+    assert "already [[state:engaged|Engaged]]" in restrictions
+    assert "(N5.3 p. 51)" in restrictions
+    assert "direct " + direct["name"] + " Skill" in clarifications
+    assert "does not print a universal Allied-only prerequisite" in clarifications
+    assert f"[[{kit_id}|" in clarifications
+    assert "[[rule:peripheral-type:servant|Servant]]" in clarifications
+    assert "[[rule:peripheral-type:cyberplug|Cyberplug]]" in clarifications
+    assert "Allied" in " ".join(kit["facts"]["requirements"])
+    assert "allied Model" in " ".join(servant["facts"]["effects"])
+    assert "allied target" in " ".join(cyberplug["facts"]["clarifications"])
+    assert len(notes) == 1
+    assert "does not itself verify a blanket permission" in notes[0]
+    assert "[[state:unconscious|Unconscious]]" in notes[0]
+    assert "No scoped current N5 ruling" in notes[0]
+    assert {
+        (ref["source_id"], ref.get("page"))
+        for ref in direct["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 51),
+        ("n5-core-v5.3-pdf", source_page),
+    }
+
+
 def test_recovery_and_intuitive_attack_avoid_the_old_misleading_baselines(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -2802,3 +3825,519 @@ def test_recovery_and_intuitive_attack_avoid_the_old_misleading_baselines(
     assert "on success, the user performs a single" not in " ".join(
         intuitive["facts"]["effects"]
     )
+
+
+def test_impersonation_discover_has_correct_mods_and_retry_limit(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """REA-035: IMP-2 has no special -3, but ordinary Discover MODs remain."""
+    discover = current_rules_database.composed_record("skill:discover")
+    imp1 = current_rules_database.composed_record("state:impersonation-1")
+    imp2 = current_rules_database.composed_record("state:impersonation-2")
+    biometric = current_rules_database.composed_record("equipment:biometric-visor")
+    assert discover is not None
+    assert imp1 is not None
+    assert imp2 is not None
+    assert biometric is not None
+
+    restrictions = " ".join(discover["facts"]["restrictions"])
+    assert "Discover's own Range bands" in restrictions
+    assert "Cover and [[skill:mimetism|Mimetism]]" in restrictions
+    assert "twice during one Order" in " ".join(discover["facts"]["requirements"])
+    assert "until the next Player Turn" in restrictions
+    assert "treated as a different Marker" in restrictions
+
+    assert "no additional -3 WIP penalty" in imp2["summary"]
+    assert "ordinary" in imp2["summary"]
+    assert any("Cover" in rule and "Mimetism" in rule
+               for rule in imp2["facts"]["clarifications"])
+    assert any("After a failed" in rule and "next Player Turn" in rule
+               for rule in imp2["facts"]["restrictions"])
+    assert any("only to" in rule and "IMP-2" in rule
+               for rule in imp1["facts"]["clarifications"])
+    assert "ignores the WIP -3 MOD" in str(biometric["facts"])
+    assert "impersonation-1" in str(biometric["facts"])
+    assert "unmodified Discover" not in imp2["summary"]
+
+
+def test_deployable_cover_has_full_placement_and_saving_cap(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """REA-036: source-listed properties and cap order are playable."""
+    cover = current_rules_database.composed_record("equipment:deployable-cover")
+    assert cover is not None
+    effects = cover["facts"]["effects"]
+    restrictions = cover["facts"]["restrictions"]
+    text = " ".join(effects)
+    for trait in (
+        "[[trait:deployable|Deployable]]",
+        "[[trait:disposable-x|Disposable (2)]]",
+        "[[trait:indiscriminate|Indiscriminate]]",
+        "[[trait:perimeter|Perimeter]]",
+    ):
+        assert trait in text
+    assert "Silhouette S3" in text
+    assert "completely inside the user's Zone of Control" in text
+    assert "Silhouette contact" in text
+    assert "ordinary partial-obscuration conditions" in text
+    assert "does not stack" in text
+    assert (
+        "capping ARM/BTS plus all applicable Saving Roll MODs "
+        "at 12 before adding the attack's PS"
+    ) in text
+    assert "ARM 9 plus Vitroferro +6 is capped at 12 before PS" in text
+    assert "Cutting Foam" in text
+    assert any("cannot end movement on" in rule for rule in restrictions)
+    assert any("available on the Unit Profile" in rule for rule in restrictions)
+    assert any(source["source_id"] == "n5-core-v5.3-pdf" and source["page"] == 122
+               for source in cover["citations"])
+
+
+def test_rea022_same_order_kit_recovery_and_disposable_burst_examples(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """N5.3 pp. 75, 123-124 and 175: distinguish hit, PH, recovery and charges."""
+    for kit, page in (("medikit", 124), ("gizmokit", 123)):
+        record = current_rules_database.composed_record(f"equipment:{kit}")
+        assert record is not None
+        effects = " ".join(record["facts"]["effects"])
+        clarifications = " ".join(record["facts"]["clarifications"])
+        assert "Each successful hit/use makes the target roll [[attribute:ph|PH]]" in effects
+        assert "PH Rolls succeed" in effects
+        assert "two target PH Rolls" in clarifications
+        assert "If one succeeds and the other fails" in clarifications
+        assert "only one Wound" in clarifications or "one Wound in total" in clarifications
+        assert (
+            "one Wound per hit" in clarifications
+            or "one Wound for each hit" in clarifications
+        )
+        assert any(
+            citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == page
+            for citation in record["citations"]
+        )
+    remote = current_rules_database.composed_record("skill:remote-presence")
+    gizmokit = current_rules_database.composed_record("equipment:gizmokit")
+    assert remote is not None and gizmokit is not None
+    assert "cancel either level of [[state:unconscious|Unconscious]]" in (
+        " ".join(gizmokit["facts"]["clarifications"])
+    )
+
+    disposable = current_rules_database.composed_record("trait:disposable-x")
+    double_shot = current_rules_database.composed_record("trait:double-shot")
+    special_dice = current_rules_database.composed_record("rule:special-dice")
+    assert disposable is not None and double_shot is not None and special_dice is not None
+    explanation = " ".join(disposable["facts"]["clarifications"])
+    assert "B1" in explanation and "B2" in explanation
+    assert "spends both charges" in explanation
+    assert "With only one charge left" in explanation
+    assert "With +1 SD instead" in explanation
+    assert "spending only the original B1 charge" in explanation
+    assert "both charges must remain unspent" in double_shot["summary"]
+    assert "Unloaded State" in double_shot["summary"]
+    assert "the bonus is unavailable" in double_shot["summary"]
+    assert "do not spend" in " ".join(special_dice["facts"]["restrictions"])
+    for record, page in ((disposable, 175), (double_shot, 175)):
+        assert any(
+            citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == page
+            for citation in record["citations"]
+        )
+
+
+def test_rea023_deployable_placement_geometry_and_exception_owners(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """N5.3 pp. 70, 74, 82, 102, 175 and FAQ v0.1: scoped placement rules."""
+    def source(record: dict, source_id: str, page: int) -> bool:
+        return any(
+            cite["source_id"] == source_id and cite["page"] == page
+            for cite in record["citations"]
+        )
+
+    place = current_rules_database.composed_record("skill:place-deployable")
+    perimeter = current_rules_database.composed_record("trait:perimeter")
+    deployable = current_rules_database.composed_record("trait:deployable")
+    minelayer = current_rules_database.composed_record("skill:minelayer")
+    indiscriminate = current_rules_database.composed_record("trait:indiscriminate")
+    assert place is not None
+    assert perimeter is not None
+    assert deployable is not None
+    assert minelayer is not None
+    assert indiscriminate is not None
+    place_effects = " ".join(place["facts"]["effects"])
+    place_limits = " ".join(place["facts"]["restrictions"])
+    assert "after movement, with any point along their movement path" in place_effects
+    assert "In the Reactive Turn, Silhouette contact" in place_effects
+    assert "fully supported on its surface" in place_effects
+    assert "placement on a vertical surface is not legal" in place_effects
+    assert "active only in subsequent Orders" in place_effects
+    assert "Silhouette contact" in place_effects
+    assert "passable-path" in place_limits
+    assert "Camouflaged Marker" in place_limits
+    assert "valid non-camouflaged enemy" in place_limits
+    assert "[[trait:indiscriminate|Indiscriminate]]" in place_limits
+    assert "another Trooper occupies the declared placement" in place_limits
+    assert "If no legal location remains" in place_limits
+    assert source(place, "n5-core-v5.3-pdf", 82)
+    assert source(place, "n5-faq-v0.1-en-pdf", 3)
+
+    perim_reqs = " ".join(perimeter["facts"]["requirements"])
+    assert "wholly inside" in perim_reqs
+    assert "Silhouette" in perim_reqs
+    assert "without an impassable obstacle" in perim_reqs
+    assert "a gap too narrow" in perim_reqs
+    assert source(perimeter, "n5-core-v5.3-pdf", 82)
+
+    assert "enters [[state:dead|Dead State]] immediately" in deployable["summary"]
+    assert "cannot activate other Deployable Weapons" in deployable["summary"]
+    assert source(deployable, "n5-core-v5.3-pdf", 175)
+    assert "no otherwise valid target nearby" in (
+        " ".join(indiscriminate["facts"]["clarifications"])
+    )
+    assert source(indiscriminate, "n5-core-v5.3-pdf", 175)
+
+    minelayer_reqs = " ".join(minelayer["facts"]["requirements"])
+    minelayer_effects = " ".join(minelayer["facts"]["effects"])
+    assert "no enemy Troopers" in minelayer_reqs
+    assert "item's Trigger Area" in minelayer_reqs
+    assert "entire [[trait:zone-of-control-zc|Zone of Control]]" in minelayer_reqs
+    assert "Trooper's permitted Deployment area" in minelayer_effects
+    assert "Minelayer (X)" in minelayer_effects
+    assert "Superior Deployment Roll fails" in minelayer_effects
+    assert source(minelayer, "n5-core-v5.3-pdf", 102)
+
+    turret = current_rules_database.composed_record("weapon:armed-turret")
+    wildparrot = current_rules_database.composed_record("weapon:wildparrot")
+    panda = current_rules_database.composed_record("equipment:fastpanda")
+    repeater = current_rules_database.composed_record("equipment:deployable-repeater")
+    assert turret is not None
+    assert wildparrot is not None
+    assert panda is not None
+    assert repeater is not None
+    assert "enemy **Model**, not a Marker" in turret["summary"]
+    assert "Unresolved source conflict" not in turret["summary"]
+    assert "one BTS/2 Saving Roll" not in turret["summary"]
+    assert "one Saving Roll" in turret["facts"]["sourceNotes"][1]
+    assert "two BTS/2 Saving Rolls" in turret["facts"]["sourceNotes"][1]
+    assert "passable" in wildparrot["summary"]
+    assert "instead of in Silhouette contact" in wildparrot["summary"]
+    assert "passable path" in " ".join(panda["facts"]["effects"])
+    assert "Silhouette-contact placement" in " ".join(repeater["facts"]["effects"])
+    assert source(turret, "n5-core-v5.3-pdf", 70)
+    assert source(wildparrot, "n5-core-v5.3-pdf", 74)
+
+
+def test_reviewed_normal_da_smoke_eclipse_interactions_publish(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """N5.3 pp. 63-64, 66: canonical saves, Smoke geometry and Eclipse inheritance."""
+    normal = current_rules_database.composed_record("ammunition:normal")
+    da = current_rules_database.composed_record("ammunition:da")
+    smoke = current_rules_database.composed_record("ammunition:smoke")
+    eclipse = current_rules_database.composed_record("ammunition:eclipse")
+    assert normal is not None and da is not None
+    assert smoke is not None and eclipse is not None
+
+    assert normal["facts"]["ammunitionResolution"]["rollsPerHit"] == 1
+    assert normal["facts"]["ammunitionResolution"]["criticalAdditionalSavingRolls"] == 1
+    assert da["facts"]["ammunitionResolution"]["rollsPerHit"] == 2
+    assert da["facts"]["ammunitionResolution"]["criticalAdditionalSavingRolls"] == 1
+    assert "second roll is mandatory" in da["summary"]
+    assert "[[state:unconscious|Unconscious]]" in da["summary"]
+    assert "three total per Critical hit" in da["summary"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 63
+               for c in normal["citations"])
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 64
+               for c in da["citations"])
+
+    smoke_notes = " ".join(smoke["facts"]["clarifications"])
+    assert "[[term:scenery-element:plural|Scenery Elements]]" in smoke_notes
+    assert "horizontally and vertically" in smoke_notes
+    assert smoke["facts"]["visibilityZone"]["multispectralVisor"] == "can-draw-lof"
+    assert eclipse["facts"]["visibilityZone"]["multispectralVisor"] == "blocked"
+    assert ("uses-effects-of", "outbound", "ammunition:smoke") in {
+        (r["type"], r["direction"], r["record"]["id"])
+        for r in eclipse["display_relations"]
+    }
+    assert ("uses-effects-of", "inbound", "ammunition:eclipse") in {
+        (r["type"], r["direction"], r["record"]["id"])
+        for r in smoke["display_relations"]
+    }
+
+
+def test_rea024_bioweapon_condition_and_viral_mine_baseline(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """Official N5.3 pp. 63-65, 174, 181: source values vs conditional effects."""
+    trait = current_rules_database.composed_record("trait:bioweapon")
+    mines = current_rules_database.composed_record("weapon:mines")
+    normal = current_rules_database.composed_record("ammunition:normal")
+    da = current_rules_database.composed_record("ammunition:da")
+    shock = current_rules_database.composed_record("ammunition:shock")
+    vulnerability = current_rules_database.composed_record("skill:vulnerability")
+    assert trait is not None
+    assert mines is not None
+    assert normal is not None
+    assert da is not None
+    assert shock is not None
+    assert vulnerability is not None
+
+    assert "[[ammunition:da|DA]]" in trait["summary"]
+    assert "[[ammunition:shock|Shock]]" in trait["summary"]
+    assert "[[attribute:vita|VITA]]" in trait["summary"]
+    assert "[[attribute:str|STR]]" in trait["summary"]
+    notes = " ".join(trait["facts"]["clarifications"])
+    assert "**Derived interaction:**" in notes
+    assert "two Saving Rolls" in notes
+    assert "VITA 1" in notes and "if a Saving Roll fails" in notes
+    assert "[[skill:immunity|Immunity]]" in notes
+    assert "Against STR, BioWeapon adds neither DA nor Shock" in notes
+    assert "[[weapon-property:viral|Viral Weapon Property]]" in notes
+    assert trait["facts"]["sourceIdentity"]["prefixes"] == [
+        "BioWeapon (", "Bioweapon (",
+    ]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 174
+               for c in trait["citations"])
+
+    # The family profile must not turn a source N/BTS/1 into DA by default.
+    assert mines["facts"]["variantRuleReferences"]["viral-mine"] == [
+        "ammunition:normal", "trait:bioweapon",
+    ]
+    assert "**[[weapon:viral-mine|Viral Mine]]:**" in mines["summary"]
+    assert "[[weapon-property:viral|shared Viral Weapon Property]]" in mines["summary"]
+    assert "VITA-versus-STR" in mines["summary"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 181
+               for c in mines["citations"])
+
+    assert normal["facts"]["ammunitionResolution"]["rollsPerHit"] == 1
+    assert da["facts"]["ammunitionResolution"]["rollsPerHit"] == 2
+    assert shock["facts"]["ammunitionResolution"]["stateEffects"][0][
+        "targetAttribute"
+    ] == {"name": "VITA", "equals": 1}
+    assert "weapon with Viral in its name" in " ".join(
+        vulnerability["facts"]["effects"]
+    )
+
+
+def test_rea020_fireteam_action_ownership_and_integrity_are_distinct(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """N5.3 pp. 132-136: activation, dissent, cancellation and departure."""
+    record = current_rules_database.composed_record("rule:fireteam-general")
+    assert record is not None
+    rules = record["facts"]["rules"]
+    assert len(rules) == 13
+    joined = " ".join(rules)
+    assert "formation requirements" in record["summary"]
+    assert "Type does not change" in joined
+    for phrase in (
+        "only the designated Team Leader performs it",
+        "other members declare [[skill:idle|Idle]]",
+        "[[skill:reset|Reset]]",
+        "A Reactive Trooper chooses only one member",
+        "more than half of the members who actually declare",
+        "otherwise the player chooses",
+        "Dissenting members leave the Fireteam",
+        "dissenting Team Leader cancels the Fireteam",
+        "one remaining member",
+        "voluntarily cancel before an Order is spent",
+        "**Individual departure:**",
+        "Departure occurs when the Order or [[trait:aro|ARO]] is declared",
+        "Recalculate bonuses and cancellation immediately",
+        "end of the next States Phase",
+        "[[skill:number-2|Number 2]]",
+        "[[skill:ft-master|FT Master]]",
+        "[[skill:nco|NCO]]",
+        "[[skill:tactical-awareness|Tactical Awareness]]",
+        "[[state:suppressive-fire|Suppressive Fire]]",
+        "[[skill:peripheral|Peripheral]]",
+    ):
+        assert phrase in joined
+    pages = {
+        c["page"]
+        for c in record["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf" and "page" in c
+    }
+    assert {132, 133, 134, 135, 136} <= pages
+    for ref in ("skill:number-2", "skill:ft-master", "skill:nco",
+                "skill:tactical-awareness", "state:suppressive-fire"):
+        assert current_rules_database.composed_record(ref) is not None
+
+
+def test_rea027_flash_pulse_bilingual_publication_conflict_preserves_outcome(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """One BTS save in Army and both N5.3 PDFs; Spanish Wiki remains conflicting."""
+    flash = current_rules_database.composed_record("weapon:flash-pulse")
+    immunity = current_rules_database.composed_record("skill:immunity")
+    stun = current_rules_database.composed_record("ammunition:stun")
+    assert flash is not None
+    assert immunity is not None
+    assert stun is not None
+    summary = flash["summary"]
+    assert "one BTS Saving Roll per hit" in summary
+    assert "[[ammunition:stun|Stun Ammunition]]" in summary
+    assert "[[trait:non-lethal|Non-Lethal]]" in summary
+    assert "[[trait:state|State: Stunned]]" in summary
+    assert "Saving Roll remains BTS, not ARM" in summary
+    assert "[[state:stunned|Stunned]] applies only if the BTS Saving Roll fails" in summary
+
+    notes = " ".join(flash["facts"]["sourceNotes"])
+    for term in (
+        "revision 3987", "revision 3988", "2026-10-14",
+        "two PB/BTS Saving Rolls", "one BTS Saving Roll",
+        "pinned Army weapon 72", "p. 196", "p. 186",
+        "revision 3677", "conflicting publication",
+        "does not establish a superseding rules change",
+    ):
+        assert term in notes
+
+    cited = {
+        (entry["source_id"], entry.get("page"))
+        for entry in flash["citations"]
+    }
+    for expected in (
+        ("n5-core-v5.3-pdf", 186),
+        ("n5-core-v5.3-pdf", 96),
+        ("n5-core-v5.3-es-pdf", 196),
+        ("n5-core-v5.3-es-pdf", 99),
+        ("wiki-es-weapon-chart-oldid-3987", None),
+        ("wiki-es-weapon-chart-alternatives-oldid-3988", None),
+        ("wiki-es-immunity-oldid-3677", None),
+        ("wiki-weapon-chart-oldid-4083", None),
+    ):
+        assert expected in cited
+    interaction = immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"]
+    case = next(item for item in interaction if
+                item["when"]["weaponId"] == "weapon:flash-pulse")
+    assert case["when"]["savingAttribute"] == "BTS"
+    assert case["ammunitionTreatedAs"] == "ammunition:normal"
+    assert set(case["survivingTraits"]) == {"trait:non-lethal", "trait:state"}
+    assert case["stateEffect"] == {
+        "stateId": "state:stunned", "condition": "failed-saving-roll"
+    }
+
+
+def test_rea030_general_faq_and_its_only_scope_stay_separate(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """FAQ v0.1: general SS/MSV1 versus ITS-only objectives (pp. 2-4)."""
+    sixth = current_rules_database.composed_record("skill:sixth-sense")
+    visor = current_rules_database.composed_record("equipment:multispectral-visor")
+    targeted = current_rules_database.composed_record("state:targeted")
+    ancillary = current_rules_database.composed_record("rule:peripheral-type:ancillary")
+    curated = json.loads(
+        (Path(__file__).resolve().parents[1]
+         / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    scoped_records = {record["id"]: record for record in curated["records"]}
+    supplies = scoped_records["rule:scenario:carrying-supply-boxes"]
+    killing = scoped_records["rule:scenario:killing"]
+    assert sixth is not None
+    assert visor is not None
+    assert targeted is not None
+    assert ancillary is not None
+    assert supplies is not None
+    assert killing is not None
+
+    faq_sources = {"n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf"}
+    for record, page in ((sixth, 2), (visor, 2), (targeted, 3), (ancillary, 4)):
+        assert {
+            citation["source_id"]
+            for citation in record["citations"]
+            if citation.get("page") == page
+        } >= faq_sources
+
+    ss_note = " ".join(sixth["facts"]["clarifications"])
+    assert (
+        "both [[equipment:multispectral-visor|Multispectral Visor Level 1]]"
+        " and Sixth Sense"
+    ) in ss_note
+    assert "target of a [[skill:bs-attack|BS Attack]]" in ss_note
+    assert "does not cancel other MODs" in ss_note
+    msv_note = " ".join(visor["facts"]["clarifications"])
+    assert "[[skill:sixth-sense|Sixth Sense]]" in msv_note
+    assert "Level 1 alone still uses the listed -6 LoF MOD" in msv_note
+    assert "applying a -6 MOD to Skills that require LoF" in " ".join(
+        visor["facts"]["levels"][0]["effects"]
+    )
+
+    targeted_note = " ".join(targeted["facts"]["sourceNotes"])
+    assert "ITS Classified Objective scoring condition" in targeted_note
+    assert "not necessarily entry into [[state:targeted|Targeted State]]" in targeted_note
+    assert "successful [[hacking-program:spotlight|Spotlight]] Rolls" in targeted_note
+    ancillary_note = " ".join(ancillary["facts"]["clarifications"])
+    assert "ITS FAQ v0.1, page 4" in ancillary_note
+    assert "undeployed Ancillary is not counted as Killed" in ancillary_note
+    assert "core Annihilation/Firefight is not independently established" in ancillary_note
+
+    # The ITS FAQ does not silently change the published core missions.
+    assert supplies["scope"]["scenarios"] == ["scenario:supplies"]
+    assert supplies["facts"]["effects"] == [
+        "Each Specialist Troop may carry at most one Supply Box.",
+        "Only Models can carry Supply Boxes; Markers cannot carry them.",
+        "Keep the Supply Box Token on the table even if its carrier becomes classified as Null.",
+    ]
+    assert killing["scope"]["scenarios"] == [
+        "scenario:annihilation", "scenario:firefight",
+    ]
+    assert "never deployed on the table as a Model or Marker" in " ".join(
+        killing["facts"]["effects"]
+    )
+    for record in (supplies, killing):
+        assert not (faq_sources & {
+            citation["sourceId"] for citation in record["citations"]
+        })
+        assert "sourceNotes" not in record["facts"]
+
+
+def test_armed_turret_source_placement_clauses_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record('weapon:armed-turret')
+    assert record is not None
+    assert '[[trait:disposable-x|Disposable (1)]]' in record['summary']
+    assert '[[trait:non-reloadable|Non-Reloadable]]' in record['summary']
+    assert 'totally inside the deploying Trooper' in record['summary']
+    assert '[[trait:zone-of-control-zc|Zone of Control]]' in record['summary']
+    assert record['facts']['specialProfile']['stats'][-1] == ['S', '2']
+    assert any(
+        rel['type'] == 'enables-use-of'
+        and rel['record_id'] == 'skill:place-deployable'
+        for rel in record['relations']
+    )
+    assert any(
+        source['source_id'] == 'n5-core-v5.3-pdf'
+        and source['page'] == 70
+        for source in record['citations']
+    )
+
+@pytest.mark.parametrize(
+    ("slug", "ammunition_id", "chart_page"),
+    [
+        ("crazykoala", "ammunition:shock", 186),
+        ("madtraps", "ammunition:para", 187),
+    ],
+)
+def test_perimeter_boost_weapons_have_distinct_source_backed_rules(
+    current_rules_database: RulesDatabase,
+    slug: str,
+    ammunition_id: str,
+    chart_page: int,
+) -> None:
+    record = current_rules_database.composed_record(f"weapon:{slug}")
+    assert record is not None
+    assert "[[trait:perimeter|Perimeter]]" in record["summary"]
+    assert "[[trait:boost|Boost]]" in record["summary"]
+    assert "[[skill:place-deployable|Place Deployable]]" in record["summary"]
+    relations = {(rel["type"], rel["record_id"]) for rel in record["relations"]}
+    assert ("uses-effects-of", ammunition_id) in relations
+    assert ("enables-use-of", "skill:place-deployable") in relations
+    assert ("uses-effects-of", "trait:boost") in relations
+    assert not any(target == "weapon:mines" for _, target in relations)
+    pages = {
+        cite["page"]
+        for cite in record["citations"]
+        if cite["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert {69, 82, chart_page} <= pages
+
