@@ -1200,7 +1200,7 @@ shapes, exact Army profile selectors/attributes, lost source clauses/citations
 and invented missing-attribute values. Source text and alternative Silhouette
 values remain unchanged; no canonical object or carrier IDs are created.
 
-### Deployed-object release publication (new, not yet packaged)
+### Deployed-object release publication
 
 The read-only inventory is for review; ordinary web requests must not read
 the raw curated source files. In a development/release checkout, after
@@ -1223,10 +1223,15 @@ publication. There are 17 reviewed entries, not the entire game-object corpus;
 Mine Dispenser's subtype remains unresolved and Unit/loadout reverse uses
 are not inferred.
 
-The publication is **not yet included in the Docker/release artifact
-contract**, so passing the temporary-artifact browser test does not establish
-hosted availability. Complete packaging, source-pair drift checks and hosted
-acceptance before closing the 1.0 TODO item.
+The release deployment command generates and verifies this ignored publication
+from the checked-out pinned database pair before building the Docker image.
+The Docker image must contain the publication beside both databases. The image
+smoke test verifies the publication against the actual installed database
+hashes, its 17 reviewed entries and unresolved delivery, and the HTTP/API
+browser entry point. Deployment-smoke CI generates the same deterministic
+artifact from the tracked sources before Docker build. Passing the isolated
+browser test alone is not proof of hosted availability; final hosted acceptance
+and the separate Unit/loadout reverse-usage work remain open.
 
 For the older Wiki Weapon Chart name inventory, use the read-only
 explicit-alias audit. It preserves repeated alternative tables and reports

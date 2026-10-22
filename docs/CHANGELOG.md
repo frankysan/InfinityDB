@@ -14,6 +14,8 @@ are not retroactively relabeled.
 
 - Find more linked N5.3 explanations for Weapons, deployed objects, Peripherals,
   Hacking, Orders, Fireteams and Saving Rolls, with clearer conditions and exceptions.
+- Browse reviewed deployed-object profiles and their source links independently of the
+  carrying Weapon or Equipment; disputed and unavailable attributes remain visible.
 - Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties
   such as Plasma, Viral, MULTI and combined Ammunition. Shared Weapon rules are also
   discoverable through the Glossary.
@@ -33,6 +35,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend + Deployment:** Add a standalone
+  reference for 17 source-reviewed deployed objects with known, unreported and disputed
+  attributes, source-backed delivery links and an explicit unresolved Mine Dispenser
+  subtype. Release images now ship the reference matched to their Army/rules databases.
 - **Data processing + Web backend + Web frontend:** Expand source-cited Weapon references
   across CC Weapons, Pistols, Rifles, Sniper Rifles, heavy and support weapons, Mines
   and deployed objects. Explain exact modes, placement, charges, templates and conditional

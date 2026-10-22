@@ -652,13 +652,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 and keyboard fragment navigation. Missing publications
                 return 503; invalid or database-mismatched publications
                 fail closed. No Unit usage is inferred.
-              - [ ] **Generate and ship** the deterministic
+              - [ ] **Validate hosted delivery** of the deterministic
                 `data/generated/deployed-objects.json` release publication
-                for the pinned `infinity.db`/`rules.db` pair.
-                `tools.build_deployed_object_publication` builds/verifies
-                it; validate drift, add the artifact to Docker/deployment
-                checks and rerun hosted acceptance. Development tests
-                generate a temporary artifact only, not a release file.
+                for the pinned `infinity.db`/`rules.db` pair. The release
+                deployment script and deployment-smoke CI generate/check it
+                from reviewed sources; Docker packages the artifact and image
+                smoke verifies its hashes, 17 objects, unresolved delivery and
+                live HTTP entry points. Local integration checks are required;
+                rerun hosted deployment smoke on the candidate before closing.
+                Do not substitute isolated temporary-artifact browser tests.
               - [ ] Derive **reverse Unit/loadout uses** only from exact Army
                 usage occurrences and reviewed object/delivery edges.
                 Preserve unavailable values, conflicting Silhouettes and

@@ -89,10 +89,13 @@ attach a release publication from beside the Army database. The deployed-object
 API returns 503 in that mixed-source configuration. A mismatched publication
 beside a co-located release pair still fails closed on startup.
 
-**Release packaging of this new artifact is still pending.** The current
-Docker image does not copy it, and the tracked database pair alone is not
-proof of deployed-object publication. True Unit/loadout reverse uses, extra
-objects and full-source inventory remain v1.0 tasks. Do not describe these
+Release packaging generates this deterministic, Git-ignored publication from
+the tracked database pair and reviewed source files immediately before the
+Docker build. The image copies it beside both databases; its startup smoke
+test verifies source-pair hashes, 17 reviewed objects, the unresolved Mine
+Dispenser origin and the HTTP/browser entry points. Hosted release acceptance
+remains a separate gate. True Unit/loadout reverse uses, extra objects and
+full-source inventory remain v1.0 tasks. Do not describe these
 delivery origins as proof of Unit ownership, Army List legality or an
 exhaustive N5.3 deployed-object model.
 Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition

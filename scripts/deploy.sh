@@ -128,6 +128,10 @@ start_metrics_history() {
   fi
 }
 
+echo "Generating release-paired deployed-object reference publication..."
+"$python" -m tools.build_deployed_object_publication
+"$python" -m tools.build_deployed_object_publication --check
+
 echo "Validating tracked runtime databases and published symbol set..."
 "$python" tools/verify_deployment_assets.py
 
