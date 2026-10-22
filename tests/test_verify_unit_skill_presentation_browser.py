@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import ExitStack
 from copy import deepcopy
+from functools import partial
 from pathlib import Path
 from socketserver import ThreadingMixIn
 from threading import Thread
@@ -438,24 +440,30 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
     )
     thread = Thread(target=server.serve_forever, daemon=True)
     thread.start()
+    stack = ExitStack()
     try:
         try:
-            result = verify(
-                f"http://127.0.0.1:{server.server_port}",
-                slugs=DEFAULT_SLUGS, channel="chrome",
-            )
+            playwright = pytest.importorskip("playwright.sync_api")
+            driver = stack.enter_context(playwright.sync_playwright())
+            browser = driver.chromium.launch(channel="chrome")
+            stack.callback(browser.close)
+            verify_case = partial(verify, browser=browser)
         except Exception as exc:
             if "Executable doesn't exist" in str(exc) or (
                 "chrome" in str(exc).lower() and "not found" in str(exc).lower()
             ):
                 pytest.skip(f"Chromium browser unavailable: {exc}")
             raise
+        result = verify_case(
+            f"http://127.0.0.1:{server.server_port}",
+            slugs=DEFAULT_SLUGS, channel="chrome",
+        )
         assert result["passed"] == result["total"] == len(WIDTHS) * len(DEFAULT_SLUGS), (
             [entry for entry in result["results"] if entry["status"] != "passed"]
         )
         rich_slugs = _complex_unit_cases(root / "data/generated/infinity.db")
         rich_widths = (*WIDTHS, 768)
-        rich = verify(
+        rich = verify_case(
             f"http://127.0.0.1:{server.server_port}",
             slugs=rich_slugs, channel="chrome", widths=rich_widths,
         )
@@ -477,7 +485,7 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
             ),
         )
         for filtered_slugs, flags in scenarios:
-            filtered = verify(
+            filtered = verify_case(
                 f"http://127.0.0.1:{server.server_port}",
                 slugs=filtered_slugs, optional_filters=flags, channel="chrome",
             )
@@ -506,7 +514,7 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
             base_url, source_db, "reinforcement", excluded=(specops_slug,),
         )
         optional_slugs = (specops_slug, reinforcement_slug)
-        optional_baseline = verify(
+        optional_baseline = verify_case(
             base_url, slugs=optional_slugs, channel="chrome",
         )
         assert optional_baseline["passed"] == optional_baseline["total"] == (
@@ -519,7 +527,7 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
         for flag, slug in (
             ("specops", specops_slug), ("reinforcement", reinforcement_slug),
         ):
-            filtered = verify(
+            filtered = verify_case(
                 base_url, slugs=(slug,), channel="chrome",
                 optional_filters={flag: False},
             )
@@ -530,7 +538,7 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
                 ]
                 for entry in filtered["results"]
             ), (flag, slug, filtered)
-        mixed = verify(
+        mixed = verify_case(
             base_url, slugs=optional_slugs, channel="chrome",
             optional_filters={"specops": False, "reinforcement": False},
         )
@@ -558,7 +566,7 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
             ))
         assert len(distance_slugs) == 2, distance_slugs
         for distance_unit in ("in", "cm"):
-            distances = verify(
+            distances = verify_case(
                 f"http://127.0.0.1:{server.server_port}",
                 slugs=distance_slugs, channel="chrome",
                 distance_unit=distance_unit,
@@ -571,6 +579,7 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
                 for result in distances["results"]
             ) > 0, distances
     finally:
+        stack.close()
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)

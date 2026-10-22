@@ -105,6 +105,25 @@ python -m pyright
 
 Do not report Ruff/Pyright as run when those tools are unavailable in the active environment.
 
+## Chromium concurrency under pytest-xdist
+
+Full local checks retain `-n auto --dist worksteal`; the worker count is not
+reduced for browser acceptance. During an xdist run, `tests/conftest.py`
+reserves up to **two concurrent browser test modules** across workers using
+cross-process OS file locks in the per-run pytest temporary directory. This
+protects Chromium/browser-server resources while unrelated tests run on all
+available workers. Locks release even if a worker process exits unexpectedly;
+normal serial tests and environments without Playwright do not acquire them.
+`tests/test_browser_test_capacity.py` covers cross-process exclusion and reuse.
+
+The Unit Skill browser matrix additionally reuses **one Chromium instance**
+for all its independent scenarios; each viewport still receives a fresh
+browser context and the same API/DOM assertions. Standalone verifier calls
+continue to create and close their own browser. These measures prevent
+excessive simultaneous Chromium instances rather than increasing test timeouts
+or silently retrying a failed page. A full parallel run is still required to
+validate stability under the developer workstation workload.
+
 ## Theme runtime regression coverage
 
 The web test suite executes the checked-in theme startup and preference modules in a minimal Node.js

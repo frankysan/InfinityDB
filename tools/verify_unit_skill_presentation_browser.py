@@ -11,6 +11,7 @@ import argparse
 import importlib
 import json
 import re
+from contextlib import nullcontext
 from dataclasses import dataclass
 from decimal import Decimal
 from functools import partial
@@ -421,6 +422,7 @@ def verify(
     base_url: str, *, slugs: tuple[str, ...] = DEFAULT_SLUGS, headed: bool = False,
     channel: str | None = None, optional_filters: dict[str, bool] | None = None,
     distance_unit: str = "in", widths: tuple[int, ...] = WIDTHS,
+    browser: Any | None = None,
 ) -> dict[str, Any]:
     if not widths or any(width < 240 or width > 3840 for width in widths):
         raise ValueError("Viewport widths must be between 240 and 3840 px")
@@ -432,14 +434,21 @@ def verify(
     filters = optional_filters or {}
     init_script = _settings_script(filters, distance_unit)
     results: list[dict[str, Any]] = []
-    with playwright.sync_playwright() as driver:
-        browser = driver.chromium.launch(
-            headless=not headed,
-            **({"channel": channel} if channel else {}),
-        )
+    # Test callers may reuse one launched Chromium instance across scenarios.
+    # The CLI continues to own and close its own browser as before.
+    driver_context = playwright.sync_playwright() if browser is None else nullcontext(None)
+    with driver_context as driver:
+        if browser is None:
+            assert driver is not None
+            active_browser = driver.chromium.launch(
+                headless=not headed,
+                **({"channel": channel} if channel else {}),
+            )
+        else:
+            active_browser = browser
         try:
             for width in widths:
-                context = browser.new_context(viewport={"width": width, "height": 900})
+                context = active_browser.new_context(viewport={"width": width, "height": 900})
                 context.add_init_script(script=init_script)
                 try:
                     for slug in slugs:
@@ -505,7 +514,8 @@ def verify(
                 finally:
                     context.close()
         finally:
-            browser.close()
+            if browser is None:
+                active_browser.close()
     return {
         "format": "InfinityDB Unit Skill presentation browser acceptance",
         "baseUrl": base,

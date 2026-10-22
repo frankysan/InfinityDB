@@ -2,14 +2,36 @@
 
 from __future__ import annotations
 
+import importlib.util
+import os
 import sqlite3
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 
+from tools.browser_test_capacity import browser_slot
 from tools.test_sections import load_test_sections, section_for_module
 
 _TEST_SECTIONS = load_test_sections()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def limit_concurrent_browser_tests(
+    request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory,
+) -> Iterator[None]:
+    """Keep Chromium resource use bounded across xdist workers, not pytest jobs."""
+    if (
+        not str(request.node.path).endswith("_browser.py")
+        or "PYTEST_XDIST_WORKER" not in os.environ
+        or importlib.util.find_spec("playwright") is None
+    ):
+        yield
+        return
+    # xdist gives each worker a child basetemp of the same run-level directory.
+    directory = tmp_path_factory.getbasetemp().parent / "infinitydb-chromium-slots"
+    with browser_slot(directory, slots=2):
+        yield
 
 
 @pytest.fixture(scope="module")
