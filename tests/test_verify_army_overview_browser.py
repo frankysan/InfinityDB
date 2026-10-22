@@ -163,14 +163,35 @@ def test_overview_ignores_missing_nonplayable_and_legacy_targets(
 
     page = chrome.new_page(viewport={"width": width, "height": 900})
     errors: list[str] = []
+    failed_requests: list[str] = []
+    api_responses: list[int] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "requestfailed",
+        lambda request: failed_requests.append(f"{request.url}: {request.failure}"),
+    )
+    page.on(
+        "response",
+        lambda response: api_responses.append(response.status)
+        if "/api/armies" in response.url else None,
+    )
     page.route("**/api/armies*", lambda route: route.fulfill(
         status=200, content_type="application/json",
         json={"items": [first, second, reinforcement, excluded, legacy, empty]},
     ))
     try:
         page.goto(f"{origin}/armies", wait_until="domcontentloaded")
-        page.locator("#army-overview-groups").wait_for(state="visible", timeout=60000)
+        try:
+            page.locator("#army-overview-groups").wait_for(
+                state="visible", timeout=60000
+            )
+        except Exception as exc:
+            message = page.locator("#army-overview-error-message").inner_text()
+            raise AssertionError(
+                f"Injected Army overview at {width}px never rendered; "
+                f"status={message!r}; api statuses={api_responses!r}; "
+                f"page errors={errors!r}; failed requests={failed_requests!r}"
+            ) from exc
         for army_id, expected in (
             (1, ["#army-army-3"]), (2, ["#army-army-3"]),
             (3, ["#army-army-1", "#army-army-2"]),

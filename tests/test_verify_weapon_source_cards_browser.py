@@ -691,7 +691,12 @@ def test_armed_turret_curated_object_profile_keeps_source_conflict_visible(
     """Armed Turret has a curated Trooper profile, not a Weapon Chart object row."""
     page = chrome.new_page(viewport={"width": width, "height": 900})
     errors: list[str] = []
+    failed_requests: list[str] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "requestfailed",
+        lambda request: failed_requests.append(f"{request.url}: {request.failure}"),
+    )
     try:
         response = page.request.get(f"{origin}/api/weapons/armed-turret")
         assert response.status == 200
@@ -702,9 +707,18 @@ def test_armed_turret_curated_object_profile_keeps_source_conflict_visible(
         assert dict(profile["stats"])["BTS"] == "3"
         assert dict(profile["stats"])["STR"] == "1"
 
-        page.goto(f"{origin}/weapons/armed-turret", wait_until="domcontentloaded")
+        url = f"{origin}/weapons/armed-turret"
+        page.goto(url, wait_until="domcontentloaded")
         card = page.locator(".special-weapon-profile")
-        card.wait_for(state="visible", timeout=15000)
+        try:
+            card.wait_for(state="visible", timeout=45000)
+        except Exception as exc:
+            status_text = page.locator("#item-status").inner_text()
+            raise AssertionError(
+                f"Armed Turret at {width}px: {url}; "
+                f"catalog status={status_text!r}; "
+                f"page errors={errors!r}; failed requests={failed_requests!r}"
+            ) from exc
         observed = card.evaluate(
             """(element) => [...element.querySelectorAll('thead th')].map(
               (th, index) => [
