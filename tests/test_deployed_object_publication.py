@@ -43,6 +43,48 @@ def test_pinned_publication_is_deterministic_and_source_complete(
     )
 
 
+def test_reviewed_delivery_uses_are_exact_army_occurrences_only(
+    source_paths: tuple[Path, Path, Path, Path, Path],
+) -> None:
+    publication = build_publication(*source_paths)
+    uses_count = 0
+    with sqlite3.connect(source_paths[0]) as db:
+        for obj in publication["objects"]:
+            reviewed = {
+                (edge["recordId"], edge["method"])
+                for edge in obj["deliverySources"]
+            }
+            if not reviewed:
+                assert obj["unitUses"] == [], obj["name"]
+            for use in obj["unitUses"]:
+                uses_count += 1
+                assert (use["originRecordId"], use["method"]) in reviewed
+                assert use["kind"] in {"profile", "loadout"}
+                assert use["unitSlug"] and use["armyName"]
+                kind = use["kind"]
+                identity = "profileId" if kind == "profile" else "optionId"
+                other = "optionId" if kind == "profile" else "profileId"
+                assert use[identity] is not None and use[other] is None
+                matches = db.execute(
+                    f"SELECT COUNT(*) FROM {kind}_payload_occurrences AS o "
+                    f"JOIN {kind}_payload_"
+                    f"{'weapons' if use['originRecordId'].startswith('weapon:') else 'equipment'} "
+                    f"AS p ON p.{kind}_payload_id = o.{kind}_payload_id "
+                    f"WHERE o.army_id = ? AND o.unit_id = ? AND o.group_id = ? "
+                    f"AND o.{'profile_id' if kind == 'profile' else 'option_id'} = ? "
+                    "AND p.item_id = ? AND p.position = ?",
+                    (use["armyId"], use["unitId"], use["groupId"],
+                     use[identity], use["sourceItemId"], use["sourcePosition"]),
+                ).fetchone()[0]
+                assert matches == 1, use
+    assert uses_count > 0
+    # Reviewed source use does not resolve Mine Dispenser subtype or invent
+    # ownership for curated objects without a reviewed delivery edge.
+    assert publication["unresolvedDeliveries"][0]["originRecordId"] == (
+        "weapon:mine-dispenser"
+    )
+
+
 def test_publication_missing_is_legacy_compatible_but_corrupt_fails_closed(
     source_paths: tuple[Path, Path, Path, Path, Path], tmp_path: Path,
 ) -> None:
@@ -93,6 +135,21 @@ def test_publication_rejects_identity_value_and_delivery_tampering(
     changed = copy.deepcopy(original)
     changed["objects"][0]["deliverySources"] = [{"recordId": "weapon:pitcher"}]
     rejected(changed, "reviewed delivery edge")
+
+    changed = copy.deepcopy(original)
+    with_uses = next(obj for obj in changed["objects"] if obj["unitUses"])
+    with_uses["unitUses"][0]["originRecordId"] = "weapon:mine-dispenser"
+    rejected(changed, "unreviewed deployed-object Unit usage")
+
+    changed = copy.deepcopy(original)
+    with_uses = next(obj for obj in changed["objects"] if obj["unitUses"])
+    with_uses["unitUses"][0]["optionId"] = 1 if (
+        with_uses["unitUses"][0]["kind"] == "profile"
+    ) else None
+    with_uses["unitUses"][0]["profileId"] = 1 if (
+        with_uses["unitUses"][0]["kind"] == "loadout"
+    ) else None
+    rejected(changed, "profile/loadout usage context")
 
 
 def test_external_rules_database_does_not_inherit_adjacent_release_publication(

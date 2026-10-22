@@ -69,7 +69,18 @@ conflicting source values, and missing Scenery attributes remain `null`
 rather than becoming zero. Exact reviewed delivery paths point *toward* the
 shared object reference; Mine Dispenser's unresolved loadout-specific Mine
 subtype remains explicitly unresolved. These edges establish **delivery
-origins only**, not Unit carriers, Army List legality or Unit/loadout usage.
+origins only**. The release builder separately matches reviewed delivery origin
+slugs through `application_domain_slugs` and exact
+`application_catalog_sources` IDs to the published
+`profile_payload_occurrences`/`loadout_payload_occurrences` with their
+corresponding item rows. Each `unitUses` occurrence preserves the Army,
+source Unit, group, profile or option ID, source catalog item ID/position,
+logical Unit slug and reviewed delivery method. It represents a source item
+listed in that Army profile/loadout, **not** a deployed object already on the
+table or an inferred Army List legality claim. Source-only Unit options,
+nested Includes and unresolved Mine Dispenser subtype are intentionally
+excluded pending specific source-context validation. Objects lacking exact
+matches are not claimed to have zero possible users.
 
 The release-builder `tools.build_deployed_object_publication` compiles the
 validated review and current Army/rules database pair to deterministic
@@ -93,11 +104,11 @@ Release packaging generates this deterministic, Git-ignored publication from
 the tracked database pair and reviewed source files immediately before the
 Docker build. The image copies it beside both databases; its startup smoke
 test verifies source-pair hashes, 17 reviewed objects, the unresolved Mine
-Dispenser origin and the HTTP/browser entry points. Hosted release acceptance
-remains a separate gate. True Unit/loadout reverse uses, extra objects and
-full-source inventory remain v1.0 tasks. Do not describe these
-delivery origins as proof of Unit ownership, Army List legality or an
-exhaustive N5.3 deployed-object model.
+Dispenser origin and the HTTP/browser entry points. Hosted release packaging passed on commit `9c9a09f` (2026-10-22);
+repeat against the final release candidate. Additional Unit-option/Includes
+usage contexts, extra objects and full-source inventory remain v1.0 tasks.
+Do not describe these delivery origins or partial reverse uses as proof of
+complete Unit ownership, Army List legality or an exhaustive N5.3 model.
 Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition
 composition. `config/catalogs/weapon-ammunition-references.json` pins exact Army
 metadata Ammunition IDs and names to canonical published base Ammunition references.

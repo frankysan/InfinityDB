@@ -1212,7 +1212,8 @@ building both matching databases, compile the reviewed reference payload:
 ```
 
 The builder writes deterministic `data/generated/deployed-objects.json` with
-the source and rules review evidence and the **exact** current
+the source and rules review evidence, direct Army profile/loadout occurrences
+for explicitly reviewed delivery sources, and the **exact** current
 `infinity.db`/`rules.db` SHA-256 fingerprints. Changes to either database
 require regenerating and revalidating the publication. The corresponding
 `tests/test_deployed_object_publication.py` tests prove deterministic bytes
@@ -1220,8 +1221,10 @@ and rejection of corrupt, duplicate, stale or unsupported values.
 `tests/test_verify_deployed_object_publication_browser.py` exercises the
 real API and Chromium at 1440/390 px with an isolated, freshly generated
 publication. There are 17 reviewed entries, not the entire game-object corpus;
-Mine Dispenser's subtype remains unresolved and Unit/loadout reverse uses
-are not inferred.
+Mine Dispenser's subtype remains unresolved. The first reverse-usage pass
+includes only exact Army profile/loadout source occurrences linked to reviewed
+delivery origins; unrelated source-only Unit options and nested Includes are
+not silently treated as eligible loadouts.
 
 The release deployment command generates and verifies this ignored publication
 from the checked-out pinned database pair before building the Docker image.

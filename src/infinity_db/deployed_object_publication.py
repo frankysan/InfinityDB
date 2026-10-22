@@ -101,6 +101,7 @@ def load_deployed_object_publication(
                 or any(not isinstance(row, dict) or not row.get("source") for row in evidence)
             ):
                 raise ValueError("Deployed-object attribute missing source provenance")
+        reviewed_edges: set[tuple[str, str]] = set()
         for delivery in entry["deliverySources"]:
             if (
                 not isinstance(delivery, dict)
@@ -109,4 +110,24 @@ def load_deployed_object_publication(
                 or not isinstance(delivery.get("sourcePages"), list)
             ):
                 raise ValueError("Invalid reviewed delivery edge")
+            reviewed_edges.add((delivery["recordId"], delivery["method"]))
+        uses = entry.get("unitUses", [])
+        if not isinstance(uses, list):
+            raise ValueError("Invalid deployed-object Unit usage collection")
+        for use in uses:
+            if (
+                not isinstance(use, dict)
+                or (use.get("originRecordId"), use.get("method")) not in reviewed_edges
+                or use.get("kind") not in {"profile", "loadout"}
+                or any(type(use.get(key)) is not int for key in (
+                    "armyId", "unitId", "groupId", "sourceItemId", "sourcePosition"
+                ))
+                or any(not isinstance(use.get(key), str) or not use[key]
+                       for key in ("armyName", "unitName", "unitSlug", "contextName"))
+            ):
+                raise ValueError("Invalid or unreviewed deployed-object Unit usage")
+            identity_key = "profileId" if use["kind"] == "profile" else "optionId"
+            other_key = "optionId" if use["kind"] == "profile" else "profileId"
+            if type(use.get(identity_key)) is not int or use.get(other_key) is not None:
+                raise ValueError("Invalid deployed-object profile/loadout usage context")
     return document

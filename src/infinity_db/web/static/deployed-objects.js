@@ -109,7 +109,45 @@ function entry(object) {
     }
     section.append(uses);
   }
+  section.append(armyUsesSection(object));
   return section;
+}
+
+function armyUsesSection(object) {
+  const uses = object.unitUses || [];
+  if (!uses.length) {
+    const note = document.createElement("p");
+    note.className = "detail-copy";
+    note.textContent = "No exact Army profile/loadout use has been established for this reviewed delivery. This does not mean no Unit can use the object.";
+    return note;
+  }
+  const details = document.createElement("details");
+  details.className = "deployed-object-unit-uses";
+  const summary = document.createElement("summary");
+  summary.textContent = `Army profile/loadout uses (${uses.length} reviewed delivery occurrences)`;
+  details.append(summary);
+  const description = document.createElement("p");
+  description.className = "detail-copy";
+  description.textContent = "Listed source items occur in these exact Army profiles or loadouts. Unit-wide options, nested Includes and unresolved Mine subtypes are not inferred.";
+  details.append(description);
+  // Large Army datasets should not materialize every list item before users
+  // choose to inspect the reverse provenance.
+  details.addEventListener("toggle", () => {
+    if (!details.open || details.querySelector("ul")) return;
+    const list = document.createElement("ul");
+    for (const use of uses) {
+      const item = document.createElement("li");
+      if (use.unitSlug) {
+        item.append(labelledLink(use.unitName, `/units/${encodeURIComponent(use.unitSlug)}`));
+      } else {
+        item.append(use.unitName);
+      }
+      item.append(` — ${use.armyName}; ${use.kind === "profile" ? "profile" : "loadout"} ${use.contextName}; ${use.originRecordId} (${use.method})`);
+      list.append(item);
+    }
+    details.append(list);
+  });
+  return details;
 }
 
 function focusHashTarget() {

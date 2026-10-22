@@ -641,7 +641,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 Turret disputes retain alternatives; Cover lacks only
                 unreported ARM/BTS/STR. Mine Dispenser remains unresolved.
                 Tests assert shared-object delivery and no invented Units.
-                This code is **not yet published via API or browser**.
+                The pure projection is separate from artifact-gated publication.
               - [x] Add the **artifact-gated read-only API and normal browser
                 entry point** for the 17 reviewed objects:
                 `/api/deployed-objects`, exact `/api/deployed-objects/{id}`,
@@ -652,20 +652,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 and keyboard fragment navigation. Missing publications
                 return 503; invalid or database-mismatched publications
                 fail closed. No Unit usage is inferred.
-              - [ ] **Validate hosted delivery** of the deterministic
+              - [x] **Validate hosted delivery** of the deterministic
                 `data/generated/deployed-objects.json` release publication
-                for the pinned `infinity.db`/`rules.db` pair. The release
-                deployment script and deployment-smoke CI generate/check it
-                from reviewed sources; Docker packages the artifact and image
-                smoke verifies its hashes, 17 objects, unresolved delivery and
-                live HTTP entry points. Local integration checks are required;
-                rerun hosted deployment smoke on the candidate before closing.
-                Do not substitute isolated temporary-artifact browser tests.
-              - [ ] Derive **reverse Unit/loadout uses** only from exact Army
-                usage occurrences and reviewed object/delivery edges.
-                Preserve unavailable values, conflicting Silhouettes and
-                the unresolved Mine Dispenser subtype; do not infer roster
-                ownership from rule prose.
+                for the pinned `infinity.db`/`rules.db` pair. Deployment
+                and CI generate/check the artifact from reviewed sources,
+                Docker packages it, and the image smoke validates hashes,
+                17 objects, unresolved delivery, API and browser entry.
+                Deployment smoke, source checks and installed-wheel smoke
+                passed on commit `9c9a09f` (2026-10-22). Revalidate on the
+                final tagged candidate as part of final 1.0 acceptance.
+              - [ ] Complete **reverse Unit/loadout uses** from exact Army
+                occurrences and reviewed object/delivery edges.
+                The first pass derives direct Army profile/loadout source-item
+                occurrences from reviewed delivery origins, retains their Army,
+                Unit, group, profile/option and source IDs, and exposes them
+                under expandable object references. Still review/cover
+                source-only Unit options, nested Includes, and any other
+                context not proven by the first pass. Preserve unavailable
+                values, conflicting Silhouettes and the unresolved Mine
+                Dispenser subtype; do not infer roster ownership from rule prose.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.

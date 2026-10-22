@@ -91,6 +91,18 @@ def test_deployed_reference_api_has_reviewed_objects_and_no_invented_units(
         "weapon:pitcher", "equipment:deployable-repeater",
     }
     assert "units" not in repeater and "carriers" not in repeater
+    assert all(
+        (use["originRecordId"], use["method"]) in {
+            (edge["recordId"], edge["method"]) for edge in obj["deliverySources"]
+        }
+        for obj in result["items"] for use in obj["unitUses"]
+    )
+    assert any(obj["unitUses"] for obj in result["items"])
+    first_use = next(
+        use for obj in result["items"] for use in obj["unitUses"]
+    )
+    unit_status, _ = _request(app, f"/units/{first_use['unitSlug']}")
+    assert unit_status == 200, first_use
 
     # Every source link is a real Army-backed catalog entry, not a guessed slug.
     for obj in result["items"]:
@@ -173,6 +185,12 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                         "a[href='/equipment/deployable-repeater']"
                     ).count() == 1
                     assert "Mine Dispenser" in page.locator("#deployed-unresolved").inner_text()
+                    usage = page.locator(".deployed-object-unit-uses")
+                    assert usage.count() > 0
+                    first = usage.first
+                    first.locator("summary").click()
+                    assert first.locator("li").count() > 0
+                    assert first.locator('a[href^="/units/"]').count() > 0
                     assert not errors, errors
                     assert page.evaluate(
                         "() => document.documentElement.scrollWidth <= window.innerWidth + 1"

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.deployed_object_reference import project_deployed_references
+from infinity_db.deployed_object_usage import attach_reviewed_unit_uses
 from tools.audit_deployed_object_inventory import audit_inventory
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +34,7 @@ def build_publication(
     """Project only validated review evidence; pin both shipped databases."""
     report = audit_inventory(army_db, curated_source, delivery_reviews, candidate_reviews)
     publication = project_deployed_references(report)
+    attach_reviewed_unit_uses(army_db, publication)
     publication["sourceSnapshot"]["rulesDatabaseSha256"] = _digest(rules_db)
     publication["sourceSnapshot"]["deliveryReviewSha256"] = report["deliveryReviewSha256"]
     publication["sourceSnapshot"]["candidateReviewSha256"] = report["candidateReviewSha256"]
