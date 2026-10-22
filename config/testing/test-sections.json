@@ -125,6 +125,7 @@
       "modules": [
         "test_benchmark_test_workers",
         "test_browser_test_capacity",
+        "test_browser_wsgi_transport",
         "test_capacity_test",
         "test_compare_determinism_manifests",
         "test_compare_runtime_benchmarks",

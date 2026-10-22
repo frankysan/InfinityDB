@@ -15,6 +15,7 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_db.web import create_app
+from tools.browser_wsgi_transport import route_browser_page
 from tools.build_deployed_object_publication import build_publication, publication_bytes
 
 
@@ -128,7 +129,7 @@ def test_published_reference_is_discoverable_in_normal_browser_pages(
 def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
     published_app: tuple[Callable, str],
 ) -> None:
-    _, origin = published_app
+    app, origin = published_app
     sync_api = pytest.importorskip("playwright.sync_api")
     with sync_api.sync_playwright() as playwright:
         try:
@@ -140,6 +141,7 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
         try:
             for width in (1440, 390):
                 page = browser.new_page(viewport={"width": width, "height": 900})
+                route_browser_page(page, app, origin)
                 errors: list[str] = []
                 page.on("pageerror", lambda error, failures=errors: failures.append(str(error)))
                 try:

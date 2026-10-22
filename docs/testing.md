@@ -123,8 +123,14 @@ continue to create and close their own browser. These measures prevent
 excessive simultaneous Chromium instances without changing pytest worker
 parallelism. Long-running catalog render checks retain bounded deadlines and
 report HTTP, JavaScript, and page-status evidence on failure; none silently
-retry a failed page. A full parallel run is still required to validate
-stability under the developer workstation workload.
+retry a failed page. The Weapon and deployed-object browser suites
+intercept same-origin page requests and serve them directly from the application
+WSGI callable using `tools/browser_wsgi_transport.py`. This keeps real HTML,
+JS module execution, API responses, and browser assertions, but removes
+dependence on a transient local TCP listener for browser rendering. Dedicated
+HTTP/API tests still exercise the socket/transport boundary. The WSGI adapter
+has separate routing/response regression tests. A full parallel run is still
+required to validate stability under the developer workstation workload.
 
 ## Theme runtime regression coverage
 

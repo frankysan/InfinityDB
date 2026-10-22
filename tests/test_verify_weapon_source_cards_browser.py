@@ -16,6 +16,7 @@ from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 import pytest
 
 from infinity_db.web import create_app
+from tools.browser_wsgi_transport import route_browser_page
 
 
 class _ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -28,14 +29,18 @@ class _QuietHandler(WSGIRequestHandler):
 
 
 @pytest.fixture(scope="module")
-def origin() -> Iterator[str]:
+def weapon_app() -> Any:
     root = Path(__file__).resolve().parents[1]
-    app = create_app(
+    return create_app(
         root / "data/generated/infinity.db",
         rules_database_path=root / "data/generated/rules.db",
     )
+
+
+@pytest.fixture(scope="module")
+def origin(weapon_app: Any) -> Iterator[str]:
     server = make_server(
-        "127.0.0.1", 0, app,
+        "127.0.0.1", 0, weapon_app,
         server_class=_ThreadedServer, handler_class=_QuietHandler,
     )
     thread = Thread(target=server.serve_forever, daemon=True)
@@ -49,7 +54,7 @@ def origin() -> Iterator[str]:
 
 
 @pytest.fixture(scope="module")
-def chrome() -> Iterator[Any]:
+def chrome(weapon_app: Any, origin: str) -> Iterator[Any]:
     sync_api = pytest.importorskip("playwright.sync_api")
     with sync_api.sync_playwright() as driver:
         try:
@@ -58,8 +63,14 @@ def chrome() -> Iterator[Any]:
             if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
                 pytest.skip(f"Chromium unavailable: {exc}")
             raise
+        class RoutedBrowser:
+            def new_page(self, **kwargs: Any) -> Any:
+                page = browser.new_page(**kwargs)
+                route_browser_page(page, weapon_app, origin)
+                return page
+
         try:
-            yield browser
+            yield RoutedBrowser()
         finally:
             browser.close()
 
