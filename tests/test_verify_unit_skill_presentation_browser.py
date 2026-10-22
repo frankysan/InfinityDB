@@ -246,7 +246,8 @@ def _relationship_cohort(database_path: Path) -> tuple[str, ...]:
 
 def test_reinforcement_parentage_is_visible_without_developer_mode() -> None:
     """A real Reinforcement Unit must link to its source-backed parent Army."""
-    sync_playwright = pytest.importorskip("playwright.sync_api").sync_playwright
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    sync_playwright = playwright_api.sync_playwright
 
     root = Path(__file__).resolve().parents[1]
     database = root / "data/generated/infinity.db"
@@ -298,11 +299,33 @@ def test_reinforcement_parentage_is_visible_without_developer_mode() -> None:
             try:
                 for width in (1440, 390):
                     page = browser.new_page(viewport={"width": width, "height": 900})
+                    page_errors: list[str] = []
+                    failed_requests: list[str] = []
+                    page.on(
+                        "pageerror",
+                        lambda error, errors=page_errors: errors.append(str(error)),
+                    )
+                    page.on(
+                        "requestfailed",
+                        lambda request, failures=failed_requests: failures.append(
+                            f"{request.url}: {request.failure}"
+                        ),
+                    )
                     try:
                         page.goto(f"{base}/units/{slug}", wait_until="domcontentloaded")
-                        page.locator("#unit-content").wait_for(
-                            state="visible", timeout=60000,
-                        )
+                        try:
+                            page.locator("#unit-content").wait_for(
+                                state="visible", timeout=60000,
+                            )
+                        except playwright_api.TimeoutError as exc:
+                            status_text = page.locator("#unit-status").text_content(
+                                timeout=1000,
+                            )
+                            raise AssertionError(
+                                f"Unit content stayed hidden: slug={slug}, width={width}, "
+                                f"status={status_text!r}, page_errors={page_errors}, "
+                                f"failed_requests={failed_requests}"
+                            ) from exc
                         section = page.locator(".army-relationships")
                         assert section.is_visible(), (slug, width)
                         assert "Reinforcement relationships" in section.inner_text()

@@ -1293,7 +1293,9 @@ def test_uncategorized_weapon_source_profiles_and_reusable_ammunition(
     ] == effects
     for p in payload["profiles"]:
         assert all(effect["citations"] for effect in p["ammunition_effects"])
-    specific = slug in {"feuerbach", "hyper-rapid-magnetic-cannon"}
+    specific = slug in {
+        "feuerbach", "hyper-rapid-magnetic-cannon", "crazykoala", "madtraps",
+    }
     assert bool(payload.get("rules")) == specific
     if specific:
         record = _weapon_rules(payload)[f"weapon:{slug}"]
@@ -1301,7 +1303,12 @@ def test_uncategorized_weapon_source_profiles_and_reusable_ammunition(
             citation["page"] == page and citation["source_id"] == "n5-core-v5.3-pdf"
             for citation in record["citations"]
         )
-        assert "modes" in record["summary"] and "Saving Rolls" in record["summary"]
+        if slug in {"crazykoala", "madtraps"}:
+            assert "[[trait:boost|Boost]]" in record["summary"]
+            assert "[[trait:perimeter|Perimeter]]" in record["summary"]
+            assert "[[skill:place-deployable|Place Deployable]]" in record["summary"]
+        else:
+            assert "modes" in record["summary"] and "Saving Rolls" in record["summary"]
 
 
 def test_feuerbach_and_hrmc_preserve_mode_specific_traits(

@@ -129,7 +129,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",
     )
-    assert len(result["reviewedDeliveryPaths"]) == 10
+    assert len(result["reviewedDeliveryPaths"]) == 12
     assert len(result["reviewedCandidateDecisions"]) == 12
     assert len(result["candidateReviewSha256"]) == 64
     by_id = {
@@ -154,7 +154,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
     assert {
         candidate["recordId"] for candidate in result["remainingCuratedCandidateMentions"]
     }.isdisjoint(by_id)
-    assert len(result["curatedCandidateMentions"]) == 15
+    assert len(result["curatedCandidateMentions"]) == 17
     assert result["remainingCuratedCandidateMentions"] == []
     assert {
         entry["recordId"] for entry in result["deliveryCoveredCandidateMentions"]
@@ -162,6 +162,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         "weapon:pitcher", "weapon:mine-dispenser", "weapon:drop-bears",
         "weapon:disco-baller", "equipment:deployable-repeater",
         "weapon:armed-turret", "weapon:wildparrot", "equipment:fastpanda",
+        "weapon:crazykoala", "weapon:madtraps",
     }
     assert by_id["equipment:dazer"]["knownAttributes"]["S"] == "0"
     assert by_id["weapon:mines"]["profileShape"] == "none"
@@ -235,9 +236,9 @@ def test_delivery_reviews_require_pinned_curated_evidence_and_exact_source_modes
         profile = review["sourceProfile"]
         if profile and profile not in profiles:
             profiles.append(profile)
-    assert len(profiles) == 5
+    assert len(profiles) == 7
     approved = validate_delivery_reviews(reviews, records, profiles)
-    assert len(approved) == 10
+    assert len(approved) == 12
     assert all(entry["reviewStatus"] == "source-backed-audit-only" for entry in approved)
 
     tampered = copy.deepcopy(reviews)
