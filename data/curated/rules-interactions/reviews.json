@@ -917,6 +917,20 @@
       "note": "N5.3 Drop Bears BS/Deployable modes share three charges but have different placement restrictions; typed relationships connect PH throwing, Targetless, Deployable/Intuitive placement, Shock and the modified Mines behavior. Imported legacy Throwing Weapon remains source data, not an additional N5 effect."
     },
     {
+      "recordId": "weapon:crazykoala",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-22",
+      "note": "N5.3 pp. 69 and 186: Place Deployable with Perimeter positioning, then Boost only after activation; Shock/PS 5/B1/one ARM Saving Roll is source-specific. Camouflage/Impersonation markers do not trigger Boost, and blocked paths prevent contact. No Mine or WildParrot effect is inherited."
+    },
+    {
+      "recordId": "weapon:madtraps",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-22",
+      "note": "N5.3 pp. 69 and 187: Place Deployable with Perimeter positioning, then Boost; the printed PARA/PH-6/one-roll Non-Lethal effect is separate from Crazykoala Shock and WildParrot E/M. No automatic Mine mechanics or unreviewed carrier relationships."
+    },
+    {
       "recordId": "weapon:mines",
       "targetRelease": "1.0.0",
       "status": "reviewed",

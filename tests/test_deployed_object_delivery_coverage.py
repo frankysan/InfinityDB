@@ -75,10 +75,10 @@ def test_pinned_delivery_review_gap_is_explicit() -> None:
     assert report["scope"] == "delivery-review-queue-not-inferred-object-ownership"
     assert report["reviewedObjectCount"] == 17
     assert report["withReviewedDelivery"] + len(report["withoutReviewedDelivery"]) == 17
-    assert len(report["withoutReviewedDelivery"]) == 11
+    assert len(report["withoutReviewedDelivery"]) == 9
     assert {row["name"] for row in report["objects"] if row["reviewedDeliverySources"]} == {
         "Deployable Repeater", "Disco Ball", "Drop Bears",
-        "WildParrot", "FastPanda", "Armed Turret",
+        "WildParrot", "FastPanda", "Armed Turret", "Crazykoala", "Madtraps",
     }
     assert report["unresolvedDeliveryOrigins"] == [{
         "originRecordId": "weapon:mine-dispenser",

@@ -771,7 +771,7 @@ def test_deactivator_same_order_devices_keep_distinct_trigger_rules() -> None:
     assert "[[weapon:cybermine|Cybermines]] share this trigger condition" in text
     assert "[[skill:reset|Reset]], not [[skill:dodge|Dodge]]" in text
     assert "**Contact-seeking devices:** [[trait:boost|Boost]]" in text
-    assert "Crazykoalas/MadTraps" in text
+    assert "[[weapon:crazykoala|Crazykoalas]]/[[weapon:madtraps|MadTraps]]" in text
     assert "eligible enemy **Model**" in text
     assert "passable route to Silhouette contact" in text
     assert "Exempt Markers do not trigger it" in text

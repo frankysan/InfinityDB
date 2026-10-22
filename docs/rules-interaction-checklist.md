@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **191/191** complete, **0** pending.
-- Current authored outgoing relations: **483**.
+- Supporting semantic identities: **193/193** complete, **0** pending.
+- Current authored outgoing relations: **497**.
 - Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
@@ -983,7 +983,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (59/59)
+#### Weapon (61/61)
 
 - [x] **AP + EXP CC Weapon** (`weapon:ap-exp-cc-weapon`) — reviewed: N5.3 English p. 177, Spanish p. 184 and pinned Army 227 agree on AP+EXP with three ARM/2 Saving Rolls; archived Spanish Wiki charts report two, a retained unresolved source conflict. AP and EXP remain separate canonical Ammunition effects, not independent attack modes.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1026,6 +1026,13 @@ review. `declaration-category` projection records are excluded.
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+- [x] **Crazykoala** (`weapon:crazykoala`) — reviewed: N5.3 pp. 69 and 186: Place Deployable with Perimeter positioning, then Boost only after activation; Shock/PS 5/B1/one ARM Saving Roll is source-specific. Camouflage/Impersonation markers do not trigger Boost, and blocked paths prevent contact. No Mine or WildParrot effect is inherited.
+  - `uses-effects-of` → Perimeter (`trait:perimeter`)
+  - `uses-effects-of` → Boost (`trait:boost`)
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
 - [x] **Cybermine** (`weapon:cybermine`) — reviewed: Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose.
   - `uses-effects-of` → Mines (`weapon:mines`)
   - `modifies-use-of` → Reset (`skill:reset`)
@@ -1114,6 +1121,15 @@ review. `declaration-category` projection records are excluded.
 - [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
   - `variant-of` → Kobra Pistol (`weapon:kobra-pistol`)
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+- [x] **Madtraps** (`weapon:madtraps`) — reviewed: N5.3 pp. 69 and 187: Place Deployable with Perimeter positioning, then Boost; the printed PARA/PH-6/one-roll Non-Lethal effect is separate from Crazykoala Shock and WildParrot E/M. No automatic Mine mechanics or unreviewed carrier relationships.
+  - `uses-effects-of` → Perimeter (`trait:perimeter`)
+  - `uses-effects-of` → Boost (`trait:boost`)
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+  - `uses-effects-of` → Paralysis (PARA) Ammunition (`ammunition:para`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `causes-state` → Immobilized-A State (`state:immobilized-a`)
 - [x] **Marksman Rifles** (`weapon:marksman-rifles`) — reviewed: N5.3 chart p. 180, September 26 archived English Weapon Chart and pinned Army: all eight Marksman types have PS 7 and identical range bands; six previously undefined single-mode variants now link to this shared family. Each of those six retains its own Ammunition, Saving Roll Attribute, Trait and scoped navigation associations. Breaker and MULTI retain separate authoritative Weapon definitions to avoid ambiguous family mappings. No ammunition or Trait is inherited universally, especially not by MULTI Anti-Material Mode.
   - outgoing: none
 - [x] **Mine Dispenser** (`weapon:mine-dispenser`) — reviewed: N5.3 pp. 71-72/181 and pinned Wiki: Mine Dispenser uses its own BS Weapon Chart profile, but adopts the Drop Bears BS Mode Mine Token placement procedure, including Conclusion timing, no same-Order detonation and placement restrictions. Mine subtype is supplied by bracketed Unit Profile; do not inherit Drop Bears PH roll or Shock subtype. Double Shot optionally expends both Disposable (2) charges for B2. Army savingNum=1 is non-operative with no Saving Roll Attribute or Ammunition; no damaging launcher attack is inferred.

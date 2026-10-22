@@ -5312,10 +5312,162 @@
             }
         },
         {
+            "id": "weapon:crazykoala",
+            "kind": "weapon",
+            "name": "Crazykoala",
+            "summary": "Crazykoalas use [[skill:place-deployable|Place Deployable]] without a Roll. Their [[trait:perimeter|Perimeter]] Trait places the object entirely within the user's [[trait:zone-of-control-zc|Zone of Control]] rather than in Silhouette contact. The device becomes active at the placement Order's Conclusion, not during that Order.\n\nOnce in play, [[trait:boost|Boost]] triggers when an eligible enemy Model declares or performs an Order or [[trait:aro|ARO]] inside its [[trait:zone-of-control-zc|Zone of Control]]. If a traversable path admits the device's Silhouette, it advances into Silhouette contact, detonates, and is removed.\n\nA successful [[skill:dodge|Dodge]] resolved as a [[rule:face-to-face-rolls|Normal Roll]] avoids the attack. [[state:camouflaged|Camouflage]] and [[state:impersonation-1|IMP-1]]/[[state:impersonation-2|IMP-2]] Markers do not trigger [[trait:boost|Boost]]; [[trait:deployable|Deployables]] do not activate other [[trait:deployable|Deployables]].\n\nThe printed Crazykoala Weapon profile uses [[ammunition:shock|Shock]] with PS 5, B 1 and one ARM Saving Roll, plus [[trait:disposable-x|Disposable (2)]]. These are not [[weapon:mines|Mine]] or [[weapon:wildparrot|WildParrot]] E/M mechanics.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "crazykoala"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:perimeter"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:boost"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:deployable"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:disposable-x"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:place-deployable"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 69,
+                    "section": "Perimeter Weapons; Perimeter Weapons and the Boost Trait"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "Weapon Chart: Crazykoala"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-22"
+            }
+        },
+        {
+            "id": "weapon:madtraps",
+            "kind": "weapon",
+            "name": "Madtraps",
+            "summary": "Madtraps are [[trait:perimeter|Perimeter]] Weapons placed with [[skill:place-deployable|Place Deployable]] without a Roll, entirely within the user's [[trait:zone-of-control-zc|Zone of Control]] instead of Silhouette contact. They become active when the placement Order concludes.\n\nTheir [[trait:boost|Boost]] Trait requires the deployed object to advance into Silhouette contact and detonate when an eligible enemy Model declares or performs an Order or [[trait:aro|ARO]] in its [[trait:zone-of-control-zc|Zone of Control]], provided the path is passable for its Silhouette.\n\nA successful [[skill:dodge|Dodge]] resolved as a [[rule:face-to-face-rolls|Normal Roll]] avoids the attack; [[state:camouflaged|Camouflage]] and [[state:impersonation-1|IMP-1]]/[[state:impersonation-2|IMP-2]] Markers do not trigger [[trait:boost|Boost]]. [[trait:deployable|Deployable]] Weapons do not activate other [[trait:deployable|Deployables]].\n\nUnlike a [[ammunition:shock|Shock]] [[weapon:crazykoala|Crazykoala]], a Madtraps hit uses [[ammunition:para|Paralysis (PARA) Ammunition]] with one PH-6 Saving Roll and [[trait:non-lethal|Non-Lethal]]: an affected target with PH becomes [[state:immobilized-a|Immobilized-A]] on a failed Roll, without suffering a Wound.\n\nThe chart also specifies B 1 and [[trait:disposable-x|Disposable (2)]]. These are not [[weapon:mines|Mine]] or [[weapon:wildparrot|WildParrot]] E/M effects.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "madtraps"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:perimeter"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:boost"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:deployable"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:disposable-x"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:place-deployable"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:para"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:non-lethal"
+                },
+                {
+                    "type": "causes-state",
+                    "recordId": "state:immobilized-a"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 69,
+                    "section": "Perimeter Weapons; Perimeter Weapons and the Boost Trait"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 187,
+                    "section": "Weapon Chart: Madtraps"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-22"
+            }
+        },
+        {
             "id": "weapon:wildparrot",
             "kind": "weapon",
             "name": "WildParrot",
-            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]].\n\nThe [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact. A path wide enough for the WildParrot's Silhouette must remain passable; an impassable barrier or gap too small for it blocks the placement.\n\nOnce deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker.\n\nUnlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls).\n\n**Placement Roll:** Ordinary [[skill:place-deployable|Place Deployable]] needs no Roll. A legal [[skill:intuitive-attack|Intuitive Attack]] instead uses an unmodified WIP Roll; failure places no Token but consumes the [[trait:disposable-x|Disposable (1)]] use. The existing camouflage-placement restrictions and exceptions still apply.\n\n**Timing and object:** A WildParrot becomes active at the Order's Conclusion and cannot trigger during its own placement Order. Its visible S1 Token or Model has ARM 0, BTS 0 and STR 1; it remains stationary until triggered or destroyed. The [[trait:deployable|Deployable]] removal rule applies.",
+            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]].\n\nThe [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact. A path wide enough for the WildParrot's Silhouette must remain passable; an impassable barrier or gap too small for it blocks the placement.\n\nOnce deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker.\n\nUnlike [[trait:boost|Boost]] devices such as [[weapon:crazykoala|Crazykoalas]] and [[weapon:madtraps|Madtraps]], WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls).\n\n**Placement Roll:** Ordinary [[skill:place-deployable|Place Deployable]] needs no Roll. A legal [[skill:intuitive-attack|Intuitive Attack]] instead uses an unmodified WIP Roll; failure places no Token but consumes the [[trait:disposable-x|Disposable (1)]] use. The existing camouflage-placement restrictions and exceptions still apply.\n\n**Timing and object:** A WildParrot becomes active at the Order's Conclusion and cannot trigger during its own placement Order. Its visible S1 Token or Model has ARM 0, BTS 0 and STR 1; it remains stationary until triggered or destroyed. The [[trait:deployable|Deployable]] removal rule applies.",
             "facts": {
                 "variantRuleReferences": {
                     "wildparrot": [
@@ -14985,7 +15137,7 @@
             "labelIds": [
                 "attack"
             ],
-            "summary": "**Enemy removal:** A Deactivator can select an enemy deployed [[trait:deployable|Deployable]] Weapon or Equipment in the user's LoF or [[trait:zone-of-control-zc|Zone of Control]], but never a [[state:camouflaged|Camouflage Marker]]. This is a Short Skill (Attack), not [[skill:place-deployable|Place Deployable]].\n\n**Resolution:** Make a WIP [[rule:face-to-face-rolls|Normal Roll]], applying Range MODs only, not [[skill:mimetism|Mimetism]] or Cover. Success removes the enemy item from the table, but does **not** prevent an eligible device from triggering during that same Order.\n\n**Ongoing effects:** Removing [[equipment:dazer|Dazer]] ends its persistent area effect; removing [[equipment:fastpanda|FastPanda]] or [[equipment:deployable-repeater|Deployable Repeater]] ends that item's [[equipment:repeater|Repeater]] extension. Removing [[equipment:deployable-cover|Deployable Cover]] removes its scenery-based Cover effect.\n\n**Template triggers:** A [[state:camouflaged|CAMO]] Marker is not a Deactivator target. A revealed [[weapon:mines|Mine]] may still trigger this Order if its template reaches an enemy Model/Marker without affecting an ally. [[weapon:cybermine|Cybermines]] share this trigger condition; evasion uses [[skill:reset|Reset]], not [[skill:dodge|Dodge]].\n\n**Contact-seeking devices:** [[trait:boost|Boost]] (Crazykoalas/MadTraps) requires an eligible enemy **Model** declaring an Order/[[trait:aro|ARO]] in its [[trait:zone-of-control-zc|ZoC]] and a passable route to Silhouette contact. Exempt Markers do not trigger it; only a successful [[rule:face-to-face-rolls|Normal Dodge Roll]] avoids it.\n\n**Automated turret reactions:** An [[weapon:armed-turret|Armed Turret]] may declare [[skill:bs-attack|BS Attack]] or [[skill:cc-attack|CC Attack]] against an active enemy **Model**, never a Marker, within LoF or in Silhouette contact. This is not [[weapon:mines|Mine]] or [[trait:boost|Boost]] detonation.\n\n**Separate allied action:** [[skill:activate-disco-ball|Activate Disco Ball]] uses Deactivator Equipment to reactivate an **allied** Ball with WIP +3 and Range MODs. It does not remove the Ball and does not change Deactivator's enemy-only targeting rule.",
+            "summary": "**Enemy removal:** A Deactivator can select an enemy deployed [[trait:deployable|Deployable]] Weapon or Equipment in the user's LoF or [[trait:zone-of-control-zc|Zone of Control]], but never a [[state:camouflaged|Camouflage Marker]]. This is a Short Skill (Attack), not [[skill:place-deployable|Place Deployable]].\n\n**Resolution:** Make a WIP [[rule:face-to-face-rolls|Normal Roll]], applying Range MODs only, not [[skill:mimetism|Mimetism]] or Cover. Success removes the enemy item from the table, but does **not** prevent an eligible device from triggering during that same Order.\n\n**Ongoing effects:** Removing [[equipment:dazer|Dazer]] ends its persistent area effect; removing [[equipment:fastpanda|FastPanda]] or [[equipment:deployable-repeater|Deployable Repeater]] ends that item's [[equipment:repeater|Repeater]] extension. Removing [[equipment:deployable-cover|Deployable Cover]] removes its scenery-based Cover effect.\n\n**Template triggers:** A [[state:camouflaged|CAMO]] Marker is not a Deactivator target. A revealed [[weapon:mines|Mine]] may still trigger this Order if its template reaches an enemy Model/Marker without affecting an ally. [[weapon:cybermine|Cybermines]] share this trigger condition; evasion uses [[skill:reset|Reset]], not [[skill:dodge|Dodge]].\n\n**Contact-seeking devices:** [[trait:boost|Boost]] ([[weapon:crazykoala|Crazykoalas]]/[[weapon:madtraps|MadTraps]]) requires an eligible enemy **Model** declaring an Order/[[trait:aro|ARO]] in its [[trait:zone-of-control-zc|ZoC]] and a passable route to Silhouette contact.\n\nExempt Markers do not trigger it; only a successful [[rule:face-to-face-rolls|Normal Dodge Roll]] avoids it.\n\n**Automated turret reactions:** An [[weapon:armed-turret|Armed Turret]] may declare [[skill:bs-attack|BS Attack]] or [[skill:cc-attack|CC Attack]] against an active enemy **Model**, never a Marker, within LoF or in Silhouette contact. This is not [[weapon:mines|Mine]] or [[trait:boost|Boost]] detonation.\n\n**Separate allied action:** [[skill:activate-disco-ball|Activate Disco Ball]] uses Deactivator Equipment to reactivate an **allied** Ball with WIP +3 and Range MODs. It does not remove the Ball and does not change Deactivator's enemy-only targeting rule.",
             "composition": {
                 "role": "definition"
             },

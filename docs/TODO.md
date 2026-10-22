@@ -71,7 +71,7 @@ These foundations are implemented; final source-to-browser acceptance remains se
 - Reviewed exact source variants, including Mimetism, Berserk and Dodge mappings;
   the cross-army usage index remains unimplemented:
   [variant contract](data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
-- The 1.0 interaction-review ledger passes for 191 supporting identities with
+- The 1.0 interaction-review ledger passes for 193 supporting identities with
   zero pending entries. This is a separate gate from full clause/source review:
   [generated checklist](rules-interaction-checklist.md).
 - Source archive/storage/API parity checks, optional Chromium verifiers and an
@@ -626,8 +626,8 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               Neither bounded scan proves full N5.3 object, delivery,
               Unit or loadout completeness.
             - [ ] **Reconcile uncovered delivery paths for existing objects.**
-              The pinned review now covers 6 of 17 published objects with
-              10 reviewed delivery paths; 11 remain without an approved
+              The pinned review now covers 8 of 17 published objects with
+              12 reviewed delivery paths; 9 remain without an approved
               delivery origin. Newly reviewed: WildParrot's ordinary
               Place Deployable and WIP-based Intuitive Attack paths,
               FastPanda's Perimeter placement and Armed Turret's
@@ -636,9 +636,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               Army four-stat profile. `tools.audit_deployed_object_delivery_coverage`
               lists the outstanding objects and exact source-catalog aliases
               for further N5.3 review, without promoting aliases into
-              methods or Army/Unit carriers. Investigate uncurated origins
-              such as CrazyKoala separately, and preserve Mine Dispenser's
-              unresolved subtype.
+              methods or Army/Unit carriers. Keep Mine Dispenser's
+              unresolved subtype explicit.
+              - [x] Add source-cited Crazykoala/Madtraps N5.3 definitions
+                and reviewed Place Deployable/Perimeter delivery paths.
+                N5.3 p. 69 and chart pp. 186-187 distinguish their shared
+                Boost placement/trigger behavior from Crazykoala Shock and
+                Madtraps PARA/Non-Lethal. The publication API and 1440/390 px
+                Chromium acceptance now verify their source links and exact
+                Army-backed reverse uses; this does not certify remaining
+                unreviewed object deliveries or roster legality.
             - [ ] Implement the minimal **deployed-object reference
               contract** after source review. Separate stable object/
               variant identity from the carrier's Weapon/Equipment
@@ -684,6 +691,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 Deployment smoke, source checks and installed-wheel smoke
                 passed on commit `9c9a09f` (2026-10-22). Revalidate on the
                 final tagged candidate as part of final 1.0 acceptance.
+              - [ ] Regenerate the release-matched local rules database and
+                deployed-object publication before further browser/release
+                acceptance. The existing local generated JSON predates reviewed
+                WildParrot, FastPanda, Armed Turret and new Crazykoala/Madtraps
+                delivery relationships, as well as reverse `unitUses`.
+                Run `python -m tools.build_deployed_object_publication --check`
+                after rebuilding the current Army/rules publication pair;
+                distinguish stale development artifacts from the separately
+                validated earlier hosted image.
               - [ ] Complete **reverse Unit/loadout uses** from exact Army
                 occurrences and reviewed object/delivery edges.
                 Direct Army profile/loadout and source-wide Unit-option

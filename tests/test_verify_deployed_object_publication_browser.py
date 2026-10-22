@@ -100,6 +100,17 @@ def test_deployed_reference_api_has_reviewed_objects_and_no_invented_units(
     assert objects["FastPanda"]["deliverySources"][0]["recordId"] == (
         "equipment:fastpanda"
     )
+    for name, record_id in (
+        ("Crazykoala", "weapon:crazykoala"),
+        ("Madtraps", "weapon:madtraps"),
+    ):
+        obj = objects[name]
+        assert obj["sourceProfile"]["catalog"] == "weapon"
+        assert [(edge["recordId"], edge["method"]) for edge in obj["deliverySources"]] == [
+            (record_id, "Place Deployable Skill with Perimeter positioning"),
+        ]
+        assert all(use["originRecordId"] == record_id for use in obj["unitUses"])
+        assert obj["unitUses"], name
     assert objects["Armed Turret"]["sourceProfile"] is None
     assert objects["Armed Turret"]["attributes"]["S"]["status"] == "disputed"
     assert objects["Armed Turret"]["deliverySources"][0]["recordId"] == (
@@ -204,6 +215,19 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     assert repeater.locator(
                         "a[href='/equipment/deployable-repeater']"
                     ).count() == 1
+                    for name, slug in (
+                        ("Crazykoala", "crazykoala"),
+                        ("Madtraps", "madtraps"),
+                    ):
+                        device = page.locator(".deployed-object-entry").filter(
+                            has=page.get_by_role("heading", name=name, exact=True)
+                        )
+                        assert device.count() == 1
+                        assert device.locator(f'a[href="/weapons/{slug}"]').count() >= 1
+                        assert "Place Deployable Skill with Perimeter positioning" in (
+                            device.inner_text()
+                        )
+                        assert device.locator(".deployed-object-unit-uses").count() == 1
                     assert "Mine Dispenser" in page.locator("#deployed-unresolved").inner_text()
                     usage = page.locator(".deployed-object-unit-uses")
                     assert usage.count() > 0

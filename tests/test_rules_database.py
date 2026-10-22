@@ -606,7 +606,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 4
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 463
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 465
         assert connection.execute(
             "SELECT id, title FROM scenario_collections ORDER BY id"
         ).fetchall() == [
@@ -4310,3 +4310,34 @@ def test_armed_turret_source_placement_clauses_are_published(
         and source['page'] == 70
         for source in record['citations']
     )
+
+@pytest.mark.parametrize(
+    ("slug", "ammunition_id", "chart_page"),
+    [
+        ("crazykoala", "ammunition:shock", 186),
+        ("madtraps", "ammunition:para", 187),
+    ],
+)
+def test_perimeter_boost_weapons_have_distinct_source_backed_rules(
+    current_rules_database: RulesDatabase,
+    slug: str,
+    ammunition_id: str,
+    chart_page: int,
+) -> None:
+    record = current_rules_database.composed_record(f"weapon:{slug}")
+    assert record is not None
+    assert "[[trait:perimeter|Perimeter]]" in record["summary"]
+    assert "[[trait:boost|Boost]]" in record["summary"]
+    assert "[[skill:place-deployable|Place Deployable]]" in record["summary"]
+    relations = {(rel["type"], rel["record_id"]) for rel in record["relations"]}
+    assert ("uses-effects-of", ammunition_id) in relations
+    assert ("enables-use-of", "skill:place-deployable") in relations
+    assert ("uses-effects-of", "trait:boost") in relations
+    assert not any(target == "weapon:mines" for _, target in relations)
+    pages = {
+        cite["page"]
+        for cite in record["citations"]
+        if cite["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert {69, 82, chart_page} <= pages
+

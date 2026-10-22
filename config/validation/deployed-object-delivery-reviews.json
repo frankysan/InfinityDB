@@ -4,6 +4,42 @@
   "scope": "audit-only; not a canonical object ID, roster legality, or runtime relation",
   "reviewedDeliveryPaths": [
     {
+      "originRecordId": "weapon:crazykoala",
+      "delivery": "Place Deployable Skill with Perimeter positioning",
+      "objectLabel": "Crazykoala",
+      "objectRulesRecordId": "weapon:crazykoala",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Crazykoala",
+        "mode": null
+      },
+      "sourcePages": [
+        69,
+        82,
+        186
+      ],
+      "summaryEvidence": "Crazykoalas use [[skill:place-deployable|Place Deployable]] without a Roll",
+      "caveat": "Perimeter placement is inside Zone of Control; Boost movement/detonation applies after activation. Shock/ARM profile is unique to Crazykoala, not WildParrot or Madtraps."
+    },
+    {
+      "originRecordId": "weapon:madtraps",
+      "delivery": "Place Deployable Skill with Perimeter positioning",
+      "objectLabel": "Madtraps",
+      "objectRulesRecordId": "weapon:madtraps",
+      "sourceProfile": {
+        "catalog": "weapon",
+        "name": "Madtraps",
+        "mode": null
+      },
+      "sourcePages": [
+        69,
+        82,
+        187
+      ],
+      "summaryEvidence": "Madtraps are [[trait:perimeter|Perimeter]] Weapons placed with [[skill:place-deployable|Place Deployable]] without a Roll",
+      "caveat": "Perimeter placement is inside Zone of Control; Boost after activation. PARA PH-6/Non-Lethal is separate from Crazykoala Shock or WildParrot E/M."
+    },
+    {
       "originRecordId": "weapon:armed-turret",
       "delivery": "Place Deployable Skill with Perimeter positioning",
       "objectLabel": "Armed Turret",
