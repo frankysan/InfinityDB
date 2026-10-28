@@ -8,7 +8,7 @@ import subprocess
 import sys
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from urllib.parse import urlsplit
 from wsgiref.util import setup_testing_defaults
 
@@ -16,6 +16,11 @@ import pytest
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import export_rules_database
+from infinity_db.specialist_filter import (
+    _non_specialist_chain_variant,
+    _qualifying_skills,
+    candidate_unit_ids,
+)
 from infinity_db.web.app import Application, create_app
 
 
@@ -60,6 +65,95 @@ def scenario_app(tmp_path_factory: pytest.TempPathFactory) -> Application:
     rules_path = tmp_path_factory.mktemp("scenario-api") / "rules.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     return create_app(root / "data" / "generated" / "infinity.db", rules_path)
+
+
+def test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills() -> None:
+    class FakeRules:
+        def composed_record(self, identifier: str) -> dict:
+            assert identifier == "rule:specialist-troops:standard"
+            return {"facts": {"specialists": {
+                "anyOfSkills": ["skill:doctor", "skill:chain-of-command"],
+            }}}
+
+    class FakeDatabase:
+        def get_skill(self, identifier: str) -> dict:
+            items = {
+                "doctor": [
+                    {"skill_name": "Doctor", "extras": [],
+                     "units": [{"id": 1}, {"id": 4}]},
+                ],
+                "chain-of-command": [
+                    {"skill_name": "Chain of Command", "extras": [],
+                     "units": [{"id": 2}]},
+                    {"skill_name": "Chain of Command", "extras": [
+                        {"name": "Non Specialist"},
+                    ], "units": [{"id": 3}, {"id": 4}]},
+                ],
+            }
+            return {"variants": items[identifier]}
+
+    candidates = candidate_unit_ids(
+        cast(Any, FakeDatabase()), cast(Any, FakeRules()), "standard",
+    )
+    assert candidates == frozenset({1, 2, 4})
+
+
+def test_specialist_candidate_variant_exclusion_is_per_skill() -> None:
+    assert _non_specialist_chain_variant({
+        "skill_name": "Chain of Command (Non Specialist)", "extras": [],
+    })
+    assert _non_specialist_chain_variant({
+        "skill_name": "Chain of Command", "extras": [{"name": "Non Specialist"}],
+    })
+    assert not _non_specialist_chain_variant({
+        "skill_name": "Chain of Command", "extras": [{"name": "Other"}],
+    })
+
+
+@pytest.mark.parametrize("context", ["standard", "domination", "supplies", "firefight"])
+def test_specialist_filter_uses_published_qualifiers_and_unit_intersection(
+    scenario_app: Application, context: str,
+) -> None:
+    assert scenario_app.rules_database is not None
+    source_skills = _qualifying_skills(scenario_app.rules_database, context)
+    assert "skill:doctor" in source_skills
+    assert "skill:chain-of-command" in source_skills
+    candidates = candidate_unit_ids(
+        scenario_app.database, scenario_app.rules_database, context,
+    )
+    assert candidates
+    assert all(type(identifier) is int for identifier in candidates)
+    status, _, body = request(
+        scenario_app, "/api/units",
+        query=f"specialist={context}&limit=50&offset=0",
+    )
+    assert status == 200
+    payload = json.loads(body)
+    expected = scenario_app.database.list_units(
+        _logical_unit_ids=candidates, limit=50,
+    )
+    assert payload["total"] == expected["total"]
+    assert [item["id"] for item in payload["items"]] == [
+        item["id"] for item in expected["items"]
+    ]
+    status, _, body = request(
+        scenario_app, "/api/units",
+        query=f"specialist={context}&search=doctor&limit=50",
+    )
+    assert status == 200
+    narrowed = json.loads(body)
+    assert narrowed["total"] <= payload["total"]
+
+
+@pytest.mark.parametrize("value", ["invalid", "annihilation", "standard,domination"])
+def test_specialist_filter_rejects_unsupported_contexts(
+    scenario_app: Application, value: str,
+) -> None:
+    status, _, body = request(
+        scenario_app, "/api/units", query=f"specialist={value}",
+    )
+    assert status == 400
+    assert "Specialist" in json.loads(body)["error"]
 
 
 def test_scenario_list_api_exposes_current_publications_without_selecting_game_size(

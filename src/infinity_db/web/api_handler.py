@@ -42,6 +42,7 @@ from infinity_db.scenario_geometry import parse_scenario_geometry
 from infinity_db.scenario_map_svg import render_scenario_map_svg
 from infinity_db.search_catalog import SearchCatalog
 from infinity_db.skill_catalog import SkillCatalog
+from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.trait_catalog import TraitCatalog
@@ -359,6 +360,7 @@ def _unit_query(query: str) -> dict:
             "declared_faction_id",
             "search",
             "skill_id",
+            "specialist",
             "equipment_id",
             "weapon_id",
             "troop_type",
@@ -386,6 +388,9 @@ def _unit_query(query: str) -> dict:
             raise ValueError(f"Unknown query parameter: {key}")
         if len(values) != 1:
             raise ValueError(f"Provide {key} only once")
+    specialist = params.get("specialist", [""])[0]
+    if specialist and specialist not in SPECIALIST_CONTEXTS:
+        raise ValueError("Unknown Specialist Troops filter context")
     search = params.get("search", [""])[0].strip()
     if len(search) > 200:
         raise ValueError("search must be at most 200 characters")
@@ -421,6 +426,7 @@ def _unit_query(query: str) -> dict:
         "declared_faction_id": declared_faction_id,
         "search": search,
         "skill_id": _domain_filter_identifier(params, "skill_id"),
+        "specialist": specialist,
         "equipment_id": _domain_filter_identifier(params, "equipment_id"),
         "weapon_id": _domain_filter_identifier(params, "weapon_id"),
         "troop_type": _domain_filter_identifier(params, "troop_type"),
@@ -1205,7 +1211,19 @@ class ApiHandler:
                     )
                     if logical_unit_ids is not None:
                         query["equipment_id"] = None
-                        query["_logical_unit_ids"] = logical_unit_ids
+                    specialist = query.pop("specialist")
+                    if specialist:
+                        if self.rules_database is None:
+                            raise ValueError("Specialist filter requires published rules data")
+                        qualifying = candidate_unit_ids(
+                            self.database, self.rules_database, specialist,
+                        )
+                        logical_unit_ids = (
+                            qualifying if logical_unit_ids is None
+                            else logical_unit_ids & qualifying
+                        )
+                    if logical_unit_ids is not None:
+                        query["_logical_unit_ids"] = frozenset(logical_unit_ids)
                     payload = self.database.list_units(**query)
                     payload = {
                         **payload,

@@ -1170,6 +1170,23 @@ exception are maintained once. That exception affects qualification through Chai
 without disqualifying a Trooper that has another qualifying Skill. This is a reference list and
 exception statement; the catalog does not evaluate game state or assign permanent profile roles.
 
+The Unit Explorer's optional `specialist` filter selects either `standard`
+(the InfinityDB general reference) or a named core scenario with a reviewed
+Specialist inclusion (`domination`, `supplies`, `firefight`). The API
+resolves the effective qualifier list from `rules.db` (including any
+scenario-specific add/remove overrides), then checks the current Army Skill
+occurrences via the existing Skill catalog. Chain of Command occurrences
+marked **Non Specialist** are excluded only as qualification through that
+Skill; another qualifying Skill still counts. Filtering is at the logical
+Unit level: a match means **at least one** profile, loadout, or Unit option
+contains a qualifying Skill, not that every profile or Army list is a
+Specialist, nor that currently selected Army contexts are all eligible.
+This candidate-set filter intersects with other logical Unit filters,
+respects existing availability flags, and does not persist new Unit facts.
+Unsupported scenario names fail as invalid query selections; a missing
+reviewed baseline or Skill identity fails closed instead of silently
+inventing eligibility.
+
 `RulesDatabase.scenario_reference()` reads the composed scenario, its included Rule records, and
 its derived Skill records from `rules.db`. `ScenarioCatalog` builds the current player-facing backend
 read models on that boundary: list entries retain maintained scenario-set order and publication/source

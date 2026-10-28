@@ -45,6 +45,67 @@ def chrome() -> Iterator[Any]:
             browser.close()
 
 
+@pytest.mark.parametrize("width", [1440, 390])
+def test_specialist_filter_combines_persists_and_resets(
+    app: Any, chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/units", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelector('#skill-filter')?.disabled === false",
+            timeout=30000,
+        )
+        advanced = page.locator(".advanced-filters")
+        if not advanced.evaluate("(node) => node.open"):
+            advanced.locator("summary").click()
+        specialist = page.locator("#specialist-filter")
+        assert specialist.locator("option").all_text_contents() == [
+            "Any", "Standard (InfinityDB)", "Domination", "Supplies", "Firefight",
+        ]
+        assert page.locator('a[href="/rules/specialist-troops-standard"]').is_visible()
+        specialist.select_option("standard")
+        assert "s=v1.u." in page.url
+        page.wait_for_function(
+            "() => document.querySelector('#unit-count')?.textContent?.includes(' / ')",
+            timeout=12000,
+        )
+        standard = int(page.locator("#unit-count").inner_text().split(" / ")[0]
+                       .replace(",", ""))
+        assert standard > 0
+
+        skills = page.locator("#skill-filter")
+        doctor = skills.locator("option").filter(has_text="Doctor").first
+        assert doctor.count() == 1
+        doctor_id = doctor.get_attribute("value")
+        skills.select_option(doctor_id)
+        page.wait_for_function(
+            "() => document.querySelector('#unit-count')?.textContent?.includes(' / ')",
+            timeout=12000,
+        )
+        combined = int(page.locator("#unit-count").inner_text().split(" / ")[0]
+                       .replace(",", ""))
+        assert combined <= standard
+        specialist.select_option("supplies")
+        page.reload(wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelector('#skill-filter')?.disabled === false",
+            timeout=30000,
+        )
+        assert specialist.input_value() == "supplies"
+        assert skills.input_value() == doctor_id
+        page.locator("#clear-filters").click()
+        page.wait_for_function(
+            "() => document.querySelector('#specialist-filter')?.value === '' "
+            "&& document.querySelector('#skill-filter')?.value === ''"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
 @pytest.mark.parametrize("width,height", [(1440, 900), (1024, 768)])
 def test_desktop_sidebar_compacts_without_hiding_destinations(
     app: Any, chrome: Any, width: int, height: int,

@@ -75,12 +75,13 @@ export function getScenario(scenarioId, armyPoints, signal, { collection = "", r
   return getJson(`/api/scenarios/${encodeURIComponent(scenarioId)}?${params}`, signal);
 }
 
-export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, troopType, classification, characteristic, ava, avaMin, avaMax, points, pointsMin, pointsMax, swc, swcMin, swcMax, limit, offset, mercs, specops, teamops, reinforcement, descending, extended }, signal) {
+export function getUnits({ armyId, declaredFactionId, search, skillId, specialist, equipmentId, weaponId, troopType, classification, characteristic, ava, avaMin, avaMax, points, pointsMin, pointsMax, swc, swcMin, swcMax, limit, offset, mercs, specops, teamops, reinforcement, descending, extended }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);
   if (declaredFactionId) params.set("declared_faction_id", declaredFactionId);
   if (search) params.set("search", search);
   if (skillId) params.set("skill_id", skillId);
+  if (specialist) params.set("specialist", specialist);
   if (equipmentId) params.set("equipment_id", equipmentId);
   if (weaponId) params.set("weapon_id", weaponId);
   if (troopType) params.set("troop_type", troopType);

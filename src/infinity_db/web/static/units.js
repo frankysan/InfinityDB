@@ -12,7 +12,8 @@ const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
 const elements = {
   filters: byId("filters"), army: byId("army-filter"), search: byId("unit-search"),
-  skill: byId("skill-filter"), equipment: byId("equipment-filter"), weapon: byId("weapon-filter"),
+  skill: byId("skill-filter"), specialist: byId("specialist-filter"),
+  equipment: byId("equipment-filter"), weapon: byId("weapon-filter"),
   troopType: byId("troop-type-filter"), classification: byId("classification-filter"),
   characteristic: byId("characteristic-filter"),
   ava: byId("ava-filter"), avaMin: byId("ava-min-filter"), avaMax: byId("ava-max-filter"),
@@ -81,7 +82,7 @@ let state = readLocation();
 const advancedFilters = document.querySelector(".advanced-filters");
 if (advancedFilters) {
   const savedAdvancedFiltersOpen = unitAdvancedFiltersOpen();
-  const hasAdvancedFilterState = state.skillId || state.equipmentId || state.weaponId
+  const hasAdvancedFilterState = state.skillId || state.specialist || state.equipmentId || state.weaponId
     || state.troopType || state.classification || state.characteristic
     || state.ava || state.avaMin || state.avaMax
     || state.points || state.pointsMin || state.pointsMax
@@ -135,7 +136,7 @@ function renderOptionalUnitContext() {
 
 function hasActiveFilters() {
   return state.armyId || state.declaredFactionId || state.search
-    || state.skillId || state.equipmentId || state.weaponId
+    || state.skillId || state.specialist || state.equipmentId || state.weaponId
     || state.troopType || state.classification || state.characteristic
     || state.ava || state.avaMin || state.avaMax
     || state.points || state.pointsMin || state.pointsMax
@@ -291,6 +292,7 @@ function readLocation() {
   const armyId = params.get("army_id") || "";
   const declaredFactionId = params.get("declared_faction_id") || "";
   const skillId = params.get("skill_id") || "";
+  const specialist = params.get("specialist") || "";
   const equipmentId = params.get("equipment_id") || "";
   const weaponId = params.get("weapon_id") || "";
   const troopType = params.get("troop_type") || "";
@@ -312,6 +314,8 @@ function readLocation() {
     armyId: domainFilterIdentifier(armyId),
     declaredFactionId: /^\d+$/.test(declaredFactionId) ? declaredFactionId : "",
     skillId: domainFilterIdentifier(skillId),
+    specialist: ["standard", "domination", "supplies", "firefight"].includes(specialist)
+      ? specialist : "",
     equipmentId: domainFilterIdentifier(equipmentId),
     weaponId: domainFilterIdentifier(weaponId),
     troopType: domainFilterIdentifier(troopType),
@@ -343,6 +347,7 @@ function writeLocation(replace = false) {
   if (state.declaredFactionId) params.set("declared_faction_id", state.declaredFactionId);
   if (state.search) params.set("search", state.search);
   if (state.skillId) params.set("skill_id", state.skillId);
+  if (state.specialist) params.set("specialist", state.specialist);
   if (state.equipmentId) params.set("equipment_id", state.equipmentId);
   if (state.weaponId) params.set("weapon_id", state.weaponId);
   if (state.troopType) params.set("troop_type", state.troopType);
@@ -368,6 +373,7 @@ function syncFilters() {
   elements.army.value = state.armyId;
   elements.search.value = state.search;
   elements.skill.value = state.skillId;
+  elements.specialist.value = state.specialist;
   elements.equipment.value = state.equipmentId;
   elements.weapon.value = state.weaponId;
   elements.troopType.value = state.troopType;
@@ -632,7 +638,8 @@ function applyFilters() {
   clearTimeout(searchTimer);
   const next = {
     armyId: elements.army.value, search: elements.search.value.trim(),
-    skillId: elements.skill.value, equipmentId: elements.equipment.value, weaponId: elements.weapon.value,
+    skillId: elements.skill.value, specialist: elements.specialist.value,
+    equipmentId: elements.equipment.value, weaponId: elements.weapon.value,
     troopType: elements.troopType.value, classification: elements.classification.value,
     characteristic: elements.characteristic.value,
     ava: avaExactFilterValue(elements.ava.value),
@@ -678,7 +685,7 @@ function clearFilters() {
   clearTimeout(searchTimer);
   state = {
     ...state, armyId: "", declaredFactionId: "", search: "", offset: 0,
-    skillId: "", equipmentId: "", weaponId: "",
+    skillId: "", specialist: "", equipmentId: "", weaponId: "",
     troopType: "", classification: "", characteristic: "",
     ava: "", avaMin: "", avaMax: "", points: "", pointsMin: "", pointsMax: "",
     swc: "", swcMin: "", swcMax: "",
@@ -718,7 +725,7 @@ function resetNumericRangeAndApply(control) {
 elements.filters.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); });
 elements.army.addEventListener("change", applyFilters);
 for (const filter of [
-  elements.skill, elements.equipment, elements.weapon,
+  elements.skill, elements.specialist, elements.equipment, elements.weapon,
   elements.troopType, elements.classification, elements.characteristic,
 ]) {
   filter.addEventListener("change", applyFilters);

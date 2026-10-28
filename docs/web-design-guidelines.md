@@ -147,6 +147,19 @@ When a layout problem appears, first look for unnecessary width, spacing, wrappe
 
 An exception should exist because the information has different requirements, not because the current cascade makes the common structure inconvenient to reuse.
 
+### Specialist Troops filtering is contextual
+
+The Unit Explorer exposes an optional Specialist Troops selector with an
+**InfinityDB Standard** baseline and explicitly named reviewed scenarios.
+Filtering shows Units that have at least one qualifying Skill occurrence
+across their source profiles, loadouts or Unit options. Explain that this
+does not certify every profile or Army context and that the selected
+scenario governs qualification. Chain of Command (Non Specialist) is
+not a qualifying occurrence through that Skill; other qualifying Skills
+remain valid. Link to the reviewed General Rule instead of embedding
+a separate Skill list in presentation code. Keep the selector compatible
+with other advanced filters, pagination, reset, and versioned share URLs.
+
 ### Optimize for lookup, comparison, and scanning
 
 InfinityDB is a dense reference application. The interface should make names, values, relationships, and differences easy to scan without feeling cramped. Decorative complexity must not compete with data hierarchy.

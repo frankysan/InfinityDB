@@ -890,28 +890,30 @@ would materially impair required reference access, clarity or source disclosure.
   destinations, focus/scroll reachability, responsive sticky navigation,
   settings expansion and keyboard/touch operation. See the
   [responsive design contract](web-design-guidelines.md#make-responsiveness-a-content-priority-decision).
-- [ ] **Data processing + Web backend + Web frontend:** Publish
+- [x] **Data processing + Web backend + Web frontend:** Publish
   **Specialist Troops** as an **InfinityDB general reference Rule**, even
   though the official N5.3 source defines it within individual scenarios.
-  The maintained `rule:specialist-troops:standard` now carries one
-  unscoped standard qualifier list in the General Rules catalog,
-  search and Glossary; scenario inclusions preserve their explicit
-  `addSkills`/`removeSkills` precedence and cited N5.3 context.
-  The General Rules detail derives **Used by** links from the current
-  Domination, Supplies and Firefight inclusions. Exact/partial HTTP
-  search and browser navigation at desktop/mobile are verified.
-  This does **not** create an unconditional Specialist attribute
-  for Units. **Before closing:** rebuild the tracked
-  `data/generated/rules.db` from curated source and pass the
-  on-disk source/publication parity test, followed by ordinary checks.
-  The bounded rules check builds a temporary database only.
-- [ ] **Web backend + Web frontend:** Add a **Specialist Troops filter**
-  to the Unit Explorer using reviewed qualification criteria. State which
-  baseline or selected scenario context the filter applies to, retain
-  exceptions/overrides such as Chain of Command (Non Specialist), and
-  avoid treating a per-scenario role as a permanent Army source field.
-  Check filter combinations, counts, reset and representative Units
-  against the underlying source/qualification rule.
+  The maintained `rule:specialist-troops:standard` carries the unscoped
+  qualifier list in General Rules, search and Glossary, while scenario
+  inclusions preserve explicit `addSkills`/`removeSkills` precedence and
+  citations. Detail pages derive **Used by** links to Domination, Supplies
+  and Firefight. Source/publication parity was revalidated after rebuilding
+  the tracked rules database and dependent deployed-object artifact
+  (`test_application_rule_references.py`: 15 passing).
+  This does **not** create an unconditional Specialist Unit attribute.
+- [x] **Web backend + Web frontend:** Add a **Specialist Troops filter**
+  to the Unit Explorer using the shared published qualifier Rule.
+  The selector distinguishes InfinityDB Standard from Domination, Supplies,
+  and Firefight; resolves scenario overrides from the reviewed rules database;
+  filters candidate Units by profile/loadout/Unit-option Skill occurrences;
+  excludes Chain of Command (Non Specialist) through that Skill while
+  retaining Units with another qualifying Skill; and intersects with existing
+  filters without inventing permanent Unit facts. The browser explains
+  candidate-vs-profile scope and links to the General Rule. API tests verify
+  context validation and matching counts; Chromium at 1440/390px verifies
+  filter combinations, clear/reset, and versioned URL persistence.
+  See the [Unit filter semantics](data-model.md#current-scenario-foundation)
+  and [web design contract](web-design-guidelines.md#specialist-troops-filtering-is-contextual).
 - [ ] **Data processing + Web frontend:** Establish and test a clear
   **visual distinction policy** for source-native rules text, official
   updated rules/stats, examples, InfinityDB explanations,

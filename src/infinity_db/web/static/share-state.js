@@ -10,7 +10,7 @@ const SCHEMAS = Object.freeze({
       "army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id",
       "troop_type", "classification", "characteristic", "ava", "ava_min", "ava_max",
       "points", "points_min", "points_max", "swc", "swc_min", "swc_max", "offset",
-      "mercs", "specops", "teamops", "reinforcement", "order", "extended",
+      "mercs", "specops", "teamops", "reinforcement", "order", "extended", "specialist",
     ]),
   }),
   catalog: Object.freeze({ scope: "c", fields: Object.freeze(["q"]) }),
