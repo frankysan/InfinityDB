@@ -798,6 +798,23 @@ html:not([data-developer-mode="true"])
   overflow-wrap: anywhere;
 }
 
+.scenario-fact--source-conflict {
+  box-shadow: inset 3px 0 var(--color-status-warning-indicator);
+}
+
+.scenario-swc-source-conflict {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-status-warning-text);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+.scenario-source-issue[id] {
+  scroll-margin-top: 100px;
+}
+
 .scenario-map-card {
   margin: 0;
 }

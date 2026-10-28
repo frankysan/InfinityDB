@@ -141,9 +141,23 @@ function setupCard(item) {
   const geometry = item.placement?.geometry || {};
   const table = geometry.table || {};
   const tableFact = fact("Table", "—");
+  const swcFact = fact("SWC", String(gameSize.swc ?? "—"));
+  const swcIssue = (item.source_issues || []).find(
+    (issue) => issue.status === "needs-verification"
+      && issue.gameSizeField === "swc"
+      && (issue.armyPoints || []).includes(item.selected_army_points),
+  );
+  if (swcIssue) {
+    swcFact.classList.add("scenario-fact--source-conflict");
+    const link = document.createElement("a");
+    link.className = "scenario-swc-source-conflict";
+    link.href = `#scenario-source-issue-${swcIssue.id}`;
+    link.textContent = "Official sources disagree — see source note";
+    swcFact.querySelector("dd")?.append(link);
+  }
   facts.append(
     fact("Army Points", String(item.selected_army_points)),
-    fact("SWC", String(gameSize.swc ?? "—")),
+    swcFact,
     tableFact,
   );
   if (gameSize.minimumVictoryPoints != null) {
@@ -380,6 +394,7 @@ function issuesSection(item) {
   const cards = item.source_issues.map((issue) => {
     const card = document.createElement("article");
     card.className = "surface surface--highlighted scenario-source-issue";
+    card.id = `scenario-source-issue-${issue.id}`;
     const heading = document.createElement("div");
     heading.className = "scenario-source-issue-heading";
     const title = document.createElement("h3");

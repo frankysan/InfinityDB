@@ -502,10 +502,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   APIs, browser selection and deterministic theme/distance-aware maps are implemented
   and included in 0.10.1. The current contract belongs in
   [the data model](data-model.md#scenario-model-implemented-core-and-future-extensions).
-  - [ ] Verify Domination's 350-point SWC disclosure on the final candidate:
-    the published English-source 6 and conflicting official Spanish 7 must be
-    clearly sourced and explained. An official clarification is not required
-    for release; preserve the uncertainty and reviewed publication baseline.
+  - [x] Verify Domination's 350-point SWC disclosure on the final candidate.
+    Pinned official English N5.3 p. 151 and N5.2 p. 150 show **6 SWC**;
+    pinned official Spanish N5.3 p. 155 shows **7 CAP/SWC**. Retain 6 as
+    the English-source publication value and keep `needs-verification`
+    rather than asserting either source is an erratum. The normal setup
+    SWC row now links to the full, sourced cross-language discrepancy
+    note. Browser acceptance at 1440/390px verifies the 350-point value,
+    direct keyboard-accessible note link, and non-leakage to other game
+    sizes and core scenarios. Seeking an authoritative clarification
+    remains an independent future task below, not a 1.0 blocker.
   - [x] **Data processing + Web frontend:** Correct **Domination
     center-placement measurements** before 1.0. Keep all four source-defined
     scoring Quadrants intact, but replace their on-map area-size captions

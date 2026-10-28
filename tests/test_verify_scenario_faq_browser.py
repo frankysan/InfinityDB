@@ -238,6 +238,59 @@ def test_domination_embedded_map_emphasizes_console_center_placement(
 
 
 @pytest.mark.parametrize("width", [1440, 390])
+def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for slug, points in (
+            ("domination", 300), ("domination", 350), ("domination", 400),
+            ("annihilation", 350), ("firefight", 350), ("supplies", 350),
+        ):
+            page.goto(
+                f"{ORIGIN}/scenarios/{slug}?army_points={points}",
+                wait_until="domcontentloaded",
+            )
+            setup = page.locator(".scenario-setup-card")
+            setup.wait_for(state="visible", timeout=60000)
+            conflict = setup.locator(".scenario-fact--source-conflict")
+            issue = page.locator("#scenario-source-issue-350-point-swc")
+            if slug == "domination" and points == 350:
+                assert conflict.count() == 1
+                assert conflict.locator("dt").inner_text() == "SWC"
+                assert conflict.locator("dd").inner_text().startswith("6")
+                link = conflict.locator("a.scenario-swc-source-conflict")
+                assert link.count() == 1
+                assert "Official sources disagree" in link.inner_text()
+                assert link.get_attribute("href") == "#scenario-source-issue-350-point-swc"
+                assert issue.is_visible()
+                detail = issue.inner_text()
+                assert "needs verification" in detail.lower()
+                assert "English Domination N5.3 chart (printed p. 151)" in detail
+                assert "Spanish N5.3 Domination chart (printed p. 155)" in detail
+                assert "7 SWC (CAP)" in detail
+                assert "retains 6 SWC" in detail
+                link.focus()
+                assert link.evaluate("(node) => document.activeElement === node")
+                link.press("Enter")
+                assert page.evaluate("() => location.hash") == (
+                    "#scenario-source-issue-350-point-swc"
+                )
+            else:
+                assert conflict.count() == 0
+                assert issue.count() == 0
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= innerWidth + 1"
+            ), (width, slug, points)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
 def test_scenario_rule_cards_omit_only_redundant_subtitles(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

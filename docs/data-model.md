@@ -1314,6 +1314,12 @@ preserves the English N5.3 value of 6 SWC at 350 points from printed page 151,
 with a game-size `needs-verification` note because Spanish N5.3 printed page 155
 instead has 7 CAP/SWC for that same Domination row. This is an unresolved
 official cross-language conflict, not merely a possible progression exception.
+The ordinary 350-point Domination setup visibly flags the SWC cell as
+source-disputed, with a keyboard-accessible in-page link to the full
+`needs-verification` note under Source notes. This warning is sourced
+from the existing game-size issue and is absent for other point values
+and other scenarios. The issue stays unresolved pending a future official
+clarification; neither edition is silently treated as an erratum.
 Printed English pages 151–152 cite the mission rules.
 
 Supplies uses the written placement consistently at every game size: printed page 153 places the
