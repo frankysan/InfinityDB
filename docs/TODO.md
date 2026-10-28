@@ -558,8 +558,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
 - [ ] **Data processing + Web backend + Web frontend:** Complete source coverage and
   applicability review of the published dated FAQ/errata layer from `data/pdf/faq/`.
   The authoring contract, source-precedence policy, export validation, runtime selector,
-  explicit-context API and 28 browser-published rulings are implemented; see the
+  explicit-context API and 29 reviewed current-source rulings are implemented; see the
   [current contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
+  - [x] Pin the **FAQ v0.1 question-level source inventory**: 29 reviewed
+    rulings (27 general-section, two ITS-section with separately verified
+    Core scenario scope) and eight deferred ITS-only questions. The
+    [source triage](faq-v0.1-scope-inventory.md) remains the narrative
+    disposition; the machine-readable audit manifest and regression
+    verify printed page/identity, provenance, selected citation, date and
+    rules-revision gates, and scenario selection against a fresh rules
+    database. This is the v0.1 question inventory only, **not** full
+    historical FAQ/errata completeness or ITS applicability certification.
   - [ ] Reconcile every remaining in-scope ruling against the pinned FAQ and
     source inventory. Reuse the existing question/answer, topic, version/date,
     citation and applicability fields; preserve original provenance on carry-forwards.

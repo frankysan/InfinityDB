@@ -18,6 +18,15 @@ in the printed ITS section have no standalone curated FAQ ruling. The section he
 source placement, not proof that an answer can never apply to a
 core-rules scenario.
 
+A separate [audit-only question manifest](../config/validation/n5-faq-v0.1-question-inventory.json)
+pins all 29 reviewed FAQ identities to their printed English pages (11 on
+p. 1, 12 on p. 2, 5 on p. 3, 1 on p. 4), along with the eight deferred
+ITS questions. The tracked `test_pinned_faq_v01_question_inventory_is_complete_and_scoped`
+checks source citations, v0.0/v0.1 provenance, current rules revision/date
+selection and the two scenario-only runtime scopes against a fresh rules
+export. The manifest is an **audit gate**, not an additional gameplay
+definition or a substitute for a future historical/ITS applicability review.
+
 ## Printed ITS section — uncovered questions
 
 All source pages here are the **printed FAQ page numbers**, not the

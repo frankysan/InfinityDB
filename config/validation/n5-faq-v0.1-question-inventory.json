@@ -1,0 +1,174 @@
+{
+  "description": "Audit-only question-level inventory of the pinned official N5 FAQ v0.1 (English printed pages 1–4, cross-checked against Spanish v0.1). No new gameplay semantics or historical publication date claims.",
+  "reviewedOn": "2026-10-28",
+  "sourceIds": {
+    "english": "n5-faq-v0.1-en-pdf",
+    "spanish": "n5-faq-v0.1-es-pdf"
+  },
+  "coreQuestions": [
+    [
+      "deployment-phase-reposition-after-measurement",
+      1
+    ],
+    [
+      "deployment-private-zoc-coherency",
+      1
+    ],
+    [
+      "skill-declaration-target-position",
+      1
+    ],
+    [
+      "prone-movement-label",
+      1
+    ],
+    [
+      "prone-at-end-of-move-distance",
+      1
+    ],
+    [
+      "vault-during-climb-and-jump",
+      1
+    ],
+    [
+      "bs-attack-roll-label-mods",
+      1
+    ],
+    [
+      "direct-template-secondary-target-los",
+      1
+    ],
+    [
+      "controlled-jump-speedball",
+      1
+    ],
+    [
+      "hacking-device-firewall-disabled",
+      1
+    ],
+    [
+      "fired-deployable-vertical-surface",
+      1
+    ],
+    [
+      "place-deployable-space-occupied",
+      2
+    ],
+    [
+      "surprise-attack-multiple-users",
+      2
+    ],
+    [
+      "sixth-sense-msv1-zero-visibility",
+      2
+    ],
+    [
+      "marker-automatic-skill-declarations",
+      2
+    ],
+    [
+      "protheion-excess-saving-rolls",
+      2
+    ],
+    [
+      "camouflage-one-use-infiltration-failure",
+      2
+    ],
+    [
+      "aerial-boost-no-silhouette-contact",
+      2
+    ],
+    [
+      "stealth-aro-multiple-activations",
+      2
+    ],
+    [
+      "peripheral-controller-unable-to-declare",
+      2
+    ],
+    [
+      "deployable-cover-no-placement",
+      2
+    ],
+    [
+      "coordinated-order-special-dice",
+      2
+    ],
+    [
+      "null-state-marker-and-cautious-movement",
+      2
+    ],
+    [
+      "camouflaged-marker-total-cover",
+      3
+    ],
+    [
+      "discover-fireteam-sd-bonuses",
+      3
+    ],
+    [
+      "fireteam-type-after-member-loss",
+      3
+    ],
+    [
+      "fireteam-required-member-lost",
+      3
+    ],
+    [
+      "scenario-element-carrier-marker-state",
+      3
+    ],
+    [
+      "undeployed-ancillary-not-killed",
+      4
+    ]
+  ],
+  "coreScenarioOverlaps": {
+    "scenario-element-carrier-marker-state": [
+      "scenario:supplies"
+    ],
+    "undeployed-ancillary-not-killed": [
+      "scenario:annihilation"
+    ]
+  },
+  "deferredItsOnlyQuestions": [
+    {
+      "page": 3,
+      "subject": "Neutral Troopers such as HVTs blocking movement"
+    },
+    {
+      "page": 3,
+      "subject": "Spotlight for Telemetry and HVT: Designation Classified Objectives"
+    },
+    {
+      "page": 3,
+      "subject": "Area of Interest: Activate Communication Antenna and Oppose Activation ARO"
+    },
+    {
+      "page": 3,
+      "subject": "Crossing Lines: Superior Deployment of Netrods and Imetrons"
+    },
+    {
+      "page": 3,
+      "subject": "Akial Interference: retrying a card after a failed Skill Roll"
+    },
+    {
+      "page": 3,
+      "subject": "Akial Interference: Predator kills before drawing the card"
+    },
+    {
+      "page": 3,
+      "subject": "Akial Interference: tracking cards already used"
+    },
+    {
+      "page": 4,
+      "subject": "Crossing Lines: Impetuous movement towards nearest enemy Deployment Zone"
+    }
+  ],
+  "notes": [
+    "Page numbers are printed PDF page labels; the PDF cover is file page 1.",
+    "The two core-scenario overlaps appear under ITS in the FAQ but have separately reviewed narrow core applicability. They do not make other ITS FAQ rulings universal.",
+    "This inventory reviews the questions in the pinned FAQ v0.1 PDFs. It does not establish an independently dated PDF publication or full historical ITS applicability.",
+    "No official resolution is inferred from the different English/Spanish Fireteam Haris example."
+  ]
+}

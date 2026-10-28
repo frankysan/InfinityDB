@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -111,6 +112,114 @@ def _export(base: list[tuple[Path, dict]], temp: Path, records: list[dict],
     db = RulesDatabase(output)
     db.validate()
     return db
+
+
+def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
+    published_pilot: RulesDatabase,
+) -> None:
+    """Independently reviewed printed-question list, not inferred from curation.
+
+    ITS-only mission questions are inventoried but deliberately not promoted
+    into universal N5 rules. Two exceptions have separately reviewed narrow
+    core-scenario overlaps.
+    """
+    root = Path(__file__).resolve().parents[1]
+    inventory = json.loads(
+        (root / "config/validation/n5-faq-v0.1-question-inventory.json")
+        .read_text(encoding="utf-8")
+    )
+    faq = json.loads(
+        (root / "data/curated/rules/n5-faq-v0.1.json").read_text(encoding="utf-8")
+    )
+    expected = {
+        f"faq-ruling:{slug}": page
+        for slug, page in inventory["coreQuestions"]
+    }
+    assert len(inventory["coreQuestions"]) == len(expected) == 29
+    assert {page: list(expected.values()).count(page) for page in range(1, 5)} == {
+        1: 11, 2: 12, 3: 5, 4: 1,
+    }
+    assert {row["page"] for row in inventory["deferredItsOnlyQuestions"]} == {3, 4}
+    assert len(inventory["deferredItsOnlyQuestions"]) == 8
+    assert len({
+        row["subject"] for row in inventory["deferredItsOnlyQuestions"]
+    }) == 8
+    records = {record["id"]: record for record in faq["records"]}
+    assert len(records) == len(faq["records"])
+    assert set(records) == set(expected), (
+        "Pinned FAQ source inventory and published question identities differ"
+    )
+    source_ids = inventory["sourceIds"]
+    overlaps = {
+        f"faq-ruling:{slug}": scenarios
+        for slug, scenarios in inventory["coreScenarioOverlaps"].items()
+    }
+    assert set(overlaps) == {
+        "faq-ruling:scenario-element-carrier-marker-state",
+        "faq-ruling:undeployed-ancillary-not-killed",
+    }
+
+    historical = 0
+    for identifier, record in records.items():
+        facts = record["facts"]
+        page = expected[identifier]
+        assert record["review"]["status"] == "reviewed"
+        assert facts["question"] and facts["answer"]
+        assert facts["topicIds"]
+        assert facts["selectedCitation"] == {
+            "sourceId": source_ids["english"], "page": page,
+        }
+        assert {citation["sourceId"] for citation in record["citations"]} >= {
+            source_ids["english"], source_ids["spanish"],
+        }
+        assert facts["originalPublication"]["version"] in {"0.0", "0.1"}
+        historical += facts["originalPublication"]["version"] == "0.0"
+        assert facts["selectionReason"]
+        assert facts["applicability"] == [{
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            **({"scenarioIds": overlaps[identifier]} if identifier in overlaps else {}),
+        }]
+        assert facts["supersedes"] == []
+    assert historical == 19
+    published = {row["id"] for row in published_pilot.records_by_kind("faq-ruling")}
+    assert published == set(expected)
+
+    # Verify actual runtime selection, not only the maintained JSON shape.
+    for identifier, record in records.items():
+        topic = record["facts"]["topicIds"][0]
+        scenarios = overlaps.get(identifier)
+        selected = published_pilot.faq_rulings_for_topic(
+            topic,
+            rules_revision="5.3",
+            as_of="2026-09-01",
+            **({"scenario_id": scenarios[0]} if scenarios else {}),
+        )
+        result = next((row for row in selected if row["id"] == identifier), None)
+        assert result is not None, identifier
+        assert result["selected_citation"] == {
+            "sourceId": source_ids["english"], "page": expected[identifier],
+        }
+        assert result["selected_source"]["version"] == "0.1"
+        assert result["matched_applicability"] == record["facts"]["applicability"]
+        for context in (
+            {"rules_revision": "5.2", "as_of": "2026-09-01"},
+            {"rules_revision": "5.3", "as_of": "2026-08-31"},
+        ):
+            assert identifier not in {
+                row["id"] for row in published_pilot.faq_rulings_for_topic(
+                    topic, **context,
+                    **({"scenario_id": scenarios[0]} if scenarios else {}),
+                )
+            }
+        if scenarios:
+            for other in (None, "scenario:domination"):
+                assert identifier not in {
+                    row["id"] for row in published_pilot.faq_rulings_for_topic(
+                        topic, rules_revision="5.3", as_of="2026-09-01",
+                        scenario_id=other,
+                    )
+                }
 
 
 def test_current_topics_and_historical_predecessor_are_allowed(
