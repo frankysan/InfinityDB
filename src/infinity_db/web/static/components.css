@@ -3554,11 +3554,38 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
 .page-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 15px;
+  gap: 12px 15px;
   padding: 26px 0 32px;
   font-size: var(--font-size-xs);
   color: var(--color-text-footer);
+}
+
+.page-footer-notice {
+  flex-basis: 100%;
+  min-width: 0;
+  border-top: 1px solid var(--color-border-default);
+  padding-top: 8px;
+}
+
+.page-footer-notice summary {
+  width: fit-content;
+  max-width: 100%;
+  cursor: pointer;
+  padding: 6px 0;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.page-footer-notice summary:hover {
+  color: var(--color-text-primary);
+}
+
+.page-footer-notice p {
+  max-width: 75ch;
+  margin: 6px 0 0;
+  line-height: 1.6;
 }
 
 .version {

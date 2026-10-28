@@ -917,13 +917,18 @@ would materially impair required reference access, clarity or source disclosure.
   and 390px confirms the Supplies rule card has no redundant summary,
   retains facts and citations, and remains navigable. See the
   [web design contract](web-design-guidelines.md#curated-rules-text-hierarchy).
-- [ ] **Web frontend:** Add an accessible, **collapsible independent-resource
-  notice** at the bottom of the normal browser experience. Explain that
-  InfinityDB is non-official, is not affiliated with Corvus Belli, and
-  may contain errors; reuse existing required attribution/disclaimer
-  language rather than duplicating or contradicting it. Reserve a
-  future feedback link without making a feedback form or data
-  collection a 1.0 dependency. Test mobile, keyboard and screen readers.
+- [x] **Web frontend:** Add an accessible, **collapsible independent-resource
+  notice** in the shared page footer. Native `details`/`summary` keeps the
+  non-affiliation and accuracy warning available without covering gameplay
+  controls, links to the existing About/attribution page, and leaves a
+  reserved markup location for a later feedback link without creating an
+  inactive control or collecting data. Shared-shell regressions cover all
+  normal routes; Chromium checks at 1440px, 390px and 320px cover keyboard
+  focus, Enter/Space toggling, visibility and no horizontal overflow.
+  Native disclosure semantics provide screen-reader accessible state;
+  dedicated assistive-technology testing remains a final accessibility
+  acceptance activity. See the
+  [web design contract](web-design-guidelines.md#use-progressive-disclosure-for-secondary-information).
 
 ### Final 1.0 acceptance
 

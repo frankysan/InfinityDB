@@ -165,6 +165,13 @@ Player-facing information should dominate the normal view. Provenance, internal 
 
 Developer mode should add technical depth rather than redefine the primary presentation.
 
+The shared page footer has a collapsed, keyboard-operable **Independent community
+reference** notice. Its expanded content reiterates InfinityDB's non-commercial,
+non-affiliated status and the possibility of errors, linking to the existing
+About/attribution page. Use native `details`/`summary` disclosure and existing
+focus affordances; do not cover page controls with a fixed warning, add
+persistent dismissal state, or invent a feedback collection destination.
+
 ### Write player-facing copy for players
 
 Normal browser surfaces should describe Infinity concepts, player choices, and visible outcomes
