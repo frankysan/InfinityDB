@@ -1042,8 +1042,14 @@ FAQ about repositioning before Roll/measurement is attached to that
 general rule, not to a specific Deployment Skill, and remains a
 separate dated explanatory overlay. Existing Skill/Army data are unchanged.
 
-The Annihilation-only Ancillary ruling is intentionally a subset of the
-FAQ's general scenario-objective wording. The source label
+The Annihilation-only Ancillary ruling is a conservative InfinityDB
+applicability selection, not a claim that the ITS-section FAQ explicitly
+names Annihilation. N5.3 uses the same Killing clause for Annihilation
+(p. 150) and Firefight (p. 155), but FAQ v0.1 (English/Spanish printed
+p. 4) does not name either Core mission. Shared Killing wording and the
+FAQ's generic scenario-objective language do not justify adding
+Firefight to the selected scope. Widening requires scenario-specific
+source support and a reviewed applicability change. The source label
 `2026-09-01` is the project-documented announcement-era anchor, not
 a separately established document publication date. The Fireteam Type ruling
 uses the consistent English HARIS three-to-two-member example. The contradictory

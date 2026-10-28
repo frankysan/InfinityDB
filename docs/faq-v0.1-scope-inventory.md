@@ -77,7 +77,21 @@ five-page PDF file's indices.
   `scenarioIds: ["scenario:annihilation"]`. The FAQ question refers
   generically to scenario objectives; its exact applicability beyond
   Annihilation remains **review-needed**, not an inferred universal
-  kill-count rule.
+  kill-count rule. The comparative review of pinned N5.3 English
+  **Annihilation p. 150** and **Firefight p. 155** confirms that both
+  scenarios publish the same Killing wording (Dead State, end-of-game
+  Null State, and undeployed Troopers). Firefight also scores Killed
+  Specialist Troops, Lieutenants and Army Points. This is real
+  scenario-specific overlap, but the **English and Spanish FAQ v0.1
+  p. 4** exception is placed under ITS and identifies neither Core
+  mission. Identical Killing wording alone does not establish official
+  cross-publication applicability. The generic Peripheral rules
+  (N5.3 pp. 106–108) establish the equipment's deployment and points
+  treatment, but not a mission-specific Killed exception. Keep the
+  reviewed Annihilation-only InfinityDB selection as a conservative
+  publication decision, not an explicit assignment in the FAQ itself.
+  Firefight remains unselected pending scenario-specific source evidence
+  and a reviewed applicability change; do not silently broaden it.
 
 ## Release implications
 
@@ -104,6 +118,12 @@ stale FAQ content. The source-isolated API regression also pins
 Supplies selection. This acceptance is not a general FAQ
 source-coverage or cross-scenario applicability certification.
 
-**Next review:** establish whether the undeployed Ancillary ruling
-should apply beyond Annihilation. Do not broaden it without
-scenario-specific source evidence.
+**Comparative review, 2026-10-28:** the two Core Killing passages
+and bilingual FAQ were checked as above. The source supports considering
+Firefight, but does not settle the edition/mission applicability of an
+ITS-section answer. The FAQ remains Annihilation-only in InfinityDB.
+`test_undeployed_ancillary_does_not_inherit_firefight_killing_scope`
+pins the shared Core Killing source scope separately from the effective
+FAQ selector for Annihilation, Firefight, other Core scenarios and an
+unscoped lookup. Further widening requires an explicit reviewed
+applicability decision or official clarification (REA-030).

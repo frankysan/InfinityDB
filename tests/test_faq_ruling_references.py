@@ -633,6 +633,67 @@ def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
     ) == []
 
 
+@pytest.mark.parametrize(
+    ("topic", "scenario", "selected"),
+    [
+        ("scenario:annihilation", "scenario:annihilation", True),
+        ("rule:scenario:killing", "scenario:annihilation", True),
+        ("rule:scenario:killing", "scenario:firefight", False),
+        ("scenario:firefight", "scenario:firefight", False),
+        ("rule:scenario:killing", "scenario:domination", False),
+        ("rule:scenario:killing", "scenario:supplies", False),
+        ("rule:scenario:killing", None, False),
+    ],
+)
+def test_undeployed_ancillary_does_not_inherit_firefight_killing_scope(
+    published_pilot: RulesDatabase,
+    topic: str,
+    scenario: str | None,
+    selected: bool,
+) -> None:
+    """Shared Core Killing wording is not an adopted FAQ applicability grant.
+
+    N5.3 Annihilation p. 150 and Firefight p. 155 use the same Killing
+    text. The ITS-section FAQ v0.1 p. 4 does not identify either Core
+    mission: preserve the currently reviewed Annihilation-only scope.
+    """
+    core = next(
+        document for _, document in load_curated_directory(Path("data/curated"))
+        if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    killing = next(
+        row for row in core["records"] if row["id"] == "rule:scenario:killing"
+    )
+    assert set(killing["scope"]["scenarios"]) == {
+        "scenario:annihilation", "scenario:firefight",
+    }
+    assert {citation["page"] for citation in killing["citations"]
+            if citation["sourceId"] == "n5-core-v5.3-pdf"} >= {150, 155}
+    results = published_pilot.faq_rulings_for_topic(
+        topic, rules_revision="5.3", as_of="2026-09-01",
+        scenario_id=scenario,
+    )
+    matching = [
+        row for row in results
+        if row["id"] == "faq-ruling:undeployed-ancillary-not-killed"
+    ]
+    assert len(matching) == int(selected)
+    if selected:
+        ruling = matching[0]
+        assert ruling["matched_applicability"] == [{
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            "scenarioIds": ["scenario:annihilation"],
+        }]
+        assert ruling["selected_citation"] == {
+            "sourceId": "n5-faq-v0.1-en-pdf", "page": 4,
+        }
+        assert {(cite["source_id"], cite["page"]) for cite in ruling["citations"]} == {
+            ("n5-faq-v0.1-en-pdf", 4),
+            ("n5-faq-v0.1-es-pdf", 4),
+        }
+
+
 def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
     published_pilot: RulesDatabase,
 ) -> None:

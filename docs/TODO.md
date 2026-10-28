@@ -297,7 +297,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         for core Supplies (corroborated by N5.3 p. 153). Eight ITS-only
         questions remain without standalone curated FAQ rulings and are
         deferred from the four core-scenario baseline. The existing
-        Ancillary ruling still needs review before widening its scope.
+        Ancillary ruling was compared with the Core N5.3 Killing
+        clauses (Annihilation p. 150 and Firefight p. 155). Both share
+        the same Killing wording, but FAQ v0.1 EN/ES p. 4 places the
+        exception under ITS without naming either Core mission.
+        Retain the existing Annihilation-only InfinityDB selection; the
+        FAQ does not explicitly assign that answer to a Core mission.
+        The follow-up review also checked the generic Peripheral rules
+        (N5.3 pp. 106–108), which do not establish a Firefight scoring
+        exception. **Do not extend to Firefight** on shared Killing text
+        alone; reopen only with scenario-specific supporting evidence
+        and a reviewed applicability change. The cross-scenario runtime
+        regression prevents implicit inheritance through the shared
+        Killing Rule.
         See [FAQ v0.1 applicability inventory](faq-v0.1-scope-inventory.md).
         This does not certify full FAQ or browser coverage; keep scenario
         applicability explicit before further curation.
