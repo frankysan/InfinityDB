@@ -158,6 +158,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Army snapshot, rules/FAQ PDF, exact Wiki revision, and available historical N5
     versions. Record unmatched announcement claims and unknown release/snapshot
     boundaries as open review work, not confirmed database defects.
+    - [ ] **Data processing:** Before 1.0, explicitly review Corvus Belli's
+      **N5.3 update blog post** and trace each published change against the pinned
+      N5.3 rules, FAQ, Wiki revision and Army snapshot as applicable. Record
+      affected maintained identities, confirmed mismatches, no-change results
+      and unresolved source/version boundaries; update player-facing data only
+      for source-confirmed discrepancies. This is a named N5.3 review within
+      the wider update-post reconciliation task, not a substitute for it.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or
@@ -499,6 +506,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     the published English-source 6 and conflicting official Spanish 7 must be
     clearly sourced and explained. An official clarification is not required
     for release; preserve the uncertainty and reviewed publication baseline.
+  - [ ] **Data processing + Web frontend:** Correct the **Domination map's
+    small scoring-quadrant depiction** before 1.0. Prioritize the distances
+    from each quadrant's center point to the table edges, which players use
+    to place markers, rather than suggesting that the small quadrant area
+    itself is the important measurement. Verify the source-defined center
+    coordinates and derived labels for every supported table size, both
+    distance-unit settings, and standalone/embedded SVG views.
+  - [ ] **Data processing + Web frontend:** Make **canonical physical
+    dimensions of scenario markers** visible where players set up the four
+    core scenarios. Distinguish marker size/diameter from scoring-area
+    geometry, table-distance dimensions and artistic SVG scaling; source
+    and cite the dimensions rather than inferring them from drawings.
+    Validate source/model/API and readable browser presentation for each
+    supported scenario and marker type.
   - **Browser acceptance:** The separate
     [1.0 core-scenario browser checklist](#final-10-acceptance) owns
     keyboard/touch, rapid selection, theme/distance, direct/soft navigation,
@@ -849,6 +870,56 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     deployed-object statistics without selecting a carrier first; reverse uses preserve
     Army/loadout context. Missing in-scope facts must be exposed; dedicated comparison
     controls are not a separate release blocker.
+
+### Player-facing navigation and reference clarity
+
+**Project domains:** Data processing, Web backend, Web frontend
+
+These are 1.0-scoped usability and reference-interpretation follow-ups.
+Reuse the published data model and existing browser components; treat
+enhancements as release-blocking only when their omission
+would materially impair required reference access, clarity or source disclosure.
+
+- [ ] **Web frontend:** Reduce the **sidebar menu's vertical footprint**
+  before 1.0 while preserving access to every existing destination and
+  the current responsive/sticky navigation behavior. Review grouping,
+  spacing and any collapsible sections against narrow and desktop layouts;
+  verify mouse, keyboard, touch, focus and no hidden/unreachable links.
+- [ ] **Data processing + Web backend + Web frontend:** Make the term
+  **Specialist Troops** discoverable through **global search**, resolving
+  to its reviewed reference definition and relevant core-scenario usage.
+  Reuse `rule:specialist-troops:standard` and existing search identities;
+  avoid inventing a universal Trooper attribute from scenario-dependent
+  qualifications. Test exact/partial term queries, navigation and
+  source/scenario context in the normal browser.
+- [ ] **Web backend + Web frontend:** Add a **Specialist Troops filter**
+  to the Unit Explorer using reviewed qualification criteria. State which
+  baseline or selected scenario context the filter applies to, retain
+  exceptions/overrides such as Chain of Command (Non Specialist), and
+  avoid treating a per-scenario role as a permanent Army source field.
+  Check filter combinations, counts, reset and representative Units
+  against the underlying source/qualification rule.
+- [ ] **Data processing + Web frontend:** Establish and test a clear
+  **visual distinction policy** for source-native rules text, official
+  updated rules/stats, examples, InfinityDB explanations,
+  corrections/errata, reviewed interpretations and unresolved source
+  inconsistencies. Reuse existing citation/provenance and discrepancy
+  metadata; require actual dated change evidence before using a
+  "recently updated" treatment. Evaluate typography/color choices
+  against dark/light themes, color-blind accessibility, narrow widths
+  and non-color cues before applying them consistently.
+- [ ] **Web frontend:** Omit redundant rule-card subtitles when a card's
+  heading is `Title` and its sole subtitle repeats `Rules for Title`.
+  Preserve meaningful summaries, applicability, citations and
+  source-discrepancy notices; verify ordinary catalog, contextual and
+  scenario rule cards, including linked navigation.
+- [ ] **Web frontend:** Add an accessible, **collapsible independent-resource
+  notice** at the bottom of the normal browser experience. Explain that
+  InfinityDB is non-official, is not affiliated with Corvus Belli, and
+  may contain errors; reuse existing required attribution/disclaimer
+  language rather than duplicating or contradicting it. Reserve a
+  future feedback link without making a feedback form or data
+  collection a 1.0 dependency. Test mobile, keyboard and screen readers.
 
 ### Final 1.0 acceptance
 
