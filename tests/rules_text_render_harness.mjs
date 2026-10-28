@@ -85,4 +85,51 @@ assert.ok(note);
 assert.equal(note.textContent, "Army retains Throwing Weapon.");
 assert.ok(note.children.some((node) => node.className === "maintained-reference-wrap"));
 assert.ok(article.children.indexOf(note) > article.children.indexOf(paragraphs[2]));
-console.log("4 paragraphs; bold links; separate source note; no literal markers");
+
+const placeholder = {
+  id: "rule:scenario:supply-boxes", name: "Supply Boxes",
+  summary: "Rules for Supply Boxes.",
+  summary_tokens: [{ type: "text", text: "Rules for Supply Boxes." }],
+  facts: {
+    effects: ["Only Models, not Markers, may carry a Supply Box."],
+    sourceNotes: ["Reviewed in the N5.3 core scenario."],
+  },
+  citations: [{ source_title: "N5.3", page: 153 }],
+  collection: { title: "N5 Core Scenarios" },
+  scope: { game: "N5" },
+};
+const redundant = rulesReferenceSection([placeholder]).children.find(
+  (node) => node.tag === "article"
+);
+assert.equal(redundant.id, "rule-rule-scenario-supply-boxes");
+assert.equal(redundant.children.filter((node) => node.className === "detail-copy").length, 0);
+assert.ok(redundant.textContent.includes("Supply Boxes"));
+assert.ok(redundant.textContent.includes("Only Models, not Markers"));
+assert.ok(redundant.textContent.includes("Reviewed in the N5.3 core scenario."));
+assert.ok(redundant.textContent.includes("N5.3, p. 153"));
+assert.ok(redundant.textContent.includes("N5 Core Scenarios"));
+
+const meaningful = {
+  ...placeholder,
+  summary: "Supply Boxes can be carried by Specialist Troops.",
+  summary_tokens: [{ type: "text", text: "Supply Boxes can be carried by Specialist Troops." }],
+};
+const meaningfulArticle = rulesReferenceSection([meaningful]).children.find(
+  (node) => node.tag === "article"
+);
+assert.equal(meaningfulArticle.children.filter((node) => node.className === "detail-copy").length, 1);
+assert.ok(meaningfulArticle.textContent.includes("can be carried by Specialist Troops"));
+
+const linked = {
+  ...placeholder,
+  summary_tokens: [
+    { type: "text", text: "Rules for " }, reference("Supply Boxes"),
+    { type: "text", text: "." },
+  ],
+};
+const linkedArticle = rulesReferenceSection([linked]).children.find(
+  (node) => node.tag === "article"
+);
+assert.equal(linkedArticle.children.filter((node) => node.className === "detail-copy").length, 1);
+assert.ok(linkedArticle.textContent.includes("Rules for Supply Boxes."));
+console.log("4 paragraphs; bold links; separate source note; no literal markers; redundant summary omitted");

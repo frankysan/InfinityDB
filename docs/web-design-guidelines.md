@@ -38,7 +38,11 @@ Restrictions. Put explanatory examples and clarifying interpretations in a separ
 When reviewed, condition-scoped interaction cases are available, display
 **Reviewed interactions** after those clarifications, retaining their evidence
 labels. Do not infer new interactions from presentation markup; all these
-sections use the same shared rules-card renderer.
+sections use the same shared rules-card renderer. In a reference card, omit
+a summary that only repeats its title as `Rules for Title` (with optional
+final period). Preserve the maintained source value, meaningful summaries,
+linked summary text, facts, source notes, applicability and citations.
+Apply this in the shared renderer, not by deleting source data.
 
 **Separate gameplay rules from editorial provenance.** Keep rules players act on
 at normal body size. Source-history, Army/PDF mismatches, and legacy terminology

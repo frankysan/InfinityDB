@@ -276,12 +276,23 @@ function summaryParagraphs(tokens, fallback = "") {
   ));
 }
 
+function hasRedundantRuleSummary(rule) {
+  if (typeof rule.name !== "string" || typeof rule.summary !== "string") return false;
+  const summary = rule.summary.trim();
+  const label = `Rules for ${rule.name}`;
+  return (summary === label || summary === `${label}.`)
+    && (!Array.isArray(rule.summary_tokens)
+      || rule.summary_tokens.every((token) => token?.type === "text"));
+}
+
 function appendRuleDetails(
   container,
   rule,
   { includeBadges = true, includeApplicability = true, beforeRelations = [] } = {},
 ) {
-  for (const paragraphTokens of summaryParagraphs(rule.summary_tokens, rule.summary)) {
+  for (const paragraphTokens of (
+    hasRedundantRuleSummary(rule) ? [] : summaryParagraphs(rule.summary_tokens, rule.summary)
+  )) {
     const paragraph = document.createElement("p");
     paragraph.className = "detail-copy";
     appendMaintainedText(paragraph, paragraphTokens);

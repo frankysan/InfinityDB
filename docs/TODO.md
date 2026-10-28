@@ -908,11 +908,15 @@ would materially impair required reference access, clarity or source disclosure.
   "recently updated" treatment. Evaluate typography/color choices
   against dark/light themes, color-blind accessibility, narrow widths
   and non-color cues before applying them consistently.
-- [ ] **Web frontend:** Omit redundant rule-card subtitles when a card's
+- [x] **Web frontend:** Omit redundant rule-card subtitles when a card's
   heading is `Title` and its sole subtitle repeats `Rules for Title`.
-  Preserve meaningful summaries, applicability, citations and
-  source-discrepancy notices; verify ordinary catalog, contextual and
-  scenario rule cards, including linked navigation.
+  The shared renderer skips only the exact placeholder (optional period)
+  without changing curated data, meaningful/linked summaries, facts,
+  applicability, citations or source notes. Node DOM regressions cover
+  ordinary/shared cards; real Chromium scenario acceptance at 1440px
+  and 390px confirms the Supplies rule card has no redundant summary,
+  retains facts and citations, and remains navigable. See the
+  [web design contract](web-design-guidelines.md#curated-rules-text-hierarchy).
 - [ ] **Web frontend:** Add an accessible, **collapsible independent-resource
   notice** at the bottom of the normal browser experience. Explain that
   InfinityDB is non-official, is not affiliated with Corvus Belli, and
