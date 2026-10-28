@@ -407,7 +407,12 @@ def test_render_scenario_map_command_uses_maintained_scenario_definition(
     assert 'data-marker-type="console" data-diameter-mm="40"' in svg
     assert 'id="deployment-a-depth" class="measurement"' in svg
     assert '>12″</text></g>' in svg
-    assert '>16″ × 12″</text>' in svg
+    # Reviewed Domination maps measure Console centers instead of labeling quadrant sizes.
+    assert 'id="quadrant-1-size" class="area-size"' not in svg
+    assert 'id="console-q1-center-left" class="center-measurement"' in svg
+    assert 'id="console-q1-center-top" class="center-measurement"' in svg
+    assert 'data-distance-inches="8"' in svg
+    assert 'data-distance-inches="18"' in svg
     assert f"Scenario map ready: {output}" in capsys.readouterr().out
 
 

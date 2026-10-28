@@ -4602,14 +4602,16 @@ def test_rules_badges_and_desktop_sidebar_use_consistent_presentation(app: Calla
         styles,
         ".sidebar",
         {
-            "--sidebar-section-gap": "clamp(28px, 6.5vh, 70px)",
-            "--sidebar-body-padding": "clamp(24px, 6vh, 66px)",
+            "--sidebar-section-gap": "clamp(12px, 2vh, 24px)",
+            "--sidebar-edge-padding-top": "clamp(14px, 2vh, 24px)",
+            "--sidebar-edge-padding-bottom": "clamp(14px, 2vh, 24px)",
+            "--sidebar-body-padding": "clamp(12px, 2.5vh, 24px)",
         },
     )
     assert_css_rule(
         styles,
         ".nav-item",
-        {"padding": "clamp(9px, 1.3vh, 13px) 12px"},
+        {"padding": "clamp(7px, 0.9vh, 9px) 10px"},
     )
 
 
@@ -4835,7 +4837,8 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 21
+    assert len(general_rules) == 22
+    assert general_rules["specialist-troops-standard"]["name"] == "Specialist Troops"
     assert general_rules["modifiers-explained"]["name"] == "Modifiers Explained (MODs)"
     assert general_rules["deployment-phase"]["name"] == "Deployment Phase"
     assert general_rules["regular-order"]["name"] == "Regular Order"
