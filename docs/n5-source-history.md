@@ -100,6 +100,31 @@ PDF creation metadata is not a publication date. Preserve these as historical
 comparison inputs; verify the intended N5 source and applicability before curation.
 Do not infer current Commlink or Request Reinforcements mechanics from a filename.
 
+**ITS Season 18 applicability check, 2026-10-28:** The locally archived official
+`data/pdf/its/Its-rules-season-18-en.pdf` identifies itself as version
+**2026.09.01**, last updated September 1, 2026 (file page 1). Its printed
+page **27** explicitly offers **Reinforcements** as an optional Tournament
+Extra and refers readers to the **Reinforcements Annex**. This is positive
+evidence that the Extra remains an available current ITS mode, not evidence
+that the existing N4 Annex's Commlink or Request Reinforcements mechanics
+were adopted unchanged in N5. The core N5.3 Game Modes table (p. 6)
+also names games with Reinforcements but does not supply their procedures.
+
+- Current official ITS Extra listing:
+  <https://infinityuniverse.com/games/infinity/its/tournament/e6ae05f22-we-are-back>
+- Official N4-era Reinforcements PDF:
+  <https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf>
+- Explicitly N4-scoped Wiki annex revision:
+  <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
+
+**Unresolved source boundary:** ITS 18 calls for an Annex without supplying a
+version identifier in its p. 27 cross-reference. We have not established an
+official N5-applicable revision of that Annex, nor an official adoption statement
+for the N4 text. Do not mark `skill:commlink` reviewed in the 1.0 candidate,
+treat the old exception as a current N5 decision, or claim Reinforcements is
+obsolete. Verify the annex revision or obtain an explicit ruling before
+curating its procedural Skill effects as N5.
+
 ## Reviewed 1.0 structured Skill chart provenance
 
 **Scope:** Martial Arts, Booty and MetaChemistry only; this is a completed

@@ -292,10 +292,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     database pair exposes the three omitted primary identities and cannot be treated as a
     release check until its target and review coverage are reconciled. Commlink remains under a
     post-0.7.0 scope exception in that historical ledger. Current evidence identifies its
-    Reinforcements Wiki source as N4-only, while N5.3 p. 6 only cross-references games with
-    Reinforcements; the available evidence does not establish a current N5 annex. Keep Commlink
-    unresolved for 1.0 rather than importing N4 rules or treating the old exception as a current
-    scope decision. Reconcile the 1.0 primary review baseline and Commlink against pinned inputs,
+    Reinforcements Wiki source as N4-only. N5.3 p. 6 mentions games with Reinforcements;
+    ITS Season 18 (version 2026.09.01, p. 27) explicitly permits the Reinforcements
+    Extra in tournaments and refers players to the Reinforcements Annex. This confirms
+    current optional-mode applicability, but does not identify an N5 edition of the Annex
+    or certify unchanged N4 procedures. Keep Commlink unresolved for 1.0 rather than
+    importing N4 rules or treating the old exception as a current scope decision.
+    Reconcile the 1.0 primary review baseline and Commlink against pinned inputs,
     preserving historical review dates and labels as provenance.
     - [x] Add a distinct `--require-primary-release` audit guard. The existing
       `--require-release 1.0.0` validates the 1.0 supporting slice while the
@@ -332,6 +335,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Verify an N5-applicable Reinforcements annex or explicitly decide the
       1.0 applicability boundary before making this candidate the active
       release gate.
+    - [x] Verify **current Reinforcements Extra applicability** without
+      inferring N5 mechanics. The local official ITS Season 18 PDF
+      (`data/pdf/its/Its-rules-season-18-en.pdf`, version 2026.09.01,
+      p. 27) explicitly offers Reinforcements and refers to the Annex.
+      The pinned N4 annex and archived N4-labeled Wiki remain historical
+      procedure evidence only. See `docs/n5-source-history.md` and
+      `docs/rules-semantics.md`. **Still open:** identify an official
+      N5-applicable Annex revision or explicit adoption ruling before
+      curating Commlink/Request Reinforcements as N5 and activating the
+      strict 1.0 primary release gate.
   - [ ] Turn confirmed gaps into bounded batches under the owning tasks below. Each batch names
     the concepts/source sections, dependency, missing contract or content, and completion evidence;
     material source conflicts need reviewed applicability and clear user-visible disclosure

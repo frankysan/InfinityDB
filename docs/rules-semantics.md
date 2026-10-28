@@ -4178,18 +4178,25 @@ The current wiki navigation presents Infinity Reinforcements alongside the N5.3
 main sections, and the core N5 V5.3 Game Modes table still names games with
 Reinforcements. The detailed Reinforcements page itself, however, explicitly
 identifies the material as an official N4 Annex rule with provisional annex
-status.
+status. The official **ITS Season 18, version 2026.09.01, p. 27** also lists
+Reinforcements as an optional tournament Extra and directs players to the
+Reinforcements Annex. This establishes current optional-mode applicability,
+**not** an edition-verified text of the annex or an unchanged N4 procedure.
 
 InfinityDB must preserve that source identity instead of silently folding
-`Commlink` and `Request Reinforcements` into the `n5-core-rules` collection. A
-future reviewed replacement can supersede this annex scope if Corvus Belli
-publishes one explicitly for N5.
+`Commlink` and `Request Reinforcements` into the `n5-core-rules` collection.
+Keep the 1.0 Commlink review pending until an authoritative N5-applicable annex
+or explicit adoption ruling is identified; do not infer the Extra is obsolete.
+The following RS-RF sections describe **N4 annex semantics and source/Army
+modeling implications**, not approved N5 gameplay rules.
 
 Sources:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
-- Official annex: <https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf>
+- Official N4 annex: <https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf>
 - PDF cross-reference: Infinity N5 V5.3, printed page 6
+- Current optional-mode cross-reference: `data/pdf/its/Its-rules-season-18-en.pdf`,
+  version 2026.09.01, printed page 27 (Reinforcements Extra)
 
 ### RS-RF-SECTION-001 — Reinforcement eligibility is Army-List section/occurrence context
 
