@@ -914,15 +914,23 @@ would materially impair required reference access, clarity or source disclosure.
   filter combinations, clear/reset, and versioned URL persistence.
   See the [Unit filter semantics](data-model.md#current-scenario-foundation)
   and [web design contract](web-design-guidelines.md#specialist-troops-filtering-is-contextual).
-- [ ] **Data processing + Web frontend:** Establish and test a clear
-  **visual distinction policy** for source-native rules text, official
-  updated rules/stats, examples, InfinityDB explanations,
-  corrections/errata, reviewed interpretations and unresolved source
-  inconsistencies. Reuse existing citation/provenance and discrepancy
-  metadata; require actual dated change evidence before using a
-  "recently updated" treatment. Evaluate typography/color choices
-  against dark/light themes, color-blind accessibility, narrow widths
-  and non-color cues before applying them consistently.
+- [x] **Data processing + Web frontend:** Establish a
+  **text-first provenance distinction policy** for source-native
+  Army/statline material, InfinityDB-maintained rules, explanations,
+  reviewed examples, dated FAQ/errata and source conflicts. The shared
+  rules renderer identifies maintained text, visibly labels sources
+  and source-context notes, and separates reviewed examples. Dated FAQ
+  publications have distinct treatment; competing citations display
+  an explicit normal-mode discrepancy warning. Colors use existing
+  light/dark semantic tokens with textual labels and borders rather
+  than color alone. Node regressions cover interpretation/source roles
+  and synthetic conflict evidence; Chromium covers the General Rules
+  and Supplies FAQ pages at 1440/390px in both light/dark themes.
+  No generic "recently updated" tag is inferred without a dated
+  authoritative change. This defines the policy and applies it to
+  shared Rule/FAQ surfaces; it is **not** a claim that every imported
+  statline or historical erratum has been source-reconciled. See
+  [visual provenance contract](web-design-guidelines.md#distinguish-rules-provenance-without-implying-new-authority).
 - [x] **Web frontend:** Omit redundant rule-card subtitles when a card's
   heading is `Title` and its sole subtitle repeats `Rules for Title`.
   The shared renderer skips only the exact placeholder (optional period)

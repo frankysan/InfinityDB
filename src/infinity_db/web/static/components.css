@@ -1336,11 +1336,41 @@ h1>span {
   margin: 0;
 }
 
-/* Editorial source discrepancies remain readable without competing with rules. */
+/* Provenance is named in text, not inferred from color or publication age. */
+.rules-card-provenance,
+.rules-provenance-caption {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.rules-card-provenance {
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.rules-provenance-label {
+  color: var(--color-text-secondary);
+  font-weight: 650;
+}
+
+.detail-fact-group[data-provenance="reviewed-explanation"] {
+  border-inline-start: 2px solid var(--color-border-muted);
+  padding-inline-start: var(--space-3);
+}
+
 .rules-source-note {
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
   line-height: 1.5;
+  border-inline-start: 2px solid var(--color-border-default);
+  padding-inline-start: var(--space-3);
+}
+
+.rules-source-citations {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-2);
 }
 
 .rules-card-titlebar {

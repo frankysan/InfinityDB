@@ -86,6 +86,60 @@ def test_specialist_troops_search_leads_to_general_rule_and_scenarios(
 
 
 @pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_reference_provenance_labels_remain_distinct_across_themes(
+    scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(
+            f"{ORIGIN}/rules/specialist-troops-standard",
+            wait_until="domcontentloaded",
+        )
+        card = page.locator("#rule-rule-specialist-troops-standard")
+        card.wait_for(state="visible", timeout=60000)
+        page.evaluate(
+            "(value) => document.documentElement.setAttribute('data-theme', value)",
+            theme,
+        )
+        assert "InfinityDB-maintained reference" in card.locator(
+            ".rules-card-provenance"
+        ).inner_text()
+        sources = card.locator(".rules-source-citations")
+        assert sources.count() == 1
+        assert sources.locator(".rules-provenance-label").inner_text().strip() == "Sources:"
+        assert "p. 152" in sources.inner_text()
+        assert card.locator(".rules-provenance-caption").count() == 0
+
+        page.goto(
+            f"{ORIGIN}/scenarios/supplies?army_points=300",
+            wait_until="domcontentloaded",
+        )
+        card = page.locator("#rule-rule-scenario-supply-boxes")
+        card.wait_for(state="visible", timeout=60000)
+        page.evaluate(
+            "(value) => document.documentElement.setAttribute('data-theme', value)",
+            theme,
+        )
+        assert card.locator(".rules-card-provenance").is_visible()
+        assert "Sources:" in card.locator(".rules-source-citations").inner_text()
+        faq = page.locator("#scenario-content .faq-dated-clarification")
+        faq.wait_for(state="visible", timeout=60000)
+        assert "published 2026-09-01" in faq.locator(
+            ".faq-publication-source"
+        ).inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (width, theme)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
 def test_scenario_rule_cards_omit_only_redundant_subtitles(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

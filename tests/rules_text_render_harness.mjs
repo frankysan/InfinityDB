@@ -82,7 +82,12 @@ assert.ok(paragraphs[2].children.some((node) => node.tag === "strong"));
 assert.ok(!paragraphs.some((node) => node.textContent.includes("**")));
 const note = article.children.find((node) => node.className === "rules-source-note");
 assert.ok(note);
-assert.equal(note.textContent, "Army retains Throwing Weapon.");
+assert.equal(note.textContent, "Source context: Army retains Throwing Weapon.");
+assert.equal(note.children[0].className, "rules-provenance-label");
+assert.ok(article.children.some((node) => (
+  node.className === "rules-card-provenance"
+  && node.textContent.includes("InfinityDB-maintained reference")
+)));
 assert.ok(note.children.some((node) => node.className === "maintained-reference-wrap"));
 assert.ok(article.children.indexOf(note) > article.children.indexOf(paragraphs[2]));
 
@@ -106,8 +111,11 @@ assert.equal(redundant.children.filter((node) => node.className === "detail-copy
 assert.ok(redundant.textContent.includes("Supply Boxes"));
 assert.ok(redundant.textContent.includes("Only Models, not Markers"));
 assert.ok(redundant.textContent.includes("Reviewed in the N5.3 core scenario."));
-assert.ok(redundant.textContent.includes("N5.3, p. 153"));
+assert.ok(redundant.textContent.includes("Sources: N5.3, p. 153"));
 assert.ok(redundant.textContent.includes("N5 Core Scenarios"));
+const cited = redundant.children.find((node) => node.className === "detail-source rules-source-citations");
+assert.ok(cited);
+assert.equal(cited.children[0].textContent, "Sources: ");
 
 const meaningful = {
   ...placeholder,
@@ -132,4 +140,51 @@ const linkedArticle = rulesReferenceSection([linked]).children.find(
 );
 assert.equal(linkedArticle.children.filter((node) => node.className === "detail-copy").length, 1);
 assert.ok(linkedArticle.textContent.includes("Rules for Supply Boxes."));
-console.log("4 paragraphs; bold links; separate source note; no literal markers; redundant summary omitted");
+const clarifications = rulesReferenceSection([{
+  ...meaningful,
+  facts: { clarifications: ["InfinityDB notes an interaction."] },
+}]).children.find((node) => node.tag === "article");
+const reviewed = clarifications.children.find((node) => (
+  node.className === "detail-fact-group" && node.children.some((child) => (
+    child.className === "rules-provenance-caption"
+  ))
+));
+assert.ok(reviewed);
+assert.equal(reviewed.children[0].textContent, "Clarifications and examples");
+assert.ok(reviewed.children[1].textContent.includes("InfinityDB-reviewed explanation"));
+assert.equal(reviewed.children[2].tag, "ul");
+
+const { faqRulingsSection } = await import(
+  "../src/infinity_db/web/static/faq-rulings.js"
+);
+const selectedFaq = {
+  question: "Can this be done?", answer: "No.",
+  selected_source: { version: "0.1", published_date: "2026-09-01" },
+  original_publication: { version: "0.1" },
+  citations: [{ source_id: "faq", page: 3, source_title: "N5 FAQ" }],
+  selected_citation: { sourceId: "faq", page: 3 },
+};
+const FAQ = faqRulingsSection([
+  selectedFaq,
+  {
+    ...selectedFaq,
+    question: "Are the publications in agreement?",
+    conflicting_citations: [{ sourceId: "faq", page: 3 }],
+    selection_reason: "The publications differ in a material requirement.",
+  },
+]);
+const dated = FAQ.children.find((node) => node.tag === "article");
+assert.ok(dated.className.includes("faq-dated-clarification"));
+assert.ok(dated.children.some((node) => (
+  node.className === "detail-source faq-publication-source"
+  && node.textContent.includes("published 2026-09-01")
+)));
+const conflicted = FAQ.children.filter((node) => node.tag === "article")[1];
+const warning = conflicted.children.find((node) => (
+  node.className === "faq-source-discrepancy"
+));
+assert.ok(warning);
+assert.equal(warning.children[0].textContent, "Source discrepancy — cited publications differ");
+assert.ok(warning.children[1].textContent.includes("publications differ"));
+
+console.log("4 paragraphs; bold links; separate source note; no literal markers; redundant summary omitted; explicit provenance roles");

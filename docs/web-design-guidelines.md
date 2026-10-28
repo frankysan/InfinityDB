@@ -78,6 +78,59 @@ reference preview provides the explanation on hover, keyboard focus, or touch,
 with navigation to the Glossary on activation. Do not match and link arbitrary
 common nouns automatically; the full Game-term vocabulary needs separate review.
 
+### Distinguish rules provenance without implying new authority
+
+**Source identity is not publication recency.** Use the available cited
+publication, source revision, dated FAQ applicability and explicit discrepancy
+metadata. Never infer an official erratum or a "recently updated" status from
+a modified local record, an Army snapshot date, a missing citation or the
+viewer's clock. A dated update label requires a verified upstream change,
+the source/version and its effective date.
+
+Use the following text-first visual vocabulary across player-facing
+references, with theme tokens and a second cue beyond color:
+
+- **Official/source-native data:** retain source values in ordinary statlines
+  and source citations. Do not recolor an Army profile into "updated rules"
+  merely because its values differ from a maintained summary. Display a
+  specific authoritative revision/change only when a verified publication
+  record identifies it.
+- **InfinityDB-maintained reference:** the shared Rule card labels curated
+  summaries, requirements and effects as an **InfinityDB-maintained reference**,
+  explicitly pointing to citations for source wording. This label identifies
+  editorial ownership, **not** a claim that the rules are unofficial or
+  mechanically different.
+- **Explanations, examples and reviewed interpretations:** keep gameplay
+  requirements/effects at body size. Distinguish explanations under
+  **Clarifications and examples**, with an explicit InfinityDB-reviewed
+  caption and a neutral left border. Keep reviewed interaction provenance.
+  A curation review date alone is not an official rules effective date.
+- **Source history/context:** label editorial `facts.sourceNotes` as
+  **Source context**, in secondary type with a neutral divider, preserving
+  maintained links. Cite sources as **Sources**, without conflating Wiki
+  evidence, PDFs and official Army data.
+- **Dated FAQ/errata:** render an actual source-reviewed FAQ in its own
+  **FAQ clarifications** section with selected version, publication date and
+  linked citation. The date describes this source publication; it is
+  not an automatically assigned "new" or "changed" badge. Future official
+  errata must have equally explicit publication evidence before adopting
+  a distinct revision status.
+- **Unresolved conflict:** when structured competing citations exist, show
+  **Source discrepancy — cited publications differ** in the ordinary
+  interface even while explanatory detail remains collapsible. The warning
+  uses readable text, a leading border and accessible warning theme colors.
+  Inline `[[review-needed:source-conflict]]` markers retain their own
+  visible uncertainty labels. Do not silently select a winner or hide
+  material gameplay ambiguity in Developer Mode.
+
+The shared renderer owns the first four presentation roles, and the
+source-reviewed FAQ renderer owns the last two. This is a provenance
+**presentation contract**; it does not authorize invented source
+classifications or complete an audit of every Army statline, scenario
+discrepancy, or possible historical update. Maintain the source-model
+boundaries in [data-model.md](data-model.md) and test both light/dark,
+desktop/mobile layouts and non-color text cues.
+
 ### Explain rules interactions, not just outcomes
 
 **Target design direction:** When showing a reviewed interaction, give the

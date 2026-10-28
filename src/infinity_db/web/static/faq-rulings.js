@@ -35,7 +35,7 @@ export function faqRulingsSection(items) {
 
   for (const ruling of items) {
     const card = document.createElement("article");
-    card.className = "surface surface--subtle detail-section faq-ruling";
+    card.className = "surface surface--subtle detail-section faq-ruling faq-dated-clarification";
 
     const question = document.createElement("h3");
     question.className = "surface-titlebar surface-titlebar--subtle";
@@ -46,7 +46,7 @@ export function faqRulingsSection(items) {
     card.append(question, answer);
 
     const source = document.createElement("p");
-    source.className = "detail-source";
+    source.className = "detail-source faq-publication-source";
     const selected = ruling.selected_source || {};
     const publication = ruling.original_publication || {};
     source.append(
@@ -66,7 +66,7 @@ export function faqRulingsSection(items) {
       const discrepancy = document.createElement("details");
       discrepancy.className = "faq-source-discrepancy";
       const label = document.createElement("summary");
-      label.textContent = "Source discrepancy";
+      label.textContent = "Source discrepancy — cited publications differ";
       const explanation = document.createElement("p");
       explanation.className = "detail-source";
       explanation.textContent = ruling.selection_reason || "The cited sources differ.";

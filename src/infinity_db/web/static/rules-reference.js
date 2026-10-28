@@ -170,9 +170,18 @@ function appendRuleFactGroup(container, rule, key, label) {
   if (!Array.isArray(facts[key]) || !facts[key].length) return;
   const group = document.createElement("div");
   group.className = "detail-fact-group";
+  if (key === "clarifications") {
+    group.setAttribute("data-provenance", "reviewed-explanation");
+  }
   const heading = document.createElement("h4");
   heading.className = "detail-fact-heading";
   heading.textContent = label;
+  if (key === "clarifications") {
+    const context = document.createElement("p");
+    context.className = "rules-provenance-caption";
+    context.textContent = "InfinityDB-reviewed explanation or example; see source citations.";
+    group.append(heading, context);
+  }
   const list = document.createElement("ul");
   list.className = "detail-list";
   for (const [index, fact] of facts[key].entries()) {
@@ -180,7 +189,8 @@ function appendRuleFactGroup(container, rule, key, label) {
     appendMaintainedText(item, rule.fact_tokens?.[key]?.[index], fact);
     list.append(item);
   }
-  group.append(heading, list);
+  if (key === "clarifications") group.append(list);
+  else group.append(heading, list);
   container.append(group);
 }
 
@@ -335,6 +345,10 @@ function appendRuleDetails(
   for (const [index, note] of (rule.facts?.sourceNotes || []).entries()) {
     const paragraph = document.createElement("p");
     paragraph.className = "rules-source-note";
+    const label = document.createElement("strong");
+    label.className = "rules-provenance-label";
+    label.textContent = "Source context: ";
+    paragraph.append(label);
     appendMaintainedText(paragraph, rule.fact_tokens?.sourceNotes?.[index], note);
     container.append(paragraph);
   }
@@ -349,7 +363,11 @@ function appendRuleDetails(
 
   if (rule.citations?.length) {
     const citations = document.createElement("p");
-    citations.className = "detail-source";
+    citations.className = "detail-source rules-source-citations";
+    const label = document.createElement("strong");
+    label.className = "rules-provenance-label";
+    label.textContent = "Sources: ";
+    citations.append(label);
     for (const [index, citation] of rule.citations.entries()) {
       if (index) citations.append(" · ");
       citations.append(rulesCitationNode(citation));
@@ -453,7 +471,10 @@ export function rulesReferenceArticle(
   const badgeRow = ruleBadgeRow(rule);
   if (badgeRow) header.append(badgeRow);
   header.append(...headerContent);
-  article.append(header, ...leadingContent);
+  const provenance = document.createElement("p");
+  provenance.className = "rules-card-provenance";
+  provenance.textContent = "InfinityDB-maintained reference · consult citations for source wording";
+  article.append(header, ...leadingContent, provenance);
   appendRuleDetails(article, rule, {
     includeBadges: false,
     includeApplicability,
