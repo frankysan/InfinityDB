@@ -584,6 +584,31 @@ def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> 
     assert "Pending identities:" not in output
 
 
+def test_primary_release_gate_requires_its_own_scope_not_supporting_only(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert main(["--require-primary-release", "0.7.0"]) == 0
+    assert main(["--require-primary-release", "1.0.0"]) == 1
+    output = capsys.readouterr().out
+    assert "Primary catalog does not target 1.0.0" in output
+    assert "maintained scope targets 0.7.0" in output
+    assert "supporting reviews do not certify the primary catalog" in output
+
+
+def test_primary_release_gate_rejects_pending_catalog_items(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
+    report["summary"]["primaryCatalog"]["pending"] = 1
+    monkeypatch.setattr(
+        "tools.audit_rules_interactions.audit_rules_interactions",
+        lambda *_args: report,
+    )
+    assert main(["--require-primary-release", "0.7.0"]) == 1
+    assert "Primary catalog for 0.7.0 has 1 pending items" in capsys.readouterr().out
+
+
 def test_rules_interaction_1_0_gate_reports_regressed_pending_item(
     monkeypatch: pytest.MonkeyPatch,
     capsys,

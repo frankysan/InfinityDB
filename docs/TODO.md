@@ -297,6 +297,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     unresolved for 1.0 rather than importing N4 rules or treating the old exception as a current
     scope decision. Reconcile the 1.0 primary review baseline and Commlink against pinned inputs,
     preserving historical review dates and labels as provenance.
+    - [x] Add a distinct `--require-primary-release` audit guard. The existing
+      `--require-release 1.0.0` validates the 1.0 supporting slice while the
+      primary denominator still targets 0.7.0. The new strict guard fails
+      rather than misreporting that historical scope as a completed 1.0
+      primary review; it also fails on pending primary items. It is not
+      added to CI's currently passing 1.0 supporting gate until the
+      maintained primary catalog and Commlink scope are reconciled.
   - [ ] Turn confirmed gaps into bounded batches under the owning tasks below. Each batch names
     the concepts/source sections, dependency, missing contract or content, and completion evidence;
     material source conflicts need reviewed applicability and clear user-visible disclosure

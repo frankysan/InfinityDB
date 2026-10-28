@@ -810,6 +810,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fail if the named release still has pending catalog/supporting reviews.",
     )
     parser.add_argument(
+        "--require-primary-release",
+        help=(
+            "Fail unless the maintained primary catalog explicitly targets this "
+            "release and has no pending reviews; a supporting-only pass is insufficient."
+        ),
+    )
+    parser.add_argument(
         "--database",
         type=Path,
         help="Validate the maintained catalog scope against this application database.",
@@ -893,6 +900,20 @@ def main(argv: list[str] | None = None) -> int:
         f"Outgoing relations: {report['summary']['authoredOutgoingRelationCount']}; "
         f"future interactions: {report['summary']['futureInteractionCount']}"
     )
+    if args.require_primary_release is not None:
+        required = args.require_primary_release
+        if primary["targetRelease"] != required:
+            print(
+                f"Primary catalog does not target {required}: maintained scope targets "
+                f"{primary['targetRelease']}; supporting reviews do not certify "
+                "the primary catalog for a later release"
+            )
+            return 1
+        if primary["pending"]:
+            print(
+                f"Primary catalog for {required} has {primary['pending']} pending items"
+            )
+            return 1
     if args.require_release is not None:
         pending_ids = sorted(
             item["id"]
