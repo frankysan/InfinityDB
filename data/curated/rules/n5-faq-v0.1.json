@@ -1364,6 +1364,66 @@
       }
     },
     {
+      "id": "faq-ruling:scenario-element-carrier-marker-state",
+      "kind": "faq-ruling",
+      "name": "Carrying a Supply Box prevents entering Marker State",
+      "summary": "Source-reviewed N5 FAQ clarification applied only to the core Supplies scenario, whose printed rules independently restrict Supply Box carriers to Models.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-28"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "Can a Trooper carrying a scenario element, such as a Supply Box, enter Marker State?",
+        "answer": "No. A Trooper carrying a scenario element such as a Supply Box cannot enter Marker State.",
+        "topicIds": [
+          "scenario:supplies",
+          "rule:scenario:carrying-supply-boxes"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            "scenarioIds": [
+              "scenario:supplies"
+            ]
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 3
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        "selectionReason": "English and Spanish N5 FAQ v0.1 printed p. 3 agree. The core N5.3 Supplies scenario (p. 153) independently limits Supply Box carriers to Models rather than Markers. Apply this FAQ to scenario:supplies only; do not infer broader ITS-scenario or unscoped Marker-State applicability.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
       "id": "faq-ruling:sixth-sense-msv1-zero-visibility",
       "kind": "faq-ruling",
       "name": "Sixth Sense with Multispectral Visor Level 1",

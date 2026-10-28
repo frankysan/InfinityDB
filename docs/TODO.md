@@ -282,6 +282,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       PDFs are N4 publications; verify a supported N5 annex rather than inferring
       current rules from those older files or the related Wiki page.
       Do not make full ITS-season publication a 1.0 requirement.
+      - [x] Inventory the FAQ v0.1 **ITS-section applicability boundary**
+        against the maintained 29-ruling collection. Of ten source
+        questions in the printed ITS section, two are now published with
+        scoped applicability: undeployed Ancillary/Killed objectives for
+        Annihilation, and the scenario-element/Marker-State restriction
+        for core Supplies (corroborated by N5.3 p. 153). Eight ITS-only
+        questions remain without standalone curated FAQ rulings and are
+        deferred from the four core-scenario baseline. The existing
+        Ancillary ruling still needs review before widening its scope.
+        See [FAQ v0.1 applicability inventory](faq-v0.1-scope-inventory.md).
+        This does not certify full FAQ or browser coverage; keep scenario
+        applicability explicit before further curation.
   - [ ] Reconcile `data/curated/rules-interactions/reviews.json` and `catalog-scope.json` with the
     pinned input set. Historical review/defer release labels are evidence, not the active roadmap.
     A preliminary audit of the current tracked database pair found that the maintained primary
@@ -340,8 +352,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       (`data/pdf/its/Its-rules-season-18-en.pdf`, version 2026.09.01,
       p. 27) explicitly offers Reinforcements and refers to the Annex.
       The pinned N4 annex and archived N4-labeled Wiki remain historical
-      procedure evidence only. See `docs/n5-source-history.md` and
-      `docs/rules-semantics.md`. **Still open:** identify an official
+      procedure evidence only. Subsequent official N5-era Army updates
+      (March 18, October 2 and October 15, 2025) confirm maintained
+      Reinforcement profiles, **not** their annex procedure or Commlink
+      effects. See `docs/n5-source-history.md` and `docs/rules-semantics.md`.
+      **Still open:** identify an official
       N5-applicable Annex revision or explicit adoption ruling before
       curating Commlink/Request Reinforcements as N5 and activating the
       strict 1.0 primary release gate.

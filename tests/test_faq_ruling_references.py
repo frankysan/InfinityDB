@@ -436,6 +436,7 @@ def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
     assert {record["id"] for record in records} == {
         "faq-ruling:hacking-device-firewall-disabled",
         "faq-ruling:undeployed-ancillary-not-killed",
+        "faq-ruling:scenario-element-carrier-marker-state",
         "faq-ruling:skill-declaration-target-position",
         "faq-ruling:fired-deployable-vertical-surface",
         "faq-ruling:peripheral-controller-unable-to-declare",
@@ -570,6 +571,19 @@ def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
     )
     assert status == 200 and response["items"] == []
 
+    status, response = request("scenario:supplies", scenario_id="scenario:supplies")
+    assert status == 200
+    assert [r["id"] for r in response["items"]] == [
+        "faq-ruling:scenario-element-carrier-marker-state",
+    ]
+    assert response["items"][0]["selected_citation"] == {
+        "sourceId": "n5-faq-v0.1-en-pdf", "page": 3,
+    }
+    for extra in ({}, {"scenario_id": "scenario:domination"}):
+        status, response = request("scenario:supplies", **extra)
+        assert status == 200
+        assert response["items"] == []
+
     status, response = request("rule:fireteam-general")
     assert status == 200
     type_ruling = next(
@@ -701,11 +715,54 @@ def test_v00_carried_forward_rulings_preserve_original_and_current_sources(
     ) == []
 
 
+def test_supplies_scenario_element_marker_faq_is_strictly_scoped(
+    published_pilot: RulesDatabase,
+) -> None:
+    ruling_id = "faq-ruling:scenario-element-carrier-marker-state"
+    for topic in ("scenario:supplies", "rule:scenario:carrying-supply-boxes"):
+        scoped = published_pilot.faq_rulings_for_topic(
+            topic, rules_revision="5.3", as_of="2026-09-01",
+            scenario_id="scenario:supplies",
+        )
+        selected = [item for item in scoped if item["id"] == ruling_id]
+        assert len(selected) == 1
+        ruling = selected[0]
+        assert "cannot enter Marker State" in ruling["answer"]
+        assert ruling["matched_applicability"] == [{
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            "scenarioIds": ["scenario:supplies"],
+        }]
+        assert ruling["selected_citation"] == {
+            "sourceId": "n5-faq-v0.1-en-pdf", "page": 3,
+        }
+        assert {(c["source_id"], c["page"]) for c in ruling["citations"]} == {
+            ("n5-faq-v0.1-en-pdf", 3), ("n5-faq-v0.1-es-pdf", 3),
+        }
+        assert ruling["original_publication"] == {
+            "collectionId": "n5-faq-v0.1",
+            "sourceId": "n5-faq-v0.1-en-pdf",
+            "version": "0.1",
+            "publishedDate": "2026-09-01",
+            "page": 3,
+        }
+        for context in ({}, {"scenario_id": "scenario:annihilation"}):
+            other = published_pilot.faq_rulings_for_topic(
+                topic, rules_revision="5.3", as_of="2026-09-01", **context,
+            )
+            assert ruling_id not in {item["id"] for item in other}
+        older = published_pilot.faq_rulings_for_topic(
+            topic, rules_revision="5.2", as_of="2026-09-01",
+            scenario_id="scenario:supplies",
+        )
+        assert ruling_id not in {item["id"] for item in older}
+
+
 def test_earlier_faq_identity_is_not_inferred_from_current_publication(
     published_pilot: RulesDatabase,
 ) -> None:
     records = published_pilot.records_by_kind("faq-ruling")
-    assert len(records) == 28
+    assert len(records) == 29
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.0"
         for record in records
@@ -713,7 +770,7 @@ def test_earlier_faq_identity_is_not_inferred_from_current_publication(
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.1"
         for record in records
-    ) == 9
+    ) == 10
     assert published_pilot.composed_record("skill:climb") is not None
 
 

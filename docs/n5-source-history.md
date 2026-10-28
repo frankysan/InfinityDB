@@ -117,10 +117,23 @@ also names games with Reinforcements but does not supply their procedures.
 - Explicitly N4-scoped Wiki annex revision:
   <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
 
+**Additional N5-era official Army evidence, checked 2026-10-28:**
+Corvus Belli's [March 18, 2025 Army update](https://infinityuniverse.com/en/news/army-update-march-2025)
+modifies Reinforcement variants (for example Azra'il, Vector and Nightshade).
+The [October 2, 2025 N5 Army update](https://infinityuniverse.com/en/news/army-update-october-25)
+explicitly describes recovered profiles as adapted to N5 and includes
+Reinforcements profiles, such as Aquila Guard and Swiss Guard. The
+[October 15, 2025 follow-up](https://infinityuniverse.com/en/news/army-update-october-2025-part2)
+also adjusts Reinforcement variants. These establish that official N5 Army
+data continued to include Reinforcements; they do **not** supply an
+annex version, Commlink's precise N5 effects, or legal roster composition
+semantics. The live Wiki still labels its Reinforcements page as an N4 Annex.
+
 **Unresolved source boundary:** ITS 18 calls for an Annex without supplying a
-version identifier in its p. 27 cross-reference. We have not established an
-official N5-applicable revision of that Annex, nor an official adoption statement
-for the N4 text. Do not mark `skill:commlink` reviewed in the 1.0 candidate,
+version identifier in its p. 27 cross-reference. The N5-era official Army updates
+confirm maintained source variants but do not identify the governing procedures.
+We have not established an official N5-applicable revision of that Annex, nor
+an official adoption statement for the N4 text. Do not mark `skill:commlink` reviewed in the 1.0 candidate,
 treat the old exception as a current N5 decision, or claim Reinforcements is
 obsolete. Verify the annex revision or obtain an explicit ruling before
 curating its procedural Skill effects as N5.
