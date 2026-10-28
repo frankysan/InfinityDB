@@ -143,6 +143,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Refresh the release-candidate baseline and source occupancy gate once
       the Army/rules database pair is frozen for 1.0. Do not reuse the
       pre-Peripheral-projection publication SHA or paired runtime revision.
+    - [x] Reconcile the currently pinned source artifacts without fetching
+      anything. The 2026-10-28 source-evidence run matched all **113/113**
+      archived Wiki revisions, **88/88** English Wiki references across 74
+      pages, and **2/2** Spanish references; both language snapshots matched
+      their declared hashes. The pinned Army ZIP matched the current
+      application database source identity. The available N5.3 PDF has no
+      maintained byte-hash pin, FAQ v0.1 still needs publication-scope review,
+      and the available Reinforcements PDFs are N4 rather than a verified N5
+      annex. This is source-identity evidence only, not gameplay or browser
+      completeness. Full local report:
+      `local/audits/gate-1.0/current-20261028/source-evidence.md`.
   - [ ] Reconcile each N5 update-post changelog item with its applicable versioned
     Army snapshot, rules/FAQ PDF, exact Wiki revision, and available historical N5
     versions. Record unmatched announcement claims and unknown release/snapshot
@@ -272,10 +283,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       current rules from those older files or the related Wiki page.
       Do not make full ITS-season publication a 1.0 requirement.
   - [ ] Reconcile `data/curated/rules-interactions/reviews.json` and `catalog-scope.json` with the
-    pinned input set. Historical review/defer release labels are evidence, not the active roadmap:
-    the current 1.0 ledger has no pending identities. Reassess deferred candidates and changed
-    inputs against the 1.0 gate rather than treating every candidate as automatically required
-    or automatically excluded.
+    pinned input set. Historical review/defer release labels are evidence, not the active roadmap.
+    A preliminary audit of the current tracked database pair found that the maintained primary
+    scope still targets 0.7.0 and omits the published `activate-disco-ball`, `request-specball`,
+    and `firewall` identities, whose reviews target 1.0.0. The independent 1.0.0 supporting-
+    identity slice passes 111/111, but does not expand or certify that primary catalog: the
+    maintained primary denominator remains 182 items at 0.7.0. A refresh against the current
+    database pair exposes the three omitted primary identities and cannot be treated as a
+    release check until its target and review coverage are reconciled. Commlink remains under a
+    post-0.7.0 scope exception in that historical ledger. Current evidence identifies its
+    Reinforcements Wiki source as N4-only, while N5.3 p. 6 only cross-references games with
+    Reinforcements; the available evidence does not establish a current N5 annex. Keep Commlink
+    unresolved for 1.0 rather than importing N4 rules or treating the old exception as a current
+    scope decision. Reconcile the 1.0 primary review baseline and Commlink against pinned inputs,
+    preserving historical review dates and labels as provenance.
   - [ ] Turn confirmed gaps into bounded batches under the owning tasks below. Each batch names
     the concepts/source sections, dependency, missing contract or content, and completion evidence;
     material source conflicts need reviewed applicability and clear user-visible disclosure
