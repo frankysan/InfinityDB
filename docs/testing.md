@@ -2681,6 +2681,35 @@ clarification. Previous browser acceptance covers all 24 selections;
 this source-review milestone does not close the project-wide 1.0
 source inventory or normal release checklist.
 
+**Repeatable core-scenario browser regression, 2026-10-28:** The tracked
+`tests/test_verify_scenario_faq_browser.py` suite now includes a
+source-chart-to-ordinary-browser matrix for all four Core scenarios and
+six Army Points sizes at 1440/390 px. It checks presented Army Points,
+SWC (including Domination's documented 350-point conflict), table sizes,
+minimum Victory Points where applicable, Objective and Rule/Skill card
+counts, canonical inline map dimensions, N5.3 citations, scoped source
+notes, and reload persistence. Additional browser cases cover
+keyboard-operated catalog-to-detail/back navigation for all four
+scenarios at 1440/390/320 px; scoped Rule/Skill navigation with restored
+scenario selection; rapid successive game-size changes; controlled
+catalog failure/empty states; and detail API failure recovery.
+The companion catalog tests independently pin the 24 curated chart
+rows; the browser suite tests their player-facing rendering.
+
+Run this reproducible local regression from the repository root:
+
+```powershell
+.venv\Scripts\python.exe -m tools.run_checks --stage test tests/test_verify_scenario_faq_browser.py
+.venv\Scripts\python.exe -m tools.run_checks --stage test tests/test_scenario_catalog.py
+.venv\Scripts\python.exe -m tools.run_checks --stage test tests/test_scenario_api.py
+```
+
+The WSGI-backed browser uses a fresh isolated rules export and the
+checkout's Army database. This is repeatable **local development evidence**,
+not a substitute for broader manual visual/touch review, source
+inventory, hosted exact-version deployment or the final 1.0 release gate.
+The official cross-language Domination discrepancy remains unresolved.
+
 ## 1.0 FAQ v0.1 pilot acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** The

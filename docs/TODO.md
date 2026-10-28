@@ -543,9 +543,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - **Browser acceptance:** The separate
     [1.0 core-scenario browser checklist](#final-10-acceptance) owns
     keyboard/touch, rapid selection, theme/distance, direct/soft navigation,
-    and loading/empty/error states. Bounded Chromium acceptance subsequently
-    covered all 24 selections; rerun on the final candidate. The earlier
-    user-confirmed visual review and lifecycle tests alone do not establish it.
+    and loading/empty/error states. The tracked
+    `test_verify_scenario_faq_browser.py` now repeats source-chart-to-browser
+    checks for all 24 configurations at 1440/390 px, plus keyboard catalog
+    and scoped Skill navigation, soft navigation/back, rapid selections,
+    empty/error and recovery cases (320 px catalog coverage included).
+    See [the repeatable acceptance procedure](testing.md#10-four-core-scenario-browser-acceptance).
+    Rerun against the final candidate, including broader visual/touch,
+    full-source and hosted gates; this does not itself certify 1.0 completeness.
   - **Completion:** the final source inventory accounts for every in-scope fact and
     scoped concept, and all four scenarios remain understandable and navigable in
     every supported configuration. No mutable match state or live scoring engine is required.
