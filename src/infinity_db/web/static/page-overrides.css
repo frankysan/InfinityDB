@@ -802,6 +802,15 @@ html:not([data-developer-mode="true"])
   margin: 0;
 }
 
+.scenario-map-placement-note {
+  margin: 0;
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
 .scenario-marker-dimensions {
   display: grid;
   gap: 8px;
@@ -873,6 +882,13 @@ svg.scenario-map .measurement {
   fill: none;
   stroke: var(--color-scenario-map-measurement);
   stroke-width: .05;
+}
+
+svg.scenario-map .center-measurement {
+  fill: none;
+  stroke: var(--color-scenario-map-measurement);
+  stroke-width: .075;
+  stroke-dasharray: .3 .16;
 }
 svg.scenario-map .dimension-label,
 svg.scenario-map .area-size {

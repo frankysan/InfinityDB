@@ -952,8 +952,12 @@ def test_scenario_map_api_renders_selected_maintained_geometry(
     assert headers["content-type"].startswith("image/svg+xml")
     assert b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"' in body
     assert b'data-unit="in"' in body
-    assert b'id="quadrant-1-size" class="area-size"' in body
-    assert "24″ × 12″".encode() in body
+    assert b'id="quadrant-1-size" class="area-size"' not in body
+    assert b'id="console-q1-center-left"' in body
+    assert b'id="console-q1-center-top"' in body
+    assert b'data-reference="center"' in body
+    assert b'data-distance-inches="12"' in body
+    assert b'data-distance-inches="18"' in body
 
     status, _, body = request(
         scenario_app,

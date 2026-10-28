@@ -177,6 +177,17 @@ function mapCard(item) {
   if (selectedPublication.revision) params.set("revision", selectedPublication.revision);
   image.src = `/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?${params}`;
   figure.append(heading, image);
+  if (item.slug === "domination" && item.publication?.collection_id === "n5-core") {
+    const note = document.createElement("p");
+    note.className = "scenario-map-placement-note";
+    note.append("Dashed measurements locate each Console center from the nearest table edges. Shaded Quadrants are scoring areas, not marker footprints.");
+    const citation = (item.citations || []).find((entry) => entry.page === 152);
+    if (citation) {
+      note.append(" · ");
+      note.append(rulesCitationNode(citation));
+    }
+    figure.append(note);
+  }
   const markers = item.placement?.marker_dimensions || [];
   if (markers.length) {
     const dimensions = document.createElement("div");

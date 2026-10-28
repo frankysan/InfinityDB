@@ -1162,6 +1162,24 @@ instances. The map's SVG circles retain the same fixed-mm metadata, and
 the player-facing setup note keeps that physical measurement distinct from
 scoring-area geometry, map drawing scale, and configurable game distances.
 Do not invent dimensions for unreviewed marker types.
+
+**Domination Console placement** is another derived *map-only* projection.
+The pinned N5.3 English scenario map (printed p. 152) locates each Console
+at the center of its scoring Quadrant. The renderer recognizes only the
+complete four-Quadrant/four-Console arrangement and verifies that all four
+centers coincide before drawing placement rulers. It measures directly
+from each Console **center** to its nearest horizontal and vertical table
+edges, not from the marker circumference. For the 24 × 32, 32 × 48 and
+48 × 48 inch tables, the corresponding nearest horizontal/vertical
+edge distances are **6/12**, **8/18**, and **12/18** inches. Measurements
+use the normal in/cm game-distance conversion, independently of physical
+40 mm Console diameters. The existing four scoring rectangles remain
+intact: they define gameplay scoring regions, not small placement zones.
+The renderer omits only their redundant dimension annotations in this
+recognized setup, retaining all semantic source geometry, marker centers,
+zone boundaries, and deployment-depth measurements. No curated data or
+generated-database contract changes are required.
+
 The validated foundation accepts a Side with multiple Deployment Zone
 element references and different objective `sideIds` (needed by
 `Crossing Lines` and `Critical Intervention` respectively); both survive

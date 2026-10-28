@@ -188,6 +188,56 @@ def test_core_scenario_marker_sizes_are_visible_and_physically_fixed(
 
 
 @pytest.mark.parametrize("width", [1440, 390])
+def test_domination_embedded_map_emphasizes_console_center_placement(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for points, horizontal, vertical in ((150, 6, 12), (200, 8, 18), (300, 12, 18)):
+            page.goto(
+                f"{ORIGIN}/scenarios/domination?army_points={points}",
+                wait_until="domcontentloaded",
+            )
+            svg = page.locator("svg.scenario-map")
+            svg.wait_for(state="visible", timeout=60000)
+            guides = svg.locator("g.center-measurement")
+            assert guides.count() == 8
+            assert svg.locator('rect.scoring').count() == 4
+            assert svg.locator('text.area-size[data-target^="quadrant-"]').count() == 0
+            note = page.locator(".scenario-map-placement-note")
+            assert note.is_visible()
+            assert "each Console center" in note.inner_text()
+            assert "scoring areas" in note.inner_text()
+            assert "p. 152" in note.inner_text()
+            for unit, scale, suffix in (("in", 1, "″"), ("cm", 2.5, " cm")):
+                page.evaluate(
+                    """(unit) => {
+                      const toggle = document.querySelector("#distance-unit-toggle");
+                      toggle.checked = unit === "in";
+                      toggle.dispatchEvent(new Event("change", { bubbles: true }));
+                    }""",
+                    unit,
+                )
+                for edge, inches in (("left", horizontal), ("top", vertical)):
+                    group = svg.locator(
+                        f'#console-q1-center-{edge}'
+                    )
+                    assert group.get_attribute("data-reference") == "center"
+                    label = group.locator("text.dimension-label")
+                    assert label.get_attribute("data-distance-inches") == str(inches)
+                    assert label.text_content() == f"{inches * scale:g}{suffix}"
+                assert page.evaluate(
+                    "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                ), (width, points, unit)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
 def test_scenario_rule_cards_omit_only_redundant_subtitles(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

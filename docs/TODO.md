@@ -506,13 +506,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     the published English-source 6 and conflicting official Spanish 7 must be
     clearly sourced and explained. An official clarification is not required
     for release; preserve the uncertainty and reviewed publication baseline.
-  - [ ] **Data processing + Web frontend:** Correct the **Domination map's
-    small scoring-quadrant depiction** before 1.0. Prioritize the distances
-    from each quadrant's center point to the table edges, which players use
-    to place markers, rather than suggesting that the small quadrant area
-    itself is the important measurement. Verify the source-defined center
-    coordinates and derived labels for every supported table size, both
-    distance-unit settings, and standalone/embedded SVG views.
+  - [x] **Data processing + Web frontend:** Correct **Domination
+    center-placement measurements** before 1.0. Keep all four source-defined
+    scoring Quadrants intact, but replace their on-map area-size captions
+    with dashed rulers from each Console **center** to its nearest horizontal
+    and vertical table edges. Derived nearest-edge distances from the pinned
+    N5.3 map (p. 152) are 6/12 in (150 points), 8/18 in (200–250),
+    and 12/18 in (300–400), following the normal in/cm conversion.
+    Render the same measured coordinates in standalone and embedded SVG
+    and explain that shaded Quadrants are scoring regions, not Console
+    marker footprints. The projection activates only for the verified
+    four-Quadrant/four-Console layout; no curated geometry or rules
+    database rebuild is needed. SVG, API and desktop/mobile Chromium
+    acceptance cover all three table configurations and both units.
+    See [the map projection contract](data-model.md#current-scenario-foundation).
   - [x] **Data processing + Web frontend:** Show **physical scenario
     marker diameters** alongside the normal setup map. The read-only
     `placement.marker_dimensions` projection derives type and count from
