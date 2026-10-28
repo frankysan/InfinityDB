@@ -802,6 +802,30 @@ html:not([data-developer-mode="true"])
   margin: 0;
 }
 
+.scenario-marker-dimensions {
+  display: grid;
+  gap: 8px;
+  padding: 10px 16px 16px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.scenario-marker-dimensions h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.scenario-marker-dimensions .detail-list {
+  margin: 0;
+  padding-inline-start: 22px;
+  font-size: var(--font-size-sm);
+}
+
+.scenario-marker-dimensions .detail-source {
+  margin: 0;
+  line-height: 1.5;
+}
+
 .scenario-map {
   display: block;
   width: 100%;

@@ -831,6 +831,51 @@ def test_scenario_grid_can_shrink_to_narrow_viewports(scenario_app: Application)
 
 
 @pytest.mark.parametrize(
+    ("slug", "marker_type", "name", "count", "diameter"),
+    [
+        ("domination", "console", "Console A Marker", 4, 40),
+        ("supplies", "supply-box", "Supply Box Marker", 3, 25),
+        ("annihilation", None, None, 0, None),
+        ("firefight", None, None, 0, None),
+    ],
+)
+def test_core_scenario_marker_sizes_are_source_cited_and_independent_of_game_size(
+    scenario_app: Application,
+    slug: str,
+    marker_type: str | None,
+    name: str | None,
+    count: int,
+    diameter: int | None,
+) -> None:
+    for points in (150, 200, 250, 300, 350, 400):
+        status, _, body = request(
+            scenario_app, f"/api/scenarios/{slug}", query=f"army_points={points}"
+        )
+        assert status == 200
+        placement = json.loads(body)["placement"]
+        physical = placement["marker_dimensions"]
+        assert physical == ([] if marker_type is None else [{
+            "marker_type": marker_type,
+            "name": name,
+            "count": count,
+            "diameter_mm": diameter,
+            "citation": {
+                "source_id": "its-season-18-en-pdf",
+                "source_title": "ITS Season 18: Overheat (English)",
+                "source_version": "2026.09.01",
+                "source_url": "https://experience.corvusbelli.com/en/infinity/its-rules",
+                "page": 17,
+            },
+        }])
+        occurrences = [
+            element for element in placement["geometry"]["elements"]
+            if element["kind"] == "marker"
+        ]
+        assert len(occurrences) == count
+        assert all(element["markerType"] == marker_type for element in occurrences)
+
+
+@pytest.mark.parametrize(
     "slug",
     ["annihilation", "domination", "supplies", "firefight"],
 )
@@ -851,6 +896,24 @@ def test_scenario_map_api_renders_every_supported_configuration(
         assert status == 200
         assert headers["content-type"].startswith("image/svg+xml")
         assert b'<svg xmlns="http://www.w3.org/2000/svg"' in svg
+
+
+@pytest.mark.parametrize(
+    ("slug", "diameter", "count"),
+    [("domination", 40, 4), ("supplies", 25, 3)],
+)
+def test_standalone_marker_svg_preserves_physical_footprint_in_both_units(
+    scenario_app: Application, slug: str, diameter: int, count: int,
+) -> None:
+    for points in (150, 200, 250, 300, 350, 400):
+        for unit in ("in", "cm"):
+            status, _, body = request(
+                scenario_app, f"/api/scenarios/{slug}/map.svg",
+                query=f"army_points={points}&distance_unit={unit}",
+            )
+            assert status == 200
+            assert body.count(f'data-diameter-mm="{diameter}"'.encode()) == count
+            assert f'data-distance-unit="{unit}"'.encode() in body
 
 
 def test_scenario_map_api_supports_cm_and_rejects_invalid_unit_requests(

@@ -513,13 +513,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     itself is the important measurement. Verify the source-defined center
     coordinates and derived labels for every supported table size, both
     distance-unit settings, and standalone/embedded SVG views.
-  - [ ] **Data processing + Web frontend:** Make **canonical physical
-    dimensions of scenario markers** visible where players set up the four
-    core scenarios. Distinguish marker size/diameter from scoring-area
-    geometry, table-distance dimensions and artistic SVG scaling; source
-    and cite the dimensions rather than inferring them from drawings.
-    Validate source/model/API and readable browser presentation for each
-    supported scenario and marker type.
+  - [x] **Data processing + Web frontend:** Show **physical scenario
+    marker diameters** alongside the normal setup map. The read-only
+    `placement.marker_dimensions` projection derives type and count from
+    each selected geometry, using the existing canonical 40 mm Console
+    and 25 mm Supply Box footprints. The cited source is the official,
+    pinned ITS Season 18 v2026.09.01 token-diameter chart (p. 17);
+    N5.3 core pp. 151 and 153 establish the marker types/placement.
+    This uses an ITS physical-token source, **not** ITS scenario rules.
+    The browser explicitly distinguishes mm footprint from scoring
+    areas, map drawing scale and inch/cm game distances.
+    All six supported Army Points settings, all four Core scenarios,
+    standalone SVGs in both units, and desktop/mobile Chromium display
+    are covered; Annihilation and Firefight correctly omit marker rows.
+    See [the marker projection contract](data-model.md#current-scenario-foundation).
   - **Browser acceptance:** The separate
     [1.0 core-scenario browser checklist](#final-10-acceptance) owns
     keyboard/touch, rapid selection, theme/distance, direct/soft navigation,

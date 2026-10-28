@@ -140,6 +140,54 @@ def test_reference_provenance_labels_remain_distinct_across_themes(
 
 
 @pytest.mark.parametrize("width", [1440, 390])
+def test_core_scenario_marker_sizes_are_visible_and_physically_fixed(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for slug, expected in (
+            ("domination", "4 × Console A Marker — 40 mm diameter"),
+            ("supplies", "3 × Supply Box Marker — 25 mm diameter"),
+            ("annihilation", None),
+            ("firefight", None),
+        ):
+            page.goto(
+                f"{ORIGIN}/scenarios/{slug}?army_points=300",
+                wait_until="domcontentloaded",
+            )
+            page.locator(".scenario-map-card").wait_for(state="visible", timeout=60000)
+            marker = page.locator(".scenario-marker-dimensions")
+            if expected is None:
+                assert marker.count() == 0
+                continue
+            assert marker.count() == 1
+            for unit in ("in", "cm"):
+                page.evaluate(
+                    """async (unit) => {
+                      const preferences = await import("/static/preferences.js");
+                      preferences.saveDistanceUnit(unit);
+                      window.dispatchEvent(new Event("distanceunitchange"));
+                    }""",
+                    unit,
+                )
+                assert expected in marker.inner_text()
+                assert "not scoring area or map scale" in marker.inner_text()
+                citation = marker.locator(".detail-source a")
+                assert citation.count() == 1
+                assert "ITS Season 18" in citation.inner_text()
+                assert "p. 17" in citation.inner_text()
+                assert page.evaluate(
+                    "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                ), (width, slug, unit)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
 def test_scenario_rule_cards_omit_only_redundant_subtitles(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

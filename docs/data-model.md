@@ -1144,6 +1144,24 @@ ending, and minimum-VP ending are shared. Domination retains its explicit 350-po
 Objective definitions use the same reference mechanism; geometry titles come from the including
 scenario as presentation metadata. Unsupported fields and mismatched component kinds fail closed.
 References are collection-local; cross-collection historical/season selection remains future work.
+
+**Scenario marker sizes** are a derived, read-only setup projection:
+`placement.marker_dimensions` enumerates only marker types actually present
+in the selected configuration's validated geometry, with occurrence count,
+physical diameter in **millimeters**, and a source citation. The existing
+`marker_diameter_mm()` registry owns physical sizes; neither table
+dimensions (inches/centimeters) nor apparent SVG scale change the footprint.
+The pinned N5.3 Core PDF pp. 151 and 153 identifies the Console A and
+Supply Box markers. The separately pinned official ITS Season 18 document
+(version 2026.09.01, printed p. 17, token diameter chart) supplies their
+numerical sizes: Console 40 mm, Supply Box 25 mm. This ITS citation supplies
+physical marker metadata only, **not** ITS-specific scenario rules. Domination
+has four Consoles and Supplies three Supply Boxes for every supported Army
+Points setting; Annihilation and Firefight have no placed scenario-marker
+instances. The map's SVG circles retain the same fixed-mm metadata, and
+the player-facing setup note keeps that physical measurement distinct from
+scoring-area geometry, map drawing scale, and configurable game distances.
+Do not invent dimensions for unreviewed marker types.
 The validated foundation accepts a Side with multiple Deployment Zone
 element references and different objective `sideIds` (needed by
 `Crossing Lines` and `Critical Intervention` respectively); both survive

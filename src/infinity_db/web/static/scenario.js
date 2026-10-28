@@ -177,6 +177,27 @@ function mapCard(item) {
   if (selectedPublication.revision) params.set("revision", selectedPublication.revision);
   image.src = `/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?${params}`;
   figure.append(heading, image);
+  const markers = item.placement?.marker_dimensions || [];
+  if (markers.length) {
+    const dimensions = document.createElement("div");
+    dimensions.className = "scenario-marker-dimensions";
+    const title = document.createElement("h3");
+    title.textContent = "Physical marker sizes";
+    const list = document.createElement("ul");
+    list.className = "detail-list";
+    for (const marker of markers) {
+      const row = document.createElement("li");
+      row.textContent = `${marker.count} × ${marker.name} — ${marker.diameter_mm} mm diameter`;
+      list.append(row);
+    }
+    const note = document.createElement("p");
+    note.className = "detail-source";
+    note.append("Physical token diameter, not scoring area or map scale · ");
+    // One shared source specifies the available Core marker types.
+    note.append(rulesCitationNode(markers[0].citation));
+    dimensions.append(title, list, note);
+    figure.append(dimensions);
+  }
   // <img> SVGs cannot inherit theme variables. Inline the same-origin generated
   // SVG, as we do for the themed logo, keeping the image as a network fallback.
   fetch(image.src, { signal: pageController.signal })

@@ -7,6 +7,7 @@ from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, route_slug_from_typed_domain_id
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.scenario_geometry import MarkerElement, marker_diameter_mm, parse_scenario_geometry
 
 
 def _scenario_slug(record: dict[str, Any]) -> str:
@@ -63,6 +64,45 @@ def _supported_army_points(record: dict[str, Any]) -> list[int]:
     if len(points) != len(set(points)):
         raise ValueError(f"Scenario {record.get('id')!r} has duplicate game-size rows")
     return points
+
+
+# Source: pinned official ITS Season 18 v2026.09.01, printed p. 17
+# ("Diameter of ITS Tokens"). Core N5.3 pp. 151/153 identify the
+# corresponding Console A and Supply Box markers, but do not print mm sizes.
+_MARKER_SIZE_CITATION = {
+    "source_id": "its-season-18-en-pdf",
+    "source_title": "ITS Season 18: Overheat (English)",
+    "source_version": "2026.09.01",
+    "source_url": "https://experience.corvusbelli.com/en/infinity/its-rules",
+    "page": 17,
+}
+_MARKER_LABELS = {
+    "console": "Console A Marker",
+    "supply-box": "Supply Box Marker",
+}
+
+
+def _marker_dimensions(geometry: dict[str, Any]) -> list[dict[str, Any]]:
+    """Project marker counts and *physical* footprints from canonical geometry."""
+    parsed = parse_scenario_geometry(geometry)
+    counts: dict[str, int] = {}
+    for element in parsed.elements:
+        if isinstance(element, MarkerElement):
+            counts[element.marker_type] = counts.get(element.marker_type, 0) + 1
+    result: list[dict[str, Any]] = []
+    for marker_type, count in counts.items():
+        diameter = marker_diameter_mm(marker_type)
+        label = _MARKER_LABELS.get(marker_type)
+        if diameter is None or label is None:
+            raise ValueError(f"Missing reviewed marker dimensions for {marker_type!r}")
+        result.append({
+            "marker_type": marker_type,
+            "name": label,
+            "count": count,
+            "diameter_mm": diameter,
+            "citation": dict(_MARKER_SIZE_CITATION),
+        })
+    return result
 
 
 class ScenarioCatalog:
@@ -279,6 +319,7 @@ class ScenarioCatalog:
                 "configuration_id": configuration_id,
                 "configuration_army_points": deepcopy(configuration_points),
                 "geometry": deepcopy(configuration["geometry"]),
+                "marker_dimensions": _marker_dimensions(configuration["geometry"]),
             },
             "objectives": objectives,
             "special_rules": special_rules,
