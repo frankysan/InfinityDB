@@ -24300,23 +24300,18 @@
             "id": "rule:specialist-troops:standard",
             "kind": "rule",
             "name": "Specialist Troops",
-            "summary": "Skills that qualify a Trooper as a Specialist for the applicable scenario.",
+            "summary": "Specialist Troops are Troopers whose Skills qualify them for tasks reserved for Specialists in a scenario. These are the standard qualifying Skills; each scenario determines whether the role applies and can change which Skills qualify.",
             "scope": {
                 "game": "N5",
                 "seasons": [
                     "current"
-                ],
-                "scenarios": [
-                    "scenario:domination",
-                    "scenario:supplies",
-                    "scenario:firefight"
                 ]
             },
             "composition": {
                 "role": "definition"
             },
             "facts": {
-                "category": "scenario-rule",
+                "category": "basic-rule",
                 "effects": [],
                 "restrictions": [
                     "[[skill:doctor:plural]] and [[skill:engineer:plural]] cannot use [[skill:peripheral:plural]] for tasks reserved for Specialist Troops.",

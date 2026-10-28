@@ -890,13 +890,21 @@ would materially impair required reference access, clarity or source disclosure.
   destinations, focus/scroll reachability, responsive sticky navigation,
   settings expansion and keyboard/touch operation. See the
   [responsive design contract](web-design-guidelines.md#make-responsiveness-a-content-priority-decision).
-- [ ] **Data processing + Web backend + Web frontend:** Make the term
-  **Specialist Troops** discoverable through **global search**, resolving
-  to its reviewed reference definition and relevant core-scenario usage.
-  Reuse `rule:specialist-troops:standard` and existing search identities;
-  avoid inventing a universal Trooper attribute from scenario-dependent
-  qualifications. Test exact/partial term queries, navigation and
-  source/scenario context in the normal browser.
+- [ ] **Data processing + Web backend + Web frontend:** Publish
+  **Specialist Troops** as an **InfinityDB general reference Rule**, even
+  though the official N5.3 source defines it within individual scenarios.
+  The maintained `rule:specialist-troops:standard` now carries one
+  unscoped standard qualifier list in the General Rules catalog,
+  search and Glossary; scenario inclusions preserve their explicit
+  `addSkills`/`removeSkills` precedence and cited N5.3 context.
+  The General Rules detail derives **Used by** links from the current
+  Domination, Supplies and Firefight inclusions. Exact/partial HTTP
+  search and browser navigation at desktop/mobile are verified.
+  This does **not** create an unconditional Specialist attribute
+  for Units. **Before closing:** rebuild the tracked
+  `data/generated/rules.db` from curated source and pass the
+  on-disk source/publication parity test, followed by ordinary checks.
+  The bounded rules check builds a temporary database only.
 - [ ] **Web backend + Web frontend:** Add a **Specialist Troops filter**
   to the Unit Explorer using reviewed qualification criteria. State which
   baseline or selected scenario context the filter applies to, retain

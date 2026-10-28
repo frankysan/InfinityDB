@@ -1153,9 +1153,17 @@ Classified Objective choices, `Double Bind`'s selectable objective sets, or
 multiple active season revisions. Those remain future opt-in features and
 cannot be inferred from core scenario records.
 
-Specialist Troops uses one shared Rule, `rule:specialist-troops:standard`, with
-`facts.specialists.anyOfSkills` as a JSON array of complete Skill IDs. Scenario inclusions author
-only `addSkills` and `removeSkills` differences. Resolution rejects unknown, duplicate, conflicting,
+Specialist Troops uses one **unscoped, InfinityDB-owned General Rules
+presentation** of the shared Rule `rule:specialist-troops:standard`, published
+at `/rules/specialist-troops-standard` and in global search/Glossary.
+Its source citations remain the scenario sections in N5.3, not a claim that
+the official core rules define a universal Specialist Troop attribute.
+`facts.specialists.anyOfSkills` is the standard qualifier list as complete
+Skill IDs. Scenarios explicitly include the same Rule and author only
+`addSkills` and `removeSkills` differences; only the selected scenario
+determines whether a Trooper qualifies. General Rules details derive
+**Used by** links from actual scenario inclusions, rather than maintaining a
+second relationship list. Resolution rejects unknown, duplicate, conflicting,
 or non-baseline removals and produces an effective qualifier list without changing the baseline.
 Doctor/Engineer Peripheral restrictions and the Chain of Command (Non Specialist) qualification
 exception are maintained once. That exception affects qualification through Chain of Command,

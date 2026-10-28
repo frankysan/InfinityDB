@@ -40,6 +40,52 @@ def chrome() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width", [1440, 390])
+def test_specialist_troops_search_leads_to_general_rule_and_scenarios(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(
+            f"{ORIGIN}/search?q=Specialist%20Troops",
+            wait_until="domcontentloaded",
+        )
+        search_link = page.locator(
+            '#search-list a[href="/rules/specialist-troops-standard"]'
+        )
+        search_link.wait_for(state="visible", timeout=60000)
+        assert search_link.count() == 1
+        assert search_link.inner_text() == "Specialist Troops"
+        assert "GENERAL RULE" in search_link.locator("..").inner_text()
+        search_link.click()
+        page.wait_for_url(f"{ORIGIN}/rules/specialist-troops-standard")
+        card = page.locator("#rule-rule-specialist-troops-standard")
+        card.wait_for(state="visible", timeout=60000)
+        assert "each scenario determines" in card.inner_text()
+        assert card.get_by_role("heading", name="Qualifying Skills").is_visible()
+        assert card.locator(".detail-list li").count() >= 7
+        assert "Non Specialist" in card.inner_text()
+        assert "p. 152" in card.inner_text()
+        links = page.locator('.reference-usage-list a[href^="/scenarios/"]')
+        assert [link.get_attribute("href") for link in links.all()] == [
+            "/scenarios/domination",
+            "/scenarios/firefight",
+            "/scenarios/supplies",
+        ]
+        page.locator('.reference-usage-list a[href="/scenarios/supplies"]').click()
+        page.wait_for_url(f"{ORIGIN}/scenarios/supplies")
+        scoped = page.locator("#rule-rule-specialist-troops-standard")
+        scoped.wait_for(state="visible", timeout=60000)
+        assert scoped.get_by_role("heading", name="Qualifying Skills").is_visible()
+        assert "p. 154" in scoped.inner_text()
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
 def test_scenario_rule_cards_omit_only_redundant_subtitles(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

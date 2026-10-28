@@ -1745,20 +1745,24 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             for scenario_id in scoped:
                 for skill_id in facts.get("definesSkills", []):
                     registry.record(skill_id, "skill", scenario_id)
-            if "specialists" in facts:
-                baseline = facts["specialists"]
-                if not isinstance(baseline, dict) or set(baseline) != {"anyOfSkills"}:
-                    raise ValueError("Specialist baseline requires anyOfSkills")
-                qualifiers = baseline["anyOfSkills"]
-                if (
-                    not isinstance(qualifiers, list)
-                    or not qualifiers
-                    or len(set(qualifiers)) != len(qualifiers)
-                ):
-                    raise ValueError("Specialist qualifiers must be a unique non-empty array")
-                for skill_id in qualifiers:
-                    if record_kind_by_id.get(skill_id) != "skill":
-                        raise ValueError(f"Unknown Specialist Skill {skill_id!r}")
+        if "specialists" in facts:
+            if record["kind"] != "rule" or facts.get("category") not in {
+                "basic-rule", "scenario-rule",
+            }:
+                raise ValueError("Specialist qualifiers require a general or scenario Rule")
+            baseline = facts["specialists"]
+            if not isinstance(baseline, dict) or set(baseline) != {"anyOfSkills"}:
+                raise ValueError("Specialist baseline requires anyOfSkills")
+            qualifiers = baseline["anyOfSkills"]
+            if (
+                not isinstance(qualifiers, list)
+                or not qualifiers
+                or len(set(qualifiers)) != len(qualifiers)
+            ):
+                raise ValueError("Specialist qualifiers must be a unique non-empty array")
+            for skill_id in qualifiers:
+                if record_kind_by_id.get(skill_id) != "skill":
+                    raise ValueError(f"Unknown Specialist Skill {skill_id!r}")
     if "scenarioComponents" in document:
         for component in document["scenarioComponents"]["definitions"]:
             for citation in component["citations"]:

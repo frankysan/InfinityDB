@@ -5387,6 +5387,52 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     assert json.loads(body)["error"] == "Provide q exactly once"
 
 
+def test_specialist_troops_general_rule_is_searchable_with_scenario_context(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    expected = {
+        "domain": "General rule", "name": "Specialist Troops",
+        "href": "/rules/specialist-troops-standard",
+    }
+    for query in ("Specialist Troops", "specialist troop", "specialist"):
+        status, _, body = request(
+            rules_app, "/api/search", query=urlencode({"q": query}),
+        )
+        assert status == 200
+        assert json.loads(body)["items"].count(expected) == 1
+
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    entries = [
+        item for item in json.loads(body)["items"]
+        if item["id"] == "rule:specialist-troops:standard"
+    ]
+    assert len(entries) == 1
+    assert entries[0]["href"] == expected["href"]
+    assert entries[0]["domain"] == "General rule"
+
+    status, _, body = request(rules_app, "/api/rules/specialist-troops-standard")
+    assert status == 200
+    details = json.loads(body)
+    assert details["id"] == "specialist-troops-standard"
+    assert details["rules"][0]["id"] == "rule:specialist-troops:standard"
+    assert details["rules"][0]["facts"]["category"] == "basic-rule"
+    assert len(details["rules"][0]["facts"]["specialists"]["anyOfSkills"]) == 7
+    assert "each scenario determines" in details["description"]
+    assert {cite["page"] for cite in details["rules"][0]["citations"]} == {
+        152, 154, 155,
+    }
+    assert [(row["name"], row["href"]) for row in details["used_by"]] == [
+        ("Domination", "/scenarios/domination"),
+        ("Firefight", "/scenarios/firefight"),
+        ("Supplies", "/scenarios/supplies"),
+    ]
+
+
 def test_glossary_projects_canonical_rules_and_embedded_attributes(
     app: Callable, tmp_path: Path,
 ) -> None:

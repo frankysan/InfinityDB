@@ -349,7 +349,7 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
 
     general_rules = RulesRecordCatalog(rules_database, "rules")
     general_rule_items = general_rules.list_items()
-    assert len(general_rule_items) == 21
+    assert len(general_rule_items) == 22
     assert {item["slug"] for item in general_rule_items} == {
         "command-token-strategic-use",
         "coordinated-orders",
@@ -370,9 +370,27 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
         "saving-rolls",
         "special-lieutenant-order",
         "special-dice",
+        "specialist-troops-standard",
         "supportware",
         "tactical-order",
     }
+    specialists = general_rules.get_item("specialist-troops-standard")
+    assert specialists is not None
+    assert specialists["rules"][0]["id"] == "rule:specialist-troops:standard"
+    assert specialists["rules"][0]["facts"]["specialists"]["anyOfSkills"] == [
+        "skill:doctor", "skill:engineer", "skill:forward-observer",
+        "skill:hacker", "skill:paramedic", "skill:specialist-operative",
+        "skill:chain-of-command",
+    ]
+    assert specialists["used_by"] == [
+        {"catalog": "scenarios", "catalog_name": "Scenarios", "name": name,
+         "href": f"/scenarios/{slug}"}
+        for name, slug in (
+            ("Domination", "domination"),
+            ("Firefight", "firefight"),
+            ("Supplies", "supplies"),
+        )
+    ]
     assert general_rules.get_item("fireteam-general") is None
     tactical_order = general_rules.get_item("tactical-order")
     assert tactical_order is not None
@@ -601,7 +619,7 @@ def test_all_current_general_rules_preserve_category_scoped_publication() -> Non
         for record in document["records"]
         if record_matches_domain(domain, record)
     }
-    assert len(sources) == 21
+    assert len(sources) == 22
     slugs = {
         route_slug_from_qualified_typed_domain_id(
             record_id, expected_domain="rule", context="General Rule source identity"

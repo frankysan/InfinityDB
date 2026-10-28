@@ -457,7 +457,11 @@ def test_scope_is_explicit_and_skill_definitions_are_separate(
     database = RulesDatabase(output)
     database.validate()
     assert database.composed_record("skill:hack-consoles") is None
-    assert database.composed_record("rule:specialist-troops:standard") is None
+    specialists = database.composed_record("rule:specialist-troops:standard")
+    assert specialists is not None
+    assert specialists["facts"]["category"] == "basic-rule"
+    assert "scenarios" not in specialists["scope"]
+    assert len(specialists["facts"]["specialists"]["anyOfSkills"]) == 7
     assert database.composed_record("skill:hack-consoles", scenario_id="supplies") is None
     view = database.scenario_reference("domination")
     assert view and len(view["skills"]) == 1
@@ -469,6 +473,10 @@ def test_scope_is_explicit_and_skill_definitions_are_separate(
     assert skill["applicable_scenarios"] == [{"id": "scenario:domination", "name": "Domination"}]
     assert all(r["id"] != skill["id"] for r in view["rules"])
     assert all(not r["scope"].get("scenarios") for r in database.composed_records_by_kind("rule"))
+    assert sum(
+        r["id"] == "rule:specialist-troops:standard"
+        for r in database.composed_records_by_kind("rule")
+    ) == 1
     assert database.scenario_reference("missing") is None
     firefight = database.scenario_reference("firefight")
     assert firefight is not None and firefight["skills"] == []
