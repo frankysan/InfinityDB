@@ -629,6 +629,116 @@ def test_rules_interaction_1_0_gate_reports_regressed_pending_item(
     assert "Pending identities: scenario:supplies" in output
 
 
+def test_catalog_scope_drift_is_read_only_and_preserves_review_exceptions(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    from tools.audit_rules_interactions import _catalog_scope_drift
+
+    baseline = {
+        "targetRelease": "0.7.0",
+        "catalogs": {
+            "skills": [{"id": "old", "name": "Old"}],
+            "equipment": [{"id": "common", "name": "Old label"}],
+            "traits": [],
+            "states": [],
+        },
+        "releaseExceptions": [{
+            "catalog": "skills",
+            "itemId": "commlink",
+            "targetRelease": "post-0.7.0",
+            "reason": "Needs source review.",
+        }],
+    }
+    current = {
+        **baseline,
+        "catalogs": {
+            "skills": [{"id": "new", "name": "New"}],
+            "equipment": [{"id": "common", "name": "Current label"}],
+            "traits": [],
+            "states": [],
+        },
+    }
+    result = _catalog_scope_drift(baseline, current)
+    assert result["catalogs"]["skills"] == {
+        "added": [{"id": "new", "name": "New"}],
+        "removed": [{"id": "old", "name": "Old"}],
+        "renamed": [],
+    }
+    assert result["catalogs"]["equipment"] == {
+        "added": [],
+        "removed": [],
+        "renamed": [{
+            "id": "common", "name": "Current label", "previousName": "Old label",
+        }],
+    }
+    assert result["catalogs"]["traits"] == {
+        "added": [], "removed": [], "renamed": [],
+    }
+    assert result["releaseExceptions"] == baseline["releaseExceptions"]
+    assert main(["--report-catalog-scope-drift"]) == 2
+    assert "--database and --rules-database" in capsys.readouterr().out
+    for conflicting in (
+        ["--refresh-catalog-scope"],
+        ["--require-release", "1.0.0"],
+        ["--require-primary-release", "1.0.0"],
+        ["--check-output", str(DEFAULT_CHECKLIST_PATH)],
+    ):
+        assert main(["--report-catalog-scope-drift", *conflicting]) == 2
+        assert "cannot be combined" in capsys.readouterr().out
+
+
+def test_pinned_catalog_scope_drift_identifies_three_reviewed_primary_omissions(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    database = root / "data/generated/infinity.db"
+    rules_database = root / "data/generated/rules.db"
+    if not database.is_file() or not rules_database.is_file():
+        pytest.skip("Paired generated catalog databases unavailable")
+    original = DEFAULT_CATALOG_SCOPE_PATH.read_bytes()
+    assert main([
+        "--report-catalog-scope-drift",
+        "--database", str(database),
+        "--rules-database", str(rules_database),
+    ]) == 0
+    drift = json.loads(capsys.readouterr().out)
+    assert drift["targetRelease"] == "0.7.0"
+    assert {
+        category: [item["id"] for item in row["added"]]
+        for category, row in drift["catalogs"].items()
+    } == {
+        "skills": ["activate-disco-ball", "request-specball"],
+        "equipment": ["firewall"],
+        "traits": [],
+        "states": [],
+    }
+    assert all(
+        not row["removed"] and not row["renamed"]
+        for row in drift["catalogs"].values()
+    )
+    assert drift["releaseExceptions"] == [
+        {
+            "catalog": "skills",
+            "itemId": "commlink",
+            "targetRelease": "post-0.7.0",
+            "reason": (
+                "Commlink belongs to the official Reinforcements Extra rather than the "
+                "N5 core rules. It is explicitly vetted for 0.7.0 but its canonical "
+                "definition is deferred until the Reinforcements annex is modeled as a "
+                "separately scoped collection."
+            ),
+        },
+    ]
+    policy = json.loads(DEFAULT_POLICY_PATH.read_text(encoding="utf-8"))
+    reviews = {item["recordId"]: item for item in policy["records"]}
+    for record_id in (
+        "skill:activate-disco-ball", "skill:request-specball", "equipment:firewall",
+    ):
+        assert reviews[record_id]["status"] == "reviewed"
+        assert reviews[record_id]["targetRelease"] == "1.0.0"
+    assert DEFAULT_CATALOG_SCOPE_PATH.read_bytes() == original
+
+
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:
     document = json.loads(DEFAULT_CATALOG_SCOPE_PATH.read_text(encoding="utf-8"))
     assert document["formatVersion"] == 2

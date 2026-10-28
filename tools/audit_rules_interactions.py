@@ -223,6 +223,37 @@ def _catalog_scope_from_databases(
     }
 
 
+def _catalog_scope_drift(
+    maintained: dict[str, Any],
+    runtime: dict[str, Any],
+) -> dict[str, Any]:
+    """Describe catalog changes without promoting current entries into review scope."""
+    catalogs: dict[str, dict[str, list[dict[str, str]]]] = {}
+    for catalog in PRIMARY_CATALOGS:
+        old = {item["id"]: item["name"] for item in maintained["catalogs"][catalog]}
+        new = {item["id"]: item["name"] for item in runtime["catalogs"][catalog]}
+        catalogs[catalog] = {
+            "added": [
+                {"id": identifier, "name": new[identifier]}
+                for identifier in sorted(new.keys() - old.keys())
+            ],
+            "removed": [
+                {"id": identifier, "name": old[identifier]}
+                for identifier in sorted(old.keys() - new.keys())
+            ],
+            "renamed": [
+                {"id": identifier, "name": new[identifier], "previousName": old[identifier]}
+                for identifier in sorted(new.keys() & old.keys())
+                if old[identifier] != new[identifier]
+            ],
+        }
+    return {
+        "targetRelease": maintained["targetRelease"],
+        "catalogs": catalogs,
+        "releaseExceptions": maintained["releaseExceptions"],
+    }
+
+
 def _write_catalog_scope(path: Path, document: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
@@ -831,14 +862,33 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Rewrite --catalog-scope from --database and --rules-database before auditing.",
     )
+    parser.add_argument(
+        "--report-catalog-scope-drift",
+        action="store_true",
+        help=(
+            "Report exact public-catalog additions, removals, renamed entries and "
+            "retained release exceptions from the paired databases without editing."
+        ),
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.report_catalog_scope_drift and (
+            args.refresh_catalog_scope
+            or args.output is not None
+            or args.check_output is not None
+            or args.require_release is not None
+            or args.require_primary_release is not None
+        ):
+            raise RulesInteractionAuditError(
+                "--report-catalog-scope-drift cannot be combined with write or release gates"
+            )
         if (
             args.refresh_catalog_scope
+            or args.report_catalog_scope_drift
             or args.database is not None
             or args.rules_database is not None
         ):
@@ -853,6 +903,15 @@ def main(argv: list[str] | None = None) -> int:
                 target_release=current_scope["targetRelease"],
                 release_exceptions=current_scope["releaseExceptions"],
             )
+            if args.report_catalog_scope_drift:
+                print(
+                    json.dumps(
+                        _catalog_scope_drift(current_scope, runtime_scope),
+                        ensure_ascii=False,
+                        indent=2,
+                    )
+                )
+                return 0
             if args.refresh_catalog_scope:
                 _write_catalog_scope(args.catalog_scope, runtime_scope)
                 print(f"Rules interaction catalog scope written: {args.catalog_scope}")

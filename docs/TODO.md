@@ -304,6 +304,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       primary review; it also fails on pending primary items. It is not
       added to CI's currently passing 1.0 supporting gate until the
       maintained primary catalog and Commlink scope are reconciled.
+    - [x] Add non-mutating `--report-catalog-scope-drift` to the existing
+      rules-interaction auditor, using the paired Army/rules databases.
+      A pinned regression finds only `skill:activate-disco-ball`,
+      `skill:request-specball`, and `equipment:firewall` added versus
+      the 0.7.0 primary scope; there are no removed or renamed entries.
+      All three have reviewed N5.3 definitions and 1.0 review records
+      dated October 13–14. The report preserves the old Commlink exception
+      without endorsing it as a current N5 scope decision. Inspect with:
+      `python -m tools.audit_rules_interactions --report-catalog-scope-drift --database data/generated/infinity.db --rules-database data/generated/rules.db`.
+      This identifies the bounded delta; it does not close the 1.0
+      primary baseline or settle the missing verified N5 annex for Commlink.
   - [ ] Turn confirmed gaps into bounded batches under the owning tasks below. Each batch names
     the concepts/source sections, dependency, missing contract or content, and completion evidence;
     material source conflicts need reviewed applicability and clear user-visible disclosure
