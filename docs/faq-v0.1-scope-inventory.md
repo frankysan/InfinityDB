@@ -86,7 +86,15 @@ five-page PDF file's indices.
   Reinforcements Annex** edition boundary. The FAQ v0.1 does not
   provide Commlink mechanics or an annex adoption statement.
 
-**Next validation:** extend ordinary Supplies browser acceptance
-to verify that the contextual FAQ appears only when the Supplies
-scenario is selected; separately review the undeployed Ancillary
-ruling before expanding it beyond Annihilation.
+**Browser acceptance, 2026-10-28:** `test_verify_scenario_faq_browser.py`
+verifies the live scenario page at 1440px and 390px. It confirms that
+the Supplies clarification and citation are visible, that Annihilation
+keeps its own Ancillary clarification, and that Domination/Firefight
+display no FAQ section. Navigation reuses the same page to detect
+stale FAQ content. The source-isolated API regression also pins
+Supplies selection. This acceptance is not a general FAQ
+source-coverage or cross-scenario applicability certification.
+
+**Next review:** establish whether the undeployed Ancillary ruling
+should apply beyond Annihilation. Do not broaden it without
+scenario-specific source evidence.

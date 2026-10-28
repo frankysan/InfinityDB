@@ -1022,7 +1022,7 @@ def test_battleground_its18_is_never_returned_from_core_or_another_season(
     [
         ("annihilation", "n5-core", "5.3", ["faq-ruling:undeployed-ancillary-not-killed"]),
         ("domination", "n5-core", "5.3", []),
-        ("supplies", "n5-core", "5.3", []),
+        ("supplies", "n5-core", "5.3", ["faq-ruling:scenario-element-carrier-marker-state"]),
         ("firefight", "n5-core", "5.3", []),
         ("battleground", "its-18", "2026.09.01", []),
     ],

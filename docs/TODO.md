@@ -294,6 +294,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         See [FAQ v0.1 applicability inventory](faq-v0.1-scope-inventory.md).
         This does not certify full FAQ or browser coverage; keep scenario
         applicability explicit before further curation.
+      - [x] Validate **ordinary browser FAQ selection** for the new
+        Supplies ruling at 1440px and 390px using
+        `tests/test_verify_scenario_faq_browser.py`. The Chromium
+        acceptance checks source-linked Supplies clarification,
+        Annihilation's existing Ancillary clarification, and no
+        FAQ section in Domination or Firefight. It reuses the same
+        page across navigations to catch stale FAQ leakage.
+        `test_scenario_api.py` also pins the Supplies selection.
+        This is bounded scenario-page delivery, not a claim of full
+        FAQ browser or final release completeness.
   - [ ] Reconcile `data/curated/rules-interactions/reviews.json` and `catalog-scope.json` with the
     pinned input set. Historical review/defer release labels are evidence, not the active roadmap.
     A preliminary audit of the current tracked database pair found that the maintained primary
