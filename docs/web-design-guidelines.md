@@ -231,12 +231,21 @@ Player-facing information should dominate the normal view. Provenance, internal 
 
 Developer mode should add technical depth rather than redefine the primary presentation.
 
-The shared page footer has a collapsed, keyboard-operable **Independent community
-reference** notice. Its expanded content reiterates InfinityDB's non-commercial,
-non-affiliated status and the possibility of errors, linking to the existing
-About/attribution page. Use native `details`/`summary` disclosure and existing
-focus affordances; do not cover page controls with a fixed warning, add
-persistent dismissal state, or invent a feedback collection destination.
+The accuracy and independence notice is a **floating, viewport-bottom
+section** in the shared page shell, rather than an ordinary footer row.
+It starts **expanded** in each new browsing session, reiterating InfinityDB's
+non-commercial, non-affiliated status and potential inaccuracies, and links to
+the existing About/attribution page. Native `details`/`summary` permits
+keyboard/touch collapse to a **44px icon-only control** that remains reachable
+at the bottom corner. The open panel is viewport-bounded, adapts to narrow
+widths, and leaves scroll clearance at the end of the document. A collapse
+choice persists only in the current tab's session storage, including soft
+navigation and reload; it is not a cookie, permanent dismissal, or consent
+control. When session storage is disabled, the native disclosure still works.
+Keep visible focus and accessible expanded/collapsed state, avoid obscuring
+mobile navigation or other fixed controls, and do not invent a feedback
+collection destination. Dedicated assistive-technology testing remains part
+of final accessibility acceptance.
 
 ### Write player-facing copy for players
 

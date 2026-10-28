@@ -1,4 +1,4 @@
-"""Chromium acceptance for the shared independent-resource footer disclosure."""
+"""Chromium acceptance for the floating, session-collapsible accuracy notice."""
 
 from __future__ import annotations
 
@@ -39,43 +39,76 @@ def chrome() -> Iterator[Any]:
             browser.close()
 
 
-@pytest.mark.parametrize("width", [1440, 390, 320])
-def test_shared_footer_disclosure_keyboard_and_mobile(
-    app: Any, chrome: Any, width: int,
+@pytest.mark.parametrize("width,height", [(1440, 900), (390, 640), (320, 540)])
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_accuracy_notice_floats_and_remembers_session_toggle(
+    app: Any, chrome: Any, width: int, height: int, theme: str,
 ) -> None:
-    page = chrome.new_page(viewport={"width": width, "height": 900})
+    page = chrome.new_page(viewport={"width": width, "height": height}, has_touch=True)
     route_browser_page(page, app, ORIGIN)
     errors: list[str] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     try:
-        for path in ("/", "/about", "/scenarios/supplies?army_points=300"):
-            page.goto(f"{ORIGIN}{path}", wait_until="domcontentloaded")
-            details = page.locator("footer.page-footer details.page-footer-notice")
-            summary = details.locator("summary")
-            assert details.count() == 1
-            assert summary.count() == 1
-            assert not details.evaluate("(element) => element.open")
-            assert summary.inner_text() == (
-                "Independent community reference — important notice"
-            )
-            assert details.locator("a").get_attribute("href") == "/about"
-            assert not details.locator("p").is_visible()
-            summary.focus()
-            assert summary.evaluate(
-                "(element) => element === document.activeElement"
-            )
-            summary.press("Enter")
-            assert details.evaluate("(element) => element.open")
-            assert details.locator("p").is_visible()
-            disclosure = details.locator("p").inner_text()
-            assert "not affiliated with Corvus Belli S.L." in disclosure
-            assert "may contain errors" in disclosure
-            assert page.evaluate(
-                "() => document.documentElement.scrollWidth <= innerWidth + 1"
-            ), (width, path)
-            summary.press("Space")
-            assert not details.evaluate("(element) => element.open")
-            assert not details.locator("p").is_visible()
+        page.goto(f"{ORIGIN}/", wait_until="domcontentloaded")
+        page.evaluate(
+            "(theme) => document.documentElement.setAttribute('data-theme', theme)",
+            theme,
+        )
+        details = page.locator("main .page-footer-notice")
+        summary = details.locator("summary")
+        assert details.count() == 1
+        assert details.evaluate("(node) => node.open")
+        assert details.locator(".page-footer-notice-title").is_visible()
+        assert details.locator("p").is_visible()
+        assert details.locator("a").get_attribute("href") == "/about"
+        disclosure = details.locator("p").inner_text()
+        assert "not affiliated with Corvus Belli S.L." in disclosure
+        assert "may contain errors" in disclosure
+        assert summary.get_attribute("aria-label") == (
+            "Toggle InfinityDB accuracy and independence notice"
+        )
+        assert details.evaluate(
+            "(node) => getComputedStyle(node).position === 'fixed'"
+        )
+        page.evaluate("() => window.scrollTo(0, document.body.scrollHeight)")
+        bounds = details.bounding_box()
+        assert bounds is not None
+        assert bounds["x"] >= 0 and bounds["x"] + bounds["width"] <= width + 1
+        assert 0 <= height - (bounds["y"] + bounds["height"]) <= 36
+        assert bounds["height"] <= height * 0.65
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (width, theme)
+
+        summary.focus()
+        assert summary.evaluate("(node) => node === document.activeElement")
+        summary.press("Enter")
+        assert not details.evaluate("(node) => node.open")
+        assert not details.locator("p").is_visible()
+        assert not details.locator(".page-footer-notice-title").is_visible()
+        assert details.locator(".page-footer-notice-icon").is_visible()
+        closed = details.bounding_box()
+        assert closed is not None
+        assert 43 <= closed["width"] <= 45 and 43 <= closed["height"] <= 45
+        page.wait_for_function(
+            "() => sessionStorage.getItem('infinitydb-accuracy-notice-collapsed') === 'true'"
+        )
+
+        # Soft navigation replaces main; the icon and its state must survive.
+        page.evaluate("() => window.infinityNavigate('/about')")
+        page.locator("main .page-footer-notice").wait_for(state="visible")
+        assert not details.evaluate("(node) => node.open")
+        summary.press("Space")
+        assert details.evaluate("(node) => node.open")
+        page.wait_for_function(
+            "() => sessionStorage.getItem('infinitydb-accuracy-notice-collapsed') === 'false'"
+        )
+        page.reload(wait_until="domcontentloaded")
+        assert details.evaluate("(node) => node.open")
+        assert details.locator("p").is_visible()
+        page.locator(".page-footer-notice-body a[href='/about']").click()
+        page.wait_for_url(f"{ORIGIN}/about")
+        assert details.evaluate("(node) => node.open")
         assert not errors, errors
     finally:
         page.close()

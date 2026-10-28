@@ -3592,30 +3592,102 @@ html[data-distance-unit="in"] .unit-extended-statline {
   color: var(--color-text-footer);
 }
 
+/* Floating notice: visible by default, compact icon when collapsed.
+   Its position is viewport-relative, not anchored to the document footer. */
 .page-footer-notice {
-  flex-basis: 100%;
-  min-width: 0;
-  border-top: 1px solid var(--color-border-default);
-  padding-top: 8px;
+  position: fixed;
+  z-index: 6;
+  inset-inline-end: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: min(460px, calc(100vw - 24px));
+  max-height: min(60dvh, 420px);
+  overflow-y: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-menu);
+  font-size: var(--font-size-sm);
+}
+
+.page-footer-notice:not([open]) {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .page-footer-notice summary {
-  width: fit-content;
-  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 9px 12px;
   cursor: pointer;
-  padding: 6px 0;
-  color: var(--color-text-secondary);
-  font-weight: 600;
+  list-style: none;
+  color: var(--color-text-primary);
+  font-weight: 650;
+}
+
+.page-footer-notice summary::-webkit-details-marker {
+  display: none;
 }
 
 .page-footer-notice summary:hover {
-  color: var(--color-text-primary);
+  background: var(--color-surface-interactive-hover);
+}
+
+.page-footer-notice-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.page-footer-notice-title {
+  flex: 1 1 auto;
+}
+
+.page-footer-notice-collapse {
+  font-size: var(--font-size-lg);
+}
+
+.page-footer-notice:not([open]) summary {
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.page-footer-notice:not([open]) .page-footer-notice-title,
+.page-footer-notice:not([open]) .page-footer-notice-collapse {
+  display: none;
+}
+
+.page-footer-notice-body {
+  padding: 0 14px 14px;
 }
 
 .page-footer-notice p {
-  max-width: 75ch;
-  margin: 6px 0 0;
-  line-height: 1.6;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.page-footer:has(.page-footer-notice[open]) {
+  /* Allow the end of the document to scroll clear of the floating panel. */
+  padding-bottom: clamp(190px, 30vh, 270px);
+}
+
+@media (max-width: 700px) {
+  .page-footer-notice[open] {
+    inset-inline-start: max(12px, env(safe-area-inset-left));
+    width: auto;
+  }
 }
 
 .version {

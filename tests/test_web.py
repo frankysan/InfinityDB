@@ -2196,8 +2196,10 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert b'<header class="topbar page-header">' in body
     assert b'aria-label="Breadcrumb"' in body
     assert b'<footer class="page-footer">' in body
-    assert b'<details class="page-footer-notice">' in body
-    assert b"<summary>Independent community reference" in body
+    assert b'<details class="page-footer-notice" open>' in body
+    assert b'Toggle InfinityDB accuracy and independence notice' in body
+    assert b'page-footer-notice-icon' in body
+    assert b'/static/page-footer-notice.js' in body
     assert b'href="/about">About InfinityDB and attribution</a>' in body
     assert f"Version {__display_version__}".encode() in body
 

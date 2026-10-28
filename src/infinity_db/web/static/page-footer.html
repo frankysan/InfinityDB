@@ -1,9 +1,15 @@
 <footer class="page-footer">
   <span>InfinityDB <span class="version">Version {{VERSION}}</span></span>
   <span>A growing reference for your next game.</span>
-  <details class="page-footer-notice">
-    <summary>Independent community reference — important notice</summary>
-    <p>InfinityDB is a non-commercial community project and is not affiliated with Corvus Belli S.L. Its rules explanations and game information may contain errors; refer to official sources when accuracy matters. <a href="/about">About InfinityDB and attribution</a></p>
-    <!-- A future feedback link can be added here when reporting is implemented. -->
+  <details class="page-footer-notice" open>
+    <summary aria-label="Toggle InfinityDB accuracy and independence notice" title="Toggle accuracy notice">
+      <span class="page-footer-notice-icon" aria-hidden="true">!</span>
+      <span class="page-footer-notice-title">Accuracy and independence notice</span>
+      <span class="page-footer-notice-collapse" aria-hidden="true">−</span>
+    </summary>
+    <div class="page-footer-notice-body">
+      <p>InfinityDB is a non-commercial community project and is not affiliated with Corvus Belli S.L. Its rules explanations and game information may contain errors; refer to official sources when accuracy matters. <a href="/about">About InfinityDB and attribution</a></p>
+      <!-- A future feedback link can be added here when reporting is implemented. -->
+    </div>
   </details>
 </footer>

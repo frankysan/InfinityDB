@@ -61,6 +61,7 @@ ASSETS = {
     "/static/distance.js": ("distance.js", "text/javascript; charset=utf-8"),
     "/static/navigation.js": ("navigation.js", "text/javascript; charset=utf-8"),
     "/static/page-navigation.js": ("page-navigation.js", "text/javascript; charset=utf-8"),
+    "/static/page-footer-notice.js": ("page-footer-notice.js", "text/javascript; charset=utf-8"),
     "/static/themed-logo.js": ("themed-logo.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
     "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),

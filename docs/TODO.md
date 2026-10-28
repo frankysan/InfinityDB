@@ -947,18 +947,21 @@ would materially impair required reference access, clarity or source disclosure.
   and 390px confirms the Supplies rule card has no redundant summary,
   retains facts and citations, and remains navigable. See the
   [web design contract](web-design-guidelines.md#curated-rules-text-hierarchy).
-- [x] **Web frontend:** Add an accessible, **collapsible independent-resource
-  notice** in the shared page footer. Native `details`/`summary` keeps the
-  non-affiliation and accuracy warning available without covering gameplay
-  controls, links to the existing About/attribution page, and leaves a
-  reserved markup location for a later feedback link without creating an
-  inactive control or collecting data. Shared-shell regressions cover all
-  normal routes; Chromium checks at 1440px, 390px and 320px cover keyboard
-  focus, Enter/Space toggling, visibility and no horizontal overflow.
-  Native disclosure semantics provide screen-reader accessible state;
-  dedicated assistive-technology testing remains a final accessibility
-  acceptance activity. See the
-  [web design contract](web-design-guidelines.md#use-progressive-disclosure-for-secondary-information).
+- [x] **Web frontend:** Show the **accuracy/independence disclaimer** in
+  a floating section attached to the bottom of the viewport, **expanded by
+  default** for each new browsing session. The shared shell uses native
+  `details`/`summary` to collapse into an unobtrusive 44px icon-only
+  control, with a session-scoped choice that survives reload and soft
+  navigation without creating a persistent cookie or consent dependency.
+  The non-affiliation and accuracy text still links to About/attribution,
+  reserves a future feedback slot without an inactive control, and keeps
+  room to scroll page-end content clear of the panel. Shared-shell tests
+  cover normal routes; Chromium at 1440px, 390px, and 320px in both themes
+  covers default visibility, viewport geometry, keyboard toggle, focus,
+  collapsed size, mobile overflow, soft navigation, and reload.
+  Native disclosure semantics provide accessible expanded/collapsed state;
+  dedicated assistive-technology sign-off remains a final 1.0 task.
+  See the [web design contract](web-design-guidelines.md#use-progressive-disclosure-for-secondary-information).
 
 ### Final 1.0 acceptance
 
