@@ -1007,6 +1007,18 @@ coverage. Each inventory row starts with pending source/relationship/presentatio
 review. Reconcile the report with the existing source-presentation, enrichment, and
 rules-interaction audits before closing the Stage 1 inventory in `TODO.md`.
 
+The FAQ v0.1 audit inventory
+(`config/validation/n5-faq-v0.1-question-inventory.json`) additionally
+pins the exact English v0.0 and English/Spanish v0.1 PDF hashes, paths,
+versions and file-page counts. The three parameterized
+`test_pinned_faq_pdf_source_identity_and_available_bytes` cases verify
+maintained source declarations in every checkout and compare source
+SHA-256 when the ignored local PDFs are present. Missing files produce
+explicit skips, not byte-verification passes; **3/3** source hashes
+matched in the 2026-10-28 local review. This gate complements, but
+does not replace, question coverage, scenario applicability or browser
+verification.
+
 The separate read-only `tools/audit_1_0_reference_inputs.py` command
 cross-checks supplied **source bytes** with the existing enrichment report,
 the current curated Wiki citation archive and historical Wiki revisions. These

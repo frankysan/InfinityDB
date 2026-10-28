@@ -14,8 +14,10 @@ The maintained FAQ collection now contains **29** reviewed
 `faq-ruling` records with current-source citations: 27 from the
 non-ITS sections and two ITS-section answers (the scoped Supplies
 carrier and undeployed Ancillary rulings). The other **eight** answers
-in the printed ITS section have no standalone curated FAQ ruling. The section heading is evidence of
-source placement, not proof that an answer can never apply to a
+in the printed ITS section have no standalone curated FAQ ruling. Of
+the 29 published rulings, **20** are carried from the English v0.0 FAQ
+and **nine** were first recorded in v0.1. The section heading is evidence
+of source placement, not proof that an answer can never apply to a
 core-rules scenario.
 
 A separate [audit-only question manifest](../config/validation/n5-faq-v0.1-question-inventory.json)
@@ -26,6 +28,26 @@ checks source citations, v0.0/v0.1 provenance, current rules revision/date
 selection and the two scenario-only runtime scopes against a fresh rules
 export. The manifest is an **audit gate**, not an additional gameplay
 definition or a substitute for a future historical/ITS applicability review.
+
+## Source-byte identity and publication boundary
+
+The audit manifest also pins the exact SHA-256, source ID, version,
+repository-relative local path and PDF file-page count for the historical
+English v0.0 and current English/Spanish v0.1 FAQs. On 2026-10-28, all
+three locally available PDFs matched these pins (**3/3**). The focused
+`test_pinned_faq_pdf_source_identity_and_available_bytes` checks that
+the pins agree with the maintained FAQ source declarations and hashes
+the local files when available. A clean checkout without the ignored
+source PDFs skips byte verification; a skipped test is not source
+authentication. This is an audit-only gate, independent of runtime
+publication and the question-level coverage check.
+
+The official September 1, 2026 N5.3 update notice announces a new FAQ.
+It does not independently prove the exact publication day of either
+FAQ v0.1 PDF. PDF creation metadata, source-update announcement dates,
+local acquisition dates and selected applicability dates remain
+distinct evidence. The earlier English v0.0 PDF likewise has no
+independently established publication day.
 
 ## Printed ITS section — uncovered questions
 
@@ -65,8 +87,9 @@ five-page PDF file's indices.
 
 - **Printed p. 3 — carrying a scenario element into Marker State:**
   `faq-ruling:scenario-element-carrier-marker-state` now applies only
-  to `scenario:supplies` (and its carrying rule), with printed FAQ
-  English/Spanish p. 3 citations. Core N5.3 Supplies p. 153 independently
+  to `scenario:supplies` (and its carrying rule). Its original English
+  FAQ v0.0 wording is on printed p. 2; the current English/Spanish v0.1
+  citations remain on printed p. 3. Core N5.3 Supplies p. 153 independently
   says that only Models, not Markers, can carry Supply Boxes. Unscoped
   and unrelated scenario queries must not select this ruling. This is
   **not** a global Marker State restriction for other scenarios.

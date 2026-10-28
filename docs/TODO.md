@@ -61,7 +61,7 @@ These foundations are implemented; final source-to-browser acceptance remains se
 - Eleven base Ammunition references, reviewed combined forms, Weapon Properties,
   shared/specific Weapon definitions and disclosed source discrepancies:
   [data model](data-model.md#pipeline-and-persistent-artifacts).
-- Twenty-eight dated FAQ rulings, nineteen carried from v0.0, with validated
+- Twenty-nine dated FAQ rulings, twenty carried from v0.0, with validated
   applicability, supersession, explicit-context API and topic/scenario cards:
   [published FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
 - Martial Arts, Booty and MetaChemistry typed, linked charts with reviewed PDF,
@@ -313,6 +313,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         See [FAQ v0.1 applicability inventory](faq-v0.1-scope-inventory.md).
         This does not certify full FAQ or browser coverage; keep scenario
         applicability explicit before further curation.
+      - [x] Pin and independently verify the available FAQ source PDFs.
+        The audit-only inventory records SHA-256, source identity, version,
+        file-page count and local path for English v0.0 and English/Spanish
+        v0.1. All **3/3** local bytes matched on 2026-10-28, and the
+        focused pytest cases passed. Clean CI skips missing ignored PDF
+        bytes rather than treating the declared hashes as verification.
+        This does not establish exact original PDF publication dates,
+        final 1.0 input freezing, or broader ITS applicability.
+      - [x] Correct the Supplies carrier FAQ's original source to English
+        v0.0 printed p. 2. It was incorrectly recorded as v0.1-origin;
+        English/Spanish v0.1 p. 3 remains the selected current citation.
+        The 29 published rulings now comprise 20 v0.0-origin and nine
+        v0.1-origin entries. Its Supplies-only effective scope is unchanged.
       - [x] Validate **ordinary browser FAQ selection** for the new
         Supplies ruling at 1440px and 390px using
         `tests/test_verify_scenario_faq_browser.py`. The Chromium

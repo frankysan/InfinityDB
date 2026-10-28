@@ -1383,6 +1383,10 @@
       },
       "citations": [
         {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
           "sourceId": "n5-faq-v0.1-en-pdf",
           "page": 3
         },
@@ -1408,17 +1412,17 @@
           }
         ],
         "originalPublication": {
-          "collectionId": "n5-faq-v0.1",
-          "sourceId": "n5-faq-v0.1-en-pdf",
-          "version": "0.1",
-          "publishedDate": "2026-09-01",
-          "page": 3
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
         },
         "selectedCitation": {
           "sourceId": "n5-faq-v0.1-en-pdf",
           "page": 3
         },
-        "selectionReason": "English and Spanish N5 FAQ v0.1 printed p. 3 agree. The core N5.3 Supplies scenario (p. 153) independently limits Supply Box carriers to Models rather than Markers. Apply this FAQ to scenario:supplies only; do not infer broader ITS-scenario or unscoped Marker-State applicability.",
+        "selectionReason": "First verified in English FAQ v0.0 printed p. 2, carried without substantive change to English/Spanish v0.1 printed p. 3. The 2025-10-15 date is a version-associated update anchor, not a verified PDF publication day. Core N5.3 Supplies p. 153 independently restricts Supply Box carriers to Models rather than Markers. Apply this FAQ to scenario:supplies only; do not infer broader ITS-scenario or unscoped Marker-State applicability.",
         "conflictingCitations": [],
         "supersedes": []
       }

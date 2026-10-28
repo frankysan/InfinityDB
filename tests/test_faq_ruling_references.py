@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -114,6 +116,49 @@ def _export(base: list[tuple[Path, dict]], temp: Path, records: list[dict],
     return db
 
 
+@pytest.mark.parametrize(
+    "source_id",
+    (
+        "n5-faq-v0.0-en-pdf",
+        "n5-faq-v0.1-en-pdf",
+        "n5-faq-v0.1-es-pdf",
+    ),
+)
+def test_pinned_faq_pdf_source_identity_and_available_bytes(source_id: str) -> None:
+    """Audit-only byte pins; a clean CI checkout cannot verify ignored PDFs."""
+    root = Path(__file__).resolve().parents[1]
+    inventory = json.loads(
+        (root / "config/validation/n5-faq-v0.1-question-inventory.json")
+        .read_text(encoding="utf-8")
+    )
+    faq = json.loads(
+        (root / "data/curated/rules/n5-faq-v0.1.json").read_text(encoding="utf-8")
+    )
+    artifacts = inventory["sourceArtifacts"]
+    assert set(artifacts) == {
+        "n5-faq-v0.0-en-pdf",
+        "n5-faq-v0.1-en-pdf",
+        "n5-faq-v0.1-es-pdf",
+    }
+    sources = {source["id"]: source for source in faq["sources"]}
+    assert set(artifacts) <= set(sources)
+    source = sources[source_id]
+    pin = artifacts[source_id]
+    assert source["kind"] == "pdf"
+    assert source["version"] == pin["version"]
+    assert source["localPath"] == pin["localPath"]
+    assert source["pageCount"] == pin["filePages"]
+    assert re.fullmatch(r"[0-9a-f]{64}", pin["sha256"])
+
+    path = root / pin["localPath"]
+    if not path.exists():
+        pytest.skip(f"Local-only source PDF unavailable: {pin['localPath']}")
+    assert path.is_file()
+    with path.open("rb") as stream:
+        actual_sha256 = hashlib.file_digest(stream, "sha256").hexdigest()
+    assert actual_sha256 == pin["sha256"], f"FAQ source bytes changed: {source_id}"
+
+
 def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
     published_pilot: RulesDatabase,
 ) -> None:
@@ -181,7 +226,7 @@ def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
             **({"scenarioIds": overlaps[identifier]} if identifier in overlaps else {}),
         }]
         assert facts["supersedes"] == []
-    assert historical == 19
+    assert historical == 20
     published = {row["id"] for row in published_pilot.records_by_kind("faq-ruling")}
     assert published == set(expected)
 
@@ -907,14 +952,16 @@ def test_supplies_scenario_element_marker_faq_is_strictly_scoped(
             "sourceId": "n5-faq-v0.1-en-pdf", "page": 3,
         }
         assert {(c["source_id"], c["page"]) for c in ruling["citations"]} == {
-            ("n5-faq-v0.1-en-pdf", 3), ("n5-faq-v0.1-es-pdf", 3),
+            ("n5-faq-v0.0-en-pdf", 2),
+            ("n5-faq-v0.1-en-pdf", 3),
+            ("n5-faq-v0.1-es-pdf", 3),
         }
         assert ruling["original_publication"] == {
-            "collectionId": "n5-faq-v0.1",
-            "sourceId": "n5-faq-v0.1-en-pdf",
-            "version": "0.1",
-            "publishedDate": "2026-09-01",
-            "page": 3,
+            "collectionId": "n5-faq-v0.0",
+            "sourceId": "n5-faq-v0.0-en-pdf",
+            "version": "0.0",
+            "publishedDate": "2025-10-15",
+            "page": 2,
         }
         for context in ({}, {"scenario_id": "scenario:annihilation"}):
             other = published_pilot.faq_rulings_for_topic(
@@ -936,11 +983,11 @@ def test_earlier_faq_identity_is_not_inferred_from_current_publication(
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.0"
         for record in records
-    ) == 19
+    ) == 20
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.1"
         for record in records
-    ) == 10
+    ) == 9
     assert published_pilot.composed_record("skill:climb") is not None
 
 

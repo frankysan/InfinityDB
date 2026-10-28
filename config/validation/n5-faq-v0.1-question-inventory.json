@@ -5,6 +5,26 @@
     "english": "n5-faq-v0.1-en-pdf",
     "spanish": "n5-faq-v0.1-es-pdf"
   },
+  "sourceArtifacts": {
+    "n5-faq-v0.0-en-pdf": {
+      "version": "0.0",
+      "localPath": "data/pdf/faq/n5-faqs-v0-0-en.pdf",
+      "filePages": 4,
+      "sha256": "a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043"
+    },
+    "n5-faq-v0.1-en-pdf": {
+      "version": "0.1",
+      "localPath": "data/pdf/faq/n5-faqs-v0-1-en.pdf",
+      "filePages": 5,
+      "sha256": "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa"
+    },
+    "n5-faq-v0.1-es-pdf": {
+      "version": "0.1",
+      "localPath": "data/pdf/faq/esp-faqs-n5-v0-1.pdf",
+      "filePages": 5,
+      "sha256": "7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a"
+    }
+  },
   "coreQuestions": [
     [
       "deployment-phase-reposition-after-measurement",
