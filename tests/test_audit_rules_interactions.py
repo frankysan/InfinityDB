@@ -739,6 +739,82 @@ def test_pinned_catalog_scope_drift_identifies_three_reviewed_primary_omissions(
     assert DEFAULT_CATALOG_SCOPE_PATH.read_bytes() == original
 
 
+def test_1_0_primary_candidate_preserves_historical_reviews_and_pending_commlink(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    candidate = DEFAULT_CATALOG_SCOPE_PATH.with_name("catalog-scope-1.0.0.json")
+    document = json.loads(candidate.read_text(encoding="utf-8"))
+    assert document["targetRelease"] == "1.0.0"
+    assert document["releaseExceptions"] == []
+    assert {kind: len(items) for kind, items in document["catalogs"].items()} == {
+        "skills": 97, "equipment": 31, "traits": 33, "states": 24,
+    }
+
+    report = audit_rules_interactions(
+        DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH, candidate,
+    )
+    primary = report["summary"]["primaryCatalog"]
+    assert (primary["total"], primary["complete"], primary["pending"]) == (
+        185, 184, 1,
+    )
+    assert report["summary"]["supporting"]["total"] == 195
+    primary_items = {item["id"]: item for item in report["primaryCatalogItems"]}
+    for record_id, release in {
+        "skill:activate-disco-ball": "1.0.0",
+        "skill:request-specball": "1.0.0",
+        "equipment:firewall": "1.0.0",
+        "skill:hacker": "0.7.0",
+    }.items():
+        assert primary_items[record_id]["status"] == "reviewed"
+        assert primary_items[record_id]["targetRelease"] == release
+        assert primary_items[record_id]["reviewedOn"]
+    commlink = primary_items["skill:commlink"]
+    assert commlink["status"] == "pending"
+    assert not commlink["recordDefined"]
+    assert not commlink["scopeException"]
+    assert main([
+        "--catalog-scope", str(candidate),
+        "--require-primary-release", "1.0.0",
+    ]) == 1
+    assert "Pending primary identities: skill:commlink" in capsys.readouterr().out
+    assert main([
+        "--catalog-scope", str(candidate),
+        "--require-release", "1.0.0",
+    ]) == 1
+    assert "Pending identities: skill:commlink" in capsys.readouterr().out
+
+
+def test_1_0_primary_candidate_matches_pinned_public_database_pair(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    candidate = DEFAULT_CATALOG_SCOPE_PATH.with_name("catalog-scope-1.0.0.json")
+    root = Path(__file__).resolve().parents[1]
+    database = root / "data/generated/infinity.db"
+    rules_database = root / "data/generated/rules.db"
+    if not database.is_file() or not rules_database.is_file():
+        pytest.skip("Paired generated catalog databases unavailable")
+    assert main([
+        "--catalog-scope", str(candidate),
+        "--database", str(database),
+        "--rules-database", str(rules_database),
+    ]) == 0
+    assert "1.0.0 primary catalog: 184/185 complete" in capsys.readouterr().out
+
+
+def test_1_0_primary_candidate_rejects_reviews_from_future_releases(
+    tmp_path: Path,
+) -> None:
+    candidate = DEFAULT_CATALOG_SCOPE_PATH.with_name("catalog-scope-1.0.0.json")
+    document = json.loads(candidate.read_text(encoding="utf-8"))
+    document["targetRelease"] = "0.6.0"
+    younger_scope = tmp_path / "catalog-scope.json"
+    younger_scope.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(RulesInteractionAuditError, match="expected no later than"):
+        audit_rules_interactions(
+            DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH, younger_scope,
+        )
+
+
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:
     document = json.loads(DEFAULT_CATALOG_SCOPE_PATH.read_text(encoding="utf-8"))
     assert document["formatVersion"] == 2

@@ -529,11 +529,22 @@ def audit_rules_interactions(
                         "definition now exists"
                     )
                 review = policy[record_id]
-                if review["targetRelease"] != target_release:
-                    raise RulesInteractionAuditError(
-                        f"{record_id}: primary {catalog} catalog review targets "
-                        f"{review['targetRelease']!r}, expected {target_release!r}"
-                    )
+                # The primary release is a coverage target, not a rewrite of
+                # historical reviewedOn/targetRelease provenance. Existing
+                # completed reviews may carry forward from an earlier release.
+                review_release = review["targetRelease"]
+                if review_release != target_release:
+                    old_parts = review_release.split(".")
+                    new_parts = target_release.split(".")
+                    if (
+                        len(old_parts) != 3 or len(new_parts) != 3
+                        or not all(part.isdigit() for part in old_parts + new_parts)
+                        or tuple(map(int, old_parts)) > tuple(map(int, new_parts))
+                    ):
+                        raise RulesInteractionAuditError(
+                            f"{record_id}: primary {catalog} catalog review targets "
+                            f"{review_release!r}, expected no later than {target_release!r}"
+                        )
                 if review["status"] == "inherited":
                     raise RulesInteractionAuditError(
                         f"{record_id}: primary catalog identities cannot use inherited status"
@@ -972,14 +983,25 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 f"Primary catalog for {required} has {primary['pending']} pending items"
             )
+            print(
+                "Pending primary identities: " + ", ".join(sorted(
+                    item["id"] for item in report["primaryCatalogItems"]
+                    if item["status"] == "pending"
+                ))
+            )
             return 1
     if args.require_release is not None:
-        pending_ids = sorted(
+        pending_ids = sorted({
             item["id"]
             for item in report["items"]
             if item["targetRelease"] == args.require_release
             and item["status"] == "pending"
-        )
+        } | {
+            item["id"]
+            for item in report["primaryCatalogItems"]
+            if primary["targetRelease"] == args.require_release
+            and item["status"] == "pending"
+        })
         if args.require_release != primary["targetRelease"]:
             releases = report["summary"]["supporting"]["releases"]
             release = releases.get(args.require_release)

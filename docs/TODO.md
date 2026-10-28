@@ -315,6 +315,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       `python -m tools.audit_rules_interactions --report-catalog-scope-drift --database data/generated/infinity.db --rules-database data/generated/rules.db`.
       This identifies the bounded delta; it does not close the 1.0
       primary baseline or settle the missing verified N5 annex for Commlink.
+    - [x] Establish a **separate, non-release-ready 1.0 primary catalog
+      candidate** in `data/curated/rules-interactions/catalog-scope-1.0.0.json`.
+      The candidate matches the pinned public Skill/Equipment/Trait/State
+      catalogs (97/31/33/24 entries), includes the three reviewed new
+      identities, and retains existing historical review dates and target
+      labels rather than rewriting them as 1.0 reviews. It does not carry
+      forward the old Commlink release exception. The bounded candidate
+      audit reports **184/185 primary identities complete, Commlink pending**,
+      and **195 supporting identities**. The strict candidate gate
+      `python -m tools.audit_rules_interactions --catalog-scope data/curated/rules-interactions/catalog-scope-1.0.0.json --require-primary-release 1.0.0`
+      fails and names Commlink as intended. The unchanged 0.7.0 scope and
+      generated historical checklist remain the default CI baseline.
+      This candidate is review-tracking evidence, **not** proof that earlier
+      curated meanings remain accurate for the final 1.0 source set.
+      Verify an N5-applicable Reinforcements annex or explicitly decide the
+      1.0 applicability boundary before making this candidate the active
+      release gate.
   - [ ] Turn confirmed gaps into bounded batches under the owning tasks below. Each batch names
     the concepts/source sections, dependency, missing contract or content, and completion evidence;
     material source conflicts need reviewed applicability and clear user-visible disclosure
