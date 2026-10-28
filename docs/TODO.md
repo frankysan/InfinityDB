@@ -880,11 +880,16 @@ Reuse the published data model and existing browser components; treat
 enhancements as release-blocking only when their omission
 would materially impair required reference access, clarity or source disclosure.
 
-- [ ] **Web frontend:** Reduce the **sidebar menu's vertical footprint**
-  before 1.0 while preserving access to every existing destination and
-  the current responsive/sticky navigation behavior. Review grouping,
-  spacing and any collapsible sections against narrow and desktop layouts;
-  verify mouse, keyboard, touch, focus and no hidden/unreachable links.
+- [x] **Web frontend:** Reduce the **sidebar menu's vertical footprint**
+  before 1.0 without hiding destinations or introducing another nested
+  navigation disclosure. Compact desktop row padding, section spacing
+  and decorative footer gaps while retaining readable targets and
+  current-route indication. Bound the existing compact popovers to
+  the viewport with internal scrolling for short touch screens.
+  Chromium checks at 1440px, 1024px, 390px and 320px validate all 16
+  destinations, focus/scroll reachability, responsive sticky navigation,
+  settings expansion and keyboard/touch operation. See the
+  [responsive design contract](web-design-guidelines.md#make-responsiveness-a-content-priority-decision).
 - [ ] **Data processing + Web backend + Web frontend:** Make the term
   **Specialist Troops** discoverable through **global search**, resolving
   to its reviewed reference definition and relevant core-scenario usage.

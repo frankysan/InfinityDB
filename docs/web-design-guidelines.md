@@ -206,6 +206,15 @@ compare, or do before explaining how InfinityDB stores or derives it.
 
 Responsive design is not simply shrinking desktop geometry. At narrower widths, preserve the most important information and relationships first, then deliberately choose whether secondary content should wrap, scroll, collapse, or transform.
 
+The shared sidebar should keep every navigation destination directly discoverable on
+desktop without excessive viewport-scaled gaps. Use compact but readable link
+rows and retain visible focus, current-page identity and scroll-to-focus
+behavior. The existing compact navigation and Settings popovers retain the
+same links and controls below the sidebar breakpoint; bound their height to
+the viewport and allow their contents to scroll rather than letting the last
+options become inaccessible on short touch screens. Do not hide desktop
+navigation destinations in new disclosures simply to reduce empty space.
+
 Breakpoints should correspond to layout failure or content need rather than arbitrary device categories.
 
 ### Treat accessibility as part of the component contract

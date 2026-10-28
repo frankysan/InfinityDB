@@ -3049,7 +3049,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         ),
         {"display": "none"},
     )
-    assert_css_rule(styles, ".settings-menu", {"margin-top": "clamp(20px, 3vh, 32px)"})
+    assert_css_rule(styles, ".settings-menu", {"margin-top": "clamp(12px, 2vh, 20px)"})
     assert_css_rule(
         styles,
         ".setting-row",

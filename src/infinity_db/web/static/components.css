@@ -70,10 +70,10 @@ html:not([data-developer-mode="true"]) .id-column {
 }
 
 .sidebar {
-  --sidebar-section-gap: clamp(28px, 6.5vh, 70px);
-  --sidebar-edge-padding-top: clamp(18px, 3.2vh, 34px);
-  --sidebar-edge-padding-bottom: clamp(18px, 2.8vh, 28px);
-  --sidebar-body-padding: clamp(24px, 6vh, 66px);
+  --sidebar-section-gap: clamp(12px, 2vh, 24px);
+  --sidebar-edge-padding-top: clamp(14px, 2vh, 24px);
+  --sidebar-edge-padding-bottom: clamp(14px, 2vh, 24px);
+  --sidebar-body-padding: clamp(12px, 2.5vh, 24px);
   position: fixed;
   inset: 0 auto 0 0;
   width: 244px;
@@ -117,7 +117,7 @@ html:not([data-developer-mode="true"]) .id-column {
 }
 
 .global-search {
-  margin: 0 0 clamp(18px, 2.6vh, 28px);
+  margin: 0 0 clamp(12px, 1.6vh, 18px);
 }
 
 .global-search input {
@@ -172,7 +172,7 @@ html:not([data-developer-mode="true"]) .id-column {
 }
 
 .settings-menu {
-  margin-top: clamp(20px, 3vh, 32px);
+  margin-top: clamp(12px, 2vh, 20px);
 }
 
 .menu-button {
@@ -212,16 +212,16 @@ html:not([data-developer-mode="true"]) .id-column {
 
 .nav-label {
   padding-left: 14px;
-  margin: 0 0 17px;
+  margin: 0 0 8px;
 }
 
 .nav-item {
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9px;
   color: var(--color-nav-text);
-  padding: clamp(9px, 1.3vh, 13px) 12px;
+  padding: clamp(7px, 0.9vh, 9px) 10px;
   border: 1px solid transparent;
   border-radius: 6px;
   font-size: var(--font-size-md);
@@ -399,7 +399,7 @@ html[data-distance-unit="in"] .setting-choice>span:last-child {
   font-size: var(--font-size-2xl);
   line-height: 1.5;
   letter-spacing: -.3px;
-  margin: 18px 0 28px;
+  margin: 12px 0 16px;
   color: var(--color-nav-text-detail);
 }
 
@@ -3792,6 +3792,9 @@ html[data-distance-unit="in"] .unit-extended-statline {
     right: 0;
     display: none;
     min-width: 190px;
+    max-height: calc(100dvh - 100px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 12px;
     border: 1px solid var(--color-nav-border);
     border-radius: 6px;
