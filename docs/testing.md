@@ -173,12 +173,17 @@ The grouped run exposed another issue: mock-only
 `test_verify_rule_fragment_browser.py` waited **118.09 s** for a Chromium
 slot even though no tests in it launch a browser. That module is now excluded
 from slot admission and grouped scheduling, retaining its test coverage.
-Two mixed modules, `test_verify_release_candidate_browser.py` and
-`test_verify_deployed_object_publication_browser.py`, now acquire slots
-only for their explicitly identified real-Chromium tests. Their other
-API/contract tests run without waiting for a slot. Modules with shared
+Three mixed modules, `test_verify_release_candidate_browser.py`,
+`test_verify_deployed_object_publication_browser.py`, and
+`test_verify_unit_skill_presentation_browser.py`, now acquire slots only
+for explicitly identified real-Chromium tests. Unit Skill's pure database
+and DOM-contract tests no longer wait for slots. Modules with shared
 module-scoped Chromium fixtures retain module-wide slot protection.
-The option remains **opt-in**, pending another full-run comparison:
+The `loadgroup` option remains opt-in; the latest full `worksteal` run
+passed 2,826 tests (19 skipped) in **220.72 s**, with all eight workers
+ready within 2.06 s of xdist startup and the first test at 4.59 s from
+process launch. Remaining large setup durations arise from Chromium-slot
+contention rather than process startup. For a scheduling comparison:
 
 ```powershell
 .\.venv\Scripts\python.exe tools/run_checks.py --all --test-dist loadgroup
@@ -186,11 +191,11 @@ The option remains **opt-in**, pending another full-run comparison:
 
 No new report snapshot is needed unless recording a release milestone.
 
-During an xdist run, `tests/conftest.py`
-admits **at most two browser test modules concurrently** across workers using
-cross-process OS file locks in the per-run pytest temporary directory. This
-protects Chromium/browser-server resources while allowing two long-running
-modules to make progress. Unrelated tests continue on all available workers.
+During an xdist run, `tests/conftest.py` admits **at most two Chromium
+slot holders concurrently** across workers using cross-process OS file locks
+in the per-run pytest temporary directory. For modules with shared browser
+fixtures the slot spans the module; mixed modules acquire it only around
+browser-dependent cases. Unrelated tests continue on available workers.
 Locks release even if a worker process exits unexpectedly; normal serial tests
 and environments without Playwright do not acquire them.
 `tests/test_browser_test_capacity.py` covers cross-process exclusion and reuse.

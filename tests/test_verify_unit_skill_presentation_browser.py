@@ -244,6 +244,7 @@ def _relationship_cohort(database_path: Path) -> tuple[str, ...]:
     return tuple(selected)
 
 
+@pytest.mark.usefixtures("chromium_test_slot")
 def test_reinforcement_parentage_is_visible_without_developer_mode() -> None:
     """A real Reinforcement Unit must link to its source-backed parent Army."""
     playwright_api = pytest.importorskip("playwright.sync_api")
@@ -357,6 +358,7 @@ def test_source_backed_relationship_cohort_is_distinct() -> None:
     assert len(cohort) == len(set(cohort)) == 4
 
 
+@pytest.mark.usefixtures("chromium_test_slot")
 def test_live_chromium_contextual_relationship_cohort() -> None:
     """Check actual source-present Includes, Peripherals and access links."""
     pytest.importorskip("playwright.sync_api")
@@ -441,6 +443,7 @@ def test_complex_unit_cohort_has_nonempty_published_profile_variants() -> None:
     assert all(slug not in ("", None) for slug in slugs)
 
 
+@pytest.mark.usefixtures("chromium_test_slot")
 @pytest.mark.parametrize(
     "matrix", ("core_default", "core_rich", "optional_flags", "optional_sources", "distance"),
 )

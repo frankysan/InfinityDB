@@ -23,6 +23,7 @@ _NON_CHROMIUM_BROWSER_MODULES = frozenset({"test_verify_rule_fragment_browser.py
 _PER_TEST_CHROMIUM_MODULES = frozenset({
     "test_verify_release_candidate_browser.py",
     "test_verify_deployed_object_publication_browser.py",
+    "test_verify_unit_skill_presentation_browser.py",
 })
 
 
