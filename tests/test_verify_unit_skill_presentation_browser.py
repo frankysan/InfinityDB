@@ -485,6 +485,14 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                             ("next-wave-team-ops", 1935, 14),
                             ("chandra-spec-ops", 1922, 12),
                             ("aleph-team-ops", 1936, 14),
+                            ("tormo-spec-ops", 1923, 12),
+                            ("o12-team-ops", 1937, 14),
+                            ("kaizoku-spec-ops", 1924, 12),
+                            ("jsa-team-ops", 1938, 14),
+                            ("hatail-spec-ops", 1908, 12),
+                            ("tohaa-team-ops", 1909, 14),
+                            ("rumbler-spec-ops", 1925, 12),
+                            ("na2-team-ops", 1939, 14),
                         ):
                             page.goto(
                                 f"http://127.0.0.1:{server.server_port}/units/{slug}",

@@ -163,9 +163,13 @@ def test_source_choices_are_exposed_on_unit_api_without_player_selections() -> N
         ),
         ("605-next-wave.json", "blur-spec-ops", 1921, "next-wave-team-ops", 1935),
         ("701-aleph.json", "chandra-spec-ops", 1922, "aleph-team-ops", 1936),
+        ("1001-o-12.json", "tormo-spec-ops", 1923, "o12-team-ops", 1937),
+        ("1101-jsa.json", "kaizoku-spec-ops", 1924, "jsa-team-ops", 1938),
+        ("801-tohaa.json", "hatail-spec-ops", 1908, "tohaa-team-ops", 1909),
+        ("902-druze.json", "rumbler-spec-ops", 1925, "na2-team-ops", 1939),
     ),
 )
-def test_army_02_to_12_source_pairs_are_published_with_own_chart_context(
+def test_army_02_to_16_source_pairs_are_published_with_own_chart_context(
     source_member: str,
     spec_slug: str,
     spec_id: int,
@@ -275,6 +279,104 @@ def test_army_12_chandra_source_revision_and_three_faction_contexts() -> None:
             (version["version"], version["source_file"])
             for version in entry["source_versions"]
         } == {("7.26246.159", member) for member in members}
+
+
+@pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
+@pytest.mark.parametrize(
+    ("spec_slug", "spec_id", "team_slug", "team_id", "spec_members", "team_members"),
+    (
+        (
+            "tormo-spec-ops", 1923, "o12-team-ops", 1937,
+            ("1001-o-12.json", "1002-starmada.json", "1003-torchlight-brigade.json"),
+            ("1001-o-12.json", "1002-starmada.json", "1003-torchlight-brigade.json"),
+        ),
+        (
+            "kaizoku-spec-ops", 1924, "jsa-team-ops", 1938,
+            ("1101-jsa.json", "1102-shindenbutai.json", "1103-oban.json"),
+            ("1101-jsa.json", "1102-shindenbutai.json", "1103-oban.json"),
+        ),
+        (
+            "rumbler-spec-ops", 1925, "na2-team-ops", 1939,
+            (
+                "901-non-aligned-armies.json", "902-druze.json",
+                "904-ikari.json", "905-starco-free-company-of-the-star.json",
+                "908-dahshat.json", "909-white-company.json",
+            ),
+            (
+                "902-druze.json", "904-ikari.json",
+                "905-starco-free-company-of-the-star.json",
+                "908-dahshat.json", "909-white-company.json",
+            ),
+        ),
+    ),
+)
+def test_army_13_14_16_faction_context_and_chart_payloads_are_distinct(
+    spec_slug: str,
+    spec_id: int,
+    team_slug: str,
+    team_id: int,
+    spec_members: tuple[str, ...],
+    team_members: tuple[str, ...],
+) -> None:
+    """Keep real faction membership, not an inferred shared TEAM-OPS matrix."""
+    with zipfile.ZipFile(SOURCE) as archive:
+        documents = {
+            member: json.loads(archive.read(member))
+            for member in {*spec_members, *team_members}
+        }
+    app = create_app(ARMY, rules_database_path=RULES)
+    for slug, source_id, members in (
+        (spec_slug, spec_id, spec_members),
+        (team_slug, team_id, team_members),
+    ):
+        raw_payloads = []
+        for member in members:
+            document = documents[member]
+            assert document["version"] == "7.26246.159"
+            unit = next(unit for unit in document["units"] if unit["id"] == source_id)
+            raw_payloads.append(json.dumps(unit["spectables"], sort_keys=True))
+        assert len(set(raw_payloads)) == 1
+        published = _unit_api(app, slug)
+        assert source_id in published["source_ids"]
+        assert len(published["source_charts"]) == 1
+        assert {
+            (item["version"], item["source_file"])
+            for item in published["source_charts"][0]["source_versions"]
+        } == {("7.26246.159", member) for member in members}
+    if spec_id == 1925:
+        assert all(
+            not any(unit["id"] == team_id for unit in documents[member]["units"])
+            for member in spec_members if member not in team_members
+        )
+
+
+@pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
+def test_army_15_hatail_source_keeps_symbiont_profiles_outside_choice_chart() -> None:
+    """Tohaa's two Symbiont profile states are profiles, not chart selections."""
+    with zipfile.ZipFile(SOURCE) as archive:
+        document = json.loads(archive.read("801-tohaa.json"))
+    assert document["version"] == "7.26246.159"
+    units = {unit["id"]: unit for unit in document["units"]}
+    assert units[1908]["slug"] == "hatail-spec-ops"
+    assert units[1909]["slug"] == "tohaa-team-ops"
+    assert any(
+        "ACTIVE SYMBIONT" in profile["name"]
+        for group in units[1908]["profileGroups"]
+        for profile in group["profiles"]
+    )
+    assert any(
+        "INACTIVE SYMBIONT" in profile["name"]
+        for group in units[1908]["profileGroups"]
+        for profile in group["profiles"]
+    )
+    app = create_app(ARMY, rules_database_path=RULES)
+    for slug, source_id in (("hatail-spec-ops", 1908), ("tohaa-team-ops", 1909)):
+        unit = _unit_api(app, slug)
+        assert unit["source_ids"] == [source_id]
+        assert len(unit["source_charts"]) == 1
+        assert unit["source_charts"][0]["source_versions"] == [
+            {"version": "7.26246.159", "source_file": "801-tohaa.json"}
+        ]
 
 
 @pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")

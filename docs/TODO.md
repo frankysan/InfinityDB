@@ -234,7 +234,29 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         This is **current chart/publication coverage only**, not
         full roster, profiles, AVA, Fireteams, historical deltas
         or final hosted release acceptance.
-      - [ ] **ARMY-01 and ARMY-13–20, plus full ARMY-02–12 profiles:**
+      - [x] **ARMY-13–16 source-pair chart publication:** Rechecked
+        Ŝtormo/O-12 TEAM-OPS (1923/1937), Kaizoku/JSA TEAM-OPS
+        (1924/1938), Hatail/Tohaa TEAM-OPS (1908/1909), and
+        Rumbler/NA2 TEAM-OPS (1925/1939) against the pinned
+        September 29 source members, database and public Unit API.
+        The final eight source identities preserve separate ordered
+        selection charts (8 Spec-Ops, 10 TEAM-OPS entries), four
+        SpecBall options, grouped attributes and version/file
+        provenance. All source members use revision `7.26246.159`.
+        Ŝtormo appears in O-12/Starmada/Torchlight Brigade, and
+        Kaizoku in JSA/Shindenbutai/Ōban. Rumbler Spec-Ops is
+        present in six NA2 source members (Non-Aligned Armies,
+        Druze, Ikari, StarCo, Dahshat, White Company), but NA2
+        TEAM-OPS is absent from the Non-Aligned Armies umbrella
+        member and present in the other five. The duplicate
+        chart payloads agree. Hatail's separate active/inactive
+        Symbiont Armor profiles remain profile-level data,
+        **not** chart choices. Chromium passes all 30 chart-bearing
+        Unit pages at 1440/390/320 px (90 page/viewport checks).
+        This completes **selected current chart/identity publication
+        for ARMY-02–16**, not roster/profile/AVA/Fireteam acceptance
+        or a pre/post Army change comparison.
+      - [ ] **ARMY-01 and ARMY-17–20, plus full ARMY-02–16 profiles:**
         Continue source-to-database-to-player verification by the
         original 20-item Army update inventory. Keep Fireteam chart
         constraints (ARMY-01) distinct from the Spec-Ops/TEAM-OPS
