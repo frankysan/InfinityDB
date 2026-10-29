@@ -353,6 +353,44 @@ def test_all_24_core_scenario_setups_render_source_backed_browser_contract(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_esx02_jet_propulsion_variant_scope_is_visible_in_browser(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """N5.3 Jet Propulsion changes direction freely, not Jump distance."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(
+            f"{ORIGIN}/skills/super-jump", wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        card = page.locator("#rule-skill-super-jump")
+        card.wait_for(state="visible", timeout=30000)
+        assert card.count() == 1
+        body = card.inner_text()
+        assert "change direction and heading in mid-air as many times as desired" in body
+        assert "not a general benefit of Super-Jump" in body
+        assert "does not add Jump distance or remove the once-per-Order limit" in body
+        assert "first MOV value plus 4" in body
+        assert "Short Skill Jump adds that distance" in body
+        assert "complete path to be declared in advance" in body
+        source_note = card.locator(".rules-source-note")
+        assert source_note.count() == 1
+        assert "Spanish N5.3 p. 116" in source_note.inner_text()
+        citations = card.locator(".rules-source-citations").inner_text()
+        assert "p. 113" in citations and "p. 116" in citations
+        assert card.locator('a[href="/skills/jump"]').count() >= 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_esx01_stealth_contact_reaction_choices_are_published_in_browser(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

@@ -2722,8 +2722,11 @@
                 ],
                 "clarifications": [
                     "When declaring [[skill:super-jump|Super-Jump]], specify the entire exact trajectory before [[trait:aro|ARO]] declarations; the Trooper has 360° LoF throughout that trajectory.",
-                    "If the Unit Profile lists Super-Jump (Jet Propulsion), the Trooper may freely change heading and direction in mid-air throughout the [[skill:jump|Jump]]; this is a named variant, not a general benefit of Super-Jump.",
+                    "If the Unit Profile lists [[skill:super-jump|Super-Jump]] (Jet Propulsion), the Trooper may freely change direction and heading in mid-air as many times as desired along the declared [[skill:jump|Jump]] trajectory. This is a named variant, not a general benefit of [[skill:super-jump|Super-Jump]]; it does not add [[skill:jump|Jump]] distance or remove the once-per-Order limit.",
                     "Declaring [[skill:jump|Jump]] automatically cancels [[state:prone]], including when its declaration is modified by Super-Jump."
+                ],
+                "sourceNotes": [
+                    "English N5.3 p. 113 expressly permits repeated mid-air direction and heading changes for [[skill:super-jump|Super-Jump]] (Jet Propulsion). Spanish N5.3 p. 116 retains less explicit before-landing wording, but its p. 117 trajectory example describes freely varying the path. Both require the complete path to be declared in advance for [[trait:aro|ARO]] purposes; the wording difference does not confer additional movement distance."
                 ]
             },
             "armyLinks": [
@@ -2737,6 +2740,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 113,
                     "section": "Super-Jump"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 116,
+                    "section": "Súper-Salto (Retropropulsión)"
                 },
                 {
                     "sourceId": "wiki-super-jump-oldid-4075",

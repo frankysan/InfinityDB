@@ -339,6 +339,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         unprovable** without that exact earlier PDF; this closes
         current-rule publication, not the historical delta or final
         hosted release acceptance.
+      - [x] **Spanish-only ESX-02 / Jet Propulsion wording:** English
+        N5.2 p. 112 allowed direction and heading changes before
+        landing; English N5.3 p. 113 expressly permits repeating
+        them freely during the airborne trajectory. Current Spanish
+        N5.3 pp. 116-117 retains less explicit before-landing
+        wording, but its illustrated example describes changing the
+        path freely in the air. The `skill:super-jump` reference now
+        states the repeated-direction privilege **only for the named
+        Jet Propulsion variant**, while preserving exact-trajectory
+        declaration, ordinary Jump distance, the Short Skill
+        bracket-distance condition and one-Basic-Short-Jump-per-Order
+        restriction. A bilingual source-context note and citation
+        disclose the difference. Pinned English N5.2/N5.3 and
+        current Spanish PDF regressions, curated tests and Chromium
+        at 1440/390/320 px passed. Historical **Spanish** N5.2
+        before/after verification remains unavailable without its
+        exact PDF; hosted release acceptance remains open.
       - [x] Verify **N5.3 new weapon profiles (N53-25)** against the
         English Weapon Chart p. 180 and Army metadata. Source ID 225,
         Breaker Marksman Rifle, is already published through the

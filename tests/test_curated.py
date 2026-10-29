@@ -2306,6 +2306,65 @@ def test_n5_conditional_movement_clauses_match_pinned_pdf() -> None:
         assert fragment.casefold() in jump.casefold(), fragment
 
 
+def test_esx02_jet_propulsion_is_variant_only_and_distance_neutral() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in document["records"]}
+    super_jump = records["skill:super-jump"]
+    facts = super_jump["facts"]
+    jet = facts["clarifications"][1]
+    assert "Unit Profile lists [[skill:super-jump|Super-Jump]] (Jet Propulsion)" in jet
+    assert "change direction and heading in mid-air as many times as desired" in jet
+    assert "declared [[skill:jump|Jump]] trajectory" in jet
+    assert "not a general benefit" in jet
+    assert "does not add [[skill:jump|Jump]] distance or remove the once-per-Order limit" in jet
+    assert "Long Skill [[skill:jump|Jump]] uses the first MOV value plus" in (
+        facts["effects"][1]
+    )
+    assert "a Short Skill [[skill:jump]] adds that distance instead" in (
+        facts["effects"][1]
+    )
+    assert "only once per Order" in facts["restrictions"][0]
+    assert "entire exact trajectory before [[trait:aro|ARO]] declarations" in (
+        facts["clarifications"][0]
+    )
+    assert len(facts["sourceNotes"]) == 1
+    assert "English N5.3 p. 113" in facts["sourceNotes"][0]
+    assert "Spanish N5.3 p. 116" in facts["sourceNotes"][0]
+    assert "p. 117 trajectory example" in facts["sourceNotes"][0]
+    assert {
+        (citation["sourceId"], citation.get("page"))
+        for citation in super_jump["citations"]
+    } >= {("n5-core-v5.3-pdf", 113), ("n5-core-v5.3-es-pdf", 116)}
+
+
+def test_esx02_jet_propulsion_wording_in_pinned_source_versions() -> None:
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    old = root / "data/pdf/rules/n5-rules-v5-2-en.pdf"
+    current = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    spanish = root / "data/pdf/rules/esp-n5-update-5-3.pdf"
+    if not all(path.exists() for path in (old, current, spanish)):
+        pytest.skip("Required pinned N5.2/N5.3 PDFs unavailable")
+    with pdf.open(old) as book:
+        old_text = " ".join(book[111].get_text().split())
+    with pdf.open(current) as book:
+        current_text = " ".join(book[112].get_text().split())
+    with pdf.open(spanish) as book:
+        spanish_text = " ".join(book[115].get_text().split())
+        example = " ".join(book[116].get_text().split())
+    assert "change the direction and heading of the jump before" in old_text
+    assert "change direction and heading in mid-air as many times as they wish" in (
+        current_text
+    )
+    assert "variar la dirección y sentido de su trayectoria en el aire" in (
+        spanish_text
+    )
+    assert "antes de situarse sobre la superficie de aterrizaje" in spanish_text
+    assert "variar libremente su trayectoria por el aire" in example
+
+
 def test_guard_neurocinetics_total_reaction_n53_citations() -> None:
     path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
     records = {r["id"]: r for r in load_curated_document(path)["records"]}

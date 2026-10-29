@@ -110,12 +110,21 @@ counts above.
   the main scope and FAQ mixed activation; its explicit contact
   choices now appear in the owner card and pass bilingual current-PDF,
   curated and 1440/390/320 px Chromium checks. ESX-02 (Jet
-  Propulsion), ESX-03 (MSV3 disclosure/turn scope), and ESX-04
-  (AP+T2 CC Anti-materiel) remain separate current-rule checks.
-  The absent *earlier* Spanish PDF still prevents a proven
-  Spanish historical before/after delta **for all four items**.
-  Do not infer historical equivalence, a blanket MSV3 Marker-state
-  exemption, or unrestricted Super-Jump distance.
+  Propulsion) is also **locally accepted for current-rule publication**:
+  English N5.2 p. 112 has the older before-landing text, English
+  N5.3 p. 113 explicitly permits repeated changes of direction and
+  heading in mid-air, and Spanish N5.3 pp. 116-117 keeps less
+  explicit wording but shows freely varied trajectories. The
+  maintained `skill:super-jump` card now makes the repeated-change
+  permission specific to the Jet Propulsion variant, with a
+  bilingual source-context note, citation, and focused source/browser
+  regressions. No general Super-Jump distance, declaration type, or
+  once-per-Order permission changed. ESX-03 (MSV3 disclosure/turn
+  scope) and ESX-04 (AP+T2 CC Anti-materiel) remain separate
+  current-rule checks. The absent *earlier* Spanish PDF still
+  prevents a proven Spanish historical before/after delta **for all
+  four items**. Do not infer historical equivalence, a blanket
+  MSV3 Marker-state exemption, or unrestricted Super-Jump distance.
 - **ARMY-01 to ARMY-20 (20 items):** the current post-notice
   snapshot and selected identities were inspected in the original
   audit, but no pinned pre-notice Army snapshot was available.
