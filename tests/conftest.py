@@ -13,6 +13,8 @@ import pytest
 from tools.browser_test_capacity import browser_slot
 from tools.test_sections import load_test_sections, section_for_module
 
+pytest_plugins = ("tools.pytest_startup_profile",)
+
 _TEST_SECTIONS = load_test_sections()
 # Despite its filename, this module tests a browser verifier entirely with mocks.
 _NON_CHROMIUM_BROWSER_MODULES = frozenset({"test_verify_rule_fragment_browser.py"})

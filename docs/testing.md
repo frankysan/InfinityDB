@@ -111,6 +111,22 @@ The default pytest configuration reports the 20 slowest setup/call/teardown
 durations, including local runs (CI already requested those durations). This
 identifies slow individual cases but not idle time spent by other workers.
 
+An automatic controller-side `xdist startup and collection timings` summary
+also reports elapsed time from xdist worker-spawning to first/last worker ready,
+first/last worker collection complete, and first dispatched test. This makes
+the otherwise unprofiled `bringing up nodes...` delay measurable without
+generating files. The intervals overlap and exclude Python/pytest initialization
+before xdist begins starting workers; serial runs omit this summary. For
+reproducible startup comparisons, retain the runner's total elapsed time too.
+
+On 2026-10-29, running five non-browser test sections with 8 workers took
+**94.91 s** (2,669 passed, 3 skipped), and the browser section with two
+grouped workers took **143.21 s** (152 passed, 16 skipped). The combined
+**238.12 s** did not materially improve over the **239.25 s** unified run.
+Neither older report separated worker bootstrap from collection, so the cause
+of the observed browser startup delay remains unmeasured until the new
+instrumentation is run.
+
 Browser verifier modules have their own maintained `browser` section, separate
 from the `web` HTTP/API tests. A complete suite still includes both. For
 independent diagnosis or CI job partitioning, use:
