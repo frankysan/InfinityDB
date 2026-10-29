@@ -131,8 +131,9 @@ with otherwise identical tests measured **80.7 s (one slot) vs 49.7 s
 and **73.1 s vs 52.3 s** for the Weapon cards browser module (23 passed).
 These are single-run comparisons, not a full-suite benchmark. The previous
 one-slot runs showed lock waits of approximately 76 s and 69 s in setup.
-A full parallel suite is still needed to measure aggregate benefit and detect
-resource contention under the workstation's normal worker count.
+The subsequent full `-n auto` run on 2026-10-29 passed all
+2,812 tests (19 skipped) in **246.85 s**, confirming that two browser slots
+remain stable under the workstation's normal worker count.
 
 ## Chromium concurrency under pytest-xdist
 
@@ -158,8 +159,8 @@ browser's same-origin page requests use the WSGI adapter. Standalone verifier
 calls continue to create and close their own browser. In a focused Windows
 two-worker run, the five cases passed in **37.53 s** and the complete Unit
 browser module passed **33 tests in 40.01 s**, compared with an approximately
-79-second serial monolithic Unit matrix before these changes. These results
-do not replace a full `-n auto` suite validation.
+79-second serial monolithic Unit matrix before these changes. The
+subsequent full auto-worker run also passed.
 
 Long-running catalog render checks retain bounded deadlines and report HTTP,
 JavaScript, failed-request and page-status evidence on failure; none silently
@@ -169,8 +170,16 @@ WSGI callable using `tools/browser_wsgi_transport.py`. This keeps real HTML,
 JS module execution, API responses, and browser assertions, but removes
 dependence on a transient local TCP listener for browser rendering. Dedicated
 HTTP/API tests still exercise the socket/transport boundary. The WSGI adapter
-has separate routing/response regression tests. A full parallel run is still
-required to validate stability under the developer workstation workload.
+has separate routing/response regression tests.
+
+The cross-domain relation destination gate is divided by its eight **public
+route catalogs** (distinct from singular source record kinds). All discovered
+destinations are required to belong to a tested catalog, and each still
+receives the original API and HTML response checks. This avoids one long
+pytest item at the end of an xdist run. On Windows, the isolated gate passed
+eight cases in **35.08 s serially** and **25.09 s with two workers**; the
+complete relation module passed 11 tests in **34.15 s** with two workers.
+The full auto-worker suite has not yet been rerun after this split.
 
 ## Theme runtime regression coverage
 

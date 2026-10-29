@@ -9,6 +9,8 @@ from typing import Any
 from urllib.parse import urlsplit
 from wsgiref.util import setup_testing_defaults
 
+import pytest
+
 from infinity_db.database import Database
 from infinity_db.domain_references import enrich_rule_relation_references
 from infinity_db.rules_database import RulesDatabase
@@ -37,19 +39,28 @@ def _get(app: Any, path: str) -> tuple[str, bytes]:
     return statuses[0], body
 
 
-def test_published_cross_domain_relation_catalog_destinations_resolve() -> None:
+RELATION_SOURCE_KINDS = (
+    "ammunition", "equipment", "hacking-program", "rule",
+    "skill", "state", "trait", "weapon",
+)
+RELATION_ROUTE_CATALOGS = (
+    "ammunition", "equipment", "hacking-programs", "rules",
+    "skills", "states", "traits", "weapons",
+)
+
+
+@pytest.fixture(scope="module")
+def relation_destinations() -> tuple[Any, dict[tuple[str, str], set[str]]]:
+    """Collect the full published relation inventory once per pytest worker."""
     root = Path(__file__).resolve().parents[1]
     army_path = root / "data/generated/infinity.db"
     rules_path = root / "data/generated/rules.db"
     database = Database(army_path)
     rules = RulesDatabase(rules_path)
     app = create_app(army_path, rules_database_path=rules_path)
-
-    kinds = ("ammunition", "equipment", "hacking-program", "rule", "skill",
-             "state", "trait", "weapon")
     records = [
         record
-        for kind in kinds
+        for kind in RELATION_SOURCE_KINDS
         for record in rules.composed_records_by_kind(kind)
     ]
     enriched = enrich_rule_relation_references(database, {"records": records})
@@ -62,10 +73,20 @@ def test_published_cross_domain_relation_catalog_destinations_resolve() -> None:
             if "catalog" not in reference:
                 continue  # Embedded or deliberately unlinked source variants.
             targets[(reference["catalog"], reference["id"])].add(owner["id"])
-
     assert len(targets) >= 40, len(targets)
-    failures = {}
-    for (catalog, slug), owners in sorted(targets.items()):
+    assert {catalog for catalog, _ in targets} <= set(RELATION_ROUTE_CATALOGS)
+    return app, targets
+
+
+@pytest.mark.parametrize("catalog", RELATION_ROUTE_CATALOGS)
+def test_published_cross_domain_relation_catalog_destinations_resolve(
+    relation_destinations: tuple[Any, dict[tuple[str, str], set[str]]], catalog: str,
+) -> None:
+    app, targets = relation_destinations
+    failures: dict[str, list[str]] = {}
+    for (target_catalog, slug), owners in sorted(targets.items()):
+        if target_catalog != catalog:
+            continue
         api_path = f"/api/{catalog}/{slug}"
         detail_path = f"/{catalog}/{slug}"
         status, _ = _get(app, api_path)
