@@ -2754,6 +2754,14 @@ v0.1 rulings must be absent. The focused regression passed. This is
 a current-source selector/association gate, not historical v0.0 replay
 or a certification of deferred ITS-specific applicability.
 
+**FAQ public-copy encoding regression, 2026-10-29:**
+`test_published_faq_copy_has_no_corrupted_question_mark_possessives`
+checks the 29 current FAQ question/answer strings for accidental
+replacement question marks, anchors the five apostrophes recovered
+from the English FAQ sources, and verifies the English v0.0 PDF
+title. It guards presentation fidelity only: it does not certify
+full historical answer wording or translation equivalence.
+
 ## 1.0 FAQ v0.1 pilot acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** The

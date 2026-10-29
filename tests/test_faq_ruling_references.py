@@ -159,6 +159,43 @@ def test_pinned_faq_pdf_source_identity_and_available_bytes(source_id: str) -> N
     assert actual_sha256 == pin["sha256"], f"FAQ source bytes changed: {source_id}"
 
 
+def test_published_faq_copy_has_no_corrupted_question_mark_possessives() -> None:
+    """Keep source-reviewed FAQ copy free of replacement punctuation."""
+    root = Path(__file__).resolve().parents[1]
+    faq = json.loads(
+        (root / "data/curated/rules/n5-faq-v0.1.json").read_text(encoding="utf-8")
+    )
+    records = {row["id"]: row["facts"] for row in faq["records"]}
+    assert len(records) == 29
+    for identifier, facts in records.items():
+        assert facts["question"].endswith("?"), identifier
+        assert facts["question"].count("?") == 1, identifier
+        assert "?" not in facts["answer"], identifier
+
+    expected = {
+        "deployment-phase-reposition-after-measurement": {
+            "answer": "element's position",
+        },
+        "direct-template-secondary-target-los": {
+            "question": "attacker's Line of Fire",
+            "answer": "Trooper's Line of Fire",
+        },
+        "skill-declaration-target-position": {
+            "answer": "target's position",
+        },
+        "surprise-attack-multiple-users": {
+            "answer": "Trooper's Surprise Attack MOD",
+        },
+    }
+    for slug, fields in expected.items():
+        facts = records[f"faq-ruling:{slug}"]
+        for field, phrase in fields.items():
+            assert phrase in facts[field], (slug, field)
+    titles = {source["id"]: source["title"] for source in faq["sources"]}
+    assert titles["n5-faq-v0.0-en-pdf"] == "N5 FAQs — English (historical)"
+    assert all("?" not in title for title in titles.values())
+
+
 def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
     published_pilot: RulesDatabase,
 ) -> None:

@@ -608,6 +608,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [ ] Reconcile every remaining in-scope ruling against the pinned FAQ and
     source inventory. Reuse the existing question/answer, topic, version/date,
     citation and applicability fields; preserve original provenance on carry-forwards.
+    - [x] Repair **five corrupted possessives in four reviewed FAQ
+      questions/answers** and the stray replacement `?` in the English
+      historical v0.0 source title. Verified against the pinned English
+      FAQ source pages; a regression now checks all 29 current FAQ
+      question/answer strings for replacement question marks and pins
+      the five restored phrases. No meaning, source selection, topic
+      identity, citation or applicability changed. This is a bounded
+      text-fidelity correction, not the remaining full wording audit.
   - [x] Verify source-to-ordinary-browser reachability of **all 29 published
     reviewed FAQ rulings** against a fresh rules export. The tracked
     `test_every_published_faq_has_a_normal_browser_entry_point` drives

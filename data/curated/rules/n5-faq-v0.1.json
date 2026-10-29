@@ -41,7 +41,7 @@
     {
       "id": "n5-faq-v0.0-en-pdf",
       "kind": "pdf",
-      "title": "N5 FAQs ? English (historical)",
+      "title": "N5 FAQs — English (historical)",
       "version": "0.0",
       "publishedDate": "2025-10-15",
       "localPath": "data/pdf/faq/n5-faqs-v0-0-en.pdf",
@@ -503,7 +503,7 @@
       ],
       "facts": {
         "question": "Can players reposition Troopers, Deployables, or other game elements during their main Deployment Phase step?",
-        "answer": "Yes. A player may reposition those game elements during their main Deployment Phase step until a Roll or measurement is made for them. Once that occurs, the affected element?s position is fixed for the remainder of the Deployment Phase. For example, once a Fireteam Coherency Check is measured and its members are adjusted, those members can no longer be repositioned.",
+        "answer": "Yes. A player may reposition those game elements during their main Deployment Phase step until a Roll or measurement is made for them. Once that occurs, the affected element's position is fixed for the remainder of the Deployment Phase. For example, once a Fireteam Coherency Check is measured and its members are adjusted, those members can no longer be repositioned.",
         "topicIds": [
           "rule:deployment-phase"
         ],
@@ -624,8 +624,8 @@
         }
       ],
       "facts": {
-        "question": "Can a Direct Template Weapon hit secondary targets around corners outside the attacker?s Line of Fire?",
-        "answer": "No. A Direct Template Weapon cannot fire around a corner to hit a secondary target that is outside the firing Trooper?s Line of Fire.",
+        "question": "Can a Direct Template Weapon hit secondary targets around corners outside the attacker's Line of Fire?",
+        "answer": "No. A Direct Template Weapon cannot fire around a corner to hit a secondary target that is outside the firing Trooper's Line of Fire.",
         "topicIds": [
           "trait:direct-template"
         ],
@@ -1518,7 +1518,7 @@
       ],
       "facts": {
         "question": "Which Skill details must be specified on declaration?",
-        "answer": "Declare the Skill details, including a BS Attack or template placement, except for the target?s position. Choose the target position in Resolution, before measuring Ranges. If declaration order matters, the active player chooses who declares first.",
+        "answer": "Declare the Skill details, including a BS Attack or template placement, except for the target's position. Choose the target position in Resolution, before measuring Ranges. If declaration order matters, the active player chooses who declares first.",
         "topicIds": [
           "skill:bs-attack"
         ],
@@ -1638,7 +1638,7 @@
       ],
       "facts": {
         "question": "Do Surprise Attack MODs from multiple attacking Troopers stack on one target?",
-        "answer": "No. Each Trooper?s Surprise Attack MOD applies separately, including during a Coordinated Order or when a Controller and Peripheral attack the same target.",
+        "answer": "No. Each Trooper's Surprise Attack MOD applies separately, including during a Coordinated Order or when a Controller and Peripheral attack the same target.",
         "topicIds": [
           "skill:surprise-attack"
         ],

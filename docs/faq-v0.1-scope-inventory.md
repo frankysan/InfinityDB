@@ -59,6 +59,21 @@ This establishes no historical replay or broader ITS applicability;
 it does not re-interpret unchanged question text or select answers
 from v0.0 for historical users.
 
+**Published FAQ punctuation fidelity, 2026-10-29:** A source-text
+check against the pinned English FAQ PDFs found five malformed
+possessive apostrophes rendered as question marks in four reviewed
+FAQ records: Deployment Phase repositioning, Direct Template Weapon
+secondary targets (question and answer), declaration target position,
+and separate Surprise Attack MODs. The historical English FAQ v0.0
+source title also had a stray replacement question mark. These are
+text-encoding artifacts, not new source contradictions. The reviewed
+FAQ copy now uses ordinary apostrophes; source identity, page citations,
+application dates and rules semantics are unchanged. The regression
+`test_published_faq_copy_has_no_corrupted_question_mark_possessives`
+verifies all 29 current FAQ questions/answers and pins the repaired
+phrases and historical source title. This is **not** a full source
+wording/translation certification.
+
 ## Source-byte identity and publication boundary
 
 The audit manifest also pins the exact SHA-256, source ID, version,
