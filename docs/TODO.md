@@ -180,6 +180,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         two generic-word reviewed-text fingerprints affected by the summary
         extension were refreshed. The tracked rules database must be rebuilt
         before final player-facing browser acceptance.
+      - [x] Reconcile the player-facing **Berserk/Prone exception (N53-03)**
+        against General Movement Rules, N5.3 p. 29. Both `state:prone`
+        and `skill:berserk` now explain that Berserk's Movement Label does
+        not permit voluntary Prone entry/exit at the start or end of movement.
+        This does not impose an unsupported general ban on Berserk while
+        Prone. A focused curated regression guards the source citation and
+        the two owner cards. The shorter Prone summary at N5.3 p. 169
+        still omits Berserk; retain this source-internal discrepancy as
+        documented. Release-matched rules data and browser acceptance
+        remain separate requirements.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or

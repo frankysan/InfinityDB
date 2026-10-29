@@ -17364,7 +17364,8 @@
                     "Although [[skill:berserk|Berserk]] is a Long Skill, the user can apply any +1 SD MOD they have; see the [[rule:special-dice|Special Dice]] exception."
                 ],
                 "restrictions": [
-                    "The user declares the movement route and [[skill:cc-attack]] target before ARO declarations."
+                    "The user declares the movement route and [[skill:cc-attack]] target before ARO declarations.",
+                    "The General Movement Rules exclude Berserk from the usual permission to enter or leave [[state:prone|Prone]] at the start or end of movement, despite its Movement Label."
                 ]
             },
             "labelIds": [
@@ -17389,6 +17390,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 86,
                     "heading": "Berserk"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 29,
+                    "section": "General Movement Rules"
                 }
             ],
             "review": {

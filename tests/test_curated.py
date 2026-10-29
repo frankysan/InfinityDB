@@ -2112,6 +2112,31 @@ def test_n5_impetuous_separates_movement_and_end_of_order_prone_limits() -> None
     )
 
 
+def test_n53_berserk_prone_transition_exception_is_scoped_and_linked() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in document["records"]}
+    berserk = records["skill:berserk"]
+    prone = records["state:prone"]
+    assert berserk["labelIds"].count("movement") == 1
+    restriction = berserk["facts"]["restrictions"][-1]
+    assert "General Movement Rules exclude Berserk" in restriction
+    assert "enter or leave [[state:prone|Prone]]" in restriction
+    assert "start or end of movement" in restriction
+    assert "Movement Label" in restriction
+    assert not any("cannot declare Berserk" in rule for rule in berserk["facts"]["restrictions"])
+    assert any(
+        "[[skill:berserk|Berserk]] from voluntary Prone transitions" in note
+        for note in prone["facts"]["clarifications"]
+    )
+    assert {
+        "sourceId": "n5-core-v5.3-pdf",
+        "page": 29,
+        "section": "General Movement Rules",
+    } in berserk["citations"]
+
+
 def test_n5_cautious_movement_aro_suppression_has_scoped_exceptions() -> None:
     document = load_curated_document(
         Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
