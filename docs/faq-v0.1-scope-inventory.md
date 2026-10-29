@@ -65,6 +65,17 @@ local acquisition dates and selected applicability dates remain
 distinct evidence. The earlier English v0.0 PDF likewise has no
 independently established publication day.
 
+**Player-facing provenance correction, 2026-10-29:** The FAQ section
+now identifies 2026-09-01 as the selected **reference date** and
+explicitly states that it is an announcement-era anchor, not a verified
+PDF publication day. Individual FAQ cards label the API's existing
+`selected_source.published_date` as a **source date anchor**, retaining
+the selected version, exact PDF page citation, and original v0.0
+provenance. The field name and selector remain unchanged for
+compatibility; historical replay is not newly enabled. Chromium and
+JavaScript render regressions pin the distinction. No change to
+question/answer text or scenario applicability was made.
+
 ## Printed ITS section — uncovered questions
 
 All source pages here are the **printed FAQ page numbers**, not the

@@ -303,8 +303,10 @@ def select_applicable_faq_rulings(
 ) -> list[dict[str, Any]]:
     """Select only reviewed, currently applicable rulings for an explicit context.
 
-    Candidates must include selected_source with the verified source's
-    publication date. Do not infer context from the newest source or today.
+    Candidates must include selected_source with its curated source-date
+    anchor (stored as published_date for compatibility). That date may be
+    an announcement-era applicability anchor, not a verified per-PDF publication
+    day. Do not infer context from the newest source or today.
     Historical editions are not part of the default current read model.
     """
     topic = _ids([topic_id], "topic_id")[0]

@@ -430,8 +430,11 @@ def test_reference_provenance_labels_remain_distinct_across_themes(
         assert "Sources:" in card.locator(".rules-source-citations").inner_text()
         faq = page.locator("#scenario-content .faq-dated-clarification")
         faq.wait_for(state="visible", timeout=60000)
-        assert "published 2026-09-01" in faq.locator(
+        assert "source date anchor 2026-09-01" in faq.locator(
             ".faq-publication-source"
+        ).inner_text()
+        assert "not a verified PDF publication date" in page.locator(
+            "#scenario-content .faq-rulings > .detail-source"
         ).inner_text()
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= innerWidth + 1"

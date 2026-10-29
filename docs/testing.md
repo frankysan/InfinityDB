@@ -2754,7 +2754,7 @@ pilot. Private checker:
 `local/audits/verify_faq_pilot_browser.py`.
 
 The browser deliberately uses explicit FAQ v0.1/N5.3
-`as_of=2026-09-01` publication context rather than guessing from the
+`as_of=2026-09-01` reference context rather than guessing from the
 user's clock. This confirms two published examples, not the
 complete FAQ inventory, ITS season-specific verification or historical
 edition selection.

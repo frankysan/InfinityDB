@@ -629,6 +629,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     answer must show its date/version and remain separate from the base definition.
     Assess historical replay and user-selectable applicability against the current
     reference gate; full ITS history is post-1.0.
+    - [x] Correct the **FAQ source-date label** without altering the selected
+      source or historical API field contract. The curated 2026-09-01
+      `publishedDate` is an announcement-era reference/applicability anchor,
+      not independent evidence of the PDF's publication day. The player
+      section and citation cards now distinguish that provenance explicitly;
+      Chromium/JavaScript regressions pin the wording. No source precedence
+      or scenario scope changed. Exact PDF dates and full historical
+      applicability remain open.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.

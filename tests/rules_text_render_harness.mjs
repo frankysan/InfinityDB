@@ -177,7 +177,20 @@ const dated = FAQ.children.find((node) => node.tag === "article");
 assert.ok(dated.className.includes("faq-dated-clarification"));
 assert.ok(dated.children.some((node) => (
   node.className === "detail-source faq-publication-source"
-  && node.textContent.includes("published 2026-09-01")
+  && node.textContent.includes("source date anchor 2026-09-01")
+)));
+assert.ok(FAQ.children.some((node) => (
+  node.className === "detail-source"
+  && node.textContent.includes("not a verified PDF publication date")
+)));
+const carriedFaq = faqRulingsSection([{
+  ...selectedFaq,
+  original_publication: { version: "0.0", publishedDate: "2025-10-15" },
+}]);
+const carried = carriedFaq.children.find((node) => node.tag === "article");
+assert.ok(carried.children.some((node) => (
+  node.className === "detail-source faq-publication-source"
+  && node.textContent.includes("first documented v0.0 (date anchor 2025-10-15)")
 )));
 const conflicted = FAQ.children.filter((node) => node.tag === "article")[1];
 const warning = conflicted.children.find((node) => (

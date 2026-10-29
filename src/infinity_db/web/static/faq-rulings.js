@@ -30,7 +30,7 @@ export function faqRulingsSection(items) {
   heading.textContent = "FAQ clarifications";
   const context = document.createElement("p");
   context.className = "detail-source";
-  context.textContent = "Dated clarifications · N5.3 · FAQ v0.1 (1 September 2026). Base rules remain separate.";
+  context.textContent = "N5.3 · FAQ v0.1 · reference date 2026-09-01 (announcement-era anchor, not a verified PDF publication date). Base rules remain separate.";
   group.append(heading, context);
 
   for (const ruling of items) {
@@ -50,7 +50,7 @@ export function faqRulingsSection(items) {
     const selected = ruling.selected_source || {};
     const publication = ruling.original_publication || {};
     source.append(
-      `FAQ clarification · version ${selected.version || "?"} · published ${selected.published_date || "unknown"} · `,
+      `FAQ clarification · version ${selected.version || "?"} · source date anchor ${selected.published_date || "unknown"} · `,
     );
     const citation = (ruling.citations || []).find((item) =>
       item.source_id === ruling.selected_citation?.sourceId
