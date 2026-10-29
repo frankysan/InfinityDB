@@ -20,6 +20,7 @@ CHROMIUM_SCHEDULING_LANES = {
     # Stable, opt-in xdist groups prevent workers waiting on the two-slot lock.
     "test_verify_unit_skill_presentation_browser": "chromium-a",
     "test_verify_scenario_faq_browser": "chromium-a",
+    "test_verify_fireteam_context_browser": "chromium-a",
     "test_verify_release_candidate_browser": "chromium-a",
     "test_verify_weapon_source_cards_browser": "chromium-b",
     "test_verify_army_overview_browser": "chromium-b",

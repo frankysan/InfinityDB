@@ -643,6 +643,8 @@ class ApiHandler:
                         payload = {"error": "Fireteam chart not found"}
                     else:
                         attach_public_army_slug(self.database, payload["army"])
+                        for parent in payload["parent_charts"]:
+                            attach_public_army_slug(self.database, parent["army"])
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Fireteam chart")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

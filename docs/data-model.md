@@ -967,6 +967,25 @@ not approval of Wildcard eligibility. The browser omits combined Wildcard rows
 from excluded teams and retains a separate Wildcard card when no team can
 display the pool. The source-separated view preserves every original chart row.
 
+Each member also exposes `reference_issues` with stable codes and player-readable
+messages derived from the persisted resolution and Army-local FTO loadout links.
+An unresolved or ambiguous Unit, a global-only match, and a missing Army-local
+FTO option remain distinct. A global Unit link is reference navigation, not
+proof of Army-local eligibility. These issues are visible in ordinary member
+rows, including combined Wildcards, alongside the original `comment` as a chart
+annotation. Technical resolution/ID columns remain developer-only. Original
+annotations supplement the existing equivalence projection; they do not create
+new aliases or automatically interpret additional conditions.
+
+`parent_charts` retains each Reinforcement Section's source-backed parent Army
+reference, selected chart source and independent type-limit projection. A
+`selectable` flag reuses the ordinary Fireteam Army picker eligibility; grouping
+parents remain represented without a chart link. Normal Reinforcement pages show
+these parent limits, including zero/unavailable values, separately from Section
+members. An absent chart and an existing chart with no limits are distinct; neither
+becomes a zero limit. Parent links use canonical public slugs and shared Fireteam
+state. This is contextual reference information, not combined roster validation.
+
 ## Relationship model
 
 Application relationships should be materialized where their semantics are understood and useful.

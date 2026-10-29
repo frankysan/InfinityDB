@@ -317,13 +317,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         both charts, the real Settings toggle and an all-excluded
         fallback at 1440/390/320 px; source-separated rows remain
         available. This does not validate general roster legality.
+      - [x] **Web backend + Web frontend — ARMY-01 reference
+        uncertainty and context:** The 11 unresolved rows have no
+        exact Unit-slug definition in the pinned archive; ARJUNA's
+        match exists only outside its Reinforcement Section, and
+        KORSAN's three local loadouts have no FTO name. All 13
+        affected rows now expose verification notices without
+        inventing targets or options. Original member annotations
+        are visible, including the three `--` / Spec-Ops rows.
+        All 11 Reinforcement charts expose 46 parent contexts with
+        independent limits; 45 lead to selectable charts, while the
+        non-playable NA2 grouping stays unlinked. Nine contexts
+        show a Section CORE type alongside parent CORE 0; this
+        discrepancy remains explicit rather than merging pools.
+        Source/API and Chromium tests cover the notices, real
+        Wildcard toggle, parent navigation/back and empty/missing
+        chart distinctions at 1440/390/320 px in light/dark themes.
       - [ ] **ARMY-01 remaining semantics, full roster/profile
-        acceptance, and release gates:** Review the 12 non-local/
-        unresolved chart members and two unmatched FTO contexts;
-        assess member annotations that are hidden or interpreted
-        only as equivalence labels (including Spec-Ops, Triad,
-        Varuna Div and Strategic Deployment). Verify Reinforcement
-        parent/type restrictions in the ordinary chart journey.
+        acceptance, and release gates:** Review annotation-specific
+        profile applicability where it is not established by the
+        original note and existing equivalence projection (including
+        Triad, Varuna Div and Strategic Deployment); retain the
+        unresolved current N5 Reinforcements authority boundary.
         Compare complete unit/profile/option costs and source-specific
         AVA for ARMY-02–20 where still unreviewed. Do not infer
         a historical before/after delta without an earlier
@@ -1627,6 +1642,14 @@ owns disclosure and accurate scope; this section owns later authoritative
 resolution. Preserve reviewed source values and uncertainty while waiting.
 An external correction can be incorporated earlier when available without
 making its arrival a release prerequisite.
+
+- [ ] Seek source corrections or clarification for the pinned Fireteam chart
+  references disclosed under ARMY-01: 11 rows referencing eight exact slugs
+  without Unit definitions (including three Combined Army Spec-Ops placeholders), ARJUNA's global-only
+  match and KORSAN's FTO annotation without an FTO-named local loadout.
+  Preserve chart names/annotations and uncertainty; do not create aliases or
+  eligible options from similar names. The visible disclosure is locally
+  accepted; an external publisher response is not a 1.0 prerequisite.
 
 - [ ] Continue review of PARA Mine's intended Army footnote marker, Sepsitor
   Plus's missing Army `[*]`, and WildParrot's printed `Non-Lethal` against

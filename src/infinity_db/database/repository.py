@@ -29,7 +29,11 @@ from infinity_db.domain_slugs import (
     require_domain_slug,
     resolve_domain_slug_candidates,
 )
-from infinity_db.fireteam_semantics import excludes_wildcards, fireteam_limit_kind
+from infinity_db.fireteam_semantics import (
+    excludes_wildcards,
+    fireteam_limit_kind,
+    member_reference_issues,
+)
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -1740,6 +1744,39 @@ class Database:
                 )
             ]
 
+            parent_charts = []
+            selectable_parents = {
+                item["id"] for item in self.list_fireteam_armies()
+            } if army["parent_armies"] else set()
+            for parent in army["parent_armies"]:
+                parent_source = connection.execute(
+                    "SELECT source_army_id, source_kind, source_file, source_sha256 "
+                    "FROM application_fireteam_charts WHERE application_army_id = ?",
+                    (parent["id"],),
+                ).fetchone()
+                parent_limits = connection.execute(
+                    "SELECT fireteam_type, position, raw_limit "
+                    "FROM application_fireteam_chart_limits WHERE application_army_id = ? "
+                    "ORDER BY position, fireteam_type",
+                    (parent["id"],),
+                ).fetchall()
+                parent_charts.append({
+                    "army": {key: parent[key] for key in ("id", "name", "slug")},
+                    "selectable": parent["id"] in selectable_parents,
+                    "source": {
+                        "army_id": int(parent_source["source_army_id"]),
+                        "kind": parent_source["source_kind"],
+                        "file": parent_source["source_file"],
+                        "sha256": parent_source["source_sha256"],
+                    } if parent_source is not None else None,
+                    "limits": [{
+                        "type": row["fireteam_type"],
+                        "position": int(row["position"]),
+                        "max_count": int(row["raw_limit"]),
+                        "limit_kind": fireteam_limit_kind(int(row["raw_limit"])),
+                    } for row in parent_limits],
+                })
+
         types_by_team: dict[int, list[str]] = {}
         for row in type_rows:
             types_by_team.setdefault(int(row["fireteam_id"]), []).append(
@@ -1790,6 +1827,10 @@ class Database:
                     "source_unit_id": row["source_unit_id"],
                     "unit": unit,
                     "loadouts": loadouts_by_member.get((fireteam_id, member_id), []),
+                    "reference_issues": member_reference_issues(
+                        row["resolution"], row["source_unit_id"], row["fto_marker"],
+                        bool(loadouts_by_member.get((fireteam_id, member_id))),
+                    ),
                     "equivalence_labels": equivalence_by_member.get(
                         (fireteam_id, member_id), []
                     ),
@@ -1833,6 +1874,7 @@ class Database:
                 for row in limits
             ],
             "teams": teams,
+            "parent_charts": parent_charts,
         }
 
     @instance_lru_cache(maxsize=1)

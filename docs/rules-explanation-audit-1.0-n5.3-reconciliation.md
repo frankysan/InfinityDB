@@ -214,10 +214,26 @@ counts above.
   local Chromium acceptance, including the separate-pool fallback.
   This does not approve arbitrary note interpretation or legality.
 
+  The next bounded review classifies **13 affected chart rows**:
+  11 rows reference eight exact slugs with no Unit definition in the pinned archive;
+  ARJUNA resolves only outside its Reinforcement Section; KORSAN's
+  three local options lack an FTO name. Original rows, unresolved
+  identities and source-local annotations remain intact. Public
+  member rows now expose verification notices, including combined
+  Wildcards, while the three Combined Army `--` placeholders retain
+  their visible Spec-Ops annotation. No replacement identities or
+  FTO options are inferred. Reinforcement pages expose 46 independent
+  parent contexts across 11 Sections: 45 selectable chart links and
+  one unlinked non-playable NA2 grouping. Nine parent CORE-zero
+  contexts coexist with Section CORE entries; parent limits and
+  Section pools remain separate. Source/API and normal Chromium
+  acceptance cover these disclosures and navigation, not a current
+  N5 Reinforcements ruling or complete roster legality.
+
   These bounded checks do **not** approve every profile, option
   cost, faction availability, Fireteam chart, or historical Army
-  delta. ARMY-01's unresolved member/FTO references, member-note
-  interpretation, Reinforcement parent applicability and remaining
+  delta. ARMY-01's annotation-specific profile interpretation,
+  current N5 Reinforcements authority and remaining
   ARMY-02–20 roster/profile semantics remain open; final hosted
   release-browser acceptance is separate. Keep unavailable
   pre-change evidence as a provenance limitation, not a

@@ -6,6 +6,7 @@ import hashlib
 import json
 import sqlite3
 import zipfile
+from collections import Counter
 from pathlib import Path
 
 import pytest
@@ -101,3 +102,86 @@ def test_army_01_all_pinned_chart_constraints_reach_public_api() -> None:
                     assert member["max_count"] == original_member.get("max")
                     assert member["required"] == bool(original_member.get("required"))
     assert (chart_count, team_count, member_count) == (57, 268, 1249)
+
+
+@pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
+def test_pinned_member_reference_gaps_are_disclosed_without_replacement() -> None:
+    database = Database(ARMY_DB)
+    with zipfile.ZipFile(ARMY_ZIP) as archive:
+        documents = {
+            name: json.loads(archive.read(name)) for name in archive.namelist()
+            if name.endswith(".json") and name != "metadata.json"
+        }
+    all_slugs = {unit["slug"] for source in documents.values() for unit in source["units"]}
+    codes: Counter[str] = Counter()
+    affected = unresolved = 0
+    for army in database.list_fireteam_armies():
+        chart = database.get_fireteam_chart(army["id"])
+        assert chart is not None
+        for team in chart["teams"]:
+            for member in team["members"]:
+                issues = member["reference_issues"]
+                codes.update(issue["code"] for issue in issues)
+                affected += bool(issues)
+                if member["resolution"] == "unresolved":
+                    unresolved += 1
+                    assert member["slug"] not in all_slugs
+                    assert member["unit"] is None
+                elif member["resolution"] == "global":
+                    assert army["id"] == 799
+                    assert member["unit"]["id"] == 1178
+                    assert member["slug"] not in {
+                        unit["slug"] for unit in documents[chart["source"]["file"]]["units"]
+                    }
+                    assert member["loadouts"] == []
+                elif member["fto_marker"] and not member["loadouts"]:
+                    assert army["id"] == 499
+                    assert member["source_unit_id"] == 1656
+                    source = documents[chart["source"]["file"]]
+                    korsan = next(unit for unit in source["units"] if unit["id"] == 1656)
+                    options = [option for group in korsan["profileGroups"]
+                               for option in group["options"]]
+                    assert len(options) == 3
+                    assert all("FTO" not in option["name"] for option in options)
+    assert (affected, unresolved) == (13, 11)
+    assert codes == {
+        "unit-reference-unresolved": 11, "unit-not-in-army": 1,
+        "fto-unit-context-mismatch": 1, "fto-option-unresolved": 1,
+    }
+
+
+def test_reinforcement_parent_chart_limits_remain_independent() -> None:
+    database = Database(ARMY_DB)
+    app = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules.db")
+    sections = edges = unavailable_core = blocked_section_core = selectable = 0
+    selectable_ids = {army["id"] for army in database.list_fireteam_armies()}
+    for army in database.list_fireteam_armies():
+        chart = database.get_fireteam_chart(army["id"])
+        assert chart is not None
+        if army["role"] != "reinforcement":
+            assert chart["parent_charts"] == []
+            continue
+        sections += 1
+        status, _, body = wsgi_response(app, f"http://test/api/fireteams?army_id={army['slug']}")
+        assert status == 200
+        published = json.loads(body)
+        assert {parent["army"]["id"] for parent in published["parent_charts"]} == set(
+            army["parent_army_ids"]
+        )
+        for parent in published["parent_charts"]:
+            edges += 1
+            parent_chart = database.get_fireteam_chart(parent["army"]["id"])
+            assert parent_chart is not None
+            assert parent["source"] == parent_chart["source"]
+            assert parent["limits"] == parent_chart["limits"]
+            assert parent["army"]["public_slug"]
+            assert parent["selectable"] == (parent["army"]["id"] in selectable_ids)
+            selectable += parent["selectable"]
+            core_unavailable = any(limit["type"] == "CORE" and limit["max_count"] == 0
+                                   for limit in parent["limits"])
+            unavailable_core += core_unavailable
+            blocked_section_core += core_unavailable and any(
+                "CORE" in team["types"] for team in chart["teams"]
+            )
+    assert (sections, edges, unavailable_core, blocked_section_core) == (11, 46, 10, 9)
+    assert selectable == 45

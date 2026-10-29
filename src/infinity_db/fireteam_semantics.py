@@ -23,6 +23,55 @@ def excludes_wildcards(observation: str | None) -> bool:
     return bool(_NO_WILDCARDS_RE.fullmatch(observation or ""))
 
 
+def fto_reference_status(
+    resolution: str, source_unit_id: int | None, marker: str | None, has_loadouts: bool,
+) -> str:
+    """Classify chart FTO evidence without granting cross-Army eligibility."""
+    if marker is None:
+        return "not-applicable"
+    if resolution != "army" or source_unit_id is None:
+        return "source-unit-context-mismatch"
+    return "resolved" if has_loadouts else "no-matching-fto-option"
+
+
+def member_reference_issues(
+    resolution: str, source_unit_id: int | None, marker: str | None, has_loadouts: bool,
+) -> list[dict[str, str]]:
+    """Explain incomplete Unit/FTO references using the materialized evidence."""
+    issues = []
+    if resolution == "global":
+        issues.append({
+            "code": "unit-not-in-army",
+            "message": (
+                "This Unit is listed in another Army; its profile in this Army is unconfirmed."
+            ),
+        })
+    elif resolution == "ambiguous":
+        issues.append({
+            "code": "unit-reference-ambiguous",
+            "message": "More than one Unit matches this chart entry.",
+        })
+    elif resolution != "army" or source_unit_id is None:
+        issues.append({
+            "code": "unit-reference-unresolved",
+            "message": "No matching Unit was found for this chart entry.",
+        })
+    status = fto_reference_status(resolution, source_unit_id, marker, has_loadouts)
+    if status == "source-unit-context-mismatch":
+        issues.append({
+            "code": "fto-unit-context-mismatch",
+            "message": "The FTO profile in this Army has not been verified.",
+        })
+    elif status == "no-matching-fto-option":
+        issues.append({
+            "code": "fto-option-unresolved",
+            "message": (
+                "The chart requires FTO, but no matching FTO loadout was found in this Army."
+            ),
+        })
+    return issues
+
+
 def ascii_upper(value: str | None) -> str:
     """Return accent-insensitive uppercase text for source-label comparison."""
     normalized = unicodedata.normalize("NFKD", value or "")

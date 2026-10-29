@@ -183,6 +183,10 @@ validated set. Production must not substitute a server-side rebuild.
 - Fireteam combined-view Wildcard exclusions come from the backend's reviewed note decoding
   (`wildcards_excluded`); JavaScript must not interpret chart prose. A false flag does not certify
   eligibility. See `docs/data-model.md#fireteams` for the bounded observation contract.
+- Fireteam `reference_issues` expose incomplete Unit/FTO evidence in normal rows; retain
+  global-only links as navigation without implying Army-local eligibility. Original member
+  comments stay visible. Reinforcement `parent_charts` retain independent parent limits;
+  only parents eligible for the ordinary Fireteam picker receive chart links.
 
 ## Query-coherence invariant
 

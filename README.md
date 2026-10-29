@@ -93,7 +93,9 @@ its application metrics.
   preference, while an explicit choice can be remembered with the other browser settings.
 - Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
   an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, equivalence
-  labels, and N5 rules/bonus context. The combined view respects reviewed explicit Wildcard exclusions.
+  labels, chart notes, and N5 rules/bonus context. Unverified Unit/FTO references are flagged;
+  Reinforcement charts show parent Army limits separately. The combined view respects reviewed
+  explicit Wildcard exclusions.
 - Presents connected Unit relationships for Peripherals/Controllers, Includes,
   selection/dependency constraints, Reinforcement parentage, and broader
   source-declared faction membership.

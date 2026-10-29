@@ -2,7 +2,7 @@ import { getFireteamArmies, getFireteamChart } from "./api.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { fireteamsIncludeWildcards } from "./preferences.js";
-import { readShareState, writeShareState } from "./share-state.js";
+import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { createPanelSwitcher, tableViewport } from "./view-components.js";
 
 const number = new Intl.NumberFormat();
@@ -26,6 +26,8 @@ const elements = {
   source: byId("fireteam-chart-source"),
   sourceDetail: byId("fireteam-chart-source-detail"),
   list: byId("fireteam-list"),
+  parents: byId("fireteam-parent-charts"),
+  parentList: byId("fireteam-parent-list"),
 };
 
 let armies = [];
@@ -241,6 +243,18 @@ function renderTeam(team) {
     name.scope = "row";
     name.className = "table-column--primary";
     name.append(memberName(member));
+    if (member.comment) {
+      const annotation = document.createElement("span");
+      annotation.className = "fireteam-member-note fireteam-member-annotation";
+      annotation.textContent = `Chart note: ${member.comment}`;
+      name.append(annotation);
+    }
+    for (const issue of member.reference_issues || []) {
+      const notice = document.createElement("span");
+      notice.className = "fireteam-member-note fireteam-member-verification";
+      notice.textContent = `Needs verification: ${issue.message}`;
+      name.append(notice);
+    }
     if (wildcard) name.append(badge("Wildcard"));
     if (!wildcard) appendVerifiedFtoSummary(name, member);
     const requirements = document.createElement("td");
@@ -266,15 +280,40 @@ function renderTeam(team) {
   return article;
 }
 
-function fireteamLimitBadge(limit) {
+function fireteamLimitBadge(limit, { showUnavailable = false } = {}) {
   const kind = String(limit.limit_kind || "maximum");
   let label;
   if (kind === "unavailable") label = `${limit.type}: unavailable`;
   else if (kind === "unlimited") label = `${limit.type}: unlimited`;
   else label = `${limit.type}: max ${limit.max_count}`;
   const element = badge(label);
-  if (kind === "unavailable") element.classList.add("developer-only");
+  if (kind === "unavailable" && !showUnavailable) element.classList.add("developer-only");
   return element;
+}
+
+function renderParentCharts(chart) {
+  elements.parentList.replaceChildren();
+  for (const parent of chart.parent_charts || []) {
+    const item = document.createElement("li");
+    const linked = parent.source && parent.selectable;
+    const link = document.createElement(linked ? "a" : "span");
+    if (linked) link.href = shareStateHref("/fireteams", "fireteams", {
+      army: armyValue(parent.army),
+    });
+    link.textContent = parent.army.name;
+    item.append(link);
+    const limits = document.createElement("div");
+    limits.className = "detail-badges";
+    for (const limit of parent.limits || []) {
+      limits.append(fireteamLimitBadge(limit, { showUnavailable: true }));
+    }
+    if (!(parent.limits || []).length) limits.textContent = parent.source
+      ? "No Fireteam type limits are listed."
+      : "Chart limits unavailable.";
+    item.append(limits);
+    elements.parentList.append(item);
+  }
+  elements.parents.hidden = !(chart.parent_charts || []).length;
 }
 
 function teamsForDisplay(chart) {
@@ -503,6 +542,7 @@ function renderChart(chart) {
   if (chart.source.file) sourceDetails.push(chart.source.file);
   if (chart.source.sha256) sourceDetails.push(chart.source.sha256);
   elements.sourceDetail.textContent = sourceDetails.join(" · ");
+  renderParentCharts(chart);
   const teams = teamsForDisplay(chart);
   elements.list.replaceChildren(...teams.map(renderTeam));
   elements.count.textContent = `${teams.length} chart entries`;
