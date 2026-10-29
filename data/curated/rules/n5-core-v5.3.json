@@ -15593,7 +15593,8 @@
                     "[[skill:place-deployable]] places the Deployable Cover Scenery Element completely inside the user's Zone of Control.",
                     "To benefit from Partial Cover, the Trooper must be in Silhouette contact with the Deployable Cover and meet the ordinary partial-obscuration conditions. Apply only the selected variant; its Cover bonus does not stack with the bonus from other scenery providing Partial Cover.",
                     "Cutting Foam prevents enemy Troopers from claiming Partial Cover from that Deployable Cover.",
-                    "For Vitroferro, do not apply the usual -3 Partial Cover MOD to the attacker's [[skill:bs-attack]] Roll. Instead add +6 to the benefiting Trooper's ARM/BTS Saving Roll modifier, capping ARM/BTS plus all applicable Saving Roll MODs at 12 before adding the attack's PS. For example, ARM 5 and Vitroferro +6 gives 11 before PS; ARM 9 plus Vitroferro +6 is capped at 12 before PS."
+                    "For Vitroferro, do not apply the usual -3 Partial Cover MOD to the attacker's [[skill:bs-attack]] Roll. Instead add +6 to the benefiting Trooper's ARM/BTS Saving Roll modifier, capping ARM/BTS plus all applicable Saving Roll MODs at 12 before adding the attack's PS. For example, ARM 5 and Vitroferro +6 gives 11 before PS; ARM 9 plus Vitroferro +6 is capped at 12 before PS.",
+                    "A successful [[equipment:deactivator|Deactivator]] Attack removes the placed Scenery Element from the game table. The Scenery Element does not hinder movement by Allied or enemy Troopers taller than its S3 Silhouette; this stated exception is limited to taller Troopers."
                 ],
                 "restrictions": [
                     "The player must declare a Cutting Foam or Vitroferro variant available on the Unit Profile when [[skill:place-deployable]] is declared. A Trooper cannot end movement on, or place objects on, this scenery element (N5 FAQ v0.1)."

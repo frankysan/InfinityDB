@@ -3922,6 +3922,10 @@ def test_deployable_cover_has_full_placement_and_saving_cap(
     ) in text
     assert "ARM 9 plus Vitroferro +6 is capped at 12 before PS" in text
     assert "Cutting Foam" in text
+    assert "A successful [[equipment:deactivator|Deactivator]] Attack removes" in text
+    assert "does not hinder movement by Allied or enemy Troopers" in text
+    assert "taller than its S3 Silhouette" in text
+    assert "exception is limited to taller Troopers" in text
     assert any("cannot end movement on" in rule for rule in restrictions)
     assert any("available on the Unit Profile" in rule for rule in restrictions)
     assert any(source["source_id"] == "n5-core-v5.3-pdf" and source["page"] == 122

@@ -233,6 +233,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         expand Ancillary-specific scenario rulings beyond their source
         scope. A fresh rules export and scoped regressions pass; final
         release-matched browser acceptance remains open.
+      - [x] Reconcile **Deployable Cover (N53-19)** against N5.3
+        p. 122. The maintained `equipment:deployable-cover` already
+        lists Disposable (2), Indiscriminate, Perimeter, S3, placement
+        wholly within ZoC, both variants, and the Vitroferro
+        ARM/BTS-plus-MOD cap of 12 before PS; the earlier audit's
+        missing-property finding is stale. Added the omitted
+        Deactivator-removal and taller-than-S3 movement exceptions
+        to the owner card, with a focused regression. No unsupported
+        ARM/BTS/STR values were inferred for the Scenery Element.
+        Release-matched browser acceptance remains pending.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or
