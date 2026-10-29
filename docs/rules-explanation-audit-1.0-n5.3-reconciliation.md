@@ -70,10 +70,15 @@ The owning 1.0 work and release criteria remain in
   attributes, so they cannot be flattened or treated as a configured
   Unit. The existing `logical_unit_spectables` store preserves the
   payloads exactly; a source-archive/database parity regression
-  verifies all 30. An ordinary player-facing API/Unit chart view is
-  **not yet implemented**. It remains a 1.0 read-only completeness
-  task distinct from the deferred interactive list/session
-  configurator. See the scoped [TODO](TODO.md#source-inventory-and-gap-batches).
+  verifies all 30. The Unit API and ordinary Unit page now expose
+  the choice charts with source Unit/version provenance, resolved
+  catalog names and routes, preserved option groupings, and raw
+  source-notation values for ambiguous modifiers. A focused
+  Chromium test covers desktop/mobile presentation and links.
+  Final hosted release acceptance remains open. The interactive
+  list/session configurator is still deferred, not part of the
+  read-only reference contract. See the scoped
+  [TODO](TODO.md#source-inventory-and-gap-batches).
 - **2 changes with disclosed official-source disagreements:**
   N53-07 (Kobra CC) preserves a proven DA two-save correction and an
   unresolved Anti-materiel disagreement between Army/Wiki and both PDFs.

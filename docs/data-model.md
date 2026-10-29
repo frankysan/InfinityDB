@@ -405,6 +405,24 @@ availability path.
 Configured aliases remain maintained policy and are pinned into generated metadata; they are not
 rewritten into source rows.
 
+### Spec-Ops and TEAM-OPS source-choice charts
+
+Army `spectables` is source-native *choice inventory*, not a configured roster or a Trooper's
+selected upgrades. Each source Unit's chart is stored unchanged in `logical_unit_spectables`;
+`Database.get_unit()` exposes it under `source_charts`, scoped by exact
+`source_unit_id` and carrying source name and Army source-version/file provenance.
+The projection retains the two independent `table` and `specball` collections,
+source order, and every attribute in compound entries. Source catalog IDs are
+resolved to available names and stable public routes; unresolved extras retain their
+numeric source IDs and are not silently dropped. Raw `q` values and individual
+MOV components are shown as source notation because the source payload alone does
+not justify interpreting all of them as modifiers or final statline values.
+
+The Unit detail page provides an ordinary read-only reference with relevant core
+Skill links. It does not apply upgrades, validate a list, equate Spec-Ops to
+ITS TEAM-OPS, or interpret the in-game Initial/Enhanced Profile transition.
+The separate configurable-list/session feature remains deferred.
+
 ### General profile
 
 The **General profile** is an InfinityDB abstraction for profile information that can safely be shown

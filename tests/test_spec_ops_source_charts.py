@@ -11,14 +11,37 @@ import json
 import sqlite3
 import zipfile
 from pathlib import Path
+from typing import Any
+from wsgiref.util import setup_testing_defaults
 
 import pytest
+
+from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY = ROOT / "data/generated/infinity.db"
 SOURCE = ROOT / "data/raw/JSON 20260929-114335.zip"
+RULES = ROOT / "data/generated/rules.db"
 SPEC_OPS_IDS = {1908, *range(1912, 1926)}
 TEAM_OPS_IDS = {1909, *range(1926, 1940)}
+
+
+def _unit_api(app: Any, slug: str) -> dict[str, Any]:
+    environ: dict[str, Any] = {}
+    setup_testing_defaults(environ)
+    environ.update(PATH_INFO=f"/api/units/{slug}", REQUEST_METHOD="GET")
+    statuses: list[str] = []
+    response = app(
+        environ, lambda status, headers, exc_info=None: statuses.append(status)
+    )
+    try:
+        body = b"".join(response)
+    finally:
+        closer = getattr(response, "close", None)
+        if closer is not None:
+            closer()
+    assert statuses == ["200 OK"]
+    return json.loads(body)
 
 
 def test_spec_ops_charts_are_source_attributed_and_not_flattened() -> None:
@@ -49,6 +72,71 @@ def test_spec_ops_charts_are_source_attributed_and_not_flattened() -> None:
                 assert all(attr["type"] in {"stat", "weapon", "equip", "skill"} for attr in attrs)
                 saw_compound_option |= len(attrs) > 1
     assert saw_compound_option
+
+
+def test_every_source_chart_option_reaches_public_unit_api_in_order() -> None:
+    app = create_app(ARMY, rules_database_path=RULES)
+    with sqlite3.connect(ARMY) as connection:
+        rows = connection.execute(
+            "SELECT lu.slug, s.source_unit_id, s.spectables "
+            "FROM logical_unit_spectables AS s "
+            "JOIN logical_units AS lu ON lu.id = s.logical_unit_id "
+            "ORDER BY lu.slug, s.source_unit_id"
+        ).fetchall()
+    assert len(rows) == 30
+    cached: dict[str, dict[str, Any]] = {}
+    for slug, source_id, original in rows:
+        if slug not in cached:
+            cached[slug] = _unit_api(app, slug)
+        unit = cached[slug]
+        chart = next(
+            item for item in unit["source_charts"]
+            if item["source_unit_id"] == source_id
+        )
+        assert chart["source_versions"]
+        for kind, raw_chart in json.loads(original).items():
+            actual = chart["charts"][kind]["items"]
+            assert len(actual) == len(raw_chart["items"])
+            for original_item, published_item in zip(
+                raw_chart["items"], actual, strict=True
+            ):
+                assert [
+                    {
+                        key: value for key, value in attribute.items()
+                        if key not in ("name", "href", "extras")
+                    }
+                    for attribute in published_item["attributes"]
+                ] == original_item["attrs"]
+
+
+def test_source_choices_are_exposed_on_unit_api_without_player_selections() -> None:
+    app = create_app(ARMY, rules_database_path=RULES)
+    for slug, source_id, table_size in (
+        ("indigo-spec-ops", 1912, 8),
+        ("indigo-team-ops", 1926, 10),
+    ):
+        unit = _unit_api(app, slug)
+        charts = [item for item in unit["source_charts"]
+                  if item["source_unit_id"] == source_id]
+        assert len(charts) == 1
+        entry = charts[0]
+        assert entry["source_name"]
+        assert entry["source_versions"] and entry["source_versions"][0]["version"]
+        assert len(entry["charts"]["table"]["items"]) == table_size
+        assert len(entry["charts"]["specball"]["items"]) == 4
+        all_attributes = [
+            attr for chart in entry["charts"].values()
+            for choice in chart["items"] for attr in choice["attributes"]
+        ]
+        assert any(attr["name"] and attr["href"] for attr in all_attributes)
+        assert any(attr["type"] == "stat" and attr.get("q") is not None
+                   for attr in all_attributes)
+        assert any(len(choice["attributes"]) > 1
+                   for choice in entry["charts"]["table"]["items"])
+        assert not any("selected" in chart for chart in entry["charts"].values())
+
+    ordinary = _unit_api(app, "pathfinder-dronbot")
+    assert ordinary["source_charts"] == []
 
 
 @pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")

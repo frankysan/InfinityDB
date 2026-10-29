@@ -427,6 +427,72 @@ def test_live_chromium_contextual_relationship_cohort() -> None:
         thread.join(timeout=5)
 
 
+@pytest.mark.usefixtures("chromium_test_slot")
+def test_live_chromium_spec_ops_source_charts() -> None:
+    """Read-only source choices render on both desktop and narrow Unit pages."""
+    playwright_module = pytest.importorskip("playwright.sync_api")
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+
+    class ThreadedServer(ThreadingMixIn, WSGIServer):
+        daemon_threads = True
+
+    class QuietHandler(WSGIRequestHandler):
+        def log_message(self, format: str, *args: object) -> None:
+            pass
+
+    server = make_server(
+        "127.0.0.1", 0, app, server_class=ThreadedServer,
+        handler_class=QuietHandler,
+    )
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        with playwright_module.sync_playwright() as playwright:
+            try:
+                browser = playwright.chromium.launch(channel="chrome")
+            except Exception as exc:
+                if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                    pytest.skip(f"Chromium unavailable: {exc}")
+                raise
+            try:
+                for width in (1440, 390):
+                    page = browser.new_page(viewport={"width": width, "height": 900})
+                    try:
+                        for slug, total in (("indigo-spec-ops", 12),
+                                            ("indigo-team-ops", 14)):
+                            page.goto(
+                                f"http://127.0.0.1:{server.server_port}/units/{slug}",
+                                wait_until="domcontentloaded",
+                            )
+                            chart = page.locator(".source-choice-charts")
+                            chart.wait_for(state="visible", timeout=12000)
+                            assert chart.locator(".source-choice-chart").count() == 1
+                            assert chart.locator(".source-choice-list li").count() == total
+                            assert chart.locator("a[href^='/skills/']").count() > 0
+                            assert chart.locator(
+                                "a[href='/skills/infinity-spec-ops']"
+                            ).count() == 1
+                            assert chart.locator(
+                                "a[href='/skills/request-specball']"
+                            ).count() == 1
+                            assert "Army source version" in chart.inner_text()
+                            assert page.evaluate(
+                                "document.documentElement.scrollWidth <= window.innerWidth + 1"
+                            ), (slug, width)
+                    finally:
+                        page.close()
+            finally:
+                browser.close()
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
 def test_optional_mode_source_selectors_are_nonempty() -> None:
     root = Path(__file__).resolve().parents[1]
     path = root / "data/generated/infinity.db"

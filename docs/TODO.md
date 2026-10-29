@@ -207,22 +207,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         `test_spec_ops_source_charts.py`. These are available source
         choices, **not** player-selected upgrades; duplicate faction
         occurrences do not create extra canonical Unit identities.
-      - [ ] **N53-02 read-only choice publication (1.0):** Publish
-        source-attributed Spec-Ops and SpecBall choices on ordinary
-        Unit reference pages (or a directly linked ordinary chart
-        view), with names resolved against the pinned source catalogs
-        and complete multi-attribute options preserved in source order.
-        Project by exact `source_unit_id`, not an inferred global
-        shared chart; distinguish Spec-Ops and TEAM-OPS, including
-        the different choice counts. Keep numeric source IDs and
-        unresolvable extras honest, display the snapshot identity,
-        and verify ambiguous `stat` modifiers and MOV components
-        before assigning player-facing labels. Add API and responsive
-        browser acceptance for the source choices and Skill cross-links.
-        Do not treat selectable options as a configured Army List or
-        model an in-game Enhanced Profile transition from them.
-        A full list/session configurator remains separate, post-1.0
-        work. The core N5.3 p. 98 procedure is already published.
+      - [x] **N53-02 read-only choice publication (1.0):** The Unit
+        API now projects each exact `source_unit_id` separately from
+        `logical_unit_spectables`; the ordinary Unit page publishes
+        ordered Spec-Ops/TEAM-OPS and SpecBall options without
+        flattening combined attributes. Catalog names and canonical
+        routes are resolved from the current Army database, and
+        unresolved extras retain their source IDs. Attribute `q`
+        values and MOV components are shown explicitly as raw
+        source notation, not guessed modifiers or final statistics.
+        Each source record includes the source Unit ID and Army
+        source-version/file provenance; the page links the core
+        Spec-Ops and Request SpecBall Skills while distinguishing
+        ITS TEAM-OPS applicability. API tests and focused Chromium
+        checks at 1440/390 px cover the source options, links, and
+        responsive overflow. Final release-matched hosted browser
+        acceptance remains open, as does the post-1.0 interactive
+        list/session configurator and any future review of the
+        numeric option semantics.
       - [x] Recheck the **Impetuous/Prone update (N53-13)** against N5.3
         p. 97. Preserve the Impetuous-Phase Move/Jump/Climb movement-end rule
         separately from the additional end-of-Order Prone restriction, and cite

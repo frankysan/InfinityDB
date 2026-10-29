@@ -3413,6 +3413,97 @@ class Database:
                         ],
                     }
                 )
+            chart_rows = connection.execute(
+                "SELECT s.source_unit_id, u.name AS source_name, s.spectables "
+                "FROM logical_unit_spectables AS s "
+                "JOIN units AS u ON u.id = s.source_unit_id "
+                "WHERE s.logical_unit_id = ? ORDER BY s.source_unit_id",
+                (group["id"],),
+            ).fetchall()
+            source_charts: list[dict[str, Any]] = []
+            if chart_rows:
+                chart_names = {
+                    kind: {
+                        row["id"]: row["name"]
+                        for row in connection.execute(
+                            f"SELECT id, name FROM {table}"
+                        )
+                    }
+                    for kind, table in (
+                        ("skill", "skills"),
+                        ("weapon", "weapons"),
+                        ("equip", "equipment"),
+                    )
+                }
+                extra_names = {
+                    row["id"]: row["name"]
+                    for row in connection.execute("SELECT id, name FROM extras")
+                }
+                chart_links = {
+                    (row["catalog"], row["source_item_id"]): (
+                        f"/{row['catalog']}/{row['slug']}"
+                    )
+                    for row in connection.execute(
+                        "SELECT s.catalog, s.source_item_id, d.slug "
+                        "FROM application_catalog_sources AS s "
+                        "JOIN application_domain_slugs AS d "
+                        "ON d.domain = s.catalog AND d.application_id = s.application_item_id "
+                        "WHERE d.slug IS NOT NULL AND d.status = 'resolved'"
+                    )
+                }
+                for chart_row in chart_rows:
+                    original_charts = json.loads(chart_row["spectables"])
+                    if (
+                        not isinstance(original_charts, dict)
+                        or set(original_charts) != {"table", "specball"}
+                        or any(
+                            not isinstance(chart, dict)
+                            or not isinstance(chart.get("items"), list)
+                            for chart in original_charts.values()
+                        )
+                    ):
+                        # Preserve non-Spec-Ops payloads without guessing their semantics.
+                        continue
+                    source_unit_id = chart_row["source_unit_id"]
+                    versions = [
+                        {"version": row["version"], "source_file": row["source_file"]}
+                        for row in connection.execute(
+                            "SELECT DISTINCT a.version, a.source_file "
+                            "FROM army_lists AS a "
+                            "JOIN army_units AS u ON u.army_id = a.id "
+                            "WHERE u.unit_id = ? ORDER BY a.version, a.source_file",
+                            (source_unit_id,),
+                        )
+                    ]
+                    charts: dict[str, Any] = {}
+                    for chart_kind, chart_data in original_charts.items():
+                        items = []
+                        for option in chart_data["items"]:
+                            attributes = []
+                            for attribute in option["attrs"]:
+                                kind = attribute["type"]
+                                catalog = {
+                                    "skill": "skills", "weapon": "weapons",
+                                    "equip": "equipment",
+                                }.get(kind)
+                                source_id = attribute.get("id")
+                                attributes.append({
+                                    **attribute,
+                                    "name": chart_names.get(kind, {}).get(source_id),
+                                    "href": chart_links.get((catalog, source_id)),
+                                    "extras": [
+                                        {"id": extra_id, "name": extra_names.get(extra_id)}
+                                        for extra_id in attribute.get("extra", [])
+                                    ],
+                                })
+                            items.append({"attributes": attributes})
+                        charts[chart_kind] = {"items": items}
+                    source_charts.append({
+                        "source_unit_id": source_unit_id,
+                        "source_name": chart_row["source_name"],
+                        "source_versions": versions,
+                        "charts": charts,
+                    })
             profile_rows = connection.execute(
                 "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, "
                 "ppo.logo, pp.name, "
@@ -4273,6 +4364,7 @@ class Database:
             "isc_abbr": group["isc_abbr"],
             "notes": group["notes"],
             "source_notes": source_notes,
+            "source_charts": source_charts,
             "main_army_id": group["main_army_id"],
             "main_army_name": army_names.get(group["main_army_id"]),
             "main_faction": main_faction,

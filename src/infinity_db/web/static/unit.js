@@ -680,6 +680,89 @@ function renderSourceNotes(unit, armies) {
   return section;
 }
 
+function renderSourceChoices(unit) {
+  const sourceCharts = unit.source_charts || [];
+  if (!sourceCharts.length) return null;
+  const section = document.createElement("section");
+  section.className = "detail-group source-choice-charts";
+  const title = heading("Spec-Ops and SpecBall choices");
+  title.className = "detail-heading detail-heading--rule";
+  section.append(title);
+
+  const intro = document.createElement("p");
+  intro.textContent = "Source-defined choices, not selected upgrades or an Army List. "
+    + "Entries with multiple items are a single combined option. "
+    + "TEAM-OPS availability is governed separately by applicable ITS rules.";
+  section.append(intro);
+  const related = document.createElement("p");
+  related.append("Core rules: ");
+  for (const [index, slug, title] of [
+    [0, "infinity-spec-ops", "Infinity Spec-Ops"],
+    [1, "request-specball", "Request SpecBall"],
+  ]) {
+    if (index) related.append(" · ");
+    const link = document.createElement("a");
+    link.href = `/skills/${slug}`;
+    link.textContent = title;
+    related.append(link);
+  }
+  section.append(related);
+
+  for (const [index, source] of sourceCharts.entries()) {
+    const disclosure = document.createElement("details");
+    disclosure.className = "surface content-frame source-choice-chart";
+    disclosure.open = index === 0;
+    const summary = document.createElement("summary");
+    summary.textContent = source.source_name + ` · Source Unit #${source.source_unit_id}`;
+    disclosure.append(summary);
+    const provenance = document.createElement("p");
+    provenance.className = "army-relationship-intro";
+    const versions = [...new Set((source.source_versions || [])
+      .map((item) => item.version).filter(Boolean))];
+    provenance.textContent = `Army source version: ${versions.join(", ") || "unspecified"}`;
+    disclosure.append(provenance);
+
+    for (const [key, label] of [
+      ["table", "Spec-Ops / TEAM-OPS selection chart"],
+      ["specball", "SpecBall chart"],
+    ]) {
+      const chart = source.charts[key];
+      if (!chart) continue;
+      disclosure.append(subheading(label));
+      const choices = document.createElement("ol");
+      choices.className = "detail-list source-choice-list";
+      for (const choice of chart.items) {
+        const row = document.createElement("li");
+        choice.attributes.forEach((attribute, attributeIndex) => {
+          if (attributeIndex) row.append(" + ");
+          const isStat = attribute.type === "stat";
+          const stat = attribute.stat === "move0" ? "MOV first component"
+            : attribute.stat === "move1" ? "MOV second component"
+              : (attribute.stat || "Unknown").toUpperCase();
+          const labelText = isStat ? `${stat} (source q=${text(attribute.q)})`
+            : attribute.name || `${attribute.type} #${attribute.id}`;
+          if (attribute.href && !isStat) {
+            const link = document.createElement("a");
+            link.href = attribute.href;
+            link.textContent = labelText;
+            row.append(link);
+          } else {
+            row.append(labelText);
+          }
+          if (attribute.q != null && !isStat) row.append(` (source q=${attribute.q})`);
+          for (const extra of attribute.extras || []) {
+            row.append(` (extra #${extra.id}: ${extra.name || "unresolved"})`);
+          }
+        });
+        choices.append(row);
+      }
+      disclosure.append(choices);
+    }
+    section.append(disclosure);
+  }
+  return section;
+}
+
 function renderArmyRelationships(unit, armies) {
   const uniqueArmies = [...new Map(
     armies.filter((army) => army.presentation_visible !== false)
@@ -1334,6 +1417,8 @@ function render(unit, helpItems = [], attributeItems = []) {
   content.append(profilesFilteredOut ? filteredProfilesNotice() : generalProfilesSection);
   const sourceNotes = renderSourceNotes(unit, armies);
   if (sourceNotes) content.append(sourceNotes);
+  const sourceChoices = renderSourceChoices(unit);
+  if (sourceChoices) content.append(sourceChoices);
   const armyRelationships = renderArmyRelationships(unit, unit.armies);
   if (armyRelationships) content.append(armyRelationships);
   const peripheralRelationships = renderPeripheralRelationships(unit);
