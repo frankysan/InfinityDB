@@ -3669,6 +3669,8 @@ def test_rea007_speedball_ph15_excludes_only_controlled_jump_mods() -> None:
     assert "PH 18" in example and "PH 12" in example
     assert "not allied or enemy Troopers" in example
     assert "not every other possible modifier to placement" in example
+    assert "[[hacking-program:controlled-jump|Controlled Jump]]'s +3/-3" in example
+    assert "?s" not in example
     assert speedball["relations"] == [
         {"type": "uses-effects-of", "recordId": "skill:combat-jump"}
     ]
@@ -3773,6 +3775,9 @@ def test_rea004_continuous_damage_critical_extra_roll_does_not_chain() -> None:
     assert "covered non-Comms Attack" in immune
     assert "[[skill:immunity|Immunity (Critical)]]" in immune
     assert "matching [[skill:immunity|Immunity]] printed" in immune
+    assert "Trait's repeating-Saving-Roll effect" in immune
+    assert "target's Unit Profile" in immune
+    assert "?s" not in immune
     effects = " ".join(immunity["facts"]["effects"])
     assert "Immunity (Trait) ignores" in effects
     assert "Immunity (Critical) removes the additional Saving Roll" in effects

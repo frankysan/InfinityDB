@@ -616,6 +616,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       the five restored phrases. No meaning, source selection, topic
       identity, citation or applicability changed. This is a bounded
       text-fidelity correction, not the remaining full wording audit.
+    - [x] Correct adjacent N5.3 **core-rule copy encoding** discovered in
+      the FAQ review: two possessives in `trait:continuous-damage`
+      Immunity clarifications and one in `skill:request-speedball`'s
+      Controlled Jump exclusion example, plus the Spanish *Daño
+      Continuo* title in testing evidence. Targeted curated/composed
+      rules tests protect the restored text. No source authority,
+      rule behavior, links or effective-date scopes changed.
   - [x] Verify source-to-ordinary-browser reachability of **all 29 published
     reviewed FAQ rulings** against a fresh rules export. The tracked
     `test_every_published_faq_has_a_normal_browser_entry_point` drives

@@ -2250,7 +2250,7 @@ semantic navigation to the shared roll and placement references.
 ## 1.0 Continuous Damage Critical and Immunity acceptance (REA-004)
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Compared official English N5.3
-Continuous Damage p. 175 and Immunity p. 95 with Spanish N5.3 Da?o
+Continuous Damage p. 175 and Immunity p. 95 with Spanish N5.3 Daño
 Continuo p. 182 and Inmunidad p. 99. Continuous Damage repeats Saving
 Rolls after a failed ordinary hit save but explicitly does not apply to
 the additional Saving Roll from a Critical. A failed Critical-added roll
@@ -2331,6 +2331,18 @@ and 1440/390/320 px overflow. **18/18 Chromium checks passed** with
 no JavaScript errors or page-level horizontal overflow. Private verifier,
 screenshots, result JSON and rebuilt rules DB stay Git-ignored in
 `local/audits/`.
+
+**Source-copy fidelity follow-up, 2026-10-29:** Corrected three
+corrupted possessives in two maintained N5.3 core-rule clarifications:
+`trait:continuous-damage`'s Immunity explanation (`Trait's`, `target's`)
+and `skill:request-speedball`'s Controlled Jump explanation
+(`Controlled Jump`'s). The associated English N5.3 Immunity p. 95
+and FAQ v0.1 p. 1 remain the reviewed rule evidence. Restored the
+Spanish *Daño Continuo* title above. Both curated and composed-rules
+regressions now assert the restored phrases, preserving existing
+effects, links, citations and applicability. This is text fidelity,
+not a new Immunity/Controlled Jump interpretation or general
+curated-text certification.
 
 ## 1.0 simultaneous recovery and re-infliction (REA-009)
 

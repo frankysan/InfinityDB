@@ -1047,6 +1047,7 @@ def test_rea007_speedball_ph15_worked_example_is_published(
     assert "Each Token still uses its own PH 15 Roll" in example
     assert "PH 18" in example and "PH 12" in example
     assert "not every other possible modifier to placement" in example
+    assert "[[hacking-program:controlled-jump|Controlled Jump]]'s +3/-3" in example
     assert "[[skill:combat-jump|Combat Jump]]" in example
     assert "[[hacking-program:controlled-jump|Controlled Jump]]" in example
     assert "**Troopers versus Speedball Tokens:**" in " ".join(
@@ -1101,6 +1102,8 @@ def test_rea004_continuous_damage_critical_and_immunity_examples_are_published(
     assert "[[skill:immunity|Immunity (Trait: Continuous Damage)]]" in immune
     assert "[[skill:immunity|Immunity (Critical)]]" in immune
     assert "covered non-Comms Attack" in immune
+    assert "Trait's repeating-Saving-Roll effect" in immune
+    assert "target's Unit Profile" in immune
     assert "Immunity (Trait) ignores the special effects" in " ".join(
         immunity["facts"]["effects"]
     )
