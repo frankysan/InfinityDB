@@ -95,7 +95,7 @@ its application metrics.
   an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, equivalence
   labels, chart notes, and N5 rules/bonus context. Unverified Unit/FTO references are flagged;
   Reinforcement charts show parent Army limits separately. The combined view respects reviewed
-  explicit Wildcard exclusions.
+  explicit Wildcard exclusions. General Fireteam rules remain available without Army chart entries.
 - Presents connected Unit relationships for Peripherals/Controllers, Includes,
   selection/dependency constraints, Reinforcement parentage, and broader
   source-declared faction membership.

@@ -4849,6 +4849,12 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
         status, _, body = request(rules_app, f"/api/rules/peripheral-type-{subtype}")
         assert status == 200
         rule = json.loads(body)["rules"][0]
+        if subtype == "ancillary":
+            assert any(
+                token.get("target") == "rule:fireteam-general"
+                and token.get("public_reference") == {"href": "/fireteams"}
+                for clause in rule["fact_tokens"]["clarifications"] for token in clause
+            )
         assert rule["id"] == f"rule:peripheral-type:{subtype}"
         assert rule["facts"]["effects"]
         assert rule["fact_tokens"]["effects"]
@@ -5576,7 +5582,12 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     assert loss_of_lieutenant["domain"] == "General rule"
     assert loss_of_lieutenant["href"] == "/rules/loss-of-lieutenant"
     assert loss_of_lieutenant["embedded"] is False
-    assert not any(item["id"] == "rule:fireteam-general" for item in items)
+    fireteam_rules = [item for item in items if item["domain_slug"] == "fireteams"]
+    assert {item["id"] for item in fireteam_rules} == {
+        "rule:fireteam-general", "rule:fireteam-level-bonuses",
+    }
+    assert all(item["href"] == "/fireteams" and not item["embedded"]
+               for item in fireteam_rules)
     assert any(item["id"] == "rule:profile-help:unit-profile" for item in items)
     profile_domain_entries = {
         item["id"]: item

@@ -588,8 +588,7 @@ async function initialize() {
     populateArmies(payload.items || []);
     currentReference = payload.reference || null;
     if (!armies.length) {
-      elements.count.textContent = "0 armies";
-      return show(elements.empty);
+      return renderOverview();
     }
     const selection = normalizeSelection();
     if (selection) await loadChart(selection);

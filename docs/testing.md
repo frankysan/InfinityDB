@@ -248,7 +248,7 @@ subsequent full auto-worker run also passed.
 
 Long-running catalog render checks retain bounded deadlines and report HTTP,
 JavaScript, failed-request and page-status evidence on failure; none silently
-retry a failed page. The Weapon and deployed-object browser suites
+retry a failed page. The Weapon, deployed-object and Fireteam FTO browser suites
 intercept same-origin page requests and serve them directly from the application
 WSGI callable using `tools/browser_wsgi_transport.py`. This keeps real HTML,
 JS module execution, API responses, and browser assertions, but removes
@@ -263,7 +263,7 @@ receives the original API and HTML response checks. This avoids one long
 pytest item at the end of an xdist run. On Windows, the isolated gate passed
 eight cases in **35.08 s serially** and **25.09 s with two workers**; the
 complete relation module passed 11 tests in **34.15 s** with two workers.
-The full auto-worker suite has not yet been rerun after this split.
+This split participates in the normal full-suite checks.
 
 ## Theme runtime regression coverage
 
@@ -2926,7 +2926,7 @@ also assert selected English source, version and source-date labels.
 This is bounded current-publication presentation proof, not final
 hosted release acceptance or independently dated historical replay.
 
-**Release-tracked FAQ database parity (opt-in; 2026-10-29):**
+**Release-tracked FAQ database parity (opt-in):**
 The ordinary source/API/Chromium FAQ tests use a freshly built rules
 database, which cannot detect a stale checked-in binary. The opt-in
 `test_tracked_faq_database_matches_current_curated_release_projection`
@@ -2936,14 +2936,8 @@ export: exact 29-rule record facts, source/citation metadata and
 with independent pre-effective-date and N5.2 exclusions. It never
 rewrites the artifact.
 
-The first read-only run on `f1dbf187` **failed** (28 record-field
-differences and 134 topic/scenario projections; all 29 ruling
-identities were present). Following the local rules database rebuild
-on 2026-10-29, a temporary direct test invocation of the opt-in
-parity function **passed** and the temporary test hook was removed.
-The published FAQ records, citations and topic projections now match
-the curated source. Opt in deliberately again during final
-release-candidate preparation; normal development checks skip
+Run this gate after rebuilding the tracked rules artifact, and repeat it
+against the final frozen release candidate. Normal development checks skip
 this release-only gate:
 
 ```powershell
@@ -2958,10 +2952,9 @@ try {
 
 **Rebuild dependent publication before testing the release pair.**
 The tracked rules DB hash also anchors the ignored
-`data/generated/deployed-objects.json`. After the rules rebuild,
-the first production-equivalent browser fixture failed closed on
-`Deployed-object publication does not match release databases`,
-as expected for the still-stale publication. Run:
+`data/generated/deployed-objects.json`. Regenerate and verify that
+publication whenever either runtime database changes; application startup
+rejects a mismatched pair. Run:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.build_deployed_object_publication

@@ -1155,15 +1155,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       168 scenario/topic selections and closed pre-date/N5.2 contexts).
       This fixes the earlier 28 record-field and 134 projection
       differences detected at `f1dbf187`; no curated rule changed.
-    - [ ] Regenerate and verify the paired **deployed-objects.json**
-      publication before release browser acceptance. After the rules DB
-      rebuild, production-equivalent `create_app` correctly rejected
-      the stale deployed-object publication because its pinned rules DB
-      SHA-256 no longer matched. Rebuild using
-      `tools.build_deployed_object_publication`, verify with `--check`,
-      then run the newly added opt-in tracked-database FAQ Chromium
-      primary/secondary/conflict gates (both widths). Do not bypass
-      the artifact hash check or claim browser acceptance yet.
+    - [x] Rebuild and verify the paired **deployed-objects.json**
+      publication after the current rules export. The tracked-pair
+      FAQ parity and primary/secondary/conflict Chromium gates pass
+      at 1440/390 px with `INFINITYDB_RELEASE_FAQ_PARITY=1`.
+      This is local database-pair acceptance; repeat it against
+      the final frozen release candidate.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.
@@ -1450,15 +1447,10 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 Deployment smoke, source checks and installed-wheel smoke
                 passed on commit `9c9a09f` (2026-10-22). Revalidate on the
                 final tagged candidate as part of final 1.0 acceptance.
-              - [ ] Regenerate the release-matched local rules database and
-                deployed-object publication before further browser/release
-                acceptance. The existing local generated JSON predates reviewed
-                WildParrot, FastPanda, Armed Turret and new Crazykoala/Madtraps
-                delivery relationships, as well as reverse `unitUses`.
-                Run `python -m tools.build_deployed_object_publication --check`
-                after rebuilding the current Army/rules publication pair;
-                distinguish stale development artifacts from the separately
-                validated earlier hosted image.
+              - [x] Refresh the local rules/deployed-object publication pair
+                from current maintained inputs and pass the publication
+                `--check` and deployment-asset validation. Final frozen
+                candidate and hosted acceptance remain separate gates.
               - [ ] Complete **reverse Unit/loadout uses** from exact Army
                 occurrences and reviewed object/delivery edges.
                 Direct Army profile/loadout and source-wide Unit-option
@@ -1612,15 +1604,6 @@ do not establish exhaustive source coverage or hosted acceptance.
     uncertainty where appropriate and fix every defect that materially misrepresents in-scope data.
     Record evidence by category and source identity in ignored reports/audits rather than keeping
     completed release narrative in this backlog.
-  - [ ] **Data processing + Web backend + Project infrastructure:** Resolve the
-    existing local check failures before final acceptance: classify
-    `logical_unit_spectables` in the runtime-surface audit; reconcile the
-    tracked rules artifact with current Ancillary and Camouflaged State
-    curation using the release-pair rebuild procedure; and reconcile the
-    General Rule API fixture's unavailable `rule:fireteam-general` reference
-    without weakening maintained-text validation. The nine failing tests
-    also reproduce on the unchanged `3f8b9da` baseline; retained reports are
-    under `local/audits/army01-baseline-3f8b9da/reports/`.
   - [ ] Run [the complete release checklist](releasing.md), including the mandatory whole-corpus
     documentation audit, rebuilt release-matched artifacts where needed, local/hosted checks for
     the final candidate, annotated-tag evidence, and deployed smoke/rollback acceptance where

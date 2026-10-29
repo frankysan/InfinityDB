@@ -49,6 +49,41 @@ def _chart(app: Any, army: str | int) -> dict[str, Any]:
 
 
 @pytest.mark.parametrize("width,theme", VIEWPORTS)
+@pytest.mark.parametrize("has_reference", (True, False))
+def test_fireteam_rules_landing_is_independent_of_army_charts(
+    app: Any, chrome: Any, width: int, theme: str, has_reference: bool,
+) -> None:
+    status, _, body = wsgi_response(app, f"{ORIGIN}/api/fireteams")
+    assert status == 200
+    reference = json.loads(body)["reference"] if has_reference else None
+    if has_reference:
+        assert reference is not None
+    page = chrome.new_page(viewport={"width": width, "height": 900}, color_scheme=theme)
+    route_browser_page(page, app, ORIGIN)
+    page.route(
+        "**/api/fireteams",
+        lambda route: route.fulfill(json={"items": [], "reference": reference}),
+    )
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/fireteams", wait_until="domcontentloaded")
+        panel = page.locator("#fireteam-landing" if has_reference else "#fireteam-empty")
+        panel.wait_for(state="visible", timeout=30000)
+        assert page.locator("#fireteam-army").is_disabled()
+        assert page.locator("#fireteam-content").is_hidden()
+        if has_reference:
+            assert page.locator("#fireteam-reference-heading").inner_text() == (
+                "Fireteam quick reference"
+            )
+            assert page.locator(".fireteam-reference-table tbody tr").count() >= 4
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width,theme", VIEWPORTS)
 @pytest.mark.parametrize("army_id", (302, 499, 502, 601, 604, 799, 899, 902, 999))
 def test_pinned_uncertainty_and_original_annotations_are_visible(
     app: Any, chrome: Any, army_id: int, width: int, theme: str,

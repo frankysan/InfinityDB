@@ -3457,9 +3457,10 @@ class Database:
                     }
                 )
             chart_rows = connection.execute(
-                "SELECT s.source_unit_id, u.name AS source_name, s.spectables "
+                "WITH " + SOURCE_UNIT_NAMES_CTE + " "
+                "SELECT s.source_unit_id, n.unit_name AS source_name, s.spectables "
                 "FROM logical_unit_spectables AS s "
-                "JOIN units AS u ON u.id = s.source_unit_id "
+                "JOIN source_unit_names AS n ON n.unit_id = s.source_unit_id "
                 "WHERE s.logical_unit_id = ? ORDER BY s.source_unit_id",
                 (group["id"],),
             ).fetchall()

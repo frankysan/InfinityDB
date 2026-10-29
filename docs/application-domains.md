@@ -279,6 +279,13 @@ General Fireteam reference records remain globally searchable/linkable even when
 is hidden in an Army-scoped view. Stable record IDs need not be renamed merely because Fireteams is
 now their canonical presentation domain.
 
+The registry owns `fireteam-general` and `fireteam-level-bonuses` Rule categories
+through Fireteams even though that domain has no individual detail route. Shared
+maintained-text and relation links resolve these records to `/fireteams`; detail-only
+record lookup remains separate from semantic ownership. The quick reference remains
+available when curated Fireteam rules exist without any Army chart entries. If both
+rules and charts are absent, the normal empty state is shown.
+
 ## Ammunition and Labels
 
 **Current.** Ammunition and Labels are published top-level domains using the shared domain

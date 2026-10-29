@@ -18,6 +18,7 @@ from infinity_db.application_domains import (
     public_rule_record_domain,
     record_matches_domain,
     semantic_record_domain,
+    semantic_record_owner,
 )
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database
@@ -233,6 +234,14 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     ) == general_rules
     assert public_rule_record_domain(
         {"kind": "rule", "facts": {"category": "fireteam-general"}}
+    ) is None
+    for category in ("fireteam-general", "fireteam-level-bonuses"):
+        record = {"kind": "rule", "facts": {"category": category}}
+        assert semantic_record_owner(record) == fireteams
+        assert rule_record_public_reference(None, record) == {"href": "/fireteams"}
+    assert semantic_record_owner({"kind": "rule", "facts": {"category": "unknown"}}) is None
+    assert rule_record_public_reference(
+        None, {"kind": "rule", "facts": {"category": "unknown"}},
     ) is None
 
 

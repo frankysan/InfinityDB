@@ -103,6 +103,8 @@ are not retroactively relabeled.
   Next Wave's Team Achilles. Show original member annotations and flag unverified
   Unit/FTO references. Reinforcement charts expose their parent Army limits and
   links separately from Section members; the separate Wildcard pool remains available.
+  Fireteam links from other rules and the Glossary now reach the quick reference, which remains
+  usable when no Army charts are available.
 - **Data processing + Web backend + Web frontend:** Correct declaration categories and N5.3
   citations for reviewed Short, Long, Deployment and Automatic Skills. Alert! is explained
   as an automatic facing adjustment rather than a declared ARO. Clarify conditional

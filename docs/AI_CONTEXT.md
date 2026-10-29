@@ -232,6 +232,11 @@ because the source does not attach them to a profile group.
 
 ## Application-domain and browser invariants
 
+- Semantic record ownership does not require a detail page. Fireteam Rule categories
+  resolve to the Fireteams landing route through the central registry; detail-only
+  record lookup remains separate. Maintained-text references still fail closed when
+  no published owner/destination exists.
+
 `src/infinity_db/application_domains.py` is the canonical capability registry. Published top-level
 application domains are Armies, Units, Skills, Equipment, Weapons, Ammunition, Traits, States,
 Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Embedded vocabularies are Attributes,

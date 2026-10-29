@@ -411,6 +411,8 @@ Army `spectables` is source-native *choice inventory*, not a configured roster o
 selected upgrades. Each source Unit's chart is stored unchanged in `logical_unit_spectables`;
 `Database.get_unit()` exposes it under `source_charts`, scoped by exact
 `source_unit_id` and carrying source name and Army source-version/file provenance.
+Source names resolve through the materialized logical-Unit/alias projection by exact
+source Unit identity; normal chart serving does not read the raw `units.name` copy.
 The projection retains the two independent `table` and `specball` collections,
 source order, and every attribute in compound entries. Source catalog IDs are
 resolved to available names and stable public routes; unresolved extras retain their

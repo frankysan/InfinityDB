@@ -252,6 +252,15 @@ _register(
     reason="Explicit occurrence, relationship, presentation, or metadata context.",
 )
 _register(
+    ["logical_unit_spectables"],
+    CONTEXTUAL,
+    reason=(
+        "Materialized source-identified Spec-Ops/TEAM-OPS selection and SpecBall charts "
+        "retain ordered grouped source choices and source Unit provenance; they are "
+        "not immutable Unit profiles or configured Army List selections."
+    ),
+)
+_register(
     ["unit_factions"],
     CONTEXTUAL,
     reason=(

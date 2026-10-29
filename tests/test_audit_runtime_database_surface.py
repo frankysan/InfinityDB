@@ -130,14 +130,14 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
 
     assert report["summary"] == {
         "surfaceCount": 42,
-        "runtimeTableCount": 82,
-        "runtimeFieldCount": 391,
+        "runtimeTableCount": 83,
+        "runtimeFieldCount": 394,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 391,
+        "issue:none:fieldCount": 394,
         "role:canonical_application:fieldCount": 151,
-        "role:contextual_application:fieldCount": 203,
+        "role:contextual_application:fieldCount": 206,
         "role:intentional_source_representation:fieldCount": 37,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
@@ -214,6 +214,13 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert "metadata_factions" not in observed_tables
     assert _field(report, "unit_options", "name")["role"] == SOURCE
     assert _field(report, "unit_options", "name")["issue"] == NO_ISSUE
+    assert _field(report, "logical_unit_spectables", "spectables")["role"] == CONTEXTUAL
+    assert _field(report, "logical_unit_spectables", "source_unit_id")["role"] == CONTEXTUAL
+    assert _field(report, "logical_unit_spectables", "spectables")["issue"] == NO_ISSUE
+    assert "name" not in {
+        item["name"] for table in report["inventory"] if table["table"] == "units"
+        for item in table["fields"]
+    }
     assert _field(report, "unit_option_orders", "order_type")["role"] == SOURCE
     assert "metadata_skills" not in observed_tables
     assert "metadata_equipment" not in observed_tables
