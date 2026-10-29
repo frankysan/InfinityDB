@@ -1391,6 +1391,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 summary-only Trait definitions gain detailed text.
                 Next: remaining deployment-state, scenario, and command-
                 token candidates, then broader wording/source discovery.
+              - [x] Review the remaining 17 **directly N5.3-cited**
+                non-catalog candidates: failed deployment handling for
+                Combat Jump/Impersonation/Infiltration; Impetuous, NWI,
+                Protheion, G: Jumper and Retreat! status Tokens; Doctor,
+                Engineer, Remote Presence, Strategos L2 and reroll/
+                Command Token references; Coordinated Orders' Spearhead,
+                Deployment Phase, Domination scoring and Hacking Area.
+                These change neither the underlying object identity nor
+                reverse Unit use. The bounded keyword queue is now
+                **42 reviewed of 48**, with **six unresolved**.
+              - [ ] Review the six remaining keyword matches without
+                pinned N5.3 PDF page citations: Frenzy, Possessed,
+                Command Token Strategic Use, Counterintelligence,
+                Inspiring Leadership and Transmutation. Establish exact
+                rule-page provenance or document the other maintained
+                sources before classifying. The audit now reports missing
+                primary citations separately. Once addressed, expand
+                discovery beyond these keyword/field boundaries and
+                reconcile any actual additional object identities.
             - [x] **Reconcile delivery paths for all 17 currently published
               reviewed deployed objects.** The pinned review now covers
               17 of 17 objects with 28 approved delivery paths and zero

@@ -1396,8 +1396,8 @@ structured detail fields without turning keyword mentions into object IDs:
 ```
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
-manifest pins **25 bounded N5.3 classifications** across 48 keyword-matching
-non-catalog definitions; **23 remain unreviewed** in this discovery queue.
+manifest pins **42 bounded N5.3 classifications** across 48 keyword-matching
+non-catalog definitions; **six remain unreviewed** in this discovery queue.
 The original three Skill decisions distinguish `skill:place-deployable`
 (delivery action, p. 82), `skill:minelayer` (deployment method, p. 102)
 and `skill:request-speedball` (support State Tokens, p. 84). Additional
@@ -1435,6 +1435,31 @@ source-reviewed classes distinguish:
 - **Camouflaged and HoloMask States** (pp. 157 and 164): a Marker/imitated
   Model represents an existing identity. HoloMask expressly cannot copy
   Deployable items represented by Models or Tokens.
+- **Combat Jump, Impersonation, Infiltration** (pp. 89, 96-97): a failed
+  superior deployment removes already placed eligible Deployables. The Skill
+  does not establish an unsourced item identity or carrier.
+- **Impetuous, NWI, Protheion, G: Jumper, Retreat!** (pp. 97, 104,
+  109, 93 and 170): activation, State, VITA and Active Proxy Tokens
+  represent the owning Trooper's existing status or role.
+- **Doctor, Engineer, Remote Presence, Strategos L2 and MOD rules**
+  (pp. 90-91, 110, 113, 68): Command Tokens are expended resources or
+  reroll references, not physical deployed objects.
+- **Coordinated Orders and Deployment Phase** (pp. 129-130, 15):
+  Spearhead Tokens identify a participant; deployment/order exceptions do
+  not grant item identity or reverse Unit ownership.
+- **Domination and Hacking Area** (pp. 151, 55-57): scenario scoring
+  excludes Weapon/Equipment Markers; existing Repeaters extend Hacking
+  Area but do not become another item or delivery edge.
+
+The six open matches are `skill:frenzy`, `state:possessed`,
+`rule:command-token-strategic-use`, `skill:counterintelligence`,
+`skill:inspiring-leadership` and `skill:transmutation`. None of these
+maintained definitions currently has an exact `n5-core-v5.3-pdf` page
+citation. The audit reports that gap explicitly as
+`unreviewedMissingN5Citation`; this does **not** establish that the
+official PDF lacks corresponding rules. Review the underlying source
+and add verified citations or retain unresolved provenance before
+classifying them.
 
 The negative/exception decisions were manually compared with the pinned
 English N5.3 pages. The audit validator pins the maintained definitions'

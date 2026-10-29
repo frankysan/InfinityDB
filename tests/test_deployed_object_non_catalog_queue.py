@@ -59,7 +59,7 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = candidate_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 25
+    assert len(validate_reviews(manifest, curated, candidates)) == 42
 
     for key, bad_value, error in (
         ("classification", "fully-reviewed-four-stat-object", "classification"),
@@ -96,9 +96,9 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     report = audit_non_catalog_candidates(CURATED, REVIEWS)
     assert report["scope"] == "non-catalog-keyword-discovery-not-object-inventory"
     assert len(report["curatedSourceSha256"]) == 64
-    assert report["reviewedCount"] == 25
+    assert report["reviewedCount"] == 42
     assert report["candidateCount"] == 48
-    assert len(report["unreviewed"]) == 23
+    assert len(report["unreviewed"]) == 6
     selected = {
         row["recordId"]: row for row in report["candidates"]
     }
@@ -150,9 +150,27 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     assert reviewed["rule:peripheral-type:cyberplug"]["classification"] == (
         "peripheral-mode-token-not-object"
     )
-    assert {"skill:infiltration", "skill:impersonation"} <= {
-        entry["recordId"] for entry in report["unreviewed"]
+    assert reviewed["skill:infiltration"]["classification"] == (
+        "deployment-failure-removes-existing-deployables"
+    )
+    assert reviewed["rule:coordinated-orders"]["classification"] == (
+        "role-token-and-delivery-choice-not-object"
+    )
+    assert reviewed["rule:hacking-area"]["classification"] == (
+        "existing-repeater-interaction-not-object"
+    )
+    expected_unreviewed = {
+        "skill:frenzy",
+        "state:possessed",
+        "rule:command-token-strategic-use",
+        "skill:counterintelligence",
+        "skill:inspiring-leadership",
+        "skill:transmutation",
     }
+    assert {entry["recordId"] for entry in report["unreviewed"]} == expected_unreviewed
+    assert {
+        entry["recordId"] for entry in report["unreviewedMissingN5Citation"]
+    } == expected_unreviewed
 
 
 def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
@@ -163,5 +181,6 @@ def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
     output = capsys.readouterr().out
     assert "Candidate definitions:" in output
     assert "Candidate definitions: 48" in output
-    assert "Reviewed classifications: 25" in output
-    assert "Awaiting manual review: 23" in output
+    assert "Reviewed classifications: 42" in output
+    assert "Awaiting manual review: 6" in output
+    assert "Unreviewed without pinned N5.3 PDF page: 6" in output

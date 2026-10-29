@@ -293,6 +293,212 @@
         "A Trooper in [[state:holomask|HoloMask State]] cannot copy [[skill:hacker]] or Hackable status or items with the [[trait:deployable]] Trait represented by Tokens or Models."
       ],
       "caveat": "HoloMask changes a Trooper's presentation and explicitly excludes copying Deployable items represented by Tokens or Models. Neither the disguise nor its restriction creates a new deployed-object profile."
+    },
+    {
+      "recordId": "skill:combat-jump",
+      "classification": "deployment-failure-removes-existing-deployables",
+      "sourcePages": [
+        89
+      ],
+      "summaryEvidence": "A Long Special Skill that keeps the user off-table",
+      "factsEvidence": [
+        "A failed landing moves the user to the player's Deployment Zone edge"
+      ],
+      "caveat": "Combat Jump affects the Trooper and independently sourced carried deployables. A failed landing removes placed eligible items; no generic object identity or carrier link is created."
+    },
+    {
+      "recordId": "skill:impersonation",
+      "classification": "deployment-failure-removes-existing-deployables",
+      "sourcePages": [
+        96
+      ],
+      "summaryEvidence": "A Deployment Skill that lets the user deploy forward while disguised",
+      "factsEvidence": [
+        "A failed WIP Roll places the user in their own Deployment Zone"
+      ],
+      "caveat": "Impersonation's failed deployment removes eligible carried Deployables and changes the Trooper's representation; no new object profile follows."
+    },
+    {
+      "recordId": "skill:infiltration",
+      "classification": "deployment-failure-removes-existing-deployables",
+      "sourcePages": [
+        97
+      ],
+      "summaryEvidence": "A Deployment Skill that allows forward deployment",
+      "factsEvidence": [
+        "If the Roll fails, the user is moved to their own Deployment Zone edge"
+      ],
+      "caveat": "Failed Infiltration removes independently sourced deployed equipment/weapons accompanying the Trooper; it does not define a device variant or ownership edge."
+    },
+    {
+      "recordId": "skill:impetuous",
+      "classification": "activation-token-not-object",
+      "sourcePages": [
+        97
+      ],
+      "summaryEvidence": "An obligatory Automatic Special Skill that grants one activation",
+      "factsEvidence": [
+        "During the Tactical Phase, place an Impetuous Token next to the user"
+      ],
+      "caveat": "Impetuous Tokens mark a Trooper's activation entitlement and are removed when spent; they are not independent deployed Weapon or Equipment profiles."
+    },
+    {
+      "recordId": "state:retreat",
+      "classification": "state-reminder-and-command-spend-not-object",
+      "sourcePages": [
+        170
+      ],
+      "summaryEvidence": "A State applied when an army enters Retreat!",
+      "factsEvidence": [
+        "[[state:retreat|Retreat!]] ends when the army leaves the Retreat! situation"
+      ],
+      "caveat": "Retreat! and Command Token references govern an existing Trooper/Army State, not a separate deployed game element; Marker cancellation changes representation only."
+    },
+    {
+      "recordId": "skill:no-wound-incapacitation",
+      "classification": "state-indicator-not-object",
+      "sourcePages": [
+        104
+      ],
+      "summaryEvidence": "An optional Automatic Special Skill that lets an [[state:unconscious|Unconscious]] Trooper",
+      "factsEvidence": [
+        "The user can be healed; removing one Wound returns it to [[state:normal]] and removes the NWI Token."
+      ],
+      "caveat": "NWI Token indicates an existing Trooper's condition and is removed on recovery. It is not a targetable deployed object."
+    },
+    {
+      "recordId": "skill:protheion",
+      "classification": "attribute-tracker-token-not-object",
+      "sourcePages": [
+        109
+      ],
+      "summaryEvidence": "Protheion uses Wounds inflicted through a [[skill:cc-attack]]",
+      "factsEvidence": [
+        "Indicate the increase with a Power-Up 1 or Power-Up 2 Token."
+      ],
+      "caveat": "Power-Up Tokens track an existing Trooper's increased VITA; they do not define new Weapon/Equipment or Trooper identities."
+    },
+    {
+      "recordId": "skill:g-jumper",
+      "classification": "active-proxy-token-not-object",
+      "sourcePages": [
+        93
+      ],
+      "summaryEvidence": "An obligatory Automatic Special Skill that represents one Trooper through two or three Proxy Models",
+      "factsEvidence": [
+        "Marker and [[state:hidden-deployment|Hidden Deployment]] status are not canceled merely by placing or assigning the Active Proxy Token."
+      ],
+      "caveat": "The Active Proxy Token identifies the active Proxy of an existing G: Jumper Trooper. It is a status/role indicator, not an independent object or Unit."
+    },
+    {
+      "recordId": "rule:scenario:dominate-quadrants",
+      "classification": "scenario-scoring-excludes-deployables",
+      "sourcePages": [
+        151
+      ],
+      "summaryEvidence": "Rules for Dominate Quadrants.",
+      "factsEvidence": [
+        "Tokens and Markers for weapons, Equipment, or anything other than a Trooper do not contribute Victory Points."
+      ],
+      "caveat": "Domination excludes Weapon/Equipment Tokens and Markers from the scoring rule. This is an objective eligibility restriction, not a new deployed object."
+    },
+    {
+      "recordId": "skill:doctor",
+      "classification": "recovery-roll-not-object",
+      "sourcePages": [
+        90
+      ],
+      "summaryEvidence": "A Short Special Skill that normally recovers a [[state:unconscious|Unconscious]] VITA Trooper",
+      "factsEvidence": [
+        "Doctor (2W) removes two Wounds on successful ordinary recovery."
+      ],
+      "caveat": "Doctor is recovery and State cancellation; its Command Token rerolls concern a spendable resource, not a deployed Token or newly created target identity."
+    },
+    {
+      "recordId": "skill:engineer",
+      "classification": "recovery-roll-not-object",
+      "sourcePages": [
+        91
+      ],
+      "summaryEvidence": "A Short Special Skill that repairs STR targets",
+      "factsEvidence": [
+        "With [[skill:remote-presence|Remote Presence]], one successful repair Roll removes enough Wounds"
+      ],
+      "caveat": "Engineer repairs existing STR targets or cancels States. Command Token rerolls do not create an object or establish a carrier."
+    },
+    {
+      "recordId": "skill:strategos-l2",
+      "classification": "command-resource-action-not-object",
+      "sourcePages": [
+        113
+      ],
+      "summaryEvidence": "Level 2 of [[skill:strategos]].",
+      "factsEvidence": [
+        "During the Tactical Phase's Executive Use of Command Tokens step"
+      ],
+      "caveat": "Strategos L2 moves Troopers and Peripherals between Combat Groups without Command Token expenditure. This is a command effect, not a Token or deployed object."
+    },
+    {
+      "recordId": "skill:remote-presence",
+      "classification": "recovery-reroll-not-object",
+      "sourcePages": [
+        110
+      ],
+      "summaryEvidence": "An obligatory Automatic Special Skill for STR Troopers",
+      "factsEvidence": [
+        "When [[skill:engineer]] or another rule explicitly permits it, Command Tokens may reroll the failed repair Roll."
+      ],
+      "caveat": "Remote Presence changes a STR Trooper's Unconscious behavior; the Command Token reroll refers to a resource rather than a standalone battlefield object."
+    },
+    {
+      "recordId": "rule:hacking-area",
+      "classification": "existing-repeater-interaction-not-object",
+      "sourcePages": [
+        55,
+        57
+      ],
+      "summaryEvidence": "A [[skill:hacker]] can use Hacking Programs within their Hacking Area",
+      "factsEvidence": [
+        "The Hacking Area includes the [[skill:hacker]]'s own [[trait:zone-of-control-zc|Zone of Control]]"
+      ],
+      "caveat": "Hacking Area uses existing Repeater and Deployable Repeater equipment; this does not add a new Repeater object or Army carrier relationship."
+    },
+    {
+      "recordId": "rule:modifiers-explained",
+      "classification": "command-token-terminology-not-object",
+      "sourcePages": [
+        68
+      ],
+      "summaryEvidence": "A Modifier (**MOD**) is a bonus (+) or penalty (-)",
+      "factsEvidence": [
+        "A named ReRoll is one die from the relevant Roll, not a Command Token reroll"
+      ],
+      "caveat": "Modifier and ReRoll terminology distinguishes a named reroll from Command Token expenditure; it describes no physical Token or deployed object."
+    },
+    {
+      "recordId": "rule:coordinated-orders",
+      "classification": "role-token-and-delivery-choice-not-object",
+      "sourcePages": [
+        129,
+        130
+      ],
+      "summaryEvidence": "A Coordinated Order lets up to four eligible Troopers act together",
+      "factsEvidence": [
+        "Name one participating Trooper as Spearhead and place a Spearhead Token beside them."
+      ],
+      "caveat": "A Spearhead Token marks the role of an existing participant. The Targetless/Deployable exception allows different target points, not inferred object identities or sources."
+    },
+    {
+      "recordId": "rule:deployment-phase",
+      "classification": "deployment-procedure-not-object",
+      "sourcePages": [
+        15
+      ],
+      "summaryEvidence": "After the Initiative Roll, the players deploy their Troopers before the game begins",
+      "factsEvidence": [
+        "Rules such as [[skill:forward-deployment|Forward Deployment]]"
+      ],
+      "caveat": "Deployment Phase governs reserve ordering and adjustments such as Command Tokens. It does not define new deployed objects or deliveries."
     }
   ]
 }

@@ -47,6 +47,23 @@ CLASSIFICATIONS = {
     "rule:peripheral-type:cyberplug": ("rule", "peripheral-mode-token-not-object"),
     "state:camouflaged": ("state", "representation-state-not-object-identity"),
     "state:holomask": ("state", "representation-state-not-object-identity"),
+    "skill:doctor": ("skill", "recovery-roll-not-object"),
+    "skill:engineer": ("skill", "recovery-roll-not-object"),
+    "skill:strategos-l2": ("skill", "command-resource-action-not-object"),
+    "skill:combat-jump": ("skill", "deployment-failure-removes-existing-deployables"),
+    "skill:impersonation": ("skill", "deployment-failure-removes-existing-deployables"),
+    "skill:infiltration": ("skill", "deployment-failure-removes-existing-deployables"),
+    "skill:impetuous": ("skill", "activation-token-not-object"),
+    "state:retreat": ("state", "state-reminder-and-command-spend-not-object"),
+    "skill:no-wound-incapacitation": ("skill", "state-indicator-not-object"),
+    "skill:remote-presence": ("skill", "recovery-reroll-not-object"),
+    "skill:protheion": ("skill", "attribute-tracker-token-not-object"),
+    "skill:g-jumper": ("skill", "active-proxy-token-not-object"),
+    "rule:scenario:dominate-quadrants": ("rule", "scenario-scoring-excludes-deployables"),
+    "rule:hacking-area": ("rule", "existing-repeater-interaction-not-object"),
+    "rule:modifiers-explained": ("rule", "command-token-terminology-not-object"),
+    "rule:coordinated-orders": ("rule", "role-token-and-delivery-choice-not-object"),
+    "rule:deployment-phase": ("rule", "deployment-procedure-not-object"),
 }
 
 
@@ -146,6 +163,17 @@ def audit_non_catalog_candidates(curated_source: Path, reviews_source: Path) -> 
         json.loads(reviews_source.read_text(encoding="utf-8")), curated, candidates,
     )
     reviewed_ids = {item["recordId"] for item in reviews}
+    unreviewed = [
+        candidate for candidate in candidates if candidate["recordId"] not in reviewed_ids
+    ]
+    missing_primary_citation = [
+        candidate for candidate in unreviewed
+        if not any(
+            citation["sourceId"] == "n5-core-v5.3-pdf"
+            and isinstance(citation["page"], int)
+            for citation in candidate["citations"]
+        )
+    ]
     return {
         "scope": "non-catalog-keyword-discovery-not-object-inventory",
         "curatedSourceSha256": hashlib.sha256(curated_bytes).hexdigest(),
@@ -155,9 +183,8 @@ def audit_non_catalog_candidates(curated_source: Path, reviews_source: Path) -> 
             {**candidate, "reviewed": candidate["recordId"] in reviewed_ids}
             for candidate in candidates
         ],
-        "unreviewed": [
-            candidate for candidate in candidates if candidate["recordId"] not in reviewed_ids
-        ],
+        "unreviewed": unreviewed,
+        "unreviewedMissingN5Citation": missing_primary_citation,
         "reviews": reviews,
     }
 
@@ -180,6 +207,10 @@ def main() -> int:
         print(f"Candidate definitions: {report['candidateCount']}")
         print(f"Reviewed classifications: {report['reviewedCount']}")
         print(f"Awaiting manual review: {len(report['unreviewed'])}")
+        print(
+            "Unreviewed without pinned N5.3 PDF page: "
+            f"{len(report['unreviewedMissingN5Citation'])}"
+        )
         for entry in report["unreviewed"]:
             print(f"  {entry['recordId']}: {', '.join(entry['details']) or 'summary'}")
     return 0
