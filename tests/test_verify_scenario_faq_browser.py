@@ -741,6 +741,128 @@ FAQ_BROWSER_ROUTES = {
 }
 
 
+# Every additional authored topic association must have a real player-facing
+# owner. Embedded rules share their normal Fireteams/Scenario surfaces rather
+# than inventing duplicate standalone pages. The primary map above verifies one
+# entry point per FAQ; this secondary map verifies the other 19 topic edges.
+FAQ_ADDITIONAL_TOPIC_ROUTES = {
+    "skills": (
+        ("/skills/intuitive-attack", "skill:intuitive-attack", (
+            "bs-attack-roll-label-mods",
+        )),
+        ("/skills/speculative-attack", "skill:speculative-attack", (
+            "bs-attack-roll-label-mods",
+        )),
+        ("/skills/infiltration", "skill:infiltration", (
+            "camouflage-one-use-infiltration-failure",
+        )),
+        ("/skills/request-speedball", "skill:request-speedball", (
+            "controlled-jump-speedball",
+        )),
+        ("/skills/decoy", "skill:decoy", ("deployment-private-zoc-coherency",)),
+        ("/skills/cautious-movement", "skill:cautious-movement", (
+            "null-state-marker-and-cautious-movement",
+        )),
+        ("/skills/jump", "skill:jump", (
+            "prone-movement-label", "vault-during-climb-and-jump",
+        )),
+        ("/skills/berserk", "skill:berserk", ("prone-movement-label",)),
+        ("/skills/stealth", "skill:stealth", (
+            "marker-automatic-skill-declarations",
+        )),
+    ),
+    "catalogs": (
+        ("/traits/boost", "trait:boost", ("aerial-boost-no-silhouette-contact",)),
+        ("/rules/special-dice", "rule:special-dice", (
+            "coordinated-order-special-dice",
+        )),
+        ("/states/holoecho", "state:holoecho", ("deployment-private-zoc-coherency",)),
+        ("/states/isolated", "state:isolated", ("hacking-device-firewall-disabled",)),
+        ("/states/unconscious", "state:unconscious", (
+            "null-state-marker-and-cautious-movement",
+        )),
+        ("/equipment/multispectral-visor", "equipment:multispectral-visor", (
+            "sixth-sense-msv1-zero-visibility",
+        )),
+    ),
+    "embedded": (
+        ("/fireteams", "rule:fireteam-level-bonuses", (
+            "discover-fireteam-sd-bonuses",
+        )),
+        ("/scenarios/annihilation?army_points=300", "rule:scenario:killing", (
+            "undeployed-ancillary-not-killed",
+        )),
+        ("/scenarios/supplies?army_points=300",
+         "rule:scenario:carrying-supply-boxes", (
+             "scenario-element-carrier-marker-state",
+         )),
+    ),
+}
+
+
+def test_faq_browser_routes_cover_every_published_topic_association() -> None:
+    """Current FAQ topic links resolve to 42 player-facing owners, 48 edges."""
+    faq = next(
+        document for _, document in load_curated_directory(ROOT / "data/curated")
+        if document["collection"]["id"] == "n5-faq-v0.1"
+    )
+    records = {row["id"].removeprefix("faq-ruling:"): row for row in faq["records"]}
+    expected = {
+        (topic, slug)
+        for slug, record in records.items()
+        for topic in record["facts"]["topicIds"]
+    }
+    routes = [
+        entry
+        for grouping in (FAQ_BROWSER_ROUTES, FAQ_ADDITIONAL_TOPIC_ROUTES)
+        for group_routes in grouping.values()
+        for entry in group_routes
+    ]
+    actual = [(topic, slug) for _, topic, slugs in routes for slug in slugs]
+    assert len(records) == 29
+    assert len(expected) == len(actual) == len(set(actual)) == 48
+    assert {topic for topic, _ in expected} == {topic for topic, _ in actual}
+    assert len({topic for topic, _ in expected}) == 42
+    assert set(actual) == expected
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("group", tuple(FAQ_ADDITIONAL_TOPIC_ROUTES))
+def test_every_additional_faq_topic_link_is_visible_from_its_normal_page(
+    scenario_app: Callable[..., Any], chrome: Any, group: str, width: int,
+) -> None:
+    """The additional 19 topic edges render real FAQ cards, not just API links."""
+    faq = next(
+        document for _, document in load_curated_directory(ROOT / "data/curated")
+        if document["collection"]["id"] == "n5-faq-v0.1"
+    )
+    records = {row["id"].removeprefix("faq-ruling:"): row for row in faq["records"]}
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for path, topic, identifiers in FAQ_ADDITIONAL_TOPIC_ROUTES[group]:
+            page.goto(f"{ORIGIN}{path}", wait_until="domcontentloaded")
+            for identifier in identifiers:
+                record = records[identifier]
+                assert topic in record["facts"]["topicIds"], (path, identifier)
+                heading = page.locator(".faq-rulings .faq-ruling h3").get_by_text(
+                    record["facts"]["question"], exact=True,
+                )
+                heading.wait_for(state="visible", timeout=20000)
+                assert heading.count() == 1, (path, identifier)
+                card = heading.locator("xpath=..")
+                assert record["facts"]["answer"] in card.inner_text()
+                assert f"p. {record['facts']['selectedCitation']['page']}" in (
+                    card.locator(".faq-publication-source").inner_text()
+                )
+                assert card.locator(".faq-publication-source a").count() >= 1
+            assert not errors, (path, errors)
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390])
 @pytest.mark.parametrize("group", tuple(FAQ_BROWSER_ROUTES))
 def test_every_published_faq_has_a_normal_browser_entry_point(

@@ -2766,6 +2766,19 @@ v0.1 rulings must be absent. The focused regression passed. This is
 a current-source selector/association gate, not historical v0.0 replay
 or a certification of deferred ITS-specific applicability.
 
+**All-topic FAQ browser entry-point regression, 2026-10-29:**
+`test_faq_browser_routes_cover_every_published_topic_association`
+guards exactly 48 published topic/ruling associations across 42
+topics, including the 19 associations outside the existing primary
+29-ruling route matrix. The paired
+`test_every_additional_faq_topic_link_is_visible_from_its_normal_page`
+verifies normal Chromium publication at 1440/390 px from each of
+17 additional topic owners, including embedded Fireteams/Scenario
+rule topics on their owning pages. Questions, answers and selected
+citations must render. The original primary 25 routes remain a
+separate 8-check gate. These tests verify bounded discoverability,
+not click-path ranking, touch acceptance or historical/ITS editions.
+
 **Current-source temporal gate regression, 2026-10-29:**
 `test_current_faq_temporal_gates_are_independent_for_all_published_rulings`
 asserts all 29 current rulings appear at their N5.3 2026-09-01

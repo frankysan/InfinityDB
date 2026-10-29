@@ -674,12 +674,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     scoped Core scenario overlaps. Passed on 2026-10-29. This is a
     selector/reference coverage gate, **not** historical FAQ replay,
     source-wording certification or adoption of deferred ITS rulings.
-  - [ ] Prioritize links to features already represented by the app: deployment
-    and private-information handling; BS Attack/MOD and template behavior;
-    hacking Firewall; Marker, Camouflage, Peripheral, and State interactions;
-    Coordinated Orders; and Fireteam creation/bonuses/integrity. Defer
-    ITS-only FAQ rulings and season-specific scenarios to post-1.0; do not
-    present their outcomes as universal core rules.
+  - [x] Prioritize links to features already represented by the app:
+    deployment/private information, BS Attack/MODs/templates, Firewall,
+    Marker/Camouflage/Peripheral/State interactions, Coordinated Orders,
+    Fireteam creation/bonuses/integrity, and the two reviewed Core
+    scenario overlaps. The maintained **48 FAQ topic associations over
+    42 topics** now have an exact source-to-normal-browser coverage
+    assertion, including 19 secondary associations beyond the first
+    entry point for each of the 29 rulings. Chromium verifies those
+    additional Skills, Traits, Equipment, States, General Rules and
+    shared Fireteams/Core Scenario pages at 1440/390 px. Embedded
+    scenario/Fireteam rule topics reuse their normal owning page,
+    not duplicate rule cards. ITS-only rulings and season-specific
+    scenarios remain post-1.0 and do not acquire universal core scope.
+    This is current-source navigation coverage, not final release
+    visual/touch acceptance or a historical FAQ browser.
   - [ ] Verify remaining source selections, conflicts and effective-date scopes
     against the implemented applicability-first precedence policy. Every selected
     answer must show its date/version and remain separate from the base definition.

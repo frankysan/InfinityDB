@@ -322,6 +322,24 @@ current-publication browser delivery, **not** full historical
 applicability, all source wording, general discoverability through
 search, manual visual acceptance or hosted release parity.
 
+**All authored-topic browser coverage, 2026-10-29:** Extending
+the first-entry-point gate, the tracked
+`test_faq_browser_routes_cover_every_published_topic_association`
+now verifies an exact one-to-one inventory of all **48 (topic, FAQ)
+associations across 42 unique topics**: 29 primary FAQ entries and
+19 additional authored-topic entries. The secondary route map covers
+existing Skills, Traits, Equipment, States, General Rules, Fireteams
+and both published Core Scenarios. On the shared Fireteams/Scenario
+pages, the owning topic's FAQ is displayed without creating a
+duplicate route for the embedded rule. The paired
+`test_every_additional_faq_topic_link_is_visible_from_its_normal_page`
+runs Chromium at 1440 and 390 px and verifies each additional card's
+question, answer and selected citation. This complements the
+48-edge applicability-first API test, which independently verifies
+topic matching and scenario/date/revision scope. It does not establish
+user navigation clicks or search rankings, hosted release parity, or
+unpublished ITS applicability.
+
 **Comparative review, 2026-10-28:** the two Core Killing passages
 and bilingual FAQ were checked as above. The source supports considering
 Firefight, but does not settle the edition/mission applicability of an
