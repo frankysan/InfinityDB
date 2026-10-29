@@ -18153,6 +18153,7 @@
                 "restrictions": [
                     "In the Impetuous Phase, [[skill:move]], [[skill:jump]], or [[skill:climb]] cancels [[state:prone]] and the user cannot enter [[state:prone]] at the end of the movement.",
                     "Impetuous Troopers cannot enter Marker States or any other States that explicitly prohibit entry.",
+                    "Impetuous Troopers cannot enter [[state:prone]] at the end of an Order.",
                     "A player in Retreat does not carry out the Impetuous Phase."
                 ]
             },
@@ -18169,6 +18170,11 @@
                 {
                     "sourceId": "wiki-impetuous-oldid-4039",
                     "heading": "Impetuous"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 97,
+                    "section": "Impetuous"
                 }
             ],
             "review": {

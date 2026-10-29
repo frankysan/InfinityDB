@@ -2087,6 +2087,31 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     assert "plus [[distance:4:inch]]" in super_jump["effects"][1]
 
 
+def test_n5_impetuous_separates_movement_and_end_of_order_prone_limits() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    impetuous = next(
+        record for record in document["records"] if record["id"] == "skill:impetuous"
+    )
+    restrictions = impetuous["facts"]["restrictions"]
+    assert "In the Impetuous Phase" in restrictions[0]
+    assert all(
+        link in restrictions[0]
+        for link in ("[[skill:move]]", "[[skill:jump]]", "[[skill:climb]]")
+    )
+    assert "at the end of the movement" in restrictions[0]
+    assert restrictions[1] == (
+        "Impetuous Troopers cannot enter Marker States or any other States "
+        "that explicitly prohibit entry."
+    )
+    assert "at the end of an Order" in restrictions[2]
+    assert "[[state:prone]]" in restrictions[2]
+    assert {"sourceId": "n5-core-v5.3-pdf", "page": 97, "section": "Impetuous"} in (
+        impetuous["citations"]
+    )
+
+
 def test_n5_cautious_movement_aro_suppression_has_scoped_exceptions() -> None:
     document = load_curated_document(
         Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"

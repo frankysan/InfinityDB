@@ -165,6 +165,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       and unresolved source/version boundaries; update player-facing data only
       for source-confirmed discrepancies. This is a named N5.3 review within
       the wider update-post reconciliation task, not a substitute for it.
+      - [x] Recheck the **Impetuous/Prone update (N53-13)** against N5.3
+        p. 97. Preserve the Impetuous-Phase Move/Jump/Climb movement-end rule
+        separately from the additional end-of-Order Prone restriction, and cite
+        the printed page on `skill:impetuous`. A focused curated-data regression
+        guards both clauses. This closes one reviewed changelog item, not the
+        remaining N5.3 rules/Army review; rebuild release-matched rules data
+        before final browser acceptance.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or
