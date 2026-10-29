@@ -3678,6 +3678,74 @@ def test_checked_in_n5_collection_models_mimetism_affected_rolls() -> None:
     ]
 
 
+def test_esx03_msv3_marker_attack_is_not_global_revelation() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    record = next(
+        item for item in document["records"]
+        if item["id"] == "equipment:multispectral-visor"
+    )
+    facts = record["facts"]
+    assert [level["level"] for level in facts["levels"]] == [1, 2, 3]
+    assert [len(level["effects"]) for level in facts["levels"]] == [4, 3, 6]
+    level3 = facts["levels"][2]["effects"][5]
+    assert "During the Active Turn" in level3
+    assert "without first succeeding at [[skill:discover]]" in level3
+    assert "Marker's [[skill:mimetism]] MOD still applies" in level3
+    assert "usual [[state:camouflaged|Camouflaged State]] Cancellation" in level3
+
+    explanation = facts["clarifications"][1]
+    assert "merely declaring the attack does not reveal the Marker" in explanation
+    assert "Ordinary [[state:camouflaged|Camouflaged State]] cancellation" in explanation
+    assert "must make a [[rule:saving-rolls|Saving Roll]]" in explanation
+    assert "neither a Reactive Turn attack permission" in explanation
+    assert "The attack declaration alone is not a general" in facts["sourceNotes"][0]
+    assert "rest of the army" in facts["sourceNotes"][0]
+    assert "historical Spanish wording change remains unverified" in (
+        facts["sourceNotes"][0]
+    )
+    assert {
+        (citation["sourceId"], citation.get("page"))
+        for citation in record["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 125),
+        ("n5-core-v5.3-pdf", 158),
+        ("n5-core-v5.3-es-pdf", 131),
+        ("n5-core-v5.3-es-pdf", 163),
+    }
+
+
+def test_esx03_msv3_source_disclosure_and_state_cancellation_are_scoped() -> None:
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    english = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    spanish = root / "data/pdf/rules/esp-n5-update-5-3.pdf"
+    if not english.exists() or not spanish.exists():
+        pytest.skip("Pinned current English/Spanish N5.3 PDFs unavailable")
+    with pdf.open(english) as book:
+        english_visor = " ".join(book[124].get_text().split())
+        english_state = " ".join(book[157].get_text().split())
+    with pdf.open(spanish) as book:
+        spanish_visor = " ".join(book[130].get_text().split())
+        spanish_state = " ".join(book[162].get_text().split())
+    for fragment in (
+        "in the Active Turn the user may perform a BS Attack",
+        "without making a previous Discover Roll",
+        "Cancellation clauses for Camouflaged State",
+    ):
+        assert fragment in english_visor, fragment
+    for fragment in (
+        "en Turno Activo permite efectuar un Ataque CD",
+        "sin realizar una tirada de Descubrir previa",
+        "Efectuar dicho Ataque no revela al objetivo ante el",
+        "resto del ejército",
+    ):
+        assert fragment in spanish_visor, fragment
+    assert "Camouflaged Marker is forced to make a Saving Roll" in english_state
+    assert "deba realizar una Tirada de Salvación" in spanish_state
+
+
 def test_checked_in_n5_collection_models_multispectral_visor_levels() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

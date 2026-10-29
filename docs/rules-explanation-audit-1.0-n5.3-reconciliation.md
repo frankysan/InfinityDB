@@ -120,11 +120,21 @@ counts above.
   bilingual source-context note, citation, and focused source/browser
   regressions. No general Super-Jump distance, declaration type, or
   once-per-Order permission changed. ESX-03 (MSV3 disclosure/turn
-  scope) and ESX-04 (AP+T2 CC Anti-materiel) remain separate
-  current-rule checks. The absent *earlier* Spanish PDF still
-  prevents a proven Spanish historical before/after delta **for all
-  four items**. Do not infer historical equivalence, a blanket
-  MSV3 Marker-state exemption, or unrestricted Super-Jump distance.
+  scope) is **locally accepted for current-rule publication**:
+  English N5.3 p. 125 and Spanish p. 131 restrict attack-without-
+  Discover to the user's Active Turn; the English rule retains
+  ordinary Camouflaged cancellation, while Spanish clarifies the
+  attack does not itself reveal the target to the rest of the army.
+  The maintained Level 3 owner distinguishes the attacking user's
+  exception from ordinary State cancellation (pp. 158/163) and
+  retains Mimetism, LoF, and source-language qualifications.
+  Pinned source tests and 1440/390/320 px Chromium checks pass;
+  do not infer a Reactive-Turn bypass or blanket Marker immunity.
+  ESX-04 (AP+T2 CC Anti-materiel) remains a separate current-rule
+  review. The absent *earlier* Spanish PDF still prevents a proven
+  Spanish historical before/after delta **for all four items**.
+  Do not infer historical equivalence or unrestricted Super-Jump
+  distance.
 - **ARMY-01 to ARMY-20 (20 items):** the current post-notice
   snapshot and selected identities were inspected in the original
   audit, but no pinned pre-notice Army snapshot was available.

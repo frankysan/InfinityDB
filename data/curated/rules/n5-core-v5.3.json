@@ -12518,10 +12518,14 @@
             },
             "facts": {
                 "clarifications": [
-                    "The FAQ's joint [[skill:sixth-sense|Sixth Sense]] / Level 1 exception applies specifically when the Trooper is the target of a [[skill:bs-attack|BS Attack]] through a [[term:zero-visibility-zone|Zero Visibility Zone]]. See the [[skill:sixth-sense|Sixth Sense]] rule for that condition; Level 1 alone still uses the listed -6 LoF MOD."
+                    "The FAQ's joint [[skill:sixth-sense|Sixth Sense]] / Level 1 exception applies specifically when the Trooper is the target of a [[skill:bs-attack|BS Attack]] through a [[term:zero-visibility-zone|Zero Visibility Zone]]. See the [[skill:sixth-sense|Sixth Sense]] rule for that condition; Level 1 alone still uses the listed -6 LoF MOD.",
+                    "**Level 3 targeting versus revelation:** In the user's Active Turn, [[equipment:multispectral-visor|Multispectral Visor Level 3]] permits a [[skill:bs-attack|BS Attack]] on a [[state:camouflaged|Camouflage Marker]] in LoF without first passing [[skill:discover|Discover]]. That permission belongs to the attacking user; merely declaring the attack does not reveal the Marker for the rest of the army. Ordinary [[state:camouflaged|Camouflaged State]] cancellation still applies, including when the Marker must make a [[rule:saving-rolls|Saving Roll]]. This is neither a Reactive Turn attack permission nor an exemption from later cancellation."
                 ],
                 "effects": [
                     "The Level listed for the user supplies its defined [[skill:mimetism]], [[term:visibility-zone|Visibility Zone]], [[ammunition:smoke|Smoke Ammunition]], and camouflage-countering effects."
+                ],
+                "sourceNotes": [
+                    "English N5.3 p. 125 explicitly retains ordinary [[state:camouflaged|Camouflaged State]] cancellation for the Level 3 Active-Turn attack. Spanish N5.3 p. 131 adds that performing that attack does not reveal the target to the rest of the army. The attack declaration alone is not a general [[skill:discover|Discover]] for other Troopers; independently triggered [[state:camouflaged|Camouflaged State]] cancellation, such as a required [[rule:saving-rolls|Saving Roll]], remains in effect. The earlier Spanish N5.2 PDF is unavailable, so the historical Spanish wording change remains unverified."
                 ],
                 "levels": [
                     {
@@ -12564,6 +12568,26 @@
                 {
                     "sourceId": "wiki-multispectral-visor-oldid-4111",
                     "heading": "Multispectral Visor"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 125,
+                    "section": "Multispectral Visor Level 3"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 131,
+                    "section": "Visor Multiespectral Nivel 3"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 158,
+                    "section": "Camouflaged State: Cancellation"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 163,
+                    "section": "Estado Camuflado: Cancelación"
                 },
                 {
                     "sourceId": "n5-faq-v0.1-en-pdf",

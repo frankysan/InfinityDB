@@ -356,6 +356,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         at 1440/390/320 px passed. Historical **Spanish** N5.2
         before/after verification remains unavailable without its
         exact PDF; hosted release acceptance remains open.
+      - [x] **Spanish-only ESX-03 / Multispectral Visor L3:** Current
+        English N5.3 p. 125 and Spanish N5.3 p. 131 agree that only
+        in the user's Active Turn may L3 make a BS Attack against a
+        Camouflaged Marker in LoF without previous Discover, while
+        applying the Marker's Mimetism. English p. 125 retains normal
+        Camouflaged State cancellation; Spanish p. 131 additionally
+        says that performing the attack does not reveal the target
+        to the rest of the army. The maintained
+        `equipment:multispectral-visor` now separates the user's
+        targeting permission from automatic global revelation and
+        the cancellation triggers (notably a required Saving Roll),
+        referencing Camouflaged State pp. 158/163. This does **not**
+        permit Reactive-Turn attacks against unrevealed Markers or
+        immunity from cancellation when its conditions apply.
+        Pinned bilingual source checks, curated regression and
+        Chromium at 1440/390/320 px passed. Historical Spanish
+        N5.2 before/after evidence and final hosted release
+        acceptance remain open.
       - [x] Verify **N5.3 new weapon profiles (N53-25)** against the
         English Weapon Chart p. 180 and Army metadata. Source ID 225,
         Breaker Marksman Rifle, is already published through the

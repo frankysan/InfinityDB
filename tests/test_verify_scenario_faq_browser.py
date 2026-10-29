@@ -353,6 +353,50 @@ def test_all_24_core_scenario_setups_render_source_backed_browser_contract(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_esx03_msv3_targeting_does_not_conflate_marker_revelation(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """Current N5.3 MSV3 references keep turn scope and cancellation separate."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(
+            f"{ORIGIN}/equipment/multispectral-visor",
+            wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        card = page.locator("#rule-equipment-multispectral-visor")
+        card.wait_for(state="visible", timeout=30000)
+        assert card.count() == 1
+        level_table = page.locator(".level-effects-table")
+        assert level_table.count() == 1
+        level_text = level_table.inner_text()
+        assert "During the Active Turn" in level_text
+        assert "Camouflage Marker" in level_text
+        body = card.inner_text()
+        assert "merely declaring the attack does not reveal the Marker" in body
+        assert "must make a Saving Roll" in body
+        assert "neither a Reactive Turn attack permission" in body
+        note = card.locator(".rules-source-note")
+        assert note.count() == 1
+        assert "rest of the army" in note.inner_text()
+        assert "historical Spanish wording change remains unverified" in (
+            note.inner_text()
+        )
+        citations = card.locator(".rules-source-citations").inner_text()
+        assert "p. 125" in citations and "p. 131" in citations
+        assert card.locator('a[href="/states/camouflaged"]').count() >= 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_esx02_jet_propulsion_variant_scope_is_visible_in_browser(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:
