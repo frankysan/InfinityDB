@@ -207,9 +207,20 @@ the baseline:
 .\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-dist browserlanes
 ```
 
-This option is **not** the default and has not yet established a full-suite
-speedup. No new report snapshot is needed unless recording a release
-milestone.
+Full Windows benchmarks on 2026-10-29 did **not** validate this mode:
+**240.41 s** (one local JavaScript-request failure in release-candidate
+Chromium acceptance) and **222.88 s** (one Fireteam page visibility timeout),
+versus the passing **211.53 s** worksteal baseline. In the second run, both
+lanes started **3.63 s** after xdist spawned and finished at **221.79 s**
+and **222.35 s** respectively; non-lane tests also started at 3.63 s.
+This rules out late lane scheduling as the explanation. The long, nearly
+suite-length lanes limit scheduling flexibility, and the observed browser
+failures under full load remain unproven root-cause-wise. Keep
+**worksteal as the recommended default**; do not promote this experimental
+mode without both a passing full run and reproducible speedup. The Fireteam
+browser test now records browser request, HTTP and JavaScript diagnostics on
+visibility timeout without weakening its assertions. No new report snapshot
+is needed unless recording a release milestone.
 
 During an xdist run, `tests/conftest.py` admits **at most two Chromium
 slot holders concurrently** across workers using cross-process OS file locks

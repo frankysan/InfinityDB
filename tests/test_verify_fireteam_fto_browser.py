@@ -83,14 +83,46 @@ def test_live_fireteam_fto_is_scoped_to_verified_member_options() -> None:
             try:
                 for width in (1440, 390):
                     page = browser.new_page(viewport={"width": width, "height": 900})
+                    page_errors: list[str] = []
+                    failed_requests: list[str] = []
+                    http_errors: list[str] = []
+                    page.on(
+                        "pageerror", lambda error, errors=page_errors: errors.append(str(error))
+                    )
+                    page.on(
+                        "requestfailed",
+                        lambda request, failures=failed_requests: failures.append(
+                            f"{request.url}: {request.failure}"
+                        ),
+                    )
+                    page.on(
+                        "response",
+                        lambda response, errors=http_errors: errors.append(
+                            f"{response.status} {response.url}"
+                        ) if response.status >= 400 else None,
+                    )
                     try:
                         page.goto(
                             f"{base}/fireteams?army={army['id']}",
                             wait_until="domcontentloaded",
                         )
-                        page.locator("#fireteam-content").wait_for(
-                            state="visible", timeout=60000,
-                        )
+                        try:
+                            page.locator("#fireteam-content").wait_for(
+                                state="visible", timeout=60000,
+                            )
+                        except sync_api.TimeoutError as exc:
+                            error_text = page.locator(
+                                "#fireteam-error-message"
+                            ).all_text_contents()
+                            raise AssertionError(
+                                f"Fireteam content stayed hidden: army={army['id']}, "
+                                f"width={width}, "
+                                f"loading={page.locator('#fireteam-loading').is_visible()}, "
+                                f"error={error_text!r}, "
+                                f"page_errors={page_errors[:8]!r}, "
+                                f"failed_requests={failed_requests[:12]!r}, "
+                                f"http_errors={http_errors[:12]!r}"
+                            ) from exc
                         summaries = page.locator(".fireteam-member-fto-summary")
                         assert summaries.count() == len(expected), (army["name"], width)
                         assert sorted(summaries.all_text_contents()) == expected
