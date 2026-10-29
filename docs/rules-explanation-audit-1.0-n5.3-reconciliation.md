@@ -49,12 +49,17 @@ The owning 1.0 work and release criteria remain in
   N53-23 (IMM-B Hacking example) and N53-26 (Thunderbolt grouping).
   Carry their original *selected-clause* scope forward; do not infer
   complete records, rules interactions or browser verification.
-- **2 current implementations with residual acceptance work:**
+- **2 current implementations locally accepted, hosted release still pending:**
   N53-05 (Guts geometry) and N53-02 (Spec-Ops/SpecBall).
-  The maintained `rule:guts-roll` already evaluates Line of Fire
-  from where attackers actually attacked (N5.3 p. 38), with an
-  owning rules-database test; full source-to-browser/interaction
-  acceptance remains open. N53-02's core N5.3 p. 98
+  The maintained `rule:guts-roll` evaluates Line of Fire only from
+  the positions where attackers actually attacked (N5.3 p. 38)
+  and sends an already-outside Trooper Prone on a failed Guts Roll.
+  Both a fresh curated export and the tracked rules database pass
+  the public API regression. The ordinary Guts reference card
+  passes Chromium checks at 1440/390/320 px for the exact geometry,
+  fallback, Prone link, citation and layout. This closes the
+  **bounded local publication check**, not general Guts adjudication
+  or hosted release-candidate acceptance. N53-02's core N5.3 p. 98
   `skill:infinity-spec-ops` and `skill:request-specball` procedure
   is **already published**, with pickup, placement, once-per-game
   and Initial/Enhanced Profile transition effects. Its Combat Jump,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -12,7 +13,7 @@ import pytest
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import export_rules_database
 from infinity_db.web import create_app
-from tools.browser_wsgi_transport import route_browser_page
+from tools.browser_wsgi_transport import route_browser_page, wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-browser.test"
@@ -346,6 +347,71 @@ def test_all_24_core_scenario_setups_render_source_backed_browser_contract(
             timeout=30000,
         )
         assert select.input_value() == "400"
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("app_fixture", ("scenario_app", "release_scenario_app"))
+def test_n53_05_guts_geometry_survives_public_api(
+    request: pytest.FixtureRequest, app_fixture: str,
+) -> None:
+    """The current curated and tracked publications both retain N5.3 p. 38."""
+    app = request.getfixturevalue(app_fixture)
+    status, _, body = wsgi_response(app, f"{ORIGIN}/api/rules/guts-roll")
+    assert status == 200
+    rules = json.loads(body)["rules"]
+    assert [rule["id"] for rule in rules] == ["rule:guts-roll"]
+    guts = rules[0]
+    assert ("n5-core-v5.3-pdf", 38) in {
+        (citation["source_id"], citation["page"])
+        for citation in guts["citations"]
+    }
+    clarifications = guts["facts"]["clarifications"]
+    assert "only from the positions where they actually attacked" in clarifications[0]
+    assert "already outside all relevant Lines of Fire" in clarifications[0]
+    assert "goes [[state:prone|Prone]]" in clarifications[0]
+    assert "relocate up to [[distance:2:inch]]" in guts["facts"]["effects"][1]
+    assert any(
+        token.get("target") == "state:prone"
+        for clause in guts["fact_tokens"]["clarifications"]
+        for token in clause
+    )
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_n53_05_guts_attack_position_geometry_renders_in_chromium(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """Guts geometry and its scoped Prone fallback remain readable on player pages."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(
+            f"{ORIGIN}/rules/guts-roll", wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        card = page.locator("#rule-rule-guts-roll")
+        card.wait_for(state="visible", timeout=30000)
+        assert card.count() == 1
+        assert card.get_by_role("heading", name="Guts Roll").is_visible()
+        clarifications = card.locator('[data-provenance="reviewed-explanation"]')
+        assert clarifications.count() == 1
+        explanation = clarifications.inner_text()
+        assert "only from the positions where they actually attacked" in explanation
+        assert "already outside all relevant Lines of Fire" in explanation
+        assert "goes Prone instead of making the withdrawal movement" in explanation
+        assert "p. 38" in card.locator(".rules-source-citations").inner_text()
+        prone_link = clarifications.locator(
+            'a.maintained-reference[href="/states/prone"]'
+        )
+        assert prone_link.count() >= 1
+        assert prone_link.first.is_visible()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
         assert not errors, errors
     finally:
         page.close()

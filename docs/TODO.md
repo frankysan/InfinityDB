@@ -170,17 +170,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         [current disposition](rules-explanation-audit-1.0-n5.3-reconciliation.md#current-reconciliation-inventory-2026-10-29).
         It distinguishes
         **12 focused rechecks/clarifications**, **9 previously verified
-        selected clauses**, **2 represented rules awaiting bounded
-        acceptance** (N53-02/05), **2 disclosed source conflicts**
-        (N53-07/09) and **1 editorial item** (N53-01) across
-        the 26 English bullets.
+        selected clauses**, **2 represented rules with local
+        source-to-browser checks complete** (N53-02/05),
+        **2 disclosed source conflicts** (N53-07/09) and
+        **1 editorial item** (N53-01) across the 26 English bullets.
         Review four additional Spanish-only subjects, all 20 Army update
         subjects and the nine added FAQ rulings in their own source/scope
-        boundaries. Prioritize N53-02's selection-chart source and
-        read-only presentation review, source-to-browser Guts coverage,
-        ESX-01..04 and Army current-state coverage; preserve disclosed
-        publisher conflicts and the ITS-only
-        Ancillary ruling boundary. Finish release-matched database,
+        boundaries. Prioritize ESX-01..04 and Army current-state
+        coverage; preserve disclosed publisher conflicts and the
+        ITS-only Ancillary ruling boundary. Finish release-matched database,
         derived-publication and browser acceptance without replacing the
         original audit's historical counts.
       - [x] Recheck **Infinity Spec-Ops / Request SpecBall (N53-02)**
@@ -225,6 +223,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         acceptance remains open, as does the post-1.0 interactive
         list/session configurator and any future review of the
         numeric option semantics.
+      - [x] **N53-05 Guts Roll attack-position geometry:** Rechecked
+        official N5.3 p. 38 against `rule:guts-roll`, including the
+        positions from which attackers actually attacked and the
+        Prone fallback when already outside relevant LoF/areas.
+        The fresh curated export and tracked `rules.db` both publish
+        the rule through `/api/rules/guts-roll`. Focused Chromium
+        acceptance passes at 1440, 390 and 320 px for the ordinary
+        `/rules/guts-roll` page, including clarification, Prone
+        cross-link, p. 38 citation, and zero horizontal overflow.
+        No gameplay-data change was required; this closes the
+        bounded local source-to-browser review, **not** hosted
+        release-candidate acceptance or the broader Guts interaction
+        completeness gate.
       - [x] Recheck the **Impetuous/Prone update (N53-13)** against N5.3
         p. 97. Preserve the Impetuous-Phase Move/Jump/Climb movement-end rule
         separately from the additional end-of-Order Prone restriction, and cite
