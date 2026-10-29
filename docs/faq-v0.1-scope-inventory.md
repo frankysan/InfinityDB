@@ -135,8 +135,9 @@ five-page PDF file's indices.
 ## Release implications
 
 - The first 27 source answers are already represented as reviewed
-  current-source rulings; their API/browser completeness remains a
-  separate acceptance task.
+  current-source rulings. Their ordinary-browser reachability is
+  checked alongside the two narrowly scoped Core-scenario overlaps;
+  broader source-semantic and release completeness remain open.
 - The Supplies carrier clarification has a reviewed, scenario-scoped
   FAQ record and a focused API selection regression. The other eight
   ITS-section answers remain uncurated until their own season/scenario
@@ -156,6 +157,21 @@ display no FAQ section. Navigation reuses the same page to detect
 stale FAQ content. The source-isolated API regression also pins
 Supplies selection. This acceptance is not a general FAQ
 source-coverage or cross-scenario applicability certification.
+
+**Published-ruling browser reachability, 2026-10-29:** The source-driven
+`test_every_published_faq_has_a_normal_browser_entry_point` asserts
+that the maintained 29-record set is exactly covered by 25 normal
+player-facing topic/scenario routes. A fresh curated rules export and
+the current local Army database back WSGI-routed Chromium at 1440 and
+390 px. All **8/8 grouped tests passed**, checking each ruling's
+question, answer, selected FAQ citation, and authored topic at its
+normal entry point. Covered paths include Skills, Equipment, Traits,
+States, Hacking Programs, General Rules, Fireteams and the two approved
+Core scenario overlaps. The separate scenario navigation regression
+retains Domination/Firefight non-selection. This certifies bounded
+current-publication browser delivery, **not** full historical
+applicability, all source wording, general discoverability through
+search, manual visual acceptance or hosted release parity.
 
 **Comparative review, 2026-10-28:** the two Core Killing passages
 and bilingual FAQ were checked as above. The source supports considering

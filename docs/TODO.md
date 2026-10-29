@@ -608,6 +608,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [ ] Reconcile every remaining in-scope ruling against the pinned FAQ and
     source inventory. Reuse the existing question/answer, topic, version/date,
     citation and applicability fields; preserve original provenance on carry-forwards.
+  - [x] Verify source-to-ordinary-browser reachability of **all 29 published
+    reviewed FAQ rulings** against a fresh rules export. The tracked
+    `test_every_published_faq_has_a_normal_browser_entry_point` drives
+    25 normal Skill, Equipment, Trait, State, Hacking Program, General Rule,
+    Fireteams and Core Scenario entry points in Chromium at 1440/390 px.
+    All 8 grouped browser checks passed on 2026-10-29, matching every
+    selected FAQ question, answer, source citation and authored topic
+    against its owning page. Separate scenario tests reject ITS-only
+    applicability leakage. This is bounded published-question delivery,
+    not exhaustive FAQ source semantics or final 1.0 acceptance.
   - [ ] Prioritize links to features already represented by the app: deployment
     and private-information handling; BS Attack/MOD and template behavior;
     hacking Firewall; Marker, Camouflage, Peripheral, and State interactions;

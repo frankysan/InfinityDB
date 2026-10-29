@@ -2717,9 +2717,17 @@ Run this reproducible local regression from the repository root:
 ```
 
 The WSGI-backed browser uses a fresh isolated rules export and the
-checkout's Army database. This is repeatable **local development evidence**,
-not a substitute for broader manual visual/touch review, source
-inventory, hosted exact-version deployment or the final 1.0 release gate.
+checkout's Army database. The additional
+`test_every_published_faq_has_a_normal_browser_entry_point` tests
+all 29 reviewed FAQ question/answer/citation cards at 25 ordinary
+reference entry points, grouped into eight Chromium checks at
+1440/390 px; all eight passed on 2026-10-29. Its independent
+coverage assertion fails on added, removed or unmapped rulings.
+The normal browser paths include catalog details, Fireteams and the
+two scenario-only selections. This is repeatable **local development
+evidence**, not a substitute for broader manual visual/touch review,
+source inventory, hosted exact-version deployment or the final 1.0
+release gate.
 The official cross-language Domination discrepancy remains unresolved.
 
 ## 1.0 FAQ v0.1 pilot acceptance

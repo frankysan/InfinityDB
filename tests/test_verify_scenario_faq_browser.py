@@ -658,3 +658,132 @@ def test_supplies_faq_is_visible_and_does_not_leak_to_other_scenarios(
         assert not errors, errors
     finally:
         page.close()
+
+
+# Each reviewed FAQ has at least one specific normal-player entry point. Keep
+# the route/topic selection separate from curated topicIds so a removed route,
+# missing frontend FAQ fetch or a no-longer-published catalog record fails.
+FAQ_BROWSER_ROUTES = {
+    "skills": (
+        ("/skills/aerial", "skill:aerial", ("aerial-boost-no-silhouette-contact",)),
+        ("/skills/bs-attack", "skill:bs-attack", (
+            "bs-attack-roll-label-mods", "skill-declaration-target-position",
+        )),
+        ("/skills/camouflage", "skill:camouflage", (
+            "camouflage-one-use-infiltration-failure",
+        )),
+        ("/skills/minelayer", "skill:minelayer", ("deployment-private-zoc-coherency",)),
+        ("/skills/discover", "skill:discover", ("discover-fireteam-sd-bonuses",)),
+        ("/skills/peripheral", "skill:peripheral", (
+            "peripheral-controller-unable-to-declare",
+        )),
+        ("/skills/place-deployable", "skill:place-deployable", (
+            "place-deployable-space-occupied",
+        )),
+        ("/skills/protheion", "skill:protheion", ("protheion-excess-saving-rolls",)),
+        ("/skills/sixth-sense", "skill:sixth-sense", (
+            "sixth-sense-msv1-zero-visibility",
+        )),
+        ("/skills/stealth", "skill:stealth", ("stealth-aro-multiple-activations",)),
+        ("/skills/surprise-attack", "skill:surprise-attack", (
+            "surprise-attack-multiple-users",
+        )),
+        ("/skills/climb", "skill:climb", ("vault-during-climb-and-jump",)),
+    ),
+    "catalogs": (
+        ("/states/camouflaged", "state:camouflaged", (
+            "camouflaged-marker-total-cover", "marker-automatic-skill-declarations",
+        )),
+        ("/hacking-programs/controlled-jump", "hacking-program:controlled-jump", (
+            "controlled-jump-speedball",
+        )),
+        ("/equipment/deployable-cover", "equipment:deployable-cover", (
+            "deployable-cover-no-placement",
+        )),
+        ("/traits/direct-template", "trait:direct-template", (
+            "direct-template-secondary-target-los",
+        )),
+        ("/traits/deployable", "trait:deployable", (
+            "fired-deployable-vertical-surface",
+        )),
+        ("/equipment/hacking-device", "equipment:hacking-device", (
+            "hacking-device-firewall-disabled",
+        )),
+        ("/states/disconnected", "state:disconnected", (
+            "null-state-marker-and-cautious-movement",
+        )),
+        ("/states/prone", "state:prone", (
+            "prone-at-end-of-move-distance", "prone-movement-label",
+        )),
+    ),
+    "rules": (
+        ("/rules/coordinated-orders", "rule:coordinated-orders", (
+            "coordinated-order-special-dice",
+        )),
+        ("/rules/deployment-phase", "rule:deployment-phase", (
+            "deployment-phase-reposition-after-measurement",
+        )),
+        ("/fireteams", "rule:fireteam-general", (
+            "fireteam-required-member-lost", "fireteam-type-after-member-loss",
+        )),
+    ),
+    "scenarios": (
+        ("/scenarios/annihilation?army_points=300", "scenario:annihilation", (
+            "undeployed-ancillary-not-killed",
+        )),
+        ("/scenarios/supplies?army_points=300", "scenario:supplies", (
+            "scenario-element-carrier-marker-state",
+        )),
+    ),
+}
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("group", tuple(FAQ_BROWSER_ROUTES))
+def test_every_published_faq_has_a_normal_browser_entry_point(
+    scenario_app: Callable[..., Any], chrome: Any, group: str, width: int,
+) -> None:
+    """Full 29-ruling source -> API -> ordinary browser reachability gate.
+
+    Source/version and selected scenario applicability are independently tested
+    in test_faq_ruling_references.py. This verifies live, visible browser cards.
+    """
+    faq = next(
+        document for _, document in load_curated_directory(ROOT / "data/curated")
+        if document["collection"]["id"] == "n5-faq-v0.1"
+    )
+    records = {row["id"].removeprefix("faq-ruling:"): row for row in faq["records"]}
+    routes = FAQ_BROWSER_ROUTES
+    all_rulings = [
+        ruling_id
+        for group_routes in routes.values()
+        for _, _, ids in group_routes
+        for ruling_id in ids
+    ]
+    assert len(all_rulings) == len(set(all_rulings)) == 29
+    assert set(all_rulings) == set(records)
+
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for path, topic, identifiers in routes[group]:
+            page.goto(f"{ORIGIN}{path}", wait_until="domcontentloaded")
+            for identifier in identifiers:
+                record = records[identifier]
+                assert topic in record["facts"]["topicIds"], (path, identifier)
+                heading = page.locator(".faq-rulings .faq-ruling h3").get_by_text(
+                    record["facts"]["question"], exact=True,
+                )
+                heading.wait_for(state="visible", timeout=20000)
+                assert heading.count() == 1, (path, identifier)
+                card = heading.locator("xpath=..")
+                assert record["facts"]["answer"] in card.inner_text()
+                source = card.locator(".faq-publication-source")
+                assert "FAQ clarification" in source.inner_text()
+                assert f"p. {record['facts']['selectedCitation']['page']}" in source.inner_text()
+                assert source.locator("a").count() >= 1
+            assert not errors, (path, errors)
+    finally:
+        page.close()
