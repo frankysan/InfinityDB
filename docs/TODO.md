@@ -196,15 +196,32 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         nor evidence of a historical before/after Army change. The
         remaining full profiles and roster options for these three
         pairs are still included in the wider Army coverage gate.
-      - [ ] **ARMY-01 and ARMY-05–20, plus full ARMY-02–04 profiles:** Continue
-        source-to-database-to-player verification by the original
-        20-item Army update inventory. Keep Fireteam chart constraints
-        (ARMY-01) distinct from the Spec-Ops/TEAM-OPS option tables
-        (ARMY-02–16). For each source Unit/faction, check current
-        profiles, options, availability and source-specific references
-        as applicable; do not infer historical changes without a
-        pinned pre-notice Army snapshot. Retain final release-browser
-        acceptance as a separate gate.
+      - [x] **ARMY-05–08 source-pair chart publication:** Rechecked
+        Intel/Ariadna TEAM-OPS (1915/1929), Husam/Haqqislam TEAM-OPS
+        (1916/1930), Vortex/Nomads TEAM-OPS (1917/1931), and
+        Nexus-7/Combined Army TEAM-OPS (1918/1932) against the
+        respective faction members of `JSON 20260929-114335.zip`,
+        application database and public Unit API. All eight source
+        identities, names, version/file provenance and ordered
+        grouped attributes match. Each Spec-Ops entry has eight
+        selection options and four SpecBall options; each TEAM-OPS
+        entry has ten selection options and four SpecBall options.
+        The shared Chromium test now passes 14 Unit pages across
+        1440/390/320 px (42 page/viewport checks), including all
+        seven previously and newly reviewed pairs. Intel's source
+        includes separate Full Power/Battle Ravaged Enhanced
+        Profiles; these source profile differences are **not**
+        inferred to be configurable chart choices or accepted as
+        completed roster/profile semantics.
+      - [ ] **ARMY-01 and ARMY-09–20, plus full ARMY-02–08 profiles:**
+        Continue source-to-database-to-player verification by the
+        original 20-item Army update inventory. Keep Fireteam chart
+        constraints (ARMY-01) distinct from the Spec-Ops/TEAM-OPS
+        option tables (ARMY-02–16). For each source Unit/faction,
+        check current profiles, options, availability and
+        source-specific references as applicable; do not infer
+        historical changes without a pinned pre-notice Army snapshot.
+        Retain final release-browser acceptance as a separate gate.
       - [x] Recheck **Infinity Spec-Ops / Request SpecBall (N53-02)**
         against N5.3 p. 98 and the already recorded REA-040
         acceptance. The core request Skill, drop, selection, pickup,

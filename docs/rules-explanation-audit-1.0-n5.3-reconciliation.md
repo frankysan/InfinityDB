@@ -149,17 +149,21 @@ counts above.
   All 20 **historical** dispositions therefore remain *partially
   verified*. A current-only snapshot supports present-state
   publication checks, not a claim about what changed. Selected
-  **ARMY-02–04** source-pair chart coverage is now locally accepted:
+  **ARMY-02–08** source-pair chart coverage is now locally accepted:
   the pinned September 29 ZIP, built database and public Unit API
-  agree on all six Indigo, Confessor and Gui Feng/Yu Jing source
-  Units (1912/1926, 1913/1927 and 1914/1928), their source-member
-  provenance and full grouped Spec-Ops/TEAM-OPS and SpecBall choice
-  payloads. All six ordinary Unit pages passed Chromium checks
-  at 1440/390/320 px for chart counts, source IDs, links and overflow.
-  This does **not** approve all profile groups, option costs, AVA,
-  Fireteam constraints or an Army historical delta. ARMY-01's
-  Fireteam chart context is **not** the same as these selection
-  charts and remains open; ARMY-05–20 and final release-browser
+  agree on all 14 Indigo, Confessor, Gui Feng/Yu Jing, Intel/Ariadna,
+  Husam/Haqqislam, Vortex/Nomads and Nexus-7/Combined Army source
+  Units (1912–1918 and 1926–1932), their source-member provenance
+  and full grouped Spec-Ops/TEAM-OPS and SpecBall choice payloads.
+  All 14 ordinary Unit pages passed Chromium at 1440/390/320 px
+  (42 page/viewport checks) for chart counts, source IDs, links and
+  overflow. The Ariadna Intel source uniquely has Full Power and
+  Battle Ravaged Enhanced Profiles, which remain a separate full-
+  profile/roster review. This selected chart verification does
+  **not** approve all profile groups, option costs, AVA, Fireteam
+  constraints or an Army historical delta. ARMY-01's Fireteam
+  chart context is **not** the same as these selection charts
+  and remains open; ARMY-09–20 and final hosted release-browser
   acceptance remain open. Preserve missing pre-change evidence
   as a provenance limit rather than a present-state defect.
 - **FAQ-01 to FAQ-09 (nine added rulings):** compared against v0.0

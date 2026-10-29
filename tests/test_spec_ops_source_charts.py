@@ -149,9 +149,16 @@ def test_source_choices_are_exposed_on_unit_api_without_player_selections() -> N
             "confessor-spec-ops", 1913, "confessor-team-ops", 1927,
         ),
         ("201-yu-jing.json", "gu-feng-spec-ops", 1914, "yu-jing-team-ops", 1928),
+        ("301-ariadna.json", "intel-spec-ops", 1915, "ariadnateam-ops", 1929),
+        ("401-haqqislam.json", "husam-spec-ops", 1916, "haqqislam-team-ops", 1930),
+        ("501-nomads.json", "vortex-spec-ops", 1917, "nomads-team-ops", 1931),
+        (
+            "601-combined-army.json",
+            "nexus-7-spec-ops", 1918, "combined-army-team-ops", 1932,
+        ),
     ),
 )
-def test_army_02_to_04_source_pairs_are_published_with_own_chart_context(
+def test_army_02_to_08_source_pairs_are_published_with_own_chart_context(
     source_member: str,
     spec_slug: str,
     spec_id: int,
