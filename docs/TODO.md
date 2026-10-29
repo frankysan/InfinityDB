@@ -243,6 +243,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         to the owner card, with a focused regression. No unsupported
         ARM/BTS/STR values were inferred for the Scenery Element.
         Release-matched browser acceptance remains pending.
+      - [x] Reconcile **Camouflaged ARO declarations (N53-22)** against
+        N5.3 pp. 157-158. The four permitted Skills (Discover, Dodge,
+        Look Out!, Reset), delayed response and whole-Order revelation
+        were already covered in `state:camouflaged` clarifications.
+        The declaration-only restriction is now explicit in the State's
+        operative restrictions, with a separate explanation of the
+        delayed-ARO window and its lost-reaction condition. Existing
+        reviewed text remains intact; the catalog regression verifies
+        the permitted list and subsequent reveal. Final release-matched
+        browser acceptance remains open.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or

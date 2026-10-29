@@ -2470,12 +2470,14 @@
                     "Enemy Troopers cannot declare Attacks against a Camouflaged Marker unless another rule allows it; the Marker must normally be Discovered first.",
                     "Enemy Troopers cannot enter Silhouette contact with a Camouflaged Marker.",
                     "A Trooper in Camouflaged State cannot be part of a Fireteam.",
+                    "When declaring an [[trait:aro|ARO]] against an unrevealed [[state:camouflaged|Camouflaged Marker]], the only permitted Skills are [[skill:discover|Discover]], [[skill:dodge|Dodge]], [[skill:look-out|Look Out!]], and [[skill:reset|Reset]]. This restriction governs declarations against the Marker, not reactions declared after the Marker reveals itself.",
                     "During the Active Turn, a [[skill:camouflage]] user may regain this State only with the required Long Skill while outside the LoF of enemy Models and Markers."
                 ],
                 "clarifications": [
                     "Cancellation: a Camouflaged Marker is revealed when it declares an Attack, [[skill:look-out|Look Out!]], or another Skill requiring a Roll; declares a Long Skill other than [[skill:cautious-movement|Cautious Movement]]; enters Silhouette contact with an enemy Model; is [[skill:discover|Discovered]]; or must make a Saving Roll.",
                     "The condition also ends if the Trooper becomes [[skill:impetuous|Impetuous]] or enters [[state:retreat|Retreat!]]. Reveal the Model and its public information. Cancellation applies to the entire declared Order, even if the revealing Skill is declared second.",
-                    "Against an unrevealed Camouflaged Marker, the only permitted AROs are [[skill:discover|Discover]], [[skill:dodge|Dodge]], [[skill:look-out|Look Out!]], and [[skill:reset|Reset]]. A delayed reaction is lost if the Marker does not reveal itself in the second half of its Order."
+                    "Against an unrevealed Camouflaged Marker, the only permitted AROs are [[skill:discover|Discover]], [[skill:dodge|Dodge]], [[skill:look-out|Look Out!]], and [[skill:reset|Reset]]. A delayed reaction is lost if the Marker does not reveal itself in the second half of its Order.",
+                    "A reactive Trooper may delay declaring an [[trait:aro|ARO]] against an activated [[state:camouflaged|Camouflaged Marker]] until the second half of the Order. If the Marker reveals itself then, the Trooper may declare an eligible [[trait:aro|ARO]] against the revealed Model; otherwise the delayed reaction is lost. When revelation cancels the Camouflaged condition, cancellation applies to the entire declared Order, including its first Skill."
                 ]
             },
             "citations": [

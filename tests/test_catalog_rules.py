@@ -1650,7 +1650,7 @@ def test_state_cancellation_clarifications_are_scoped_and_published(
     """REA-015: each State exposes its own operative cancellation conditions."""
     database = _rules_database(tmp_path)
     required = {
-        "state:camouflaged": ("entire declared Order", "permitted AROs"),
+        "state:camouflaged": ("entire declared Order", "delayed reaction is lost"),
         "state:hidden-deployment": ("declares an Order or ARO", "Marker status"),
         "state:holoecho": ("successful Attack (no Saving Roll)", "Coherency"),
         "state:holomask": ("end of that Order", "real Model"),
@@ -1674,9 +1674,17 @@ def test_state_cancellation_clarifications_are_scoped_and_published(
     hidden = database.composed_record("state:hidden-deployment")
     impersonation = database.composed_record("state:impersonation-1")
     assert camouflage is not None and hidden is not None and impersonation is not None
-    assert "[[skill:discover|Discover]]" in " ".join(
-        camouflage["facts"]["clarifications"]
-    )
+    declaration_restrictions = " ".join(camouflage["facts"]["restrictions"])
+    for required_aro in (
+        "[[skill:discover|Discover]]", "[[skill:dodge|Dodge]]",
+        "[[skill:look-out|Look Out!]]", "[[skill:reset|Reset]]",
+    ):
+        assert required_aro in declaration_restrictions
+    assert "governs declarations against the Marker" in declaration_restrictions
+    delayed = " ".join(camouflage["facts"]["clarifications"])
+    assert "may delay declaring an [[trait:aro|ARO]]" in delayed
+    assert "delayed reaction is lost" in delayed
+    assert "cancellation applies to the entire declared Order" in delayed
     assert "[[skill:sensor|Sensor]]" in " ".join(
         hidden["facts"]["clarifications"]
     )
@@ -1686,7 +1694,10 @@ def test_state_cancellation_clarifications_are_scoped_and_published(
 
     # Keep distinct revelation, cancellation and recovery routes visible.
     cases = {
-        "state:camouflaged": ("only permitted AROs", "entire declared Order"),
+        "state:camouflaged": (
+            "eligible [[trait:aro|ARO]] against the revealed Model",
+            "entire declared Order",
+        ),
         "state:hidden-deployment": ("another Marker status", "recorded position"),
         "state:holoecho": ("holographic duplicate disappears separately",
                             "before measuring movement"),
