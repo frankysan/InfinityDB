@@ -2730,6 +2730,17 @@ source inventory, hosted exact-version deployment or the final 1.0
 release gate.
 The official cross-language Domination discrepancy remains unresolved.
 
+**Bilingual Fireteam FAQ follow-up, 2026-10-29:** The tracked
+`test_fireteam_faq_source_omission_is_not_a_contradictory_ruling`
+checks English v0.1 printed p. 3's FT Master exception against the
+Spanish omission and the reviewed `skill:ft-master` restriction.
+The selected FAQ still carries both language citations, with no
+conflicting citation for that omission. The adjacent Haris Type
+example retains its real numerical conflicting citation. The source
+review changed only the required-member ruling's `selectionReason`;
+effective date, selected source, gameplay and scenario scope remain
+unchanged.
+
 ## 1.0 FAQ v0.1 pilot acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** The

@@ -4701,7 +4701,15 @@ FAQ page positions are:
   not alter Burst values and therefore still apply.
 - Fireteam required member lost: `rule:fireteam-general`
   (EN/ES p. 3). Chart minimum membership applies at creation;
-  the FT Master Special Skill can add its own requirements.
+  the FT Master Special Skill can add its own requirements. **Bilingual
+  source omission, checked 2026-10-29:** English FAQ v0.1 p. 3 explicitly
+  qualifies the answer with FT Master's own rules; Spanish v0.1 p. 3
+  gives the creation-only minimum without that qualifier. N5.3 English
+  Fireteam Integrity p. 134 and the separately reviewed
+  `skill:ft-master` restriction support keeping that exception visible.
+  Spanish does not explicitly deny it, so this is documented as an
+  omission in the selection rationale, not a conflicting FAQ citation.
+  This does not change which Fireteam conditions cause cancellation.
 
 These entries are absent from the pinned English FAQ v0.0 and
 first appear in the available English v0.1 publication. They

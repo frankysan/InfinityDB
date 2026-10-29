@@ -637,6 +637,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Chromium/JavaScript regressions pin the wording. No source precedence
       or scenario scope changed. Exact PDF dates and full historical
       applicability remain open.
+    - [x] Recheck the **Fireteam required-member FAQ bilingual qualifier**.
+      English v0.1 p. 3 preserves the bracketed FT Master exception;
+      Spanish v0.1 p. 3 omits it while agreeing on chart minimums.
+      Source curation now records this omission without inventing a
+      contradictory Spanish ruling; the actual Haris member-count
+      contradiction remains explicitly flagged. N5.3 Fireteam
+      Integrity p. 134 and reviewed `skill:ft-master` confirm the
+      distinction. A source/API regression verifies both dispositions.
+      No rules, selected citation, effective date or scope changed.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.

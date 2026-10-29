@@ -143,6 +143,22 @@ five-page PDF file's indices.
   Firefight remains unselected pending scenario-specific source evidence
   and a reviewed applicability change; do not silently broaden it.
 
+## Fireteam bilingual source qualification
+
+**Checked 2026-10-29:** English FAQ v0.1 p. 3 says that the Fireteam
+Charts' minimum membership requirements apply at creation, explicitly
+adding that **FT Master has its own overriding rules**. Spanish FAQ
+v0.1 p. 3 confirms the creation-only minimum, but omits the FT Master
+qualification. The underlying N5.3 Fireteam Integrity rule (English
+p. 134) and the maintained `skill:ft-master` restriction independently
+support the exception. Because Spanish does not negate the exception,
+the maintained `faq-ruling:fireteam-required-member-lost` retains
+English as selected source and `conflictingCitations: []`, with the
+omission recorded in `selectionReason`. This differs from the
+actual numerical contradiction in the adjacent **Fireteam Type / Haris**
+example, which remains an explicit conflicting citation. No effective
+date, source selection, gameplay semantics or scenario scope changed.
+
 ## Release implications
 
 - The first 27 source answers are already represented as reviewed

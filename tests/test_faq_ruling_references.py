@@ -703,6 +703,47 @@ def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
     ) == []
 
 
+def test_fireteam_faq_source_omission_is_not_a_contradictory_ruling(
+    published_pilot: RulesDatabase,
+) -> None:
+    """Keep the omitted Spanish qualification distinct from the Haris count conflict."""
+    rulings = {
+        item["id"]: item
+        for item in published_pilot.faq_rulings_for_topic(
+            "rule:fireteam-general", rules_revision="5.3", as_of="2026-09-01",
+        )
+    }
+    required = rulings["faq-ruling:fireteam-required-member-lost"]
+    assert required["selected_citation"] == {
+        "sourceId": "n5-faq-v0.1-en-pdf", "page": 3,
+    }
+    assert required["conflicting_citations"] == []
+    assert "FT Master Special Skill" in required["answer"]
+    assert "Spanish FAQ v0.1" in required["selection_reason"]
+    assert "omits" in required["selection_reason"]
+    assert "not a contradictory Spanish ruling" in required["selection_reason"]
+    assert {
+        (citation["source_id"], citation["page"])
+        for citation in required["citations"]
+    } == {
+        ("n5-faq-v0.1-en-pdf", 3), ("n5-faq-v0.1-es-pdf", 3),
+    }
+
+    master = published_pilot.composed_record("skill:ft-master")
+    assert master is not None
+    assert any(
+        "canceled if the FT Master leaves the Fireteam" in clause
+        for clause in master["facts"]["restrictions"]
+    )
+
+    haris = rulings["faq-ruling:fireteam-type-after-member-loss"]
+    assert haris["conflicting_citations"] == [
+        {"sourceId": "n5-faq-v0.1-es-pdf", "page": 3},
+    ]
+    assert "three-member HARIS" in haris["answer"]
+    assert "two-member HARIS" in haris["answer"]
+
+
 @pytest.mark.parametrize(
     ("topic", "scenario", "selected"),
     [
