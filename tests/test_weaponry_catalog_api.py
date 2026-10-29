@@ -2055,6 +2055,48 @@ def test_ammunition_metadata_links_are_reviewed_base_types(
         ]
 
 
+def test_esx04_ap_t2_cc_row_in_bilingual_current_n53_charts() -> None:
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    english = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    spanish = root / "data/pdf/rules/esp-n5-update-5-3.pdf"
+    if not english.exists() or not spanish.exists():
+        pytest.skip("Pinned bilingual N5.3 rulebook PDFs unavailable")
+    with pdf.open(english) as book:
+        en_chart = " ".join(book[176].get_text().split())
+    with pdf.open(spanish) as book:
+        es_chart = " ".join(book[183].get_text().split())
+    for expected in ("AP+T2 CC", "AP+T2", "ARM/2", "ANTI-MATERIEL, CC"):
+        assert expected in en_chart
+    for expected in ("ARMA CC AP+T2", "AP+T2", "BLI/2", "ANTIMATERIAL, CC"):
+        assert expected in es_chart
+
+
+def test_esx04_ap_t2_cc_profile_matches_pinned_weapon_row(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "ap-t2-cc-weapon")
+    assert payload["slug"] == "ap-t2-cc-weapon"
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (profile["damage"], profile["burst"]) == ("8", "1")
+    assert (profile["ammunition"], profile["saving"], str(profile["saving_num"])) == (
+        "AP+T2", "ARM/2", "1",
+    )
+    assert profile["traits"] == ["Anti-materiel", "CC"]
+    assert {ref["slug"] for ref in profile["trait_references"]} == {
+        "anti-materiel", "cc",
+    }
+    assert profile["ammunition_source_id"] == 40
+    assert [component["record_id"] for component in
+            profile["ammunition_composition"]["components"]] == [
+        "ammunition:ap", "ammunition:t2",
+    ]
+    assert [prop["id"] for prop in profile["weapon_properties"]] == [
+        "weapon-property:ap-t2",
+    ]
+
+
 def test_combined_ammunition_components_do_not_change_saving_rolls(
     weaponry_app: Callable,
 ) -> None:

@@ -374,6 +374,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Chromium at 1440/390/320 px passed. Historical Spanish
         N5.2 before/after evidence and final hosted release
         acceptance remain open.
+      - [x] **Spanish-only ESX-04 / AP+T2 CC Anti-materiel:** The
+        English N5.3 p. 177 and Spanish N5.3 p. 184 CC Weapon
+        charts both print PS 8, B1, AP+T2, one ARM/2 Saving
+        Roll and the Anti-materiel and CC Traits. The public
+        `ap-t2-cc-weapon` profile and `weapon-property:ap-t2`
+        already preserve those values and link both component
+        Ammunition rules; no additional saving roll or separate
+        attack mode is implied. Pinned bilingual PDF and public
+        API regressions passed, as did ordinary Chromium weapon
+        presentation at 1440/390/320 px, including Anti-materiel
+        and the AP/T2 links. No production-data change was
+        necessary. The exact earlier Spanish N5.2 PDF is still
+        missing, so historical Spanish before/after evidence
+        and final hosted release acceptance remain open.
       - [x] Verify **N5.3 new weapon profiles (N53-25)** against the
         English Weapon Chart p. 180 and Army metadata. Source ID 225,
         Breaker Marksman Rifle, is already published through the

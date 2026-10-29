@@ -130,11 +130,19 @@ counts above.
   retains Mimetism, LoF, and source-language qualifications.
   Pinned source tests and 1440/390/320 px Chromium checks pass;
   do not infer a Reactive-Turn bypass or blanket Marker immunity.
-  ESX-04 (AP+T2 CC Anti-materiel) remains a separate current-rule
-  review. The absent *earlier* Spanish PDF still prevents a proven
-  Spanish historical before/after delta **for all four items**.
-  Do not infer historical equivalence or unrestricted Super-Jump
-  distance.
+  ESX-04 (AP+T2 CC Anti-materiel) is likewise **locally accepted
+  for current-rule publication**: English N5.3 p. 177 and Spanish
+  p. 184 agree on PS 8, B1, AP+T2, one ARM/2 Saving Roll, and
+  Anti-materiel plus CC. The existing published weapon profile,
+  `weapon-property:ap-t2`, and AP/T2 Ammunition references already
+  retain the printed facts. Bilingual source/API checks and
+  1440/390/320 px Chromium weapon-page acceptance pass; no
+  production-data edit or extra Saving Roll was warranted.
+  All four ESX subjects now have **current-rule local acceptance**.
+  The absent *earlier* Spanish PDF still prevents a proven Spanish
+  historical before/after delta **for all four items**, and hosted
+  release acceptance remains separate. Do not infer historical
+  equivalence or unrestricted Super-Jump distance.
 - **ARMY-01 to ARMY-20 (20 items):** the current post-notice
   snapshot and selected identities were inspected in the original
   audit, but no pinned pre-notice Army snapshot was available.
