@@ -441,8 +441,11 @@ def test_complex_unit_cohort_has_nonempty_published_profile_variants() -> None:
     assert all(slug not in ("", None) for slug in slugs)
 
 
-def test_live_chromium_unit_detail_matrix_when_available() -> None:
-    """Run the complete seven-Unit, three-width matrix when Chrome is installed."""
+@pytest.mark.parametrize(
+    "matrix", ("core_default", "core_rich", "optional_flags", "optional_sources", "distance"),
+)
+def test_live_chromium_unit_detail_matrix_when_available(matrix: str) -> None:
+    """Verify the complete Unit browser matrices in independently scheduled groups."""
     pytest.importorskip("playwright.sync_api")
     root = Path(__file__).resolve().parents[1]
     app = create_app(
@@ -470,63 +473,105 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
             driver = stack.enter_context(playwright.sync_playwright())
             browser = driver.chromium.launch(channel="chrome")
             stack.callback(browser.close)
-            verify_case = partial(verify, browser=browser)
+            verify_case = partial(verify, browser=browser, browser_wsgi_app=app)
         except Exception as exc:
             if "Executable doesn't exist" in str(exc) or (
                 "chrome" in str(exc).lower() and "not found" in str(exc).lower()
             ):
                 pytest.skip(f"Chromium browser unavailable: {exc}")
             raise
-        result = verify_case(
-            f"http://127.0.0.1:{server.server_port}",
-            slugs=DEFAULT_SLUGS, channel="chrome",
-        )
-        assert result["passed"] == result["total"] == len(WIDTHS) * len(DEFAULT_SLUGS), (
-            [entry for entry in result["results"] if entry["status"] != "passed"]
-        )
-        rich_slugs = _complex_unit_cases(root / "data/generated/infinity.db")
-        rich_widths = (*WIDTHS, 768)
-        rich = verify_case(
-            f"http://127.0.0.1:{server.server_port}",
-            slugs=rich_slugs, channel="chrome", widths=rich_widths,
-        )
-        assert rich["passed"] == rich["total"] == len(rich_widths) * len(rich_slugs), (
-            rich_slugs,
-            [entry for entry in rich["results"] if entry["status"] != "passed"],
-        )
-
-        scenarios: tuple[tuple[tuple[str, ...], dict[str, bool]], ...] = (
-            (("tohaa-team-ops",), {"teamops": False}),
-            (("raoul-spector-mercenary-operative",), {"mercs": False}),
-            (
-                ("tohaa-team-ops", "raoul-spector-mercenary-operative"),
-                {"mercs": False, "teamops": False},
-            ),
-            (
-                ("raoul-spector-mercenary-operative", "tohaa-team-ops"),
-                dict.fromkeys(OPTIONAL_FLAGS, False),
-            ),
-        )
-        for filtered_slugs, flags in scenarios:
-            filtered = verify_case(
-                f"http://127.0.0.1:{server.server_port}",
-                slugs=filtered_slugs, optional_filters=flags, channel="chrome",
+        base_url = f"http://127.0.0.1:{server.server_port}"
+        if matrix == "core_default":
+            result = verify_case(base_url, slugs=DEFAULT_SLUGS, channel="chrome")
+            assert result["passed"] == result["total"] == len(WIDTHS) * len(DEFAULT_SLUGS), (
+                [entry for entry in result["results"] if entry["status"] != "passed"]
             )
-            assert filtered["passed"] == filtered["total"] == (
-                len(WIDTHS) * len(filtered_slugs)
-            ), filtered
+            return
+
+        if matrix == "core_rich":
+            rich_slugs = _complex_unit_cases(root / "data/generated/infinity.db")
+            rich_widths = (*WIDTHS, 768)
+            rich = verify_case(
+                base_url, slugs=rich_slugs, channel="chrome", widths=rich_widths,
+            )
+            assert rich["passed"] == rich["total"] == len(rich_widths) * len(rich_slugs), (
+                rich_slugs,
+                [entry for entry in rich["results"] if entry["status"] != "passed"],
+            )
+            return
+
+        if matrix == "distance":
+            source_db = root / "data/generated/infinity.db"
+            with sqlite3.connect(source_db) as db:
+                distance_slugs = tuple(row[0] for row in db.execute(
+                    "SELECT DISTINCT lu.slug FROM profile_payload_skill_extras AS x "
+                    "JOIN extras AS e ON e.id = x.extra_id AND e.type = 'DISTANCE' "
+                    "JOIN profile_payloads AS p ON p.id = x.profile_payload_id "
+                    "JOIN logical_units AS lu ON lu.id = p.logical_unit_id "
+                    "WHERE lu.slug IS NOT NULL "
+                    "UNION "
+                    "SELECT DISTINCT lu.slug FROM loadout_payload_skill_extras AS x "
+                    "JOIN extras AS e ON e.id = x.extra_id AND e.type = 'DISTANCE' "
+                    "JOIN loadout_payloads AS p ON p.id = x.loadout_payload_id "
+                    "JOIN logical_units AS lu ON lu.id = p.logical_unit_id "
+                    "WHERE lu.slug IS NOT NULL ORDER BY slug LIMIT 2"
+                ))
+            assert len(distance_slugs) == 2, distance_slugs
+            for distance_unit in ("in", "cm"):
+                distances = verify_case(
+                    base_url, slugs=distance_slugs, channel="chrome",
+                    distance_unit=distance_unit,
+                )
+                assert distances["passed"] == distances["total"] == (
+                    len(WIDTHS) * len(distance_slugs)
+                ), distances
+                assert sum(
+                    result.get("counts", {}).get("distanceExtras", 0)
+                    for result in distances["results"]
+                ) > 0, distances
+            return
+
+        if matrix == "optional_flags":
+            # Default values are compared only for the Units affected by these flags.
+            result = verify_case(
+                base_url, slugs=("tohaa-team-ops", "raoul-spector-mercenary-operative"),
+                channel="chrome",
+            )
+            assert result["passed"] == result["total"] == 2 * len(WIDTHS), result
+            scenarios: tuple[tuple[tuple[str, ...], dict[str, bool]], ...] = (
+                (("tohaa-team-ops",), {"teamops": False}),
+                (("raoul-spector-mercenary-operative",), {"mercs": False}),
+                (
+                    ("tohaa-team-ops", "raoul-spector-mercenary-operative"),
+                    {"mercs": False, "teamops": False},
+                ),
+                (
+                    ("raoul-spector-mercenary-operative", "tohaa-team-ops"),
+                    dict.fromkeys(OPTIONAL_FLAGS, False),
+                ),
+            )
             baseline_visibility = {
                 (entry["unit"], entry["width"]): (
                     entry["visibleArmies"], entry["visibleGeneralProfiles"]
                 )
                 for entry in result["results"]
             }
-            assert any(
-                (
-                    entry["visibleArmies"], entry["visibleGeneralProfiles"]
-                ) != baseline_visibility[(entry["unit"], entry["width"])]
-                for entry in filtered["results"]
-            ), ("Optional filters did not change any visible content", filtered)
+            for filtered_slugs, flags in scenarios:
+                filtered = verify_case(
+                    base_url, slugs=filtered_slugs, optional_filters=flags, channel="chrome",
+                )
+                assert filtered["passed"] == filtered["total"] == (
+                    len(WIDTHS) * len(filtered_slugs)
+                ), filtered
+                assert any(
+                    (
+                        entry["visibleArmies"], entry["visibleGeneralProfiles"]
+                    ) != baseline_visibility[(entry["unit"], entry["width"])]
+                    for entry in filtered["results"]
+                ), ("Optional filters did not change any visible content", filtered)
+            return
+
+        assert matrix == "optional_sources"
 
         # The source corpus, rather than a hardcoded display name or an
         # already-filtered API response, selects these optional-mode cases.
@@ -573,34 +618,6 @@ def test_live_chromium_unit_detail_matrix_when_available() -> None:
             for entry in mixed["results"]
         ), mixed
 
-        with sqlite3.connect(root / "data/generated/infinity.db") as db:
-            distance_slugs = tuple(row[0] for row in db.execute(
-                "SELECT DISTINCT lu.slug FROM profile_payload_skill_extras AS x "
-                "JOIN extras AS e ON e.id = x.extra_id AND e.type = 'DISTANCE' "
-                "JOIN profile_payloads AS p ON p.id = x.profile_payload_id "
-                "JOIN logical_units AS lu ON lu.id = p.logical_unit_id "
-                "WHERE lu.slug IS NOT NULL "
-                "UNION "
-                "SELECT DISTINCT lu.slug FROM loadout_payload_skill_extras AS x "
-                "JOIN extras AS e ON e.id = x.extra_id AND e.type = 'DISTANCE' "
-                "JOIN loadout_payloads AS p ON p.id = x.loadout_payload_id "
-                "JOIN logical_units AS lu ON lu.id = p.logical_unit_id "
-                "WHERE lu.slug IS NOT NULL ORDER BY slug LIMIT 2"
-            ))
-        assert len(distance_slugs) == 2, distance_slugs
-        for distance_unit in ("in", "cm"):
-            distances = verify_case(
-                f"http://127.0.0.1:{server.server_port}",
-                slugs=distance_slugs, channel="chrome",
-                distance_unit=distance_unit,
-            )
-            assert distances["passed"] == distances["total"] == (
-                len(WIDTHS) * len(distance_slugs)
-            ), distances
-            assert sum(
-                result.get("counts", {}).get("distanceExtras", 0)
-                for result in distances["results"]
-            ) > 0, distances
     finally:
         stack.close()
         server.shutdown()

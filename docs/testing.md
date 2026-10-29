@@ -146,13 +146,23 @@ Locks release even if a worker process exits unexpectedly; normal serial tests
 and environments without Playwright do not acquire them.
 `tests/test_browser_test_capacity.py` covers cross-process exclusion and reuse.
 
-The Unit Skill browser matrix additionally reuses **one Chromium instance**
-for all its independent scenarios; each viewport still receives a fresh
-browser context and the same API/DOM assertions. Standalone verifier calls
-continue to create and close their own browser. These measures prevent
-excessive simultaneous Chromium instances without changing pytest worker
-parallelism. Long-running catalog render checks retain bounded deadlines and
-report HTTP, JavaScript, and page-status evidence on failure; none silently
+The Unit Skill acceptance matrix is split into independently scheduled
+pytest cases for default Units, complex profiles, optional flags, source-backed
+optional variants, and distance conversions. Each case reuses one Chromium
+instance across its viewports and Unit scenarios, while distinct cases can
+occupy the two available browser slots. The browser waits for `domcontentloaded`
+and then explicitly for visible Unit content rather than waiting for
+`networkidle` on every navigation. The suite's real HTTP server remains
+available for independent API requests and source-backed selection; the
+browser's same-origin page requests use the WSGI adapter. Standalone verifier
+calls continue to create and close their own browser. In a focused Windows
+two-worker run, the five cases passed in **37.53 s** and the complete Unit
+browser module passed **33 tests in 40.01 s**, compared with an approximately
+79-second serial monolithic Unit matrix before these changes. These results
+do not replace a full `-n auto` suite validation.
+
+Long-running catalog render checks retain bounded deadlines and report HTTP,
+JavaScript, failed-request and page-status evidence on failure; none silently
 retry a failed page. The Weapon and deployed-object browser suites
 intercept same-origin page requests and serve them directly from the application
 WSGI callable using `tools/browser_wsgi_transport.py`. This keeps real HTML,

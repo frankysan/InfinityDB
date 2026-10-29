@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlencode
 
+from tools.browser_wsgi_transport import route_browser_page
 from tools.verify_non_skill_army_browser import CASES, WIDTHS
 
 DEFAULT_SLUGS = tuple(case.slug for case in CASES)
@@ -423,6 +424,7 @@ def verify(
     channel: str | None = None, optional_filters: dict[str, bool] | None = None,
     distance_unit: str = "in", widths: tuple[int, ...] = WIDTHS,
     browser: Any | None = None,
+    browser_wsgi_app: Any | None = None,
 ) -> dict[str, Any]:
     if not widths or any(width < 240 or width > 3840 for width in widths):
         raise ValueError("Viewport widths must be between 240 and 3840 px")
@@ -456,11 +458,27 @@ def verify(
                             "unit": slug, "width": width, "status": "failed",
                         }
                         page = context.new_page()
+                        if browser_wsgi_app is not None:
+                            route_browser_page(page, browser_wsgi_app, base)
                         errors: list[str] = []
+                        failed_requests: list[str] = []
+                        bad_responses: list[str] = []
                         page.on("pageerror", partial(_page_error, errors))
+                        page.on(
+                            "requestfailed",
+                            lambda request, failures=failed_requests: failures.append(
+                                f"{request.url}: {request.failure}"
+                            ),
+                        )
+                        page.on(
+                            "response",
+                            lambda response, failures=bad_responses: failures.append(
+                                f"{response.status} {response.url}"
+                            ) if response.status >= 400 else None,
+                        )
                         try:
                             response = page.goto(
-                                f"{base}/units/{slug}", wait_until="networkidle",
+                                f"{base}/units/{slug}", wait_until="domcontentloaded",
                                 timeout=20000,
                             )
                             if response is None or response.status != 200:
@@ -473,7 +491,9 @@ def verify(
                                 status = page.locator("#unit-status").text_content()
                                 raise AssertionError(
                                     f"Unit content not visible: status={status!r}, "
-                                    f"JavaScript errors={errors!r}"
+                                    f"JavaScript errors={errors!r}, "
+                                    f"failed requests={failed_requests!r}, "
+                                    f"HTTP errors={bad_responses!r}"
                                 ) from exc
                             api = context.request.get(
                                 _unit_api_url(base, slug, filters), timeout=15000,
