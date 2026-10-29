@@ -11,7 +11,26 @@ from infinity_db.database.fireteam_relationships import (
     validate_application_fireteams,
 )
 from infinity_db.database.schema import create_schema
-from infinity_db.fireteam_semantics import fireteam_limit_kind
+from infinity_db.fireteam_semantics import excludes_wildcards, fireteam_limit_kind
+
+
+@pytest.mark.parametrize(
+    ("observation", "expected"),
+    [
+        ("No Wildcards", True),
+        ("No Wildcards Special Fireteam", True),
+        ("  no WILDCARDS.\n", True),
+        (None, False),
+        ("", False),
+        ("No Wildcards unless specified", False),
+        ("No Wildcards Special Fireteam; other conditions apply", False),
+        ("The Fireteam is automatically Cancelled if its leader leaves.", False),
+    ],
+)
+def test_explicit_wildcard_exclusion_notes(
+    observation: str | None, expected: bool,
+) -> None:
+    assert excludes_wildcards(observation) is expected
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: object) -> None:

@@ -285,9 +285,17 @@ function teamsForDisplay(chart) {
   if (wildcardTeams.length !== 1) return teams;
 
   const wildcardMembers = wildcardTeams[0].members || [];
-  return teams
+  const ordinaryTeams = teams
     .filter((team) => !team.is_wildcard)
-    .map((team) => ({ ...team, wildcard_members: wildcardMembers }));
+    .map((team) => ({
+      ...team,
+      wildcard_members: team.wildcards_excluded ? [] : wildcardMembers,
+    }));
+  // Keep the pool discoverable when it cannot be included in any team.
+  if (!ordinaryTeams.some((team) => !team.wildcards_excluded)) {
+    return [...ordinaryTeams, wildcardTeams[0]];
+  }
+  return ordinaryTeams;
 }
 
 function fireteamTypeLabel(type) {

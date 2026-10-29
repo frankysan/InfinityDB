@@ -182,8 +182,11 @@ counts above.
   three native loadouts in Haqqislam, Hassassin Bahram and Qapu
   Khalqi. Sāchā (#1874) exposes AVA 1 in four selected faction
   contexts spanning Army revisions `7.26246.158` and `.159`;
-  its Unit page is responsive, but numeric AVA discoverability
-  on that page is **not** established. Racerbot (#1905) preserves
+  its Unit page now has separate numeric-AVA acceptance: AVA 1
+  is visible in each of the four Army profile sections through
+  keyboard expansion and Army-specific links at 1440/390/320 px
+  (15 page/viewport checks). It is not a General-profile Attribute.
+  Racerbot (#1905) preserves
   both native Equipment 246 and legacy Skill 266 source provenance
   (Bangbomb extra 310) while publishing one deduplicated
   Equipment reference. Source/API tests and the four Unit pages
@@ -191,9 +194,30 @@ counts above.
   pages pass at the same widths (18 page/viewport checks).
   No production-data changes were required.
 
+  A subsequent **ARMY-01 current-state source/chart recheck**
+  covers all 58 raw Army contexts and their 57 application chart
+  contexts (including the empty grouping chart), 268 teams and
+  1,249 member rows. Source hashes, ordered types, type limits,
+  member bounds, required-choice flags and annotations match the
+  public API. Contracted Back-up source contexts 998 and 999 have
+  identical charts and share one application identity. All 56
+  playable source-separated charts pass local Chromium checks
+  at 1440/390/320 px (168 page/viewport cases) for visible limits,
+  types, requirements, equivalence labels, chart/team notes and
+  horizontal overflow. Rendered whitespace is normalized only for
+  browser comparison; exact source text is preserved in the API.
+  Private evidence is under `local/audits/army01-browser-20261029/`.
+  The review
+  also found and corrected combined-view Wildcard rows appearing
+  under explicit `No Wildcards` observations in Invincible Army
+  and Next Wave. Both charts and their Settings toggle now have
+  local Chromium acceptance, including the separate-pool fallback.
+  This does not approve arbitrary note interpretation or legality.
+
   These bounded checks do **not** approve every profile, option
   cost, faction availability, Fireteam chart, or historical Army
-  delta. ARMY-01's complete Fireteam chart review and remaining
+  delta. ARMY-01's unresolved member/FTO references, member-note
+  interpretation, Reinforcement parent applicability and remaining
   ARMY-02–20 roster/profile semantics remain open; final hosted
   release-browser acceptance is separate. Keep unavailable
   pre-change evidence as a provenance limitation, not a

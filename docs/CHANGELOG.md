@@ -96,6 +96,9 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Web backend + Web frontend:** Keep Wildcards out of Fireteams whose chart notes
+  explicitly exclude them, including Invincible Army's Forward Fireteams and
+  Next Wave's Team Achilles. The separate Wildcard pool remains available.
 - **Data processing + Web backend + Web frontend:** Correct declaration categories and N5.3
   citations for reviewed Short, Long, Deployment and Automatic Skills. Alert! is explained
   as an automatic facing adjustment rather than a declared ARO. Clarify conditional

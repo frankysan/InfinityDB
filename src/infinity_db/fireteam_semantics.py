@@ -9,6 +9,18 @@ from typing import Any
 
 _FTO_RE = re.compile(r"\bFTO(?:[-\s]?(\d+))?\b", re.IGNORECASE)
 _BRACKET_RE = re.compile(r"\(([^()]*)\)")
+_NO_WILDCARDS_RE = re.compile(
+    r"\s*No\s+Wildcards(?:\s+Special\s+Fireteam)?\s*[.!]?\s*", re.IGNORECASE,
+)
+
+
+def excludes_wildcards(observation: str | None) -> bool:
+    """Decode the reviewed explicit exclusion notes, not arbitrary chart prose.
+
+    Both forms occur in the pinned Army chart observations. A false result
+    means no recognized exclusion; it does not certify Wildcard eligibility.
+    """
+    return bool(_NO_WILDCARDS_RE.fullmatch(observation or ""))
 
 
 def ascii_upper(value: str | None) -> str:

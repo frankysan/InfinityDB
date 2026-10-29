@@ -427,6 +427,126 @@ def test_army_17_20_selected_unit_publication_is_responsive(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    "army_slug", (None, "torchlight-brigade", "kestrel-colonial-force",
+                  "invincible-army", "usariadna"),
+)
+def test_sacha_numeric_ava_is_visible_in_its_army_context(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+    width: int, army_slug: str | None,
+) -> None:
+    """AVA is usable through native disclosures and Army-specific Unit links."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        path = "/units/sacha-xenotech-hunters"
+        if army_slug:
+            path += f"?army_id={army_slug}"
+        page.goto(f"{ORIGIN}{path}", wait_until="domcontentloaded")
+        page.locator(".general-profile").first.wait_for(state="visible", timeout=30000)
+        assert page.locator(".general-profile").get_by_text("AVA", exact=True).count() == 0
+        contexts = {
+            "torchlight-brigade": "Torchlight Brigade",
+            "kestrel-colonial-force": "Kestrel Colonial Force",
+            "invincible-army": "Invincible Army",
+            "usariadna": "USAriadna",
+        }
+        for slug, label in contexts.items():
+            if army_slug and slug != army_slug:
+                continue
+            army = page.locator(".army-profile").filter(
+                has=page.locator("summary").filter(has_text=label),
+            )
+            assert army.count() == 1, (slug, width)
+            summary = army.locator("summary")
+            if army_slug:
+                assert army.get_attribute("open") is not None, (slug, width)
+            elif army.get_attribute("open") is None:
+                summary.focus()
+                summary.press("Enter")
+            value = army.locator(".attribute-statline-with-availability > div").filter(
+                has=page.get_by_text("AVA", exact=True),
+            ).locator(".attribute-value")
+            assert value.count() == 1, (slug, width)
+            assert value.is_visible(), (slug, width)
+            assert value.inner_text() == "1", (slug, width)
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (army_slug, width)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("army_slug", "team_name"),
+    (("invincible-army", "Forward Fireteams"), ("next-wave", "Team Achilles Fireteams")),
+)
+@pytest.mark.parametrize("only_excluded_team", (False, True))
+def test_fireteam_no_wildcards_note_controls_combined_view(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+    width: int, army_slug: str, team_name: str, only_excluded_team: bool,
+) -> None:
+    """Source exclusions survive the default view and the real Settings toggle."""
+    status, _, body = wsgi_response(
+        release_scenario_app, f"{ORIGIN}/api/fireteams?army_id={army_slug}",
+    )
+    assert status == 200
+    chart = json.loads(body)
+    if only_excluded_team:
+        chart["teams"] = [
+            team for team in chart["teams"] if team["is_wildcard"] or team["name"] == team_name
+        ]
+    excluded = next(team for team in chart["teams"] if team["name"] == team_name)
+    wildcard_team = next(team for team in chart["teams"] if team["is_wildcard"])
+    assert excluded["wildcards_excluded"] is True
+    assert wildcard_team["members"]
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    if only_excluded_team:
+        page.route(
+            "**/api/fireteams?army_id=*",
+            lambda route: route.fulfill(json=chart),
+        )
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/fireteams?army={army_slug}", wait_until="domcontentloaded")
+        page.locator("#fireteam-content").wait_for(state="visible", timeout=30000)
+        for combined in (True, False, True):
+            toggle = page.locator("#fireteams-include-wildcards-toggle")
+            if toggle.is_checked() != combined:
+                if not toggle.is_visible():
+                    page.locator('button[aria-controls="settings-menu"]').click()
+                toggle.set_checked(combined)
+            for team in chart["teams"]:
+                if combined and team["is_wildcard"] and not only_excluded_team:
+                    continue
+                card = page.locator(".fireteam-card").filter(
+                    has=page.get_by_role("heading", name=team["name"].strip(), exact=True),
+                )
+                assert card.count() == 1, (team["name"], width, combined)
+                extra = len(wildcard_team["members"]) if (
+                    combined and not team["is_wildcard"] and not team["wildcards_excluded"]
+                ) else 0
+                assert card.locator("tbody tr").count() == len(team["members"]) + extra
+            card = page.locator(".fireteam-card").filter(
+                has=page.get_by_role("heading", name=team_name, exact=True),
+            )
+            assert card.locator(".fireteam-observation").inner_text() == excluded["observation"]
+            assert card.locator("tbody th .skill-category-badge").count() == 0
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= innerWidth + 1"
+            ), (army_slug, width, combined)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_esx04_ap_t2_cc_weapon_property_is_visible_in_browser(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

@@ -29,7 +29,7 @@ from infinity_db.domain_slugs import (
     require_domain_slug,
     resolve_domain_slug_candidates,
 )
-from infinity_db.fireteam_semantics import fireteam_limit_kind
+from infinity_db.fireteam_semantics import excludes_wildcards, fireteam_limit_kind
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -1805,6 +1805,7 @@ class Database:
                     "position": int(row["position"]),
                     "name": row["name"],
                     "observation": row["observation"],
+                    "wildcards_excluded": excludes_wildcards(row["observation"]),
                     "source_army_id": int(row["source_army_id"]),
                     "source_fireteam_id": int(row["source_fireteam_id"]),
                     "is_wildcard": bool(row["is_wildcard"]),

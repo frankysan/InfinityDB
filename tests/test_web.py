@@ -748,6 +748,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
         {"type": "CORE", "position": 1, "max_count": 1, "limit_kind": "maximum"}
     ]
     assert chart["teams"][0]["name"] == "Ranger Team"
+    assert chart["teams"][0]["wildcards_excluded"] is True
     assert chart["teams"][0]["types"] == ["CORE"]
     member = chart["teams"][0]["members"][0]
     assert member["unit"]["slug"] == "ranger-prototype"
@@ -833,7 +834,6 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b"const wildcardTeams = teams.filter((team) => team.is_wildcard);" in script
     assert b"if (wildcardTeams.length !== 1) return teams;" in script
     assert b".filter((team) => !team.is_wildcard)" in script
-    assert b"wildcard_members: wildcardMembers" in script
     assert b'if (wildcard) name.append(badge("Wildcard"));' in script
     assert b"appendMemberRow(member, { wildcard: true })" in script
     assert b'window.addEventListener("fireteamswildcardschange"' in script

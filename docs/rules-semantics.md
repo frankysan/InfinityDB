@@ -3142,6 +3142,14 @@ surface them with the relevant chart entry. Structured interpretation should be
 reviewed and use-driven rather than inferred automatically from arbitrary note
 text.
 
+The current chart read model recognizes the complete Army observations
+`No Wildcards` (Next Wave, Team Achilles Fireteams) and
+`No Wildcards Special Fireteam` (Invincible Army, Forward Fireteams) as explicit
+exclusions when combining Wildcard rows. Both occur in the pinned September 29
+Army archive, source revision `7.26246.158`. Other observations remain
+uninterpreted by this decoder; an unrecognized note does not prove eligibility.
+See [the data model](data-model.md#fireteams) for the publication contract.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Fireteams_Chart>

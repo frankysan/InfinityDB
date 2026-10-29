@@ -279,9 +279,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           Army and USAriadna (`7.26246.158`) sources all have
           profile AVA 1. The four corresponding public Unit API
           contexts retain AVA 1; the ordinary Unit page loads
-          responsively. Player-facing numeric AVA discoverability
-          is **not** established by this browser check and needs
-          separate review.
+          responsively. A separate numeric-AVA Chromium check
+          now verifies AVA 1 inside each of these four Army
+          profile sections, keyboard expansion and Army-specific
+          links at 1440/390/320 px (15 page/viewport checks).
+          AVA remains contextual rather than appearing in the
+          General profile.
         - **ARMY-20 / Racerbot #1905:** PanOceania and Haqqislam
           `7.26246.158` source profiles contain both native
           Equipment 246 and legacy Skill 266 (Bangbomb, extra
@@ -294,11 +297,35 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Ioann Fireteam pages also passed in O-12 and Starmada.
         These checks establish **selected present-state behavior**,
         not historical Army changes or final hosted acceptance.
-      - [ ] **ARMY-01, remaining full roster/profile acceptance,
-        and release gates:** Compare Fireteam chart constraints,
-        complete unit/profile/option costs and source-specific
-        AVA for ARMY-02–20 where still unreviewed. In particular,
-        review numeric AVA visibility for ARMY-19. Do not infer
+      - [x] **Data processing + Web backend — ARMY-01 current
+        source/chart parity:** Check all 58 pinned Army source
+        contexts against the selected application charts and public
+        API: 57 chart contexts (one empty grouping chart), 268 teams
+        and 1,249 member rows preserve ordered types, limits,
+        bounds, required choices, annotations and source hashes.
+        Contracted Back-up sources 998/999 have identical charts
+        and map to one application Army; this is not a missing chart.
+        A local source-separated Chromium audit covers all 56
+        playable charts at 1440/390/320 px (168 page/viewport
+        cases), including visible limits, types, member bounds,
+        required choices, equivalence labels and chart/team notes.
+        Private evidence: `local/audits/army01-browser-20261029/`.
+      - [x] **Web backend + Web frontend — explicit Wildcard
+        exclusions:** The combined view now respects the reviewed
+        `No Wildcards` observations on Invincible Army's Forward
+        Fireteams and Next Wave's Team Achilles. Chromium checks
+        both charts, the real Settings toggle and an all-excluded
+        fallback at 1440/390/320 px; source-separated rows remain
+        available. This does not validate general roster legality.
+      - [ ] **ARMY-01 remaining semantics, full roster/profile
+        acceptance, and release gates:** Review the 12 non-local/
+        unresolved chart members and two unmatched FTO contexts;
+        assess member annotations that are hidden or interpreted
+        only as equivalence labels (including Spec-Ops, Triad,
+        Varuna Div and Strategic Deployment). Verify Reinforcement
+        parent/type restrictions in the ordinary chart journey.
+        Compare complete unit/profile/option costs and source-specific
+        AVA for ARMY-02–20 where still unreviewed. Do not infer
         a historical before/after delta without an earlier
         pinned Army snapshot. Final release-matched database,
         browser and CI acceptance remain separate gates.
@@ -1570,6 +1597,15 @@ do not establish exhaustive source coverage or hosted acceptance.
     uncertainty where appropriate and fix every defect that materially misrepresents in-scope data.
     Record evidence by category and source identity in ignored reports/audits rather than keeping
     completed release narrative in this backlog.
+  - [ ] **Data processing + Web backend + Project infrastructure:** Resolve the
+    existing local check failures before final acceptance: classify
+    `logical_unit_spectables` in the runtime-surface audit; reconcile the
+    tracked rules artifact with current Ancillary and Camouflaged State
+    curation using the release-pair rebuild procedure; and reconcile the
+    General Rule API fixture's unavailable `rule:fireteam-general` reference
+    without weakening maintained-text validation. The nine failing tests
+    also reproduce on the unchanged `3f8b9da` baseline; retained reports are
+    under `local/audits/army01-baseline-3f8b9da/reports/`.
   - [ ] Run [the complete release checklist](releasing.md), including the mandatory whole-corpus
     documentation audit, rebuilt release-matched artifacts where needed, local/hosted checks for
     the final candidate, annotated-tag evidence, and deployed smoke/rollback acceptance where

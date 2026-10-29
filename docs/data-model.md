@@ -958,6 +958,15 @@ Fireteam Level curated facts allow an optional `sourceNotes` list for
 provenance and rules-publication conflicts. These notes are displayed as
 secondary text without affecting Level requirements or bonuses.
 
+The chart read model exposes `wildcards_excluded` for the reviewed complete
+observations `No Wildcards` and `No Wildcards Special Fireteam` (ignoring case,
+whitespace and a terminal full stop or exclamation mark). The backend decodes
+these explicit exclusions from the preserved observation; it does not infer
+restrictions from arbitrary prose. `false` means no recognized exclusion,
+not approval of Wildcard eligibility. The browser omits combined Wildcard rows
+from excluded teams and retains a separate Wildcard card when no team can
+display the pool. The source-separated view preserves every original chart row.
+
 ## Relationship model
 
 Application relationships should be materialized where their semantics are understood and useful.
