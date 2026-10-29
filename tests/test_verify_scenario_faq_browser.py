@@ -663,6 +663,90 @@ def test_supplies_faq_is_visible_and_does_not_leak_to_other_scenarios(
         page.close()
 
 
+@pytest.mark.parametrize("width", [1440, 390])
+def test_fireteam_faq_discloses_real_source_conflict_not_language_omission(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """Selected English Haris ruling shows cited Spanish conflict in normal UI.
+
+    The Spanish FT Master omission is compatible with the selected English
+    answer and must not generate a false contradictory-source warning.
+    """
+    faq = next(
+        document for _, document in load_curated_directory(ROOT / "data/curated")
+        if document["collection"]["id"] == "n5-faq-v0.1"
+    )
+    records = {record["id"]: record for record in faq["records"]}
+    conflicts = {
+        identifier: record["facts"]["conflictingCitations"]
+        for identifier, record in records.items()
+        if record["facts"]["conflictingCitations"]
+    }
+    assert conflicts == {
+        "faq-ruling:fireteam-type-after-member-loss": [
+            {"sourceId": "n5-faq-v0.1-es-pdf", "page": 3},
+        ],
+    }
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/fireteams", wait_until="domcontentloaded")
+        root = page.locator("#fireteam-faq .faq-rulings")
+        root.wait_for(state="visible", timeout=30000)
+        cards = root.locator(".faq-ruling")
+        assert cards.count() == 3  # two general Fireteam and one bonus ruling
+
+        def ruling_card(identifier: str) -> Any:
+            question = records[identifier]["facts"]["question"]
+            heading = root.locator(".faq-ruling h3").get_by_text(question, exact=True)
+            heading.wait_for(state="visible", timeout=30000)
+            return heading.locator("xpath=..")
+
+        haris = ruling_card("faq-ruling:fireteam-type-after-member-loss")
+        assert "three-member HARIS" in haris.locator(".detail-copy").inner_text()
+        selected = haris.locator(".faq-publication-source")
+        assert "version 0.1" in selected.inner_text()
+        assert "source date anchor 2026-09-01" in selected.inner_text()
+        assert "English" in selected.inner_text()
+        assert "p. 3" in selected.inner_text()
+        assert selected.locator("a").count() == 1
+        assert "Base rules remain separate" in root.inner_text()
+        assert "not a verified PDF publication date" in root.inner_text()
+
+        warning = haris.locator("details.faq-source-discrepancy")
+        assert warning.count() == 1
+        summary = warning.locator("summary")
+        assert summary.is_visible()
+        assert "Source discrepancy" in summary.inner_text()
+        assert not warning.evaluate("(node) => node.open")
+        summary.click()
+        assert warning.evaluate("(node) => node.open")
+        explanation = warning.locator(".detail-source")
+        assert explanation.is_visible()
+        assert explanation.inner_text() == (
+            records["faq-ruling:fireteam-type-after-member-loss"]["facts"]["selectionReason"]
+            + " · " + explanation.locator("a").inner_text()
+        )
+        assert "three-to-two-member HARIS" in explanation.inner_text()
+        assert "two-member HARIS loses one Trooper" in explanation.inner_text()
+        assert "Spanish" in explanation.locator("a").inner_text()
+        assert "p. 3" in explanation.locator("a").inner_text()
+        assert explanation.locator("a").count() == 1
+        summary.click()
+        assert not warning.evaluate("(node) => node.open")
+
+        required = ruling_card("faq-ruling:fireteam-required-member-lost")
+        assert "FT Master Special Skill" in required.locator(".detail-copy").inner_text()
+        assert required.locator(".faq-publication-source a").count() == 1
+        assert required.locator(".faq-source-discrepancy").count() == 0
+        assert root.locator(".faq-source-discrepancy").count() == 1
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 # Each reviewed FAQ has at least one specific normal-player entry point. Keep
 # the route/topic selection separate from curated topicIds so a removed route,
 # missing frontend FAQ fetch or a no-longer-published catalog record fails.
@@ -854,10 +938,14 @@ def test_every_additional_faq_topic_link_is_visible_from_its_normal_page(
                 assert heading.count() == 1, (path, identifier)
                 card = heading.locator("xpath=..")
                 assert record["facts"]["answer"] in card.inner_text()
+                source = card.locator(".faq-publication-source")
+                assert "version 0.1" in source.inner_text()
+                assert "source date anchor 2026-09-01" in source.inner_text()
+                assert "English" in source.inner_text()
                 assert f"p. {record['facts']['selectedCitation']['page']}" in (
-                    card.locator(".faq-publication-source").inner_text()
+                    source.inner_text()
                 )
-                assert card.locator(".faq-publication-source a").count() >= 1
+                assert source.locator("a").count() >= 1
             assert not errors, (path, errors)
     finally:
         page.close()
@@ -907,6 +995,9 @@ def test_every_published_faq_has_a_normal_browser_entry_point(
                 assert record["facts"]["answer"] in card.inner_text()
                 source = card.locator(".faq-publication-source")
                 assert "FAQ clarification" in source.inner_text()
+                assert "version 0.1" in source.inner_text()
+                assert "source date anchor 2026-09-01" in source.inner_text()
+                assert "English" in source.inner_text()
                 assert f"p. {record['facts']['selectedCitation']['page']}" in source.inner_text()
                 assert source.locator("a").count() >= 1
             assert not errors, (path, errors)

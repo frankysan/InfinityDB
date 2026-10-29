@@ -283,10 +283,13 @@ date, source selection, gameplay semantics or scenario scope changed.
 
 ## Release implications
 
-- The first 27 source answers are already represented as reviewed
-  current-source rulings. Their ordinary-browser reachability is
-  checked alongside the two narrowly scoped Core-scenario overlaps;
-  broader source-semantic and release completeness remain open.
+- The 27 general answers and the two narrowly reviewed Core-scenario
+  overlaps are all represented as reviewed current-source rulings.
+  All 29 English selected answers and their corroborating Spanish
+  source pages have completed bounded semantic/source review. The
+  48 authored topic associations have verified current API and
+  normal browser entry points; the remaining release-candidate
+  acceptance is separate from the source-inventory reconciliation.
 - The Supplies carrier clarification has a reviewed, scenario-scoped
   FAQ record and a focused API selection regression. The other eight
   ITS-section answers remain uncurated until their own season/scenario
@@ -339,6 +342,22 @@ question, answer and selected citation. This complements the
 topic matching and scenario/date/revision scope. It does not establish
 user navigation clicks or search rankings, hosted release parity, or
 unpublished ITS applicability.
+
+**Player-facing source-discrepancy acceptance, 2026-10-29:**
+`test_fireteam_faq_discloses_real_source_conflict_not_language_omission`
+uses the normal Fireteams page and fresh rules export in Chromium
+at 1440 and 390 px. Exactly one of the 29 curated rulings has
+`conflictingCitations`: the English-selected three-to-two Haris
+example versus the Spanish two-to-two count. The visible FAQ card
+labels its selected English v0.1 citation and 2026-09-01 source-date
+anchor, and an expandable disclosure reveals the English selection
+rationale and separate Spanish printed p. 3 link.
+The adjacent required-member ruling retains the FT Master exception
+without a false contradictory-source warning. All primary/secondary
+FAQ route gates also assert English selected source, v0.1 version
+and date-anchor labels. No gameplay, source precedence, date gates
+or new ITS scope was changed. Final 1.0 release-candidate parity and
+manual visual/touch review remain outstanding.
 
 **Comparative review, 2026-10-28:** the two Core Killing passages
 and bilingual FAQ were checked as above. The source supports considering

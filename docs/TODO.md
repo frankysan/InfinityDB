@@ -605,9 +605,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     rules-revision gates, and scenario selection against a fresh rules
     database. This is the v0.1 question inventory only, **not** full
     historical FAQ/errata completeness or ITS applicability certification.
-  - [ ] Reconcile every remaining in-scope ruling against the pinned FAQ and
-    source inventory. Reuse the existing question/answer, topic, version/date,
-    citation and applicability fields; preserve original provenance on carry-forwards.
+  - [x] Reconcile all **29 in-scope current FAQ v0.1 rulings** against the
+    pinned English and Spanish FAQ PDFs and question-level source inventory.
+    Retain question/answer meaning, 20 carried-forward v0.0 source origins,
+    nine new v0.1 origins, source-specific pages, topic references and
+    applicability. The eight remaining ITS-only Q&As are explicitly
+    inventoried and deferred, not promoted to generic core rules.
     - [x] Repair **five corrupted possessives in four reviewed FAQ
       questions/answers** and the stray replacement `?` in the English
       historical v0.0 source title. Verified against the pinned English
@@ -689,11 +692,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     scenarios remain post-1.0 and do not acquire universal core scope.
     This is current-source navigation coverage, not final release
     visual/touch acceptance or a historical FAQ browser.
-  - [ ] Verify remaining source selections, conflicts and effective-date scopes
-    against the implemented applicability-first precedence policy. Every selected
-    answer must show its date/version and remain separate from the base definition.
-    Historical replay and a reader-facing date/season picker are deferred
-    to post-1.0; full ITS history remains post-1.0.
+  - [x] Verify all 29 current source selections, conflicting citations,
+    effective-date scopes and source/version display against the
+    applicability-first policy. English FAQ v0.1 is selected in each case;
+    exactly one real numerical source conflict is retained (Fireteam Type:
+    English three-to-two vs Spanish two-to-two Haris example). The Spanish
+    FT Master omission is not a contradictory answer, so it generates no
+    false warning. Chromium at 1440/390 px verifies visible selected English
+    citation, date/version anchor, expandable Haris discrepancy explanation
+    and Spanish alternative citation, with the base rules kept separate.
+    Historical replay and browser date/season selection remain post-1.0.
     - [x] Assess historical v0.0 replay against the **current N5.3
       1.0 reference gate**: the 20 v0.0-origin citations are provenance,
       not v0.0-selected rulings or proof of N5.2 gameplay applicability.
@@ -704,8 +712,8 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       N5.2 exclusions, and valid scenario context. Preserve the
       2026-09-01 announcement-era anchor without claiming an exact
       PDF publication day. Record historical edition replay and
-      browser date/season controls under post-1.0. Current FAQ
-      source completeness and final acceptance remain open.
+      browser date/season controls under post-1.0. Final
+      release-candidate FAQ acceptance remains open.
     - [x] Correct the **FAQ source-date label** without altering the selected
       source or historical API field contract. The curated 2026-09-01
       `publishedDate` is an announcement-era reference/applicability anchor,
@@ -723,6 +731,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Integrity p. 134 and reviewed `skill:ft-master` confirm the
       distinction. A source/API regression verifies both dispositions.
       No rules, selected citation, effective date or scope changed.
+    - [x] Verify the **player-visible source-selection distinction** on
+      Fireteams at desktop/mobile widths. The only current FAQ numerical
+      contradiction exposes both English-selected and Spanish-alternative
+      citations via an expandable disclosure. FT Master remains
+      non-contradictory, not a warning; all ordinary FAQ entry points
+      retain the explicit source version/date anchor and English citation.
+      No rendering or source-selection bug required a gameplay change.
+  - [ ] Revalidate this bounded 29-ruling/48-topic FAQ acceptance against
+    the **final 1.0 release candidate** and release-matched rules database,
+    including browser evidence and final source/disclaimer review. This is
+    a release acceptance task, not a requirement for historical replay,
+    official resolution of the Haris conflict or the eight ITS-only Q&As.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.

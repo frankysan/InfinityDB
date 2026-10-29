@@ -2779,6 +2779,20 @@ citations must render. The original primary 25 routes remain a
 separate 8-check gate. These tests verify bounded discoverability,
 not click-path ranking, touch acceptance or historical/ITS editions.
 
+**Player-facing FAQ source selection/conflict gate, 2026-10-29:**
+`test_fireteam_faq_discloses_real_source_conflict_not_language_omission`
+covers desktop/mobile Fireteams (1440/390 px). The 29-record source
+inventory contains exactly one numerical conflict: the Haris member
+example. The normal FAQ card shows its selected English v0.1 citation
+and source date anchor, and the expandable warning shows the actual
+selection rationale with a Spanish alternative PDF citation link.
+The FT Master qualifier omission remains visible in the selected
+English answer and does not produce a false contradiction warning.
+Both the 29 primary and 19 secondary browser topic associations now
+also assert selected English source, version and source-date labels.
+This is bounded current-publication presentation proof, not final
+hosted release acceptance or independently dated historical replay.
+
 **Current-source temporal gate regression, 2026-10-29:**
 `test_current_faq_temporal_gates_are_independent_for_all_published_rulings`
 asserts all 29 current rulings appear at their N5.3 2026-09-01
