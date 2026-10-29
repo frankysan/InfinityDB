@@ -122,20 +122,28 @@ independent diagnosis or CI job partitioning, use:
 
 The browser section includes the real Chromium scenario FAQ and Weapon card
 matrices. They exercise repeated page navigations, desktop/mobile renderings,
-and all maintained source-to-DOM cases. Browser modules remain guarded by the
-global slot lock during xdist runs, so dividing them into a separate job does
-not itself make the browser checks run faster. For speed comparisons, measure
-the full suite before and after changing worker or browser-slot policy.
+and all maintained source-to-DOM cases. Splitting jobs can isolate this work,
+but the slot limit also determines concurrency within each job.
+
+On local Windows (2026-10-29), paired two-worker `--dist worksteal` runs
+with otherwise identical tests measured **80.7 s (one slot) vs 49.7 s
+(two slots)** for the Scenario FAQ browser module (54 passed, 16 skipped),
+and **73.1 s vs 52.3 s** for the Weapon cards browser module (23 passed).
+These are single-run comparisons, not a full-suite benchmark. The previous
+one-slot runs showed lock waits of approximately 76 s and 69 s in setup.
+A full parallel suite is still needed to measure aggregate benefit and detect
+resource contention under the workstation's normal worker count.
 
 ## Chromium concurrency under pytest-xdist
 
 Full local checks retain `-n auto --dist worksteal`; the worker count is not
 reduced for browser acceptance. During an xdist run, `tests/conftest.py`
-reserves **one browser test module at a time** across workers using
+admits **at most two browser test modules concurrently** across workers using
 cross-process OS file locks in the per-run pytest temporary directory. This
-protects Chromium/browser-server resources while unrelated tests run on all
-available workers. Locks release even if a worker process exits unexpectedly;
-normal serial tests and environments without Playwright do not acquire them.
+protects Chromium/browser-server resources while allowing two long-running
+modules to make progress. Unrelated tests continue on all available workers.
+Locks release even if a worker process exits unexpectedly; normal serial tests
+and environments without Playwright do not acquire them.
 `tests/test_browser_test_capacity.py` covers cross-process exclusion and reuse.
 
 The Unit Skill browser matrix additionally reuses **one Chromium instance**

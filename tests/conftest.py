@@ -30,7 +30,7 @@ def limit_concurrent_browser_tests(
         return
     # xdist gives each worker a child basetemp of the same run-level directory.
     directory = tmp_path_factory.getbasetemp().parent / "infinitydb-chromium-slots"
-    with browser_slot(directory, slots=1):
+    with browser_slot(directory, slots=2):
         yield
 
 
