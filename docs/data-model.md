@@ -1056,16 +1056,42 @@ uses the consistent English HARIS three-to-two-member example. The contradictory
 Spanish v0.1 count is published as separate conflict evidence; an official
 correction remains open.
 
-Historical FAQ collection replay, remaining FAQ inventory coverage,
-and user-selectable date/season applicability in the browser remain
-unfinished. Assess their 1.0 priority against material gaps in the
-supported current-reference experience; the existing explicit-context
-FAQ API is not equivalent to a general historical publication browser.
-Full ITS season-revision coverage and historical mission libraries are
-outside the 1.0 completeness gate. The separately published Season 18
-Battleground pilot does not make the remaining ITS catalog a requirement.
-The generic supplement mechanism must not auto-attach a ruling to
-a core topic by name or by a newer collection date.
+**1.0 historical applicability decision (2026-10-29):** The 1.0 FAQ
+read model remains a **current N5.3 reference**, not a historical
+replay service. The 20 answers carried forward from v0.0 preserve
+their earlier source identity but are selected from v0.1 and reviewed
+only for N5.3 from the 2026-09-01 announcement-era reference anchor.
+Nine answers first appear in v0.1. An older
+`facts.originalPublication.publishedDate` is **not** an applicability
+grant. The selector independently requires that the selected source
+anchor, original source anchor, collection effective date and
+ruling-specific applicability window all permit the requested date,
+and that the rules revision, season and scenario match. A date supplied
+to the explicit-context API is therefore a **filter over published,
+reviewed current selections**, not a request to reconstruct the rules
+and FAQ available at that historical instant.
+
+Historical FAQ replay and user-selectable date/season controls in the
+browser are **post-1.0**. They require separately authored and reviewed
+v0.0 source selections and applicability for the actual historical N5
+rules revision(s), compatible historical topic/Scenario identities,
+source-specific effective-date evidence or clearly marked anchors,
+and explicit version/season context for the reader. Historical
+collections must remain independent of current canonical composition.
+Do not backdate a v0.1 selected citation, copy N5.3 applicability
+into N5.2, claim a source's PDF creation day is a publication day, or
+derive historical supersession from recency. The same stable FAQ ID
+may carry distinct reviewed historical contributions; duplicate
+current definitions are not an acceptable replay mechanism.
+
+This decision does not close the remaining 1.0 **current** FAQ
+source/errata coverage, source-conflict disclosure or final
+source-to-browser acceptance. Full ITS season-revision coverage and
+historical mission libraries are outside the 1.0 completeness gate.
+The separately published Season 18 Battleground pilot does not make
+the remaining ITS catalog a requirement. The generic supplement
+mechanism must not auto-attach a ruling to a core topic by name or
+by a newer collection date.
 
 ### Domain ownership
 

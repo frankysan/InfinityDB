@@ -557,6 +557,70 @@ def test_published_faq_all_topic_links_preserve_selected_scope_and_history(
             ) == [], (topic, revision, as_of)
 
 
+def test_current_faq_temporal_gates_are_independent_for_all_published_rulings(
+    published_pilot: RulesDatabase,
+) -> None:
+    """An earlier original FAQ citation never backdates the current selection.
+
+    Each date gate is independently exercised with synthetic in-memory
+    mutations. Historical v0.0 source dates are provenance, not a
+    substitute for a reviewed v0.0 read model or N5.2 applicability.
+    """
+    from infinity_db.faq_rulings import select_applicable_faq_rulings
+
+    records = published_pilot.records_by_kind("faq-ruling")
+    assert len(records) == 29
+    assert sum(
+        record["facts"]["originalPublication"]["version"] == "0.0"
+        for record in records
+    ) == 20
+
+    for stored in records:
+        candidate = deepcopy(stored)
+        candidate["selected_source"] = {
+            "id": "n5-faq-v0.1-en-pdf",
+            "version": "0.1",
+            "published_date": "2026-09-01",
+        }
+        assert candidate["collection"]["effective_from"] == "2026-09-01"
+        assert candidate["facts"]["applicability"][0]["effectiveFrom"] == "2026-09-01"
+        topic = candidate["facts"]["topicIds"][0]
+        scenario = candidate["facts"]["applicability"][0].get("scenarioIds", [None])[0]
+
+        def selected(
+            record: dict, *, as_of: str, revision: str = "5.3",
+            topic_id: str = topic, scenario_id: str | None = scenario,
+        ) -> list[dict]:
+            return select_applicable_faq_rulings(
+                [record], topic_id=topic_id, rules_revision=revision,
+                as_of=as_of, scenario_id=scenario_id,
+            )
+
+        assert selected(candidate, as_of="2025-10-15") == [], candidate["id"]
+        assert selected(candidate, as_of="2026-08-31") == [], candidate["id"]
+        assert selected(candidate, as_of="2026-09-01")[0]["id"] == candidate["id"]
+        assert selected(candidate, as_of="2026-09-02")[0]["id"] == candidate["id"]
+        assert selected(candidate, as_of="2026-09-01", revision="5.2") == []
+
+        # Each gate must fail closed even while all other gates permit the date.
+        for gate in ("selected-source", "original-source", "collection", "applicability"):
+            shifted = deepcopy(candidate)
+            if gate == "selected-source":
+                shifted["selected_source"]["published_date"] = "2026-09-02"
+            elif gate == "original-source":
+                shifted["facts"]["originalPublication"]["publishedDate"] = "2026-09-02"
+            elif gate == "collection":
+                shifted["collection"]["effective_from"] = "2026-09-02"
+            else:
+                shifted["facts"]["applicability"][0]["effectiveFrom"] = "2026-09-02"
+            assert selected(shifted, as_of="2026-09-01") == [], (
+                candidate["id"], gate,
+            )
+            assert len(selected(shifted, as_of="2026-09-02")) == 1, (
+                candidate["id"], gate,
+            )
+
+
 def test_current_topics_and_historical_predecessor_are_allowed(
     base_documents: list[tuple[Path, dict]], tmp_path: Path,
 ) -> None:

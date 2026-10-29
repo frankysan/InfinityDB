@@ -167,6 +167,37 @@ compatibility; historical replay is not newly enabled. Chromium and
 JavaScript render regressions pin the distinction. No change to
 question/answer text or scenario applicability was made.
 
+## Historical applicability decision (1.0 boundary)
+
+**Reviewed 2026-10-29:** All 29 current rulings have selected English
+v0.1 citations and N5.3 applicability from the project's
+2026-09-01 announcement-era reference anchor; the 20 v0.0-origin
+citations are retained as historical **provenance only**. None
+supplies a reviewed v0.0-selected historical read-model contribution.
+Neither the date anchor nor the source-PDF metadata independently
+establishes an exact FAQ upload or effective date.
+
+The selector's four independent date gates are (1) selected source
+date anchor, (2) original source date anchor, (3) owning collection
+effective date and (4) ruling applicability `effectiveFrom` /
+`effectiveUntil`, followed by exact rules revision and any
+season/scenario restrictions. A historical query must not substitute
+the earlier original citation for the selected v0.1 citation.
+The `test_current_faq_temporal_gates_are_independent_for_all_published_rulings`
+regression checks each gate separately for all 29 current rulings,
+including the two scenario-specific Core overlaps, with synthetic
+in-memory date shifts only; it does not publish a historical edition.
+
+**1.0 choice:** Keep the existing explicit-context API and current
+player-facing source-date explanation; historical edition replay,
+version/season/date picker UI and reconstruction of older rule/FAQ
+combinations are deferred. Such support first requires independently
+reviewed earlier rule-revision compatibility, historical selected
+source/citation, scoped effective dates, retained topic identities,
+and conflict/supersession review. The ongoing 1.0 current-source
+completeness and discoverability gate remains open. See
+[the authoritative data model](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
+
 ## Printed ITS section — uncovered questions
 
 All source pages here are the **printed FAQ page numbers**, not the

@@ -2766,6 +2766,18 @@ v0.1 rulings must be absent. The focused regression passed. This is
 a current-source selector/association gate, not historical v0.0 replay
 or a certification of deferred ITS-specific applicability.
 
+**Current-source temporal gate regression, 2026-10-29:**
+`test_current_faq_temporal_gates_are_independent_for_all_published_rulings`
+asserts all 29 current rulings appear at their N5.3 2026-09-01
+reference-date anchor, not the previous day, at the v0.0 origin
+anchor, or under N5.2. It shifts each of the four independently
+enforced date gates into the future in isolated in-memory copies:
+selected source, original source, owning collection and ruling
+applicability. Each blocks the earlier query and permits the next
+day; scenario-specific cases retain their explicitly reviewed
+scenario context. This guards the 1.0 current-reference selector
+without backdating records or authorizing historical replay.
+
 **Carried-forward FAQ meaning regression, 2026-10-29:** The
 `test_carried_forward_v00_faq_answers_retain_reviewed_v01_semantics`
 compares reviewed semantic anchors of all 20 v0.0-origin published

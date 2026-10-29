@@ -683,8 +683,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [ ] Verify remaining source selections, conflicts and effective-date scopes
     against the implemented applicability-first precedence policy. Every selected
     answer must show its date/version and remain separate from the base definition.
-    Assess historical replay and user-selectable applicability against the current
-    reference gate; full ITS history is post-1.0.
+    Historical replay and a reader-facing date/season picker are deferred
+    to post-1.0; full ITS history remains post-1.0.
+    - [x] Assess historical v0.0 replay against the **current N5.3
+      1.0 reference gate**: the 20 v0.0-origin citations are provenance,
+      not v0.0-selected rulings or proof of N5.2 gameplay applicability.
+      Retain the explicit-context API as a current-source filter, not
+      a complete historical rules reconstruction. A regression checks
+      all 29 current rulings against each of the four independent date
+      gates, original versus selected provenance, previous-day and
+      N5.2 exclusions, and valid scenario context. Preserve the
+      2026-09-01 announcement-era anchor without claiming an exact
+      PDF publication day. Record historical edition replay and
+      browser date/season controls under post-1.0. Current FAQ
+      source completeness and final acceptance remain open.
     - [x] Correct the **FAQ source-date label** without altering the selected
       source or historical API field contract. The curated 2026-09-01
       `publishedDate` is an announcement-era reference/applicability anchor,
@@ -1269,6 +1281,20 @@ making its arrival a release prerequisite.
   mappings. Do not require this richer display for 1.0 completeness.
 
 ### Per-reference change history
+
+- [ ] **Data processing + Web backend + Web frontend:** Add optional
+  **historical FAQ edition replay and source-date/season selection**,
+  separate from the 1.0 current-reference API. Independently curate
+  v0.0-selected historical ruling contributions and evidence for
+  compatibility with the appropriate historical N5 revision(s);
+  validate historical topic/Scenario identities, effective windows,
+  supersession, source authority and unresolved ITS boundaries.
+  Preserve stable FAQ identities and original citations without
+  replacing current v0.1 selection, backdating it, or interpreting
+  announcement/PDF creation dates as verified publication days.
+  Add browser controls only after a trustworthy historical read
+  model exists; ambiguous dates must remain visibly qualified.
+  See the [current FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
 
 - [ ] **Data processing + Web backend + Web frontend:** Show a change-history
   marker/notice on each updated Rule, Skill, Weapon, Unit/profile, and other
