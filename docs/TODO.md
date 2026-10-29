@@ -172,6 +172,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         guards both clauses. This closes one reviewed changelog item, not the
         remaining N5.3 rules/Army review; rebuild release-matched rules data
         before final browser acceptance.
+      - [x] Reconcile the **Null Label enumeration (N53-24)** against
+        N5.3 p. 174. The maintained `term:null-state` summary links
+        the five source-named States: Dead, Disconnected, Possessed,
+        Sepsitorized and Unconscious. A fresh rules export and Glossary
+        projection regression verify the list and source citation. Only the
+        two generic-word reviewed-text fingerprints affected by the summary
+        extension were refreshed. The tracked rules database must be rebuilt
+        before final player-facing browser acceptance.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or

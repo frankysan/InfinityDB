@@ -307,6 +307,32 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
     }
 
 
+def test_null_state_glossary_lists_the_five_n53_source_states(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules = RulesDatabase(rules_path)
+    null_state = next(
+        term for term in rules.composed_records_by_kind("term")
+        if term["id"] == "term:null-state"
+    )
+    expected = (
+        "N5.3 explicitly lists: [[state:dead|Dead]], "
+        "[[state:disconnected|Disconnected]], [[state:possessed|Possessed]], "
+        "[[state:sepsitorized|Sepsitorized]], and "
+        "[[state:unconscious|Unconscious]]."
+    )
+    assert null_state["summary"].endswith(expected)
+    assert [
+        (citation["source_id"], citation["page"]) for citation in null_state["citations"]
+    ] == [("n5-core-v5.3-pdf", 174)]
+    glossary = GlossaryCatalog(_reference_database(tmp_path), rules)
+    entry = next(item for item in glossary.entries() if item["id"] == "term:null-state")
+    assert entry["description"] == null_state["summary"]
+    assert entry["href"] == "/glossary#term-null-state"
+    assert entry["embedded"] is True
+
+
 def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules.db"

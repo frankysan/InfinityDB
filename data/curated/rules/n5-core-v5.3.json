@@ -2124,7 +2124,7 @@
             "id": "term:null-state",
             "kind": "term",
             "name": "Null State",
-            "summary": "A null-classified state is one carrying the Null Label. Troopers in such a state do not provide Orders or Victory Points.",
+            "summary": "A null-classified state is one carrying the Null Label. Troopers in such a state do not provide Orders or Victory Points.\n\nN5.3 explicitly lists: [[state:dead|Dead]], [[state:disconnected|Disconnected]], [[state:possessed|Possessed]], [[state:sepsitorized|Sepsitorized]], and [[state:unconscious|Unconscious]].",
             "composition": {
                 "role": "definition"
             },
