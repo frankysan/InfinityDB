@@ -48,6 +48,34 @@ def detail(app: Any, slug: str) -> dict[str, Any]:
     return json.loads(body)
 
 
+def test_breaker_marksman_public_id_and_slug_resolve_without_sniper_alias(
+    app: Any,
+) -> None:
+    """N53-25: source ID 225 is public but does not invent a Sniper profile."""
+    by_id = detail(app, "225")
+    by_slug = detail(app, "breaker-marksman-rifle")
+    assert by_id == by_slug
+    assert by_id["id"] == 225
+    assert by_id["slug"] == "breaker-marksman-rifle"
+    assert [profile["id"] for profile in by_id["profiles"]] == [225]
+
+    environ: dict[str, Any] = {}
+    setup_testing_defaults(environ)
+    environ.update(PATH_INFO="/api/weapons/breaker-sniper-rifle", REQUEST_METHOD="GET")
+    status: list[str] = []
+    response = app(
+        environ,
+        lambda text, headers, exc_info=None: status.append(text),
+    )
+    try:
+        b"".join(response)
+    finally:
+        close = getattr(response, "close", None)
+        if close is not None:
+            close()
+    assert status == ["404 Not Found"]
+
+
 @pytest.mark.parametrize(
     ("slug", "source_id", "ammo", "saving", "traits", "refs", "property_id", "rules"),
     [

@@ -253,6 +253,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         reviewed text remains intact; the catalog regression verifies
         the permitted list and subsequent reveal. Final release-matched
         browser acceptance remains open.
+      - [x] Verify **N5.3 new weapon profiles (N53-25)** against the
+        English Weapon Chart p. 180 and Army metadata. Source ID 225,
+        Breaker Marksman Rifle, is already published through the
+        reviewed metadata-only Weapon mechanism in the current
+        application database: public numeric ID and slug resolve to
+        the same one-mode weapon with the printed BTS/2, PS 7,
+        Burst 3, range and Breaker property. Its source signature
+        is pinned and checked before publication; the new API
+        regression additionally rejects an invented Breaker Sniper
+        Rifle alias. AP Red Fury (229) and AP Thunderbolt (230)
+        remain source-verified from the prior reconciliation.
+        No production-data change was needed on this checkout.
+        Browser acceptance against the final release build remains
+        a separate requirement.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or
