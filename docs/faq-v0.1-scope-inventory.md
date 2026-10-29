@@ -45,6 +45,20 @@ for the two pinned English FAQ versions. It does not establish exact
 publication dates, identical answer wording across versions,
 out-of-scope ITS applicability, or exhaustive topic-to-browser access.
 
+**Current-selector cross-topic reconciliation, 2026-10-29:** The
+`test_published_faq_all_topic_links_preserve_selected_scope_and_history`
+regression checks all 48 topic associations across 42 distinct topics
+from the 29 current reviewed rulings. For every topic, it checks exact
+runtime membership in four contexts (unscoped, Annihilation, Supplies,
+Firefight), retaining selected v0.1 citations, original v0.0/v0.1
+provenance and explicitly reviewed applicability. It also checks that
+queries for the older 2025-10-15 anchor, the pre-effective 2026-08-31
+boundary and N5.2 do not select current FAQ rulings. The two
+ITS-section/approved Core-scenario overlaps remain strictly scoped.
+This establishes no historical replay or broader ITS applicability;
+it does not re-interpret unchanged question text or select answers
+from v0.0 for historical users.
+
 ## Source-byte identity and publication boundary
 
 The audit manifest also pins the exact SHA-256, source ID, version,

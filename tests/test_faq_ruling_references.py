@@ -292,6 +292,65 @@ def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
                 }
 
 
+def test_published_faq_all_topic_links_preserve_selected_scope_and_history(
+    published_pilot: RulesDatabase,
+) -> None:
+    """All 48 curated topic edges obey current source, revision and scenario gates.
+
+    The original v0.0 page is provenance, not permission to replay current
+    v0.1 answers in the v0.0 historical period.
+    """
+    root = Path(__file__).resolve().parents[1]
+    inventory = json.loads(
+        (root / "config/validation/n5-faq-v0.1-question-inventory.json")
+        .read_text(encoding="utf-8")
+    )
+    faq = json.loads(
+        (root / "data/curated/rules/n5-faq-v0.1.json").read_text(encoding="utf-8")
+    )
+    records = {record["id"]: record for record in faq["records"]}
+    overlaps = {
+        f"faq-ruling:{slug}": scenarios
+        for slug, scenarios in inventory["coreScenarioOverlaps"].items()
+    }
+    by_topic: dict[str, set[str]] = {}
+    for identifier, record in records.items():
+        for topic in record["facts"]["topicIds"]:
+            by_topic.setdefault(topic, set()).add(identifier)
+    assert len(records) == 29
+    assert sum(map(len, by_topic.values())) == 48
+    assert len(by_topic) == 42
+
+    for topic, identifiers in by_topic.items():
+        for scenario in (None, "scenario:annihilation", "scenario:supplies", "scenario:firefight"):
+            selected = published_pilot.faq_rulings_for_topic(
+                topic, rules_revision="5.3", as_of="2026-09-01",
+                scenario_id=scenario,
+            )
+            expected = {
+                identifier for identifier in identifiers
+                if identifier not in overlaps or scenario in overlaps[identifier]
+            }
+            assert {row["id"] for row in selected} == expected, (topic, scenario)
+            for row in selected:
+                record = records[row["id"]]
+                assert row["topic_ids"] == record["facts"]["topicIds"]
+                assert row["original_publication"] == record["facts"]["originalPublication"]
+                assert row["selected_citation"] == record["facts"]["selectedCitation"]
+                assert row["selected_source"]["version"] == "0.1"
+                assert row["matched_applicability"] == record["facts"]["applicability"]
+
+        for revision, as_of in (
+            ("5.3", "2025-10-15"),  # v0.0 provenance is not historical publication.
+            ("5.3", "2026-08-31"),  # day before current FAQ's chosen date anchor.
+            ("5.2", "2026-09-01"),  # not the reviewed rules revision.
+        ):
+            assert published_pilot.faq_rulings_for_topic(
+                topic, rules_revision=revision, as_of=as_of,
+                scenario_id="scenario:annihilation",
+            ) == [], (topic, revision, as_of)
+
+
 def test_current_topics_and_historical_predecessor_are_allowed(
     base_documents: list[tuple[Path, dict]], tmp_path: Path,
 ) -> None:

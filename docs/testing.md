@@ -2741,6 +2741,19 @@ review changed only the required-member ruling's `selectionReason`;
 effective date, selected source, gameplay and scenario scope remain
 unchanged.
 
+**FAQ topic/reference applicability matrix, 2026-10-29:** The
+`test_published_faq_all_topic_links_preserve_selected_scope_and_history`
+regression traverses all 48 authored topic associations for 29 current
+reviewed FAQ rulings (42 unique topics) against a fresh curated rules
+database. Each topic is queried with no scenario, Annihilation,
+Supplies and Firefight; selected answers are compared with source
+records and their provenance/citation/scope. All topics are separately
+checked at the 2025-10-15 historical source anchor, the 2026-08-31
+pre-effective boundary and the non-reviewed 5.2 revision; current
+v0.1 rulings must be absent. The focused regression passed. This is
+a current-source selector/association gate, not historical v0.0 replay
+or a certification of deferred ITS-specific applicability.
+
 ## 1.0 FAQ v0.1 pilot acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** The

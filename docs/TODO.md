@@ -618,6 +618,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     against its owning page. Separate scenario tests reject ITS-only
     applicability leakage. This is bounded published-question delivery,
     not exhaustive FAQ source semantics or final 1.0 acceptance.
+  - [x] Reconcile all **48 authored FAQ topic edges** (42 distinct topics
+    for 29 current rulings) with the current rules selector. A focused
+    source-derived regression verifies exact membership, selected source,
+    original v0.0/v0.1 provenance and reviewed applicability for every
+    topic in unscoped, Annihilation, Supplies and Firefight contexts.
+    Historical 2025-10-15, pre-effective 2026-08-31 and wrong-revision
+    5.2 queries select no current FAQ, including the two narrowly
+    scoped Core scenario overlaps. Passed on 2026-10-29. This is a
+    selector/reference coverage gate, **not** historical FAQ replay,
+    source-wording certification or adoption of deferred ITS rulings.
   - [ ] Prioritize links to features already represented by the app: deployment
     and private-information handling; BS Attack/MOD and template behavior;
     hacking Firewall; Marker, Camouflage, Peripheral, and State interactions;
