@@ -8,7 +8,19 @@ from pathlib import Path
 
 import pytest
 
-from tools.browser_test_capacity import browser_slot
+from tools.browser_test_capacity import CHROMIUM_SCHEDULING_LANES, browser_slot
+from tools.test_sections import load_test_sections
+
+
+def test_two_browser_lanes_cover_all_real_chromium_modules() -> None:
+    browser_modules = set(load_test_sections()["browser"].modules)
+    # The verifier-contract module is pure mocks; it must never hold a slot.
+    browser_modules.remove("test_verify_rule_fragment_browser")
+    assert set(CHROMIUM_SCHEDULING_LANES) == browser_modules
+    assert set(CHROMIUM_SCHEDULING_LANES.values()) == {"chromium-a", "chromium-b"}
+    assert CHROMIUM_SCHEDULING_LANES["test_verify_unit_skill_presentation_browser"] != (
+        CHROMIUM_SCHEDULING_LANES["test_verify_weapon_source_cards_browser"]
+    )
 
 
 def test_browser_slots_reject_invalid_configuration(tmp_path: Path) -> None:

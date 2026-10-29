@@ -10,10 +10,20 @@ from pathlib import Path
 
 import pytest
 
-from tools.browser_test_capacity import browser_slot
+from tools.browser_test_capacity import CHROMIUM_SCHEDULING_LANES, browser_slot
 from tools.test_sections import load_test_sections, section_for_module
 
 pytest_plugins = ("tools.pytest_startup_profile",)
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--browser-lanes",
+        action="store_true",
+        default=False,
+        help="Use two exclusive Chromium scheduling groups with --dist loadgroup.",
+    )
+
 
 _TEST_SECTIONS = load_test_sections()
 # Despite its filename, this module tests a browser verifier entirely with mocks.
@@ -97,8 +107,11 @@ def requires_pinned_raw_army_archive() -> None:
 
 
 @pytest.hookimpl(tryfirst=True)
-def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: list[pytest.Item],
+) -> None:
     """Assign every repository test module to exactly one maintained local section."""
+    browser_lanes = bool(config.getoption("--browser-lanes"))
 
     for item in items:
         path = Path(str(item.path))
@@ -111,6 +124,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             )
         item.add_marker(section.marker)
         if _uses_chromium(path):
-            # Group only Chromium-gated modules in optional xdist loadgroup runs.
-            # Otherwise worksteal may repeat module fixtures and hold slots idle.
-            item.add_marker(pytest.mark.xdist_group(name=path.stem))
+            # In opt-in browser-lane mode, limit browser work to two xdist
+            # workers instead of having others block on Chromium-slot locks.
+            group = (
+                CHROMIUM_SCHEDULING_LANES[path.stem] if browser_lanes else path.stem
+            )
+            item.add_marker(pytest.mark.xdist_group(name=group))

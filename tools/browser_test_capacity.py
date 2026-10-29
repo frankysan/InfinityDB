@@ -16,6 +16,19 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import BinaryIO
 
+CHROMIUM_SCHEDULING_LANES = {
+    # Stable, opt-in xdist groups prevent workers waiting on the two-slot lock.
+    "test_verify_unit_skill_presentation_browser": "chromium-a",
+    "test_verify_scenario_faq_browser": "chromium-a",
+    "test_verify_release_candidate_browser": "chromium-a",
+    "test_verify_weapon_source_cards_browser": "chromium-b",
+    "test_verify_army_overview_browser": "chromium-b",
+    "test_verify_sidebar_density_browser": "chromium-b",
+    "test_verify_fireteam_fto_browser": "chromium-b",
+    "test_verify_page_footer_browser": "chromium-b",
+    "test_verify_deployed_object_publication_browser": "chromium-b",
+}
+
 
 def _lock(handle: BinaryIO) -> bool:
     if os.name == "nt":

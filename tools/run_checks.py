@@ -40,7 +40,7 @@ PROFILES = {
 }
 DEFAULT_TEST_WORKERS = "auto"
 DEFAULT_TEST_DISTRIBUTION = "worksteal"
-TEST_DISTRIBUTIONS = ("worksteal", "loadgroup")
+TEST_DISTRIBUTIONS = ("worksteal", "loadgroup", "browserlanes")
 TEST_SECTIONS = load_test_sections()
 TEST_SECTION_NAMES = tuple(TEST_SECTIONS)
 DEFAULT_LINT_TARGETS = (
@@ -164,7 +164,8 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help=(
             "pytest-xdist scheduling strategy; defaults to worksteal. "
-            "Use loadgroup to keep each Chromium browser module on one worker."
+            "Use loadgroup for browser modules or browserlanes to consolidate "
+            "Chromium acceptance into two opt-in worker groups."
         ),
     )
     parser.add_argument(
@@ -228,7 +229,12 @@ def stage_definitions(
         if name == "test":
             command = [python, "-m", "pytest"]
             if test_workers != "0":
-                command.extend(("-n", test_workers, "--dist", test_distribution))
+                distribution = (
+                    "loadgroup" if test_distribution == "browserlanes" else test_distribution
+                )
+                command.extend(("-n", test_workers, "--dist", distribution))
+                if test_distribution == "browserlanes":
+                    command.append("--browser-lanes")
             if targets:
                 command.extend(targets)
             asset_marker = (

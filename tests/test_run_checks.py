@@ -182,6 +182,17 @@ def test_test_stage_can_group_browser_modules_without_changing_default() -> None
     assert stage.command[3:7] == ("-n", "4", "--dist", "loadgroup")
 
 
+def test_test_stage_can_schedule_two_browser_lanes() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",), [], build_source=None,
+        test_workers="8", test_distribution="browserlanes",
+    )
+    assert stage.command[3:8] == (
+        "-n", "8", "--dist", "loadgroup", "--browser-lanes",
+    )
+    assert stage.command[8:] == ("-m", "not full_assets", "-q")
+
+
 def test_test_distribution_requires_test_stage(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

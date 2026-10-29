@@ -179,17 +179,29 @@ Three mixed modules, `test_verify_release_candidate_browser.py`,
 for explicitly identified real-Chromium tests. Unit Skill's pure database
 and DOM-contract tests no longer wait for slots. Modules with shared
 module-scoped Chromium fixtures retain module-wide slot protection.
-The `loadgroup` option remains opt-in; the latest full `worksteal` run
-passed 2,826 tests (19 skipped) in **220.72 s**, with all eight workers
-ready within 2.06 s of xdist startup and the first test at 4.59 s from
-process launch. Remaining large setup durations arise from Chromium-slot
-contention rather than process startup. For a scheduling comparison:
+The `loadgroup` option remains opt-in. The latest full `worksteal` run
+passed 2,826 tests (19 skipped) in **211.53 s**, with the first test starting
+4.14 s after process launch. Remaining large setup durations arise from
+Chromium-slot contention rather than process startup.
+
+An additional experimental `--test-dist browserlanes` mode uses xdist's
+`loadgroup` scheduler but maps all real Chromium browser modules to **two
+stable scheduling lanes**. Each lane is owned by one xdist worker; other
+tests remain independently schedulable across workers. This prevents idle
+pytest workers from waiting on Chromium locks, while retaining the two-slot
+lock as a safety limit. Source-backed Unit, Scenario FAQ, and release browser
+tests occupy lane A; Weapon cards and the remaining browser modules occupy
+lane B. The mock-only verifier module is not assigned to either lane. These
+assignments are provisional estimates of execution cost, **not** guaranteed
+balanced work. Compare the same full test command with the baseline:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/run_checks.py --all --test-dist loadgroup
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-dist browserlanes
 ```
 
-No new report snapshot is needed unless recording a release milestone.
+This option is **not** the default and has not yet established a full-suite
+speedup. No new report snapshot is needed unless recording a release
+milestone.
 
 During an xdist run, `tests/conftest.py` admits **at most two Chromium
 slot holders concurrently** across workers using cross-process OS file locks
