@@ -2793,6 +2793,63 @@ also assert selected English source, version and source-date labels.
 This is bounded current-publication presentation proof, not final
 hosted release acceptance or independently dated historical replay.
 
+**Release-tracked FAQ database parity (opt-in; 2026-10-29):**
+The ordinary source/API/Chromium FAQ tests use a freshly built rules
+database, which cannot detect a stale checked-in binary. The opt-in
+`test_tracked_faq_database_matches_current_curated_release_projection`
+compares the tracked `data/generated/rules.db` with a fresh curated
+export: exact 29-rule record facts, source/citation metadata and
+168 topic/scenario query projections (42 topics in four contexts),
+with independent pre-effective-date and N5.2 exclusions. It never
+rewrites the artifact.
+
+The first read-only run on `f1dbf187` **failed** (28 record-field
+differences and 134 topic/scenario projections; all 29 ruling
+identities were present). Following the local rules database rebuild
+on 2026-10-29, a temporary direct test invocation of the opt-in
+parity function **passed** and the temporary test hook was removed.
+The published FAQ records, citations and topic projections now match
+the curated source. Opt in deliberately again during final
+release-candidate preparation; normal development checks skip
+this release-only gate:
+
+```powershell
+.venv\Scripts\python.exe -m infinity_db build-rules --output data/generated/rules.db
+$env:INFINITYDB_RELEASE_FAQ_PARITY = "1"
+try {
+    .venv\Scripts\python.exe -m pytest tests/test_faq_ruling_references.py::test_tracked_faq_database_matches_current_curated_release_projection -q
+} finally {
+    Remove-Item Env:INFINITYDB_RELEASE_FAQ_PARITY -ErrorAction SilentlyContinue
+}
+```
+
+**Rebuild dependent publication before testing the release pair.**
+The tracked rules DB hash also anchors the ignored
+`data/generated/deployed-objects.json`. After the rules rebuild,
+the first production-equivalent browser fixture failed closed on
+`Deployed-object publication does not match release databases`,
+as expected for the still-stale publication. Run:
+
+```powershell
+.venv\Scripts\python.exe -m tools.build_deployed_object_publication
+.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+```
+
+Then opt in with `INFINITYDB_RELEASE_FAQ_PARITY=1` for the tracked
+FAQ browser cases in `tests/test_verify_scenario_faq_browser.py`:
+`test_release_faq_primary_entry_points_use_tracked_database`,
+`test_release_faq_secondary_entry_points_use_tracked_database`, and
+`test_release_faq_haris_conflict_uses_tracked_database`.
+They exercise the same 29 primary/19 secondary association cards
+and bilingual conflict disclosure at 1440/390 px, using the
+**tracked** Army and rules databases rather than a temporary build.
+These are opt-in release-candidate tests; ordinary tests skip them.
+
+Review the tracked binary diff and validate the release-matched
+database/Army pair with the normal asset and release gates before
+committing. Neither the parity nor local browser checks validate an
+actual deployed release or authenticate external source bytes.
+
 **Current-source temporal gate regression, 2026-10-29:**
 `test_current_faq_temporal_gates_are_independent_for_all_published_rulings`
 asserts all 29 current rulings appear at their N5.3 2026-09-01

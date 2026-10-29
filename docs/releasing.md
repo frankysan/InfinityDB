@@ -186,6 +186,19 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 - [ ] Rebuild and validate any release runtime database whose source/curated inputs changed,
   then ensure `data/generated/infinity.db` and `data/generated/rules.db` are the intended
   tracked release artifacts.
+- [ ] For 1.0, after rebuilding the tracked `rules.db`, run the
+  [opt-in FAQ release-artifact parity gate](testing.md#10-four-core-scenario-browser-acceptance)
+  with `INFINITYDB_RELEASE_FAQ_PARITY=1`. Require all 29 current FAQ
+  records, citations, source metadata and 48 topic associations to
+  match a fresh curated export. A stale tracked binary blocks release,
+  even when source and browser tests using fresh exports pass.
+- [ ] After rebuilding either database, regenerate and `--check` the
+  pinned `data/generated/deployed-objects.json` with
+  `tools.build_deployed_object_publication`. Its exact Army/rules
+  SHA-256 pair must match or application startup intentionally fails.
+  With `INFINITYDB_RELEASE_FAQ_PARITY=1`, run the tracked-pair FAQ
+  primary, secondary and conflict Chromium tests. Fresh-export browser
+  tests alone do not verify the release database pair.
 - [ ] For 1.0, require source-field occupancy verification against the release-matched
   `data/generated/infinity.db` and its paired `infinity.raw.db`. Use
   `python tools/run_checks.py --all --source-occupancy-gate` for the local

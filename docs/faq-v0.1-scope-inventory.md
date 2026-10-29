@@ -359,6 +359,28 @@ and date-anchor labels. No gameplay, source precedence, date gates
 or new ITS scope was changed. Final 1.0 release-candidate parity and
 manual visual/touch review remain outstanding.
 
+**Release-artifact parity follow-up, 2026-10-29:** The normal FAQ
+tests and browser gate build a fresh rules database, so they do
+not establish that the tracked `data/generated/rules.db` is
+release-matched. A new explicitly enabled release-only test compares
+all 29 stored ruling records and all 168 current topic/scenario
+query contexts against a fresh curated export, while also checking
+the closed earlier-date and wrong-revision boundaries. Initial
+read-only validation at `f1dbf187` failed with **28 record-field
+differences** and **134 read-model projection differences**, including
+an older historical FAQ citation title. After regenerating the tracked
+rules database on 2026-10-29, a direct invocation of the opt-in parity
+function **passed**, covering all 29 identities and 168 read-model
+topic/scenario contexts. No curated gameplay or source authority
+changed. A subsequently attempted **release-pair browser fixture**
+failed at application startup: the existing ignored
+`data/generated/deployed-objects.json` still pins the *old*
+rules-database SHA-256. This is intentional release integrity
+enforcement, not a FAQ selector failure. Regenerate and check that
+dependent publication before rerunning the opt-in tracked-database
+FAQ Chromium gates; final 1.0 candidate/browser acceptance is still
+open. See the [repeatable candidate check](testing.md#10-four-core-scenario-browser-acceptance).
+
 **Comparative review, 2026-10-28:** the two Core Killing passages
 and bilingual FAQ were checked as above. The source supports considering
 Firefight, but does not settle the edition/mission applicability of an

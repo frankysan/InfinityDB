@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,15 @@ def scenario_app(tmp_path_factory: pytest.TempPathFactory) -> Callable[..., Any]
     rules_path = tmp_path_factory.mktemp("scenario-faq-browser") / "rules.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated"), rules_path)
     return create_app(ROOT / "data/generated/infinity.db", rules_database_path=rules_path)
+
+
+@pytest.fixture(scope="module")
+def release_scenario_app() -> Callable[..., Any]:
+    """Serve the tracked Army/rules database pair, never a fresh test export."""
+    return create_app(
+        ROOT / "data/generated/infinity.db",
+        rules_database_path=ROOT / "data/generated/rules.db",
+    )
 
 
 @pytest.fixture(scope="module")
@@ -1003,3 +1013,47 @@ def test_every_published_faq_has_a_normal_browser_entry_point(
             assert not errors, (path, errors)
     finally:
         page.close()
+
+
+# Release-only browser gate: unlike source-oriented tests, serve the
+# actual tracked rules database paired with the tracked Army database.
+@pytest.mark.skipif(
+    os.environ.get("INFINITYDB_RELEASE_FAQ_PARITY") != "1",
+    reason="Opt in after rebuilding the release-matched tracked databases",
+)
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("group", tuple(FAQ_BROWSER_ROUTES))
+def test_release_faq_primary_entry_points_use_tracked_database(
+    release_scenario_app: Callable[..., Any], chrome: Any, group: str, width: int,
+) -> None:
+    test_every_published_faq_has_a_normal_browser_entry_point(
+        release_scenario_app, chrome, group, width,
+    )
+
+
+@pytest.mark.skipif(
+    os.environ.get("INFINITYDB_RELEASE_FAQ_PARITY") != "1",
+    reason="Opt in after rebuilding the release-matched tracked databases",
+)
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("group", tuple(FAQ_ADDITIONAL_TOPIC_ROUTES))
+def test_release_faq_secondary_entry_points_use_tracked_database(
+    release_scenario_app: Callable[..., Any], chrome: Any, group: str, width: int,
+) -> None:
+    test_every_additional_faq_topic_link_is_visible_from_its_normal_page(
+        release_scenario_app, chrome, group, width,
+    )
+
+
+@pytest.mark.skipif(
+    os.environ.get("INFINITYDB_RELEASE_FAQ_PARITY") != "1",
+    reason="Opt in after rebuilding the release-matched tracked databases",
+)
+@pytest.mark.parametrize("width", [1440, 390])
+def test_release_faq_haris_conflict_uses_tracked_database(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    test_fireteam_faq_discloses_real_source_conflict_not_language_omission(
+        release_scenario_app, chrome, width,
+    )
+

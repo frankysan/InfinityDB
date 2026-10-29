@@ -743,6 +743,27 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     including browser evidence and final source/disclaimer review. This is
     a release acceptance task, not a requirement for historical replay,
     official resolution of the Haris conflict or the eight ITS-only Q&As.
+    - [x] Introduce an opt-in **tracked release rules.db FAQ parity gate**:
+      compare all 29 stored rulings and their source/citation facts against
+      a fresh curated export, then compare all 42 topics across four
+      scenario contexts (168 selections, 48 authored edges), including
+      pre-effective-date and N5.2 exclusions. Fail closed on stale
+      release artifacts without writing or silently replacing the DB.
+    - [x] **Regenerate and verify tracked rules.db**: after the local
+      rebuild on 2026-10-29, the independent opt-in FAQ parity function
+      passed against the tracked binary (29 records, 48 topic edges,
+      168 scenario/topic selections and closed pre-date/N5.2 contexts).
+      This fixes the earlier 28 record-field and 134 projection
+      differences detected at `f1dbf187`; no curated rule changed.
+    - [ ] Regenerate and verify the paired **deployed-objects.json**
+      publication before release browser acceptance. After the rules DB
+      rebuild, production-equivalent `create_app` correctly rejected
+      the stale deployed-object publication because its pinned rules DB
+      SHA-256 no longer matched. Rebuild using
+      `tools.build_deployed_object_publication`, verify with `--check`,
+      then run the newly added opt-in tracked-database FAQ Chromium
+      primary/secondary/conflict gates (both widths). Do not bypass
+      the artifact hash check or claim browser acceptance yet.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.

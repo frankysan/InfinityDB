@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from copy import deepcopy
 from pathlib import Path
@@ -935,6 +936,87 @@ def published_pilot(tmp_path_factory: pytest.TempPathFactory) -> RulesDatabase:
     db = RulesDatabase(path)
     db.validate()
     return db
+
+
+@pytest.mark.skipif(
+    os.environ.get("INFINITYDB_RELEASE_FAQ_PARITY") != "1",
+    reason="Opt in when validating a rebuilt, release-matched tracked rules.db",
+)
+def test_tracked_faq_database_matches_current_curated_release_projection(
+    published_pilot: RulesDatabase,
+) -> None:
+    """Release artifact must not lag the curated 29-ruling FAQ publication.
+
+    The regular FAQ/browser suites use freshly exported rules; this gate
+    independently checks the tracked database packaged for deployment.
+    It is opt-in until the release candidate's generated artifacts are
+    rebuilt, so ordinary source checks do not fail on a known interim DB.
+    """
+    root = Path(__file__).resolve().parents[1]
+    tracked_path = root / "data/generated/rules.db"
+    assert tracked_path.is_file(), "Release rules.db is missing"
+    tracked = RulesDatabase(tracked_path)
+    tracked.validate()
+
+    fresh_records = {
+        item["id"]: item for item in published_pilot.records_by_kind("faq-ruling")
+    }
+    release_records = {
+        item["id"]: item for item in tracked.records_by_kind("faq-ruling")
+    }
+    assert len(fresh_records) == 29
+    assert set(release_records) == set(fresh_records), (
+        "Tracked rules.db FAQ inventory differs from the curated release",
+        sorted(set(fresh_records) - set(release_records)),
+        sorted(set(release_records) - set(fresh_records)),
+    )
+    topics = {
+        topic
+        for item in fresh_records.values()
+        for topic in item["facts"]["topicIds"]
+    }
+    assert len(topics) == 42
+    assert sum(
+        len(item["facts"]["topicIds"]) for item in fresh_records.values()
+    ) == 48
+
+    record_drift = [
+        (identifier, field)
+        for identifier, source in fresh_records.items()
+        for field in ("facts", "review", "citations", "collection", "name")
+        if release_records[identifier][field] != source[field]
+    ]
+    selection_drift = []
+    for topic in sorted(topics):
+        for scenario in (
+            None, "scenario:annihilation", "scenario:supplies", "scenario:firefight",
+        ):
+            context = {
+                "rules_revision": "5.3",
+                "as_of": "2026-09-01",
+                "scenario_id": scenario,
+            }
+            expected = published_pilot.faq_rulings_for_topic(topic, **context)
+            actual = tracked.faq_rulings_for_topic(topic, **context)
+            if actual != expected:
+                selection_drift.append((topic, scenario))
+            # The packaged database must fail closed at both other contexts.
+            assert tracked.faq_rulings_for_topic(
+                topic, rules_revision="5.3", as_of="2026-08-31",
+                scenario_id=scenario,
+            ) == [], (topic, scenario, "before-effective-date")
+            assert tracked.faq_rulings_for_topic(
+                topic, rules_revision="5.2", as_of="2026-09-01",
+                scenario_id=scenario,
+            ) == [], (topic, scenario, "different-rules-revision")
+    assert not record_drift and not selection_drift, (
+        f"Tracked rules.db FAQ drift: {len(record_drift)} record-field "
+        f"differences, {len(selection_drift)} topic/scenario projection "
+        f"differences. First record fields: {record_drift[:5]}; "
+        f"first topic contexts: {selection_drift[:3]}. "
+        "Rebuild data/generated/rules.db from reviewed curation "
+        "before final 1.0 FAQ acceptance."
+    )
 
 
 def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
