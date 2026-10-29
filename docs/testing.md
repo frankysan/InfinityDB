@@ -1366,23 +1366,51 @@ already identified*, independently of keyword discovery. Run:
 .venv\Scripts\python.exe -m tools.audit_deployed_object_delivery_coverage --json
 ```
 
-The pinned review has 17 object identities, of which **6** have
-**10 reviewed delivery paths**: Deployable Repeater, Disco Ball, Drop Bears,
-WildParrot, FastPanda and Armed Turret. The other **11** remain for review.
-WildParrot has separate Place Deployable and WIP-based Intuitive Attack
-methods (N5.3 pp. 49, 74, 82); FastPanda uses Perimeter placement
-(pp. 82, 186), and Armed Turret uses a reviewed-only curated Trooper profile
-rather than an invented Army four-stat profile (pp. 70, 74).
-Its S1/S2 conflict remains visible. The report provides exact source-ID-based
-catalog aliases only as **candidates to investigate**: a source alias does not
-prove delivery mechanics, mode or Unit/Army roster legality. Mine Dispenser's
-subtype remains separately unresolved. `tests/test_deployed_object_delivery_coverage.py`
-pins the gap and verifies that aliases cannot become inferred delivery edges.
+The pinned review has **17 reviewed object identities and 28 approved
+delivery paths**, with no uncovered origin for an object in that bounded
+publication. This is not a complete N5.3 object inventory. WildParrot has
+separate Place Deployable and WIP-based Intuitive Attack methods (N5.3 pp.
+49, 74, 82); FastPanda uses Perimeter placement (pp. 82, 186), and Armed
+Turret uses a reviewed-only curated Trooper profile rather than an invented
+Army four-stat profile (pp. 70, 74). Its S1/S2 conflict remains visible.
+The report provides exact source-ID-based catalog aliases only as
+**candidates to investigate**: a source alias does not prove delivery mechanics,
+mode or Unit/Army roster legality. Mine Dispenser's subtype remains separately
+unresolved. `tests/test_deployed_object_delivery_coverage.py` guards these
+boundaries and verifies that aliases cannot become inferred delivery edges.
 
-The validator rejects mismatched profile shapes, exact Army profile
-selectors/attributes, lost source clauses/citations, and invented
-missing-attribute values. Source text and alternative Silhouette
+The Weapon/Equipment candidate validator rejects mismatched profile shapes,
+exact Army profile selectors/attributes, lost source clauses/citations, and
+invented missing-attribute values. Source text and alternative Silhouette
 values remain unchanged; no canonical object or carrier IDs are created.
+
+### Non-catalog game-element discovery
+
+Weapon/Equipment definition scans do not examine Skills, generic rules,
+Traits, terminology or States. Audit their own definition summaries and
+structured detail fields without turning keyword mentions into object IDs:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_deployed_object_non_catalog_queue
+.venv\Scripts\python.exe -m tools.audit_deployed_object_non_catalog_queue --json
+```
+
+The separate `config/validation/deployed-object-non-catalog-reviews.json`
+manifest pins **three bounded N5.3 Skills classifications**:
+`skill:place-deployable` defines a delivery action, `skill:minelayer` a
+deployment method, and `skill:request-speedball` places 55 mm support
+State Tokens (N5.3 pp. 82, 102 and 84 respectively). Speedball Tokens
+explicitly do not block movement or allow Deactivator targeting; they are
+not conventional targetable four-attribute deployed objects. This negative
+classification is manually verified against the pinned English N5.3 p. 84;
+the audit validator pins the maintained skill's source citation and existing
+Speedball clauses, but does not parse the PDF in CI. Neither Speedball nor a
+generic delivery Skill is granted invented ARM/BTS/STR/S values, catalog
+identity, or Unit reverse uses. The audit retains all other matching
+non-catalog definitions as an **open manual review queue** rather than
+claiming complete classification; the source-backed validator rejects
+stale evidence, unapproved classifications or citations.
+`tests/test_deployed_object_non_catalog_queue.py` checks those boundaries.
 
 ### Deployed-object release publication
 

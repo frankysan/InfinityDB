@@ -1,0 +1,38 @@
+{
+  "format": "InfinityDB non-catalog game-element candidate reviews",
+  "formatVersion": 1,
+  "scope": "audit-only; does not authorize object identity, attributes, delivery edges, or Unit uses",
+  "reviews": [
+    {
+      "recordId": "skill:minelayer",
+      "classification": "skill-deployment-method-not-object",
+      "sourcePages": [102],
+      "summaryEvidence": "A Deployment Skill that lets the user place carried Weapons or Equipment",
+      "factsEvidence": [
+        "When the user deploys, they may place the allowed number of carried Weapons or Equipment"
+      ],
+      "caveat": "Minelayer is a deployment method for the user's source-listed items, not a separate deployed-object identity. It cannot authorize a generic Mine variant or reverse Unit ownership."
+    },
+    {
+      "recordId": "skill:place-deployable",
+      "classification": "skill-delivery-method-not-object",
+      "sourcePages": [82],
+      "summaryEvidence": "A Common Skill used to place eligible",
+      "factsEvidence": [
+        "The user places one eligible Token or Model without a Roll"
+      ],
+      "caveat": "Place Deployable defines a placement method for eligible source-listed items; its generic Token/Model wording is not a new object identity or a blanket delivery edge."
+    },
+    {
+      "recordId": "skill:request-speedball",
+      "classification": "support-state-token-not-standard-deployable",
+      "sourcePages": [84],
+      "summaryEvidence": "Call two Speedball Tokens",
+      "factsEvidence": [
+        "During the Active Turn, place two 55 mm Speedball Tokens",
+        "Request Speedball cannot be performed partway through the Order Expenditure Sequence."
+      ],
+      "caveat": "N5.3 p. 84 explicitly defines Speedball Tokens as State Tokens for support drops, not as standard targetable Deployable Weapon/Equipment profiles. The Tokens and their single-use contents have no reviewed ARM/BTS/STR/S source profile here and must not receive inferred reverse uses."
+    }
+  ]
+}

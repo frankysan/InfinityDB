@@ -1352,6 +1352,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               repeatable audit fails on future uncovered detailed mentions.
               Neither bounded scan proves full N5.3 object, delivery,
               Unit or loadout completeness.
+            - [x] Start a separate **non-catalog game-element queue** across
+              Skill/rule/Trait/term/State definitions. The read-only
+              `tools.audit_deployed_object_non_catalog_queue` records
+              keyword evidence and source citations without generating object
+              identities. Three source-backed Skill decisions are pinned:
+              Place Deployable is a delivery action (p. 82), Minelayer a
+              deployment method (p. 102), and Request Speedball creates
+              support State Tokens that Deactivators cannot target, rather
+              than standard four-attribute deployed objects (p. 84). Preserve other
+              matches as an open manual queue and review further candidate
+              identities before expanding the 17-object reference.
             - [x] **Reconcile delivery paths for all 17 currently published
               reviewed deployed objects.** The pinned review now covers
               17 of 17 objects with 28 approved delivery paths and zero
