@@ -105,6 +105,28 @@ python -m pyright
 
 Do not report Ruff/Pyright as run when those tools are unavailable in the active environment.
 
+## Source-test tail profiling and browser isolation
+
+The default pytest configuration reports the 20 slowest setup/call/teardown
+durations, including local runs (CI already requested those durations). This
+identifies slow individual cases but not idle time spent by other workers.
+
+Browser verifier modules have their own maintained `browser` section, separate
+from the `web` HTTP/API tests. A complete suite still includes both. For
+independent diagnosis or CI job partitioning, use:
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-section browser --test-workers 2
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-section web --test-workers 2
+```
+
+The browser section includes the real Chromium scenario FAQ and Weapon card
+matrices. They exercise repeated page navigations, desktop/mobile renderings,
+and all maintained source-to-DOM cases. Browser modules remain guarded by the
+global slot lock during xdist runs, so dividing them into a separate job does
+not itself make the browser checks run faster. For speed comparisons, measure
+the full suite before and after changing worker or browser-slot policy.
+
 ## Chromium concurrency under pytest-xdist
 
 Full local checks retain `-n auto --dist worksteal`; the worker count is not

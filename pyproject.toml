@@ -96,11 +96,12 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = ["-m", "not full_assets"]
+addopts = ["-m", "not full_assets", "--durations=20"]
 markers = [
   "full_assets: requires the complete validated local Corvus Belli graphical asset set",
   "section_model: data model, canonical rules, semantic audits, and database behavior",
-  "section_web: web application, HTTP/API behavior, browser runtime, and web metrics",
+  "section_web: web application, HTTP/API behavior, and web metrics",
+  "section_browser: Chromium acceptance and browser verifier contract tests",
   "section_build: Army acquisition, normalization, deterministic build, and ingestion",
   "section_ops: development checks, deployment, archives, reports, and operational tooling",
   "section_assets: symbols, SVG/font tooling, and processed graphical asset publication",

@@ -87,15 +87,6 @@
         "test_non_skill_army_presentation",
         "test_unit_source_options_notes",
         "test_unit_source_api_parity",
-        "test_verify_unit_skill_presentation_browser",
-        "test_verify_fireteam_fto_browser",
-        "test_verify_army_overview_browser",
-        "test_verify_page_footer_browser",
-        "test_verify_scenario_faq_browser",
-        "test_verify_sidebar_density_browser",
-        "test_verify_deployed_object_publication_browser",
-        "test_verify_weapon_source_cards_browser",
-        "test_verify_rule_fragment_browser",
         "test_support_weapon_deployable_references",
         "test_source_conflict_publication",
         "test_public_relation_destinations",
@@ -106,6 +97,21 @@
         "test_web",
         "test_web_metrics",
         "test_weaponry_catalog_api"
+      ]
+    },
+    "browser": {
+      "description": "Real Chromium acceptance and browser verifier contract tests.",
+      "modules": [
+        "test_verify_army_overview_browser",
+        "test_verify_deployed_object_publication_browser",
+        "test_verify_fireteam_fto_browser",
+        "test_verify_page_footer_browser",
+        "test_verify_release_candidate_browser",
+        "test_verify_rule_fragment_browser",
+        "test_verify_scenario_faq_browser",
+        "test_verify_sidebar_density_browser",
+        "test_verify_unit_skill_presentation_browser",
+        "test_verify_weapon_source_cards_browser"
       ]
     },
     "build": {
@@ -150,7 +156,6 @@
         "test_run_checks",
         "test_snapshot_archive",
         "test_test_sections",
-        "test_verify_release_candidate_browser",
         "test_version"
       ]
     },
