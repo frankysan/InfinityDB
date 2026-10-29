@@ -36,6 +36,7 @@
         "test_deployed_object_source_contexts",
         "test_deployed_object_detail_queue",
         "test_deployed_object_delivery_coverage",
+        "test_deployed_object_expanded_queue",
         "test_deployed_object_non_catalog_queue",
         "test_deployed_object_transitive_includes",
         "test_availability",

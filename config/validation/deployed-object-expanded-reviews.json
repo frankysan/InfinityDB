@@ -1,0 +1,81 @@
+{
+  "format": "InfinityDB expanded non-catalog battlefield element reviews",
+  "formatVersion": 1,
+  "scope": "audit-only; excludes publication, inferred object profiles, carriers and delivery",
+  "reviews": [
+    {
+      "recordId": "term:marker",
+      "classification": "representation-type-not-object-identity",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "A Marker is a game element with Attributes represented by a Marker",
+      "factsEvidence": [],
+      "caveat": "The glossary describes an on-table representation, not a concrete new Weapon/Equipment profile. Resolve the represented source element separately."
+    },
+    {
+      "recordId": "rule:scenario:consoles",
+      "classification": "scenario-object-separate-domain",
+      "sourcePages": [
+        151
+      ],
+      "summaryEvidence": "Rules for Consoles.",
+      "factsEvidence": [
+        "Place one Console at the center of each of the four scoring Quadrants",
+        "Represent each Console with a Console A Marker or scenery of the same diameter."
+      ],
+      "caveat": "The four Console objectives are Domination scenario elements represented by markers or scenery, not catalog Weapon/Equipment Deployables. Maintain scenario geometry and Hack Consoles separately."
+    },
+    {
+      "recordId": "rule:scenario:supply-boxes",
+      "classification": "scenario-object-separate-domain",
+      "sourcePages": [
+        153
+      ],
+      "summaryEvidence": "Rules for Supply Boxes.",
+      "factsEvidence": [
+        "Place three Supply Boxes: one at the center of the table",
+        "Represent each Supply Box with a Supply Box Marker or a similar scenery item."
+      ],
+      "caveat": "The three Supply Boxes are Supplies scenario objectives, not Army-carried Weapon/Equipment object identities. Their placement and carrying restrictions are scenario scoped."
+    },
+    {
+      "recordId": "rule:scenario:controlling-supply-boxes",
+      "classification": "scenario-control-not-object-identity",
+      "sourcePages": [
+        153
+      ],
+      "summaryEvidence": "Rules for Controlling Supply Boxes.",
+      "factsEvidence": [
+        "At game end, a player controls a Supply Box only if one of their Models is carrying it."
+      ],
+      "caveat": "Controlling a scenario Supply Box does not create another object identity; it only defines when an existing objective scores."
+    },
+    {
+      "recordId": "skill:hack-consoles",
+      "classification": "scenario-interaction-not-object-identity",
+      "sourcePages": [
+        151
+      ],
+      "summaryEvidence": "A Short Skill used by Specialist Troops to Hack a Console.",
+      "factsEvidence": [
+        "The Specialist Troop must be in Silhouette contact with a Console.",
+        "A successful unopposed [[attribute:wip]] Roll Hacks the Console."
+      ],
+      "caveat": "Hack Consoles changes the state/owner of an existing scenario Console; it creates no new console or Army equipment delivery edge."
+    },
+    {
+      "recordId": "skill:activate-disco-ball",
+      "classification": "reviewed-object-interaction-not-identity",
+      "sourcePages": [
+        71
+      ],
+      "summaryEvidence": "Activate Disco Ball is a Short Skill (Attack) for reactivating a deployed allied Disco Ball.",
+      "factsEvidence": [
+        "The deployed Disco Ball must be allied and in LoF or [[trait:zone-of-control-zc|Zone of Control]].",
+        "An enemy Disco Ball cannot be activated."
+      ],
+      "caveat": "Activate Disco Ball interacts with the already reviewed Disco Baller source-mode deployed Disco Ball. It does not introduce a second source Weapon, new Ball identity, or another placement path."
+    }
+  ]
+}

@@ -1488,6 +1488,40 @@ but the scan covers neither unmentioned terms nor other source domains and
 is **not** a complete N5.3 object inventory.
 `tests/test_deployed_object_non_catalog_queue.py` checks these boundaries.
 
+### Expanded non-catalog battlefield-element discovery
+
+The initial 48-definition queue excludes other relevant wording, including
+Consoles, Supply Boxes, Disco Balls, and Marker/decoy representations. Run a
+separate, read-only pass over Skill/Rule/Trait/Term/State definitions:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_deployed_object_expanded_queue
+.venv\Scripts\python.exe -m tools.audit_deployed_object_expanded_queue --json
+```
+
+The expanded audit excludes all 48 candidates from the original scan rather
+than recounting them. It currently identifies **25 additional definitions**:
+six source-cited reviews in
+`config/validation/deployed-object-expanded-reviews.json`, plus **19
+unreviewed leads**. N5.3 pp. 151 and 153 establish that Domination's four
+Consoles and Supplies' three Supply Boxes are *scenario-specific objectives*,
+represented by scenario Markers or scenery; Hack Consoles and controlling
+Supply Boxes act on those existing objectives and create no further objects.
+N5.3 p. 71 makes Activate Disco Ball an interaction with the previously
+reviewed Disco Baller source-mode object, **not another delivery method or
+object identity**. The generic Marker terminology on p. 173 likewise
+describes a representation rather than a concrete source catalog object.
+
+This expanded scan is deliberately bounded to named objectives/devices and
+Marker/decoy wording, not all N5.3 prose, source tables, or all possible
+game elements. Remaining leads include Decoy, Holoecho, Impersonation and
+Hidden Deployment representations; these require further source review.
+The manifest and validator reject unsupported IDs, lost detailed clauses,
+stale PDF citations or inferred object profiles. No production database,
+object count, Unit ownership or approved delivery path is changed.
+`tests/test_deployed_object_expanded_queue.py` checks the discovery and
+fail-closed review boundaries.
+
 ### Deployed-object release publication
 
 The read-only inventory is for review; ordinary web requests must not read
