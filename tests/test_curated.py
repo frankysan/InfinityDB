@@ -1561,6 +1561,15 @@ def test_n5_cyberplug_connected_controller_idle_and_reactive_split() -> None:
     assert peripheral["facts"]["typeIds"] == ["automatic"]
     assert facts["profileModes"] == ["connected", "autonomous"]
     assert facts["maxPerController"] == 2
+    assert "At the start of each Order or [[trait:aro|ARO]]" in facts["effects"][0]
+    assert "Connected or Autonomous for each" in facts["effects"][0]
+    assert "no more than one can use its Connected Profile" in facts["effects"][1]
+    assert "the other Autonomous" in facts["effects"][1]
+    assert "The Controller then performs the recovery Skill and makes the Roll" in (
+        facts["clarifications"][0]
+    )
+    assert "allied target" in facts["clarifications"][0]
+    assert "only one target can be treated per Order" in facts["clarifications"][0]
     pages = {c["page"] for c in subtype["citations"] if c["sourceId"] == "n5-core-v5.3-pdf"}
     assert pages >= {107, 108}
     assert "separate [[trait:aro|ARO]] entitlements" in peripheral["facts"]["effects"][3]

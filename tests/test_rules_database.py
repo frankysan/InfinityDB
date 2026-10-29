@@ -4176,7 +4176,7 @@ def test_rea020_fireteam_action_ownership_and_integrity_are_distinct(
         "one remaining member",
         "voluntarily cancel before an Order is spent",
         "**Individual departure:**",
-        "Departure occurs when the Order or [[trait:aro|ARO]] is declared",
+        "departure occurs when the Order or [[trait:aro|ARO]] is declared",
         "Recalculate bonuses and cancellation immediately",
         "end of the next States Phase",
         "[[skill:number-2|Number 2]]",
@@ -4196,6 +4196,41 @@ def test_rea020_fireteam_action_ownership_and_integrity_are_distinct(
     for ref in ("skill:number-2", "skill:ft-master", "skill:nco",
                 "skill:tactical-awareness", "state:suppressive-fire"):
         assert current_rules_database.composed_record(ref) is not None
+
+
+def test_n53_peripheral_controller_fireteam_exception_is_scoped(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """N5.3 pp. 107/134: Ancillary exception versus leader/member departure."""
+    peripheral = current_rules_database.composed_record("skill:peripheral")
+    ancillary = current_rules_database.composed_record("rule:peripheral-type:ancillary")
+    cyberplug = current_rules_database.composed_record("rule:peripheral-type:cyberplug")
+    fireteam = current_rules_database.composed_record("rule:fireteam-general")
+    assert all(record is not None for record in (peripheral, ancillary, cyberplug, fireteam))
+    assert peripheral is not None and ancillary is not None
+    assert cyberplug is not None and fireteam is not None
+
+    rules = " ".join(fireteam["facts"]["rules"])
+    clarifications = " ".join(ancillary["facts"]["clarifications"])
+    assert "[[rule:peripheral-type:ancillary|Ancillary]] Controller exception" in rules
+    assert "while the Ancillary is undeployed" in rules
+    assert "[[state:disconnected|Disconnected]]" in rules
+    assert "its [[state:disconnected|Disconnected]]/Null condition is canceled" in rules
+    assert "a non-Leader's departure does not by itself cancel the whole Fireteam" in rules
+    assert "a Leader's departure does" in rules
+    assert (
+        "Ancillary exception instead ends when the [[skill:peripheral|Peripheral]] "
+        "is deployed"
+    ) in rules
+    assert "[[rule:fireteam-general|Fireteam Integrity]]" in clarifications
+    assert "[[rule:peripheral-type:cyberplug|Cyberplug]] Controllers" in clarifications
+    assert "no more than one can use its Connected Profile" in " ".join(
+        cyberplug["facts"]["effects"]
+    )
+    assert {
+        (citation["source_id"], citation.get("page"))
+        for citation in fireteam["citations"]
+    } >= {("n5-core-v5.3-pdf", 107), ("n5-core-v5.3-pdf", 134)}
 
 
 def test_rea027_flash_pulse_bilingual_publication_conflict_preserves_outcome(

@@ -214,6 +214,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         citations and mechanics; this does not change the Ammunition
         resolution or weapon-profile source values. Release-matched
         browser acceptance remains pending.
+      - [x] Recheck **Cyberplug profiles (N53-15)** against N5.3
+        p. 107 and its p. 108 examples: the maintained
+        `rule:peripheral-type:cyberplug` already specifies profile
+        choice at each Order/ARO start, no more than one Connected
+        Cyberplug, Controller-owned Doctor/Engineer Rolls on one allied
+        target per Order, and Autonomous fallback rather than Disconnected.
+        Strengthen the existing curated regression; no gameplay-data
+        edit was required.
+      - [x] Clarify **Peripheral/Fireteam Integrity (N53-21)** against
+        N5.3 pp. 107 and 134. `rule:fireteam-general` now links the
+        narrow `rule:peripheral-type:ancillary` exception: its Controller
+        may remain in a Fireteam while Ancillary is undeployed,
+        Disconnected, or Null; placement or recovery ends the exception.
+        Distinguish a departing non-Leader from a departing Leader,
+        which cancels the entire team. The Ancillary card links back
+        and explicitly excludes Cyberplug Controllers. This does not
+        expand Ancillary-specific scenario rulings beyond their source
+        scope. A fresh rules export and scoped regressions pass; final
+        release-matched browser acceptance remains open.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or
