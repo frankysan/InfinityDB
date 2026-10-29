@@ -16,10 +16,27 @@ from tools.test_sections import load_test_sections, section_for_module
 _TEST_SECTIONS = load_test_sections()
 # Despite its filename, this module tests a browser verifier entirely with mocks.
 _NON_CHROMIUM_BROWSER_MODULES = frozenset({"test_verify_rule_fragment_browser.py"})
+# These modules mix contract checks with a single real Chromium test. Their
+# browser tests acquire the slot individually instead of blocking the module.
+_PER_TEST_CHROMIUM_MODULES = frozenset({
+    "test_verify_release_candidate_browser.py",
+    "test_verify_deployed_object_publication_browser.py",
+})
 
 
 def _uses_chromium(path: Path) -> bool:
     return path.name.endswith("_browser.py") and path.name not in _NON_CHROMIUM_BROWSER_MODULES
+
+
+def _browser_slot_directory(factory: pytest.TempPathFactory) -> Path:
+    return factory.getbasetemp().parent / "infinitydb-chromium-slots"
+
+
+def _needs_chromium_slot() -> bool:
+    return (
+        "PYTEST_XDIST_WORKER" in os.environ
+        and importlib.util.find_spec("playwright") is not None
+    )
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -27,16 +44,25 @@ def limit_concurrent_browser_tests(
     request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory,
 ) -> Iterator[None]:
     """Keep Chromium resource use bounded across xdist workers, not pytest jobs."""
+    path = Path(str(request.node.path))
     if (
-        not _uses_chromium(Path(str(request.node.path)))
-        or "PYTEST_XDIST_WORKER" not in os.environ
-        or importlib.util.find_spec("playwright") is None
+        not _uses_chromium(path)
+        or path.name in _PER_TEST_CHROMIUM_MODULES
+        or not _needs_chromium_slot()
     ):
         yield
         return
-    # xdist gives each worker a child basetemp of the same run-level directory.
-    directory = tmp_path_factory.getbasetemp().parent / "infinitydb-chromium-slots"
-    with browser_slot(directory, slots=2):
+    with browser_slot(_browser_slot_directory(tmp_path_factory), slots=2):
+        yield
+
+
+@pytest.fixture
+def chromium_test_slot(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    """Reserve capacity only while a mixed module executes a real browser test."""
+    if not _needs_chromium_slot():
+        yield
+        return
+    with browser_slot(_browser_slot_directory(tmp_path_factory), slots=2):
         yield
 
 

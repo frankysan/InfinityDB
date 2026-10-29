@@ -75,7 +75,9 @@ def test_release_gate_accepts_exact_local_runtime_before_and_after_browser() -> 
     assert result["browser"]["passed"] == result["browser"]["total"] == 2
 
 
-def test_release_gate_runs_real_local_chromium_when_available() -> None:
+def test_release_gate_runs_real_local_chromium_when_available(
+    chromium_test_slot: None,
+) -> None:
     """Exercise exact identity preflight, real DOM, and identity postflight together."""
     pytest.importorskip("playwright.sync_api")
     app = create_app(ARMY_DB, rules_database_path=RULES_DB)

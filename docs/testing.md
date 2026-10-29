@@ -154,6 +154,11 @@ The grouped run exposed another issue: mock-only
 `test_verify_rule_fragment_browser.py` waited **118.09 s** for a Chromium
 slot even though no tests in it launch a browser. That module is now excluded
 from slot admission and grouped scheduling, retaining its test coverage.
+Two mixed modules, `test_verify_release_candidate_browser.py` and
+`test_verify_deployed_object_publication_browser.py`, now acquire slots
+only for their explicitly identified real-Chromium tests. Their other
+API/contract tests run without waiting for a slot. Modules with shared
+module-scoped Chromium fixtures retain module-wide slot protection.
 The option remains **opt-in**, pending another full-run comparison:
 
 ```powershell

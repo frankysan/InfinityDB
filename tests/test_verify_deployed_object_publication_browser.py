@@ -185,7 +185,7 @@ def test_published_reference_is_discoverable_in_normal_browser_pages(
 
 
 def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
-    published_app: tuple[Callable, str],
+    published_app: tuple[Callable, str], chromium_test_slot: None,
 ) -> None:
     app, origin = published_app
     status, body = _request(app, "/api/deployed-objects")
