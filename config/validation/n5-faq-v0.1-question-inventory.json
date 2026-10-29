@@ -165,6 +165,28 @@
       4
     ]
   ],
+  "historicalV00CarriedSpanishPages": {
+    "deployment-phase-reposition-after-measurement": 1,
+    "deployment-private-zoc-coherency": 1,
+    "prone-movement-label": 1,
+    "prone-at-end-of-move-distance": 1,
+    "vault-during-climb-and-jump": 1,
+    "bs-attack-roll-label-mods": 1,
+    "direct-template-secondary-target-los": 1,
+    "controlled-jump-speedball": 1,
+    "place-deployable-space-occupied": 2,
+    "surprise-attack-multiple-users": 2,
+    "sixth-sense-msv1-zero-visibility": 2,
+    "marker-automatic-skill-declarations": 2,
+    "protheion-excess-saving-rolls": 2,
+    "camouflage-one-use-infiltration-failure": 2,
+    "aerial-boost-no-silhouette-contact": 2,
+    "stealth-aro-multiple-activations": 2,
+    "deployable-cover-no-placement": 3,
+    "null-state-marker-and-cautious-movement": 3,
+    "discover-fireteam-sd-bonuses": 3,
+    "scenario-element-carrier-marker-state": 3
+  },
   "currentV01NewSpanishPages": {
     "skill-declaration-target-position": 1,
     "hacking-device-firewall-disabled": 1,

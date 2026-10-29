@@ -236,6 +236,64 @@ def test_carried_forward_v00_faq_answers_retain_reviewed_v01_semantics() -> None
             assert clause in facts["answer"], (slug, clause)
 
 
+def test_carried_forward_v00_faq_bilingual_pages_and_question_scope() -> None:
+    """Twenty carried-forward answers retain distinct Spanish printed pages.
+
+    Spanish Stealth/ARO question adds an outside-ZoC/Hacking-Area context.
+    This is not a contradictory answer or a grant of broader applicability.
+    """
+    root = Path(__file__).resolve().parents[1]
+    inventory = json.loads(
+        (root / "config/validation/n5-faq-v0.1-question-inventory.json")
+        .read_text(encoding="utf-8")
+    )
+    faq = json.loads(
+        (root / "data/curated/rules/n5-faq-v0.1.json").read_text(encoding="utf-8")
+    )
+    original_pages = dict(inventory["historicalV00CoreQuestions"])
+    selected_pages = dict(inventory["coreQuestions"])
+    spanish_pages = inventory["historicalV00CarriedSpanishPages"]
+    records = {
+        record["id"].removeprefix("faq-ruling:"): record for record in faq["records"]
+    }
+    assert set(original_pages) == set(spanish_pages)
+    assert len(spanish_pages) == 20
+    assert {page: list(spanish_pages.values()).count(page) for page in (1, 2, 3)} == {
+        1: 8, 2: 8, 3: 4,
+    }
+    for slug, es_page in spanish_pages.items():
+        record = records[slug]
+        facts = record["facts"]
+        historical = {"sourceId": "n5-faq-v0.0-en-pdf", "page": original_pages[slug]}
+        en = {"sourceId": "n5-faq-v0.1-en-pdf", "page": selected_pages[slug]}
+        es = {"sourceId": "n5-faq-v0.1-es-pdf", "page": es_page}
+        assert record["citations"] == [historical, en, es], slug
+        assert facts["selectedCitation"] == en, slug
+        assert facts["conflictingCitations"] == [], slug
+        assert facts["originalPublication"] == {
+            "collectionId": "n5-faq-v0.0",
+            **historical,
+            "version": "0.0",
+            "publishedDate": "2025-10-15",
+        }, slug
+        assert facts["applicability"] == [{
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            **({
+                "scenarioIds": ["scenario:supplies"],
+            } if slug == "scenario-element-carrier-marker-state" else {}),
+        }], slug
+
+    stealth = records["stealth-aro-multiple-activations"]["facts"]
+    reason = stealth["selectionReason"]
+    assert "outside the reactive Trooper's Zone of Control or Hacking Area" in reason
+    assert "English question is not framed with that additional positional condition" in reason
+    assert "difference in question context, not a contradictory answer" in reason
+    assert "without inferring any new permission inside" in reason
+    assert "ARO becomes Idle" in reason
+    assert "ARO becomes Idle" in stealth["answer"]
+
+
 def test_new_v01_faq_answers_retain_reviewed_bilingual_source_semantics() -> None:
     """Pin all nine added FAQ answers and their distinct English/Spanish pages.
 

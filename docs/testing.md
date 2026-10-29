@@ -2775,6 +2775,18 @@ against both pinned English FAQs. This is an audit-only source wording
 gate: it does not read the ignored PDF bytes in CI, grant historical
 publication, or certify Spanish/ITS translation and applicability.
 
+**Bilingual review of 20 carried-forward answers, 2026-10-29:**
+`test_carried_forward_v00_faq_bilingual_pages_and_question_scope`
+checks all 20 pinned Spanish printed-page positions, v0.0 origin and
+selected v0.1 English citation, no conflicting answers, N5.3 date
+gates and the Supplies-only scenario exception. English and Spanish
+source comparison found the Spanish Stealth/ARO question adds an
+outside-ZoC/Hacking-Area qualifier absent from the English question;
+the answers remain compatible. The selection rationale and test
+document this as a context difference, not a conflicting ruling or
+generalization to other positions. This is a current-reference
+source review, not automated PDF extraction or historical replay.
+
 **Nine new FAQ v0.1 answers, 2026-10-29:**
 `test_new_v01_faq_answers_retain_reviewed_bilingual_source_semantics`
 checks all v0.1-origin published answers with independent semantic

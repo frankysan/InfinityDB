@@ -1599,7 +1599,7 @@
           "sourceId": "n5-faq-v0.1-en-pdf",
           "page": 2
         },
-        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "selectionReason": "English FAQ v0.0 p. 2 carried forward without substantive answer change in English FAQ v0.1 p. 2. Spanish FAQ v0.1 p. 2 asks specifically about multiple activations where a Stealth user is outside the reactive Trooper's Zone of Control or Hacking Area; the English question is not framed with that additional positional condition. Both answers say the ARO becomes Idle if the Stealth user declares no Skill allowing AROs, so this is a difference in question context, not a contradictory answer. Preserve English as the selected current source without inferring any new permission inside the Zone of Control/Hacking Area. The 2025-10-15 original-source date is an official update anchor, not a verified PDF publication day.",
         "conflictingCitations": [],
         "supersedes": []
       }

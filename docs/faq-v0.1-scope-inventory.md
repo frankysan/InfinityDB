@@ -59,6 +59,31 @@ answers, not exact typography, automatic extraction of source-PDF text,
 historical runtime replay, Spanish translation equivalence or the eight
 deferred ITS-only questions.
 
+**Carried-forward Spanish cross-check, 2026-10-29:** All 20
+published v0.0-origin current answers were independently reviewed
+against Spanish FAQ v0.1 printed pp. 1–3. Eight are on Spanish p. 1,
+eight on p. 2, and four on p. 3; this differs from the English
+printed-page distribution. The audit-only manifest now pins each
+Spanish citation page in `historicalV00CarriedSpanishPages`.
+`test_carried_forward_v00_faq_bilingual_pages_and_question_scope`
+checks all 20 original/selected/corroborating citations, retained
+current date and revision gates, the Supplies-only carrier scope,
+and no invented contradictory citations. No material contradiction
+in the answers was found.
+
+One **question-context qualification** was found: English v0.0 and
+v0.1 ask generally about targeting a Stealth user during multiple
+activations that generate AROs, but Spanish v0.1 p. 2 specifically
+asks about a Stealth user *outside* the reactive Trooper's Zone of
+Control or Hacking Area. Both answers make the ARO Idle when the
+Stealth user declares no ARO-enabling Skill. Keep English selected
+and record the narrower Spanish context rather than implying an
+independent permission for other positions. No published answer,
+runtime rule scope or source precedence was changed. This is a
+manual bilingual semantic audit of the 20 published carry-forwards,
+not exact translation certification or review of the eight deferred
+ITS-only questions.
+
 **New v0.1 answer semantic review, 2026-10-29:** The nine
 published answers first found in the English v0.1 FAQ were checked
 against the pinned English and Spanish v0.1 PDFs. The audit-only

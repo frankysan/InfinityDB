@@ -4825,6 +4825,13 @@ and Spanish FAQ v0.1 without a verified material answer change:
 - Stealth and grouped AROs: `skill:stealth` (v0.0 EN p. 2,
   v0.1 EN/ES p. 2). ARO targeting a Stealth user is permitted
   initially, but becomes Idle if the declared Skill does not permit AROs.
+  **Bilingual question-context qualifier, checked 2026-10-29:**
+  Spanish v0.1 p. 2 specifically describes the Stealth user outside
+  the reactive Trooper's Zone of Control or Hacking Area; English
+  v0.1 and the earlier English v0.0 questions omit that positional
+  condition. The conditional Idle answers agree. Keep the selected
+  English wording without interpreting the narrower Spanish example
+  as permission for unrelated inside-ZoC/Hacking-Area situations.
 - Deployable Cover: `equipment:deployable-cover` (v0.0 EN p. 2,
   v0.1 EN p. 2, ES p. 3). Nothing may be placed or end movement on it.
 - Disconnected/Unconscious: `state:disconnected`,

@@ -640,9 +640,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       applicability. Preserve the real Haris numerical contradiction
       while recording the non-contradictory Spanish FT Master omission
       and broader Deployable-placement question. No answer, published
-      scope or effective-date selection changed. The 20 historical
-      Spanish carry-forward translations and deferred ITS-specific
-      applicability are not claimed complete.
+      scope or effective-date selection changed. The 20 carried-forward
+      Spanish source answers are reviewed separately below; deferred
+      ITS-only applicability is not claimed complete.
+    - [x] Cross-check the **20 current, v0.0-origin answers** against
+      Spanish FAQ v0.1. Pin each Spanish printed citation page
+      (8/8/4 across pp. 1–3) and assert all original/current citations,
+      date/version gates, non-conflicting answers and Supplies-only
+      scenario scope. The Spanish Stealth/ARO question specifies
+      *outside ZoC or Hacking Area*, unlike the broader English
+      question; both conditional Idle answers agree. Source rationale
+      records the narrower Spanish question without inventing
+      permission inside those areas or changing gameplay. The
+      regression and source audit distinguish this bounded bilingual
+      review from historical replay and deferred ITS-only questions.
   - [x] Verify source-to-ordinary-browser reachability of **all 29 published
     reviewed FAQ rulings** against a fresh rules export. The tracked
     `test_every_published_faq_has_a_normal_browser_entry_point` drives
