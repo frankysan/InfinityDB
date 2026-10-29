@@ -6,6 +6,7 @@ import copy
 import json
 import shutil
 import sqlite3
+from collections import Counter
 from pathlib import Path
 
 import pytest
@@ -213,6 +214,177 @@ def test_reviewed_delivery_uses_are_exact_army_occurrences_only(
     assert publication["unresolvedDeliveries"][0]["originRecordId"] == (
         "weapon:mine-dispenser"
     )
+
+
+def test_reviewed_direct_uses_cover_every_matching_raw_source_occurrence(
+    source_paths: tuple[Path, Path, Path, Path, Path],
+) -> None:
+    """Check the reverse direction: source rows must not disappear from publication."""
+    from infinity_db.database import raw_database_path
+    from infinity_db.deployed_object_usage import _source_ids
+
+    raw_path = raw_database_path(source_paths[0])
+    if not raw_path.is_file():
+        pytest.skip("Ignored raw Army database is unavailable in clean CI")
+    publication = build_publication(*source_paths)
+    observed_kinds: set[str] = set()
+    with (
+        sqlite3.connect(f"{source_paths[0].resolve().as_uri()}?mode=ro", uri=True) as db,
+        sqlite3.connect(f"{raw_path.resolve().as_uri()}?mode=ro", uri=True) as raw,
+    ):
+        db.row_factory = sqlite3.Row
+        raw.row_factory = sqlite3.Row
+        for obj in publication["objects"]:
+            for edge in obj["deliverySources"]:
+                record_id = edge["recordId"]
+                method = edge["method"]
+                catalog = "weapons" if record_id.startswith("weapon:") else "equipment"
+                source_ids = _source_ids(db, record_id)
+                placeholders = ",".join("?" for _ in source_ids)
+                expected: Counter[tuple] = Counter()
+                for kind, table in (
+                    ("profile", f"profile_{catalog}"),
+                    ("loadout", f"option_{catalog}"),
+                    ("unit-option", f"unit_option_{catalog}"),
+                ):
+                    army = "NULL" if kind == "unit-option" else "o.army_id"
+                    group = "NULL" if kind == "unit-option" else "o.group_id"
+                    profile = "o.profile_id" if kind == "profile" else "NULL"
+                    option = "NULL" if kind == "profile" else "o.option_id"
+                    if table == "option_weapons":
+                        item_source = "JOIN option_weapon_templates AS t ON t.id = o.template_id"
+                        item_id = "t.item_id"
+                    else:
+                        item_source = ""
+                        item_id = "o.item_id"
+                    query = (
+                        f"SELECT {army} AS army_id, o.unit_id, {group} AS group_id, "
+                        f"{profile} AS profile_id, {option} AS option_id, "
+                        f"{item_id} AS item_id, o.position FROM {table} AS o "
+                        f"{item_source} WHERE {item_id} IN ({placeholders})"
+                    )
+                    for row in raw.execute(query, source_ids):
+                        expected[(
+                            kind, row["army_id"], row["unit_id"], row["group_id"],
+                            row["profile_id"], row["option_id"], row["item_id"], row["position"],
+                        )] += 1
+                actual: Counter[tuple] = Counter(
+                    (
+                        use["kind"], use["armyId"], use["unitId"], use["groupId"],
+                        use["profileId"], use["optionId"], use["sourceItemId"],
+                        use["sourcePosition"],
+                    )
+                    for use in obj["unitUses"]
+                    if use["originRecordId"] == record_id
+                    and use["method"] == method
+                    and use["kind"] in {"profile", "loadout", "unit-option"}
+                )
+                observed_kinds.update(kind for kind, *_ in actual)
+                assert actual == expected, (
+                    obj["name"], record_id, method,
+                    "unexpected", actual - expected, "missing", expected - actual,
+                )
+    assert {"profile", "loadout"} <= observed_kinds
+
+
+def test_reviewed_include_uses_cover_matching_raw_target_loadouts(
+    source_paths: tuple[Path, Path, Path, Path, Path],
+) -> None:
+    """Compare every resolved one-level Include with its source target option."""
+    from infinity_db.database import raw_database_path
+    from infinity_db.deployed_object_usage import _source_ids
+
+    raw_path = raw_database_path(source_paths[0])
+    if not raw_path.is_file():
+        pytest.skip("Ignored raw Army database is unavailable in clean CI")
+    publication = build_publication(*source_paths)
+    observed_kinds: set[str] = set()
+    with (
+        sqlite3.connect(f"{source_paths[0].resolve().as_uri()}?mode=ro", uri=True) as db,
+        sqlite3.connect(f"{raw_path.resolve().as_uri()}?mode=ro", uri=True) as raw,
+    ):
+        db.row_factory = sqlite3.Row
+        raw.row_factory = sqlite3.Row
+        raw.execute("ATTACH DATABASE ? AS published", (
+            f"{source_paths[0].resolve().as_uri()}?mode=ro",
+        ))
+        for obj in publication["objects"]:
+            for edge in obj["deliverySources"]:
+                record_id = edge["recordId"]
+                method = edge["method"]
+                catalog = "weapons" if record_id.startswith("weapon:") else "equipment"
+                source_ids = _source_ids(db, record_id)
+                placeholders = ",".join("?" for _ in source_ids)
+                item_table = f"option_{catalog}"
+                if catalog == "weapons":
+                    template_join = "JOIN option_weapon_templates AS t ON t.id = o.template_id "
+                    item_id = "t.item_id"
+                else:
+                    template_join = ""
+                    item_id = "o.item_id"
+                expected: Counter[tuple] = Counter()
+                for kind, source_table, identity in (
+                    ("profile-include", "profile_includes", "profile_id"),
+                    ("loadout-include", "option_includes", "option_id"),
+                ):
+                    query = (
+                        f"SELECT i.army_id, i.unit_id, i.group_id, i.{identity} AS identity_id, "
+                        "i.position AS include_position, "
+                        f"{item_id} AS item_id, o.position AS source_position "
+                        f"FROM {source_table} AS i JOIN {item_table} AS o "
+                        "ON o.army_id = i.army_id AND o.unit_id = i.unit_id "
+                        "AND o.group_id = i.target_group_id "
+                        "AND o.option_id = i.target_option_id "
+                        f"{template_join}WHERE {item_id} IN ({placeholders})"
+                    )
+                    for row in raw.execute(query, source_ids):
+                        expected[(
+                            kind, row["army_id"], row["unit_id"], row["group_id"],
+                            row["identity_id"], row["include_position"],
+                            None, row["item_id"], row["source_position"],
+                        )] += 1
+                query = (
+                    "SELECT i.unit_id, i.option_id AS identity_id, "
+                    "i.position AS include_position, target.target_army_id, "
+                    f"{item_id} AS item_id, o.position AS source_position "
+                    "FROM published.unit_option_include_targets AS target "
+                    "JOIN unit_option_includes AS i "
+                    "ON i.unit_id = target.unit_id AND i.option_id = target.option_id "
+                    "AND i.position = target.position "
+                    f"JOIN {item_table} AS o "
+                    "ON o.army_id = target.target_army_id AND o.unit_id = i.unit_id "
+                    "AND o.group_id = i.target_group_id "
+                    "AND o.option_id = i.target_option_id "
+                    f"{template_join}WHERE {item_id} IN ({placeholders})"
+                )
+                for row in raw.execute(query, source_ids):
+                    expected[(
+                        "unit-option-include", None, row["unit_id"], None,
+                        row["identity_id"], row["include_position"],
+                        row["target_army_id"], row["item_id"], row["source_position"],
+                    )] += 1
+                actual: Counter[tuple] = Counter(
+                    (
+                        use["kind"], use["armyId"], use["unitId"], use["groupId"],
+                        use["profileId"] if use["kind"] == "profile-include" else use["optionId"],
+                        use["includePosition"], use.get("targetArmyId"),
+                        use["sourceItemId"], use["sourcePosition"],
+                    )
+                    for use in obj["unitUses"]
+                    if use["originRecordId"] == record_id
+                    and use["method"] == method
+                    and use["kind"] in {
+                        "profile-include", "loadout-include", "unit-option-include",
+                    }
+                )
+                observed_kinds.update(kind for kind, *_ in actual)
+                assert actual == expected, (
+                    obj["name"], record_id, method,
+                    "unexpected", actual - expected, "missing", expected - actual,
+                )
+    # No reviewed delivery source is reached through profile Includes in this snapshot;
+    # their source rows are still checked above if a later snapshot adds one.
+    assert {"loadout-include", "unit-option-include"} <= observed_kinds
 
 
 def test_unit_wide_occurrence_preserves_missing_army_context(

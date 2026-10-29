@@ -1470,6 +1470,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 unavailable attributes, conflicting Silhouettes and the
                 unresolved Mine Dispenser subtype; do not infer ownership
                 from rule prose.
+                - [x] Independently reconcile reviewed Weapon/Equipment
+                  reverse-use rows with all matching raw Army direct
+                  profile/loadout/Unit-option occurrences and resolved
+                  one-level Include targets. The 2026-10-29 pinned-pair
+                  local tests pass without missing or extra uses; reviewed
+                  profile-include origins have no matches in this snapshot.
+                  This requires the ignored `infinity.raw.db`, so clean CI
+                  skips the raw-pair comparison. It does not establish
+                  unreviewed delivery, variant or object completeness.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.

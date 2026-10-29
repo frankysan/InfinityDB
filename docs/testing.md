@@ -1402,7 +1402,15 @@ for reviewed delivery sources, along with the **exact** current
 `infinity.db`/`rules.db` SHA-256 fingerprints. Changes to either database
 require regenerating and revalidating the publication. The corresponding
 `tests/test_deployed_object_publication.py` tests prove deterministic bytes
-and rejection of corrupt, duplicate, stale or unsupported values.
+and rejection of corrupt, duplicate, stale or unsupported values. When
+`data/generated/infinity.raw.db` is available alongside the published Army
+database, two additional local-only tests compare every reviewed origin's
+published direct and one-level Include reverse-use rows against independent
+raw Weapon/Equipment occurrences and exact Include targets, including
+source-wide Unit options without invented Army ownership. These comparisons
+skip in clean CI without the ignored raw source database and must be repeated
+against the final pinned release input pair. They do not validate unreviewed
+delivery origins or objects.
 `tests/test_verify_deployed_object_publication_browser.py` exercises the
 real API and Chromium at 1440/390 px with an isolated, freshly generated
 publication. There are 17 reviewed entries, not the entire game-object corpus;
