@@ -236,6 +236,77 @@ def test_carried_forward_v00_faq_answers_retain_reviewed_v01_semantics() -> None
             assert clause in facts["answer"], (slug, clause)
 
 
+def test_new_v01_faq_answers_retain_reviewed_bilingual_source_semantics() -> None:
+    """Pin all nine added FAQ answers and their distinct English/Spanish pages.
+
+    The Spanish Haris example is a numerical conflict; the broader Spanish
+    Deployable question and omitted FT Master note are not contradictory answers.
+    This audit does not broaden scenario applicability or certify ITS-only rulings.
+    """
+    root = Path(__file__).resolve().parents[1]
+    inventory = json.loads(
+        (root / "config/validation/n5-faq-v0.1-question-inventory.json")
+        .read_text(encoding="utf-8")
+    )
+    faq = json.loads(
+        (root / "data/curated/rules/n5-faq-v0.1.json").read_text(encoding="utf-8")
+    )
+    current_pages = dict(inventory["coreQuestions"])
+    historical_slugs = {slug for slug, _ in inventory["historicalV00CoreQuestions"]}
+    anchors = inventory["currentV01NewAnswerAnchors"]
+    spanish_pages = inventory["currentV01NewSpanishPages"]
+    records = {
+        record["id"].removeprefix("faq-ruling:"): record for record in faq["records"]
+    }
+    expected_new = set(current_pages) - historical_slugs
+    assert len(expected_new) == len(anchors) == len(spanish_pages) == 9
+    assert expected_new == set(anchors) == set(spanish_pages)
+    for slug, clauses in anchors.items():
+        assert isinstance(clauses, list) and clauses and len(clauses) == len(set(clauses))
+        record = records[slug]
+        facts = record["facts"]
+        en = {"sourceId": "n5-faq-v0.1-en-pdf", "page": current_pages[slug]}
+        es = {"sourceId": "n5-faq-v0.1-es-pdf", "page": spanish_pages[slug]}
+        assert facts["selectedCitation"] == en, slug
+        assert facts["originalPublication"] == {
+            "collectionId": "n5-faq-v0.1",
+            **en,
+            "version": "0.1",
+            "publishedDate": "2026-09-01",
+        }, slug
+        assert record["citations"] == [en, es], slug
+        assert facts["applicability"] == [{
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            **({
+                "scenarioIds": ["scenario:annihilation"],
+            } if slug == "undeployed-ancillary-not-killed" else {}),
+        }], slug
+        for clause in clauses:
+            assert isinstance(clause, str) and clause.strip() == clause and clause
+            assert clause in facts["answer"], (slug, clause)
+        assert facts["conflictingCitations"] == (
+            [es] if slug == "fireteam-type-after-member-loss" else []
+        ), slug
+
+    fired = records["fired-deployable-vertical-surface"]["facts"]
+    assert "firing a Deployable" in fired["question"] or "fired onto" in fired["question"]
+    assert "Spanish question broadly asks about placing Deployables" in (
+        fired["selectionReason"]
+    )
+    assert "not a contradictory answer" in fired["selectionReason"]
+    assert "narrower English question scope" in fired["selectionReason"]
+
+    required = records["fireteam-required-member-lost"]["facts"]
+    assert "omits the English answer's explicit FT Master exception" in (
+        required["selectionReason"]
+    )
+    assert required["conflictingCitations"] == []
+    haris = records["fireteam-type-after-member-loss"]["facts"]
+    assert "three-to-two-member HARIS" in haris["selectionReason"]
+    assert "two-member HARIS loses one Trooper" in haris["selectionReason"]
+
+
 def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
     published_pilot: RulesDatabase,
 ) -> None:

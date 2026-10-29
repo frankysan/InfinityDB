@@ -165,6 +165,63 @@
       4
     ]
   ],
+  "currentV01NewSpanishPages": {
+    "skill-declaration-target-position": 1,
+    "hacking-device-firewall-disabled": 1,
+    "fired-deployable-vertical-surface": 2,
+    "peripheral-controller-unable-to-declare": 2,
+    "coordinated-order-special-dice": 3,
+    "camouflaged-marker-total-cover": 3,
+    "fireteam-type-after-member-loss": 3,
+    "fireteam-required-member-lost": 3,
+    "undeployed-ancillary-not-killed": 4
+  },
+  "currentV01NewAnswerAnchors": {
+    "skill-declaration-target-position": [
+      "except for the target's position",
+      "Resolution, before measuring Ranges",
+      "active player chooses who declares first"
+    ],
+    "hacking-device-firewall-disabled": [
+      "Comms Attacks against the Trooper",
+      "Hacking Device is operational",
+      "Device is disabled",
+      "Isolated or in any Null State"
+    ],
+    "fired-deployable-vertical-surface": [
+      "placed Token must be fully supported by its surface",
+      "vertical surface cannot support that placement",
+      "addresses firing a Deployable"
+    ],
+    "peripheral-controller-unable-to-declare": [
+      "Controller and all their Peripherals declare the same Skill",
+      "participant that cannot declare the Skill",
+      "declares Idle instead"
+    ],
+    "coordinated-order-special-dice": [
+      "Special Dice MODs do not change a Burst value",
+      "still apply during a Coordinated Order"
+    ],
+    "camouflaged-marker-total-cover": [
+      "Attack forces a Saving Roll",
+      "Camouflaged Marker is revealed",
+      "underlying game element is not hit because it is in Total Cover"
+    ],
+    "fireteam-type-after-member-loss": [
+      "three-member HARIS",
+      "two-member HARIS, not a DUO",
+      "does not override separate rules that cancel the Fireteam"
+    ],
+    "fireteam-required-member-lost": [
+      "minimum membership requirements in Fireteam Charts apply when creating",
+      "FT Master Special Skill has its own rules"
+    ],
+    "undeployed-ancillary-not-killed": [
+      "only counts as Killed if it was deployed during the game",
+      "either entered Dead State or remains in a Null State at the end of the game",
+      "scenario objectives"
+    ]
+  },
   "historicalV00StableAnswerAnchors": {
     "deployment-phase-reposition-after-measurement": [
       "Roll or measurement",

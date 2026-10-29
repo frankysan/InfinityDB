@@ -632,6 +632,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       on 2026-10-29. This does not grant historical runtime selection,
       independently date either PDF, or certify the eight deferred
       ITS-only rulings or all Spanish translations.
+    - [x] Reconcile the **nine v0.1-origin current FAQ answers** with
+      pinned English and Spanish v0.1 PDFs. An independent audit-only
+      manifest pins answer conditions and each language's printed
+      page; the focused test checks those nine answers, selected
+      English source, bilingual citations, provenance and scoped
+      applicability. Preserve the real Haris numerical contradiction
+      while recording the non-contradictory Spanish FT Master omission
+      and broader Deployable-placement question. No answer, published
+      scope or effective-date selection changed. The 20 historical
+      Spanish carry-forward translations and deferred ITS-specific
+      applicability are not claimed complete.
   - [x] Verify source-to-ordinary-browser reachability of **all 29 published
     reviewed FAQ rulings** against a fresh rules export. The tracked
     `test_every_published_faq_has_a_normal_browser_entry_point` drives

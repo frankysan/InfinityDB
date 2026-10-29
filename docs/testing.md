@@ -2775,6 +2775,18 @@ against both pinned English FAQs. This is an audit-only source wording
 gate: it does not read the ignored PDF bytes in CI, grant historical
 publication, or certify Spanish/ITS translation and applicability.
 
+**Nine new FAQ v0.1 answers, 2026-10-29:**
+`test_new_v01_faq_answers_retain_reviewed_bilingual_source_semantics`
+checks all v0.1-origin published answers with independent semantic
+anchors and bilingual printed-page pins reviewed against local English
+and Spanish PDFs. It retains English selected-source provenance,
+current N5.3 reference-date gates, the Annihilation-only Ancillary
+scope and the one explicit Haris numerical conflict. The Spanish
+FT Master qualification omission and broader Deployable placement
+question remain non-contradictory source differences. Tests use
+tracked evidence; they do not fetch ignored PDF bytes in CI or
+implement historical replay.
+
 **FAQ public-copy encoding regression, 2026-10-29:**
 `test_published_faq_copy_has_no_corrupted_question_mark_possessives`
 checks the 29 current FAQ question/answer strings for accidental

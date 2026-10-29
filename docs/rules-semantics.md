@@ -4690,6 +4690,13 @@ FAQ page positions are:
 - Fired Deployables on vertical surfaces: `trait:deployable`
   (EN p. 1, ES p. 2). The Token must have full supporting surface;
   this is not a global alteration of placing other Deployables.
+  **Bilingual question-scope difference, checked 2026-10-29:**
+  English asks whether a Deployable may be *fired* onto a vertical
+  surface; Spanish more broadly asks about *placing* Deployables on
+  vertical surfaces. Both answers forbid vertical placement, but the
+  broader Spanish question does not silently expand the selected
+  English FAQ's topic to every form of placement. Record the differing
+  question breadth in provenance, not as conflicting answer text.
 - Controller unable to declare: `skill:peripheral` (EN/ES p. 2).
   Controller and Peripherals declare the same Skill; any participant
   who cannot declare it substitutes Idle.

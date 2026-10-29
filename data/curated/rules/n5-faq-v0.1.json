@@ -763,7 +763,7 @@
           "sourceId": "n5-faq-v0.1-en-pdf",
           "page": 1
         },
-        "selectionReason": "Official English FAQ v0.1 selected and independently cross-checked against the corresponding Spanish FAQ v0.1 answer; no material conflict identified.",
+        "selectionReason": "Official English FAQ v0.1 p. 1 selected and cross-checked against Spanish FAQ v0.1 p. 2. Both forbid placement on vertical surfaces and require a fully supporting surface. The English question specifically concerns firing a Deployable, whereas the Spanish question broadly asks about placing Deployables; keep the narrower English question scope without treating the Spanish phrasing as an expansion of all placement rules. This difference in question breadth is not a contradictory answer.",
         "conflictingCitations": [],
         "supersedes": []
       }

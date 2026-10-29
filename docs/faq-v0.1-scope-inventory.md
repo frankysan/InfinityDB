@@ -59,6 +59,29 @@ answers, not exact typography, automatic extraction of source-PDF text,
 historical runtime replay, Spanish translation equivalence or the eight
 deferred ITS-only questions.
 
+**New v0.1 answer semantic review, 2026-10-29:** The nine
+published answers first found in the English v0.1 FAQ were checked
+against the pinned English and Spanish v0.1 PDFs. The audit-only
+manifest now pins their **nine answer-semantic anchor sets**, distinct
+English/Spanish printed-page locations, and v0.1 original publication.
+`test_new_v01_faq_answers_retain_reviewed_bilingual_source_semantics`
+checks the exact nine new identities, answer meaning, citation pages,
+selected source, effective-date/revision gates and the existing narrow
+Annihilation scope of the ITS-section Ancillary ruling.
+
+Three differences require explicit classification: the Haris
+**three-to-two (EN) versus two-to-two (ES)** example remains a
+conflicting numerical citation; Spanish omits English's explicit
+**FT Master** qualification without denying it; and the English
+**firing a Deployable** question is narrower than Spanish's
+**placing Deployables** question, although both forbid vertical
+placement. The last two are source wording differences, not
+contradictory answers. Keep English selected, preserve both citations,
+and do not infer new gameplay or scenario scope. This closes the
+bounded nine-answer semantic comparison, **not** general bilingual
+equivalence of all historical answers, historical replay, exact
+publication dating or deferred ITS season applicability.
+
 **Current-selector cross-topic reconciliation, 2026-10-29:** The
 `test_published_faq_all_topic_links_preserve_selected_scope_and_history`
 regression checks all 48 topic associations across 42 distinct topics
