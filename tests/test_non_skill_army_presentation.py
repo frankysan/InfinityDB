@@ -8,18 +8,21 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import zipfile
 from pathlib import Path
 from typing import Any
 from wsgiref.util import setup_testing_defaults
 
 import pytest
 
+from infinity_db.database import Database
 from infinity_db.web import create_app
 from tools.verify_non_skill_army_browser import CASES, WIDTHS, projected_buckets
 
 ROOT = Path(__file__).resolve().parents[1]
 APPLICATION_DB = ROOT / "data/generated/infinity.db"
 RULES_DB = ROOT / "data/generated/rules.db"
+ARMY_ZIP = ROOT / "data/raw/JSON 20260929-114335.zip"
 
 # Original Army Skill IDs deliberately published in other player-facing buckets.
 SOURCE_BUCKETS = {
@@ -158,6 +161,146 @@ def test_browser_case_manifest_tracks_the_pinned_api_samples() -> None:
             slug, source_slug, category, destination,
         )
         assert case.minimum_rows >= 1
+
+
+def _army_source(member: str) -> dict[str, Any]:
+    with zipfile.ZipFile(ARMY_ZIP) as archive:
+        return json.loads(archive.read(member))
+
+
+def _published_unit(application: Any, slug: str) -> dict[str, Any]:
+    status, data = _get(application, f"/api/units/{slug}")
+    assert status == 200, slug
+    return json.loads(data)
+
+
+@pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
+def test_army_17_ioann_source_membership_and_duo_chart_are_published(
+    application: Any,
+) -> None:
+    database = Database(APPLICATION_DB)
+    for source_file, army_id, expected_team in (
+        ("1001-o-12.json", 1001, "O-12 Fireteams I"),
+        ("1002-starmada.json", 1002, "Varangian Guards Fireteams"),
+    ):
+        source = _army_source(source_file)
+        assert source["version"] == "7.26246.159"
+        ioann = next(unit for unit in source["units"] if unit["id"] == 1940)
+        assert ioann["slug"] == "ioann-bann-varangian-dog-warrior"
+        profiles = ioann["profileGroups"][0]["profiles"]
+        assert [(p["name"], p["ava"]) for p in profiles] == [
+            ("DOGFACE FORM", 1), ("DOG-WARRIOR FORM", -1),
+        ]
+        source_team = next(team for team in source["fireteamChart"]["teams"]
+                           if team["name"] == expected_team)
+        source_member = next(member for member in source_team["units"]
+                             if member["slug"] == ioann["slug"])
+        assert source_member["max"] == 1
+        assert source_member["required"] is False
+        assert source_member["comment"] == "(Varangian)"
+        assert "DUO" in source_team["type"]
+
+        published_chart = database.get_fireteam_chart(army_id)
+        assert published_chart is not None
+        team = next(team for team in published_chart["teams"]
+                    if team["name"] == expected_team)
+        match = next(member for member in team["members"]
+                     if member["slug"] == ioann["slug"])
+        assert match["unit"]["slug"] == ioann["slug"]
+        assert (match["max_count"], match["required"], match["comment"]) == (
+            1, False, "(Varangian)",
+        )
+        assert "DUO" in team["types"]
+    published = _published_unit(application, "ioann-bann-varangian-dog-warrior")
+    assert 1940 in published["source_ids"]
+    assert {"DOGFACE FORM", "DOG-WARRIOR FORM"} <= {
+        profile["name"] for army in published["armies"] for profile in army["profiles"]
+    }
+
+
+@pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
+def test_army_18_najjarun_shared_deactivator_survives_all_loadouts(
+    application: Any,
+) -> None:
+    metadata = _army_source("metadata.json")
+    assert next(item for item in metadata["equips"] if item["id"] == 238)["name"] == (
+        "Deactivator"
+    )
+    sources = ("401-haqqislam.json", "402-hassassin-bahram.json",
+               "403-qapu-khalqi.json")
+    for member in sources:
+        document = _army_source(member)
+        assert document["version"] == "7.26246.158"
+        unit = next(unit for unit in document["units"] if unit["id"] == 314)
+        group = unit["profileGroups"][0]
+        assert 238 in {entry["id"] for entry in group["profiles"][0]["equip"]}
+        assert len(group["options"]) == 3
+    unit = _published_unit(application, "najjarun-engineers")
+    assert 314 in unit["source_ids"]
+    assert any(item["slug"] == "deactivator"
+               for profile in unit["general_profiles"]
+               for item in profile["shared_items"]["equipment"])
+    reviewed_armies = {
+        army["id"]: army for army in unit["armies"] if army["id"] in (401, 402, 403)
+    }
+    assert set(reviewed_armies) == {401, 402, 403}
+    for army in reviewed_armies.values():
+        assert len(army["loadouts"]) == 3
+        assert any(profile["ava"] in (1, 2) for profile in army["profiles"])
+    assert _get(application, "/equipment/deactivator")[0] == 200
+
+
+@pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
+def test_army_19_sacha_ava_one_across_pinned_factions(
+    application: Any,
+) -> None:
+    contexts = (
+        ("1003-torchlight-brigade.json", "7.26246.159", 1003),
+        ("107-kestrel-colonial-force.json", "7.26246.158", 107),
+        ("204-invincible-army.json", "7.26246.158", 204),
+        ("304-usariadna.json", "7.26246.158", 304),
+    )
+    for member, version, _ in contexts:
+        document = _army_source(member)
+        assert document["version"] == version
+        unit = next(unit for unit in document["units"] if unit["id"] == 1874)
+        assert unit["slug"] == "sacha-xenotech-hunters"
+        assert [p["ava"] for group in unit["profileGroups"]
+                for p in group["profiles"]] == [1]
+    unit = _published_unit(application, "sacha-xenotech-hunters")
+    assert 1874 in unit["source_ids"]
+    for _, _, source_army in contexts:
+        matching = [army for army in unit["armies"] if army["id"] == source_army]
+        assert matching, source_army
+        assert all(profile["ava"] == 1
+                   for army in matching for profile in army["profiles"])
+
+
+@pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
+def test_army_20_racerbot_bangbomb_source_buckets_are_deduplicated(
+    application: Any,
+) -> None:
+    meta = _army_source("metadata.json")
+    assert next(item for item in meta["equips"] if item["id"] == 246)["name"] == "Bangbomb"
+    assert next(item for item in meta["skills"] if item["id"] == 266)["name"] == "Bangbomb"
+    for member in ("101-panoceania.json", "401-haqqislam.json"):
+        source = _army_source(member)
+        assert source["version"] == "7.26246.158"
+        racer = next(unit for unit in source["units"] if unit["id"] == 1905)
+        profile = racer["profileGroups"][0]["profiles"][0]
+        for bucket, source_id in (("equip", 246), ("skills", 266)):
+            assert any(item["id"] == source_id and item.get("extra") == [310]
+                       for item in profile[bucket])
+    published = _published_unit(application, "racerbots")
+    assert 1905 in published["source_ids"]
+    for general in published["general_profiles"]:
+        bangbombs = [item for item in general["shared_items"]["equipment"]
+                     if item.get("slug") == "bangbomb"]
+        assert len(bangbombs) == 1
+        assert [extra["id"] for extra in bangbombs[0]["extras"]] == [310]
+        assert not any(item.get("slug") == "bangbomb"
+                       for item in general["shared_items"]["skills"])
+    assert _get(application, "/equipment/bangbomb")[0] == 200
 
 
 def test_browser_verifier_collects_general_and_army_local_source_buckets() -> None:

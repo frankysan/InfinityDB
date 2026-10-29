@@ -173,13 +173,31 @@ counts above.
   Symbiont Armor profiles, like Intel's Full Power/Battle Ravaged
   profiles, are not interchangeable chart selections.
 
-  The present-state chart acceptance does **not** approve every
-  profile group, option cost, AVA, Fireteam constraint, or historical
-  Army delta. ARMY-01's Fireteam chart context remains distinct,
-  ARMY-17–20 and full ARMY-02–16 profile/roster checks remain open,
-  and final hosted release-browser acceptance is separate. Keep
-  unavailable pre-change evidence as a provenance limitation,
-  not a present-state defect.
+  **ARMY-17–20** now have **selected current-state local acceptance**
+  independently of the Spec-Ops charts. Ioann Bann (#1940) retains
+  Dogface/Dog-Warrior profiles and maximum-one Varangian Duo
+  membership in both O-12 and Starmada source Fireteam charts;
+  the Fireteam API and both ordinary chart pages agree. Najjarun
+  (#314) exposes shared Deactivator (Equipment 238) across all
+  three native loadouts in Haqqislam, Hassassin Bahram and Qapu
+  Khalqi. Sāchā (#1874) exposes AVA 1 in four selected faction
+  contexts spanning Army revisions `7.26246.158` and `.159`;
+  its Unit page is responsive, but numeric AVA discoverability
+  on that page is **not** established. Racerbot (#1905) preserves
+  both native Equipment 246 and legacy Skill 266 source provenance
+  (Bangbomb extra 310) while publishing one deduplicated
+  Equipment reference. Source/API tests and the four Unit pages
+  pass Chromium at 1440/390/320 px; Ioann's two Fireteam chart
+  pages pass at the same widths (18 page/viewport checks).
+  No production-data changes were required.
+
+  These bounded checks do **not** approve every profile, option
+  cost, faction availability, Fireteam chart, or historical Army
+  delta. ARMY-01's complete Fireteam chart review and remaining
+  ARMY-02–20 roster/profile semantics remain open; final hosted
+  release-browser acceptance is separate. Keep unavailable
+  pre-change evidence as a provenance limitation, not a
+  present-state defect.
 - **FAQ-01 to FAQ-09 (nine added rulings):** compared against v0.0
   and v0.1; this does not independently approve every affected
   owner page or applicability. FAQ-09's undeployed Ancillary

@@ -353,6 +353,80 @@ def test_all_24_core_scenario_setups_render_source_backed_browser_contract(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("army", ("o-12", "starmada"))
+def test_army_17_ioann_duo_membership_reaches_fireteam_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int, army: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(
+            f"{ORIGIN}/fireteams?army={army}", wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        page.locator("#fireteam-content").wait_for(state="visible", timeout=30000)
+        matches = page.locator(".fireteam-member-table tr").filter(
+            has=page.locator('a[href="/units/ioann-bann-varangian-dog-warrior"]')
+        )
+        assert matches.count() >= 1
+        assert any("Max 1" in row.inner_text() for row in matches.all())
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (army, width)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "expected"),
+    (
+        ("ioann-bann-varangian-dog-warrior", "DOG-WARRIOR FORM"),
+        ("najjarun-engineers", "Deactivator"),
+        ("sacha-xenotech-hunters", "Xenotech Hunters"),
+        ("racerbots", "Bangbomb"),
+    ),
+)
+def test_army_17_20_selected_unit_publication_is_responsive(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+    width: int, slug: str, expected: str,
+) -> None:
+    """Pinned Army Unit pages render source-backed profile/equipment references."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/units/{slug}", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        page.locator(".general-profile").first.wait_for(state="visible", timeout=30000)
+        assert expected in page.locator("#unit-content").inner_text()
+        if slug == "ioann-bann-varangian-dog-warrior":
+            assert "DOGFACE FORM" in page.locator("#unit-content").inner_text()
+        elif slug == "najjarun-engineers":
+            assert page.locator(
+                '.general-profile a[href="/equipment/deactivator"]'
+            ).count() == 1
+            assert page.locator(".army-profile").first.locator(
+                ".loadout-start"
+            ).count() >= 2
+        elif slug == "racerbots":
+            assert page.locator(
+                '.general-profile a[href="/equipment/bangbomb"]'
+            ).count() == 1
+            assert page.locator('a[href="/skills/bangbomb"]').count() == 0
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_esx04_ap_t2_cc_weapon_property_is_visible_in_browser(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

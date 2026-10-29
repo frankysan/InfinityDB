@@ -256,15 +256,52 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         This completes **selected current chart/identity publication
         for ARMY-02–16**, not roster/profile/AVA/Fireteam acceptance
         or a pre/post Army change comparison.
-      - [ ] **ARMY-01 and ARMY-17–20, plus full ARMY-02–16 profiles:**
-        Continue source-to-database-to-player verification by the
-        original 20-item Army update inventory. Keep Fireteam chart
-        constraints (ARMY-01) distinct from the Spec-Ops/TEAM-OPS
-        option tables (ARMY-02–16). For each source Unit/faction,
-        check current profiles, options, availability and
-        source-specific references as applicable; do not infer
-        historical changes without a pinned pre-notice Army snapshot.
-        Retain final release-browser acceptance as a separate gate.
+      - [x] **ARMY-17–20 selected current-state publication:** The
+        September 29 Army snapshot, application database and public
+        pages agree on four distinct source cases:
+        - **ARMY-17 / Ioann Bann #1940:** The O-12 and Starmada
+          `7.26246.159` members preserve Dogface (AVA 1) and
+          Dog-Warrior (transition profile AVA -1) forms. Both
+          Fireteam charts permit a maximum-one, optional
+          Varangian-labeled member in a Duo. Public Fireteam API
+          and Chromium chart pages at 1440/390/320 px show the
+          scoped membership. This is not approval of the entire
+          sectorial chart or a pre-update membership delta.
+        - **ARMY-18 / Najjarun #314:** Haqqislam, Hassassin
+          Bahram and Qapu Khalqi `7.26246.158` source profiles
+          each contain shared Equipment 238 (Deactivator). The
+          three distinct native loadouts in each context are
+          published with the shared Equipment reference linked
+          on the ordinary Unit page; the separate option weapon
+          ID 222 is not a substitute for Equipment 238.
+        - **ARMY-19 / Sāchā #1874:** Selected Torchlight Brigade
+          (`7.26246.159`), Kestrel Colonial Force, Invincible
+          Army and USAriadna (`7.26246.158`) sources all have
+          profile AVA 1. The four corresponding public Unit API
+          contexts retain AVA 1; the ordinary Unit page loads
+          responsively. Player-facing numeric AVA discoverability
+          is **not** established by this browser check and needs
+          separate review.
+        - **ARMY-20 / Racerbot #1905:** PanOceania and Haqqislam
+          `7.26246.158` source profiles contain both native
+          Equipment 246 and legacy Skill 266 (Bangbomb, extra
+          310). The maintained public projection deduplicates
+          these into one Equipment entry, not a duplicate
+          Equipment/Skill listing. The ordinary Unit page links
+          `/equipment/bangbomb` without a Skill duplicate.
+        Source/API regressions and Chromium checks at 1440/390/
+        320 px passed for all four selected Unit pages; the
+        Ioann Fireteam pages also passed in O-12 and Starmada.
+        These checks establish **selected present-state behavior**,
+        not historical Army changes or final hosted acceptance.
+      - [ ] **ARMY-01, remaining full roster/profile acceptance,
+        and release gates:** Compare Fireteam chart constraints,
+        complete unit/profile/option costs and source-specific
+        AVA for ARMY-02–20 where still unreviewed. In particular,
+        review numeric AVA visibility for ARMY-19. Do not infer
+        a historical before/after delta without an earlier
+        pinned Army snapshot. Final release-matched database,
+        browser and CI acceptance remain separate gates.
       - [x] Recheck **Infinity Spec-Ops / Request SpecBall (N53-02)**
         against N5.3 p. 98 and the already recorded REA-040
         acceptance. The core request Skill, drop, selection, pickup,
