@@ -623,6 +623,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Continuo* title in testing evidence. Targeted curated/composed
       rules tests protect the restored text. No source authority,
       rule behavior, links or effective-date scopes changed.
+    - [x] Compare the **20 published v0.0-origin answers** against pinned
+      English FAQ v0.0 and v0.1 PDFs, checking their meaning and exceptions
+      did not change across those source versions. Pin independent
+      answer-semantic anchors in the audit-only question inventory and
+      assert each carried-forward current answer retains them, alongside
+      original and selected printed-page references. Focused test passed
+      on 2026-10-29. This does not grant historical runtime selection,
+      independently date either PDF, or certify the eight deferred
+      ITS-only rulings or all Spanish translations.
   - [x] Verify source-to-ordinary-browser reachability of **all 29 published
     reviewed FAQ rulings** against a fresh rules export. The tracked
     `test_every_published_faq_has_a_normal_browser_entry_point` drives

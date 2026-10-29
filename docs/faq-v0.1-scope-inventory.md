@@ -42,8 +42,22 @@ the independent v0.0 inventory and each published ruling's
 
 This closes the **question identity and historical page reconciliation**
 for the two pinned English FAQ versions. It does not establish exact
-publication dates, identical answer wording across versions,
-out-of-scope ITS applicability, or exhaustive topic-to-browser access.
+publication dates, out-of-scope ITS applicability, or exhaustive
+topic-to-browser access.
+
+**Carried-forward answer semantic review, 2026-10-29:** The 20
+published v0.0-origin English answers were compared with their
+corresponding v0.1 English FAQ passages, including conditions and
+exceptions. No material answer change was identified for these 20
+rulings. The audit-only manifest now records independent answer-semantic
+anchors per question; the
+`test_carried_forward_v00_faq_answers_retain_reviewed_v01_semantics`
+regression requires exactly those 20 identities, their original v0.0
+page and selected current v0.1 page, and every reviewed answer anchor
+in curated text. This protects the *meaning* of the currently selected
+answers, not exact typography, automatic extraction of source-PDF text,
+historical runtime replay, Spanish translation equivalence or the eight
+deferred ITS-only questions.
 
 **Current-selector cross-topic reconciliation, 2026-10-29:** The
 `test_published_faq_all_topic_links_preserve_selected_scope_and_history`

@@ -2766,6 +2766,15 @@ v0.1 rulings must be absent. The focused regression passed. This is
 a current-source selector/association gate, not historical v0.0 replay
 or a certification of deferred ITS-specific applicability.
 
+**Carried-forward FAQ meaning regression, 2026-10-29:** The
+`test_carried_forward_v00_faq_answers_retain_reviewed_v01_semantics`
+compares reviewed semantic anchors of all 20 v0.0-origin published
+answers against current curated v0.1 text, including the original and
+selected English printed-page citations. The anchors were reviewed
+against both pinned English FAQs. This is an audit-only source wording
+gate: it does not read the ignored PDF bytes in CI, grant historical
+publication, or certify Spanish/ITS translation and applicability.
+
 **FAQ public-copy encoding regression, 2026-10-29:**
 `test_published_faq_copy_has_no_corrupted_question_mark_possessives`
 checks the 29 current FAQ question/answer strings for accidental

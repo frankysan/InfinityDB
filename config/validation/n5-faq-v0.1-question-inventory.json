@@ -165,6 +165,89 @@
       4
     ]
   ],
+  "historicalV00StableAnswerAnchors": {
+    "deployment-phase-reposition-after-measurement": [
+      "Roll or measurement",
+      "Fireteam Coherency Check"
+    ],
+    "deployment-private-zoc-coherency": [
+      "opponent looking away",
+      "Private Information"
+    ],
+    "prone-movement-label": [
+      "Movement Label",
+      "Jump and Berserk"
+    ],
+    "prone-at-end-of-move-distance": [
+      "moves normally",
+      "end of the movement"
+    ],
+    "vault-during-climb-and-jump": [
+      "General Movement Rules",
+      "including vaulting"
+    ],
+    "bs-attack-roll-label-mods": [
+      "Intuitive Attack and Speculative Attack",
+      "+1 SD MODs do not apply to Long Skills"
+    ],
+    "direct-template-secondary-target-los": [
+      "cannot fire around a corner",
+      "outside the firing Trooper's Line of Fire"
+    ],
+    "controlled-jump-speedball": [
+      "Controlled Jump affects Troopers, not Speedballs"
+    ],
+    "place-deployable-space-occupied": [
+      "another legal position",
+      "Deployable is lost",
+      "Drop Bears (BS Mode)"
+    ],
+    "surprise-attack-multiple-users": [
+      "applies separately",
+      "Coordinated Order",
+      "Controller and Peripheral"
+    ],
+    "sixth-sense-msv1-zero-visibility": [
+      "both Sixth Sense and Multispectral Visor Level 1",
+      "-6 MOD"
+    ],
+    "marker-automatic-skill-declarations": [
+      "changes how an Order activates a Trooper",
+      "restricts AROs"
+    ],
+    "protheion-excess-saving-rolls": [
+      "Further failed Saving Rolls have no effect",
+      "no additional benefit"
+    ],
+    "camouflage-one-use-infiltration-failure": [
+      "Deploying as a Model",
+      "failing an Infiltration Roll uses up the one use"
+    ],
+    "aerial-boost-no-silhouette-contact": [
+      "cannot enter Silhouette contact",
+      "do not activate Boost"
+    ],
+    "stealth-aro-multiple-activations": [
+      "ARO can target",
+      "ARO becomes Idle"
+    ],
+    "deployable-cover-no-placement": [
+      "Nothing can be placed on Deployable Cover",
+      "cannot end a move"
+    ],
+    "null-state-marker-and-cautious-movement": [
+      "Disconnected or Unconscious State",
+      "re-entering Marker State",
+      "Cautious Movement"
+    ],
+    "discover-fireteam-sd-bonuses": [
+      "Neither BS Attack (+1 SD) nor the +1 BS Fireteam bonus applies to Discover"
+    ],
+    "scenario-element-carrier-marker-state": [
+      "scenario element such as a Supply Box",
+      "cannot enter Marker State"
+    ]
+  },
   "coreScenarioOverlaps": {
     "scenario-element-carrier-marker-state": [
       "scenario:supplies"

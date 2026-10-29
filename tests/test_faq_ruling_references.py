@@ -196,6 +196,46 @@ def test_published_faq_copy_has_no_corrupted_question_mark_possessives() -> None
     assert all("?" not in title for title in titles.values())
 
 
+def test_carried_forward_v00_faq_answers_retain_reviewed_v01_semantics() -> None:
+    """Audit-only source anchors: v0.0 and v0.1 English answers agree in meaning.
+
+    These checks guard only the 20 current published carry-forwards, not
+    deferred ITS rulings, historical replay, or full translation equivalence.
+    """
+    root = Path(__file__).resolve().parents[1]
+    manifest = json.loads(
+        (root / "config/validation/n5-faq-v0.1-question-inventory.json")
+        .read_text(encoding="utf-8")
+    )
+    faq = json.loads(
+        (root / "data/curated/rules/n5-faq-v0.1.json").read_text(encoding="utf-8")
+    )
+    original_pages = dict(manifest["historicalV00CoreQuestions"])
+    current_pages = dict(manifest["coreQuestions"])
+    anchors = manifest["historicalV00StableAnswerAnchors"]
+    records = {record["id"].removeprefix("faq-ruling:"): record for record in faq["records"]}
+    assert len(original_pages) == len(anchors) == 20
+    assert set(anchors) == set(original_pages)
+    assert set(original_pages) <= set(current_pages) == set(records)
+    for slug, clauses in anchors.items():
+        assert isinstance(clauses, list) and clauses and len(clauses) == len(set(clauses))
+        facts = records[slug]["facts"]
+        assert facts["originalPublication"] == {
+            "collectionId": "n5-faq-v0.0",
+            "sourceId": "n5-faq-v0.0-en-pdf",
+            "version": "0.0",
+            "publishedDate": "2025-10-15",
+            "page": original_pages[slug],
+        }, slug
+        assert facts["selectedCitation"] == {
+            "sourceId": "n5-faq-v0.1-en-pdf",
+            "page": current_pages[slug],
+        }, slug
+        for clause in clauses:
+            assert isinstance(clause, str) and clause.strip() == clause and clause
+            assert clause in facts["answer"], (slug, clause)
+
+
 def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
     published_pilot: RulesDatabase,
 ) -> None:
