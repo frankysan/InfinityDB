@@ -104,19 +104,33 @@ Cube 2.0's Command Token recovery reroll, is source-backed and classified
 as automatic Equipment rather than a deployed object; the resulting
 review manifest remains distinct from new object/delivery publication.
 The separate read-only `tools.audit_deployed_object_delivery_coverage`
-compares the 17 reviewed object identities against their *approved* delivery
-origins. Six identities now have ten reviewed delivery paths: Deployable
-Repeater, Disco Ball, Drop Bears, WildParrot, FastPanda and Armed Turret.
-Eleven objects remain in the delivery review queue. WildParrot distinguishes
-ordinary Place Deployable from Intuitive Attack with a WIP Roll. Armed Turret
-has no separate Army auxiliary-profile selector: its approved delivery path
-targets the exact reviewed curated object by `originRuleId`, retaining its
-S1/S2 Silhouette conflict. Mine Dispenser has neither an exact reviewed
-target profile nor a reviewed-only object and remains unresolved.
+compares the 17 published reviewed object identities against their *approved*
+delivery origins. All 17 currently have reviewed origins (28 approved delivery
+paths in the pinned review); this closes the bounded published-object delivery
+queue, **not** the inventory of all possible deployed objects. WildParrot
+distinguishes ordinary Place Deployable from Intuitive Attack with a WIP Roll.
+Armed Turret has no separate Army auxiliary-profile selector: its approved
+delivery path targets the exact reviewed curated object by `originRuleId`,
+retaining its S1/S2 Silhouette conflict. Mine Dispenser has neither an exact
+reviewed target profile nor a reviewed-only object and remains unresolved.
 The audit reports exact Army source-catalog aliases as investigation leads,
 **not** evidence of a delivery method, legal roster carrier or equivalence
 between distinct Weapon modes. Missing delivery edges are evidence gaps,
 not claims that an object cannot be deployed.
+
+The source-schema review distinguishes direct source Unit ownership from
+catalog availability and reusable metadata. Army-local `profile_*` and
+`option_*` item occurrences, plus source-wide `unit_option_*` occurrences,
+are eligible for reviewed reverse uses; Army-level `army_weapons` and
+`army_equipment` catalogs are not carriers. Army option Weapons are reached
+through `option_weapons` and `option_weapon_templates`; the template alone
+does not establish Unit ownership. The three source Include contexts may
+reference exact option targets, with Unit-wide Include targets retaining
+unknown parent Army membership. `metadata_weapons` describes source profiles
+and modes, not carrier assignments. A schema-level regression guards these
+known structural context roles against silent additions; it cannot establish
+whether an unreviewed rule, mode or source-text mention represents another
+deployed object.
 
 The release-builder `tools.build_deployed_object_publication` compiles the
 validated review and current Army/rules database pair to deterministic

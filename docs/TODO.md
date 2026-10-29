@@ -1479,6 +1479,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                   This requires the ignored `infinity.raw.db`, so clean CI
                   skips the raw-pair comparison. It does not establish
                   unreviewed delivery, variant or object completeness.
+                - [x] Classify current source-schema Weapon/Equipment
+                  references: Army-level catalog membership, Unit-bearing
+                  profile/loadout/Unit-option occurrences, reusable Weapon
+                  option templates and the three Include contexts. The
+                  schema regression flags new source catalog foreign keys
+                  or changed Include selectors for explicit review, even
+                  without the ignored raw database. This is structural
+                  coverage, not evidence of all N5 object/delivery semantics.
     - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
       Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
       missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.

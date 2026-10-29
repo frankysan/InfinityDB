@@ -1410,7 +1410,12 @@ raw Weapon/Equipment occurrences and exact Include targets, including
 source-wide Unit options without invented Army ownership. These comparisons
 skip in clean CI without the ignored raw source database and must be repeated
 against the final pinned release input pair. They do not validate unreviewed
-delivery origins or objects.
+delivery origins or objects. The hermetic
+`tests/test_deployed_object_source_contexts.py` checks the known schema-level
+Weapon/Equipment foreign-key contexts, distinguishes whole-Army catalogs and
+reusable Weapon templates from Unit ownership, and guards all three source
+Include selector shapes against drift. New source context types must be
+reviewed rather than automatically promoted to reverse Unit uses.
 `tests/test_verify_deployed_object_publication_browser.py` exercises the
 real API and Chromium at 1440/390 px with an isolated, freshly generated
 publication. There are 17 reviewed entries, not the entire game-object corpus;
