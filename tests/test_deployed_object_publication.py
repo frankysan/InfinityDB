@@ -308,6 +308,10 @@ def test_publication_rejects_identity_value_and_delivery_tampering(
     rejected(changed, "reviewed delivery edge")
 
     changed = copy.deepcopy(original)
+    changed["objects"][0].pop("unitUses")
+    rejected(changed, "Missing or invalid deployed-object Unit usage collection")
+
+    changed = copy.deepcopy(original)
     with_uses = next(obj for obj in changed["objects"] if obj["unitUses"])
     with_uses["unitUses"][0]["originRecordId"] = "weapon:mine-dispenser"
     rejected(changed, "unreviewed deployed-object Unit usage")

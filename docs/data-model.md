@@ -120,9 +120,11 @@ not claims that an object cannot be deployed.
 
 The release-builder `tools.build_deployed_object_publication` compiles the
 validated review and current Army/rules database pair to deterministic
-`deployed-objects.json` once during release preparation. The runtime loader
-checks the artifact's Army and rules database SHA-256 hashes and structural
-attribute/identity provenance. It does **not** access the raw normalized Army
+`deployed-objects.json` once during release preparation. Every published object
+must carry an explicit `unitUses` list (which may be empty when no exact uses
+are established); an omitted list is invalid, not a claim of zero uses. The
+runtime loader checks the artifact's Army and rules database SHA-256 hashes and
+structural attribute/identity provenance. It does **not** access the raw normalized Army
 snapshot, curated JSON, or review files on requests. When the artifact is
 present, `/api/deployed-objects` and the `/deployed-objects` browser page
 publish its reviewed identities, attributes and delivery source links.

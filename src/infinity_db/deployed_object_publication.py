@@ -111,9 +111,9 @@ def load_deployed_object_publication(
             ):
                 raise ValueError("Invalid reviewed delivery edge")
             reviewed_edges.add((delivery["recordId"], delivery["method"]))
-        uses = entry.get("unitUses", [])
+        uses = entry.get("unitUses")
         if not isinstance(uses, list):
-            raise ValueError("Invalid deployed-object Unit usage collection")
+            raise ValueError("Missing or invalid deployed-object Unit usage collection")
         for use in uses:
             if (
                 not isinstance(use, dict)
