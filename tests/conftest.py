@@ -14,6 +14,12 @@ from tools.browser_test_capacity import browser_slot
 from tools.test_sections import load_test_sections, section_for_module
 
 _TEST_SECTIONS = load_test_sections()
+# Despite its filename, this module tests a browser verifier entirely with mocks.
+_NON_CHROMIUM_BROWSER_MODULES = frozenset({"test_verify_rule_fragment_browser.py"})
+
+
+def _uses_chromium(path: Path) -> bool:
+    return path.name.endswith("_browser.py") and path.name not in _NON_CHROMIUM_BROWSER_MODULES
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -22,7 +28,7 @@ def limit_concurrent_browser_tests(
 ) -> Iterator[None]:
     """Keep Chromium resource use bounded across xdist workers, not pytest jobs."""
     if (
-        not str(request.node.path).endswith("_browser.py")
+        not _uses_chromium(Path(str(request.node.path)))
         or "PYTEST_XDIST_WORKER" not in os.environ
         or importlib.util.find_spec("playwright") is None
     ):
@@ -75,7 +81,7 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 f"Test module {path.name} is not assigned in config/testing/test-sections.json"
             )
         item.add_marker(section.marker)
-        if path.name.endswith("_browser.py"):
+        if _uses_chromium(path):
             # Group only Chromium-gated modules in optional xdist loadgroup runs.
             # Otherwise worksteal may repeat module fixtures and hold slots idle.
             item.add_marker(pytest.mark.xdist_group(name=path.stem))

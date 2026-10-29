@@ -144,14 +144,17 @@ browser module fixture setup waits up to 142 s, suggesting contention and
 repeated module setup when worksteal distributes one module among workers.
 This is not evidence that fixture teardown or pytest post-processing is slow.
 
-For a controlled comparison, the runner also supports
-`--test-dist loadgroup`. It assigns all cases from each `*_browser.py`
-module to the same xdist worker, while other tests remain individually
-schedulable. The grouping marker is added in a `tryfirst` collection hook,
-before xdist generates grouped test IDs. A two-worker Army overview browser
-smoke run confirmed that all four tests carried the same group ID and shared
-one module setup. The option is **not** the default until a representative
-full-suite run demonstrates improvement:
+The runner also supports `--test-dist loadgroup`. It assigns all
+Chromium-gated browser module cases to the same xdist worker, while other
+tests remain individually schedulable. The grouping marker is added in a
+`tryfirst` collection hook, before xdist generates grouped test IDs.
+A full Windows run on 2026-10-29 passed 2,821 tests (19 skipped) in
+**247.43 s**, nearly identical to the best worksteal run of 246.85 s.
+The grouped run exposed another issue: mock-only
+`test_verify_rule_fragment_browser.py` waited **118.09 s** for a Chromium
+slot even though no tests in it launch a browser. That module is now excluded
+from slot admission and grouped scheduling, retaining its test coverage.
+The option remains **opt-in**, pending another full-run comparison:
 
 ```powershell
 .\.venv\Scripts\python.exe tools/run_checks.py --all --test-dist loadgroup
