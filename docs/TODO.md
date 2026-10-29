@@ -326,6 +326,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         English/Spanish v0.1 p. 3 remains the selected current citation.
         The 29 published rulings now comprise 20 v0.0-origin and nine
         v0.1-origin entries. Its Supplies-only effective scope is unchanged.
+      - [x] Reconcile the **28 English FAQ v0.0 question identities**
+        against the current v0.1 inventory, pinning the original
+        printed page of every carried-forward ruling and all eight
+        deferred ITS questions. Twenty reviewed published questions
+        originate in v0.0 (ten on p. 1, ten on p. 2), alongside eight
+        ITS-only deferred questions (two on p. 2, six on p. 3).
+        The nine remaining v0.1 questions are new. The independent
+        inventory and FAQ regression now prevent unreviewed historical
+        source/page reclassification. This closes question provenance,
+        not gameplay applicability, exact publication dates or complete
+        browser reachability.
       - [x] Validate **ordinary browser FAQ selection** for the new
         Supplies ruling at 1440px and 390px using
         `tests/test_verify_scenario_faq_browser.py`. The Chromium

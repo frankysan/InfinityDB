@@ -1,6 +1,6 @@
 {
-  "description": "Audit-only question-level inventory of the pinned official N5 FAQ v0.1 (English printed pages 1–4, cross-checked against Spanish v0.1). No new gameplay semantics or historical publication date claims.",
-  "reviewedOn": "2026-10-28",
+  "description": "Audit-only question-level inventory of pinned N5 FAQ v0.1 (English printed pages 1–4, cross-checked against Spanish v0.1), with original English v0.0 question/page pins. No new gameplay semantics or historical publication date claims.",
+  "reviewedOn": "2026-10-29",
   "sourceIds": {
     "english": "n5-faq-v0.1-en-pdf",
     "spanish": "n5-faq-v0.1-es-pdf"
@@ -25,6 +25,28 @@
       "sha256": "7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a"
     }
   },
+  "historicalV00CoreQuestions": [
+    ["deployment-phase-reposition-after-measurement", 1],
+    ["deployment-private-zoc-coherency", 1],
+    ["prone-movement-label", 1],
+    ["prone-at-end-of-move-distance", 1],
+    ["vault-during-climb-and-jump", 1],
+    ["bs-attack-roll-label-mods", 1],
+    ["direct-template-secondary-target-los", 1],
+    ["controlled-jump-speedball", 1],
+    ["place-deployable-space-occupied", 1],
+    ["surprise-attack-multiple-users", 1],
+    ["sixth-sense-msv1-zero-visibility", 2],
+    ["marker-automatic-skill-declarations", 2],
+    ["protheion-excess-saving-rolls", 2],
+    ["camouflage-one-use-infiltration-failure", 2],
+    ["aerial-boost-no-silhouette-contact", 2],
+    ["stealth-aro-multiple-activations", 2],
+    ["deployable-cover-no-placement", 2],
+    ["null-state-marker-and-cautious-movement", 2],
+    ["discover-fireteam-sd-bonuses", 2],
+    ["scenario-element-carrier-marker-state", 2]
+  ],
   "coreQuestions": [
     [
       "deployment-phase-reposition-after-measurement",
@@ -154,35 +176,43 @@
   "deferredItsOnlyQuestions": [
     {
       "page": 3,
-      "subject": "Neutral Troopers such as HVTs blocking movement"
+      "subject": "Neutral Troopers such as HVTs blocking movement",
+      "v00Page": 2
     },
     {
       "page": 3,
-      "subject": "Spotlight for Telemetry and HVT: Designation Classified Objectives"
+      "subject": "Spotlight for Telemetry and HVT: Designation Classified Objectives",
+      "v00Page": 2
     },
     {
       "page": 3,
-      "subject": "Area of Interest: Activate Communication Antenna and Oppose Activation ARO"
+      "subject": "Area of Interest: Activate Communication Antenna and Oppose Activation ARO",
+      "v00Page": 3
     },
     {
       "page": 3,
-      "subject": "Crossing Lines: Superior Deployment of Netrods and Imetrons"
+      "subject": "Crossing Lines: Superior Deployment of Netrods and Imetrons",
+      "v00Page": 3
     },
     {
       "page": 3,
-      "subject": "Akial Interference: retrying a card after a failed Skill Roll"
+      "subject": "Akial Interference: retrying a card after a failed Skill Roll",
+      "v00Page": 3
     },
     {
       "page": 3,
-      "subject": "Akial Interference: Predator kills before drawing the card"
+      "subject": "Akial Interference: Predator kills before drawing the card",
+      "v00Page": 3
     },
     {
       "page": 3,
-      "subject": "Akial Interference: tracking cards already used"
+      "subject": "Akial Interference: tracking cards already used",
+      "v00Page": 3
     },
     {
       "page": 4,
-      "subject": "Crossing Lines: Impetuous movement towards nearest enemy Deployment Zone"
+      "subject": "Crossing Lines: Impetuous movement towards nearest enemy Deployment Zone",
+      "v00Page": 3
     }
   ],
   "notes": [

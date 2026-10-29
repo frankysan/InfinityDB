@@ -2,7 +2,7 @@
 
 **Project domain:** Data processing
 
-**Reviewed:** 2026-10-28. **Scope:** the locally pinned English N5 FAQ
+**Reviewed:** 2026-10-29. **Scope:** the locally pinned English N5 FAQ
 v0.1, `data/pdf/faq/n5-faqs-v0-1-en.pdf` (five file pages, printed
 pages 1–4), compared with the maintained
 `data/curated/rules/n5-faq-v0.1.json`. This is a source-section
@@ -28,6 +28,22 @@ checks source citations, v0.0/v0.1 provenance, current rules revision/date
 selection and the two scenario-only runtime scopes against a fresh rules
 export. The manifest is an **audit gate**, not an additional gameplay
 definition or a substitute for a future historical/ITS applicability review.
+
+**Historical v0.0 reconciliation, 2026-10-29:** The earlier English
+FAQ contains 28 Q&A blocks on printed pp. 1–3. The audit manifest
+independently pins the original pages of all 20 carried-forward published
+rulings (ten on p. 1 and ten on p. 2), plus all eight still-deferred
+ITS questions (two on p. 2, six on p. 3). Together they account for
+all 28 earlier questions, leaving nine v0.1 additions, one of which
+is the narrowly scoped Ancillary question. The regression checks both
+the independent v0.0 inventory and each published ruling's
+`facts.originalPublication` identity/page; current v0.1
+`selectedCitation` pages remain separately pinned.
+
+This closes the **question identity and historical page reconciliation**
+for the two pinned English FAQ versions. It does not establish exact
+publication dates, identical answer wording across versions,
+out-of-scope ITS applicability, or exhaustive topic-to-browser access.
 
 ## Source-byte identity and publication boundary
 

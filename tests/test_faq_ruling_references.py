@@ -181,6 +181,16 @@ def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
         for slug, page in inventory["coreQuestions"]
     }
     assert len(inventory["coreQuestions"]) == len(expected) == 29
+    # Independently inventoried from all three printed pages of English FAQ v0.0.
+    historical_expected = {
+        f"faq-ruling:{slug}": page
+        for slug, page in inventory["historicalV00CoreQuestions"]
+    }
+    assert len(historical_expected) == 20
+    assert set(historical_expected) <= set(expected)
+    assert {
+        page: list(historical_expected.values()).count(page) for page in (1, 2)
+    } == {1: 10, 2: 10}
     assert {page: list(expected.values()).count(page) for page in range(1, 5)} == {
         1: 11, 2: 12, 3: 5, 4: 1,
     }
@@ -189,6 +199,13 @@ def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
     assert len({
         row["subject"] for row in inventory["deferredItsOnlyQuestions"]
     }) == 8
+    assert [
+        row["v00Page"] for row in inventory["deferredItsOnlyQuestions"]
+    ] == [2, 2, 3, 3, 3, 3, 3, 3]
+    # All 28 v0.0 questions persist in v0.1; the other nine v0.1 Q&As are new.
+    assert len(historical_expected) + len(inventory["deferredItsOnlyQuestions"]) == 28
+    assert len(expected) + len(inventory["deferredItsOnlyQuestions"]) == 37
+    assert len(expected) - len(historical_expected) == 9
     records = {record["id"]: record for record in faq["records"]}
     assert len(records) == len(faq["records"])
     assert set(records) == set(expected), (
@@ -217,8 +234,16 @@ def test_pinned_faq_v01_question_inventory_is_complete_and_scoped(
         assert {citation["sourceId"] for citation in record["citations"]} >= {
             source_ids["english"], source_ids["spanish"],
         }
-        assert facts["originalPublication"]["version"] in {"0.0", "0.1"}
-        historical += facts["originalPublication"]["version"] == "0.0"
+        original = facts["originalPublication"]
+        if identifier in historical_expected:
+            assert original["version"] == "0.0", identifier
+            assert original["sourceId"] == "n5-faq-v0.0-en-pdf", identifier
+            assert original["page"] == historical_expected[identifier], identifier
+            historical += 1
+        else:
+            assert original["version"] == "0.1", identifier
+            assert original["sourceId"] == source_ids["english"], identifier
+            assert original["page"] == page, identifier
         assert facts["selectionReason"]
         assert facts["applicability"] == [{
             "rulesRevision": "5.3",
