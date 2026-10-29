@@ -1506,6 +1506,72 @@ def test_vulnerability_example_is_explicit_and_not_a_component_rule(
         assert "reviewedVulnerabilityCases" not in load_ammunition_reference_map()[source_id]
 
 
+def test_n53_specball_core_procedure_reaches_public_skill_routes(tmp_path: Path) -> None:
+    """N53-02: public Skills expose the reviewed core procedure, not ITS-only rules."""
+    rules_db = _rules_database(tmp_path)
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+
+    def request(path: str) -> tuple[str, bytes]:
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ, lambda status, headers, exc_info=None: statuses.append(status)
+        )
+        try:
+            body = b"".join(response)
+        finally:
+            close = getattr(response, "close", None)
+            if close is not None:
+                close()
+        return statuses[0], body
+
+    for slug in ("infinity-spec-ops", "request-specball"):
+        status, html = request(f"/skills/{slug}")
+        assert status == "200 OK"
+        assert b"InfinityDB" in html
+
+    status, body = request("/api/skills/infinity-spec-ops")
+    assert status == "200 OK"
+    spec_ops = json.loads(body)["rules"]
+    assert [rule["id"] for rule in spec_ops] == ["skill:infinity-spec-ops"]
+    assert "two different options from the Spec-Ops Chart" in " ".join(
+        spec_ops[0]["facts"]["effects"]
+    )
+    assert "skill:request-specball" in {
+        relation["record"]["id"]
+        for relation in spec_ops[0]["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+
+    status, body = request("/api/skills/request-specball")
+    assert status == "200 OK"
+    request_rule = json.loads(body)["rules"]
+    assert [rule["id"] for rule in request_rule] == ["skill:request-specball"]
+    facts = request_rule[0]["facts"]
+    assert "Game Round 2 or 3" in request_rule[0]["summary"]
+    assert "one 55 mm SpecBall Token" in " ".join(facts["effects"])
+    assert "two different items from the printed SpecBall Chart" in " ".join(
+        facts["effects"]
+    )
+    assert "once per game" in " ".join(facts["restrictions"])
+    assert "At the end of the collecting Order" in " ".join(facts["effects"])
+    assert "English printing discrepancy" in facts["sourceNotes"][0]
+    assert "ITS applicability" in facts["sourceNotes"][1]
+    assert ("uses-effects-of", "outbound", "Combat Jump") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in request_rule[0]["display_relations"]
+    }
+
+    status, body = request("/api/skills/request-speedball")
+    assert status == "200 OK"
+    assert [rule["id"] for rule in json.loads(body)["rules"]] == [
+        "skill:request-speedball"
+    ]
+
+
 def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
     rules_db = _rules_database(tmp_path)
     root = Path(__file__).resolve().parents[1]

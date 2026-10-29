@@ -49,17 +49,24 @@ The owning 1.0 work and release criteria remain in
   N53-23 (IMM-B Hacking example) and N53-26 (Thunderbolt grouping).
   Carry their original *selected-clause* scope forward; do not infer
   complete records, rules interactions or browser verification.
-- **1 current implementation with residual acceptance work:**
-  N53-05 (Guts geometry). The maintained `rule:guts-roll` already
-  evaluates Line of Fire from where attackers actually attacked
-  (N5.3 p. 38), and an owning rules-database test checks the phrase.
-  The original missing-explanation finding is stale; a complete
-  source-to-browser/interaction acceptance check is still open.
-- **3 changes requiring bounded follow-up or source-discrepancy disclosure:**
-  N53-02 (Spec-Ops/SpecBall procedure and TEAM-OPS scope) has
-  maintained core Skill/Request references but still needs review of
-  chart/procedure and player-accessible completeness; an interactive
-  list configurator is not automatically a 1.0 requirement.
+- **2 current implementations with residual acceptance work:**
+  N53-05 (Guts geometry) and N53-02 (Spec-Ops/SpecBall).
+  The maintained `rule:guts-roll` already evaluates Line of Fire
+  from where attackers actually attacked (N5.3 p. 38), with an
+  owning rules-database test; full source-to-browser/interaction
+  acceptance remains open. N53-02's core N5.3 p. 98
+  `skill:infinity-spec-ops` and `skill:request-specball` procedure
+  is **already published**, with pickup, placement, once-per-game
+  and Initial/Enhanced Profile transition effects. Its Combat Jump,
+  Speedball distinction, source discrepancy and ITS Season 18
+  TEAM-OPS boundary are explicit. Historical 2026-10-14 responsive
+  browser acceptance passed 24/24 checks; the current API/route
+  regression confirms the two Skills remain accessible. The
+  **Spec-Ops and SpecBall choice charts** still need a source
+  inventory and read-only player-presentation decision under the
+  1.0 completeness gate. A full interactive list/session configurator
+  is separately deferred, not a prerequisite to reference coverage.
+- **2 changes with disclosed official-source disagreements:**
   N53-07 (Kobra CC) preserves a proven DA two-save correction and an
   unresolved Anti-materiel disagreement between Army/Wiki and both PDFs.
   N53-09 (Dodge ARM+3) presents the bilingual PDF reading and discloses
@@ -69,7 +76,7 @@ The owning 1.0 work and release criteria remain in
 - **1 not applicable:** N53-01 is editorial blue-annotation guidance,
   not a missing player-facing gameplay identity.
 
-The 12 + 9 + 1 + 3 + 1 grouping accounts for all **26 English items**;
+The 12 + 9 + 2 + 2 + 1 grouping accounts for all **26 English items**;
 it is **not** a replacement for the historical 9/12/4/1 source-assessment
 counts above.
 

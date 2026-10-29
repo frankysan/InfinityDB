@@ -170,17 +170,39 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         [current disposition](rules-explanation-audit-1.0-n5.3-reconciliation.md#current-reconciliation-inventory-2026-10-29).
         It distinguishes
         **12 focused rechecks/clarifications**, **9 previously verified
-        selected clauses**, **1 represented rule awaiting final acceptance**
-        (N53-05), **3 scoped follow-ups/source conflicts** (N53-02/07/09)
-        and **1 editorial item** (N53-01) across the 26 English bullets.
+        selected clauses**, **2 represented rules awaiting bounded
+        acceptance** (N53-02/05), **2 disclosed source conflicts**
+        (N53-07/09) and **1 editorial item** (N53-01) across
+        the 26 English bullets.
         Review four additional Spanish-only subjects, all 20 Army update
         subjects and the nine added FAQ rulings in their own source/scope
-        boundaries. Prioritize N53-02's procedure/chart presentation,
-        source-to-browser Guts coverage, ESX-01..04 and Army current-state
-        coverage; preserve disclosed publisher conflicts and the ITS-only
+        boundaries. Prioritize N53-02's selection-chart source and
+        read-only presentation review, source-to-browser Guts coverage,
+        ESX-01..04 and Army current-state coverage; preserve disclosed
+        publisher conflicts and the ITS-only
         Ancillary ruling boundary. Finish release-matched database,
         derived-publication and browser acceptance without replacing the
         original audit's historical counts.
+      - [x] Recheck **Infinity Spec-Ops / Request SpecBall (N53-02)**
+        against N5.3 p. 98 and the already recorded REA-040
+        acceptance. The core request Skill, drop, selection, pickup,
+        state/profile transition, timing, once-per-game and
+        SpecBot procedures are already published, cross-linked
+        to Combat Jump and separate from Speedball/Tacball. Source
+        notes preserve the English misprint and ITS Season 18
+        tournament boundary. A new public API/route regression
+        confirms both Skills remain accessible; the historical
+        2026-10-14 responsive browser run passed 24/24 checks.
+        No gameplay-data edit was necessary.
+      - [ ] **N53-02 selection charts:** Determine which Spec-Ops
+        Chart and SpecBall Chart choices are present in the pinned
+        Army `spectables` and other versioned primary sources.
+        Inventory their player-useful read-only data and any
+        source/version mismatch, then provide ordinary reference
+        presentation for in-scope choices or record a justified
+        exclusion. Do not conflate source chart data with user-selected
+        customizations, require a list builder for reference coverage,
+        or invent absent choices from the rulebook's chart mentions.
       - [x] Recheck the **Impetuous/Prone update (N53-13)** against N5.3
         p. 97. Preserve the Impetuous-Phase Move/Jump/Climb movement-end rule
         separately from the additional end-of-Order Prone restriction, and cite
