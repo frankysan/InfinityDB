@@ -33,6 +33,119 @@
         "Request Speedball cannot be performed partway through the Order Expenditure Sequence."
       ],
       "caveat": "N5.3 p. 84 explicitly defines Speedball Tokens as State Tokens for support drops, not as standard targetable Deployable Weapon/Equipment profiles. The Tokens and their single-use contents have no reviewed ARM/BTS/STR/S source profile here and must not receive inferred reverse uses."
+    },
+    {
+      "recordId": "term:token",
+      "classification": "game-element-type-not-instance",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "A Token represents a [[trait:deployable|Deployable]] Weapon or piece of Equipment on the battlefield.",
+      "factsEvidence": [],
+      "caveat": "Glossary term for an on-table representation, not a separate object profile. Resolve any particular Token to its actual source Weapon or Equipment and reviewed delivery before publishing uses."
+    },
+    {
+      "recordId": "term:state-token",
+      "classification": "state-indicator-type-not-object-profile",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "This token is a reminder placed to indicate the effect of a rule, Skill, or game state",
+      "factsEvidence": [],
+      "caveat": "A State Token indicates an effect and is not automatically a targetable Deployable. Specific Speedball and SpecBall tokens are classified by their own source clauses."
+    },
+    {
+      "recordId": "term:deployable-equipment",
+      "classification": "game-element-type-not-instance",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "Equipment with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element",
+      "factsEvidence": [],
+      "caveat": "Generic Deployable Equipment terminology provides neither a concrete Equipment identity nor four-attribute values; review each source item separately."
+    },
+    {
+      "recordId": "term:deployable-weapon",
+      "classification": "game-element-type-not-instance",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "A Weapon with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element",
+      "factsEvidence": [],
+      "caveat": "Generic Deployable Weapon terminology is not an object instance or source-specific delivery edge; source Weapon and mode must be verified separately."
+    },
+    {
+      "recordId": "term:scenery-element",
+      "classification": "game-element-type-not-instance",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "A Scenery Element is a battlefield game element representing scenery or terrain",
+      "factsEvidence": [],
+      "caveat": "Scenery Element is a class of battlefield game elements, not one universal scenery profile. Deployable Cover remains a separately reviewed S3 example; other scenery requires its own source evidence."
+    },
+    {
+      "recordId": "skill:request-specball",
+      "classification": "support-state-token-not-standard-deployable",
+      "sourcePages": [
+        98
+      ],
+      "summaryEvidence": "Place the 55 mm Token via [[skill:combat-jump|Combat Jump]] with PH 15",
+      "factsEvidence": [
+        "Outside the [[rule:order-expenditure-sequence|Order Expenditure Sequence]], place one 55 mm SpecBall Token",
+        "SpecBall Tokens are [[term:state-token|State Tokens]]: they do not block enemy Movement and cannot be selected as targets for [[equipment:deactivator|Deactivators]]."
+      ],
+      "caveat": "N5.3 p. 98 describes one SpecBall State Token collected by an eligible Spec-Ops Trooper; it is distinct from the two Speedballs in Request Speedball (p. 84). Neither drop Token is a standard targetable four-attribute Deployable. A SpecBot selected as a SpecBall item requires separate evidence and is not classified here."
+    },
+    {
+      "recordId": "skill:remdriver",
+      "classification": "assignment-token-not-independent-object",
+      "sourcePages": [
+        110
+      ],
+      "summaryEvidence": "assigns the user's profile-listed MODs to one deployed Remote",
+      "factsEvidence": [
+        "When the user is deployed, the player places a RemDriver Token beside one Remote already deployed on the game table.",
+        "The RemDriver Token is removed at the end of the Order in which the user enters any Null State."
+      ],
+      "caveat": "RemDriver Token marks a Remote receiving MODs from a separate Trooper. It is not an independently deployed Weapon/Equipment profile, delivery edge or additional Remote carrier."
+    },
+    {
+      "recordId": "rule:peripheral-type:ancillary",
+      "classification": "deployed-peripheral-trooper-separate-domain",
+      "sourcePages": [
+        107,
+        108
+      ],
+      "summaryEvidence": "A Peripheral type with unlimited operating distance that starts undeployed",
+      "factsEvidence": [
+        "An Ancillary [[skill:peripheral|Peripheral]] does not deploy with its Controller. The Controller may place it later using [[skill:place-deployable|Place Deployable]]"
+      ],
+      "caveat": "N5.3 pp. 107-108 explicitly allow a Controller to place its Ancillary Peripheral, which then uses Peripheral activation rules. This is a Peripheral Trooper with its own source Unit/Profile relationships, not a Weapon/Equipment four-stat object or generic source-weapon reverse use. Whether a dedicated peripheral-object reference is needed remains open."
+    },
+    {
+      "recordId": "rule:scenario:carrying-supply-boxes",
+      "classification": "scenario-object-outside-weapon-equipment",
+      "sourcePages": [
+        153
+      ],
+      "summaryEvidence": "Rules for Carrying Supply Boxes.",
+      "factsEvidence": [
+        "Keep the Supply Box Token on the table even if its carrier becomes classified as Null."
+      ],
+      "caveat": "Supply Box Tokens belong to the core Supplies scenario, with scenario-specific representation, carrying and control rules. They are concrete objective elements, not source Weapon/Equipment Deployables or Army roster items; an objective catalog would need separate provenance and presentation."
+    },
+    {
+      "recordId": "skill:pick-up-supply-boxes",
+      "classification": "scenario-interaction-not-object-identity",
+      "sourcePages": [
+        153
+      ],
+      "summaryEvidence": "A Short Skill used by Specialist Troops to collect a Supply Box.",
+      "factsEvidence": [
+        "The Specialist must be in Silhouette contact with a Supply Box Token not being carried by a Model"
+      ],
+      "caveat": "Pick Up Supply Boxes is a scenario Skill acting on a Supplies objective. It creates no additional Supply Box identity, general Deployable placement edge, or Weapon/Equipment Unit use."
     }
   ]
 }

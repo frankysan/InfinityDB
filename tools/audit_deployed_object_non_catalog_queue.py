@@ -22,9 +22,19 @@ TERMS = re.compile(r"\b(?:deployables?|tokens?|scenery elements?)\b", re.IGNOREC
 # These are source-reviewed decisions, not a generic classification heuristic.
 # Adding another decision requires explicit review of its exact source clause.
 CLASSIFICATIONS = {
-    "skill:minelayer": "skill-deployment-method-not-object",
-    "skill:place-deployable": "skill-delivery-method-not-object",
-    "skill:request-speedball": "support-state-token-not-standard-deployable",
+    "skill:minelayer": ("skill", "skill-deployment-method-not-object"),
+    "skill:place-deployable": ("skill", "skill-delivery-method-not-object"),
+    "skill:request-speedball": ("skill", "support-state-token-not-standard-deployable"),
+    "skill:request-specball": ("skill", "support-state-token-not-standard-deployable"),
+    "skill:remdriver": ("skill", "assignment-token-not-independent-object"),
+    "skill:pick-up-supply-boxes": ("skill", "scenario-interaction-not-object-identity"),
+    "rule:peripheral-type:ancillary": ("rule", "deployed-peripheral-trooper-separate-domain"),
+    "rule:scenario:carrying-supply-boxes": ("rule", "scenario-object-outside-weapon-equipment"),
+    "term:token": ("term", "game-element-type-not-instance"),
+    "term:state-token": ("term", "state-indicator-type-not-object-profile"),
+    "term:deployable-equipment": ("term", "game-element-type-not-instance"),
+    "term:deployable-weapon": ("term", "game-element-type-not-instance"),
+    "term:scenery-element": ("term", "game-element-type-not-instance"),
 }
 
 
@@ -85,11 +95,9 @@ def validate_reviews(
         seen.add(record_id)
         if record_id not in candidate_ids:
             raise ValueError(f"No current non-catalog candidate mention: {record_id}")
-        if decision["classification"] != CLASSIFICATIONS.get(record_id):
-            raise ValueError(f"Unsupported non-catalog classification: {record_id}")
         record = indexed[record_id]
-        if record.get("kind") != "skill":
-            raise ValueError(f"Non-skill classification requires separate review: {record_id}")
+        if (record.get("kind"), decision["classification"]) != CLASSIFICATIONS.get(record_id):
+            raise ValueError(f"Unsupported non-catalog classification: {record_id}")
         summary = record.get("summary", "")
         if not decision["summaryEvidence"] or decision["summaryEvidence"] not in summary:
             raise ValueError(f"Non-catalog summary evidence drift: {record_id}")
@@ -98,9 +106,12 @@ def validate_reviews(
             text for key in FIELDS for text in facts.get(key, [])
             if isinstance(text, str)
         )
-        if not decision["factsEvidence"] or any(
-            not text or text not in detail for text in decision["factsEvidence"]
-        ):
+        evidence = decision["factsEvidence"]
+        # Glossary definitions have cited summaries but no structured
+        # Requirements/Effects clauses. Other decisions must pin both.
+        if not isinstance(evidence, list) or (
+            not evidence and record["kind"] != "term"
+        ) or any(not isinstance(text, str) or not text or text not in detail for text in evidence):
             raise ValueError(f"Non-catalog detailed evidence drift: {record_id}")
         pages = {
             cite.get("page") for cite in record.get("citations", [])

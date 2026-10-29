@@ -1396,21 +1396,39 @@ structured detail fields without turning keyword mentions into object IDs:
 ```
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
-manifest pins **three bounded N5.3 Skills classifications**:
-`skill:place-deployable` defines a delivery action, `skill:minelayer` a
-deployment method, and `skill:request-speedball` places 55 mm support
-State Tokens (N5.3 pp. 82, 102 and 84 respectively). Speedball Tokens
-explicitly do not block movement or allow Deactivator targeting; they are
-not conventional targetable four-attribute deployed objects. This negative
-classification is manually verified against the pinned English N5.3 p. 84;
-the audit validator pins the maintained skill's source citation and existing
-Speedball clauses, but does not parse the PDF in CI. Neither Speedball nor a
-generic delivery Skill is granted invented ARM/BTS/STR/S values, catalog
-identity, or Unit reverse uses. The audit retains all other matching
-non-catalog definitions as an **open manual review queue** rather than
-claiming complete classification; the source-backed validator rejects
-stale evidence, unapproved classifications or citations.
-`tests/test_deployed_object_non_catalog_queue.py` checks those boundaries.
+manifest pins **13 bounded N5.3 classifications** across 48 keyword-matching
+non-catalog definitions; **35 remain unreviewed** in this discovery queue.
+The original three Skill decisions distinguish `skill:place-deployable`
+(delivery action, p. 82), `skill:minelayer` (deployment method, p. 102)
+and `skill:request-speedball` (support State Tokens, p. 84). Additional
+source-reviewed classes distinguish:
+
+- **Five glossary concepts** (p. 173): Token, State Token, Deployable
+  Weapon/Equipment and Scenery Element describe types or representations,
+  never a single universal object identity, profile or delivery edge.
+- **SpecBall** (p. 98): `skill:request-specball` places one support
+  State Token, distinct from Speedball's two Tokens. Neither blocks
+  enemy Movement or can be Deactivated. A separately selected SpecBot
+  requires its own evidence; the drop Token does not establish its profile.
+- **RemDriver** (p. 110): the Token shows a MOD assignment to an existing
+  Remote and is not an independent deployed device.
+- **Peripheral (Ancillary)** (pp. 107–108): the Controller can place an
+  Ancillary Trooper with Place Deployable, but this belongs to the Peripheral
+  Unit/Profile model, not a generic Weapon/Equipment deployed-object profile.
+  Dedicated Peripheral reference coverage is a separate question.
+- **Supplies** (p. 153): carrying a Supply Box preserves its scenario
+  Token even with a Null carrier; the Pick Up Supply Boxes Skill manipulates
+  that scenario objective. These are not Army source Weapon/Equipment items.
+
+The negative/exception decisions were manually compared with the pinned
+English N5.3 pages. The audit validator pins the maintained definitions'
+exact cited pages, summary evidence and detailed clauses, but does not parse
+the PDF in CI. No new ARM/BTS/STR/S value, Army carrier, delivery edge
+or runtime object is inferred. All remaining matches stay in an **open
+manual review queue**; new classifications are explicit, record-specific,
+and fail closed on changed evidence. The count is specific to this bounded
+keyword scan, not a complete N5.3 object inventory.
+`tests/test_deployed_object_non_catalog_queue.py` checks these boundaries.
 
 ### Deployed-object release publication
 

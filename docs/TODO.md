@@ -1363,6 +1363,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               than standard four-attribute deployed objects (p. 84). Preserve other
               matches as an open manual queue and review further candidate
               identities before expanding the 17-object reference.
+              - [x] Review ten additional non-catalog source candidates in
+                a bounded N5.3 batch. The pinned keyword queue contains
+                48 definitions: **13 reviewed, 35 still open**. Glossary
+                Token/State Token/Deployable/Scenery terms (p. 173) describe
+                categories, not universal object instances. SpecBall (p. 98)
+                is a distinct non-targetable support State Token; RemDriver
+                (p. 110) marks a Remote's MODs. Ancillary Peripherals
+                (pp. 107-108) are placeable Troopers requiring separate
+                Unit/Profile interpretation, and Supplies' Box plus Pick Up
+                Skill (p. 153) are scenario-specific objective mechanics.
+                No additional four-stat profile, Army carrier or reviewed
+                delivery edge follows from these rules. Next: review
+                remaining keyword hits including Boost/Perimeter and
+                scenario/peripheral markers, plus source wording absent
+                from the keyword query.
             - [x] **Reconcile delivery paths for all 17 currently published
               reviewed deployed objects.** The pinned review now covers
               17 of 17 objects with 28 approved delivery paths and zero

@@ -59,7 +59,7 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = candidate_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 3
+    assert len(validate_reviews(manifest, curated, candidates)) == 13
 
     for key, bad_value, error in (
         ("classification", "fully-reviewed-four-stat-object", "classification"),
@@ -88,13 +88,19 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     report = audit_non_catalog_candidates(CURATED, REVIEWS)
     assert report["scope"] == "non-catalog-keyword-discovery-not-object-inventory"
     assert len(report["curatedSourceSha256"]) == 64
-    assert report["reviewedCount"] == 3
-    assert report["candidateCount"] >= report["reviewedCount"]
+    assert report["reviewedCount"] == 13
+    assert report["candidateCount"] == 48
+    assert len(report["unreviewed"]) == 35
     selected = {
         row["recordId"]: row for row in report["candidates"]
     }
     for record_id in (
         "skill:minelayer", "skill:place-deployable", "skill:request-speedball",
+        "skill:request-specball", "skill:remdriver",
+        "skill:pick-up-supply-boxes", "rule:peripheral-type:ancillary",
+        "rule:scenario:carrying-supply-boxes", "term:token",
+        "term:state-token", "term:deployable-equipment",
+        "term:deployable-weapon", "term:scenery-element",
     ):
         assert selected[record_id]["reviewed"]
         assert selected[record_id]["citations"]
@@ -110,6 +116,20 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     assert speedball["classification"] == "support-state-token-not-standard-deployable"
     assert speedball["sourcePages"] == [84]
     assert "State Tokens" in speedball["caveat"]
+    reviewed = {decision["recordId"]: decision for decision in report["reviews"]}
+    assert reviewed["skill:request-specball"]["classification"] == (
+        "support-state-token-not-standard-deployable"
+    )
+    assert reviewed["rule:peripheral-type:ancillary"]["classification"] == (
+        "deployed-peripheral-trooper-separate-domain"
+    )
+    assert reviewed["rule:scenario:carrying-supply-boxes"]["classification"] == (
+        "scenario-object-outside-weapon-equipment"
+    )
+    assert reviewed["term:state-token"]["factsEvidence"] == []
+    assert {"trait:boost", "skill:intuitive-attack"} <= {
+        entry["recordId"] for entry in report["unreviewed"]
+    }
 
 
 def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
@@ -119,5 +139,6 @@ def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
     assert main() == 0
     output = capsys.readouterr().out
     assert "Candidate definitions:" in output
-    assert "Reviewed classifications: 3" in output
-    assert "Awaiting manual review:" in output
+    assert "Candidate definitions: 48" in output
+    assert "Reviewed classifications: 13" in output
+    assert "Awaiting manual review: 35" in output
