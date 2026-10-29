@@ -352,6 +352,39 @@ def test_all_24_core_scenario_setups_render_source_backed_browser_contract(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_esx01_stealth_contact_reaction_choices_are_published_in_browser(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """Current N5.3 English/Spanish Stealth contact exception is discoverable."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(
+            f"{ORIGIN}/skills/stealth", wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        card = page.locator("#rule-skill-stealth")
+        card.wait_for(state="visible", timeout=30000)
+        assert card.count() == 1
+        content = card.inner_text()
+        assert "For that Silhouette-contact case" in content
+        assert "protected movement itself does not grant a reaction" in content
+        for slug in ("cc-attack", "dodge", "reset"):
+            assert card.locator(f'a[href="/skills/{slug}"]').count() >= 1
+        assert card.locator('a[href="/states/engaged"]').count() >= 1
+        citations = card.locator(".rules-source-citations").inner_text()
+        assert "p. 112" in citations and "p. 114" in citations
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("app_fixture", ("scenario_app", "release_scenario_app"))
 def test_n53_05_guts_geometry_survives_public_api(
     request: pytest.FixtureRequest, app_fixture: str,

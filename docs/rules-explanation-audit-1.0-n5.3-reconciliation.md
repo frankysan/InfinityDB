@@ -101,13 +101,21 @@ counts above.
 ### Additional Spanish, Army and FAQ subjects
 
 - **ESX-01 to ESX-04 (four items):** retain the historical partially
-  verified boundaries. These cover Stealth source alignment, Jet
-  Propulsion direction changes, MSV3 disclosure/turn scope, and
-  AP+T2 CC Anti-materiel. The absent *earlier* Spanish PDF prevents
-  a fully proven Spanish historical before/after delta. Review the
-  current player-facing clause where in scope without inventing
-  historical equivalence; specifically do not turn MSV3 into a
-  blanket Marker-state exemption or broaden Super-Jump distance.
+  verified boundaries. ESX-01 (Stealth) is **locally accepted for
+  current-rule publication**: English p. 112 and Spanish p. 114 agree
+  on LoF-dependent reactions to Cautious Movement, Idle and Basic
+  Short Movement, Combat Instinct/Sixth Sense and Deployable
+  exceptions, and the CC Attack/Dodge/Reset/Engaged-usable choices
+  after Silhouette contact. The already maintained Skill covers
+  the main scope and FAQ mixed activation; its explicit contact
+  choices now appear in the owner card and pass bilingual current-PDF,
+  curated and 1440/390/320 px Chromium checks. ESX-02 (Jet
+  Propulsion), ESX-03 (MSV3 disclosure/turn scope), and ESX-04
+  (AP+T2 CC Anti-materiel) remain separate current-rule checks.
+  The absent *earlier* Spanish PDF still prevents a proven
+  Spanish historical before/after delta **for all four items**.
+  Do not infer historical equivalence, a blanket MSV3 Marker-state
+  exemption, or unrestricted Super-Jump distance.
 - **ARMY-01 to ARMY-20 (20 items):** the current post-notice
   snapshot and selected identities were inspected in the original
   audit, but no pinned pre-notice Army snapshot was available.

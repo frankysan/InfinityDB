@@ -12788,7 +12788,8 @@
                     "[[skill:cautious-movement]], [[skill:idle]], and Basic Short Skills with the Movement Label grant AROs only to enemies that have LoF to the user.",
                     "Other declared Skills grant AROs normally.",
                     "[[trait:deployable|Deployable]] Weapons and Equipment are not affected by Stealth. When another activated Trooper generates a reaction, an enemy may choose the Stealth user as the target, but the reaction becomes [[skill:idle|Idle]] if that user does not declare a Skill permitting it. Announce Stealth when using it in Marker form.",
-                    "If the user enters Silhouette contact without entering the enemy's LoF and then declares another Skill, that enemy's available AROs are restricted to the options allowed by the Stealth rule."
+                    "If the user enters Silhouette contact without entering the enemy's LoF and then declares another Skill, that enemy's available AROs are restricted to the options allowed by the Stealth rule.",
+                    "For that Silhouette-contact case, when a subsequent declaration grants the enemy an [[trait:aro|ARO]], only [[skill:cc-attack|CC Attack]], [[skill:dodge|Dodge]], [[skill:reset|Reset]], or Skills usable in [[state:engaged|Engaged State]] can be declared. The protected movement itself does not grant a reaction."
                 ],
                 "restrictions": [
                     "Stealth does not prevent AROs when an enemy has LoF to the user or when the user declares another Skill.",

@@ -324,6 +324,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         reviewed text remains intact; the catalog regression verifies
         the permitted list and subsequent reveal. Final release-matched
         browser acceptance remains open.
+      - [x] **Spanish-only ESX-01 / Stealth alignment:** Current
+        English N5.3 p. 112 and Spanish N5.3 p. 114 agree on
+        Cautious Movement/Idle/Basic Short Movement ARO scope, the
+        Combat Instinct, Sixth Sense and Deployable exclusions, and
+        the restricted Silhouette-contact reaction choices. Existing
+        `skill:stealth` and counter-Skill references already cover
+        the broader effects and FAQ v0.1 mixed activation; explicitly
+        list CC Attack, Dodge, Reset and Engaged-usable Skills in
+        the owner card for discoverability, without granting a new
+        ARO during protected movement. Current PDF and curated
+        regressions plus Chromium at 1440/390/320 px verify the
+        scoped change. **Historical Spanish N5.2 comparison remains
+        unprovable** without that exact earlier PDF; this closes
+        current-rule publication, not the historical delta or final
+        hosted release acceptance.
       - [x] Verify **N5.3 new weapon profiles (N53-25)** against the
         English Weapon Chart p. 180 and Army metadata. Source ID 225,
         Breaker Marksman Rifle, is already published through the

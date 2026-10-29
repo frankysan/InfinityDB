@@ -2430,6 +2430,67 @@ def test_n5_stealth_counter_scope_matches_pinned_pdf() -> None:
     assert "while remaining outside that Trooper" in zoc
 
 
+def test_esx01_stealth_contact_reaction_choices_are_explicit_and_scoped() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in document["records"]}
+    stealth = records["skill:stealth"]
+    effects = stealth["facts"]["effects"]
+    assert "Basic Short Skills with the Movement Label" in effects[1]
+    assert "Other declared Skills grant AROs normally" in effects[2]
+    assert "Silhouette contact without entering the enemy's LoF" in effects[4]
+    contact = effects[5]
+    assert "when a subsequent declaration grants the enemy an [[trait:aro|ARO]]" in contact
+    for option in (
+        "[[skill:cc-attack|CC Attack]]",
+        "[[skill:dodge|Dodge]]",
+        "[[skill:reset|Reset]]",
+        "[[state:engaged|Engaged State]]",
+    ):
+        assert option in contact
+    assert "protected movement itself does not grant a reaction" in contact
+    assert any(
+        "[[trait:deployable|Deployable]] Weapons or Equipment" in restriction
+        for restriction in stealth["facts"]["restrictions"]
+    )
+    assert {
+        (citation["sourceId"], citation.get("page"))
+        for citation in stealth["citations"]
+    } >= {("n5-core-v5.3-pdf", 112), ("n5-core-v5.3-es-pdf", 114)}
+
+
+def test_esx01_current_spanish_stealth_agrees_with_english_primary_source() -> None:
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    english = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    spanish = root / "data/pdf/rules/esp-n5-update-5-3.pdf"
+    if not english.exists() or not spanish.exists():
+        pytest.skip("Pinned current N5.3 English/Spanish PDFs unavailable")
+    with pdf.open(english) as book:
+        english_text = " ".join(book[111].get_text().split())
+    with pdf.open(spanish) as book:
+        spanish_text = " ".join(book[113].get_text().split())
+    for fragment in (
+        "STEALTH AUTOMATIC SKILL",
+        "they only grant AROs to enemies that have LoF to them",
+        "only declare CC Attack, Dodge, Reset",
+        "Combat Instinct or",
+        "Deployable Weapons",
+    ):
+        assert fragment in english_text, fragment
+    for fragment in (
+        "SIGILO",
+        "Movimiento Cauteloso, Inacción",
+        "Ataque CC, Esquivar, Reset",
+        "Intuición de Combate o Sexto Sentido",
+        "Posicionable",
+    ):
+        assert fragment in spanish_text, fragment
+    # Without the Spanish N5.2 PDF this proves current alignment, not
+    # which wording was changed between Spanish releases.
+
+
 def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
