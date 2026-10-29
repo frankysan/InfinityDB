@@ -7,6 +7,7 @@ without creating persistent report artifacts or changing test distribution.
 
 from __future__ import annotations
 
+import os
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -20,13 +21,15 @@ class XdistStartupProfile:
     """Monotonic controller-side timestamps for one distributed pytest run."""
 
     started_at: float | None = None
+    launch_at: float | None = None
     expected_workers: int = 0
     ready_at: dict[str, float] = field(default_factory=dict)
     collected_at: dict[str, float] = field(default_factory=dict)
     first_test_at: float | None = None
 
-    def start(self, workers: int, now: float) -> None:
+    def start(self, workers: int, now: float, *, launch_at: float | None = None) -> None:
         self.started_at = now
+        self.launch_at = launch_at if launch_at is not None and 0 <= launch_at <= now else None
         self.expected_workers = workers
         self.ready_at.clear()
         self.collected_at.clear()
@@ -72,19 +75,48 @@ class XdistStartupProfile:
                 f"+{elapsed(self.first_test_at)}"
                 if self.first_test_at is not None else "not observed"
             ),
-            "Times are elapsed since xdist began spawning workers; startup and "
-            "collection overlap. Earlier pytest initialization is not included.",
         ]
+        if self.launch_at is not None:
+            lines.append(
+                "Runner process launch to xdist worker spawn: "
+                f"{start - self.launch_at:.2f}s"
+            )
+            if self.first_test_at is not None:
+                lines.append(
+                    f"Runner process launch to first test: "
+                    f"{self.first_test_at - self.launch_at:.2f}s"
+                )
+        else:
+            lines.append(
+                "Runner process launch to worker spawn: unavailable "
+                "(run through tools/run_checks.py)"
+            )
+        lines.append(
+            "Worker times are relative to xdist spawn; startup and collection overlap."
+        )
         return tuple(lines)
 
 
 _PROFILE = XdistStartupProfile()
 
 
+def _runner_launch_timestamp() -> float | None:
+    """Read the inherited cross-process perf-counter value if supplied."""
+    raw = os.environ.get("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER")
+    if not raw:
+        return None
+    try:
+        return float(raw)
+    except ValueError:
+        return None
+
+
 @pytest.hookimpl(optionalhook=True)
 def pytest_xdist_setupnodes(specs: Sequence[Any]) -> None:
     """Called on the controller immediately before xdist starts its workers."""
-    _PROFILE.start(len(specs), time.perf_counter())
+    _PROFILE.start(
+        len(specs), time.perf_counter(), launch_at=_runner_launch_timestamp()
+    )
 
 
 @pytest.hookimpl(optionalhook=True)

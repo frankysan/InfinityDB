@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tools.pytest_startup_profile import XdistStartupProfile
+import pytest
+
+from tools.pytest_startup_profile import XdistStartupProfile, _runner_launch_timestamp
 from tools.test_sections import load_test_sections, section_for_module
 
 
@@ -46,6 +48,32 @@ def test_xdist_startup_timing_tracks_ready_collection_and_first_test() -> None:
         "Collections complete: 2/2; first +4.00s, last +6.00s",
         "First test started: +6.25s",
     )
+    assert "unavailable" in profile.summary_lines()[3]
+
+
+def test_xdist_launch_includes_python_and_pytest_initialization() -> None:
+    profile = XdistStartupProfile()
+    profile.start(2, 100.0, launch_at=97.5)
+    profile.ready("gw0", 100.5)
+    profile.collected("gw0", 101.5)
+    profile.first_test(102.0)
+    assert profile.summary_lines()[3:5] == (
+        "Runner process launch to xdist worker spawn: 2.50s",
+        "Runner process launch to first test: 4.50s",
+    )
+    profile.start(1, 200.0, launch_at=205.0)
+    assert "unavailable" in profile.summary_lines()[3]
+
+
+def test_xdist_runner_launch_env_is_optional_and_validated(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", raising=False)
+    assert _runner_launch_timestamp() is None
+    monkeypatch.setenv("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", "invalid")
+    assert _runner_launch_timestamp() is None
+    monkeypatch.setenv("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", "42.5")
+    assert _runner_launch_timestamp() == 42.5
 
 
 def test_xdist_startup_timing_handles_incomplete_and_restarted_runs() -> None:

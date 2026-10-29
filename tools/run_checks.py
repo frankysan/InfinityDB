@@ -338,6 +338,14 @@ def run_stage(
     for command in commands:
         reporter.write(f"Command: {format_command(command)}")
         reporter.write()
+        # Python's perf_counter shares a system-wide clock across processes.
+        # Pass the timestamp immediately before spawning pytest so its xdist
+        # plugin can report interpreter and pytest startup separately.
+        command_env = dict(env)
+        if stage.name == "test":
+            command_env["INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER"] = repr(time.perf_counter())
+        else:
+            command_env.pop("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", None)
         try:
             process = subprocess.Popen(
                 command,
@@ -347,7 +355,7 @@ def run_stage(
                 errors="replace",
                 bufsize=1,
                 cwd=REPO_ROOT,
-                env=env,
+                env=command_env,
             )
         except OSError as exc:
             duration = time.perf_counter() - started

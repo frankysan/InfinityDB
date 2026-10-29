@@ -367,6 +367,36 @@ def test_run_stage_streams_output_and_reports_failure(
     assert "Result: FAIL" in output
 
 
+def test_test_stage_passes_launch_clock_only_to_pytest(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    environments: list[dict[str, str]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("ok\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        environments.append(kwargs["env"])
+        return FakeProcess()
+
+    monkeypatch.setenv("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", "stale")
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        assert run_checks.run_stage(
+            run_checks.Stage("test", (sys.executable, "-m", "pytest")), reporter,
+        ).status == "PASS"
+        assert run_checks.run_stage(
+            run_checks.Stage("lint", (sys.executable, "-m", "ruff")), reporter,
+        ).status == "PASS"
+
+    assert float(environments[0]["INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER"]) > 0
+    assert environments[0]["INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER"] != "stale"
+    assert "INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER" not in environments[1]
+
+
 def test_docs_stage_runs_markdownlint_before_local_link_validation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

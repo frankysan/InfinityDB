@@ -112,12 +112,15 @@ durations, including local runs (CI already requested those durations). This
 identifies slow individual cases but not idle time spent by other workers.
 
 An automatic controller-side `xdist startup and collection timings` summary
-also reports elapsed time from xdist worker-spawning to first/last worker ready,
-first/last worker collection complete, and first dispatched test. This makes
-the otherwise unprofiled `bringing up nodes...` delay measurable without
-generating files. The intervals overlap and exclude Python/pytest initialization
-before xdist begins starting workers; serial runs omit this summary. For
-reproducible startup comparisons, retain the runner's total elapsed time too.
+reports elapsed time from xdist worker-spawning to first/last worker ready,
+first/last worker collection complete, and first dispatched test. The check
+runner also passes a monotonic launch timestamp into pytest, allowing the
+summary to measure **process launch to xdist worker-spawning** (interpreter
+and pytest initialization) and **process launch to first test**. For a direct
+`python -m pytest` invocation, the pre-xdist interval is explicitly marked
+unavailable. The durations overlap, require no extra report files, and do
+not modify test scheduling. Serial runs omit the xdist summary. Retain the
+runner's total elapsed time for broader performance comparisons.
 
 On 2026-10-29, running five non-browser test sections with 8 workers took
 **94.91 s** (2,669 passed, 3 skipped), and the browser section with two
