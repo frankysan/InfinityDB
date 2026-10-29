@@ -190,6 +190,30 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         still omits Berserk; retain this source-internal discrepancy as
         documented. Release-matched rules data and browser acceptance
         remain separate requirements.
+      - [x] Recheck **Protheion (N53-16)** against N5.3 p. 109 and FAQ
+        v0.1 p. 2: `skill:protheion` already specifies that a printed
+        negative MOD affects the enemy in a Face to Face Roll and that
+        additional failed Saving Rolls after Dead State grant no benefit.
+        Existing `test_protheion_overkill_and_opponent_mod_are_published`
+        covers both; no rules-data edit required.
+      - [x] Recheck **Minelayer (N53-14)** against N5.3 p. 102:
+        `skill:minelayer` already includes Deployable Weapons **or
+        Equipment**, the enemy/Marker exclusion in the Trigger Area,
+        and the entire ZoC for Perimeter items. Existing REA-023
+        tests cover these; no rules-data edit required.
+      - [x] Recheck **Firewall (N53-06)** against N5.3 p. 55 and FAQ
+        v0.1 p. 1: `equipment:firewall` is already represented as
+        Automatic Equipment with its Device-enabled restriction and
+        appropriate provenance; no rules-data edit required.
+      - [x] Clarify the **PARA CC Weapon modifier (N53-10)** using
+        N5.3 p. 75 and PARA Ammunition p. 65. The common
+        `rule:modifiers-explained` and `weapon:para-cc-weapon`
+        now distinguish the opponent's profile-listed negative MOD
+        during Face to Face Rolls from the separate PH-6 Saving Roll
+        after a hit. A focused rules-export regression guards both
+        citations and mechanics; this does not change the Ammunition
+        resolution or weapon-profile source values. Release-matched
+        browser acceptance remains pending.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or

@@ -930,6 +930,38 @@ def test_rea006_controlled_jump_worked_examples_are_published(
     }
 
 
+def test_n53_para_weapon_modifier_is_distinct_from_its_saving_roll(
+    current_rules_database: RulesDatabase,
+) -> None:
+    modifiers = current_rules_database.composed_record("rule:modifiers-explained")
+    weapon = current_rules_database.composed_record("weapon:para-cc-weapon")
+    ammunition = current_rules_database.composed_record("ammunition:para")
+    assert modifiers is not None and weapon is not None and ammunition is not None
+
+    modifier_example = " ".join(modifiers["facts"]["clarifications"])
+    weapon_notes = " ".join(weapon["facts"]["clarifications"])
+    assert "[[weapon:para-cc-weapon|PARA CC Weapon]] (-6)" in modifier_example
+    assert "opponent during the [[rule:face-to-face-rolls|Face to Face Roll]]" in (
+        modifier_example
+    )
+    assert "do not apply the weapon's Face-to-Face penalty again" in modifier_example
+    assert "[[weapon:para-cc-weapon|PARA CC Weapon]] (-6)" in weapon_notes
+    assert "penalizes the opponent's Attribute" in weapon_notes
+    assert "It does not change the separate PH-6" in weapon_notes
+    assert "[[rule:modifiers-explained|Modifiers Explained]]" in weapon_notes
+    assert ammunition["facts"]["ammunitionResolution"]["savingRoll"] == {
+        "attribute": "PH", "modifier": -6, "missingAttribute": "no-effect",
+    }
+    assert {
+        (citation["source_id"], citation.get("page"))
+        for citation in weapon["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 75),
+        ("n5-core-v5.3-pdf", 65),
+        ("n5-core-v5.3-pdf", 177),
+    }
+
+
 def test_protheion_overkill_and_opponent_mod_are_published(
     current_rules_database: RulesDatabase,
 ) -> None:

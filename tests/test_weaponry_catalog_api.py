@@ -3073,7 +3073,13 @@ def test_modifiers_explained_player_reference_and_mixed_weapon_navigation(
             if c["source_id"] == "n5-core-v5.3-pdf"} == {68, 75}
     assert rule["facts"]["category"] == "basic-rule"
     assert len(rule["facts"]["restrictions"]) == 2
-    assert len(rule["facts"]["clarifications"]) == 2
+    assert len(rule["facts"]["clarifications"]) == 3
+    assert "[[weapon:para-cc-weapon|PARA CC Weapon]] (-6)" in (
+        rule["facts"]["clarifications"][2]
+    )
+    assert "do not apply the weapon's Face-to-Face penalty again" in (
+        rule["facts"]["clarifications"][2]
+    )
     for slug in ("trench-hammer", "kobra-pistol", "vorpal-cc-weapon"):
         payload = _weapon_detail(mixed_weapons_app, slug)
         family = _weapon_rules(payload)["weapon:mixed-weapons"]

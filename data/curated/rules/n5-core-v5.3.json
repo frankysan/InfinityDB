@@ -6199,7 +6199,11 @@
             "summary": "The PARA variant uses [[ammunition:para|Paralysis (PARA) Ammunition]]. A successful hit requires one PH-6 Saving Roll, rather than ARM or BTS, and its PS is printed as a dash. Failure causes [[state:immobilized-a|Immobilized-A]], not Wounds. The [[trait:non-lethal|Non-Lethal]] and [[trait:cc|CC]] Traits apply.",
             "composition": {"role": "definition"},
             "scope": {"game": "N5", "seasons": ["current"]},
-            "facts": {},
+            "facts": {
+                "clarifications": [
+                    "If a Unit Profile prints a negative MOD with this weapon (for example, [[weapon:para-cc-weapon|PARA CC Weapon]] (-6)), that MOD penalizes the opponent's Attribute during a [[rule:face-to-face-rolls|Face to Face Roll]] against the weapon. It does not change the separate PH-6 [[ammunition:para|PARA Ammunition]] Saving Roll after a hit; see [[rule:modifiers-explained|Modifiers Explained]]."
+                ]
+            },
             "armyLinks": [{"entity": "weapon", "id": "para-cc-weapon"}],
             "variantSemantics": {"inheritance": "family"},
             "relations": [
@@ -6208,7 +6212,11 @@
                 {"type": "uses-effects-of", "recordId": "trait:non-lethal"},
                 {"type": "uses-effects-of", "recordId": "trait:cc"}
             ],
-            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: PARA CC Weapon"}],
+            "citations": [
+                {"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: PARA CC Weapon"},
+                {"sourceId": "n5-core-v5.3-pdf", "page": 75, "section": "Modifiers Explained: PARA CCW (-6)"},
+                {"sourceId": "n5-core-v5.3-pdf", "page": 65, "section": "Paralysis (PARA) Ammunition"}
+            ],
             "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
         },
         {
@@ -24889,7 +24897,8 @@
                 ],
                 "clarifications": [
                     "For example, [[trait:bs-weapon-ph|BS Weapon (PH)]] changes the Attribute for an eligible [[skill:bs-attack|BS Attack]], not other actions. [[weapon:mixed-weapons|Mixed Weapons]] choose their attack Mode before applying that Mode's MODs.",
-                    "A named ReRoll is one die from the relevant Roll, not a Command Token reroll or a general change to the reroll rules."
+                    "A named ReRoll is one die from the relevant Roll, not a Command Token reroll or a general change to the reroll rules.",
+                    "For a [[weapon:para-cc-weapon|PARA CC Weapon]] (-6), the weapon's -6 penalizes the opponent during the [[rule:face-to-face-rolls|Face to Face Roll]]. That is distinct from [[ammunition:para|PARA Ammunition]] requiring a PH-6 Saving Roll on a hit; do not apply the weapon's Face-to-Face penalty again to the Saving Roll."
                 ]
             },
             "citations": [
