@@ -64,6 +64,26 @@ CLASSIFICATIONS = {
     "rule:modifiers-explained": ("rule", "command-token-terminology-not-object"),
     "rule:coordinated-orders": ("rule", "role-token-and-delivery-choice-not-object"),
     "rule:deployment-phase": ("rule", "deployment-procedure-not-object"),
+    "skill:frenzy": ("skill", "indirect-deployable-wounds-not-eligible"),
+    "state:possessed": ("state", "state-profile-and-command-resource-not-object"),
+    "rule:command-token-strategic-use": ("rule", "command-resource-and-support-state-token"),
+    "skill:counterintelligence": ("skill", "command-resource-counteraction-not-object"),
+    "skill:inspiring-leadership": ("skill", "command-order-benefit-not-object"),
+    "skill:transmutation": ("skill", "trooper-profile-representation-not-deployable"),
+}
+
+# Manually checked against the locally pinned English N5.3 PDF. These six
+# definitions still cite older Wiki revisions in maintained rules data.
+# Keep this audit-only provenance distinct from a published rules citation.
+# After a coordinated rules DB rebuild, migrate the citations to the
+# definitions, then remove the corresponding exceptions here.
+PDF_ONLY_REVIEWS = {
+    "skill:frenzy": (93, "The Trooper’s Deployable Weapons are not taken"),
+    "state:possessed": (169, "by spending 1 Command Token."),
+    "rule:command-token-strategic-use": (128, "to gain 2 Speedball Tokens"),
+    "skill:counterintelligence": (90, "reducing to one the number of Orders the"),
+    "skill:inspiring-leadership": (99, "Command Tokens or extra Orders."),
+    "skill:transmutation": (117, "place a Transmuted (TRANSMUTED) Token"),
 }
 
 
@@ -146,8 +166,22 @@ def validate_reviews(
             cite.get("page") for cite in record.get("citations", [])
             if cite.get("sourceId") == "n5-core-v5.3-pdf"
         }
-        if not decision["sourcePages"] or not set(decision["sourcePages"]) <= pages:
-            raise ValueError(f"Missing exact N5.3 non-catalog citation: {record_id}")
+        pdf_only = PDF_ONLY_REVIEWS.get(record_id)
+        if pdf_only is None:
+            if (
+                decision.get("citationStatus") is not None
+                or decision.get("pdfExcerpt") is not None
+                or not decision["sourcePages"]
+                or not set(decision["sourcePages"]) <= pages
+            ):
+                raise ValueError(f"Missing exact N5.3 non-catalog citation: {record_id}")
+        elif (
+            pages
+            or decision["sourcePages"] != [pdf_only[0]]
+            or decision.get("citationStatus") != "pdf-verified-manifest-only"
+            or decision.get("pdfExcerpt") != pdf_only[1]
+        ):
+            raise ValueError(f"Missing reviewed PDF-only provenance: {record_id}")
         if not decision.get("caveat") or decision.get("objectProfile") is not None:
             raise ValueError(f"Invalid non-catalog review scope: {record_id}")
         decisions.append(decision)
@@ -167,12 +201,16 @@ def audit_non_catalog_candidates(curated_source: Path, reviews_source: Path) -> 
         candidate for candidate in candidates if candidate["recordId"] not in reviewed_ids
     ]
     missing_primary_citation = [
-        candidate for candidate in unreviewed
+        candidate for candidate in candidates
         if not any(
             citation["sourceId"] == "n5-core-v5.3-pdf"
             and isinstance(citation["page"], int)
             for citation in candidate["citations"]
         )
+    ]
+    reviewed_pdf_only = [
+        decision for decision in reviews
+        if decision["recordId"] in PDF_ONLY_REVIEWS
     ]
     return {
         "scope": "non-catalog-keyword-discovery-not-object-inventory",
@@ -184,7 +222,8 @@ def audit_non_catalog_candidates(curated_source: Path, reviews_source: Path) -> 
             for candidate in candidates
         ],
         "unreviewed": unreviewed,
-        "unreviewedMissingN5Citation": missing_primary_citation,
+        "reviewedPdfOnly": reviewed_pdf_only,
+        "missingMaintainedN5Citation": missing_primary_citation,
         "reviews": reviews,
     }
 
@@ -207,9 +246,10 @@ def main() -> int:
         print(f"Candidate definitions: {report['candidateCount']}")
         print(f"Reviewed classifications: {report['reviewedCount']}")
         print(f"Awaiting manual review: {len(report['unreviewed'])}")
+        print(f"Reviewed with audit-only PDF citation: {len(report['reviewedPdfOnly'])}")
         print(
-            "Unreviewed without pinned N5.3 PDF page: "
-            f"{len(report['unreviewedMissingN5Citation'])}"
+            "Definitions missing maintained N5.3 PDF citation: "
+            f"{len(report['missingMaintainedN5Citation'])}"
         )
         for entry in report["unreviewed"]:
             print(f"  {entry['recordId']}: {', '.join(entry['details']) or 'summary'}")

@@ -1401,15 +1401,29 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 These change neither the underlying object identity nor
                 reverse Unit use. The bounded keyword queue is now
                 **42 reviewed of 48**, with **six unresolved**.
-              - [ ] Review the six remaining keyword matches without
-                pinned N5.3 PDF page citations: Frenzy, Possessed,
-                Command Token Strategic Use, Counterintelligence,
-                Inspiring Leadership and Transmutation. Establish exact
-                rule-page provenance or document the other maintained
-                sources before classifying. The audit now reports missing
-                primary citations separately. Once addressed, expand
-                discovery beyond these keyword/field boundaries and
-                reconcile any actual additional object identities.
+              - [x] Classify the final six keyword matches with
+                independently checked English N5.3 PDF evidence:
+                Frenzy (p. 93), Possessed (p. 169), Command Token
+                Strategic Use (p. 128), Counterintelligence (p. 90),
+                Inspiring Leadership (p. 99) and Transmutation
+                (p. 117). The bounded non-catalog keyword queue
+                is now **48/48 reviewed**, without any new deployed
+                Weapon/Equipment identity or inferred carrier.
+                The audit manifest pins PDF excerpts separately because
+                these six maintained records still only cite Wiki
+                revisions; PDF-only reviews are not runtime citations.
+              - [ ] Migrate the six verified PDF citations into their
+                maintained rule records in a coordinated `rules.db`
+                rebuild and deployed-object publication fingerprint
+                refresh. Until then the audit separately reports all
+                six missing maintained N5.3 citations and rejects
+                stale PDF-only exceptions when their sources change.
+              - [ ] Extend object discovery beyond the bounded
+                non-catalog keyword/definition-fields scan, checking
+                alternate wording and other N5.3 source domains.
+                Reconcile any source-backed object identities and
+                delivery edges independently, without extrapolating
+                from names, rule methods or generic Traits.
             - [x] **Reconcile delivery paths for all 17 currently published
               reviewed deployed objects.** The pinned review now covers
               17 of 17 objects with 28 approved delivery paths and zero

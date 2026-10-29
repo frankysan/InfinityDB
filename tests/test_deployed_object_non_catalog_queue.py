@@ -59,13 +59,13 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = candidate_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 42
+    assert len(validate_reviews(manifest, curated, candidates)) == 48
 
     for key, bad_value, error in (
         ("classification", "fully-reviewed-four-stat-object", "classification"),
         ("summaryEvidence", "text that does not exist", "summary evidence"),
         ("factsEvidence", ["fabricated effect"], "detailed evidence"),
-        ("sourcePages", [999], "citation"),
+        ("sourcePages", [999], "PDF-only provenance"),
         ("objectProfile", {"ARM": 0}, "review scope"),
     ):
         changed = copy.deepcopy(manifest)
@@ -91,14 +91,39 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     with pytest.raises(ValueError, match="detailed evidence"):
         validate_reviews(manifest, detailed, candidate_mentions(detailed))
 
+    # The six independently PDF-verified decisions have no maintained N5.3
+    # citation yet. Their manually checked evidence is pinned separately,
+    # and they must be migrated when the curated source gains the citation.
+    for key, bad in (
+        ("sourcePages", [999]),
+        ("citationStatus", "maintained-source-cited"),
+        ("pdfExcerpt", "a different quote"),
+    ):
+        changed = copy.deepcopy(manifest)
+        changed["reviews"][-1][key] = bad
+        with pytest.raises(ValueError, match="PDF-only provenance"):
+            validate_reviews(changed, curated, candidates)
+
+    added_citation = copy.deepcopy(curated)
+    transmutation = next(
+        record for record in added_citation["records"]
+        if record["id"] == "skill:transmutation"
+    )
+    transmutation["citations"].append({
+        "sourceId": "n5-core-v5.3-pdf", "page": 117,
+    })
+    with pytest.raises(ValueError, match="PDF-only provenance"):
+        validate_reviews(manifest, added_citation, candidate_mentions(added_citation))
+
 
 def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     report = audit_non_catalog_candidates(CURATED, REVIEWS)
     assert report["scope"] == "non-catalog-keyword-discovery-not-object-inventory"
     assert len(report["curatedSourceSha256"]) == 64
-    assert report["reviewedCount"] == 42
+    assert report["reviewedCount"] == 48
     assert report["candidateCount"] == 48
-    assert len(report["unreviewed"]) == 6
+    assert report["unreviewed"] == []
+    assert len(report["reviewedPdfOnly"]) == 6
     selected = {
         row["recordId"]: row for row in report["candidates"]
     }
@@ -159,7 +184,7 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     assert reviewed["rule:hacking-area"]["classification"] == (
         "existing-repeater-interaction-not-object"
     )
-    expected_unreviewed = {
+    pdf_only_ids = {
         "skill:frenzy",
         "state:possessed",
         "rule:command-token-strategic-use",
@@ -167,10 +192,16 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
         "skill:inspiring-leadership",
         "skill:transmutation",
     }
-    assert {entry["recordId"] for entry in report["unreviewed"]} == expected_unreviewed
+    assert {entry["recordId"] for entry in report["reviewedPdfOnly"]} == pdf_only_ids
     assert {
-        entry["recordId"] for entry in report["unreviewedMissingN5Citation"]
-    } == expected_unreviewed
+        entry["recordId"] for entry in report["missingMaintainedN5Citation"]
+    } == pdf_only_ids
+    assert reviewed["skill:transmutation"]["classification"] == (
+        "trooper-profile-representation-not-deployable"
+    )
+    assert reviewed["skill:frenzy"]["classification"] == (
+        "indirect-deployable-wounds-not-eligible"
+    )
 
 
 def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
@@ -181,6 +212,7 @@ def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
     output = capsys.readouterr().out
     assert "Candidate definitions:" in output
     assert "Candidate definitions: 48" in output
-    assert "Reviewed classifications: 42" in output
-    assert "Awaiting manual review: 6" in output
-    assert "Unreviewed without pinned N5.3 PDF page: 6" in output
+    assert "Reviewed classifications: 48" in output
+    assert "Awaiting manual review: 0" in output
+    assert "Reviewed with audit-only PDF citation: 6" in output
+    assert "Definitions missing maintained N5.3 PDF citation: 6" in output

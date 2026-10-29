@@ -1396,8 +1396,10 @@ structured detail fields without turning keyword mentions into object IDs:
 ```
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
-manifest pins **42 bounded N5.3 classifications** across 48 keyword-matching
-non-catalog definitions; **six remain unreviewed** in this discovery queue.
+manifest pins **all 48 definitions in this bounded keyword scan**.
+Six decisions have PDF evidence recorded in the audit manifest only: the
+maintained rules records still cite older Wiki revisions, so they require a
+separately coordinated source/database publication update.
 The original three Skill decisions distinguish `skill:place-deployable`
 (delivery action, p. 82), `skill:minelayer` (deployment method, p. 102)
 and `skill:request-speedball` (support State Tokens, p. 84). Additional
@@ -1451,26 +1453,39 @@ source-reviewed classes distinguish:
   excludes Weapon/Equipment Markers; existing Repeaters extend Hacking
   Area but do not become another item or delivery edge.
 
-The six open matches are `skill:frenzy`, `state:possessed`,
-`rule:command-token-strategic-use`, `skill:counterintelligence`,
-`skill:inspiring-leadership` and `skill:transmutation`. None of these
-maintained definitions currently has an exact `n5-core-v5.3-pdf` page
-citation. The audit reports that gap explicitly as
-`unreviewedMissingN5Citation`; this does **not** establish that the
-official PDF lacks corresponding rules. Review the underlying source
-and add verified citations or retain unresolved provenance before
-classifying them.
+The final six decisions were verified against the pinned English N5.3
+PDF: `skill:frenzy` (p. 93, indirectly inflicted Deployable wounds do
+not qualify); `state:possessed` (p. 169, an existing Trooper changes
+control/profile); `rule:command-token-strategic-use` (p. 128,
+resource expenditure and Speedball State Tokens);
+`skill:counterintelligence` (p. 90, counters strategic resource use);
+`skill:inspiring-leadership` (p. 99, modifies Order expenditure);
+and `skill:transmutation` (p. 117, changes the same Trooper's
+Unit Profile and representation). None establishes a separate
+Weapon/Equipment deployed-object identity.
 
-The negative/exception decisions were manually compared with the pinned
-English N5.3 pages. The audit validator pins the maintained definitions'
-exact cited pages, summary evidence and detailed clauses, but does not parse
-the PDF in CI. No new ARM/BTS/STR/S value, Army carrier, delivery edge
-or runtime object is inferred. All remaining matches stay in an **open
-manual review queue**; new classifications are explicit, record-specific,
-and fail closed on changed evidence. Summary-only glossary/trait definitions
-are valid only while they lack detailed source fields; adding such fields
-requires a fresh review. The count is specific to this bounded keyword
-scan, not a complete N5.3 object inventory.
+For these six, `citationStatus: pdf-verified-manifest-only` and
+`pdfExcerpt` preserve manually verified evidence separately from the
+maintained rules records, which **still lack N5.3 PDF citations**.
+The audit reports both `reviewedPdfOnly` and
+`missingMaintainedN5Citation`; the latter stays at six even though
+the bounded keyword review queue is closed. The validator rejects
+changed pages/excerpts and requires migration of the exception
+when the maintained record receives a matching PDF citation.
+Do not imply the production rules database contains these new
+citations. Add the six source citations to curated rules only in a
+coordinated `rules.db` rebuild and deployed-object publication
+fingerprint refresh.
+
+The decisions were manually compared with pinned English N5.3 pages.
+The audit validator pins source citations already in maintained definitions
+or the six explicit PDF-only review exceptions, plus curated summary and
+detail evidence; it does **not** parse the PDF in CI. No new ARM/BTS/STR/S
+value, Army carrier, delivery edge or runtime object is inferred.
+Summary-only glossary/trait reviews remain valid only while they lack
+detailed source fields. All 48 keyword-matching definitions are classified,
+but the scan covers neither unmentioned terms nor other source domains and
+is **not** a complete N5.3 object inventory.
 `tests/test_deployed_object_non_catalog_queue.py` checks these boundaries.
 
 ### Deployed-object release publication
