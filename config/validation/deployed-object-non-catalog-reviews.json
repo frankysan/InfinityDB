@@ -146,6 +146,153 @@
         "The Specialist must be in Silhouette contact with a Supply Box Token not being carried by a Model"
       ],
       "caveat": "Pick Up Supply Boxes is a scenario Skill acting on a Supplies objective. It creates no additional Supply Box identity, general Deployable placement edge, or Weapon/Equipment Unit use."
+    },
+    {
+      "recordId": "trait:deployable",
+      "classification": "object-classification-trait-not-instance",
+      "sourcePages": [
+        175
+      ],
+      "summaryEvidence": "A [[trait:deployable|Deployable]] Weapon or Equipment is placed as an independent battlefield element",
+      "factsEvidence": [],
+      "caveat": "Deployable describes an eligible Weapon/Equipment class and its general consequences; it does not establish a concrete deployed object, carrier, mode or four-stat profile. Existing reviewed objects remain individually identified."
+    },
+    {
+      "recordId": "trait:perimeter",
+      "classification": "placement-trait-not-object-identity",
+      "sourcePages": [
+        82
+      ],
+      "summaryEvidence": "When placed, applies [[trait:deployable|Deployable]] and Perimeter",
+      "factsEvidence": [
+        "When using [[skill:place-deployable|Place Deployable]], a destination wholly inside the user's [[trait:zone-of-control-zc|Zone of Control]] replaces the usual Silhouette contact.",
+        "The placed item becomes active at the Conclusion of the Order and remains stationary."
+      ],
+      "caveat": "Perimeter changes placement and subsequent behavior for an eligible item. It is not a canonical object identity and cannot equate Crazykoala, Madtraps, WildParrot, FastPanda or other items."
+    },
+    {
+      "recordId": "trait:boost",
+      "classification": "trigger-trait-not-object-identity",
+      "sourcePages": [
+        69,
+        49,
+        72,
+        82
+      ],
+      "summaryEvidence": "Once in play, a Boost weapon must trigger",
+      "factsEvidence": [],
+      "caveat": "Boost describes how an already placed eligible Weapon triggers, moves, detonates and is removed. It does not establish another object or authorize equivalence with Mines; placement, CAMO exceptions and source-specific effects remain separate."
+    },
+    {
+      "recordId": "skill:intuitive-attack",
+      "classification": "conditional-delivery-skill-not-object",
+      "sourcePages": [
+        49
+      ],
+      "summaryEvidence": "or placing a [[trait:deployable|Deployable]] Weapon under its specific conditions",
+      "factsEvidence": [
+        "To place a [[trait:deployable|Deployable]] Weapon whose Trigger Area contains an enemy [[state:camouflaged|Camouflaged]] Marker"
+      ],
+      "caveat": "Intuitive Attack is a conditional declaration and WIP-based delivery method, not a Weapon subtype or a new deployed object. Whether it applies must be reviewed for each item and its placement requirements."
+    },
+    {
+      "recordId": "skill:dodge",
+      "classification": "movement-exception-not-object",
+      "sourcePages": [
+        79,
+        80
+      ],
+      "summaryEvidence": "A Common Skill for evading applicable Attacks and repositioning",
+      "factsEvidence": [
+        "Dodge movement occurs in the Effects step, follows the General Movement Rules, and does not generate reactions or trigger [[trait:deployable|Deployable]] Weapons or Equipment."
+      ],
+      "caveat": "Dodge defines an evasion and movement exception to Deployable triggering; a Dodge-related Token or MOD mention does not introduce a separate battlefield object."
+    },
+    {
+      "recordId": "skill:stealth",
+      "classification": "trigger-interaction-not-object",
+      "sourcePages": [
+        112
+      ],
+      "summaryEvidence": "An Automatic Special Skill that limits ARO generation",
+      "factsEvidence": [
+        "Stealth does not prevent [[trait:deployable|Deployable]] Weapons or Equipment from triggering."
+      ],
+      "caveat": "Stealth affects reaction eligibility, not the identity, activation or delivery edge of a Deployable. Its triggering exception must not be interpreted as an additional source carrier."
+    },
+    {
+      "recordId": "skill:cautious-movement",
+      "classification": "trigger-interaction-not-object",
+      "sourcePages": [
+        32,
+        112
+      ],
+      "summaryEvidence": "A Long Common Skill that can move a Trooper without generating enemy AROs",
+      "factsEvidence": [
+        "With [[skill:stealth|Stealth]] in the Active Turn, the user may declare [[skill:cautious-movement|Cautious Movement]]"
+      ],
+      "caveat": "Cautious Movement's ARO and Stealth interactions do not suppress eligible Deployable triggering or define a deployed object."
+    },
+    {
+      "recordId": "rule:guts-roll",
+      "classification": "movement-exception-not-object",
+      "sourcePages": [
+        38
+      ],
+      "summaryEvidence": "After surviving one or more successful Attacks",
+      "factsEvidence": [
+        "Movement after failing a Guts Roll follows general movement and measuring requirements. It does not generate [[trait:aro|AROs]], trigger [[trait:deployable|Deployable]] Weapons or Equipment"
+      ],
+      "caveat": "Guts Roll movement is a rule-specific exemption from triggering Deployables, not another battlefield object, delivery route or carrier context."
+    },
+    {
+      "recordId": "rule:peripheral-type:control",
+      "classification": "peripheral-role-token-not-object",
+      "sourcePages": [
+        107
+      ],
+      "summaryEvidence": "A Peripheral type with unlimited operating distance and a maximum of three per Controller",
+      "factsEvidence": [
+        "Up to three Control [[skill:peripheral|Peripherals]] form a Control Unit. Designate one [[skill:peripheral|Peripheral]] as Spearhead with a Spearhead Token"
+      ],
+      "caveat": "The Spearhead Token indicates a Control Unit role held by a Peripheral Trooper, not an additional independent Weapon/Equipment Deployable or troop profile."
+    },
+    {
+      "recordId": "rule:peripheral-type:cyberplug",
+      "classification": "peripheral-mode-token-not-object",
+      "sourcePages": [
+        107,
+        108
+      ],
+      "summaryEvidence": "A Peripheral type granted by [[skill:cyberplug]]",
+      "factsEvidence": [
+        "If two deploy, one must be Connected and the other Autonomous. Mark Autonomous units with an Autonomous Token."
+      ],
+      "caveat": "The Autonomous Token marks which Cyberplug Peripheral Trooper operates in the Autonomous Profile. It is not a separate deployed object or an excuse to derive Controller/Army ownership from the Token."
+    },
+    {
+      "recordId": "state:camouflaged",
+      "classification": "representation-state-not-object-identity",
+      "sourcePages": [
+        157
+      ],
+      "summaryEvidence": "A Marker State that hides the represented Trooper, Weapon, or Equipment",
+      "factsEvidence": [
+        "A successful [[skill:discover]] Roll reveals the Marker and replaces it with the corresponding Model or Token."
+      ],
+      "caveat": "A Camouflaged Marker is a representation of an existing Trooper, Weapon or Equipment. The Marker does not define a generic Mine or a new independent object identity; its represented item must be resolved separately."
+    },
+    {
+      "recordId": "state:holomask",
+      "classification": "representation-state-not-object-identity",
+      "sourcePages": [
+        164
+      ],
+      "summaryEvidence": "A disguise State that represents the bearer as another same-faction Trooper",
+      "factsEvidence": [
+        "A Trooper in [[state:holomask|HoloMask State]] cannot copy [[skill:hacker]] or Hackable status or items with the [[trait:deployable]] Trait represented by Tokens or Models."
+      ],
+      "caveat": "HoloMask changes a Trooper's presentation and explicitly excludes copying Deployable items represented by Tokens or Models. Neither the disguise nor its restriction creates a new deployed-object profile."
     }
   ]
 }

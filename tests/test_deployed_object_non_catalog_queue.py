@@ -59,7 +59,7 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = candidate_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 13
+    assert len(validate_reviews(manifest, curated, candidates)) == 25
 
     for key, bad_value, error in (
         ("classification", "fully-reviewed-four-stat-object", "classification"),
@@ -83,14 +83,22 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     with pytest.raises(ValueError, match="No current"):
         validate_reviews(missing, curated, candidates)
 
+    # Some cited Trait definitions have only summary text. A future detailed
+    # clause must not silently inherit that summary-only review decision.
+    detailed = copy.deepcopy(curated)
+    boost = next(record for record in detailed["records"] if record["id"] == "trait:boost")
+    boost["facts"] = {"effects": ["New Boost deployment behavior."]}
+    with pytest.raises(ValueError, match="detailed evidence"):
+        validate_reviews(manifest, detailed, candidate_mentions(detailed))
+
 
 def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     report = audit_non_catalog_candidates(CURATED, REVIEWS)
     assert report["scope"] == "non-catalog-keyword-discovery-not-object-inventory"
     assert len(report["curatedSourceSha256"]) == 64
-    assert report["reviewedCount"] == 13
+    assert report["reviewedCount"] == 25
     assert report["candidateCount"] == 48
-    assert len(report["unreviewed"]) == 35
+    assert len(report["unreviewed"]) == 23
     selected = {
         row["recordId"]: row for row in report["candidates"]
     }
@@ -101,6 +109,11 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
         "rule:scenario:carrying-supply-boxes", "term:token",
         "term:state-token", "term:deployable-equipment",
         "term:deployable-weapon", "term:scenery-element",
+        "trait:deployable", "trait:perimeter", "trait:boost",
+        "skill:intuitive-attack", "skill:dodge", "skill:stealth",
+        "skill:cautious-movement", "rule:guts-roll",
+        "rule:peripheral-type:control", "rule:peripheral-type:cyberplug",
+        "state:camouflaged", "state:holomask",
     ):
         assert selected[record_id]["reviewed"]
         assert selected[record_id]["citations"]
@@ -127,7 +140,17 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
         "scenario-object-outside-weapon-equipment"
     )
     assert reviewed["term:state-token"]["factsEvidence"] == []
-    assert {"trait:boost", "skill:intuitive-attack"} <= {
+    assert reviewed["trait:boost"]["factsEvidence"] == []
+    assert reviewed["trait:perimeter"]["classification"] == (
+        "placement-trait-not-object-identity"
+    )
+    assert reviewed["rule:peripheral-type:control"]["classification"] == (
+        "peripheral-role-token-not-object"
+    )
+    assert reviewed["rule:peripheral-type:cyberplug"]["classification"] == (
+        "peripheral-mode-token-not-object"
+    )
+    assert {"skill:infiltration", "skill:impersonation"} <= {
         entry["recordId"] for entry in report["unreviewed"]
     }
 
@@ -140,5 +163,5 @@ def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
     output = capsys.readouterr().out
     assert "Candidate definitions:" in output
     assert "Candidate definitions: 48" in output
-    assert "Reviewed classifications: 13" in output
-    assert "Awaiting manual review: 35" in output
+    assert "Reviewed classifications: 25" in output
+    assert "Awaiting manual review: 23" in output

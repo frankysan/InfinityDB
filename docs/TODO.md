@@ -1378,6 +1378,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 remaining keyword hits including Boost/Perimeter and
                 scenario/peripheral markers, plus source wording absent
                 from the keyword query.
+              - [x] Review 12 further N5.3 non-catalog definitions:
+                the Deployable/Perimeter/Boost Traits, Intuitive Attack,
+                Dodge, Stealth, Cautious Movement, Guts Roll, Control/
+                Cyberplug Peripheral role Tokens, Camouflaged and HoloMask
+                States. This bounded scan now has **25 reviewed of 48**,
+                leaving **23 open**. The reviewed cases are object-class,
+                placement/trigger interactions, or representations of
+                existing Troopers/items—not new object profiles or
+                inferred Army ownership. Source citations and summary/
+                detailed clauses are pinned, including a drift guard when
+                summary-only Trait definitions gain detailed text.
+                Next: remaining deployment-state, scenario, and command-
+                token candidates, then broader wording/source discovery.
             - [x] **Reconcile delivery paths for all 17 currently published
               reviewed deployed objects.** The pinned review now covers
               17 of 17 objects with 28 approved delivery paths and zero

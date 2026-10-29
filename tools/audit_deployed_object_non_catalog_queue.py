@@ -35,6 +35,18 @@ CLASSIFICATIONS = {
     "term:deployable-equipment": ("term", "game-element-type-not-instance"),
     "term:deployable-weapon": ("term", "game-element-type-not-instance"),
     "term:scenery-element": ("term", "game-element-type-not-instance"),
+    "trait:deployable": ("trait", "object-classification-trait-not-instance"),
+    "trait:perimeter": ("trait", "placement-trait-not-object-identity"),
+    "trait:boost": ("trait", "trigger-trait-not-object-identity"),
+    "skill:intuitive-attack": ("skill", "conditional-delivery-skill-not-object"),
+    "skill:dodge": ("skill", "movement-exception-not-object"),
+    "skill:stealth": ("skill", "trigger-interaction-not-object"),
+    "skill:cautious-movement": ("skill", "trigger-interaction-not-object"),
+    "rule:guts-roll": ("rule", "movement-exception-not-object"),
+    "rule:peripheral-type:control": ("rule", "peripheral-role-token-not-object"),
+    "rule:peripheral-type:cyberplug": ("rule", "peripheral-mode-token-not-object"),
+    "state:camouflaged": ("state", "representation-state-not-object-identity"),
+    "state:holomask": ("state", "representation-state-not-object-identity"),
 }
 
 
@@ -107,10 +119,10 @@ def validate_reviews(
             if isinstance(text, str)
         )
         evidence = decision["factsEvidence"]
-        # Glossary definitions have cited summaries but no structured
-        # Requirements/Effects clauses. Other decisions must pin both.
+        # Some glossary/trait definitions contain only a cited summary.
+        # Any record with structured text must pin at least one exact clause.
         if not isinstance(evidence, list) or (
-            not evidence and record["kind"] != "term"
+            not evidence and bool(detail.strip())
         ) or any(not isinstance(text, str) or not text or text not in detail for text in evidence):
             raise ValueError(f"Non-catalog detailed evidence drift: {record_id}")
         pages = {

@@ -1396,8 +1396,8 @@ structured detail fields without turning keyword mentions into object IDs:
 ```
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
-manifest pins **13 bounded N5.3 classifications** across 48 keyword-matching
-non-catalog definitions; **35 remain unreviewed** in this discovery queue.
+manifest pins **25 bounded N5.3 classifications** across 48 keyword-matching
+non-catalog definitions; **23 remain unreviewed** in this discovery queue.
 The original three Skill decisions distinguish `skill:place-deployable`
 (delivery action, p. 82), `skill:minelayer` (deployment method, p. 102)
 and `skill:request-speedball` (support State Tokens, p. 84). Additional
@@ -1419,6 +1419,22 @@ source-reviewed classes distinguish:
 - **Supplies** (p. 153): carrying a Supply Box preserves its scenario
   Token even with a Null carrier; the Pick Up Supply Boxes Skill manipulates
   that scenario objective. These are not Army source Weapon/Equipment items.
+- **Deployable, Perimeter and Boost Traits** (pp. 175, 82 and 69):
+  these define the object class, placement variation and trigger behavior,
+  respectively, not interchangeable device identities. Boost/Mines remain
+  distinct; a generic Trait does not authorize a delivery edge.
+- **Intuitive Attack** (p. 49) conditionally permits placement of eligible
+  Deployable Weapons and consumes a use on a failed Roll where applicable.
+  It is a delivery Skill, not a separate deployed profile.
+- **Dodge, Guts Roll, Stealth and Cautious Movement** (pp. 79-80, 38,
+  112 and 32/112) distinguish exempt post-Roll movement from ordinary
+  triggering and ARO restrictions. None adds a carrier or object.
+- **Control and Cyberplug Peripherals** (pp. 107-108): Spearhead and
+  Autonomous Tokens indicate a Peripheral's role or operating profile,
+  not independent Weapon/Equipment objects.
+- **Camouflaged and HoloMask States** (pp. 157 and 164): a Marker/imitated
+  Model represents an existing identity. HoloMask expressly cannot copy
+  Deployable items represented by Models or Tokens.
 
 The negative/exception decisions were manually compared with the pinned
 English N5.3 pages. The audit validator pins the maintained definitions'
@@ -1426,8 +1442,10 @@ exact cited pages, summary evidence and detailed clauses, but does not parse
 the PDF in CI. No new ARM/BTS/STR/S value, Army carrier, delivery edge
 or runtime object is inferred. All remaining matches stay in an **open
 manual review queue**; new classifications are explicit, record-specific,
-and fail closed on changed evidence. The count is specific to this bounded
-keyword scan, not a complete N5.3 object inventory.
+and fail closed on changed evidence. Summary-only glossary/trait definitions
+are valid only while they lack detailed source fields; adding such fields
+requires a fresh review. The count is specific to this bounded keyword
+scan, not a complete N5.3 object inventory.
 `tests/test_deployed_object_non_catalog_queue.py` checks these boundaries.
 
 ### Deployed-object release publication
