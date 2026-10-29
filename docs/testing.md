@@ -193,7 +193,15 @@ lock as a safety limit. Source-backed Unit, Scenario FAQ, and release browser
 tests occupy lane A; Weapon cards and the remaining browser modules occupy
 lane B. The mock-only verifier module is not assigned to either lane. These
 assignments are provisional estimates of execution cost, **not** guaranteed
-balanced work. Compare the same full test command with the baseline:
+balanced work. Group order matters: xdist's `loadgroup` scheduler inherits
+`loadscope` scheduling, which normally assigns the groups with the greatest
+**number of cases** first (not the greatest estimated runtime). The two
+Chromium groups are therefore expected to start early, but the default
+scheduler does not balance their actual durations. The startup profiler now
+prints the first start and last teardown for each browser lane, plus the
+first non-lane test start, to verify overlap and diagnose a late-running lane
+without creating per-step reports. Compare the same full test command with
+the baseline:
 
 ```powershell
 .\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-dist browserlanes

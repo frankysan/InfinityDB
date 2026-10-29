@@ -51,6 +51,39 @@ def test_xdist_startup_timing_tracks_ready_collection_and_first_test() -> None:
     assert "unavailable" in profile.summary_lines()[3]
 
 
+def test_xdist_browser_lanes_report_start_and_last_teardown() -> None:
+    profile = XdistStartupProfile()
+    profile.start(8, 100.0)
+    profile.test_started("tests/test_web.py::test_api", 104.0)
+    profile.test_started(
+        "tests/test_verify_scenario_faq_browser.py::test_browser@chromium-a", 105.0
+    )
+    profile.test_started(
+        "tests/test_verify_weapon_source_cards_browser.py::test_browser@chromium-b",
+        105.5,
+    )
+    profile.test_started(
+        "tests/test_verify_scenario_faq_browser.py::test_other@chromium-a", 108.0
+    )
+    profile.test_finished(
+        "tests/test_verify_scenario_faq_browser.py::test_browser@chromium-a", 111.0
+    )
+    profile.test_finished(
+        "tests/test_verify_scenario_faq_browser.py::test_other@chromium-a", 115.0
+    )
+    profile.test_finished(
+        "tests/test_verify_weapon_source_cards_browser.py::test_browser@chromium-b",
+        117.0,
+    )
+    assert profile.summary_lines()[-4:-1] == (
+        "First non-lane test started: +4.00s",
+        "Browser lane chromium-a: first +5.00s, last teardown +15.00s",
+        "Browser lane chromium-b: first +5.50s, last teardown +17.00s",
+    )
+    profile.start(2, 200.0)
+    assert not any("Browser lane" in line for line in profile.summary_lines())
+
+
 def test_xdist_launch_includes_python_and_pytest_initialization() -> None:
     profile = XdistStartupProfile()
     profile.start(2, 100.0, launch_at=97.5)

@@ -26,6 +26,9 @@ class XdistStartupProfile:
     ready_at: dict[str, float] = field(default_factory=dict)
     collected_at: dict[str, float] = field(default_factory=dict)
     first_test_at: float | None = None
+    first_ordinary_test_at: float | None = None
+    browser_lane_started_at: dict[str, float] = field(default_factory=dict)
+    browser_lane_finished_at: dict[str, float] = field(default_factory=dict)
 
     def start(self, workers: int, now: float, *, launch_at: float | None = None) -> None:
         self.started_at = now
@@ -34,6 +37,9 @@ class XdistStartupProfile:
         self.ready_at.clear()
         self.collected_at.clear()
         self.first_test_at = None
+        self.first_ordinary_test_at = None
+        self.browser_lane_started_at.clear()
+        self.browser_lane_finished_at.clear()
 
     def ready(self, worker: str, now: float) -> None:
         if self.started_at is not None:
@@ -46,6 +52,28 @@ class XdistStartupProfile:
     def first_test(self, now: float) -> None:
         if self.started_at is not None and self.first_test_at is None:
             self.first_test_at = now
+
+    @staticmethod
+    def _browser_lane(nodeid: str) -> str | None:
+        lane = nodeid.rpartition("@")[2]
+        return lane if lane in ("chromium-a", "chromium-b") else None
+
+    def test_started(self, nodeid: str, now: float) -> None:
+        if self.started_at is None:
+            return
+        self.first_test(now)
+        lane = self._browser_lane(nodeid)
+        if lane is not None:
+            self.browser_lane_started_at.setdefault(lane, now)
+        elif self.first_ordinary_test_at is None:
+            self.first_ordinary_test_at = now
+
+    def test_finished(self, nodeid: str, now: float) -> None:
+        if self.started_at is None:
+            return
+        lane = self._browser_lane(nodeid)
+        if lane is not None:
+            self.browser_lane_finished_at[lane] = now
 
     def summary_lines(self) -> tuple[str, ...]:
         start = self.started_at
@@ -91,6 +119,20 @@ class XdistStartupProfile:
                 "Runner process launch to worker spawn: unavailable "
                 "(run through tools/run_checks.py)"
             )
+        if self.browser_lane_started_at:
+            if self.first_ordinary_test_at is not None:
+                lines.append(
+                    f"First non-lane test started: +{elapsed(self.first_ordinary_test_at)}"
+                )
+            for lane in ("chromium-a", "chromium-b"):
+                started = self.browser_lane_started_at.get(lane)
+                if started is None:
+                    continue
+                finished = self.browser_lane_finished_at.get(lane)
+                lines.append(
+                    f"Browser lane {lane}: first +{elapsed(started)}"
+                    + (f", last teardown +{elapsed(finished)}" if finished is not None else "")
+                )
         lines.append(
             "Worker times are relative to xdist spawn; startup and collection overlap."
         )
@@ -132,9 +174,14 @@ def pytest_xdist_node_collection_finished(node: Any, ids: Sequence[str]) -> None
 
 
 def pytest_runtest_logstart(nodeid: str, location: tuple[str, int, str]) -> None:
-    """Track the first test dispatched by the controller."""
-    if _PROFILE.started_at is not None and _PROFILE.first_test_at is None:
-        _PROFILE.first_test(time.perf_counter())
+    """Track when Chromium lanes and ordinary tests first start."""
+    _PROFILE.test_started(nodeid, time.perf_counter())
+
+
+def pytest_runtest_logreport(report: pytest.TestReport) -> None:
+    """Track the last teardown observed per Chromium scheduling lane."""
+    if report.when == "teardown":
+        _PROFILE.test_finished(report.nodeid, time.perf_counter())
 
 
 def pytest_terminal_summary(terminalreporter: Any) -> None:
