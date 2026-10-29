@@ -176,11 +176,35 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         **1 editorial item** (N53-01) across the 26 English bullets.
         Review four additional Spanish-only subjects, all 20 Army update
         subjects and the nine added FAQ rulings in their own source/scope
-        boundaries. Prioritize ESX-01..04 and Army current-state
-        coverage; preserve disclosed publisher conflicts and the
-        ITS-only Ancillary ruling boundary. Finish release-matched database,
-        derived-publication and browser acceptance without replacing the
-        original audit's historical counts.
+        boundaries. Current-rule ESX-01..04 checks have local acceptance;
+        continue Army current-state coverage while preserving disclosed
+        publisher conflicts and the ITS-only Ancillary ruling boundary.
+        Finish release-matched database, derived-publication and browser
+        acceptance without replacing the original audit's historical counts.
+      - [x] **ARMY-02–04 source-pair chart publication:** Rechecked
+        Indigo (1912/1926, PanOceania), Confessor (1913/1927,
+        Military Orders) and Gui Feng/Yu Jing (1914/1928) against the
+        exact `JSON 20260929-114335.zip` faction members, database
+        and Unit API. For each source Unit the public reference preserves
+        source name, ID, archive file/version, separate Spec-Ops
+        (8 choices) or TEAM-OPS (10 choices) selection chart, four
+        SpecBall choices, original option order and compound attributes.
+        Chromium confirms all six Unit pages at 1440/390/320 px, with
+        links, expected rows and no horizontal overflow. This is
+        **selected current chart/identity coverage**, not a complete
+        profile, availability, Fireteam or customization acceptance,
+        nor evidence of a historical before/after Army change. The
+        remaining full profiles and roster options for these three
+        pairs are still included in the wider Army coverage gate.
+      - [ ] **ARMY-01 and ARMY-05–20, plus full ARMY-02–04 profiles:** Continue
+        source-to-database-to-player verification by the original
+        20-item Army update inventory. Keep Fireteam chart constraints
+        (ARMY-01) distinct from the Spec-Ops/TEAM-OPS option tables
+        (ARMY-02–16). For each source Unit/faction, check current
+        profiles, options, availability and source-specific references
+        as applicable; do not infer historical changes without a
+        pinned pre-notice Army snapshot. Retain final release-browser
+        acceptance as a separate gate.
       - [x] Recheck **Infinity Spec-Ops / Request SpecBall (N53-02)**
         against N5.3 p. 98 and the already recorded REA-040
         acceptance. The core request Skill, drop, selection, pickup,

@@ -2,7 +2,7 @@
 
 These are immutable Army source options, not a player's selected upgrades.
 The current application database preserves them with per-source-unit provenance
-even though ordinary Unit detail APIs do not yet publish their contents.
+and ordinary Unit detail APIs publish them as read-only source choices.
 """
 
 from __future__ import annotations
@@ -137,6 +137,64 @@ def test_source_choices_are_exposed_on_unit_api_without_player_selections() -> N
 
     ordinary = _unit_api(app, "pathfinder-dronbot")
     assert ordinary["source_charts"] == []
+
+
+@pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
+@pytest.mark.parametrize(
+    ("source_member", "spec_slug", "spec_id", "team_slug", "team_id"),
+    (
+        ("101-panoceania.json", "indigo-spec-ops", 1912, "indigo-team-ops", 1926),
+        (
+            "103-military-orders.json",
+            "confessor-spec-ops", 1913, "confessor-team-ops", 1927,
+        ),
+        ("201-yu-jing.json", "gu-feng-spec-ops", 1914, "yu-jing-team-ops", 1928),
+    ),
+)
+def test_army_02_to_04_source_pairs_are_published_with_own_chart_context(
+    source_member: str,
+    spec_slug: str,
+    spec_id: int,
+    team_slug: str,
+    team_id: int,
+) -> None:
+    """Current-source pair identities and exact option context, not a historical diff."""
+    with zipfile.ZipFile(SOURCE) as archive:
+        member = json.loads(archive.read(source_member))
+    source_units = {unit["id"]: unit for unit in member["units"]}
+    app = create_app(ARMY, rules_database_path=RULES)
+    for slug, source_id, choices in (
+        (spec_slug, spec_id, 8),
+        (team_slug, team_id, 10),
+    ):
+        source_unit = source_units[source_id]
+        assert source_unit["slug"] == slug
+        assert len(source_unit["spectables"]["table"]["items"]) == choices
+        assert len(source_unit["spectables"]["specball"]["items"]) == 4
+        published = _unit_api(app, slug)
+        assert source_id in published["source_ids"]
+        source_chart = next(
+            chart for chart in published["source_charts"]
+            if chart["source_unit_id"] == source_id
+        )
+        assert source_chart["source_name"] == source_unit["name"]
+        assert {"version": member["version"], "source_file": source_member} in (
+            source_chart["source_versions"]
+        )
+        for chart_kind, source_table in source_unit["spectables"].items():
+            actual = source_chart["charts"][chart_kind]["items"]
+            assert len(actual) == len(source_table["items"])
+            for source_choice, public_choice in zip(
+                source_table["items"], actual, strict=True,
+            ):
+                assert [
+                    {
+                        key: value for key, value in attr.items()
+                        if key not in ("name", "href", "extras")
+                    }
+                    for attr in public_choice["attributes"]
+                ] == source_choice["attrs"]
+        assert "selected" not in source_chart
 
 
 @pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")

@@ -459,11 +459,17 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                     pytest.skip(f"Chromium unavailable: {exc}")
                 raise
             try:
-                for width in (1440, 390):
+                for width in (1440, 390, 320):
                     page = browser.new_page(viewport={"width": width, "height": 900})
                     try:
-                        for slug, total in (("indigo-spec-ops", 12),
-                                            ("indigo-team-ops", 14)):
+                        for slug, source_id, total in (
+                            ("indigo-spec-ops", 1912, 12),
+                            ("indigo-team-ops", 1926, 14),
+                            ("confessor-spec-ops", 1913, 12),
+                            ("confessor-team-ops", 1927, 14),
+                            ("gu-feng-spec-ops", 1914, 12),
+                            ("yu-jing-team-ops", 1928, 14),
+                        ):
                             page.goto(
                                 f"http://127.0.0.1:{server.server_port}/units/{slug}",
                                 wait_until="domcontentloaded",
@@ -471,6 +477,9 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                             chart = page.locator(".source-choice-charts")
                             chart.wait_for(state="visible", timeout=12000)
                             assert chart.locator(".source-choice-chart").count() == 1
+                            assert chart.locator("summary").first.inner_text().endswith(
+                                f"Source Unit #{source_id}"
+                            )
                             assert chart.locator(".source-choice-list li").count() == total
                             assert chart.locator("a[href^='/skills/']").count() > 0
                             assert chart.locator(
