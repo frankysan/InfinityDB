@@ -174,6 +174,22 @@ def test_test_stage_can_enable_xdist_workers() -> None:
     )
 
 
+def test_test_stage_can_group_browser_modules_without_changing_default() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",), [], build_source=None,
+        test_workers="4", test_distribution="loadgroup",
+    )
+    assert stage.command[3:7] == ("-n", "4", "--dist", "loadgroup")
+
+
+def test_test_distribution_requires_test_stage(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    result = run_checks.main(["--stage", "lint", "--test-dist", "loadgroup"])
+    assert result == run_checks.EXIT_RUNNER_ERROR
+    assert "--test-dist requires the test stage" in capsys.readouterr().err
+
+
 def test_test_stage_can_force_serial_execution() -> None:
     [stage] = run_checks.stage_definitions(
         ("test",),

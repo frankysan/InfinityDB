@@ -137,8 +137,29 @@ remain stable under the workstation's normal worker count.
 
 ## Chromium concurrency under pytest-xdist
 
-Full local checks retain `-n auto --dist worksteal`; the worker count is not
-reduced for browser acceptance. During an xdist run, `tests/conftest.py`
+Full local checks retain `-n auto --dist worksteal` by default; the worker
+count is not reduced for browser acceptance. The 2026-10-29 full suite varied
+from 246.85 s to 305.64 s despite both runs passing. The latter showed
+browser module fixture setup waits up to 142 s, suggesting contention and
+repeated module setup when worksteal distributes one module among workers.
+This is not evidence that fixture teardown or pytest post-processing is slow.
+
+For a controlled comparison, the runner also supports
+`--test-dist loadgroup`. It assigns all cases from each `*_browser.py`
+module to the same xdist worker, while other tests remain individually
+schedulable. The grouping marker is added in a `tryfirst` collection hook,
+before xdist generates grouped test IDs. A two-worker Army overview browser
+smoke run confirmed that all four tests carried the same group ID and shared
+one module setup. The option is **not** the default until a representative
+full-suite run demonstrates improvement:
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --all --test-dist loadgroup
+```
+
+No new report snapshot is needed unless recording a release milestone.
+
+During an xdist run, `tests/conftest.py`
 admits **at most two browser test modules concurrently** across workers using
 cross-process OS file locks in the per-run pytest temporary directory. This
 protects Chromium/browser-server resources while allowing two long-running

@@ -39,6 +39,8 @@ PROFILES = {
     "all": STAGE_ORDER,
 }
 DEFAULT_TEST_WORKERS = "auto"
+DEFAULT_TEST_DISTRIBUTION = "worksteal"
+TEST_DISTRIBUTIONS = ("worksteal", "loadgroup")
 TEST_SECTIONS = load_test_sections()
 TEST_SECTION_NAMES = tuple(TEST_SECTIONS)
 DEFAULT_LINT_TARGETS = (
@@ -157,6 +159,15 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--test-dist",
+        choices=TEST_DISTRIBUTIONS,
+        default=None,
+        help=(
+            "pytest-xdist scheduling strategy; defaults to worksteal. "
+            "Use loadgroup to keep each Chromium browser module on one worker."
+        ),
+    )
+    parser.add_argument(
         "--test-section",
         action="append",
         choices=TEST_SECTION_NAMES,
@@ -208,6 +219,7 @@ def stage_definitions(
     build_source: Path | None,
     include_full_assets: bool = False,
     test_workers: str = DEFAULT_TEST_WORKERS,
+    test_distribution: str = DEFAULT_TEST_DISTRIBUTION,
     test_sections: tuple[str, ...] = (),
 ) -> list[Stage]:
     python = sys.executable
@@ -216,7 +228,7 @@ def stage_definitions(
         if name == "test":
             command = [python, "-m", "pytest"]
             if test_workers != "0":
-                command.extend(("-n", test_workers, "--dist", "worksteal"))
+                command.extend(("-n", test_workers, "--dist", test_distribution))
             if targets:
                 command.extend(targets)
             asset_marker = (
@@ -395,6 +407,8 @@ def main(argv: list[str] | None = None) -> int:
             build_parser().error("--build-source requires the build stage")
         if args.test_workers is not None and "test" not in stage_names:
             build_parser().error("--test-workers requires the test stage")
+        if args.test_dist is not None and "test" not in stage_names:
+            build_parser().error("--test-dist requires the test stage")
         if args.test_section and "test" not in stage_names:
             build_parser().error("--test-section requires the test stage")
         if args.source_occupancy_gate and "rules" not in stage_names:
@@ -435,6 +449,7 @@ def main(argv: list[str] | None = None) -> int:
                 asset_selection is not None and asset_selection.include_full_assets
             ),
             test_workers=test_workers,
+            test_distribution=args.test_dist or DEFAULT_TEST_DISTRIBUTION,
             test_sections=test_sections,
         )
     except SystemExit as exc:

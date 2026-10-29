@@ -102,6 +102,7 @@ markers = [
   "section_model: data model, canonical rules, semantic audits, and database behavior",
   "section_web: web application, HTTP/API behavior, and web metrics",
   "section_browser: Chromium acceptance and browser verifier contract tests",
+  "xdist_group(name): keep related tests on the same worker under --dist loadgroup",
   "section_build: Army acquisition, normalization, deterministic build, and ingestion",
   "section_ops: development checks, deployment, archives, reports, and operational tooling",
   "section_assets: symbols, SVG/font tooling, and processed graphical asset publication",

@@ -61,6 +61,7 @@ def requires_pinned_raw_army_archive() -> None:
     assert not missing, f"Full Army raw archive has missing tables: {sorted(missing)}"
 
 
+@pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     """Assign every repository test module to exactly one maintained local section."""
 
@@ -74,3 +75,7 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 f"Test module {path.name} is not assigned in config/testing/test-sections.json"
             )
         item.add_marker(section.marker)
+        if path.name.endswith("_browser.py"):
+            # Group only Chromium-gated modules in optional xdist loadgroup runs.
+            # Otherwise worksteal may repeat module fixtures and hold slots idle.
+            item.add_marker(pytest.mark.xdist_group(name=path.stem))
