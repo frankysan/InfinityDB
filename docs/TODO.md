@@ -165,6 +165,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       and unresolved source/version boundaries; update player-facing data only
       for source-confirmed discrepancies. This is a named N5.3 review within
       the wider update-post reconciliation task, not a substitute for it.
+      - [ ] Close the current N5.3 reconciliation inventory against
+        the final 1.0 source and browser evidence. See the
+        [current disposition](rules-explanation-audit-1.0-n5.3-reconciliation.md#current-reconciliation-inventory-2026-10-29).
+        It distinguishes
+        **12 focused rechecks/clarifications**, **9 previously verified
+        selected clauses**, **1 represented rule awaiting final acceptance**
+        (N53-05), **3 scoped follow-ups/source conflicts** (N53-02/07/09)
+        and **1 editorial item** (N53-01) across the 26 English bullets.
+        Review four additional Spanish-only subjects, all 20 Army update
+        subjects and the nine added FAQ rulings in their own source/scope
+        boundaries. Prioritize N53-02's procedure/chart presentation,
+        source-to-browser Guts coverage, ESX-01..04 and Army current-state
+        coverage; preserve disclosed publisher conflicts and the ITS-only
+        Ancillary ruling boundary. Finish release-matched database,
+        derived-publication and browser acceptance without replacing the
+        original audit's historical counts.
       - [x] Recheck the **Impetuous/Prone update (N53-13)** against N5.3
         p. 97. Preserve the Impetuous-Phase Move/Jump/Climb movement-end rule
         separately from the additional end-of-Order Prone restriction, and cite

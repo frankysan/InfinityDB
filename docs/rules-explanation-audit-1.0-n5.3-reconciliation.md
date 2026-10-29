@@ -18,6 +18,112 @@ work and the canonical data/semantic documents for current behavior. Preserve
 the original source identities, counts and unresolved disagreements rather than
 reclassifying historical rows as current approvals.
 
+## Current reconciliation inventory (2026-10-29)
+
+This section is a **current disposition overlay**, not a revision to the
+2026-10-09 comparison or its fixed denominators. It reconciles the English
+notice's 26 numbered rule changes, the four additional Spanish-only subjects,
+20 separate Army changes and nine added FAQ rulings. A completed *selected
+change* is not whole-record, cross-source, or release-browser acceptance.
+The owning 1.0 work and release criteria remain in
+[TODO](TODO.md#source-inventory-and-gap-batches) and
+[releasing](releasing.md#version-10-data-completeness-gate).
+
+### English rules changelog: 26 subjects
+
+- **12 source-backed changes rechecked or clarified in current maintained
+  data:** N53-03 (Berserk/Prone), N53-06 (Firewall),
+  N53-10 (PARA CC weapon MOD versus ammunition save), N53-13
+  (Impetuous/Prone), N53-14 (Minelayer), N53-15 (Cyberplug),
+  N53-16 (Protheion), N53-19 (Deployable Cover), N53-21
+  (Peripheral/Fireteam Integrity), N53-22 (Camouflaged ARO declarations),
+  N53-24 (five Null States), N53-25 (Breaker Marksman publication).
+  Some needed only a regression or a verified *no-data-change* result.
+  These are the focused N5.3 items documented in TODO, not a claim of
+  full-source acceptance. In particular, N53-03 still has a shorter
+  contradictory/omissive Prone summary in the source itself.
+- **9 selected rule clauses verified at the original audit baseline:**
+  N53-04 (Climb/Cover), N53-08 (Trench-Hammer), N53-11
+  (Speedball PH), N53-12 (Aerial/Boost), N53-17 (Strategos L2),
+  N53-18 (Super-Jump distance), N53-20 (Hacking Device category),
+  N53-23 (IMM-B Hacking example) and N53-26 (Thunderbolt grouping).
+  Carry their original *selected-clause* scope forward; do not infer
+  complete records, rules interactions or browser verification.
+- **1 current implementation with residual acceptance work:**
+  N53-05 (Guts geometry). The maintained `rule:guts-roll` already
+  evaluates Line of Fire from where attackers actually attacked
+  (N5.3 p. 38), and an owning rules-database test checks the phrase.
+  The original missing-explanation finding is stale; a complete
+  source-to-browser/interaction acceptance check is still open.
+- **3 changes requiring bounded follow-up or source-discrepancy disclosure:**
+  N53-02 (Spec-Ops/SpecBall procedure and TEAM-OPS scope) has
+  maintained core Skill/Request references but still needs review of
+  chart/procedure and player-accessible completeness; an interactive
+  list configurator is not automatically a 1.0 requirement.
+  N53-07 (Kobra CC) preserves a proven DA two-save correction and an
+  unresolved Anti-materiel disagreement between Army/Wiki and both PDFs.
+  N53-09 (Dodge ARM+3) presents the bilingual PDF reading and discloses
+  the contradictory English/Spanish Wiki notes. An external publisher
+  ruling is not required for release *if* the selected behavior,
+  conflicting sources and uncertainty remain clearly available.
+- **1 not applicable:** N53-01 is editorial blue-annotation guidance,
+  not a missing player-facing gameplay identity.
+
+The 12 + 9 + 1 + 3 + 1 grouping accounts for all **26 English items**;
+it is **not** a replacement for the historical 9/12/4/1 source-assessment
+counts above.
+
+### Additional Spanish, Army and FAQ subjects
+
+- **ESX-01 to ESX-04 (four items):** retain the historical partially
+  verified boundaries. These cover Stealth source alignment, Jet
+  Propulsion direction changes, MSV3 disclosure/turn scope, and
+  AP+T2 CC Anti-materiel. The absent *earlier* Spanish PDF prevents
+  a fully proven Spanish historical before/after delta. Review the
+  current player-facing clause where in scope without inventing
+  historical equivalence; specifically do not turn MSV3 into a
+  blanket Marker-state exemption or broaden Super-Jump distance.
+- **ARMY-01 to ARMY-20 (20 items):** the current post-notice
+  snapshot and selected identities were inspected in the original
+  audit, but no pinned pre-notice Army snapshot was available.
+  All 20 historical dispositions therefore remain *partially
+  verified*. A current-only snapshot can support a present-state
+  inventory, not a claim about the previous source change. Finish
+  source-to-canonical-to-public browser coverage for in-scope
+  profiles, options and Fireteam constraints; record unavailable
+  pre-change evidence as a provenance limit rather than a defect.
+- **FAQ-01 to FAQ-09 (nine added rulings):** compared against v0.0
+  and v0.1; this does not independently approve every affected
+  owner page or applicability. FAQ-09's undeployed Ancillary
+  *Killed* interpretation is explicitly under the ITS heading.
+  Its application to core Annihilation/Firefight remains unproven:
+  do not publish that scope without scenario-specific evidence.
+  The FAQ v0.1 publication date is also not established.
+
+### Remaining release gates (not counted as additional change items)
+
+1. **Source and scope:** freeze the intended Army/rules/FAQ/Wiki
+   input identities; record PDF hash/publication boundaries and
+   any missing pre-change or N5 Reinforcements evidence. Resolve
+   supported-current semantics first, disclose genuine source
+   conflicts, and do not treat missing historical sources as
+   confirmed implementation defects.
+2. **Coverage:** complete the source-section-to-maintained-layer,
+   API and ordinary browser inventory, including all four core
+   scenarios and cross-references. The frozen 367-record audit and
+   the 198/198 interaction checklist are bounded evidence, not a
+   completeness certificate. Verify the remaining N53-02/05,
+   ESX and relevant Army/FAQ source-to-player cases.
+3. **Publication and acceptance:** regenerate the release-matched
+   `infinity.db` / `rules.db` pair and dependent publications,
+   check source occupancy and API/route consistency, run targeted
+   regressions and the user/CI full checks, then perform final
+   responsive and hosted release-browser acceptance. Prior local
+   passes do not certify a future release candidate.
+
+Keep this overlay updated as these gates close; retain the original
+source comparison tables unchanged for provenance.
+
 ## Denominator and interpretation
 
 The [English notice S11](https://infinityuniverse.com/en/news/infinity-rules-update-5-3)
