@@ -156,9 +156,16 @@ def test_source_choices_are_exposed_on_unit_api_without_player_selections() -> N
             "601-combined-army.json",
             "nexus-7-spec-ops", 1918, "combined-army-team-ops", 1932,
         ),
+        ("602-morat.json", "treitak-spec-ops", 1919, "morat-team-ops", 1933),
+        (
+            "603-shasvastii.json",
+            "shasvastii-corax-spec-ops", 1920, "shasvastii-team-ops", 1934,
+        ),
+        ("605-next-wave.json", "blur-spec-ops", 1921, "next-wave-team-ops", 1935),
+        ("701-aleph.json", "chandra-spec-ops", 1922, "aleph-team-ops", 1936),
     ),
 )
-def test_army_02_to_08_source_pairs_are_published_with_own_chart_context(
+def test_army_02_to_12_source_pairs_are_published_with_own_chart_context(
     source_member: str,
     spec_slug: str,
     spec_id: int,
@@ -202,6 +209,72 @@ def test_army_02_to_08_source_pairs_are_published_with_own_chart_context(
                     for attr in public_choice["attributes"]
                 ] == source_choice["attrs"]
         assert "selected" not in source_chart
+
+
+@pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
+def test_army_09_treitak_preserves_combined_and_morat_source_contexts() -> None:
+    """One Treitak identity spans two factions; Morat TEAM-OPS is faction-specific."""
+    with zipfile.ZipFile(SOURCE) as archive:
+        combined = json.loads(archive.read("601-combined-army.json"))
+        morat = json.loads(archive.read("602-morat.json"))
+    combined_units = {unit["id"]: unit for unit in combined["units"]}
+    morat_units = {unit["id"]: unit for unit in morat["units"]}
+    assert 1919 in combined_units and 1919 in morat_units
+    assert 1933 not in combined_units and 1933 in morat_units
+    assert combined["version"] == morat["version"] == "7.26246.158"
+    assert combined_units[1919]["spectables"] == morat_units[1919]["spectables"]
+
+    app = create_app(ARMY, rules_database_path=RULES)
+    spec_ops = _unit_api(app, "treitak-spec-ops")
+    assert 1919 in spec_ops["source_ids"]
+    assert len(spec_ops["source_charts"]) == 1
+    assert {
+        (item["version"], item["source_file"])
+        for item in spec_ops["source_charts"][0]["source_versions"]
+    } >= {
+        ("7.26246.158", "601-combined-army.json"),
+        ("7.26246.158", "602-morat.json"),
+    }
+    morat_team = _unit_api(app, "morat-team-ops")
+    assert 1933 in morat_team["source_ids"]
+    assert len(morat_team["source_charts"]) == 1
+    assert {
+        (item["version"], item["source_file"])
+        for item in morat_team["source_charts"][0]["source_versions"]
+    } == {("7.26246.158", "602-morat.json")}
+
+
+@pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
+def test_army_12_chandra_source_revision_and_three_faction_contexts() -> None:
+    members = ("701-aleph.json", "702-steel-phalanx.json", "703-operations.json")
+    with zipfile.ZipFile(SOURCE) as archive:
+        documents = {
+            member: json.loads(archive.read(member))
+            for member in members
+        }
+    app = create_app(ARMY, rules_database_path=RULES)
+    for slug, source_id in (("chandra-spec-ops", 1922), ("aleph-team-ops", 1936)):
+        source_payloads = {
+            json.dumps(
+                next(unit for unit in document["units"] if unit["id"] == source_id)[
+                    "spectables"
+                ],
+                sort_keys=True,
+            )
+            for document in documents.values()
+        }
+        assert len(source_payloads) == 1
+        assert all(document["version"] == "7.26246.159"
+                   for document in documents.values())
+        unit = _unit_api(app, slug)
+        entry = next(
+            chart for chart in unit["source_charts"]
+            if chart["source_unit_id"] == source_id
+        )
+        assert {
+            (version["version"], version["source_file"])
+            for version in entry["source_versions"]
+        } == {("7.26246.159", member) for member in members}
 
 
 @pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")

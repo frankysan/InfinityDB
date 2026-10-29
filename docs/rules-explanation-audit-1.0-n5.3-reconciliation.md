@@ -149,23 +149,31 @@ counts above.
   All 20 **historical** dispositions therefore remain *partially
   verified*. A current-only snapshot supports present-state
   publication checks, not a claim about what changed. Selected
-  **ARMY-02–08** source-pair chart coverage is now locally accepted:
+  **ARMY-02–12** source-pair chart coverage is now locally accepted:
   the pinned September 29 ZIP, built database and public Unit API
-  agree on all 14 Indigo, Confessor, Gui Feng/Yu Jing, Intel/Ariadna,
-  Husam/Haqqislam, Vortex/Nomads and Nexus-7/Combined Army source
-  Units (1912–1918 and 1926–1932), their source-member provenance
-  and full grouped Spec-Ops/TEAM-OPS and SpecBall choice payloads.
-  All 14 ordinary Unit pages passed Chromium at 1440/390/320 px
-  (42 page/viewport checks) for chart counts, source IDs, links and
-  overflow. The Ariadna Intel source uniquely has Full Power and
-  Battle Ravaged Enhanced Profiles, which remain a separate full-
-  profile/roster review. This selected chart verification does
-  **not** approve all profile groups, option costs, AVA, Fireteam
-  constraints or an Army historical delta. ARMY-01's Fireteam
-  chart context is **not** the same as these selection charts
-  and remains open; ARMY-09–20 and final hosted release-browser
-  acceptance remain open. Preserve missing pre-change evidence
-  as a provenance limit rather than a present-state defect.
+  agree on all 22 source Unit identities (1912–1922 and 1926–1936),
+  their version/file provenance and full grouped Spec-Ops/TEAM-OPS
+  and SpecBall choice payloads. The first seven pairs are Indigo,
+  Confessor, Gui Feng/Yu Jing, Intel/Ariadna, Husam/Haqqislam,
+  Vortex/Nomads and Nexus-7/Combined Army; the next four are
+  Treitak/Morat, Shasvastii Corax, Blur/Next Wave and Chandra/ALEPH.
+  All 22 ordinary Unit pages passed Chromium at 1440/390/320 px
+  (66 page/viewport checks) for chart counts, source IDs, links
+  and overflow. Treitak Spec-Ops (1919) is shared by Combined Army
+  and Morat sources, but Morat TEAM-OPS (1933) is Morat-only.
+  Both Chandra (1922) and ALEPH TEAM-OPS (1936) occur in ALEPH,
+  Steel Phalanx and Operations source members, all `7.26246.159`,
+  distinct from the `7.26246.158` source files of ARMY-09–11.
+  The duplicated chart payloads in these contexts agree. The
+  Ariadna Intel source includes separate Full Power and Battle
+  Ravaged Enhanced Profiles, which remain a full-profile/roster
+  review. This selected chart verification does **not** approve
+  all profile groups, option costs, AVA, Fireteam constraints or
+  a historical Army delta. ARMY-01's Fireteam chart context is
+  **not** these selection charts and remains open; ARMY-13–20
+  and final hosted release-browser acceptance remain open. Keep
+  unavailable pre-change evidence as a provenance limit rather
+  than a present-state defect.
 - **FAQ-01 to FAQ-09 (nine added rulings):** compared against v0.0
   and v0.1; this does not independently approve every affected
   owner page or applicability. FAQ-09's undeployed Ancillary

@@ -477,6 +477,14 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                             ("nomads-team-ops", 1931, 14),
                             ("nexus-7-spec-ops", 1918, 12),
                             ("combined-army-team-ops", 1932, 14),
+                            ("treitak-spec-ops", 1919, 12),
+                            ("morat-team-ops", 1933, 14),
+                            ("shasvastii-corax-spec-ops", 1920, 12),
+                            ("shasvastii-team-ops", 1934, 14),
+                            ("blur-spec-ops", 1921, 12),
+                            ("next-wave-team-ops", 1935, 14),
+                            ("chandra-spec-ops", 1922, 12),
+                            ("aleph-team-ops", 1936, 14),
                         ):
                             page.goto(
                                 f"http://127.0.0.1:{server.server_port}/units/{slug}",

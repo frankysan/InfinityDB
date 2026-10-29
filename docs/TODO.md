@@ -213,7 +213,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Profiles; these source profile differences are **not**
         inferred to be configurable chart choices or accepted as
         completed roster/profile semantics.
-      - [ ] **ARMY-01 and ARMY-09–20, plus full ARMY-02–08 profiles:**
+      - [x] **ARMY-09–12 source-pair chart publication:** Rechecked
+        Treitak/Morat TEAM-OPS (1919/1933), Shasvastii Corax/
+        Shasvastii TEAM-OPS (1920/1934), Blur/Next Wave TEAM-OPS
+        (1921/1935), and Chandra/ALEPH TEAM-OPS (1922/1936) against
+        the pinned September 29 ZIP, current Army database and Unit
+        API. All eight records preserve source names and IDs,
+        grouped ordered choices (8 Spec-Ops or 10 TEAM-OPS entries),
+        four SpecBall choices and exact file/version provenance.
+        Treitak Spec-Ops occurs in both Combined Army and Morat
+        source files, while Morat TEAM-OPS occurs only in Morat;
+        the duplicate Treitak choice payload is identical and
+        published under one logical identity. Chandra Spec-Ops
+        and ALEPH TEAM-OPS both occur in ALEPH, Steel Phalanx and
+        Operations members, all version `7.26246.159`, with
+        identical choice payloads; do not attribute them only to
+        the ALEPH main Army file or to the `.158` revision.
+        Chromium now passes all 22 reviewed Unit pages at
+        1440/390/320 px (66 page/viewport combinations).
+        This is **current chart/publication coverage only**, not
+        full roster, profiles, AVA, Fireteams, historical deltas
+        or final hosted release acceptance.
+      - [ ] **ARMY-01 and ARMY-13–20, plus full ARMY-02–12 profiles:**
         Continue source-to-database-to-player verification by the
         original 20-item Army update inventory. Keep Fireteam chart
         constraints (ARMY-01) distinct from the Spec-Ops/TEAM-OPS
