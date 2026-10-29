@@ -1501,8 +1501,8 @@ separate, read-only pass over Skill/Rule/Trait/Term/State definitions:
 
 The expanded audit excludes all 48 candidates from the original scan rather
 than recounting them. It currently identifies **25 additional definitions**:
-six source-cited reviews in
-`config/validation/deployed-object-expanded-reviews.json`, plus **19
+**14 source-cited reviews** in
+`config/validation/deployed-object-expanded-reviews.json`, plus **11
 unreviewed leads**. N5.3 pp. 151 and 153 establish that Domination's four
 Consoles and Supplies' three Supply Boxes are *scenario-specific objectives*,
 represented by scenario Markers or scenery; Hack Consoles and controlling
@@ -1512,10 +1512,25 @@ reviewed Disco Baller source-mode object, **not another delivery method or
 object identity**. The generic Marker terminology on p. 173 likewise
 describes a representation rather than a concrete source catalog object.
 
+The second review batch distinguishes **Decoy deployment** (p. 90),
+**Holoecho** (pp. 162–163), **Hidden Deployment** (pp. 161–162),
+**Impersonation-1/-2** (pp. 166–167), **Discover** (p. 77),
+**Surprise Attack** (p. 114) and **Sensor** (p. 111). They operate on
+representations or detect/modify existing Troopers, Weapons and Equipment;
+none provides another independent deployed-object profile or Army carrier.
+Crucially, Holoecho duplicates are **not inert markers**: p. 162 explicitly
+treats them as Troopers for ARO, LoF and triggering deployed Weapons/Equipment,
+including Mines and CrazyKoalas. Their separate removal rules are reviewed
+on p. 163. Likewise, a normal successful Discover against Impersonation-1
+reduces it to Impersonation-2, whereas Discover against Impersonation-2
+reveals the underlying Model. This does not create two Trooper identities.
+
 This expanded scan is deliberately bounded to named objectives/devices and
 Marker/decoy wording, not all N5.3 prose, source tables, or all possible
-game elements. Remaining leads include Decoy, Holoecho, Impersonation and
-Hidden Deployment representations; these require further source review.
+game elements. Remaining leads include `state:decoy` (maintained Wiki
+citation only), Concealed, other Marker interactions and scenario references.
+The Decoy Skill is separately cited to N5.3 p. 90; this does not silently
+provide the Decoy State record with a verified maintained PDF citation.
 The manifest and validator reject unsupported IDs, lost detailed clauses,
 stale PDF citations or inferred object profiles. No production database,
 object count, Unit ownership or approved delivery path is changed.

@@ -34,6 +34,14 @@ CLASSIFICATIONS = {
     ),
     "skill:hack-consoles": ("skill", "scenario-interaction-not-object-identity"),
     "skill:activate-disco-ball": ("skill", "reviewed-object-interaction-not-identity"),
+    "skill:decoy": ("skill", "trooper-replica-deployment-not-device"),
+    "state:holoecho": ("state", "interactive-trooper-replicas-not-device"),
+    "state:hidden-deployment": ("state", "unplaced-trooper-position-not-object"),
+    "state:impersonation-1": ("state", "trooper-disguise-marker-not-device"),
+    "state:impersonation-2": ("state", "trooper-disguise-marker-not-device"),
+    "skill:discover": ("skill", "reveals-existing-marker-not-device"),
+    "skill:surprise-attack": ("skill", "marker-attack-modifier-not-device"),
+    "skill:sensor": ("skill", "reveals-existing-game-elements-not-device"),
 }
 
 

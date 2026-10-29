@@ -52,8 +52,8 @@ def test_pinned_extended_queue_keeps_scenario_and_device_identities_separate() -
     assert report["scope"] == "expanded-lexical-discovery-not-object-completeness"
     assert len(report["curatedSourceSha256"]) == 64
     assert report["candidateCount"] == 25
-    assert report["reviewedCount"] == 6
-    assert len(report["unreviewed"]) == 19
+    assert report["reviewedCount"] == 14
+    assert len(report["unreviewed"]) == 11
     reviewed = {row["recordId"]: row for row in report["reviews"]}
     assert set(reviewed) == {
         "term:marker",
@@ -62,15 +62,33 @@ def test_pinned_extended_queue_keeps_scenario_and_device_identities_separate() -
         "rule:scenario:controlling-supply-boxes",
         "skill:hack-consoles",
         "skill:activate-disco-ball",
+        "skill:decoy",
+        "state:holoecho",
+        "state:hidden-deployment",
+        "state:impersonation-1",
+        "state:impersonation-2",
+        "skill:discover",
+        "skill:surprise-attack",
+        "skill:sensor",
     }
     assert reviewed["rule:scenario:consoles"]["sourcePages"] == [151]
     assert reviewed["rule:scenario:supply-boxes"]["sourcePages"] == [153]
     assert reviewed["skill:activate-disco-ball"]["classification"] == (
         "reviewed-object-interaction-not-identity"
     )
-    assert {"state:decoy", "state:holoecho", "state:hidden-deployment"} <= {
+    assert {"state:decoy", "trait:concealed", "skill:look-out"} <= {
         row["recordId"] for row in report["unreviewed"]
     }
+    assert reviewed["state:holoecho"]["classification"] == (
+        "interactive-trooper-replicas-not-device"
+    )
+    assert "trigger Mines or CrazyKoalas" in reviewed["state:holoecho"]["caveat"]
+    assert reviewed["state:impersonation-1"]["classification"] == (
+        "trooper-disguise-marker-not-device"
+    )
+    assert reviewed["state:impersonation-2"]["classification"] == (
+        "trooper-disguise-marker-not-device"
+    )
     assert all(row["recordId"] not in reviewed for row in report["unreviewed"])
 
     # The Disco Ball object/source-mode has its own earlier approved
@@ -84,7 +102,7 @@ def test_extended_reviews_reject_unsupported_or_stale_evidence() -> None:
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = expanded_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 6
+    assert len(validate_reviews(manifest, curated, candidates)) == 14
 
     for field, bad_value, reason in (
         ("classification", "new-four-stat-object", "classification"),
@@ -118,5 +136,5 @@ def test_extended_cli_reports_open_queue(
     assert main() == 0
     output = capsys.readouterr().out
     assert "Additional candidate definitions: 25" in output
-    assert "Reviewed distinctions: 6" in output
-    assert "Open additional candidates: 19" in output
+    assert "Reviewed distinctions: 14" in output
+    assert "Open additional candidates: 11" in output

@@ -1435,11 +1435,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                   reviewed Disco Baller source-mode object; a generic
                   Marker (p. 173) is a representation, not an item.
                   None adds an Army carrier or a publication edge.
-                - [ ] Review the **19 remaining expanded candidates**,
-                  starting with Decoy, Holoecho, Impersonation and
-                  Hidden Deployment representations. Search beyond
-                  both keyword sets, especially rules/source types not
-                  covered by these definition-level scans.
+                - [x] Review eight additional N5.3-cited expanded
+                  definitions: Decoy Skill, Holoecho, Hidden Deployment,
+                  Impersonation-1/-2, Discover, Surprise Attack and Sensor.
+                  Holoecho replicas can provoke AROs and trigger deployed
+                  devices despite not having independent Weapon/Equipment
+                  identities. The expanded queue is **14/25 reviewed**.
+                - [ ] Review **11 remaining expanded candidates**,
+                  including Decoy State (maintained Wiki citation only),
+                  Concealed and other Marker/interaction/scenario
+                  references. Continue discovery beyond both keyword sets.
             - [x] **Reconcile delivery paths for all 17 currently published
               reviewed deployed objects.** The pinned review now covers
               17 of 17 objects with 28 approved delivery paths and zero

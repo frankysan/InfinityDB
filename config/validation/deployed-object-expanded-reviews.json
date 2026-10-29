@@ -76,6 +76,110 @@
         "An enemy Disco Ball cannot be activated."
       ],
       "caveat": "Activate Disco Ball interacts with the already reviewed Disco Baller source-mode deployed Disco Ball. It does not introduce a second source Weapon, new Ball identity, or another placement path."
+    },
+    {
+      "recordId": "skill:decoy",
+      "classification": "trooper-replica-deployment-not-device",
+      "sourcePages": [
+        90
+      ],
+      "summaryEvidence": "A Deployment Skill that lets the user deploy with false replicas represented through [[state:decoy]].",
+      "factsEvidence": [
+        "When placed on the table, the user may deploy in [[state:decoy]]."
+      ],
+      "caveat": "Decoy lets a Trooper deploy with false replicas. These are representations associated with that Trooper, not separate Weapon/Equipment profiles or Army carriers."
+    },
+    {
+      "recordId": "state:holoecho",
+      "classification": "interactive-trooper-replicas-not-device",
+      "sourcePages": [
+        163
+      ],
+      "summaryEvidence": "A Marker State created by [[equipment:holoprojector]] that conceals which of up to three representations is the real bearer.",
+      "factsEvidence": [
+        "A holographic duplicate disappears separately when Discovered, entering enemy Silhouette contact, being hit by a successful Attack (no Saving Roll), or breaking Coherency."
+      ],
+      "caveat": "Holoecho replicas belong to one Holoprojector bearer, not to separate Army Unit or Weapon/Equipment identities. N5.3 p. 162 specifies that replicas can provoke AROs and trigger Mines or CrazyKoalas; they are not inert decorations. P. 163 describes cancellation."
+    },
+    {
+      "recordId": "state:hidden-deployment",
+      "classification": "unplaced-trooper-position-not-object",
+      "sourcePages": [
+        161,
+        162
+      ],
+      "summaryEvidence": "A deployment state in which a Trooper's position is recorded privately without placing a Model or Marker on the table.",
+      "factsEvidence": [
+        "The Trooper is not placed on the table while the state is active and is generally treated as not being on the table."
+      ],
+      "caveat": "Hidden Deployment records an existing Trooper's position privately. Revealing that Trooper places the same Model or Marker; it does not create another object or source ownership."
+    },
+    {
+      "recordId": "state:impersonation-1",
+      "classification": "trooper-disguise-marker-not-device",
+      "sourcePages": [
+        166,
+        167
+      ],
+      "summaryEvidence": "The stronger Impersonation Marker State, which represents the user as an apparent ally",
+      "factsEvidence": [
+        "The Model is replaced by an IMP-1 Marker and enemies perceive it as Allied.",
+        "A normal successful [[skill:discover]] Roll against IMP-1 applies the State's WIP -3 MOD and changes the user to [[state:impersonation-2]]."
+      ],
+      "caveat": "The IMP-1 Marker represents an existing disguised Trooper, not an independent deployed device. A normal successful Discover changes IMP-1 to IMP-2 rather than directly revealing the Model."
+    },
+    {
+      "recordId": "state:impersonation-2",
+      "classification": "trooper-disguise-marker-not-device",
+      "sourcePages": [
+        166,
+        167
+      ],
+      "summaryEvidence": "The second Impersonation Marker State, which disguises the user until a successful [[skill:discover]] Roll reveals the Model.",
+      "factsEvidence": [
+        "The Model is replaced by an IMP-2 Marker and enemies perceive it as Allied.",
+        "A successful [[skill:discover]] Roll removes IMP-2 and replaces the Marker with the corresponding Model."
+      ],
+      "caveat": "IMP-2 represents the existing disguised Trooper, not a new Weapon/Equipment identity. A successful Discover reveals the Model; this differs from IMP-1's normal downgrade to IMP-2."
+    },
+    {
+      "recordId": "skill:discover",
+      "classification": "reveals-existing-marker-not-device",
+      "sourcePages": [
+        77
+      ],
+      "summaryEvidence": "A Common Skill used to reveal game elements represented by Markers.",
+      "factsEvidence": [
+        "The user must be able to draw LoF to the target Marker.",
+        "The user makes the required WIP Roll to reveal an eligible Marker."
+      ],
+      "caveat": "Discover reveals an already represented Trooper, Weapon or Equipment; the original entity and Marker State determine identity and resolution. It does not create a new game object."
+    },
+    {
+      "recordId": "skill:surprise-attack",
+      "classification": "marker-attack-modifier-not-device",
+      "sourcePages": [
+        114
+      ],
+      "summaryEvidence": "An Automatic Special Skill that imposes its listed negative MOD on targets' Face to Face ARO Rolls",
+      "factsEvidence": [
+        "The user must begin the Order in Marker form or [[state:hidden-deployment|Hidden Deployment]].",
+        "The Attack imposes the negative Surprise Attack MOD shown in the Unit Profile"
+      ],
+      "caveat": "Surprise Attack modifies an existing Trooper's Attack when starting in Marker or Hidden Deployment. Marker use does not establish another object or source Weapon."
+    },
+    {
+      "recordId": "skill:sensor",
+      "classification": "reveals-existing-game-elements-not-device",
+      "sourcePages": [
+        111
+      ],
+      "summaryEvidence": "A Short Special Skill that detects hidden threats in the user's Zone of Control",
+      "factsEvidence": [
+        "The user may make a Normal WIP+6 Roll to simultaneously [[skill:discover]] enemy Troopers, Weapons, or Equipment",
+        "The user gains +6 WIP when declaring [[skill:discover]] against Camouflage Markers."
+      ],
+      "caveat": "Sensor can detect and reveal existing hidden Troopers, Weapons or Equipment, not place new ones. Preserve each revealed element's independently sourced identity."
     }
   ]
 }
