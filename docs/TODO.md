@@ -194,15 +194,35 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         confirms both Skills remain accessible; the historical
         2026-10-14 responsive browser run passed 24/24 checks.
         No gameplay-data edit was necessary.
-      - [ ] **N53-02 selection charts:** Determine which Spec-Ops
-        Chart and SpecBall Chart choices are present in the pinned
-        Army `spectables` and other versioned primary sources.
-        Inventory their player-useful read-only data and any
-        source/version mismatch, then provide ordinary reference
-        presentation for in-scope choices or record a justified
-        exclusion. Do not conflate source chart data with user-selected
-        customizations, require a list builder for reference coverage,
-        or invent absent choices from the rulebook's chart mentions.
+      - [x] **N53-02 source-chart inventory:** The pinned September 29
+        Army snapshot has source-defined `spectables` on 30 distinct
+        Units: 15 Spec-Ops (source IDs 1908, 1912-1925) and 15
+        TEAM-OPS (1909, 1926-1939). Each has a `table` choice list
+        (8 Spec-Ops or 10 TEAM-OPS entries) and a separate four-entry
+        `specball` list; an entry can group multiple `stat`,
+        `skill`, `weapon`, or `equip` attributes. The same source
+        payloads are preserved verbatim per Unit in
+        `logical_unit_spectables`, as checked against
+        `JSON 20260929-114335.zip` and the built Army database by
+        `test_spec_ops_source_charts.py`. These are available source
+        choices, **not** player-selected upgrades; duplicate faction
+        occurrences do not create extra canonical Unit identities.
+      - [ ] **N53-02 read-only choice publication (1.0):** Publish
+        source-attributed Spec-Ops and SpecBall choices on ordinary
+        Unit reference pages (or a directly linked ordinary chart
+        view), with names resolved against the pinned source catalogs
+        and complete multi-attribute options preserved in source order.
+        Project by exact `source_unit_id`, not an inferred global
+        shared chart; distinguish Spec-Ops and TEAM-OPS, including
+        the different choice counts. Keep numeric source IDs and
+        unresolvable extras honest, display the snapshot identity,
+        and verify ambiguous `stat` modifiers and MOV components
+        before assigning player-facing labels. Add API and responsive
+        browser acceptance for the source choices and Skill cross-links.
+        Do not treat selectable options as a configured Army List or
+        model an in-game Enhanced Profile transition from them.
+        A full list/session configurator remains separate, post-1.0
+        work. The core N5.3 p. 98 procedure is already published.
       - [x] Recheck the **Impetuous/Prone update (N53-13)** against N5.3
         p. 97. Preserve the Impetuous-Phase Move/Jump/Climb movement-end rule
         separately from the additional end-of-Order Prone restriction, and cite

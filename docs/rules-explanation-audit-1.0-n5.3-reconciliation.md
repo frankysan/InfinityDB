@@ -62,10 +62,18 @@ The owning 1.0 work and release criteria remain in
   TEAM-OPS boundary are explicit. Historical 2026-10-14 responsive
   browser acceptance passed 24/24 checks; the current API/route
   regression confirms the two Skills remain accessible. The
-  **Spec-Ops and SpecBall choice charts** still need a source
-  inventory and read-only player-presentation decision under the
-  1.0 completeness gate. A full interactive list/session configurator
-  is separately deferred, not a prerequisite to reference coverage.
+  **Spec-Ops and SpecBall choice charts** have now been traced to
+  the pinned September 29 Army snapshot: 30 distinct source Units,
+  split into 15 Spec-Ops and 15 TEAM-OPS. Both kinds contain a
+  four-option SpecBall list; their own selection tables contain eight
+  and ten entries respectively. Options can contain multiple source
+  attributes, so they cannot be flattened or treated as a configured
+  Unit. The existing `logical_unit_spectables` store preserves the
+  payloads exactly; a source-archive/database parity regression
+  verifies all 30. An ordinary player-facing API/Unit chart view is
+  **not yet implemented**. It remains a 1.0 read-only completeness
+  task distinct from the deferred interactive list/session
+  configurator. See the scoped [TODO](TODO.md#source-inventory-and-gap-batches).
 - **2 changes with disclosed official-source disagreements:**
   N53-07 (Kobra CC) preserves a proven DA two-save correction and an
   unresolved Anti-materiel disagreement between Army/Wiki and both PDFs.
