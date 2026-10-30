@@ -86,6 +86,7 @@ are not retroactively relabeled.
   Stealth, Controlled Jump/Speedball, Intuitive Attack, BS Weapon (WIP), Continuous
   Damage and Negative Feedback lifetimes.
   Preserve the distinction between ordinary rules, conditional exceptions and derived examples.
+  Hacking Device references now also cite the verified N5.3 source chart alongside their Wiki sources.
 - **Data processing + Web frontend:** Clarify Fireteam formation versus ongoing membership,
   Team Leader versus shared actions, leaving/rejoining, TinBot sharing, Special Dice and
   Disposable spending. Explain the Level 3 Morat example without granting Level 4 bonuses.

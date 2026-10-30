@@ -1485,12 +1485,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               read-only audit pins printed row assignments and
               verifies all Program references; no runtime relation
               or identity was created.
-              - [ ] Promote the **four verified p. 58 citations**
+              - [x] Promote the **four verified p. 58 citations**
                 into the maintained Hacking Device definitions
                 together with `rules.db` and the dependent
-                deployed-object publication fingerprint. Current
-                device facts match the source, but the checked-out
-                definitions still have wiki-only citations.
+                deployed-object publication fingerprint. The four
+                direct PDF citations are now maintained alongside
+                the existing wiki sources; Program access is unchanged.
                 - [x] Implement the staging-only citation migration
                   in `tools/stage_hacking_device_chart_citations.py`.
                   The source audit now rejects partial/wrong-page
@@ -1501,17 +1501,43 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                   and fingerprint are aligned, all 17 deployed-object
                   records are identical, and tracked inputs remain
                   unchanged. The p. 58 PDF source is verified.
-                - [ ] Inspect the three staging outputs and SHA-256
-                  report, then promote the curated JSON, `rules.db`,
-                  and `deployed-objects.json` **as a single batch**.
-                  Re-run the audit (zero citations missing), targeted
-                  tests, publication `--check`, full suite and CI.
-                  Do not publish only the source JSON.
+                - [x] Stage and inspect the three outputs on
+                  2026-10-30 from HEAD `5e4647c`. The report at
+                  `local/hacking-device-citations-n53/staging-report.json`
+                  matches all three independently read SHA-256 hashes,
+                  the unchanged source/Army inputs and the verified
+                  N5.3 PDF. Exactly four p. 58 citations are added;
+                  the existing wiki citations and 4/6/2/4 Program
+                  assignments remain intact. The staged publication
+                  passes `--check` with the matching rules fingerprint
+                  and identical 17 reviewed objects/delivery paths.
+                  Focused staging/chart tests: 8 passed, 1 skipped.
+                - [x] Promote the curated JSON, `rules.db` and
+                  `deployed-objects.json` as a guarded, rollback-capable
+                  batch through tracked MCP `run_script` on 2026-10-30.
+                  The promoted SHA-256 values match all three staged
+                  outputs; the source audit has zero missing citations,
+                  publication `--check` passes, and the 17 reviewed
+                  objects/delivery paths are unchanged. Focused tests,
+                  rules, lint, docs and type checks pass. The full
+                  project test suite and CI remain release-level gates.
             - [ ] Continue source-table discovery beyond the terrain,
               scenario, Game Modes, Retreat!, Silhouette Templates,
               Hacking Device charts, Weapon Chart and p. 74 reviews;
               verify additional game-element categories against direct
               rules before expanding a canonical inventory.
+              - [ ] Independently verify the **12-row N5.3 Hacking Programs
+                statistics chart** (p. 58) against the pinned Army Program
+                metadata and published API: Attack/Opponent MOD, PS,
+                Burst, Target, Skill Type and Special. Existing tests
+                prove Army-to-API parity, while the device chart audit
+                covers only four Equipment-to-Program access sets;
+                neither verifies all printed statistics cells. Preserve
+                source conflicts rather than rewriting Army values or
+                creating deployed-object identities. The separately
+                checked Discover range (p. 77/main Weapon Chart) and
+                Fireteam charts (pp. 133–136) already have maintained
+                references; avoid duplicate definitions.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery

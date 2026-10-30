@@ -1651,24 +1651,28 @@ Missing, duplicated or incorrectly assigned Programs, changed source
 scope, and missing canonical records fail closed. CI does not require
 the ignored local PDF.
 
-The four Equipment facts already agree with the N5.3 chart, but
-the **checked-out records still cite the wiki only**.
+The four Equipment facts agree with the N5.3 chart. On 2026-10-30,
+the four p. 58 citations were staged, verified and **promoted together**
+with the matching `rules.db` and deployed-object publication. The checked-out
+source now retains both the existing wiki citations and direct N5.3 citations,
+without changing its 4/6/2/4 Program assignments. The checkout audit reports
+`missingMaintainedN53ChartCitations: []`.
 The audit's `missingMaintainedN53ChartCitations` report allows
 either all four missing or none missing and fails closed on partial
 migration, duplicate N5.3 source citations or incorrect page.
 `tests/test_hacking_device_program_source_chart.py` covers these
 boundaries and the four source-backed Program sets.
 
-#### Stage the four N5.3 p. 58 Equipment citations
+#### Stage and promote the four N5.3 p. 58 Equipment citations
 
-A reviewed, staging-only migration adds one
+The reviewed migration stages and promotes one
 `{"sourceId":"n5-core-v5.3-pdf","page":58}` citation to each of
 `equipment:hacking-device`, `equipment:hacking-device-plus`,
 `equipment:killer-hacking-device` and
 `equipment:evo-hacking-device`. It retains all wiki citations
 and existing Equipment facts. Because the tracked rules database
-changes, the dependent deployed-object publication must be rebuilt
-and promoted **in the same batch**.
+changes, the dependent deployed-object publication was rebuilt and
+promoted **in the same batch**.
 
 From the repository root, after committing the staging tool/tests
 and with unchanged curated source and Army database:
@@ -1686,10 +1690,42 @@ builds and validates the same three artifacts under a temporary
 directory, compares the published 17 object records byte-for-byte
 and checks all tracked inputs remain unchanged.
 
-Inspect the staging report and changed citations. Before promotion,
-verify source and Army hashes and all three staged output hashes.
-The following PowerShell procedure fails before copying if any
-reported hash or file differs:
+**Staging and promotion verified 2026-10-30, HEAD `5e4647c`.**
+Before promotion, the live input hashes matched the staging report: curated source
+`264db18e21c6a2cf4e7de98d3532726735b3b9e7309feef9c4e56cb38341f0e8`
+and Army database
+`8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`.
+The PDF fingerprint is
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.
+Independently inspected **staged and promoted** hashes match the report: curated source
+`e40f8bbd6b83fc74dd301d620bc36021d19b68e6551c9afc16d590b86d1e9756`,
+`rules.db`
+`3cd6653be1e34193477946eb850e90b13baa102be88c23b7bbfdcaba9a760636`,
+and `deployed-objects.json`
+`262f47cd4e32173919452367dd599f66a66df727d692ac8a6d73bde5e90f5398`.
+The staged publication passes `--check`; it embeds the matching rules
+database fingerprint and retains all 17 reviewed objects and approved
+delivery paths. Pre-promotion focused tests: **8 passed, 1 skipped**.
+Post-promotion staging/promotion tests: **5 passed, 2 expected skips**
+(including an injected mid-batch copy failure and successful rollback);
+chart tests: **5 passed**. The checkout audit now reports zero missing
+citations; publication `--check`, rules, Ruff, Markdown lint, documentation
+links and canonical Pyright (0 errors/0 warnings) all pass. The full suite
+and CI are reserved for the broader release gate.
+
+The tracked staging module now supports guarded promotion through MCP
+`run_script`, with `--output-dir local/hacking-device-citations-n53
+--promote-staged`. It verifies all source/staging fingerprints, independently
+rebuilds the dependent publication, checks the 17 unchanged objects and
+copies all three artifacts with rollback on validation failure. Its recovery
+backup is retained under ignored `local/hacking-device-citation-backup-*/`.
+A three-file replacement is not filesystem-atomic; the backup permits
+recovery after interruption.
+
+The following PowerShell procedure was prepared before the tracked
+promotion command became available. It is retained as a **historical manual
+fallback**, not a step to repeat after this completed promotion. It verifies
+source/Army and staged hashes before writing, and attempts rollback on error:
 
 ```powershell
 $stage = "local/hacking-device-citations-n53"
@@ -1712,8 +1748,8 @@ if ($report.scope -ne "staged-only-hacking-device-p58-citations-not-applied" -or
     (@(Compare-Object $ids $report.migratedDeviceIds).Count -ne 0)) {
     throw "Unexpected device citation migration report"
 }
-if (git status --porcelain) {
-    throw "Commit or resolve current tracked changes before promotion"
+if (git status --porcelain -- $expected) {
+    throw "The three promotion targets have changed since staging"
 }
 if ((Get-FileHash "data/curated/rules/n5-core-v5.3.json" -Algorithm SHA256).Hash -ne
     $report.sourceSha256 -or
@@ -1733,19 +1769,58 @@ for ($i = 0; $i -lt $expected.Count; $i++) {
         throw "Missing or altered staged artifact: $file"
     }
 }
-foreach ($path in $expected) {
-    Copy-Item -LiteralPath (Join-Path $stage $path) -Destination $path -Force
+$ErrorActionPreference = "Stop"
+$backup = Join-Path "local" ("hacking-device-citation-backup-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $backup | Out-Null
+$cleanupBackup = $false
+try {
+    foreach ($path in $expected) {
+        $saved = Join-Path $backup $path
+        New-Item -ItemType Directory -Path (Split-Path $saved -Parent) -Force | Out-Null
+        Copy-Item -LiteralPath $path -Destination $saved
+    }
+    foreach ($path in $expected) {
+        Copy-Item -LiteralPath (Join-Path $stage $path) -Destination $path -Force
+    }
+    for ($i = 0; $i -lt $expected.Count; $i++) {
+        if ((Get-FileHash -LiteralPath $expected[$i] -Algorithm SHA256).Hash -ne $hashes[$i]) {
+            throw "Promoted artifact hash mismatch: $($expected[$i])"
+        }
+    }
+    $auditJson = & .\.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart --json
+    if ($LASTEXITCODE -ne 0) { throw "Hacking Device source audit failed" }
+    $audit = $auditJson | ConvertFrom-Json
+    if (@($audit.missingMaintainedN53ChartCitations).Count -ne 0) {
+        throw "Hacking Device citation migration remained incomplete"
+    }
+    & .\.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+    if ($LASTEXITCODE -ne 0) { throw "Deployed-object publication check failed" }
+    $cleanupBackup = $true
+} catch {
+    $promotionError = $_
+    try {
+        foreach ($path in $expected) {
+            $saved = Join-Path $backup $path
+            if (Test-Path -LiteralPath $saved -PathType Leaf) {
+                Copy-Item -LiteralPath $saved -Destination $path -Force
+            }
+        }
+        $cleanupBackup = $true
+    } catch {
+        Write-Warning "Rollback incomplete; preserve backups at $backup"
+        throw
+    }
+    throw $promotionError
+} finally {
+    if ($cleanupBackup) { Remove-Item -LiteralPath $backup -Recurse -Force }
 }
-& .\.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart --json
-& .\.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
 ```
 
-After promotion, `missingMaintainedN53ChartCitations` must be
-`[]`. Run the focused tests and normal rules/lint/docs/type and
-project/CI gates before committing the promoted artifacts.
-This migration changes **citations only**; Program statistics,
-Unit carriers, delivery paths and canonical object identities
-remain unchanged.
+Post-promotion checks confirm `missingMaintainedN53ChartCitations: []`,
+matching generated artifact fingerprints and identical approved delivery
+paths for all 17 reviewed objects. The change affects **citations only**;
+Program statistics, Unit carriers and canonical object identities remain
+unchanged. The full suite and CI still require release-level execution.
 
 ### N5.3 Silhouette Templates source and browser geometry
 

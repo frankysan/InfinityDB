@@ -24,6 +24,7 @@ from tools.stage_hacking_device_chart_citations import (
     PUBLICATION,
     SOURCE_CITATION,
     STAGED_PATHS,
+    _replace_staged_batch,
     prepare_chart_citations,
     stage_hacking_device_chart_citations,
 )
@@ -154,3 +155,70 @@ def test_staging_rejects_overlapping_output_directory() -> None:
     # No source changes are needed to check the rejection ordering.
     with pytest.raises(ValueError, match="overlaps tracked inputs"):
         stage_hacking_device_chart_citations(CURATED.parent)
+
+
+@pytest.mark.parametrize("fail_validation", [False, True])
+def test_coordinated_promotion_retains_recovery_and_rolls_back(
+    tmp_path: Path, fail_validation: bool,
+) -> None:
+    (tmp_path / "local").mkdir()
+    original = {}
+    staged = {}
+    for i, relative in enumerate(STAGED_PATHS):
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        original[relative] = f"original-{i}".encode()
+        staged[relative] = f"staged-{i}".encode()
+        target.write_bytes(original[relative])
+
+    def validate() -> None:
+        assert all((tmp_path / path).read_bytes() == staged[path] for path in STAGED_PATHS)
+        if fail_validation:
+            raise ValueError("post-promotion check failed")
+
+    if fail_validation:
+        with pytest.raises(RuntimeError, match="Promotion rolled back"):
+            _replace_staged_batch(tmp_path, staged, validate)
+    else:
+        backup = _replace_staged_batch(tmp_path, staged, validate)
+        assert backup.is_dir()
+
+    expected = original if fail_validation else staged
+    assert all((tmp_path / path).read_bytes() == expected[path] for path in STAGED_PATHS)
+    backups = list((tmp_path / "local").glob("hacking-device-citation-backup-*"))
+    assert len(backups) == 1
+    assert all((backups[0] / path).read_bytes() == original[path] for path in STAGED_PATHS)
+
+
+def test_promotion_rolls_back_when_second_artifact_write_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tools import stage_hacking_device_chart_citations as migration
+
+    (tmp_path / "local").mkdir()
+    original = {}
+    proposed = {}
+    for index, relative in enumerate(STAGED_PATHS):
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        original[relative] = f"old-{index}".encode()
+        proposed[relative] = f"new-{index}".encode()
+        target.write_bytes(original[relative])
+
+    replace = migration.os.replace
+    calls = 0
+
+    def fail_second_replace(source: str | Path, destination: str | Path) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("injected second-artifact failure")
+        replace(source, destination)
+
+    monkeypatch.setattr(migration.os, "replace", fail_second_replace)
+    with pytest.raises(RuntimeError, match="Promotion rolled back"):
+        migration._replace_staged_batch(tmp_path, proposed, lambda: None)
+    assert all((tmp_path / path).read_bytes() == original[path] for path in STAGED_PATHS)
+    backups = list((tmp_path / "local").glob("hacking-device-citation-backup-*"))
+    assert len(backups) == 1
+    assert all((backups[0] / path).read_bytes() == original[path] for path in STAGED_PATHS)
