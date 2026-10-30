@@ -70,6 +70,7 @@ CLASSIFICATIONS = {
     "skill:counterintelligence": ("skill", "command-resource-counteraction-not-object"),
     "skill:inspiring-leadership": ("skill", "command-order-benefit-not-object"),
     "skill:transmutation": ("skill", "trooper-profile-representation-not-deployable"),
+    "rule:access-width": ("rule", "scenery-access-gate-label-not-deployed-object"),
 }
 
 # Manually checked against the locally pinned English N5.3 PDF. These six

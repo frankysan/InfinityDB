@@ -59,7 +59,7 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = candidate_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 48
+    assert len(validate_reviews(manifest, curated, candidates)) == 49
 
     for key, bad_value, error in (
         ("classification", "fully-reviewed-four-stat-object", "classification"),
@@ -72,6 +72,26 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
         changed["reviews"][-1][key] = bad_value
         with pytest.raises(ValueError, match=error):
             validate_reviews(changed, curated, candidates)
+
+    # Access Width gate Tokens are source-reviewed scenery labels. Reject
+    # changes to their maintained evidence or exact PDF citation.
+    access_drift = copy.deepcopy(curated)
+    access = next(
+        record for record in access_drift["records"]
+        if record["id"] == "rule:access-width"
+    )
+    access["facts"]["effects"][0] = "Unreviewed gate-token claim."
+    with pytest.raises(ValueError, match="detailed evidence"):
+        validate_reviews(manifest, access_drift, candidate_mentions(access_drift))
+
+    citation_drift = copy.deepcopy(curated)
+    access = next(
+        record for record in citation_drift["records"]
+        if record["id"] == "rule:access-width"
+    )
+    access["citations"][0]["page"] = 999
+    with pytest.raises(ValueError, match="Missing exact N5.3"):
+        validate_reviews(manifest, citation_drift, candidate_mentions(citation_drift))
 
     repeated = copy.deepcopy(manifest)
     repeated["reviews"].append(copy.deepcopy(repeated["reviews"][0]))
@@ -123,22 +143,20 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
         validate_reviews(manifest, changed_citation, candidate_mentions(changed_citation))
 
 
-def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
+def test_pinned_non_catalog_discovery_closes_bounded_review_queue() -> None:
     report = audit_non_catalog_candidates(CURATED, REVIEWS)
     assert report["scope"] == "non-catalog-keyword-discovery-not-object-inventory"
     assert len(report["curatedSourceSha256"]) == 64
-    assert report["reviewedCount"] == 48
+    assert report["reviewedCount"] == 49
     assert report["candidateCount"] == 49
-    # Access Width now mentions scenery gate Tokens; it is a new audit
-    # candidate, not automatically approved as a deployed object.
-    assert [row["recordId"] for row in report["unreviewed"]] == [
-        "rule:access-width",
-    ]
-    assert set(report["unreviewed"][0]["details"]) == {"effects", "restrictions"}
-    assert not next(
-        entry["reviewed"] for entry in report["candidates"]
+    assert report["unreviewed"] == []
+    access = next(
+        entry for entry in report["candidates"]
         if entry["recordId"] == "rule:access-width"
     )
+    assert access["reviewed"]
+    assert set(access["details"]) == {"effects", "restrictions"}
+    assert access["citations"] == [{"sourceId": "n5-core-v5.3-pdf", "page": 145}]
     assert len(report["reviewedPdfOnly"]) in (0, 6)
     selected = {
         row["recordId"]: row for row in report["candidates"]
@@ -171,6 +189,12 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     assert speedball["sourcePages"] == [84]
     assert "State Tokens" in speedball["caveat"]
     reviewed = {decision["recordId"]: decision for decision in report["reviews"]}
+    assert reviewed["rule:access-width"]["classification"] == (
+        "scenery-access-gate-label-not-deployed-object"
+    )
+    assert reviewed["rule:access-width"]["sourcePages"] == [145]
+    assert "Unit carriers" in reviewed["rule:access-width"]["caveat"]
+    assert "Prone Trooper" in reviewed["rule:access-width"]["caveat"]
     assert reviewed["skill:request-specball"]["classification"] == (
         "support-state-token-not-standard-deployable"
     )
@@ -222,7 +246,7 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     )
 
 
-def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
+def test_non_catalog_cli_reports_reviewed_queue_without_publishing_objects(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
 ) -> None:
     monkeypatch.setattr(sys, "argv", ["audit_deployed_object_non_catalog_queue"])
@@ -230,9 +254,9 @@ def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
     output = capsys.readouterr().out
     assert "Candidate definitions:" in output
     assert "Candidate definitions: 49" in output
-    assert "Reviewed classifications: 48" in output
-    assert "Awaiting manual review: 1" in output
-    assert "rule:access-width: effects, restrictions" in output
+    assert "Reviewed classifications: 49" in output
+    assert "Awaiting manual review: 0" in output
+    assert "rule:access-width:" not in output
     count = 6 if any(
         review.get("citationStatus") == "pdf-verified-manifest-only"
         for review in json.loads(REVIEWS.read_text(encoding="utf-8"))["reviews"]

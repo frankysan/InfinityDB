@@ -1909,13 +1909,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 deployed-object publication fingerprints together.
                 The non-catalog audit now reports **zero** missing
                 maintained N5.3 citations.
-              - [ ] Review the newly discovered `rule:access-width`
-                candidate in the non-catalog game-element queue:
-                49 keyword matches, 48 pinned classifications,
-                one unreviewed gate-Token mention. Do not classify
-                or create a deployable object from the keyword hit
-                without explicit source-backed review of its effects
-                and restrictions.
+              - [x] Classify `rule:access-width` against the existing
+                reviewed N5.3 p. 145 Access Width definition. Narrow
+                and Wide Gate Tokens label agreed scenery openings;
+                they are not deployed Weapon/Equipment profiles or
+                reverse Unit uses. The Prone/Silhouette X exception and
+                Movement priority remain rule-level constraints. The
+                non-catalog keyword queue now has **49/49 reviewed**
+                classifications; this does not establish complete N5.3
+                game-element coverage beyond the bounded keyword scan.
               - [ ] Extend object discovery beyond the bounded
                 non-catalog keyword/definition-fields scan, checking
                 alternate wording and other N5.3 source domains.

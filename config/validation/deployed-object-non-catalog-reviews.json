@@ -561,6 +561,18 @@
       "caveat": "N5.3 p. 99 permits a Coordinated Order using the Special Lieutenant Order without spending additional Command Tokens. This is an Order/resource benefit, not a deployed object or carrier relationship."
     },
     {
+      "recordId": "rule:access-width",
+      "classification": "scenery-access-gate-label-not-deployed-object",
+      "sourcePages": [145],
+      "summaryEvidence": "Their gate Tokens label scenery openings, not deployed Weapons or Equipment.",
+      "factsEvidence": [
+        "Players agree on the Access Width of scenery openings during table setup and mark each as a Narrow Gate or Wide Gate Token.",
+        "Access Width restrictions take priority over the General Movement Rules and the Requirements of Skills with the Movement Label. A Trooper lacking the required Silhouette cannot pass.",
+        "Troopers in [[state:prone|Prone State]] with Silhouette X use the Silhouette Attribute on their Unit Profile when checking access restrictions."
+      ],
+      "caveat": "N5.3 p. 145 uses Narrow Gate and Wide Gate Tokens to label agreed scenery openings. They are not independent deployed Weapon or Equipment profiles, nor reviewed delivery edges or Army Unit carriers. A Prone Trooper still checks the Unit Profile Silhouette Attribute; no additional can-pass attribute is inferred."
+    },
+    {
       "recordId": "skill:transmutation",
       "classification": "trooper-profile-representation-not-deployable",
       "sourcePages": [
