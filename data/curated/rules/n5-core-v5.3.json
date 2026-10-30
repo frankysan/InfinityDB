@@ -21062,6 +21062,30 @@
                                 ]
                             },
                             "evidence": "derived-from-pinned-general-rules"
+                        },
+                        {
+                            "sourceAmmunitionId": 5,
+                            "sourceAmmunitionName": "N+E/M",
+                            "components": [
+                                "ammunition:normal",
+                                "ammunition:em"
+                            ],
+                            "when": {
+                                "immunity": "BTS",
+                                "savingAttribute": "BTS",
+                                "attackClass": "non-comms",
+                                "weaponId": "weapon:e-m-cc-weapon"
+                            },
+                            "withoutImmunity": {
+                                "hitRolls": 2,
+                                "criticalRolls": 3
+                            },
+                            "withImmunity": {
+                                "hitRolls": 1,
+                                "criticalRolls": 2,
+                                "treatedAs": "ammunition:normal"
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
                         }
                     ]
                 }

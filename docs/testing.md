@@ -4127,6 +4127,21 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**BTS Immunity / E/M CC Weapon, 2026-10-30:**
+`tests/test_immunity_bts_em_cc.py` verifies the pinned N5.3
+pp. 64, 67, 95–96 and 177 excerpts, exact Army E/M CC Weapon
+source identity and BTS/2 × 2 profile, fourth source-scoped Immunity
+case, API publication and preservation of Weapon profile fields.
+Curated mutations reject unrelated weapons, Comms Attack scope,
+source/component changes and unsupported roll results. The
+coordinated stage/promotion in `tools/stage_immunity_bts_cc.py`
+checks the exact record and preserves all 17 deployed objects
+with a rollback backup.
+`tests/test_verify_immunity_plasma_browser.py` also covers this
+seventh reviewed interaction at 1440/390/320 px, with links,
+source-scope labeling and no overflow or JS errors. This is local
+acceptance, not a generic Immunity calculator or deployment check.
+
 **Immunity/Plasma Combined Saving Roll example, 2026-10-30:**
 `tests/test_immunity_combined_saving_roll_example.py` checks the
 pinned English N5.3 p. 96 Example 3, the exact Plasma Rifle Army

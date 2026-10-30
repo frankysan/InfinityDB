@@ -341,8 +341,17 @@ its own closed validation contract, a linked player-facing Immunity
 interaction, and regression against the pinned PDF, Army Plasma profile
 and existing Combined Saving Roll map. It is not added to the
 `reviewedCombinedCases` component examples or as an inferred
-`immunity_result` on Weapon profiles. Other component Immunities,
-BTS conditions and unreviewed combinations remain unresolved.
+`immunity_result` on Weapon profiles. A fourth combined case is now explicitly bounded to
+`weapon:e-m-cc-weapon`: the N5.3 p. 177 non-Comms CC Weapon uses
+Army Ammunition source ID 5 (`N+E/M`) with BTS/2 × 2; p. 67 and
+Immunity (BTS) p. 95 support a **rule-derived** one-roll Normal
+BTS result (two for Critical without Immunity (Critical)). This
+case is stored on `skill:immunity`, not the source Ammunition map
+or Weapon profile. The checked-in `rules.db` and regenerated
+deployed-object publication were promoted together, with all
+17 reviewed deployed objects unchanged and a recovery backup.
+Other component Immunities, Comms Attack coverage, BTS conditions
+and unreviewed combinations remain unresolved.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;

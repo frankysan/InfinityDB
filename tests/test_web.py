@@ -6555,7 +6555,7 @@ def test_immunity_skill_card_renders_only_reviewed_conditions(app: Callable) -> 
     harness = Path(__file__).resolve().parent / "immunity_cases_render_harness.mjs"
     result = subprocess.run([node, str(harness)], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
-    assert "6 reviewed Immunity cases, conditions, evidence labels" in result.stdout
+    assert "7 reviewed Immunity cases, conditions, evidence labels" in result.stdout
 
     status, _, renderer = request(app, "/static/rules-reference.js")
     assert status == 200

@@ -21,9 +21,14 @@ const rollCount = (count) => `${count} Saving Roll${count === 1 ? "" : "s"}`;
 const counts = (rolls) => `${rollCount(rolls.hitRolls)} on a hit (${rolls.criticalRolls} on a Critical)`;
 
 function componentTokens(ids) {
-  return ids.flatMap((id, index) => [
-    ...(index ? [text(" + ")] : []), reference(id, id.split(":")[1].toUpperCase()),
-  ]);
+  const labels = { normal: "N", em: "E/M" };
+  return ids.flatMap((id, index) => {
+    const slug = id.split(":")[1];
+    return [
+      ...(index ? [text(" + ")] : []),
+      reference(id, labels[slug] || slug.toUpperCase()),
+    ];
+  });
 }
 
 export function immunityCaseRows(facts = {}) {
@@ -81,7 +86,11 @@ export function immunityCaseRows(facts = {}) {
     const partial = Array.isArray(item.withImmunity.ignoredComponents);
     const applied = item.withImmunity;
     rows.push({
-      title: [text(`Immunity (${item.when.immunity}) vs `), ...componentTokens(item.components)],
+      title: [
+        text(`Immunity (${item.when.immunity}) vs `), ...componentTokens(item.components),
+        ...(item.when.weaponId
+          ? [text(" — "), reference(item.when.weaponId, "E/M CC Weapon")] : []),
+      ],
       detail: [
         text(`${counts(applied)} using ${item.when.savingAttribute}, rather than `),
         text(`${counts(item.withoutImmunity)}. `),

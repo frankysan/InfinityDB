@@ -404,7 +404,7 @@ def test_rea010_published_immunity_protection_and_source_examples(
     assert "Non-Lethal" in flash["summary"]
     assert "Stunned" in flash["summary"]
     assert "[[skill:immunity]]" in continuous["summary"]
-    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 3
+    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 4
     cited = {(c["source_id"], c.get("page")) for c in immunity["citations"]}
     assert cited >= {
         ("n5-core-v5.3-pdf", 95), ("n5-core-v5.3-pdf", 96),

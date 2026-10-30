@@ -413,6 +413,10 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
     ap_when = {
         "immunity": "AP", "savingAttribute": "ARM", "attackClass": "non-comms"
     }
+    bts_cc_when = {
+        "immunity": "BTS", "savingAttribute": "BTS",
+        "attackClass": "non-comms", "weaponId": "weapon:e-m-cc-weapon",
+    }
     for index, case in enumerate(value):
         item = f"{context}[{index}]"
         if not isinstance(case, dict) or set(case) != {
@@ -422,7 +426,7 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
             raise ValueError(f"{item}: invalid combined Immunity case fields")
         source_id = case["sourceAmmunitionId"]
         when = case["when"]
-        if when not in (arm_when, ap_when):
+        if when not in (arm_when, ap_when, bts_cc_when):
             raise ValueError(f"{item}: unsupported Immunity applicability")
         identity = (source_id, when["immunity"])
         if type(source_id) is not int or source_id < 1 or identity in seen:
@@ -449,6 +453,19 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
         ):
             raise ValueError(f"{item}: invalid source hit/Critical Saving Roll counts")
         if when == arm_when:
+            expected = {
+                "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
+            }
+        elif when == bts_cc_when:
+            # N5.3 pp. 67, 95, 177: E/M CC Weapon is a non-Comms CC
+            # attack with N+E/M and BTS/2 x2, never an arbitrary E/M attack.
+            if (
+                source_id != 5
+                or case["sourceAmmunitionName"] != "N+E/M"
+                or components != ["ammunition:normal", "ammunition:em"]
+                or original != {"hitRolls": 2, "criticalRolls": 3}
+            ):
+                raise ValueError(f"{item}: unsupported BTS Weapon applicability")
             expected = {
                 "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
             }

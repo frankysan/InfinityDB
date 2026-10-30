@@ -2612,10 +2612,30 @@ acceptance remains historical. The six-card renderer, source/API regression,
 and real-Chromium verification at 1440/390/320 px now pass, including evidence
 labels, semantic links, error-free rendering and no horizontal overflow.
 
-Other component-specific Immunities, BTS-based Combined Ammunition, additional
-Weapon Traits and conditional State interactions remain unresolved. Do not
-extrapolate an algorithm from these reviewed examples or project outcomes into
-individual Weapon profiles.
+**E/M CC Weapon versus Immunity (BTS)** is a *rule-derived* fourth
+`reviewedCombinedCases` interaction, distinct from the printed Plasma
+Combined Saving Roll example. English N5.3 p. 177 identifies this
+non-Comms CC Weapon with `N+E/M`, BTS/2 and two Saving Rolls. The
+Combined Ammunition example (p. 67) confirms two half-BTS rolls for
+a hit and three for a Critical, with Normal Wound and E/M State
+effects when those rolls fail. Applying Immunity (BTS) under p. 95
+treats the **covered Combined Ammunition** as Normal: one unmodified
+BTS Saving Roll on a hit, or two on a Critical unless the defender
+also has Immunity (Critical) (p. 96). It does not change the Saving
+Roll Attribute to ARM. This is conditional on an actual non-Comms
+E/M CC Weapon attack, **not** a rule that E/M effects disappear from
+Comms Attacks or a generic result for other weapons. No target State,
+Wound or immunity outcome is calculated at runtime; the Army
+Weapon profile continues to show its original BTS/2 × 2 fields.
+
+The Skill reference card now presents **seven reviewed cases**:
+four component-specific/Combined Ammunition examples plus the
+explicit Plasma Combined Saving Roll, Flash Pulse and
+Vulnerability examples. Real Chromium acceptance at 1440/390/320 px
+checks the source-scope label, semantic links and no overflow.
+Other component-specific Immunities, BTS-based attacks and conditional
+State interactions remain unresolved. Do not extrapolate an algorithm
+or project reviewed Immunity outcomes into individual Weapon profiles.
 
 Sources: N5.3 English PDF printed pp. 95-96; Spanish PDF printed p. 99
 (Immunity) and p. 196 (Flash Pulse Weapon Chart); N5.3 Wiki

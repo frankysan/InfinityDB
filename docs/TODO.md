@@ -996,9 +996,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         publication and recovery backups; all 17 objects stay unchanged.
         Chromium acceptance at 1440/390/320 px confirms the sixth
         source-labelled case, links and layout.
+      - [x] Review the exact N5.3 **E/M CC Weapon** instance of BTS-based
+        Combined Ammunition. The printed N+E/M example (p. 67), Immunity
+        (BTS) and Comms limitation (pp. 95–96), and CC Weapon Chart (p. 177)
+        support a *rule-derived*, non-Comms-only case: two BTS/2 rolls
+        (three on Critical) become one unmodified BTS roll (two on
+        Critical unless Immunity (Critical) also applies). Require the
+        exact Weapon/source Ammunition ID, preserve the two Army Saving
+        Rolls and component identity, and never project an Immunity
+        result into the Weapon API. Validate the closed schema, pinned
+        source and browser at 1440/390/320 px. Publish the synchronized
+        rules DB/deployed-object pair with rollback backup.
       - [ ] Review other BTS-component Immunity outcomes using specific
-        non-Comms Weapon/combined-Ammunition evidence; the Plasma example
-        does not license extrapolation to those attacks.
+        non-Comms Weapon/combined-Ammunition evidence. This E/M CC
+        example and the Plasma case do not authorize general E/M,
+        Comms Attack or arbitrary combined-effect adjudication.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

@@ -67,7 +67,7 @@ const groups = descendants(article, (node) => node.className === "detail-fact-gr
 assert.equal(groups.length, 1);
 const group = groups[0];
 const cases = descendants(group, (node) => node.tag === "li");
-assert.equal(cases.length, 6);
+assert.equal(cases.length, 7);
 // Every reviewed case uses the same semantic list-item structure with
 // a navigable title, an outcome, and its own source-evidence classification.
 for (const item of cases) {
@@ -81,7 +81,7 @@ assert.deepEqual(labels, [
   "Explicit source example", "Explicit source example",
   "Explicit N5.3 p. 96, Example 3",
   "Derived from reviewed general rules", "Derived from reviewed general rules",
-  "Derived from reviewed general rules",
+  "Derived from reviewed general rules", "Derived from reviewed general rules",
 ]);
 assert.match(cases[0].textContent, /non-Comms attacks/);
 for (const item of cases.slice(3)) {
@@ -100,11 +100,14 @@ assert.match(combined[3], /1 Saving Roll on a hit \(2 on a Critical\).*2 Saving 
 assert.match(combined[4], /1 Saving Roll on a hit \(2 on a Critical\).*3 Saving Rolls on a hit \(4 on a Critical\)/);
 assert.match(combined[5], /2 Saving Rolls on a hit \(3 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
 assert.match(combined[5], /AP component is ignored; DA still applies/);
+assert.match(combined[6], /Immunity \(BTS\) vs N \+ E\/M.*E\/M CC Weapon/);
+assert.match(combined[6], /1 Saving Roll on a hit \(2 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
 for (const item of cases.slice(3)) assert.match(item.textContent, /Derived from reviewed general rules/);
 assert.match(group.textContent, /Critical counts assume no Immunity \(Critical\)/);
 const links = descendants(group, (node) => node.tag === "a");
 for (const url of ["/weapons/flash-pulse", "/weapons/plasma-rifle", "/skills/vulnerability", "/ammunition/ap",
-  "/ammunition/da", "/ammunition/exp", "/ammunition/normal", "/states/stunned",
+  "/ammunition/da", "/ammunition/exp", "/ammunition/normal", "/ammunition/em",
+  "/weapons/e-m-cc-weapon", "/states/stunned",
   "/traits/non-lethal", "/traits/state"]) {
   assert.ok(links.some((link) => link.href === url), `Missing link ${url}`);
 }
@@ -118,4 +121,4 @@ assert.deepEqual(descendants(generic, (node) => node.className === "detail-fact-
   .map((node) => node.textContent), [
   "Requirements", "Effects", "Restrictions", "Clarifications and examples",
 ]);
-console.log("6 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");
+console.log("7 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");

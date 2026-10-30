@@ -61,6 +61,7 @@
         "test_hacking_program_catalog",
         "test_hacking_program_publication",
         "test_immunity_combined_saving_roll_example",
+        "test_immunity_bts_em_cc",
         "test_identities",
         "test_identity_database",
         "test_interim_reference_consistency",
