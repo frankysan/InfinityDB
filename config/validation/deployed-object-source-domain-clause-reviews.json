@@ -81,8 +81,6 @@
       "factsEvidence": [
         "The profile change places an Eclipse Special Ammo Circular Template centered on the replacement Model."
       ],
-      "citationStatus": "pdf-verified-manifest-only",
-      "pdfExcerpt": "an Eclipse Special Ammo Circular Template",
       "caveat": "N5.3 p.117 Transmutation (Escape System-X) replaces an existing Trooper's Unit Profile/Model and places a temporary Eclipse Template; neither a distinct persistent equipment object nor its carrier is created."
     },
     {
@@ -95,8 +93,6 @@
       "factsEvidence": [
         "During Deployment, the user may deploy in [[state:holomask]]."
       ],
-      "citationStatus": "pdf-verified-manifest-only",
-      "pdfExcerpt": "During the Deployment Phase",
       "caveat": "N5.3 p.124 Holomask makes an existing Trooper appear as another Model; it does not create a second Trooper or permit copying the imitated Trooper's deployed Weapon/Equipment."
     },
     {
@@ -109,8 +105,6 @@
       "factsEvidence": [
         "When placed on the table, the bearer may deploy in [[state:holoecho]]."
       ],
-      "citationStatus": "pdf-verified-manifest-only",
-      "pdfExcerpt": "allows its bearers to deploy in Holoecho",
       "caveat": "N5.3 p.124 Holoprojector enables Holoecho State of one existing bearer. Holoecho replicas can trigger Mines and CrazyKoalas under their State rules, but are not independently deployed Weapon/Equipment objects."
     }
   ]

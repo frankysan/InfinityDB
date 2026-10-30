@@ -1315,12 +1315,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           clause leads are accounted for (including previously reviewed
           SymbioBomb). No new source profile, delivery edge or Unit
           carrier is inferred.
-        - [ ] Migrate the three audit-only N5.3 PDF citations for
-          Escape System (p. 117), Holomask (p. 124) and Holoprojector
-          (p. 124) alongside the previous eleven citation gaps.
-          Refresh `rules.db` and its dependent publication
-          fingerprints together; until then the read-only audit
-          distinguishes source-verified pages from maintained citations.
+        - [x] Migrate all **14 N5.3 citations** into maintained rules:
+          Escape System (p. 117), Holomask and Holoprojector (p. 124),
+          plus the eleven reviewed non-catalog/expanded definitions.
+          The six-file coordinated promotion replaced the three
+          review manifests, curated JSON, `rules.db` and its matching
+          `deployed-objects.json`. Preflight confirms **0 pending /
+          14 migrated**; the published reference remains 17 objects
+          with 28 reviewed delivery paths.
           - [x] Add a single **read-only migration preflight**
             (`tools.audit_deployed_object_citation_migrations`) that
             reconciles all 14 pending records and their exact page
@@ -1339,12 +1341,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
             complete pre- or post-migration state, but reject partial
             migration and mismatched evidence. Focused staging tests
             verify generated data without altering tracked inputs.
-          - [ ] Inspect and promote the **six staged files together**
-            in a build-capable checkout, following `docs/testing.md`.
-            Require the post-migration preflight (0 pending/14
-            migrated), publication `--check`, affected tests and
-            normal project/CI checks before committing. Do not
-            deploy a partial or unvalidated promotion.
+          - [x] Promote all six staged files together, following
+            `docs/testing.md`. The local post-promotion preflight,
+            focused audit and publication tests, temporary rules
+            rebuild and lint/docs/type checks pass. A targeted
+            regression additionally matches all six promoted files
+            byte-for-byte against the staging report and validates
+            the binary SHA-256 fingerprints. Full suite and CI
+            remain the release gates; nothing deployed.
         - [ ] Expand object discovery beyond maintained definitions
           and the current lexical scans, especially source tables,
           scenarios and unmodeled Weapon/Equipment variants. Closed
@@ -1479,12 +1483,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 The audit manifest pins PDF excerpts separately because
                 these six maintained records still only cite Wiki
                 revisions; PDF-only reviews are not runtime citations.
-              - [ ] Migrate the six verified PDF citations into their
-                maintained rule records in a coordinated `rules.db`
-                rebuild and deployed-object publication fingerprint
-                refresh. Until then the audit separately reports all
-                six missing maintained N5.3 citations and rejects
-                stale PDF-only exceptions when their sources change.
+              - [x] Migrate the six verified PDF citations into
+                maintained rule records, alongside the other eight
+                verified citations; rebuild `rules.db` and refresh the
+                deployed-object publication fingerprints together.
+                The non-catalog audit now reports **zero** missing
+                maintained N5.3 citations.
               - [ ] Extend object discovery beyond the bounded
                 non-catalog keyword/definition-fields scan, checking
                 alternate wording and other N5.3 source domains.
@@ -1518,12 +1522,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                   Decoy replicas may affect LoF and be targeted, while
                   Concealed applies an S2 Camouflage representation to
                   an existing Weapon/Equipment item.
-                - [ ] Migrate the five expanded-review PDF-only
-                  citations (Decoy State p. 159, Concealed p. 175,
-                  Mnemonica p. 103, Tactical Awareness p. 115,
-                  Explode p. 92) with the six prior citation gaps.
-                  The audit keeps them separate until a coordinated
-                  rules database rebuild and publication refresh.
+                - [x] Migrate the five expanded-review citations
+                  (Decoy State p. 159, Concealed p. 175, Mnemonica
+                  p. 103, Tactical Awareness p. 115, Explode p. 92)
+                  alongside the other nine citations, with a
+                  coordinated rules database and publication refresh.
+                  The expanded audit now reports **zero** missing
+                  maintained N5.3 citations.
                 - [ ] Expand discovery beyond both lexical scans and
                   their definition/field boundaries, including
                   source tables and other N5.3 game-element domains.

@@ -1419,13 +1419,12 @@ The reviewed distinctions are:
   Weapon/Equipment profile. Holoecho's gameplay interaction with other
   devices is reviewed separately under its State.
 
-Escape System, Holomask and Holoprojector still lack maintained N5.3 PDF
-citations. Their pages and short verified PDF excerpts remain **audit-only**
-in the clause manifest; `pdf-verified-manifest-only` does not add
-citations to `rules.db`. The validator rejects changed evidence, claimed
-profiles or delivery, and stale PDF-only exceptions when source citations
-are later added. Coordinate those three citations with the prior 11 gaps
-during a generated rules database rebuild and publication refresh.
+The verified N5.3 PDF citations for Escape System, Holomask and
+Holoprojector have been **promoted into maintained rules and rebuilt
+`rules.db`**, together with the 11 related citations from other audits.
+Their source-only PDF metadata was removed from the review manifest.
+The validator now checks each exact maintained source page and continues
+to reject unsupported object profiles, delivery claims and citation drift.
 
 The 104-record census is limited to maintained Weapon/Equipment
 definitions; closed lexical queues cannot establish overall source-table,
@@ -1538,23 +1537,18 @@ and `skill:transmutation` (p. 117, changes the same Trooper's
 Unit Profile and representation). None establishes a separate
 Weapon/Equipment deployed-object identity.
 
-For these six, `citationStatus: pdf-verified-manifest-only` and
-`pdfExcerpt` preserve manually verified evidence separately from the
-maintained rules records, which **still lack N5.3 PDF citations**.
-The audit reports both `reviewedPdfOnly` and
-`missingMaintainedN5Citation`; the latter stays at six even though
-the bounded keyword review queue is closed. The validator rejects
-changed pages/excerpts and requires migration of the exception
-when the maintained record receives a matching PDF citation.
-Do not imply the production rules database contains these new
-citations. Add the six source citations to curated rules only in a
-coordinated `rules.db` rebuild and deployed-object publication
-fingerprint refresh.
+These six definitions now have **maintained N5.3 PDF citations** in the
+curated rules and regenerated `rules.db`. Their former
+`citationStatus: pdf-verified-manifest-only` and `pdfExcerpt` fields
+were retired as part of the coordinated promotion, which also refreshed
+the deployed-object publication fingerprint. The audit continues to
+verify exact source pages and summary/detail evidence. Its
+`reviewedPdfOnly` and `missingMaintainedN5Citation` reports are now empty.
 
 The decisions were manually compared with pinned English N5.3 pages.
 The audit validator pins source citations already in maintained definitions
-or the six explicit PDF-only review exceptions, plus curated summary and
-detail evidence; it does **not** parse the PDF in CI. No new ARM/BTS/STR/S
+or explicit transitional PDF-only review evidence, plus curated summary
+and detail evidence; it does **not** parse the PDF in CI. No new ARM/BTS/STR/S
 value, Army carrier, delivery edge or runtime object is inferred.
 Summary-only glossary/trait reviews remain valid only while they lack
 detailed source fields. All 48 keyword-matching definitions are classified,
@@ -1612,17 +1606,14 @@ Decoy replicas are static, but can affect LoF and be targeted under the
 State rules. The Concealed Trait describes S2 Camouflage Markers for
 existing Weapons/Equipment, not an additional deployed item.
 
-The five records without maintained PDF citations are `state:decoy`,
+The five previously PDF-only records—`state:decoy`,
 `trait:concealed`, `skill:mnemonica`, `skill:tactical-awareness`
-and `skill:explode`. Each has a separately verified N5.3 PDF page
-and a pinned `pdfExcerpt` with `citationStatus:
-pdf-verified-manifest-only`. The audit reports these as
-`reviewedPdfOnly` and `missingMaintainedN5Citation`, even though
-the bounded queue is closed; new maintained citations invalidate the
-exception until it is migrated. This is **not** a production citation,
-nor does CI parse the PDF. Coordinate maintained-source updates with
-a `rules.db` rebuild and deployed-object publication fingerprint
-refresh, together with the six gaps from the original audit.
+and `skill:explode`—now have their verified N5.3 source pages
+in the maintained curated definitions and regenerated `rules.db`.
+Temporary `pdfExcerpt` and `citationStatus` metadata has been
+retired. The expanded audit's `reviewedPdfOnly` and
+`missingMaintainedN5Citation` reports are now empty. CI still
+validates the curated citations, not the ignored source PDF.
 
 This expanded scan is deliberately bounded to named objectives/devices
 and Marker/decoy wording, not all N5.3 prose, source tables, or possible
@@ -1633,29 +1624,31 @@ delivery path is changed.
 `tests/test_deployed_object_expanded_queue.py` checks the discovery and
 fail-closed review boundaries.
 
-### Audit-only N5.3 citation migration preflight
+### N5.3 citation migration verification
 
-Three deployed-object review manifests contain **14 independently verified N5.3
-PDF page citations that are not yet in maintained rule records**: six
-non-catalog, five expanded, and three Weapon/Equipment source-domain
-classifications. Before their coordinated database publication, run:
+The **14 independently verified N5.3 PDF citations** are now present in
+maintained rules and the regenerated `rules.db`: six non-catalog, five
+expanded, and three Weapon/Equipment source-domain citations. The review
+manifests no longer carry temporary PDF-only status/excerpt fields. Verify
+their coordinated post-migration state with:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations
 .venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations --json --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
 ```
 
-The read-only preflight verifies the current source definitions and all three
-review manifests, rejects missing/duplicated/stale reviews and premature source
-citations, and lists exactly the proposed `sourceId: n5-core-v5.3-pdf` plus
-page for each record. `--pdf` additionally checks every pinned excerpt
-against the *local English N5.3 PDF text* and reports its SHA-256; this needs
-PyMuPDF and is optional in CI. The standard preflight requires only curated
-JSON, so it also works without ignored source archives. A page-only
-`proposedCitation` deliberately avoids inventing an unchecked section label.
+The read-only preflight verifies all three manifests and all 14 exact
+`sourceId: n5-core-v5.3-pdf` citations. It reports **0 pending / 14
+migrated** and rejects partial, duplicate, or stale migrations. `--pdf`
+also verifies source excerpts against the local English N5.3 PDF and
+reports its SHA-256; this requires PyMuPDF. Normal CI validation does
+not require the ignored PDF. The curated citations specify verified
+pages without adding unverified section labels.
 
-The preflight **does not modify any file**. A separate staging command
-builds all six required replacements without touching tracked inputs:
+The migration was first built in an isolated staging directory, using
+the following command **from the pre-migration checkout**. This command
+requires the 14 citations to be pending and is not rerunnable from
+the already migrated working tree:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.stage_deployed_object_citation_migration --output-dir local/citation-migration-n53 --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
@@ -1675,9 +1668,9 @@ migrated checkout. It uses the existing pinned Army database but does not
 rebuild it. Staging tests compare the original curated files, both tracked
 generated artifacts and all three manifests byte-for-byte before/after.
 
-**Promotion is a deliberate separate step.** Inspect the staged files and
-their report. From the repository root, copy the six listed paths into the
-working tree as one review batch:
+The six staged files were subsequently promoted together. For an
+independent replay from a pre-migration checkout, inspect the staging
+report and copy all six paths in one review batch:
 
 ```powershell
 $stage = "local/citation-migration-n53"
@@ -1696,17 +1689,16 @@ foreach ($path in $paths) {
 .venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
 ```
 
-After promotion the preflight reports **0 pending / 14 migrated**; it rejects
-partial migrations. The audit exception maps remain as strict page/excerpt
-transition pins, but the maintained citations supersede their PDF-only
-manifest metadata. Run the focused audit tests and the normal project
-checks before committing the six data files and code together.
-Do not ship only the curated text and leave `rules.db` or publication
-fingerprints stale. No new object identity, delivery edge or Unit carrier
-is implied by the citation additions.
-`tests/test_deployed_object_citation_migrations.py` covers both
-review states, staged artifact consistency, fail-closed drift and the
-optional pinned-PDF text check.
+The promoted `rules.db` and deployed-object publication were checked
+against the staging report's exact SHA-256 fingerprints, and the focused
+audit and publication regressions passed. The audit exception maps
+remain as transition guards, but the maintained citations replace
+their PDF-only manifest metadata. Never publish the curated text alone
+without its matching `rules.db` and derived publication. The migration
+adds no object identities, delivery edges, or Unit carriers.
+`tests/test_deployed_object_citation_migrations.py` verifies pending and
+migrated states, source drift, optional PDF excerpts, and (when the local
+staging report exists) byte-for-byte equality of all six promoted files.
 
 ### Deployed-object release publication
 

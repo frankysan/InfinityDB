@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -218,4 +219,40 @@ def test_migration_staging_rejects_partial_and_duplicate_inputs() -> None:
     ].append({"sourceId": "n5-core-v5.3-pdf", "page": 93})
     with pytest.raises(ValueError, match="PDF-only provenance"):
         build_citation_migration_plan(partial, manifests)
+
+
+def test_promoted_artifacts_match_staging_report_when_available() -> None:
+    """Verify every promoted file, including the opaque database, against staging."""
+    repo = CURATED.parents[3]
+    stage = repo / "local/citation-migration-n53"
+    report_path = stage / "migration-report.json"
+    if not report_path.is_file():
+        pytest.skip("Local migration staging report is unavailable")
+    report = audit_citations()
+    if report["migratedCount"] != 14:
+        pytest.skip("Citation migration has not yet been promoted")
+
+    staged = json.loads(report_path.read_text(encoding="utf-8"))
+    assert staged["scope"] == "staged-artifacts-only-not-applied-or-committed"
+    assert staged["migratedCount"] == 14
+    assert staged["reviewedObjects"] == 17
+    assert len(staged["stagedPaths"]) == 6
+
+    for relative in staged["stagedPaths"]:
+        assert (repo / relative).read_bytes() == (stage / relative).read_bytes()
+
+    for key, relative in (
+        ("rulesDatabase", "data/generated/rules.db"),
+        ("deployedObjects", "data/generated/deployed-objects.json"),
+    ):
+        digest = hashlib.sha256((repo / relative).read_bytes()).hexdigest()
+        assert digest == staged["stagedSha256"][key]
+
+    publication = json.loads(
+        (repo / "data/generated/deployed-objects.json").read_text(encoding="utf-8")
+    )
+    assert len(publication["objects"]) == 17
+    assert publication["sourceSnapshot"]["rulesDatabaseSha256"] == (
+        staged["stagedSha256"]["rulesDatabase"]
+    )
 

@@ -510,8 +510,6 @@
       "factsEvidence": [
         "Wounds caused by the user’s Weapons with the [[trait:deployable]] Trait do not satisfy the Requirement."
       ],
-      "citationStatus": "pdf-verified-manifest-only",
-      "pdfExcerpt": "The Trooper’s Deployable Weapons are not taken",
       "caveat": "N5.3 p. 93 excludes wounds from the user's Deployable Weapons from qualifying Frenzy. This distinction concerns ownership and a Skill trigger, not a new object or implicit carrier edge; the maintained definition still cites a Wiki revision only."
     },
     {
@@ -524,8 +522,6 @@
       "factsEvidence": [
         "The owning player may cancel Possessed State with a Command Token in the specified Tactical Phase step"
       ],
-      "citationStatus": "pdf-verified-manifest-only",
-      "pdfExcerpt": "by spending 1 Command Token.",
       "caveat": "N5.3 p. 169 changes control and the profile used by an existing Trooper. The Command Token cancels that State; it is not an independently deployed item or another owner/carrier."
     },
     {
@@ -538,8 +534,6 @@
       "factsEvidence": [
         "Strategic Use can alter Deployment, remove Regular Orders, limit enemy Command Token use, place a Trooper into [[state:suppressive-fire]], or grant Speedball Tokens"
       ],
-      "citationStatus": "pdf-verified-manifest-only",
-      "pdfExcerpt": "to gain 2 Speedball Tokens",
       "caveat": "N5.3 p. 128 Strategic Use spends resource Command Tokens and optionally grants two Speedball State Tokens. The reviewed Speedball classification is separate; Strategic Use does not establish a conventional Deployable object or source Weapon/Equipment carrier."
     },
     {
@@ -552,8 +546,6 @@
       "factsEvidence": [
         "Alternatively, if the opponent uses Strategic Use to limit your Command Token spending to one during your first Turn"
       ],
-      "citationStatus": "pdf-verified-manifest-only",
-      "pdfExcerpt": "reducing to one the number of Orders the",
       "caveat": "N5.3 p. 90 Counterintelligence modifies opponents' Strategic Command Token effects on Orders or Command Token spending. It neither places a battlefield Token nor creates a Weapon/Equipment identity."
     },
     {
@@ -566,8 +558,6 @@
       "factsEvidence": [
         "The Special Lieutenant Order may be used to declare a Coordinated Order including the user without the normal Command Token or extra Order expenditure."
       ],
-      "citationStatus": "pdf-verified-manifest-only",
-      "pdfExcerpt": "Command Tokens or extra Orders.",
       "caveat": "N5.3 p. 99 permits a Coordinated Order using the Special Lieutenant Order without spending additional Command Tokens. This is an Order/resource benefit, not a deployed object or carrier relationship."
     },
     {
@@ -580,8 +570,6 @@
       "factsEvidence": [
         "When Transmutation occurs, the first Unit Profile and its Model or representation are replaced by the second Unit Profile and corresponding Model or Token."
       ],
-      "citationStatus": "pdf-verified-manifest-only",
-      "pdfExcerpt": "place a Transmuted (TRANSMUTED) Token",
       "caveat": "N5.3 p. 117 describes replacement of an existing Trooper's profile/Model or indication of its new form using a Transmuted/Seed-Embryo Token. This is a Trooper representation, not a Weapon/Equipment Deployable; variant-specific behavior must not be collapsed into a single object identity."
     }
   ]
