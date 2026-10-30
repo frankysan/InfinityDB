@@ -100,6 +100,16 @@ PDF creation metadata is not a publication date. Preserve these as historical
 comparison inputs; verify the intended N5 source and applicability before curation.
 Do not infer current Commlink or Request Reinforcements mechanics from a filename.
 
+**Offline identity verification, 2026-10-30:** Both files still match the
+reviewed hashes above. The audit-only
+[source inventory](../config/validation/reinforcements-source-inputs.json)
+now pins these N4 identities for `tools/audit_1_0_reference_inputs.py`.
+Its version-3 report distinguishes verified historical bytes, missing ignored
+files and unresolved N5 authority. A mismatch fails rather than assigning the
+reviewed edition to changed bytes. This verifies availability/identity only;
+it neither refreshes official online authority nor adopts N4 procedures in N5.
+Publication dates remain unestablished. See [validation](testing.md#10-source-evidence-baseline).
+
 **ITS Season 18 applicability check, 2026-10-28:** The locally archived official
 `data/pdf/its/Its-rules-season-18-en.pdf` identifies itself as version
 **2026.09.01**, last updated September 1, 2026 (file page 1). Its printed
@@ -127,7 +137,7 @@ Reinforcements profiles, such as Aquila Guard and Swiss Guard. The
 also adjusts Reinforcement variants. These establish that official N5 Army
 data continued to include Reinforcements; they do **not** supply an
 annex version, Commlink's precise N5 effects, or legal roster composition
-semantics. The live Wiki still labels its Reinforcements page as an N4 Annex.
+semantics. The 2026-10-28 Wiki check found an N4 Annex label.
 
 **Unresolved source boundary:** ITS 18 calls for an Annex without supplying a
 version identifier in its p. 27 cross-reference. The N5-era official Army updates

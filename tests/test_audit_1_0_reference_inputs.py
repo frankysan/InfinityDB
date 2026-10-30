@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import zipfile
+from functools import partial
 from pathlib import Path
 
 import pytest
@@ -15,8 +16,151 @@ from tools.audit_1_0_reference_inputs import (
     chart_name_evidence,
     verify_curated_wiki_snapshot,
     verify_curated_wiki_snapshots,
+    verify_reinforcements_inputs,
     verify_wiki_revisions,
 )
+
+
+def _reinforcements_inventory(tmp_path: Path, present: tuple[str, ...]) -> Path:
+    sources = []
+    for language in ("en", "es"):
+        relative = f"data/pdf/rules/reinforcement-rules-{language}.pdf"
+        # Synthetic bytes test identity verification, not PDF interpretation.
+        payload = f"%PDF synthetic historical fixture {language}".encode()
+        if language in present:
+            target = tmp_path / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(payload)
+        sources.append({
+            "id": f"reinforcements-n4-{language}", "language": language,
+            "edition": "N4", "applicability": "historical-only",
+            "localPath": relative, "sha256": hashlib.sha256(payload).hexdigest(),
+            "sourceUrl": f"https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-{language}.pdf",
+            "publishedDate": None,
+        })
+    path = tmp_path / "inventory.json"
+    path.write_text(json.dumps({
+        "formatVersion": 1, "scope": "historical-source-identity-not-n5-authority",
+        "sources": sources,
+    }), encoding="utf-8")
+    return path
+
+
+@pytest.mark.parametrize("present", ((), ("en",), ("en", "es")))
+def test_historical_reinforcements_availability_does_not_establish_n5(
+    tmp_path: Path, present: tuple[str, ...],
+) -> None:
+    evidence = verify_reinforcements_inputs(_reinforcements_inventory(tmp_path, present), tmp_path)
+    assert evidence["declaredCount"] == 2
+    assert evidence["verifiedCount"] == len(present)
+    assert evidence["n5AuthorityVerified"] is False
+    for source in evidence["items"]:
+        assert source["edition"] == "N4" and source["publishedDate"] is None
+        if source["language"] in present:
+            assert source["status"] == "verified-pinned-historical-bytes"
+            assert source["actualSha256"] == source["sha256"]
+        else:
+            assert source["status"] == "not-supplied"
+            assert source["actualSha256"] is None
+
+
+def test_historical_reinforcements_changed_bytes_fail_closed(tmp_path: Path) -> None:
+    inventory = _reinforcements_inventory(tmp_path, ("en", "es"))
+    (tmp_path / "data/pdf/rules/reinforcement-rules-en.pdf").write_bytes(b"new unknown revision")
+    with pytest.raises(SourceEvidenceError, match="hash mismatch"):
+        verify_reinforcements_inputs(inventory, tmp_path)
+
+
+@pytest.mark.parametrize(
+    "field,value,message",
+    (("edition", "N5", "cannot establish N5"),
+     ("applicability", "current", "cannot establish N5"),
+     ("publishedDate", "2026-10-30", "cannot establish N5"),
+     ("localPath", "data/pdf/rules/../../../outside.pdf", "Unsafe"),
+     ("localPath", "C:/private/source.pdf", "Unsafe"),
+     ("sha256", "not-a-sha256", "fingerprint"),
+     ("sourceUrl", "https://example.invalid/annex.pdf", "official"),
+     ("language", ["en"], "identity")),
+)
+def test_historical_source_inventory_rejects_unreviewed_claims(
+    tmp_path: Path, field: str, value: object, message: str,
+) -> None:
+    inventory = _reinforcements_inventory(tmp_path, ())
+    document = json.loads(inventory.read_text(encoding="utf-8"))
+    document["sources"][0][field] = value
+    inventory.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(SourceEvidenceError, match=message):
+        verify_reinforcements_inputs(inventory, tmp_path)
+
+
+@pytest.mark.parametrize("present", ((), ("en",), ("en", "es")))
+def test_historical_reinforcements_report_uses_actual_availability(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, present: tuple[str, ...],
+) -> None:
+    import sqlite3
+
+    from tools import audit_1_0_reference_inputs as audit
+
+    inventory = _reinforcements_inventory(tmp_path, present)
+    monkeypatch.setattr(audit, "verify_reinforcements_inputs", partial(
+        audit.verify_reinforcements_inputs, source_root=tmp_path,
+    ))
+    monkeypatch.setattr(audit, "audit_coverage", lambda *args: {"domains": {
+        "weapons": {"items": []}, "skills": {"items": [{"name": "Commlink"}]},
+    }})
+    army = tmp_path / "army.db"
+    army.touch()
+    core = tmp_path / "core.pdf"
+    core.write_bytes(b"synthetic N5 core")
+    faq = tmp_path / "faq.pdf"
+    faq.write_bytes(b"synthetic FAQ")
+    rules = tmp_path / "rules.db"
+    with sqlite3.connect(rules) as db:
+        db.execute("CREATE TABLE sources(id, url, kind, title, version, sha256)")
+        db.execute("INSERT INTO sources VALUES (?, ?, ?, ?, ?, ?)", (
+            "core", "https://example.invalid/core", "pdf", "N5 Core Rules", "5.3",
+            hashlib.sha256(core.read_bytes()).hexdigest(),
+        ))
+    history = _archive(tmp_path)
+    with zipfile.ZipFile(history, "a") as archive:
+        archive.writestr("Weapon_Chart", "<table></table>")
+        archive.writestr("Commlink", "<h1>Commlink</h1>")
+    report = audit.build_report(army, rules, history, core, faq, reinforcements_inventory=inventory)
+    assert report["formatVersion"] == 3
+    assert report["enrichmentGapEvidence"]["reinforcementsAnnexPdfSupplied"] is bool(present)
+    assert report["enrichmentGapEvidence"]["reinforcementsN5AuthorityVerified"] is False
+    markdown = audit.report_markdown(report)
+    assert f"**{len(present)}/2**" in markdown
+    assert "has not been supplied" not in markdown
+    assert "not verified N5 procedural authority" in markdown
+
+
+@pytest.mark.parametrize("defect", ("version", "extra-authority", "duplicate-language"))
+def test_historical_inventory_contract_cannot_silently_expand(
+    tmp_path: Path, defect: str,
+) -> None:
+    inventory = _reinforcements_inventory(tmp_path, ())
+    document = json.loads(inventory.read_text(encoding="utf-8"))
+    if defect == "version":
+        document["formatVersion"] = True
+    elif defect == "extra-authority":
+        document["n5AuthorityVerified"] = True
+    else:
+        document["sources"][1]["language"] = "en"
+    inventory.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(SourceEvidenceError):
+        verify_reinforcements_inputs(inventory, tmp_path)
+
+
+def test_available_pinned_historical_reinforcements_bytes_match_review() -> None:
+    root = Path(__file__).resolve().parents[1]
+    inventory = root / "config/validation/reinforcements-source-inputs.json"
+    document = json.loads(inventory.read_text(encoding="utf-8"))
+    if not all((root / source["localPath"]).is_file() for source in document["sources"]):
+        pytest.skip("Ignored historical PDFs unavailable; byte identity not verified")
+    evidence = verify_reinforcements_inputs(inventory, root)
+    assert evidence["verifiedCount"] == 2
+    assert evidence["n5AuthorityVerified"] is False
 
 
 def _archive(tmp_path: Path, *, title: str = "Protheion", revision: int = 3908,

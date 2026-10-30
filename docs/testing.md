@@ -1289,6 +1289,22 @@ the ignored `local/` workspace:
 .venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5-3-en.pdf" --faq-pdf "data/pdf/faq/n5-faqs-v0-1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
+The report's version-3 `reinforcementsSourceEvidence` separately checks the
+audit-only [historical source inventory](../config/validation/reinforcements-source-inputs.json).
+Its two relative research paths resolve within the checkout. Optional
+`--reinforcements-inventory` selects another inventory under the same contract;
+no files are fetched. Matching bytes establish availability of the reviewed
+N4 inputs; absent ignored PDFs are `not-supplied`, and changed bytes fail closed.
+The inventory cannot assert an N5 edition, current applicability or an unverified
+publication date. Edition identity comes from the cover review tied to its byte
+pin; the auditor does not parse the PDF or check live publication authority.
+The retained `reinforcementsAnnexPdfSupplied` flag now means at least one pinned
+historical PDF was verified; `reinforcementsN5AuthorityVerified` stays false.
+It must not be used as an N5 procedure/completeness verdict. Tests cover
+zero/one/two available files, altered bytes, invalid source claims, JSON/Markdown
+report wiring and optional real-file verification. This corrects the earlier
+hard-coded "PDF not supplied" report, without publishing N4 rules as N5.
+
 The English and Spanish history archives each need `_history/index.json`
 and their indexed `_history/oldid/*.html` payloads. Historical revisions
 are checked by their URL language, page identity and embedded `wgRevisionId`.

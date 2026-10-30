@@ -842,6 +842,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       N5-applicable Annex revision or explicit adoption ruling before
       curating Commlink/Request Reinforcements as N5 and activating the
       strict 1.0 primary release gate.
+    - [x] **Data processing + Project infrastructure:** Correct historical
+      Reinforcements source availability in the existing evidence auditor.
+      A maintained inventory verifies the two reviewed N4 PDF fingerprints;
+      missing files stay unverified and changed bytes fail closed. The
+      version-3 JSON/Markdown report separates historical availability from
+      unresolved N5 authority. Both local hashes match; this does not close
+      Commlink, Request Reinforcements or the strict 1.0 primary gate.
   - [ ] Turn confirmed gaps into bounded batches under the owning tasks below. Each batch names
     the concepts/source sections, dependency, missing contract or content, and completion evidence;
     material source conflicts need reviewed applicability and clear user-visible disclosure

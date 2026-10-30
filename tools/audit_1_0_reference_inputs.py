@@ -14,7 +14,7 @@ import sqlite3
 import unicodedata
 import zipfile
 from html.parser import HTMLParser
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
@@ -24,7 +24,9 @@ except ModuleNotFoundError:  # Executing this file directly from the tools direc
     from audit_enrichment_coverage import audit_coverage
 
 FORMAT = "InfinityDB 1.0 reference source evidence"
-VERSION = 2
+VERSION = 3
+ROOT = Path(__file__).resolve().parents[1]
+REINFORCEMENTS_INVENTORY = ROOT / "config/validation/reinforcements-source-inputs.json"
 REVISION_ID = re.compile(r'"wgRevisionId":(\d+)')
 PAGE_NAME = re.compile(r'"wgPageName":"([^"\\]*(?:\\.[^"\\]*)*)"')
 HISTORY_PATH = re.compile(r"_history/oldid/(\d+)\.html")
@@ -71,6 +73,90 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def verify_reinforcements_inputs(
+    inventory_path: Path, source_root: Path = ROOT,
+) -> dict[str, Any]:
+    """Verify reviewed historical bytes without granting current N5 authority.
+
+    Edition identity comes from the maintained cover review and its byte pin,
+    not a filename or PDF metadata. Missing ignored files are not verified.
+    """
+    try:
+        inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise SourceEvidenceError("Cannot read Reinforcements source inventory") from exc
+    scope = "historical-source-identity-not-n5-authority"
+    if (not isinstance(inventory, dict) or set(inventory) != {"formatVersion", "scope", "sources"}
+            or type(inventory.get("formatVersion")) is not int
+            or inventory.get("formatVersion") != 1
+            or inventory.get("scope") != scope):
+        raise SourceEvidenceError("Unsupported Reinforcements inventory contract")
+    sources = inventory.get("sources")
+    if not isinstance(sources, list) or len(sources) != 2:
+        raise SourceEvidenceError("Expected two historical Reinforcements sources")
+    seen_ids: set[str] = set()
+    seen_languages: set[str] = set()
+    items = []
+    for source in sources:
+        if not isinstance(source, dict) or set(source) != {
+            "id", "language", "edition", "applicability", "localPath", "sha256",
+            "sourceUrl", "publishedDate",
+        }:
+            raise SourceEvidenceError("Invalid Reinforcements source fields")
+        source_id = source["id"]
+        language = source["language"]
+        if (not isinstance(source_id, str) or not source_id
+                or source_id in seen_ids or not isinstance(language, str)
+                or language not in {"en", "es"}
+                or language in seen_languages):
+            raise SourceEvidenceError("Invalid or duplicate Reinforcements source identity")
+        if (source["edition"] != "N4" or source["applicability"] != "historical-only"
+                or source["publishedDate"] is not None):
+            raise SourceEvidenceError(
+                "Reinforcements inventory cannot establish N5 authority or dates"
+            )
+        relative = source["localPath"]
+        if (not isinstance(relative, str) or "\\" in relative
+                or not relative.startswith("data/pdf/rules/")
+                or ".." in PurePosixPath(relative).parts
+                or not relative.endswith(".pdf")):
+            raise SourceEvidenceError("Unsafe Reinforcements source path")
+        digest = source["sha256"]
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise SourceEvidenceError("Invalid Reinforcements source fingerprint")
+        url = source["sourceUrl"]
+        if (not isinstance(url, str) or urlsplit(url).scheme != "https"
+                or urlsplit(url).netloc != "downloads.corvusbelli.com"):
+            raise SourceEvidenceError("Expected an official Reinforcements source URL")
+        path = (source_root / relative).resolve()
+        if not path.is_relative_to(source_root.resolve()):
+            raise SourceEvidenceError("Reinforcements source escapes the research root")
+        actual = None
+        if path.exists():
+            try:
+                actual = _sha256(path)
+            except OSError as exc:
+                raise SourceEvidenceError(
+                    f"Cannot read Reinforcements source: {source_id}"
+                ) from exc
+            if actual != digest:
+                raise SourceEvidenceError(f"Reinforcements source hash mismatch: {source_id}")
+        items.append({
+            **source,
+            "actualSha256": actual,
+            "status": "verified-pinned-historical-bytes" if actual else "not-supplied",
+        })
+        seen_ids.add(source_id)
+        seen_languages.add(language)
+    return {
+        "scope": scope,
+        "declaredCount": len(items),
+        "verifiedCount": sum(item["actualSha256"] is not None for item in items),
+        "n5AuthorityVerified": False,
+        "items": items,
+    }
 
 
 def _oldid_pin(url: str) -> tuple[str, int] | None:
@@ -399,6 +485,7 @@ def build_report(
     wiki_snapshot: Path | None = None,
     wiki_history_es: Path | None = None,
     wiki_snapshot_es: Path | None = None,
+    reinforcements_inventory: Path = REINFORCEMENTS_INVENTORY,
 ) -> dict[str, Any]:
     for path in (army_database, rules_database, wiki_history, core_pdf, faq_pdf):
         if not path.is_file():
@@ -446,6 +533,7 @@ def build_report(
                         "AND s.local_path IS NOT NULL"
                     )
                 )
+    reinforcements = verify_reinforcements_inputs(reinforcements_inventory)
     enrichment = audit_coverage(army_database, rules_database)
     weapon_items = enrichment["domains"]["weapons"]["items"]
     weapon_names = [entry["name"] for entry in weapon_items]
@@ -543,6 +631,7 @@ def build_report(
         },
         "wikiSnapshotEvidence": snapshot_evidence,
         "wikiSpanishSnapshotEvidence": spanish_snapshot_evidence,
+        "reinforcementsSourceEvidence": reinforcements,
         "wikiRevisionEvidence": {
             "exact": exact,
             "total": len(revisions),
@@ -560,7 +649,8 @@ def build_report(
                 item["name"] == "Commlink" for item in enrichment["domains"]["skills"]["items"]
             ),
             "commlinkSupportingWikiPageAvailable": "Commlink" in commlink,
-            "reinforcementsAnnexPdfSupplied": False,
+            "reinforcementsAnnexPdfSupplied": reinforcements["verifiedCount"] > 0,
+            "reinforcementsN5AuthorityVerified": False,
         },
     }
 
@@ -571,6 +661,21 @@ def report_markdown(report: dict[str, Any]) -> str:
     snapshot = report["wikiSnapshotEvidence"]
     spanish_snapshot = report.get("wikiSpanishSnapshotEvidence")
     gaps = report["enrichmentGapEvidence"]
+    reinforcements = report["reinforcementsSourceEvidence"]
+    reinforcement_lines = [
+        "## Historical Reinforcements source identity",
+        "",
+        f"- Verified pinned historical PDFs: **{reinforcements['verifiedCount']}/"
+        f"{reinforcements['declaredCount']}**.",
+        "- These are reviewed N4 inputs, not verified N5 procedural authority.",
+        "- Edition identity follows the maintained cover review and matching byte pin;",
+        "  this check does not parse the PDFs or verify current online publications.",
+    ]
+    for item in reinforcements["items"]:
+        reinforcement_lines.append(
+            f"- `{item['localPath']}`: **{item['status']}**; declared SHA-256 "
+            f"`{item['sha256']}`; publication date unestablished."
+        )
     snapshot_lines = (
         [
             f"- Verified pinned archive: `{snapshot['archiveName']}`",
@@ -633,16 +738,18 @@ def report_markdown(report: dict[str, Any]) -> str:
         f"  **{gaps['weaponNamesNotSeenInWikiChartText']}** do not. These are",
         "  **candidate matches**, not profile-fact coverage.",
         "- Weapon profile storage and missing *rule definitions* are separate audit dimensions.",
-        "- Commlink lacks a curated rule definition; a related Wiki page is available,",
-        "  but the official separately scoped Reinforcements Extra PDF has not been supplied.",
+        "- Commlink lacks a curated rule definition; a related Wiki page is available.",
+        "  Historical N4 PDF availability and verified N5 authority are separate below.",
+        "",
+        *reinforcement_lines,
         "",
         "## Follow-up",
         "",
         "- Verify Weapon Chart rows, modes, ammunition, ranges, saves and Traits against the",
         "  core PDF pages 176–188 and published weapon profiles; review unmatched names/aliases.",
         "- Reconcile the FAQ v0.1 as its own publication and review scope for core/ITS questions.",
-        "- Obtain the exact Reinforcements Extra and curate Commlink/Request",
-        "  Reinforcements separately.",
+        "- Establish an N5-applicable Annex revision or explicit adoption ruling before",
+        "  curating Commlink/Request Reinforcements separately as current N5 procedures.",
         "- Review all 1.0 deferred gap classifications; do not promote every missing definition to",
         "  a core-rule defect without checking its source ownership.",
         "",
@@ -666,6 +773,7 @@ def main() -> int:
     parser.add_argument("--wiki-snapshot-es", type=Path)
     parser.add_argument("--core-pdf", type=Path, required=True)
     parser.add_argument("--faq-pdf", type=Path, required=True)
+    parser.add_argument("--reinforcements-inventory", type=Path, default=REINFORCEMENTS_INVENTORY)
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     args = parser.parse_args()
@@ -673,6 +781,7 @@ def main() -> int:
         result = build_report(
             args.army_db, args.rules_db, args.wiki_history, args.core_pdf, args.faq_pdf,
             args.wiki_snapshot, args.wiki_history_es, args.wiki_snapshot_es,
+            args.reinforcements_inventory,
         )
     except (SourceEvidenceError, sqlite3.DatabaseError) as exc:
         parser.error(str(exc))
