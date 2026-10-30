@@ -4127,6 +4127,21 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Monofilament / printed Immunity (ARM) Example 2, 2026-10-30:**
+`tests/test_immunity_monofilament_example.py` pins N5.3
+pp. 95–96/177, confirms the Normal Ammunition, ARM=0,
+one-roll and State: Dead source Weapon profile, and verifies
+the third source-scoped `reviewedWeaponCases` entry through
+`rules.db` and the Skill API. The source Weapon API does
+not inherit a calculated Immunity outcome. Curated mutation
+tests fail closed on changed Weapon, category, source Traits,
+roll counts and death-State behavior. The JS renderer and
+Chromium at 1440/390/320 px verify the eleventh case,
+source label, semantic links and no overflow. The existing
+rollback-aware `tools/stage_immunity_plasma_saving_roll.py`
+promotes the synchronized database/publication pair; all
+17 reviewed deployed objects remain unchanged.
+
 **AP+T2 CC Weapon / partial Immunity (AP), 2026-10-30:**
 `tests/test_immunity_ap_t2_cc.py` checks the pinned English
 N5.3 pp. 63, 67, 95–96 and 177, the exact Army AP+T2

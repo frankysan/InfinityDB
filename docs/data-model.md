@@ -376,8 +376,18 @@ roll. The new `failedRollWounds` member is validated against
 canonical `ammunition:t2` facts; it is not an arbitrary
 combat computation. The independent Anti-materiel Trait and
 the original Army ARM/2 profile are preserved.
-The ten reviewed interactions are a curated reference, not a
-runtime Weapon-resolution engine. Coordinated `rules.db` and
+A third `reviewedWeaponCases` entry captures the directly
+printed N5.3 p. 96 Monofilament CC Weapon example. The
+exact Normal Ammunition profile retains ARM=0 and State: Dead
+Traits, but Immunity (ARM) ignores those two Traits and
+uses full ARM, with one Saving Roll on a hit or two on a
+Critical. This does **not** cancel the ordinary failed
+Normal Ammunition Saving Roll or imply Monofilament is a
+separate source Ammunition type. The printed example is
+shown only on the Immunity Skill reference; Army Weapon
+data and its Weapon Property remain unchanged.
+The eleven reviewed interactions are curated references,
+not a runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms
 Attack coverage, BTS conditions and unreviewed combinations

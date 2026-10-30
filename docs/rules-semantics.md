@@ -2678,11 +2678,27 @@ facts, not a printed Immunity example or an executable Wound
 calculator. The actual Army AP+T2 Weapon profile retains its
 original one ARM/2 Saving Roll and component identity.
 
-The Skill reference now presents **ten reviewed interactions**:
-six Combined Ammunition cases, Flash Pulse and standalone E/Mitter
-Weapon cases, one Plasma Combined Saving Roll and one Vulnerability
-example. Chromium acceptance at 1440/390/320 px verifies the new
-conditional source explanation, semantic links and mobile layout.
+**Monofilament CC Weapon versus Immunity (ARM)** promotes the
+directly printed N5.3 p. 96, Example 2 into the third
+`reviewedWeaponCases` record. The p. 177 chart identifies one
+Normal Ammunition Saving Roll with ARM=0 and State: Dead
+Traits, not a separate Monofilament Ammunition identity.
+Immunity (ARM) ignores **ARM=0** and the **State: Dead
+Trait**; the target uses its full ARM for one Saving Roll
+on a hit or two on a Critical unless Immunity (Critical)
+also applies. Failure of a Normal Ammunition Saving Roll
+still has its ordinary consequences; it does **not**
+apply the suppressed State: Dead Trait. This is an
+explicitly printed example, not a derived rule for
+arbitrary State-causing Weapons or an attack calculator.
+The source Weapon profile remains unchanged.
+
+The Skill reference now presents **eleven reviewed
+interactions**: six Combined Ammunition cases, Flash Pulse,
+E/Mitter and Monofilament Weapon cases, one Plasma Combined
+Saving Roll and one Vulnerability example. Chromium acceptance
+at 1440/390/320 px verifies the eleventh source-labeled
+interaction, semantic links and mobile layout.
 Other component-specific Immunities, BTS-based attacks, Comms Attack
 rules and conditional State interactions remain unresolved. Do not
 extrapolate an evaluator or project outcomes into Weapon profiles.

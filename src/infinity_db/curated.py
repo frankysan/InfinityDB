@@ -605,9 +605,9 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
         ]
     ):
         raise ValueError(f"{context}: invalid Immunity exceptions")
-    # Explicit Flash Pulse and rule-derived standalone E/Mitter are the only
-    # reviewed Weapon cases. The latter must not inherit the Armed Turret's
-    # unresolved one-roll E/Mitter mode or suppress the Non-Lethal Trait.
+    # Source-reviewed Flash Pulse, standalone E/Mitter and printed
+    # Monofilament (Immunity ARM) cases only. Do not generalize Trait
+    # suppression to other weapons or inherit the Armed Turret E/Mitter mode.
     if value["reviewedWeaponCases"] != [
         {
             "when": {
@@ -646,6 +646,29 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
                 "savingAttribute": "BTS",
             },
             "evidence": "derived-from-pinned-general-rules",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:monofilament-cc-weapon",
+                "immunity": "ARM",
+                "savingAttribute": "ARM",
+                "attackClass": "non-comms",
+            },
+            "sourceProfile": {
+                "ammunitionId": "ammunition:normal",
+                "savingRoll": "ARM=0",
+                "hitRolls": 1,
+                "traits": ["trait:arm-0", "trait:state"],
+                "stateId": "state:dead",
+            },
+            "withImmunity": {
+                "savingAttribute": "ARM",
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "ignoredTraits": ["trait:arm-0", "trait:state"],
+                "stateAppliedOnFailedRoll": False,
+            },
+            "evidence": "explicit-n5.3-pdf-p96-example-2",
         },
     ]:
         raise ValueError(f"{context}: unsupported reviewed Weapon Immunity examples")

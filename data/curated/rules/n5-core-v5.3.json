@@ -20978,6 +20978,35 @@
                                 "savingAttribute": "BTS"
                             },
                             "evidence": "derived-from-pinned-general-rules"
+                        },
+                        {
+                            "when": {
+                                "weaponId": "weapon:monofilament-cc-weapon",
+                                "immunity": "ARM",
+                                "savingAttribute": "ARM",
+                                "attackClass": "non-comms"
+                            },
+                            "sourceProfile": {
+                                "ammunitionId": "ammunition:normal",
+                                "savingRoll": "ARM=0",
+                                "hitRolls": 1,
+                                "traits": [
+                                    "trait:arm-0",
+                                    "trait:state"
+                                ],
+                                "stateId": "state:dead"
+                            },
+                            "withImmunity": {
+                                "savingAttribute": "ARM",
+                                "hitRolls": 1,
+                                "criticalRolls": 2,
+                                "ignoredTraits": [
+                                    "trait:arm-0",
+                                    "trait:state"
+                                ],
+                                "stateAppliedOnFailedRoll": false
+                            },
+                            "evidence": "explicit-n5.3-pdf-p96-example-2"
                         }
                     ],
                     "reviewedVulnerabilityCases": [

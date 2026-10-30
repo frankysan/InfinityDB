@@ -16,7 +16,9 @@ const evidence = (value) => value === "derived-from-pinned-general-rules"
   : value === "explicit-pinned-wiki-example" ? "Explicit source example"
     : value === "explicit-n5.3-pdf-p96-example-3"
       ? "Explicit N5.3 p. 96, Example 3"
-      : "Evidence classification unavailable";
+      : value === "explicit-n5.3-pdf-p96-example-2"
+        ? "Explicit N5.3 p. 96, Example 2"
+        : "Evidence classification unavailable";
 const rollCount = (count) => `${count} Saving Roll${count === 1 ? "" : "s"}`;
 const counts = (rolls) => `${rollCount(rolls.hitRolls)} on a hit (${rolls.criticalRolls} on a Critical)`;
 
@@ -67,6 +69,27 @@ export function immunityCaseRows(facts = {}) {
           text(" Trait still applies, so this weapon inflicts no Wounds. "),
           text("Only the source Weapon 25 non-Comms profile is reviewed; "),
           text("the Armed Turret E/Mitter discrepancy is not adjudicated."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:monofilament-cc-weapon") {
+      const profile = item.sourceProfile;
+      const applied = item.withImmunity;
+      rows.push({
+        title: [text("Immunity (ARM) vs "),
+          reference(item.when.weaponId, "Monofilament CC Weapon")],
+        detail: [
+          text("The source's one "), reference(profile.ammunitionId, "Normal"),
+          text(` Ammunition Saving Roll uses ${profile.savingRoll}. With Immunity (ARM), `),
+          reference("trait:arm-0", "ARM = 0"),
+          text(" is ignored: the defender uses full "),
+          text(applied.savingAttribute),
+          text(` for ${rollCount(applied.hitRolls)} on a hit or `),
+          text(`${rollCount(applied.criticalRolls)} on a Critical unless Immunity (Critical) applies. `),
+          reference("trait:state", "State: Dead"),
+          text(" is also ignored, so a failed Saving Roll does not cause "),
+          reference(profile.stateId, "Dead"),
+          text(" from that Trait. Ordinary failed Normal Ammunition Saving Rolls are not cancelled. This is the exact printed non-Comms example, not a general Weapon Trait calculator."),
         ],
         evidence: evidence(item.evidence),
       });

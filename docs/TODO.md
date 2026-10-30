@@ -1044,6 +1044,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Gate the case with exact schema, source/Army/API tests,
         1440/390/320 Chromium and coordinated rules/publication
         promotion with recovery backups.
+      - [x] Publish the **printed Monofilament CC Weapon / Immunity
+        (ARM)** Example 2 from N5.3 p. 96 as a typed, exact-Weapon
+        interaction. The source Weapon Chart p. 177 specifies Normal
+        Ammunition, ARM=0, one Saving Roll and State: Dead; with
+        Immunity (ARM), the ARM=0 and State: Dead Traits are
+        ignored, but one roll using full ARM still applies
+        (two on Critical absent Immunity (Critical)). A failed
+        ordinary Normal Ammunition Saving Roll is not automatically
+        negated. Preserve the original Army profile; validate
+        exact source, API, renderer, 1440/390/320 Chromium and
+        fail-closed curated mutations. Rebuild/promote the
+        synchronized rules/publication pair with recovery backups.
       - [ ] Review other BTS-component Immunity outcomes using exact
         non-Comms Weapon/combined-Ammunition evidence. The four
         reviewed BTS-based examples do not authorize generic E/M,
