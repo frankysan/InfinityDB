@@ -41,6 +41,7 @@
         "test_deployed_object_expanded_queue",
         "test_deployed_object_non_catalog_queue",
         "test_deployed_object_transitive_includes",
+        "test_core_scenario_object_boundary",
         "test_availability",
         "test_availability_schema",
         "test_catalog_rules",

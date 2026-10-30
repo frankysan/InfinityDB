@@ -1368,6 +1368,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
             elements not covered by the main Weapon Chart or p. 74.
             Reconcile their game-element categories independently
             of Unit/loadout ownership and current lexical scans.
+            - [x] Independently reconcile **N5.3 core scenario
+              objectives** (pp. 149–156): Annihilation and Firefight
+              contain no scenario-object Markers; Domination has
+              exactly four Consoles (p. 151) and Supplies has three
+              Supply Boxes (p. 153) in each of three map
+              configurations. The read-only boundary audit verifies
+              placement/source citations, scenario-only interaction
+              Skills, scoring-status references, physical Marker IDs,
+              and exclusion from the 17 published Weapon/Equipment
+              deployed-object identities. No Army carrier or new
+              delivery relationship is inferred.
+            - [ ] Continue source-table discovery beyond core
+              scenarios, the main Weapon Chart and p. 74. Review
+              uncovered game-element types against direct rules
+              before expanding a canonical object inventory.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery

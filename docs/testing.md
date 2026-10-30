@@ -1624,6 +1624,38 @@ delivery path is changed.
 `tests/test_deployed_object_expanded_queue.py` checks the discovery and
 fail-closed review boundaries.
 
+### Core scenario-object source-domain boundary
+
+The deployed Weapon/Equipment inventory must not absorb scenario objectives
+simply because they are represented by physical Markers or scenery. The
+read-only boundary audit checks the four **N5.3 core scenarios** (printed
+pp. 149–156) against maintained scenario geometry, scoped rules and Skills,
+scoring references, and the published deployed-object identities:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_core_scenario_objects
+.venv\Scripts\python.exe -m tools.audit_core_scenario_objects --json
+```
+
+Annihilation and Firefight have no scenario-object Marker instances.
+Domination (pp. 151–152) places exactly **four Consoles** across all three
+supported map configurations; the `Hack Consoles` Skill and `hacked`
+scoring status are confined to that scenario. Supplies (pp. 153–154) places
+**three Supply Boxes** in each configuration; the `Pick Up Supply Boxes`
+Skill and `controlled` status are scenario scoped. Each scoring condition
+must reference the exact physical Marker IDs present in every configuration.
+The audit pins the maintained N5.3 citation pages for the scenario definitions,
+placement rules and associated Skills, and rejects mismatched/duplicate
+source references or accidental promotion of `Console` / `Supply Box`
+to the Weapon/Equipment publication. The printed source pages were reviewed
+against the pinned English N5.3 PDF; the audit itself does not read the PDF.
+The existing scenario tests separately validate placement coordinates,
+individual setup/scoring rules, and the unresolved Domination 350-point SWC
+discrepancy. This cross-domain gate is not an exhaustive scenario or ITS
+game-object inventory and must not create Army carriers or delivery paths.
+`tests/test_core_scenario_object_boundary.py` exercises the fail-closed
+publication and provenance boundary.
+
 ### N5.3 citation migration verification
 
 The **14 independently verified N5.3 PDF citations** are now present in
