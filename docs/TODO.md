@@ -1226,9 +1226,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **38 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **37 Skill** source IDs with unresolved
       occurrence parameters and 14 Equipment source IDs. The tracked
-      rules.db now includes the reviewed Mimetism/Berserk/Dodge mappings;
+      rules.db now includes the reviewed Mimetism/Berserk/Dodge/Surprise Attack mappings;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
       the release-matched source pair before final certification.
@@ -1238,6 +1238,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       variants with extra MODs; preserve raw signatures and exclude
       unreviewed specific combinations from index counts. Fail closed
       rather than parsing numeric-looking display strings.
+      - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
+        against English N5.3 p. 114, Spanish p. 88 and archived Wiki
+        revision 3943. Its 767 direct rows have only exact extras 6/7
+        (`TEXT: -3/-6`, 762/5 rows). The typed map targets the attacked
+        opponent's Face to Face ARO Roll; activation requirements,
+        Attribute-specific exceptions and the separate-attacker FAQ remain
+        unchanged. The guarded matched-v9 refresh changes only the owning
+        record's variant metadata and publication fingerprints. Source-only
+        regressions cover both tracked and fresh rules exports; this is
+        parameter reconciliation, not a published Unit-use index. See
+        [source review](n5-source-history.md#reviewed-surprise-attack-occurrence-modifiers).
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

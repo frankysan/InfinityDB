@@ -574,16 +574,16 @@ source-variant mappings. It does **not** calculate Unit usage.
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
 application/raw databases. The tracked artifact now includes the
-reviewed Mimetism, Berserk and Dodge occurrence-parameter mappings.
+reviewed Mimetism, Berserk, Dodge and Surprise Attack occurrence-parameter mappings.
 This baseline contains **96 Skill** source identities across
 **33,153 direct rows** and **34 Equipment** source identities across
 **5,427 direct rows**:
 
 - Skills: 10 reviewed exact-source IDs without occurrence extras;
   44 family-only IDs; 1 reviewed distance-parameter source
-  (Forward Deployment, `161`); 2 reviewed numeric-parameter
-  sources (Mimetism `28` and Berserk `24`); 1 reviewed
-  extra-parameter source (Dodge `40`); and **38** IDs with
+  (Forward Deployment, `161`); 3 reviewed numeric-parameter
+  sources (Mimetism `28`, Berserk `24` and Surprise Attack `191`); 1 reviewed
+  extra-parameter source (Dodge `40`); and **37** IDs with
   unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
   19 family-only IDs; and 14 IDs with unresolved occurrence parameters.
@@ -682,14 +682,34 @@ exposes this reviewed typed evidence separately from the legacy
 distance-only display query and `skill_numeric_mod_semantics()`.
 Source ID `40` is now `reviewed-extra-parameter` in the
 tracked `rules.db` and in a freshly exported database from
-curated sources. Both inventories report **2 reviewed-numeric,
-1 reviewed-extra, and 38 unresolved** Skill source IDs.
+curated sources. With the Surprise Attack review below, both inventories
+report **3 reviewed-numeric, 1 reviewed-extra, and 37 unresolved** Skill source IDs.
 The inventory is read-only and does not overwrite either database.
 `tests/test_audit_source_variant_inputs.py` checks the tracked
 artifact and independently exports current curation into a
 temporary rules database to verify the exact source signatures.
 Certification is per observed source signature, not a new
 player-visible variant index or a game-state simulator.
+
+**Reviewed Surprise Attack occurrence MODs (2026-10-30):** Source Skill
+`191` has 767 direct relationships, all with one exact extra: `TEXT: -3`
+(ID 6, 762 rows) or `TEXT: -6` (ID 7, 5 rows). The family record now maps
+these signed values to `surprise-attack-target-face-to-face-aro`, with the
+Skill holder as owner and the attacked opponent as target. The new scope
+is accepted only on the Surprise Attack family link; it cannot be mixed
+with Mimetism's BS Attack/Discover scopes or a positive owner-roll MOD.
+The owning rule continues to require Marker/Hidden Deployment at the
+start of the Order, an eligible Attack and the Active Turn. Attribute-specific
+variants and non-stacking exceptions are not inferred from these two
+unqualified extras. The existing multiple-attacker FAQ is unchanged.
+See [source review](n5-source-history.md#reviewed-surprise-attack-occurrence-modifiers).
+
+Both the tracked v9 artifact and fresh curated exports classify this exact
+source ID as `reviewed-numeric-parameter`. The guarded paired refresh permits
+only occurrence-parameter additions in explicitly named existing family records;
+every other row, schema object, Restriction and deployed-object payload must
+remain identical. It does not populate the future Unit-use index or make the
+parameter metadata part of the distance-only display API.
 
 Do **not** parse a variant from a display string, strip punctuation, infer a
 parameter from a shared family name, or count an unresolved variant as a
@@ -1000,9 +1020,11 @@ a guarded paired refresh permitted only the nine remaining NULL-to-hash
 cells. Every other stored row and the complete database schema, including
 indexes, remained identical, as did typed Restrictions and reviewed objects.
 Two independent exports were byte-identical. The rules SHA-256 is
-`7235b78e7c9ca295d35e44cd05972ffeece11a968b80e6096ae4db4b44c74846`;
+`4a7da9a6237bca26ccfd453fc07d7e40b5e57a59b92da6b84de3ac4b9ab7b255`;
 the matching ignored publication SHA-256 is
-`dd4d0343c7f235934f82b1a6675a66fd1d1b1029ec662a0a2b513f086b7050d1`.
+`b680f0bf1e55d119fc0590ea35a04fc917eafc22244715ef64a6bcc1e8b8131d`.
+These current fingerprints include the subsequent Surprise Attack
+occurrence-metadata refresh described above.
 The original matched v9 pair is retained under ignored `local/`; the retained
 local audit evidence records its recovery location. The publication changes only
 its rules-database and curated-source fingerprints. This is local provenance

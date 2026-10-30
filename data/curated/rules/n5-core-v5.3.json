@@ -12944,7 +12944,32 @@
                 "reviewedOn": "2026-09-23"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "numeric-mod",
+                        "owner": "skill-holder",
+                        "target": "opponent",
+                        "appliesTo": [
+                            "surprise-attack-target-face-to-face-aro"
+                        ],
+                        "extraValues": [
+                            {
+                                "extraId": 6,
+                                "extraType": "TEXT",
+                                "rawValue": "-3",
+                                "modifier": -3
+                            },
+                            {
+                                "extraId": 7,
+                                "extraType": "TEXT",
+                                "rawValue": "-6",
+                                "modifier": -6
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

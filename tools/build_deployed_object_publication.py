@@ -88,6 +88,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--refresh-pdf-source-pins-v9", action="store_true",
         help="Verify and publish missing byte pins for already-cataloged PDFs in a v9 pair",
     )
+    migration.add_argument(
+        "--refresh-variant-semantics-v9", nargs="+", metavar="RECORD_ID",
+        help="Append reviewed occurrence metadata for explicit records in a matched v9 pair",
+    )
     return parser
 
 
@@ -99,6 +103,7 @@ def main() -> int:
         or args.refresh_isolated_context_v9
         or args.refresh_core_pdf_pin_v9
         or args.refresh_pdf_source_pins_v9
+        or args.refresh_variant_semantics_v9 is not None
     ):
         if args.check:
             raise ValueError("--check cannot be combined with v9 migration operations")
@@ -107,9 +112,15 @@ def main() -> int:
             refresh_core_pdf_pin_v9_release,
             refresh_isolated_context_v9_release,
             refresh_pdf_source_pins_v9_release,
+            refresh_variant_semantics_v9_release,
             stage_restrictions_v9,
         )
 
+        if args.refresh_variant_semantics_v9 is not None:
+            backup = refresh_variant_semantics_v9_release(set(args.refresh_variant_semantics_v9))
+            print("Refreshed reviewed variant metadata in v9 release artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
         if args.refresh_pdf_source_pins_v9:
             backup = refresh_pdf_source_pins_v9_release()
             print("Refreshed verified PDF source pins in v9 release artifacts.")

@@ -37,9 +37,9 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "family-only": 44,
             "reviewed-distance-parameter": 1,
             "reviewed-exact-source": 10,
-            "reviewed-numeric-parameter": 2,
+            "reviewed-numeric-parameter": 3,
             "reviewed-extra-parameter": 1,
-            "unresolved-occurrence-parameter": 38,
+            "unresolved-occurrence-parameter": 37,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -208,7 +208,7 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
     )
     rules = RulesDatabase(output)
     parameters = rules.skill_numeric_mod_semantics()
-    assert set(parameters) == {"mimetism", "berserk", "dodge"}
+    assert set(parameters) == {"mimetism", "berserk", "dodge", "surprise-attack"}
     assert {
         ref: {
             (value["extra_id"], value["extra_type"], value["raw_value"], value["modifier"])
@@ -219,6 +219,7 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "mimetism": {(6, "TEXT", "-3", -3), (7, "TEXT", "-6", -6)},
         "berserk": {(1, "TEXT", "+3", 3), (2, "TEXT", "+6", 6)},
         "dodge": {(1, "TEXT", "+3", 3), (2, "TEXT", "+6", 6)},
+        "surprise-attack": {(6, "TEXT", "-3", -3), (7, "TEXT", "-6", -6)},
     }
     assert parameters["mimetism"]["target"] == "opponent"
     assert parameters["mimetism"]["applies_to"] == [
@@ -237,9 +238,9 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "family-only": 44,
         "reviewed-distance-parameter": 1,
         "reviewed-exact-source": 10,
-        "reviewed-numeric-parameter": 2,
+        "reviewed-numeric-parameter": 3,
         "reviewed-extra-parameter": 1,
-        "unresolved-occurrence-parameter": 38,
+        "unresolved-occurrence-parameter": 37,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -292,6 +293,34 @@ def test_dodge_source_signatures_are_exact_and_independent(tmp_path: Path) -> No
     # A source-ID-wide status must not promote the remaining exact signatures.
     assert dodge["status"] == "reviewed-extra-parameter"
     assert all(signature["reviewed"] for signature in signatures)
+
+
+def test_surprise_attack_signatures_preserve_conditional_target_mods(tmp_path: Path) -> None:
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), output)
+    for path in (output, ROOT / "data/generated/rules.db"):
+        rules = RulesDatabase(path)
+        parameters = rules.skill_numeric_mod_semantics()["surprise-attack"]
+        assert parameters["owner"] == "skill-holder"
+        assert parameters["target"] == "opponent"
+        assert parameters["applies_to"] == ["surprise-attack-target-face-to-face-aro"]
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db", ROOT / "data/generated/infinity.raw.db", path,
+        )
+        source = next(row for row in report["catalogs"]["skills"]["items"] if row["id"] == 191)
+        assert source["status"] == "reviewed-numeric-parameter"
+        assert source["occurrences"] == 767
+        assert {
+            tuple(signature["extras"][0]): signature["count"]
+            for signature in source["extraSignatures"]
+        } == {(6, "TEXT", "-3"): 762, (7, "TEXT", "-6"): 5}
+        assert all(len(s["extras"]) == 1 and s["reviewed"] for s in source["extraSignatures"])
+        rule = rules.composed_record("skill:surprise-attack")
+        assert rule is not None
+        assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 114
+                   for c in rule["citations"])
+        assert rule["variant_semantics"]["inheritance"] == "family"
+        assert "surprise-attack" not in rules.skill_parameter_semantics()
 
 
 def test_source_inventory_is_deterministic() -> None:

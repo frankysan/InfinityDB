@@ -48,7 +48,8 @@ VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
 VARIANT_PARAMETER_KINDS = frozenset({"distance", "numeric-mod", "reviewed-extra"})
 VARIANT_MOD_TARGETS = frozenset({"skill-holder", "opponent"})
 VARIANT_MOD_APPLICATIONS = frozenset(
-    {"bs-attack-requiring-lof", "discover", "berserk-cc-attack", "dodge-ph-roll"}
+    {"bs-attack-requiring-lof", "discover", "berserk-cc-attack", "dodge-ph-roll",
+     "surprise-attack-target-face-to-face-aro"}
 )
 SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
@@ -240,13 +241,22 @@ def _validate_variant_semantics(
                 raise ValueError(f"{parameter_context}: invalid appliesTo scopes")
             if (
                 parameter["target"] == "opponent"
-                and set(applies_to) != {"bs-attack-requiring-lof", "discover"}
+                and set(applies_to) not in (
+                    {"bs-attack-requiring-lof", "discover"},
+                    {"surprise-attack-target-face-to-face-aro"},
+                )
             ) or (
                 parameter["target"] == "skill-holder"
                 and not set(applies_to) <= {"berserk-cc-attack", "dodge-ph-roll"}
             ):
                 raise ValueError(
                     f"{parameter_context}: target conflicts with appliesTo scope"
+                )
+            if "surprise-attack-target-face-to-face-aro" in applies_to and (
+                army_links != [{"entity": "skill", "id": "surprise-attack"}]
+            ):
+                raise ValueError(
+                    f"{parameter_context}: Surprise Attack scope requires its exact family link"
                 )
             values = parameter["extraValues"]
             if not isinstance(values, list) or not values:

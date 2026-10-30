@@ -463,18 +463,73 @@ def _check_source_pins_delta(
 
 def refresh_core_pdf_pin_v9_release(*, root: Path = ROOT) -> Path:
     """Publish the reviewed English N5.3 byte pin without changing rules or objects."""
-    return _refresh_pdf_source_pins_v9_release(
+    return _refresh_metadata_v9_release(
         root=root, source_ids={"n5-core-v5.3-pdf"}, expected_count=2,
     )
 
 
 def refresh_pdf_source_pins_v9_release(*, root: Path = ROOT) -> Path:
     """Publish missing pins for already-cataloged PDFs, verifying their local bytes."""
-    return _refresh_pdf_source_pins_v9_release(root=root)
+    return _refresh_metadata_v9_release(root=root)
 
 
-def _refresh_pdf_source_pins_v9_release(
+def _check_variant_semantics_delta(
+    previous: Path, proposed: Path, variants: dict[tuple[str, str], str],
+) -> None:
+    """Permit only explicit occurrence-parameter additions to existing family records."""
+    with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
+        for pragma in ("user_version", "application_id"):
+            if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
+                f"PRAGMA {pragma}",
+            ).fetchone():
+                raise ValueError("Variant refresh changed database identity")
+        schema_sql = "SELECT type, name, sql FROM sqlite_master ORDER BY type, name"
+        schema = old.execute(schema_sql).fetchall()
+        if schema != new.execute(schema_sql).fetchall():
+            raise ValueError("Variant refresh changed database schema")
+        changed: set[tuple[str, str]] = set()
+        for kind, name, _ in schema:
+            if kind != "table":
+                continue
+            quoted = '"' + name.replace('"', '""') + '"'
+            columns = [row[1] for row in old.execute(f"PRAGMA table_info({quoted})")]
+            order = ",".join(str(index + 1) for index in range(len(columns)))
+            query = f"SELECT * FROM {quoted} ORDER BY {order}"
+            rows = old.execute(query).fetchall()
+            if name == "records":
+                rows = [list(row) for row in rows]
+                for row in rows:
+                    key = (row[columns.index("collection_id")], row[columns.index("id")])
+                    if key not in variants:
+                        continue
+                    index = columns.index("variant_json")
+                    before, after = json.loads(row[index]), json.loads(variants[key])
+                    prior = before.pop("occurrenceParameters", [])
+                    additions = after.pop("occurrenceParameters", [])
+                    if (before != after or before.get("inheritance") != "family"
+                            or len(additions) <= len(prior) or additions[:len(prior)] != prior):
+                        raise ValueError("Variant refresh must only append reviewed parameters")
+                    row[index] = variants[key]
+                    changed.add(key)
+                rows = [tuple(row) for row in rows]
+            if rows != new.execute(query).fetchall():
+                raise ValueError(f"Variant refresh changed unrelated rows: {name}")
+        if not variants or changed != set(variants):
+            raise ValueError("Variant refresh did not cover the exact requested records")
+
+
+def refresh_variant_semantics_v9_release(
+    record_ids: set[str], *, root: Path = ROOT,
+) -> Path:
+    """Synchronize reviewed occurrence metadata without changing other rule content."""
+    if not record_ids:
+        raise ValueError("Variant refresh requires explicit record IDs")
+    return _refresh_metadata_v9_release(root=root, variant_records=record_ids)
+
+
+def _refresh_metadata_v9_release(
     *, root: Path, source_ids: set[str] | None = None, expected_count: int | None = None,
+    variant_records: set[str] | None = None,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -507,10 +562,19 @@ def _refresh_pdf_source_pins_v9_release(
     input_hashes[root / PDF] = chart["sourcePdfSha256"]
     documents = load_curated_directory(root / "data/curated/rules")
     pins: dict[tuple[str, str], str] = {}
+    variants = {
+        (document["collection"]["id"], row["id"]): json.dumps(
+            row["variantSemantics"], ensure_ascii=False, separators=(",", ":"),
+        )
+        for _, document in documents for row in document["records"]
+        if variant_records is not None and row["id"] in variant_records
+        and row.get("review", {}).get("status") == "reviewed"
+        and row.get("variantSemantics", {}).get("occurrenceParameters")
+    }
     for _, document in documents:
         for source in document["sources"]:
             key = (document["collection"]["id"], source["id"])
-            if (source["kind"] != "pdf" or key not in previous_pins
+            if (variant_records is not None or source["kind"] != "pdf" or key not in previous_pins
                     or previous_pins[key] is not None
                     or (source_ids is not None and source["id"] not in source_ids)):
                 continue
@@ -525,7 +589,12 @@ def _refresh_pdf_source_pins_v9_release(
                 raise ValueError(f"Source pin refresh PDF hash mismatch: {source['id']}")
             input_hashes[path] = actual
             pins[key] = digest
-    if not pins or (expected_count is not None and len(pins) != expected_count):
+    if variant_records is not None:
+        if {record for _, record in variants} != variant_records or len(variants) != len(
+            variant_records
+        ):
+            raise ValueError("Variant refresh requires exact reviewed family records")
+    elif not pins or (expected_count is not None and len(pins) != expected_count):
         raise ValueError("Source pin refresh requires the expected missing PDF declarations")
     originals = {path: (root / path).read_bytes() for path in ARTIFACTS}
     with tempfile.TemporaryDirectory(prefix="pdf-source-pin-v9-stage-", dir=root / "local") as tmp:
@@ -538,7 +607,10 @@ def _refresh_pdf_source_pins_v9_release(
             raise ValueError("Source pin export is not byte deterministic")
         generated = RulesDatabase(next_rules)
         generated.validate()
-        _check_source_pins_delta(current_rules, next_rules, pins)
+        if variant_records is not None:
+            _check_variant_semantics_delta(current_rules, next_rules, variants)
+        else:
+            _check_source_pins_delta(current_rules, next_rules, pins)
         if generated.restrictions_payload() != current.restrictions_payload():
             raise ValueError("Source pin refresh changed typed Restrictions")
         proposed = build_publication(
@@ -563,5 +635,8 @@ def _refresh_pdf_source_pins_v9_release(
 
         return _replace_with_rollback(
             root, {RULES: next_rules.read_bytes(), PUBLICATION: publication_bytes(proposed)},
-            post_validate, backup_prefix="pdf-source-pin-v9-recovery-",
+            post_validate, backup_prefix=(
+                "variant-semantics-v9-recovery-" if variant_records is not None
+                else "pdf-source-pin-v9-recovery-"
+            ),
         )

@@ -876,9 +876,14 @@ contract (not a general parser for `TEXT` extras):
 Numeric modifiers currently require a family Skill Army link and a reviewed
 mapping of every recognized `extraId`, exact `extraType` and `rawValue`.
 Allowed targets are `skill-holder` and `opponent`; allowed applications
-are `bs-attack-requiring-lof`, `discover`, `berserk-cc-attack`, and
-`dodge-ph-roll`. An opponent-target modifier must apply to the two
-Mimetism scopes; a skill-holder modifier may apply to a Berserk CC Attack
+are `bs-attack-requiring-lof`, `discover`, `berserk-cc-attack`,
+`dodge-ph-roll`, and `surprise-attack-target-face-to-face-aro`.
+An opponent-target modifier must apply either to the two Mimetism scopes
+or to the single Surprise Attack scope. The latter requires exactly the
+`skill:surprise-attack` family Army link and cannot be combined with the
+Mimetism scopes. It identifies the attacked target's Face to Face ARO Roll;
+the owning rule retains activation conditions and exceptions. It does not
+grant an unconditional negative MOD to enemy rolls. A skill-holder modifier may apply to a Berserk CC Attack
 or Dodge PH Roll. Each mapped source modifier is a nonzero signed integer
 within -12 to +12. Unknown extra signatures, other gameplay scopes and
 unreviewed combinations stay unresolved. A single Skill family can specify
@@ -892,7 +897,10 @@ projection. Schema support alone does not certify any current Army
 occurrence: the source-inventory audit must match the current reviewed
 extra IDs, types and values, and reject unmapped co-occurring extras.
 The N5.3 core collection reviews Mimetism (-3/-6), Berserk (+3/+6),
-and Dodge PH-roll (+3/+6) as `numeric-mod` entries.
+and Dodge PH-roll (+3/+6) as `numeric-mod` entries. Surprise Attack now
+maps exact extras 6/7 (`TEXT: -3/-6`) to the target's Face to Face ARO
+scope. The existing FAQ keeps different attackers' modifiers separate;
+this metadata does not calculate stacking or an effective game-state MOD.
 
 The **`reviewed-extra`** kind adds explicit, per-source-ID typed effects
 without broadening numeric MODs or the distance-only browser projection.

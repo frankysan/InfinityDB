@@ -128,6 +128,36 @@ No publication-date anchor, historical/current applicability or gameplay text
 changed. These are local byte-identity checks, separate from live authority,
 source-section coverage and the final release input freeze.
 
+## Reviewed Surprise Attack occurrence modifiers
+
+**Project domain:** Data processing
+
+**Pinned-source review, 2026-10-30:** English N5.3 printed p. 114 and
+Spanish printed p. 88 agree that the profile's Surprise Attack negative
+MOD applies to the attacked target's Face to Face ARO Roll. The attacker
+must begin the Order in Marker form or Hidden Deployment, declare an eligible
+Attack and be in the Active Turn. An explicitly named Attribute restricts
+the MOD to that Attribute; these cases are not inferred from unqualified
+`-3/-6` extras. The exact PDF byte identities are recorded above.
+
+The English history archive `WIKI-en-history 20260928-165727.zip`
+(SHA-256 `d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`)
+contains `_history/oldid/3943.html`, identifying
+[Surprise Attack revision 3943](https://infinitythewiki.com/index.php?title=Surprise_Attack&oldid=3943).
+Its marked N5.2 replacement agrees on Face to Face ARO Rolls; the retained
+original text refers more broadly to Skill Rolls and is historical evidence,
+not the selected scope. The existing multiple-attacker FAQ (English v0.0
+p. 1; English/Spanish v0.1 p. 2) keeps each attacker's modifier separate.
+No FAQ date gate or gameplay interpretation changed.
+
+The paired September 29 Army application/raw databases contain 767 direct
+Skill-191 rows: 762 with extra 6 (`TEXT: -3`) and five with extra 7
+(`TEXT: -6`). Every observed signature has exactly one extra and no raw
+override. The curated family now binds these exact IDs/types/values to the
+conditional target scope; unrelated or future signatures remain unresolved.
+This is a review of pinned local evidence, not a live publication refresh,
+historical Army delta, Unit-use count or complete variant-index acceptance.
+
 ## Locally available Reinforcements PDFs
 
 **Availability check, 2026-10-21:** The local files below are present and readable,

@@ -1099,6 +1099,38 @@ def test_numeric_mod_occurrence_parameter_schema_is_explicit_and_compatible(
         load_curated_document(path)
 
 
+@pytest.mark.parametrize("defect", (None, "family", "target", "mixed-scope", "positive"))
+def test_surprise_attack_numeric_mod_is_bound_to_target_face_to_face_aro(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    document = valid_document()
+    record = next(item for item in document["records"] if item["kind"] == "skill")
+    record["armyLinks"] = [{"entity": "skill", "id": "surprise-attack"}]
+    parameter = {
+        "source": "army-extra", "kind": "numeric-mod", "owner": "skill-holder",
+        "target": "opponent", "appliesTo": ["surprise-attack-target-face-to-face-aro"],
+        "extraValues": [{"extraId": 6, "extraType": "TEXT", "rawValue": "-3", "modifier": -3}],
+    }
+    record["variantSemantics"] = {"inheritance": "family", "occurrenceParameters": [parameter]}
+    if defect == "family":
+        record["armyLinks"][0]["id"] = "mimetism"
+    elif defect == "target":
+        parameter["target"] = "skill-holder"
+    elif defect == "mixed-scope":
+        parameter["appliesTo"].append("discover")
+    elif defect == "positive":
+        parameter["extraValues"] = [
+            {"extraId": 1, "extraType": "TEXT", "rawValue": "+3", "modifier": 3},
+        ]
+    path = tmp_path / "surprise-attack.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    if defect is None:
+        load_curated_document(path)
+    else:
+        with pytest.raises(ValueError):
+            load_curated_document(path)
+
+
 def test_reviewed_dodge_extra_parameter_rejects_unscoped_or_mismatched_values(
     tmp_path: Path,
 ) -> None:

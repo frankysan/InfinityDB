@@ -150,6 +150,46 @@ def test_all_selected_pdf_sources_have_consistent_pins_and_exports(tmp_path: Pat
                             for collection, source in pdfs)
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "facts", "other-record", "index", "inheritance", "replace", "missing"),
+)
+def test_variant_metadata_refresh_preserves_other_rows_and_prior_parameters(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import _check_variant_semantics_delta
+
+    before = {"inheritance": "family", "occurrenceParameters": [{"kind": "existing"}]}
+    after = copy.deepcopy(before)
+    after["occurrenceParameters"].append({"kind": "reviewed-addition"})
+    if defect == "inheritance":
+        after["inheritance"] = "source"
+    elif defect == "replace":
+        after["occurrenceParameters"][0]["kind"] = "replacement"
+    old_path, new_path = tmp_path / "old.db", tmp_path / "new.db"
+    payload = json.dumps(after)
+    with sqlite3.connect(old_path) as old, sqlite3.connect(new_path) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", (
+            ("core", "skill", json.dumps(before), "preserved"),
+            ("core", "other", json.dumps(before), "preserved"),
+        ))
+        old.commit()
+        old.backup(new)
+        new.execute("UPDATE records SET variant_json=? WHERE id='skill'", (payload,))
+        if defect == "facts":
+            new.execute("UPDATE records SET facts='changed' WHERE id='skill'")
+        elif defect == "other-record":
+            new.execute("UPDATE records SET variant_json=? WHERE id='other'", (payload,))
+        elif defect == "index":
+            new.execute("CREATE INDEX changed ON records(id)")
+    variants = {("core", "absent" if defect == "missing" else "skill"): payload}
+    if defect is None:
+        _check_variant_semantics_delta(old_path, new_path, variants)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(old_path, new_path, variants)
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

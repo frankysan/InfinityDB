@@ -1464,6 +1464,9 @@ def test_rules_database_preserves_reviewed_numeric_mod_extra_maps(
         "skill:mimetism": ("opponent", ["bs-attack-requiring-lof", "discover"], 6, "-3", -3),
         "skill:berserk": ("skill-holder", ["berserk-cc-attack"], 1, "+3", 3),
         "skill:dodge": ("skill-holder", ["dodge-ph-roll"], 2, "+6", 6),
+        "skill:surprise-attack": (
+            "opponent", ["surprise-attack-target-face-to-face-aro"], 7, "-6", -6,
+        ),
     }
     for _path, document in documents:
         for record in document["records"]:
@@ -1486,7 +1489,7 @@ def test_rules_database_preserves_reviewed_numeric_mod_extra_maps(
     export_rules_database(documents, output)
     rules = RulesDatabase(output)
     mods = rules.skill_numeric_mod_semantics()
-    assert set(mods) == {"mimetism", "berserk", "dodge"}
+    assert set(mods) == {"mimetism", "berserk", "dodge", "surprise-attack"}
     for record_id, (target, scopes, extra_id, raw_value, value) in specifications.items():
         slug = record_id.split(":", 1)[1]
         assert mods[slug] == {

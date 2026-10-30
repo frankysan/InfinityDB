@@ -325,6 +325,13 @@ then run these modules explicitly.
 A clean CI pass does **not** claim to have verified the full source-only
 occurrence counts.
 
+The reviewed Surprise Attack source gate covers Skill `191`, all 767 direct
+rows and the exact single-extra signatures 6/7 (`TEXT: -3/-6`, 762/5 rows).
+It checks both the tracked rules artifact and a fresh export, preserving the
+opponent-target Face to Face ARO scope separately from Mimetism and the
+distance-only display query. The current source inventory has 37 unresolved
+Skill IDs and 14 Equipment IDs; these are per-source review flags, not Unit counts.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic
@@ -1311,6 +1318,16 @@ the input hashes during staging. The retained `--refresh-core-pdf-pin-v9` form
 restricts the operation to the two English core declarations. These are scoped
 provenance operations, not general artifact replacement workflows. The normal default rules export
 remains v8-compatible. No acquisition runs during these checks.
+
+For reviewed occurrence-parameter additions, use
+`python -m tools.build_deployed_object_publication --refresh-variant-semantics-v9 skill:surprise-attack`
+with the exact intended record IDs. This shares the matched-v9 pair,
+deterministic double export, frozen-input and rollback checks above, but
+permits only appended `occurrenceParameters` in those existing reviewed family
+records. It rejects changing prior parameters, inheritance, gameplay prose,
+citations, source rows, other records or schema objects. The only publication
+changes allowed are the paired rules/curated-source fingerprints. This scoped
+operation does not replace general versioned migrations or final release checks.
 
 The version-4 report matches a supplied FAQ PDF against the reviewed
 `sourceArtifacts` in the question inventory and consistent catalog declarations.
