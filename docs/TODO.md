@@ -1303,16 +1303,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           evidence-preserving leads, marking SymbioBomb as already
           reviewed rather than a new gap. The scan changes no object
           identities, source values, or delivery relationships.
-        - [ ] Review the nine new source-domain clause leads:
-          Chest Mine, Sepsitor Plus, Flammenspeer, Chain Rifle,
-          Multispectral Visor, Baggage, Escape System, Holomask and
-          Holoprojector. N5.3 p. 72 explicitly excludes Chest Mine
-          from shared Mines placement; p. 117 uses an Eclipse Template
-          on Escape System profile replacement. Retain false-positive
-          matches (e.g. chart footnote markers) explicitly rather
-          than interpreting every deployment/Marker reference as a
-          separate persistent object. This is not a complete
-          source-table inventory.
+        - [x] Review all nine additional source-domain clause leads
+          against pinned N5.3: Chest Mine, Sepsitor Plus, Flammenspeer,
+          Chain Rifle, Multispectral Visor, Baggage, Escape System,
+          Holomask and Holoprojector. Explicit source-backed decisions
+          separate carried attacks, temporary Templates, chart footnote
+          markers, reloads and Trooper representations from persistent
+          deployed objects. The read-only manifest
+          `config/validation/deployed-object-source-domain-clause-reviews.json`
+          is validated against exact curated evidence; all **10/10**
+          clause leads are accounted for (including previously reviewed
+          SymbioBomb). No new source profile, delivery edge or Unit
+          carrier is inferred.
+        - [ ] Migrate the three audit-only N5.3 PDF citations for
+          Escape System (p. 117), Holomask (p. 124) and Holoprojector
+          (p. 124) alongside the previous eleven citation gaps.
+          Refresh `rules.db` and its dependent publication
+          fingerprints together; until then the read-only audit
+          distinguishes source-verified pages from maintained citations.
+        - [ ] Expand object discovery beyond maintained definitions
+          and the current lexical scans, especially source tables,
+          scenarios and unmodeled Weapon/Equipment variants. Closed
+          queues are not an exhaustive game-object inventory.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery

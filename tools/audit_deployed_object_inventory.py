@@ -55,6 +55,27 @@ SOURCE_DOMAIN_CLAUSE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# These decisions classify *lexical leads*, not independent object profiles.
+SOURCE_DOMAIN_CLASSIFICATIONS = {
+    "weapon:chest-mine": ("weapon", "carried-attack-not-mines-deployment"),
+    "weapon:sepsitor-plus": ("weapon", "chart-footnote-not-object"),
+    "weapon:flammenspeer": ("weapon", "impact-template-not-persistent-object"),
+    "weapon:chain-rifle": ("weapon", "direct-template-not-persistent-object"),
+    "equipment:multispectral-visor": ("equipment", "marker-targeting-not-object"),
+    "equipment:baggage": ("equipment", "reload-effect-not-deployment"),
+    "equipment:escape-system": ("equipment", "trooper-transformation-template"),
+    "equipment:holomask": ("equipment", "existing-trooper-disguise"),
+    "equipment:holoprojector": ("equipment", "existing-trooper-holoechoes"),
+}
+
+# Manually verified against locally pinned N5.3 PDF. The maintained
+# definitions still cite Wiki text; these excerpts are NOT runtime citations.
+SOURCE_DOMAIN_PDF_ONLY = {
+    "equipment:escape-system": (117, "an Eclipse Special Ammo Circular Template"),
+    "equipment:holomask": (124, "During the Deployment Phase"),
+    "equipment:holoprojector": (124, "allows its bearers to deploy in Holoecho"),
+}
+
 
 def source_domain_clause_leads(
     records: dict[str, dict[str, Any]],
@@ -93,6 +114,82 @@ def source_domain_clause_leads(
                 "citations": _citation_summary(record),
             })
     return leads
+
+
+def validate_source_domain_clause_reviews(
+    manifest: dict[str, Any],
+    records: dict[str, dict[str, Any]],
+    leads: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Fail closed on lexical evidence drift; never authorize object publication."""
+    if manifest.get("formatVersion") != 1:
+        raise ValueError("Unsupported source-domain clause review version")
+    lead_ids = {row["recordId"] for row in leads}
+    seen: set[str] = set()
+    accepted: list[dict[str, Any]] = []
+    for decision in manifest["reviews"]:
+        record_id = decision["recordId"]
+        if record_id in seen:
+            raise ValueError(f"Duplicate source-domain review: {record_id}")
+        seen.add(record_id)
+        record = records.get(record_id)
+        if record is None or record_id not in lead_ids:
+            raise ValueError(f"Missing source-domain lead: {record_id}")
+        if (
+            record["kind"], decision["classification"]
+        ) != SOURCE_DOMAIN_CLASSIFICATIONS.get(record_id):
+            raise ValueError(f"Unsupported source-domain classification: {record_id}")
+        summary = record.get("summary")
+        snippet = decision.get("summaryEvidence")
+        if not isinstance(summary, str) or not isinstance(snippet, str) or (
+            not snippet or snippet not in summary
+        ):
+            raise ValueError(f"Source-domain summary drift: {record_id}")
+        details = "\n".join(
+            item for field in CLAUSE_FIELDS
+            for item in (record.get("facts") or {}).get(field, [])
+            if isinstance(item, str)
+        )
+        evidence = decision.get("factsEvidence")
+        if (
+            not isinstance(evidence, list)
+            or (not evidence and bool(details.strip()))
+            or any(
+                not isinstance(item, str) or not item or item not in details
+                for item in evidence
+            )
+        ):
+            raise ValueError(f"Source-domain facts drift: {record_id}")
+        pages = {
+            citation.get("page") for citation in record.get("citations", [])
+            if citation.get("sourceId") == "n5-core-v5.3-pdf"
+        }
+        claimed = decision.get("sourcePages")
+        pdf_only = SOURCE_DOMAIN_PDF_ONLY.get(record_id)
+        if pdf_only is None:
+            if (
+                not isinstance(claimed, list) or not claimed
+                or not set(claimed) <= pages
+                or decision.get("citationStatus") is not None
+                or decision.get("pdfExcerpt") is not None
+            ):
+                raise ValueError(f"Source-domain citation drift: {record_id}")
+        elif (
+            pages or claimed != [pdf_only[0]]
+            or decision.get("citationStatus") != "pdf-verified-manifest-only"
+            or decision.get("pdfExcerpt") != pdf_only[1]
+        ):
+            raise ValueError(f"Source-domain PDF-only provenance drift: {record_id}")
+        if (
+            not isinstance(decision.get("caveat"), str)
+            or not decision["caveat"]
+            or any(key in decision for key in (
+                "objectProfile", "knownAttributes", "sourceProfile", "delivery"
+            ))
+        ):
+            raise ValueError(f"Source-domain review is audit-only: {record_id}")
+        accepted.append(decision)
+    return accepted
 
 
 def _identity(row: dict[str, Any]) -> tuple[str, str | None, str]:
@@ -266,6 +363,7 @@ def audit_inventory(
     curated_source: Path,
     delivery_reviews: Path | None = None,
     candidate_reviews: Path | None = None,
+    source_clause_reviews: Path | None = None,
 ) -> dict[str, Any]:
     with sqlite3.connect(f"{army_db.resolve().as_uri()}?mode=ro", uri=True) as conn:
         conn.row_factory = sqlite3.Row
@@ -359,16 +457,27 @@ def audit_inventory(
         if delivery_reviews is not None else []
     )
     delivery_origins = {path["originRecordId"] for path in reviewed_paths}
+    raw_clause_leads = source_domain_clause_leads(records)
+    clause_decisions = (
+        validate_source_domain_clause_reviews(
+            json.loads(source_clause_reviews.read_text(encoding="utf-8")),
+            records, raw_clause_leads,
+        )
+        if source_clause_reviews is not None else []
+    )
+    clause_reviewed_ids = {decision["recordId"] for decision in clause_decisions}
     source_clause_leads = [
         {
             **row,
             "reviewStatus": (
                 "candidate-reviewed" if row["recordId"] in decided_ids
                 else "delivery-reviewed" if row["recordId"] in delivery_origins
+                else "source-domain-reviewed"
+                if row["recordId"] in clause_reviewed_ids
                 else "manual-review-required"
             ),
         }
-        for row in source_domain_clause_leads(records)
+        for row in raw_clause_leads
     ]
 
     return {
@@ -379,6 +488,15 @@ def audit_inventory(
             for record in records.values()
         ),
         "additionalCuratedClauseLeads": source_clause_leads,
+        "sourceClauseReviewSha256": (
+            hashlib.sha256(source_clause_reviews.read_bytes()).hexdigest()
+            if source_clause_reviews is not None else None
+        ),
+        "reviewedSourceClauseDecisions": clause_decisions,
+        "reviewedSourceClausePdfOnly": [
+            row for row in clause_decisions
+            if row["recordId"] in SOURCE_DOMAIN_PDF_ONLY
+        ],
         "unreviewedCuratedClauseLeads": [
             row for row in source_clause_leads
             if row["reviewStatus"] == "manual-review-required"
@@ -424,11 +542,18 @@ def main() -> int:
         "--candidate-reviews", type=Path,
         default=Path("config/validation/deployed-object-candidate-reviews.json"),
     )
+    parser.add_argument(
+        "--source-clause-reviews", type=Path,
+        default=Path(
+            "config/validation/deployed-object-source-domain-clause-reviews.json"
+        ),
+    )
     parser.add_argument("--json-output", type=Path)
     arguments = parser.parse_args()
     report = audit_inventory(
         arguments.army_db, arguments.curated_source,
         arguments.delivery_reviews, arguments.candidate_reviews,
+        arguments.source_clause_reviews,
     )
     result = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     if arguments.json_output is not None:

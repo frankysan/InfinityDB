@@ -1365,22 +1365,49 @@ structured Requirements, Effects, Restrictions, Clarifications and source notes
 for placement, deployment, representation and related language. The report
 includes `additionalCuratedClauseLeads` with the exact matching text and
 citations, and `unreviewedCuratedClauseLeads` separately from prior decisions.
-It finds **10 additional leads** on the pinned source: SymbioBomb is already
-classified as an assigned, non-deployed Weapon; **nine require further source
-review**. The nine are Chest Mine, Sepsitor Plus, Flammenspeer, Chain Rifle,
-Multispectral Visor, Baggage, Escape System, Holomask and Holoprojector.
+It finds **10 additional leads** on the pinned source: SymbioBomb was
+already classified as an assigned non-deployed Weapon; the other **nine are
+now reviewed**, leaving no open candidates in this clause-based queue.
+The additional decisions are separately pinned in
+`config/validation/deployed-object-source-domain-clause-reviews.json`.
+The CLI includes them by default; programmatic callers may pass its path as
+the fifth argument to `audit_inventory`. The audit exposes
+`reviewedSourceClauseDecisions`, `reviewedSourceClausePdfOnly`,
+`unreviewedCuratedClauseLeads` and the manifest SHA-256. Existing
+candidate/delivery reviews retain their separate publication boundaries.
 
-A lexical hit is not evidence of an independent object. In particular,
-N5.3 p. 72 explicitly says Chest Mine uses **neither** ordinary Mines
-placement nor triggering; p. 117 describes Escape System placing an Eclipse
-Template on replacement of an existing Trooper; and pp. 124, 162–164
-distinguish Holoprojector/HoloMask representations from independently
-deployed Weapons and Equipment. Other matches include ordinary chart
-footnotes and attack/targeting wording. These remain review leads until
-their exact source scope and intended classification are pinned, not new
-identities, attributes, or delivery links. The 104-record census is limited
-to maintained Weapon/Equipment definitions and cannot establish overall
-source-table or gameplay completeness.
+The reviewed distinctions are:
+
+- **Chest Mine** (N5.3 p. 72): two carried attack modes, not Mines
+  placement or an independent deployed profile.
+- **Sepsitor Plus** (pp. 73, 176, 187): the chart's `[*]` is a rules
+  cross-reference, not a game Marker or independent object.
+- **Flammenspeer** (p. 178) and **Chain Rifle** (p. 186): placed Impact/
+  Direct Templates resolve attacks; they are not persistent deployed
+  Weapons/Equipment.
+- **Multispectral Visor** (p. 125): Level 3 targeting of an existing
+  Camouflage Marker is not placement or general revelation.
+- **Baggage** (p. 120): recovery of uses does not recover items already
+  deployed on the table.
+- **Escape System** (p. 117): an Eclipse Template accompanies an
+  existing Trooper's profile/Model replacement.
+- **Holomask and Holoprojector** (p. 124): disguise and Holoecho
+  representations of an existing bearer, with no independent deployed
+  Weapon/Equipment profile. Holoecho's gameplay interaction with other
+  devices is reviewed separately under its State.
+
+Escape System, Holomask and Holoprojector still lack maintained N5.3 PDF
+citations. Their pages and short verified PDF excerpts remain **audit-only**
+in the clause manifest; `pdf-verified-manifest-only` does not add
+citations to `rules.db`. The validator rejects changed evidence, claimed
+profiles or delivery, and stale PDF-only exceptions when source citations
+are later added. Coordinate those three citations with the prior 11 gaps
+during a generated rules database rebuild and publication refresh.
+
+The 104-record census is limited to maintained Weapon/Equipment
+definitions; closed lexical queues cannot establish overall source-table,
+Army/Unit/loadout or gameplay completeness. No new identities, attributes
+or delivery links are inferred.
 
 The second remaining inventory question is *delivery coverage for the objects
 already identified*, independently of keyword discovery. Run:

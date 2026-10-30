@@ -16,6 +16,7 @@ from tools.audit_deployed_object_inventory import (
     source_domain_clause_leads,
     validate_candidate_reviews,
     validate_delivery_reviews,
+    validate_source_domain_clause_reviews,
 )
 
 
@@ -83,6 +84,62 @@ def test_source_domain_clause_discovery_preserves_independent_evidence() -> None
     assert leads[2]["matchedClauses"] == {
         "sourceNotes": ["The chart marker is a footnote."],
     }
+
+
+def test_source_domain_reviews_fail_closed_on_source_and_provenance_drift() -> None:
+    root = Path(__file__).resolve().parents[1]
+    curated = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    records = {
+        row["id"]: row for row in curated["records"]
+        if row["kind"] in {"weapon", "equipment"}
+    }
+    leads = source_domain_clause_leads(records)
+    manifest = json.loads(
+        (root / "config/validation/deployed-object-source-domain-clause-reviews.json")
+        .read_text(encoding="utf-8")
+    )
+    assert len(validate_source_domain_clause_reviews(manifest, records, leads)) == 9
+
+    for field, value, message in (
+        ("classification", "new-object", "classification"),
+        ("summaryEvidence", "fabricated source", "summary"),
+        ("factsEvidence", ["missing rule clause"], "facts"),
+        ("sourcePages", [999], "PDF-only provenance"),
+        ("pdfExcerpt", "mismatched PDF excerpt", "PDF-only provenance"),
+        ("objectProfile", {"ARM": 0}, "audit-only"),
+    ):
+        changed = copy.deepcopy(manifest)
+        changed["reviews"][-1][field] = value
+        with pytest.raises(ValueError, match=message):
+            validate_source_domain_clause_reviews(changed, records, leads)
+
+    cited = copy.deepcopy(manifest)
+    cited["reviews"][0]["sourcePages"] = [999]
+    with pytest.raises(ValueError, match="citation"):
+        validate_source_domain_clause_reviews(cited, records, leads)
+
+    duplicate = copy.deepcopy(manifest)
+    duplicate["reviews"].append(copy.deepcopy(duplicate["reviews"][0]))
+    with pytest.raises(ValueError, match="Duplicate"):
+        validate_source_domain_clause_reviews(duplicate, records, leads)
+
+    # The audit-only PDF exception must be migrated when source citation
+    # publication is coordinated with the generated rules database.
+    updated = copy.deepcopy(records)
+    updated["equipment:holoprojector"]["citations"].append(
+        {"sourceId": "n5-core-v5.3-pdf", "page": 124}
+    )
+    with pytest.raises(ValueError, match="PDF-only provenance"):
+        validate_source_domain_clause_reviews(manifest, updated, leads)
+
+    # A previously summary-only case gaining new detail cannot silently
+    # inherit the old review decision without a pinned exact clause.
+    updated = copy.deepcopy(records)
+    updated["weapon:chest-mine"]["facts"]["effects"] = ["A new delivery effect."]
+    with pytest.raises(ValueError, match="facts"):
+        validate_source_domain_clause_reviews(manifest, updated, leads)
 
 
 def test_inventory_preserves_source_modes_and_review_candidates(tmp_path: Path) -> None:
@@ -184,6 +241,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         root / "data/curated/rules/n5-core-v5.3.json",
         root / "config/validation/deployed-object-delivery-reviews.json",
         root / "config/validation/deployed-object-candidate-reviews.json",
+        root / "config/validation/deployed-object-source-domain-clause-reviews.json",
     )
     assert len(result["reviewedDeliveryPaths"]) == 28
     assert len(result["reviewedCandidateDecisions"]) == 12
@@ -196,8 +254,20 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
         "equipment:escape-system", "equipment:holomask", "equipment:holoprojector",
     }
     assert leads["weapon:symbiobomb"]["reviewStatus"] == "candidate-reviewed"
-    assert {row["recordId"] for row in result["unreviewedCuratedClauseLeads"]} == (
-        set(leads) - {"weapon:symbiobomb"}
+    assert result["unreviewedCuratedClauseLeads"] == []
+    assert len(result["reviewedSourceClauseDecisions"]) == 9
+    assert len(result["reviewedSourceClausePdfOnly"]) == 3
+    assert len(result["sourceClauseReviewSha256"]) == 64
+    assert {
+        entry["recordId"] for entry in result["reviewedSourceClausePdfOnly"]
+    } == {
+        "equipment:escape-system", "equipment:holomask",
+        "equipment:holoprojector",
+    }
+    assert all(
+        row["reviewStatus"] == "source-domain-reviewed"
+        for row in leads.values()
+        if row["recordId"] != "weapon:symbiobomb"
     )
     assert "placement or triggering rules" in (
         leads["weapon:chest-mine"]["matchedClauses"]["summary"][0]
