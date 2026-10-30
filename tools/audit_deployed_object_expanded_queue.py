@@ -169,10 +169,20 @@ def validate_reviews(
             ):
                 raise ValueError(f"Expanded source citation drift: {record_id}")
         elif (
-            pages
-            or claimed != [pdf_only[0]]
-            or review.get("citationStatus") != "pdf-verified-manifest-only"
-            or review.get("pdfExcerpt") != pdf_only[1]
+            claimed != [pdf_only[0]]
+            or (
+                not pages and (
+                    review.get("citationStatus") != "pdf-verified-manifest-only"
+                    or review.get("pdfExcerpt") != pdf_only[1]
+                )
+            )
+            or (
+                bool(pages) and (
+                    pages != {pdf_only[0]}
+                    or review.get("citationStatus") is not None
+                    or review.get("pdfExcerpt") is not None
+                )
+            )
         ):
             raise ValueError(f"Expanded PDF-only provenance drift: {record_id}")
         if not review.get("caveat") or review.get("objectProfile") is not None:
@@ -199,7 +209,7 @@ def audit_expanded_candidates(curated_source: Path, reviews_source: Path) -> dic
     ]
     reviewed_pdf_only = [
         decision for decision in reviews
-        if decision["recordId"] in PDF_ONLY_REVIEWS
+        if decision.get("citationStatus") == "pdf-verified-manifest-only"
     ]
     return {
         "scope": "expanded-lexical-discovery-not-object-completeness",

@@ -16,6 +16,10 @@ from tools.audit_deployed_object_citation_migrations import (
     build_citation_migration_plan,
     main,
 )
+from tools.stage_deployed_object_citation_migration import (
+    prepare_migrated_inputs,
+    stage_citation_migration,
+)
 
 
 def _inputs() -> tuple[dict, dict[str, dict]]:
@@ -28,27 +32,47 @@ def _inputs() -> tuple[dict, dict[str, dict]]:
     )
 
 
+def _pending_inputs() -> tuple[dict, dict[str, dict]]:
+    """Reconstruct the reviewed pending state for negative tests after promotion."""
+    curated, manifests = _inputs()
+    current = build_citation_migration_plan(curated, manifests)
+    for entry in current["migrated"]:
+        record = next(
+            item for item in curated["records"] if item["id"] == entry["recordId"]
+        )
+        record["citations"].remove(entry["proposedCitation"])
+        review = next(
+            item for item in manifests[entry["reviewManifest"]]["reviews"]
+            if item["recordId"] == entry["recordId"]
+        )
+        review["citationStatus"] = "pdf-verified-manifest-only"
+        review["pdfExcerpt"] = entry["pdfExcerpt"]
+    assert build_citation_migration_plan(curated, manifests)["pendingCount"] == 14
+    return curated, manifests
+
+
 def test_pinned_citation_migration_preflight_preserves_provenance() -> None:
     report = audit_citations()
     assert report["scope"] == "citation-preflight-only-no-source-or-runtime-modification"
     assert report["source"] == "n5-core-v5.3-pdf"
-    assert report["pendingCount"] == 14
+    assert (report["pendingCount"], report["migratedCount"]) in ((14, 0), (0, 14))
     assert report["countsByManifest"] == {
         "non-catalog": 6, "expanded": 5, "source-domain": 3,
     }
     assert len(report["curatedSourceSha256"]) == 64
     assert set(report["reviewManifestSha256"]) == set(MANIFEST_PATHS)
     assert all(len(digest) == 64 for digest in report["reviewManifestSha256"].values())
-    assert len({row["recordId"] for row in report["pending"]}) == 14
+    all_reviews = report["pending"] + report["migrated"]
+    assert len({row["recordId"] for row in all_reviews}) == 14
     assert all(
         row["proposedCitation"]["sourceId"] == "n5-core-v5.3-pdf"
         and isinstance(row["proposedCitation"]["page"], int)
         and row["pdfExcerpt"]
-        for row in report["pending"]
+        for row in all_reviews
     )
     assert {
         row["recordId"]: row["proposedCitation"]["page"]
-        for row in report["pending"]
+        for row in all_reviews
     } == {
         "skill:frenzy": 93,
         "state:possessed": 169,
@@ -66,13 +90,13 @@ def test_pinned_citation_migration_preflight_preserves_provenance() -> None:
         "equipment:holoprojector": 124,
     }
     assert not any(
-        key in row for row in report["pending"]
+        key in row for row in all_reviews
         for key in ("objectProfile", "delivery", "sourceProfile", "unitCarriers")
     )
 
 
 def test_preflight_rejects_lost_review_and_stale_or_published_citation() -> None:
-    curated, manifests = _inputs()
+    curated, manifests = _pending_inputs()
     assert build_citation_migration_plan(curated, manifests)["pendingCount"] == 14
     missing = copy.deepcopy(manifests)
     missing["expanded"]["reviews"] = [
@@ -117,12 +141,81 @@ def test_preflight_does_not_write_sources(
     monkeypatch.setattr(sys, "argv", ["audit_deployed_object_citation_migrations"])
     assert main() == 0
     output = capsys.readouterr().out
-    assert "Audit-only citations pending migration: 14" in output
+    current = build_citation_migration_plan(*_inputs())
+    assert f"Audit-only citations pending migration: {current['pendingCount']}" in output
+    assert f"Verified maintained citations migrated: {current['migratedCount']}" in output
     assert "No curated sources, generated databases" in output
     assert CURATED.read_bytes() == original
 
     # A copy of the curated document is accepted as input; it is never edited.
     copied = tmp_path / "curated.json"
     copied.write_bytes(original)
-    assert audit_citations(copied)["pendingCount"] == 14
+    assert audit_citations(copied)["pendingCount"] == current["pendingCount"]
     assert copied.read_bytes() == original
+
+
+def test_migration_staging_is_complete_and_does_not_touch_inputs(tmp_path: Path) -> None:
+    original_curated = CURATED.read_bytes()
+    original_manifests = {name: path.read_bytes() for name, path in MANIFEST_PATHS.items()}
+    original_rules = (CURATED.parents[2] / "generated/rules.db").read_bytes()
+    original_publication = (
+        CURATED.parents[2] / "generated/deployed-objects.json"
+    ).read_bytes()
+
+    if audit_citations()["pendingCount"] == 0:
+        pytest.skip("Migration already promoted; staging covered before promotion")
+    output = tmp_path / "stage"
+    report = stage_citation_migration(output)
+    assert report["migratedCount"] == 14
+    assert report["reviewedObjects"] == 17
+    assert len(report["stagedPaths"]) == 6
+    staged = json.loads(
+        (output / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    manifests = {
+        name: json.loads((output / "config/validation" / path.name).read_text(
+            encoding="utf-8",
+        ))
+        for name, path in MANIFEST_PATHS.items()
+    }
+    after = build_citation_migration_plan(staged, manifests)
+    assert after["pendingCount"] == 0
+    assert after["migratedCount"] == 14
+    assert len((output / "data/generated/rules.db").read_bytes()) > 0
+    publication = json.loads(
+        (output / "data/generated/deployed-objects.json").read_text(encoding="utf-8")
+    )
+    assert len(publication["objects"]) == 17
+    assert publication["sourceSnapshot"]["rulesDatabaseSha256"] == (
+        report["stagedSha256"]["rulesDatabase"]
+    )
+    assert (output / "migration-report.json").is_file()
+    assert original_curated == CURATED.read_bytes()
+    assert original_rules == (CURATED.parents[2] / "generated/rules.db").read_bytes()
+    assert original_publication == (
+        CURATED.parents[2] / "generated/deployed-objects.json"
+    ).read_bytes()
+    assert original_manifests == {
+        name: path.read_bytes() for name, path in MANIFEST_PATHS.items()
+    }
+    with pytest.raises(FileExistsError):
+        stage_citation_migration(output)
+
+
+def test_migration_staging_rejects_partial_and_duplicate_inputs() -> None:
+    curated, manifests = _pending_inputs()
+    plan = build_citation_migration_plan(curated, manifests)
+    migrated, manifest_changes = prepare_migrated_inputs(
+        copy.deepcopy(curated), copy.deepcopy(manifests), plan,
+    )
+    with pytest.raises(ValueError, match="already cites"):
+        prepare_migrated_inputs(migrated, manifest_changes, plan)
+    # Neither a source-only citation nor a manifest-only update may be
+    # mistaken for a complete coordinated migration.
+    partial = copy.deepcopy(curated)
+    next(record for record in partial["records"] if record["id"] == "skill:frenzy")[
+        "citations"
+    ].append({"sourceId": "n5-core-v5.3-pdf", "page": 93})
+    with pytest.raises(ValueError, match="PDF-only provenance"):
+        build_citation_migration_plan(partial, manifests)
+

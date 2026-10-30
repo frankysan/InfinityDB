@@ -1654,19 +1654,59 @@ PyMuPDF and is optional in CI. The standard preflight requires only curated
 JSON, so it also works without ignored source archives. A page-only
 `proposedCitation` deliberately avoids inventing an unchecked section label.
 
-The preflight **does not modify any file**. To complete publication, update
-the 14 maintained citations *and* retire the corresponding PDF-only entries
-from the three manifests and their audit exception maps in one coordinated
-source change. Rebuild tracked `rules.db` against the exact pinned curated
-source, regenerate `data/generated/deployed-objects.json` against the matching
-Army/rules database pair, and run their publication checks and affected
-regressions. The preflight expects all 14 migrations to remain pending; remove
-or replace it with a checked post-migration contract as part of that
-coordinated change. Do not ship a source-only citation edit that leaves
-`rules.db` or its derived fingerprints stale. No newly discovered
-object identity, delivery edge or Unit carrier is implied by these citations.
-`tests/test_deployed_object_citation_migrations.py` covers the inventory,
-fail-closed drift and optional pinned-PDF text check.
+The preflight **does not modify any file**. A separate staging command
+builds all six required replacements without touching tracked inputs:
+
+```powershell
+.venv\Scripts\python.exe -m tools.stage_deployed_object_citation_migration --output-dir local/citation-migration-n53 --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
+```
+
+The exclusive staging directory contains a citation-only edit to the
+maintained N5.3 curated JSON, the three reviewed manifests with only temporary
+`citationStatus` and `pdfExcerpt` fields removed, a freshly built
+`data/generated/rules.db`, the matching fingerprinted
+`data/generated/deployed-objects.json`, and `migration-report.json`.
+All 14 migrated records are validated through their post-migration
+review contracts before staging, and the object publication must retain
+17 reviewed identities. The source/manifest changes preserve existing
+formatting. The stage command refuses to overwrite an existing directory,
+write inside a source/generated input directory, or run on a partially
+migrated checkout. It uses the existing pinned Army database but does not
+rebuild it. Staging tests compare the original curated files, both tracked
+generated artifacts and all three manifests byte-for-byte before/after.
+
+**Promotion is a deliberate separate step.** Inspect the staged files and
+their report. From the repository root, copy the six listed paths into the
+working tree as one review batch:
+
+```powershell
+$stage = "local/citation-migration-n53"
+$paths = @(
+    "data/curated/rules/n5-core-v5.3.json"
+    "config/validation/deployed-object-non-catalog-reviews.json"
+    "config/validation/deployed-object-expanded-reviews.json"
+    "config/validation/deployed-object-source-domain-clause-reviews.json"
+    "data/generated/rules.db"
+    "data/generated/deployed-objects.json"
+)
+foreach ($path in $paths) {
+    Copy-Item -LiteralPath (Join-Path $stage $path) -Destination $path
+}
+.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations --json
+.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+```
+
+After promotion the preflight reports **0 pending / 14 migrated**; it rejects
+partial migrations. The audit exception maps remain as strict page/excerpt
+transition pins, but the maintained citations supersede their PDF-only
+manifest metadata. Run the focused audit tests and the normal project
+checks before committing the six data files and code together.
+Do not ship only the curated text and leave `rules.db` or publication
+fingerprints stale. No new object identity, delivery edge or Unit carrier
+is implied by the citation additions.
+`tests/test_deployed_object_citation_migrations.py` covers both
+review states, staged artifact consistency, fail-closed drift and the
+optional pinned-PDF text check.
 
 ### Deployed-object release publication
 

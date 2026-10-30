@@ -1329,12 +1329,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
             English N5.3 PDF and records its SHA-256. Missing,
             stale or prematurely published citations fail closed;
             there is no source/database mutation.
-          - [ ] In a build-capable checkout, add all 14 maintained
-            citations and retire the related PDF-only exceptions
-            together; regenerate and verify `rules.db` and
-            `deployed-objects.json` from the same pinned sources.
-            Update or retire the pending-only preflight contract
-            after successful coordinated migration.
+          - [x] Implement and test an **isolated, coordinated migration
+            staging build**. `tools.stage_deployed_object_citation_migration`
+            preserves existing curated/manifest formatting, stages
+            exactly 14 maintained citations and removes the 14
+            temporary PDF-only manifest fields, then builds a matching
+            `rules.db` and fingerprinted `deployed-objects.json`.
+            Review validators and the preflight now accept either the
+            complete pre- or post-migration state, but reject partial
+            migration and mismatched evidence. Focused staging tests
+            verify generated data without altering tracked inputs.
+          - [ ] Inspect and promote the **six staged files together**
+            in a build-capable checkout, following `docs/testing.md`.
+            Require the post-migration preflight (0 pending/14
+            migrated), publication `--check`, affected tests and
+            normal project/CI checks before committing. Do not
+            deploy a partial or unvalidated promotion.
         - [ ] Expand object discovery beyond maintained definitions
           and the current lexical scans, especially source tables,
           scenarios and unmodeled Weapon/Equipment variants. Closed

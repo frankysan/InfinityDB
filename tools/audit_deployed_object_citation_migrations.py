@@ -65,11 +65,9 @@ def build_citation_migration_plan(
     )
     seen: set[str] = set()
     pending: list[dict[str, Any]] = []
+    migrated: list[dict[str, Any]] = []
     for manifest_name, pinned, reviews in sources:
-        found = {
-            row["recordId"] for row in reviews
-            if row.get("citationStatus") == STATUS
-        }
+        found = {row["recordId"] for row in reviews if row["recordId"] in pinned}
         if found != set(pinned):
             raise ValueError(f"PDF-only review inventory changed: {manifest_name}")
         for decision in reviews:
@@ -83,33 +81,48 @@ def build_citation_migration_plan(
             page, excerpt = pinned[record_id]
             if (
                 decision["sourcePages"] != [page]
-                or decision.get("pdfExcerpt") != excerpt
                 or record.get("composition", {}).get("role") != "definition"
             ):
                 raise ValueError(f"Stale PDF-only source evidence: {record_id}")
-            if any(
-                item.get("sourceId") == SOURCE_PDF
-                for item in record.get("citations", [])
-            ):
-                raise ValueError(f"Maintained citation already exists: {record_id}")
-            pending.append({
+            entry = {
                 "recordId": record_id,
                 "kind": record["kind"],
                 "name": record["name"],
                 "reviewManifest": manifest_name,
                 "pdfExcerpt": excerpt,
                 "proposedCitation": {"sourceId": SOURCE_PDF, "page": page},
-            })
-    if len(pending) != sum(len(pinned) for _, pinned, _ in sources):
-        raise ValueError("Incomplete cross-manifest citation migration")
+            }
+            if decision.get("citationStatus") == STATUS:
+                if (
+                    decision.get("pdfExcerpt") != excerpt
+                    or any(
+                        item.get("sourceId") == SOURCE_PDF
+                        for item in record.get("citations", [])
+                    )
+                ):
+                    raise ValueError(f"Stale pending migration: {record_id}")
+                pending.append(entry)
+            else:
+                if (
+                    "citationStatus" in decision or "pdfExcerpt" in decision
+                    or [
+                        item for item in record.get("citations", [])
+                        if item.get("sourceId") == SOURCE_PDF
+                    ] != [entry["proposedCitation"]]
+                ):
+                    raise ValueError(f"Stale migrated citation: {record_id}")
+                migrated.append(entry)
+    expected = sum(len(pinned) for _, pinned, _ in sources)
+    if len(pending) + len(migrated) != expected or (pending and migrated):
+        raise ValueError("Incomplete or partial cross-manifest citation migration")
     return {
         "scope": "citation-preflight-only-no-source-or-runtime-modification",
         "source": SOURCE_PDF,
         "pendingCount": len(pending),
-        "countsByManifest": {
-            name: len(pinned) for name, pinned, _ in sources
-        },
+        "migratedCount": len(migrated),
+        "countsByManifest": {name: len(pinned) for name, pinned, _ in sources},
         "pending": sorted(pending, key=lambda row: row["recordId"]),
+        "migrated": sorted(migrated, key=lambda row: row["recordId"]),
     }
 
 
@@ -122,7 +135,7 @@ def verify_pdf_excerpts(plan: dict[str, Any], pdf_path: Path) -> str:
     source = pdf_path.read_bytes()
     with pymupdf.open(stream=source, filetype="pdf") as document:
         page_text: dict[int, str] = {}
-        for row in plan["pending"]:
+        for row in plan["pending"] + plan["migrated"]:
             page = row["proposedCitation"]["page"]
             if page > len(document) or page <= 0:
                 raise ValueError(f"Source PDF lacks page {page}")
@@ -175,6 +188,7 @@ def main() -> int:
         print(json.dumps(plan, ensure_ascii=False, indent=2))
     else:
         print(f"Audit-only citations pending migration: {plan['pendingCount']}")
+        print(f"Verified maintained citations migrated: {plan['migratedCount']}")
         for name, count in plan["countsByManifest"].items():
             print(f"  {name}: {count}")
         for row in plan["pending"]:

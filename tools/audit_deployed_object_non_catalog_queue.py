@@ -176,10 +176,20 @@ def validate_reviews(
             ):
                 raise ValueError(f"Missing exact N5.3 non-catalog citation: {record_id}")
         elif (
-            pages
-            or decision["sourcePages"] != [pdf_only[0]]
-            or decision.get("citationStatus") != "pdf-verified-manifest-only"
-            or decision.get("pdfExcerpt") != pdf_only[1]
+            decision["sourcePages"] != [pdf_only[0]]
+            or (
+                not pages and (
+                    decision.get("citationStatus") != "pdf-verified-manifest-only"
+                    or decision.get("pdfExcerpt") != pdf_only[1]
+                )
+            )
+            or (
+                bool(pages) and (
+                    pages != {pdf_only[0]}
+                    or decision.get("citationStatus") is not None
+                    or decision.get("pdfExcerpt") is not None
+                )
+            )
         ):
             raise ValueError(f"Missing reviewed PDF-only provenance: {record_id}")
         if not decision.get("caveat") or decision.get("objectProfile") is not None:
@@ -210,7 +220,7 @@ def audit_non_catalog_candidates(curated_source: Path, reviews_source: Path) -> 
     ]
     reviewed_pdf_only = [
         decision for decision in reviews
-        if decision["recordId"] in PDF_ONLY_REVIEWS
+        if decision.get("citationStatus") == "pdf-verified-manifest-only"
     ]
     return {
         "scope": "non-catalog-keyword-discovery-not-object-inventory",

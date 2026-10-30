@@ -175,9 +175,20 @@ def validate_source_domain_clause_reviews(
             ):
                 raise ValueError(f"Source-domain citation drift: {record_id}")
         elif (
-            pages or claimed != [pdf_only[0]]
-            or decision.get("citationStatus") != "pdf-verified-manifest-only"
-            or decision.get("pdfExcerpt") != pdf_only[1]
+            claimed != [pdf_only[0]]
+            or (
+                not pages and (
+                    decision.get("citationStatus") != "pdf-verified-manifest-only"
+                    or decision.get("pdfExcerpt") != pdf_only[1]
+                )
+            )
+            or (
+                bool(pages) and (
+                    pages != {pdf_only[0]}
+                    or decision.get("citationStatus") is not None
+                    or decision.get("pdfExcerpt") is not None
+                )
+            )
         ):
             raise ValueError(f"Source-domain PDF-only provenance drift: {record_id}")
         if (
@@ -495,7 +506,7 @@ def audit_inventory(
         "reviewedSourceClauseDecisions": clause_decisions,
         "reviewedSourceClausePdfOnly": [
             row for row in clause_decisions
-            if row["recordId"] in SOURCE_DOMAIN_PDF_ONLY
+            if row.get("citationStatus") == "pdf-verified-manifest-only"
         ],
         "unreviewedCuratedClauseLeads": [
             row for row in source_clause_leads
