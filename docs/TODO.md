@@ -1439,13 +1439,29 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               The pinned PDF check verifies the source rows using
               page coordinates; no Unit attributes, scenario
               overrides or deployed-object identities were added.
-            - [ ] Decide whether game-wide Retreat! thresholds and
-              generic table-size recommendations need an additional
-              maintained general-reference display model. Do not
-              assign calculated Retreat! status to a static Unit,
-              or treat advisory table dimensions as scenario rules.
+            - [x] Reconcile N5.3 **Game Modes** (p. 6) against
+              independent Retreat!/table recommendations (pp. 146–147).
+              All six source rows now have pinned mode names, Army Points,
+              SWC allowances (3/4/5/6/7/8), table dimensions,
+              deployment-zone dimensions, and recommended durations
+              (40/50/60/90/100/120 minutes). The new read-only
+              cross-table audit checks row order, exact PDF cell
+              positions and consistency with the separate source
+              manifests. Game Modes are recommendations, not
+              mandatory scenario or Unit Profile rules.
+            - [x] Decide the immediate general-reference boundary:
+              retain **source-reviewed manifest-only data** for Game
+              Modes, Retreat! thresholds and generic table guidance
+              until a unified general-reference presentation contract
+              is designed. Do not duplicate these rows into a
+              scenario, Unit, Army, or deployed-object identity, or
+              treat advisory setup dimensions as scenario rules.
+            - [ ] Design a general game-setup reference presentation
+              if required by the 1.0 player-useful-data inventory;
+              model the source rows once, identify authority/overrides,
+              and keep session/Retreat! computation outside static data.
             - [ ] Continue source-table discovery beyond the terrain,
-              scenario, Retreat!, Weapon Chart and p. 74 reviews;
+              scenario, Game Modes, Retreat!, Weapon Chart and p. 74 reviews;
               verify additional game-element categories against
               direct rules before expanding a canonical inventory.
         - [ ] Review remaining source-only profiles and curated-text

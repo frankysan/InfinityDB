@@ -1624,6 +1624,45 @@ delivery path is changed.
 `tests/test_deployed_object_expanded_queue.py` checks the discovery and
 fail-closed review boundaries.
 
+### N5.3 Game Modes versus general setup/reference tables
+
+The **Game Modes chart** (printed English N5.3 p. 6) is a separate
+recommended-play reference, not an authoritative scenario forces/setup
+contract. Its six named modes provide Army Points, baseline SWC,
+recommended table size, Deployment Zone dimensions, and nominal duration.
+The independent N5.3 Retreat! and advisory table-size sources remain on
+pp. 146–147. Audit the same Army Points keys across both source tables:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_game_mode_source_table
+.venv\Scripts\python.exe -m tools.audit_game_mode_source_table --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+```
+
+The read-only manifest
+`config/validation/game-mode-source-table.json` pins six exact rows:
+Beginner (150 / 3 SWC / 40 min), Raid (200 / 4 / 50),
+Intermediate (250 / 5 / 60), Standard (300 / 6 / 90),
+Magnum and Games with Reinforcements (350 / 7 / 100),
+and Large-Scale (400 / 8 / 120). Table sizes are 24×32,
+32×48 or 48×48 inches; Deployment Zones are 8×24, 8×32
+or 12×48 inches, respectively. The six table dimensions must
+match the independently maintained p. 147 recommendations.
+Source-review semantics preserve baseline SWC rather than conflating
+profile-specific bonuses, and the indicated game duration is in
+minutes, not a limit of Game Rounds.
+
+The audit rejects changed values, schemas, sources, row order,
+Army Points/SWC alignment, and divergence from the separate
+Retreat!/table-size manifest. Optional local-PDF verification checks
+the printed p. 6 headings and source words, uses positional cell
+alignment for Army Points/SWC/minutes and the table/Deployment
+dimensions, and reports its PDF SHA-256. The ignored PDF is not
+required by CI. No runtime entities or scenario overrides are added;
+the generic recommended setup is deliberately kept in reviewed
+source inventories pending a unified player-facing reference
+design. `tests/test_game_mode_source_table.py` includes source and
+failure-path coverage.
+
 ### Independent Retreat! and generic game-setup source tables
 
 N5.3 prints a **Retreat! threshold table** on p. 146 and separate
