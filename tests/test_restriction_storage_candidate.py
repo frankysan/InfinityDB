@@ -57,7 +57,7 @@ def test_english_core_pdf_pin_survives_curated_export(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize(
     "defect", (None, "rules", "source-url", "source-hash", "missing", "extra", "schema", "version",
-               "previous-pin"),
+               "previous-pin", "index"),
 )
 def test_source_pin_guard_rejects_every_unrelated_database_change(
     tmp_path: Path, defect: str | None,
@@ -95,11 +95,59 @@ def test_source_pin_guard_rejects_every_unrelated_database_change(
             new.execute("ALTER TABLE records ADD COLUMN unexpected TEXT")
         elif defect == "version":
             new.execute("PRAGMA user_version=8")
+        elif defect == "index":
+            new.execute("CREATE INDEX unreviewed ON records(id)")
     if defect is None:
         _check_source_pin_delta(old_path, new_path, "pdf", digest, {"core", "hacking"})
     else:
         with pytest.raises(ValueError, match="Source pin refresh"):
             _check_source_pin_delta(old_path, new_path, "pdf", digest, {"core", "hacking"})
+
+
+def test_multiple_pdf_pin_guard_preserves_existing_pins(tmp_path: Path) -> None:
+    from tools.restrictions_v9_release import _check_source_pins_delta
+
+    old_path, new_path = tmp_path / "old.db", tmp_path / "new.db"
+    with sqlite3.connect(old_path) as old, sqlite3.connect(new_path) as new:
+        old.execute("CREATE TABLE sources(collection_id TEXT, id TEXT, sha256 TEXT)")
+        old.executemany("INSERT INTO sources VALUES (?, ?, ?)", (
+            ("core", "core-pdf", "a" * 64), ("core", "faq-en", None),
+            ("faq", "faq-es", None),
+        ))
+        old.commit()
+        old.backup(new)
+        new.execute("UPDATE sources SET sha256 = ? WHERE id = 'faq-en'", ("b" * 64,))
+        new.execute("UPDATE sources SET sha256 = ? WHERE id = 'faq-es'", ("c" * 64,))
+    pins = {("core", "faq-en"): "b" * 64, ("faq", "faq-es"): "c" * 64}
+    _check_source_pins_delta(old_path, new_path, pins)
+    with sqlite3.connect(new_path) as new:
+        new.execute("UPDATE sources SET sha256 = ? WHERE id = 'core-pdf'", ("d" * 64,))
+    with pytest.raises(ValueError, match="unrelated rows"):
+        _check_source_pins_delta(old_path, new_path, pins)
+
+
+def test_all_selected_pdf_sources_have_consistent_pins_and_exports(tmp_path: Path) -> None:
+    documents = load_curated_directory(ROOT / "data/curated/rules")
+    pdfs = [(doc["collection"]["id"], source)
+            for _, doc in documents for source in doc["sources"] if source["kind"] == "pdf"]
+    assert len(pdfs) == 12
+    source_pins: dict[str, str] = {}
+    for _, source in pdfs:
+        assert len(source["sha256"]) == 64
+        assert source_pins.setdefault(source["id"], source["sha256"]) == source["sha256"]
+        path = ROOT / source["localPath"]
+        if path.exists():
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"]
+    assert len(source_pins) == 6
+    output = tmp_path / "rules.db"
+    export_rules_database(documents, output)
+    with sqlite3.connect(output) as db:
+        actual = db.execute(
+            "SELECT collection_id, id, sha256 FROM sources WHERE kind='pdf' "
+            "ORDER BY collection_id,id",
+        ).fetchall()
+    assert actual == sorted((collection, source["id"], source["sha256"])
+                            for collection, source in pdfs)
 
 
 def source_data() -> tuple[dict, dict]:

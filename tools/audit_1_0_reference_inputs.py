@@ -24,9 +24,10 @@ except ModuleNotFoundError:  # Executing this file directly from the tools direc
     from audit_enrichment_coverage import audit_coverage
 
 FORMAT = "InfinityDB 1.0 reference source evidence"
-VERSION = 3
+VERSION = 4
 ROOT = Path(__file__).resolve().parents[1]
 REINFORCEMENTS_INVENTORY = ROOT / "config/validation/reinforcements-source-inputs.json"
+FAQ_INVENTORY = ROOT / "config/validation/n5-faq-v0.1-question-inventory.json"
 REVISION_ID = re.compile(r'"wgRevisionId":(\d+)')
 PAGE_NAME = re.compile(r'"wgPageName":"([^"\\]*(?:\\.[^"\\]*)*)"')
 HISTORY_PATH = re.compile(r"_history/oldid/(\d+)\.html")
@@ -476,6 +477,49 @@ def chart_name_evidence(chart_html: str, names: list[str]) -> list[dict[str, str
     return items
 
 
+def faq_pdf_pin_evidence(
+    catalog: list[dict[str, Any]], actual_hash: str, inventory_path: Path = FAQ_INVENTORY,
+) -> dict[str, Any]:
+    """Match supplied bytes to reviewed FAQ identities without inferring applicability."""
+    try:
+        inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise SourceEvidenceError("Cannot read FAQ source inventory") from exc
+    artifacts = inventory.get("sourceArtifacts") if isinstance(inventory, dict) else None
+    if not isinstance(artifacts, dict) or not artifacts:
+        raise SourceEvidenceError("FAQ inventory requires reviewed source artifacts")
+    reviewed = {}
+    for source_id, artifact in artifacts.items():
+        digest = artifact.get("sha256") if isinstance(artifact, dict) else None
+        if (not isinstance(source_id, str) or not isinstance(digest, str)
+                or re.fullmatch(r"[0-9a-fA-F]{64}", digest) is None):
+            raise SourceEvidenceError("Invalid FAQ source fingerprint")
+        reviewed[source_id] = digest.lower()
+    declared: dict[str, str | None] = {}
+    for source in catalog:
+        source_id = source["id"]
+        if source_id not in reviewed:
+            continue
+        digest = source["sha256"]
+        if digest is not None:
+            if not isinstance(digest, str) or digest.lower() != reviewed[source_id]:
+                raise SourceEvidenceError(
+                    f"FAQ source pin differs from reviewed bytes: {source_id}"
+                )
+            digest = digest.lower()
+        if source_id in declared and declared[source_id] != digest:
+            raise SourceEvidenceError(f"Conflicting FAQ source declarations: {source_id}")
+        declared[source_id] = digest
+    matches = sorted(source_id for source_id, digest in declared.items() if digest == actual_hash)
+    status = (
+        "declared-hash-match" if matches else "not-in-rules-source-catalog" if not declared
+        else "version-declared-hash-unpinned" if None in declared.values()
+        else "declared-hash-mismatch"
+    )
+    return {"status": status, "matchedSourceIds": matches,
+            "publicationScope": "not-verified-by-byte-check"}
+
+
 def build_report(
     army_database: Path,
     rules_database: Path,
@@ -486,14 +530,16 @@ def build_report(
     wiki_history_es: Path | None = None,
     wiki_snapshot_es: Path | None = None,
     reinforcements_inventory: Path = REINFORCEMENTS_INVENTORY,
+    faq_inventory: Path = FAQ_INVENTORY,
 ) -> dict[str, Any]:
     for path in (army_database, rules_database, wiki_history, core_pdf, faq_pdf):
         if not path.is_file():
             raise SourceEvidenceError(f"Input unavailable: {path}")
     with sqlite3.connect(rules_database) as connection:
-        pdf_pins = [dict(zip(("title", "version", "sha256"), row, strict=True))
+        pdf_pins: list[dict[str, Any]] = [
+            dict(zip(("id", "title", "version", "sha256"), row, strict=True))
                     for row in connection.execute(
-                        "SELECT title, version, sha256 FROM sources WHERE kind = 'pdf'"
+                        "SELECT id, title, version, sha256 FROM sources WHERE kind = 'pdf'"
                     )]
         records = [
             {"id": row[0], "url": row[1]}
@@ -598,7 +644,6 @@ def build_report(
     faq_hash = _sha256(faq_pdf)
     core_sources = [pin for pin in pdf_pins
                     if pin["title"] == "N5 Core Rules" and pin["version"] == "5.3"]
-    faq_sources = [pin for pin in pdf_pins if "faq" in pin["title"].casefold()]
     core_hashes = {pin["sha256"].lower() if pin["sha256"] else None for pin in core_sources}
     if not core_sources or len(core_hashes) != 1:
         raise SourceEvidenceError("Expected consistent N5 Core Rules v5.3 source pins")
@@ -608,7 +653,7 @@ def build_report(
         else "declared-hash-mismatch" if declared_core_hash
         else "version-declared-hash-unpinned"
     )
-    faq_status = "cataloged-needs-revision-review" if faq_sources else "not-in-rules-source-catalog"
+    faq_evidence = faq_pdf_pin_evidence(pdf_pins, faq_hash, faq_inventory)
     exact = sum(record["status"] == "exact-revision-payload" for record in revisions)
     chart_names = sum(row["evidence"] == "name-in-chart-text" for row in weapons)
     return {
@@ -623,7 +668,9 @@ def build_report(
                 _sha256(wiki_history_es) if wiki_history_es is not None else None
             ),
             "coreRulesPdfPinStatus": core_status,
-            "faqPdfPinStatus": faq_status,
+            "faqPdfPinStatus": faq_evidence["status"],
+            "faqPdfMatchedSourceIds": faq_evidence["matchedSourceIds"],
+            "faqPublicationScope": faq_evidence["publicationScope"],
             "wikiHistoryPinStatus": "separate-historical-revision-evidence",
             "wikiSnapshotPinStatus": (
                 "verified" if snapshot_evidence_by_language else "not-checked"
@@ -721,10 +768,10 @@ def report_markdown(report: dict[str, Any]) -> str:
         "",
         f"- Core N5 v5.3 PDF: `{artifacts['coreRulesPdfSha256']}`",
         f"  (pin status: {artifacts['coreRulesPdfPinStatus']}).",
-        f"- FAQ v0.1 PDF: `{artifacts['faqPdfSha256']}` "
-        + ("(cataloged; publication scope/revision still requires review)."
-           if artifacts["faqPdfPinStatus"] == "cataloged-needs-revision-review"
-           else "(not yet independently cataloged)."),
+        f"- Supplied FAQ PDF: `{artifacts['faqPdfSha256']}`",
+        f"  (pin status: {artifacts['faqPdfPinStatus']}; matched sources: "
+        + (", ".join(artifacts["faqPdfMatchedSourceIds"]) or "none") + ").",
+        "  Byte identity does not establish publication dates or gameplay applicability.",
         f"- English Wiki history ZIP: `{artifacts['wikiHistorySha256']}`",
         "  (separate historical-revision evidence; not interchangeable with the curated snapshot).",
         f"- Spanish Wiki history ZIP: `{artifacts['wikiSpanishHistorySha256']}`"
@@ -774,6 +821,7 @@ def main() -> int:
     parser.add_argument("--core-pdf", type=Path, required=True)
     parser.add_argument("--faq-pdf", type=Path, required=True)
     parser.add_argument("--reinforcements-inventory", type=Path, default=REINFORCEMENTS_INVENTORY)
+    parser.add_argument("--faq-inventory", type=Path, default=FAQ_INVENTORY)
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     args = parser.parse_args()
@@ -782,6 +830,7 @@ def main() -> int:
             args.army_db, args.rules_db, args.wiki_history, args.core_pdf, args.faq_pdf,
             args.wiki_snapshot, args.wiki_history_es, args.wiki_snapshot_es,
             args.reinforcements_inventory,
+            args.faq_inventory,
         )
     except (SourceEvidenceError, sqlite3.DatabaseError) as exc:
         parser.error(str(exc))

@@ -16,7 +16,7 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-from infinity_db.curated import load_curated_directory
+from infinity_db.curated import discover_curated_documents, load_curated_directory
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from tools.audit_restrictions_source_chart import verify_pinned_pdf
@@ -409,6 +409,15 @@ def _check_source_pin_delta(
     previous: Path, proposed: Path, source_id: str, digest: str,
     expected_collections: set[str],
 ) -> None:
+    """Compatibility wrapper for the original single-source guarded refresh."""
+    _check_source_pins_delta(previous, proposed, {
+        (collection, source_id): digest for collection in expected_collections
+    })
+
+
+def _check_source_pins_delta(
+    previous: Path, proposed: Path, pins: dict[tuple[str, str], str],
+) -> None:
     """Allow only the declared NULL-to-hash source cells; preserve every other row."""
     with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
         for pragma in ("application_id", "user_version"):
@@ -416,12 +425,14 @@ def _check_source_pin_delta(
                 f"PRAGMA {pragma}",
             ).fetchone():
                 raise ValueError("Source pin refresh changed database identity")
-        schema_sql = "SELECT name, sql FROM sqlite_master WHERE type='table' ORDER BY name"
+        schema_sql = "SELECT type, name, sql FROM sqlite_master ORDER BY type, name"
         schema = old.execute(schema_sql).fetchall()
         if schema != new.execute(schema_sql).fetchall():
             raise ValueError("Source pin refresh changed the table schema")
-        changed: set[str] = set()
-        for name, _ in schema:
+        changed: set[tuple[str, str]] = set()
+        for kind, name, _ in schema:
+            if kind != "table":
+                continue
             quoted = '"' + name.replace('"', '""') + '"'
             columns = [row[1] for row in old.execute(f"PRAGMA table_info({quoted})")]
             order = ",".join(str(index + 1) for index in range(len(columns)))
@@ -434,24 +445,37 @@ def _check_source_pin_delta(
                 expected_rows = []
                 for row in rows:
                     expected = list(row)
-                    if row[id_column] == source_id:
-                        collection = row[collection_column]
-                        if collection not in expected_collections or row[hash_column] is not None:
+                    key = (row[collection_column], row[id_column])
+                    if key in pins:
+                        if row[hash_column] is not None:
                             raise ValueError(
                                 "Source pin refresh requires exact unpinned declarations"
                             )
-                        expected[hash_column] = digest
-                        changed.add(collection)
+                        expected[hash_column] = pins[key]
+                        changed.add(key)
                     expected_rows.append(tuple(expected))
                 rows = expected_rows
             if rows != new.execute(query).fetchall():
                 raise ValueError(f"Source pin refresh changed unrelated rows: {name}")
-        if changed != expected_collections:
+        if not pins or changed != set(pins):
             raise ValueError("Source pin refresh did not cover the expected declarations")
 
 
 def refresh_core_pdf_pin_v9_release(*, root: Path = ROOT) -> Path:
     """Publish the reviewed English N5.3 byte pin without changing rules or objects."""
+    return _refresh_pdf_source_pins_v9_release(
+        root=root, source_ids={"n5-core-v5.3-pdf"}, expected_count=2,
+    )
+
+
+def refresh_pdf_source_pins_v9_release(*, root: Path = ROOT) -> Path:
+    """Publish missing pins for already-cataloged PDFs, verifying their local bytes."""
+    return _refresh_pdf_source_pins_v9_release(root=root)
+
+
+def _refresh_pdf_source_pins_v9_release(
+    *, root: Path, source_ids: set[str] | None = None, expected_count: int | None = None,
+) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
     if not (root / "local").is_dir():
@@ -467,24 +491,44 @@ def refresh_core_pdf_pin_v9_release(*, root: Path = ROOT) -> Path:
     with closing(sqlite3.connect(current_rules)) as connection:
         if connection.execute("PRAGMA user_version").fetchone()[0] != 9:
             raise ValueError("Source pin refresh requires the promoted v9 release")
+        previous_pins = {
+            (collection, source_id): digest for collection, source_id, digest in connection.execute(
+                "SELECT collection_id, id, sha256 FROM sources WHERE kind = 'pdf'",
+            )
+        }
     before = load_deployed_object_publication(current_publication, army, current_rules)
     if before is None:
         raise ValueError("Existing v9 publication does not match its release databases")
+    input_paths = set(discover_curated_documents(root / "data/curated/rules")) | {
+        root / path for path in (ARMY, CHART, CURATED, DELIVERY, CANDIDATES)
+    }
+    input_hashes = {path: _sha(path) for path in input_paths}
     chart = _checked_chart(root)
-    digest, source_id = chart["sourcePdfSha256"], chart["sourceId"]
+    input_hashes[root / PDF] = chart["sourcePdfSha256"]
     documents = load_curated_directory(root / "data/curated/rules")
-    declarations = [
-        (document["collection"]["id"], source)
-        for _, document in documents for source in document["sources"]
-        if source["id"] == source_id
-    ]
-    collections = {collection for collection, _ in declarations}
-    if (collections != {"n5-core-v5.3", "n5-hacking-programs-v5.3"}
-            or len(declarations) != 2 or any(source.get("sha256") != digest
-                                         for _, source in declarations)):
-        raise ValueError("Both English N5.3 source declarations must carry the reviewed byte pin")
+    pins: dict[tuple[str, str], str] = {}
+    for _, document in documents:
+        for source in document["sources"]:
+            key = (document["collection"]["id"], source["id"])
+            if (source["kind"] != "pdf" or key not in previous_pins
+                    or previous_pins[key] is not None
+                    or (source_ids is not None and source["id"] not in source_ids)):
+                continue
+            digest = source.get("sha256")
+            if not isinstance(digest, str):
+                continue
+            path = (root / source["localPath"]).resolve()
+            if not path.is_relative_to(root):
+                raise ValueError("Source pin refresh requires checkout-local research inputs")
+            actual = _sha(path)
+            if actual != digest.lower():
+                raise ValueError(f"Source pin refresh PDF hash mismatch: {source['id']}")
+            input_hashes[path] = actual
+            pins[key] = digest
+    if not pins or (expected_count is not None and len(pins) != expected_count):
+        raise ValueError("Source pin refresh requires the expected missing PDF declarations")
     originals = {path: (root / path).read_bytes() for path in ARTIFACTS}
-    with tempfile.TemporaryDirectory(prefix="core-pdf-pin-v9-stage-", dir=root / "local") as tmp:
+    with tempfile.TemporaryDirectory(prefix="pdf-source-pin-v9-stage-", dir=root / "local") as tmp:
         stage = Path(tmp)
         next_rules = stage / "rules.db"
         export_rules_database(documents, next_rules, restrictions_manifest=chart)
@@ -494,7 +538,7 @@ def refresh_core_pdf_pin_v9_release(*, root: Path = ROOT) -> Path:
             raise ValueError("Source pin export is not byte deterministic")
         generated = RulesDatabase(next_rules)
         generated.validate()
-        _check_source_pin_delta(current_rules, next_rules, source_id, digest, collections)
+        _check_source_pins_delta(current_rules, next_rules, pins)
         if generated.restrictions_payload() != current.restrictions_payload():
             raise ValueError("Source pin refresh changed typed Restrictions")
         proposed = build_publication(
@@ -507,6 +551,8 @@ def refresh_core_pdf_pin_v9_release(*, root: Path = ROOT) -> Path:
             raise ValueError("Source pin refresh changed deployed objects or unrelated provenance")
         if any((root / path).read_bytes() != data for path, data in originals.items()):
             raise ValueError("Release pair changed during source pin staging")
+        if any(_sha(path) != digest for path, digest in input_hashes.items()):
+            raise ValueError("Reviewed inputs changed during source pin staging")
 
         def post_validate() -> None:
             RulesDatabase(current_rules).validate()
@@ -517,5 +563,5 @@ def refresh_core_pdf_pin_v9_release(*, root: Path = ROOT) -> Path:
 
         return _replace_with_rollback(
             root, {RULES: next_rules.read_bytes(), PUBLICATION: publication_bytes(proposed)},
-            post_validate, backup_prefix="core-pdf-pin-v9-recovery-",
+            post_validate, backup_prefix="pdf-source-pin-v9-recovery-",
         )

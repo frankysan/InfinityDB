@@ -101,6 +101,33 @@ gameplay content retain their previous values. The tracked v9 rules database
 and paired deployed-object publication were refreshed together; see
 [the artifact contract](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
 
+## Remaining reviewed PDF identities
+
+**Project domain:** Data processing
+
+**Local verification, 2026-10-30:** The remaining selected PDF declarations
+now carry byte pins. The supplied files identify the following versions on
+their covers; page counts below are file pages, not printed citation pages.
+
+| Source ID | Cover version | File pages | SHA-256 |
+| --- | --- | --- | --- |
+| `n5-core-v5.3-es-pdf` | N5 v5.3 | 204 | `7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f` |
+| `n5-faq-v0.1-en-pdf` | FAQ v0.1 | 5 | `7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa` |
+| `n5-faq-v0.1-es-pdf` | FAQ v0.1 | 5 | `7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a` |
+| `n5-faq-v0.0-en-pdf` | FAQ v0.0 | 4 | `a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043` |
+| `its-season-18-en-pdf` | 2026.09.01 | 132 | `9e16874924112e62d51acf78d622f5c0cf6196064cc36f003b515de9dc448baf` |
+
+The Spanish core and ITS hashes match the frozen S17/S16 entries in the
+[audit source register](rules-explanation-audit-1.0-sources.md).
+The three FAQ hashes match the independently reviewed
+[question inventory](../config/validation/n5-faq-v0.1-question-inventory.json).
+All 12 declarations for the six selected PDF identities, including the English
+core above, are now pinned consistently across collections. This adds nine
+previously absent fingerprints; the ITS collection already carried its pin.
+No publication-date anchor, historical/current applicability or gameplay text
+changed. These are local byte-identity checks, separate from live authority,
+source-section coverage and the final release input freeze.
+
 ## Locally available Reinforcements PDFs
 
 **Availability check, 2026-10-21:** The local files below are present and readable,

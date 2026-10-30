@@ -23,6 +23,7 @@
       "version": "0.1",
       "publishedDate": "2026-09-01",
       "localPath": "data/pdf/faq/n5-faqs-v0-1-en.pdf",
+      "sha256": "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa",
       "pageCount": 5,
       "authority": "primary",
       "url": "https://experience.corvusbelli.com/en/infinity/resources"
@@ -34,6 +35,7 @@
       "version": "0.1",
       "publishedDate": "2026-09-01",
       "localPath": "data/pdf/faq/esp-faqs-n5-v0-1.pdf",
+      "sha256": "7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a",
       "pageCount": 5,
       "authority": "primary",
       "url": "https://experience.corvusbelli.com/en/infinity/resources"
@@ -45,6 +47,7 @@
       "version": "0.0",
       "publishedDate": "2025-10-15",
       "localPath": "data/pdf/faq/n5-faqs-v0-0-en.pdf",
+      "sha256": "a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043",
       "pageCount": 4,
       "authority": "primary",
       "url": "https://downloads.corvusbelli.com/infinity/rules/infinity-faq-n5-en-v5.0.0.pdf"

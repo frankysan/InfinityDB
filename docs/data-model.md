@@ -992,15 +992,17 @@ contract. The 14 typed source restrictions, not these generic
 graph edges, remain the source of conditional semantics; the seven
 source-only/unrepresentable generic edges are not manufactured.
 
-**English core source pin refresh (2026-10-30):** The tracked v9 database
-now carries the reviewed English N5.3 PDF fingerprint in both Core and
-Hacking source declarations. A guarded paired refresh compared every table
-and permitted only those two NULL-to-hash cells; gameplay rows, relations,
-typed Restrictions and reviewed objects remained identical. Two independent
-exports were byte-identical. The rules SHA-256 is
-`45b58043ebb442c6f119802647c7254129d3507e04ec5e67ad7099503f9bb05f`;
+**Reviewed PDF source pins (2026-10-30):** All 12 PDF source declarations
+in the tracked v9 database now carry reviewed byte fingerprints for six
+documents: English/Spanish N5.3 core, English/Spanish FAQ v0.1, historical
+English FAQ v0.0 and English ITS Season 18. After the English core refresh,
+a guarded paired refresh permitted only the nine remaining NULL-to-hash
+cells. Every other stored row and the complete database schema, including
+indexes, remained identical, as did typed Restrictions and reviewed objects.
+Two independent exports were byte-identical. The rules SHA-256 is
+`7235b78e7c9ca295d35e44cd05972ffeece11a968b80e6096ae4db4b44c74846`;
 the matching ignored publication SHA-256 is
-`51b0bb2c26fafbc1cc290cfc61355f2060ce5bc4d89d06ab1966cd39af3b75ad`.
+`dd4d0343c7f235934f82b1a6675a66fd1d1b1029ec662a0a2b513f086b7050d1`.
 The original matched v9 pair is retained under ignored `local/`; the retained
 local audit evidence records its recovery location. The publication changes only
 its rules-database and curated-source fingerprints. This is local provenance

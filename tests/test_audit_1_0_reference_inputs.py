@@ -14,6 +14,7 @@ from tools.audit_1_0_reference_inputs import (
     _wiki_history_language,
     _WikiErrataLabels,
     chart_name_evidence,
+    faq_pdf_pin_evidence,
     verify_curated_wiki_snapshot,
     verify_curated_wiki_snapshots,
     verify_reinforcements_inputs,
@@ -128,8 +129,20 @@ def test_historical_reinforcements_report_uses_actual_availability(
     with zipfile.ZipFile(history, "a") as archive:
         archive.writestr("Weapon_Chart", "<table></table>")
         archive.writestr("Commlink", "<h1>Commlink</h1>")
-    report = audit.build_report(army, rules, history, core, faq, reinforcements_inventory=inventory)
-    assert report["formatVersion"] == 3
+    faq_inventory = tmp_path / "faq-inventory.json"
+    faq_hash = hashlib.sha256(faq.read_bytes()).hexdigest()
+    faq_inventory.write_text(json.dumps({"sourceArtifacts": {
+        "faq-current": {"sha256": faq_hash},
+    }}), encoding="utf-8")
+    with sqlite3.connect(rules) as db:
+        db.execute("INSERT INTO sources VALUES (?, ?, ?, ?, ?, ?)", (
+            "faq-current", "https://example.invalid/faq", "pdf", "FAQ", "0.1", faq_hash,
+        ))
+    report = audit.build_report(
+        army, rules, history, core, faq,
+        reinforcements_inventory=inventory, faq_inventory=faq_inventory,
+    )
+    assert report["formatVersion"] == 4
     assert report["enrichmentGapEvidence"]["reinforcementsAnnexPdfSupplied"] is bool(present)
     assert report["enrichmentGapEvidence"]["reinforcementsN5AuthorityVerified"] is False
     markdown = audit.report_markdown(report)
@@ -138,6 +151,43 @@ def test_historical_reinforcements_report_uses_actual_availability(
     assert "not verified N5 procedural authority" in markdown
     assert "pin status: declared-hash-match" in markdown
     assert "no declared SHA" not in markdown
+    assert report["suppliedArtifacts"]["faqPdfPinStatus"] == "declared-hash-match"
+    assert report["suppliedArtifacts"]["faqPdfMatchedSourceIds"] == ["faq-current"]
+    assert report["suppliedArtifacts"]["faqPublicationScope"] == "not-verified-by-byte-check"
+
+
+@pytest.mark.parametrize(
+    "catalog,actual_hash,status,matched",
+    (([], "b" * 64, "not-in-rules-source-catalog", []),
+     ([{"id": "current", "sha256": None}], "b" * 64, "version-declared-hash-unpinned", []),
+     ([{"id": "current", "sha256": "B" * 64}], "b" * 64, "declared-hash-match", ["current"]),
+     ([{"id": "historical", "sha256": "a" * 64}], "a" * 64, "declared-hash-match", ["historical"]),
+     ([{"id": "current", "sha256": "b" * 64}], "c" * 64, "declared-hash-mismatch", [])),
+)
+def test_faq_byte_identity_preserves_exact_source_scope(
+    tmp_path: Path, catalog: list[dict], actual_hash: str, status: str, matched: list[str],
+) -> None:
+    inventory = tmp_path / "faq.json"
+    inventory.write_text(json.dumps({"sourceArtifacts": {
+        "historical": {"sha256": "a" * 64}, "current": {"sha256": "b" * 64},
+    }}), encoding="utf-8")
+    evidence = faq_pdf_pin_evidence(catalog, actual_hash, inventory)
+    assert evidence == {"status": status, "matchedSourceIds": matched,
+                        "publicationScope": "not-verified-by-byte-check"}
+
+
+@pytest.mark.parametrize("conflicting", (False, True))
+def test_faq_catalog_pin_must_agree_with_review_and_other_declarations(
+    tmp_path: Path, conflicting: bool,
+) -> None:
+    inventory = tmp_path / "faq.json"
+    inventory.write_text(json.dumps({"sourceArtifacts": {
+        "current": {"sha256": "b" * 64},
+    }}), encoding="utf-8")
+    catalog = ([{"id": "current", "sha256": "b" * 64}, {"id": "current", "sha256": None}]
+               if conflicting else [{"id": "current", "sha256": "c" * 64}])
+    with pytest.raises(SourceEvidenceError):
+        faq_pdf_pin_evidence(catalog, "b" * 64, inventory)
 
 
 @pytest.mark.parametrize("defect", ("version", "extra-authority", "duplicate-language"))

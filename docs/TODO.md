@@ -164,6 +164,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Restrictions and reviewed objects are unchanged. See
       [source identity](n5-source-history.md#reviewed-english-n53-core-pdf-identity)
       and [validation](testing.md#10-source-evidence-baseline).
+    - [x] **Data processing + Project infrastructure:** Pin the remaining
+      selected Spanish core, FAQ and duplicated ITS PDF declarations.
+      All 12 declarations for six reviewed documents now have byte hashes;
+      the paired v9 refresh changed only nine missing source hashes and
+      corresponding publication fingerprints. The source-evidence report
+      identifies supplied FAQ bytes by exact reviewed source ID, including
+      historical v0.0. Publication-date/applicability review and the final
+      input freeze remain separate gates. See
+      [source identities](n5-source-history.md#remaining-reviewed-pdf-identities).
   - [ ] Reconcile each N5 update-post changelog item with its applicable versioned
     Army snapshot, rules/FAQ PDF, exact Wiki revision, and available historical N5
     versions. Record unmatched announcement claims and unknown release/snapshot

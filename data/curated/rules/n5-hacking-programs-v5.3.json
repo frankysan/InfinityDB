@@ -35,6 +35,7 @@
             "version": "5.3",
             "publishedDate": "2026-09-01",
             "localPath": "data/pdf/rules/esp-n5-update-5-3.pdf",
+            "sha256": "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f",
             "pageCount": 204,
             "authority": "primary",
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
@@ -46,6 +47,7 @@
             "version": "0.1",
             "publishedDate": "2026-09-01",
             "localPath": "data/pdf/faq/n5-faqs-v0-1-en.pdf",
+            "sha256": "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa",
             "pageCount": 5,
             "authority": "primary",
             "url": "https://experience.corvusbelli.com/en/infinity/resources"

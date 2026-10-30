@@ -1289,8 +1289,8 @@ the ignored `local/` workspace:
 .venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5-3-en.pdf" --faq-pdf "data/pdf/faq/n5-faqs-v0-1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
-The English N5.3 PDF now has a maintained SHA-256 pin in both Core and
-Hacking source declarations; see [source identity](n5-source-history.md#reviewed-english-n53-core-pdf-identity).
+All 12 PDF source declarations now carry maintained SHA-256 pins for six
+reviewed documents; see [source identities](n5-source-history.md#remaining-reviewed-pdf-identities).
 The auditor compares the supplied bytes with consistent source-catalog pins
 (hexadecimal case is immaterial) and renders the actual `coreRulesPdfPinStatus`
 in both JSON and Markdown. A declared match establishes byte identity only.
@@ -1298,18 +1298,31 @@ in both JSON and Markdown. A declared match establishes byte identity only.
 `tests/test_restriction_storage_candidate.py` verifies declaration/export parity
 and rejects unrelated changes during a source-pin refresh.
 
-The one-time `tools.build_deployed_object_publication --refresh-core-pdf-pin-v9`
-operation stages a matched v9 pair, verifies the reviewed PDF, compares two
-independent exports, and permits only the two previously NULL English source
-hashes to change across the complete stored table set. The matching publication
+The `tools.build_deployed_object_publication --refresh-pdf-source-pins-v9`
+operation stages a matched v9 pair, verifies local bytes for previously unpinned
+PDF declarations, compares two independent exports, and permits only those
+NULL-to-hash cells to change across the complete stored table set. The complete
+schema, including indexes, must also remain identical. The matching publication
 may change only its rules-database/curated-source fingerprints. Coordinated
 replacement retains recovery copies of both original artifacts and restores them
 if post-publication checks fail. It requires an unchanged tracked rules database
-and refuses already-pinned or otherwise changed source rows; it is not a general
-replacement for the scoped artifact workflows. The normal default rules export
+and refuses changes to existing pins or other source metadata. It also freezes
+the input hashes during staging. The retained `--refresh-core-pdf-pin-v9` form
+restricts the operation to the two English core declarations. These are scoped
+provenance operations, not general artifact replacement workflows. The normal default rules export
 remains v8-compatible. No acquisition runs during these checks.
 
-The report's version-3 `reinforcementsSourceEvidence` separately checks the
+The version-4 report matches a supplied FAQ PDF against the reviewed
+`sourceArtifacts` in the question inventory and consistent catalog declarations.
+It records `faqPdfPinStatus`, exact `faqPdfMatchedSourceIds` and
+`faqPublicationScope: not-verified-by-byte-check` in JSON, with the same identity
+and status in Markdown. This identifies historical v0.0 separately from v0.1;
+matching bytes do not establish publication dates, historical runtime replay or
+gameplay applicability. `--faq-inventory` selects an alternative reviewed
+inventory for the same check. Local verification on 2026-10-30 matched all three
+reviewed FAQ files to their exact source IDs.
+
+The report's `reinforcementsSourceEvidence` (introduced in version 3) separately checks the
 audit-only [historical source inventory](../config/validation/reinforcements-source-inputs.json).
 Its two relative research paths resolve within the checkout. Optional
 `--reinforcements-inventory` selects another inventory under the same contract;

@@ -29,6 +29,14 @@ selection and the two scenario-only runtime scopes against a fresh rules
 export. The manifest is an **audit gate**, not an additional gameplay
 definition or a substitute for a future historical/ITS applicability review.
 
+**PDF identity publication, 2026-10-30:** The three reviewed FAQ byte hashes
+are now present in all six maintained FAQ source declarations across the
+collections: three English v0.1, two Spanish v0.1 and one historical English
+v0.0. The source-evidence auditor matches each supplied file to its exact
+reviewed source ID. This preserves all 29 rulings and their date/scope gates;
+byte identity does not establish exact publication dates or historical replay.
+See [source identities](n5-source-history.md#remaining-reviewed-pdf-identities).
+
 **Historical v0.0 reconciliation, 2026-10-29:** The earlier English
 FAQ contains 28 Q&A blocks on printed pp. 1–3. The audit manifest
 independently pins the original pages of all 20 carried-forward published
