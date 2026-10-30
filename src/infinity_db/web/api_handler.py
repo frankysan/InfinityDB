@@ -21,6 +21,7 @@ from infinity_db.army_slugs import attach_public_army_slug, enrich_army_referenc
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
 from infinity_db.database import ArmySelectionError, Database
+from infinity_db.declaration_matrix import core_declaration_matrix
 from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
@@ -522,7 +523,24 @@ class ApiHandler:
         status = HTTPStatus.OK
         cache_control = "no-cache"
         payload = None
-        if path == "/api/restrictions":
+        if path == "/api/orders-aros":
+            cache_control = API_CACHE_CONTROL
+            try:
+                _validated_query_params(query_string, {"cache_bust"})
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                if self.rules_database is None:
+                    raise ValueError("Core rules reference unavailable")
+                payload = core_declaration_matrix(self.database, self.rules_database)
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not project core Orders/AROs")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The Orders/AROs reference is unavailable."}
+        elif path == "/api/restrictions":
             cache_control = API_CACHE_CONTROL
             try:
                 params = _validated_query_params(

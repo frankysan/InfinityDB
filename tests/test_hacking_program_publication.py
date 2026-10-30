@@ -12,6 +12,7 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.hacking_program_catalog import hacking_program_declaration_categories
+from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 from tools.verify_hacking_programs_browser import WIDTHS, source_programs
 
@@ -161,3 +162,76 @@ def test_all_published_hacking_programs_match_army_and_curated_rules() -> None:
     }
     assert "baselineDevicesGroup(program)" in javascript
     assert "content.hidden = false;" in javascript
+
+
+def test_generated_core_orders_aros_matrix_matches_pinned_source_and_routes() -> None:
+    """The browser matrix projects domain metadata, not a second literal chart."""
+    from infinity_db.declaration_matrix import core_declaration_matrix
+
+    database = Database(ARMY_DB)
+    rules = RulesDatabase(RULES_DB)
+    projected = core_declaration_matrix(database, rules)
+    assert projected["scope"] == "n5-core-current-unscoped"
+    assert projected["legalityEvaluation"] is False
+    assert projected["source"] == {"id": "n5-core-v5.3-pdf", "page": 191}
+
+    source = json.loads(
+        (ROOT / "config/validation/orders-aro-object-adjacent-source-review.json")
+        .read_text(encoding="utf-8")
+    )
+    section_ids = {
+        "basic": "basic-short-skill",
+        "long": "long-skill",
+        "short": "short-skill",
+        "aro": "aro",
+    }
+    by_section = {
+        section["id"]: {item["record_id"]: item for item in section["items"]}
+        for section in projected["sections"]
+    }
+    assert len(by_section) == 4
+    expected: dict[str, set[str]] = {key: set() for key in section_ids.values()}
+    for source_row in source["rows"]:
+        category = section_ids[source_row["section"]]
+        expected[category].add(source_row["recordId"])
+        item = by_section[category][source_row["recordId"]]
+        assert item["name"].removesuffix("!") == source_row["name"].removesuffix("!")
+        assert item["source_type"].upper() == source_row["sourceType"]
+        assert item["href"].startswith(("/skills/", "/equipment/", "/hacking-programs/"))
+    assert {key: set(items) for key, items in by_section.items()} == expected, {
+        key: {"additional": sorted(set(items) - expected[key]),
+              "missing": sorted(expected[key] - set(items))}
+        for key, items in by_section.items()
+    }
+    for action in ("equipment:deactivator", "equipment:gizmokit", "equipment:medikit"):
+        assert action in by_section["short-skill"]
+        assert all(
+            action not in items for section, items in by_section.items()
+            if section != "short-skill"
+        )
+
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    status, html = _get(app, "/orders-aros")
+    assert status == "200 OK"
+    assert b"/static/orders-aros.js" in html
+    assert b'aria-current="page"' in html
+    status, body = _get(app, "/api/orders-aros")
+    assert status == "200 OK"
+    assert json.loads(body) == projected
+    status, javascript = _get(app, "/static/orders-aros.js")
+    assert status == "200 OK"
+    assert b"textContent" in javascript
+    assert b"getOrdersAros" in javascript
+    invalid = app.api.handle("/api/orders-aros", "unexpected=1")
+    assert invalid is not None and invalid.status.value == 400
+    assert b"Unknown query parameter" in invalid.body
+    assert app.api.handle("/api/orders-aros", "cache_bust=1") is not None
+
+    # Neither scenario actions nor source-replacement variants enter the
+    # unscoped core projection just because they have a declaration type.
+    assert all(
+        item["record_id"] not in {"skill:bs-11", "skill:bs-12", "skill:cc-21"}
+        for section in projected["sections"] for item in section["items"]
+    )
+    for section in projected["sections"]:
+        assert len({row["record_id"] for row in section["items"]}) == len(section["items"])

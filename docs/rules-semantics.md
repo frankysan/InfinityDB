@@ -4041,12 +4041,22 @@ metadata. The PDF-backed source Type is not always the canonical owning kind:
 the Equipment-labelled Activate Disco Ball is a Skill, and Look Out! shares the
 canonical Look Out identity. Neither case creates a new deployed object.
 
-A generated cross-domain Orders/AROs matrix remains unimplemented for 1.0.
+The player-facing `/orders-aros` page and `/api/orders-aros` endpoint now
+project the same **57 printed declaration occurrences** directly from current
+core Skill categories and Army-backed Hacking Program metadata, with only
+three source-verified Equipment action exceptions (Deactivator, GizmoKit and
+MediKit) where the curated Equipment facts have no declaration `typeIds`.
+Activate Disco Ball retains its Skill identity and printed Equipment source
+Type. Source-replacement Skill variants are not separate declarations.
+
 The complete source-table audit in
-`config/validation/orders-aro-object-adjacent-source-review.json` is validation
-evidence, not a parallel published chart. The future projection should consume
-the existing Skill and Hacking Program declaration categories, distinguish core
-actions from scenario- or phase-scoped actions, and expose owning reference links.
+`config/validation/orders-aro-object-adjacent-source-review.json` remains
+an independent validation reference, not a second runtime chart. The matrix is
+scoped to unmodified N5 core declarations: it excludes scenario/season overlays,
+Reinforcements phase actions, automatic/passive categories, and Deployment-only
+categories. It does not calculate whether a declaration is currently legal.
+Scoped extensions and promoting Equipment declaration types to curated metadata
+remain separate 1.0 follow-ups.
 
 Sources:
 

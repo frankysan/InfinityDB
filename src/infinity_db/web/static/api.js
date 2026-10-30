@@ -28,6 +28,10 @@ export function getFaqRulings(topicId, context, signal) {
   return getJson(`/api/faq-rulings?${params}`, signal);
 }
 
+export function getOrdersAros(signal) {
+  return getJson("/api/orders-aros", signal);
+}
+
 export function getCatalogItems(catalog, signal) {
   return getJson(`/api/${encodeURIComponent(catalog)}`, signal);
 }

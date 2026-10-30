@@ -927,18 +927,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     rule domains, retaining rulebook version and printed-page citation. Do not
     duplicate Hacking Program facts already owned by the current Hacking Program
     domain.
-  - [ ] Generate an Orders/AROs declaration matrix from the reconciled cross-domain
-    relationships and use it as a completeness check for missing, invalid, or
-    contradictory declaration categories rather than maintaining a second hard-coded
-    chart. Make the projection source/scope-aware so scenario-only Skills/AROs can be
-    represented without appearing in the core N5 matrix or being flagged as missing
-    core categories.
-    - [ ] Define projection rows and declaration/scope columns from the existing canonical
-      declaration metadata; expose the owning rule links and cited exceptions. Choose a normal
-      reference entry point rather than leaving the matrix as an audit-only output.
-    - [ ] Validate the pinned core chart against the generated projection. Cover action-like
-      Equipment and Hacking Programs, missing/contradictory categories, scenario-only actions,
-      and phase-scoped exclusions without interpreting absence as permission or prohibition.
+  - [x] Generate a current-core **Orders/AROs declaration matrix** from
+    composed Skill rules and Army-backed Hacking Program declarations, published
+    at `/orders-aros` and `/api/orders-aros`. Its 57 category occurrences
+    match the independently reviewed N5.3 p. 191 chart exactly, across 42
+    existing canonical action owners. The page links to owning Skills, Equipment
+    or Hacking Programs and explicitly excludes live action-legality evaluation.
+    - [x] Reuse current Skill type categories and normalized Hacking Program
+      metadata; keep source-only BS/CC replacement variants, Automatic and
+      Deployment Skills, scenario-only and phase-scoped actions outside the
+      unscoped core projection. Three Equipment-labelled Short actions without
+      declaration `typeIds` retain a narrow source-reviewed p. 191 exception;
+      Activate Disco Ball remains a canonical Skill.
+    - [x] Validate the full pinned chart against generated runtime rows, including
+      declaration category, source Type, owning identity and public route. Do not
+      infer that an absent action is prohibited or allow a source table row to
+      create a new Weapon/Equipment or Army carrier.
+    - [ ] Consider replacing the three narrow Equipment exceptions with explicit
+      curated declaration metadata in a coordinated rules database rebuild.
+      Preserve p. 191 source validation as an independent regression gate.
+    - [ ] Extend the projection with separately selected scenario/season action
+      contexts and explicitly phase-scoped actions when those domains are ready.
+      Do not merge them into the unscoped N5 core view.
   - [ ] Deepen the existing first-class Ammunition model with explicit typed
     relationships. Preserve the eleven published base Ammunition identities, distinguish
     source-defined combined forms, preserve component relationships for Combined

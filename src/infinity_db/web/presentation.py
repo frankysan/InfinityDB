@@ -64,6 +64,7 @@ ASSETS = {
     "/static/page-footer-notice.js": ("page-footer-notice.js", "text/javascript; charset=utf-8"),
     "/static/themed-logo.js": ("themed-logo.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
+    "/static/orders-aros.js": ("orders-aros.js", "text/javascript; charset=utf-8"),
     "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),
     "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-search-state.js": (
@@ -247,6 +248,12 @@ _FIXED_PAGES = {
         (("InfinityDB", "/"), ("Skills", "/skills"), ("Skill modifiers", None)),
         "Reference data",
         "skills",
+    ),
+    "/orders-aros": PageSpec(
+        "orders-aros.html",
+        (("InfinityDB", "/"), ("Skills", "/skills"), ("Orders & AROs", None)),
+        "Rules reference",
+        "orders-aros",
     ),
     "/skills": PageSpec(
         "skills.html",
@@ -561,6 +568,7 @@ def _render_page(
         "armies": "ARMIES_CURRENT",
         "units": "UNIT_EXPLORER_CURRENT",
         "skills": "SKILLS_CURRENT",
+        "orders-aros": "ORDERS_AROS_CURRENT",
         "equipment": "EQUIPMENT_CURRENT",
         "weapons": "WEAPONS_CURRENT",
         "traits": "TRAITS_CURRENT",
