@@ -270,7 +270,19 @@ of the ARM and BTS Saving Rolls from the hit. This is a reviewed source-profile
 annotation, not a roll evaluator, an Ammunition effect, or an inferred
 `ammunition_composition`. Other Weapon Saving Roll notations remain untouched.
 Full cross-source Combined Saving Roll coverage and immunity interactions remain
-open.
+open. A full identity/transport parity gate in
+`tests/test_ammunition_publication_parity.py` separately asserts that all
+16 explicitly reviewed Army Ammunition source ID/name pairs (11 base and five
+combined) resolve to the same 11 canonical `ammunition:*` records, with
+unchanged citations/summaries, navigable component identities, at least one
+actual Weapon profile for each source identity, and unchanged imported
+Saving Roll fields. All five combinations also have HTTP Weapon-detail
+coverage. The independent pinned N5.3 p. 67 check establishes printed
+examples for AP+DA, AP+Exp, and N+E/M; the other two combinations are
+verified against exact Army metadata and public profiles instead. This is
+a completeness gate for the *reviewed map*, not coverage of all source
+Ammunition IDs, combined effect precedence, full Critical mechanics, or
+a future Weapon comparison view.
 
 **Weapon Properties (current):** InfinityDB maintains a separate, descriptive
 `weapon-property:*` vocabulary in `config/catalogs/weapon-properties.json`.

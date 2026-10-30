@@ -4127,6 +4127,17 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Ammunition reviewed-source publication parity, 2026-10-30:**
+`tests/test_ammunition_publication_parity.py` verifies the 11 published
+base Ammunition identities, 16 current reviewed Army source IDs/names,
+five ordered combined identities, canonical rules citations/summaries,
+all 16 profile-to-rule entry points, and representative HTTP Weapon
+details for all five combinations. The test pins N5.3 p. 67's three
+printed combination examples independently of the Army config and
+confirms the distinct Combined Saving Roll source section. This
+does not infer attack roll arithmetic, immunity precedence or comparison
+results from composition.
+
 **Reinforcements applicability gate, 2026-10-30:** The tracked
 `tests/test_audit_reinforcements_applicability.py` checks exact N5.3
 p. 6 and ITS18 v2026.09.01 p. 27 PDF references, pinned historical

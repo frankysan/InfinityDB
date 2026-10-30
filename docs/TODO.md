@@ -993,6 +993,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Validate every published base identity and reviewed combined form against the pinned
       source; prove that weapon links, Ammunition detail, and later comparison views consume the
       same facts without conflating composition with roll notation.
+      - [x] Add full cross-domain publication parity for all 11 canonical base
+        identities and 16 exact Army source Ammunition ID/name pairs (11 base,
+        five combined). The regression verifies the current metadata lookup,
+        canonical rules facts and citations, at least one real imported/public
+        Weapon profile per source identity, ordered component routes and
+        shared-rule summaries, and preservation of source Saving Roll fields.
+        Exercise all five combined forms through the public Weapon API and
+        independently pin N5.3 p. 67's printed AP+DA, AP+Exp and N+E/M
+        examples (including the distinct Combined Saving Roll discussion).
+        Source-defined AP+Shock and AP+T2 remain grounded in exact Army
+        metadata, not misattributed to the p. 67 examples.
+      - [ ] Review any remaining component-level precedence, exceptions, and
+        future comparison-view consumers independently. Identity/transport
+        parity is not an executable attack or Critical resolution model.
   - [ ] Include scenario-defined catalog concepts needed for the core-rules
     scenario reference, including core-scenario Skills, contextual roles such as
     Specialist Troop, and the scenario elements those concepts act on. Preserve
