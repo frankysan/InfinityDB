@@ -1526,15 +1526,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               Hacking Device charts, Weapon Chart and p. 74 reviews;
               verify additional game-element categories against direct
               rules before expanding a canonical inventory.
-              - [ ] Independently verify the **12-row N5.3 Hacking Programs
-                statistics chart** (p. 58) against the pinned Army Program
-                metadata and published API: Attack/Opponent MOD, PS,
-                Burst, Target, Skill Type and Special. Existing tests
-                prove Army-to-API parity, while the device chart audit
-                covers only four Equipment-to-Program access sets;
-                neither verifies all printed statistics cells. Preserve
-                source conflicts rather than rewriting Army values or
-                creating deployed-object identities. The separately
+              - [x] Independently verify the **12-row N5.3 Hacking Programs
+                statistics chart** (p. 58) against the pinned September 29
+                Army `metadata.json`, generated database and existing API
+                parity checks. An audit-only source manifest pins all 12
+                printed identities, Attack/Opponent MOD, PS, Burst, Target,
+                Skill Type and reviewed Special clauses. The optional pinned
+                PDF check validates row/column geometry independently of
+                Army row order, with **zero statistical mismatches**.
+                Source order places Total Control and Trinity before
+                Spotlight, while Army orders Spotlight first; this is a
+                harmless order difference, not a profile discrepancy.
+                No Program facts, Device grants, Unit carrier, runtime
+                identity or generated database was changed. The separately
                 checked Discover range (p. 77/main Weapon Chart) and
                 Fireteam charts (pp. 133–136) already have maintained
                 references; avoid duplicate definitions.

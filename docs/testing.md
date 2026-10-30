@@ -1822,6 +1822,41 @@ paths for all 17 reviewed objects. The change affects **citations only**;
 Program statistics, Unit carriers and canonical object identities remain
 unchanged. The full suite and CI still require release-level execution.
 
+### N5.3 Hacking Programs statistics source chart
+
+The independent **Hacking Programs Chart** on English N5.3 printed p. 58
+defines 12 Program profiles. The read-only manifest
+`config/validation/hacking-program-statistics-source-chart.json` records all
+printed Program names, Attack/Opponent MOD, PS, Burst, Target and Skill Type
+cells, plus separately reviewed Special-clause evidence. It is distinct from
+the four-device Program entitlement chart and does not authorize additional
+Equipment, Unit carrier or deployed-object identities.
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --json
+.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --archive "data/raw/JSON 20260929-114335.zip" --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+```
+
+The offline default checks the exact source rows against the published
+`infinity.db` Program profiles without requiring ignored source assets.
+Optional `--archive` verifies the pinned September 29 Army ZIP SHA-256 and
+its original `metadata.json` Program values, including source order,
+declaration types, targets and normalized Special text. Optional `--pdf`
+verifies the pinned English PDF fingerprint and every printed row/column,
+including the reviewed Special-clause fragments, using page geometry rather
+than raw text extraction order.
+
+**Reviewed 2026-10-30:** all 12 Program identities and numerical,
+Target/Skill Type and Special-clause evidence agree; zero mismatches.
+The PDF lists **Total Control, Trinity, Spotlight**, while Army metadata
+lists **Spotlight, Total Control, Trinity**. The audit records this
+source-order discrepancy and joins by Program name; it is not a changed
+Program profile. The existing `tests/test_hacking_program_publication.py`
+continues to cover the Army-to-API/browser-data layer. The adjacent
+`tests/test_hacking_device_program_source_chart.py` covers both page 58
+source audits, drift detection and optional PDF/archive evidence. No
+runtime database or curated Program record was modified.
+
 ### N5.3 Silhouette Templates source and browser geometry
 
 The English N5.3 **Silhouette Templates** table (printed p. 18)

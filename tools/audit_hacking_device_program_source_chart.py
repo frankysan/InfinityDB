@@ -193,6 +193,14 @@ def audit_source_files(
 
 
 def main() -> int:
+    # The adjacent N5.3 chart has a separate audit; this entry point is
+    # tracked and callable through the bounded repository MCP script runner.
+    import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--statistics-chart":
+        from tools.audit_hacking_program_statistics_chart import main as statistics_main
+
+        return statistics_main(sys.argv[2:])
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=MANIFEST)
     parser.add_argument("--curated", type=Path, default=CURATED)
