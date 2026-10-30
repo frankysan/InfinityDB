@@ -126,7 +126,7 @@ installed-wheel checks. The `/changes` probe compares the served release-note co
 the installed canonical changelog. It accepts both development notes under `Unreleased`
 and finalized version sections, and rejects stale or missing release-note content.
 
-**Rollback-image rehearsal (CI gate, pending its first hosted run):** the workflow also rebuilds
+**Rollback-image rehearsal (passed at commit `663a345`, 2026-10-30):** the workflow also rebuilds
 a **disposable v8/compatibility-10** `rules.db` from current reviewed curated sources under
 ignored `local/` and generates its matching deployed-object publication. It validates both
 databases and publication fingerprints, requires the complete reviewed object content

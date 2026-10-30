@@ -851,8 +851,16 @@ establish permission; neither this reference nor existing broad
 `restricts-use-of` edges evaluate live action legality.
 Source/manifest/PDF checks, static byte parity and browser acceptance
 are documented in [testing](testing.md#n53-restrictions-chart-source-and-browser-reference).
-Canonical condition-aware relation modeling and verified
-Irregular Training Unit-occurrence mapping remain backlog work.
+The maintained typed condition model is implemented separately from the
+generic relation graph. Irregular Training occurrence ownership has
+also been verified: source Order types live at specific Army loadout/
+Unit-option occurrences, not in a generic Unit Skill array.
+`SkillCatalog.enrich_unit()` attaches the reviewed
+`training:irregular` reference to matching Order occurrences.
+The tracked Army database regression verifies that real Irregular
+loadouts retain this association without asserting Unit/profile-wide
+Training ownership. A Unit-level reverse link remains intentionally
+absent until an option-scoped source/provenance requirement is established.
 The existing generic relation graph is unchanged.
 
 The separate typed model in
@@ -952,9 +960,12 @@ publication workflow. Do not overwrite either artifact individually.
 **CI release-image acceptance passed on 2026-10-30** for commit
 `b7230761`: Source checks, Installed wheel smoke and Deployment
 smoke all succeeded with the promoted v9 rules database and its
-generated deployed-object publication. That verifies the release
-image, **not** a hosted deployment. A release-image or live-host
-test of the retained v8 rollback pair remains open.
+generated deployed-object publication. That verifies the release image, **not** a hosted deployment.
+The subsequent v8 overlay-image rollback and v9 forward-image CI
+rehearsal passed at `663a345` (2026-10-30), using a freshly
+rebuilt source-equivalent v8 pair. Rehearsal does not verify byte
+identity with the retained original v8 backup or exercise live-host
+rollback. The hosted operational test remains open.
 
 **Legacy relationship consumer review:** the reviewed Motorcycle →
 Jump and Irregular → Lieutenant graph edges are retained as

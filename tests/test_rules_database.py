@@ -1283,6 +1283,75 @@ def test_training_classifies_normal_order_types_without_conflating_tactical_orde
     assert database.training_by_order_type() == {}
 
 
+def test_tracked_army_irregular_order_occurrences_map_to_training_without_unit_inference(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """Irregular Training belongs to source Order occurrences, not a whole Unit.
+
+    Inspect the release Army database, not synthetic Skill arrays. A logical Unit
+    may aggregate multiple source/profile/loadout options, so its presence is
+    evidence for context-scoped navigation only, never every Unit option.
+    """
+    root = Path(__file__).parents[1]
+    path = root / "data/generated/infinity.db"
+    assert path.is_file()
+    database = Database(path)
+    database.validate()
+
+    with sqlite3.connect(path) as connection:
+        candidates = connection.execute(
+            "SELECT DISTINCT lus.logical_unit_id "
+            "FROM logical_unit_sources AS lus "
+            "JOIN loadout_payload_occurrences AS lpo "
+            "ON lpo.unit_id = lus.source_unit_id "
+            "JOIN loadout_payload_orders AS o "
+            "ON o.loadout_payload_id = lpo.loadout_payload_id "
+            "WHERE LOWER(o.order_type) = 'irregular' "
+            "ORDER BY lus.logical_unit_id LIMIT 24"
+        ).fetchall()
+        assert candidates, "Release Army snapshot has no source Irregular Order occurrences"
+
+    catalog = SkillCatalog(database, current_rules_database)
+    verified = 0
+    for (logical_unit_id,) in candidates:
+        unit = database.get_unit(logical_unit_id)
+        if unit is None:
+            continue
+        enriched = catalog.enrich_unit(unit)
+        occurrences = [
+            order
+            for army in enriched.get("armies", ())
+            for loadout in army.get("loadouts", ())
+            for order in loadout.get("orders", ())
+        ]
+        irregular = [order for order in occurrences if order.get("type") == "irregular"]
+        if not irregular:
+            continue
+        assert all(
+            order.get("training_reference", {}).get("id") == "training:irregular"
+            for order in irregular
+        )
+        assert all(
+            order.get("training_reference", {}).get("id") == "training:regular"
+            for order in occurrences if order.get("type") == "regular"
+        )
+        assert all(
+            "training_reference" not in order
+            for order in occurrences
+            if order.get("type") not in {"regular", "irregular"}
+        )
+        assert "training_reference" not in enriched
+        assert all(
+            "training_reference" not in profile
+            for army in enriched.get("armies", ())
+            for profile in army.get("profiles", ())
+        )
+        verified += 1
+        if verified == 3:
+            break
+    assert verified >= 1, "Source Irregular orders did not survive Unit-detail projection"
+
+
 def test_training_enrichment_preserves_all_other_orders(
     tmp_path: Path,
     current_rules_database: RulesDatabase,

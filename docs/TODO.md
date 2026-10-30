@@ -1299,26 +1299,37 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         unavailable typed Restrictions, full container startup/HTTP
         checks, then recheck the original v9 image. Hermetic
         release-pair parity and workflow contract tests pass locally.
-        **The Docker rehearsal itself awaits CI execution.**
-      - [ ] **Confirm the v8 rollback-image CI gate passes** on an
-        exact commit. Subsequently validate the real host-level
-        rollback/forward process using the original retained v8
-        database/publication pair. The recreated CI v8 pair proves
-        compatibility, not historical-byte identity or a production
-        deployment. No live-host changes are authorized by this step.
+        The Docker rehearsal passed hosted Deployment smoke at
+        `663a345` (2026-10-30).
+      - [x] **Confirm the v8 rollback-image CI gate passes** for
+        commit `663a345` (Deployment smoke test, 2026-10-30).
+        The disposable source-equivalent v8 rules/publication pair
+        passed provenance, container-startup and HTTP checks, followed
+        by another successful v9 image check. This proves application
+        compatibility, not exact historical v8-byte identity.
+      - [ ] **Validate the real host-level rollback/forward process**
+        using the retained original v8 database/publication pair.
+        The CI rehearsal did not replace live containers or perform
+        a hosted deployment. Require explicit operational authorization
+        and a separately reviewed rollback plan before changing the host.
       - [ ] Review the **seven absent conventional legacy edges** only
         if a consumer still requires them; all 14 restrictions already
         have typed source-backed coverage. Preserve TAG/VH/REM as
         source-only selectors, ladders as terrain traversal, and scoped
         Jump/Lieutenant semantics; never insert unqualified generic
         edges or infer legal permissions.
-      - [ ] Confirm how Irregular Training is represented on actual
-        Unit/profile/loadout occurrences before adding a Unit-level
-        reverse link. Sampled Irregular-source candidates did not
-        expose `irregular` in the existing Training item arrays; the
-        existing source chart and Lieutenant detail already link to
-        the Irregular selection prohibition. Do not infer per-Unit
-        Training ownership from the source category alone.
+      - [x] **Verify Irregular Training occurrence ownership**
+        against the tracked Army database: normalized
+        `loadout_payload_orders` carry source Order types at specific
+        loadout occurrences; `SkillCatalog.enrich_unit()` already maps
+        Irregular Order entries to `training:irregular`. The real-snapshot
+        regression verifies the source-to-Unit-detail mapping and
+        confirms no Training reference is promoted to a profile or
+        Unit-wide property. Earlier samples of Skill/Training item
+        arrays were not the authoritative Order source.
+        The chart and Lieutenant detail already link the selection
+        prohibition; **do not add a Unit-level reverse link** absent
+        an explicitly option-scoped use case and provenance model.
   - **Completion:** each projection has a normal browser entry point, source reconciliation, and
     regression coverage for its exceptional rows. Exact variant reconciliation gates the usage
     index; it need not block independently ready lookup or Restrictions views.

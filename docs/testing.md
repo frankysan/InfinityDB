@@ -1969,12 +1969,17 @@ checks both v8 and v9 views, inbound/outbound scopes, and the
 unmodified labels on all other relationships. This is contextual
 help, not a declaration or Army selection legality resolver.
 
-Irregular Training has no standalone catalog route; sampled
-source candidate Unit details did not expose an `irregular` Training
-entry. A proposed Unit-level hook was not retained because its
-source-to-occurrence contract is unverified. Players can follow
-the Irregular restriction from the Lieutenant Skill and chart
-until that separate mapping is established.
+Irregular Training has no standalone catalog route. The source
+ownership is now verified against the tracked Army database:
+`loadout_payload_orders.order_type` contains actual Irregular
+occurrences, and `SkillCatalog.enrich_unit()` maps those specific
+Order entries to `training:irregular`. The existing Skill/Training
+item arrays were not the authoritative Order source. Regression
+`tests/test_rules_database.py::test_tracked_army_irregular_order_occurrences_map_to_training_without_unit_inference`
+checks the real source-to-Unit-detail projection and prevents an
+unreviewed Unit/profile-wide Training claim. The Lieutenant Skill and
+source chart already expose the Irregular selection prohibition; no
+Unit-level reverse link is published.
 
 **Version-aware SQLite/API migration contract (v9 locally promoted, not deployed):**
 `tests/test_restriction_storage_candidate.py` prepares a separate
@@ -2036,7 +2041,8 @@ objects and legacy graph against v9, overlays both artifacts into a copy
 of the tested release image, starts that v8 image with full HTTP checks,
 then rechecks the original v9 image. The original retained v8 backup
 and production host are not altered by the CI rehearsal. The overlay
-Docker gate has not yet been run in hosted CI for this change.
+Docker gate passed hosted Deployment smoke for commit `663a345`
+(2026-10-30); live-host rollback remains untested.
 
 Local regression coverage:
 `tests/test_restriction_storage_candidate.py::test_disposable_v8_rollback_pair_preserves_v9_reviewed_objects`
