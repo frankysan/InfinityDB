@@ -227,10 +227,98 @@ def verify_pinned_pdf(path: Path, manifest: dict[str, Any]) -> str:
     return digest
 
 
+
+
+PUBLICATION = ROOT / "src/infinity_db/web/static/restrictions-reference.json"
+SOURCE_URL = "https://experience.corvusbelli.com/en/infinity/resources"
+ACTION_DISPLAY: dict[str, tuple[str, str | None]] = {
+    "enter-prone": ("Cannot enter Prone State", None),
+    "declare-cautious-movement": ("Cannot declare Cautious Movement", None),
+    "declare-climb": ("Cannot declare Climb", None),
+    "use-ladders": ("Cannot use ladders", "Ladders are a separate restriction from Climb."),
+    "upward-jump": (
+        "Cannot Jump upward",
+        "Only upward Jump is prohibited here; horizontal/downward Jump "
+        "is not prohibited by this row.",
+    ),
+    "lieutenant-selection": (
+        "Cannot be chosen as Lieutenant",
+        "Army selection eligibility, not a ban on using the Lieutenant Skill.",
+    ),
+}
+SUBJECT_DISPLAY: dict[str, tuple[str, str]] = {
+    "TAG": ("TAG", "Troop Type"),
+    "Motorcycle": ("Mounted Motorcycle", "Equipment, while mounted"),
+    "Aerial": ("Aerial", "Special Skill, while active"),
+    "VH": ("Vehicle (VH)", "Troop Type"),
+    "REM": ("Remote (REM)", "Troop Type"),
+    "Irregular": ("Irregular Trooper", "Irregular Training"),
+}
+
+
+def project_public_restrictions(
+    manifest: dict[str, Any], records: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Produce negative-only, linked browser facts from the validated source."""
+    restrictions_audit(manifest, records)
+    rows: list[dict[str, Any]] = []
+    for row in manifest["rows"]:
+        subject = row["subject"]
+        title, kind = SUBJECT_DISPLAY[subject]
+        owner_id = row["ownerRecordId"]
+        owner_href = None
+        if owner_id and (domain := owner_id.split(":", 1)[0]) in {"skill", "equipment"}:
+            owner_href = f"/{'skills' if domain == 'skill' else 'equipment'}/" + (
+                owner_id.split(":", 1)[1]
+            )
+        conditions: list[dict[str, Any]] = []
+        for entry in row["restrictions"]:
+            target = entry["targetRecordId"]
+            link = None
+            if target:
+                domain, slug = target.split(":", 1)
+                link = f"/{'states' if domain == 'state' else 'skills'}/{slug}"
+            label, note = ACTION_DISPLAY[entry["action"]]
+            conditions.append({
+                "action": entry["action"], "label": label, "scope": entry["scope"],
+                "href": link, "note": note,
+            })
+        rows.append({
+            "id": subject.lower(), "name": title, "category": kind,
+            "ownerHref": owner_href, "sourceSubject": subject,
+            "conditions": conditions,
+        })
+    return {
+        "formatVersion": 1,
+        "scope": "reviewed-negative-conditions-not-action-legality",
+        "source": {
+            "id": manifest["sourceId"], "page": manifest["sourcePage"],
+            "url": SOURCE_URL,
+        },
+        "rows": rows,
+    }
+
+
+def publication_bytes(data: dict[str, Any]) -> bytes:
+    return (json.dumps(data, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+
+
+def verify_published_restrictions(
+    manifest: dict[str, Any], records: dict[str, dict[str, Any]],
+    path: Path,
+) -> str:
+    expected = publication_bytes(project_public_restrictions(manifest, records))
+    actual = path.read_bytes()
+    if actual != expected:
+        raise ValueError("Published Restrictions reference is stale or does not match source")
+    return hashlib.sha256(actual).hexdigest()
+
+
 def audit_source_files(
     manifest_path: Path = MANIFEST,
     curated_path: Path = CURATED,
     pdf_path: Path | None = None,
+    publication_path: Path | None = None,
 ) -> dict[str, Any]:
     manifest_raw = manifest_path.read_bytes()
     curated_raw = curated_path.read_bytes()
@@ -243,6 +331,10 @@ def audit_source_files(
         "manifestSha256": hashlib.sha256(manifest_raw).hexdigest(),
         "curatedSha256": hashlib.sha256(curated_raw).hexdigest(),
         "verifiedPdfSha256": verify_pinned_pdf(pdf_path, manifest) if pdf_path else None,
+        "publishedReferenceSha256": (
+            verify_published_restrictions(manifest, records, publication_path)
+            if publication_path is not None else None
+        ),
     }
 
 
@@ -251,9 +343,26 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, default=MANIFEST)
     parser.add_argument("--curated", type=Path, default=CURATED)
     parser.add_argument("--pdf", type=Path)
+    parser.add_argument("--check-publication", action="store_true")
+    parser.add_argument("--output", type=Path)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
-    report = audit_source_files(args.manifest, args.curated, args.pdf)
+    if args.output and args.check_publication:
+        parser.error("--output and --check-publication are exclusive")
+    if args.output:
+        destination = args.output.resolve()
+        if not destination.is_relative_to(ROOT / "local") or destination.exists():
+            parser.error("--output must name a new file beneath the ignored local/ directory")
+        manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+        curated = json.loads(args.curated.read_text(encoding="utf-8"))
+        records = {row["id"]: row for row in curated["records"]}
+        data = publication_bytes(project_public_restrictions(manifest, records))
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(data)
+    report = audit_source_files(
+        args.manifest, args.curated, args.pdf,
+        PUBLICATION if args.check_publication else None,
+    )
     if args.json:
         print(json.dumps(report, indent=2))
     else:

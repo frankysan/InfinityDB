@@ -28,13 +28,21 @@ from tools.audit_restrictions_source_chart import (
     PDF as RESTRICTIONS_PDF,
 )
 from tools.audit_restrictions_source_chart import (
+    PUBLICATION as RESTRICTIONS_PUBLICATION,
+)
+from tools.audit_restrictions_source_chart import (
     audit_source_files as audit_restrictions_files,
 )
 from tools.audit_restrictions_source_chart import (
     main as restrictions_main,
 )
 from tools.audit_restrictions_source_chart import (
+    project_public_restrictions,
     restrictions_audit,
+    verify_published_restrictions,
+)
+from tools.audit_restrictions_source_chart import (
+    publication_bytes as restrictions_publication_bytes,
 )
 from tools.audit_restrictions_source_chart import (
     verify_pinned_pdf as verify_restrictions_pdf,
@@ -211,3 +219,180 @@ def test_n53_restrictions_chart_cli(
     output = capsys.readouterr().out
     assert "6 rows, 14 negative conditions" in output
     assert "Source-only: no action-legality" in output
+
+
+def test_published_restrictions_reference_is_exact_source_projection() -> None:
+    manifest, records = _restriction_inputs()
+    published = json.loads(RESTRICTIONS_PUBLICATION.read_text(encoding="utf-8"))
+    expected = project_public_restrictions(manifest, records)
+    assert published == expected
+    assert RESTRICTIONS_PUBLICATION.read_bytes() == restrictions_publication_bytes(expected)
+    assert len(verify_published_restrictions(manifest, records, RESTRICTIONS_PUBLICATION)) == 64
+    assert published["scope"] == "reviewed-negative-conditions-not-action-legality"
+    assert len(published["rows"]) == 6
+    assert sum(len(item["conditions"]) for item in published["rows"]) == 14
+
+    motorcycle = published["rows"][1]
+    assert motorcycle["ownerHref"] == "/equipment/motorcycle"
+    assert {item["action"] for item in motorcycle["conditions"]} == {
+        "enter-prone", "declare-cautious-movement", "declare-climb",
+        "use-ladders", "upward-jump",
+    }
+    jump = motorcycle["conditions"][4]
+    assert jump["scope"] == "while-mounted-upwards-only"
+    assert "horizontal/downward Jump" in jump["note"]
+    assert jump["href"] == "/skills/jump"
+    assert motorcycle["conditions"][3]["href"] is None
+    irregular = published["rows"][-1]
+    assert irregular["ownerHref"] is None
+    assert irregular["conditions"][0]["scope"] == "army-selection-only"
+    assert "not a ban on using" in irregular["conditions"][0]["note"]
+    for row in published["rows"]:
+        if row["category"] == "Troop Type":
+            assert row["ownerHref"] is None
+
+    altered = copy.deepcopy(manifest)
+    altered["rows"][1]["restrictions"][4]["scope"] = "while-mounted"
+    with pytest.raises(ValueError, match="action-scope drift"):
+        project_public_restrictions(altered, records)
+    assert audit_restrictions_files(
+        publication_path=RESTRICTIONS_PUBLICATION,
+    )["publishedReferenceSha256"]
+
+
+def test_restrictions_reference_is_served_from_normal_rules_catalog() -> None:
+    from wsgiref.util import setup_testing_defaults
+
+    from infinity_db.web import create_app
+    from tools.audit_restrictions_source_chart import ROOT
+
+    app = create_app(
+        ROOT / "data/generated/infinity.db",
+        rules_database_path=ROOT / "data/generated/rules.db",
+    )
+
+    def get(path: str) -> tuple[int, dict[str, str], bytes]:
+        environ: dict[str, object] = {}
+        setup_testing_defaults(environ)
+        environ["PATH_INFO"] = path
+        status_code = 0
+        response_headers: dict[str, str] = {}
+
+        def respond(status: str, headers: list[tuple[str, str]], exc_info=None) -> None:
+            nonlocal status_code, response_headers
+            status_code = int(status.split()[0])
+            response_headers = dict(headers)
+
+        result = app(environ, respond)
+        try:
+            body = b"".join(result)
+        finally:
+            close = getattr(result, "close", None)
+            if close:
+                close()
+        return status_code, response_headers, body
+
+    status, headers, body = get("/static/restrictions-reference.json")
+    assert status == 200
+    assert headers["Content-Type"].startswith("application/json")
+    assert body == RESTRICTIONS_PUBLICATION.read_bytes()
+    assert json.loads(body)["rows"][1]["conditions"][4]["action"] == "upward-jump"
+    status, _, body = get("/rules")
+    assert status == 200
+    assert b'data-catalog="rules"' in body
+    status, _, script = get("/static/reference-catalog.js")
+    assert status == 200
+    assert b'getRestrictionsReference(pageController.signal)' in script
+    assert b'anchor.href = "/rules#restrictions"' in script
+    status, _, script = get("/static/restrictions-reference.js")
+    assert status == 200
+    assert b'Other rules may also restrict' not in script
+    assert b'not a complete list of legal actions' in script
+    assert b'linkOrText(condition.label, condition.href)' in script
+
+
+def test_restrictions_chart_normal_chromium_at_three_widths(
+    chromium_test_slot: None,
+) -> None:
+    """Check source-scoped labels, navigable anchors, and actual DOM at mobile widths."""
+    from socketserver import ThreadingMixIn
+    from threading import Thread
+    from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
+
+    playwright = pytest.importorskip("playwright.sync_api")
+    from infinity_db.web import create_app
+    from tools.audit_restrictions_source_chart import ROOT
+
+    app = create_app(
+        ROOT / "data/generated/infinity.db",
+        rules_database_path=ROOT / "data/generated/rules.db",
+    )
+
+    class ThreadedServer(ThreadingMixIn, WSGIServer):
+        daemon_threads = True
+
+    class QuietHandler(WSGIRequestHandler):
+        def log_message(self, format: str, *args: object) -> None:
+            pass
+
+    server = make_server(
+        "127.0.0.1", 0, app,
+        server_class=ThreadedServer, handler_class=QuietHandler,
+    )
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        with playwright.sync_playwright() as driver:
+            try:
+                browser = driver.chromium.launch(headless=True)
+            except Exception as exc:
+                if "Executable doesn't exist" in str(exc):
+                    pytest.skip(f"Chromium unavailable: {exc}")
+                raise
+            try:
+                for width in (1440, 390, 320):
+                    page = browser.new_page(viewport={"width": width, "height": 844})
+                    errors: list[str] = []
+                    page.on("pageerror", lambda exc, sink=errors: sink.append(str(exc)))
+                    page.goto(
+                        f"http://127.0.0.1:{server.server_port}/rules#restrictions",
+                        wait_until="domcontentloaded",
+                    )
+                    section = page.locator("#restrictions")
+                    section.wait_for(state="visible", timeout=15000)
+                    assert page.locator("#restrictions .restrictions-subject").count() == 6
+                    assert section.locator("li[data-action]").count() == 14
+                    assert page.locator(
+                        "#restriction-motorcycle li[data-action='upward-jump']"
+                    ).get_attribute("data-scope") == "while-mounted-upwards-only"
+                    assert page.locator(
+                        "#restriction-motorcycle li[data-action='upward-jump']"
+                    ).inner_text().find("horizontal/downward Jump") >= 0
+                    assert page.locator(
+                        "#restriction-irregular li[data-action='lieutenant-selection']"
+                    ).get_attribute("data-scope") == "army-selection-only"
+                    assert page.locator(
+                        "#restriction-motorcycle li[data-action='use-ladders'] a"
+                    ).count() == 0
+                    assert page.locator("#restriction-tag h3 a").count() == 0
+                    assert page.locator(
+                        "#restriction-motorcycle h3 a[href='/equipment/motorcycle']"
+                    ).count() == 1
+                    assert page.locator(
+                        "#restrictions .detail-source a"
+                        "[href='https://experience.corvusbelli.com/en/infinity/resources']"
+                    ).count() == 1
+                    assert page.locator(
+                        "a[href='/rules#restrictions']"
+                    ).is_visible()
+                    assert not page.evaluate(
+                        "() => document.documentElement.scrollWidth > innerWidth + 1"
+                    ), width
+                    assert errors == [], errors
+                    page.close()
+            finally:
+                browser.close()
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)

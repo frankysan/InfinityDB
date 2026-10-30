@@ -74,6 +74,14 @@ ASSETS = {
         "reference-catalog.js",
         "text/javascript; charset=utf-8",
     ),
+    "/static/restrictions-reference.js": (
+        "restrictions-reference.js",
+        "text/javascript; charset=utf-8",
+    ),
+    "/static/restrictions-reference.json": (
+        "restrictions-reference.json",
+        "application/json; charset=utf-8",
+    ),
     "/static/reference-detail.js": (
         "reference-detail.js",
         "text/javascript; charset=utf-8",

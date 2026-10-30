@@ -824,6 +824,31 @@ belong to [the reviewed chart provenance](n5-source-history.md#reviewed-10-struc
 Repeatable API/browser verification belongs to
 [testing](testing.md#10-martial-arts-booty-and-metachemistry-structured-chart-parity).
 
+### Reviewed Restrictions Chart projection
+
+**Current.** The N5.3 p. 194 Restrictions Chart has one reviewed
+source-only manifest at
+`config/validation/restrictions-source-chart.json`. Its six ordered
+subjects and 14 negative conditions are projected reproducibly to
+`src/infinity_db/web/static/restrictions-reference.json` by
+`tools.audit_restrictions_source_chart`. The packaged JSON is the
+runtime read model for the normal
+[General Rules Restrictions section](/rules#restrictions); the browser
+does not inspect maintained configuration or infer rules semantics.
+
+Each condition retains a source action and scope, player-readable
+description, and optional exact destination link. TAG/VH/REM are
+unlinked source Troop Type selectors, not new domain identities.
+Mounted Motorcycles cannot Jump **upwards** or use ladders; Irregular
+and REM restrictions concern **selection** as Lieutenant, not use of
+Lieutenant skills. No source-negative relation means *permission*;
+neither this reference nor existing broad
+`restricts-use-of` edges evaluate live action legality.
+Source/manifest/PDF checks, static byte parity and browser acceptance
+are documented in [testing](testing.md#n53-restrictions-chart-source-and-browser-reference).
+Canonical reverse links and condition-aware relation modeling remain
+backlog work.
+
 ## Availability and membership
 
 InfinityDB distinguishes several relationships that source data often places near each other:

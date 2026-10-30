@@ -1882,7 +1882,7 @@ Programs at 1440/390/320 px). This validates the conditional target-scope
 note and original profile/Device/citation rendering, not the full 1.0
 browser or release suite.
 
-### N5.3 Restrictions Chart source-only reconciliation
+### N5.3 Restrictions Chart source and browser reference
 
 The English N5.3 **Restrictions Chart** (printed p. 194) lists six source
 conditions and 14 prohibited actions/eligibility choices. The read-only
@@ -1909,9 +1909,30 @@ not canonical rules identities; Motorcycle's printed restriction concerns
 **upward** Jump and its ladder prohibition is distinct from Climb.
 Irregular Training's Lieutenant restriction concerns **selection**, not
 the act of using a Skill. Existing broad `restricts-use-of` relations
-cannot currently express those qualifications. This test does not assert
-positive legality, Unit ownership, user-facing publication, or all
-possible N5.3 restrictions beyond this finite chart.
+cannot currently express those qualifications. This audit does not assert
+positive legality, Unit ownership, or restrictions beyond the finite
+source chart.
+
+The reviewed manifest is now projected into packaged
+`src/infinity_db/web/static/restrictions-reference.json`; the normal
+General Rules catalog loads this read model at `/rules#restrictions`.
+The display groups six source conditions and 14 linked, condition-scoped
+negative facts. Troop Type selectors without canonical references remain
+plain text. The JSON must match the deterministic source projection
+byte-for-byte:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
+```
+
+The second command stages replacement bytes under the ignored `local/`
+directory for review, without overwriting the live tracked asset.
+`tests/test_game_mode_source_table.py` checks publication byte parity,
+source drift, WSGI static delivery and three real Chromium viewport
+renderings (1440/390/320 px), including conditional scope, references
+and page overflow. This is normal browser presentation, not a generic
+declaration or Army selection legality resolver.
 
 ### N5.3 Silhouette Templates source and browser geometry
 

@@ -1205,13 +1205,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         `restricts-use-of` relations are not sufficiently scoped for
         automatic legality decisions. This is source reconciliation, not
         a published player-facing Restrictions reference.
-      - [ ] Add condition-aware, source-backed cross-domain restrictions
-        and a normal contextual reference view. Resolve the missing
-        Troop Type identity/selector presentation contract and explicit
-        ladder/upward-Jump qualifiers; preserve the distinction between
-        Lieutenant **eligibility** and use of the Lieutenant Skill.
-        Do not make absence of a relation into permission or treat the
-        existing generic Jump relation as a ban on every Jump.
+      - [x] Publish the **six-subject, 14-condition** N5.3 Restrictions
+        chart as a deterministic read-only projection of the reviewed
+        source manifest under the normal `/rules#restrictions` reference.
+        Keep source-only TAG/VH/REM selectors unlinked, and link exact
+        Motorcycle/Aerial/Prone/Cautious Movement/Climb/Jump/Lieutenant
+        records without inventing new Troop Type identities. Make
+        mounted-only upward Jump, distinct ladders and Lieutenant
+        **selection** qualifications explicit. The browser reference
+        preserves negative-only semantics; it is not a legality engine.
+        The byte-exact static publication check and Chromium tests
+        (1440/390/320 px) protect the source-to-browser contract.
+      - [ ] Complete canonical reverse/contextual links from affected
+        Skills, Equipment and Training to the Restrictions chart, after
+        reviewing the remaining seven missing typed edges and the two
+        over-broad generic relations. Preserve source-only Troop Type
+        selectors until a canonical Troop Type reference model is
+        justified; absence of an edge conveys no permission. Do not
+        reinterpret Motorcycle's `skill:jump` edge as a ban on all
+        directions or Lieutenant selection as Skill-use prohibition.
   - **Completion:** each projection has a normal browser entry point, source reconciliation, and
     regression coverage for its exceptional rows. Exact variant reconciliation gates the usage
     index; it need not block independently ready lookup or Restrictions views.

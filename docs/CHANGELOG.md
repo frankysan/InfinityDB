@@ -29,6 +29,9 @@ are not retroactively relabeled.
   categories and remain readable on narrow screens.
 - Hacking Program pages explain when the source chart does not specify a Troop Type,
   instead of leaving the Target dash ambiguous about eligibility or effects.
+- General Rules now includes a linked N5.3 Restrictions chart, showing six
+  affected categories and their exact prohibitions, including conditions
+  for mounted Motorcycles and Lieutenant selection.
 - Fireteam charts show their original notes, flag unverified Unit/FTO references,
   and keep Reinforcement parent limits separate.
 - All canonical Trait pages offer official Wiki heading links. Glossary deep links
@@ -39,6 +42,11 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Publish the N5.3
+  Restrictions chart as a deterministic reference under General Rules.
+  Reconcile its six subjects and 14 negative conditions with the pinned
+  source, retaining qualified upward Jump, ladder and Lieutenant selection
+  semantics and links to existing rules without creating a legality engine.
 - **Data processing + Web backend + Web frontend + Deployment:** Add a standalone
   reference for 17 source-reviewed deployed objects with known, unreported and disputed
   attributes, source-backed delivery links and an explicit unresolved Mine Dispenser

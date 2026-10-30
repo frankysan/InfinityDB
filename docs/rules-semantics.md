@@ -4114,8 +4114,11 @@ against the pinned PDF by `tools.audit_restrictions_source_chart`. The
 source selectors for TAG, VH, and REM have no canonical Troop Type identity in
 the current rules registry. Existing `equipment:motorcycle`, `skill:aerial`,
 `training:irregular`, `skill:cautious-movement` and `skill:lieutenant`
-records retain related clauses, but these do not yet form a complete,
-condition-aware player-facing Restrictions view.
+records retain related clauses. A complete conditional projection of
+the chart is now available at `/rules#restrictions`; it is generated
+from the source-review manifest, not inferred from the incomplete
+generic relation graph. Source-only Troop Type labels are displayed
+without fictitious canonical record links.
 
 Two typed-relation limitations are material: Motorcycle's
 `restricts-use-of → skill:jump` edge lacks the printed **upwards-only**
@@ -4123,10 +4126,13 @@ qualifier (horizontal/downward Jump remains permitted), while Irregular
 Training's `restricts-use-of → skill:lieutenant` describes **selection as
 Lieutenant**, not a prohibition on using every aspect of that Skill.
 Motorcycle ladder use is a separate source restriction, not an inferred
-Climb alias. Preserve each condition explicitly when implementing a
-contextual projection; a missing edge conveys neither permission nor
-prohibition. The read-only audit introduces no new Unit facts, canonical
-Troop Type identities or executable action-legality behavior.
+Climb alias. The publication retains each prohibition, its exact
+conditional scope and any reviewed Skill/Equipment/State destination;
+a missing edge conveys neither permission nor prohibition. Its source
+provenance is English N5.3 p. 194. The read-only projection introduces
+no new Unit facts, canonical Troop Type identities or executable
+action-legality behavior. Reverse links from other catalog pages and
+the remaining relation-model work are separately tracked.
 
 Sources:
 

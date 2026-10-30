@@ -1,0 +1,163 @@
+{
+  "formatVersion": 1,
+  "scope": "reviewed-negative-conditions-not-action-legality",
+  "source": {
+    "id": "n5-core-v5.3-pdf",
+    "page": 194,
+    "url": "https://experience.corvusbelli.com/en/infinity/resources"
+  },
+  "rows": [
+    {
+      "id": "tag",
+      "name": "TAG",
+      "category": "Troop Type",
+      "ownerHref": null,
+      "sourceSubject": "TAG",
+      "conditions": [
+        {
+          "action": "enter-prone",
+          "label": "Cannot enter Prone State",
+          "scope": "all",
+          "href": "/states/prone",
+          "note": null
+        },
+        {
+          "action": "declare-cautious-movement",
+          "label": "Cannot declare Cautious Movement",
+          "scope": "all",
+          "href": "/skills/cautious-movement",
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "motorcycle",
+      "name": "Mounted Motorcycle",
+      "category": "Equipment, while mounted",
+      "ownerHref": "/equipment/motorcycle",
+      "sourceSubject": "Motorcycle",
+      "conditions": [
+        {
+          "action": "enter-prone",
+          "label": "Cannot enter Prone State",
+          "scope": "while-mounted",
+          "href": "/states/prone",
+          "note": null
+        },
+        {
+          "action": "declare-cautious-movement",
+          "label": "Cannot declare Cautious Movement",
+          "scope": "while-mounted",
+          "href": "/skills/cautious-movement",
+          "note": null
+        },
+        {
+          "action": "declare-climb",
+          "label": "Cannot declare Climb",
+          "scope": "while-mounted",
+          "href": "/skills/climb",
+          "note": null
+        },
+        {
+          "action": "use-ladders",
+          "label": "Cannot use ladders",
+          "scope": "while-mounted",
+          "href": null,
+          "note": "Ladders are a separate restriction from Climb."
+        },
+        {
+          "action": "upward-jump",
+          "label": "Cannot Jump upward",
+          "scope": "while-mounted-upwards-only",
+          "href": "/skills/jump",
+          "note": "Only upward Jump is prohibited here; horizontal/downward Jump is not prohibited by this row."
+        }
+      ]
+    },
+    {
+      "id": "aerial",
+      "name": "Aerial",
+      "category": "Special Skill, while active",
+      "ownerHref": "/skills/aerial",
+      "sourceSubject": "Aerial",
+      "conditions": [
+        {
+          "action": "enter-prone",
+          "label": "Cannot enter Prone State",
+          "scope": "aerial-active",
+          "href": "/states/prone",
+          "note": null
+        },
+        {
+          "action": "declare-cautious-movement",
+          "label": "Cannot declare Cautious Movement",
+          "scope": "aerial-active",
+          "href": "/skills/cautious-movement",
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "vh",
+      "name": "Vehicle (VH)",
+      "category": "Troop Type",
+      "ownerHref": null,
+      "sourceSubject": "VH",
+      "conditions": [
+        {
+          "action": "enter-prone",
+          "label": "Cannot enter Prone State",
+          "scope": "all",
+          "href": "/states/prone",
+          "note": null
+        },
+        {
+          "action": "declare-cautious-movement",
+          "label": "Cannot declare Cautious Movement",
+          "scope": "all",
+          "href": "/skills/cautious-movement",
+          "note": null
+        }
+      ]
+    },
+    {
+      "id": "rem",
+      "name": "Remote (REM)",
+      "category": "Troop Type",
+      "ownerHref": null,
+      "sourceSubject": "REM",
+      "conditions": [
+        {
+          "action": "declare-cautious-movement",
+          "label": "Cannot declare Cautious Movement",
+          "scope": "all",
+          "href": "/skills/cautious-movement",
+          "note": null
+        },
+        {
+          "action": "lieutenant-selection",
+          "label": "Cannot be chosen as Lieutenant",
+          "scope": "army-selection-only",
+          "href": "/skills/lieutenant",
+          "note": "Army selection eligibility, not a ban on using the Lieutenant Skill."
+        }
+      ]
+    },
+    {
+      "id": "irregular",
+      "name": "Irregular Trooper",
+      "category": "Irregular Training",
+      "ownerHref": null,
+      "sourceSubject": "Irregular",
+      "conditions": [
+        {
+          "action": "lieutenant-selection",
+          "label": "Cannot be chosen as Lieutenant",
+          "scope": "army-selection-only",
+          "href": "/skills/lieutenant",
+          "note": "Army selection eligibility, not a ban on using the Lieutenant Skill."
+        }
+      ]
+    }
+  ]
+}

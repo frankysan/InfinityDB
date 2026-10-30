@@ -60,6 +60,10 @@ export function getGlossary(signal) {
   return getJson("/api/glossary", signal);
 }
 
+export function getRestrictionsReference(signal) {
+  return getJson("/static/restrictions-reference.json", signal);
+}
+
 export function getScenarios(signal, { collection = "", revision = "" } = {}) {
   const params = new URLSearchParams();
   if (collection) params.set("collection", collection);
