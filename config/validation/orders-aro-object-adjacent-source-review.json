@@ -1,6 +1,6 @@
 {
   "formatVersion": 1,
-  "scope": "selected-object-adjacent-declaration-rows-not-full-orders-aro-chart",
+  "scope": "complete-pinned-core-source-chart-not-published-declaration-matrix",
   "sourceId": "n5-core-v5.3-pdf",
   "sourcePage": 191,
   "sourcePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
@@ -8,11 +8,130 @@
   "sourceChartIsObjectInventory": false,
   "rows": [
     {
+      "section": "basic",
+      "name": "Discover",
+      "sourceType": "COMMON",
+      "sourcePage": 77,
+      "recordId": "skill:discover"
+    },
+    {
+      "section": "basic",
+      "name": "Idle",
+      "sourceType": "COMMON",
+      "sourcePage": 80,
+      "recordId": "skill:idle"
+    },
+    {
+      "section": "basic",
+      "name": "Move",
+      "sourceType": "COMMON",
+      "sourcePage": 29,
+      "recordId": "skill:move"
+    },
+    {
+      "section": "long",
+      "name": "Assisted Fire",
+      "sourceType": "HACKING",
+      "sourcePage": 59,
+      "recordId": "hacking-program:assisted-fire"
+    },
+    {
+      "section": "long",
+      "name": "Berserk",
+      "sourceType": "SPECIAL",
+      "sourcePage": 86,
+      "recordId": "skill:berserk"
+    },
+    {
+      "section": "long",
+      "name": "Cautious Movement",
+      "sourceType": "COMMON",
+      "sourcePage": 32,
+      "recordId": "skill:cautious-movement"
+    },
+    {
+      "section": "long",
+      "name": "Cybermask",
+      "sourceType": "HACKING",
+      "sourcePage": 59,
+      "recordId": "hacking-program:cybermask"
+    },
+    {
+      "section": "long",
+      "name": "Combat Jump",
+      "sourceType": "SPECIAL",
+      "sourcePage": 89,
+      "recordId": "skill:combat-jump"
+    },
+    {
+      "section": "long",
+      "name": "Climb",
+      "sourceType": "COMMON",
+      "sourcePage": 32,
+      "recordId": "skill:climb"
+    },
+    {
+      "section": "long",
+      "name": "Enhanced Reaction",
+      "sourceType": "HACKING",
+      "sourcePage": 60,
+      "recordId": "hacking-program:enhanced-reaction"
+    },
+    {
+      "section": "long",
+      "name": "Fairy Dust",
+      "sourceType": "HACKING",
+      "sourcePage": 60,
+      "recordId": "hacking-program:fairy-dust"
+    },
+    {
       "section": "long",
       "name": "Intuitive Attack",
       "sourceType": "COMMON",
       "sourcePage": 49,
       "recordId": "skill:intuitive-attack"
+    },
+    {
+      "section": "long",
+      "name": "Jump",
+      "sourceType": "COMMON",
+      "sourcePage": 34,
+      "recordId": "skill:jump"
+    },
+    {
+      "section": "long",
+      "name": "Parachutist",
+      "sourceType": "SPECIAL",
+      "sourcePage": 105,
+      "recordId": "skill:parachutist"
+    },
+    {
+      "section": "long",
+      "name": "Sapper",
+      "sourceType": "SPECIAL",
+      "sourcePage": 111,
+      "recordId": "skill:sapper"
+    },
+    {
+      "section": "long",
+      "name": "Speculative Attack",
+      "sourceType": "COMMON",
+      "sourcePage": 48,
+      "recordId": "skill:speculative-attack"
+    },
+    {
+      "section": "long",
+      "name": "Suppressive Fire",
+      "sourceType": "COMMON",
+      "sourcePage": 85,
+      "recordId": "skill:suppressive-fire"
+    },
+    {
+      "section": "long",
+      "name": "Triangulated Fire",
+      "sourceType": "SPECIAL",
+      "sourcePage": 118,
+      "recordId": "skill:triangulated-fire"
     },
     {
       "section": "short",
@@ -30,6 +149,20 @@
     },
     {
       "section": "short",
+      "name": "Carbonite",
+      "sourceType": "HACKING",
+      "sourcePage": 59,
+      "recordId": "hacking-program:carbonite"
+    },
+    {
+      "section": "short",
+      "name": "CC Attack",
+      "sourceType": "COMMON",
+      "sourcePage": 51,
+      "recordId": "skill:cc-attack"
+    },
+    {
+      "section": "short",
       "name": "Controlled Jump",
       "sourceType": "HACKING",
       "sourcePage": 59,
@@ -41,6 +174,27 @@
       "sourceType": "EQUIPMENT",
       "sourcePage": 121,
       "recordId": "equipment:deactivator"
+    },
+    {
+      "section": "short",
+      "name": "Doctor",
+      "sourceType": "SPECIAL",
+      "sourcePage": 90,
+      "recordId": "skill:doctor"
+    },
+    {
+      "section": "short",
+      "name": "Dodge",
+      "sourceType": "COMMON",
+      "sourcePage": 79,
+      "recordId": "skill:dodge"
+    },
+    {
+      "section": "short",
+      "name": "Engineer",
+      "sourceType": "SPECIAL",
+      "sourcePage": 91,
+      "recordId": "skill:engineer"
     },
     {
       "section": "short",
@@ -65,6 +219,20 @@
     },
     {
       "section": "short",
+      "name": "Morpho-Scan",
+      "sourceType": "SPECIAL",
+      "sourcePage": 103,
+      "recordId": "skill:morpho-scan"
+    },
+    {
+      "section": "short",
+      "name": "Oblivion",
+      "sourceType": "HACKING",
+      "sourcePage": 60,
+      "recordId": "hacking-program:oblivion"
+    },
+    {
+      "section": "short",
       "name": "Place Deployable",
       "sourceType": "COMMON",
       "sourcePage": 82,
@@ -78,11 +246,74 @@
       "recordId": "skill:reload"
     },
     {
+      "section": "short",
+      "name": "Reset",
+      "sourceType": "COMMON",
+      "sourcePage": 85,
+      "recordId": "skill:reset"
+    },
+    {
+      "section": "short",
+      "name": "Sensor",
+      "sourceType": "SPECIAL",
+      "sourcePage": 111,
+      "recordId": "skill:sensor"
+    },
+    {
+      "section": "short",
+      "name": "Spotlight",
+      "sourceType": "HACKING",
+      "sourcePage": 60,
+      "recordId": "hacking-program:spotlight"
+    },
+    {
+      "section": "short",
+      "name": "Total Control",
+      "sourceType": "HACKING",
+      "sourcePage": 61,
+      "recordId": "hacking-program:total-control"
+    },
+    {
+      "section": "short",
+      "name": "Trinity",
+      "sourceType": "HACKING",
+      "sourcePage": 61,
+      "recordId": "hacking-program:trinity"
+    },
+    {
+      "section": "short",
+      "name": "White Noise",
+      "sourceType": "HACKING",
+      "sourcePage": 61,
+      "recordId": "hacking-program:white-noise"
+    },
+    {
+      "section": "short",
+      "name": "Zero Pain",
+      "sourceType": "HACKING",
+      "sourcePage": 61,
+      "recordId": "hacking-program:zero-pain"
+    },
+    {
       "section": "aro",
       "name": "BS Attack",
       "sourceType": "COMMON",
       "sourcePage": 39,
       "recordId": "skill:bs-attack"
+    },
+    {
+      "section": "aro",
+      "name": "Carbonite",
+      "sourceType": "HACKING",
+      "sourcePage": 59,
+      "recordId": "hacking-program:carbonite"
+    },
+    {
+      "section": "aro",
+      "name": "CC Attack",
+      "sourceType": "COMMON",
+      "sourcePage": 51,
+      "recordId": "skill:cc-attack"
     },
     {
       "section": "aro",
@@ -93,10 +324,38 @@
     },
     {
       "section": "aro",
+      "name": "Discover",
+      "sourceType": "COMMON",
+      "sourcePage": 77,
+      "recordId": "skill:discover"
+    },
+    {
+      "section": "aro",
+      "name": "Dodge",
+      "sourceType": "COMMON",
+      "sourcePage": 79,
+      "recordId": "skill:dodge"
+    },
+    {
+      "section": "aro",
       "name": "Forward Observer",
       "sourceType": "SPECIAL",
       "sourcePage": 92,
       "recordId": "skill:forward-observer"
+    },
+    {
+      "section": "aro",
+      "name": "Look Out!",
+      "sourceType": "COMMON",
+      "sourcePage": 81,
+      "recordId": "skill:look-out"
+    },
+    {
+      "section": "aro",
+      "name": "Oblivion",
+      "sourceType": "HACKING",
+      "sourcePage": 60,
+      "recordId": "hacking-program:oblivion"
     },
     {
       "section": "aro",
@@ -111,6 +370,41 @@
       "sourceType": "COMMON",
       "sourcePage": 83,
       "recordId": "skill:reload"
+    },
+    {
+      "section": "aro",
+      "name": "Reset",
+      "sourceType": "COMMON",
+      "sourcePage": 85,
+      "recordId": "skill:reset"
+    },
+    {
+      "section": "aro",
+      "name": "Spotlight",
+      "sourceType": "HACKING",
+      "sourcePage": 60,
+      "recordId": "hacking-program:spotlight"
+    },
+    {
+      "section": "aro",
+      "name": "Total Control",
+      "sourceType": "HACKING",
+      "sourcePage": 61,
+      "recordId": "hacking-program:total-control"
+    },
+    {
+      "section": "aro",
+      "name": "Trinity",
+      "sourceType": "HACKING",
+      "sourcePage": 61,
+      "recordId": "hacking-program:trinity"
+    },
+    {
+      "section": "aro",
+      "name": "Zero Pain",
+      "sourceType": "HACKING",
+      "sourcePage": 61,
+      "recordId": "hacking-program:zero-pain"
     }
   ]
 }

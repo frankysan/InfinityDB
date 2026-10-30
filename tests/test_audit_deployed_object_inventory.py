@@ -492,13 +492,17 @@ def test_p191_object_adjacent_source_chart_is_canonical_and_audit_only() -> None
     from tools.audit_orders_aro_object_adjacent_chart import audit
 
     report = audit()
-    assert report["selectedRows"] == 15
-    assert report["distinctOwners"] == 10
-    assert report["rowsByDeclaration"] == {"long": 1, "short": 9, "aro": 5}
-    assert report["missingCuratedSkillTypesOrSeparatelyOwnedProgramTypes"] == [
-        "hacking-program:controlled-jump:short",
-        "hacking-program:controlled-jump:aro",
-    ]
+    assert report["selectedRows"] == 57
+    assert report["sourceChartFullyTranscribed"] is True
+    assert report["distinctOwners"] == 42
+    assert report["rowsByDeclaration"] == {
+        "basic": 3, "long": 15, "short": 23, "aro": 16,
+    }
+    assert len(report["separatelyOwnedProgramDeclarations"]) == 19
+    assert "hacking-program:controlled-jump:aro" in (
+        report["separatelyOwnedProgramDeclarations"]
+    )
+    assert report["armyProgramDeclarationsVerified"] is None
     assert report["publishedObjectIdentityChanges"] == 0
     assert report["newDeliveryEdges"] == 0
     assert report["fullChartCertified"] is False
@@ -513,6 +517,9 @@ def test_p191_selected_action_source_cells_match_pinned_pdf() -> None:
         pytest.skip("Pinned English N5.3 PDF unavailable")
     report = audit(pdf_path=PDF)
     assert report["verifiedPdfSha256"] == report["sourcePdfSha256"]
+    assert report["rowsByDeclaration"] == {
+        "basic": 3, "long": 15, "short": 23, "aro": 16,
+    }
 
 
 def test_p191_selected_action_review_rejects_unverified_owners_and_rows() -> None:
@@ -529,7 +536,7 @@ def test_p191_selected_action_review_rejects_unverified_owners_and_rows() -> Non
         for record in json.loads(path.read_text(encoding="utf-8"))["records"]
     }
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    assert check_rows(manifest, records)["selectedRows"] == 15
+    assert check_rows(manifest, records)["selectedRows"] == 57
 
     broken = copy.deepcopy(manifest)
     broken["rows"][0]["recordId"] = "weapon:unverified"
@@ -550,5 +557,58 @@ def test_p191_selected_action_review_rejects_unverified_owners_and_rows() -> Non
     broken["rows"][1]["recordId"] = "equipment:deactivator"
     with pytest.raises(ValueError, match="Missing current canonical"):
         check_rows(broken, records)
+
+    # Printed Look Out! is the canonical skill:look-out, not another action.
+    look_out = next(row for row in manifest["rows"] if row["name"] == "Look Out!")
+    assert look_out["recordId"] == "skill:look-out"
+    assert look_out["section"] == "aro"
+
+    broken = copy.deepcopy(manifest)
+    next(row for row in broken["rows"] if row["name"] == "Deactivator")[
+        "section"
+    ] = "aro"
+    with pytest.raises(ValueError, match="category row-count"):
+        check_rows(broken, records)
+
+    modified_records = copy.deepcopy(records)
+    modified_records["skill:move"]["facts"]["typeIds"] = ["short-skill"]
+    with pytest.raises(ValueError, match="Core Skill declaration mismatch"):
+        check_rows(manifest, modified_records)
+
+
+def test_p191_all_hacking_declarations_match_current_army_metadata() -> None:
+    from tools.audit_orders_aro_object_adjacent_chart import (
+        ARMY_DB,
+        CORE,
+        HACKING,
+        MANIFEST,
+        audit,
+        check_rows,
+    )
+
+    if not ARMY_DB.is_file():
+        pytest.skip("Generated Army database unavailable")
+    report = audit(army_db_path=ARMY_DB)
+    assert report["armyProgramDeclarationsVerified"] == 19
+    assert len(report["separatelyOwnedProgramDeclarations"]) == 19
+
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    records = {
+        record["id"]: record
+        for path in (CORE, HACKING)
+        for record in json.loads(path.read_text(encoding="utf-8"))["records"]
+    }
+    categories: dict[str, set[str]] = {}
+    for declaration in report["separatelyOwnedProgramDeclarations"]:
+        record_id, category = declaration.rsplit(":", 1)
+        type_id = {
+            "basic": "basic-short-skill", "long": "long-skill",
+            "short": "short-skill", "aro": "aro",
+        }[category]
+        categories.setdefault(record_id, set()).add(type_id)
+    assert check_rows(manifest, records, categories)["armyProgramDeclarationsVerified"] == 19
+    categories["hacking-program:controlled-jump"].remove("aro")
+    with pytest.raises(ValueError, match="Hacking declarations"):
+        check_rows(manifest, records, categories)
 
 

@@ -1,9 +1,8 @@
-"""Audit selected N5.3 p. 191 Orders/AROs chart entries adjacent to object use.
+"""Audit all N5.3 p. 191 Orders/AROs source rows without creating a matrix.
 
-This source-table audit is intentionally narrower than the planned generated
-declaration matrix. Printed Equipment actions, Skills and Programs are
-different owning domains; neither a chart row nor an ARO category grants
-an additional deployed-object identity or Unit ownership.
+This audit grew from a selected deployed-object-related review. The full printed
+chart is source evidence for a later generated cross-domain declaration matrix,
+not a second runtime model or an authorization to create deployed objects.
 """
 from __future__ import annotations
 
@@ -14,18 +13,27 @@ import re
 from pathlib import Path
 from typing import Any
 
+from infinity_db.database.repository import Database
+from infinity_db.domain_slugs import assign_domain_slugs
+from infinity_db.hacking_program_catalog import hacking_program_declaration_categories
+
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/orders-aro-object-adjacent-source-review.json"
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 HACKING = ROOT / "data/curated/rules/n5-hacking-programs-v5.3.json"
 PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
-EXPECTED_COUNT = 15
-SECTIONS = {"long", "short", "aro"}
+ARMY_DB = ROOT / "data/generated/infinity.db"
+EXPECTED_SECTION_COUNTS = {"basic": 3, "long": 15, "short": 23, "aro": 16}
+EXPECTED_COUNT = sum(EXPECTED_SECTION_COUNTS.values())
+SECTIONS = set(EXPECTED_SECTION_COUNTS)
 SOURCE_TYPES = {"COMMON", "SPECIAL", "EQUIPMENT", "HACKING"}
-EXPECTED_SCOPE = "selected-object-adjacent-declaration-rows-not-full-orders-aro-chart"
+EXPECTED_SCOPE = "complete-pinned-core-source-chart-not-published-declaration-matrix"
 
 
-def check_rows(manifest: dict[str, Any], records: dict[str, dict[str, Any]]) -> dict[str, Any]:
+def check_rows(
+    manifest: dict[str, Any], records: dict[str, dict[str, Any]],
+    program_categories: dict[str, set[str]] | None = None,
+) -> dict[str, Any]:
     """Check a bounded source transcription and independently owned record identities."""
     if (
         manifest.get("formatVersion") != 1
@@ -42,7 +50,8 @@ def check_rows(manifest: dict[str, Any], records: dict[str, dict[str, Any]]) -> 
         raise ValueError("Selected p. 191 declaration row-count drift")
     seen: set[tuple[str, str]] = set()
     represented: dict[str, list[str]] = {}
-    untyped: list[str] = []
+    separately_owned_programs: list[str] = []
+    program_sections: dict[str, set[str]] = {}
     for row in rows:
         if not isinstance(row, dict) or set(row) != {
             "section", "name", "sourceType", "sourcePage", "recordId"
@@ -64,7 +73,9 @@ def check_rows(manifest: dict[str, Any], records: dict[str, dict[str, Any]]) -> 
             raise ValueError(f"Duplicate p. 191 declaration: {key}")
         seen.add(key)
         record = records.get(record_id)
-        if record is None or record.get("name", "").casefold() != name.casefold() or (
+        # The printed Look Out! punctuation differs from the canonical name.
+        canonical_name = "Look Out" if name == "Look Out!" else name
+        if record is None or record.get("name", "").casefold() != canonical_name.casefold() or (
             record.get("composition") or {}
         ).get("role") != "definition" or record.get("scope") != {
             "game": "N5", "seasons": ["current"]
@@ -84,16 +95,21 @@ def check_rows(manifest: dict[str, Any], records: dict[str, dict[str, Any]]) -> 
             # instead live in Army metadata and require the later full projection.
             types = (record.get("facts") or {}).get("typeIds", [])
             requested = {
-                "long": "long-skill", "short": "short-skill", "aro": "aro"
+                "basic": "basic-short-skill", "long": "long-skill",
+                "short": "short-skill", "aro": "aro"
             }[section]
             if kind == "skill":
                 if requested not in types:
-                    untyped.append(f"{record_id}:{section}")
+                    raise ValueError(f"Core Skill declaration mismatch: {record_id}:{section}")
             else:
-                untyped.append(f"{record_id}:{section}")
+                separately_owned_programs.append(f"{record_id}:{section}")
+                program_sections.setdefault(record_id, set()).add(requested)
         represented.setdefault(section, []).append(record_id)
-    if {key[0] for key in seen} != SECTIONS:
-        raise ValueError("Missing a selected p. 191 declaration section")
+    if {section: len(rows) for section, rows in represented.items()} != EXPECTED_SECTION_COUNTS:
+        raise ValueError("Printed p. 191 category row-count drift")
+    if program_categories is not None:
+        if program_sections != program_categories:
+            raise ValueError("N5.3 printed Hacking declarations differ from Army metadata")
     if not all(
         (section, name) in seen for section, name in (
             ("short", "place deployable"), ("aro", "place deployable"),
@@ -106,10 +122,14 @@ def check_rows(manifest: dict[str, Any], records: dict[str, dict[str, Any]]) -> 
         "scope": EXPECTED_SCOPE,
         "sourcePage": 191,
         "selectedRows": len(rows),
+        "sourceChartFullyTranscribed": True,
         "distinctOwners": len({row["recordId"] for row in rows}),
         "rowsByDeclaration": {key: len(value) for key, value in represented.items()},
-        "missingCuratedSkillTypesOrSeparatelyOwnedProgramTypes": untyped,
-        "fullChartCertified": False,
+        "separatelyOwnedProgramDeclarations": separately_owned_programs,
+        "armyProgramDeclarationsVerified": (
+            len(separately_owned_programs) if program_categories is not None else None
+        ),
+        "fullChartCertified": False,  # Generated player-facing matrix remains open.
         "publishedObjectIdentityChanges": 0,
         "newDeliveryEdges": 0,
     }
@@ -142,29 +162,28 @@ def verify_pdf(source: Path, manifest: dict[str, Any]) -> str:
             section = row["section"]
             right = section in {"long", "aro"}
             expected_lower = section in {"short", "aro"}
-            matches = [
-                rect for rect in page.search_for(row["name"])
-                if (rect.x0 >= middle) == right
-                and (rect.y0 >= lower_start) == expected_lower
-            ]
+            # Short names like Jump also occur inside Combat Jump. Use
+            # the printed Type/page cells to disambiguate source-row matches.
+            matches = []
+            for name_rect in page.search_for(row["name"]):
+                if (name_rect.x0 >= middle) != right or (
+                    (name_rect.y0 >= lower_start) != expected_lower
+                ):
+                    continue
+                x_end = page.rect.width if right else middle
+                line = [
+                    str(word[4]).upper().strip(".,")
+                    for word in words
+                    if name_rect.x1 - 2 < float(word[0]) < x_end
+                    and abs((float(word[1]) + float(word[3])) / 2
+                            - (name_rect.y0 + name_rect.y1) / 2) < 5
+                ]
+                if row["sourceType"] in line and str(row["sourcePage"]) in line:
+                    matches.append(name_rect)
             if len(matches) != 1:
                 raise ValueError(
                     f"Missing or ambiguous printed p. 191 declaration: "
-                    f"{section} {row['name']} ({len(matches)} matches)"
-                )
-            name_rect = matches[0]
-            x_end = page.rect.width if right else middle
-            line = [
-                str(word[4]).upper().strip(".,")
-                for word in words
-                if name_rect.x1 - 2 < float(word[0]) < x_end
-                and abs((float(word[1]) + float(word[3])) / 2
-                        - (name_rect.y0 + name_rect.y1) / 2) < 5
-            ]
-            if row["sourceType"] not in line or str(row["sourcePage"]) not in line:
-                raise ValueError(
-                    f"Printed p. 191 Type/page mismatch for {section} "
-                    f"{row['name']}: {line}"
+                    f"{section} {row['name']} ({len(matches)} verified matches)"
                 )
     return digest
 
@@ -174,6 +193,7 @@ def audit(
     core_path: Path = CORE,
     hacking_path: Path = HACKING,
     pdf_path: Path | None = None,
+    army_db_path: Path | None = None,
 ) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     sources = [
@@ -184,7 +204,22 @@ def audit(
         record["id"]: record for doc in sources
         for record in doc["records"]
     }
-    report = check_rows(manifest, records)
+    programs = None
+    if army_db_path is not None:
+        rows = Database(army_db_path).list_hacking_programs()
+        slugs = assign_domain_slugs(
+            ((int(row["position"]), row["name"]) for row in rows),
+            domain="hacking-programs",
+        )
+        programs = {}
+        for row in rows:
+            categories = hacking_program_declaration_categories(row["skill_types"])
+            if any(category["id"] == "unclassified" for category in categories):
+                raise ValueError(f"Unclassified Army Hacking Skill Type: {row['name']}")
+            programs[f"hacking-program:{slugs[int(row['position'])]}"] = {
+                category["id"] for category in categories
+            }
+    report = check_rows(manifest, records, programs)
     return {
         **report,
         "sourcePdfSha256": manifest["sourcePdfSha256"],
@@ -195,17 +230,20 @@ def audit(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pdf", type=Path, help="Verify against pinned English N5.3 PDF")
+    parser.add_argument(
+        "--army-db", type=Path, help="Verify Hacking categories against Army metadata",
+    )
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
-    report = audit(pdf_path=args.pdf)
+    report = audit(pdf_path=args.pdf, army_db_path=args.army_db)
     if args.json:
         print(json.dumps(report, indent=2))
     else:
         print(f"Selected p. 191 rows: {report['selectedRows']}")
         print(f"Distinct canonical owners: {report['distinctOwners']}")
         print(f"Declaration categories: {report['rowsByDeclaration']}")
-        print(f"Skill/Program types needing separate reconciliation: "
-              f"{len(report['missingCuratedSkillTypesOrSeparatelyOwnedProgramTypes'])}")
+        print(f"Army-backed Hacking declarations verified: "
+              f"{report['armyProgramDeclarationsVerified']}")
         print(f"Direct PDF verification: {report['verifiedPdfSha256'] is not None}")
     return 0
 

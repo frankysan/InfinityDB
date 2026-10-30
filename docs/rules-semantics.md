@@ -4033,10 +4033,20 @@ Short, Long, and ARO while identifying whether the action comes from Common/
 Special Skills, Hacking, or Equipment. Declaration category and owning catalog
 domain are therefore independent axes.
 
-The N5 declaration-category reconciliation is complete. A generated cross-domain Orders/AROs
-matrix is still unimplemented and belongs to the 1.0 backlog. It can use the reviewed categories
-as a completeness check without maintaining a parallel hard-coded chart, while distinguishing
-core actions from future scenario- or phase-scoped actions.
+The N5 declaration-category reconciliation is complete. The independently pinned
+N5.3 p. 191 source audit now verifies all **57 printed rows** (3 Basic Short, 15 Long,
+23 Short, 16 ARO) against **42 existing canonical owners**, including all 19
+Hacking Program declaration occurrences independently checked against Army
+metadata. The PDF-backed source Type is not always the canonical owning kind:
+the Equipment-labelled Activate Disco Ball is a Skill, and Look Out! shares the
+canonical Look Out identity. Neither case creates a new deployed object.
+
+A generated cross-domain Orders/AROs matrix remains unimplemented for 1.0.
+The complete source-table audit in
+`config/validation/orders-aro-object-adjacent-source-review.json` is validation
+evidence, not a parallel published chart. The future projection should consume
+the existing Skill and Hacking Program declaration categories, distinguish core
+actions from scenario- or phase-scoped actions, and expose owning reference links.
 
 Sources:
 
