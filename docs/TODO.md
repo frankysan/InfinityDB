@@ -1426,10 +1426,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 terrain-characteristic combinations if player
                 discoverability requires them; do not conflate
                 their labels with persistent deployed devices.
+            - [x] Independently reconcile the N5.3 **Retreat! threshold
+              table** (p. 146) and generic **recommended table-size**
+              guidance (p. 147). Six printed Army Points rows
+              (150/200/250/300/350/400) have Retreat! thresholds
+              (38/50/63/75/88/100 VP) and advisory dimensions
+              (24×32 / 32×48 / 48×48 inches by game-size group).
+              The new read-only source manifest and audit preserve
+              upward rounding at 150/250/350, army/session Victory
+              Points versus Trooper Retreat! State, and optional
+              table-layout advice versus scenario-owned dimensions.
+              The pinned PDF check verifies the source rows using
+              page coordinates; no Unit attributes, scenario
+              overrides or deployed-object identities were added.
+            - [ ] Decide whether game-wide Retreat! thresholds and
+              generic table-size recommendations need an additional
+              maintained general-reference display model. Do not
+              assign calculated Retreat! status to a static Unit,
+              or treat advisory table dimensions as scenario rules.
             - [ ] Continue source-table discovery beyond the terrain,
-              scenario, Weapon Chart and p. 74 reviews; verify any
-              additional game-element categories against direct
-              rules before expanding the canonical object inventory.
+              scenario, Retreat!, Weapon Chart and p. 74 reviews;
+              verify additional game-element categories against
+              direct rules before expanding a canonical inventory.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery

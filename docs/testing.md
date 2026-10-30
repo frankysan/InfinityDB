@@ -1624,6 +1624,46 @@ delivery path is changed.
 `tests/test_deployed_object_expanded_queue.py` checks the discovery and
 fail-closed review boundaries.
 
+### Independent Retreat! and generic game-setup source tables
+
+N5.3 prints a **Retreat! threshold table** on p. 146 and separate
+**advisory table-size recommendations** on p. 147. The maintained
+Trooper `state:retreat` (p. 170) and `term:victory-points` (p. 173)
+do not themselves represent the army-wide threshold or generic table
+layout. Review the read-only inventory with:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_standard_game_reference_tables
+.venv\Scripts\python.exe -m tools.audit_standard_game_reference_tables --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+```
+
+The audit pins six Army Points rows in
+`config/validation/standard-game-reference-tables.json`: 150 → 38 VP,
+200 → 50 VP, 250 → 63 VP, 300 → 75 VP, 350 → 88 VP,
+400 → 100 VP. These are ceilings of one quarter of the game/list
+points, checked against **current surviving Victory Points** at the
+beginning of the active turn's Tactical Phase. This is an **army/session
+condition**; it is not a static Unit/Profile attribute or a direct
+synonym for the Trooper's `state:retreat`.
+
+The adjacent generic table-size recommendations are 24×32 inches at
+150 points, 32×48 at 200/250, and 48×48 at 300/350/400.
+The source explicitly identifies table setup guidance as advisory, not
+mandatory. These dimensions must not override authoritative
+scenario-scoped geometry or deployment rules.
+
+The source audit fails closed on changed row values, threshold
+rounding, page provenance, scope, missing maintained Retreat!/VP
+identities, or newly introduced canonical reference records requiring
+review. With `--pdf`, it checks both pages in the locally pinned
+English N5.3 PDF, including positional alignment of Army Points and
+survivor thresholds across the printed two-column table. Without the
+ignored PDF, the manifest and maintained-boundary checks remain
+available in CI. It does not publish scenario data, infer surviving
+Troopers from an Army loadout, evaluate game state, or add any deployed
+object. `tests/test_standard_game_reference_tables.py` covers source
+rows, rounding, negative drift and the optional PDF extraction.
+
 ### Terrain and Scenery Structures source gaps
 
 The optional N5.3 terrain chapter (pp. 143–145) contains a separate source

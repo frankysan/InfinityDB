@@ -1,0 +1,71 @@
+{
+  "formatVersion": 1,
+  "sourceId": "n5-core-v5.3-pdf",
+  "sourcePages": {
+    "retreatThresholds": 146,
+    "recommendedTables": 147
+  },
+  "reviewStatus": "source-reviewed-audit-only",
+  "thresholdRule": {
+    "comparison": "current-victory-points-less-than-or-equal-to-threshold",
+    "basis": "army-points-available-for-building-list",
+    "percent": 25,
+    "checkPhase": "beginning-of-active-turn-tactical-phase",
+    "domain": "army-session-not-unit-or-trooper-attribute"
+  },
+  "tableSizeRule": {
+    "scope": "advisory-not-mandatory",
+    "domain": "generic-table-setup-not-scenario-override",
+    "units": "inches"
+  },
+  "rows": [
+    {
+      "armyPoints": 150,
+      "retreatThresholdVictoryPoints": 38,
+      "recommendedTableInches": [
+        24,
+        32
+      ]
+    },
+    {
+      "armyPoints": 200,
+      "retreatThresholdVictoryPoints": 50,
+      "recommendedTableInches": [
+        32,
+        48
+      ]
+    },
+    {
+      "armyPoints": 250,
+      "retreatThresholdVictoryPoints": 63,
+      "recommendedTableInches": [
+        32,
+        48
+      ]
+    },
+    {
+      "armyPoints": 300,
+      "retreatThresholdVictoryPoints": 75,
+      "recommendedTableInches": [
+        48,
+        48
+      ]
+    },
+    {
+      "armyPoints": 350,
+      "retreatThresholdVictoryPoints": 88,
+      "recommendedTableInches": [
+        48,
+        48
+      ]
+    },
+    {
+      "armyPoints": 400,
+      "retreatThresholdVictoryPoints": 100,
+      "recommendedTableInches": [
+        48,
+        48
+      ]
+    }
+  ]
+}
