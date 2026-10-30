@@ -39,9 +39,10 @@ def test_n53_device_chart_exactly_reconciles_maintained_program_sets() -> None:
     assert report["deviceCount"] == 4
     assert report["distinctProgramCount"] == 11
     assert report["programStatisticsIncluded"] is False
-    assert report["missingMaintainedN53ChartCitations"] == [
-        row[0] for row in PINNED
-    ]
+    assert report["missingMaintainedN53ChartCitations"] in (
+        [],
+        [row[0] for row in PINNED],
+    )
     assert [
         (row["deviceId"], row["name"],
          tuple(program_id.removeprefix("hacking-program:") for program_id in row["programIds"]))
@@ -86,6 +87,24 @@ def test_device_chart_rejects_unreviewed_changes_or_program_gaps() -> None:
     ]
     with pytest.raises(ValueError, match="Missing canonical Program"):
         audit_device_program_chart(manifest, curated, altered)
+
+
+def test_device_chart_rejects_partial_or_incorrect_citation_migration() -> None:
+    manifest, curated, programs = _inputs()
+    target = next(
+        record for record in curated["records"]
+        if record["id"] == "equipment:hacking-device-plus"
+    )
+    source_citation = {"sourceId": "n5-core-v5.3-pdf", "page": 58}
+    if not any(cite["sourceId"] == source_citation["sourceId"] for cite in target["citations"]):
+        target["citations"].append(source_citation)
+        with pytest.raises(ValueError, match="Partial Hacking Device"):
+            audit_device_program_chart(manifest, curated, programs)
+    target["citations"] = [
+        cite for cite in target["citations"] if cite["sourceId"] != source_citation["sourceId"]
+    ] + [{**source_citation, "page": 57}]
+    with pytest.raises(ValueError, match="Unreviewed N5.3"):
+        audit_device_program_chart(manifest, curated, programs)
 
 
 def test_device_chart_optional_pinned_pdf_evidence() -> None:

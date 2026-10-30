@@ -91,11 +91,13 @@ def audit_device_program_chart(
             or device.get("composition", {}).get("role") != "definition"
         ):
             raise ValueError(f"Maintained hacking device missing: {device_id}")
-        if not any(
-            citation.get("sourceId") == "n5-core-v5.3-pdf"
-            and citation.get("page") == 58
-            for citation in device.get("citations", [])
-        ):
+        direct = [
+            citation for citation in device.get("citations", [])
+            if citation.get("sourceId") == "n5-core-v5.3-pdf"
+        ]
+        if direct and direct != [{"sourceId": "n5-core-v5.3-pdf", "page": 58}]:
+            raise ValueError(f"Unreviewed N5.3 Hacking Device citation: {device_id}")
+        if not direct:
             missing_direct_citations.append(device_id)
         effects = device.get("facts", {}).get("effects")
         if not isinstance(effects, list) or len(effects) != 1 or not isinstance(
@@ -113,6 +115,8 @@ def audit_device_program_chart(
                 or program.get("composition", {}).get("role") != "definition"
             ):
                 raise ValueError(f"Missing canonical Program: {program_id}")
+    if len(missing_direct_citations) not in (0, 4):
+        raise ValueError("Partial Hacking Device N5.3 citation migration")
     return {
         "scope": CLASSIFICATION["scope"],
         "sourcePage": 58,

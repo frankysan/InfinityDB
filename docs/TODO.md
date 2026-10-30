@@ -1485,13 +1485,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               read-only audit pins printed row assignments and
               verifies all Program references; no runtime relation
               or identity was created.
-              - [ ] Add exact p. 58 N5.3 source citations to the
-                four maintained Hacking Device definitions in a
-                coordinated curated source + `rules.db` +
-                publication fingerprint update. Currently the
-                reviewed device facts are consistent with the PDF,
-                but their citations remain wiki-only; the audit
-                reports these four citation gaps explicitly.
+              - [ ] Promote the **four verified p. 58 citations**
+                into the maintained Hacking Device definitions
+                together with `rules.db` and the dependent
+                deployed-object publication fingerprint. Current
+                device facts match the source, but the checked-out
+                definitions still have wiki-only citations.
+                - [x] Implement the staging-only citation migration
+                  in `tools/stage_hacking_device_chart_citations.py`.
+                  The source audit now rejects partial/wrong-page
+                  migrations while allowing exactly the fully pending
+                  or fully migrated state. Focused tests verify that
+                  only four source citations are appended, wiki
+                  citations remain, the generated rules database
+                  and fingerprint are aligned, all 17 deployed-object
+                  records are identical, and tracked inputs remain
+                  unchanged. The p. 58 PDF source is verified.
+                - [ ] Inspect the three staging outputs and SHA-256
+                  report, then promote the curated JSON, `rules.db`,
+                  and `deployed-objects.json` **as a single batch**.
+                  Re-run the audit (zero citations missing), targeted
+                  tests, publication `--check`, full suite and CI.
+                  Do not publish only the source JSON.
             - [ ] Continue source-table discovery beyond the terrain,
               scenario, Game Modes, Retreat!, Silhouette Templates,
               Hacking Device charts, Weapon Chart and p. 74 reviews;

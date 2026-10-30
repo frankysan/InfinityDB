@@ -606,7 +606,16 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 4
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 471
+        # Special Terrain and Access Width were published after this
+        # baseline; both are general rules, not deployed-object identities.
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 473
+        assert connection.execute(
+            "SELECT id FROM records WHERE id IN (?, ?) ORDER BY id",
+            ("rule:access-width", "rule:special-terrain"),
+        ).fetchall() == [
+            ("rule:access-width",),
+            ("rule:special-terrain",),
+        ]
         assert connection.execute(
             "SELECT id, title FROM scenario_collections ORDER BY id"
         ).fetchall() == [

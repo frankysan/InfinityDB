@@ -1651,15 +1651,101 @@ Missing, duplicated or incorrectly assigned Programs, changed source
 scope, and missing canonical records fail closed. CI does not require
 the ignored local PDF.
 
-The four Equipment facts already agree with the N5.3 chart, but the
-device records currently **do not cite p. 58 directly**: they retain
-their wiki citations. The audit reports these as
-`missingMaintainedN53ChartCitations`. A future coordinated citation
-migration must rebuild `rules.db` and refresh the publication
-fingerprint; this source-only audit does not make that claim or
-change any runtime records, Program statistics or delivery paths.
-`tests/test_hacking_device_program_source_chart.py` covers the
-boundary and source-backed Program sets.
+The four Equipment facts already agree with the N5.3 chart, but
+the **checked-out records still cite the wiki only**.
+The audit's `missingMaintainedN53ChartCitations` report allows
+either all four missing or none missing and fails closed on partial
+migration, duplicate N5.3 source citations or incorrect page.
+`tests/test_hacking_device_program_source_chart.py` covers these
+boundaries and the four source-backed Program sets.
+
+#### Stage the four N5.3 p. 58 Equipment citations
+
+A reviewed, staging-only migration adds one
+`{"sourceId":"n5-core-v5.3-pdf","page":58}` citation to each of
+`equipment:hacking-device`, `equipment:hacking-device-plus`,
+`equipment:killer-hacking-device` and
+`equipment:evo-hacking-device`. It retains all wiki citations
+and existing Equipment facts. Because the tracked rules database
+changes, the dependent deployed-object publication must be rebuilt
+and promoted **in the same batch**.
+
+From the repository root, after committing the staging tool/tests
+and with unchanged curated source and Army database:
+
+```powershell
+& .\.venv\Scripts\python.exe -m tools.stage_hacking_device_chart_citations --output-dir local/hacking-device-citations-n53 --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
+```
+
+The command refuses an existing staging directory and writes
+`staging-report.json` with the original source and Army SHA-256,
+the verified PDF SHA-256, four migrated IDs, and three artifact
+hashes. It **never changes the tracked checkout**. The isolated
+regression `tests/test_hacking_device_chart_citation_staging.py`
+builds and validates the same three artifacts under a temporary
+directory, compares the published 17 object records byte-for-byte
+and checks all tracked inputs remain unchanged.
+
+Inspect the staging report and changed citations. Before promotion,
+verify source and Army hashes and all three staged output hashes.
+The following PowerShell procedure fails before copying if any
+reported hash or file differs:
+
+```powershell
+$stage = "local/hacking-device-citations-n53"
+$report = Get-Content (Join-Path $stage "staging-report.json") -Raw |
+    ConvertFrom-Json
+$expected = @(
+    "data/curated/rules/n5-core-v5.3.json",
+    "data/generated/rules.db",
+    "data/generated/deployed-objects.json"
+)
+$ids = @(
+    "equipment:hacking-device",
+    "equipment:hacking-device-plus",
+    "equipment:killer-hacking-device",
+    "equipment:evo-hacking-device"
+)
+if ($report.scope -ne "staged-only-hacking-device-p58-citations-not-applied" -or
+    $report.sourcePage -ne 58 -or $report.reviewedObjects -ne 17 -or
+    (@(Compare-Object $expected $report.stagedPaths).Count -ne 0) -or
+    (@(Compare-Object $ids $report.migratedDeviceIds).Count -ne 0)) {
+    throw "Unexpected device citation migration report"
+}
+if (git status --porcelain) {
+    throw "Commit or resolve current tracked changes before promotion"
+}
+if ((Get-FileHash "data/curated/rules/n5-core-v5.3.json" -Algorithm SHA256).Hash -ne
+    $report.sourceSha256 -or
+    (Get-FileHash "data/generated/infinity.db" -Algorithm SHA256).Hash -ne
+    $report.armySha256) {
+    throw "Current curated source or Army database changed after staging"
+}
+$hashes = @(
+    $report.stagedSha256.curated,
+    $report.stagedSha256.rulesDatabase,
+    $report.stagedSha256.deployedObjects
+)
+for ($i = 0; $i -lt $expected.Count; $i++) {
+    $file = Join-Path $stage $expected[$i]
+    if (-not (Test-Path -LiteralPath $file -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -ne $hashes[$i]) {
+        throw "Missing or altered staged artifact: $file"
+    }
+}
+foreach ($path in $expected) {
+    Copy-Item -LiteralPath (Join-Path $stage $path) -Destination $path -Force
+}
+& .\.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart --json
+& .\.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+```
+
+After promotion, `missingMaintainedN53ChartCitations` must be
+`[]`. Run the focused tests and normal rules/lint/docs/type and
+project/CI gates before committing the promoted artifacts.
+This migration changes **citations only**; Program statistics,
+Unit carriers, delivery paths and canonical object identities
+remain unchanged.
 
 ### N5.3 Silhouette Templates source and browser geometry
 
