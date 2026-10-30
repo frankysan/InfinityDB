@@ -1392,13 +1392,32 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               and gate-marker reference terms. Existing `skill:terrain`
               remains available. No source/profile/carrier publication
               change was made.
-            - [ ] Model/review the Special Terrain and Access Width
-              reference gaps independently of current map/session
-              instances. Preserve terrain-type parameters,
-              Difficult/Saturation/Visibility composition and
-              Narrow Gate Silhouette/Prone restrictions. Do not
-              manufacture persistent object identities from
-              terrain suggestions or label Tokens.
+            - [ ] Publish the reviewed **Special Terrain** and
+              **Access Width** reference definitions independently of
+              current map/session instances. Preserve the five
+              terrain-type parameters, Difficult/Saturation/Visibility
+              composition, and Narrow Gate Silhouette/Prone
+              restrictions; do not create deployable object identities
+              from terrain suggestions or label Tokens.
+              - [x] Pin two N5.3-cited `basic-rule` proposals in
+                `config/validation/terrain-scenery-reference-additions.json`
+                (pp. 143 and 145). Validate the source format and
+                canonical refs, and stage the curated JSON, rebuilt
+                `rules.db`, and fingerprinted
+                `deployed-objects.json` together using
+                `tools.stage_terrain_scenery_references`. The
+                isolated staging regression passes and preserves
+                all tracked files.
+              - [ ] Inspect and promote the **three staged files**
+                together; then run the reference audit in its
+                fully maintained state, publication `--check`,
+                focused tests and normal project/CI checks.
+                The reference changes are not yet live.
+              - [ ] Consider separate glossary/source terms for
+                Narrow and Wide Gate labels and typed
+                terrain-characteristic combinations if player
+                discoverability requires them; do not conflate
+                their labels with persistent deployed devices.
             - [ ] Continue source-table discovery beyond the terrain,
               scenario, Weapon Chart and p. 74 reviews; verify any
               additional game-element categories against direct

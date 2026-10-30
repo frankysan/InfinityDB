@@ -31,7 +31,10 @@ EXAMPLE_LABELS = (
     "Generator Room", "Energy Core Room",
 )
 GATE_MARKERS = ("Narrow Gate", "Wide Gate")
-EXPECTED_UNMAINTAINED = ("rule:special-terrain", "rule:access-width")
+EXPECTED_SOURCE_RECORDS = {
+    "rule:special-terrain": (143, "Special Terrain"),
+    "rule:access-width": (145, "Access Width"),
+}
 
 
 def audit_terrain_scenery_boundary(
@@ -55,8 +58,27 @@ def audit_terrain_scenery_boundary(
         raise ValueError("Terrain or access token promoted to deployed object")
     if len(objects) != 17:
         raise ValueError("Reviewed deployed-object publication count changed")
-    if any(key in records for key in EXPECTED_UNMAINTAINED):
-        raise ValueError("New terrain/access source record needs re-review")
+    present = set(EXPECTED_SOURCE_RECORDS).intersection(records)
+    if present and present != set(EXPECTED_SOURCE_RECORDS):
+        raise ValueError("Partial terrain/access source publication")
+    for record_id in present:
+        page, name = EXPECTED_SOURCE_RECORDS[record_id]
+        record = records[record_id]
+        if (
+            record.get("kind") != "rule"
+            or record.get("name") != name
+            or record.get("composition") != {"role": "definition"}
+            or record.get("scope") != {"game": "N5", "seasons": ["current"]}
+            or record.get("facts", {}).get("category") != "basic-rule"
+            or not record["facts"].get("effects")
+            or not record["facts"].get("restrictions")
+            or not any(
+                cite.get("sourceId") == "n5-core-v5.3-pdf"
+                and cite.get("page") == page
+                for cite in record.get("citations", [])
+            )
+        ):
+            raise ValueError(f"Unreviewed terrain/access source definition: {record_id}")
     if any(
         records.get(f"term:{name.lower().replace(' ', '-')}", {}).get("kind") == "term"
         for name in GATE_MARKERS
@@ -78,8 +100,12 @@ def audit_terrain_scenery_boundary(
         ],
         "reviewStatus": {
             "terrainSkill": "maintained",
-            "specialTerrainRule": "unmodelled",
-            "accessWidthRule": "unmodelled",
+            "specialTerrainRule": (
+                "maintained" if present else "unmodelled"
+            ),
+            "accessWidthRule": (
+                "maintained" if present else "unmodelled"
+            ),
             "accessWidthTokens": "unmodelled",
             "exampleTable": "unmodelled-not-18-missing-types",
         },
@@ -162,7 +188,10 @@ def main() -> int:
         print(f"Current terrain Types: {len(report['terrainTypes'])}")
         print(f"Suggested terrain examples: {report['namedExampleCount']}")
         print(f"Scenery gate tokens: {len(report['sceneryGateTokens'])}")
-        print("Unmodelled reference scope: Special Terrain, Access Width and gate labels")
+        status = report["reviewStatus"]
+        print(f"Special Terrain rule: {status['specialTerrainRule']}")
+        print(f"Access Width rule: {status['accessWidthRule']}")
+        print(f"Separate gate-label terms: {status['accessWidthTokens']}")
         print(f"Unchanged deployed objects: {report['publishedDeployedObjectCount']}")
     return 0
 

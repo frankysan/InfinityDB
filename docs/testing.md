@@ -1639,10 +1639,13 @@ Types or deployed Weapon/Equipment profiles. Audit the source boundary with:
 The audit pins **five Terrain Types** (Aquatic, Desert, Mountain, Jungle,
 Zero-G), **18 printed suggestion/example labels** (retaining the source's
 `Artic Plains` spelling), and **two Scenery Access Width Tokens** (`Narrow
-Gate` / `Wide Gate`). It records the actual maintained boundary: the
-`skill:terrain` reference exists, but standalone Special Terrain and
-Access Width rules and gate-token terms have not yet been modeled. Its
-optional `--pdf` mode verifies the source headings, listed names and
+Gate` / `Wide Gate`). The `skill:terrain` reference exists;
+standalone Special Terrain and Access Width reference definitions are
+reviewed and prepared for coordinated publication but are **not yet
+promoted**. Gate Token labels do not have separate canonical definitions.
+The audit accepts both the original two-gap state and the fully
+published two-rule state but rejects partial migration or unsupported
+definitions. Its optional `--pdf` mode verifies source headings, names and
 Narrow Gate eligibility against the local English N5.3 source. Without
 the ignored PDF, it still checks maintained and published domain boundaries;
 it does not claim to have re-extracted the PDF.
@@ -1655,12 +1658,62 @@ restriction; the Narrow/Wide Gate Tokens label access points rather than
 deployable devices, and the applicable Silhouette/Prone restrictions cannot
 be inferred from an Army loadout. The audit fails on unexpected promotion
 of these names into the 17-object Weapon/Equipment publication or new
-maintained source identities requiring re-review. It adds no rules,
-attributes, source carrier edges or runtime records. The semantics are
-already reviewed in `docs/rules-semantics.md` and
-`docs/rules-research.md`; the new audit records the outstanding catalog
-coverage. `tests/test_terrain_scenery_source_gaps.py` guards the boundary,
-including a local-only test of the pinned PDF.
+maintained source identities requiring re-review. The source-gap
+audit itself does not add attributes, source carriers or runtime records.
+The semantics are already reviewed in `docs/rules-semantics.md` and
+`docs/rules-research.md`. `tests/test_terrain_scenery_source_gaps.py`
+guards the boundary, including a local-only test of the pinned PDF.
+
+Two source-backed `basic-rule` definitions are now **prepared for staging**:
+`rule:special-terrain` (p. 143) and `rule:access-width` (p. 145).
+They specify optional table-wide scope, finite terrain Types and
+characteristic composition, scenery Access Width precedence, and the
+Silhouette X/Prone restriction. They do **not** introduce 18 example Types,
+a new Unit characteristic, or deployed Weapon/Equipment identities.
+Because `rules.db` is a tracked binary and deployed-object publication
+pins its hash, stage the source and both generated artifacts together:
+
+```powershell
+.venv\Scripts\python.exe -m tools.stage_terrain_scenery_references --output-dir local/terrain-scenery-references-n53 --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
+```
+
+This command refuses to overwrite an existing staging directory, validates
+the proposed source records, preserves the original curated JSON formatting
+outside the two appended definitions, and regenerates both artifacts from
+the same staged source. It writes `staging-report.json` containing hashes
+and the three required promotion paths. The command **does not modify the
+working tree**; the regression at
+`tests/test_terrain_scenery_reference_staging.py` builds an isolated
+temporary staging directory and verifies original file bytes and the
+publication fingerprint. After reviewing the staged content and report,
+copy **all three staged paths together** into the checkout:
+
+```powershell
+$stage = "local/terrain-scenery-references-n53"
+$report = Get-Content (Join-Path $stage "staging-report.json") -Raw |
+    ConvertFrom-Json
+if ($report.reviewedObjects -ne 17 -or $report.proposedIds.Count -ne 2) {
+    throw "Unexpected terrain reference staging report"
+}
+if (git status --porcelain) {
+    throw "Working tree must be clean before promotion"
+}
+foreach ($path in $report.stagedPaths) {
+    if (-not (Test-Path -LiteralPath (Join-Path $stage $path) -PathType Leaf)) {
+        throw "Missing staged file: $path"
+    }
+}
+foreach ($path in $report.stagedPaths) {
+    Copy-Item -LiteralPath (Join-Path $stage $path) -Destination $path -Force
+}
+.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps
+.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+```
+
+The post-promotion audit must show both rules as `maintained` in JSON
+output. Run the focused tests and normal project/CI gates before committing;
+do not commit only the curated JSON, which would leave `rules.db`
+and the deployed-object publication fingerprint stale.
 
 ### Core scenario-object source-domain boundary
 

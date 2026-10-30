@@ -36,10 +36,12 @@ def test_terrain_scenery_inventory_remains_outside_deployed_objects() -> None:
     assert report["namedExampleCount"] == len(EXAMPLE_LABELS) == 18
     assert [row["printedName"] for row in report["terrainExamples"]] == list(EXAMPLE_LABELS)
     assert [row["printedName"] for row in report["sceneryGateTokens"]] == list(GATE_MARKERS)
+    rule_status = report["reviewStatus"]["specialTerrainRule"]
+    assert rule_status in {"unmodelled", "maintained"}
     assert report["reviewStatus"] == {
         "terrainSkill": "maintained",
-        "specialTerrainRule": "unmodelled",
-        "accessWidthRule": "unmodelled",
+        "specialTerrainRule": rule_status,
+        "accessWidthRule": rule_status,
         "accessWidthTokens": "unmodelled",
         "exampleTable": "unmodelled-not-18-missing-types",
     }
@@ -76,11 +78,20 @@ def test_terrain_scenery_audit_fails_closed_on_domain_promotion() -> None:
         audit_terrain_scenery_boundary(missing_skill, publication)
 
     new_rule = copy.deepcopy(curated)
-    new_rule["records"].append({
-        "id": "rule:access-width", "kind": "rule", "name": "Access Width",
-    })
-    with pytest.raises(ValueError, match="needs re-review"):
-        audit_terrain_scenery_boundary(new_rule, publication)
+    existing = {record["id"] for record in new_rule["records"]}
+    if "rule:access-width" not in existing:
+        new_rule["records"].append({
+            "id": "rule:access-width", "kind": "rule", "name": "Access Width",
+        })
+        with pytest.raises(ValueError, match="Partial"):
+            audit_terrain_scenery_boundary(new_rule, publication)
+    else:
+        missing = copy.deepcopy(curated)
+        missing["records"] = [
+            row for row in missing["records"] if row["id"] != "rule:access-width"
+        ]
+        with pytest.raises(ValueError, match="Partial"):
+            audit_terrain_scenery_boundary(missing, publication)
 
 
 def test_terrain_scenery_source_cli(

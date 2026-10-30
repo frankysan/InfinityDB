@@ -79,6 +79,7 @@
         "test_state_catalog",
         "test_structured_skill_charts_publication",
         "test_terrain_scenery_source_gaps",
+        "test_terrain_scenery_reference_staging",
         "test_trait_wiki_references",
         "test_weapon_config",
         "test_weapon_properties"
