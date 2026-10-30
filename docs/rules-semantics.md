@@ -2594,18 +2594,23 @@ between the Spanish Wiki and both PDFs, not between the published rulebooks.
 The source-scoped `reviewedWeaponCases` preserves the confirmed interaction
 without providing a general BTS attack or component evaluator.
 
-The shared Skill reference card now presents the five validated
-`reviewedWeaponCases`, `reviewedVulnerabilityCases`, and
-`reviewedCombinedCases` as **Reviewed interactions**, keeping their conditions,
-recorded Saving Roll counts, source-evidence classification (explicit versus
-derived), and linked rule identities visible. It uses the stored outcomes without
-evaluating arbitrary attacks. No Plasma/Enhanced combination is stored in these
-reviewed-case arrays; the existing Plasma discussion is not a sixth reviewed case.
-The ordinary curated explanation and the cited source links remain available.
-REA-011 browser acceptance verified all five cards at 1440/390/320 px,
-including each explicit/derived evidence label, per-case applicability,
-roll counts, semantic link navigation, Tab/Enter operation, visible focus
-and mobile width. No unreviewed Plasma/Enhanced result was added.
+The shared Skill reference card now presents **six source-bounded interactions**:
+the five previously reviewed `reviewedWeaponCases`,
+`reviewedVulnerabilityCases` and `reviewedCombinedCases`, plus the
+independent `reviewedSavingRollCases` entry for N5.3 p. 96, Example 3.
+It keeps conditions, roll counts, source-evidence classification and owning
+rule links visible, without evaluating new attacks.
+
+**Plasma Rifle versus Immunity (Enhanced)** is explicitly printed, not a
+deduction. The Plasma Rifle uses Normal Ammunition and a **Combined Saving
+Roll** requiring one ARM and one BTS Saving Roll. Immunity (Enhanced) does not
+remove either roll; this does not imply Combined Ammunition components or
+determine a new Critical outcome. The authored case is tied to that printed
+Weapon and reviewed source-profile contract, not generalized to other Weapons
+or BTS-based combined Ammunition. The earlier REA-011 five-card browser
+acceptance remains historical. The six-card renderer, source/API regression,
+and real-Chromium verification at 1440/390/320 px now pass, including evidence
+labels, semantic links, error-free rendering and no horizontal overflow.
 
 Other component-specific Immunities, BTS-based Combined Ammunition, additional
 Weapon Traits and conditional State interactions remain unresolved. Do not

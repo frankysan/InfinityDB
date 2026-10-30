@@ -20966,6 +20966,27 @@
                             "evidence": "explicit-pinned-wiki-example"
                         }
                     ],
+                    "reviewedSavingRollCases": [
+                        {
+                            "when": {
+                                "weaponId": "weapon:plasma-rifle",
+                                "immunity": "Enhanced",
+                                "ammunitionId": "ammunition:normal"
+                            },
+                            "savingRolls": [
+                                {
+                                    "attribute": "ARM",
+                                    "count": 1
+                                },
+                                {
+                                    "attribute": "BTS",
+                                    "count": 1
+                                }
+                            ],
+                            "result": "combined-saving-roll-preserved",
+                            "evidence": "explicit-n5.3-pdf-p96-example-3"
+                        }
+                    ],
                     "reviewedCombinedCases": [
                         {
                             "sourceAmmunitionId": 10,

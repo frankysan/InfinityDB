@@ -332,8 +332,17 @@ This example adds no weapon-name parsing at runtime. An independent, explicit
 example (Wiki Immunity `oldid=3643`, Weapon Chart `oldid=4083`): Stun becomes
 Normal, but Non-Lethal and Stunned on a failed Saving Roll remain. Flash Pulse
 has its own cited Weapon reference and semantic links; none of these cases
-executes a Weapon profile calculation. Other component Immunities, BTS
-conditions and unreviewed combinations remain unresolved.
+executes a Weapon profile calculation. The **printed** N5.3 p. 96 Example 3 is now a separate authored
+`skill:immunity.facts.immunityInteraction.reviewedSavingRollCases` entry:
+Plasma Rifle versus Immunity (Enhanced) retains one ARM and one BTS
+Saving Roll because the weapon has Normal Ammunition and a Combined
+Saving Roll, **not** Combined Ammunition. This exact-source example has
+its own closed validation contract, a linked player-facing Immunity
+interaction, and regression against the pinned PDF, Army Plasma profile
+and existing Combined Saving Roll map. It is not added to the
+`reviewedCombinedCases` component examples or as an inferred
+`immunity_result` on Weapon profiles. Other component Immunities,
+BTS conditions and unreviewed combinations remain unresolved.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;

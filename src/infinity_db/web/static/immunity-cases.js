@@ -14,7 +14,9 @@ const reference = (id, label) => {
 const evidence = (value) => value === "derived-from-pinned-general-rules"
   ? "Derived from reviewed general rules"
   : value === "explicit-pinned-wiki-example" ? "Explicit source example"
-    : "Evidence classification unavailable";
+    : value === "explicit-n5.3-pdf-p96-example-3"
+      ? "Explicit N5.3 p. 96, Example 3"
+      : "Evidence classification unavailable";
 const rollCount = (count) => `${count} Saving Roll${count === 1 ? "" : "s"}`;
 const counts = (rolls) => `${rollCount(rolls.hitRolls)} on a hit (${rolls.criticalRolls} on a Critical)`;
 
@@ -54,6 +56,24 @@ export function immunityCaseRows(facts = {}) {
         reference("skill:vulnerability", `Vulnerability (${item.when.vulnerability})`)],
       detail: [text(`Immunity cannot apply against a weapon with “${item.when.weaponNameContains}” `),
         text("in its name. This is a weapon-name example, not a rule for individual Ammunition components.")],
+      evidence: evidence(item.evidence),
+    });
+  }
+  for (const item of cases.reviewedSavingRollCases || []) {
+    // Printed Plasma/Enhanced case is a Combined Saving Roll, not combined
+    // Ammunition. These fixed source-reviewed rolls are not a calculator.
+    if (item.when.weaponId !== "weapon:plasma-rifle") continue;
+    const rolls = item.savingRolls.map(
+      (roll) => `${roll.count} ${roll.attribute} Saving Roll${roll.count === 1 ? "" : "s"}`
+    ).join(" and ");
+    rows.push({
+      title: [text(`Immunity (${item.when.immunity}) vs `),
+        reference(item.when.weaponId, "Plasma Rifle")],
+      detail: [
+        text(`Still requires ${rolls}. `),
+        reference(item.when.ammunitionId, "Normal Ammunition"),
+        text(" is not a combined Ammunition type; treating it as Normal does not eliminate either Saving Roll Attribute. This is the exact printed example, not a general immunity calculation."),
+      ],
       evidence: evidence(item.evidence),
     });
   }

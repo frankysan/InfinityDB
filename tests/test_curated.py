@@ -4804,6 +4804,20 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
          "Immunity exceptions"),
         (lambda f: f["exceptions"]["notNegatedByImmunity"].pop(),
          "Immunity exceptions"),
+        (lambda f: f["reviewedSavingRollCases"][0]["when"].update(
+            immunity="ARM"), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][0]["when"].update(
+            ammunitionId="ammunition:ap"), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][0]["savingRolls"][1].update(
+            attribute="ARM"), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][0].update(
+            result="immunity-removes-bts"), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][0].update(
+            evidence="derived-from-pinned-general-rules"),
+            "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"].append(
+            deepcopy(f["reviewedSavingRollCases"][0])),
+            "Plasma Combined Saving Roll example"),
         (lambda f: f["reviewedCombinedCases"][0]["when"].update(immunity="DA"),
          "Immunity applicability"),
         (lambda f: f["reviewedWeaponCases"][0]["when"].update(

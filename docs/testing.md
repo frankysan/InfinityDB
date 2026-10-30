@@ -4127,6 +4127,21 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Immunity/Plasma Combined Saving Roll example, 2026-10-30:**
+`tests/test_immunity_combined_saving_roll_example.py` checks the
+pinned English N5.3 p. 96 Example 3, the exact Plasma Rifle Army
+Combined Saving Roll profile, canonical Immunity facts and Skill API,
+and absence of any invented runtime Weapon immunity evaluation.
+`tests/test_curated.py` mutates the reviewed example's conditions,
+roll attributes, result, evidence and multiplicity to verify the
+closed contract. The six-case maintained-text renderer is tested
+with `tests/immunity_cases_render_harness.mjs` through the
+focused `test_web.py` regression. A coordinated database/publication
+promotion retains all 17 existing deployed objects.
+`tests/test_verify_immunity_plasma_browser.py` verifies the sixth case
+at 1440, 390 and 320 px with its source label, semantic links,
+no invented Critical outcome, and no horizontal overflow or JS errors.
+
 **Ammunition reviewed-source publication parity, 2026-10-30:**
 `tests/test_ammunition_publication_parity.py` verifies the 11 published
 base Ammunition identities, 16 current reviewed Army source IDs/names,

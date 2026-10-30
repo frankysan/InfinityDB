@@ -480,8 +480,27 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
     if not isinstance(value, dict) or set(value) != {
         "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
         "reviewedCombinedCases", "reviewedVulnerabilityCases", "reviewedWeaponCases",
+        "reviewedSavingRollCases",
     }:
         raise ValueError(f"{context}: invalid Immunity interaction fields")
+    # Printed Example 3 of N5.3 p. 96 is a Combined Saving Roll, NOT a
+    # combination of ammunition effects. Preserve both attribute rolls.
+    if value["reviewedSavingRollCases"] != [
+        {
+            "when": {
+                "weaponId": "weapon:plasma-rifle",
+                "immunity": "Enhanced",
+                "ammunitionId": "ammunition:normal",
+            },
+            "savingRolls": [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "result": "combined-saving-roll-preserved",
+            "evidence": "explicit-n5.3-pdf-p96-example-3",
+        }
+    ]:
+        raise ValueError(f"{context}: unsupported Plasma Combined Saving Roll example")
     covered = value["coveredAmmunition"]
     if (
         not isinstance(covered, dict)

@@ -986,6 +986,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Review other component-level Immunities, BTS-based variants and
       weapon-specific exceptions. Do not generalize from the reviewed examples
       or the name-scoped Viral Vulnerability case.
+      - [x] Promote N5.3 p. 96 **printed Example 3** as a distinct typed
+        `reviewedSavingRollCases` record: Immunity (Enhanced) against the
+        Plasma Rifle does not remove its separate ARM and BTS Saving Rolls.
+        Validate the exact pinned PDF, Normal Ammunition, published Army
+        Combined Saving Roll profile and Immunity API; render the sixth
+        source-labelled interaction without adding an attack evaluator.
+        Rebuild/promote `rules.db` with synchronized deployed-object
+        publication and recovery backups; all 17 objects stay unchanged.
+        Chromium acceptance at 1440/390/320 px confirms the sixth
+        source-labelled case, links and layout.
+      - [ ] Review other BTS-component Immunity outcomes using specific
+        non-Comms Weapon/combined-Ammunition evidence; the Plasma example
+        does not license extrapolation to those attacks.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view
