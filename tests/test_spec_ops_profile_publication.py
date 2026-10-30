@@ -1,4 +1,4 @@
-"""Selected ARMY-02–04 current-source profiles, not historical deltas or list legality."""
+"""Selected ARMY-02–08 current-source profiles, not historical deltas or list legality."""
 
 from __future__ import annotations
 
@@ -18,7 +18,6 @@ from tools.browser_wsgi_transport import wsgi_response
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data/raw/JSON 20260929-114335.zip"
 ARMY = ROOT / "data/generated/infinity.db"
-SOURCE_IDS = (1912, 1926, 1913, 1927, 1914, 1928)
 SOURCE_CONTEXTS = {
     1912: {101, 102, 104, 105, 106, 107},
     1926: {101, 102, 104, 105, 106, 107},
@@ -26,7 +25,16 @@ SOURCE_CONTEXTS = {
     1927: {103},
     1914: {201, 202, 204, 205},
     1928: {201, 202, 204, 205},
+    1915: {301, 302, 303, 304, 305, 306},
+    1929: {301, 302, 303, 304, 305, 306},
+    1916: {401, 402, 403, 404},
+    1930: {401, 402, 403, 404},
+    1917: {501, 502, 503, 504},
+    1931: {501, 502, 503, 504},
+    1918: {601, 604, 605},
+    1932: {601, 604},
 }
+SOURCE_IDS = tuple(SOURCE_CONTEXTS)
 
 
 @pytest.fixture(scope="module")
@@ -97,7 +105,7 @@ def _assert_native_items(source: dict[str, Any], published: dict[str, Any]) -> N
 
 
 @pytest.mark.parametrize("source_id", SOURCE_IDS)
-def test_army_02_to_04_complete_native_profiles_and_loadouts_reach_api(
+def test_army_02_to_08_complete_native_profiles_and_loadouts_reach_api(
     profile_app: Callable[..., Any], source_documents: dict[int, dict[str, Any]],
     source_id: int,
 ) -> None:

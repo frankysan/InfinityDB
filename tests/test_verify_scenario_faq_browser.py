@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
@@ -487,8 +488,25 @@ def test_sacha_numeric_ava_is_visible_in_its_army_context(
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize("theme", ("light", "dark"))
-def test_army_02_to_04_native_profiles_costs_and_ava_in_browser(
+@pytest.mark.parametrize(
+    ("slugs", "expected_totals"),
+    (
+        pytest.param(
+            ("indigo-spec-ops", "indigo-team-ops", "confessor-spec-ops",
+             "confessor-team-ops", "gu-feng-spec-ops", "yu-jing-team-ops"),
+            {"armies": 22, "profiles": 66, "loadouts": 220}, id="army02-04",
+        ),
+        pytest.param(
+            ("intel-spec-ops", "ariadnateam-ops", "husam-spec-ops",
+             "haqqislam-team-ops", "vortex-spec-ops", "nomads-team-ops",
+             "nexus-7-spec-ops", "combined-army-team-ops"),
+            {"armies": 33, "profiles": 111, "loadouts": 328}, id="army05-08",
+        ),
+    ),
+)
+def test_army_02_to_08_native_profiles_costs_and_ava_in_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
+    slugs: tuple[str, ...], expected_totals: dict[str, int],
 ) -> None:
     """API-to-DOM parity complements the independent pinned-source profile audit."""
     page = chrome.new_page(viewport={"width": width, "height": 900})
@@ -499,10 +517,7 @@ def test_army_02_to_04_native_profiles_costs_and_ava_in_browser(
     page.on("pageerror", lambda error: errors.append(str(error)))
     totals = {"armies": 0, "profiles": 0, "loadouts": 0}
     try:
-        for slug in (
-            "indigo-spec-ops", "indigo-team-ops", "confessor-spec-ops",
-            "confessor-team-ops", "gu-feng-spec-ops", "yu-jing-team-ops",
-        ):
+        for slug in slugs:
             status, _, body = wsgi_response(
                 release_scenario_app, f"{ORIGIN}/api/units/{slug}",
             )
@@ -514,13 +529,21 @@ def test_army_02_to_04_native_profiles_costs_and_ava_in_browser(
             assert_unit_dom(unit, page.evaluate(DOM_SNAPSHOT), slug, "cm")
             assert page.locator(".army-profile").count() == len(unit["armies"])
             for army in unit["armies"]:
+                expected_heading = army["name"] + "".join(
+                    badge["label"] for badge in army.get("availability_badges") or []
+                )
                 section = page.locator(".army-profile").filter(
-                    has=page.locator("summary").filter(has_text=army["name"]),
+                    has=page.locator("summary").filter(
+                        has_text=re.compile(f"^{re.escape(expected_heading)}$"),
+                    ),
                 )
                 assert section.count() == 1, (slug, army["name"])
                 if section.get_attribute("open") is None:
                     section.locator("summary").focus()
                     section.locator("summary").press("Enter")
+                assert section.locator(
+                    ".profile-details-table tr.profile-summary th",
+                ).all_text_contents() == [profile["name"] for profile in army["profiles"]]
                 stats = section.locator(".attribute-statline-with-availability")
                 assert stats.count() == len(army["profiles"])
                 for index, profile in enumerate(army["profiles"]):
@@ -554,7 +577,7 @@ def test_army_02_to_04_native_profiles_costs_and_ava_in_browser(
                 totals["profiles"] += stats.count()
                 totals["loadouts"] += rows.count()
             assert not page.evaluate("document.documentElement.scrollWidth > innerWidth + 1")
-        assert totals == {"armies": 22, "profiles": 66, "loadouts": 220}
+        assert totals == expected_totals
         assert not errors, errors
     finally:
         page.close()

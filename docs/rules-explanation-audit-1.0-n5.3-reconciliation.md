@@ -188,6 +188,20 @@ counts above.
   upgrade/profile-transition semantics, Fireteam/roster legality,
   historical deltas and final hosted acceptance remain separate.
 
+  **2026-10-30 follow-up — ARMY-05–08 native publication:**
+  Intel (1915/1929), Husam (1916/1930), Vortex (1917/1931)
+  and Nexus-7 (1918/1932) now have equivalent pinned-source-to-API
+  checks across 33 Army/Unit contexts, 111 profiles and 328 loadouts.
+  Intel's Full Power/Battle Ravaged profiles keep distinct names,
+  Attributes, AVA and items. Nexus-7 Spec-Ops occurs in Combined
+  Army, Onyx and Next Wave; Combined Army TEAM-OPS occurs only in
+  Combined Army and Onyx. Chromium checks all eight ordinary Unit
+  pages at 1440/390/320 px in light/dark themes (48 page checks),
+  including exact profile names/values, AVA, costs and linked items.
+  The [same validation contract](testing.md#selected-spec-ops-and-team-ops-profile-acceptance)
+  retains the native-publication scope; no transition, upgrade,
+  legality, historical-change or hosted-release approval is implied.
+
   **ARMY-17–20** now have **selected current-state local acceptance**
   independently of the Spec-Ops charts. Ioann Bann (#1940) retains
   Dogface/Dog-Warrior profiles and maximum-one Varangian Duo
