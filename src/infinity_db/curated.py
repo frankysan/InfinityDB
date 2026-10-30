@@ -796,6 +796,11 @@ def _validate_source(source: dict[str, Any], context: str) -> None:
         _require_string(source.get("publishedDate"), "publishedDate", context)
         _require_string(source.get("localPath"), "localPath", context)
         _require_positive_int(source.get("pageCount"), "pageCount", context)
+        if "sha256" in source:
+            _require_string(source["sha256"], "sha256", context)
+            digest = source["sha256"]
+            if len(digest) != 64 or any(char not in "0123456789abcdefABCDEF" for char in digest):
+                raise ValueError(f"{context}: 'sha256' must be a 64-character hexadecimal digest")
         return
 
     if source.get("localPath") is not None:

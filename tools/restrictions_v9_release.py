@@ -403,3 +403,119 @@ def refresh_isolated_context_v9_release(*, root: Path = ROOT) -> Path:
         return _replace_with_rollback(
             root, payloads, post_validate, backup_prefix="isolated-v9-recovery-",
         )
+
+
+def _check_source_pin_delta(
+    previous: Path, proposed: Path, source_id: str, digest: str,
+    expected_collections: set[str],
+) -> None:
+    """Allow only the declared NULL-to-hash source cells; preserve every other row."""
+    with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
+        for pragma in ("application_id", "user_version"):
+            if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
+                f"PRAGMA {pragma}",
+            ).fetchone():
+                raise ValueError("Source pin refresh changed database identity")
+        schema_sql = "SELECT name, sql FROM sqlite_master WHERE type='table' ORDER BY name"
+        schema = old.execute(schema_sql).fetchall()
+        if schema != new.execute(schema_sql).fetchall():
+            raise ValueError("Source pin refresh changed the table schema")
+        changed: set[str] = set()
+        for name, _ in schema:
+            quoted = '"' + name.replace('"', '""') + '"'
+            columns = [row[1] for row in old.execute(f"PRAGMA table_info({quoted})")]
+            order = ",".join(str(index + 1) for index in range(len(columns)))
+            query = f"SELECT * FROM {quoted} ORDER BY {order}"
+            rows = old.execute(query).fetchall()
+            if name == "sources":
+                collection_column, id_column, hash_column = (
+                    columns.index(key) for key in ("collection_id", "id", "sha256")
+                )
+                expected_rows = []
+                for row in rows:
+                    expected = list(row)
+                    if row[id_column] == source_id:
+                        collection = row[collection_column]
+                        if collection not in expected_collections or row[hash_column] is not None:
+                            raise ValueError(
+                                "Source pin refresh requires exact unpinned declarations"
+                            )
+                        expected[hash_column] = digest
+                        changed.add(collection)
+                    expected_rows.append(tuple(expected))
+                rows = expected_rows
+            if rows != new.execute(query).fetchall():
+                raise ValueError(f"Source pin refresh changed unrelated rows: {name}")
+        if changed != expected_collections:
+            raise ValueError("Source pin refresh did not cover the expected declarations")
+
+
+def refresh_core_pdf_pin_v9_release(*, root: Path = ROOT) -> Path:
+    """Publish the reviewed English N5.3 byte pin without changing rules or objects."""
+    root = root.resolve()
+    current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
+    if not (root / "local").is_dir():
+        raise ValueError("Ignored local/ recovery directory is required")
+    git = subprocess.run(
+        ["git", "diff", "--quiet", "HEAD", "--", str(RULES)],
+        cwd=root, capture_output=True, check=False,
+    )
+    if git.returncode != 0:
+        raise ValueError("Tracked release rules.db differs from HEAD")
+    current = RulesDatabase(current_rules)
+    current.validate()
+    with closing(sqlite3.connect(current_rules)) as connection:
+        if connection.execute("PRAGMA user_version").fetchone()[0] != 9:
+            raise ValueError("Source pin refresh requires the promoted v9 release")
+    before = load_deployed_object_publication(current_publication, army, current_rules)
+    if before is None:
+        raise ValueError("Existing v9 publication does not match its release databases")
+    chart = _checked_chart(root)
+    digest, source_id = chart["sourcePdfSha256"], chart["sourceId"]
+    documents = load_curated_directory(root / "data/curated/rules")
+    declarations = [
+        (document["collection"]["id"], source)
+        for _, document in documents for source in document["sources"]
+        if source["id"] == source_id
+    ]
+    collections = {collection for collection, _ in declarations}
+    if (collections != {"n5-core-v5.3", "n5-hacking-programs-v5.3"}
+            or len(declarations) != 2 or any(source.get("sha256") != digest
+                                         for _, source in declarations)):
+        raise ValueError("Both English N5.3 source declarations must carry the reviewed byte pin")
+    originals = {path: (root / path).read_bytes() for path in ARTIFACTS}
+    with tempfile.TemporaryDirectory(prefix="core-pdf-pin-v9-stage-", dir=root / "local") as tmp:
+        stage = Path(tmp)
+        next_rules = stage / "rules.db"
+        export_rules_database(documents, next_rules, restrictions_manifest=chart)
+        repeat = stage / "repeat.db"
+        export_rules_database(documents, repeat, restrictions_manifest=chart)
+        if _sha(next_rules) != _sha(repeat):
+            raise ValueError("Source pin export is not byte deterministic")
+        generated = RulesDatabase(next_rules)
+        generated.validate()
+        _check_source_pin_delta(current_rules, next_rules, source_id, digest, collections)
+        if generated.restrictions_payload() != current.restrictions_payload():
+            raise ValueError("Source pin refresh changed typed Restrictions")
+        proposed = build_publication(
+            army, next_rules, root / CURATED, root / DELIVERY, root / CANDIDATES,
+        )
+        expected = json.loads(json.dumps(before))
+        expected["sourceSnapshot"]["rulesDatabaseSha256"] = _sha(next_rules)
+        expected["sourceSnapshot"]["curatedSourceSha256"] = _sha(root / CURATED)
+        if proposed != expected:
+            raise ValueError("Source pin refresh changed deployed objects or unrelated provenance")
+        if any((root / path).read_bytes() != data for path, data in originals.items()):
+            raise ValueError("Release pair changed during source pin staging")
+
+        def post_validate() -> None:
+            RulesDatabase(current_rules).validate()
+            if load_deployed_object_publication(current_publication, army, current_rules) != (
+                proposed
+            ):
+                raise ValueError("Promoted source pin publication differs from staged source")
+
+        return _replace_with_rollback(
+            root, {RULES: next_rules.read_bytes(), PUBLICATION: publication_bytes(proposed)},
+            post_validate, backup_prefix="core-pdf-pin-v9-recovery-",
+        )

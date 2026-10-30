@@ -148,12 +148,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       archived Wiki revisions, **88/88** English Wiki references across 74
       pages, and **2/2** Spanish references; both language snapshots matched
       their declared hashes. The pinned Army ZIP matched the current
-      application database source identity. The available N5.3 PDF has no
-      maintained byte-hash pin, FAQ v0.1 still needs publication-scope review,
+      application database source identity. At that review, the N5.3 PDF had no
+      maintained byte-hash pin; FAQ v0.1 still needs publication-scope review,
       and the available Reinforcements PDFs are N4 rather than a verified N5
       annex. This is source-identity evidence only, not gameplay or browser
       completeness. Full local report:
       `local/audits/gate-1.0/current-20261028/source-evidence.md`.
+    - [x] **Data processing + Project infrastructure:** Pin the supplied
+      English N5.3 PDF in both Core and Hacking source declarations.
+      The 196-page input matches the reviewed Restrictions SHA-256;
+      JSON/Markdown evidence now reports `declared-hash-match`.
+      A guarded refresh synchronized the tracked v9 rules/publication
+      pair, allowing only the two source-hash cells and corresponding
+      publication provenance fingerprints to change. Rule rows,
+      Restrictions and reviewed objects are unchanged. See
+      [source identity](n5-source-history.md#reviewed-english-n53-core-pdf-identity)
+      and [validation](testing.md#10-source-evidence-baseline).
   - [ ] Reconcile each N5 update-post changelog item with its applicable versioned
     Army snapshot, rules/FAQ PDF, exact Wiki revision, and available historical N5
     versions. Record unmatched announcement claims and unknown release/snapshot

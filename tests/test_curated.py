@@ -13,6 +13,20 @@ from infinity_db.curated import (
 )
 
 
+@pytest.mark.parametrize("digest", ("a" * 64, "A" * 64, None, "", "g" * 64, "a" * 63, 123))
+def test_pdf_source_optional_fingerprint_is_validated(tmp_path: Path, digest: object) -> None:
+    document = valid_document()
+    source = next(source for source in document["sources"] if source["kind"] == "pdf")
+    source["sha256"] = digest
+    path = tmp_path / "curated.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    if digest in ("a" * 64, "A" * 64):
+        assert load_curated_document(path)["sources"][0]["sha256"] == digest
+    else:
+        with pytest.raises(ValueError, match="sha256"):
+            load_curated_document(path)
+
+
 def valid_document() -> dict:
     return {
         "format": "InfinityDB curated reference",

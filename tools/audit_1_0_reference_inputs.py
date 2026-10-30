@@ -599,7 +599,7 @@ def build_report(
     core_sources = [pin for pin in pdf_pins
                     if pin["title"] == "N5 Core Rules" and pin["version"] == "5.3"]
     faq_sources = [pin for pin in pdf_pins if "faq" in pin["title"].casefold()]
-    core_hashes = {pin["sha256"] for pin in core_sources}
+    core_hashes = {pin["sha256"].lower() if pin["sha256"] else None for pin in core_sources}
     if not core_sources or len(core_hashes) != 1:
         raise SourceEvidenceError("Expected consistent N5 Core Rules v5.3 source pins")
     declared_core_hash = next(iter(core_hashes))
@@ -720,7 +720,7 @@ def report_markdown(report: dict[str, Any]) -> str:
         "## Supplied artifact hashes (SHA-256)",
         "",
         f"- Core N5 v5.3 PDF: `{artifacts['coreRulesPdfSha256']}`",
-        "  (no declared SHA in current catalog).",
+        f"  (pin status: {artifacts['coreRulesPdfPinStatus']}).",
         f"- FAQ v0.1 PDF: `{artifacts['faqPdfSha256']}` "
         + ("(cataloged; publication scope/revision still requires review)."
            if artifacts["faqPdfPinStatus"] == "cataloged-needs-revision-review"

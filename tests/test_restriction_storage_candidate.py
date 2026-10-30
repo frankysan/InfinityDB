@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import sqlite3
 from collections.abc import Iterator
@@ -28,6 +29,77 @@ ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "data/generated/rules.db"
 CHART = ROOT / "config/validation/restrictions-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
+
+
+def test_english_core_pdf_pin_survives_curated_export(tmp_path: Path) -> None:
+    documents = load_curated_directory(ROOT / "data/curated/rules")
+    chart = json.loads(CHART.read_text(encoding="utf-8"))
+    pins = {
+        document["collection"]["id"]: source["sha256"]
+        for _, document in documents for source in document["sources"]
+        if source["id"] == chart["sourceId"]
+    }
+    assert pins == {
+        "n5-core-v5.3": chart["sourcePdfSha256"],
+        "n5-hacking-programs-v5.3": chart["sourcePdfSha256"],
+    }
+    output = tmp_path / "rules.db"
+    export_rules_database(documents, output)
+    with sqlite3.connect(output) as db:
+        stored = dict(db.execute(
+            "SELECT collection_id, sha256 FROM sources WHERE id = ?", (chart["sourceId"],),
+        ))
+    assert stored == pins
+    pdf = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if pdf.exists():
+        assert hashlib.sha256(pdf.read_bytes()).hexdigest() == chart["sourcePdfSha256"]
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "rules", "source-url", "source-hash", "missing", "extra", "schema", "version",
+               "previous-pin"),
+)
+def test_source_pin_guard_rejects_every_unrelated_database_change(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import _check_source_pin_delta
+
+    old_path, new_path = tmp_path / "old.db", tmp_path / "new.db"
+    digest = "a" * 64
+    with sqlite3.connect(old_path) as old, sqlite3.connect(new_path) as new:
+        old.executescript("""
+            PRAGMA application_id=123;
+            PRAGMA user_version=9;
+            CREATE TABLE sources(collection_id TEXT, id TEXT, sha256 TEXT, url TEXT);
+            CREATE TABLE records(id TEXT, summary TEXT);
+            INSERT INTO records VALUES ('unchanged', 'reviewed meaning');
+            INSERT INTO sources VALUES ('core', 'pdf', NULL, 'https://example.invalid/core');
+            INSERT INTO sources VALUES ('hacking', 'pdf', NULL, 'https://example.invalid/core');
+        """)
+        if defect == "previous-pin":
+            old.execute("UPDATE sources SET sha256 = ?", ("b" * 64,))
+        old.commit()
+        old.backup(new)
+        new.execute("UPDATE sources SET sha256 = ?", (digest,))
+        if defect == "rules":
+            new.execute("UPDATE records SET summary = 'unreviewed meaning'")
+        elif defect == "source-url":
+            new.execute("UPDATE sources SET url = 'https://example.invalid/other'")
+        elif defect == "source-hash":
+            new.execute("UPDATE sources SET sha256 = ?", ("c" * 64,))
+        elif defect == "missing":
+            new.execute("DELETE FROM sources WHERE collection_id = 'hacking'")
+        elif defect == "extra":
+            new.execute("INSERT INTO sources VALUES ('extra', 'pdf', NULL, 'unknown')")
+        elif defect == "schema":
+            new.execute("ALTER TABLE records ADD COLUMN unexpected TEXT")
+        elif defect == "version":
+            new.execute("PRAGMA user_version=8")
+    if defect is None:
+        _check_source_pin_delta(old_path, new_path, "pdf", digest, {"core", "hacking"})
+    else:
+        with pytest.raises(ValueError, match="Source pin refresh"):
+            _check_source_pin_delta(old_path, new_path, "pdf", digest, {"core", "hacking"})
 
 
 def source_data() -> tuple[dict, dict]:

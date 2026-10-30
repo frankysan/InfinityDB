@@ -1289,6 +1289,26 @@ the ignored `local/` workspace:
 .venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5-3-en.pdf" --faq-pdf "data/pdf/faq/n5-faqs-v0-1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
+The English N5.3 PDF now has a maintained SHA-256 pin in both Core and
+Hacking source declarations; see [source identity](n5-source-history.md#reviewed-english-n53-core-pdf-identity).
+The auditor compares the supplied bytes with consistent source-catalog pins
+(hexadecimal case is immaterial) and renders the actual `coreRulesPdfPinStatus`
+in both JSON and Markdown. A declared match establishes byte identity only.
+`tests/test_curated.py` rejects malformed optional PDF hashes, and
+`tests/test_restriction_storage_candidate.py` verifies declaration/export parity
+and rejects unrelated changes during a source-pin refresh.
+
+The one-time `tools.build_deployed_object_publication --refresh-core-pdf-pin-v9`
+operation stages a matched v9 pair, verifies the reviewed PDF, compares two
+independent exports, and permits only the two previously NULL English source
+hashes to change across the complete stored table set. The matching publication
+may change only its rules-database/curated-source fingerprints. Coordinated
+replacement retains recovery copies of both original artifacts and restores them
+if post-publication checks fail. It requires an unchanged tracked rules database
+and refuses already-pinned or otherwise changed source rows; it is not a general
+replacement for the scoped artifact workflows. The normal default rules export
+remains v8-compatible. No acquisition runs during these checks.
+
 The report's version-3 `reinforcementsSourceEvidence` separately checks the
 audit-only [historical source inventory](../config/validation/reinforcements-source-inputs.json).
 Its two relative research paths resolve within the checkout. Optional

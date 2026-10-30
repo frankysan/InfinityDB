@@ -80,6 +80,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--refresh-isolated-context-v9", action="store_true",
         help="Refresh the exact reviewed Isolated State contextual links in a matched v9 pair",
     )
+    migration.add_argument(
+        "--refresh-core-pdf-pin-v9", action="store_true",
+        help="Pin the reviewed English N5.3 PDF in the matched v9 release pair",
+    )
     return parser
 
 
@@ -89,15 +93,22 @@ def main() -> int:
         args.stage_restrictions_v9 is not None
         or args.promote_restrictions_v9 is not None
         or args.refresh_isolated_context_v9
+        or args.refresh_core_pdf_pin_v9
     ):
         if args.check:
             raise ValueError("--check cannot be combined with v9 migration operations")
         from tools.restrictions_v9_release import (
             promote_restrictions_v9,
+            refresh_core_pdf_pin_v9_release,
             refresh_isolated_context_v9_release,
             stage_restrictions_v9,
         )
 
+        if args.refresh_core_pdf_pin_v9:
+            backup = refresh_core_pdf_pin_v9_release()
+            print("Refreshed the reviewed English N5.3 source pin in v9 release artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
         if args.refresh_isolated_context_v9:
             backup = refresh_isolated_context_v9_release()
             print("Refreshed the reviewed Isolated links in v9 release artifacts.")

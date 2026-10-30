@@ -394,7 +394,11 @@ example `rules/n5-core-v5.3.json`. Each file contains:
 - `formatVersion`: `23`
 - `collection`: publication/source collection identity, scope, status, and authority
 - optional `scenarioCollection`: stable scenario-set identity, exact set revision, and ordered members
-- `sources`: source-specific PDF or wiki provenance
+- `sources`: source-specific PDF or wiki provenance. PDF sources may declare
+  an optional 64-character hexadecimal `sha256`; malformed declarations fail
+  validation. The source-evidence auditor verifies supplied bytes separately.
+  Normal rules builds validate the declaration without opening or downloading
+  research PDFs.
 - `vocabularySources`: source references for maintained vocabularies
 - `skillTypes`, `labels`, and typed `records`
 

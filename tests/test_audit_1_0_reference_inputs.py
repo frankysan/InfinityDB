@@ -94,8 +94,10 @@ def test_historical_source_inventory_rejects_unreviewed_claims(
 
 
 @pytest.mark.parametrize("present", ((), ("en",), ("en", "es")))
+@pytest.mark.parametrize("core_hash_uppercase", (False, True))
 def test_historical_reinforcements_report_uses_actual_availability(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, present: tuple[str, ...],
+    core_hash_uppercase: bool,
 ) -> None:
     import sqlite3
 
@@ -117,9 +119,10 @@ def test_historical_reinforcements_report_uses_actual_availability(
     rules = tmp_path / "rules.db"
     with sqlite3.connect(rules) as db:
         db.execute("CREATE TABLE sources(id, url, kind, title, version, sha256)")
+        core_hash = hashlib.sha256(core.read_bytes()).hexdigest()
         db.execute("INSERT INTO sources VALUES (?, ?, ?, ?, ?, ?)", (
             "core", "https://example.invalid/core", "pdf", "N5 Core Rules", "5.3",
-            hashlib.sha256(core.read_bytes()).hexdigest(),
+            core_hash.upper() if core_hash_uppercase else core_hash,
         ))
     history = _archive(tmp_path)
     with zipfile.ZipFile(history, "a") as archive:
@@ -133,6 +136,8 @@ def test_historical_reinforcements_report_uses_actual_availability(
     assert f"**{len(present)}/2**" in markdown
     assert "has not been supplied" not in markdown
     assert "not verified N5 procedural authority" in markdown
+    assert "pin status: declared-hash-match" in markdown
+    assert "no declared SHA" not in markdown
 
 
 @pytest.mark.parametrize("defect", ("version", "extra-authority", "duplicate-language"))

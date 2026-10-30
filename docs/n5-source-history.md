@@ -83,6 +83,24 @@ version ID`, `publication date`, `acquisition date`, `exact revision/commit`,
 For a source announcement, record each independent changelog section as a
 separate scoped claim; never treat ITS-only changes as core N5 rules.
 
+## Reviewed English N5.3 core PDF identity
+
+**Local verification, 2026-10-30:** The supplied
+`data/pdf/rules/n5-rules-v5-3-en.pdf` identifies N5 v5.3 on its cover and
+contains 196 file pages. Its SHA-256 is
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`,
+matching the previously reviewed Restrictions source manifest.
+Both `n5-core-v5.3-pdf` declarations, in the Core and Hacking Programs
+collections, now carry this byte pin. The source-evidence auditor reports
+`declared-hash-match` against the supplied file and displays the actual pin
+status in Markdown as well as JSON.
+
+The pin identifies the local review input; source-section coverage and the
+final 1.0 input freeze remain separate gates. Publication-date metadata and
+gameplay content retain their previous values. The tracked v9 rules database
+and paired deployed-object publication were refreshed together; see
+[the artifact contract](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+
 ## Locally available Reinforcements PDFs
 
 **Availability check, 2026-10-21:** The local files below are present and readable,

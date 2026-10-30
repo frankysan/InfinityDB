@@ -992,6 +992,20 @@ contract. The 14 typed source restrictions, not these generic
 graph edges, remain the source of conditional semantics; the seven
 source-only/unrepresentable generic edges are not manufactured.
 
+**English core source pin refresh (2026-10-30):** The tracked v9 database
+now carries the reviewed English N5.3 PDF fingerprint in both Core and
+Hacking source declarations. A guarded paired refresh compared every table
+and permitted only those two NULL-to-hash cells; gameplay rows, relations,
+typed Restrictions and reviewed objects remained identical. Two independent
+exports were byte-identical. The rules SHA-256 is
+`45b58043ebb442c6f119802647c7254129d3507e04ec5e67ad7099503f9bb05f`;
+the matching ignored publication SHA-256 is
+`51b0bb2c26fafbc1cc290cfc61355f2060ce5bc4d89d06ab1966cd39af3b75ad`.
+The original matched v9 pair is retained under ignored `local/`; the retained
+local audit evidence records its recovery location. The publication changes only
+its rules-database and curated-source fingerprints. This is local provenance
+acceptance, separate from final release and hosted deployment gates.
+
 The API, schema and rollback contract remains covered by
 `tests/test_restriction_storage_candidate.py` with both
 versions tested independently of the tracked database version.
