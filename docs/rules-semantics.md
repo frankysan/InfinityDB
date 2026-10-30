@@ -2628,14 +2628,29 @@ Comms Attacks or a generic result for other weapons. No target State,
 Wound or immunity outcome is calculated at runtime; the Army
 Weapon profile continues to show its original BTS/2 × 2 fields.
 
-The Skill reference card now presents **seven reviewed cases**:
-four component-specific/Combined Ammunition examples plus the
-explicit Plasma Combined Saving Roll, Flash Pulse and
-Vulnerability examples. Real Chromium acceptance at 1440/390/320 px
-checks the source-scope label, semantic links and no overflow.
-Other component-specific Immunities, BTS-based attacks and conditional
-State interactions remain unresolved. Do not extrapolate an algorithm
-or project reviewed Immunity outcomes into individual Weapon profiles.
+**Standalone E/Mitter versus Immunity (BTS)** is another narrowly
+scoped, *rule-derived* example, this time for **E/M Ammunition
+without a combined component**. The N5.3 p. 186 chart lists the
+standalone E/Mitter as E/M, BTS/2, two Saving Rolls, Non-Lethal,
+with no Comms Attack Trait. Under pp. 64, 95–96, covered E/M
+becomes Normal, so one unmodified BTS Saving Roll remains for a hit
+(two for a Critical absent Immunity (Critical)); E/M's Isolated and
+conditional Immobilized-B effects are ignored. The Non-Lethal
+Trait is expressly unaffected by Immunity and continues to prevent
+Wounds. This authored case is restricted to standalone Army weapon
+source ID 25 and Ammunition source ID 14. It **does not** resolve
+REA-045: Armed Turret weapon 226 retains an unexplained imported
+E/Mitter variant with one BTS/2 Saving Roll. Neither source profile
+is modified by the reviewed interaction.
+
+The Skill reference now presents **eight reviewed interactions**:
+four Combined Ammunition cases, Flash Pulse and standalone E/Mitter
+Weapon cases, one Plasma Combined Saving Roll and one Vulnerability
+example. Chromium acceptance at 1440/390/320 px verifies the new
+conditional source explanation, semantic links and mobile layout.
+Other component-specific Immunities, BTS-based attacks, Comms Attack
+rules and conditional State interactions remain unresolved. Do not
+extrapolate an evaluator or project outcomes into Weapon profiles.
 
 Sources: N5.3 English PDF printed pp. 95-96; Spanish PDF printed p. 99
 (Immunity) and p. 196 (Flash Pulse Weapon Chart); N5.3 Wiki

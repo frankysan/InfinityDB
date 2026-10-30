@@ -53,7 +53,7 @@ def test_printed_plasma_case_has_separate_normal_reference_without_overflow(
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         rows = page.locator(".immunity-reviewed-cases li")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 7",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 8",
             timeout=20000,
         )
         plasma = rows.filter(has_text="Immunity (Enhanced) vs Plasma Rifle")
@@ -85,7 +85,7 @@ def test_n53_bts_immunity_em_cc_weapon_is_exact_and_source_scoped(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 7",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 8",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -99,6 +99,43 @@ def test_n53_bts_immunity_em_cc_weapon_is_exact_and_source_scoped(
         assert reviewed.locator('a[href="/weapons/e-m-cc-weapon"]').count() == 1
         assert reviewed.locator('a[href="/ammunition/normal"]').count() >= 1
         assert reviewed.locator('a[href="/ammunition/em"]').count() == 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width,height", [
+    (1440, 900), (390, 844), (320, 640),
+])
+def test_standalone_emitter_immunity_keeps_nonlethal_and_turret_warning(
+    app: Any, browser: Any, width: int, height: int,
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 8",
+            timeout=20000,
+        )
+        rows = page.locator(".immunity-reviewed-cases li")
+        emitter = rows.filter(has_text="Immunity (BTS) vs standalone E/Mitter")
+        assert emitter.count() == 1
+        rendered = emitter.inner_text()
+        assert "2 Saving Rolls on a hit (3 on a Critical) at BTS/2" in rendered
+        assert "1 Saving Roll on a hit (2 on a Critical) at BTS" in rendered
+        assert "Non-Lethal" in rendered and "inflicts no Wounds" in rendered
+        assert "Armed Turret E/Mitter discrepancy is not adjudicated" in rendered
+        assert "Derived from reviewed general rules" in rendered
+        assert emitter.locator('a[href="/weapons/e-mitter"]').count() == 1
+        assert emitter.locator('a[href="/ammunition/em"]').count() == 1
+        assert emitter.locator('a[href="/ammunition/normal"]').count() == 1
+        assert emitter.locator('a[href="/traits/non-lethal"]').count() == 1
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         )

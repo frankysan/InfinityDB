@@ -20953,6 +20953,31 @@
                                 "condition": "failed-saving-roll"
                             },
                             "evidence": "explicit-pinned-wiki-example"
+                        },
+                        {
+                            "when": {
+                                "weaponId": "weapon:e-mitter",
+                                "sourceWeaponId": 25,
+                                "sourceAmmunitionId": 14,
+                                "immunity": "BTS",
+                                "savingAttribute": "BTS",
+                                "attackClass": "non-comms"
+                            },
+                            "ammunitionTreatedAs": "ammunition:normal",
+                            "survivingTraits": [
+                                "trait:non-lethal"
+                            ],
+                            "withoutImmunity": {
+                                "hitRolls": 2,
+                                "criticalRolls": 3,
+                                "savingAttribute": "BTS/2"
+                            },
+                            "withImmunity": {
+                                "hitRolls": 1,
+                                "criticalRolls": 2,
+                                "savingAttribute": "BTS"
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
                         }
                     ],
                     "reviewedVulnerabilityCases": [

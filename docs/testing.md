@@ -4127,6 +4127,22 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Standalone E/Mitter / Immunity (BTS), 2026-10-30:**
+`tests/test_immunity_bts_emitter.py` pins N5.3 pp. 64, 95–96
+and 186, standalone Army weapon 25 / E/M source 14, and the
+distinct Armed Turret one-roll discrepancy (weapon 226).
+It proves the source-backed one-BTS-roll result with surviving
+Non-Lethal under Immunity (BTS) without modifying either
+Weapon API profile. The curated validator rejects unsupported
+weapon IDs, source Ammunition, Comms scope, altered roll counts,
+suppressed Non-Lethal and mislabeled evidence. The eighth
+player-facing Immunity card, source/restriction text and links
+pass real Chromium at 1440/390/320 px. Coordinated rules
+database/publication staging and promotion in
+`tools/stage_immunity_bts_emitter.py` retains 17 deployed objects
+and recovery backups. This is not a Comms/immunity evaluator
+or an Armed Turret adjudication.
+
 **BTS Immunity / E/M CC Weapon, 2026-10-30:**
 `tests/test_immunity_bts_em_cc.py` verifies the pinned N5.3
 pp. 64, 67, 95–96 and 177 excerpts, exact Army E/M CC Weapon

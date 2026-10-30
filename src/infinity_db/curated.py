@@ -549,8 +549,9 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
         ]
     ):
         raise ValueError(f"{context}: invalid Immunity exceptions")
-    # This is the one printed Flash Pulse example, not a weapon/trait evaluator.
-    # In particular, the stunned condition must not be inferred for other weapons.
+    # Explicit Flash Pulse and rule-derived standalone E/Mitter are the only
+    # reviewed Weapon cases. The latter must not inherit the Armed Turret's
+    # unresolved one-roll E/Mitter mode or suppress the Non-Lethal Trait.
     if value["reviewedWeaponCases"] != [
         {
             "when": {
@@ -566,9 +567,32 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
                 "condition": "failed-saving-roll",
             },
             "evidence": "explicit-pinned-wiki-example",
-        }
+        },
+        {
+            "when": {
+                "weaponId": "weapon:e-mitter",
+                "sourceWeaponId": 25,
+                "sourceAmmunitionId": 14,
+                "immunity": "BTS",
+                "savingAttribute": "BTS",
+                "attackClass": "non-comms",
+            },
+            "ammunitionTreatedAs": "ammunition:normal",
+            "survivingTraits": ["trait:non-lethal"],
+            "withoutImmunity": {
+                "hitRolls": 2,
+                "criticalRolls": 3,
+                "savingAttribute": "BTS/2",
+            },
+            "withImmunity": {
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "savingAttribute": "BTS",
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
     ]:
-        raise ValueError(f"{context}: unsupported Flash Pulse Immunity example")
+        raise ValueError(f"{context}: unsupported reviewed Weapon Immunity examples")
     # The pinned Vulnerability example names a *weapon*, not just an
     # Ammunition component. Do not turn this into substring-based runtime logic.
     if value["reviewedVulnerabilityCases"] != [

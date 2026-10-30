@@ -1007,10 +1007,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         result into the Weapon API. Validate the closed schema, pinned
         source and browser at 1440/390/320 px. Publish the synchronized
         rules DB/deployed-object pair with rollback backup.
-      - [ ] Review other BTS-component Immunity outcomes using specific
-        non-Comms Weapon/combined-Ammunition evidence. This E/M CC
-        example and the Plasma case do not authorize general E/M,
-        Comms Attack or arbitrary combined-effect adjudication.
+      - [x] Add the **standalone E/Mitter** case under source weapon
+        ID 25 and E/M source ID 14 (N5.3 pp. 64, 95–96, 186).
+        Its non-Comms two BTS/2 rolls (three on Critical) become
+        one unmodified BTS Saving Roll (two on Critical without
+        Immunity (Critical)); **Non-Lethal survives** and E/M State
+        effects do not apply. Keep the Armed Turret E/Mitter
+        discrepancy (source weapon 226, one imported roll) explicitly
+        excluded and unchanged. Verify source, Army and API,
+        fail-closed validation mutations, eight-card renderer and
+        1440/390/320 px browser acceptance; promote the coordinated
+        rules/publication pair with a recovery backup.
+      - [ ] Review other BTS-component Immunity outcomes using exact
+        non-Comms Weapon/combined-Ammunition evidence. Neither
+        standalone E/Mitter, E/M CC nor Plasma authorizes a
+        generic E/M, Comms Attack or arbitrary combined-effect
+        evaluator.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

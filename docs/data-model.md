@@ -315,9 +315,10 @@ modifiers, the default additional Critical Saving Roll (unless the defender has
 Immunity (Critical)), and the Comms Attack/Non-Lethal/Stunned exceptions. These
 facts belong to Immunity, **not** to the ordered Combined Ammunition mapping:
 checking whether a defender's particular Immunity covers an entire attack or
-one or more constituent effects remains unimplemented. Three `reviewedCombinedCases`
+one or more constituent effects remains unimplemented. Four `reviewedCombinedCases`
 now give **rule-derived, conditional** examples: Immunity (ARM) against source
-IDs 10 (AP+DA) and 13 (AP+Exp), plus Immunity (AP) against AP+DA only.
+IDs 10 (AP+DA) and 13 (AP+Exp), plus Immunity (AP) against AP+DA and
+the exact non-Comms E/M CC Weapon's Immunity (BTS) interaction.
 The AP case records its ignored AP component and surviving DA effect, retaining
 two full-ARM rolls (three on Critical), instead of collapsing to Normal.
 Each example preserves before/after hit and Critical counts with source IDs,
@@ -350,8 +351,19 @@ case is stored on `skill:immunity`, not the source Ammunition map
 or Weapon profile. The checked-in `rules.db` and regenerated
 deployed-object publication were promoted together, with all
 17 reviewed deployed objects unchanged and a recovery backup.
-Other component Immunities, Comms Attack coverage, BTS conditions
-and unreviewed combinations remain unresolved.
+A separate **standalone E/Mitter** `reviewedWeaponCases` entry
+fixes the exact source weapon ID 25 and E/M ID 14, with the
+original BTS/2 × 2 and conditional Immunity (BTS) one-BTS-roll
+result. The surviving **Non-Lethal** Trait and absence of E/M State
+effects are shown only as source-backed player guidance. The
+Armed Turret source weapon 226's conflicting one-roll E/Mitter
+mode remains untouched and explicitly excluded (REA-045).
+The eight reviewed interactions are a curated reference, not a
+runtime Weapon-resolution engine. Coordinated `rules.db` and
+deployed-object publication remain synchronized; 17 reviewed
+deployed objects are unchanged. Other component Immunities, Comms
+Attack coverage, BTS conditions and unreviewed combinations
+remain unresolved.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;

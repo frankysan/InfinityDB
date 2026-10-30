@@ -36,24 +36,41 @@ export function immunityCaseRows(facts = {}) {
   if (!cases) return [];
   const rows = [];
   for (const item of cases.reviewedWeaponCases || []) {
-    // The source currently reviews Flash Pulse, not arbitrary BTS weapons.
-    if (item.when.weaponId !== "weapon:flash-pulse") continue;
-    rows.push({
-      title: [text(`Immunity (${item.when.immunity}) vs `),
-        reference(item.when.weaponId, "Flash Pulse")],
-      detail: [
-        text(`A failed ${item.when.savingAttribute} Saving Roll still causes `),
-        reference(item.stateEffect.stateId, "Stunned"),
-        text(" without Wounds. "),
-        reference("ammunition:stun", "STUN"),
-        text(" counts as "), reference(item.ammunitionTreatedAs, "Normal"),
-        text(`, but the Saving Roll remains ${item.when.savingAttribute}; the explicit `),
-        reference("trait:non-lethal", "Non-Lethal"), text(" and "),
-        reference("trait:state", "State: Stunned"),
-        text(" Trait exceptions still apply (non-Comms attacks)."),
-      ],
-      evidence: evidence(item.evidence),
-    });
+    if (item.when.weaponId === "weapon:flash-pulse") {
+      rows.push({
+        title: [text(`Immunity (${item.when.immunity}) vs `),
+          reference(item.when.weaponId, "Flash Pulse")],
+        detail: [
+          text(`A failed ${item.when.savingAttribute} Saving Roll still causes `),
+          reference(item.stateEffect.stateId, "Stunned"),
+          text(" without Wounds. "),
+          reference("ammunition:stun", "STUN"),
+          text(" counts as "), reference(item.ammunitionTreatedAs, "Normal"),
+          text(`, but the Saving Roll remains ${item.when.savingAttribute}; the explicit `),
+          reference("trait:non-lethal", "Non-Lethal"), text(" and "),
+          reference("trait:state", "State: Stunned"),
+          text(" Trait exceptions still apply (non-Comms attacks)."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:e-mitter") {
+      rows.push({
+        title: [text(`Immunity (${item.when.immunity}) vs standalone `),
+          reference(item.when.weaponId, "E/Mitter")],
+        detail: [
+          text(`The source's ${counts(item.withoutImmunity)} at ${item.withoutImmunity.savingAttribute} `),
+          text(`become ${counts(item.withImmunity)} at ${item.withImmunity.savingAttribute}. `),
+          reference("ammunition:em", "E/M"), text(" is treated as "),
+          reference(item.ammunitionTreatedAs, "Normal"),
+          text("; its Isolated/Immobilized-B effects are ignored. The "),
+          reference("trait:non-lethal", "Non-Lethal"),
+          text(" Trait still applies, so this weapon inflicts no Wounds. "),
+          text("Only the source Weapon 25 non-Comms profile is reviewed; "),
+          text("the Armed Turret E/Mitter discrepancy is not adjudicated."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    }
   }
   for (const item of cases.reviewedVulnerabilityCases || []) {
     rows.push({
