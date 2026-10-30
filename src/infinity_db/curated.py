@@ -421,6 +421,10 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
         "immunity": "AP", "savingAttribute": "BTS",
         "attackClass": "non-comms", "weaponId": "weapon:silenced-pistol",
     }
+    ap_t2_when = {
+        "immunity": "AP", "savingAttribute": "ARM",
+        "attackClass": "non-comms", "weaponId": "weapon:ap-t2-cc-weapon",
+    }
     for index, case in enumerate(value):
         item = f"{context}[{index}]"
         if not isinstance(case, dict) or set(case) != {
@@ -430,7 +434,7 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
             raise ValueError(f"{item}: invalid combined Immunity case fields")
         source_id = case["sourceAmmunitionId"]
         when = case["when"]
-        if when not in (arm_when, ap_when, bts_cc_when, silenced_ap_when):
+        if when not in (arm_when, ap_when, bts_cc_when, silenced_ap_when, ap_t2_when):
             raise ValueError(f"{item}: unsupported Immunity applicability")
         identity = (source_id, when["immunity"], when.get("weaponId", ""))
         if type(source_id) is not int or source_id < 1 or identity in seen:
@@ -451,10 +455,13 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
             not isinstance(original, dict)
             or set(original) != (
                 {"hitRolls", "criticalRolls", "savingAttribute"}
-                if when == silenced_ap_when else {"hitRolls", "criticalRolls"}
+                if when in (silenced_ap_when, ap_t2_when)
+                else {"hitRolls", "criticalRolls"}
             )
             or type(original["hitRolls"]) is not int
-            or original["hitRolls"] < (1 if when == silenced_ap_when else 2)
+            or original["hitRolls"] < (
+                1 if when in (silenced_ap_when, ap_t2_when) else 2
+            )
             or type(original["criticalRolls"]) is not int
             or original["criticalRolls"] != original["hitRolls"] + 1
         ):
@@ -495,6 +502,28 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
                 "treatedAs": "ammunition:shock",
                 "ignoredComponents": ["ammunition:ap"],
                 "remainingComponents": ["ammunition:shock"],
+            }
+        elif when == ap_t2_when:
+            # N5.3 pp. 63, 67, 95-96, 177: AP+T2 CC Weapon only.
+            # Hit and extra-Critical failed rolls inflict DIFFERENT Wounds.
+            if (
+                source_id != 40
+                or case["sourceAmmunitionName"] != "AP+T2"
+                or components != ["ammunition:ap", "ammunition:t2"]
+                or original != {
+                    "hitRolls": 1, "criticalRolls": 2,
+                    "savingAttribute": "ARM/2",
+                }
+            ):
+                raise ValueError(f"{item}: unsupported AP+T2 CC applicability")
+            expected = {
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "savingAttribute": "ARM",
+                "treatedAs": "ammunition:t2",
+                "ignoredComponents": ["ammunition:ap"],
+                "remainingComponents": ["ammunition:t2"],
+                "failedRollWounds": {"hit": 2, "criticalAdditionalRoll": 1},
             }
         else:
             # Only this specific AP+DA example has been reviewed; retaining DA

@@ -2661,8 +2661,25 @@ example. It neither changes the Army Silenced Pistol's
 BTS/2 source profile nor adjudicates arbitrary AP+Shock
 or mixed-Attribute attacks.
 
-The Skill reference now presents **nine reviewed interactions**:
-five Combined Ammunition cases, Flash Pulse and standalone E/Mitter
+**AP+T2 CC Weapon versus Immunity (AP)** is the sixth strictly
+reviewed Combined Ammunition example. The N5.3 p. 177 Weapon
+Chart specifies one ARM/2 Saving Roll using AP+T2 with
+Anti-materiel and CC Traits. Immunity (AP) ignores only the AP
+component (N5.3 pp. 63, 95–96): the target makes **one
+unmodified ARM Saving Roll** per hit, plus one on a Critical
+unless Immunity (Critical) also applies. T2 remains fully
+effective. Its N5.3 p. 67 Wound distinction **must survive**
+the partial Immunity: failure of the hit roll inflicts **2
+Wounds**; failure of the **extra Critical roll** inflicts
+**1 Wound**. Players must identify the two dice before rolling.
+Anti-materiel is an independent Trait, not an additional roll
+or extra Wound. These are conditional, source-derived reference
+facts, not a printed Immunity example or an executable Wound
+calculator. The actual Army AP+T2 Weapon profile retains its
+original one ARM/2 Saving Roll and component identity.
+
+The Skill reference now presents **ten reviewed interactions**:
+six Combined Ammunition cases, Flash Pulse and standalone E/Mitter
 Weapon cases, one Plasma Combined Saving Roll and one Vulnerability
 example. Chromium acceptance at 1440/390/320 px verifies the new
 conditional source explanation, semantic links and mobile layout.

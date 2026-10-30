@@ -53,7 +53,7 @@ def test_printed_plasma_case_has_separate_normal_reference_without_overflow(
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         rows = page.locator(".immunity-reviewed-cases li")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 9",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 10",
             timeout=20000,
         )
         plasma = rows.filter(has_text="Immunity (Enhanced) vs Plasma Rifle")
@@ -85,7 +85,7 @@ def test_n53_bts_immunity_em_cc_weapon_is_exact_and_source_scoped(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 9",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 10",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -120,7 +120,7 @@ def test_standalone_emitter_immunity_keeps_nonlethal_and_turret_warning(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 9",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 10",
             timeout=20000,
         )
         rows = page.locator(".immunity-reviewed-cases li")
@@ -157,7 +157,7 @@ def test_silenced_pistol_ap_immunity_preserves_shock_bts_and_silent(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 9",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 10",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -176,6 +176,47 @@ def test_silenced_pistol_ap_immunity_preserves_shock_bts_and_silent(
         assert silenced.locator('a[href="/ammunition/shock"]').count() >= 1
         assert silenced.locator('a[href="/states/dead"]').count() == 1
         assert silenced.locator('a[href="/traits/silent-x"]').count() == 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width,height", [
+    (1440, 900), (390, 844), (320, 640),
+])
+def test_ap_t2_cc_immunity_keeps_two_wound_hit_and_one_wound_critical(
+    app: Any, browser: Any, width: int, height: int,
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 10",
+            timeout=20000,
+        )
+        cases = page.locator(".immunity-reviewed-cases li")
+        reviewed = cases.filter(has_text="Immunity (AP) vs AP + T2")
+        assert reviewed.count() == 1
+        actual = reviewed.inner_text()
+        assert "AP+T2 CC Weapon" in actual
+        assert "1 Saving Roll on a hit (2 on a Critical) using ARM" in actual
+        assert "rather than 1 Saving Roll on a hit (2 on a Critical) using ARM/2" in actual
+        assert "A failed hit Saving Roll still inflicts 2 Wounds" in actual
+        assert "a failed additional Critical Saving Roll inflicts only 1 Wound" in actual
+        assert "Identify which die is the hit roll" in actual
+        assert "Anti-materiel" in actual and "separate Weapon property" in actual
+        assert "reviewed non-Comms attack only" in actual
+        assert "Derived from reviewed general rules" in actual
+        assert reviewed.locator('a[href="/weapons/ap-t2-cc-weapon"]').count() == 1
+        assert reviewed.locator('a[href="/ammunition/ap"]').count() >= 1
+        assert reviewed.locator('a[href="/ammunition/t2"]').count() >= 1
+        assert reviewed.locator('a[href="/traits/anti-materiel"]').count() == 1
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         )

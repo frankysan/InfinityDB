@@ -366,7 +366,17 @@ VITA=1 failed-roll Dead condition. Silent (-6) remains a
 separately conditional Trait. The Army profile and Ammunition
 component mapping remain unchanged; this is not a generalized
 partial-Immunity algorithm.
-The nine reviewed interactions are a curated reference, not a
+The **sixth** combined case is narrowly scoped to the
+`weapon:ap-t2-cc-weapon` non-Comms source profile (Army
+Ammunition ID 40). With Immunity (AP), the one ARM/2
+Saving Roll becomes one full-ARM roll (one extra on Critical),
+but T2's failure consequences stay distinct: **2 Wounds**
+on a failed hit roll, **1 Wound** on a failed extra Critical
+roll. The new `failedRollWounds` member is validated against
+canonical `ammunition:t2` facts; it is not an arbitrary
+combat computation. The independent Anti-materiel Trait and
+the original Army ARM/2 profile are preserved.
+The ten reviewed interactions are a curated reference, not a
 runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms

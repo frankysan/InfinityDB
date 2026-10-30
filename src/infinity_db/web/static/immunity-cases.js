@@ -108,8 +108,11 @@ export function immunityCaseRows(facts = {}) {
         ...(item.when.weaponId
           ? [text(" — "), reference(
               item.when.weaponId,
-              item.when.weaponId === "weapon:silenced-pistol"
-                ? "Silenced Pistol" : "E/M CC Weapon"
+              ({
+                "weapon:silenced-pistol": "Silenced Pistol",
+                "weapon:ap-t2-cc-weapon": "AP+T2 CC Weapon",
+                "weapon:e-m-cc-weapon": "E/M CC Weapon",
+              })[item.when.weaponId] || "Reviewed Weapon"
             )] : []),
       ],
       detail: [
@@ -128,6 +131,14 @@ export function immunityCaseRows(facts = {}) {
             text(" instead of Unconscious. The weapon's "),
             reference("trait:silent-x", "Silent (-6)"),
             text(" remains a separately conditional Trait.")] : []),
+        ...(item.when.weaponId === "weapon:ap-t2-cc-weapon"
+          ? [text(" A failed hit Saving Roll still inflicts "),
+            text(`${applied.failedRollWounds.hit} Wounds`),
+            text("; a failed additional Critical Saving Roll inflicts only "),
+            text(`${applied.failedRollWounds.criticalAdditionalRoll} Wound`),
+            text(". Identify which die is the hit roll and which is the extra Critical roll before rolling. The "),
+            reference("trait:anti-materiel", "Anti-materiel"),
+            text(" Trait remains a separate Weapon property.")] : []),
         text(" Applies to the reviewed non-Comms attack only."),
       ],
       evidence: evidence(item.evidence),

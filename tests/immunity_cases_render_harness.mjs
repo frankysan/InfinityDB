@@ -67,7 +67,7 @@ const groups = descendants(article, (node) => node.className === "detail-fact-gr
 assert.equal(groups.length, 1);
 const group = groups[0];
 const cases = descendants(group, (node) => node.tag === "li");
-assert.equal(cases.length, 9);
+assert.equal(cases.length, 10);
 // Every reviewed case uses the same semantic list-item structure with
 // a navigable title, an outcome, and its own source-evidence classification.
 for (const item of cases) {
@@ -82,7 +82,7 @@ assert.deepEqual(labels, [
   "Explicit source example", "Explicit N5.3 p. 96, Example 3",
   "Derived from reviewed general rules", "Derived from reviewed general rules",
   "Derived from reviewed general rules", "Derived from reviewed general rules",
-  "Derived from reviewed general rules",
+  "Derived from reviewed general rules", "Derived from reviewed general rules",
 ]);
 assert.match(cases[0].textContent, /non-Comms attacks/);
 for (const item of cases.slice(4)) {
@@ -110,15 +110,22 @@ assert.match(combined[7], /Immunity \(AP\) vs AP \+ SHOCK.*Silenced Pistol/);
 assert.match(combined[7], /1 Saving Roll on a hit \(2 on a Critical\) using BTS, rather than 1 Saving Roll on a hit \(2 on a Critical\) using BTS\/2/);
 assert.match(combined[7], /Shock effect still sends a VITA 1 target directly to Dead/);
 assert.match(combined[7], /Silent \(-6\) remains a separately conditional Trait/);
-assert.match(combined[8], /Immunity \(BTS\) vs N \+ E\/M.*E\/M CC Weapon/);
-assert.match(combined[8], /1 Saving Roll on a hit \(2 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
+assert.match(combined[8], /Immunity \(AP\) vs AP \+ T2.*AP\+T2 CC Weapon/);
+assert.match(combined[8], /1 Saving Roll on a hit \(2 on a Critical\) using ARM, rather than 1 Saving Roll on a hit \(2 on a Critical\) using ARM\/2/);
+assert.match(combined[8], /failed hit Saving Roll still inflicts 2 Wounds/);
+assert.match(combined[8], /failed additional Critical Saving Roll inflicts only 1 Wound/);
+assert.match(combined[8], /Identify which die is the hit roll/);
+assert.match(combined[8], /Anti-materiel Trait remains a separate Weapon property/);
+assert.match(combined[9], /Immunity \(BTS\) vs N \+ E\/M.*E\/M CC Weapon/);
+assert.match(combined[9], /1 Saving Roll on a hit \(2 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
 for (const item of cases.slice(4)) assert.match(item.textContent, /Derived from reviewed general rules/);
 assert.match(group.textContent, /Critical counts assume no Immunity \(Critical\)/);
 const links = descendants(group, (node) => node.tag === "a");
 for (const url of ["/weapons/flash-pulse", "/weapons/e-mitter", "/weapons/plasma-rifle",
   "/weapons/silenced-pistol", "/ammunition/shock", "/traits/silent-x", "/states/dead", "/skills/vulnerability", "/ammunition/ap",
   "/ammunition/da", "/ammunition/exp", "/ammunition/normal", "/ammunition/em",
-  "/weapons/e-m-cc-weapon", "/states/stunned",
+  "/weapons/e-m-cc-weapon", "/weapons/ap-t2-cc-weapon", "/ammunition/t2",
+  "/traits/anti-materiel", "/states/stunned",
   "/traits/non-lethal", "/traits/state"]) {
   assert.ok(links.some((link) => link.href === url), `Missing link ${url}`);
 }
@@ -132,4 +139,4 @@ assert.deepEqual(descendants(generic, (node) => node.className === "detail-fact-
   .map((node) => node.textContent), [
   "Requirements", "Effects", "Restrictions", "Clarifications and examples",
 ]);
-console.log("9 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");
+console.log("10 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");

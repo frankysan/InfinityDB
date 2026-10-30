@@ -903,7 +903,10 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
     facts = immunity["facts"]["immunityInteraction"]
     cases = facts["reviewedCombinedCases"]
     assert [(case["sourceAmmunitionId"], case["when"]["immunity"])
-            for case in cases] == [(10, "ARM"), (13, "ARM"), (10, "AP"), (30, "AP"), (5, "BTS")]
+            for case in cases] == [
+                (10, "ARM"), (13, "ARM"), (10, "AP"), (30, "AP"),
+                (40, "AP"), (5, "BTS"),
+            ]
     for case, normal, critical in zip(cases[:2], (2, 3), (3, 4), strict=True):
         source = source_map[case["sourceAmmunitionId"]]
         assert case["sourceAmmunitionName"] == source["name"]
@@ -949,7 +952,24 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
         "ignoredComponents": ["ammunition:ap"],
         "remainingComponents": ["ammunition:shock"],
     }
-    bts_cc = cases[4]
+    ap_t2 = cases[4]
+    assert ap_t2["sourceAmmunitionName"] == source_map[40]["name"]
+    assert ap_t2["components"] == source_map[40]["components"]
+    assert ap_t2["when"] == {
+        "immunity": "AP", "savingAttribute": "ARM",
+        "attackClass": "non-comms", "weaponId": "weapon:ap-t2-cc-weapon",
+    }
+    assert ap_t2["withoutImmunity"] == {
+        "hitRolls": 1, "criticalRolls": 2, "savingAttribute": "ARM/2",
+    }
+    assert ap_t2["withImmunity"] == {
+        "hitRolls": 1, "criticalRolls": 2, "savingAttribute": "ARM",
+        "treatedAs": "ammunition:t2",
+        "ignoredComponents": ["ammunition:ap"],
+        "remainingComponents": ["ammunition:t2"],
+        "failedRollWounds": {"hit": 2, "criticalAdditionalRoll": 1},
+    }
+    bts_cc = cases[5]
     assert bts_cc["sourceAmmunitionName"] == source_map[5]["name"] == "N+E/M"
     assert bts_cc["components"] == source_map[5]["components"]
     assert bts_cc["when"] == {
@@ -1423,8 +1443,11 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
     immunity = rules_db.composed_record("skill:immunity")
     flash = rules_db.composed_record("weapon:flash-pulse")
     assert immunity is not None and flash is not None
-    assert immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"] == [
-        {
+    reviewed = immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"]
+    assert [case["when"]["weaponId"] for case in reviewed] == [
+        "weapon:flash-pulse", "weapon:e-mitter",
+    ]
+    assert reviewed[0] == {
             "when": {
                 "weaponId": "weapon:flash-pulse",
                 "immunity": "BTS",
@@ -1437,8 +1460,7 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
                 "stateId": "state:stunned", "condition": "failed-saving-roll"
             },
             "evidence": "explicit-pinned-wiki-example",
-        }
-    ]
+    }
     assert {relation["record_id"] for relation in flash["relations"]} == {
         "ammunition:stun", "trait:bs-weapon-wip", "trait:non-lethal",
         "trait:state", "state:stunned",
@@ -1626,7 +1648,7 @@ def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
     )
     assert [case["sourceAmmunitionId"] for case in rules[0]["facts"][
         "immunityInteraction"
-    ]["reviewedCombinedCases"]] == [10, 13, 10, 30, 5]
+    ]["reviewedCombinedCases"]] == [10, 13, 10, 30, 40, 5]
 
 
 def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(

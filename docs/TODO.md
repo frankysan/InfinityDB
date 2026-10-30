@@ -1030,6 +1030,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         source values or infer a general component evaluator.
         Promote rules/publication together with a recovery backup
         and preserve all 17 reviewed deployed objects.
+      - [x] Add exact **AP+T2 CC Weapon** partial-component
+        Immunity (AP) reference (Army Ammunition source ID 40).
+        The pinned N5.3 pp. 63, 67, 95–96 and 177 establish
+        one ARM/2 roll for the hit (two on a Critical), becoming
+        one full-ARM roll (two on a Critical) when only AP is
+        ignored. Preserve T2's distinct failed-roll outcomes:
+        **2 Wounds** from the hit roll versus **1 Wound** from
+        the extra Critical roll; identify each die before
+        rolling. Anti-materiel remains a separate Weapon Trait.
+        Restrict applicability to the non-Comms CC Weapon;
+        do not rewrite source profiles or infer target outcomes.
+        Gate the case with exact schema, source/Army/API tests,
+        1440/390/320 Chromium and coordinated rules/publication
+        promotion with recovery backups.
       - [ ] Review other BTS-component Immunity outcomes using exact
         non-Comms Weapon/combined-Ammunition evidence. The four
         reviewed BTS-based examples do not authorize generic E/M,

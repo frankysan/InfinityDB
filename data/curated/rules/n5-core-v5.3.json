@@ -21121,6 +21121,42 @@
                             "evidence": "derived-from-pinned-general-rules"
                         },
                         {
+                            "sourceAmmunitionId": 40,
+                            "sourceAmmunitionName": "AP+T2",
+                            "components": [
+                                "ammunition:ap",
+                                "ammunition:t2"
+                            ],
+                            "when": {
+                                "immunity": "AP",
+                                "savingAttribute": "ARM",
+                                "attackClass": "non-comms",
+                                "weaponId": "weapon:ap-t2-cc-weapon"
+                            },
+                            "withoutImmunity": {
+                                "hitRolls": 1,
+                                "criticalRolls": 2,
+                                "savingAttribute": "ARM/2"
+                            },
+                            "withImmunity": {
+                                "hitRolls": 1,
+                                "criticalRolls": 2,
+                                "savingAttribute": "ARM",
+                                "treatedAs": "ammunition:t2",
+                                "ignoredComponents": [
+                                    "ammunition:ap"
+                                ],
+                                "remainingComponents": [
+                                    "ammunition:t2"
+                                ],
+                                "failedRollWounds": {
+                                    "hit": 2,
+                                    "criticalAdditionalRoll": 1
+                                }
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
+                        },
+                        {
                             "sourceAmmunitionId": 5,
                             "sourceAmmunitionName": "N+E/M",
                             "components": [

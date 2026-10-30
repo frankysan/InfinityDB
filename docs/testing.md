@@ -4127,6 +4127,24 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**AP+T2 CC Weapon / partial Immunity (AP), 2026-10-30:**
+`tests/test_immunity_ap_t2_cc.py` checks the pinned English
+N5.3 pp. 63, 67, 95–96 and 177, the exact Army AP+T2
+source Ammunition ID 40 and its ARM/2 × 1 source profile,
+and the canonical T2 **2-Wound hit versus 1-Wound extra
+Critical** distinction. The sixth Combined Immunity case
+retains T2 and its two distinct conditional failed-roll
+consequences while ignoring AP's halving only. Closed-schema
+mutations reject unrelated Weapons, Comms scopes, altered
+counts/Attributes, lost T2 components or reversed Wound
+assignments. `tests/test_verify_immunity_plasma_browser.py`
+covers the tenth Immunity card at 1440/390/320 px,
+including conditional wording, semantic links and no
+horizontal overflow. `tools/stage_immunity_ap_t2_cc.py`
+stages and promotes synchronized `rules.db`/deployed-object
+publication with recovery backups, keeping all 17 reviewed
+deployed objects unchanged and Army Weapon profiles intact.
+
 **Silenced Pistol / partial Immunity (AP), 2026-10-30:**
 `tests/test_immunity_ap_silenced_pistol.py` pins English N5.3
 pp. 63, 65, 67, 95–96, 175, 182, exact Army source
