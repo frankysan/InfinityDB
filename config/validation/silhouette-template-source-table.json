@@ -1,0 +1,84 @@
+{
+  "formatVersion": 1,
+  "sourceId": "n5-core-v5.3-pdf",
+  "sourcePage": 18,
+  "reviewStatus": "source-reviewed-audit-only",
+  "domain": "trooper-geometry-reference-not-deployed-object-profile",
+  "proneSilhouette": {
+    "template": "SX",
+    "heightMm": 3,
+    "baseWidthRule": "retain-trooper-original-silhouette-base-width",
+    "context": "prone-state",
+    "fixedBaseMm": null
+  },
+  "diagramPolicy": {
+    "diagrams": "S1-S8-only",
+    "withoutSvg": [
+      "S0",
+      "SX"
+    ],
+    "visualization": "source-proportional-uniform-scale"
+  },
+  "rows": [
+    {
+      "id": "X",
+      "template": "SX",
+      "baseMm": null,
+      "heightMm": 3
+    },
+    {
+      "id": 0,
+      "template": "S0",
+      "baseMm": 25,
+      "heightMm": 3
+    },
+    {
+      "id": 1,
+      "template": "S1",
+      "baseMm": 25,
+      "heightMm": 25
+    },
+    {
+      "id": 2,
+      "template": "S2",
+      "baseMm": 25,
+      "heightMm": 40
+    },
+    {
+      "id": 3,
+      "template": "S3",
+      "baseMm": 40,
+      "heightMm": 32
+    },
+    {
+      "id": 4,
+      "template": "S4",
+      "baseMm": 55,
+      "heightMm": 32
+    },
+    {
+      "id": 5,
+      "template": "S5",
+      "baseMm": 40,
+      "heightMm": 45
+    },
+    {
+      "id": 6,
+      "template": "S6",
+      "baseMm": 40,
+      "heightMm": 55
+    },
+    {
+      "id": 7,
+      "template": "S7",
+      "baseMm": 55,
+      "heightMm": 67
+    },
+    {
+      "id": 8,
+      "template": "S8",
+      "baseMm": 70,
+      "heightMm": 70
+    }
+  ]
+}

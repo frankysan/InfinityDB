@@ -1624,6 +1624,43 @@ delivery path is changed.
 `tests/test_deployed_object_expanded_queue.py` checks the discovery and
 fail-closed review boundaries.
 
+### N5.3 Silhouette Templates source and browser geometry
+
+The English N5.3 **Silhouette Templates** table (printed p. 18)
+defines ten representations: SX, S0 and S1–S8.
+`config/validation/silhouette-template-source-table.json` pins
+the base width and template height in millimetres for each source row.
+An independent read-only audit compares these source rows against the
+eight fixed dimensions in the browser's
+`src/infinity_db/web/static/silhouette-diagrams.js` and the canonical
+`attribute:s`/Prone State references:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_silhouette_template_source_table
+.venv\Scripts\python.exe -m tools.audit_silhouette_template_source_table --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+```
+
+**S0** has a fixed 25 mm base and 3 mm height. **SX** is the
+3 mm high representation for a Trooper in Prone State; the base
+width depends on the Trooper's original Silhouette Attribute and
+must not be flattened to a universal 25 mm base or another permanent
+Unit value. The existing UI displays S1–S8 at a shared scale with
+source-backed SVGs and provides explicit text for S0/SX, which have
+no supplied reference SVGs. Neither is an independently deployed
+Weapon/Equipment identity.
+
+The source audit rejects changed table dimensions/order, an invented
+fixed SX base, missing/changed S1–S8 diagram sizes, absent SVGs,
+broken display-mode safeguards or missing maintained attribute
+references. Optional `--pdf` checks the exact printed table and
+Prone footnote using the local pinned English N5.3 PDF. The audit
+does not require the ignored PDF during CI and does not rewrite
+the application, publish profile attributes, or modify generated
+artifacts. The separate UI regression still verifies the existing
+diagram component and SVG delivery.
+`tests/test_silhouette_template_source_table.py` pins the source
+rows, browser geometry, negative drift cases, and local PDF evidence.
+
 ### N5.3 Game Modes versus general setup/reference tables
 
 The **Game Modes chart** (printed English N5.3 p. 6) is a separate

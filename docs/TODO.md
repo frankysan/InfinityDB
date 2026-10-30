@@ -1460,10 +1460,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               if required by the 1.0 player-useful-data inventory;
               model the source rows once, identify authority/overrides,
               and keep session/Retreat! computation outside static data.
-            - [ ] Continue source-table discovery beyond the terrain,
-              scenario, Game Modes, Retreat!, Weapon Chart and p. 74 reviews;
-              verify additional game-element categories against
-              direct rules before expanding a canonical inventory.
+            - [x] Reconcile the **N5.3 Silhouette Templates** table
+              (p. 18) against the existing browser diagram geometry.
+              The PDF pins **ten source rows** (SX, S0–S8); all eight
+              rendered S1–S8 dimensions match their source base widths
+              and heights. S0 is a fixed 25 mm base/3 mm height, while
+              SX is the 3 mm high Prone representation whose base width
+              follows the Trooper's original Silhouette Attribute.
+              There are deliberately no S0/SX SVG diagrams; the UI
+              already provides contextual text instead. A fail-closed
+              source manifest and audit verify maintained attribute
+              references, displayed dimensions, distinct Prone
+              semantics, all eight SVG assets, and the English PDF.
+              No Unit characteristic or deployed-object profile changed.
+            - [ ] Continue source-table discovery beyond the
+              terrain, scenario, Game Modes, Retreat!, Silhouette
+              Templates, Weapon Chart and p. 74 reviews; verify
+              additional game-element categories against direct rules
+              before expanding a canonical inventory.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery
