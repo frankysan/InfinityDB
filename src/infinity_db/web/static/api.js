@@ -28,8 +28,10 @@ export function getFaqRulings(topicId, context, signal) {
   return getJson(`/api/faq-rulings?${params}`, signal);
 }
 
-export function getOrdersAros(signal) {
-  return getJson("/api/orders-aros", signal);
+export function getOrdersAros(signal, scenario = "") {
+  const params = new URLSearchParams();
+  if (scenario) params.set("scenario", scenario);
+  return getJson(`/api/orders-aros${params.size ? `?${params}` : ""}`, signal);
 }
 
 export function getCatalogItems(catalog, signal) {

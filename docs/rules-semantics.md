@@ -4062,7 +4062,22 @@ an independent validation reference, not a second runtime chart. The matrix is
 scoped to unmodified N5 core declarations: it excludes scenario/season overlays,
 Reinforcements phase actions, automatic/passive categories, and Deployment-only
 categories. It does not calculate whether a declaration is currently legal.
-Scoped scenario/phase extensions remain separate 1.0 follow-ups.
+An optional `?scenario=<core-slug>` selection exposes **separate scoped
+declarations** from the existing current Core scenario publication and its
+`scenario_reference().skills`. Domination contributes `skill:hack-consoles`
+(Short Skill, N5.3 p. 151); Supplies contributes
+`skill:pick-up-supply-boxes` (Short Skill, p. 153). Annihilation and
+Firefight contribute no extra declared Skills. Each scoped row links to the
+actual source-cited Skill card in the selected scenario detail, not to an
+unscoped Army Skill page. The core 57-row response and core category counts
+are unchanged even with a scenario selected. Unsupported and ITS-only
+scenario selections are rejected rather than treated as default Core.
+
+The Reinforcements Extra is not yet authored as a separately versioned annex,
+so Request Reinforcements remains unclassified here. Its Tactical Phase
+activation cannot be represented as a normal Short/Long/ARO declaration.
+Phase-scoped annex actions and ITS season/revision actions remain explicit
+follow-ups and must never leak into the Core matrix.
 
 Sources:
 

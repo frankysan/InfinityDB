@@ -1549,7 +1549,14 @@ Component IDs/citations are retained in `componentSources`.
 Scoped Rule/Skill records include backend-resolved scenario names. The shared Skill-card renderer
 presents their ordinary rule-detail fields and renders Specialist qualifier references as a list.
 Normal browsing/search/glossary calls retain the default unscoped composition; scenario-only content
-does not become universal core help. `/api/scenarios` exposes the current collection without choosing
+does not become universal core help. The Orders/AROs reference similarly
+keeps its 57-row Core projection immutable: an optional current Core scenario
+selection provides a separate `scenario` response member, derived from
+`RulesDatabase.scenario_reference().skills` and exact `n5-core`
+publication membership. Domination's Hack Consoles and Supplies' Pick Up
+Supply Boxes are Short Skills only in those selected scenarios, with
+references back to their actual rendered scenario Skill cards. The main
+projection does not inherit scenario-only or season-specific actions. `/api/scenarios` exposes the current collection without choosing
 a game size. `/api/scenarios/<slug>` requires one explicit `army_points` query value, rejects
 unsupported values instead of substituting another configuration, and projects maintained-text
 tokens/public references in the selected scenario context. `/scenarios` and `/scenarios/<slug>`

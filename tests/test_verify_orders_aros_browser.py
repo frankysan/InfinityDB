@@ -137,3 +137,125 @@ def test_orders_aros_links_open_existing_reference_details(
         assert not errors, errors
     finally:
         page.close()
+
+
+@pytest.mark.parametrize(
+    ("scenario", "action", "width"),
+    [
+        ("domination", "hack-consoles", 1440),
+        ("supplies", "pick-up-supply-boxes", 390),
+    ],
+)
+def test_orders_aros_scenario_context_stays_separate_and_deep_links(
+    app: Any, chrome: Any, scenario: str, action: str, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 844})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/orders-aros", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelector('#matrix-count')?.textContent === '57 declarations'"
+        )
+        assert page.locator("#scenario-matrix").is_hidden()
+        page.locator("#matrix-scenario").select_option(scenario)
+        scoped = page.locator("#scenario-matrix")
+        page.wait_for_function(
+            "() => document.querySelector('#scenario-matrix-count')?.textContent"
+            " === '1 additional declaration'",
+            timeout=15000,
+        )
+        assert scoped.is_visible()
+        assert scenario.title() in page.locator("#scenario-matrix-title").inner_text()
+        assert page.locator("#matrix-sections tbody tr").count() == 57
+        assert page.locator("#scenario-matrix-sections tbody tr").count() == 1
+        assert (
+            f"N5.3 p. {151 if scenario == 'domination' else 153}"
+            in page.locator("#scenario-matrix-sections tbody tr").inner_text()
+        )
+        assert "scenario=" + scenario in page.url
+
+        target = f"/scenarios/{scenario}?army_points=300#rule-skill-{action}"
+        link = scoped.locator(f'tr[data-record-id="skill:{action}"] a')
+        assert link.get_attribute("href") == target
+        page.reload(wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelector('#scenario-matrix-count')?.textContent"
+            " === '1 additional declaration'",
+            timeout=15000,
+        )
+        assert page.locator("#matrix-scenario").input_value() == scenario
+        assert page.locator("#matrix-sections tbody tr").count() == 57
+        page.locator(f'tr[data-record-id="skill:{action}"] a').click()
+        page.wait_for_url(f"{ORIGIN}{target}", timeout=15000)
+        page.locator(f"#rule-skill-{action}").wait_for(state="visible", timeout=15000)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 320])
+def test_orders_aros_empty_scenario_context_and_clear_selection(
+    app: Any, chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 844})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(
+            f"{ORIGIN}/orders-aros?scenario=annihilation",
+            wait_until="domcontentloaded",
+        )
+        page.wait_for_function(
+            "() => document.querySelector('#scenario-matrix-count')?.textContent"
+            " === '0 additional declarations'",
+            timeout=15000,
+        )
+        assert page.locator("#matrix-sections tbody tr").count() == 57
+        assert page.locator("#scenario-matrix-state").inner_text().startswith(
+            "This scenario adds no separately declared Skills"
+        )
+        page.locator("#matrix-scenario").select_option("")
+        page.wait_for_function(
+            "() => !document.querySelector('#matrix-scenario')?.disabled"
+            " && document.querySelector('#scenario-matrix')?.hidden"
+        )
+        assert page.locator("#matrix-count").inner_text() == "57 declarations"
+        assert "scenario=" not in page.url
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+def test_orders_aros_invalid_url_scope_fails_closed_but_can_be_corrected(
+    app: Any, chrome: Any,
+) -> None:
+    page = chrome.new_page(viewport={"width": 390, "height": 844})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(
+            f"{ORIGIN}/orders-aros?scenario=battleground",
+            wait_until="domcontentloaded",
+        )
+        page.wait_for_function(
+            "() => document.querySelector('#matrix-count')?.textContent === 'Unavailable'"
+        )
+        assert page.locator("#matrix-scenario").input_value() == "battleground"
+        assert "Unsupported scenario" in page.locator("#matrix-scenario").inner_text()
+        assert page.locator("#matrix-state").inner_text()
+        assert page.locator("#scenario-matrix").is_hidden()
+        page.locator("#matrix-scenario").select_option("domination")
+        page.wait_for_function(
+            "() => document.querySelector('#scenario-matrix-count')?.textContent"
+            " === '1 additional declaration'",
+            timeout=15000,
+        )
+        assert page.locator("#matrix-count").inner_text() == "57 declarations"
+        assert page.locator("#matrix-scenario").input_value() == "domination"
+        assert not errors, errors
+    finally:
+        page.close()

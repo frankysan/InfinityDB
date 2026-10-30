@@ -21,7 +21,10 @@ from infinity_db.army_slugs import attach_public_army_slug, enrich_army_referenc
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
 from infinity_db.database import ArmySelectionError, Database
-from infinity_db.declaration_matrix import core_declaration_matrix
+from infinity_db.declaration_matrix import (
+    core_declaration_matrix,
+    core_scenario_declaration_extension,
+)
 from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
@@ -526,7 +529,19 @@ class ApiHandler:
         if path == "/api/orders-aros":
             cache_control = API_CACHE_CONTROL
             try:
-                _validated_query_params(query_string, {"cache_bust"})
+                params = _validated_query_params(
+                    query_string, {"scenario", "cache_bust"},
+                )
+                scenario_slug = params.get("scenario", [None])[0]
+                if scenario_slug is not None:
+                    require_domain_slug(scenario_slug, context="core scenario")
+                    if (
+                        self.rules_database is not None
+                        and self.rules_database.resolve_scenario_publication(
+                            scenario_slug, collection="n5-core",
+                        ) is None
+                    ):
+                        raise ValueError(f"Unsupported current core scenario: {scenario_slug}")
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
@@ -536,8 +551,12 @@ class ApiHandler:
                 if self.rules_database is None:
                     raise ValueError("Core rules reference unavailable")
                 payload = core_declaration_matrix(self.database, self.rules_database)
+                if scenario_slug is not None:
+                    payload["scenario"] = core_scenario_declaration_extension(
+                        self.rules_database, scenario_slug,
+                    )
             except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not project core Orders/AROs")
+                LOGGER.exception("Could not project scoped Orders/AROs")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The Orders/AROs reference is unavailable."}
         elif path == "/api/restrictions":

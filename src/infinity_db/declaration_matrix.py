@@ -144,3 +144,93 @@ def core_declaration_matrix(
             for category, title in DECLARATIONS
         ],
     }
+
+
+def core_scenario_declaration_extension(
+    rules_database: RulesDatabase,
+    scenario_slug: str,
+) -> dict[str, Any]:
+    """Return only published core-scenario Skills, never global Order permissions.
+
+    The scenario's composed mission owns the Skill inclusion. ITS and other
+    seasons are deliberately excluded; phase-scoped annex actions have no
+    normal declaration category and must receive a different future contract.
+    """
+    publication = rules_database.resolve_scenario_publication(
+        scenario_slug, collection="n5-core",
+    )
+    if publication is None or publication["status"] != "current":
+        raise ValueError(f"Unsupported current core scenario: {scenario_slug}")
+    reference = rules_database.scenario_reference(scenario_slug)
+    if reference is None:
+        raise ValueError(f"Missing scenario reference: {scenario_slug}")
+    scenario = reference["scenario"]
+    if scenario["collection"]["id"] != "n5-core-v5.3":
+        raise ValueError(f"Unsupported core-scenario rules revision: {scenario_slug}")
+    if scenario["id"] != publication["scenario_id"]:
+        raise ValueError(f"Scenario publication mismatch: {scenario_slug}")
+    scenario_id = str(scenario["id"])
+    sections: dict[str, list[dict[str, Any]]] = {key: [] for key, _ in DECLARATIONS}
+    seen: set[str] = set()
+    for skill in reference["skills"]:
+        record_id = str(skill["id"])
+        if record_id in seen:
+            raise ValueError(f"Duplicate scenario Skill: {record_id}")
+        seen.add(record_id)
+        if (
+            skill["kind"] != "skill"
+            or skill["composition"]["role"] != "definition"
+            or skill["scope"] != {
+                "game": "N5",
+                "seasons": ["current"],
+                "scenarios": [scenario_id],
+            }
+            or skill["collection"]["id"] != "n5-core-v5.3"
+            or (skill.get("facts") or {}).get("category") != "scenario-skill"
+        ):
+            raise ValueError(f"Unreviewed scenario Skill declaration: {record_id}")
+        types = {item["id"] for item in skill.get("skill_types", [])}
+        if not types or not types <= CATEGORY_IDS:
+            raise ValueError(f"Unsupported scenario Skill declaration: {record_id}: {types}")
+        citations = [
+            {
+                "source_id": citation["source_id"],
+                "page": citation["page"],
+            }
+            for citation in skill["citations"]
+            if citation.get("source_id") == "n5-core-v5.3-pdf"
+            and isinstance(citation.get("page"), int)
+        ]
+        if not citations:
+            raise ValueError(f"Uncited core-scenario Skill: {record_id}")
+        # The ordinary scenario detail renders the source's actual Skill card.
+        # A standalone /skills/<slug> URL loses the selected scenario context.
+        href = f"/scenarios/{scenario_slug}?army_points=300#rule-{record_id.replace(':', '-')}"
+        for category in types:
+            sections[category].append({
+                "record_id": record_id,
+                "name": skill["name"],
+                "owner": "skill",
+                "source_type": "Scenario",
+                "href": href,
+                "citations": citations,
+            })
+    return {
+        "id": scenario_id,
+        "name": scenario["name"],
+        "publication": {
+            "collection": publication["collection"],
+            "revision": publication["revision"],
+        },
+        "sections": [
+            {
+                "id": category,
+                "title": title,
+                "items": sorted(
+                    sections[category],
+                    key=lambda item: (item["name"].casefold(), item["record_id"]),
+                ),
+            }
+            for category, title in DECLARATIONS
+        ],
+    }

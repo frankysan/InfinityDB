@@ -4116,6 +4116,17 @@ source inventory, hosted exact-version deployment or the final 1.0
 release gate.
 The official cross-language Domination discrepancy remains unresolved.
 
+**Orders/AROs scoped-action browser acceptance, 2026-10-30:** The
+`tests/test_verify_orders_aros_browser.py` suite checks the unchanged 57-row
+Core reference at 1440/1024/390/320 px, plus opt-in Domination and Supplies
+Short Skill rows, selected context/URL persistence, source page display,
+deep links to actual scenario Skill cards, empty Annihilation scope, invalid
+ITS-only selection rejection, mobile layout and error recovery. The
+`tests/test_hacking_program_publication.py` API cases independently verify
+each of the four current Core scenario selections, distinct scopes, unchanged
+Core payloads and rejection of unsupported/season-only contexts. This is
+local Chromium acceptance, not deployed browser verification.
+
 **Bilingual Fireteam FAQ follow-up, 2026-10-29:** The tracked
 `test_fireteam_faq_source_omission_is_not_a_contradictory_ruling`
 checks English v0.1 printed p. 3's FT Master exception against the

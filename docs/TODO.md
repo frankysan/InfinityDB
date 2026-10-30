@@ -961,9 +961,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       unchanged. The matrix now discovers Equipment declaration types
       from rules.db rather than three hard-coded IDs. Retain the
       independent PDF chart audit as the drift gate.
-    - [ ] Extend the projection with separately selected scenario/season action
-      contexts and explicitly phase-scoped actions when those domains are ready.
-      Do not merge them into the unscoped N5 core view.
+    - [x] Add a separate, opt-in **current core-scenario action** panel to
+      `/orders-aros`, selected by `?scenario=<core-slug>`. Derive Skills
+      from `RulesDatabase.scenario_reference()` and verified current
+      `n5-core` publication membership, never from Unit profiles or an
+      extra maintained declaration table. Domination supplies **Hack Consoles**
+      (Short Skill, N5.3 p. 151); Supplies supplies **Pick Up Supply Boxes**
+      (Short Skill, p. 153). Annihilation and Firefight have no additional
+      declared Skills. Render separate source-cited cards/links into each
+      scenario's real Skill reference, with URL persistence, browser acceptance
+      and error recovery; the unscoped **57/57** matrix stays identical.
+      Unsupported and ITS-only scenario selections fail closed.
+    - [ ] Add explicitly **phase-scoped** annex actions (not normal
+      Short/Long/ARO categories), notably Request Reinforcements, when the
+      separately versioned Reinforcements source and typed annex records
+      exist. ITS/season-only actions remain outside the 1.0 core selection
+      and should require explicit season/revision context in later work.
   - [ ] Deepen the existing first-class Ammunition model with explicit typed
     relationships. Preserve the eleven published base Ammunition identities, distinguish
     source-defined combined forms, preserve component relationships for Combined

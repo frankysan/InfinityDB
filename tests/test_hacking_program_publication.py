@@ -6,7 +6,10 @@ import json
 import sqlite3
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 from wsgiref.util import setup_testing_defaults
+
+import pytest
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
@@ -24,7 +27,10 @@ RULES_DB = ROOT / "data/generated/rules.db"
 def _get(app: Any, path: str) -> tuple[str, bytes]:
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
-    environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
+    selected = urlsplit(path)
+    environ.update(
+        PATH_INFO=selected.path, QUERY_STRING=selected.query, REQUEST_METHOD="GET",
+    )
     statuses: list[str] = []
 
     def respond(status: str, _headers: list, _exc_info: object = None) -> None:
@@ -245,3 +251,59 @@ def test_generated_core_orders_aros_matrix_matches_pinned_source_and_routes() ->
     )
     for section in projected["sections"]:
         assert len({row["record_id"] for row in section["items"]}) == len(section["items"])
+
+
+@pytest.mark.parametrize(
+    ("scenario", "expected"),
+    [
+        ("domination", {"skill:hack-consoles"}),
+        ("supplies", {"skill:pick-up-supply-boxes"}),
+        ("annihilation", set()),
+        ("firefight", set()),
+    ],
+)
+def test_orders_aros_scenario_extensions_preserve_core_and_source_scope(
+    scenario: str, expected: set[str],
+) -> None:
+    from infinity_db.declaration_matrix import core_declaration_matrix
+
+    db = Database(ARMY_DB)
+    rules = RulesDatabase(RULES_DB)
+    unscoped = core_declaration_matrix(db, rules)
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    status, body = _get(app, f"/api/orders-aros?scenario={scenario}")
+    assert status == "200 OK"
+    payload = json.loads(body)
+    assert {key: value for key, value in payload.items() if key != "scenario"} == unscoped
+    extension = payload["scenario"]
+    assert extension["id"] == f"scenario:{scenario}"
+    assert extension["publication"] == {"collection": "n5-core", "revision": "5.3"}
+    occurrences = [
+        (section["id"], item)
+        for section in extension["sections"]
+        for item in section["items"]
+    ]
+    assert {item["record_id"] for _, item in occurrences} == expected
+    assert {section for section, _ in occurrences} <= {"short-skill"}
+    for _, item in occurrences:
+        assert item["owner"] == "skill"
+        assert item["source_type"] == "Scenario"
+        assert item["href"].startswith(f"/scenarios/{scenario}?army_points=300#rule-skill-")
+        assert item["citations"][0]["source_id"] == "n5-core-v5.3-pdf"
+        assert item["citations"][0]["page"] in {151, 153}
+        assert all(
+            item["record_id"] != core["record_id"]
+            for section in payload["sections"] for core in section["items"]
+        )
+
+
+@pytest.mark.parametrize(
+    "scenario", ["battleground", "unknown", "domination!", "its-18"],
+)
+def test_orders_aros_rejects_unsupported_or_seasonal_scenario(
+    scenario: str,
+) -> None:
+    app = create_app(ARMY_DB, rules_database_path=RULES_DB)
+    status, body = _get(app, f"/api/orders-aros?scenario={scenario}")
+    assert status == "400 Bad Request"
+    assert "error" in json.loads(body)

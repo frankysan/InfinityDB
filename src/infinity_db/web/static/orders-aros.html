@@ -32,8 +32,27 @@
           <label for="matrix-search">Find an action</label>
           <input id="matrix-search" type="search" autocomplete="off" placeholder="Search actions or source types">
         </div>
+        <div class="field">
+          <label for="matrix-scenario">Scenario context</label>
+          <select id="matrix-scenario">
+            <option value="">Core rules only</option>
+            <option value="annihilation">Annihilation</option>
+            <option value="domination">Domination</option>
+            <option value="supplies">Supplies</option>
+            <option value="firefight">Firefight</option>
+          </select>
+        </div>
       </div>
       <div id="matrix-state" role="status" aria-live="polite">Loading reference…</div>
+    </section>
+    <section id="scenario-matrix" class="surface surface--clipped content-frame" aria-labelledby="scenario-matrix-title" hidden>
+      <div class="section-heading">
+        <h2 id="scenario-matrix-title">Selected scenario actions</h2>
+        <span class="section-index" id="scenario-matrix-count"></span>
+      </div>
+      <p class="detail-copy">These Skills apply only when the selected core scenario is used. They are separate from the 57-row general Orders/AROs chart and are not Army Profile Skills.</p>
+      <div id="scenario-matrix-state" role="status" aria-live="polite"></div>
+      <div id="scenario-matrix-sections"></div>
     </section>
     <div id="matrix-sections" aria-busy="true"></div>
     <!-- page-footer -->
