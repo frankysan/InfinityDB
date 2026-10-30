@@ -333,60 +333,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Source/API and Chromium tests cover the notices, real
         Wildcard toggle, parent navigation/back and empty/missing
         chart distinctions at 1440/390/320 px in light/dark themes.
-      - [x] **Data processing + Web backend + Web frontend — ARMY-02–04
-        native profile/loadout parity:** Compare Indigo (1912/1926),
-        Confessor (1913/1927) and Gui Feng/Yu Jing (1914/1928)
-        against all their occurrences in the pinned September 29
-        Army ZIP, with source-member hashes/version checked against
-        the application database. All 22 Army/Unit contexts preserve
-        66 ordered profiles and 220 ordered loadouts, including
-        Attributes, source AVA, item quantities/Extras, Orders,
-        costs and disabled options. Preserve Indigo's PanOceania-only
-        Irregular Hacker option; the other five Army contexts are
-        Regular. Ordinary Chromium pages pass at 1440/390/320 px
-        in light/dark themes (36 page checks), including numeric
-        profiles, AVA, costs, shared/specific items, keyboard
-        expansion and no horizontal overflow. This is current-source
-        publication parity, not profile-transition/upgrade mechanics,
-        Fireteam or roster legality, historical deltas or final hosted
-        acceptance. See [validation](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
-      - [x] **Data processing + Web backend + Web frontend — ARMY-05–08
-        native profile/loadout parity:** Compare Intel (1915/1929),
-        Husam (1916/1930), Vortex (1917/1931) and Nexus-7
-        (1918/1932) against all their occurrences in the pinned
-        September 29 Army ZIP, verifying archive/member hashes and
-        source version `7.26246.158`. All 33 Army/Unit contexts,
-        111 ordered profiles and 328 ordered loadouts retain
-        Attributes, source AVA, item quantities/Extras, Orders,
-        costs and disabled options. Intel's Full Power/Battle
-        Ravaged profiles remain distinct; Nexus-7 appears in
-        Combined Army, Onyx and Next Wave, while its TEAM-OPS
-        counterpart appears only in Combined Army and Onyx.
-        Ordinary Chromium checks cover all eight Unit pages at
-        1440/390/320 px in light/dark themes (48 pages), including
-        profile names/values, AVA, costs, item placement, keyboard
-        expansion and overflow. This is native publication parity,
-        not upgrade/profile-transition rules, roster/Fireteam
-        legality, historical deltas or final hosted acceptance.
-        See [validation](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
-      - [x] **Data processing + Web backend + Web frontend — ARMY-09–12
-        native profile/loadout parity:** Compare Treitak (1919/1933),
-        Corax (1920/1934), Blur (1921/1935) and Chandra
-        (1922/1936) against all their occurrences in the pinned
-        September 29 Army ZIP, with archive/member hashes and
-        exact source revisions checked. All 13 Army/Unit contexts,
-        39 ordered profiles and 128 ordered loadouts preserve
-        Attributes, source AVA, items/Extras, Orders, costs and
-        disabled options. Treitak Spec-Ops spans Combined Army and
-        Morat; Morat TEAM-OPS is Morat-only. Both Chandra Units
-        retain three ALEPH contexts at `7.26246.159`; the other
-        source pairs use `7.26246.158`. Chromium checks all eight
-        ordinary Unit pages at 1440/390/320 px in light/dark themes
-        (48 pages), including names/values, AVA, costs, linked
-        items, keyboard expansion and overflow. This closes native
-        publication parity, not upgrades, profile transitions,
-        roster/Fireteam legality, historical deltas or final hosted
-        acceptance. See [validation](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
+      - [x] **Data processing + Web backend + Web frontend — ARMY-02–16
+        native profile/loadout parity:** All 30 Spec-Ops/TEAM-OPS
+        source Units now have pinned-source-to-API coverage for
+        93 Army/Unit contexts, 293 ordered profiles and 924 ordered
+        loadouts. Archive/member hashes and exact `.158`/`.159`
+        revisions are verified; source Attributes, AVA, items/Extras,
+        Orders, costs and disabled options remain contextual.
+        Chromium checks all 30 ordinary Unit pages at 1440/390/320 px
+        in light/dark themes (180 pages), including profile names/
+        values, AVA, costs, linked items, keyboard expansion and
+        overflow. Per-batch counts and exceptional source contexts
+        (including Hatail's separate Symbiont profiles and the
+        Rumbler/NA2 grouping distinction) are retained in
+        [validation](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
+        This completes native publication parity only; upgrade/
+        profile-transition rules, roster/Fireteam legality, historical
+        deltas and final hosted acceptance remain separate.
       - [ ] **ARMY-01 remaining semantics, full roster/profile
         acceptance, and release gates:** Review annotation-specific
         profile applicability where it is not established by the
@@ -394,7 +357,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Triad, Varuna Div and Strategic Deployment); retain the
         unresolved current N5 Reinforcements authority boundary.
         Compare complete unit/profile/option costs and source-specific
-        AVA for ARMY-13–20 where still unreviewed; ARMY-02–12
+        AVA for ARMY-17–20 where still unreviewed; ARMY-02–16
         native publication parity is covered above. Do not infer
         a historical before/after delta without an earlier
         pinned Army snapshot. Final release-matched database,

@@ -1,4 +1,4 @@
-"""Selected ARMY-02–12 current-source profiles, not historical deltas or list legality."""
+"""Selected ARMY-02–16 current-source profiles, not historical deltas or list legality."""
 
 from __future__ import annotations
 
@@ -41,10 +41,22 @@ SOURCE_CONTEXTS = {
     1935: {605},
     1922: {701, 702, 703},
     1936: {701, 702, 703},
+    1923: {1001, 1002, 1003},
+    1937: {1001, 1002, 1003},
+    1924: {1101, 1102, 1103},
+    1938: {1101, 1102, 1103},
+    1908: {801},
+    1909: {801},
+    1925: {901, 902, 904, 905, 908, 909},
+    1939: {902, 904, 905, 908, 909},
 }
 SOURCE_IDS = tuple(SOURCE_CONTEXTS)
 SOURCE_VERSION_OVERRIDES = {
     701: "7.26246.159", 702: "7.26246.159", 703: "7.26246.159",
+    801: "7.26246.159", 901: "7.26246.159", 902: "7.26246.159",
+    904: "7.26246.159", 905: "7.26246.159", 908: "7.26246.159", 909: "7.26246.159",
+    1001: "7.26246.159", 1002: "7.26246.159", 1003: "7.26246.159",
+    1101: "7.26246.159", 1102: "7.26246.159", 1103: "7.26246.159",
 }
 
 
@@ -116,7 +128,7 @@ def _assert_native_items(source: dict[str, Any], published: dict[str, Any]) -> N
 
 
 @pytest.mark.parametrize("source_id", SOURCE_IDS)
-def test_army_02_to_12_complete_native_profiles_and_loadouts_reach_api(
+def test_army_02_to_16_complete_native_profiles_and_loadouts_reach_api(
     profile_app: Callable[..., Any], source_documents: dict[int, dict[str, Any]],
     source_id: int,
 ) -> None:

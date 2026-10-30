@@ -1095,16 +1095,19 @@ parameterized Skill semantics, or every visual layout variant.
 **Project domains:** Data processing, Web backend, Web frontend
 
 `tests/test_spec_ops_profile_publication.py` independently compares the
-pinned September 29 Army ZIP with the public Unit API for ARMY-02–12.
+pinned September 29 Army ZIP with the public Unit API for ARMY-02–16.
 It verifies the archive SHA-256, each member hash and source version,
-and each Unit's complete set of source Army contexts. The three ALEPH
-members use `7.26246.159`; all other reviewed members use `7.26246.158`.
+and each Unit's complete set of source Army contexts. ALEPH, Tohaa,
+NA2, O-12 and JSA members use `7.26246.159`; all other reviewed
+members use `7.26246.158`.
 
 | Batch | Source Unit pairs | Army/Unit contexts | Profiles | Loadouts |
 | --- | --- | --- | --- | --- |
 | ARMY-02–04 | Indigo (1912/1926), Confessor (1913/1927), Gui Feng/Yu Jing (1914/1928) | 22 | 66 | 220 |
 | ARMY-05–08 | Intel (1915/1929), Husam (1916/1930), Vortex (1917/1931), Nexus-7 (1918/1932) | 33 | 111 | 328 |
 | ARMY-09–12 | Treitak (1919/1933), Corax (1920/1934), Blur (1921/1935), Chandra (1922/1936) | 13 | 39 | 128 |
+| ARMY-13–16 | Ŝtormo (1923/1937), Kaizoku (1924/1938), Hatail (1908/1909), Rumbler (1925/1939) | 25 | 77 | 248 |
+| Total | 30 source Units | 93 | 293 | 924 |
 
 Profiles and loadouts retain source order. Checks include Attributes, source-specific AVA,
 Troop Type/classification, Characteristics, native item IDs,
@@ -1115,11 +1118,11 @@ new populated relationships require review. Missing ignored source
 bytes cause an explicit skip, not source acceptance.
 
 The complementary
-`test_army_02_to_12_native_profiles_costs_and_ava_in_browser` in
+`test_army_02_to_16_native_profiles_costs_and_ava_in_browser` in
 `tests/test_verify_scenario_faq_browser.py` serves the tracked database
-pair through the existing WSGI Chromium transport. It checks all 22
-ordinary Unit pages at 1440/390/320 px in light/dark themes (132 pages:
-36 for ARMY-02–04 and 48 each for ARMY-05–08 and ARMY-09–12), using the shared Unit DOM
+pair through the existing WSGI Chromium transport. It checks all 30
+ordinary Unit pages at 1440/390/320 px in light/dark themes (180 pages:
+36 for ARMY-02–04 and 48 each for the other three batches), using the shared Unit DOM
 assertions for linked items and exact Army-local profile names,
 numeric profiles, AVA, points and SWC assertions. Keyboard
 expansion exposes each Army section; transition-profile AVA remains
@@ -1136,11 +1139,19 @@ Treitak Spec-Ops occurs in Combined Army and Morat, while Morat
 TEAM-OPS is Morat-only. Both Chandra Units retain three separate Army
 contexts (ALEPH, Steel Phalanx and Operations Subsection), including
 each source profile/loadout rather than only their shared choice chart.
+Ŝtormo and Kaizoku each retain three source Army contexts per Unit.
+Hatail keeps its active/inactive Symbiont profiles and Chaksa profiles
+separate, preserving exact source names and values without inferring
+transition mechanics. Rumbler Spec-Ops has six source contexts,
+including the non-playable NA2 grouping; NA2 TEAM-OPS has five
+sectorial contexts and no grouping occurrence. The ordinary Unit
+reference preserves that source context without making the grouping
+an independently playable Army or assigning roster legality.
 
 Run both parts with:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/run_checks.py --stage test tests/test_spec_ops_profile_publication.py tests/test_verify_scenario_faq_browser.py::test_army_02_to_12_native_profiles_costs_and_ava_in_browser --test-workers 2
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test tests/test_spec_ops_profile_publication.py tests/test_verify_scenario_faq_browser.py::test_army_02_to_16_native_profiles_costs_and_ava_in_browser --test-workers 2
 ```
 
 These checks establish current native publication parity, not

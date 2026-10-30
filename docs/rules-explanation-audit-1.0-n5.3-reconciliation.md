@@ -218,6 +218,22 @@ counts above.
   semantics, roster/Fireteam legality, historical change and final
   hosted acceptance remain separate.
 
+  **2026-10-30 follow-up — ARMY-13–16 native publication:**
+  Ŝtormo (1923/1937), Kaizoku (1924/1938), Hatail (1908/1909)
+  and Rumbler (1925/1939) now have pinned-source-to-API coverage
+  for 25 Army/Unit contexts, 77 profiles and 248 loadouts, all at
+  `7.26246.159`. Hatail's active/inactive Symbiont and Chaksa
+  profiles remain distinct. Rumbler preserves six source contexts
+  including the non-playable NA2 grouping; NA2 TEAM-OPS occurs
+  only in the five sectorials. Chromium checks all eight ordinary
+  Unit pages at 1440/390/320 px in light/dark themes (48 pages),
+  including exact profile names/values, AVA, costs and linked
+  items. Together, ARMY-02–16 native publication coverage now
+  includes all 30 source Units, 93 contexts, 293 profiles and
+  924 loadouts. The [validation contract](testing.md#selected-spec-ops-and-team-ops-profile-acceptance)
+  keeps upgrade/profile-transition mechanics, roster/Fireteam
+  legality, historical changes and final hosted acceptance separate.
+
   **ARMY-17–20** now have **selected current-state local acceptance**
   independently of the Spec-Ops charts. Ioann Bann (#1940) retains
   Dogface/Dog-Warrior profiles and maximum-one Varangian Duo
