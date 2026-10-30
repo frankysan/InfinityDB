@@ -33,6 +33,7 @@
         "test_deployable_trigger_cross_rules",
         "test_deployed_object_reference",
         "test_deployed_object_publication",
+        "test_deployed_object_quick_profiles",
         "test_deployed_object_source_contexts",
         "test_deployed_object_detail_queue",
         "test_deployed_object_delivery_coverage",

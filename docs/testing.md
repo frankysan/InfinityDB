@@ -1300,6 +1300,29 @@ and p. 187 lists its attack profile, but it is not one of the 14 separate
 four-attribute auxiliary chart entries. Do not discard it or treat that
 exclusion as a missing source value.
 
+Independently cross-check the **N5.3 p. 74 Deployable Profiles quick-reference
+table**, which is outside the pp. 176–188 Weapon Chart extractor:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_deployed_object_quick_profiles
+```
+
+The read-only PDF audit extracts **13 printed rows**, including two FastPanda
+spellings (`FAST PANDA` and `FASTPANDA`) and two Madtraps rows. Their
+source selectors resolve to **10 distinct reviewed object identities**.
+The `MINES` row is a shared family, **not** an eleventh generic Mine
+identity or a license to merge its six named subtypes. Duplicate labels
+are preserved as repeated printed evidence, not duplicate objects.
+The report checks each printed ARM/BTS/STR/S value against the existing
+reviewed source/profile reference without adding a carrier or delivery
+edge. It visibly retains **Armed Turret's S1 quick-reference versus S2
+detailed-profile conflict**, and also exposes Dazer's existing S0/S1
+source dispute even though p. 74 agrees with S0. An unmatched row or
+unreviewed value fails closed. PyMuPDF and the pinned local English PDF
+are required; the synthetic parser tests do not require them.
+`tests/test_deployed_object_quick_profiles.py` additionally verifies the
+real table when both local PDF and Army database are present.
+
 `config/validation/deployed-object-delivery-reviews.json` now pins an
 **audit-only first batch** of six reviewed delivery paths. They distinguish
 Pitcher-fired and Place Deployable delivery of the same Deployable Repeater

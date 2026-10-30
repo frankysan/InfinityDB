@@ -1325,6 +1325,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           and the current lexical scans, especially source tables,
           scenarios and unmodeled Weapon/Equipment variants. Closed
           queues are not an exhaustive game-object inventory.
+          - [x] Cross-check the independent **N5.3 p. 74 Deployable
+            Profiles quick-reference table** against the existing
+            reviewed object reference using pinned PDF extraction.
+            Its 13 printed rows resolve to ten distinct reviewed
+            objects, one generic Mines family row, and repeated
+            FastPanda/Madtraps entries. Preserve Armed Turret's
+            S1/S2 contradiction and Dazer's S0/S1 dispute instead
+            of deduplicating source observations or inventing object
+            identities. The read-only audit and regression are in
+            `tools/audit_deployed_object_quick_profiles.py` and
+            `tests/test_deployed_object_quick_profiles.py`.
+          - [ ] Audit other independent source tables and scenario
+            elements not covered by the main Weapon Chart or p. 74.
+            Reconcile their game-element categories independently
+            of Unit/loadout ownership and current lexical scans.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery
