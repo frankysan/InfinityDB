@@ -124,6 +124,7 @@
         "test_verify_deployed_object_publication_browser",
         "test_verify_fireteam_context_browser",
         "test_verify_fireteam_fto_browser",
+        "test_verify_orders_aros_browser",
         "test_verify_page_footer_browser",
         "test_verify_release_candidate_browser",
         "test_verify_rule_fragment_browser",

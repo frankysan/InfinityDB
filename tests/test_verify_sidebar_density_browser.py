@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-navigation-browser.test"
 
 DESTINATIONS = [
-    "/armies", "/units", "/skills", "/equipment", "/weapons",
+    "/armies", "/units", "/skills", "/orders-aros", "/equipment", "/weapons",
     "/ammunition", "/traits", "/labels", "/states", "/hacking-programs",
     "/fireteams", "/rules", "/scenarios", "/glossary", "/changes", "/about",
 ]

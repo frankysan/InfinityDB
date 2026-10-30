@@ -943,6 +943,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       declaration category, source Type, owning identity and public route. Do not
       infer that an absent action is prohibited or allow a source table row to
       create a new Weapon/Equipment or Army carrier.
+    - [x] Run real local Chromium acceptance at 1440, 1024, 390 and 320 px:
+      verify all 57 rows and per-category counts, Equipment/Hacking search
+      behavior, empty states, three public detail destinations, JS errors and
+      page-level overflow. Keep the 17-destination desktop/mobile sidebar
+      contract synchronized. Tests:
+      `tests/test_verify_orders_aros_browser.py` and
+      `tests/test_verify_sidebar_density_browser.py`.
     - [ ] Consider replacing the three narrow Equipment exceptions with explicit
       curated declaration metadata in a coordinated rules database rebuild.
       Preserve p. 191 source validation as an independent regression gate.
