@@ -1272,17 +1272,34 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         application startup. The legacy generic relation graph
         is unchanged. See `docs/data-model.md` for fingerprints
         and recovery location.
-      - [ ] **Validate and package the promoted v9 release pair** in
-        the real Docker/CI deployment-smoke workflow after committing
-        the source and tracked database. Verify the image includes
-        the regenerated publication (with matching checksum), v9
-        startup and v8 rollback, and the normal release gates.
-        This local promotion was not a hosted deployment.
-        The seven absent conventional edges and two over-broad
-        relations remain legacy limitations, not missing typed
-        source coverage. Audit consumers before retiring
-        compatibility edges; preserve source-only TAG/VH/REM
-        selectors, ladders, and scoped Jump/Lieutenant semantics.
+      - [x] **Validate and package the promoted v9 release pair** in
+        the GitHub Actions Source checks, Installed wheel smoke and
+        Deployment smoke test workflows (all green at `b7230761`,
+        2026-10-30). The release image accepts v9 with its generated
+        publication; separate v8 and v9 read-path/HTTP tests pass.
+        These checks validate the CI image, **not** a hosted deployment
+        or image-level rollback on the live host.
+      - [x] **Audit and qualify both over-broad legacy display
+        relations** without changing the canonical graph or the raw
+        `relations`/`reverse_relations` API contract. N5.3 p. 194
+        supports Motorcycle → Jump only for upward movement while
+        mounted and Irregular → Lieutenant only for Army role selection.
+        The player-facing labels now convey those scopes in both
+        directions; all other relation labels remain generic.
+        Source-specific typed restrictions and static chart links
+        remain the authoritative explanation. Tests exercise v8/v9
+        projections and untouched structural edges.
+      - [ ] **Verify v8 rollback in a real release image/on the host**
+        with the retained paired v8 database/publication, then check
+        the v9 forward and rollback paths against the release process.
+        Do not treat a green v9 deployment-smoke job as proof of a
+        hosted or image-level v8 rollback.
+      - [ ] Review the **seven absent conventional legacy edges** only
+        if a consumer still requires them; all 14 restrictions already
+        have typed source-backed coverage. Preserve TAG/VH/REM as
+        source-only selectors, ladders as terrain traversal, and scoped
+        Jump/Lieutenant semantics; never insert unqualified generic
+        edges or infer legal permissions.
       - [ ] Confirm how Irregular Training is represented on actual
         Unit/profile/loadout occurrences before adding a Unit-level
         reverse link. Sampled Irregular-source candidates did not

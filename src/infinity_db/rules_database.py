@@ -1121,7 +1121,15 @@ class RulesDatabase:
                 if endpoint is None:
                     continue
                 item = {**relation, "record": endpoint}
-                presentation = relation_presentation(relation["type"], relation["direction"])
+                # Source/target IDs are directional even for reverse links. Only
+                # presentation copy is qualified; raw legacy relations remain intact.
+                outbound = relation["direction"] == "outbound"
+                presentation = relation_presentation(
+                    relation["type"],
+                    relation["direction"],
+                    source_record_id=record["id"] if outbound else relation["record_id"],
+                    target_record_id=relation["record_id"] if outbound else record["id"],
+                )
                 if presentation is not None:
                     item["presentation"] = presentation
                 display_relations.append(item)

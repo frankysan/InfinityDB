@@ -118,6 +118,22 @@ RULE_RELATION_PRESENTATION: dict[str, dict[str, str] | None] = {
     "variant-of": None,
 }
 
+# Two legacy broad edges describe only source-reviewed N5.3 p. 194 conditions.
+# Preserve their historical relation IDs/types for API compatibility, while
+# preventing generic player-facing "restricts use" copy from implying a ban on
+# all Jump directions or use of the Lieutenant Skill itself.
+# Do not apply these labels to any other restricts-use-of edge.
+_SCOPED_LEGACY_RESTRICTION_LABELS = {
+    ("equipment:motorcycle", "skill:jump"): {
+        "outbound": "Prohibits upward movement while mounted with",
+        "inbound": "Upward movement while mounted prohibited by",
+    },
+    ("training:irregular", "skill:lieutenant"): {
+        "outbound": "Cannot be selected as",
+        "inbound": "Lieutenant selection excludes",
+    },
+}
+
 RULE_RELATION_TYPES = frozenset(RULE_RELATION_PRESENTATION)
 
 # Relations that positively establish, provide, or enable a condition sort before
@@ -137,7 +153,13 @@ RELATION_ESTABLISHING_TYPES = frozenset(
 )
 
 
-def relation_presentation(relation_type: str, direction: str) -> dict[str, Any] | None:
+def relation_presentation(
+    relation_type: str,
+    direction: str,
+    *,
+    source_record_id: str | None = None,
+    target_record_id: str | None = None,
+) -> dict[str, Any] | None:
     """Return canonical player-facing metadata for one typed relation direction."""
     if direction not in {"outbound", "inbound"}:
         raise ValueError(f"Unsupported relation direction: {direction!r}")
@@ -147,10 +169,21 @@ def relation_presentation(relation_type: str, direction: str) -> dict[str, Any] 
             raise ValueError(f"Unsupported relation type: {relation_type!r}")
         return None
     group = RELATION_GROUPS[semantics["group"]]
+    label = semantics[direction]
+    if (
+        relation_type == "restricts-use-of"
+        and source_record_id is not None
+        and target_record_id is not None
+    ):
+        scoped = _SCOPED_LEGACY_RESTRICTION_LABELS.get(
+            (source_record_id, target_record_id),
+        )
+        if scoped is not None:
+            label = scoped[direction]
     return {
         "group_id": semantics["group"],
         "group_label": group["label"],
         "group_order": group["order"],
         "relation_order": 10 if relation_type in RELATION_ESTABLISHING_TYPES else 20,
-        "label": semantics[direction],
+        "label": label,
     }

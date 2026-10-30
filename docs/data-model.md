@@ -949,14 +949,29 @@ v8-compatible databases, so reproducing the tracked v9 release
 artifact requires the explicit reviewed manifest and coordinated
 publication workflow. Do not overwrite either artifact individually.
 
-**Still required for hosted release:** run the full CI/deployment
-image smoke checks after committing both source and tracked
-`rules.db`, verify the generated `deployed-objects.json` is
-paired inside the release image, and test v9 startup and v8 rollback
-on an actual image/host. The local promotion **is not deployment**.
-Later consumer review must determine whether the two over-broad
-Motorcycle → Jump and Irregular → Lieutenant generic edges can
-be retired or need explicitly qualified compatibility links.
+**CI release-image acceptance passed on 2026-10-30** for commit
+`b7230761`: Source checks, Installed wheel smoke and Deployment
+smoke all succeeded with the promoted v9 rules database and its
+generated deployed-object publication. That verifies the release
+image, **not** a hosted deployment. A release-image or live-host
+test of the retained v8 rollback pair remains open.
+
+**Legacy relationship consumer review:** the reviewed Motorcycle →
+Jump and Irregular → Lieutenant graph edges are retained as
+`restricts-use-of` for old API consumers, without adding or
+removing any `record_relations` rows. Their shared player-facing
+`display_relations[].presentation.label` strings are now
+**source-scoped** in both directions: Motorcycle only prohibits
+upward Jump while mounted (horizontal/downward Jump remain
+unrestricted *by that rule*), and Irregular Training disqualifies
+Lieutenant **selection** rather than all use of a Skill.
+`src/infinity_db/rule_relations.py` owns the two exact
+source-target presentation overrides; other uses of
+`restricts-use-of` retain generic labels. Both v8 and v9
+projection tests verify this backward-compatible structural
+contract. The 14 typed source restrictions, not these generic
+graph edges, remain the source of conditional semantics; the seven
+source-only/unrepresentable generic edges are not manufactured.
 
 The API, schema and rollback contract remains covered by
 `tests/test_restriction_storage_candidate.py` with both

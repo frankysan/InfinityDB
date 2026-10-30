@@ -58,7 +58,11 @@ are not retroactively relabeled.
   rule relationship responses during migration. The reviewed v9
   rules database and matching deployed-object publication have now
   been promoted together in the development checkout, with the
-  original v8 pair retained for rollback.
+  original v8 pair retained for rollback. Their CI image, installed
+  wheel and source checks pass. Motorcycle/Jump and Irregular/
+  Lieutenant related-rule labels now convey the exact upward-mounted
+  and selection-only restrictions, respectively, without changing
+  legacy relation IDs or graph edges.
 - **Data processing + Web backend + Web frontend + Deployment:** Add a standalone
   reference for 17 source-reviewed deployed objects with known, unreported and disputed
   attributes, source-backed delivery links and an explicit unresolved Mine Dispenser

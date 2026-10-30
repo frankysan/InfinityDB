@@ -1958,11 +1958,16 @@ The public model adds `subjectKind` and `operation.kind` /
 `operation.qualifier` alongside existing chart data. Browser
 acceptance checks upward Jump, ladder traversal and Lieutenant
 selection carry distinct typed operation kinds at all three widths.
-No `rules.db` schema or generic relation was changed; the historical
-audit still reports seven missing legacy edges and two over-broad
-ones, which are separate from the now-complete typed source
-constraints. This is contextual help, not a declaration or Army
-selection legality resolver.
+The v9 schema adds a separate table, without changing the
+generic `record_relations` graph. The source audit still reports
+seven missing conventional edges and two inherently over-broad
+generic relations, separate from the complete typed condition set.
+Those two edges now receive **scoped, bidirectional player-facing
+presentation labels** only; their relation types and endpoints
+remain unchanged for compatibility. `tests/test_rule_relations.py`
+checks both v8 and v9 views, inbound/outbound scopes, and the
+unmodified labels on all other relationships. This is contextual
+help, not a declaration or Army selection legality resolver.
 
 Irregular Training has no standalone catalog route; sampled
 source candidate Unit details did not expose an `irregular` Training
