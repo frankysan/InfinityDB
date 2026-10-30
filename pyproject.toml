@@ -80,6 +80,7 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
   "static/*.css",
   "static/themes/*.css",
   "static/*.js",
+  "static/*.json",
   "static/*.svg",
   "static/*.png",
   "static/silhouettes/*.svg",

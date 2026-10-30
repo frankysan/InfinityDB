@@ -369,6 +369,28 @@ def test_wheel_packages_runtime_unit_filter_semantics() -> None:
     assert "config/catalogs/unit-filter-semantics.json" in catalog_data
 
 
+def test_wheel_packages_all_registered_static_assets() -> None:
+    """Any asset in the live HTTP registry must survive wheel installation.
+
+    The installed web module hashes these assets at import time; excluding a
+    single asset prevents both wheel and production container startup.
+    """
+    from infinity_db.web.presentation import ASSETS
+
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+    patterns = project["tool"]["setuptools"]["package-data"]["infinity_db.web"]
+    uncovered = [
+        name
+        for name, _ in sorted(ASSETS.values())
+        if not any(
+            fnmatch.fnmatchcase("static/" + name, pattern)
+            for pattern in patterns
+        )
+    ]
+    assert uncovered == [], f"Web registry assets omitted from wheel: {uncovered}"
+
+
 def test_wheel_package_data_includes_browser_icon_rasters() -> None:
     with (ROOT / "pyproject.toml").open("rb") as handle:
         project = tomllib.load(handle)
