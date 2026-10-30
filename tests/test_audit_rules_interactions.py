@@ -20,7 +20,7 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 379
+    assert report["summary"]["recordCount"] == 381
     assert not any(item["id"].startswith("faq-ruling:") for item in report["items"])
     assert report["summary"]["authoredOutgoingRelationCount"] == 510
     assert report["summary"]["futureInteractionCount"] == 111
@@ -65,10 +65,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "percentComplete": 100.0,
     }
     assert report["summary"]["releases"]["1.0.0"] == {
-        "total": 111,
-        "complete": 111,
+        "total": 113,
+        "complete": 113,
         "pending": 0,
-        "reviewed": 111,
+        "reviewed": 113,
         "inherited": 0,
         "percentComplete": 100.0,
     }
@@ -117,8 +117,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 198
-    assert report["summary"]["supporting"]["complete"] == 198
+    assert report["summary"]["supporting"]["total"] == 200
+    assert report["summary"]["supporting"]["complete"] == 200
     assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -571,7 +571,7 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 198/198 complete, 0 pending" in output
+    assert "Supporting identities: 200/200 complete, 0 pending" in output
 
 
 def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> None:
@@ -580,7 +580,7 @@ def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> 
         "--require-release", "1.0.0",
     ]) == 0
     output = capsys.readouterr().out
-    assert "Supporting identities: 198/198 complete, 0 pending" in output
+    assert "Supporting identities: 200/200 complete, 0 pending" in output
     assert "Pending identities:" not in output
 
 
@@ -757,7 +757,7 @@ def test_1_0_primary_candidate_preserves_historical_reviews_and_pending_commlink
     assert (primary["total"], primary["complete"], primary["pending"]) == (
         185, 184, 1,
     )
-    assert report["summary"]["supporting"]["total"] == 195
+    assert report["summary"]["supporting"]["total"] == 197
     primary_items = {item["id"]: item for item in report["primaryCatalogItems"]}
     for record_id, release in {
         "skill:activate-disco-ball": "1.0.0",

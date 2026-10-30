@@ -1641,8 +1641,9 @@ Zero-G), **18 printed suggestion/example labels** (retaining the source's
 `Artic Plains` spelling), and **two Scenery Access Width Tokens** (`Narrow
 Gate` / `Wide Gate`). The `skill:terrain` reference exists;
 standalone Special Terrain and Access Width reference definitions are
-reviewed and prepared for coordinated publication but are **not yet
-promoted**. Gate Token labels do not have separate canonical definitions.
+now **promoted** as N5.3 general rules. The subsequent maintained-text
+review and coordinated binary refresh are complete (see below).
+Gate Token labels do not have separate canonical definitions.
 The audit accepts both the original two-gap state and the fully
 published two-rule state but rejects partial migration or unsupported
 definitions. Its optional `--pdf` mode verifies source headings, names and
@@ -1664,56 +1665,80 @@ The semantics are already reviewed in `docs/rules-semantics.md` and
 `docs/rules-research.md`. `tests/test_terrain_scenery_source_gaps.py`
 guards the boundary, including a local-only test of the pinned PDF.
 
-Two source-backed `basic-rule` definitions are now **prepared for staging**:
-`rule:special-terrain` (p. 143) and `rule:access-width` (p. 145).
-They specify optional table-wide scope, finite terrain Types and
-characteristic composition, scenery Access Width precedence, and the
-Silhouette X/Prone restriction. They do **not** introduce 18 example Types,
-a new Unit characteristic, or deployed Weapon/Equipment identities.
-Because `rules.db` is a tracked binary and deployed-object publication
-pins its hash, stage the source and both generated artifacts together:
+Two source-backed `basic-rule` definitions were promoted together with
+their generated artifacts: `rule:special-terrain` (p. 143) and
+`rule:access-width` (p. 145). They specify optional table scope, terrain
+Types and characteristics, scenery Access Width precedence and the
+Silhouette X/Prone restriction, without creating extra object identities.
+The original one-time staging and promotion procedure was:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.stage_terrain_scenery_references --output-dir local/terrain-scenery-references-n53 --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
 ```
 
-This command refuses to overwrite an existing staging directory, validates
-the proposed source records, preserves the original curated JSON formatting
-outside the two appended definitions, and regenerates both artifacts from
-the same staged source. It writes `staging-report.json` containing hashes
-and the three required promotion paths. The command **does not modify the
-working tree**; the regression at
-`tests/test_terrain_scenery_reference_staging.py` builds an isolated
-temporary staging directory and verifies original file bytes and the
-publication fingerprint. After reviewing the staged content and report,
-copy **all three staged paths together** into the checkout:
+The original staging and three-file promotion are complete. The first
+post-promotion rules check revealed two missing interaction-review entries
+and reviewed maintained-text aliases. Those reviews are now recorded:
+the interaction checklist has **200/200 supporting identities**, Prone
+State references use canonical links, and the ordinary Terrain noun is
+pinned separately from the `skill:terrain` identity with exact
+passage hashes. The rules build now passes.
+
+The final two-binary refresh **was completed and verified** to pair the
+post-promotion source corrections with a matching `rules.db` and
+`deployed-objects.json` fingerprint. The following is the archived
+reproduction procedure; it requires a new, unused output directory
+if the original local staging directory still exists:
 
 ```powershell
-$stage = "local/terrain-scenery-references-n53"
+& .\.venv\Scripts\python.exe -m tools.stage_promoted_terrain_artifacts --output-dir local/terrain-scenery-refresh-n53
+```
+
+The original `local/terrain-scenery-refresh-n53/staging-report.json`
+matched the current curated-source SHA-256, and both promoted binary
+files matched the staged SHA-256 fingerprints byte-for-byte. For future
+rebuilds, verify the current source hash and both staged binary hashes
+before copying them together:
+
+```powershell
+$stage = "local/terrain-scenery-refresh-n53"
 $report = Get-Content (Join-Path $stage "staging-report.json") -Raw |
     ConvertFrom-Json
-if ($report.reviewedObjects -ne 17 -or $report.proposedIds.Count -ne 2) {
-    throw "Unexpected terrain reference staging report"
+if ($report.scope -ne "post-promotion-binary-rebuild-not-applied" -or
+    $report.reviewedObjects -ne 17 -or $report.stagedPaths.Count -ne 2) {
+    throw "Unexpected terrain refresh report"
 }
-if (git status --porcelain) {
-    throw "Working tree must be clean before promotion"
+if ((Get-FileHash data/curated/rules/n5-core-v5.3.json -Algorithm SHA256).Hash -ne
+    $report.sourceSha256) {
+    throw "Curated source changed after staging"
 }
-foreach ($path in $report.stagedPaths) {
-    if (-not (Test-Path -LiteralPath (Join-Path $stage $path) -PathType Leaf)) {
-        throw "Missing staged file: $path"
+$hashes = @(
+    $report.stagedSha256.rulesDatabase,
+    $report.stagedSha256.deployedObjects
+)
+for ($i = 0; $i -lt $report.stagedPaths.Count; $i++) {
+    $path = $report.stagedPaths[$i]
+    $candidate = Join-Path $stage $path
+    if (-not (Test-Path -LiteralPath $candidate -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash -ne $hashes[$i]) {
+        throw "Missing or changed staged binary: $path"
     }
 }
 foreach ($path in $report.stagedPaths) {
     Copy-Item -LiteralPath (Join-Path $stage $path) -Destination $path -Force
 }
-.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps
-.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+& .\.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
+& .\.venv\Scripts\python.exe -m tools.run_checks --stage rules
 ```
 
-The post-promotion audit must show both rules as `maintained` in JSON
-output. Run the focused tests and normal project/CI gates before committing;
-do not commit only the curated JSON, which would leave `rules.db`
-and the deployed-object publication fingerprint stale.
+The refreshed binary pair must be committed together with the curated
+source and corresponding review policy/checklist changes. No deployment
+has occurred. The regression
+`tests/test_promoted_terrain_artifacts.py` checks that an isolated rebuild
+does not modify tracked inputs and, when the ignored staging report is
+present, verifies its source hash and exact binary equality against the
+promoted files. The published `rules.db` fingerprint is checked even
+without local staging artifacts.
 
 ### Core scenario-object source-domain boundary
 

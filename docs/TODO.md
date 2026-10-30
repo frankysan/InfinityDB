@@ -1392,7 +1392,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               and gate-marker reference terms. Existing `skill:terrain`
               remains available. No source/profile/carrier publication
               change was made.
-            - [ ] Publish the reviewed **Special Terrain** and
+            - [x] Publish the reviewed **Special Terrain** and
               **Access Width** reference definitions independently of
               current map/session instances. Preserve the five
               terrain-type parameters, Difficult/Saturation/Visibility
@@ -1408,11 +1408,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 `tools.stage_terrain_scenery_references`. The
                 isolated staging regression passes and preserves
                 all tracked files.
-              - [ ] Inspect and promote the **three staged files**
-                together; then run the reference audit in its
-                fully maintained state, publication `--check`,
-                focused tests and normal project/CI checks.
-                The reference changes are not yet live.
+              - [x] Complete the **post-promotion binary refresh**.
+                Both maintained rules are present, their interaction
+                reviews and canonical text links are updated, and
+                the supporting review gate passes **200/200**. The
+                two refreshed tracked binaries match the local
+                `terrain-scenery-refresh-n53` staging report and
+                files byte-for-byte; the report's source SHA-256
+                matches the curated JSON. The publication retains
+                **17 reviewed objects**, with its rules-database
+                fingerprint verified in a focused regression.
+                Source, rules, publication and static checks pass.
+                Full project/CI checks remain release gates;
+                nothing deployed.
               - [ ] Consider separate glossary/source terms for
                 Narrow and Wide Gate labels and typed
                 terrain-characteristic combinations if player

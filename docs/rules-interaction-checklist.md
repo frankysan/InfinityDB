@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **198/198** complete, **0** pending.
+- Supporting semantic identities: **200/200** complete, **0** pending.
 - Current authored outgoing relations: **510**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -367,7 +367,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Terrain** (`skill:terrain`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `applies-effects-to` → `rule:movement-label` — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
-  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:special-terrain` — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Special Terrain (`rule:special-terrain`) — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
 - [x] **Total Reaction** (`skill:total-reaction`) — reviewed
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
 - [x] **Transmutation** (`skill:transmutation`) — reviewed
@@ -904,8 +904,10 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (19/19)
+#### Rule (21/21)
 
+- [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
+  - outgoing: none
 - [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Consoles** (`rule:scenario:consoles`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
@@ -937,6 +939,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Saving Rolls** (`rule:saving-rolls`) — reviewed: N5.3 p.37 baseline for PS, defense and Critical Saving Rolls; Profile-specific Ammunition exceptions remain separate reviewed facts.
   - outgoing: none
 - [x] **Special Dice (+1 SD)** (`rule:special-dice`) — reviewed: Shared N5.3 SD resolution, Fireteam/CC applicability and Berserk exception are source-cited prose; no universal Burst or Disposable relation is inferred.
+  - outgoing: none
+- [x] **Special Terrain** (`rule:special-terrain`) — reviewed: N5.3 p.143 optional table context: Special Terrain combines one of five Terrain Types with at least one Difficult/Saturation/Visibility characteristic. Locations, composition, current affected Troopers and Terrain Skill eligibility remain table/session scoped; no unconditional outgoing Skill or Equipment edge is inferred.
   - outgoing: none
 - [x] **Specialist Troops** (`rule:specialist-troops:standard`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
@@ -1377,7 +1381,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] Surprise Attack (`skill:surprise-attack`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
 - [ ] TAGCom (`skill:tagcom`) → `rule:troop-type:tag`; `applies-effects-to`; **post-0.7.0 / deferred** — TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD.
 - [ ] Terrain (`skill:terrain`) → `rule:movement-label`; `applies-effects-to`; **post-0.7.0 / planned** — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
-- [ ] Terrain (`skill:terrain`) → `rule:special-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
+- [ ] Terrain (`skill:terrain`) → Special Terrain (`rule:special-terrain`); `relation type TBD`; **post-0.7.0 / deferred** — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
 - [ ] Transmutation (`skill:transmutation`) → `rule:movement-label`; `relation type TBD`; **post-0.7.0 / deferred** — Transmutation (Hatching) and Transmutation (Auto) use Skills with the Movement Label as profile-change triggers; the current graph cannot express a variant-specific trigger against a Label rather than a Skill identity.
 - [ ] Transmutation (`skill:transmutation`) → `rule:unit-profile`; `relation type TBD`; **post-0.7.0 / planned** — All Transmutation variants replace or select between Unit Profiles while sharing Wounds and applicable States. Model this explicitly when Unit Profile transition/session-state semantics become a first-class rules domain.
 - [ ] Transmutation (`skill:transmutation`) → Possessed State (`state:possessed`); `cancels-state`; **post-0.7.0 / deferred** — Transmutation (Escape System-X) cancels Possessed State when the profile changes, but this is variant-specific and the current family-level graph cannot qualify the edge to only Escape System-X.

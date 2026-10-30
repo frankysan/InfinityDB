@@ -2237,6 +2237,20 @@
       "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
     },
     {
+      "recordId": "rule:access-width",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-30",
+      "note": "N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed."
+    },
+    {
+      "recordId": "rule:special-terrain",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-30",
+      "note": "N5.3 p.143 optional table context: Special Terrain combines one of five Terrain Types with at least one Difficult/Saturation/Visibility characteristic. Locations, composition, current affected Troopers and Terrain Skill eligibility remain table/session scoped; no unconditional outgoing Skill or Equipment edge is inferred."
+    },
+    {
       "recordId": "rule:specialist-troops:standard",
       "targetRelease": "1.0.0",
       "status": "reviewed",

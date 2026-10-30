@@ -49,7 +49,7 @@
       "id": "rule:access-width",
       "kind": "rule",
       "name": "Access Width",
-      "summary": "Narrow and Wide scenery access points constrain passage by Silhouette, with an explicit Prone/Silhouette X exception. Their gate Tokens label scenery openings, not deployed Weapons or Equipment.",
+      "summary": "Narrow and Wide scenery access points constrain passage by Silhouette, with an explicit [[state:prone|Prone]]/Silhouette X exception. Their gate Tokens label scenery openings, not deployed Weapons or Equipment.",
       "composition": {
         "role": "definition"
       },
@@ -68,8 +68,8 @@
           "Gates and access points are treated as open and do not block Line of Fire unless a specific rule or scenario condition says otherwise."
         ],
         "restrictions": [
-          "Troopers in Prone State with Silhouette X use the Silhouette Attribute on their Unit Profile when checking access restrictions.",
-          "Access Width is a property of the agreed scenery layout, not an intrinsic permanent can-pass property of a Trooper. Gate Tokens are labels, not independently deployable devices."
+          "Troopers in [[state:prone|Prone State]] with Silhouette X use the Silhouette Attribute on their Unit Profile when checking access restrictions.",
+          "Access Width is a property of the agreed scenery layout, not an intrinsic permanent can-pass property of a Trooper. Gate Tokens are labels, not independently placed game devices."
         ],
         "definesSkills": []
       },
