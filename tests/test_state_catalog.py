@@ -73,6 +73,64 @@ def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: P
     assert ("cancels-state", "inbound", "state:retreat") in suppressive_relations
 
 
+def test_isolated_state_fireteam_and_coordinated_order_navigation_source_boundary(
+    tmp_path: Path,
+) -> None:
+    """Pin reviewed context without equating membership with generic rule use."""
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    database = RulesDatabase(rules_path)
+    database.validate()
+
+    isolated = StateCatalog(database).get_state("isolated")
+    assert isolated is not None
+    state = isolated["rules"][0]
+    assert state["id"] == "state:isolated"
+    assert any(
+        "cannot be part of a Fireteam or take part in a Coordinated Order" in fact
+        for fact in state["facts"]["restrictions"]
+    )
+    assert any(
+        "becomes Irregular in following Active Turns" in fact
+        for fact in state["facts"]["effects"]
+    )
+    assert {item["record_id"] for item in state["display_relations"]} >= {
+        "skill:reset", "skill:engineer"
+    }
+
+    fireteam = database.composed_record("rule:fireteam-general")
+    coordinated = database.composed_record("rule:coordinated-orders")
+    assert fireteam is not None and coordinated is not None
+    fireteam_rules = fireteam["facts"]["rules"]
+    assert any(
+        "[[state:isolated|Isolated]]" in fact and "**Whole Fireteam cancellation:**" in fact
+        for fact in fireteam_rules
+    )
+    assert any(
+        "[[state:isolated|Isolated]]" in fact and "**Individual departure:**" in fact
+        for fact in fireteam_rules
+    )
+    assert any(
+        "Members must observe Coherency" in fact for fact in fireteam_rules
+    )
+    assert any(
+        "same Training (Regular or Irregular)" in fact
+        for fact in coordinated["facts"]["requirements"]
+    )
+    assert any(
+        "Members of a Fireteam" in fact
+        for fact in coordinated["facts"]["restrictions"]
+    )
+    # A shared Order-generation Training is not proof that an Isolated
+    # Trooper may participate; no live-session eligibility is inferred.
+    assert state["kind"] == "state"
+    assert all(
+        relation["type"] != "causes-state"
+        for relation in state.get("relations", ())
+    )
+
+
 def test_every_current_state_reaches_published_api_and_player_template() -> None:
     """Check every canonical State's source/storage/API identity and cited facts."""
 

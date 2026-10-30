@@ -1975,6 +1975,19 @@ only; their types and endpoints remain unchanged for compatibility.
 relationship labels. This is contextual help, not a declaration
 or Army selection legality resolver.
 
+**Isolated State cross-context audit:** the focused
+`tests/test_state_catalog.py::test_isolated_state_fireteam_and_coordinated_order_navigation_source_boundary`
+regression reads the reviewed curated rules in an independent
+test database. It confirms that Isolated forbids Fireteam membership
+and Coordinated Order participation, that Fireteam rules already
+distinguish Leader cancellation from ordinary member departure, and
+that Coordinated Orders' shared-Training requirement does not
+establish participation eligibility. This is evidence for a
+**remaining State-side navigation gap**, not proof that reciprocal
+links are published: the Isolated reference still needs a scoped
+back-link to those rule topics. No new general `restricts-use-of`
+edge or Unit-level active-State inference was introduced.
+
 Irregular Training has no standalone catalog route. The source
 ownership is now verified against the tracked Army database:
 `loadout_payload_orders.order_type` contains actual Irregular

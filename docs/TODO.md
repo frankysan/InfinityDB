@@ -1348,6 +1348,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [ ] Drive additions from the coverage inventory and new typed Ammunition/scenario/FAQ facts.
     Author each relation once and verify derived navigation in both directions; distinguish entry,
     cancellation, immunity/override, and objective completion from the resulting State.
+    - [x] **Audit Isolated State ↔ Fireteams/Coordinated Orders source ownership.**
+      The reviewed Isolated definition forbids Fireteam membership and Coordinated
+      Order participation; the Fireteam General Rules already link back to
+      `state:isolated` and distinguish Leader-triggered cancellation
+      from ordinary member departure. Coordinated Orders' same-Training
+      requirement does not override isolation. A source/database regression
+      pins these contextual facts without inventing automatic State transitions.
+    - [ ] **Publish State-to-rule contextual navigation for the Isolated case**
+      using a source-authored, bidirectional reference with explicit membership/
+      participation scope. The Isolated State page currently lacks a reverse
+      link to Fireteam General Rules or Coordinated Orders even though it
+      states both restrictions. A generic `restricts-use-of` edge alone
+      would be ambiguous (the isolated member does not prohibit an entire
+      Fireteam from existing). Reuse reviewed source rules, preserve exact
+      Leader/non-Leader and Co-Order distinctions, and regenerate the paired
+      v9 rules database/publication before claiming the browser surface is
+      complete; do not infer live Unit State or Army legality.
   - **Completion:** relevant context is linked from the owning rule and State help with applicable
     conditions/scope; no duplicate definitions or static assertions of a Trooper's live State.
 
