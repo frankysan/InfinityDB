@@ -1624,6 +1624,43 @@ delivery path is changed.
 `tests/test_deployed_object_expanded_queue.py` checks the discovery and
 fail-closed review boundaries.
 
+### N5.3 Hacking Device Programs source chart
+
+The English N5.3 p. 58 **Hacker Device Programs Chart** lists four
+Hacking Device Equipment types and the Programs each one grants. It
+is distinct from the **Hacking Programs Chart** on the same page,
+which gives individual Program statistics. The review manifest
+`config/validation/hacking-device-program-source-chart.json` pins
+the four source rows, their printed Program-column order, and the
+fact that this is a device access matrix rather than Unit ownership,
+a deployed object, or an additional Program identity.
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart
+.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+```
+
+The four devices grant **4 / 6 / 2 / 4** Programs, respectively
+(Hacking Device, Hacking Device Plus, Killer Hacking Device, EVO
+Hacking Device), for **11 distinct Program definitions** in the
+union. The audit checks exact maintained Equipment access-link
+sets and matching canonical Hacking Program records. The optional
+`--pdf` mode verifies the printed device table's four Program
+assignments separately from the preceding Program statistics table.
+Missing, duplicated or incorrectly assigned Programs, changed source
+scope, and missing canonical records fail closed. CI does not require
+the ignored local PDF.
+
+The four Equipment facts already agree with the N5.3 chart, but the
+device records currently **do not cite p. 58 directly**: they retain
+their wiki citations. The audit reports these as
+`missingMaintainedN53ChartCitations`. A future coordinated citation
+migration must rebuild `rules.db` and refresh the publication
+fingerprint; this source-only audit does not make that claim or
+change any runtime records, Program statistics or delivery paths.
+`tests/test_hacking_device_program_source_chart.py` covers the
+boundary and source-backed Program sets.
+
 ### N5.3 Silhouette Templates source and browser geometry
 
 The English N5.3 **Silhouette Templates** table (printed p. 18)

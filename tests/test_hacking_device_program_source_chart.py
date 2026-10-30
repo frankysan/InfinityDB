@@ -1,0 +1,110 @@
+"""N5.3 hacking device-to-Program source chart and maintained access sets."""
+
+from __future__ import annotations
+
+import copy
+import json
+import sys
+
+import pytest
+
+from infinity_db.curated import load_curated_document
+from tools.audit_hacking_device_program_source_chart import (
+    CURATED,
+    MANIFEST,
+    PDF,
+    PINNED,
+    PROGRAMS,
+    audit_device_program_chart,
+    audit_source_files,
+    main,
+    verify_pinned_pdf,
+)
+
+
+def _inputs() -> tuple[dict, dict, dict]:
+    return (
+        json.loads(MANIFEST.read_text(encoding="utf-8")),
+        load_curated_document(CURATED),
+        load_curated_document(PROGRAMS),
+    )
+
+
+def test_n53_device_chart_exactly_reconciles_maintained_program_sets() -> None:
+    report = audit_source_files()
+    assert report["scope"] == (
+        "equipment-granted-program-sets-not-individual-program-statistics"
+    )
+    assert report["sourcePage"] == 58
+    assert report["deviceCount"] == 4
+    assert report["distinctProgramCount"] == 11
+    assert report["programStatisticsIncluded"] is False
+    assert report["missingMaintainedN53ChartCitations"] == [
+        row[0] for row in PINNED
+    ]
+    assert [
+        (row["deviceId"], row["name"],
+         tuple(program_id.removeprefix("hacking-program:") for program_id in row["programIds"]))
+        for row in report["deviceRows"]
+    ] == list(PINNED)
+    assert [len(row["programIds"]) for row in report["deviceRows"]] == [4, 6, 2, 4]
+    assert report["verifiedPdfSha256"] is None
+    assert all(
+        len(report[name]) == 64
+        for name in ("manifestSha256", "curatedSha256", "programsSha256")
+    )
+
+
+def test_device_chart_rejects_unreviewed_changes_or_program_gaps() -> None:
+    manifest, curated, programs = _inputs()
+    assert audit_device_program_chart(manifest, curated, programs)["deviceCount"] == 4
+
+    mutation = copy.deepcopy(manifest)
+    mutation["deviceRows"][1]["programIds"].remove("hacking-program:cybermask")
+    with pytest.raises(ValueError, match="row drift"):
+        audit_device_program_chart(mutation, curated, programs)
+
+    mutation = copy.deepcopy(manifest)
+    mutation["classification"]["scope"] = "all-program-statistics"
+    with pytest.raises(ValueError, match="source/scope drift"):
+        audit_device_program_chart(mutation, curated, programs)
+
+    altered = copy.deepcopy(curated)
+    record = next(
+        row for row in altered["records"]
+        if row["id"] == "equipment:evo-hacking-device"
+    )
+    record["facts"]["effects"][0] = record["facts"]["effects"][0].replace(
+        "[[hacking-program:fairy-dust]]", "[[hacking-program:spotlight]]",
+    )
+    with pytest.raises(ValueError, match="Program access drift"):
+        audit_device_program_chart(manifest, altered, programs)
+
+    altered = copy.deepcopy(programs)
+    altered["records"] = [
+        row for row in altered["records"] if row["id"] != "hacking-program:trinity"
+    ]
+    with pytest.raises(ValueError, match="Missing canonical Program"):
+        audit_device_program_chart(manifest, curated, altered)
+
+
+def test_device_chart_optional_pinned_pdf_evidence() -> None:
+    pytest.importorskip("pymupdf")
+    if not PDF.is_file():
+        pytest.skip("Local pinned English N5.3 PDF unavailable")
+    result = audit_source_files(pdf_path=PDF)
+    assert len(result["verifiedPdfSha256"]) == 64
+    manifest, _, _ = _inputs()
+    assert verify_pinned_pdf(PDF, manifest) == result["verifiedPdfSha256"]
+
+
+def test_device_chart_cli(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(sys, "argv", ["audit_hacking_device_program_source_chart"])
+    assert main() == 0
+    out = capsys.readouterr().out
+    assert "4 devices; 11 distinct Programs" in out
+    assert "Hacking Device Plus: 6 Programs" in out
+    assert "Killer Hacking Device: 2 Programs" in out
+    assert "no Program statistics or Unit carriers" in out

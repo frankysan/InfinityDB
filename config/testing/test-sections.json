@@ -54,6 +54,7 @@
         "test_faq_ruling_references",
         "test_fireteam_relationships",
         "test_game_mode_source_table",
+        "test_hacking_device_program_source_chart",
         "test_hacking_program_catalog",
         "test_hacking_program_publication",
         "test_identities",

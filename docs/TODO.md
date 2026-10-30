@@ -1473,11 +1473,30 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               references, displayed dimensions, distinct Prone
               semantics, all eight SVG assets, and the English PDF.
               No Unit characteristic or deployed-object profile changed.
-            - [ ] Continue source-table discovery beyond the
-              terrain, scenario, Game Modes, Retreat!, Silhouette
-              Templates, Weapon Chart and p. 74 reviews; verify
-              additional game-element categories against direct rules
-              before expanding a canonical inventory.
+            - [x] Audit the independent **N5.3 Hacking Device
+              Programs Chart** (p. 58) against the four maintained
+              Equipment definitions and the canonical Hacking Programs
+              domain. The four device sets grant 4/6/2/4 Programs
+              (Hacking Device / Plus / Killer / EVO), with **11
+              distinct Programs** across them. The source matrix is
+              device access, distinct from the Hacking Programs
+              statistics chart on the same page and unrelated to
+              Unit carriers or deployed Weapons/Equipment. The
+              read-only audit pins printed row assignments and
+              verifies all Program references; no runtime relation
+              or identity was created.
+              - [ ] Add exact p. 58 N5.3 source citations to the
+                four maintained Hacking Device definitions in a
+                coordinated curated source + `rules.db` +
+                publication fingerprint update. Currently the
+                reviewed device facts are consistent with the PDF,
+                but their citations remain wiki-only; the audit
+                reports these four citation gaps explicitly.
+            - [ ] Continue source-table discovery beyond the terrain,
+              scenario, Game Modes, Retreat!, Silhouette Templates,
+              Hacking Device charts, Weapon Chart and p. 74 reviews;
+              verify additional game-element categories against direct
+              rules before expanding a canonical inventory.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery
