@@ -1312,12 +1312,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         The CI rehearsal did not replace live containers or perform
         a hosted deployment. Require explicit operational authorization
         and a separately reviewed rollback plan before changing the host.
-      - [ ] Review the **seven absent conventional legacy edges** only
-        if a consumer still requires them; all 14 restrictions already
-        have typed source-backed coverage. Preserve TAG/VH/REM as
-        source-only selectors, ladders as terrain traversal, and scoped
-        Jump/Lieutenant semantics; never insert unqualified generic
-        edges or infer legal permissions.
+      - [x] **Audit the seven absent conventional legacy edges and
+        their actual consumers.** Six represent TAG/VH/REM source-only
+        Troop Type selectors (no canonical owner record), and the
+        seventh is Motorcycle ladder traversal (no Skill target).
+        All seven are already source-ordered in the reviewed v9
+        `restriction_constraints` API and static browser publication;
+        browser reverse links use the exact target concept where
+        available. A regression pins the seven subject/action pairs,
+        source scope and operation, v9 API projection, and absence
+        of fabricated owners/ladder Skills. No current player-facing
+        consumer needs a generic edge. Retain the legacy graph
+        unchanged; do not mistake its missing edges for missing
+        Restrictions coverage or infer permission from absence.
       - [x] **Verify Irregular Training occurrence ownership**
         against the tracked Army database: normalized
         `loadout_payload_orders` carry source Order types at specific

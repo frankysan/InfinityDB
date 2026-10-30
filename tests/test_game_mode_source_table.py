@@ -166,6 +166,97 @@ def test_n53_restrictions_chart_six_subjects_and_fourteen_prohibitions() -> None
     assert len(report["curatedSha256"]) == 64
 
 
+def test_n53_seven_non_graph_restrictions_keep_source_scoped_api_and_browser_coverage() -> None:
+    """All seven absent generic edges are represented without invented identities."""
+    from infinity_db.rules_database import RulesDatabase
+    from tools.audit_restrictions_source_chart import ROOT
+
+    manifest, records = _restriction_inputs()
+    report = restrictions_audit(manifest, records)
+    missing = {(row["subject"], row["action"]) for row in report["missingTypedRelations"]}
+    source_only = {"TAG", "VH", "REM"}
+    assert missing == {
+        ("TAG", "enter-prone"),
+        ("TAG", "declare-cautious-movement"),
+        ("Motorcycle", "use-ladders"),
+        ("VH", "enter-prone"),
+        ("VH", "declare-cautious-movement"),
+        ("REM", "declare-cautious-movement"),
+        ("REM", "lieutenant-selection"),
+    }
+
+    typed = {
+        (item.subject, item.action): item
+        for item in compile_restriction_conditions(manifest, records)
+    }
+    published = json.loads(RESTRICTIONS_PUBLICATION.read_text(encoding="utf-8"))
+    browser = {
+        (row["sourceSubject"], condition["action"]): (row, condition)
+        for row in published["rows"]
+        for condition in row["conditions"]
+    }
+    database = RulesDatabase(ROOT / "data/generated/rules.db")
+    database.validate()
+    api = database.restrictions_payload()
+    assert api["available"] is True
+    assert api["evaluationSupported"] is False
+    assert api["polarity"] == "prohibition"
+    assert len(api["items"]) == 14
+    api_by_key = {(item["subject"], item["action"]): item for item in api["items"]}
+    assert set(api_by_key) == set(typed) == set(browser)
+
+    for subject, action in sorted(missing):
+        condition = typed[(subject, action)]
+        browser_row, browser_condition = browser[(subject, action)]
+        api_condition = api_by_key[(subject, action)]
+        assert browser_row["ownerRecordId"] == condition.owner_record_id
+        assert browser_condition["targetRecordId"] == condition.target_record_id
+        assert browser_condition["scope"] == api_condition["scope"] == condition.scope
+        assert browser_condition["operation"] == api_condition["operation"] == (
+            condition.publication_operation()
+        )
+        assert api_condition["polarity"] == "prohibition"
+        assert api_condition["ownerRecordId"] == condition.owner_record_id
+        assert api_condition["targetRecordId"] == condition.target_record_id
+
+        if subject in source_only:
+            # Troop Types are PDF selectors, not fabricated canonical rules IDs.
+            assert condition.subject_kind == "troop-type"
+            assert condition.owner_record_id is None
+            assert browser_row["ownerHref"] is None
+            assert browser_condition["href"] is not None
+            assert any(
+                item["action"] == action
+                for item in database.restrictions_payload(
+                    subject=subject, record_id=condition.target_record_id,
+                )["items"]
+            )
+        else:
+            # Ladders are traversal terrain, not a generic Skill or relation.
+            assert (subject, action) == ("Motorcycle", "use-ladders")
+            assert condition.owner_record_id == "equipment:motorcycle"
+            assert condition.target_record_id is None
+            assert condition.operation_kind == "terrain-traversal"
+            assert condition.qualifier == {"terrain": "ladders"}
+            assert browser_condition["href"] is None
+            assert not any(
+                edge["recordId"] == "skill:use-ladders"
+                for edge in records[condition.owner_record_id].get("relations", ())
+            )
+            assert any(
+                item["action"] == action
+                for item in database.restrictions_payload(
+                    subject=subject, record_id=condition.owner_record_id,
+                )["items"]
+            )
+
+    # No absence of a negative constraint may imply positive legality.
+    unmatched = database.restrictions_payload(record_id="skill:dodge")
+    assert unmatched["available"] is True
+    assert unmatched["items"] == []
+    assert unmatched["evaluationSupported"] is False
+
+
 def test_n53_restrictions_chart_rejects_changed_scope_actions_and_relations() -> None:
     chart, records = _restriction_inputs()
     assert restrictions_audit(chart, records)["negativeConditionCount"] == 14

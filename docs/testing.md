@@ -1959,15 +1959,21 @@ The public model adds `subjectKind` and `operation.kind` /
 acceptance checks upward Jump, ladder traversal and Lieutenant
 selection carry distinct typed operation kinds at all three widths.
 The v9 schema adds a separate table, without changing the
-generic `record_relations` graph. The source audit still reports
-seven missing conventional edges and two inherently over-broad
-generic relations, separate from the complete typed condition set.
-Those two edges now receive **scoped, bidirectional player-facing
-presentation labels** only; their relation types and endpoints
-remain unchanged for compatibility. `tests/test_rule_relations.py`
-checks both v8 and v9 views, inbound/outbound scopes, and the
-unmodified labels on all other relationships. This is contextual
-help, not a declaration or Army selection legality resolver.
+generic `record_relations` graph. Its source audit still reports
+seven non-materializable conventional edges: two TAG, two VH,
+two REM (all source-only Troop Types with no canonical owner) and
+one mounted Motorcycle ladder traversal (with no Skill target).
+`test_n53_seven_non_graph_restrictions_keep_source_scoped_api_and_browser_coverage`
+pins all seven against the complete 14-item v9 API and published
+browser JSON, checks target-based navigation, and verifies that
+no fabricated owner or ladder Skill is needed. Missing generic
+edges are **not** missing source coverage and cannot imply
+positive legality. The two inherently over-broad legacy edges
+retain **scoped, bidirectional player-facing presentation labels**
+only; their types and endpoints remain unchanged for compatibility.
+`tests/test_rule_relations.py` checks v8/v9 views and other
+relationship labels. This is contextual help, not a declaration
+or Army selection legality resolver.
 
 Irregular Training has no standalone catalog route. The source
 ownership is now verified against the tracked Army database:

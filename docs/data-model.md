@@ -876,10 +876,18 @@ source selectors or existing canonical owners; the three Troop Type
 selectors have no canonical record IDs. The deterministic browser JSON
 retains the previous fields and adds `subjectKind` and the typed
 `operation` object for exact source semantics and future integration.
-The existing two-field `rules.db` relation tuples cannot encode
-these conditions; moving or superseding their seven missing and two
-over-broad relationships requires a separately tested schema and API
-migration. No Unit/profile permissions are inferred.
+The legacy two-field `record_relations` graph cannot express these
+conditions. The separate v9 `restriction_constraints` table and API
+now carry all 14 source-scoped prohibitions without changing that graph.
+A consumer audit confirmed that its seven absent conventional edges
+are **six TAG/VH/REM source-only Troop Type restrictions** (no
+canonical owner identity) and **one mounted Motorcycle ladder
+traversal** (no Skill target). All seven are published in both the v9
+API and normal browser reference; target-based contextual links
+cover the canonical destination pages. The two broader legacy
+edges retain source-qualified display labels. No unsupported
+generic edge, Troop Type record or ladder Skill was added, and no
+Unit/profile permissions are inferred.
 
 ### Restriction persistence and version-aware API (v9 locally promoted)
 
