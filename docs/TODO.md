@@ -1599,6 +1599,26 @@ as unimplemented and distinguish them from the published core-scenario foundatio
             elements not covered by the main Weapon Chart or p. 74.
             Reconcile their game-element categories independently
             of Unit/loadout ownership and current lexical scans.
+            - [x] Independently verify **15 object-adjacent rows** of the
+              N5.3 p. 191 Orders/AROs chart: Intuitive Attack;
+              Activate Disco Ball, Deactivator, GizmoKit, MediKit;
+              BS Attack, Forward Observer, Controlled Jump,
+              Place Deployable and Reload in their printed declaration
+              categories. The geometric PDF audit checks exact row
+              name, source type and cited source page, resolving
+              **10 distinct existing canonical owners** across
+              Skills, Equipment and Hacking Programs. All selected
+              Skill declaration categories agree with curated facts;
+              Controlled Jump's two declarations remain owned by
+              Army Hacking Program metadata for the future full
+              cross-domain projection. Equipment-labeled actions
+              do not imply a new Equipment identity (notably
+              Activate Disco Ball is a Skill), deployed object,
+              delivery edge or Army carrier. Source-only manifest:
+              `config/validation/orders-aro-object-adjacent-source-review.json`;
+              focused tests guard PDF/source and identity drift.
+              This **does not** certify the other printed action rows
+              or complete the generated Orders/AROs reference matrix.
             - [x] Independently reconcile **N5.3 core scenario
               objectives** (pp. 149–156): Annihilation and Firefight
               contain no scenario-object Markers; Domination has

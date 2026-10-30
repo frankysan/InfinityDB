@@ -487,3 +487,68 @@ def test_candidate_review_shapes_are_pinned_and_fail_closed() -> None:
         validate_candidate_reviews(duplicate, records, source_profiles)
 
 
+def test_p191_object_adjacent_source_chart_is_canonical_and_audit_only() -> None:
+    """An ARO/declaration chart row does not introduce an object or carrier."""
+    from tools.audit_orders_aro_object_adjacent_chart import audit
+
+    report = audit()
+    assert report["selectedRows"] == 15
+    assert report["distinctOwners"] == 10
+    assert report["rowsByDeclaration"] == {"long": 1, "short": 9, "aro": 5}
+    assert report["missingCuratedSkillTypesOrSeparatelyOwnedProgramTypes"] == [
+        "hacking-program:controlled-jump:short",
+        "hacking-program:controlled-jump:aro",
+    ]
+    assert report["publishedObjectIdentityChanges"] == 0
+    assert report["newDeliveryEdges"] == 0
+    assert report["fullChartCertified"] is False
+    assert len(report["sourcePdfSha256"]) == 64
+    assert report["verifiedPdfSha256"] is None
+
+
+def test_p191_selected_action_source_cells_match_pinned_pdf() -> None:
+    from tools.audit_orders_aro_object_adjacent_chart import PDF, audit
+
+    if not PDF.is_file():
+        pytest.skip("Pinned English N5.3 PDF unavailable")
+    report = audit(pdf_path=PDF)
+    assert report["verifiedPdfSha256"] == report["sourcePdfSha256"]
+
+
+def test_p191_selected_action_review_rejects_unverified_owners_and_rows() -> None:
+    from tools.audit_orders_aro_object_adjacent_chart import (
+        CORE,
+        HACKING,
+        MANIFEST,
+        check_rows,
+    )
+
+    records = {
+        record["id"]: record
+        for path in (CORE, HACKING)
+        for record in json.loads(path.read_text(encoding="utf-8"))["records"]
+    }
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert check_rows(manifest, records)["selectedRows"] == 15
+
+    broken = copy.deepcopy(manifest)
+    broken["rows"][0]["recordId"] = "weapon:unverified"
+    with pytest.raises(ValueError, match="Missing current canonical"):
+        check_rows(broken, records)
+
+    broken = copy.deepcopy(manifest)
+    broken["rows"][-1] = copy.deepcopy(broken["rows"][-2])
+    with pytest.raises(ValueError, match="Duplicate"):
+        check_rows(broken, records)
+
+    broken = copy.deepcopy(manifest)
+    broken["sourceChartIsObjectInventory"] = True
+    with pytest.raises(ValueError, match="audit-only"):
+        check_rows(broken, records)
+
+    broken = copy.deepcopy(manifest)
+    broken["rows"][1]["recordId"] = "equipment:deactivator"
+    with pytest.raises(ValueError, match="Missing current canonical"):
+        check_rows(broken, records)
+
+

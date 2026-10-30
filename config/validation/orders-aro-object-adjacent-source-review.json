@@ -1,0 +1,116 @@
+{
+  "formatVersion": 1,
+  "scope": "selected-object-adjacent-declaration-rows-not-full-orders-aro-chart",
+  "sourceId": "n5-core-v5.3-pdf",
+  "sourcePage": 191,
+  "sourcePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "reviewStatus": "source-reviewed-audit-only",
+  "sourceChartIsObjectInventory": false,
+  "rows": [
+    {
+      "section": "long",
+      "name": "Intuitive Attack",
+      "sourceType": "COMMON",
+      "sourcePage": 49,
+      "recordId": "skill:intuitive-attack"
+    },
+    {
+      "section": "short",
+      "name": "Activate Disco Ball",
+      "sourceType": "EQUIPMENT",
+      "sourcePage": 71,
+      "recordId": "skill:activate-disco-ball"
+    },
+    {
+      "section": "short",
+      "name": "BS Attack",
+      "sourceType": "COMMON",
+      "sourcePage": 39,
+      "recordId": "skill:bs-attack"
+    },
+    {
+      "section": "short",
+      "name": "Controlled Jump",
+      "sourceType": "HACKING",
+      "sourcePage": 59,
+      "recordId": "hacking-program:controlled-jump"
+    },
+    {
+      "section": "short",
+      "name": "Deactivator",
+      "sourceType": "EQUIPMENT",
+      "sourcePage": 121,
+      "recordId": "equipment:deactivator"
+    },
+    {
+      "section": "short",
+      "name": "Forward Observer",
+      "sourceType": "SPECIAL",
+      "sourcePage": 92,
+      "recordId": "skill:forward-observer"
+    },
+    {
+      "section": "short",
+      "name": "GizmoKit",
+      "sourceType": "EQUIPMENT",
+      "sourcePage": 123,
+      "recordId": "equipment:gizmokit"
+    },
+    {
+      "section": "short",
+      "name": "MediKit",
+      "sourceType": "EQUIPMENT",
+      "sourcePage": 124,
+      "recordId": "equipment:medikit"
+    },
+    {
+      "section": "short",
+      "name": "Place Deployable",
+      "sourceType": "COMMON",
+      "sourcePage": 82,
+      "recordId": "skill:place-deployable"
+    },
+    {
+      "section": "short",
+      "name": "Reload",
+      "sourceType": "COMMON",
+      "sourcePage": 83,
+      "recordId": "skill:reload"
+    },
+    {
+      "section": "aro",
+      "name": "BS Attack",
+      "sourceType": "COMMON",
+      "sourcePage": 39,
+      "recordId": "skill:bs-attack"
+    },
+    {
+      "section": "aro",
+      "name": "Controlled Jump",
+      "sourceType": "HACKING",
+      "sourcePage": 59,
+      "recordId": "hacking-program:controlled-jump"
+    },
+    {
+      "section": "aro",
+      "name": "Forward Observer",
+      "sourceType": "SPECIAL",
+      "sourcePage": 92,
+      "recordId": "skill:forward-observer"
+    },
+    {
+      "section": "aro",
+      "name": "Place Deployable",
+      "sourceType": "COMMON",
+      "sourcePage": 82,
+      "recordId": "skill:place-deployable"
+    },
+    {
+      "section": "aro",
+      "name": "Reload",
+      "sourceType": "COMMON",
+      "sourcePage": 83,
+      "recordId": "skill:reload"
+    }
+  ]
+}
