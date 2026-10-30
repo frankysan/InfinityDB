@@ -13,6 +13,7 @@ from tools.audit_deployed_object_inventory import (
     CHART_AUXILIARY,
     _profile_stats,
     audit_inventory,
+    source_domain_clause_leads,
     validate_candidate_reviews,
     validate_delivery_reviews,
 )
@@ -27,6 +28,61 @@ def test_source_profile_parser_accepts_only_complete_four_stat_objects() -> None
     assert _profile_stats("ARM=0, BTS=0, STR=1, S=0, S=1") is None
     assert _profile_stats("S3 scenery; remaining stats not printed") is None
     assert _profile_stats("") is None
+
+
+def test_source_domain_clause_discovery_preserves_independent_evidence() -> None:
+    records = {
+        "weapon:explicit": {
+            "id": "weapon:explicit", "kind": "weapon",
+            "composition": {"role": "definition"},
+            "summary": "A deployed Token.", "facts": {},
+        },
+        "equipment:in-facts": {
+            "id": "equipment:in-facts", "kind": "equipment",
+            "composition": {"role": "definition"},
+            "summary": "A utility item.",
+            "facts": {"effects": ["Place a model on the table after success."]},
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 100}],
+        },
+        "weapon:footnote": {
+            "id": "weapon:footnote", "kind": "weapon",
+            "composition": {"role": "definition"},
+            "summary": "A conventional ranged attack.",
+            "facts": {"sourceNotes": ["The chart marker is a footnote."]},
+        },
+        "equipment:placing": {
+            "id": "equipment:placing", "kind": "equipment",
+            "composition": {"role": "definition"},
+            "summary": "A generic utility.",
+            "facts": {"effects": ["Placing the device completes the order."]},
+        },
+        "rule:not-in-catalog": {
+            "id": "rule:not-in-catalog", "kind": "rule",
+            "composition": {"role": "definition"},
+            "summary": "Place a Marker.",
+        },
+        "weapon:fragment": {
+            "id": "weapon:fragment", "kind": "weapon",
+            "composition": {"role": "fragment"},
+            "summary": "Place a Marker.",
+        },
+    }
+    leads = source_domain_clause_leads(records)
+    assert [row["recordId"] for row in leads] == [
+        "equipment:in-facts", "equipment:placing", "weapon:footnote",
+    ]
+    assert leads[0]["matchedClauses"] == {
+        "effects": ["Place a model on the table after success."],
+    }
+    assert leads[0]["citations"] == [
+        {"sourceId": "n5-core-v5.3-pdf", "page": 100, "member": None},
+    ]
+    assert leads[1]["matchedClauses"] == {
+        "effects": ["Placing the device completes the order."],
+    }
+    assert leads[2]["matchedClauses"] == {
+        "sourceNotes": ["The chart marker is a footnote."],
+    }
 
 
 def test_inventory_preserves_source_modes_and_review_candidates(tmp_path: Path) -> None:
@@ -131,6 +187,24 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
     )
     assert len(result["reviewedDeliveryPaths"]) == 28
     assert len(result["reviewedCandidateDecisions"]) == 12
+    assert result["curatedWeaponEquipmentDefinitions"] == 104
+    leads = {row["recordId"]: row for row in result["additionalCuratedClauseLeads"]}
+    assert set(leads) == {
+        "weapon:sepsitor-plus", "weapon:flammenspeer", "weapon:chain-rifle",
+        "weapon:symbiobomb", "weapon:chest-mine",
+        "equipment:multispectral-visor", "equipment:baggage",
+        "equipment:escape-system", "equipment:holomask", "equipment:holoprojector",
+    }
+    assert leads["weapon:symbiobomb"]["reviewStatus"] == "candidate-reviewed"
+    assert {row["recordId"] for row in result["unreviewedCuratedClauseLeads"]} == (
+        set(leads) - {"weapon:symbiobomb"}
+    )
+    assert "placement or triggering rules" in (
+        leads["weapon:chest-mine"]["matchedClauses"]["summary"][0]
+    )
+    assert "Eclipse Special Ammo Circular Template" in (
+        leads["equipment:escape-system"]["matchedClauses"]["effects"][0]
+    )
     assert len(result["candidateReviewSha256"]) == 64
     by_id = {
         entry["recordId"]: entry for entry in result["reviewedCandidateDecisions"]

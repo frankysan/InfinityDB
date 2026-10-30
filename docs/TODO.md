@@ -1297,6 +1297,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           are explicitly **not** inferred object identities; no source
           values or runtime relations are changed. The command and
           limitations are documented in `docs/testing.md`.
+        - [x] Extend the read-only Weapon/Equipment inventory beyond
+          summary-only keywords. The 104-definition source-domain scan
+          now inspects detailed clauses and reports 10 additional
+          evidence-preserving leads, marking SymbioBomb as already
+          reviewed rather than a new gap. The scan changes no object
+          identities, source values, or delivery relationships.
+        - [ ] Review the nine new source-domain clause leads:
+          Chest Mine, Sepsitor Plus, Flammenspeer, Chain Rifle,
+          Multispectral Visor, Baggage, Escape System, Holomask and
+          Holoprojector. N5.3 p. 72 explicitly excludes Chest Mine
+          from shared Mines placement; p. 117 uses an Eclipse Template
+          on Escape System profile replacement. Retain false-positive
+          matches (e.g. chart footnote markers) explicitly rather
+          than interpreting every deployment/Marker reference as a
+          separate persistent object. This is not a complete
+          source-table inventory.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery

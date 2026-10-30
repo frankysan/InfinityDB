@@ -43,6 +43,57 @@ REVIEW_CASES = (
     ("weapon:pitcher", "delivery-not-object"),
 )
 
+# A separate, intentionally broad lead finder for source-domain clauses
+# missed by the original summary-only Deployable/Token/Scenery scan.
+# Matches are evidence to inspect, NOT deployable-object identities.
+CLAUSE_FIELDS = ("requirements", "effects", "restrictions", "clarifications", "sourceNotes")
+SOURCE_DOMAIN_CLAUSE_RE = re.compile(
+    r"\b(?:deploy(?:s|ed|ment|ing)?|plac(?:e|ed|es|ing|ement)|"
+    r"creat(?:e|ed|es|ing)|generat(?:e|es|ed|ing)|spawn(?:s|ed)|"
+    r"set up|representation|marker|miniature|independent|"
+    r"remains? on the (?:game )?table)\b",
+    re.IGNORECASE,
+)
+
+
+def source_domain_clause_leads(
+    records: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Surface exact clauses absent from the earlier summary-keyword scan."""
+    leads: list[dict[str, Any]] = []
+    for record_id, record in sorted(records.items()):
+        if (
+            record.get("kind") not in {"weapon", "equipment"}
+            or (record.get("composition") or {}).get("role") != "definition"
+        ):
+            continue
+        summary = record.get("summary", "")
+        if not isinstance(summary, str) or any(
+            term.casefold() in summary.casefold()
+            for term in ("Deployable", "Token", "Scenery Element")
+        ):
+            continue
+        facts = record.get("facts") or {}
+        clauses = {"summary": [summary]}
+        for field in CLAUSE_FIELDS:
+            clauses[field] = facts.get(field, []) if isinstance(facts, dict) else []
+        matches = {
+            field: [
+                item for item in items
+                if isinstance(item, str) and SOURCE_DOMAIN_CLAUSE_RE.search(item)
+            ]
+            for field, items in clauses.items()
+        }
+        matches = {field: items for field, items in matches.items() if items}
+        if matches:
+            leads.append({
+                "recordId": record_id,
+                "kind": record["kind"],
+                "matchedClauses": matches,
+                "citations": _citation_summary(record),
+            })
+    return leads
+
 
 def _identity(row: dict[str, Any]) -> tuple[str, str | None, str]:
     catalog = "equipment" if row["type"] == "EQUIPMENT" else "weapon"
@@ -308,10 +359,30 @@ def audit_inventory(
         if delivery_reviews is not None else []
     )
     delivery_origins = {path["originRecordId"] for path in reviewed_paths}
+    source_clause_leads = [
+        {
+            **row,
+            "reviewStatus": (
+                "candidate-reviewed" if row["recordId"] in decided_ids
+                else "delivery-reviewed" if row["recordId"] in delivery_origins
+                else "manual-review-required"
+            ),
+        }
+        for row in source_domain_clause_leads(records)
+    ]
 
     return {
         "formatVersion": 1,
         "scope": "candidate-inventory-not-canonical-object-model",
+        "curatedWeaponEquipmentDefinitions": sum(
+            (record.get("composition") or {}).get("role") == "definition"
+            for record in records.values()
+        ),
+        "additionalCuratedClauseLeads": source_clause_leads,
+        "unreviewedCuratedClauseLeads": [
+            row for row in source_clause_leads
+            if row["reviewStatus"] == "manual-review-required"
+        ],
         "armyDatabaseSha256": hashlib.sha256(army_db.read_bytes()).hexdigest(),
         "curatedSourceSha256": hashlib.sha256(curated_source.read_bytes()).hexdigest(),
         "chartProfiles": chart_profiles,

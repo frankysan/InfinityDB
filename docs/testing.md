@@ -1358,6 +1358,30 @@ origin. Neither scan is **an exhaustive N5.3 game-object inventory**:
 different wording, sources outside maintained Weapon/Equipment definitions,
 Army/Unit/loadout semantics, and edition changes still need reconciliation.
 
+The same read-only inventory now performs an **additional source-domain clause
+scan** across all **104 curated Weapon/Equipment definitions**. Unlike the
+original 24 summary mentions, this examines the complete summary plus
+structured Requirements, Effects, Restrictions, Clarifications and source notes
+for placement, deployment, representation and related language. The report
+includes `additionalCuratedClauseLeads` with the exact matching text and
+citations, and `unreviewedCuratedClauseLeads` separately from prior decisions.
+It finds **10 additional leads** on the pinned source: SymbioBomb is already
+classified as an assigned, non-deployed Weapon; **nine require further source
+review**. The nine are Chest Mine, Sepsitor Plus, Flammenspeer, Chain Rifle,
+Multispectral Visor, Baggage, Escape System, Holomask and Holoprojector.
+
+A lexical hit is not evidence of an independent object. In particular,
+N5.3 p. 72 explicitly says Chest Mine uses **neither** ordinary Mines
+placement nor triggering; p. 117 describes Escape System placing an Eclipse
+Template on replacement of an existing Trooper; and pp. 124, 162–164
+distinguish Holoprojector/HoloMask representations from independently
+deployed Weapons and Equipment. Other matches include ordinary chart
+footnotes and attack/targeting wording. These remain review leads until
+their exact source scope and intended classification are pinned, not new
+identities, attributes, or delivery links. The 104-record census is limited
+to maintained Weapon/Equipment definitions and cannot establish overall
+source-table or gameplay completeness.
+
 The second remaining inventory question is *delivery coverage for the objects
 already identified*, independently of keyword discovery. Run:
 
