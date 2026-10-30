@@ -1321,6 +1321,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
           Refresh `rules.db` and its dependent publication
           fingerprints together; until then the read-only audit
           distinguishes source-verified pages from maintained citations.
+          - [x] Add a single **read-only migration preflight**
+            (`tools.audit_deployed_object_citation_migrations`) that
+            reconciles all 14 pending records and their exact page
+            proposals across three review manifests. The optional
+            `--pdf` check verifies all excerpts against the pinned
+            English N5.3 PDF and records its SHA-256. Missing,
+            stale or prematurely published citations fail closed;
+            there is no source/database mutation.
+          - [ ] In a build-capable checkout, add all 14 maintained
+            citations and retire the related PDF-only exceptions
+            together; regenerate and verify `rules.db` and
+            `deployed-objects.json` from the same pinned sources.
+            Update or retire the pending-only preflight contract
+            after successful coordinated migration.
         - [ ] Expand object discovery beyond maintained definitions
           and the current lexical scans, especially source tables,
           scenarios and unmodeled Weapon/Equipment variants. Closed

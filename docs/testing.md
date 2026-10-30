@@ -1633,6 +1633,41 @@ delivery path is changed.
 `tests/test_deployed_object_expanded_queue.py` checks the discovery and
 fail-closed review boundaries.
 
+### Audit-only N5.3 citation migration preflight
+
+Three deployed-object review manifests contain **14 independently verified N5.3
+PDF page citations that are not yet in maintained rule records**: six
+non-catalog, five expanded, and three Weapon/Equipment source-domain
+classifications. Before their coordinated database publication, run:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations
+.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations --json --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
+```
+
+The read-only preflight verifies the current source definitions and all three
+review manifests, rejects missing/duplicated/stale reviews and premature source
+citations, and lists exactly the proposed `sourceId: n5-core-v5.3-pdf` plus
+page for each record. `--pdf` additionally checks every pinned excerpt
+against the *local English N5.3 PDF text* and reports its SHA-256; this needs
+PyMuPDF and is optional in CI. The standard preflight requires only curated
+JSON, so it also works without ignored source archives. A page-only
+`proposedCitation` deliberately avoids inventing an unchecked section label.
+
+The preflight **does not modify any file**. To complete publication, update
+the 14 maintained citations *and* retire the corresponding PDF-only entries
+from the three manifests and their audit exception maps in one coordinated
+source change. Rebuild tracked `rules.db` against the exact pinned curated
+source, regenerate `data/generated/deployed-objects.json` against the matching
+Army/rules database pair, and run their publication checks and affected
+regressions. The preflight expects all 14 migrations to remain pending; remove
+or replace it with a checked post-migration contract as part of that
+coordinated change. Do not ship a source-only citation edit that leaves
+`rules.db` or its derived fingerprints stale. No newly discovered
+object identity, delivery edge or Unit carrier is implied by these citations.
+`tests/test_deployed_object_citation_migrations.py` covers the inventory,
+fail-closed drift and optional pinned-PDF text check.
+
 ### Deployed-object release publication
 
 The read-only inventory is for review; ordinary web requests must not read
