@@ -2693,12 +2693,31 @@ explicitly printed example, not a derived rule for
 arbitrary State-causing Weapons or an attack calculator.
 The source Weapon profile remains unchanged.
 
-The Skill reference now presents **eleven reviewed
-interactions**: six Combined Ammunition cases, Flash Pulse,
-E/Mitter and Monofilament Weapon cases, one Plasma Combined
-Saving Roll and one Vulnerability example. Chromium acceptance
-at 1440/390/320 px verifies the eleventh source-labeled
-interaction, semantic links and mobile layout.
+**Missile Launcher (Blast Mode) versus Immunity (ARM)**
+promotes the printed N5.3 p. 96 **Example 1** as a
+fourth typed `reviewedWeaponCases` entry. The p. 187
+Weapon Chart distinguishes Blast Mode (EXP, three ARM
+Saving Rolls, Circular Impact Template, Anti-materiel)
+from Hit Mode (AP+EXP, three ARM/2 Saving Rolls,
+Anti-materiel but no Circular Template). The example's
+EXP-only description matches **Blast Mode**. With
+Immunity (ARM), this mode's EXP is treated as Normal,
+so the defender makes one ARM Saving Roll on a hit,
+or two on a Critical absent Immunity (Critical).
+The listed Impact Template and Anti-materiel Traits
+remain source-visible and linked; this example
+does not adjudicate their independent effects or
+remove template placement. It is **not** a published
+Immunity ruling for the AP+EXP Hit Mode, and neither
+Army source mode is altered.
+
+The Skill reference now presents **twelve reviewed
+interactions**: six Combined Ammunition cases, four
+exact Weapon cases (Flash Pulse, E/Mitter, Missile
+Launcher Blast, Monofilament), one Plasma Combined
+Saving Roll and one Vulnerability example. Chromium
+acceptance at 1440/390/320 px verifies the twelfth
+source-labeled case, semantic links and mobile layout.
 Other component-specific Immunities, BTS-based attacks, Comms Attack
 rules and conditional State interactions remain unresolved. Do not
 extrapolate an evaluator or project outcomes into Weapon profiles.

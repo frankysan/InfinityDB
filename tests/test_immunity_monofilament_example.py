@@ -66,7 +66,7 @@ def test_monofilament_is_printed_n53_immunity_example_not_inferred() -> None:
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )
     immunity = next(r for r in source["records"] if r["id"] == "skill:immunity")
-    assert EXPECTED == immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"][2]
+    assert EXPECTED == immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"][3]
     assert {"sourceId": "n5-core-v5.3-pdf", "page": 96} in immunity["citations"]
 
 
@@ -87,7 +87,7 @@ def test_monofilament_review_reaches_api_without_invented_combat_results() -> No
     rules = RulesDatabase(RULES)
     record = rules.composed_record("skill:immunity")
     assert record is not None
-    assert record["facts"]["immunityInteraction"]["reviewedWeaponCases"][2] == EXPECTED
+    assert record["facts"]["immunityInteraction"]["reviewedWeaponCases"][3] == EXPECTED
     app = create_app(ARMY, rules_database_path=RULES)
 
     def get(path: str) -> dict:

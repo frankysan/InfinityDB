@@ -66,6 +66,7 @@
         "test_immunity_ap_silenced_pistol",
         "test_immunity_ap_t2_cc",
         "test_immunity_monofilament_example",
+        "test_immunity_missile_launcher_example",
         "test_identities",
         "test_identity_database",
         "test_interim_reference_consistency",

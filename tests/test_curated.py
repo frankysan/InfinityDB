@@ -4891,23 +4891,44 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
             evidence="explicit-pinned-wiki-example"),
             "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][2]["when"].update(
-            weaponId="weapon:monofilament-mine"),
-            "reviewed Weapon Immunity examples"),
+            mode="Hit Mode"), "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][2]["when"].update(
             immunity="BTS"), "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][2]["sourceProfile"].update(
             ammunitionId="ammunition:ap"), "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][2]["sourceProfile"].update(
-            savingRoll="ARM"), "reviewed Weapon Immunity examples"),
+            savingRoll="ARM/2"), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][2]["sourceProfile"].update(
+            hitRolls=1), "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][2]["sourceProfile"]["traits"].pop(),
             "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][2]["withImmunity"].update(
-            savingAttribute="BTS"), "reviewed Weapon Immunity examples"),
+            hitRolls=2), "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][2]["withImmunity"].update(
             criticalRolls=1), "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][2]["withImmunity"].update(
-            stateAppliedOnFailedRoll=True), "reviewed Weapon Immunity examples"),
+            treatedAs="ammunition:exp"), "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][2].update(
+            evidence="derived-from-pinned-general-rules"),
+            "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][3]["when"].update(
+            weaponId="weapon:monofilament-mine"),
+            "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][3]["when"].update(
+            immunity="BTS"), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][3]["sourceProfile"].update(
+            ammunitionId="ammunition:ap"), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][3]["sourceProfile"].update(
+            savingRoll="ARM"), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][3]["sourceProfile"]["traits"].pop(),
+            "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][3]["withImmunity"].update(
+            savingAttribute="BTS"), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][3]["withImmunity"].update(
+            criticalRolls=1), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][3]["withImmunity"].update(
+            stateAppliedOnFailedRoll=True), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][3].update(
             evidence="derived-from-pinned-general-rules"),
             "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][0]["when"].update(

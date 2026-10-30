@@ -18,7 +18,9 @@ const evidence = (value) => value === "derived-from-pinned-general-rules"
       ? "Explicit N5.3 p. 96, Example 3"
       : value === "explicit-n5.3-pdf-p96-example-2"
         ? "Explicit N5.3 p. 96, Example 2"
-        : "Evidence classification unavailable";
+        : value === "explicit-n5.3-pdf-p96-example-1"
+          ? "Explicit N5.3 p. 96, Example 1"
+          : "Evidence classification unavailable";
 const rollCount = (count) => `${count} Saving Roll${count === 1 ? "" : "s"}`;
 const counts = (rolls) => `${rollCount(rolls.hitRolls)} on a hit (${rolls.criticalRolls} on a Critical)`;
 
@@ -69,6 +71,28 @@ export function immunityCaseRows(facts = {}) {
           text(" Trait still applies, so this weapon inflicts no Wounds. "),
           text("Only the source Weapon 25 non-Comms profile is reviewed; "),
           text("the Armed Turret E/Mitter discrepancy is not adjudicated."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:missile-launcher") {
+      const original = item.sourceProfile;
+      const applied = item.withImmunity;
+      rows.push({
+        title: [text("Immunity (ARM) vs "),
+          reference(item.when.weaponId, "Missile Launcher (Blast Mode)")],
+        detail: [
+          text(`The reviewed Blast Mode uses `),
+          reference(original.ammunitionId, "EXP"),
+          text(` and ${rollCount(original.hitRolls)} using ${original.savingRoll} on a hit. `),
+          text("With Immunity (ARM), EXP is treated as "),
+          reference(applied.treatedAs, "Normal"),
+          text(`: ${rollCount(applied.hitRolls)} using full ${applied.savingAttribute} on a hit or `),
+          text(`${rollCount(applied.criticalRolls)} on a Critical unless Immunity (Critical) applies. `),
+          text("The Blast Mode profile also lists "),
+          reference("trait:impact-template", "Circular Impact Template"),
+          text(" and "), reference("trait:anti-materiel", "Anti-materiel"),
+          text("; this example does not determine their separate applicability. "),
+          text("Hit Mode uses AP+EXP with ARM/2 instead and is not this printed example."),
         ],
         evidence: evidence(item.evidence),
       });

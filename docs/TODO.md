@@ -1056,6 +1056,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         exact source, API, renderer, 1440/390/320 Chromium and
         fail-closed curated mutations. Rebuild/promote the
         synchronized rules/publication pair with recovery backups.
+      - [x] Publish printed N5.3 p. 96 **Example 1**, Immunity
+        (ARM) versus Missile Launcher, as a typed **Blast Mode**
+        interaction corroborated by the p. 187 Weapon Chart.
+        Blast uses EXP, three ARM rolls and a Circular Impact
+        Template; Immunity (ARM) treats EXP as Normal for
+        **one full-ARM Saving Roll**, or two on Critical
+        absent Immunity (Critical). Source Hit Mode instead uses
+        AP+EXP and ARM/2; do not merge modes or generalize the
+        example to Hit Mode. The printed Impact Template and
+        Anti-materiel Traits remain source-visible, with their
+        independent applicability not adjudicated by this
+        example. Preserve Army profiles, add pinned source/API,
+        closed validation mutations and 1440/390/320 Chromium
+        acceptance; promote the synchronized database/publication
+        pair with recovery backup and 17 reviewed objects intact.
       - [ ] Review other BTS-component Immunity outcomes using exact
         non-Comms Weapon/combined-Ammunition evidence. The four
         reviewed BTS-based examples do not authorize generic E/M,

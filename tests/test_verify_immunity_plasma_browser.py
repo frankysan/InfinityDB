@@ -53,7 +53,7 @@ def test_printed_plasma_case_has_separate_normal_reference_without_overflow(
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         rows = page.locator(".immunity-reviewed-cases li")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 11",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 12",
             timeout=20000,
         )
         plasma = rows.filter(has_text="Immunity (Enhanced) vs Plasma Rifle")
@@ -85,7 +85,7 @@ def test_n53_bts_immunity_em_cc_weapon_is_exact_and_source_scoped(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 11",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 12",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -120,7 +120,7 @@ def test_standalone_emitter_immunity_keeps_nonlethal_and_turret_warning(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 11",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 12",
             timeout=20000,
         )
         rows = page.locator(".immunity-reviewed-cases li")
@@ -157,7 +157,7 @@ def test_silenced_pistol_ap_immunity_preserves_shock_bts_and_silent(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 11",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 12",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -197,7 +197,7 @@ def test_ap_t2_cc_immunity_keeps_two_wound_hit_and_one_wound_critical(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 11",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 12",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -238,7 +238,7 @@ def test_printed_monofilament_immunity_ignores_dead_trait_not_normal_wounds(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 11",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 12",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -257,6 +257,47 @@ def test_printed_monofilament_immunity_ignores_dead_trait_not_normal_wounds(
         assert mono.locator('a[href="/traits/state"]').count() == 1
         assert mono.locator('a[href="/ammunition/normal"]').count() == 1
         assert mono.locator('a[href="/states/dead"]').count() == 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width,height", [
+    (1440, 900), (390, 844), (320, 640),
+])
+def test_printed_missile_blast_immunity_does_not_merge_hit_mode(
+    app: Any, browser: Any, width: int, height: int,
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 12",
+            timeout=20000,
+        )
+        cases = page.locator(".immunity-reviewed-cases li")
+        blast = cases.filter(has_text="Immunity (ARM) vs Missile Launcher (Blast Mode)")
+        assert blast.count() == 1
+        rendered = blast.inner_text()
+        assert "Explicit N5.3 p. 96, Example 1" in rendered
+        assert "3 Saving Rolls using ARM on a hit" in rendered
+        assert "1 Saving Roll using full ARM on a hit" in rendered
+        assert "2 Saving Rolls on a Critical" in rendered
+        assert "Circular Impact Template" in rendered
+        assert "Anti-materiel" in rendered
+        assert "does not determine their separate applicability" in rendered
+        assert "Hit Mode uses AP+EXP with ARM/2 instead" in rendered
+        assert blast.locator('a[href="/weapons/missile-launcher"]').count() == 1
+        assert blast.locator('a[href="/ammunition/exp"]').count() == 1
+        assert blast.locator('a[href="/ammunition/normal"]').count() == 1
+        assert blast.locator('a[href="/traits/impact-template"]').count() == 1
+        assert blast.locator('a[href="/traits/anti-materiel"]').count() == 1
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         )

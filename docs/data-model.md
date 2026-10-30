@@ -386,7 +386,19 @@ Normal Ammunition Saving Roll or imply Monofilament is a
 separate source Ammunition type. The printed example is
 shown only on the Immunity Skill reference; Army Weapon
 data and its Weapon Property remain unchanged.
-The eleven reviewed interactions are curated references,
+A fourth `reviewedWeaponCases` entry records the printed
+N5.3 p. 96 **Missile Launcher versus Immunity (ARM)**
+Example 1, scoped by the Weapon Chart p. 187 to
+**Blast Mode** (EXP, three ARM rolls). The covered
+attack reduces to one full-ARM Normal Saving Roll
+(two on a Critical unless Immunity (Critical)
+applies). Hit Mode has its own AP+EXP/ARM/2 source
+profile and is not included. The exact reference
+links the printed Blast Mode's Circular Impact
+Template and Anti-materiel Traits without deciding
+their separate applicability; both original Army
+profiles remain unchanged.
+The twelve reviewed interactions are curated references,
 not a runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms

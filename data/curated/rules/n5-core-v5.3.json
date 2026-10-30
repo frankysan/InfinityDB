@@ -20981,6 +20981,31 @@
                         },
                         {
                             "when": {
+                                "weaponId": "weapon:missile-launcher",
+                                "mode": "Blast Mode",
+                                "immunity": "ARM",
+                                "savingAttribute": "ARM",
+                                "attackClass": "non-comms"
+                            },
+                            "sourceProfile": {
+                                "ammunitionId": "ammunition:exp",
+                                "savingRoll": "ARM",
+                                "hitRolls": 3,
+                                "traits": [
+                                    "trait:anti-materiel",
+                                    "trait:impact-template"
+                                ]
+                            },
+                            "withImmunity": {
+                                "savingAttribute": "ARM",
+                                "hitRolls": 1,
+                                "criticalRolls": 2,
+                                "treatedAs": "ammunition:normal"
+                            },
+                            "evidence": "explicit-n5.3-pdf-p96-example-1"
+                        },
+                        {
+                            "when": {
                                 "weaponId": "weapon:monofilament-cc-weapon",
                                 "immunity": "ARM",
                                 "savingAttribute": "ARM",

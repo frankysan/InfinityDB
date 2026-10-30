@@ -4127,6 +4127,27 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Missile Launcher / printed Immunity (ARM) Example 1, 2026-10-30:**
+`tests/test_immunity_missile_launcher_example.py` verifies
+the pinned N5.3 pp. 95–96/187, differentiates Blast
+(EXP/ARM × 3, Circular Impact Template) from Hit
+(AP+EXP/ARM/2 × 3) Army modes, confirms the
+fourth source-scoped `reviewedWeaponCases` record
+in curated rules, `rules.db`, and the Skill API,
+and ensures both Weapon profiles retain their
+imported source fields. Curated mutation tests
+reject changed mode, Immunity category, source
+Ammunition, Saving Roll count, Traits, and
+derived evidence. The JS and Chromium renderer
+at 1440/390/320 px verifies the twelfth case,
+mode exclusion, source label and links, with
+no horizontal overflow. The existing rollback-
+aware `tools/stage_immunity_plasma_saving_roll.py`
+rebuilds and promotes the synchronized DB and
+deployed-object publication, retaining all 17
+reviewed objects. This is not an attack evaluator
+or a universal Weapon Trait ruling.
+
 **Monofilament / printed Immunity (ARM) Example 2, 2026-10-30:**
 `tests/test_immunity_monofilament_example.py` pins N5.3
 pp. 95–96/177, confirms the Normal Ammunition, ARM=0,

@@ -605,9 +605,9 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
         ]
     ):
         raise ValueError(f"{context}: invalid Immunity exceptions")
-    # Source-reviewed Flash Pulse, standalone E/Mitter and printed
-    # Monofilament (Immunity ARM) cases only. Do not generalize Trait
-    # suppression to other weapons or inherit the Armed Turret E/Mitter mode.
+    # Fixed source-reviewed cases only: Flash Pulse, standalone E/Mitter,
+    # printed Missile Launcher (Blast Mode), and printed Monofilament.
+    # Do not generalize to Hit Mode or other Weapon Traits.
     if value["reviewedWeaponCases"] != [
         {
             "when": {
@@ -646,6 +646,28 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
                 "savingAttribute": "BTS",
             },
             "evidence": "derived-from-pinned-general-rules",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:missile-launcher",
+                "mode": "Blast Mode",
+                "immunity": "ARM",
+                "savingAttribute": "ARM",
+                "attackClass": "non-comms",
+            },
+            "sourceProfile": {
+                "ammunitionId": "ammunition:exp",
+                "savingRoll": "ARM",
+                "hitRolls": 3,
+                "traits": ["trait:anti-materiel", "trait:impact-template"],
+            },
+            "withImmunity": {
+                "savingAttribute": "ARM",
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "treatedAs": "ammunition:normal",
+            },
+            "evidence": "explicit-n5.3-pdf-p96-example-1",
         },
         {
             "when": {
