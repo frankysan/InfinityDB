@@ -1379,10 +1379,30 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               and exclusion from the 17 published Weapon/Equipment
               deployed-object identities. No Army carrier or new
               delivery relationship is inferred.
-            - [ ] Continue source-table discovery beyond core
-              scenarios, the main Weapon Chart and p. 74. Review
-              uncovered game-element types against direct rules
-              before expanding a canonical object inventory.
+            - [x] Review the independent **Special Terrain Suggestions
+              and Examples** table and Scenery Structures access
+              markings (N5.3 pp. 143–145). The pinned PDF confirms
+              five terrain Types, **18 suggested example rows**,
+              and two Access Width Tokens (Narrow Gate, Wide Gate).
+              These are optional game-table characteristics/examples
+              and scenery access labels, not new Weapon/Equipment
+              deployments or 18 extra canonical terrain Types.
+              The read-only audit pins printed spellings and records
+              missing maintained Special Terrain/Access Width rules
+              and gate-marker reference terms. Existing `skill:terrain`
+              remains available. No source/profile/carrier publication
+              change was made.
+            - [ ] Model/review the Special Terrain and Access Width
+              reference gaps independently of current map/session
+              instances. Preserve terrain-type parameters,
+              Difficult/Saturation/Visibility composition and
+              Narrow Gate Silhouette/Prone restrictions. Do not
+              manufacture persistent object identities from
+              terrain suggestions or label Tokens.
+            - [ ] Continue source-table discovery beyond the terrain,
+              scenario, Weapon Chart and p. 74 reviews; verify any
+              additional game-element categories against direct
+              rules before expanding the canonical object inventory.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery

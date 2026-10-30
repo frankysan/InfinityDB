@@ -1624,6 +1624,44 @@ delivery path is changed.
 `tests/test_deployed_object_expanded_queue.py` checks the discovery and
 fail-closed review boundaries.
 
+### Terrain and Scenery Structures source gaps
+
+The optional N5.3 terrain chapter (pp. 143–145) contains a separate source
+table and two physical access labels outside the Weapon Chart and scenario
+object inventories. Its suggested combinations are not new canonical terrain
+Types or deployed Weapon/Equipment profiles. Audit the source boundary with:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps
+.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+```
+
+The audit pins **five Terrain Types** (Aquatic, Desert, Mountain, Jungle,
+Zero-G), **18 printed suggestion/example labels** (retaining the source's
+`Artic Plains` spelling), and **two Scenery Access Width Tokens** (`Narrow
+Gate` / `Wide Gate`). It records the actual maintained boundary: the
+`skill:terrain` reference exists, but standalone Special Terrain and
+Access Width rules and gate-token terms have not yet been modeled. Its
+optional `--pdf` mode verifies the source headings, listed names and
+Narrow Gate eligibility against the local English N5.3 source. Without
+the ignored PDF, it still checks maintained and published domain boundaries;
+it does not claim to have re-extracted the PDF.
+
+Special Terrain zones are game-table/session configurations, with a Terrain
+Type and at least one other characteristic (Difficult Terrain, Saturation
+or Visibility Conditions). The table's 18 example rows illustrate possible
+combinations, not 18 distinct terrain Types. Access Width is a scenery
+restriction; the Narrow/Wide Gate Tokens label access points rather than
+deployable devices, and the applicable Silhouette/Prone restrictions cannot
+be inferred from an Army loadout. The audit fails on unexpected promotion
+of these names into the 17-object Weapon/Equipment publication or new
+maintained source identities requiring re-review. It adds no rules,
+attributes, source carrier edges or runtime records. The semantics are
+already reviewed in `docs/rules-semantics.md` and
+`docs/rules-research.md`; the new audit records the outstanding catalog
+coverage. `tests/test_terrain_scenery_source_gaps.py` guards the boundary,
+including a local-only test of the pinned PDF.
+
 ### Core scenario-object source-domain boundary
 
 The deployed Weapon/Equipment inventory must not absorb scenario objectives
