@@ -1542,6 +1542,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 checked Discover range (p. 77/main Weapon Chart) and
                 Fireteam charts (pp. 133–136) already have maintained
                 references; avoid duplicate definitions.
+              - [x] Reconcile the **N5.3 Hacking Program chart Target dash**
+                against the p. 57 chart key and individual Program clauses
+                (pp. 59–61). Spotlight's dash does not prevent targeting
+                non-Hackable Troopers; Cybermask is self-directed, while
+                White Noise creates a zone. Preserve the original Army
+                `targets` arrays and rendered dash, and add conditional
+                player-facing guidance to consult the maintained rules
+                instead of implying there are no valid targets.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery

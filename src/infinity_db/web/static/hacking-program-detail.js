@@ -54,6 +54,15 @@ function programProfileContent(program) {
   table.append(body);
   nodes.push(tableViewport(table, "hacking-program-profile-table"));
 
+  if (!program.targets?.length) {
+    const note = document.createElement("p");
+    note.className = "detail-copy hacking-program-target-scope-note";
+    note.textContent =
+      "The source chart lists no Troop Type for this Program. Consult its rules below "
+      + "to determine target eligibility or whether its effect applies to the Hacker or an area.";
+    nodes.push(note);
+  }
+
   if (program.special) {
     const special = document.createElement("div");
     special.className = "detail-fact-group";

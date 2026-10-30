@@ -153,5 +153,11 @@ def test_all_published_hacking_programs_match_army_and_curated_rules() -> None:
         in javascript
     )
     assert "programProfileContent(program)" in javascript
+    assert "hacking-program-target-scope-note" in javascript
+    assert "if (!program.targets?.length)" in javascript
+    assert "Consult its rules below" in javascript
+    assert {slug for slug, row in expected_by_slug.items() if not row["targets"]} == {
+        "controlled-jump", "cybermask", "spotlight", "white-noise", "zero-pain"
+    }
     assert "baselineDevicesGroup(program)" in javascript
     assert "content.hidden = false;" in javascript

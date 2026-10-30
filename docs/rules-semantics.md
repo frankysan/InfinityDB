@@ -4049,6 +4049,18 @@ and Program catalog compose those layers without treating Programs as static Uni
 inferring Program sets from Equipment display names. Baseline Device associations remain
 Army-derived; Upgrade and other source-specific Program availability stays distinct.
 
+**Target-column scope (N5.3 pp. 57–61):** the printed Program-chart
+`Target` column identifies a Troop Type when one is specified. A dash is
+not a universal statement that a Program cannot affect Troopers:
+[[hacking-program:spotlight|Spotlight]] lists no Troop Type yet its detailed
+rules allow targets without the Hackable characteristic;
+[[hacking-program:cybermask|Cybermask]] affects only its user, and
+[[hacking-program:white-noise|White Noise]] places a zone. In the normal
+Program detail view, preserve the source-derived dash and explicitly refer
+readers to each Program's maintained requirements and effects rather than
+substituting an invented target category. This does not change Army `targets`
+arrays or model an executable target validator.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Hacking_Programs_Chart>

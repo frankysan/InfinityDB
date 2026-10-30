@@ -1857,6 +1857,31 @@ continues to cover the Army-to-API/browser-data layer. The adjacent
 source audits, drift detection and optional PDF/archive evidence. No
 runtime database or curated Program record was modified.
 
+**Target dash follow-up (N5.3 pp. 57–61):** the `Target` column
+identifies specified Troop Types; five Program source rows have no Troop
+Type listed, but their detailed effects are distinct (for example,
+Spotlight, Cybermask and White Noise). The normal Program detail keeps
+Army's source-derived `—` while adding a brief note to consult the
+Program's individual requirements/effects rather than interpreting a
+missing Troop Type as no valid target. The source regression verifies the
+printed chart key and program-specific clauses; the maintained
+`tools.verify_hacking_programs_browser` acceptance checks the conditional
+note alongside all original Army stat cells at 1440/390/320 px.
+
+For repeatable localhost browser acceptance without an external server:
+
+```powershell
+.venv\Scripts\python.exe -m tools.verify_hacking_programs_browser --self-host --output local/hacking-program-target-scope-browser-20261030.json
+```
+
+The self-host mode launches a disposable loopback WSGI server using the
+current pinned Army/rules databases, then shuts it down. The existing
+`--base-url` mode remains available for checking a deployed origin.
+**Verified 2026-10-30: 36/36 real Chromium Program pages passed** (12
+Programs at 1440/390/320 px). This validates the conditional target-scope
+note and original profile/Device/citation rendering, not the full 1.0
+browser or release suite.
+
 ### N5.3 Silhouette Templates source and browser geometry
 
 The English N5.3 **Silhouette Templates** table (printed p. 18)

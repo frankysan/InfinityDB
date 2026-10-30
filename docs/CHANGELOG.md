@@ -27,6 +27,8 @@ are not retroactively relabeled.
   conditional outcomes and links to reviewed Weapon, Skill and Equipment references.
 - Unit details put Equipment, Training and Attribute overrides in their proper
   categories and remain readable on narrow screens.
+- Hacking Program pages explain when the source chart does not specify a Troop Type,
+  instead of leaving the Target dash ambiguous about eligibility or effects.
 - Fireteam charts show their original notes, flag unverified Unit/FTO references,
   and keep Reinforcement parent limits separate.
 - All canonical Trait pages offer official Wiki heading links. Glossary deep links
@@ -99,6 +101,9 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Web frontend:** Explain Hacking Program profiles with an unspecified
+  source Target Troop Type without treating the original dash as no valid
+  target. Keep Army profile data and Program-specific rules unchanged.
 - **Web backend + Web frontend:** Keep Wildcards out of Fireteams whose chart notes
   explicitly exclude them, including Invincible Army's Forward Fireteams and
   Next Wave's Team Achilles. Show original member annotations and flag unverified

@@ -222,3 +222,28 @@ def test_n53_program_statistics_pinned_archive_and_pdf_evidence() -> None:
     altered["rows"][1]["specialEvidence"][0]["pdf"] = "MISSING CLAUSE"
     with pytest.raises(ValueError, match="printed Special clause drift"):
         verify_pdf(STATISTICS_PDF, altered)
+
+
+def test_n53_unlisted_program_troop_types_have_distinct_source_scope() -> None:
+    """A blank Target cell is not a uniform 'no valid target' rule."""
+    if not STATISTICS_PDF.is_file():
+        pytest.skip("Optional pinned N5.3 PDF unavailable")
+    pymupdf = pytest.importorskip("pymupdf")
+    with pymupdf.open(STATISTICS_PDF) as pdf:
+        pages = {
+            number: " ".join(pdf[number - 1].get_text("text").upper().split())
+            for number in (57, 59, 60, 61)
+        }
+    assert "TARGET. THE TROOP TYPE THAT CAN BE TARGETED" in pages[57]
+    assert "PROGRAM AFFECTS ONLY THE HACKER HIMSELF" in pages[59]
+    assert "THE TARGET OF THIS HACKING PROGRAM DOES NOT NEED TO HAVE THE HACKABLE" in (
+        pages[60]
+    )
+    assert "GENERATES A WHITE NOISE ZONE" in pages[61]
+    manifest = json.loads(STATISTICS.read_text(encoding="utf-8"))
+    unlisted = {
+        program_key(row["name"]) for row in manifest["rows"] if not row["targets"]
+    }
+    assert unlisted == {
+        "controlled-jump", "cybermask", "spotlight", "white-noise", "zero-pain"
+    }

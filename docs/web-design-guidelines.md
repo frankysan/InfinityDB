@@ -78,6 +78,15 @@ reference preview provides the explanation on hover, keyboard focus, or touch,
 with navigation to the Glossary on activation. Do not match and link arbitrary
 common nouns automatically; the full Game-term vocabulary needs separate review.
 
+**Unspecified Hacking Program targets.** On Program profiles, retain the
+source `Targets` dash when the Army chart supplies no Troop Type, but explain
+that the player must consult the Program rules for eligibility and effect
+scope. Do not convert a missing source category to `No valid targets`, infer
+`Any Trooper` for every Program, or add a target identity not present in Army.
+The explanatory note is conditional; explicit source Troop Types need no
+fallback. The shared rules card remains the authority for requirements and
+effects (English N5.3 pp. 57–61).
+
 ### Distinguish rules provenance without implying new authority
 
 **Source identity is not publication recency.** Use the available cited

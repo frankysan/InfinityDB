@@ -7,10 +7,14 @@ import argparse
 import importlib
 import json
 from pathlib import Path
+from socketserver import ThreadingMixIn
+from threading import Thread
 from typing import Any
+from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
 from infinity_db.database.repository import Database
 from infinity_db.domain_slugs import assign_domain_slugs
+from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/infinity.db"
@@ -106,6 +110,21 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                                 raise AssertionError(
                                     f"Program profile mismatch: {displayed!r} != {values!r}"
                                 )
+                            scope_note = page.locator(
+                                "#item-content .hacking-program-target-scope-note"
+                            )
+                            if not row["targets"]:
+                                if scope_note.count() != 1 or not scope_note.is_visible():
+                                    raise AssertionError(
+                                        "Missing source-chart target-scope explanation"
+                                    )
+                                note_text = scope_note.inner_text()
+                                if "Consult its rules below" not in note_text:
+                                    raise AssertionError("Target-scope explanation drift")
+                            elif scope_note.count():
+                                raise AssertionError(
+                                    "Target-scope fallback shown for an explicit Troop Type"
+                                )
                             if not page.locator(
                                 "#item-content .hacking-program-devices"
                             ).is_visible():
@@ -143,13 +162,47 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
     }
 
 
+def verify_local(*, headed: bool = False) -> dict[str, Any]:
+    """Run the complete Program navigation acceptance against a local pinned WSGI app."""
+    app = create_app(
+        ARMY_DB,
+        rules_database_path=ROOT / "data/generated/rules.db",
+    )
+
+    class ThreadedServer(ThreadingMixIn, WSGIServer):
+        daemon_threads = True
+
+    class QuietHandler(WSGIRequestHandler):
+        def log_message(self, format: str, *args: object) -> None:
+            pass
+
+    server = make_server(
+        "127.0.0.1", 0, app,
+        server_class=ThreadedServer, handler_class=QuietHandler,
+    )
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        return verify(f"http://127.0.0.1:{server.server_port}", headed=headed)
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--headed", action="store_true")
+    parser.add_argument("--self-host", action="store_true")
     args = parser.parse_args(argv)
-    report = verify(args.base_url, headed=args.headed)
+    if args.self_host and args.base_url != "http://127.0.0.1:8000":
+        parser.error("--self-host cannot be combined with --base-url")
+    report = (
+        verify_local(headed=args.headed) if args.self_host
+        else verify(args.base_url, headed=args.headed)
+    )
     if args.output is not None:
         args.output.write_text(
             json.dumps(report, sort_keys=True, indent=2) + "\n",
