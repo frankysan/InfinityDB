@@ -21,6 +21,91 @@ ARMY_DB = ROOT / "data/generated/infinity.db"
 
 
 @pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
+def test_named_chart_annotations_preserve_exact_local_profile_context() -> None:
+    """Parentheses are source syntax, not a universal counts-as/eligibility rule."""
+    assert hashlib.sha256(ARMY_ZIP.read_bytes()).hexdigest() == (
+        "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75"
+    )
+    cases = (
+        (105, "105-varuna-immediate-reaction-division.json", "7.26246.158",
+         {(1, 4), (2, 1), (2, 4)}),
+        (1102, "1102-shindenbutai.json", "7.26246.159", {(3, 5)}),
+        (801, "801-tohaa.json", "7.26246.159",
+         {(1, member) for member in (*range(1, 13), 15, 17)}),
+        (899, "899-deras-kaar.json", "7.26246.159",
+         {(1, member) for member in range(1, 5)} | {(3, 1)}),
+    )
+    application = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules.db")
+    database = Database(ARMY_DB)
+    reviewed_rows = 0
+    with zipfile.ZipFile(ARMY_ZIP) as archive:
+        metadata = json.loads(archive.read("metadata.json"))
+        assert next(item["name"] for item in metadata["skills"] if item["id"] == 251) == (
+            "Strategic\u00a0Deployment"
+        )
+        for army_id, member, version, row_keys in cases:
+            raw = archive.read(member)
+            source = json.loads(raw)
+            assert source["version"] == version
+            chart = database.get_fireteam_chart(army_id)
+            assert chart is not None
+            assert chart["source"]["file"] == member
+            assert chart["source"]["sha256"] == hashlib.sha256(raw).hexdigest()
+            status, _, body = wsgi_response(
+                application, f"http://test/api/fireteams?army_id={chart['army']['slug']}",
+            )
+            assert status == 200
+            published = json.loads(body)
+            source_units = {unit["id"]: unit for unit in source["units"]}
+            for team_id, row_id in sorted(row_keys):
+                original = source["fireteamChart"]["teams"][team_id - 1]["units"][row_id - 1]
+                actual = published["teams"][team_id - 1]["members"][row_id - 1]
+                assert (actual["name"], actual["comment"], actual["slug"]) == (
+                    original["name"], original["comment"], original["slug"],
+                )
+                # None of these notes is an explicit FTO marker; no FTO
+                # loadouts are inferred from a Skill, division or group label.
+                assert actual["fto_marker"] is None and actual["loadouts"] == []
+                if actual["source_unit_id"] is not None:
+                    assert source_units[actual["source_unit_id"]]["slug"] == original["slug"]
+                else:
+                    assert (army_id, team_id, row_id) == (899, 1, 4)
+                    assert actual["unit"] is None and actual["reference_issues"]
+                reviewed_rows += 1
+
+            # Independently compare the named source selectors with native Unit
+            # option occurrences; this is descriptive concordance, not legality.
+            for source_id, expected_option_ids, name in (
+                ((5, (13, 14, 15, 16, 17, 18, 23), "ORC Varuna Div."),
+                 (15, (3, 19, 20), "MACHINIST Varuna Div")) if army_id == 105 else
+                ((1822, (1, 2, 3), None),) if army_id == 1102 else ()
+            ):
+                original_unit = source_units[source_id]
+                options = [option for group in original_unit["profileGroups"]
+                           for option in group["options"]]
+                assert tuple(option["id"] for option in options) == expected_option_ids
+                if name:
+                    assert all(option["name"] == name for option in options)
+                status, _, body = wsgi_response(
+                    application, f"http://test/api/units/{original_unit['slug']}",
+                )
+                assert status == 200
+                unit = json.loads(body)
+                local = next(army for army in unit["armies"] if army["id"] == army_id)
+                assert [(option["option_id"], option["name"])
+                        for option in local["loadouts"]] == [
+                    (option["id"], option["name"]) for option in options
+                ]
+                if army_id == 1102:
+                    assert [option["id"] for option in options
+                            if any(skill["id"] == 251 for skill in option["skills"])] == [3]
+                    assert [option["option_id"] for option in local["loadouts"]
+                            if any(skill["id"] == 251 for skill in option["skills"])] == [3]
+                    assert [option["name"] for option in options[:2]] == ["SHIZOKU FTO"] * 2
+    assert reviewed_rows == 23
+
+
+@pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
 def test_army_01_all_pinned_chart_constraints_reach_public_api() -> None:
     """Compare original archive rows independently of the chart materializer."""
     assert hashlib.sha256(ARMY_ZIP.read_bytes()).hexdigest() == (

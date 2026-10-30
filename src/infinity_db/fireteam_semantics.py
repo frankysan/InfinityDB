@@ -130,7 +130,11 @@ def fto_option_matches(member_name: str | None, marker: str, option_name: str | 
 
 
 def equivalence_labels(comment: str | None) -> tuple[str, ...]:
-    """Return ordered Fireteam-Level equivalence labels from parenthetical source text."""
+    """Preserve ordered parenthetical source terms without inferring equivalence.
+
+    The legacy storage/API name is retained. A term can instead qualify a
+    profile or loadout; parentheses alone do not establish a counts-as rule.
+    """
     labels: list[str] = []
     for match in _BRACKET_RE.findall(comment or ""):
         labels.extend(part.strip() for part in match.split(",") if part.strip())

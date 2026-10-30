@@ -38,7 +38,8 @@ are not retroactively relabeled.
   upward movement and Lieutenant selection without changing the legacy
   relation graph.
 - Fireteam charts show their original notes, flag unverified Unit/FTO references,
-  and keep Reinforcement parent limits separate.
+  keep Reinforcement parent limits separate, and avoid treating every parenthesized
+  term as a counts-as rule.
 - All canonical Trait pages offer official Wiki heading links. Glossary deep links
   and reference previews behave more reliably when moving between pages.
 - Rules references explain source disagreements alongside the supported interpretation,
@@ -140,6 +141,9 @@ are not retroactively relabeled.
   links separately from Section members; the separate Wildcard pool remains available.
   Fireteam links from other rules and the Glossary now reach the quick reference, which remains
   usable when no Army charts are available.
+- **Web frontend:** Show parenthetical Fireteam chart terms without automatically
+  calling them counts-as rules. Profile-specific notes such as Strategic Deployment
+  remain visible alongside the original source wording.
 - **Data processing + Web backend + Web frontend:** Correct declaration categories and N5.3
   citations for reviewed Short, Long, Deployment and Automatic Skills. Alert! is explained
   as an automatic facing adjustment rather than a declared ARO. Clarify conditional

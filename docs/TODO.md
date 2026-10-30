@@ -350,11 +350,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         This completes native publication parity only; upgrade/
         profile-transition rules, roster/Fireteam legality, historical
         deltas and final hosted acceptance remain separate.
-      - [ ] **ARMY-01 remaining semantics and release gates:** Review annotation-specific
-        profile applicability where it is not established by the
-        original note and existing equivalence projection (including
-        Triad, Varuna Div and Strategic Deployment); retain the
-        unresolved current N5 Reinforcements authority boundary.
+      - [x] **Data processing + Web frontend — ARMY-01 named annotation review:**
+        Check 23 Triad/Triada, Varuna Div and Strategic Deployment
+        source rows across Varuna, Shindenbutai, Tohaa and Deras Kaar.
+        Varuna names match seven ORC and three Machinist local options;
+        Shizoku's Skill-251 option is distinct from its two FTO options.
+        Replace the blanket counts-as caption with neutral chart terms,
+        retaining source text and the legacy API/storage fields.
+        Source/API and 24 Chromium cases cover both Wildcard views,
+        1440/390/320 px and both themes. This establishes source
+        concordance and presentation, not automatic eligibility or
+        current N5 Reinforcements authority. See
+        [validation](testing.md#fireteam-annotation-applicability).
+      - [ ] **ARMY-01 remaining semantics and release gates:** Retain the
+        unresolved current N5 Reinforcements authority boundary;
+        review further profile-specific annotations if the source
+        inventory identifies them. The named annotation review above
+        does not establish a general-purpose selector or legality model.
         ARMY-02–20 native profile/loadout publication parity is
         covered above; this does not validate roster legality or
         profile-transition/upgrade semantics. Do not infer

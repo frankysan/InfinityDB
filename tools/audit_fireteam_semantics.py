@@ -419,8 +419,9 @@ def _level_equivalence_evidence(connection: sqlite3.Connection) -> dict[str, Any
         "projectionMismatchCount": len(mismatches),
         "projectionMismatches": mismatches,
         "policy": (
-            "Bracketed terms are preserved as Fireteam-Level equivalence wording. They must "
-            "not feed logical-Unit identity or generic Unit aliasing."
+            "Parenthetical source terms retain the legacy equivalence field name. "
+            "They do not independently establish Fireteam-Level equivalence, profile "
+            "eligibility, logical-Unit identity or generic Unit aliasing."
         ),
     }
 

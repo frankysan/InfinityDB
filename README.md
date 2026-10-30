@@ -92,8 +92,9 @@ its application metrics.
 - Supports System, Light, and Dark themes from Settings; System follows the operating-system
   preference, while an explicit choice can be remembered with the other browser settings.
 - Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
-  an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, equivalence
-  labels, chart notes, and N5 rules/bonus context. Unverified Unit/FTO references are flagged;
+  an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, parenthetical
+  chart terms, original chart notes, and N5 rules/bonus context. Parentheses alone do not imply
+  a counts-as rule or profile eligibility. Unverified Unit/FTO references are flagged;
   Reinforcement charts show parent Army limits separately. The combined view respects reviewed
   explicit Wildcard exclusions. General Fireteam rules remain available without Army chart entries.
 - Presents connected Unit relationships for Peripherals/Controllers, Includes,

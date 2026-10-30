@@ -308,10 +308,22 @@ counts above.
   acceptance cover these disclosures and navigation, not a current
   N5 Reinforcements ruling or complete roster legality.
 
+  **2026-10-30 named annotation follow-up:** The 23 Triad/Triada,
+  Varuna Div and Strategic Deployment rows preserve exact source
+  notes and Army-local references. Seven ORC and three Machinist
+  options match the Varuna names; Shizoku's Skill-251 option is
+  distinct from its two FTO options. Normal charts now use the
+  neutral **Chart terms** caption rather than asserting that every
+  parenthesized term is a counts-as rule. Source/API checks and
+  24 Chromium cases cover both Wildcard views at 1440/390/320 px
+  in both themes. See [validation](testing.md#fireteam-annotation-applicability).
+  No generic eligibility relation, profile selector or current
+  N5 Reinforcements ruling is inferred.
+
   These bounded checks establish native profile/loadout publication
   for the reviewed ARMY-02–20 Units, not every catalog Unit,
-  Fireteam chart or historical Army delta. ARMY-01's annotation-specific
-  profile interpretation, current N5 Reinforcements authority and
+  Fireteam chart or historical Army delta. The named annotation
+  source/presentation review is complete; current N5 Reinforcements authority and
   roster/profile-transition semantics remain open; final hosted
   release-browser acceptance is separate. Keep unavailable
   pre-change evidence as a provenance limitation, not a

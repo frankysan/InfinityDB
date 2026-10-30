@@ -1175,6 +1175,45 @@ profile-transition/upgrade rules, complete roster/Fireteam legality,
 historical Army changes or final hosted acceptance. TEAM-OPS is retained
 source data and does not expand the mandatory 1.0 ITS publication scope.
 
+### Fireteam annotation applicability
+
+**Project domains:** Data processing, Web frontend
+
+`test_named_chart_annotations_preserve_exact_local_profile_context` in
+`tests/test_army_fireteam_publication.py` pins 23 named source rows against
+`JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`),
+their source-member hashes/revisions and public chart API:
+
+- Three Varuna Div rows in the `.158` Varuna member match seven local
+  ORC options (13–18, 23) and three Machinist options (3, 19, 20).
+- Shindenbutai's `.159` Shizoku row names Strategic Deployment. Source
+  Skill 251 belongs to option 3; options 1–2 are SHIZOKU FTO. The native
+  Unit API preserves this distinction without inventing FTO applicability
+  for the third option.
+- Fourteen `.159` Tohaa Triad rows and five `.159` Deras Kaar Triada
+  rows retain their exact notes and source-local Unit resolution. The
+  unresolved Reinforcement Neema row stays unresolved. These labels do
+  not establish current N5 annex authority or a shared Unit Skill.
+
+The parser and materialized `equivalence_labels` field remain byte/shape
+compatible. Their name is legacy: parenthetical terms can be grouping
+wording or profile qualifications; syntax alone does not prove counts-as
+equivalence. The semantic audit preserves its existing report keys while
+stating that limit explicitly. No database/publication rebuild is needed.
+
+`test_named_annotations_do_not_invent_counts_as_rules` in
+`tests/test_verify_fireteam_context_browser.py` checks all four ordinary
+chart pages at 1440/390/320 px in light/dark themes (24 cases). Each case
+uses the real Settings checkbox with keyboard activation to exercise both
+Wildcard views. Exact original notes, neutral **Chart terms**, absence of
+invented FTO summaries/counts-as captions, unresolved references and no
+horizontal overflow remain covered. Existing FTO and chart-context suites
+retain their broader source/API/browser checks.
+
+This is descriptive source concordance and presentation acceptance, not
+an executable profile-selection/legality rule or final hosted acceptance.
+
 ### Hosted Unit release-candidate acceptance
 
 For **deployed release-candidate acceptance**, use the separate

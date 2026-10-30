@@ -142,10 +142,10 @@ function appendMemberDetails(cell, member) {
     cell.append(group);
   }
   if (labels.length) {
-    const countsAs = document.createElement("span");
-    countsAs.className = "fireteam-member-note";
-    countsAs.textContent = `Counts as: ${labels.join(", ")}`;
-    cell.append(countsAs);
+    const terms = document.createElement("span");
+    terms.className = "fireteam-member-note";
+    terms.textContent = `Chart terms: ${labels.join(", ")}`;
+    cell.append(terms);
   }
   if (!requirements.length && !labels.length) cell.textContent = "—";
 }

@@ -48,6 +48,79 @@ def _chart(app: Any, army: str | int) -> dict[str, Any]:
     return json.loads(body)
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+@pytest.mark.parametrize("army_id,expected_count", ((105, 3), (1102, 1), (801, 14), (899, 5)))
+def test_named_annotations_do_not_invent_counts_as_rules(
+    app: Any, chrome: Any, army_id: int, expected_count: int, width: int, theme: str,
+) -> None:
+    """Source notes and bracketed terms remain visible in both Wildcard views."""
+    chart = _chart(app, army_id)
+    selected = [
+        (team, index, member)
+        for team in chart["teams"] for index, member in enumerate(team["members"])
+        if any(term in (member["name"] + " " + (member["comment"] or "")).lower()
+               for term in ("varuna div", "strategic deployment", "triad"))
+    ]
+    assert len(selected) == expected_count
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    page.add_init_script(
+        "sessionStorage.setItem('infinity-db-fireteams-include-wildcards', 'false');"
+        f"sessionStorage.setItem('infinity-db-theme', '{theme}');"
+    )
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(
+            f"{ORIGIN}/fireteams?army={chart['army']['public_slug']}",
+            wait_until="domcontentloaded",
+        )
+        page.locator("#fireteam-content").wait_for(state="visible", timeout=30000)
+        assert page.locator("html").get_attribute("data-theme") == theme
+        for combined in (False, True):
+            if combined:
+                page.locator('button[aria-controls="settings-menu"]').click()
+                toggle = page.locator("#fireteams-include-wildcards-toggle")
+                toggle.focus()
+                toggle.press("Space")
+                assert toggle.is_checked()
+                page.locator('button[aria-controls="settings-menu"]').click()
+            for team, index, member in selected:
+                card = page.locator(".fireteam-card").filter(
+                    has=page.get_by_role("heading", name=team["name"].strip(), exact=True),
+                )
+                # Wildcard pools become injected rows in the combined view.
+                if combined and team["is_wildcard"]:
+                    matching = page.locator(".fireteam-card tbody tr").filter(
+                        has=page.get_by_role("link", name=member["name"], exact=True),
+                    )
+                    assert matching.count() > 0
+                    row = matching.first
+                else:
+                    row = card.locator("tbody tr").nth(index)
+                assert row.is_visible()
+                annotation = row.locator(".fireteam-member-annotation")
+                if member["comment"]:
+                    assert annotation.text_content() == f"Chart note: {member['comment']}"
+                    assert annotation.is_visible()
+                else:
+                    assert annotation.count() == 0
+                terms = row.locator(".fireteam-member-requirements .fireteam-member-note")
+                if member["equivalence_labels"]:
+                    assert terms.inner_text() == (
+                        "Chart terms: " + ", ".join(member["equivalence_labels"])
+                    )
+                else:
+                    assert terms.count() == 0
+                assert row.locator(".fireteam-member-fto-summary").count() == 0
+            assert "Counts as:" not in page.locator("#fireteam-content").inner_text()
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width,theme", VIEWPORTS)
 @pytest.mark.parametrize("has_reference", (True, False))
 def test_fireteam_rules_landing_is_independent_of_army_charts(

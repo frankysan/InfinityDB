@@ -180,6 +180,10 @@ validated set. Production must not substitute a server-side rebuild.
   relationships. Do not infer ownership from names.
 - Fireteam chart limit sentinels are source encoding, not browser semantics. Preserve the raw limit
   for provenance/compatibility and expose the interpreted limit kind from the backend.
+- Fireteam `equivalence_labels` is a legacy field for parenthetical source terms.
+  Parentheses alone do not prove counts-as equivalence or profile eligibility;
+  preserve the original note and the neutral **Chart terms** caption.
+  See `docs/data-model.md#fireteams` for annotation scope.
 - Fireteam combined-view Wildcard exclusions come from the backend's reviewed note decoding
   (`wildcards_excluded`); JavaScript must not interpret chart prose. A false flag does not certify
   eligibility. See `docs/data-model.md#fireteams` for the bounded observation contract.

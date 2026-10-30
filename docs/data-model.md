@@ -1135,7 +1135,7 @@ application chart per supported Army/source context while preserving:
 - chart/type limits, including the raw Army value for provenance while projecting explicit
   `maximum`, `unavailable`, or `unlimited` application semantics before browser use;
 - member requirements;
-- Wildcards and equivalence context;
+- Wildcards and parenthetical source terms;
 - source notes;
 - resolved logical Unit targets;
 - FTO-eligible loadout references; and
@@ -1164,8 +1164,18 @@ FTO option remain distinct. A global Unit link is reference navigation, not
 proof of Army-local eligibility. These issues are visible in ordinary member
 rows, including combined Wildcards, alongside the original `comment` as a chart
 annotation. Technical resolution/ID columns remain developer-only. Original
-annotations supplement the existing equivalence projection; they do not create
-new aliases or automatically interpret additional conditions.
+annotations supplement the legacy `equivalence_labels` projection; they do not
+create new aliases or automatically interpret additional conditions. That field
+and its persisted table retain their names for compatibility, but contain ordered
+parenthetical source terms, not independently verified equivalence rules. Normal
+charts label them **Chart terms**, alongside the exact original **Chart note**.
+Parentheses alone do not establish a counts-as rule, profile eligibility or Skill
+entitlement. In the pinned Shindenbutai source, Shizoku's `(Strategic Deployment)`
+note matches the option carrying Skill 251, distinct from its two FTO options.
+The Varuna Div names match Army-local ORC/Machinist loadouts; Triad/Triada terms
+retain their chart context, including Reinforcement-only source rows. These
+descriptive correspondences do not add generic eligibility relations or a rules
+engine. See [annotation validation](testing.md#fireteam-annotation-applicability).
 
 `parent_charts` retains each Reinforcement Section's source-backed parent Army
 reference, selected chart source and independent type-limit projection. A
