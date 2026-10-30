@@ -369,6 +369,15 @@ def test_wheel_packages_runtime_unit_filter_semantics() -> None:
     assert "config/catalogs/unit-filter-semantics.json" in catalog_data
 
 
+def test_source_ci_builds_ignored_release_publication_before_tests() -> None:
+    workflow = _read(".github/workflows/source-checks.yml")
+    generate = workflow.index("python -m tools.build_deployed_object_publication")
+    verify = workflow.index("python -m tools.build_deployed_object_publication --check")
+    source_checks = workflow.index("- name: Run source checks")
+    assert generate < verify < source_checks
+    assert "python tools/run_checks.py" in workflow
+
+
 def test_wheel_packages_all_registered_static_assets() -> None:
     """Any asset in the live HTTP registry must survive wheel installation.
 

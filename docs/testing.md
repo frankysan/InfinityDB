@@ -1469,10 +1469,16 @@ structured detail fields without turning keyword mentions into object IDs:
 ```
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
-manifest pins **all 48 definitions in this bounded keyword scan**.
-Six decisions have PDF evidence recorded in the audit manifest only: the
-maintained rules records still cite older Wiki revisions, so they require a
-separately coordinated source/database publication update.
+manifest pins **48 source-reviewed definitions** in this bounded keyword scan.
+There are currently **49 candidates**: `rule:access-width` was added with
+the reviewed Scenery Structure source and explicitly remains an **unreviewed
+keyword hit**, not evidence for an additional deployed-object profile.
+Its gate Tokens describe scenery access openings, not automatically Weapon/
+Equipment devices. A deliberate classification decision remains pending.
+Six earlier decisions initially had PDF-only evidence recorded in the
+audit manifest. Their verified N5.3 citations have since been migrated to
+maintained rules records and synchronized with the rules database/publication;
+the audit now reports no missing maintained N5.3 citations.
 The original three Skill decisions distinguish `skill:place-deployable`
 (delivery action, p. 82), `skill:minelayer` (deployment method, p. 102)
 and `skill:request-speedball` (support State Tokens, p. 84). Additional

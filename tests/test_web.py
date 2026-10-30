@@ -4837,7 +4837,7 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 22
+    assert len(general_rules) == 24
     assert general_rules["specialist-troops-standard"]["name"] == "Specialist Troops"
     assert general_rules["modifiers-explained"]["name"] == "Modifiers Explained (MODs)"
     assert general_rules["deployment-phase"]["name"] == "Deployment Phase"

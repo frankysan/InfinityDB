@@ -64,6 +64,11 @@ and cross-platform determinism remain unchanged.
 
 Source-check logs include the twenty slowest pytest durations and skipped-test reasons so
 hosted performance problems can be traced to individual tests or fixture setup.
+Before the test matrix runs, each source-check leg deterministically generates and verifies
+the **Git-ignored** `data/generated/deployed-objects.json` publication against the tracked
+Army and rules databases. Tests must not depend on an existing local publication:
+a fresh Git checkout does not contain the JSON file. The publication stage is
+separate from database generation and does not modify either tracked database.
 
 The manually dispatched `Full-asset checks` workflow also runs `--all`, so it performs the same
 pinned npm installation and both documentation checks. The installed-wheel and deployment-smoke jobs

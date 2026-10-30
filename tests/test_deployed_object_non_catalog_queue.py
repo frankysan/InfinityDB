@@ -128,8 +128,17 @@ def test_pinned_non_catalog_discovery_preserves_unreviewed_queue() -> None:
     assert report["scope"] == "non-catalog-keyword-discovery-not-object-inventory"
     assert len(report["curatedSourceSha256"]) == 64
     assert report["reviewedCount"] == 48
-    assert report["candidateCount"] == 48
-    assert report["unreviewed"] == []
+    assert report["candidateCount"] == 49
+    # Access Width now mentions scenery gate Tokens; it is a new audit
+    # candidate, not automatically approved as a deployed object.
+    assert [row["recordId"] for row in report["unreviewed"]] == [
+        "rule:access-width",
+    ]
+    assert set(report["unreviewed"][0]["details"]) == {"effects", "restrictions"}
+    assert not next(
+        entry["reviewed"] for entry in report["candidates"]
+        if entry["recordId"] == "rule:access-width"
+    )
     assert len(report["reviewedPdfOnly"]) in (0, 6)
     selected = {
         row["recordId"]: row for row in report["candidates"]
@@ -220,9 +229,10 @@ def test_non_catalog_cli_reports_open_queue_without_publishing_objects(
     assert main() == 0
     output = capsys.readouterr().out
     assert "Candidate definitions:" in output
-    assert "Candidate definitions: 48" in output
+    assert "Candidate definitions: 49" in output
     assert "Reviewed classifications: 48" in output
-    assert "Awaiting manual review: 0" in output
+    assert "Awaiting manual review: 1" in output
+    assert "rule:access-width: effects, restrictions" in output
     count = 6 if any(
         review.get("citationStatus") == "pdf-verified-manifest-only"
         for review in json.loads(REVIEWS.read_text(encoding="utf-8"))["reviews"]

@@ -1775,6 +1775,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 deployed-object publication fingerprints together.
                 The non-catalog audit now reports **zero** missing
                 maintained N5.3 citations.
+              - [ ] Review the newly discovered `rule:access-width`
+                candidate in the non-catalog game-element queue:
+                49 keyword matches, 48 pinned classifications,
+                one unreviewed gate-Token mention. Do not classify
+                or create a deployable object from the keyword hit
+                without explicit source-backed review of its effects
+                and restrictions.
               - [ ] Extend object discovery beyond the bounded
                 non-catalog keyword/definition-fields scan, checking
                 alternate wording and other N5.3 source domains.
