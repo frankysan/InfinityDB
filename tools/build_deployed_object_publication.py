@@ -67,11 +67,39 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", type=Path, default=ROOT / "data/generated/deployed-objects.json"
     )
     parser.add_argument("--check", action="store_true", help="Verify an existing artifact only")
+    migration = parser.add_mutually_exclusive_group()
+    migration.add_argument(
+        "--stage-restrictions-v9", type=Path,
+        help="Stage v9 rules.db and paired publication under ignored local/",
+    )
+    migration.add_argument(
+        "--promote-restrictions-v9", type=Path,
+        help="Promote a verified v9 pair with v8 recovery copies",
+    )
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
+    if args.stage_restrictions_v9 is not None or args.promote_restrictions_v9 is not None:
+        if args.check:
+            raise ValueError("--check cannot be combined with v9 migration operations")
+        from tools.restrictions_v9_release import (
+            promote_restrictions_v9,
+            stage_restrictions_v9,
+        )
+
+        if args.stage_restrictions_v9 is not None:
+            report = stage_restrictions_v9(args.stage_restrictions_v9)
+            print("Staged verified v9 rules database and paired deployed-object publication.")
+            print(f"Staged rules SHA-256: {report['staged']['data/generated/rules.db']}")
+            print(f"Staging report: {args.stage_restrictions_v9 / 'staging-report.json'}")
+            print("No tracked artifacts were modified.")
+            return 0
+        backup = promote_restrictions_v9(args.promote_restrictions_v9)
+        print("Promoted v9 rules database and matching deployed-object publication.")
+        print(f"Original v8 release pair retained: {backup}")
+        return 0
     publication = build_publication(
         args.army_db, args.rules_db, args.curated_source,
         args.delivery_reviews, args.candidate_reviews,

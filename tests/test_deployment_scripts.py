@@ -248,11 +248,13 @@ def test_container_build_packages_canonical_changelog() -> None:
 
 @pytest.mark.parametrize("heading", ["## Unreleased", "## [0.10.0] - 2026-10-07"])
 @pytest.mark.parametrize("matching_content", [True, False])
+@pytest.mark.parametrize("restrictions_version", [8, 9])
 def test_container_smoke_validates_canonical_notes_in_both_release_states(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     heading: str,
     matching_content: bool,
+    restrictions_version: int,
 ) -> None:
     changelog = tmp_path / "CHANGELOG.md"
     changelog.write_text(
@@ -266,7 +268,46 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
     if not matching_content:
         page = page.replace("New player highlight.", "Outdated player highlight.")
     page = f'<section aria-label="InfinityDB release notes">{page}</section>'
+    if restrictions_version == 9:
+        restrictions = {
+            "available": True, "evaluationSupported": False,
+            "items": [
+                *[
+                    {
+                        "subject": "TAG", "action": "enter-prone",
+                        "scope": "all", "operation": {
+                            "kind": "state-entry", "qualifier": {},
+                        },
+                    }
+                    for _ in range(11)
+                ],
+                {
+                    "subject": "Motorcycle", "action": "upward-jump",
+                    "scope": "while-mounted-upwards-only",
+                    "operation": {
+                        "kind": "directional-skill-movement",
+                        "qualifier": {"direction": "upward"},
+                    },
+                },
+                *[
+                    {
+                        "subject": subject, "action": "lieutenant-selection",
+                        "scope": "army-selection-only",
+                        "operation": {
+                            "kind": "army-role-selection",
+                            "qualifier": {"role": "lieutenant"},
+                        },
+                    }
+                    for subject in ("REM", "Irregular")
+                ],
+            ],
+        }
+    else:
+        restrictions = {
+            "available": False, "evaluationSupported": False, "items": [],
+        }
     payloads = {
+        "/api/restrictions": restrictions,
         "/api/armies": {
             "items": [
                 {"id": 101, "role": "main", "group_id": None},

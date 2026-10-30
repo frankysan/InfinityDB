@@ -26,6 +26,23 @@ jobs:
         run: |
           PYTHONPATH=src python -m tools.build_deployed_object_publication
           PYTHONPATH=src python -m tools.build_deployed_object_publication --check
+          PYTHONPATH=src python - <<'PY'
+          from pathlib import Path
+
+          from infinity_db.deployed_object_publication import load_deployed_object_publication
+          from infinity_db.rules_database import RulesDatabase
+
+          army = Path("data/generated/infinity.db")
+          rules_path = Path("data/generated/rules.db")
+          publication = Path("data/generated/deployed-objects.json")
+          rules = RulesDatabase(rules_path)
+          rules.validate()
+          restrictions = rules.restrictions_payload()
+          assert restrictions["available"] and len(restrictions["items"]) == 14
+          assert restrictions["evaluationSupported"] is False
+          paired = load_deployed_object_publication(publication, army, rules_path)
+          assert paired is not None and len(paired["objects"]) == 17
+          PY
 
       - name: Build application image from tracked databases and generated publication
         run: docker build --tag infinity-db:deployment-smoke .

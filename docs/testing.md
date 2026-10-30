@@ -1965,10 +1965,10 @@ source-to-occurrence contract is unverified. Players can follow
 the Irregular restriction from the Lieutenant Skill and chart
 until that separate mapping is established.
 
-**Version-aware SQLite/API migration contract (v9 not deployed):**
-`tests/test_restriction_storage_candidate.py` copies the current
-tracked `rules.db` to a disposable test database, adds the
-`restriction_constraints` table using
+**Version-aware SQLite/API migration contract (v9 locally promoted, not deployed):**
+`tests/test_restriction_storage_candidate.py` prepares a separate
+v8 rollback test database when the tracked release artifact is v9,
+then adds the `restriction_constraints` table using
 `src/infinity_db/restriction_storage.py`, and verifies the 14
 reviewed negative conditions and additive JSON read shape. The test
 asserts legacy `record_relations` rows and representative composed
@@ -1989,18 +1989,41 @@ byte-for-byte determinism, compares the legacy relation graph, and
 tests `/api/restrictions` on both versions: v8 reports
 `available: false`; v9 returns 14 source-scoped prohibitions
 with filters and no positive legality inference. Legacy Skill
-and Equipment JSON remains unchanged. The normal exporter and
-tracked `data/generated/rules.db` still use v8/compatibility-10.
-For a reviewed v9 staging build, use:
+and Equipment JSON remains unchanged. The normal standalone
+exporter remains v8/compatibility-10; the **tracked release**
+`data/generated/rules.db` now uses v9/compatibility-11.
+For a separately staged v9 build, use:
 
 ```powershell
 .venv\Scripts\python.exe -m infinity_db build-rules --restrictions-manifest config/validation/restrictions-source-chart.json --output local/restrictions-rules-v9.db
 ```
 
 The opt-in path refuses the default `data/generated/rules.db`
-destination; publication and release-image synchronization
-remain open in [the data model](data-model.md#restriction-persistence-and-version-aware-api-v9-staged-not-promoted).
-These checks never write to the tracked runtime database.
+destination. A paired promotion instead uses the tracked
+`tools.build_deployed_object_publication` module:
+
+```powershell
+.venv\Scripts\python.exe -m tools.build_deployed_object_publication --stage-restrictions-v9 local/restrictions-v9-n53-20261030-reviewed
+.venv\Scripts\python.exe -m tools.build_deployed_object_publication --promote-restrictions-v9 local/restrictions-v9-n53-20261030-reviewed
+```
+
+Staging refuses existing output directories; promotion requires matching
+reviewed input hashes, an unchanged tracked v8 database, the exact
+staged SHA-256 pair, and the same 17 deployed-object records with no
+additional publication changes. Both original v8 artifacts are retained
+under ignored `local/`. The historical Hacking Device citation test
+now checks source citations and deployed-object content across later
+schema versions, not obsolete byte identity.
+
+The deployment-smoke workflow now requires 14 typed constraints in the
+tracked v9 database and builds the matching deployed-object publication
+before the image; `scripts/verify-container-image.sh` checks the
+actual HTTP Restrictions conditions after container startup and keeps
+v8 unavailable-data behavior for rollback. These Docker/CI checks are
+**configured but not yet executed for this local promotion**.
+The local promotion and remaining hosted acceptance are recorded in
+[the data model](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+Normal tests never write to the tracked runtime database.
 
 ### N5.3 Silhouette Templates source and browser geometry
 

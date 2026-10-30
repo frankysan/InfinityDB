@@ -139,16 +139,34 @@ def test_promoted_citations_are_consistent_with_rules_database() -> None:
         report = json.loads(report_file.read_text(encoding="utf-8"))
         assert report["migratedDeviceIds"] == [row[0] for row in PINNED]
         assert report["sourcePage"] == 58
-        for key, relative in zip(
-            ("curated", "rulesDatabase", "deployedObjects"),
-            STAGED_PATHS,
-            strict=True,
-        ):
-            promoted_bytes = (CURATED.parents[3] / relative).read_bytes()
-            assert promoted_bytes == (stage / relative).read_bytes()
-            assert hashlib.sha256(promoted_bytes).hexdigest() == (
-                report["stagedSha256"][key]
+        # The citation stage is historical evidence: later schema migrations
+        # may rebuild rules.db without removing the four reviewed citations.
+        assert CURATED.read_bytes() == (stage / STAGED_PATHS[0]).read_bytes()
+        assert hashlib.sha256(CURATED.read_bytes()).hexdigest() == (
+            report["stagedSha256"]["curated"]
+        )
+        staged_rules = stage / STAGED_PATHS[1]
+        with sqlite3.connect(rules_db) as current, sqlite3.connect(staged_rules) as old:
+            citation_sql = (
+                "SELECT record_id, source_id, page FROM record_citations "
+                "WHERE record_id IN (?, ?, ?, ?) "
+                "AND source_id = ? ORDER BY record_id, page"
             )
+            params = (*tuple(entry[0] for entry in PINNED), SOURCE_CITATION["sourceId"])
+            expected = [(entry[0], SOURCE_CITATION["sourceId"], SOURCE_CITATION["page"])
+                        for entry in PINNED]
+            assert current.execute(citation_sql, params).fetchall() == sorted(expected)
+            assert current.execute(citation_sql, params).fetchall() == (
+                old.execute(citation_sql, params).fetchall()
+            )
+        old_publication = json.loads((stage / STAGED_PATHS[2]).read_text(encoding="utf-8"))
+        assert published["objects"] == old_publication["objects"]
+        assert published["unresolvedDeliveries"] == old_publication["unresolvedDeliveries"]
+        old_source = dict(old_publication["sourceSnapshot"])
+        old_source.pop("rulesDatabaseSha256")
+        current_source = dict(published["sourceSnapshot"])
+        current_source.pop("rulesDatabaseSha256")
+        assert current_source == old_source
 
 
 def test_staging_rejects_overlapping_output_directory() -> None:

@@ -1261,18 +1261,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         both version paths, HTTP query validation and unchanged
         legacy Skill/Equipment API responses. The browser still
         consumes its independently published static chart.
-      - [ ] **Promote synchronized v9 release artifacts** only after
-        reviewing the source/curation identity and corresponding
-        `deployed-objects.json` fingerprints; update the tracked
-        `rules.db`, release-image publication and final checks
-        together. Verify version-aware application deployment
-        against v9, and retain/test the v8 snapshot rollback path.
+      - [x] **Promote the synchronized v9 release pair locally** after
+        reviewed N5.3 PDF/source hashes and 14 constraints were
+        verified. The tracked `rules.db` now uses v9/compatibility-11,
+        and the ignored `deployed-objects.json` was regenerated
+        with its matching rules SHA-256; 17 reviewed objects and
+        all other publication fields are unchanged. A guarded
+        coordinated promotion retained the complete v8 release
+        pair under ignored `local/` and validated the promoted
+        application startup. The legacy generic relation graph
+        is unchanged. See `docs/data-model.md` for fingerprints
+        and recovery location.
+      - [ ] **Validate and package the promoted v9 release pair** in
+        the real Docker/CI deployment-smoke workflow after committing
+        the source and tracked database. Verify the image includes
+        the regenerated publication (with matching checksum), v9
+        startup and v8 rollback, and the normal release gates.
+        This local promotion was not a hosted deployment.
         The seven absent conventional edges and two over-broad
         relations remain legacy limitations, not missing typed
-        source coverage. Audit their consumers before retiring
-        any compatibility edges; preserve source-only TAG/VH/REM
-        selectors, the ladder operation, and scoped Jump/Lieutenant
-        semantics.
+        source coverage. Audit consumers before retiring
+        compatibility edges; preserve source-only TAG/VH/REM
+        selectors, ladders, and scoped Jump/Lieutenant semantics.
       - [ ] Confirm how Irregular Training is represented on actual
         Unit/profile/loadout occurrences before adding a Unit-level
         reverse link. Sampled Irregular-source candidates did not

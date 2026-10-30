@@ -55,7 +55,10 @@ are not retroactively relabeled.
   The additive Restrictions API distinguishes an unavailable v8
   snapshot from the complete typed v9 reference; an explicitly
   staged v9 exporter and dual-version reader preserve existing
-  rule relationship responses during migration.
+  rule relationship responses during migration. The reviewed v9
+  rules database and matching deployed-object publication have now
+  been promoted together in the development checkout, with the
+  original v8 pair retained for rollback.
 - **Data processing + Web backend + Web frontend + Deployment:** Add a standalone
   reference for 17 source-reviewed deployed objects with known, unreported and disputed
   attributes, source-backed delivery links and an explicit unresolved Mine Dispenser

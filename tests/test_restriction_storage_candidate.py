@@ -36,12 +36,28 @@ def source_data() -> tuple[dict, dict]:
     return chart, {row["id"]: row for row in curated["records"]}
 
 
-@pytest.fixture
-def candidate(tmp_path: Path) -> Iterator[tuple[sqlite3.Connection, dict, dict, Path]]:
+@pytest.fixture(scope="module")
+def legacy_v8_db(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Keep v8 rollback acceptance testable after the tracked v9 promotion."""
     assert DB.is_file()
     RulesDatabase(DB).validate()
+    with sqlite3.connect(DB) as current:
+        if current.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION:
+            return DB
+    output = tmp_path_factory.mktemp("restrictions-legacy-v8") / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated"), output)
+    RulesDatabase(output).validate()
+    return output
+
+
+@pytest.fixture
+def candidate(
+    tmp_path: Path, legacy_v8_db: Path,
+) -> Iterator[tuple[sqlite3.Connection, dict, dict, Path]]:
     target = tmp_path / "candidate.db"
-    with sqlite3.connect(f"file:{DB.as_posix()}?mode=ro", uri=True) as current:
+    with sqlite3.connect(
+        f"file:{legacy_v8_db.as_posix()}?mode=ro", uri=True,
+    ) as current:
         with sqlite3.connect(target) as staging:
             current.backup(staging)
     connection = sqlite3.connect(target)
@@ -202,7 +218,7 @@ def test_candidate_fails_closed_without_mutating_legacy_rows(
 
 
 def test_candidate_version_rollout_requires_application_transition(
-    candidate: tuple[sqlite3.Connection, dict, dict, Path],
+    candidate: tuple[sqlite3.Connection, dict, dict, Path], legacy_v8_db: Path,
 ) -> None:
     connection, chart, records, target = candidate
     stage_candidate_restrictions(connection, chart, records)
@@ -221,7 +237,7 @@ def test_candidate_version_rollout_requires_application_transition(
     assert connection.execute("PRAGMA quick_check").fetchone()[0] == "ok"
     RulesDatabase(target).validate()
     assert RulesDatabase(target).restrictions_payload()["available"] is True
-    assert RulesDatabase(DB).restrictions_payload()["available"] is False
+    assert RulesDatabase(legacy_v8_db).restrictions_payload()["available"] is False
 
     connection.execute(
         "UPDATE __rules_metadata SET value = '10' "
@@ -241,7 +257,7 @@ def test_candidate_version_rollout_requires_application_transition(
 
 
 def test_explicit_v9_export_is_deterministic_and_legacy_relations_unchanged(
-    tmp_path: Path,
+    tmp_path: Path, legacy_v8_db: Path,
 ) -> None:
     documents = load_curated_directory(ROOT / "data/curated")
     chart, _ = source_data()
@@ -255,18 +271,18 @@ def test_explicit_v9_export_is_deterministic_and_legacy_relations_unchanged(
     assert len(v9.restrictions_payload()["items"]) == 14
     assert v9.restrictions_payload(record_id="skill:lieutenant")["available"]
     assert len(v9.restrictions_payload(record_id="skill:lieutenant")["items"]) == 2
-    with sqlite3.connect(DB) as original, sqlite3.connect(first) as generated:
+    with sqlite3.connect(legacy_v8_db) as original, sqlite3.connect(first) as generated:
         assert legacy_relation_snapshot(original) == legacy_relation_snapshot(generated)
         assert generated.execute("PRAGMA user_version").fetchone()[0] == 9
         assert generated.execute("PRAGMA foreign_key_check").fetchall() == []
-    assert RulesDatabase(DB).restrictions_payload() == {
+    assert RulesDatabase(legacy_v8_db).restrictions_payload() == {
         "formatVersion": 1, "available": False, "source": None,
         "polarity": "prohibition", "items": [], "evaluationSupported": False,
     }
 
 
 def test_restrictions_http_v8_and_v9_are_additive(
-    candidate: tuple[sqlite3.Connection, dict, dict, Path],
+    candidate: tuple[sqlite3.Connection, dict, dict, Path], legacy_v8_db: Path,
 ) -> None:
     from urllib.parse import urlsplit
     from wsgiref.util import setup_testing_defaults
@@ -294,7 +310,7 @@ def test_restrictions_http_v8_and_v9_are_additive(
                 close()
         return result["status"], json.loads(body)
 
-    v8 = create_app(ROOT / "data/generated/infinity.db", rules_database_path=DB)
+    v8 = create_app(ROOT / "data/generated/infinity.db", rules_database_path=legacy_v8_db)
     status, payload = get(v8, "/api/restrictions")
     assert status == 200
     assert payload["available"] is False
@@ -418,3 +434,64 @@ def test_explicit_build_rules_cli_exports_v9_to_separate_path(tmp_path: Path) ->
     assert cmd_build_rules(args) == 0
     RulesDatabase(output).validate()
     assert len(RulesDatabase(output).restrictions_payload()["items"]) == 14
+
+
+@pytest.mark.parametrize("inject_failure", [False, True])
+def test_restrictions_paired_replacement_retains_v8_recovery(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, inject_failure: bool,
+) -> None:
+    from tools import restrictions_v9_release as release
+
+    (tmp_path / "local").mkdir()
+    original = {}
+    replacement = {}
+    for index, relative in enumerate(release.ARTIFACTS):
+        path = tmp_path / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        original[relative] = f"v8-original-{index}".encode()
+        replacement[relative] = f"v9-staged-{index}".encode()
+        path.write_bytes(original[relative])
+
+    if inject_failure:
+        write = release._atomic_write
+        calls = 0
+
+        def failure_on_second(path: Path, raw: bytes) -> None:
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("injected second-artifact write failure")
+            write(path, raw)
+
+        monkeypatch.setattr(release, "_atomic_write", failure_on_second)
+        with pytest.raises(RuntimeError, match="rolled back"):
+            release._replace_with_rollback(tmp_path, replacement, lambda: None)
+    else:
+        recovery = release._replace_with_rollback(
+            tmp_path, replacement, lambda: None,
+        )
+        assert recovery.is_dir()
+
+    expected = original if inject_failure else replacement
+    assert all((tmp_path / relative).read_bytes() == data
+               for relative, data in expected.items())
+    backups = list((tmp_path / "local").glob("restrictions-v8-recovery-*"))
+    assert len(backups) == 1
+    for relative, old in original.items():
+        assert (backups[0] / relative).read_bytes() == old
+
+
+def test_restrictions_promotion_rejects_unreviewed_publication_changes() -> None:
+    from tools.restrictions_v9_release import _expected_publication_delta
+
+    previous = {
+        "sourceSnapshot": {"rulesDatabaseSha256": "a" * 64, "armyDatabaseSha256": "b" * 64},
+        "objects": [{"id": "example"}],
+        "unresolvedDeliveries": [],
+    }
+    reviewed = copy.deepcopy(previous)
+    reviewed["sourceSnapshot"]["rulesDatabaseSha256"] = "c" * 64
+    _expected_publication_delta(previous, reviewed, "c" * 64)
+    reviewed["objects"][0]["id"] = "unsupported-change"
+    with pytest.raises(ValueError, match="unexpectedly changed"):
+        _expected_publication_delta(previous, reviewed, "c" * 64)

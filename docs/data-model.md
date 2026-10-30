@@ -873,9 +873,9 @@ these conditions; moving or superseding their seven missing and two
 over-broad relationships requires a separately tested schema and API
 migration. No Unit/profile permissions are inferred.
 
-### Restriction persistence and version-aware API (v9 staged, not promoted)
+### Restriction persistence and version-aware API (v9 locally promoted)
 
-**Implemented; v9 release artifact not yet promoted.**
+**Implemented; v9 database and paired publication promoted in the development checkout, not deployed.**
 `src/infinity_db/restriction_storage.py` defines a separate `restriction_constraints` SQLite table without
 rewriting `record_relations` or its API. The table retains source ID,
 printed page, pinned PDF fingerprint, source-order position, source
@@ -918,28 +918,49 @@ tracked `data/generated/rules.db` output: select a staging file.
 The v9 build is byte-deterministic in tests, and read-only HTTP
 checks confirm both v8-unavailable and v9-available responses,
 filtering, backward-compatible Skills/Equipment responses, and
-unchanged legacy relations. The implementation can be deployed with
-the existing v8 database **without** requiring a synchronized
-data migration.
+unchanged legacy relations. The application also accepts the original
+v8 snapshot as a rollback source.
 
-**Remaining release/promotion steps:**
+**Local release-pair promotion (2026-10-30):**
 
-1. Review the staged v9 snapshot's source/curation identity, final
-   checksum and matching deployed-object publication fingerprints;
-   update the tracked `rules.db` and release images together,
-   rather than independently publishing new database bytes.
-2. Verify forward deployment of the version-aware application and
-   matching v9 artifact, plus rollback to the existing v8 snapshot.
-   The static browser reference remains independently source-pinned.
-3. After dependent consumers are audited, decide whether the
-   over-broad legacy Motorcycle → Jump and Irregular → Lieutenant
-   generic edges should be retired or explicitly qualified. The
-   new table **does not** delete or reinterpret those edges.
+`tools.build_deployed_object_publication --stage-restrictions-v9`
+generated both artifacts in a new ignored `local/` directory
+after verifying the official PDF, curated review hashes, original
+v8 release pair, complete 14-condition model, and unchanged
+legacy relations. The staged **v9/compatibility-11** rules database
+has SHA-256
+`554bbefc90fa20d5181cd563979b581f5e42f3bfeca1bcbd30cfac1921de5498`.
+Its matching deployed-object publication SHA-256 is
+`1b2fc051f81eef42af104b52058d22c011d22b8819c67d4b6a9624b5662f82e2`.
+All 17 reviewed objects, unresolved deliveries and review
+fingerprints remained unchanged; only the rules database fingerprint
+in the publication changed. The staged source report is
+`local/restrictions-v9-n53-20261030-reviewed/staging-report.json`.
 
-The contract and reversible tests live in
-`tests/test_restriction_storage_candidate.py`. They build and
-exercise v9 snapshots only in disposable test directories. The
-tracked `data/generated/rules.db` has not been changed.
+`--promote-restrictions-v9` applied the verified pair to the local
+checkout with guarded replacements and post-promotion application
+startup and provenance verification. The original paired v8
+database/publication bytes are preserved under
+`local/restrictions-v8-recovery-ut9_clv3/` on the development
+machine. The **tracked rules database now uses v9**; the co-located
+ignored publication has been rebuilt accordingly. The normal
+`build-rules` command deliberately still creates standalone
+v8-compatible databases, so reproducing the tracked v9 release
+artifact requires the explicit reviewed manifest and coordinated
+publication workflow. Do not overwrite either artifact individually.
+
+**Still required for hosted release:** run the full CI/deployment
+image smoke checks after committing both source and tracked
+`rules.db`, verify the generated `deployed-objects.json` is
+paired inside the release image, and test v9 startup and v8 rollback
+on an actual image/host. The local promotion **is not deployment**.
+Later consumer review must determine whether the two over-broad
+Motorcycle → Jump and Irregular → Lieutenant generic edges can
+be retired or need explicitly qualified compatibility links.
+
+The API, schema and rollback contract remains covered by
+`tests/test_restriction_storage_candidate.py` with both
+versions tested independently of the tracked database version.
 
 ## Availability and membership
 

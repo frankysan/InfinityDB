@@ -58,7 +58,19 @@ if actual_files != expected_files:
     )
 
 Database(data_dir / "infinity.db").validate()
-RulesDatabase(data_dir / "rules.db").validate()
+rules = RulesDatabase(data_dir / "rules.db")
+rules.validate()
+restrictions = rules.restrictions_payload()
+if restrictions["available"]:
+    if (
+        restrictions["source"]["id"] != "n5-core-v5.3-pdf"
+        or restrictions["source"]["page"] != 194
+        or len(restrictions["items"]) != 14
+        or restrictions["evaluationSupported"] is not False
+    ):
+        raise SystemExit("Release image has incomplete v9 Restrictions data")
+elif restrictions["items"] or restrictions["evaluationSupported"] is not False:
+    raise SystemExit("Legacy release image invented positive Restrictions data")
 publication = load_deployed_object_publication(
     data_dir / "deployed-objects.json", data_dir / "infinity.db", data_dir / "rules.db"
 )
@@ -239,6 +251,40 @@ if len(deployed.get("items", [])) != 17 or len(deployed.get("unresolved_deliveri
 with urlopen("http://127.0.0.1:8000/deployed-objects", timeout=3) as response:
     if b"deployed" not in response.read().lower():
         raise SystemExit("/deployed-objects browser entry point unavailable")
+
+with urlopen("http://127.0.0.1:8000/api/restrictions", timeout=3) as response:
+    restrictions = json.load(response)
+if restrictions.get("evaluationSupported") is not False:
+    raise SystemExit("/api/restrictions incorrectly claims legality evaluation")
+if restrictions.get("available"):
+    if len(restrictions.get("items", [])) != 14:
+        raise SystemExit("/api/restrictions has incomplete v9 source conditions")
+    jump = next(
+        (row for row in restrictions["items"] if
+         row["subject"] == "Motorcycle" and row["action"] == "upward-jump"),
+        None,
+    )
+    if (
+        jump is None
+        or jump["scope"] != "while-mounted-upwards-only"
+        or jump["operation"] != {
+            "kind": "directional-skill-movement", "qualifier": {"direction": "upward"}
+        }
+    ):
+        raise SystemExit("/api/restrictions lost the mounted upward-Jump condition")
+    chosen = [
+        row for row in restrictions["items"]
+        if row["action"] == "lieutenant-selection"
+    ]
+    if len(chosen) != 2 or any(
+        row["operation"] != {
+            "kind": "army-role-selection", "qualifier": {"role": "lieutenant"}
+        }
+        for row in chosen
+    ):
+        raise SystemExit("/api/restrictions lost Lieutenant selection-only scope")
+elif restrictions.get("items") != []:
+    raise SystemExit("/api/restrictions legacy snapshot must not imply permissions")
 
 with urlopen("http://127.0.0.1:8000/api/version", timeout=3) as response:
     version = json.load(response)

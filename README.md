@@ -296,7 +296,15 @@ infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 infinity-db build-rules --output data/generated/rules.db
 ```
 
-`build-rules` defaults to `data/curated/rules/`.
+`build-rules` defaults to `data/curated/rules/`. Its standard output
+remains the v8-compatible format for standalone use. The tracked
+1.0-development rules release database uses the reviewed v9
+conditional Restrictions table and must be built as a coordinated
+release pair with `data/generated/deployed-objects.json`; see
+[the migration and recovery contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+Do not rebuild the tracked release database using the unqualified
+command above, as this would replace v9 with an incompatible
+release-pair fingerprint.
 
 `infinity-army` and `python -m infinity_army_data` remain available for the
 JSON-only pipeline. `infinity-db` (also available as `python -m infinity_db`)
