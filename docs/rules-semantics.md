@@ -4107,6 +4107,27 @@ Equipment, or Skill to the restricted action/role without attempting to infer a
 complete `can declare X` result for arbitrary live game state. This closes the earlier
 Unit Profile restrictions research question without creating a live legality engine.
 
+**N5.3 p. 194 source audit (2026-10-30):**
+`config/validation/restrictions-source-chart.json` pins all **six** printed
+subject rows and **14** explicit negative conditions, independently checked
+against the pinned PDF by `tools.audit_restrictions_source_chart`. The
+source selectors for TAG, VH, and REM have no canonical Troop Type identity in
+the current rules registry. Existing `equipment:motorcycle`, `skill:aerial`,
+`training:irregular`, `skill:cautious-movement` and `skill:lieutenant`
+records retain related clauses, but these do not yet form a complete,
+condition-aware player-facing Restrictions view.
+
+Two typed-relation limitations are material: Motorcycle's
+`restricts-use-of → skill:jump` edge lacks the printed **upwards-only**
+qualifier (horizontal/downward Jump remains permitted), while Irregular
+Training's `restricts-use-of → skill:lieutenant` describes **selection as
+Lieutenant**, not a prohibition on using every aspect of that Skill.
+Motorcycle ladder use is a separate source restriction, not an inferred
+Climb alias. Preserve each condition explicitly when implementing a
+contextual projection; a missing edge conveys neither permission nor
+prohibition. The read-only audit introduces no new Unit facts, canonical
+Troop Type identities or executable action-legality behavior.
+
 Sources:
 
 - PDF: Infinity N5 V5.3, printed page 194

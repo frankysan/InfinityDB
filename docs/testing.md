@@ -1882,6 +1882,37 @@ Programs at 1440/390/320 px). This validates the conditional target-scope
 note and original profile/Device/citation rendering, not the full 1.0
 browser or release suite.
 
+### N5.3 Restrictions Chart source-only reconciliation
+
+The English N5.3 **Restrictions Chart** (printed p. 194) lists six source
+conditions and 14 prohibited actions/eligibility choices. The read-only
+`config/validation/restrictions-source-chart.json` records each source
+subject, negative action, reference target and scope without materializing
+runtime relationships or assigning invented Troop Type identities.
+The audit cross-checks the relevant existing curated records and highlights
+missing or insufficiently scoped typed relationships:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --json
+.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+```
+
+The optional PDF check requires PyMuPDF, verifies the pinned source SHA-256
+and matches all six ordered printed restrictions between the chart headings.
+The default runs offline from the maintained manifest and curated JSON.
+Regression tests are in `tests/test_game_mode_source_table.py` with the
+other independent N5.3 source-table audits.
+
+**Reviewed 2026-10-30:** all six source lines match, with 14 separately
+identified restrictions. TAG, VH and REM are source Troop Type selectors,
+not canonical rules identities; Motorcycle's printed restriction concerns
+**upward** Jump and its ladder prohibition is distinct from Climb.
+Irregular Training's Lieutenant restriction concerns **selection**, not
+the act of using a Skill. Existing broad `restricts-use-of` relations
+cannot currently express those qualifications. This test does not assert
+positive legality, Unit ownership, user-facing publication, or all
+possible N5.3 restrictions beyond this finite chart.
+
 ### N5.3 Silhouette Templates source and browser geometry
 
 The English N5.3 **Silhouette Templates** table (printed p. 18)

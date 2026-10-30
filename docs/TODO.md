@@ -1193,6 +1193,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Reconcile every chart row and footnote with its owning fact/typed relationship, then
       test conditional restrictions, positive/negative cases, and scope. Present the condition and
       source; an absent restriction edge must not be presented as an affirmative legality result.
+      - [x] Pin the six N5.3 **Restrictions Chart** rows (p. 194), containing
+        **14 prohibitions**, in a read-only source manifest and cross-domain
+        audit. Optional PDF verification checks all six ordered source
+        clauses against the pinned English document. The audit preserves
+        source-only TAG/VH/REM Troop Type selectors without inventing
+        canonical IDs or Unit ownership, and compares maintained
+        Equipment/Skill/Training facts where available. It separately flags
+        Motorcycle's **upward-only** Jump restriction and Irregular's
+        **Lieutenant selection** restriction, whose existing generic
+        `restricts-use-of` relations are not sufficiently scoped for
+        automatic legality decisions. This is source reconciliation, not
+        a published player-facing Restrictions reference.
+      - [ ] Add condition-aware, source-backed cross-domain restrictions
+        and a normal contextual reference view. Resolve the missing
+        Troop Type identity/selector presentation contract and explicit
+        ladder/upward-Jump qualifiers; preserve the distinction between
+        Lieutenant **eligibility** and use of the Lieutenant Skill.
+        Do not make absence of a relation into permission or treat the
+        existing generic Jump relation as a ban on every Jump.
   - **Completion:** each projection has a normal browser entry point, source reconciliation, and
     regression coverage for its exceptional rows. Exact variant reconciliation gates the usage
     index; it need not block independently ready lookup or Restrictions views.
@@ -1550,6 +1569,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                 `targets` arrays and rendered dash, and add conditional
                 player-facing guidance to consult the maintained rules
                 instead of implying there are no valid targets.
+              - [x] Independently pin the **N5.3 p. 194 Restrictions Chart**:
+                six source conditions and 14 prohibitions in an audit-only
+                cross-domain manifest. TAG/VH/REM remain source Troop Type
+                selectors, not manufactured canonical entity records;
+                motorcycle upward Jump and Lieutenant selection remain
+                scoped operations. See the separate generated Restrictions
+                reference TODO for the outstanding player-facing work.
         - [ ] Review remaining source-only profiles and curated-text
           candidates against the exact N5.3 clauses and Army snapshot;
           record confirmed object identities, separate carriers/delivery
