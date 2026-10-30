@@ -12,6 +12,7 @@ import os
 import sqlite3
 import subprocess
 import tempfile
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
@@ -167,9 +168,10 @@ def _atomic_write(path: Path, raw: bytes) -> None:
 
 def _replace_with_rollback(
     root: Path, payloads: dict[Path, bytes], post_validate: Any,
+    *, backup_prefix: str = "restrictions-v8-recovery-",
 ) -> Path:
     """Retain both original binaries; recover them on any failed write/check."""
-    backup = Path(tempfile.mkdtemp(prefix="restrictions-v8-recovery-", dir=root / "local"))
+    backup = Path(tempfile.mkdtemp(prefix=backup_prefix, dir=root / "local"))
     originals = {relative: (root / relative).read_bytes() for relative in payloads}
     for relative, data in originals.items():
         saved = backup / relative
@@ -278,3 +280,126 @@ def promote_restrictions_v9(stage_dir: Path, *, root: Path = ROOT) -> Path:
         # artifact, verified separately before promotion and retained in backups.
 
     return _replace_with_rollback(root, proposed, post_validate)
+
+
+def refresh_isolated_context_v9_release(*, root: Path = ROOT) -> Path:
+    """Synchronize only the two reviewed Isolated contextual links into a v9 pair.
+
+    Refuse a stale/unpaired current release or unexpected legacy graph changes.
+    Build and verify everything in ignored local/ before guarded replacement.
+    """
+    root = root.resolve()
+    current_rules = root / RULES
+    current_publication = root / PUBLICATION
+    army = root / ARMY
+    if not (root / "local").is_dir():
+        raise ValueError("Ignored local/ recovery directory is required")
+    git = subprocess.run(
+        ["git", "diff", "--quiet", "HEAD", "--", str(RULES)],
+        cwd=root, capture_output=True, check=False,
+    )
+    if git.returncode != 0:
+        raise ValueError("Tracked release rules.db differs from HEAD")
+    current = RulesDatabase(current_rules)
+    current.validate()
+    with closing(sqlite3.connect(current_rules)) as connection:
+        if connection.execute("PRAGMA user_version").fetchone()[0] != 9:
+            raise ValueError("Contextual refresh requires the promoted v9 release")
+    before = load_deployed_object_publication(current_publication, army, current_rules)
+    if before is None:
+        raise ValueError("Existing v9 publication does not match its release databases")
+    chart = _checked_chart(root)
+    documents = load_curated_directory(root / "data/curated/rules")
+    source = next(
+        document for _, document in documents
+        if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    isolated = next(row for row in source["records"] if row["id"] == "state:isolated")
+    expected_links = (
+        ("prevents-membership-in", "rule:fireteam-general"),
+        ("prevents-participation-in", "rule:coordinated-orders"),
+    )
+    if [
+        (edge["type"], edge["recordId"])
+        for edge in isolated["relations"][-2:]
+    ] != list(expected_links):
+        raise ValueError("Isolated contextual links differ from reviewed scope")
+
+    with tempfile.TemporaryDirectory(prefix="isolated-v9-stage-", dir=root / "local") as tmp:
+        stage = Path(tmp)
+        next_rules = stage / "rules.db"
+        next_publication = stage / "deployed-objects.json"
+        export_rules_database(documents, next_rules, restrictions_manifest=chart)
+        generated = RulesDatabase(next_rules)
+        generated.validate()
+        if (
+            generated.restrictions_payload() != current.restrictions_payload()
+            or not generated.restrictions_payload()["available"]
+        ):
+            raise ValueError("Reviewed N5.3 typed Restrictions changed during refresh")
+        relation_sql = (
+            "SELECT collection_id, record_id, position, relation_type, related_record_id "
+            "FROM record_relations ORDER BY collection_id, record_id, position"
+        )
+        with closing(sqlite3.connect(current_rules)) as old, closing(
+            sqlite3.connect(next_rules)
+        ) as new:
+            previous_edges = set(old.execute(relation_sql).fetchall())
+            next_edges = set(new.execute(relation_sql).fetchall())
+            old_position = max(
+                position for collection, record, position, _, _ in previous_edges
+                if (collection, record) == ("n5-core-v5.3", "state:isolated")
+            )
+            expected_added = {
+                ("n5-core-v5.3", "state:isolated", old_position + index,
+                 edge_type, target)
+                for index, (edge_type, target) in enumerate(expected_links, start=1)
+            }
+            if previous_edges - next_edges or next_edges - previous_edges != expected_added:
+                raise ValueError("Unexpected legacy graph delta in isolated context refresh")
+        proposed = build_publication(
+            army, next_rules, root / CURATED, root / DELIVERY, root / CANDIDATES,
+        )
+        # The maintained source file changed, so its publication provenance
+        # advances alongside the rules hash. The reviewed 17 object payloads,
+        # delivery decisions and all other fingerprints must remain identical.
+        expected_publication = json.loads(json.dumps(before))
+        expected_publication["sourceSnapshot"]["rulesDatabaseSha256"] = _sha(next_rules)
+        expected_publication["sourceSnapshot"]["curatedSourceSha256"] = _sha(root / CURATED)
+        if expected_publication != proposed:
+            raise ValueError(
+                "Isolated contextual refresh altered deployed-object content "
+                "or unrelated provenance"
+            )
+        next_publication.write_bytes(publication_bytes(proposed))
+        if load_deployed_object_publication(next_publication, army, next_rules) != proposed:
+            raise ValueError("Staged contextual publication does not match v9 rules")
+
+        payloads = {
+            RULES: next_rules.read_bytes(),
+            PUBLICATION: next_publication.read_bytes(),
+        }
+
+        def post_validate() -> None:
+            refreshed = RulesDatabase(current_rules)
+            refreshed.validate()
+            if refreshed.restrictions_payload() != current.restrictions_payload():
+                raise ValueError("Promoted contextual links changed typed Restrictions")
+            if load_deployed_object_publication(current_publication, army, current_rules) != (
+                proposed
+            ):
+                raise ValueError("Promoted contextual publication differs from staged source")
+            state = refreshed.composed_record("state:isolated")
+            if state is None or not all(
+                any(
+                    item["type"] == edge_type and item["record_id"] == target
+                    and item["direction"] == "outbound"
+                    for item in state["display_relations"]
+                )
+                for edge_type, target in expected_links
+            ):
+                raise ValueError("Promoted v9 lost Isolated contextual navigation")
+
+        return _replace_with_rollback(
+            root, payloads, post_validate, backup_prefix="isolated-v9-recovery-",
+        )

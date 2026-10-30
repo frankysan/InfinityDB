@@ -47,6 +47,11 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend:** Add source-scoped, bidirectional
+  Isolated State links for Fireteam membership and Coordinated Order
+  participation. Preserve the distinct Leader/member consequences, reuse
+  the Fireteams landing and coordinated-rule detail, and synchronize the
+  v9 rules database with the deployed-object publication.
 - **Data processing + Web backend + Web frontend:** Publish the N5.3
   Restrictions chart as a deterministic reference under General Rules.
   Reconcile its six subjects and 14 negative conditions with the pinned

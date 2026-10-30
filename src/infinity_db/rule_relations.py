@@ -85,6 +85,16 @@ RULE_RELATION_PRESENTATION: dict[str, dict[str, str] | None] = {
         "outbound": "Overrides",
         "inbound": "Overridden by",
     },
+    "prevents-membership-in": {
+        "group": "cancels-restricts",
+        "outbound": "Prevents affected Trooper's membership in",
+        "inbound": "Trooper membership prevented by",
+    },
+    "prevents-participation-in": {
+        "group": "cancels-restricts",
+        "outbound": "Prevents affected Trooper's participation in",
+        "inbound": "Trooper participation prevented by",
+    },
     "prevents-state-entry": {
         "group": "state-interactions",
         "outbound": "Prevents state entry",

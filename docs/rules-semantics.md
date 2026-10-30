@@ -702,6 +702,18 @@ The graph edge communicates the interaction category, not the complete rule. Exa
 such as Targeted's +3 and -3 MODs, Forward Observer's LoF requirement, and Reset's
 State-specific MODs remain facts of the owning definitions.
 
+Isolated State now has two deliberately distinct relations to existing N5.3
+rule topics: `prevents-membership-in` → `rule:fireteam-general` and
+`prevents-participation-in` → `rule:coordinated-orders`. The subject
+is the *affected Trooper*, not the entire Fireteam or Order. An Isolated
+Leader cancels the whole team; a non-Leader leaves without necessarily
+canceling it. Existing reviewed Fireteam text renders its State references
+on the dedicated Fireteams landing, while the Coordinated Orders detail
+derives the reciprocal relation from the single authored Isolated edge.
+The State also links both topics explicitly. Neither link grants or
+computes eligibility, overrides the other rules, or indicates that a
+static Unit is currently Isolated.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Targeted_State>

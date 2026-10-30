@@ -76,19 +76,33 @@ def build_parser() -> argparse.ArgumentParser:
         "--promote-restrictions-v9", type=Path,
         help="Promote a verified v9 pair with v8 recovery copies",
     )
+    migration.add_argument(
+        "--refresh-isolated-context-v9", action="store_true",
+        help="Refresh the exact reviewed Isolated State contextual links in a matched v9 pair",
+    )
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
-    if args.stage_restrictions_v9 is not None or args.promote_restrictions_v9 is not None:
+    if (
+        args.stage_restrictions_v9 is not None
+        or args.promote_restrictions_v9 is not None
+        or args.refresh_isolated_context_v9
+    ):
         if args.check:
             raise ValueError("--check cannot be combined with v9 migration operations")
         from tools.restrictions_v9_release import (
             promote_restrictions_v9,
+            refresh_isolated_context_v9_release,
             stage_restrictions_v9,
         )
 
+        if args.refresh_isolated_context_v9:
+            backup = refresh_isolated_context_v9_release()
+            print("Refreshed the reviewed Isolated links in v9 release artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
         if args.stage_restrictions_v9 is not None:
             report = stage_restrictions_v9(args.stage_restrictions_v9)
             print("Staged verified v9 rules database and paired deployed-object publication.")
@@ -96,6 +110,8 @@ def main() -> int:
             print(f"Staging report: {args.stage_restrictions_v9 / 'staging-report.json'}")
             print("No tracked artifacts were modified.")
             return 0
+        if args.promote_restrictions_v9 is None:
+            raise ValueError("Missing v9 promotion staging directory")
         backup = promote_restrictions_v9(args.promote_restrictions_v9)
         print("Promoted v9 rules database and matching deployed-object publication.")
         print(f"Original v8 release pair retained: {backup}")

@@ -1975,18 +1975,26 @@ only; their types and endpoints remain unchanged for compatibility.
 relationship labels. This is contextual help, not a declaration
 or Army selection legality resolver.
 
-**Isolated State cross-context audit:** the focused
-`tests/test_state_catalog.py::test_isolated_state_fireteam_and_coordinated_order_navigation_source_boundary`
-regression reads the reviewed curated rules in an independent
-test database. It confirms that Isolated forbids Fireteam membership
-and Coordinated Order participation, that Fireteam rules already
-distinguish Leader cancellation from ordinary member departure, and
-that Coordinated Orders' shared-Training requirement does not
-establish participation eligibility. This is evidence for a
-**remaining State-side navigation gap**, not proof that reciprocal
-links are published: the Isolated reference still needs a scoped
-back-link to those rule topics. No new general `restricts-use-of`
-edge or Unit-level active-State inference was introduced.
+**Isolated State contextual navigation:** the source regression in
+`tests/test_state_catalog.py` checks distinct membership and
+participation edges, two-way composed relations, and maintained
+text that distinguishes Leader cancellation from member departure.
+The tracked v9 rules database was rebuilt alongside its matching
+deployed-object publication using the guarded
+`tools.build_deployed_object_publication --refresh-isolated-context-v9`
+command. This checks exactly two additional legacy relation rows,
+unchanged 14 typed Restrictions, unchanged reviewed deployed-object
+content, and updated rules/curated-source fingerprints; original
+paired v9 artifacts are retained under ignored `local/`.
+An API regression checks the real routed destination: Fireteam
+General Rules belongs to the specialized `/fireteams` landing
+whose reviewed facts already link back to Isolated, whereas
+Coordinated Orders has a standard General Rules detail with a
+reciprocal typed relationship. The
+`test_isolated_navigation_browser_links` Chromium acceptance checks
+the State's two destinations, the reciprocal Coordinated Orders link
+and the Fireteams existing Isolated link at 1440/390 px.
+No live State, whole-team ban, or Army legality is inferred.
 
 Irregular Training has no standalone catalog route. The source
 ownership is now verified against the tracked Army database:

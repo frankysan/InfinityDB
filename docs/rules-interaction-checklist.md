@@ -32,7 +32,7 @@ review. `declaration-category` projection records are excluded.
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **200/200** complete, **0** pending.
-- Current authored outgoing relations: **510**.
+- Current authored outgoing relations: **512**.
 - Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
@@ -589,6 +589,8 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → Reset (`skill:reset`)
   - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
   - `restricts-use-of` → NCO (`skill:nco`)
+  - `prevents-membership-in` → Fireteams: General Rules (`rule:fireteam-general`)
+  - `prevents-participation-in` → Coordinated Orders (`rule:coordinated-orders`)
   - future [post-0.7.0; deferred]: `causes-state` → Disconnected State (`state:disconnected`) — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
 - [x] **Normal State** (`state:normal`) — reviewed
   - outgoing: none

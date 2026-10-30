@@ -15049,7 +15049,7 @@
                 ],
                 "requirements": [],
                 "restrictions": [
-                    "An Isolated Trooper cannot be part of a Fireteam or take part in a Coordinated Order."
+                    "An Isolated Trooper cannot belong to a [[rule:fireteam-general|Fireteam]] or participate in a [[rule:coordinated-orders|Coordinated Order]]. For Fireteams, the Leader entering Isolated cancels the whole team; an ordinary member entering Isolated leaves without necessarily canceling the team."
                 ]
             },
             "labelIds": [],
@@ -15075,6 +15075,14 @@
                 {
                     "type": "restricts-use-of",
                     "recordId": "skill:nco"
+                },
+                {
+                    "type": "prevents-membership-in",
+                    "recordId": "rule:fireteam-general"
+                },
+                {
+                    "type": "prevents-participation-in",
+                    "recordId": "rule:coordinated-orders"
                 }
             ]
         },

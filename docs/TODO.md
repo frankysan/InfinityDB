@@ -1355,16 +1355,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       from ordinary member departure. Coordinated Orders' same-Training
       requirement does not override isolation. A source/database regression
       pins these contextual facts without inventing automatic State transitions.
-    - [ ] **Publish State-to-rule contextual navigation for the Isolated case**
-      using a source-authored, bidirectional reference with explicit membership/
-      participation scope. The Isolated State page currently lacks a reverse
-      link to Fireteam General Rules or Coordinated Orders even though it
-      states both restrictions. A generic `restricts-use-of` edge alone
-      would be ambiguous (the isolated member does not prohibit an entire
-      Fireteam from existing). Reuse reviewed source rules, preserve exact
-      Leader/non-Leader and Co-Order distinctions, and regenerate the paired
-      v9 rules database/publication before claiming the browser surface is
-      complete; do not infer live Unit State or Army legality.
+    - [x] **Publish scoped Isolated State navigation** to Fireteam General
+      Rules and Coordinated Orders. Two distinct source-authored edges,
+      `prevents-membership-in` and `prevents-participation-in`, carry
+      the affected-Trooper scope and generate reverse composed links.
+      The State's maintained restrictions now link both owning rule
+      topics and distinguish Leader cancellation from ordinary member
+      departure. The Fireteams-specific landing at `/fireteams`
+      preserves its existing State links; the Coordinated Orders
+      detail has the reciprocal typed relationship. HTTP and normal
+      Chromium tests at 1440/390 px cover both publication paths.
+      Regenerated the tracked v9 rules.db
+      and paired ignored deployed-object publication with guarded
+      checks and retained v9 recovery copies. No Unit live-State,
+      Team-wide restriction, or legality inference was introduced.
   - **Completion:** relevant context is linked from the owning rule and State help with applicable
     conditions/scope; no duplicate definitions or static assertions of a Trooper's live State.
 
