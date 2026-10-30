@@ -68,6 +68,56 @@ def candidate(
         connection.close()
 
 
+def test_disposable_v8_rollback_pair_preserves_v9_reviewed_objects(
+    legacy_v8_db: Path, tmp_path: Path,
+) -> None:
+    """Rollback image must differ only in the rules DB and its pinned SHA-256."""
+    import hashlib
+
+    from infinity_db.deployed_object_publication import load_deployed_object_publication
+    from tools.build_deployed_object_publication import build_publication, publication_bytes
+
+    army = ROOT / "data/generated/infinity.db"
+    arguments = (
+        ROOT / "data/curated/rules/n5-core-v5.3.json",
+        ROOT / "config/validation/deployed-object-delivery-reviews.json",
+        ROOT / "config/validation/deployed-object-candidate-reviews.json",
+    )
+    current = RulesDatabase(DB)
+    rollback = RulesDatabase(legacy_v8_db)
+    current.validate()
+    rollback.validate()
+    assert len(current.restrictions_payload()["items"]) == 14
+    assert rollback.restrictions_payload() == {
+        "formatVersion": 1,
+        "available": False,
+        "source": None,
+        "polarity": "prohibition",
+        "items": [],
+        "evaluationSupported": False,
+    }
+    current_publication = build_publication(army, DB, *arguments)
+    v8_publication = build_publication(army, legacy_v8_db, *arguments)
+    expected = copy.deepcopy(v8_publication)
+    expected["sourceSnapshot"]["rulesDatabaseSha256"] = (
+        current_publication["sourceSnapshot"]["rulesDatabaseSha256"]
+    )
+    assert expected == current_publication
+    assert v8_publication["sourceSnapshot"]["rulesDatabaseSha256"] == (
+        hashlib.sha256(legacy_v8_db.read_bytes()).hexdigest()
+    )
+
+    staged_publication = tmp_path / "deployed-objects.json"
+    staged_publication.write_bytes(publication_bytes(v8_publication))
+    assert load_deployed_object_publication(
+        staged_publication, army, legacy_v8_db,
+    ) == v8_publication
+    with sqlite3.connect(legacy_v8_db) as old, sqlite3.connect(DB) as new:
+        assert old.execute("PRAGMA user_version").fetchone()[0] == 8
+        assert new.execute("PRAGMA user_version").fetchone()[0] == 9
+        assert legacy_relation_snapshot(old) == legacy_relation_snapshot(new)
+
+
 def legacy_relation_snapshot(connection: sqlite3.Connection) -> list[tuple]:
     return connection.execute(
         "SELECT collection_id, record_id, position, relation_type, related_record_id "

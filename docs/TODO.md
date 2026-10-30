@@ -1289,11 +1289,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Source-specific typed restrictions and static chart links
         remain the authoritative explanation. Tests exercise v8/v9
         projections and untouched structural edges.
-      - [ ] **Verify v8 rollback in a real release image/on the host**
-        with the retained paired v8 database/publication, then check
-        the v9 forward and rollback paths against the release process.
-        Do not treat a green v9 deployment-smoke job as proof of a
-        hosted or image-level v8 rollback.
+      - [x] **Add a CI rollback-image rehearsal** to the deployment
+        smoke workflow. Generate an independent v8/compatibility-10
+        database and matching publication under ignored `local/`,
+        compare them with the tracked v9 pair (all reviewed objects
+        and legacy relations identical; only the rules database SHA
+        differs), and build a disposable v8 overlay image from the
+        same already-validated v9 application. Require v8 schema,
+        unavailable typed Restrictions, full container startup/HTTP
+        checks, then recheck the original v9 image. Hermetic
+        release-pair parity and workflow contract tests pass locally.
+        **The Docker rehearsal itself awaits CI execution.**
+      - [ ] **Confirm the v8 rollback-image CI gate passes** on an
+        exact commit. Subsequently validate the real host-level
+        rollback/forward process using the original retained v8
+        database/publication pair. The recreated CI v8 pair proves
+        compatibility, not historical-byte identity or a production
+        deployment. No live-host changes are authorized by this step.
       - [ ] Review the **seven absent conventional legacy edges** only
         if a consumer still requires them; all 14 restrictions already
         have typed source-backed coverage. Preserve TAG/VH/REM as

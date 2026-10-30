@@ -369,6 +369,38 @@ def test_wheel_packages_runtime_unit_filter_semantics() -> None:
     assert "config/catalogs/unit-filter-semantics.json" in catalog_data
 
 
+def test_deployment_smoke_builds_and_exercises_v8_rollback_image() -> None:
+    """Rehearse v8 with the same installed application, never overwrite v9."""
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    expected_order = (
+        "sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets",
+        "python -m infinity_db build-rules --output local/restrictions-v8-ci/rules.db",
+        (
+            "python -m tools.build_deployed_object_publication "
+            "--rules-db local/restrictions-v8-ci/rules.db "
+            "--output local/restrictions-v8-ci/deployed-objects.json"
+        ),
+        "--output local/restrictions-v8-ci/deployed-objects.json --check",
+        'if old.execute("PRAGMA user_version").fetchone()[0] != 8:',
+        "FROM ${BASE_IMAGE}",
+        "COPY --chown=appuser:appuser rules.db /app/data/rules.db",
+        "COPY --chown=appuser:appuser deployed-objects.json /app/data/deployed-objects.json",
+        (
+            "docker build --build-arg BASE_IMAGE=infinity-db:deployment-smoke "
+            "--tag infinity-db:rollback-v8 local/restrictions-v8-ci"
+        ),
+        "sh scripts/verify-container-image.sh infinity-db:rollback-v8 --published-assets",
+        "Verify v9 image remains valid after rollback rehearsal",
+    )
+    positions = [workflow.index(fragment) for fragment in expected_order]
+    assert positions == sorted(positions)
+    assert 'if expected != current_publication:' in workflow
+    assert "Rollback modified the canonical legacy relationship graph" in workflow
+    assert 'assert r.restrictions_payload()["available"] is False' in workflow
+    assert "data/generated/rules.db /app/data/rules.db" not in workflow
+    assert "data/generated/deployed-objects.json /app/data/deployed-objects.json" not in workflow
+
+
 def test_source_ci_builds_ignored_release_publication_before_tests() -> None:
     workflow = _read(".github/workflows/source-checks.yml")
     generate = workflow.index("python -m tools.build_deployed_object_publication")

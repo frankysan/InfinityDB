@@ -120,11 +120,27 @@ images still require the complete tracked publication through deployment-smoke v
 release `infinity.db`, `rules.db`, and processed SVG publication, then runs
 `scripts/verify-container-image.sh` with published-asset validation.
 
-Deployment smoke tests the exact artifact model used by tagged production deployment. It does not
-rebuild runtime databases and is not a substitute for the source or installed-wheel checks.
-The `/changes` probe compares the served release-note content with the installed canonical
-changelog. It accepts both development notes under `Unreleased` and finalized version sections,
-and rejects stale or missing release-note content.
+Deployment smoke first tests the exact v9 artifact model used by tagged production deployment.
+It does not rebuild the tracked release databases and is not a substitute for the source or
+installed-wheel checks. The `/changes` probe compares the served release-note content with
+the installed canonical changelog. It accepts both development notes under `Unreleased`
+and finalized version sections, and rejects stale or missing release-note content.
+
+**Rollback-image rehearsal (CI gate, pending its first hosted run):** the workflow also rebuilds
+a **disposable v8/compatibility-10** `rules.db` from current reviewed curated sources under
+ignored `local/` and generates its matching deployed-object publication. It validates both
+databases and publication fingerprints, requires the complete reviewed object content
+and canonical legacy relationship graph to remain unchanged, and confirms that the v8 API
+reports Restrictions as unavailable rather than inventing permissions. A Docker image
+derived from the already validated v9 release image replaces **only** `rules.db` and
+`deployed-objects.json`, leaving the installed application, Army database, symbols,
+and runtime configuration unchanged. The full production-startup/image verifier runs
+against that v8 overlay image, followed by another check of the original v9 image.
+
+This tests application compatibility with a reconstructed source-equivalent v8 pair;
+it does **not** claim byte identity with the retained historical v8 recovery files,
+test a host-level deployment, or swap live containers. The production rollback path
+and exact retained backup still require separate operational validation.
 
 ## Release evidence retention
 

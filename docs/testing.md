@@ -2026,12 +2026,23 @@ under ignored `local/`. The historical Hacking Device citation test
 now checks source citations and deployed-object content across later
 schema versions, not obsolete byte identity.
 
-The deployment-smoke workflow now requires 14 typed constraints in the
-tracked v9 database and builds the matching deployed-object publication
-before the image; `scripts/verify-container-image.sh` checks the
-actual HTTP Restrictions conditions after container startup and keeps
-v8 unavailable-data behavior for rollback. These Docker/CI checks are
-**configured but not yet executed for this local promotion**.
+The deployment-smoke workflow requires 14 typed constraints in the
+tracked v9 database and builds its matching deployed-object publication
+before the image; `scripts/verify-container-image.sh` checks the actual
+HTTP Restrictions conditions after startup and accepts explicit v8
+unavailable-data behavior. An additional **CI rollback-image rehearsal**
+rebuilds a disposable v8 rules/publication pair, compares its 17 reviewed
+objects and legacy graph against v9, overlays both artifacts into a copy
+of the tested release image, starts that v8 image with full HTTP checks,
+then rechecks the original v9 image. The original retained v8 backup
+and production host are not altered by the CI rehearsal. The overlay
+Docker gate has not yet been run in hosted CI for this change.
+
+Local regression coverage:
+`tests/test_restriction_storage_candidate.py::test_disposable_v8_rollback_pair_preserves_v9_reviewed_objects`
+tests actual matched v8/v9 publication payloads, while
+`tests/test_deployment_scripts.py::test_deployment_smoke_builds_and_exercises_v8_rollback_image`
+pins the sequence and isolation of the CI image gates.
 The local promotion and remaining hosted acceptance are recorded in
 [the data model](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
 Normal tests never write to the tracked runtime database.
