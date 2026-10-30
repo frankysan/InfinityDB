@@ -513,9 +513,14 @@ def test_sacha_numeric_ava_is_visible_in_its_army_context(
              "hatail-spec-ops", "tohaa-team-ops", "rumbler-spec-ops", "na2-team-ops"),
             {"armies": 25, "profiles": 77, "loadouts": 248}, id="army13-16",
         ),
+        pytest.param(
+            ("ioann-bann-varangian-dog-warrior", "najjarun-engineers",
+             "sacha-xenotech-hunters", "racerbots"),
+            {"armies": 22, "profiles": 30, "loadouts": 37}, id="army17-20",
+        ),
     ),
 )
-def test_army_02_to_16_native_profiles_costs_and_ava_in_browser(
+def test_army_update_native_profiles_costs_and_ava_in_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
     slugs: tuple[str, ...], expected_totals: dict[str, int],
 ) -> None:

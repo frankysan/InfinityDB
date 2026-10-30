@@ -1,4 +1,4 @@
-"""Selected ARMY-02–16 current-source profiles, not historical deltas or list legality."""
+"""ARMY-02–20 current-source profiles, not historical deltas or list legality."""
 
 from __future__ import annotations
 
@@ -49,6 +49,10 @@ SOURCE_CONTEXTS = {
     1909: {801},
     1925: {901, 902, 904, 905, 908, 909},
     1939: {902, 904, 905, 908, 909},
+    1940: {305, 306, 605, 801, 1001, 1002, 1101, 1102},
+    314: {401, 402, 403, 404, 908},
+    1874: {107, 204, 304, 1003, 1102},
+    1905: {101, 201, 401, 501},
 }
 SOURCE_IDS = tuple(SOURCE_CONTEXTS)
 SOURCE_VERSION_OVERRIDES = {
@@ -128,7 +132,7 @@ def _assert_native_items(source: dict[str, Any], published: dict[str, Any]) -> N
 
 
 @pytest.mark.parametrize("source_id", SOURCE_IDS)
-def test_army_02_to_16_complete_native_profiles_and_loadouts_reach_api(
+def test_army_update_complete_native_profiles_and_loadouts_reach_api(
     profile_app: Callable[..., Any], source_documents: dict[int, dict[str, Any]],
     source_id: int,
 ) -> None:
@@ -144,13 +148,18 @@ def test_army_02_to_16_complete_native_profiles_and_loadouts_reach_api(
     unit = json.loads(body)
     assert unit["source_ids"] == [source_id]
     assert {army["id"] for army in unit["armies"]} == contexts
-    chart = next(chart for chart in unit["source_charts"]
-                 if chart["source_unit_id"] == source_id)
-    assert {(version["version"], version["source_file"])
-            for version in chart["source_versions"]} == {
-        (source_documents[army_id]["version"], source_documents[army_id]["source_file"])
-        for army_id in contexts
-    }
+    if source_id in {1940, 314, 1874, 1905}:
+        assert not any(source.get("spectables") for source in sources.values())
+        assert unit["source_charts"] == []
+    else:
+        assert len(unit["source_charts"]) == 1
+        chart = unit["source_charts"][0]
+        assert chart["source_unit_id"] == source_id
+        assert {(version["version"], version["source_file"])
+                for version in chart["source_versions"]} == {
+            (source_documents[army_id]["version"], source_documents[army_id]["source_file"])
+            for army_id in contexts
+        }
     for army in unit["armies"]:
         original = sources[army["id"]]
         filters = source_documents[army["id"]]["filters"]

@@ -183,7 +183,7 @@ counts above.
   separate. Chromium verifies the six ordinary Unit pages at
   1440/390/320 px in light/dark themes (36 page checks), including
   numeric profiles, AVA, costs and linked item placement. See
-  [the validation contract](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
+  [the validation contract](testing.md#army-update-profile-acceptance).
   This closes selected current native publication parity only;
   upgrade/profile-transition semantics, Fireteam/roster legality,
   historical deltas and final hosted acceptance remain separate.
@@ -198,7 +198,7 @@ counts above.
   Combined Army and Onyx. Chromium checks all eight ordinary Unit
   pages at 1440/390/320 px in light/dark themes (48 page checks),
   including exact profile names/values, AVA, costs and linked items.
-  The [same validation contract](testing.md#selected-spec-ops-and-team-ops-profile-acceptance)
+  The [same validation contract](testing.md#army-update-profile-acceptance)
   retains the native-publication scope; no transition, upgrade,
   legality, historical-change or hosted-release approval is implied.
 
@@ -213,7 +213,7 @@ counts above.
   Chromium checks all eight ordinary Unit pages at 1440/390/320 px
   in light/dark themes (48 page checks), including profile
   names/values, AVA, costs and linked item placement. The
-  [validation contract](testing.md#selected-spec-ops-and-team-ops-profile-acceptance)
+  [validation contract](testing.md#army-update-profile-acceptance)
   retains the native-publication scope; upgrade/profile-transition
   semantics, roster/Fireteam legality, historical change and final
   hosted acceptance remain separate.
@@ -230,7 +230,7 @@ counts above.
   including exact profile names/values, AVA, costs and linked
   items. Together, ARMY-02–16 native publication coverage now
   includes all 30 source Units, 93 contexts, 293 profiles and
-  924 loadouts. The [validation contract](testing.md#selected-spec-ops-and-team-ops-profile-acceptance)
+  924 loadouts. The [validation contract](testing.md#army-update-profile-acceptance)
   keeps upgrade/profile-transition mechanics, roster/Fireteam
   legality, historical changes and final hosted acceptance separate.
 
@@ -254,6 +254,23 @@ counts above.
   pass Chromium at 1440/390/320 px; Ioann's two Fireteam chart
   pages pass at the same widths (18 page/viewport checks).
   No production-data changes were required.
+
+  **2026-10-30 follow-up — ARMY-17–20 full native publication:**
+  The broader source inventory covers 22 contexts, 30 profiles and
+  37 loadouts: eight Ioann Bann contexts, five Najjarun contexts,
+  five Sāchā contexts and four Racerbot contexts. This includes
+  Ioann outside O-12/Starmada, Najjarun in Ramah/Dahshat, Sāchā in
+  Shindenbutai and both USAriadna loadouts, and Racerbot in Yu Jing
+  and Nomads. Pinned-source-to-API checks preserve all ordered
+  Attributes, AVA, native item IDs/quantities/Extras, Orders and
+  costs. Chromium checks all four ordinary Unit pages at
+  1440/390/320 px in light/dark themes (24 pages), alongside the
+  existing Deactivator/Bangbomb classification and selected
+  Fireteam checks. ARMY-02–20 now has native publication coverage
+  for 34 source Units, 115 contexts, 323 profiles and 961 loadouts.
+  See [validation](testing.md#army-update-profile-acceptance);
+  roster legality, profile transitions/upgrades, historical deltas
+  and final hosted acceptance remain separate.
 
   A subsequent **ARMY-01 current-state source/chart recheck**
   covers all 58 raw Army contexts and their 57 application chart
@@ -291,11 +308,11 @@ counts above.
   acceptance cover these disclosures and navigation, not a current
   N5 Reinforcements ruling or complete roster legality.
 
-  These bounded checks do **not** approve every profile, option
-  cost, faction availability, Fireteam chart, or historical Army
-  delta. ARMY-01's annotation-specific profile interpretation,
-  current N5 Reinforcements authority and remaining
-  ARMY-02–20 roster/profile semantics remain open; final hosted
+  These bounded checks establish native profile/loadout publication
+  for the reviewed ARMY-02–20 Units, not every catalog Unit,
+  Fireteam chart or historical Army delta. ARMY-01's annotation-specific
+  profile interpretation, current N5 Reinforcements authority and
+  roster/profile-transition semantics remain open; final hosted
   release-browser acceptance is separate. Keep unavailable
   pre-change evidence as a provenance limitation, not a
   present-state defect.

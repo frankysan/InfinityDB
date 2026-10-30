@@ -333,32 +333,31 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Source/API and Chromium tests cover the notices, real
         Wildcard toggle, parent navigation/back and empty/missing
         chart distinctions at 1440/390/320 px in light/dark themes.
-      - [x] **Data processing + Web backend + Web frontend — ARMY-02–16
-        native profile/loadout parity:** All 30 Spec-Ops/TEAM-OPS
-        source Units now have pinned-source-to-API coverage for
-        93 Army/Unit contexts, 293 ordered profiles and 924 ordered
+      - [x] **Data processing + Web backend + Web frontend — ARMY-02–20
+        native profile/loadout parity:** All 34 reviewed source
+        Units now have pinned-source-to-API coverage for
+        115 Army/Unit contexts, 323 ordered profiles and 961 ordered
         loadouts. Archive/member hashes and exact `.158`/`.159`
         revisions are verified; source Attributes, AVA, items/Extras,
         Orders, costs and disabled options remain contextual.
-        Chromium checks all 30 ordinary Unit pages at 1440/390/320 px
-        in light/dark themes (180 pages), including profile names/
+        Chromium checks all 34 ordinary Unit pages at 1440/390/320 px
+        in light/dark themes (204 pages), including profile names/
         values, AVA, costs, linked items, keyboard expansion and
         overflow. Per-batch counts and exceptional source contexts
         (including Hatail's separate Symbiont profiles and the
         Rumbler/NA2 grouping distinction) are retained in
-        [validation](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
+        [validation](testing.md#army-update-profile-acceptance).
         This completes native publication parity only; upgrade/
         profile-transition rules, roster/Fireteam legality, historical
         deltas and final hosted acceptance remain separate.
-      - [ ] **ARMY-01 remaining semantics, full roster/profile
-        acceptance, and release gates:** Review annotation-specific
+      - [ ] **ARMY-01 remaining semantics and release gates:** Review annotation-specific
         profile applicability where it is not established by the
         original note and existing equivalence projection (including
         Triad, Varuna Div and Strategic Deployment); retain the
         unresolved current N5 Reinforcements authority boundary.
-        Compare complete unit/profile/option costs and source-specific
-        AVA for ARMY-17–20 where still unreviewed; ARMY-02–16
-        native publication parity is covered above. Do not infer
+        ARMY-02–20 native profile/loadout publication parity is
+        covered above; this does not validate roster legality or
+        profile-transition/upgrade semantics. Do not infer
         a historical before/after delta without an earlier
         pinned Army snapshot. Final release-matched database,
         browser and CI acceptance remain separate gates.

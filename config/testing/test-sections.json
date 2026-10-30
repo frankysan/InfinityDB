@@ -80,7 +80,7 @@
         "test_scenario_map_svg",
         "test_skill_config",
         "test_silhouette_template_source_table",
-        "test_spec_ops_profile_publication",
+        "test_army_profile_publication",
         "test_spec_ops_source_charts",
         "test_state_catalog",
         "test_standard_game_reference_tables",
