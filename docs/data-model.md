@@ -315,7 +315,7 @@ modifiers, the default additional Critical Saving Roll (unless the defender has
 Immunity (Critical)), and the Comms Attack/Non-Lethal/Stunned exceptions. These
 facts belong to Immunity, **not** to the ordered Combined Ammunition mapping:
 checking whether a defender's particular Immunity covers an entire attack or
-one or more constituent effects remains unimplemented. Four `reviewedCombinedCases`
+one or more constituent effects remains unimplemented. Five `reviewedCombinedCases`
 now give **rule-derived, conditional** examples: Immunity (ARM) against source
 IDs 10 (AP+DA) and 13 (AP+Exp), plus Immunity (AP) against AP+DA and
 the exact non-Comms E/M CC Weapon's Immunity (BTS) interaction.
@@ -358,7 +358,15 @@ result. The surviving **Non-Lethal** Trait and absence of E/M State
 effects are shown only as source-backed player guidance. The
 Armed Turret source weapon 226's conflicting one-roll E/Mitter
 mode remains untouched and explicitly excluded (REA-045).
-The eight reviewed interactions are a curated reference, not a
+The **fifth** combined case is the exact non-Comms
+`weapon:silenced-pistol` AP+Shock/BTS/2 profile (Army Ammunition
+source ID 30). A defender with Immunity (AP) ignores AP's halving,
+retaining the one-roll Shock effect at full BTS, including its
+VITA=1 failed-roll Dead condition. Silent (-6) remains a
+separately conditional Trait. The Army profile and Ammunition
+component mapping remain unchanged; this is not a generalized
+partial-Immunity algorithm.
+The nine reviewed interactions are a curated reference, not a
 runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms

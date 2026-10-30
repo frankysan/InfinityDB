@@ -1018,11 +1018,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         fail-closed validation mutations, eight-card renderer and
         1440/390/320 px browser acceptance; promote the coordinated
         rules/publication pair with a recovery backup.
+      - [x] Review **Silenced Pistol** as a source-bounded partial
+        component-Immunity case: source Ammunition ID 30 `AP+Shock`,
+        one BTS/2 Saving Roll and the separate Silent (-6) Trait
+        (N5.3 pp. 63, 65, 67, 95–96, 175, 182).
+        With Immunity (AP), only AP is ignored: one full-BTS roll
+        remains (two for a Critical), Shock retains its conditional
+        VITA=1 failed-save direct-Dead effect, and Silent remains
+        independently conditional. Restrict the rule-derived
+        result to `weapon:silenced-pistol`; do not rewrite Army
+        source values or infer a general component evaluator.
+        Promote rules/publication together with a recovery backup
+        and preserve all 17 reviewed deployed objects.
       - [ ] Review other BTS-component Immunity outcomes using exact
-        non-Comms Weapon/combined-Ammunition evidence. Neither
-        standalone E/Mitter, E/M CC nor Plasma authorizes a
-        generic E/M, Comms Attack or arbitrary combined-effect
-        evaluator.
+        non-Comms Weapon/combined-Ammunition evidence. The four
+        reviewed BTS-based examples do not authorize generic E/M,
+        Comms Attack or arbitrary combined-effect adjudication.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

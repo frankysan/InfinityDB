@@ -2643,8 +2643,26 @@ REA-045: Armed Turret weapon 226 retains an unexplained imported
 E/Mitter variant with one BTS/2 Saving Roll. Neither source profile
 is modified by the reviewed interaction.
 
-The Skill reference now presents **eight reviewed interactions**:
-four Combined Ammunition cases, Flash Pulse and standalone E/Mitter
+**Silenced Pistol versus Immunity (AP)** adds one tightly scoped
+**partial-component** BTS case. The official N5.3 p. 182 Weapon
+Chart identifies its AP+Shock source Ammunition and a single BTS/2
+Saving Roll, while pp. 63, 65, 67 and 95–96 establish the AP
+defense reduction, Shock's conditional failed-roll effect,
+Combined Ammunition and Immunity (AP) applicability. Against
+that reviewed non-Comms Weapon profile, Immunity (AP) ignores
+only AP: the target makes **one full-BTS Saving Roll** on a hit,
+or two for a Critical absent Immunity (Critical). Shock remains
+operative, so failure against a VITA=1 target still cancels
+applicable Unconscious protection and causes Dead State.
+The separate Silent (-6) Trait continues to use its own
+ZoC/outside-LoF conditions (p. 175); it is not a Saving Roll
+MOD. This is a rule-derived case, not a printed Immunity
+example. It neither changes the Army Silenced Pistol's
+BTS/2 source profile nor adjudicates arbitrary AP+Shock
+or mixed-Attribute attacks.
+
+The Skill reference now presents **nine reviewed interactions**:
+five Combined Ammunition cases, Flash Pulse and standalone E/Mitter
 Weapon cases, one Plasma Combined Saving Roll and one Vulnerability
 example. Chromium acceptance at 1440/390/320 px verifies the new
 conditional source explanation, semantic links and mobile layout.

@@ -903,7 +903,7 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
     facts = immunity["facts"]["immunityInteraction"]
     cases = facts["reviewedCombinedCases"]
     assert [(case["sourceAmmunitionId"], case["when"]["immunity"])
-            for case in cases] == [(10, "ARM"), (13, "ARM"), (10, "AP"), (5, "BTS")]
+            for case in cases] == [(10, "ARM"), (13, "ARM"), (10, "AP"), (30, "AP"), (5, "BTS")]
     for case, normal, critical in zip(cases[:2], (2, 3), (3, 4), strict=True):
         source = source_map[case["sourceAmmunitionId"]]
         assert case["sourceAmmunitionName"] == source["name"]
@@ -933,7 +933,23 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
         "remainingComponents": ["ammunition:da"],
     }
     assert ap_case["evidence"] == "derived-from-pinned-general-rules"
-    bts_cc = cases[3]
+    silenced = cases[3]
+    assert silenced["sourceAmmunitionName"] == source_map[30]["name"]
+    assert silenced["components"] == source_map[30]["components"]
+    assert silenced["when"] == {
+        "immunity": "AP", "savingAttribute": "BTS", "attackClass": "non-comms",
+        "weaponId": "weapon:silenced-pistol",
+    }
+    assert silenced["withoutImmunity"] == {
+        "hitRolls": 1, "criticalRolls": 2, "savingAttribute": "BTS/2",
+    }
+    assert silenced["withImmunity"] == {
+        "hitRolls": 1, "criticalRolls": 2, "savingAttribute": "BTS",
+        "treatedAs": "ammunition:shock",
+        "ignoredComponents": ["ammunition:ap"],
+        "remainingComponents": ["ammunition:shock"],
+    }
+    bts_cc = cases[4]
     assert bts_cc["sourceAmmunitionName"] == source_map[5]["name"] == "N+E/M"
     assert bts_cc["components"] == source_map[5]["components"]
     assert bts_cc["when"] == {
@@ -1610,7 +1626,7 @@ def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
     )
     assert [case["sourceAmmunitionId"] for case in rules[0]["facts"][
         "immunityInteraction"
-    ]["reviewedCombinedCases"]] == [10, 13, 10, 5]
+    ]["reviewedCombinedCases"]] == [10, 13, 10, 30, 5]
 
 
 def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(

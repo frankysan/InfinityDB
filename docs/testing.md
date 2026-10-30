@@ -4127,6 +4127,21 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Silenced Pistol / partial Immunity (AP), 2026-10-30:**
+`tests/test_immunity_ap_silenced_pistol.py` pins English N5.3
+pp. 63, 65, 67, 95–96, 175, 182, exact Army source
+Ammunition 30 (`AP+Shock`) and the published Silenced Pistol
+BTS/2 × 1 Weapon profile. The fifth typed Combined Ammunition
+case retains Shock's VITA=1 failed-save effect and separately
+conditional Silent (-6) when AP is ignored. Curated mutations
+reject changed Weapon identity, Comms scope, source components,
+roll counts, BTS attributes and retained Shock. Public
+Immunity API and Chromium at 1440/390/320 px verify
+the ninth reviewed case without altering Weapon profile data.
+The synchronized rules DB/deployed-object publication uses
+`tools/stage_immunity_ap_silenced_pistol.py`, retaining all
+17 reviewed objects with recovery backups.
+
 **Standalone E/Mitter / Immunity (BTS), 2026-10-30:**
 `tests/test_immunity_bts_emitter.py` pins N5.3 pp. 64, 95–96
 and 186, standalone Army weapon 25 / E/M source 14, and the

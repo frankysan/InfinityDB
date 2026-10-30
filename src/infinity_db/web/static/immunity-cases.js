@@ -106,15 +106,28 @@ export function immunityCaseRows(facts = {}) {
       title: [
         text(`Immunity (${item.when.immunity}) vs `), ...componentTokens(item.components),
         ...(item.when.weaponId
-          ? [text(" — "), reference(item.when.weaponId, "E/M CC Weapon")] : []),
+          ? [text(" — "), reference(
+              item.when.weaponId,
+              item.when.weaponId === "weapon:silenced-pistol"
+                ? "Silenced Pistol" : "E/M CC Weapon"
+            )] : []),
       ],
       detail: [
-        text(`${counts(applied)} using ${item.when.savingAttribute}, rather than `),
-        text(`${counts(item.withoutImmunity)}. `),
+        text(`${counts(applied)} using ${applied.savingAttribute || item.when.savingAttribute}, rather than `),
+        text(`${counts(item.withoutImmunity)}${item.withoutImmunity.savingAttribute
+          ? ` using ${item.withoutImmunity.savingAttribute}` : ""}. `),
         ...(partial ? [text("The "), ...componentTokens(applied.ignoredComponents),
           text(" component is ignored; "), ...componentTokens(applied.remainingComponents),
           text(" still applies.")] : [text("The covered combined Ammunition counts as "),
           reference(applied.treatedAs, "Normal"), text(".")]),
+        ...(item.when.weaponId === "weapon:silenced-pistol"
+          ? [text(" On a failed Saving Roll, the "),
+            reference("ammunition:shock", "Shock"),
+            text(" effect still sends a VITA 1 target directly to "),
+            reference("state:dead", "Dead"),
+            text(" instead of Unconscious. The weapon's "),
+            reference("trait:silent-x", "Silent (-6)"),
+            text(" remains a separately conditional Trait.")] : []),
         text(" Applies to the reviewed non-Comms attack only."),
       ],
       evidence: evidence(item.evidence),

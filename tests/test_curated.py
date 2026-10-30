@@ -3946,7 +3946,7 @@ def test_rea010_immunity_arm_bts_trait_baseline_and_printed_examples() -> None:
     assert immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"][0][
         "evidence"
     ] == "explicit-pinned-wiki-example"
-    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 4
+    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 5
     cited = {(c["sourceId"], c.get("page")) for c in immunity["citations"]}
     assert cited >= {
         ("n5-core-v5.3-pdf", 95), ("n5-core-v5.3-pdf", 96),
@@ -4819,18 +4819,36 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
             deepcopy(f["reviewedSavingRollCases"][0])),
             "Plasma Combined Saving Roll example"),
         (lambda f: f["reviewedCombinedCases"][3]["when"].update(
-            weaponId="weapon:e-mitter"), "Immunity applicability"),
+            weaponId="weapon:multi-pistol"), "Immunity applicability"),
         (lambda f: f["reviewedCombinedCases"][3]["when"].update(
             attackClass="comms"), "Immunity applicability"),
         (lambda f: f["reviewedCombinedCases"][3]["when"].update(
             savingAttribute="ARM"), "Immunity applicability"),
         (lambda f: f["reviewedCombinedCases"][3].update(
-            sourceAmmunitionId=14), "BTS Weapon applicability"),
+            sourceAmmunitionId=10), "Silenced Pistol applicability"),
         (lambda f: f["reviewedCombinedCases"][3]["components"].reverse(),
-            "BTS Weapon applicability"),
+            "Silenced Pistol applicability"),
         (lambda f: f["reviewedCombinedCases"][3]["withoutImmunity"].update(
-            hitRolls=1), "source hit/Critical Saving Roll counts"),
+            savingAttribute="ARM/2"), "Silenced Pistol applicability"),
+        (lambda f: f["reviewedCombinedCases"][3]["withoutImmunity"].update(
+            criticalRolls=3), "source hit/Critical Saving Roll counts"),
         (lambda f: f["reviewedCombinedCases"][3]["withImmunity"].update(
+            savingAttribute="ARM"), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][3]["withImmunity"].update(
+            remainingComponents=["ammunition:normal"]), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][4]["when"].update(
+            weaponId="weapon:e-mitter"), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][4]["when"].update(
+            attackClass="comms"), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][4]["when"].update(
+            savingAttribute="ARM"), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][4].update(
+            sourceAmmunitionId=14), "BTS Weapon applicability"),
+        (lambda f: f["reviewedCombinedCases"][4]["components"].reverse(),
+            "BTS Weapon applicability"),
+        (lambda f: f["reviewedCombinedCases"][4]["withoutImmunity"].update(
+            hitRolls=1), "source hit/Critical Saving Roll counts"),
+        (lambda f: f["reviewedCombinedCases"][4]["withImmunity"].update(
             criticalRolls=1), "covered-attack result"),
         (lambda f: f["reviewedCombinedCases"][0]["when"].update(immunity="DA"),
          "Immunity applicability"),
