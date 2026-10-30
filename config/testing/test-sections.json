@@ -17,6 +17,7 @@
         "test_audit_normalization_links",
         "test_audit_peripheral_semantics",
         "test_audit_profile_semantics",
+        "test_audit_reinforcements_applicability",
         "test_audit_relationship_semantics",
         "test_audit_rules_interactions",
         "test_audit_runtime_database_surface",

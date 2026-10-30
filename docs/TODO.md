@@ -1010,6 +1010,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
     and `Request Reinforcements`, link the capability they create to the annex
     scope, and retain the ordinary-Army -> Reinforcement Section/pool context.
+    - [x] Independently verify current **source references** without promoting
+      historical procedures: N5.3 p. 6 mentions Reinforcements as a game mode;
+      ITS Season 18 v2026.09.01 p. 27 identifies a current optional Extra
+      and points to an unversioned Reinforcements Annex. Both official
+      current PDFs and the English/Spanish **N4 annex** PDFs are byte-pinned,
+      with Commlink (Automatic Skill) and Request Reinforcements (Tactical
+      Phase step) checked as **N4-only** evidence. The source gate in
+      `config/validation/reinforcements-n5-applicability-review.json`
+      rejects changes that turn historical text into current N5 authority.
+      Current `rules.db` and the 57-row N5 Orders/AROs matrix retain
+      neither unverified annex action.
+    - [ ] **Source blocker:** Identify an authoritative N5-specific
+      Reinforcements Annex revision or an explicit official adoption
+      ruling establishing which historical N4 procedures remain applicable.
+      Archive/pin the exact approved source, effective version/date and
+      publication scope before authoring current N5 Commlink or Request
+      Reinforcements. A reference to an unversioned Annex alone does not
+      authorize silently reusing N4 rules.
     - [ ] Encode `Commlink (+X)` as a typed maximum-Trooper-count parameter, not a
       Skill Level or Attribute MOD.
     - [ ] Extend declaration-category validation so phase-scoped actions such as

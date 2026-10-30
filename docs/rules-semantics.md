@@ -4308,6 +4308,19 @@ InfinityDB must preserve that source identity instead of silently folding
 `Commlink` and `Request Reinforcements` into the `n5-core-rules` collection.
 Keep the 1.0 Commlink review pending until an authoritative N5-applicable annex
 or explicit adoption ruling is identified; do not infer the Extra is obsolete.
+The maintained source-only audit
+`config/validation/reinforcements-n5-applicability-review.json` pins
+and verifies N5.3 p. 6 plus ITS18 v2026.09.01 p. 27 **independently**
+of the existing two pinned N4-language PDFs. It identifies Commlink's
+Automatic Skill classification and Request Reinforcements' Tactical Phase
+activation as **historical N4 evidence** and explicitly rejects their
+promotion into current N5 data. Its passing status means the four
+sources match their reviews, **not** that an N5 procedure has been adopted.
+
+Before implementation, obtain an authoritative N5-applicable annex text
+or explicit adoption of the historical procedures and capture its exact
+edition, revision, effective date and source hash. This is a current
+source-verification blocker, not an inferred removal of the Extra.
 The following RS-RF sections describe **N4 annex semantics and source/Army
 modeling implications**, not approved N5 gameplay rules.
 

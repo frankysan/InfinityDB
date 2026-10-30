@@ -4127,6 +4127,17 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Reinforcements applicability gate, 2026-10-30:** The tracked
+`tests/test_audit_reinforcements_applicability.py` checks exact N5.3
+p. 6 and ITS18 v2026.09.01 p. 27 PDF references, pinned historical
+N4 English/Spanish PDFs, source-only Commlink/Request classifications
+and preservation of the 57-row Core Orders/AROs reference. Mutations
+of the source excerpts, versions, IDs, or an attempt to assert current
+N5 procedural authority fail validation. This is a source-identity
+gate only; the N5-applicable annex revision or explicit adoption
+ruling remains unresolved. Neither legacy Skill was published to
+`rules.db`.
+
 **Bilingual Fireteam FAQ follow-up, 2026-10-29:** The tracked
 `test_fireteam_faq_source_omission_is_not_a_contradictory_ruling`
 checks English v0.1 printed p. 3's FT Master exception against the
