@@ -105,6 +105,61 @@ def valid_document() -> dict:
     }
 
 
+@pytest.mark.parametrize(
+    ("type_ids", "valid"),
+    [
+        (["short-skill"], True),
+        ([], False),
+        (["unknown"], False),
+        (["short-skill", "short-skill"], False),
+        (None, False),
+    ],
+)
+def test_equipment_declaration_types_are_validated_only_when_authored(
+    tmp_path: Path, type_ids: object, valid: bool,
+) -> None:
+    """An Equipment action may use the shared Skill Type vocabulary."""
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "short-skill"
+    record = document["records"][0]
+    record["id"] = "equipment:example"
+    record["kind"] = "equipment"
+    record["facts"] = {"typeIds": type_ids}
+    path = tmp_path / "equipment.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    if valid:
+        assert load_curated_document(path)["records"][0]["facts"]["typeIds"] == type_ids
+    else:
+        with pytest.raises(ValueError, match="equipment 'facts.typeIds'"):
+            load_curated_document(path)
+
+    # Passive Equipment requires no declaration type and must not gain one
+    # as a default; this is distinct from authoring an invalid null type.
+    record["facts"] = {}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)["records"][0]["facts"] == {}
+
+
+def test_equipment_declaration_rejects_singular_field_and_supplement(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record["id"] = "equipment:example"
+    record["kind"] = "equipment"
+    record["facts"] = {"typeId": "automatic"}
+    path = tmp_path / "equipment.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="must use 'facts.typeIds'"):
+        load_curated_document(path)
+
+    record["composition"]["role"] = "supplement"
+    record["facts"] = {"typeIds": ["automatic"]}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="supplements must not redefine"):
+        load_curated_document(path)
+
+
 def _faq_ruling_document() -> dict:
     """Synthetic dated FAQ data; no unverified ruling is authored for release."""
     document = valid_document()

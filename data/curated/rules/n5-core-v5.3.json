@@ -15585,6 +15585,9 @@
                 "restrictions": [
                     "The WIP Roll applies Range MODs only; Special Skill MODs such as [[skill:mimetism]] and Cover MODs are not applied.",
                     "Passing the Roll does not prevent the target from triggering during the current Order."
+                ],
+                "typeIds": [
+                    "short-skill"
                 ]
             },
             "armyLinks": [
@@ -15619,6 +15622,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 121,
                     "section": "Deactivator requirements, Roll, removal and current-Order restriction"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 191,
+                    "section": "Orders and AROs Reference Chart: Short Skills (Equipment)"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -16219,6 +16227,9 @@
                 "clarifications": [
                     "When coordinated users apply the same recovery to one target, [[rule:coordinated-orders|Coordinated Orders]] use any-success resolution, without adding Wound recovery per successful Roll.",
                     "Example: two GizmoKit hits in one Order trigger two target PH Rolls. If one succeeds and the other fails, the any-success rule still removes one Wound in total, not one Wound per hit. With [[skill:remote-presence|Remote Presence]], that single success instead removes enough Wounds to cancel either level of [[state:unconscious|Unconscious]]."
+                ],
+                "typeIds": [
+                    "short-skill"
                 ]
             },
             "armyLinks": [
@@ -16243,6 +16254,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 123,
                     "section": "GizmoKit"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 191,
+                    "section": "Orders and AROs Reference Chart: Short Skills (Equipment)"
                 }
             ],
             "review": {
@@ -16533,6 +16549,9 @@
                 "clarifications": [
                     "During [[rule:coordinated-orders|Coordinated Orders]], multiple eligible users acting on the same target succeed if any qualifying target Roll succeeds; this does not restore an extra Wound per success.",
                     "Example: two MediKit hits in one Order trigger two target PH Rolls. If one succeeds and the other fails, the any-success rule still cancels [[state:unconscious|Unconscious State]] and removes only one Wound in total; it does not restore one Wound for each hit."
+                ],
+                "typeIds": [
+                    "short-skill"
                 ]
             },
             "armyLinks": [
@@ -16561,6 +16580,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 124,
                     "section": "MediKit"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 191,
+                    "section": "Orders and AROs Reference Chart: Short Skills (Equipment)"
                 }
             ],
             "review": {

@@ -4043,11 +4043,18 @@ canonical Look Out identity. Neither case creates a new deployed object.
 
 The player-facing `/orders-aros` page and `/api/orders-aros` endpoint now
 project the same **57 printed declaration occurrences** directly from current
-core Skill categories and Army-backed Hacking Program metadata, with only
-three source-verified Equipment action exceptions (Deactivator, GizmoKit and
-MediKit) where the curated Equipment facts have no declaration `typeIds`.
-Activate Disco Ball retains its Skill identity and printed Equipment source
-Type. Source-replacement Skill variants are not separate declarations.
+core Skill and declarable Equipment `facts.typeIds`, plus Army-backed Hacking
+Program metadata. Three source-reviewed Equipment actions (Deactivator,
+GizmoKit and MediKit) now have `["short-skill"]` explicitly authored and
+validated in their N5.3 core definitions, each citing p. 191. Equipment without
+authored declaration types is not implicitly classified. Activate Disco Ball
+retains its Skill identity and printed Equipment source Type.
+Source-replacement Skill variants are not separate declarations.
+
+The coordinated rules.db/deployed-object publication rebuild changes only
+the rules DB fingerprint in the 17-object publication; reviewed deployed-object
+identities and delivery paths are unchanged. Promotion retains a recovery
+backup and checks the entire 57-row source projection after replacement.
 
 The complete source-table audit in
 `config/validation/orders-aro-object-adjacent-source-review.json` remains
@@ -4055,8 +4062,7 @@ an independent validation reference, not a second runtime chart. The matrix is
 scoped to unmodified N5 core declarations: it excludes scenario/season overlays,
 Reinforcements phase actions, automatic/passive categories, and Deployment-only
 categories. It does not calculate whether a declaration is currently legal.
-Scoped extensions and promoting Equipment declaration types to curated metadata
-remain separate 1.0 follow-ups.
+Scoped scenario/phase extensions remain separate 1.0 follow-ups.
 
 Sources:
 

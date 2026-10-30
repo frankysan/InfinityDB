@@ -933,12 +933,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     match the independently reviewed N5.3 p. 191 chart exactly, across 42
     existing canonical action owners. The page links to owning Skills, Equipment
     or Hacking Programs and explicitly excludes live action-legality evaluation.
-    - [x] Reuse current Skill type categories and normalized Hacking Program
-      metadata; keep source-only BS/CC replacement variants, Automatic and
-      Deployment Skills, scenario-only and phase-scoped actions outside the
-      unscoped core projection. Three Equipment-labelled Short actions without
-      declaration `typeIds` retain a narrow source-reviewed p. 191 exception;
-      Activate Disco Ball remains a canonical Skill.
+    - [x] Reuse current Skill, Equipment and normalized Hacking Program
+      declaration categories; keep source-only BS/CC replacement variants,
+      Automatic and Deployment Skills, scenario-only and phase-scoped actions
+      outside the unscoped core projection. The p. 191 Equipment-labelled
+      Activate Disco Ball remains a canonical Skill with its distinct source
+      Type.
     - [x] Validate the full pinned chart against generated runtime rows, including
       declaration category, source Type, owning identity and public route. Do not
       infer that an absent action is prohibited or allow a source table row to
@@ -950,9 +950,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       contract synchronized. Tests:
       `tests/test_verify_orders_aros_browser.py` and
       `tests/test_verify_sidebar_density_browser.py`.
-    - [ ] Consider replacing the three narrow Equipment exceptions with explicit
-      curated declaration metadata in a coordinated rules database rebuild.
-      Preserve p. 191 source validation as an independent regression gate.
+    - [x] Replace the three source-reviewed Equipment Short Skill exceptions
+      (Deactivator, GizmoKit, MediKit) with first-class
+      `facts.typeIds: ["short-skill"]` in their current N5.3 definitions
+      and direct p. 191 citations. Validate optional Equipment typeIds
+      (no implicit classification), rebuild and promote the paired
+      `data/generated/rules.db` and `deployed-objects.json` fingerprints
+      with recovery backups. Confirm that 57/57 source rows, browser
+      behavior, and all 17 deployed-object identities/deliveries remain
+      unchanged. The matrix now discovers Equipment declaration types
+      from rules.db rather than three hard-coded IDs. Retain the
+      independent PDF chart audit as the drift gate.
     - [ ] Extend the projection with separately selected scenario/season action
       contexts and explicitly phase-scoped actions when those domains are ready.
       Do not merge them into the unscoped N5 core view.

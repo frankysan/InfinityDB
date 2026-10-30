@@ -1343,31 +1343,44 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 sources=sources,
                 context=f"{context}.facts",
             )
-        if record["kind"] == "skill":
+        if record["kind"] in {"skill", "equipment"}:
             facts = record.get("facts")
+            kind = record["kind"]
             if composition_role == "definition":
                 type_ids = facts.get("typeIds") if isinstance(facts, dict) else None
-                if (
-                    not isinstance(type_ids, list)
-                    or not type_ids
-                    or any(
-                        not isinstance(type_id, str) or type_id not in skill_type_ids
-                        for type_id in type_ids
-                    )
+                # All Skills require categories. Equipment may declare an action
+                # category only when its official source identifies one; passive
+                # Equipment is not silently classified as a declarable Skill.
+                if kind == "skill" or (
+                    isinstance(facts, dict) and "typeIds" in facts
                 ):
-                    raise ValueError(
-                        f"{context}: skill 'facts.typeIds' must be a non-empty array "
-                        "referencing skillTypes"
-                    )
-                if len(type_ids) != len(set(type_ids)):
-                    raise ValueError(
-                        f"{context}: skill 'facts.typeIds' must not contain duplicates"
-                    )
+                    if (
+                        not isinstance(type_ids, list)
+                        or not type_ids
+                        or any(
+                            not isinstance(type_id, str) or type_id not in skill_type_ids
+                            for type_id in type_ids
+                        )
+                    ):
+                        raise ValueError(
+                            f"{context}: {kind} 'facts.typeIds' must be a non-empty array "
+                            "referencing skillTypes"
+                        )
+                    if len(type_ids) != len(set(type_ids)):
+                        raise ValueError(
+                            f"{context}: {kind} 'facts.typeIds' must not contain duplicates"
+                        )
                 if isinstance(facts, dict) and "typeId" in facts:
                     raise ValueError(
-                        f"{context}: skill definitions must use 'facts.typeIds', "
+                        f"{context}: {kind} definitions must use 'facts.typeIds', "
                         "not singular 'facts.typeId'"
                     )
+            elif isinstance(facts, dict) and (
+                "typeIds" in facts or "typeId" in facts
+            ) and kind == "equipment":
+                raise ValueError(
+                    f"{context}: Equipment supplements must not redefine declaration types"
+                )
         if record["kind"] == "rule":
             facts = record.get("facts")
             if isinstance(facts, dict):

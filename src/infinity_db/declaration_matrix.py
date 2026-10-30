@@ -1,9 +1,9 @@
 """Project current N5 declaration categories into a player-facing reference.
 
-Skills own curated declaration types, Hacking Programs own Army metadata types.
-A few Equipment-labelled Short actions lack typed declaration metadata and
-retain narrow N5.3 p. 191 source-reviewed exceptions until curated explicitly.
-This is a reference projection, never a declaration-legality evaluator.
+Skills and declarable Equipment own curated declaration types; Hacking Programs
+own Army metadata types. The independently reviewed N5.3 p. 191 chart is the
+source-parity check, not a parallel runtime list of actions. The projection
+is a reference, never a declaration-legality evaluator.
 """
 from __future__ import annotations
 
@@ -22,12 +22,6 @@ DECLARATIONS = (
     ("aro", "AROs"),
 )
 CATEGORY_IDS = frozenset(key for key, _ in DECLARATIONS)
-# Source-reviewed action exceptions from N5.3 p. 191. These are not new
-# canonical identities; the source Type and owning catalog are different.
-EQUIPMENT_SHORT_ACTIONS = frozenset({
-    "equipment:deactivator", "equipment:gizmokit", "equipment:medikit",
-})
-
 
 def _is_core(record: dict[str, Any], collection: str) -> bool:
     return (
@@ -116,17 +110,18 @@ def core_declaration_matrix(
         }
         append(record, types, source_type="Hacking")
 
-    equipment = {
-        record["id"]: record
-        for record in rules_database.composed_records_by_kind(
-            "equipment", include_army_links=True,
-        )
-        if _is_core(record, "n5-core-v5.3")
-    }
-    if not EQUIPMENT_SHORT_ACTIONS <= equipment.keys():
-        raise ValueError("Missing reviewed N5.3 Equipment action")
-    for record_id in sorted(EQUIPMENT_SHORT_ACTIONS):
-        append(equipment[record_id], {"short-skill"}, source_type="Equipment")
+    for record in rules_database.composed_records_by_kind(
+        "equipment", include_army_links=True,
+    ):
+        if not _is_core(record, "n5-core-v5.3"):
+            continue
+        types = {item["id"] for item in record.get("skill_types", [])}
+        unknown = types - CATEGORY_IDS - {"automatic", "deployment-skill"}
+        if unknown:
+            raise ValueError(
+                f"Unsupported core Equipment declaration: {record['id']}: {types}"
+            )
+        append(record, types & CATEGORY_IDS, source_type="Equipment")
 
     # The printed Equipment action is owned by the Skill domain.
     for item in sections["short-skill"]:

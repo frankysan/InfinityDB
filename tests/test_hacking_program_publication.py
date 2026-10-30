@@ -209,6 +209,16 @@ def test_generated_core_orders_aros_matrix_matches_pinned_source_and_routes() ->
             action not in items for section, items in by_section.items()
             if section != "short-skill"
         )
+        # The Equipment Short Skill type is now authored in the current
+        # curated definition and carried by rules.db, not a runtime ID list.
+        record = rules.composed_record(action)
+        assert record is not None
+        assert record["facts"]["typeIds"] == ["short-skill"]
+        assert [item["id"] for item in record["skill_types"]] == ["short-skill"]
+        assert any(
+            cite["source_id"] == "n5-core-v5.3-pdf" and cite["page"] == 191
+            for cite in record["citations"]
+        )
 
     app = create_app(ARMY_DB, rules_database_path=RULES_DB)
     status, html = _get(app, "/orders-aros")
