@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 
+from infinity_db.curated import load_curated_directory
 from infinity_db.restriction_conditions import compile_restriction_conditions
 from infinity_db.restriction_storage import (
     CANDIDATE_COMPATIBILITY_VERSION,
@@ -20,6 +21,7 @@ from infinity_db.rules_database import (
     RULES_COMPATIBILITY_VERSION,
     RULES_SCHEMA_VERSION,
     RulesDatabase,
+    export_rules_database,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -210,11 +212,209 @@ def test_candidate_version_rollout_requires_application_transition(
         "WHERE key = 'databaseCompatibilityVersion'",
         (json.dumps(CANDIDATE_COMPATIBILITY_VERSION),),
     )
+    connection.execute(
+        "UPDATE __rules_metadata SET value = ? WHERE key = 'formatVersion'",
+        (json.dumps(CANDIDATE_SCHEMA_VERSION),),
+    )
     connection.commit()
     assert len(candidate_restrictions_payload(connection)["items"]) == 14
     assert connection.execute("PRAGMA quick_check").fetchone()[0] == "ok"
-    # Existing v8 binaries deliberately refuse v9; an app rollout must
-    # precede publication of a v9 snapshot and retain the v8 rollback DB.
+    RulesDatabase(target).validate()
+    assert RulesDatabase(target).restrictions_payload()["available"] is True
+    assert RulesDatabase(DB).restrictions_payload()["available"] is False
+
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '10' "
+        "WHERE key = 'databaseCompatibilityVersion'"
+    )
+    connection.commit()
+    with pytest.raises(ValueError, match="compatibility revision"):
+        RulesDatabase(target).validate()
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '11' "
+        "WHERE key = 'databaseCompatibilityVersion'"
+    )
+    connection.execute("PRAGMA user_version = 10")
+    connection.commit()
     with pytest.raises(ValueError, match="Unsupported rules database schema"):
         RulesDatabase(target).validate()
-    assert RulesDatabase(DB).validate() is None
+
+
+def test_explicit_v9_export_is_deterministic_and_legacy_relations_unchanged(
+    tmp_path: Path,
+) -> None:
+    documents = load_curated_directory(ROOT / "data/curated")
+    chart, _ = source_data()
+    first = tmp_path / "v9-first.db"
+    second = tmp_path / "v9-second.db"
+    export_rules_database(documents, first, restrictions_manifest=chart)
+    export_rules_database(documents, second, restrictions_manifest=chart)
+    assert first.read_bytes() == second.read_bytes()
+    v9 = RulesDatabase(first)
+    v9.validate()
+    assert len(v9.restrictions_payload()["items"]) == 14
+    assert v9.restrictions_payload(record_id="skill:lieutenant")["available"]
+    assert len(v9.restrictions_payload(record_id="skill:lieutenant")["items"]) == 2
+    with sqlite3.connect(DB) as original, sqlite3.connect(first) as generated:
+        assert legacy_relation_snapshot(original) == legacy_relation_snapshot(generated)
+        assert generated.execute("PRAGMA user_version").fetchone()[0] == 9
+        assert generated.execute("PRAGMA foreign_key_check").fetchall() == []
+    assert RulesDatabase(DB).restrictions_payload() == {
+        "formatVersion": 1, "available": False, "source": None,
+        "polarity": "prohibition", "items": [], "evaluationSupported": False,
+    }
+
+
+def test_restrictions_http_v8_and_v9_are_additive(
+    candidate: tuple[sqlite3.Connection, dict, dict, Path],
+) -> None:
+    from urllib.parse import urlsplit
+    from wsgiref.util import setup_testing_defaults
+
+    from infinity_db.web import create_app
+
+    connection, chart, records, target = candidate
+
+    def get(app, path: str) -> tuple[int, dict]:
+        parsed = urlsplit(path)
+        environ: dict = {}
+        setup_testing_defaults(environ)
+        environ["PATH_INFO"] = parsed.path
+        environ["QUERY_STRING"] = parsed.query
+        result: dict = {}
+
+        def respond(status: str, headers: list[tuple[str, str]], exc_info=None) -> None:
+            result["status"] = int(status.split()[0])
+
+        response = app(environ, respond)
+        try:
+            body = b"".join(response)
+        finally:
+            if close := getattr(response, "close", None):
+                close()
+        return result["status"], json.loads(body)
+
+    v8 = create_app(ROOT / "data/generated/infinity.db", rules_database_path=DB)
+    status, payload = get(v8, "/api/restrictions")
+    assert status == 200
+    assert payload["available"] is False
+    assert payload["items"] == []
+    assert payload["evaluationSupported"] is False
+    assert get(v8, "/api/restrictions?subject=TAG")[1]["available"] is False
+    assert get(v8, "/api/restrictions?subject=UNKNOWN")[0] == 400
+
+    stage_candidate_restrictions(connection, chart, records)
+    connection.execute("PRAGMA user_version = 9")
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '9' WHERE key = 'formatVersion'"
+    )
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '11' "
+        "WHERE key = 'databaseCompatibilityVersion'"
+    )
+    connection.commit()
+    v9 = create_app(ROOT / "data/generated/infinity.db", rules_database_path=target)
+    status, payload = get(v9, "/api/restrictions")
+    assert status == 200
+    assert payload["available"] is True
+    assert payload["polarity"] == "prohibition"
+    assert len(payload["items"]) == 14
+    assert get(v9, "/api/restrictions?subject=Motorcycle")[1]["items"][4][
+        "operation"
+    ] == {"kind": "directional-skill-movement", "qualifier": {"direction": "upward"}}
+    assert len(get(v9, "/api/restrictions?record_id=skill:lieutenant")[1]["items"]) == 2
+    assert get(v9, "/api/restrictions?record_id=skill:dodge")[1]["items"] == []
+    assert get(v9, "/api/restrictions?subject=REM&record_id=skill:lieutenant")[
+        1
+    ]["items"][0]["action"] == "lieutenant-selection"
+    for query in (
+        "?subject=UNKNOWN", "?record_id=not-an-id",
+        "?subject=TAG&subject=REM", "?extra=true",
+    ):
+        assert get(v9, "/api/restrictions" + query)[0] == 400
+    # No changes to existing API schemas or record relation semantics.
+    for path in ("/api/skills/lieutenant", "/api/equipment/motorcycle"):
+        assert get(v8, path) == get(v9, path)
+
+
+def test_v9_validator_rejects_missing_table_and_broadened_constraint(
+    candidate: tuple[sqlite3.Connection, dict, dict, Path],
+) -> None:
+    connection, chart, records, target = candidate
+    connection.execute("PRAGMA user_version = 9")
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '9' WHERE key = 'formatVersion'"
+    )
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '11' "
+        "WHERE key = 'databaseCompatibilityVersion'"
+    )
+    connection.commit()
+    with pytest.raises(ValueError, match="missing or damaged table"):
+        RulesDatabase(target).validate()
+
+    # Stage on a valid base version; only then mark the snapshot as v9.
+    connection.execute("PRAGMA user_version = 8")
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '8' WHERE key = 'formatVersion'"
+    )
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '10' "
+        "WHERE key = 'databaseCompatibilityVersion'"
+    )
+    stage_candidate_restrictions(connection, chart, records)
+    connection.execute("PRAGMA user_version = 9")
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '9' WHERE key = 'formatVersion'"
+    )
+    connection.execute(
+        "UPDATE __rules_metadata SET value = '11' "
+        "WHERE key = 'databaseCompatibilityVersion'"
+    )
+    connection.commit()
+    RulesDatabase(target).validate()
+    connection.execute(
+        "UPDATE restriction_constraints SET scope = 'while-mounted' "
+        "WHERE subject = 'Motorcycle' AND action = 'upward-jump'"
+    )
+    connection.commit()
+    with pytest.raises(ValueError, match="source condition drift"):
+        RulesDatabase(target).validate()
+
+
+def test_v9_cli_requires_separate_staging_output() -> None:
+    from infinity_db.cli import build_parser, cmd_build_rules
+
+    args = build_parser().parse_args([
+        "build-rules", "--restrictions-manifest",
+        "config/validation/restrictions-source-chart.json",
+    ])
+    with pytest.raises(ValueError, match="explicit staging --output"):
+        cmd_build_rules(args)
+
+
+def test_v8_reader_preserves_preexisting_metadata_contract(
+    candidate: tuple[sqlite3.Connection, dict, dict, Path],
+) -> None:
+    connection, _, _, target = candidate
+    # Older v8 validation checked compatibility, not the formatVersion key.
+    connection.execute(
+        "DELETE FROM __rules_metadata WHERE key = 'formatVersion'"
+    )
+    connection.commit()
+    RulesDatabase(target).validate()
+    assert RulesDatabase(target).restrictions_payload()["available"] is False
+
+
+def test_explicit_build_rules_cli_exports_v9_to_separate_path(tmp_path: Path) -> None:
+    from infinity_db.cli import build_parser, cmd_build_rules
+
+    output = tmp_path / "restrictions-v9.db"
+    args = build_parser().parse_args([
+        "build-rules", "--restrictions-manifest",
+        "config/validation/restrictions-source-chart.json",
+        "--output", str(output),
+    ])
+    assert cmd_build_rules(args) == 0
+    RulesDatabase(output).validate()
+    assert len(RulesDatabase(output).restrictions_payload()["items"]) == 14

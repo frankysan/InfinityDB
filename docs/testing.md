@@ -1965,7 +1965,7 @@ source-to-occurrence contract is unverified. Players can follow
 the Irregular restriction from the Lieutenant Skill and chart
 until that separate mapping is established.
 
-**Staged SQLite/API migration contract (not deployed):**
+**Version-aware SQLite/API migration contract (v9 not deployed):**
 `tests/test_restriction_storage_candidate.py` copies the current
 tracked `rules.db` to a disposable test database, adds the
 `restriction_constraints` table using
@@ -1974,21 +1974,33 @@ reviewed negative conditions and additive JSON read shape. The test
 asserts legacy `record_relations` rows and representative composed
 API records remain unchanged, verifies source-order and filters,
 rejects positive polarity, duplicate staging, invalid IDs/scopes,
-and confirms an empty filter result conveys no permission. It
-also simulates v9/compatibility-11 and confirms the old v8 validator
-rejects the unpromoted artifact.
+and confirms an empty filter result conveys no permission.
+The version-aware reader now accepts exact v8/compatibility-10
+and v9/compatibility-11 pairs and rejects incomplete v9 models,
+version mismatches and unsupported revisions.
 
 ```powershell
 .venv\Scripts\python.exe tools/run_checks.py --stage test tests/test_restriction_storage_candidate.py
 .venv\Scripts\python.exe tools/run_checks.py --stage test tests/test_game_mode_source_table.py
 ```
 
-The test exercises the *prospective* API payload at the Python
-read-model boundary; it does not expose or test a new HTTP route.
-It never writes to the tracked `data/generated/rules.db`. Schema
-version 8, compatibility revision 10 and existing endpoint shapes
-remain current until the version-aware promotion described in
-[the data model](data-model.md#restriction-persistence-migration-candidate-not-promoted).
+The suite also exports the reviewed v9 snapshot twice and asserts
+byte-for-byte determinism, compares the legacy relation graph, and
+tests `/api/restrictions` on both versions: v8 reports
+`available: false`; v9 returns 14 source-scoped prohibitions
+with filters and no positive legality inference. Legacy Skill
+and Equipment JSON remains unchanged. The normal exporter and
+tracked `data/generated/rules.db` still use v8/compatibility-10.
+For a reviewed v9 staging build, use:
+
+```powershell
+.venv\Scripts\python.exe -m infinity_db build-rules --restrictions-manifest config/validation/restrictions-source-chart.json --output local/restrictions-rules-v9.db
+```
+
+The opt-in path refuses the default `data/generated/rules.db`
+destination; publication and release-image synchronization
+remain open in [the data model](data-model.md#restriction-persistence-and-version-aware-api-v9-staged-not-promoted).
+These checks never write to the tracked runtime database.
 
 ### N5.3 Silhouette Templates source and browser geometry
 

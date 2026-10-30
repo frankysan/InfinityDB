@@ -52,6 +52,10 @@ are not retroactively relabeled.
   Reconcile its six subjects and 14 negative conditions with the pinned
   source, retaining qualified upward Jump, ladder and Lieutenant selection
   semantics and links to existing rules without creating a legality engine.
+  The additive Restrictions API distinguishes an unavailable v8
+  snapshot from the complete typed v9 reference; an explicitly
+  staged v9 exporter and dual-version reader preserve existing
+  rule relationship responses during migration.
 - **Data processing + Web backend + Web frontend + Deployment:** Add a standalone
   reference for 17 source-reviewed deployed objects with known, unreported and disputed
   attributes, source-backed delivery links and an explicit unresolved Mine Dispenser

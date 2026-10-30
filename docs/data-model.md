@@ -873,10 +873,10 @@ these conditions; moving or superseding their seven missing and two
 over-broad relationships requires a separately tested schema and API
 migration. No Unit/profile permissions are inferred.
 
-### Restriction persistence migration candidate (not promoted)
+### Restriction persistence and version-aware API (v9 staged, not promoted)
 
-**Design and staging only.** `src/infinity_db/restriction_storage.py`
-prototypes a separate `restriction_constraints` SQLite table without
+**Implemented; v9 release artifact not yet promoted.**
+`src/infinity_db/restriction_storage.py` defines a separate `restriction_constraints` SQLite table without
 rewriting `record_relations` or its API. The table retains source ID,
 printed page, pinned PDF fingerprint, source-order position, source
 subject and kind, nullable canonical owner/target IDs, negative
@@ -887,49 +887,59 @@ ladder traversal has no canonical target. The compiler validates all
 rejects duplicate conditions and positive polarity. No Unit-level
 eligibility or action-legality conclusion is produced.
 
-The prospective **additive API contract** is a separate
-`formatVersion: 1` payload with `source` (ID, printed page, PDF
-SHA-256), `polarity: prohibition`, ordered `items`, and
+The additive **`GET /api/restrictions`** contract returns
+`formatVersion: 1`, `available`, `source` (ID, printed page,
+PDF SHA-256), `polarity: prohibition`, ordered `items`, and
 `evaluationSupported: false`. Each item contains `subject`,
-`subjectKind`, optional `ownerRecordId`, `action`,
-`operation: {kind, qualifier}`, optional `targetRecordId`,
+`subjectKind`, nullable `ownerRecordId`, `action`,
+`operation: {kind, qualifier}`, nullable `targetRecordId`,
 `scope` and `polarity`. Optional `subject` and `record_id`
-filters are conjunctive; zero matches never means an action is
-permitted. The current browser still consumes the existing static
-Restrictions publication; **no new HTTP route is active**.
+filters are conjunctive and reject invalid identifiers. On a
+v8/compatibility-10 database, the endpoint returns
+`available: false`, `source: null`, `items: []` rather than
+fabricating a complete restriction set from generic relations.
+On v9/compatibility-11, it reads only the materialized table, with
+`available: true`. Zero matches never establishes legality.
+The **current browser still consumes the static Restrictions
+publication**; it does not require the new endpoint.
 
-The candidate is tested against a **disposable copy** of the tracked
-v8/compatibility-10 `rules.db`. Adding the table while retaining that
-header leaves all existing relation rows, composed record responses,
-and v8 validation unchanged. A proposed v9/compatibility-11 header
-is deliberately **rejected** by the existing strict validator. These
-version numbers are migration targets, **not** current runtime values.
+`RulesDatabase.validate()` now accepts only the exact schema /
+compatibility pairs **(8, 10)** and **(9, 11)**. For v9, it
+also verifies all fourteen source-ordered conditions, negative
+polarity, qualifiers, source selectors and consistent provenance;
+unsupported versions and mixed pairs fail closed. The **default**
+`build-rules` path remains v8/compatibility-10, preserving normal
+build outputs. Supplying the optional
+`--restrictions-manifest config/validation/restrictions-source-chart.json`
+produces deterministic v9/compatibility-11 data using the reviewed
+curated records. For safety, this opt-in CLI path refuses the default
+tracked `data/generated/rules.db` output: select a staging file.
 
-The required release sequence is:
+The v9 build is byte-deterministic in tests, and read-only HTTP
+checks confirm both v8-unavailable and v9-available responses,
+filtering, backward-compatible Skills/Equipment responses, and
+unchanged legacy relations. The implementation can be deployed with
+the existing v8 database **without** requiring a synchronized
+data migration.
 
-1. Implement a version-aware reader accepting both the existing
-   v8/compatibility-10 artifact and a validated v9/compatibility-11
-   artifact. The new API must explicitly report unavailable
-   conditional data on v8; it must not reconstruct source data
-   from `config/` or silently infer permissions.
-2. Implement deterministic v9 export of the reviewed table, migrate
-   the read path to the new additive API, verify all existing API
-   shapes remain compatible and complete the relevant publication
-   hash/release-image synchronization.
-3. Deploy the version-aware application **before** swapping to the
-   v9 database (or deploy atomically with an approved matching
-   image), retain the v8 database as rollback evidence, and validate
-   both forward and rollback paths.
-4. Only after dependent consumers are migrated, decide whether the
-   generic Motorcycle → Jump and Irregular → Lieutenant edges should
-   be retired or displayed as explicitly qualified legacy links.
-   No existing `{type, recordId}` relation is deleted by the
-   candidate implementation.
+**Remaining release/promotion steps:**
 
-The staging contract and compatibility proof live in
-`tests/test_restriction_storage_candidate.py`. Its tests never
-modify the tracked `rules.db`; the current schema/version and API
-remain unchanged.
+1. Review the staged v9 snapshot's source/curation identity, final
+   checksum and matching deployed-object publication fingerprints;
+   update the tracked `rules.db` and release images together,
+   rather than independently publishing new database bytes.
+2. Verify forward deployment of the version-aware application and
+   matching v9 artifact, plus rollback to the existing v8 snapshot.
+   The static browser reference remains independently source-pinned.
+3. After dependent consumers are audited, decide whether the
+   over-broad legacy Motorcycle → Jump and Irregular → Lieutenant
+   generic edges should be retired or explicitly qualified. The
+   new table **does not** delete or reinterpret those edges.
+
+The contract and reversible tests live in
+`tests/test_restriction_storage_candidate.py`. They build and
+exercise v9 snapshots only in disposable test directories. The
+tracked `data/generated/rules.db` has not been changed.
 
 ## Availability and membership
 

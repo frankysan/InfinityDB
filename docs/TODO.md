@@ -1249,17 +1249,30 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         application rollout. No HTTP endpoint, exporter, tracked
         database or live version has been changed. See
         `docs/data-model.md` for the staged read contract.
-      - [ ] **Promote** the candidate to a version-aware read path,
-        deterministic v9 exporter and additive HTTP API, with
-        v8/compatibility-10 fallback and v9/compatibility-11
-        acceptance. Test the 7 missing conventional edges and 2
-        over-broad relations as separately described legacy limitations,
-        never as source-negative coverage gaps. Synchronize the
-        generated `rules.db`, published hashes and deployment images,
-        and verify both upgrade and v8 rollback. Defer retirement of
-        Motorcycle → Jump and Irregular → Lieutenant legacy relations
-        until compatibility consumers are audited; no invented
-        TAG/VH/REM identities or ladder Skill target.
+      - [x] Implement the **version-aware read path**, explicit
+        deterministic v9/compatibility-11 exporter and additive
+        `GET /api/restrictions`. Existing v8/compatibility-10
+        snapshots remain valid; the API explicitly reports
+        `available: false` with no inferred conditions on v8.
+        Valid v9 snapshots must contain all fourteen exact typed
+        source conditions. The opt-in build remains separate from
+        normal v8 export and refuses the default tracked
+        `rules.db` destination. Tests verify stable v9 bytes,
+        both version paths, HTTP query validation and unchanged
+        legacy Skill/Equipment API responses. The browser still
+        consumes its independently published static chart.
+      - [ ] **Promote synchronized v9 release artifacts** only after
+        reviewing the source/curation identity and corresponding
+        `deployed-objects.json` fingerprints; update the tracked
+        `rules.db`, release-image publication and final checks
+        together. Verify version-aware application deployment
+        against v9, and retain/test the v8 snapshot rollback path.
+        The seven absent conventional edges and two over-broad
+        relations remain legacy limitations, not missing typed
+        source coverage. Audit their consumers before retiring
+        any compatibility edges; preserve source-only TAG/VH/REM
+        selectors, the ladder operation, and scoped Jump/Lieutenant
+        semantics.
       - [ ] Confirm how Irregular Training is represented on actual
         Unit/profile/loadout occurrences before adding a Unit-level
         reverse link. Sampled Irregular-source candidates did not

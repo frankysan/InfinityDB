@@ -522,7 +522,38 @@ class ApiHandler:
         status = HTTPStatus.OK
         cache_control = "no-cache"
         payload = None
-        if path == "/api/faq-rulings":
+        if path == "/api/restrictions":
+            cache_control = API_CACHE_CONTROL
+            try:
+                params = _validated_query_params(
+                    query_string, {"subject", "record_id", "cache_bust"},
+                )
+                subject = params.get("subject", [None])[0]
+                record_id = params.get("record_id", [None])[0]
+                from infinity_db.restriction_storage import validate_restriction_filters
+
+                validate_restriction_filters(subject, record_id)
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                if self.rules_database is None:
+                    payload = {
+                        "formatVersion": 1, "available": False, "source": None,
+                        "polarity": "prohibition", "items": [],
+                        "evaluationSupported": False,
+                    }
+                else:
+                    payload = self.rules_database.restrictions_payload(
+                        subject=subject, record_id=record_id,
+                    )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Restrictions reference")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "Restrictions reference is unavailable. Please try again."}
+        elif path == "/api/faq-rulings":
             cache_control = API_CACHE_CONTROL
             try:
                 params = _validated_query_params(
