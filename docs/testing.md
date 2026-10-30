@@ -1090,6 +1090,49 @@ This remains bounded representative **browser** acceptance, not
 full-catalog completeness, all optional-flag combinations, all
 parameterized Skill semantics, or every visual layout variant.
 
+### Selected Spec-Ops and TEAM-OPS profile acceptance
+
+**Project domains:** Data processing, Web backend, Web frontend
+
+`tests/test_spec_ops_profile_publication.py` independently compares the
+pinned September 29 Army ZIP with the public Unit API for ARMY-02–04:
+Indigo (1912/1926), Confessor (1913/1927) and Gui Feng/Yu Jing
+(1914/1928). It verifies the archive SHA-256, each member hash and
+version, all 22 Army/Unit contexts, 66 ordered native profiles and
+220 ordered loadouts. Checks include Attributes, source-specific AVA,
+Troop Type/classification, Characteristics, native item IDs,
+quantities/ordered Extras, Orders/Training, costs and disabled options.
+Null and empty Extra lists both mean no source modifier. Empty
+Includes/Peripheral attachments and notes are asserted explicitly;
+new populated relationships require review. Missing ignored source
+bytes cause an explicit skip, not source acceptance.
+
+The complementary
+`test_army_02_to_04_native_profiles_costs_and_ava_in_browser` in
+`tests/test_verify_scenario_faq_browser.py` serves the tracked database
+pair through the existing WSGI Chromium transport. It checks all six
+ordinary Unit pages at 1440/390/320 px in light/dark themes (36 pages),
+using the shared Unit DOM assertions for linked items and exact
+Army-local numeric profiles, AVA, points and SWC assertions. Keyboard
+expansion exposes each Army section; transition-profile AVA remains
+a dash rather than an invented independent availability. Indigo's
+PanOceania Hacker Order remains Irregular while the other five
+source contexts remain Regular. The source/API check guards that
+distinction without assigning Unit-wide Training.
+
+Run both parts with:
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test tests/test_spec_ops_profile_publication.py tests/test_verify_scenario_faq_browser.py::test_army_02_to_04_native_profiles_costs_and_ava_in_browser --test-workers 2
+```
+
+These checks establish current native publication parity, not
+profile-transition/upgrade rules, complete roster/Fireteam legality,
+historical Army changes or final hosted acceptance. TEAM-OPS is retained
+source data and does not expand the mandatory 1.0 ITS publication scope.
+
+### Hosted Unit release-candidate acceptance
+
 For **deployed release-candidate acceptance**, use the separate
 `tools.verify_release_candidate_browser` entrypoint from the exact
 candidate checkout (whose tracked generated databases and static assets

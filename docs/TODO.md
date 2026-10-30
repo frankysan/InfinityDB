@@ -333,6 +333,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Source/API and Chromium tests cover the notices, real
         Wildcard toggle, parent navigation/back and empty/missing
         chart distinctions at 1440/390/320 px in light/dark themes.
+      - [x] **Data processing + Web backend + Web frontend — ARMY-02–04
+        native profile/loadout parity:** Compare Indigo (1912/1926),
+        Confessor (1913/1927) and Gui Feng/Yu Jing (1914/1928)
+        against all their occurrences in the pinned September 29
+        Army ZIP, with source-member hashes/version checked against
+        the application database. All 22 Army/Unit contexts preserve
+        66 ordered profiles and 220 ordered loadouts, including
+        Attributes, source AVA, item quantities/Extras, Orders,
+        costs and disabled options. Preserve Indigo's PanOceania-only
+        Irregular Hacker option; the other five Army contexts are
+        Regular. Ordinary Chromium pages pass at 1440/390/320 px
+        in light/dark themes (36 page checks), including numeric
+        profiles, AVA, costs, shared/specific items, keyboard
+        expansion and no horizontal overflow. This is current-source
+        publication parity, not profile-transition/upgrade mechanics,
+        Fireteam or roster legality, historical deltas or final hosted
+        acceptance. See [validation](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
       - [ ] **ARMY-01 remaining semantics, full roster/profile
         acceptance, and release gates:** Review annotation-specific
         profile applicability where it is not established by the
@@ -340,7 +357,8 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Triad, Varuna Div and Strategic Deployment); retain the
         unresolved current N5 Reinforcements authority boundary.
         Compare complete unit/profile/option costs and source-specific
-        AVA for ARMY-02–20 where still unreviewed. Do not infer
+        AVA for ARMY-05–20 where still unreviewed; ARMY-02–04
+        native publication parity is covered above. Do not infer
         a historical before/after delta without an earlier
         pinned Army snapshot. Final release-matched database,
         browser and CI acceptance remain separate gates.

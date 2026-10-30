@@ -14,6 +14,11 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import export_rules_database
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import route_browser_page, wsgi_response
+from tools.verify_unit_skill_presentation_browser import (
+    DOM_SNAPSHOT,
+    _settings_script,
+    assert_unit_dom,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-browser.test"
@@ -475,6 +480,81 @@ def test_sacha_numeric_ava_is_visible_in_its_army_context(
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= innerWidth + 1"
         ), (army_slug, width)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+def test_army_02_to_04_native_profiles_costs_and_ava_in_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
+) -> None:
+    """API-to-DOM parity complements the independent pinned-source profile audit."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(_settings_script({}, "cm"))
+    page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}')")
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    totals = {"armies": 0, "profiles": 0, "loadouts": 0}
+    try:
+        for slug in (
+            "indigo-spec-ops", "indigo-team-ops", "confessor-spec-ops",
+            "confessor-team-ops", "gu-feng-spec-ops", "yu-jing-team-ops",
+        ):
+            status, _, body = wsgi_response(
+                release_scenario_app, f"{ORIGIN}/api/units/{slug}",
+            )
+            assert status == 200
+            unit = json.loads(body)
+            page.goto(f"{ORIGIN}/units/{slug}", wait_until="domcontentloaded")
+            page.locator(".army-profile").first.wait_for(state="visible", timeout=30000)
+            assert page.locator("html").get_attribute("data-theme") == theme
+            assert_unit_dom(unit, page.evaluate(DOM_SNAPSHOT), slug, "cm")
+            assert page.locator(".army-profile").count() == len(unit["armies"])
+            for army in unit["armies"]:
+                section = page.locator(".army-profile").filter(
+                    has=page.locator("summary").filter(has_text=army["name"]),
+                )
+                assert section.count() == 1, (slug, army["name"])
+                if section.get_attribute("open") is None:
+                    section.locator("summary").focus()
+                    section.locator("summary").press("Enter")
+                stats = section.locator(".attribute-statline-with-availability")
+                assert stats.count() == len(army["profiles"])
+                for index, profile in enumerate(army["profiles"]):
+                    actual = stats.nth(index).evaluate("""root => Object.fromEntries(
+                        [...root.children].map(item => [
+                            item.querySelector('.attribute-label').innerText.trim(),
+                            item.querySelector('.attribute-value').innerText.trim(),
+                        ])
+                    )""")
+                    expected = {
+                        label: str(profile[key]) for label, key in (
+                            ("CC", "cc"), ("BS", "bs"), ("PH", "ph"), ("WIP", "wip"),
+                            ("ARM", "arm"), ("BTS", "bts"), ("S", "silhouette"),
+                        )
+                    }
+                    expected["STR" if profile["is_structure"] else "VITA"] = str(
+                        profile["vitality"],
+                    )
+                    expected["MOV"] = f"{profile['move_1']}-{profile['move_2']} cm"
+                    expected["AVA"] = "—" if profile["ava"] < 0 else str(profile["ava"])
+                    assert actual == expected, (slug, army["id"], profile["name"])
+                    assert stats.nth(index).is_visible()
+                rows = section.locator(".loadout-table tbody tr.profile-summary")
+                assert rows.count() == len(army["loadouts"])
+                for index, loadout in enumerate(army["loadouts"]):
+                    assert rows.nth(index).locator("td").all_text_contents() == [
+                        loadout["name"], str(loadout["points"]), loadout["swc"],
+                    ], (slug, army["id"], loadout["option_id"])
+                    assert rows.nth(index).is_visible()
+                totals["armies"] += 1
+                totals["profiles"] += stats.count()
+                totals["loadouts"] += rows.count()
+            assert not page.evaluate("document.documentElement.scrollWidth > innerWidth + 1")
+        assert totals == {"armies": 22, "profiles": 66, "loadouts": 220}
         assert not errors, errors
     finally:
         page.close()

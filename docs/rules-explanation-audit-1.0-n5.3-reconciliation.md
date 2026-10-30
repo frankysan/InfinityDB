@@ -173,6 +173,21 @@ counts above.
   Symbiont Armor profiles, like Intel's Full Power/Battle Ravaged
   profiles, are not interchangeable chart selections.
 
+  **2026-10-30 follow-up — ARMY-02–04 native publication:**
+  Indigo (1912/1926), Confessor (1913/1927) and Gui Feng/Yu Jing
+  (1914/1928) now have independent pinned-source-to-API coverage
+  for all 22 Army/Unit contexts, 66 native profiles and 220 loadouts,
+  including Attributes, AVA, items/Extras, Orders, costs and disabled
+  options. Indigo's PanOceania Hacker is Irregular in the source;
+  its other five Army contexts are Regular. These values remain
+  separate. Chromium verifies the six ordinary Unit pages at
+  1440/390/320 px in light/dark themes (36 page checks), including
+  numeric profiles, AVA, costs and linked item placement. See
+  [the validation contract](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
+  This closes selected current native publication parity only;
+  upgrade/profile-transition semantics, Fireteam/roster legality,
+  historical deltas and final hosted acceptance remain separate.
+
   **ARMY-17–20** now have **selected current-state local acceptance**
   independently of the Spec-Ops charts. Ioann Bann (#1940) retains
   Dogface/Dog-Warrior profiles and maximum-one Varangian Duo
