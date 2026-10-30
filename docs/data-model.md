@@ -837,8 +837,13 @@ runtime read model for the normal
 does not inspect maintained configuration or infer rules semantics.
 
 Each condition retains a source action and scope, player-readable
-description, and optional exact destination link. TAG/VH/REM are
-unlinked source Troop Type selectors, not new domain identities.
+description, optional exact destination link and original
+`targetRecordId`; chart subjects retain reviewed `ownerRecordId`
+when available. Skill, Equipment and State pages render matching
+negative conditions with links to the exact chart row, using this
+published read model rather than interpreting generic canonical
+relations. TAG/VH/REM are unlinked source Troop Type selectors,
+not new domain identities.
 Mounted Motorcycles cannot Jump **upwards** or use ladders; Irregular
 and REM restrictions concern **selection** as Lieutenant, not use of
 Lieutenant skills. No source-negative relation means *permission*;
@@ -846,8 +851,9 @@ neither this reference nor existing broad
 `restricts-use-of` edges evaluate live action legality.
 Source/manifest/PDF checks, static byte parity and browser acceptance
 are documented in [testing](testing.md#n53-restrictions-chart-source-and-browser-reference).
-Canonical reverse links and condition-aware relation modeling remain
-backlog work.
+Canonical condition-aware relation modeling and verified
+Irregular Training Unit-occurrence mapping remain backlog work.
+The existing generic relation graph is unchanged.
 
 ## Availability and membership
 

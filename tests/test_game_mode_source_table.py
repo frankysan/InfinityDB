@@ -234,6 +234,7 @@ def test_published_restrictions_reference_is_exact_source_projection() -> None:
 
     motorcycle = published["rows"][1]
     assert motorcycle["ownerHref"] == "/equipment/motorcycle"
+    assert motorcycle["ownerRecordId"] == "equipment:motorcycle"
     assert {item["action"] for item in motorcycle["conditions"]} == {
         "enter-prone", "declare-cautious-movement", "declare-climb",
         "use-ladders", "upward-jump",
@@ -242,14 +243,18 @@ def test_published_restrictions_reference_is_exact_source_projection() -> None:
     assert jump["scope"] == "while-mounted-upwards-only"
     assert "horizontal/downward Jump" in jump["note"]
     assert jump["href"] == "/skills/jump"
+    assert jump["targetRecordId"] == "skill:jump"
     assert motorcycle["conditions"][3]["href"] is None
     irregular = published["rows"][-1]
     assert irregular["ownerHref"] is None
+    assert irregular["ownerRecordId"] == "training:irregular"
+    assert irregular["conditions"][0]["targetRecordId"] == "skill:lieutenant"
     assert irregular["conditions"][0]["scope"] == "army-selection-only"
     assert "not a ban on using" in irregular["conditions"][0]["note"]
     for row in published["rows"]:
         if row["category"] == "Troop Type":
             assert row["ownerHref"] is None
+            assert row["ownerRecordId"] is None
 
     altered = copy.deepcopy(manifest)
     altered["rows"][1]["restrictions"][4]["scope"] = "while-mounted"
@@ -388,6 +393,67 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                     assert not page.evaluate(
                         "() => document.documentElement.scrollWidth > innerWidth + 1"
                     ), width
+                    assert errors == [], errors
+
+                    reverse_cases = (
+                        ("/equipment/motorcycle", "motorcycle", "upward-jump", 5),
+                        ("/skills/aerial", "aerial", "enter-prone", 2),
+                        ("/skills/cautious-movement", "rem", "declare-cautious-movement", 5),
+                        ("/skills/climb", "motorcycle", "declare-climb", 1),
+                        ("/skills/jump", "motorcycle", "upward-jump", 1),
+                        ("/skills/lieutenant", "irregular", "lieutenant-selection", 2),
+                        ("/states/prone", "tag", "enter-prone", 4),
+                    )
+                    for route, subject, action, count in reverse_cases:
+                        page.goto(
+                            f"http://127.0.0.1:{server.server_port}{route}",
+                            wait_until="domcontentloaded",
+                        )
+                        context = page.locator(".restrictions-context")
+                        context.wait_for(state="visible", timeout=15000)
+                        assert context.locator("li").count() == count, (width, route)
+                        anchor = context.locator(
+                            f"a[href='/rules#restriction-{subject}-{action}']"
+                        )
+                        assert anchor.count() == 1, (width, route)
+                        if route.endswith("/jump") and width == 390:
+                            anchor.click()
+                            destination = page.locator("#restriction-motorcycle-upward-jump")
+                            destination.wait_for(state="visible", timeout=15000)
+                            assert page.url.endswith(
+                                "/rules#restriction-motorcycle-upward-jump"
+                            )
+                            assert destination.get_attribute(
+                                "data-scope"
+                            ) == "while-mounted-upwards-only"
+                            # Restore the individual Skill page before its context checks.
+                            page.goto(
+                                f"http://127.0.0.1:{server.server_port}{route}",
+                                wait_until="domcontentloaded",
+                            )
+                            context = page.locator(".restrictions-context")
+                            context.wait_for(state="visible", timeout=15000)
+                        if route.endswith("/jump"):
+                            assert context.locator("li").first.get_attribute(
+                                "data-scope"
+                            ) == "while-mounted-upwards-only"
+                            assert "horizontal/downward Jump" in context.inner_text()
+                        if route.endswith("/lieutenant"):
+                            assert all(
+                                scope == "army-selection-only"
+                                for scope in context.locator("li").evaluate_all(
+                                    "(items) => items.map((item) => item.dataset.scope)"
+                                )
+                            )
+                        assert not page.evaluate(
+                            "() => document.documentElement.scrollWidth > innerWidth + 1"
+                        ), (width, route)
+                    page.goto(
+                        f"http://127.0.0.1:{server.server_port}/skills/dodge",
+                        wait_until="domcontentloaded",
+                    )
+                    page.locator("#skill-content").wait_for(state="visible")
+                    assert page.locator(".restrictions-context").count() == 0
                     assert errors == [], errors
                     page.close()
             finally:

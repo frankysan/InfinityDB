@@ -281,11 +281,12 @@ def project_public_restrictions(
             label, note = ACTION_DISPLAY[entry["action"]]
             conditions.append({
                 "action": entry["action"], "label": label, "scope": entry["scope"],
-                "href": link, "note": note,
+                "href": link, "targetRecordId": target, "note": note,
             })
         rows.append({
             "id": subject.lower(), "name": title, "category": kind,
-            "ownerHref": owner_href, "sourceSubject": subject,
+            "ownerHref": owner_href, "ownerRecordId": owner_id,
+            "sourceSubject": subject,
             "conditions": conditions,
         })
     return {

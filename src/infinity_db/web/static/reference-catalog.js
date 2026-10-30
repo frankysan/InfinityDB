@@ -102,8 +102,16 @@ async function loadRestrictionsReference() {
     anchor.textContent = "View N5.3 Restrictions chart";
     jump.append(anchor);
     document.querySelector(".intro > div")?.append(jump);
-    if (window.location.hash === "#restrictions") {
-      requestAnimationFrame(() => section.scrollIntoView({ block: "start" }));
+    if (window.location.hash.startsWith("#restriction")) {
+      let target;
+      try {
+        target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+      } catch {
+        target = null;
+      }
+      if (target && section.contains(target)) {
+        requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
+      }
     }
   } catch (error) {
     if (error.name === "AbortError") return;

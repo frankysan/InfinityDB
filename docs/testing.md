@@ -1931,8 +1931,26 @@ directory for review, without overwriting the live tracked asset.
 `tests/test_game_mode_source_table.py` checks publication byte parity,
 source drift, WSGI static delivery and three real Chromium viewport
 renderings (1440/390/320 px), including conditional scope, references
-and page overflow. This is normal browser presentation, not a generic
-declaration or Army selection legality resolver.
+and page overflow.
+
+The reviewed read model also carries `ownerRecordId` and
+`targetRecordId` for **source-backed reverse contextual links**.
+The same Chromium test visits seven relevant canonical pages:
+Motorcycle Equipment, Aerial, Cautious Movement, Climb, Jump,
+Lieutenant and Prone State. It checks exact condition counts and
+anchor targets at all three viewports, follows the upward-Jump link
+back to its source row, and confirms the unrelated Dodge page does
+not show a spurious Restrictions section. The 11-test source
+regression also checks byte-exact publication parity. This is
+contextual help, not a generic declaration or Army selection
+legality resolver.
+
+Irregular Training has no standalone catalog route; sampled
+source candidate Unit details did not expose an `irregular` Training
+entry. A proposed Unit-level hook was not retained because its
+source-to-occurrence contract is unverified. Players can follow
+the Irregular restriction from the Lieutenant Skill and chart
+until that separate mapping is established.
 
 ### N5.3 Silhouette Templates source and browser geometry
 

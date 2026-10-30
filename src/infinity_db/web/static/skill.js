@@ -1,10 +1,11 @@
 import { formatSkillDistanceExtra } from "./distance.js";
 import { optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, visibleUnitIds } from "./api.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
+import { restrictionsContextSection } from "./restrictions-reference.js";
 import { tableViewport } from "./view-components.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
@@ -16,6 +17,7 @@ const content = document.getElementById("skill-content");
 let currentSkill;
 let displayedSkill;
 let faqItems = [];
+let restrictionsData = null;
 const pageController = new AbortController();
 
 function displayWikiUrl(url) {
@@ -287,6 +289,10 @@ function render(skill) {
   if (skill.rules?.length) children.push(rulesReferenceSection(skill.rules));
   const variantRules = gameplayVariantRules(variants);
   if (variantRules.length) children.push(rulesReferenceSection(variantRules, "Variant rules"));
+  const context = restrictionsData && restrictionsContextSection(
+    restrictionsData, (skill.rules || []).map((rule) => rule.id),
+  );
+  if (context) children.push(context);
   const structuredReference = structuredReferenceSection(skill.structured_reference);
   if (structuredReference) children.push(structuredReference);
   if (faqItems.length) children.push(faqRulingsSection(faqItems));
@@ -296,6 +302,14 @@ function render(skill) {
   status.hidden = true;
   content.hidden = false;
 }
+
+getRestrictionsReference(pageController.signal).then((data) => {
+  if (pageController.signal.aborted) return;
+  restrictionsData = data;
+  if (displayedSkill) render(displayedSkill);
+}).catch((error) => {
+  if (error.name !== "AbortError") console.error("Restrictions chart unavailable", error);
+});
 
 document.addEventListener(
   "infinity:beforenavigation",

@@ -1216,14 +1216,31 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         preserves negative-only semantics; it is not a legality engine.
         The byte-exact static publication check and Chromium tests
         (1440/390/320 px) protect the source-to-browser contract.
-      - [ ] Complete canonical reverse/contextual links from affected
-        Skills, Equipment and Training to the Restrictions chart, after
-        reviewing the remaining seven missing typed edges and the two
-        over-broad generic relations. Preserve source-only Troop Type
-        selectors until a canonical Troop Type reference model is
-        justified; absence of an edge conveys no permission. Do not
-        reinterpret Motorcycle's `skill:jump` edge as a ban on all
-        directions or Lieutenant selection as Skill-use prohibition.
+      - [x] Add **contextual reverse links** from the seven existing
+        Equipment, Skill and State reference destinations to individual
+        Restrictions chart conditions. The deterministic publication now
+        carries exact `ownerRecordId` and `targetRecordId` identity
+        alongside public links. Profile pages list only matching negative
+        conditions, including the mounted upward-only Jump and
+        Lieutenant **selection** qualifiers. The normal browser follows
+        deep links to the corresponding row. Chromium tests cover seven
+        destinations across 1440/390/320 px plus an unaffected Skill.
+        These are source-backed contextual references, not new
+        canonical `restricts-use-of` edges or legality predictions.
+      - [ ] Reconcile the **seven missing typed restriction edges** and
+        **two broad generic relations** with a condition/selection-aware
+        canonical schema before modifying the graph. Preserve TAG/VH/REM
+        as source Troop Type selectors until canonical identities are
+        justified; absence of a relation conveys no permission.
+        Do not reinterpret Motorcycle's `skill:jump` as all-direction
+        prohibition or Lieutenant **selection** as Skill-use prohibition.
+      - [ ] Confirm how Irregular Training is represented on actual
+        Unit/profile/loadout occurrences before adding a Unit-level
+        reverse link. Sampled Irregular-source candidates did not
+        expose `irregular` in the existing Training item arrays; the
+        existing source chart and Lieutenant detail already link to
+        the Irregular selection prohibition. Do not infer per-Unit
+        Training ownership from the source category alone.
   - **Completion:** each projection has a normal browser entry point, source reconciliation, and
     regression coverage for its exceptional rows. Exact variant reconciliation gates the usage
     index; it need not block independently ready lookup or Restrictions views.

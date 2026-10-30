@@ -4131,8 +4131,15 @@ conditional scope and any reviewed Skill/Equipment/State destination;
 a missing edge conveys neither permission nor prohibition. Its source
 provenance is English N5.3 p. 194. The read-only projection introduces
 no new Unit facts, canonical Troop Type identities or executable
-action-legality behavior. Reverse links from other catalog pages and
-the remaining relation-model work are separately tracked.
+action-legality behavior. Contextual reverse links on the relevant
+Skill, Equipment and State detail pages are derived from the same
+reviewed publication (`ownerRecordId` / `targetRecordId`), not copied
+into independent rules definitions. They point to the exact restriction
+row and retain the source's negative-only semantics. Irregular
+Training's restriction is discoverable from Lieutenant and the chart,
+but no dedicated Training catalog page or verified Unit-level
+Irregular occurrence mapping exists. The seven missing typed edges
+and two broad relations remain open for semantic review.
 
 Sources:
 

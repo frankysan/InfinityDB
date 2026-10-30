@@ -31,7 +31,9 @@ are not retroactively relabeled.
   instead of leaving the Target dash ambiguous about eligibility or effects.
 - General Rules now includes a linked N5.3 Restrictions chart, showing six
   affected categories and their exact prohibitions, including conditions
-  for mounted Motorcycles and Lieutenant selection.
+  for mounted Motorcycles and Lieutenant selection. Related Skill,
+  Equipment and State pages now link back to the applicable chart
+  entries with their original conditions.
 - Fireteam charts show their original notes, flag unverified Unit/FTO references,
   and keep Reinforcement parent limits separate.
 - All canonical Trait pages offer official Wiki heading links. Glossary deep links

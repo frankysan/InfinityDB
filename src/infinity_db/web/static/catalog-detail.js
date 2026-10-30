@@ -1,9 +1,10 @@
 import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, visibleUnitIds } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
+import { restrictionsContextSection } from "./restrictions-reference.js";
 import { tableViewport } from "./view-components.js";
 import {
   gameplayVariantRules,
@@ -28,6 +29,7 @@ const rangeModifierClasses = {
 let currentItem;
 let displayedItem;
 let faqItems = [];
+let restrictionsData = null;
 const pageController = new AbortController();
 
 function displayWikiUrl(url) {
@@ -615,6 +617,9 @@ function render(item) {
     }
   }
   const sections = usageSections(item);
+  const context = restrictionsData && ["equipment", "states"].includes(catalog)
+    ? restrictionsContextSection(restrictionsData, (item.rules || []).map((rule) => rule.id))
+    : null;
   const variantRules = gameplayVariantRules(item.variants);
   const levelEffects = levelEffectsSection(item.rules);
   const profiles = catalog === "weapons" && item.weapon_variants?.length
@@ -629,6 +634,7 @@ function render(item) {
   content.replaceChildren(
     ...(mineFamily && profiles ? [profiles] : []),
     ...(rules?.length ? [rulesReferenceSection(rules)] : []),
+    ...(context ? [context] : []),
     ...(levelEffects ? [levelEffects] : []),
     ...(variantRules.length ? [rulesReferenceSection(variantRules, "Variant rules")] : []),
     ...(catalog === "traits" && item.description && !item.rules?.length
@@ -644,6 +650,16 @@ function render(item) {
   );
   content.hidden = false;
   status.hidden = true;
+}
+
+if (["equipment", "states"].includes(catalog)) {
+  getRestrictionsReference(pageController.signal).then((data) => {
+    if (pageController.signal.aborted) return;
+    restrictionsData = data;
+    if (displayedItem) render(displayedItem);
+  }).catch((error) => {
+    if (error.name !== "AbortError") console.error("Restrictions chart unavailable", error);
+  });
 }
 
 // Rule cards arrive after the initial document fragment navigation. Restore
