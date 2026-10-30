@@ -180,6 +180,152 @@
         "The user gains +6 WIP when declaring [[skill:discover]] against Camouflage Markers."
       ],
       "caveat": "Sensor can detect and reveal existing hidden Troopers, Weapons or Equipment, not place new ones. Preserve each revealed element's independently sourced identity."
+    },
+    {
+      "recordId": "trait:indiscriminate",
+      "classification": "targeting-exception-not-object-identity",
+      "sourcePages": [
+        175
+      ],
+      "summaryEvidence": "May be used or deployed despite Camouflage and Hiding Markers",
+      "factsEvidence": [
+        "This permission also applies when there is no otherwise valid target nearby"
+      ],
+      "caveat": "The Indiscriminate Trait grants a targeting/placement exception to an already identified Weapon or Equipment item; it does not supply a separate device profile, Army carrier, or Minelayer exception."
+    },
+    {
+      "recordId": "skill:look-out",
+      "classification": "marker-targeted-aro-not-object",
+      "sourcePages": [
+        81
+      ],
+      "summaryEvidence": "An ARO Common Skill that lets the user warn other Troopers",
+      "factsEvidence": [
+        "The user must have LoF to an enemy Trooper or Marker that declares or performs an Order."
+      ],
+      "caveat": "Look Out! reacts to an existing Trooper/Marker and permits allied facing-related Dodge. Neither the target Marker nor allied response is an independent deployed object."
+    },
+    {
+      "recordId": "skill:chain-of-command",
+      "classification": "existing-trooper-role-transfer-not-object",
+      "sourcePages": [
+        87
+      ],
+      "summaryEvidence": "An optional private Automatic Special Skill that appoints its user as the new [[skill:lieutenant]]",
+      "factsEvidence": [
+        "The user must be on the table as a Model or Marker and cannot be [[state:isolated|Isolated]] or in a Null State."
+      ],
+      "caveat": "Chain of Command transfers the Lieutenant role to an existing eligible Trooper represented by a Model or Marker; it does not deploy a device or create a new Trooper identity."
+    },
+    {
+      "recordId": "skill:morpho-scan",
+      "classification": "existing-model-attribute-copy-not-object",
+      "sourcePages": [
+        103
+      ],
+      "summaryEvidence": "An optional no-roll Comms Attack that permanently replaces the user's MOV, CC, BS, and PH values",
+      "factsEvidence": [
+        "The target must be an enemy Model with the VITA Attribute",
+        "Morpho-Scan has no effect on enemy Markers or enemy Troopers with the STR Attribute."
+      ],
+      "caveat": "Morpho-Scan copies eligible Attribute values from an existing Model. Its exclusion of Markers is a targeting restriction, not a new Marker or source object."
+    },
+    {
+      "recordId": "rule:scenario:killing",
+      "classification": "scenario-trooper-scoring-not-object",
+      "sourcePages": [
+        150,
+        155
+      ],
+      "summaryEvidence": "Rules for Killing.",
+      "factsEvidence": [
+        "An enemy Trooper counts as killed after entering [[state:dead]] or if it is classified as Null when the game ends.",
+        "A Trooper that has never deployed on the table as a Model or Marker counts as killed when the game ends."
+      ],
+      "caveat": "Annihilation/Firefight scoring counts the state of an existing Trooper, including one never deployed as Model/Marker. No additional battlefield element or Weapon/Equipment object is created."
+    },
+    {
+      "recordId": "rule:scenario:reinforced-tactical-link",
+      "classification": "scenario-lieutenant-representation-not-object",
+      "sourcePages": [
+        155
+      ],
+      "summaryEvidence": "Rules for Reinforced Tactical Link.",
+      "factsEvidence": [
+        "For this mission, the identity of the [[skill:lieutenant]] is always Open Information.",
+        "The replacement [[skill:lieutenant]] must be a Model or Marker on the table"
+      ],
+      "caveat": "Firefight requires an existing Lieutenant's identity to be disclosed even in Marker form and controls replacement. It changes a Trooper's role/visibility, not a source Weapon/Equipment identity."
+    },
+    {
+      "recordId": "state:decoy",
+      "classification": "static-trooper-replicas-not-device",
+      "sourcePages": [
+        159
+      ],
+      "summaryEvidence": "A deployment Marker State that conceals which of several colocated replicas represents the real user.",
+      "factsEvidence": [
+        "The user deploys with one or two replica Decoys in Coherency",
+        "Replica Decoys are removed by successful [[skill:discover]]"
+      ],
+      "citationStatus": "pdf-verified-manifest-only",
+      "pdfExcerpt": "replicas do not hide a Trooper",
+      "caveat": "N5.3 p. 159 says static Decoy replicas conceal no Trooper, Weapon or Equipment themselves but can affect Line of Fire and be targeted as Models under specified conditions. They are State representations of an existing Trooper, not additional Deployable Weapon/Equipment identities. The maintained State still lacks an N5.3 PDF citation."
+    },
+    {
+      "recordId": "trait:concealed",
+      "classification": "existing-weapon-equipment-representation",
+      "sourcePages": [
+        175
+      ],
+      "summaryEvidence": "Uses the effects of [[state:camouflaged]]; its concealing marker has Silhouette 2.",
+      "factsEvidence": [],
+      "citationStatus": "pdf-verified-manifest-only",
+      "pdfExcerpt": "Camouflage Markers concealing a",
+      "caveat": "N5.3 p. 175 confirms that Concealed applies Camouflaged effects to an existing Weapon/Equipment item and specifies S2 for its concealing Marker. Concealment is not another object identity or a generic source inventory edge; the maintained Trait has only a Wiki citation."
+    },
+    {
+      "recordId": "skill:mnemonica",
+      "classification": "existing-trooper-host-transfer-not-object",
+      "sourcePages": [
+        103
+      ],
+      "summaryEvidence": "An optional Automatic Special Skill that transfers the user's WIP, Mnemonica",
+      "factsEvidence": [
+        "The chosen allied host must be on the battlefield as a Model or Marker",
+        "After the transfer, the original user enters [[state:dead]] and is removed from the game table."
+      ],
+      "citationStatus": "pdf-verified-manifest-only",
+      "pdfExcerpt": "You must identify the Model or Marker",
+      "caveat": "N5.3 p. 103 transfers an existing Trooper's WIP and optional Lieutenant status to another existing eligible Model/Marker; it does not generate an additional entity or Army Weapon/Equipment source. The maintained Skill has a Wiki citation only."
+    },
+    {
+      "recordId": "skill:tactical-awareness",
+      "classification": "order-marker-not-object",
+      "sourcePages": [
+        115
+      ],
+      "summaryEvidence": "An optional Automatic Special Skill that grants its user an additional Tactical Order.",
+      "factsEvidence": [
+        "Place the Tactical Order during Order Count when the user is on the table as a Model or Marker"
+      ],
+      "citationStatus": "pdf-verified-manifest-only",
+      "pdfExcerpt": "a Model or Marker",
+      "caveat": "N5.3 p. 115 awards a Tactical Order to an existing Trooper. The Model/Marker is that Trooper's representation and the Order is a resource, not a placed Weapon/Equipment object. The maintained Skill lacks a direct PDF citation."
+    },
+    {
+      "recordId": "skill:explode",
+      "classification": "trooper-centered-template-not-object",
+      "sourcePages": [
+        92
+      ],
+      "summaryEvidence": "An obligatory Automatic Attack Skill that detonates when the user enters [[state:unconscious]]",
+      "factsEvidence": [
+        "If the template would affect an allied Model or Marker, the Template Attack is canceled, but the user still enters [[state:dead]]."
+      ],
+      "citationStatus": "pdf-verified-manifest-only",
+      "pdfExcerpt": "Template Attacks that affect allied Models or Markers",
+      "caveat": "N5.3 p. 92 defines an Attack centered on the existing Trooper, with cancellation if allied Models/Markers are affected. An Attack Template is not an independently deployed persistent object or new Weapon/Equipment carrier. The maintained Skill is Wiki-cited only."
     }
   ]
 }

@@ -1441,10 +1441,26 @@ as unimplemented and distinguish them from the published core-scenario foundatio
                   Holoecho replicas can provoke AROs and trigger deployed
                   devices despite not having independent Weapon/Equipment
                   identities. The expanded queue is **14/25 reviewed**.
-                - [ ] Review **11 remaining expanded candidates**,
-                  including Decoy State (maintained Wiki citation only),
-                  Concealed and other Marker/interaction/scenario
-                  references. Continue discovery beyond both keyword sets.
+                - [x] Classify the final **11 expanded candidates**:
+                  Indiscriminate, Look Out!, Chain of Command, Morpho-Scan,
+                  Killing, Reinforced Tactical Link, Decoy State,
+                  Concealed, Mnemonica, Tactical Awareness and Explode.
+                  All have been manually checked against N5.3 pages;
+                  the expanded bounded lexical queue is now **25/25
+                  reviewed**, without a new deployed-object identity.
+                  Decoy replicas may affect LoF and be targeted, while
+                  Concealed applies an S2 Camouflage representation to
+                  an existing Weapon/Equipment item.
+                - [ ] Migrate the five expanded-review PDF-only
+                  citations (Decoy State p. 159, Concealed p. 175,
+                  Mnemonica p. 103, Tactical Awareness p. 115,
+                  Explode p. 92) with the six prior citation gaps.
+                  The audit keeps them separate until a coordinated
+                  rules database rebuild and publication refresh.
+                - [ ] Expand discovery beyond both lexical scans and
+                  their definition/field boundaries, including
+                  source tables and other N5.3 game-element domains.
+                  No total object-completeness claim is established.
             - [x] **Reconcile delivery paths for all 17 currently published
               reviewed deployed objects.** The pinned review now covers
               17 of 17 objects with 28 approved delivery paths and zero

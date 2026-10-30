@@ -1500,10 +1500,11 @@ separate, read-only pass over Skill/Rule/Trait/Term/State definitions:
 ```
 
 The expanded audit excludes all 48 candidates from the original scan rather
-than recounting them. It currently identifies **25 additional definitions**:
-**14 source-cited reviews** in
-`config/validation/deployed-object-expanded-reviews.json`, plus **11
-unreviewed leads**. N5.3 pp. 151 and 153 establish that Domination's four
+than recounting them. It identifies **25 additional definitions, all
+classified** in `config/validation/deployed-object-expanded-reviews.json`.
+Five decisions use audit-only PDF evidence because their maintained
+definitions still cite only the Wiki. N5.3 pp. 151 and 153 establish that
+Domination's four
 Consoles and Supplies' three Supply Boxes are *scenario-specific objectives*,
 represented by scenario Markers or scenery; Hack Consoles and controlling
 Supply Boxes act on those existing objectives and create no further objects.
@@ -1525,15 +1526,36 @@ on p. 163. Likewise, a normal successful Discover against Impersonation-1
 reduces it to Impersonation-2, whereas Discover against Impersonation-2
 reveals the underlying Model. This does not create two Trooper identities.
 
-This expanded scan is deliberately bounded to named objectives/devices and
-Marker/decoy wording, not all N5.3 prose, source tables, or all possible
-game elements. Remaining leads include `state:decoy` (maintained Wiki
-citation only), Concealed, other Marker interactions and scenario references.
-The Decoy Skill is separately cited to N5.3 p. 90; this does not silently
-provide the Decoy State record with a verified maintained PDF citation.
-The manifest and validator reject unsupported IDs, lost detailed clauses,
-stale PDF citations or inferred object profiles. No production database,
-object count, Unit ownership or approved delivery path is changed.
+The final 11 cases distinguish **Indiscriminate** (p. 175, an existing
+item's placement exception), **Look Out!** (p. 81), **Chain of Command**
+(p. 87), **Morpho-Scan** (p. 103), **scenario Killing and Reinforced
+Tactical Link** (pp. 150/155), **Decoy State** (p. 159), **Concealed**
+(p. 175), **Mnemonica** (p. 103), **Tactical Awareness** (p. 115),
+and **Explode** (p. 92). These concern target/role eligibility,
+existing Model or Marker representations, Orders, or a Trooper-centered
+Attack Template, not a new independently deployed Weapon/Equipment.
+Decoy replicas are static, but can affect LoF and be targeted under the
+State rules. The Concealed Trait describes S2 Camouflage Markers for
+existing Weapons/Equipment, not an additional deployed item.
+
+The five records without maintained PDF citations are `state:decoy`,
+`trait:concealed`, `skill:mnemonica`, `skill:tactical-awareness`
+and `skill:explode`. Each has a separately verified N5.3 PDF page
+and a pinned `pdfExcerpt` with `citationStatus:
+pdf-verified-manifest-only`. The audit reports these as
+`reviewedPdfOnly` and `missingMaintainedN5Citation`, even though
+the bounded queue is closed; new maintained citations invalidate the
+exception until it is migrated. This is **not** a production citation,
+nor does CI parse the PDF. Coordinate maintained-source updates with
+a `rules.db` rebuild and deployed-object publication fingerprint
+refresh, together with the six gaps from the original audit.
+
+This expanded scan is deliberately bounded to named objectives/devices
+and Marker/decoy wording, not all N5.3 prose, source tables, or possible
+game elements. The manifest and validator reject unsupported IDs,
+lost detail clauses, stale citations or inferred object profiles. No
+production database, published object count, Unit ownership or approved
+delivery path is changed.
 `tests/test_deployed_object_expanded_queue.py` checks the discovery and
 fail-closed review boundaries.
 

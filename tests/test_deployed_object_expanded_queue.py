@@ -52,8 +52,10 @@ def test_pinned_extended_queue_keeps_scenario_and_device_identities_separate() -
     assert report["scope"] == "expanded-lexical-discovery-not-object-completeness"
     assert len(report["curatedSourceSha256"]) == 64
     assert report["candidateCount"] == 25
-    assert report["reviewedCount"] == 14
-    assert len(report["unreviewed"]) == 11
+    assert report["reviewedCount"] == 25
+    assert report["unreviewed"] == []
+    assert len(report["reviewedPdfOnly"]) == 5
+    assert len(report["missingMaintainedN5Citation"]) == 5
     reviewed = {row["recordId"]: row for row in report["reviews"]}
     assert set(reviewed) == {
         "term:marker",
@@ -70,15 +72,42 @@ def test_pinned_extended_queue_keeps_scenario_and_device_identities_separate() -
         "skill:discover",
         "skill:surprise-attack",
         "skill:sensor",
+        "trait:indiscriminate",
+        "skill:look-out",
+        "skill:chain-of-command",
+        "skill:morpho-scan",
+        "rule:scenario:killing",
+        "rule:scenario:reinforced-tactical-link",
+        "state:decoy",
+        "trait:concealed",
+        "skill:mnemonica",
+        "skill:tactical-awareness",
+        "skill:explode",
     }
     assert reviewed["rule:scenario:consoles"]["sourcePages"] == [151]
     assert reviewed["rule:scenario:supply-boxes"]["sourcePages"] == [153]
     assert reviewed["skill:activate-disco-ball"]["classification"] == (
         "reviewed-object-interaction-not-identity"
     )
-    assert {"state:decoy", "trait:concealed", "skill:look-out"} <= {
-        row["recordId"] for row in report["unreviewed"]
+    assert {
+        row["recordId"] for row in report["missingMaintainedN5Citation"]
+    } == {
+        "state:decoy",
+        "trait:concealed",
+        "skill:mnemonica",
+        "skill:tactical-awareness",
+        "skill:explode",
     }
+    assert {row["recordId"] for row in report["reviewedPdfOnly"]} == {
+        row["recordId"] for row in report["missingMaintainedN5Citation"]
+    }
+    assert reviewed["state:decoy"]["classification"] == (
+        "static-trooper-replicas-not-device"
+    )
+    assert "Line of Fire" in reviewed["state:decoy"]["caveat"]
+    assert reviewed["trait:concealed"]["classification"] == (
+        "existing-weapon-equipment-representation"
+    )
     assert reviewed["state:holoecho"]["classification"] == (
         "interactive-trooper-replicas-not-device"
     )
@@ -102,7 +131,7 @@ def test_extended_reviews_reject_unsupported_or_stale_evidence() -> None:
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = expanded_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 14
+    assert len(validate_reviews(manifest, curated, candidates)) == 25
 
     for field, bad_value, reason in (
         ("classification", "new-four-stat-object", "classification"),
@@ -112,7 +141,11 @@ def test_extended_reviews_reject_unsupported_or_stale_evidence() -> None:
         ("objectProfile", {"ARM": 0}, "audit-only"),
     ):
         altered = copy.deepcopy(manifest)
-        altered["reviews"][-1][field] = bad_value
+        cited = next(
+            review for review in altered["reviews"]
+            if review["recordId"] == "skill:sensor"
+        )
+        cited[field] = bad_value
         with pytest.raises(ValueError, match=reason):
             validate_reviews(altered, curated, candidates)
 
@@ -128,6 +161,26 @@ def test_extended_reviews_reject_unsupported_or_stale_evidence() -> None:
     with pytest.raises(ValueError, match="detail evidence"):
         validate_reviews(manifest, extended, expanded_mentions(extended))
 
+    # Manually verified PDF pages are audit-only until tracked rules sources
+    # and their generated artifacts are rebuilt together.
+    for field, wrong in (
+        ("sourcePages", [999]),
+        ("citationStatus", "maintained-source-cited"),
+        ("pdfExcerpt", "unsupported quote"),
+    ):
+        changed = copy.deepcopy(manifest)
+        changed["reviews"][-1][field] = wrong
+        with pytest.raises(ValueError, match="PDF-only provenance"):
+            validate_reviews(changed, curated, candidates)
+
+    newly_cited = copy.deepcopy(curated)
+    explode = next(
+        item for item in newly_cited["records"] if item["id"] == "skill:explode"
+    )
+    explode["citations"].append({"sourceId": "n5-core-v5.3-pdf", "page": 92})
+    with pytest.raises(ValueError, match="PDF-only provenance"):
+        validate_reviews(manifest, newly_cited, expanded_mentions(newly_cited))
+
 
 def test_extended_cli_reports_open_queue(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
@@ -136,5 +189,7 @@ def test_extended_cli_reports_open_queue(
     assert main() == 0
     output = capsys.readouterr().out
     assert "Additional candidate definitions: 25" in output
-    assert "Reviewed distinctions: 14" in output
-    assert "Open additional candidates: 11" in output
+    assert "Reviewed distinctions: 25" in output
+    assert "Open additional candidates: 0" in output
+    assert "Reviewed with audit-only PDF evidence: 5" in output
+    assert "Definitions missing maintained N5.3 PDF citations: 5" in output

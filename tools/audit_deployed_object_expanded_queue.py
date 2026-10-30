@@ -42,6 +42,30 @@ CLASSIFICATIONS = {
     "skill:discover": ("skill", "reveals-existing-marker-not-device"),
     "skill:surprise-attack": ("skill", "marker-attack-modifier-not-device"),
     "skill:sensor": ("skill", "reveals-existing-game-elements-not-device"),
+    "trait:indiscriminate": ("trait", "targeting-exception-not-object-identity"),
+    "skill:look-out": ("skill", "marker-targeted-aro-not-object"),
+    "skill:chain-of-command": ("skill", "existing-trooper-role-transfer-not-object"),
+    "skill:morpho-scan": ("skill", "existing-model-attribute-copy-not-object"),
+    "rule:scenario:killing": ("rule", "scenario-trooper-scoring-not-object"),
+    "rule:scenario:reinforced-tactical-link": (
+        "rule", "scenario-lieutenant-representation-not-object",
+    ),
+    "state:decoy": ("state", "static-trooper-replicas-not-device"),
+    "trait:concealed": ("trait", "existing-weapon-equipment-representation"),
+    "skill:mnemonica": ("skill", "existing-trooper-host-transfer-not-object"),
+    "skill:tactical-awareness": ("skill", "order-marker-not-object"),
+    "skill:explode": ("skill", "trooper-centered-template-not-object"),
+}
+
+# Read-only N5.3 PDF review evidence for definitions whose maintained source
+# currently provides Wiki citations only. Do not publish these as rule cites
+# without rebuilding the tracked rules database and dependent fingerprints.
+PDF_ONLY_REVIEWS = {
+    "state:decoy": (159, "replicas do not hide a Trooper"),
+    "trait:concealed": (175, "Camouflage Markers concealing a"),
+    "skill:mnemonica": (103, "You must identify the Model or Marker"),
+    "skill:tactical-awareness": (115, "a Model or Marker"),
+    "skill:explode": (92, "Template Attacks that affect allied Models or Markers"),
 }
 
 
@@ -134,8 +158,23 @@ def validate_reviews(
             if cite.get("sourceId") == "n5-core-v5.3-pdf"
         }
         claimed = review.get("sourcePages")
-        if not isinstance(claimed, list) or not claimed or not set(claimed) <= pages:
-            raise ValueError(f"Expanded source citation drift: {record_id}")
+        pdf_only = PDF_ONLY_REVIEWS.get(record_id)
+        if pdf_only is None:
+            if (
+                review.get("citationStatus") is not None
+                or review.get("pdfExcerpt") is not None
+                or not isinstance(claimed, list)
+                or not claimed
+                or not set(claimed) <= pages
+            ):
+                raise ValueError(f"Expanded source citation drift: {record_id}")
+        elif (
+            pages
+            or claimed != [pdf_only[0]]
+            or review.get("citationStatus") != "pdf-verified-manifest-only"
+            or review.get("pdfExcerpt") != pdf_only[1]
+        ):
+            raise ValueError(f"Expanded PDF-only provenance drift: {record_id}")
         if not review.get("caveat") or review.get("objectProfile") is not None:
             raise ValueError(f"Expanded review must remain audit-only: {record_id}")
         accepted.append(review)
@@ -151,12 +190,25 @@ def audit_expanded_candidates(curated_source: Path, reviews_source: Path) -> dic
         json.loads(reviews_source.read_text(encoding="utf-8")), curated, candidates,
     )
     reviewed = {decision["recordId"] for decision in reviews}
+    missing_maintained_pdf = [
+        row for row in candidates if not any(
+            cite["sourceId"] == "n5-core-v5.3-pdf"
+            and isinstance(cite["page"], int)
+            for cite in row["citations"]
+        )
+    ]
+    reviewed_pdf_only = [
+        decision for decision in reviews
+        if decision["recordId"] in PDF_ONLY_REVIEWS
+    ]
     return {
         "scope": "expanded-lexical-discovery-not-object-completeness",
         "curatedSourceSha256": hashlib.sha256(raw).hexdigest(),
         "candidateCount": len(candidates),
         "reviewedCount": len(reviewed),
         "unreviewed": [r for r in candidates if r["recordId"] not in reviewed],
+        "reviewedPdfOnly": reviewed_pdf_only,
+        "missingMaintainedN5Citation": missing_maintained_pdf,
         "candidates": [
             {**r, "reviewed": r["recordId"] in reviewed} for r in candidates
         ],
@@ -182,6 +234,11 @@ def main() -> int:
         print(f"Additional candidate definitions: {report['candidateCount']}")
         print(f"Reviewed distinctions: {report['reviewedCount']}")
         print(f"Open additional candidates: {len(report['unreviewed'])}")
+        print(f"Reviewed with audit-only PDF evidence: {len(report['reviewedPdfOnly'])}")
+        print(
+            "Definitions missing maintained N5.3 PDF citations: "
+            f"{len(report['missingMaintainedN5Citation'])}"
+        )
         for item in report["unreviewed"]:
             print(f"  {item['recordId']}: {', '.join(item['matched'])}")
     return 0
