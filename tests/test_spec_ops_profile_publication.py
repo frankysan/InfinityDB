@@ -1,4 +1,4 @@
-"""Selected ARMY-02–08 current-source profiles, not historical deltas or list legality."""
+"""Selected ARMY-02–12 current-source profiles, not historical deltas or list legality."""
 
 from __future__ import annotations
 
@@ -33,8 +33,19 @@ SOURCE_CONTEXTS = {
     1931: {501, 502, 503, 504},
     1918: {601, 604, 605},
     1932: {601, 604},
+    1919: {601, 602},
+    1933: {602},
+    1920: {603},
+    1934: {603},
+    1921: {605},
+    1935: {605},
+    1922: {701, 702, 703},
+    1936: {701, 702, 703},
 }
 SOURCE_IDS = tuple(SOURCE_CONTEXTS)
+SOURCE_VERSION_OVERRIDES = {
+    701: "7.26246.159", 702: "7.26246.159", 703: "7.26246.159",
+}
 
 
 @pytest.fixture(scope="module")
@@ -64,7 +75,7 @@ def source_documents() -> dict[int, dict[str, Any]]:
                 continue
             assert army_id not in documents
             assert hashlib.sha256(raw).hexdigest() == digest
-            assert document["version"] == "7.26246.158"
+            assert document["version"] == SOURCE_VERSION_OVERRIDES.get(army_id, "7.26246.158")
             documents[army_id] = {**document, "source_file": member}
     assert {
         source_id: {
@@ -105,7 +116,7 @@ def _assert_native_items(source: dict[str, Any], published: dict[str, Any]) -> N
 
 
 @pytest.mark.parametrize("source_id", SOURCE_IDS)
-def test_army_02_to_08_complete_native_profiles_and_loadouts_reach_api(
+def test_army_02_to_12_complete_native_profiles_and_loadouts_reach_api(
     profile_app: Callable[..., Any], source_documents: dict[int, dict[str, Any]],
     source_id: int,
 ) -> None:

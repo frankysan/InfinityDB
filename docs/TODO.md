@@ -369,6 +369,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         not upgrade/profile-transition rules, roster/Fireteam
         legality, historical deltas or final hosted acceptance.
         See [validation](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
+      - [x] **Data processing + Web backend + Web frontend — ARMY-09–12
+        native profile/loadout parity:** Compare Treitak (1919/1933),
+        Corax (1920/1934), Blur (1921/1935) and Chandra
+        (1922/1936) against all their occurrences in the pinned
+        September 29 Army ZIP, with archive/member hashes and
+        exact source revisions checked. All 13 Army/Unit contexts,
+        39 ordered profiles and 128 ordered loadouts preserve
+        Attributes, source AVA, items/Extras, Orders, costs and
+        disabled options. Treitak Spec-Ops spans Combined Army and
+        Morat; Morat TEAM-OPS is Morat-only. Both Chandra Units
+        retain three ALEPH contexts at `7.26246.159`; the other
+        source pairs use `7.26246.158`. Chromium checks all eight
+        ordinary Unit pages at 1440/390/320 px in light/dark themes
+        (48 pages), including names/values, AVA, costs, linked
+        items, keyboard expansion and overflow. This closes native
+        publication parity, not upgrades, profile transitions,
+        roster/Fireteam legality, historical deltas or final hosted
+        acceptance. See [validation](testing.md#selected-spec-ops-and-team-ops-profile-acceptance).
       - [ ] **ARMY-01 remaining semantics, full roster/profile
         acceptance, and release gates:** Review annotation-specific
         profile applicability where it is not established by the
@@ -376,7 +394,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Triad, Varuna Div and Strategic Deployment); retain the
         unresolved current N5 Reinforcements authority boundary.
         Compare complete unit/profile/option costs and source-specific
-        AVA for ARMY-09–20 where still unreviewed; ARMY-02–08
+        AVA for ARMY-13–20 where still unreviewed; ARMY-02–12
         native publication parity is covered above. Do not infer
         a historical before/after delta without an earlier
         pinned Army snapshot. Final release-matched database,

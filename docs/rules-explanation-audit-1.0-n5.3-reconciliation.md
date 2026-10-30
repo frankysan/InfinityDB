@@ -202,6 +202,22 @@ counts above.
   retains the native-publication scope; no transition, upgrade,
   legality, historical-change or hosted-release approval is implied.
 
+  **2026-10-30 follow-up — ARMY-09–12 native publication:**
+  Treitak (1919/1933), Corax (1920/1934), Blur (1921/1935)
+  and Chandra (1922/1936) now have pinned-source-to-API coverage
+  for all 13 Army/Unit contexts, 39 profiles and 128 loadouts.
+  Treitak Spec-Ops spans Combined Army and Morat; Morat TEAM-OPS
+  remains Morat-only. Both Chandra Units retain ALEPH, Steel
+  Phalanx and Operations Subsection contexts with source revision
+  `7.26246.159`, separate from the other pairs' `7.26246.158`.
+  Chromium checks all eight ordinary Unit pages at 1440/390/320 px
+  in light/dark themes (48 page checks), including profile
+  names/values, AVA, costs and linked item placement. The
+  [validation contract](testing.md#selected-spec-ops-and-team-ops-profile-acceptance)
+  retains the native-publication scope; upgrade/profile-transition
+  semantics, roster/Fireteam legality, historical change and final
+  hosted acceptance remain separate.
+
   **ARMY-17–20** now have **selected current-state local acceptance**
   independently of the Spec-Ops charts. Ioann Bann (#1940) retains
   Dogface/Dog-Warrior profiles and maximum-one Varangian Duo

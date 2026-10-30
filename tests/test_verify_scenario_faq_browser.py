@@ -502,9 +502,15 @@ def test_sacha_numeric_ava_is_visible_in_its_army_context(
              "nexus-7-spec-ops", "combined-army-team-ops"),
             {"armies": 33, "profiles": 111, "loadouts": 328}, id="army05-08",
         ),
+        pytest.param(
+            ("treitak-spec-ops", "morat-team-ops", "shasvastii-corax-spec-ops",
+             "shasvastii-team-ops", "blur-spec-ops", "next-wave-team-ops",
+             "chandra-spec-ops", "aleph-team-ops"),
+            {"armies": 13, "profiles": 39, "loadouts": 128}, id="army09-12",
+        ),
     ),
 )
-def test_army_02_to_08_native_profiles_costs_and_ava_in_browser(
+def test_army_02_to_12_native_profiles_costs_and_ava_in_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
     slugs: tuple[str, ...], expected_totals: dict[str, int],
 ) -> None:
