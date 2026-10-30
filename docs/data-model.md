@@ -873,6 +873,64 @@ these conditions; moving or superseding their seven missing and two
 over-broad relationships requires a separately tested schema and API
 migration. No Unit/profile permissions are inferred.
 
+### Restriction persistence migration candidate (not promoted)
+
+**Design and staging only.** `src/infinity_db/restriction_storage.py`
+prototypes a separate `restriction_constraints` SQLite table without
+rewriting `record_relations` or its API. The table retains source ID,
+printed page, pinned PDF fingerprint, source-order position, source
+subject and kind, nullable canonical owner/target IDs, negative
+`polarity=prohibition`, action, operation kind, scope and JSON
+qualifiers. Source-only TAG/VH/REM selectors have NULL owner IDs;
+ladder traversal has no canonical target. The compiler validates all
+14 facts against the maintained source before storage, and the table
+rejects duplicate conditions and positive polarity. No Unit-level
+eligibility or action-legality conclusion is produced.
+
+The prospective **additive API contract** is a separate
+`formatVersion: 1` payload with `source` (ID, printed page, PDF
+SHA-256), `polarity: prohibition`, ordered `items`, and
+`evaluationSupported: false`. Each item contains `subject`,
+`subjectKind`, optional `ownerRecordId`, `action`,
+`operation: {kind, qualifier}`, optional `targetRecordId`,
+`scope` and `polarity`. Optional `subject` and `record_id`
+filters are conjunctive; zero matches never means an action is
+permitted. The current browser still consumes the existing static
+Restrictions publication; **no new HTTP route is active**.
+
+The candidate is tested against a **disposable copy** of the tracked
+v8/compatibility-10 `rules.db`. Adding the table while retaining that
+header leaves all existing relation rows, composed record responses,
+and v8 validation unchanged. A proposed v9/compatibility-11 header
+is deliberately **rejected** by the existing strict validator. These
+version numbers are migration targets, **not** current runtime values.
+
+The required release sequence is:
+
+1. Implement a version-aware reader accepting both the existing
+   v8/compatibility-10 artifact and a validated v9/compatibility-11
+   artifact. The new API must explicitly report unavailable
+   conditional data on v8; it must not reconstruct source data
+   from `config/` or silently infer permissions.
+2. Implement deterministic v9 export of the reviewed table, migrate
+   the read path to the new additive API, verify all existing API
+   shapes remain compatible and complete the relevant publication
+   hash/release-image synchronization.
+3. Deploy the version-aware application **before** swapping to the
+   v9 database (or deploy atomically with an approved matching
+   image), retain the v8 database as rollback evidence, and validate
+   both forward and rollback paths.
+4. Only after dependent consumers are migrated, decide whether the
+   generic Motorcycle → Jump and Irregular → Lieutenant edges should
+   be retired or displayed as explicitly qualified legacy links.
+   No existing `{type, recordId}` relation is deleted by the
+   candidate implementation.
+
+The staging contract and compatibility proof live in
+`tests/test_restriction_storage_candidate.py`. Its tests never
+modify the tracked `rules.db`; the current schema/version and API
+remain unchanged.
+
 ## Availability and membership
 
 InfinityDB distinguishes several relationships that source data often places near each other:

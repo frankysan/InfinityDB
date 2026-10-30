@@ -1965,6 +1965,31 @@ source-to-occurrence contract is unverified. Players can follow
 the Irregular restriction from the Lieutenant Skill and chart
 until that separate mapping is established.
 
+**Staged SQLite/API migration contract (not deployed):**
+`tests/test_restriction_storage_candidate.py` copies the current
+tracked `rules.db` to a disposable test database, adds the
+`restriction_constraints` table using
+`src/infinity_db/restriction_storage.py`, and verifies the 14
+reviewed negative conditions and additive JSON read shape. The test
+asserts legacy `record_relations` rows and representative composed
+API records remain unchanged, verifies source-order and filters,
+rejects positive polarity, duplicate staging, invalid IDs/scopes,
+and confirms an empty filter result conveys no permission. It
+also simulates v9/compatibility-11 and confirms the old v8 validator
+rejects the unpromoted artifact.
+
+```powershell
+.venv\Scripts\python.exe tools/run_checks.py --stage test tests/test_restriction_storage_candidate.py
+.venv\Scripts\python.exe tools/run_checks.py --stage test tests/test_game_mode_source_table.py
+```
+
+The test exercises the *prospective* API payload at the Python
+read-model boundary; it does not expose or test a new HTTP route.
+It never writes to the tracked `data/generated/rules.db`. Schema
+version 8, compatibility revision 10 and existing endpoint shapes
+remain current until the version-aware promotion described in
+[the data model](data-model.md#restriction-persistence-migration-candidate-not-promoted).
+
 ### N5.3 Silhouette Templates source and browser geometry
 
 The English N5.3 **Silhouette Templates** table (printed p. 18)

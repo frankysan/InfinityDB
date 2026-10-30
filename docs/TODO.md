@@ -1238,16 +1238,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         chart now includes typed `operation.kind` and `qualifier`.
         Preserve the original generic `rules.db` relations for backwards
         compatibility; this model does **not** assert action legality.
-      - [ ] Migrate or explicitly supersede the **seven legacy missing
-        restriction edges** and **two over-broad generic relations** in
-        the canonical graph after agreeing a backwards-compatible
-        conditional-relation schema/database/API contract. These are
-        legacy `{type, recordId}` limitations, **not** missing
-        source-typed constraint coverage. Preserve TAG/VH/REM as source
-        Troop Type selectors until canonical identities are justified;
-        the ladder operation needs no fictitious Skill endpoint. Do
-        not reinterpret Motorcycle Jump as all-direction prohibition,
-        Lieutenant selection as Skill use, or absent edges as permission.
+      - [x] Prototype and validate an **additive v9 SQLite/API contract**
+        for the finite restrictions using a disposable copy of the
+        current v8 `rules.db`. The candidate table preserves all
+        14 typed negative conditions with source fingerprint, nullable
+        source-only endpoints and distinct operation qualifiers. Legacy
+        relation rows/composed API responses remain unchanged at
+        v8; simulated v9/compatibility-11 is correctly rejected by the
+        old validator, demonstrating the required version-aware
+        application rollout. No HTTP endpoint, exporter, tracked
+        database or live version has been changed. See
+        `docs/data-model.md` for the staged read contract.
+      - [ ] **Promote** the candidate to a version-aware read path,
+        deterministic v9 exporter and additive HTTP API, with
+        v8/compatibility-10 fallback and v9/compatibility-11
+        acceptance. Test the 7 missing conventional edges and 2
+        over-broad relations as separately described legacy limitations,
+        never as source-negative coverage gaps. Synchronize the
+        generated `rules.db`, published hashes and deployment images,
+        and verify both upgrade and v8 rollback. Defer retirement of
+        Motorcycle → Jump and Irregular → Lieutenant legacy relations
+        until compatibility consumers are audited; no invented
+        TAG/VH/REM identities or ladder Skill target.
       - [ ] Confirm how Irregular Training is represented on actual
         Unit/profile/loadout occurrences before adding a Unit-level
         reverse link. Sampled Irregular-source candidates did not
