@@ -8,6 +8,7 @@ import sys
 
 import pytest
 
+from infinity_db.restriction_conditions import compile_restriction_conditions
 from tools.audit_game_mode_source_table import (
     MANIFEST,
     PDF,
@@ -142,6 +143,11 @@ def test_n53_restrictions_chart_six_subjects_and_fourteen_prohibitions() -> None
     report = audit_restrictions_files()
     assert report["rowCount"] == 6
     assert report["negativeConditionCount"] == 14
+    assert report["typedConditionCount"] == 14
+    assert report["typedOperationKinds"] == [
+        "army-role-selection", "directional-skill-movement",
+        "skill-declaration", "state-entry", "terrain-traversal",
+    ]
     assert report["scope"] == "source-restriction-conditions-not-live-action-legality"
     assert report["sourceOnlyTroopTypeSubjects"] == ["TAG", "VH", "REM"]
     assert len(report["missingTypedRelations"]) == 7
@@ -194,6 +200,82 @@ def test_n53_restrictions_chart_rejects_changed_scope_actions_and_relations() ->
         restrictions_audit(chart, edited)
 
 
+def test_n53_typed_restrictions_preserve_source_selectors_and_operation_qualifiers() -> None:
+    chart, records = _restriction_inputs()
+    conditions = compile_restriction_conditions(chart, records)
+    assert len(conditions) == 14
+    assert {(item.subject, item.action) for item in conditions} == {
+        (row["subject"], entry["action"])
+        for row in chart["rows"] for entry in row["restrictions"]
+    }
+    assert {item.subject for item in conditions if item.owner_record_id is None} == {
+        "TAG", "VH", "REM"
+    }
+    jump = next(item for item in conditions if item.action == "upward-jump")
+    assert jump.subject == "Motorcycle"
+    assert jump.owner_record_id == "equipment:motorcycle"
+    assert jump.operation_kind == "directional-skill-movement"
+    assert jump.scope == "while-mounted-upwards-only"
+    assert jump.qualifier == {"direction": "upward"}
+    assert jump.target_record_id == "skill:jump"
+
+    ladders = next(item for item in conditions if item.action == "use-ladders")
+    assert ladders.operation_kind == "terrain-traversal"
+    assert ladders.qualifier == {"terrain": "ladders"}
+    assert ladders.target_record_id is None
+    lieutenant = [item for item in conditions if item.action == "lieutenant-selection"]
+    assert len(lieutenant) == 2
+    assert {item.subject for item in lieutenant} == {"REM", "Irregular"}
+    assert all(
+        item.operation_kind == "army-role-selection"
+        and item.qualifier == {"role": "lieutenant"}
+        and item.scope == "army-selection-only"
+        for item in lieutenant
+    )
+    assert all(item.operation_kind != "skill-declaration" for item in lieutenant)
+    assert all(
+        item.operation_kind == "state-entry"
+        for item in conditions if item.action == "enter-prone"
+    )
+
+
+def test_n53_typed_restrictions_fail_closed_on_scope_selector_or_permission() -> None:
+    chart, records = _restriction_inputs()
+    for subject_index, restriction_index, property_name, changed_value in (
+        (1, 4, "scope", "while-mounted"),
+        (1, 4, "targetRecordId", "skill:climb"),
+        (1, 3, "targetRecordId", "skill:climb"),
+        (5, 0, "scope", "all"),
+        (4, 1, "action", "declare-climb"),
+    ):
+        altered = copy.deepcopy(chart)
+        altered["rows"][subject_index]["restrictions"][restriction_index][
+            property_name
+        ] = changed_value
+        with pytest.raises(ValueError, match="Restrictions model"):
+            compile_restriction_conditions(altered, records)
+    altered = copy.deepcopy(chart)
+    altered["classification"]["action"] = "positive-permission"
+    with pytest.raises(ValueError, match="negative-only"):
+        compile_restriction_conditions(altered, records)
+    altered = copy.deepcopy(chart)
+    altered["rows"][0]["ownerRecordId"] = "skill:cautious-movement"
+    with pytest.raises(ValueError, match="source identity drift"):
+        compile_restriction_conditions(altered, records)
+    altered_records = dict(records)
+    del altered_records["skill:lieutenant"]
+    with pytest.raises(ValueError, match="missing target"):
+        compile_restriction_conditions(chart, altered_records)
+    altered_records = copy.deepcopy(records)
+    altered_records["skill:jump"]["kind"] = "state"
+    with pytest.raises(ValueError, match="invalid target kind"):
+        compile_restriction_conditions(chart, altered_records)
+    altered_records = copy.deepcopy(records)
+    altered_records["equipment:motorcycle"]["kind"] = "skill"
+    with pytest.raises(ValueError, match="invalid owner kind"):
+        compile_restriction_conditions(chart, altered_records)
+
+
 def test_n53_restrictions_optional_pinned_pdf_exact_six_lines() -> None:
     pytest.importorskip("pymupdf")
     if not RESTRICTIONS_PDF.is_file():
@@ -244,15 +326,26 @@ def test_published_restrictions_reference_is_exact_source_projection() -> None:
     assert "horizontal/downward Jump" in jump["note"]
     assert jump["href"] == "/skills/jump"
     assert jump["targetRecordId"] == "skill:jump"
+    assert jump["operation"] == {
+        "kind": "directional-skill-movement",
+        "qualifier": {"direction": "upward"},
+    }
+    assert motorcycle["conditions"][3]["operation"] == {
+        "kind": "terrain-traversal", "qualifier": {"terrain": "ladders"},
+    }
     assert motorcycle["conditions"][3]["href"] is None
     irregular = published["rows"][-1]
     assert irregular["ownerHref"] is None
     assert irregular["ownerRecordId"] == "training:irregular"
     assert irregular["conditions"][0]["targetRecordId"] == "skill:lieutenant"
+    assert irregular["conditions"][0]["operation"] == {
+        "kind": "army-role-selection", "qualifier": {"role": "lieutenant"},
+    }
     assert irregular["conditions"][0]["scope"] == "army-selection-only"
     assert "not a ban on using" in irregular["conditions"][0]["note"]
     for row in published["rows"]:
         if row["category"] == "Troop Type":
+            assert row["subjectKind"] == "troop-type"
             assert row["ownerHref"] is None
             assert row["ownerRecordId"] is None
 
@@ -371,11 +464,20 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                         "#restriction-motorcycle li[data-action='upward-jump']"
                     ).get_attribute("data-scope") == "while-mounted-upwards-only"
                     assert page.locator(
+                        "#restriction-motorcycle-upward-jump"
+                    ).get_attribute("data-operation-kind") == "directional-skill-movement"
+                    assert page.locator(
+                        "#restriction-motorcycle-use-ladders"
+                    ).get_attribute("data-operation-kind") == "terrain-traversal"
+                    assert page.locator(
                         "#restriction-motorcycle li[data-action='upward-jump']"
                     ).inner_text().find("horizontal/downward Jump") >= 0
                     assert page.locator(
                         "#restriction-irregular li[data-action='lieutenant-selection']"
                     ).get_attribute("data-scope") == "army-selection-only"
+                    assert page.locator(
+                        "#restriction-irregular-lieutenant-selection"
+                    ).get_attribute("data-operation-kind") == "army-role-selection"
                     assert page.locator(
                         "#restriction-motorcycle li[data-action='use-ladders'] a"
                     ).count() == 0

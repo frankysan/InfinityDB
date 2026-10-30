@@ -13,6 +13,11 @@ import re
 from pathlib import Path
 from typing import Any
 
+from infinity_db.restriction_conditions import (
+    ACTION_OPERATIONS,
+    compile_restriction_conditions,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/restrictions-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
@@ -29,14 +34,7 @@ CLASSIFICATION = {
 }
 # Each action maps to its existing reference concept, not a proposed
 # executable gameplay operation.
-ACTION_TARGETS = {
-    "enter-prone": "state:prone",
-    "declare-cautious-movement": "skill:cautious-movement",
-    "declare-climb": "skill:climb",
-    "use-ladders": None,
-    "upward-jump": "skill:jump",
-    "lieutenant-selection": "skill:lieutenant",
-}
+ACTION_TARGETS = {action: target for action, (_, target, _) in ACTION_OPERATIONS.items()}
 ACTION_EVIDENCE = {
     "enter-prone": "prone",
     "declare-cautious-movement": "cautious movement",
@@ -185,9 +183,12 @@ def restrictions_audit(
 
     if sum(len(row["restrictions"]) for row in rows) != 14:
         raise ValueError("Restrictions Chart unexpected condition coverage")
+    typed_conditions = compile_restriction_conditions(manifest, records)
     return {
         "scope": CLASSIFICATION["scope"],
         "sourcePage": 194, "rowCount": 6, "negativeConditionCount": 14,
+        "typedConditionCount": len(typed_conditions),
+        "typedOperationKinds": sorted({c.operation_kind for c in typed_conditions}),
         "sourceOnlyTroopTypeSubjects": subjects_without_identity,
         "missingTypedRelations": uncovered,
         "conditionalRelationWarnings": nuanced,
@@ -261,6 +262,10 @@ def project_public_restrictions(
 ) -> dict[str, Any]:
     """Produce negative-only, linked browser facts from the validated source."""
     restrictions_audit(manifest, records)
+    typed = {
+        (condition.subject, condition.action): condition
+        for condition in compile_restriction_conditions(manifest, records)
+    }
     rows: list[dict[str, Any]] = []
     for row in manifest["rows"]:
         subject = row["subject"]
@@ -279,12 +284,15 @@ def project_public_restrictions(
                 domain, slug = target.split(":", 1)
                 link = f"/{'states' if domain == 'state' else 'skills'}/{slug}"
             label, note = ACTION_DISPLAY[entry["action"]]
+            constraint = typed[(subject, entry["action"])]
             conditions.append({
                 "action": entry["action"], "label": label, "scope": entry["scope"],
-                "href": link, "targetRecordId": target, "note": note,
+                "href": link, "targetRecordId": target,
+                "operation": constraint.publication_operation(), "note": note,
             })
         rows.append({
             "id": subject.lower(), "name": title, "category": kind,
+            "subjectKind": row["subjectKind"],
             "ownerHref": owner_href, "ownerRecordId": owner_id,
             "sourceSubject": subject,
             "conditions": conditions,

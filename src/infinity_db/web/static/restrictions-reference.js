@@ -43,6 +43,7 @@ export function restrictionsContextSection(data, recordIds) {
     item.dataset.subject = row.id;
     item.dataset.action = condition.action;
     item.dataset.scope = condition.scope;
+    item.dataset.operationKind = condition.operation.kind;
     const anchor = document.createElement("a");
     anchor.href = `/rules#restriction-${row.id}-${condition.action}`;
     anchor.textContent = `${row.name}: ${condition.label}`;
@@ -95,6 +96,7 @@ export function restrictionsSection(data) {
       item.id = `restriction-${row.id}-${condition.action}`;
       item.dataset.action = condition.action;
       item.dataset.scope = condition.scope;
+      item.dataset.operationKind = condition.operation.kind;
       item.append(linkOrText(condition.label, condition.href));
       if (condition.note) {
         const qualification = document.createElement("span");

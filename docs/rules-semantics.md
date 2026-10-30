@@ -4138,8 +4138,22 @@ into independent rules definitions. They point to the exact restriction
 row and retain the source's negative-only semantics. Irregular
 Training's restriction is discoverable from Lieutenant and the chart,
 but no dedicated Training catalog page or verified Unit-level
-Irregular occurrence mapping exists. The seven missing typed edges
-and two broad relations remain open for semantic review.
+Irregular occurrence mapping exists.
+
+**Typed condition semantics (2026-10-30):**
+`src/infinity_db/restriction_conditions.py` compiles the complete
+14-row negative constraint graph with explicit source-subject selectors,
+existing owner and target references when present, context scopes, and
+five typed operation kinds. `directional-skill-movement` restricts
+only upward Jump while mounted; `terrain-traversal` models ladders
+without inventing a Skill; `army-role-selection` restricts Lieutenant
+eligibility rather than declaring a Skill. The publication carries these
+operation qualifiers additively and source parity fails closed on
+broadened or missing conditions. The existing `rules.db` relation
+graph still has seven absent conventional edges and two generic
+relations that cannot express these qualifiers. Do not infer legality
+from it; its schema migration remains separate to preserve API
+compatibility.
 
 Sources:
 

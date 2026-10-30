@@ -33,7 +33,10 @@ are not retroactively relabeled.
   affected categories and their exact prohibitions, including conditions
   for mounted Motorcycles and Lieutenant selection. Related Skill,
   Equipment and State pages now link back to the applicable chart
-  entries with their original conditions.
+  entries with their original conditions. A typed source-constraint
+  model distinguishes State entry, Skill declaration, ladder traversal,
+  upward movement and Lieutenant selection without changing the legacy
+  relation graph.
 - Fireteam charts show their original notes, flag unverified Unit/FTO references,
   and keep Reinforcement parent limits separate.
 - All canonical Trait pages offer official Wiki heading links. Glossary deep links

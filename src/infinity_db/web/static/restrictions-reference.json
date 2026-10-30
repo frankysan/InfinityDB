@@ -11,6 +11,7 @@
       "id": "tag",
       "name": "TAG",
       "category": "Troop Type",
+      "subjectKind": "troop-type",
       "ownerHref": null,
       "ownerRecordId": null,
       "sourceSubject": "TAG",
@@ -21,6 +22,10 @@
           "scope": "all",
           "href": "/states/prone",
           "targetRecordId": "state:prone",
+          "operation": {
+            "kind": "state-entry",
+            "qualifier": {}
+          },
           "note": null
         },
         {
@@ -29,6 +34,10 @@
           "scope": "all",
           "href": "/skills/cautious-movement",
           "targetRecordId": "skill:cautious-movement",
+          "operation": {
+            "kind": "skill-declaration",
+            "qualifier": {}
+          },
           "note": null
         }
       ]
@@ -37,6 +46,7 @@
       "id": "motorcycle",
       "name": "Mounted Motorcycle",
       "category": "Equipment, while mounted",
+      "subjectKind": "equipment-while-mounted",
       "ownerHref": "/equipment/motorcycle",
       "ownerRecordId": "equipment:motorcycle",
       "sourceSubject": "Motorcycle",
@@ -47,6 +57,10 @@
           "scope": "while-mounted",
           "href": "/states/prone",
           "targetRecordId": "state:prone",
+          "operation": {
+            "kind": "state-entry",
+            "qualifier": {}
+          },
           "note": null
         },
         {
@@ -55,6 +69,10 @@
           "scope": "while-mounted",
           "href": "/skills/cautious-movement",
           "targetRecordId": "skill:cautious-movement",
+          "operation": {
+            "kind": "skill-declaration",
+            "qualifier": {}
+          },
           "note": null
         },
         {
@@ -63,6 +81,10 @@
           "scope": "while-mounted",
           "href": "/skills/climb",
           "targetRecordId": "skill:climb",
+          "operation": {
+            "kind": "skill-declaration",
+            "qualifier": {}
+          },
           "note": null
         },
         {
@@ -71,6 +93,12 @@
           "scope": "while-mounted",
           "href": null,
           "targetRecordId": null,
+          "operation": {
+            "kind": "terrain-traversal",
+            "qualifier": {
+              "terrain": "ladders"
+            }
+          },
           "note": "Ladders are a separate restriction from Climb."
         },
         {
@@ -79,6 +107,12 @@
           "scope": "while-mounted-upwards-only",
           "href": "/skills/jump",
           "targetRecordId": "skill:jump",
+          "operation": {
+            "kind": "directional-skill-movement",
+            "qualifier": {
+              "direction": "upward"
+            }
+          },
           "note": "Only upward Jump is prohibited here; horizontal/downward Jump is not prohibited by this row."
         }
       ]
@@ -87,6 +121,7 @@
       "id": "aerial",
       "name": "Aerial",
       "category": "Special Skill, while active",
+      "subjectKind": "skill",
       "ownerHref": "/skills/aerial",
       "ownerRecordId": "skill:aerial",
       "sourceSubject": "Aerial",
@@ -97,6 +132,10 @@
           "scope": "aerial-active",
           "href": "/states/prone",
           "targetRecordId": "state:prone",
+          "operation": {
+            "kind": "state-entry",
+            "qualifier": {}
+          },
           "note": null
         },
         {
@@ -105,6 +144,10 @@
           "scope": "aerial-active",
           "href": "/skills/cautious-movement",
           "targetRecordId": "skill:cautious-movement",
+          "operation": {
+            "kind": "skill-declaration",
+            "qualifier": {}
+          },
           "note": null
         }
       ]
@@ -113,6 +156,7 @@
       "id": "vh",
       "name": "Vehicle (VH)",
       "category": "Troop Type",
+      "subjectKind": "troop-type",
       "ownerHref": null,
       "ownerRecordId": null,
       "sourceSubject": "VH",
@@ -123,6 +167,10 @@
           "scope": "all",
           "href": "/states/prone",
           "targetRecordId": "state:prone",
+          "operation": {
+            "kind": "state-entry",
+            "qualifier": {}
+          },
           "note": null
         },
         {
@@ -131,6 +179,10 @@
           "scope": "all",
           "href": "/skills/cautious-movement",
           "targetRecordId": "skill:cautious-movement",
+          "operation": {
+            "kind": "skill-declaration",
+            "qualifier": {}
+          },
           "note": null
         }
       ]
@@ -139,6 +191,7 @@
       "id": "rem",
       "name": "Remote (REM)",
       "category": "Troop Type",
+      "subjectKind": "troop-type",
       "ownerHref": null,
       "ownerRecordId": null,
       "sourceSubject": "REM",
@@ -149,6 +202,10 @@
           "scope": "all",
           "href": "/skills/cautious-movement",
           "targetRecordId": "skill:cautious-movement",
+          "operation": {
+            "kind": "skill-declaration",
+            "qualifier": {}
+          },
           "note": null
         },
         {
@@ -157,6 +214,12 @@
           "scope": "army-selection-only",
           "href": "/skills/lieutenant",
           "targetRecordId": "skill:lieutenant",
+          "operation": {
+            "kind": "army-role-selection",
+            "qualifier": {
+              "role": "lieutenant"
+            }
+          },
           "note": "Army selection eligibility, not a ban on using the Lieutenant Skill."
         }
       ]
@@ -165,6 +228,7 @@
       "id": "irregular",
       "name": "Irregular Trooper",
       "category": "Irregular Training",
+      "subjectKind": "training",
       "ownerHref": null,
       "ownerRecordId": "training:irregular",
       "sourceSubject": "Irregular",
@@ -175,6 +239,12 @@
           "scope": "army-selection-only",
           "href": "/skills/lieutenant",
           "targetRecordId": "skill:lieutenant",
+          "operation": {
+            "kind": "army-role-selection",
+            "qualifier": {
+              "role": "lieutenant"
+            }
+          },
           "note": "Army selection eligibility, not a ban on using the Lieutenant Skill."
         }
       ]

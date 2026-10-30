@@ -846,14 +846,32 @@ relations. TAG/VH/REM are unlinked source Troop Type selectors,
 not new domain identities.
 Mounted Motorcycles cannot Jump **upwards** or use ladders; Irregular
 and REM restrictions concern **selection** as Lieutenant, not use of
-Lieutenant skills. No source-negative relation means *permission*;
-neither this reference nor existing broad
+Lieutenant skills. An absent source-negative relation does **not**
+establish permission; neither this reference nor existing broad
 `restricts-use-of` edges evaluate live action legality.
 Source/manifest/PDF checks, static byte parity and browser acceptance
 are documented in [testing](testing.md#n53-restrictions-chart-source-and-browser-reference).
 Canonical condition-aware relation modeling and verified
 Irregular Training Unit-occurrence mapping remain backlog work.
 The existing generic relation graph is unchanged.
+
+The separate typed model in
+`src/infinity_db/restriction_conditions.py` compiles the reviewed
+finite source chart into **14 negative constraints** with five
+operation kinds: `state-entry`, `skill-declaration`,
+`terrain-traversal`, `directional-skill-movement` and
+`army-role-selection`. Each operation includes the reviewed target
+record when available and only its valid qualifiers: ladders are
+terrain traversal without a Skill target, Jump has `direction=upward`,
+and Lieutenant is an Army `role=lieutenant` selection. Subjects have
+source selectors or existing canonical owners; the three Troop Type
+selectors have no canonical record IDs. The deterministic browser JSON
+retains the previous fields and adds `subjectKind` and the typed
+`operation` object for exact source semantics and future integration.
+The existing two-field `rules.db` relation tuples cannot encode
+these conditions; moving or superseding their seven missing and two
+over-broad relationships requires a separately tested schema and API
+migration. No Unit/profile permissions are inferred.
 
 ## Availability and membership
 

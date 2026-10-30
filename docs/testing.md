@@ -1940,10 +1940,23 @@ Motorcycle Equipment, Aerial, Cautious Movement, Climb, Jump,
 Lieutenant and Prone State. It checks exact condition counts and
 anchor targets at all three viewports, follows the upward-Jump link
 back to its source row, and confirms the unrelated Dodge page does
-not show a spurious Restrictions section. The 11-test source
-regression also checks byte-exact publication parity. This is
-contextual help, not a generic declaration or Army selection
-legality resolver.
+not show a spurious Restrictions section. The source regression also checks byte-exact publication parity.
+
+**Typed condition contract:** the source compiler in
+`src/infinity_db/restriction_conditions.py` covers all 14 negative
+constraints using exactly five operation kinds. It preserves source
+Troop Type selectors without canonical IDs, requires the existing
+owner/target records where appropriate, and fails closed on incorrect
+action targets, source scopes or positive-permission interpretation.
+The public model adds `subjectKind` and `operation.kind` /
+`operation.qualifier` alongside existing chart data. Browser
+acceptance checks upward Jump, ladder traversal and Lieutenant
+selection carry distinct typed operation kinds at all three widths.
+No `rules.db` schema or generic relation was changed; the historical
+audit still reports seven missing legacy edges and two over-broad
+ones, which are separate from the now-complete typed source
+constraints. This is contextual help, not a declaration or Army
+selection legality resolver.
 
 Irregular Training has no standalone catalog route; sampled
 source candidate Unit details did not expose an `irregular` Training

@@ -1227,13 +1227,27 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         destinations across 1440/390/320 px plus an unaffected Skill.
         These are source-backed contextual references, not new
         canonical `restricts-use-of` edges or legality predictions.
-      - [ ] Reconcile the **seven missing typed restriction edges** and
-        **two broad generic relations** with a condition/selection-aware
-        canonical schema before modifying the graph. Preserve TAG/VH/REM
-        as source Troop Type selectors until canonical identities are
-        justified; absence of a relation conveys no permission.
-        Do not reinterpret Motorcycle's `skill:jump` as all-direction
-        prohibition or Lieutenant **selection** as Skill-use prohibition.
+      - [x] Introduce a **source-scoped typed negative-constraint model**
+        (`src/infinity_db/restriction_conditions.py`) covering all
+        **14** N5.3 restrictions with five distinct operation kinds:
+        State entry, Skill declaration, terrain traversal, directional
+        Skill movement and Army role selection. Validate explicit source
+        selectors, actor/target identities, condition scopes, upward-only
+        direction, ladder terrain and Lieutenant selection; fail closed
+        on missing or broadened evidence. The deterministic public
+        chart now includes typed `operation.kind` and `qualifier`.
+        Preserve the original generic `rules.db` relations for backwards
+        compatibility; this model does **not** assert action legality.
+      - [ ] Migrate or explicitly supersede the **seven legacy missing
+        restriction edges** and **two over-broad generic relations** in
+        the canonical graph after agreeing a backwards-compatible
+        conditional-relation schema/database/API contract. These are
+        legacy `{type, recordId}` limitations, **not** missing
+        source-typed constraint coverage. Preserve TAG/VH/REM as source
+        Troop Type selectors until canonical identities are justified;
+        the ladder operation needs no fictitious Skill endpoint. Do
+        not reinterpret Motorcycle Jump as all-direction prohibition,
+        Lieutenant selection as Skill use, or absent edges as permission.
       - [ ] Confirm how Irregular Training is represented on actual
         Unit/profile/loadout occurrences before adding a Unit-level
         reverse link. Sampled Irregular-source candidates did not
