@@ -553,9 +553,39 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
     if not isinstance(value, dict) or set(value) != {
         "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
         "reviewedCombinedCases", "reviewedVulnerabilityCases", "reviewedWeaponCases",
-        "reviewedSavingRollCases", "reviewedCriticalCases",
+        "reviewedSavingRollCases", "reviewedCriticalCases", "reviewedCommsCases",
     }:
         raise ValueError(f"{context}: invalid Immunity interaction fields")
+    # The pinned p. 95 Comms exclusion is distinct from ordinary BTS
+    # Immunity. Oblivion p. 58 is the exact reviewed Comms Attack, and
+    # Immunity (State: Isolated) can prevent only the named State.
+    # Burst is an attack die count, NOT a Saving Roll count.
+    if value["reviewedCommsCases"] != [{
+        "when": {
+            "programId": "hacking-program:oblivion",
+            "attackClass": "comms",
+            "stateId": "state:isolated",
+        },
+        "sourceProfile": {
+            "ammunitionId": "ammunition:ap",
+            "savingAttribute": "BTS",
+            "nonLethalTrait": "trait:non-lethal",
+            "failedSaveState": "state:isolated",
+            "burst": 2,
+        },
+        "immunityBts": {
+            "applies": False,
+            "apModifierIgnored": False,
+            "isolatedStatePrevented": False,
+        },
+        "immunityStateIsolated": {
+            "applies": True,
+            "isolatedStatePrevented": True,
+            "savingRollCancelled": False,
+        },
+        "evidence": "derived-from-pinned-general-rules",
+    }]:
+        raise ValueError(f"{context}: unsupported Oblivion Comms Immunity case")
     # Printed Example 3 of N5.3 p. 96 is a Combined Saving Roll, NOT a
     # combination of ammunition effects. Preserve both attribute rolls.
     if value["reviewedSavingRollCases"] != [

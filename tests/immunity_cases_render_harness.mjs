@@ -67,7 +67,7 @@ const groups = descendants(article, (node) => node.className === "detail-fact-gr
 assert.equal(groups.length, 1);
 const group = groups[0];
 const allCases = descendants(group, (node) => node.tag === "li");
-assert.equal(allCases.length, 16);
+assert.equal(allCases.length, 17);
 const grenade = allCases[4];
 assert.match(grenade.textContent, /Immunity \(BTS\) vs E\/M Grenade Launcher/);
 assert.match(grenade.textContent, /2 Saving Rolls on a hit \(3 on a Critical\) using BTS\/2/);
@@ -76,7 +76,15 @@ assert.match(grenade.textContent, /Non-Lethal still applies, preventing Wounds/)
 assert.match(grenade.textContent, /Isolated and conditional Immobilized-B State effects are ignored/);
 assert.match(grenade.textContent, /Circular Impact Template and Speculative Attack/);
 assert.match(grenade.textContent, /not Comms Attacks or arbitrary E\/M weapons/);
-const cases = [...allCases.slice(0, 4), ...allCases.slice(5)];
+const comms = allCases[5];
+assert.match(comms.textContent, /Comms exception: Oblivion vs Immunity \(BTS \/ State: Isolated\)/);
+assert.match(comms.textContent, /Immunity \(BTS\) does not apply to Comms Attacks/);
+assert.match(comms.textContent, /neither removes the AP BTS reduction nor prevents Isolated/);
+assert.match(comms.textContent, /Immunity \(State: Isolated\) does apply and prevents entry into Isolated/);
+assert.match(comms.textContent, /without cancelling the underlying Saving Roll/);
+assert.match(comms.textContent, /Burst 2 counts attack dice, not Saving Rolls/);
+assert.match(comms.textContent, /not all hacking or Comms effects/);
+const cases = [...allCases.slice(0, 4), ...allCases.slice(6)];
 assert.equal(cases.length, 15);
 // Every reviewed case uses the same semantic list-item structure with
 // a navigable title, an outcome, and its own source-evidence classification.
@@ -163,6 +171,7 @@ const links = descendants(group, (node) => node.tag === "a");
 for (const url of ["/weapons/flash-pulse", "/weapons/e-mitter", "/weapons/plasma-rifle",
   "/weapons/silenced-pistol", "/ammunition/shock", "/traits/silent-x", "/states/dead", "/skills/vulnerability", "/ammunition/ap",
   "/ammunition/da", "/ammunition/exp", "/ammunition/normal", "/ammunition/em",
+  "/hacking-programs/oblivion", "/states/isolated",
   "/weapons/e-m-cc-weapon", "/weapons/e-m-grenade-launcher",
   "/traits/speculative-attack", "/weapons/ap-t2-cc-weapon",
   "/weapons/ap-da-cc-weapon", "/ammunition/t2",
@@ -182,4 +191,4 @@ assert.deepEqual(descendants(generic, (node) => node.className === "detail-fact-
   .map((node) => node.textContent), [
   "Requirements", "Effects", "Restrictions", "Clarifications and examples",
 ]);
-console.log("16 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");
+console.log("17 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");

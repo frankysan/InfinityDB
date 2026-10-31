@@ -1,7 +1,7 @@
 // Present only curated, source-reviewed Immunity cases. Never evaluate a new attack.
 const catalogs = {
   ammunition: "ammunition", weapon: "weapons", state: "states", trait: "traits",
-  skill: "skills",
+  skill: "skills", "hacking-program": "hacking-programs",
 };
 const text = (value) => ({ type: "text", text: value });
 const reference = (id, label) => {
@@ -138,6 +138,29 @@ export function immunityCaseRows(facts = {}) {
         evidence: evidence(item.evidence),
       });
     }
+  }
+  for (const item of cases.reviewedCommsCases || []) {
+    const source = item.sourceProfile;
+    rows.push({
+      title: [text("Comms exception: "),
+        reference(item.when.programId, "Oblivion"),
+        text(" vs Immunity (BTS / State: Isolated)")],
+      detail: [
+        reference(item.when.programId, "Oblivion"),
+        text(" is a Comms Attack using "),
+        reference(source.ammunitionId, "AP"),
+        text(" Ammunition against BTS. Immunity (BTS) does not apply to Comms Attacks, so it neither removes the AP BTS reduction nor prevents "),
+        reference(source.failedSaveState, "Isolated"),
+        text(" after a failed Saving Roll. By contrast, Immunity (State: Isolated) does apply and prevents entry into "),
+        reference(item.when.stateId, "Isolated"),
+        text(" without cancelling the underlying Saving Roll. "),
+        reference(source.nonLethalTrait, "Non-Lethal"),
+        text(" remains the program's independent Trait. Its Burst "),
+        text(String(source.burst)),
+        text(" counts attack dice, not Saving Rolls. This applies only to the reviewed Oblivion program, not all hacking or Comms effects."),
+      ],
+      evidence: evidence(item.evidence),
+    });
   }
   for (const item of cases.reviewedVulnerabilityCases || []) {
     rows.push({

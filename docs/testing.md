@@ -4148,6 +4148,27 @@ rule records. The full suite has 62 cases; all 11 base and five combined source
 identities are represented without inferred attack rules or a database rebuild.
 Future Weapon comparison views remain out of scope.
 
+**Oblivion Comms exception / Immunity (State), 2026-10-31:**
+`tests/test_immunity_oblivion_comms.py` pins English
+N5.3 pp. 57–58/95, checks the curated Oblivion
+program's Comms Attack, AP Ammunition, BTS Saving
+Roll, Non-Lethal and Isolated effects, and verifies
+the exact `reviewedCommsCases` publication on
+the Immunity Skill API. It distinguishes ordinary
+Immunity (BTS), which does not protect against
+Comms Attacks, from Immunity (State: Isolated),
+which prevents the State without suppressing the
+attack Saving Roll. Burst 2 is checked as attack
+dice, not an inferred number of Saving Rolls.
+Fail-closed curated mutations reject identity,
+Comms scope, sourced effects, Burst, exception
+mechanics or evidence drift. Chromium at
+1440/390/320 px checks the seventeenth Skill
+card, canonical Program/State/Ammo/Trait links,
+and layout. Coordinated staged rules DB and
+deployed-object publication retain all 17
+reviewed objects with a recovery backup.
+
 **E/M Grenade Launcher / Immunity (BTS), 2026-10-31:**
 `tests/test_immunity_bts_em_grenade_launcher.py`
 pins N5.3 pp. 64, 95–96 and 179 and independently

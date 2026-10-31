@@ -53,7 +53,7 @@ def test_printed_plasma_case_has_separate_normal_reference_without_overflow(
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         rows = page.locator(".immunity-reviewed-cases li")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         plasma = rows.filter(has_text="Immunity (Enhanced) vs Plasma Rifle")
@@ -85,7 +85,7 @@ def test_n53_bts_immunity_em_cc_weapon_is_exact_and_source_scoped(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -120,7 +120,7 @@ def test_standalone_emitter_immunity_keeps_nonlethal_and_turret_warning(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         rows = page.locator(".immunity-reviewed-cases li")
@@ -157,7 +157,7 @@ def test_silenced_pistol_ap_immunity_preserves_shock_bts_and_silent(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -197,7 +197,7 @@ def test_ap_t2_cc_immunity_keeps_two_wound_hit_and_one_wound_critical(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -238,7 +238,7 @@ def test_printed_monofilament_immunity_ignores_dead_trait_not_normal_wounds(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -278,7 +278,7 @@ def test_printed_missile_blast_immunity_does_not_merge_hit_mode(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -319,7 +319,7 @@ def test_printed_flash_pulse_example_4_has_pdf_provenance_and_stun_exception(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -356,7 +356,7 @@ def test_plasma_critical_immunity_removes_only_extra_arm_roll(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -392,7 +392,7 @@ def test_t2_critical_immunity_preserves_hit_and_suppresses_only_extra_roll(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -432,7 +432,7 @@ def test_ap_da_cc_critical_immunity_retains_both_da_rolls_and_arm_halving(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         reviewed = page.locator(".immunity-reviewed-cases li").filter(
@@ -473,7 +473,7 @@ def test_em_grenade_bts_immunity_preserves_nonlethal_without_comms_leak(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
             timeout=20000,
         )
         reviewed = page.locator(".immunity-reviewed-cases li").filter(
@@ -495,6 +495,48 @@ def test_em_grenade_bts_immunity_preserves_nonlethal_without_comms_leak(
             "/traits/impact-template", "/traits/speculative-attack",
         ):
             assert reviewed.locator(f'a[href="{href}"]').count() == 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width,height", [
+    (1440, 900), (390, 844), (320, 640),
+])
+def test_oblivion_comms_bts_exclusion_and_isolated_state_exception(
+    app: Any, browser: Any, width: int, height: int,
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 17",
+            timeout=20000,
+        )
+        reviewed = page.locator(".immunity-reviewed-cases li").filter(
+            has_text="Comms exception: Oblivion"
+        )
+        assert reviewed.count() == 1
+        detail = reviewed.inner_text()
+        assert "Immunity (BTS) does not apply to Comms Attacks" in detail
+        assert "neither removes the AP BTS reduction nor prevents Isolated" in detail
+        assert "Immunity (State: Isolated) does apply" in detail
+        assert "without cancelling the underlying Saving Roll" in detail
+        assert "Burst 2 counts attack dice, not Saving Rolls" in detail
+        assert "Non-Lethal" in detail
+        assert "not all hacking or Comms effects" in detail
+        assert "Derived from reviewed general rules" in detail
+        assert reviewed.locator('a[href="/hacking-programs/oblivion"]').count() >= 1
+        for href in (
+            "/ammunition/ap", "/states/isolated", "/traits/non-lethal",
+        ):
+            assert reviewed.locator(f'a[href="{href}"]').count() >= 1
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         )

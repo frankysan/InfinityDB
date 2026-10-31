@@ -2780,14 +2780,35 @@ all E/M Weapons, or the unresolved Armed Turret
 E/Mitter profile. The Army Weapon profile stays
 unchanged and no attack outcome is calculated.
 
-The Skill reference now presents **sixteen reviewed
-interactions**: six Combined Ammunition cases, five
-exact Weapon cases (Flash Pulse, E/Mitter, Missile
-Launcher Blast, Monofilament, E/M Grenade Launcher),
-two Plasma Combined Saving Roll cases, two exact
-Critical cases (AP+T2 and AP+DA CC Weapons), and
-one Vulnerability example. Chromium acceptance at
-1440/390/320 px verifies the sixteenth case and links.
+**Oblivion and the Comms Attack exception** adds one
+source-scoped `reviewedCommsCases` record. English
+N5.3 p. 95 excludes Comms Attacks from normal
+Immunity, *except Immunity (State)*; pp. 57–58
+identify Oblivion as a Comms Attack with AP
+Ammunition, a BTS Saving Roll, Non-Lethal,
+and State: Isolated on failed Saving Rolls.
+Therefore **Immunity (BTS) does not apply**:
+it does not ignore AP's BTS reduction and
+does not prevent Isolated from Oblivion.
+By contrast **Immunity (State: Isolated)**
+prevents that State, but does not cancel the
+underlying Saving Roll. The Hacking Program
+chart's **B2** is the number of attack dice,
+not a Saving Roll count; no roll count or
+outcome calculator is inferred. The example
+is *derived from two primary rule sections*,
+not a printed Immunity example, and does not
+generalize to every Comms Attack or other
+Hacking Programs. Source Hacking Program
+fields and published attributes stay unchanged.
+
+The Skill reference now presents **seventeen
+reviewed interactions**: six Combined Ammunition,
+five exact Weapon, two Plasma Combined Saving Roll,
+two exact Critical, one Vulnerability and one
+Oblivion Comms-exception reference. Chromium at
+1440/390/320 px verifies the distinct exception
+and semantic links.
 Other component-specific Immunities, BTS-based attacks, Comms Attack
 rules and conditional State interactions remain unresolved. Do not
 extrapolate an evaluator or project outcomes into Weapon profiles.

@@ -1095,10 +1095,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         fail-closed schema mutations, public API and
         1440/390/320 Chromium. Promote synchronized
         rules/publication with backup, retaining 17 objects.
+      - [x] Review the **explicit Comms Attack boundary** using
+        the exact Oblivion Hacking Program (N5.3 pp. 57–58, 95).
+        Oblivion is an AP, Non-Lethal Comms Attack against BTS
+        and inflicts Isolated after a failed Saving Roll. Normal
+        Immunity (BTS) does **not** apply to Comms Attacks: it
+        cannot ignore the AP reduction or prevent that State.
+        Conversely, Immunity (State: Isolated) does prevent
+        the named State, without cancelling the Saving Roll.
+        Oblivion's Burst 2 means attack dice, *not* two Saving
+        Rolls. Add a fixed `reviewedCommsCases` record, fail-closed
+        validation, pinned PDF/Program API checks and
+        1440/390/320 Chromium coverage. Do not generalize
+        to other Hacking Programs, infer combat results, or
+        rewrite the source Program. Promote synchronized rules
+        DB/publication with backup; preserve 17 deployed objects.
       - [ ] Review other BTS-component Immunity outcomes using exact
         non-Comms Weapon/combined-Ammunition evidence. The reviewed
-        cases do not authorize generic E/M, Comms Attack or
-        arbitrary combined-effect adjudication.
+        cases do not authorize arbitrary E/M, Comms Attack or
+        combined-effect adjudication.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

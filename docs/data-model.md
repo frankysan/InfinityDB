@@ -461,7 +461,18 @@ ignoring the E/M State effects while retaining
 Non-Lethal. The separate attack/template Traits
 remain visible but are not resolved; source
 Weapon fields and Comms mechanics are unchanged.
-The sixteen reviewed interactions are curated
+A separate fixed `reviewedCommsCases` collection
+records the N5.3 pp. 57–58/95 **Oblivion** Comms
+exception: ordinary Immunity (BTS) cannot ignore AP
+or prevent the Isolated effect of that Comms Attack,
+but Immunity (State: Isolated) prevents that State
+without cancelling the Saving Roll. The Program's
+Burst 2 is an attack-dice count, never a Saving Roll
+count. The Hacking Program source, AP Ammunition,
+Non-Lethal Trait and Program API remain unchanged.
+This is a source-scoped negative/positive Immunity
+boundary, not a general Hacking Program evaluator.
+The seventeen reviewed interactions are curated
 references, not a runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms

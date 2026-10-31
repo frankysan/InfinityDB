@@ -20935,6 +20935,33 @@
                             "state:stunned"
                         ]
                     },
+                    "reviewedCommsCases": [
+                        {
+                            "when": {
+                                "programId": "hacking-program:oblivion",
+                                "attackClass": "comms",
+                                "stateId": "state:isolated"
+                            },
+                            "sourceProfile": {
+                                "ammunitionId": "ammunition:ap",
+                                "savingAttribute": "BTS",
+                                "nonLethalTrait": "trait:non-lethal",
+                                "failedSaveState": "state:isolated",
+                                "burst": 2
+                            },
+                            "immunityBts": {
+                                "applies": false,
+                                "apModifierIgnored": false,
+                                "isolatedStatePrevented": false
+                            },
+                            "immunityStateIsolated": {
+                                "applies": true,
+                                "isolatedStatePrevented": true,
+                                "savingRollCancelled": false
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
+                        }
+                    ],
                     "reviewedWeaponCases": [
                         {
                             "when": {

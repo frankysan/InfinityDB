@@ -4994,6 +4994,27 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
         (lambda f: f["reviewedWeaponCases"][3].update(
             evidence="derived-from-pinned-general-rules"),
             "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedCommsCases"][0]["when"].update(
+            programId="hacking-program:carbonite"),
+            "unsupported Oblivion Comms Immunity case"),
+        (lambda f: f["reviewedCommsCases"][0]["when"].update(
+            attackClass="non-comms"),
+            "unsupported Oblivion Comms Immunity case"),
+        (lambda f: f["reviewedCommsCases"][0]["sourceProfile"].update(
+            ammunitionId="ammunition:normal"),
+            "unsupported Oblivion Comms Immunity case"),
+        (lambda f: f["reviewedCommsCases"][0]["sourceProfile"].update(
+            burst=1), "unsupported Oblivion Comms Immunity case"),
+        (lambda f: f["reviewedCommsCases"][0]["immunityBts"].update(
+            applies=True), "unsupported Oblivion Comms Immunity case"),
+        (lambda f: f["reviewedCommsCases"][0]["immunityStateIsolated"].update(
+            isolatedStatePrevented=False),
+            "unsupported Oblivion Comms Immunity case"),
+        (lambda f: f["reviewedCommsCases"][0]["immunityStateIsolated"].update(
+            savingRollCancelled=True), "unsupported Oblivion Comms Immunity case"),
+        (lambda f: f["reviewedCommsCases"][0].update(
+            evidence="explicit-n5.3-pdf-p96-example-4"),
+            "unsupported Oblivion Comms Immunity case"),
         (lambda f: f["reviewedWeaponCases"][4]["when"].update(
             weaponId="weapon:e-m-cc-weapon"),
             "reviewed Weapon Immunity examples"),
