@@ -3641,6 +3641,45 @@ def test_skill_catalog_adds_curated_distance_parameter_semantics(
     }
 
 
+@pytest.mark.parametrize(
+    ("source_id", "name", "slug"),
+    [(263, "Jump", "jump"), (271, "Climb", "climb")],
+)
+def test_jump_climb_distance_semantics_use_exact_source_ids(
+    tmp_path: Path, normalized: dict, source_id: int, name: str, slug: str,
+) -> None:
+    normalized["tables"]["skills"].append(
+        {"id": source_id, "name": name, "source_defined": True}
+    )
+    normalized["tables"]["extras"][0].update(
+        {"name": "7.5", "type": "DISTANCE"}
+    )
+    for occurrence in normalized["tables"]["profile_skills"]:
+        occurrence["item_id"] = source_id
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    catalog = SkillCatalog(Database(database_path), RulesDatabase(rules_path))
+    expected = {"kind": "distance", "positive_sign": "omit"}
+
+    skill = catalog.get_skill(source_id)
+    assert skill is not None
+    assert skill["parameter_semantics"] == expected
+    extra = next(
+        row for row in catalog.list_skill_extras()
+        if row["skill_id"] == source_id
+    )
+    assert extra["skill_slug"] == slug
+    assert extra["is_distance"] is True
+    assert extra["parameter_semantics"] == expected
+    raw_unit = Database(database_path).get_unit(1)
+    assert raw_unit is not None
+    enriched = catalog.enrich_unit(raw_unit)
+    assert enriched["armies"][0]["profiles"][0]["skills"][0]["parameter_semantics"] == expected
+
+
 def test_skill_catalog_without_rules_keeps_source_distance_typing(
     tmp_path: Path, normalized: dict
 ) -> None:

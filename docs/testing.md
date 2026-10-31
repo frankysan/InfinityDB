@@ -398,8 +398,24 @@ The reviewed Surprise Attack source gate covers Skill `191`, all 767 direct
 rows and the exact single-extra signatures 6/7 (`TEXT: -3/-6`, 762/5 rows).
 It checks both the tracked rules artifact and a fresh export, preserving the
 opponent-target Face to Face ARO scope separately from Mimetism and the
-distance-only display query. The current source inventory has 36 unresolved
+distance-only display query. The current source inventory has 34 unresolved
 Skill IDs and 14 Equipment IDs; these are per-source review flags, not Unit counts.
+
+**Jump/Climb distance review:** Army source IDs 263/271 have 26/6
+exact single-extra `DISTANCE: 7.5` (extra ID 372) occurrences. The
+fresh and tracked rules exports expose their family distance
+semantics keyed by numeric Army ID; no other family receives their
+meaning. `tests/test_audit_source_variant_inputs.py` checks source
+signatures against the local ignored raw Army database.
+`tests/test_restriction_storage_candidate.py` runs the
+CI-compatible migration delta tests, including malicious extra
+links, wrong IDs, unrelated records and `sqlite_stat1` changes.
+The guarded local refresh is
+`python -m tools.build_deployed_object_publication --refresh-movement-distance-v9`;
+it requires the matching ignored raw source and an unchanged
+tracked v9 rules database, retains ignored recovery copies, and
+updates `rules.db` with its paired deployed-object publication.
+Do not rerun against an already-promoted pair.
 
 ## Non-Skill Army source classification and Unit presentation
 

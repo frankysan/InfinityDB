@@ -1453,6 +1453,8 @@ def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> Non
     assert RulesDatabase(output).skill_parameter_semantics() == {
         "super-jump": {"kind": "distance", "positive_sign": "omit"},
         "forward-deployment": {"kind": "distance", "positive_sign": "force"},
+        263: {"kind": "distance", "positive_sign": "omit"},
+        271: {"kind": "distance", "positive_sign": "omit"},
     }
 
 
@@ -1510,6 +1512,8 @@ def test_rules_database_preserves_reviewed_numeric_mod_extra_maps(
         "super-jump": {"kind": "distance", "positive_sign": "omit"},
         "forward-deployment": {"kind": "distance", "positive_sign": "force"},
         "dodge": {"kind": "distance", "positive_sign": "omit"},
+        263: {"kind": "distance", "positive_sign": "omit"},
+        271: {"kind": "distance", "positive_sign": "omit"},
     }
 
 

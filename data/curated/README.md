@@ -904,7 +904,15 @@ Reviewed occurrence-parameter metadata lives under
 `{"source":"army-extra","kind":"distance","positiveSign":"preserve|omit|force"}`.
 The imported `extras.type == "DISTANCE"` remains authoritative for distance
 classification; display formatting continues to use the distance-only
-`skill_parameter_semantics()` query.
+`skill_parameter_semantics()` query. The first explicit numeric-source
+family bindings are Jump (Army Skill 263) and Climb (271), each
+restricted to source extra 372 (`DISTANCE: 7.5` cm, 3 game inches).
+Their N5.3 pp. 34/32 text adds that distance to the first MOV value
+**instead of** the normal 2-inch bonus. `positiveSign: omit`
+controls formatting, not the rules calculation. Pinned raw-source
+regressions and the guarded migration verify their exact extra
+types, IDs, and occurrence counts; the generic `distance` grammar
+alone is not evidence for other identities or future signatures.
 
 An opt-in, source-bound numeric Skill modifier uses the following **non-executable**
 contract (not a general parser for `TEXT` extras):

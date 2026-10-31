@@ -190,6 +190,151 @@ def test_variant_metadata_refresh_preserves_other_rows_and_prior_parameters(
             _check_variant_semantics_delta(old_path, new_path, variants)
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "missing-link", "extra-link", "wrong-source",
+               "other-record", "unexpected-variant", "schema", "other-stats"),
+)
+def test_initial_jump_climb_distance_refresh_rejects_unrelated_changes(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        INITIAL_MOVEMENT_DISTANCE,
+        MOVEMENT_DISTANCE_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    old_path, new_path = tmp_path / "old.db", tmp_path / "new.db"
+    variants = {
+        key: json.dumps(MOVEMENT_DISTANCE_VARIANT)
+        for key in INITIAL_MOVEMENT_DISTANCE
+    }
+    with sqlite3.connect(old_path) as old, sqlite3.connect(new_path) as new:
+        old.execute(
+            "CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)"
+        )
+        old.execute(
+            "CREATE TABLE record_army_links("
+            "collection_id TEXT,record_id TEXT,position INT,entity TEXT,"
+            "external_id TEXT,external_name TEXT)"
+        )
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            ("n5-core-v5.3", "skill:climb", None, "unchanged"),
+            ("n5-core-v5.3", "skill:jump", None, "unchanged"),
+            ("n5-core-v5.3", "skill:other", None, "unchanged"),
+        ])
+        old.execute(
+            "INSERT INTO record_army_links VALUES (?,?,?,?,?,?)",
+            ("n5-core-v5.3", "skill:other", 0, "skill", "1", None),
+        )
+        old.execute("CREATE INDEX idx_links ON record_army_links(record_id)")
+        old.execute("CREATE INDEX idx_records ON records(id)")
+        old.execute("ANALYZE")
+        old.commit()
+        old.backup(new)
+        for _, record_id in INITIAL_MOVEMENT_DISTANCE:
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE id=?",
+                (json.dumps(MOVEMENT_DISTANCE_VARIANT), record_id),
+            )
+        for (collection, record_id), source_id in INITIAL_MOVEMENT_DISTANCE.items():
+            new.execute(
+                "INSERT INTO record_army_links VALUES (?,?,?,?,?,?)",
+                (collection, record_id, 0, "skill", str(source_id), None),
+            )
+        if defect == "missing-link":
+            new.execute("DELETE FROM record_army_links WHERE record_id='skill:climb'")
+        elif defect == "extra-link":
+            new.execute(
+                "INSERT INTO record_army_links VALUES (?,?,?,?,?,?)",
+                ("n5-core-v5.3", "skill:jump", 1, "skill", "999", None),
+            )
+        elif defect == "wrong-source":
+            new.execute(
+                "UPDATE record_army_links SET external_id='999' "
+                "WHERE record_id='skill:climb'"
+            )
+        elif defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='skill:other'")
+        elif defect == "unexpected-variant":
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE id='skill:jump'",
+                (json.dumps({"inheritance": "family", "occurrenceParameters": []}),),
+            )
+        elif defect == "schema":
+            new.execute("CREATE INDEX unrelated_index ON records(id)")
+        new.execute("ANALYZE")
+        if defect == "other-stats":
+            new.execute("UPDATE sqlite_stat1 SET stat='999' WHERE tbl='records'")
+    if defect is None:
+        _check_variant_semantics_delta(
+            old_path, new_path, variants, initialize_movement_distance=True,
+        )
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                old_path, new_path, variants, initialize_movement_distance=True,
+            )
+    # The older append-only refresh never permits a new Army link.
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(old_path, new_path, variants)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "application", "count", "extra", "status", "raw"),
+)
+def test_jump_climb_migration_requires_exact_pinned_army_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as source_audit
+    from tools import restrictions_v9_release as release
+
+    items = [
+        {
+            "id": source_id, "name": name, "applicationId": source_id,
+            "occurrences": count, "status": "unresolved-occurrence-parameter",
+            "extraSignatures": [{
+                "extras": [[372, "DISTANCE", "7.5"]],
+                "reviewed": False, "count": count,
+            }],
+            "rawValues": [],
+        }
+        for source_id, name, count in ((263, "Jump", 26), (271, "Climb", 6))
+    ]
+    if defect == "name":
+        items[0]["name"] = "Not Jump"
+    elif defect == "application":
+        items[0]["applicationId"] = 999
+    elif defect == "count":
+        items[0]["occurrences"] = 27
+    elif defect == "extra":
+        items[0]["extraSignatures"][0]["extras"][0][0] = 999
+    elif defect == "status":
+        items[0]["status"] = "reviewed-distance-parameter"
+    elif defect == "raw":
+        items[0]["rawValues"] = ["unreviewed"]
+    monkeypatch.setattr(
+        source_audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": items}}},
+    )
+    calls: list[dict] = []
+
+    def migration(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migration)
+    if defect:
+        with pytest.raises(ValueError, match="source drift"):
+            release.refresh_movement_distance_v9_release(root=tmp_path)
+        assert not calls
+    else:
+        assert release.refresh_movement_distance_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls[0]["variant_records"] == {"skill:jump", "skill:climb"}
+        assert calls[0]["initialize_movement_distance"] is True
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

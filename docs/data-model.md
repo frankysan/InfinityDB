@@ -788,18 +788,20 @@ It does **not** calculate Unit usage.
 
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
-application/raw databases. The tracked artifact now includes the
-reviewed Mimetism, Berserk, Dodge and Surprise Attack occurrence-parameter mappings.
+application/raw databases. The tracked artifact includes reviewed
+Mimetism, Berserk, Dodge, Surprise Attack, Super-Jump, Jump and Climb
+occurrence-parameter mappings.
 This baseline contains **96 Skill** source identities across
 **33,153 direct rows** and **34 Equipment** source identities across
 **5,427 direct rows**:
 
 - Skills: 10 reviewed exact-source IDs without occurrence extras;
-  44 family-only IDs; 1 reviewed distance-parameter source
-  (Forward Deployment, `161`); 3 reviewed numeric-parameter
-  sources (Mimetism `28`, Berserk `24` and Surprise Attack `191`); 1 reviewed
-  extra-parameter sources (Dodge `40` and Super-Jump `74`); and
-  **36** IDs with unresolved occurrence parameters.
+  44 family-only IDs; 3 reviewed distance-parameter sources
+  (Forward Deployment `161`, Jump `263`, Climb `271`); 3 reviewed
+  numeric-parameter sources (Mimetism `28`, Berserk `24` and
+  Surprise Attack `191`); 2 reviewed extra-parameter sources
+  (Dodge `40` and Super-Jump `74`); and **34** IDs with
+  unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
   19 family-only IDs; and 14 IDs with unresolved occurrence parameters.
   Four currently published Equipment source IDs have reviewed
@@ -807,11 +809,10 @@ This baseline contains **96 Skill** source identities across
   that remain **separately unresolved** as typed usage-index parameters.
 - `TEXT` extras occur across 39 Skill source IDs and 14 Equipment
   source IDs. `DISTANCE` occurs across 5 Skill source IDs;
-  Forward Deployment `161` is the only source with exclusively
-  `DISTANCE` extras and matching reviewed distance semantics.
+  Forward Deployment `161`, Jump `263` and Climb `271` have
+  exclusively `DISTANCE` extras and matching reviewed distance semantics.
   Dodge `40` and Super-Jump `74` mix `TEXT` with `DISTANCE`;
-  both now have exact reviewed signatures. Jump `263` and Climb
-  `271` retain unresolved occurrence-distance parameters.
+  both have exact reviewed signatures.
   Do not infer coverage from source type or player-facing prose.
 
 These statuses are conservative **per-source-ID audit flags**.
@@ -903,13 +904,32 @@ distance-only display query and `skill_numeric_mod_semantics()`.
 Source ID `40` is now `reviewed-extra-parameter` in the
 tracked `rules.db` and in a freshly exported database from
 curated sources. With the Surprise Attack review below, both inventories
-report **3 reviewed-numeric, 2 reviewed-extra, and 36 unresolved** Skill source IDs.
+report **3 reviewed-numeric, 2 reviewed-extra, 3 reviewed-distance, and
+34 unresolved** Skill source IDs.
 The inventory is read-only and does not overwrite either database.
 `tests/test_audit_source_variant_inputs.py` checks the tracked
 artifact and independently exports current curation into a
 temporary rules database to verify the exact source signatures.
 Certification is per observed source signature, not a new
 player-visible variant index or a game-state simulator.
+
+**Reviewed Jump and Climb distance extras (2026-10-31):** The
+pinned Army source contains exactly 26 Jump (263) and six Climb
+(271) direct occurrences. Each has exactly one source extra:
+`extraId=372`, `DISTANCE: 7.5` cm, with no raw values or extra
+combinations. Under English N5.3 pp. 34 and 32, the listed
+distance replaces the ordinary `+2 inch` bonus added to the first
+MOV value; it is **not** the entire Jump/Climb distance and does
+not change the general movement restrictions. Both family records
+now own direct numeric Army links and `distance` occurrence
+metadata with `positiveSign: omit`, alongside their existing
+rules content. The guarded v9 refresh accepts only those two
+family metadata additions, links, and link-table index statistics.
+It synchronizes the rules DB and reviewed deployed-object
+publication with a rollback copy. `RulesDatabase.skill_parameter_semantics()`
+now returns these mappings under source IDs 263 and 271; the
+source audit classifies both as `reviewed-distance-parameter`.
+This is still **not** a cross-Army Unit-use index.
 
 **Reviewed Super-Jump Jet Propulsion extra (2026-10-31):** Source
 Skill `74` has 670 direct Army occurrences: 198 with

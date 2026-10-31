@@ -66,11 +66,11 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
         "reviewedExactSourceIds": 10,
         "statuses": {
             "family-only": 44,
-            "reviewed-distance-parameter": 1,
+            "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
             "reviewed-extra-parameter": 2,
-            "unresolved-occurrence-parameter": 36,
+            "unresolved-occurrence-parameter": 34,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -134,12 +134,11 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
         for part in signature["extras"]
     )
 
-    # Source-typed DISTANCE is not sufficient by itself. Forward Deployment
-    # has reviewed distance semantics, but Jump and Climb are not certified.
+    # Only family-linked, source-verified distance variants are certified.
     assert skills[161]["status"] == "reviewed-distance-parameter"
     assert skills[161]["extraTypes"] == ["DISTANCE"]
     for source_id in (263, 271):
-        assert skills[source_id]["status"] == "unresolved-occurrence-parameter"
+        assert skills[source_id]["status"] == "reviewed-distance-parameter"
         assert skills[source_id]["extraTypes"] == ["DISTANCE"]
     assert skills[74]["extraTypes"] == ["DISTANCE", "TEXT"]
 
@@ -297,11 +296,11 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
     sources = {item["id"]: item for item in report["items"]}
     assert report["summary"]["statuses"] == {
         "family-only": 44,
-        "reviewed-distance-parameter": 1,
+        "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
         "reviewed-extra-parameter": 2,
-        "unresolved-occurrence-parameter": 36,
+        "unresolved-occurrence-parameter": 34,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -314,6 +313,8 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
     assert rules.skill_parameter_semantics() == {
         "super-jump": {"kind": "distance", "positive_sign": "omit"},
         "forward-deployment": {"kind": "distance", "positive_sign": "force"},
+        263: {"kind": "distance", "positive_sign": "omit"},
+        271: {"kind": "distance", "positive_sign": "omit"},
     }
 
 
@@ -394,8 +395,8 @@ def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
     assert [item["id"] for item in skills] == [74, 263, 271]
     assert [item["occurrences"] for item in skills] == [670, 26, 6]
     assert [item["status"] for item in skills] == [
-        "reviewed-extra-parameter", "unresolved-occurrence-parameter",
-        "unresolved-occurrence-parameter",
+        "reviewed-extra-parameter", "reviewed-distance-parameter",
+        "reviewed-distance-parameter",
     ]
     assert {
         item["id"]: [
@@ -410,12 +411,12 @@ def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
             (((304, "TEXT", "Jet Propulsion"),), 198, True),
             (((372, "DISTANCE", "7.5"),), 43, True),
         ],
-        263: [(((372, "DISTANCE", "7.5"),), 26, False)],
-        271: [(((372, "DISTANCE", "7.5"),), 6, False)],
+        263: [(((372, "DISTANCE", "7.5"),), 26, True)],
+        271: [(((372, "DISTANCE", "7.5"),), 6, True)],
     }
     assert skills[0]["reviewedDistance"] == {"kind": "distance", "positive_sign": "omit"}
-    assert skills[1]["reviewedDistance"] is None
-    assert skills[2]["reviewedDistance"] is None
+    assert skills[1]["reviewedDistance"] == {"kind": "distance", "positive_sign": "omit"}
+    assert skills[2]["reviewedDistance"] == {"kind": "distance", "positive_sign": "omit"}
 
     [tinbot] = select_source_variants(report, "equipment", [169])["items"]
     assert tinbot["name"] == "TinBot: Firewall"

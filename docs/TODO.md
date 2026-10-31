@@ -1689,9 +1689,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **36 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
       occurrence parameters and 14 Equipment source IDs. The tracked
-      rules.db now includes the reviewed Mimetism/Berserk/Dodge/Surprise Attack mappings;
+      rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
+      Super-Jump, Jump and Climb parameter mappings;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
       the release-matched source pair before final certification.
@@ -1718,10 +1719,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         92 `-3` and 55 `-6` extras. The cited N5.3 pp.
         32/34/113/127 distinguish movement bonuses, Jet Propulsion
         steering, and enemy Comms Attack MODs. The exact source
-        signatures have a pinned-archive regression. Super-Jump's Jet
-        Propulsion mapping was subsequently promoted below; Jump,
-        Climb and TinBot Firewall remain unresolved as typed occurrence
-        parameters. No new variant/Unit use is published.
+        signatures have a pinned-archive regression. The Super-Jump,
+        Jump and Climb mappings were subsequently promoted below;
+        TinBot Firewall remains unresolved as a typed occurrence
+        parameter. No cross-Army Unit-use index is published.
       - [x] **Data processing:** Publish exact Super-Jump (Jet Propulsion)
         source extra 304 as a typed trajectory-control variant, separate
         from the existing `DISTANCE` parameter. The pinned Army source
@@ -1732,7 +1733,22 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         validation, tracked v9 rules metadata and matching deployed-object
         publication are synchronized, with ignored rollback copies.
         The source-variant audit now reports 36 unresolved Skill IDs.
-        Jump, Climb, TinBot and all Unit-usage index work remain open.
+        Jump, Climb, TinBot and all Unit-usage index work were still open
+        at that milestone.
+      - [x] **Data processing:** Promote source-verified Jump (263) and
+        Climb (271) distance parameters. N5.3 pp. 34/32 each replace
+        the usual `+2 inch` movement bonus with the listed Unit Profile
+        distance; the paired Army snapshot contains respectively 26
+        and 6 exact `DISTANCE: 7.5` occurrences (extra ID 372), with
+        no other extras. Bind both definitions to the exact Army
+        source IDs and preserve positive-sign omission separately from
+        Super-Jump's trajectory-control effect. The guarded v9
+        migration verifies the pinned raw source, permits only two
+        new record Army links and their family variant metadata,
+        accounts for changed link-table statistics, synchronizes
+        the deployed-object publication and preserves recovery copies.
+        The audited Skill unresolved baseline is now **34**.
+        TinBot Firewall and the cross-Army usage index remain open.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

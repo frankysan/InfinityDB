@@ -35,6 +35,16 @@ PDF = Path("data/pdf/rules/n5-rules-v5-3-en.pdf")
 ARTIFACTS = (RULES, PUBLICATION)
 INPUTS = (ARMY, RULES, PUBLICATION, CHART, CURATED, DELIVERY, CANDIDATES, PDF)
 STAGING_SCOPE = "restrictions-v9-source-verified-paired-staging"
+INITIAL_MOVEMENT_DISTANCE = {
+    ("n5-core-v5.3", "skill:jump"): 263,
+    ("n5-core-v5.3", "skill:climb"): 271,
+}
+MOVEMENT_DISTANCE_VARIANT = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "distance", "positiveSign": "omit",
+    }],
+}
 
 
 def _sha(path: Path) -> str:
@@ -475,8 +485,12 @@ def refresh_pdf_source_pins_v9_release(*, root: Path = ROOT) -> Path:
 
 def _check_variant_semantics_delta(
     previous: Path, proposed: Path, variants: dict[tuple[str, str], str],
+    *, initialize_movement_distance: bool = False,
 ) -> None:
-    """Permit only explicit occurrence-parameter additions to existing family records."""
+    """Guard exact family-parameter additions and optional initial movement links."""
+    initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if initial and set(variants) != set(initial):
+        raise ValueError("Movement distance refresh requires exactly Jump and Climb")
     with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
         for pragma in ("user_version", "application_id"):
             if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
@@ -503,15 +517,53 @@ def _check_variant_semantics_delta(
                     if key not in variants:
                         continue
                     index = columns.index("variant_json")
-                    before, after = json.loads(row[index]), json.loads(variants[key])
-                    prior = before.pop("occurrenceParameters", [])
-                    additions = after.pop("occurrenceParameters", [])
-                    if (before != after or before.get("inheritance") != "family"
-                            or len(additions) <= len(prior) or additions[:len(prior)] != prior):
-                        raise ValueError("Variant refresh must only append reviewed parameters")
+                    after = json.loads(variants[key])
+                    if key in initial:
+                        if row[index] is not None or after != MOVEMENT_DISTANCE_VARIANT:
+                            raise ValueError(
+                                "Initial movement distance requires exact new metadata"
+                            )
+                    else:
+                        if row[index] is None:
+                            raise ValueError("Variant refresh requires existing family metadata")
+                        before = json.loads(row[index])
+                        prior = before.pop("occurrenceParameters", [])
+                        additions = after.pop("occurrenceParameters", [])
+                        if (before != after or before.get("inheritance") != "family"
+                                or len(additions) <= len(prior) or additions[:len(prior)] != prior):
+                            raise ValueError("Variant refresh must only append reviewed parameters")
                     row[index] = variants[key]
                     changed.add(key)
                 rows = [tuple(row) for row in rows]
+            elif name == "record_army_links" and initial:
+                column_keys = ("collection_id", "record_id", "position", "entity",
+                               "external_id", "external_name")
+                if set(columns) != set(column_keys):
+                    raise ValueError("Unexpected record army link schema")
+                if any((row[columns.index("collection_id")],
+                        row[columns.index("record_id")]) in initial for row in rows):
+                    raise ValueError("Initial movement records already have Army links")
+                for (collection, record_id), source_id in initial.items():
+                    expected = dict(zip(column_keys, (
+                        collection, record_id, 0, "skill", str(source_id), None,
+                    ), strict=True))
+                    rows.append(tuple(expected[key] for key in columns))
+                rows = sorted(rows)
+            elif name == "sqlite_stat1" and initial:
+                # ANALYZE refreshes cardinality estimates for the two added
+                # Army links. Other tables' index statistics must remain exact.
+                stat_table = columns.index("tbl")
+                after_stats = new.execute(query).fetchall()
+                before_others = [
+                    row for row in rows if row[stat_table] != "record_army_links"
+                ]
+                after_others = [
+                    row for row in after_stats
+                    if row[stat_table] != "record_army_links"
+                ]
+                if before_others != after_others:
+                    raise ValueError("Movement refresh changed unrelated index statistics")
+                rows = after_stats
             if rows != new.execute(query).fetchall():
                 raise ValueError(f"Variant refresh changed unrelated rows: {name}")
         if not variants or changed != set(variants):
@@ -527,9 +579,42 @@ def refresh_variant_semantics_v9_release(
     return _refresh_metadata_v9_release(root=root, variant_records=record_ids)
 
 
+def refresh_movement_distance_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only the pinned Jump/Climb family links and distance parameters."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    for source_id, name, expected_count in ((263, "Jump", 26), (271, "Climb", 6)):
+        matches = [
+            item for item in report["catalogs"]["skills"]["items"]
+            if item["id"] == source_id
+        ]
+        if (
+            len(matches) != 1
+            or matches[0]["name"] != name
+            or matches[0]["applicationId"] != source_id
+            or matches[0]["occurrences"] != expected_count
+            or matches[0]["status"] != "unresolved-occurrence-parameter"
+            or matches[0]["extraSignatures"] != [{
+                "extras": [[372, "DISTANCE", "7.5"]],
+                "reviewed": False,
+                "count": expected_count,
+            }]
+            or matches[0]["rawValues"]
+        ):
+            raise ValueError(f"Unreviewed Jump/Climb source drift: {source_id}")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={key[1] for key in INITIAL_MOVEMENT_DISTANCE},
+        initialize_movement_distance=True,
+    )
+
+
 def _refresh_metadata_v9_release(
     *, root: Path, source_ids: set[str] | None = None, expected_count: int | None = None,
     variant_records: set[str] | None = None,
+    initialize_movement_distance: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -608,7 +693,10 @@ def _refresh_metadata_v9_release(
         generated = RulesDatabase(next_rules)
         generated.validate()
         if variant_records is not None:
-            _check_variant_semantics_delta(current_rules, next_rules, variants)
+            _check_variant_semantics_delta(
+                current_rules, next_rules, variants,
+                initialize_movement_distance=initialize_movement_distance,
+            )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)
         if generated.restrictions_payload() != current.restrictions_payload():

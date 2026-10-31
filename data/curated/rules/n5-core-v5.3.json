@@ -14271,6 +14271,22 @@
                     "A Trooper performing Climb or holding onto a vertical surface cannot benefit from Partial Cover MODs."
                 ]
             },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 271
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "distance",
+                        "positiveSign": "omit"
+                    }
+                ]
+            },
             "labelIds": [
                 "movement",
                 "no-lof",
@@ -14429,6 +14445,22 @@
                 "restrictions": [
                     "The trajectory and landing must follow the Jump and General Movement Rules.",
                     "The user cannot benefit from Partial Cover MODs during an Order in which it declared Jump."
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": 263
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "distance",
+                        "positiveSign": "omit"
+                    }
                 ]
             },
             "labelIds": [
