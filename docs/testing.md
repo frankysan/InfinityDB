@@ -928,6 +928,28 @@ source/page references may cover distinct procedures; source locations
 need their own clause-level dispositions. Metadata page/type peers are
 candidate discoveries, not approved identity renames.
 
+For the reviewed **declaration-category metadata migration** (V1-A08), add
+`--reconcile-declarations` to join retired categories to their actual Skill
+owners from historical Git commit `c5400ab1`. This explicitly requires
+the historical Git object; a shallow clone without that commit fails closed
+rather than inventing a replacement. With the pinned N5.3 source PDF
+available, also pass
+`--verify-declaration-pdf data/pdf/rules/n5-rules-v5-3-en.pdf`.
+The maintained source review lives in
+`config/validation/declaration-inventory-migration-v1.json` and checks all
+**17 retired** category identities against their historical owners and
+current destinations, plus **20 new** headings/classifications against the
+source-exact SHA-256 PDF. It distinguishes page-anchor corrections, three
+kind corrections (Decoy, Morpho Scan's former Basic Short Skill and ARO
+categories), and a shared Climb/Jump group split. No old
+`declaration-category:*` ID becomes a route alias. Conditional skill
+permissions, individual variants and full normal-browser explanation
+acceptance remain separate work. Generate ignored review evidence with:
+
+```powershell
+.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --reconcile-declarations --verify-declaration-pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json-output local/audits/v1-declaration-migration-reviewed.json --markdown-output local/audits/v1-declaration-migration-reviewed.md
+```
+
 The JSON contains the complete current identity crosswalk, D/S provenance
 where applicable, source pages/headings, curated review flags and five
 selected browser-test pointers for recently published general references.

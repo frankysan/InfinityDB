@@ -27,8 +27,10 @@ from tools.report_reference_baseline import (
     build_baseline,
     main,
     parse_frozen_explanation_inventory,
+    reconcile_declaration_owners,
     reconcile_explanation_inventory,
     render_markdown,
+    verify_declaration_review,
     verify_served_revision,
 )
 
@@ -76,6 +78,98 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
             "pending-full-normal-mode-acceptance",
             "selected-route-smoke-evidence-not-full-acceptance",
         }
+
+
+def test_declaration_migration_review_matches_historical_owners_and_current_pdf() -> None:
+    report = reconcile_explanation_inventory()
+    try:
+        crosswalk = reconcile_declaration_owners(report)
+    except ReferenceBaselineError as exc:
+        if "Historical curated snapshot unavailable" in str(exc):
+            pytest.skip("Full Git history required for optional migration audit")
+        raise
+    assert crosswalk["retiredCount"] == 17
+    assert crosswalk["addedCount"] == 20
+    source = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if source.is_file():
+        pytest.importorskip("pymupdf")
+    verified = verify_declaration_review(
+        crosswalk, pdf_path=source if source.is_file() else None,
+    )
+    assert verified["retiredReviewed"] == 17
+    assert verified["newHeadingsReviewed"] == 20
+    assert verified["kindCorrections"] == 3
+    assert verified["multiOwnerSplits"] == 1
+    assert verified["retiredCategoryAliasesCreated"] == 0
+    assert verified["fullRecordApprovalsIssued"] == 0
+    if source.is_file():
+        assert verified["status"] == "pinned-n5.3-pdf-headings-verified"
+
+
+def test_declaration_migration_review_rejects_unreviewed_identity_or_owner_changes(
+    tmp_path: Path,
+) -> None:
+    report = reconcile_explanation_inventory()
+    try:
+        crosswalk = reconcile_declaration_owners(report)
+    except ReferenceBaselineError as exc:
+        if "Historical curated snapshot unavailable" in str(exc):
+            pytest.skip("Full Git history required for optional migration audit")
+        raise
+    manifest = json.loads((
+        ROOT / "config/validation/declaration-inventory-migration-v1.json"
+    ).read_text(encoding="utf-8"))
+    edits = [
+        ("removed-review", lambda x: x["retiredTransitions"].pop()),
+        ("wrong-owner", lambda x: x["retiredTransitions"][0].update(
+            historicalOwners=["skill:not-the-original-owner"]
+        )),
+        ("wrong-target", lambda x: x["retiredTransitions"][0].update(
+            currentIds=["declaration-category:automatic:p86"]
+        )),
+        ("wrong-type", lambda x: x["retiredTransitions"][0].update(
+            disposition="corrected-source-page"
+        )),
+        ("missing-added", lambda x: x["addedHeadings"].pop()),
+        ("wrong-classification", lambda x: x["addedHeadings"][0].update(
+            printedClassification="AUTOMATIC SKILL"
+        )),
+    ]
+    for filename, alter in edits:
+        changed = json.loads(json.dumps(manifest))
+        alter(changed)
+        path = tmp_path / f"{filename}.json"
+        path.write_text(json.dumps(changed), encoding="utf-8")
+        with pytest.raises(ReferenceBaselineError):
+            verify_declaration_review(crosswalk, manifest_path=path)
+
+
+def test_explanation_migration_cli_includes_verified_declaration_owners(
+    tmp_path: Path,
+) -> None:
+    report = reconcile_explanation_inventory()
+    try:
+        reconcile_declaration_owners(report)
+    except ReferenceBaselineError as exc:
+        if "Historical curated snapshot unavailable" in str(exc):
+            pytest.skip("Full Git history required for optional migration audit")
+        raise
+    json_output = tmp_path / "declarations.json"
+    markdown_output = tmp_path / "declarations.md"
+    assert main([
+        "--reconcile-explanation-inventory", "--reconcile-declarations",
+        "--json-output", str(json_output),
+        "--markdown-output", str(markdown_output),
+    ]) == 0
+    migrated = json.loads(json_output.read_text(encoding="utf-8"))[
+        "declarationMigrations"
+    ]
+    assert migrated["review"]["retiredReviewed"] == 17
+    assert migrated["review"]["newHeadingsReviewed"] == 20
+    markdown = markdown_output.read_text(encoding="utf-8")
+    assert "17 historical retirements" in markdown
+    assert "skill `morpho-scan`" in markdown
+    assert "No historical aliases or" in markdown
 
 
 def test_frozen_explanation_parser_rejects_duplicate_and_malformed_rows() -> None:

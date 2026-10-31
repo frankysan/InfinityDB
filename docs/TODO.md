@@ -962,11 +962,21 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           source locations are listed for further clause review. The original
           **367 / 304 D / 63 S** stays frozen; this is not 448 approvals.
           Ignored JSON/Markdown reports are under `local/audits/`.
-        - [ ] **Metadata migration review:** Compare the 17 retired declaration
-          identities with 20 added page/category identities against actual PDF
-          headings, declarations and restrictions. Same-type candidates in the
-          crosswalk are not accepted renames; decide genuine replacements,
-          retirement and any unsupported declaration coverage.
+        - [x] **Metadata identity and source-heading migration:** The pinned
+          historical curated source at `c5400ab1` confirms each of the **17**
+          retired category IDs' original Skill owners. A maintained review
+          manifest verifies the corresponding current owner/category targets
+          and **all 20 added category headings** against the exact N5.3 PDF.
+          Most retired IDs had incorrect page anchors; Decoy and Morpho Scan
+          required three category-kind corrections, and the old Climb/Jump
+          group splits by Skill owner. Old page-group IDs are retired, **not**
+          public aliases. Run `tools.report_reference_baseline
+          --reconcile-explanation-inventory --reconcile-declarations
+          --verify-declaration-pdf data/pdf/rules/n5-rules-v5-3-en.pdf`
+          for the reviewed source check (requires local historical Git object
+          and pinned PDF). This closes **identity/source heading**, not the
+          separately open conditional permissions, variant effects, or final
+          normal-browser explanation acceptance.
         - [ ] **Clause and browser dispositions:** Reconcile each current source
           section and record with later documented source/FAQ decisions,
           reviewed conditional effects, and normal-player browser evidence.

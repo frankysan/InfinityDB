@@ -49,6 +49,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Project infrastructure:** Verify historical N5.3
+  declaration-category migration against the original Git snapshot and the
+  pinned rules PDF. Reconcile 17 retired grouped page identities to their
+  original Skill owners and current definitions, review 20 new source headings,
+  and retain explicit boundaries for conditional declarations, variants and
+  whole-record browser acceptance. Obsolete metadata IDs are not public aliases.
 - **Data processing + Project infrastructure:** Add a reproducible V1-A08
   reconciliation between the unchanged 367-record explanation inventory and
   current Core/Hacking records. Preserve historical D/S tiers and source

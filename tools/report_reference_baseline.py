@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 import sqlite3
+import subprocess
 import sys
 from collections import Counter
 from collections.abc import Sequence
@@ -1358,6 +1359,8 @@ def render_markdown(report: dict[str, Any]) -> str:
 FROZEN_EXPLANATION_INVENTORY = (
     PROJECT_ROOT / "docs/rules-explanation-audit-1.0-inventory.md"
 )
+FROZEN_DECLARATION_COMMIT = "c5400ab1b950990fdacc509be91c110fe85431fb"
+DECLARATION_REVIEW = PROJECT_ROOT / "config/validation/declaration-inventory-migration-v1.json"
 FROZEN_EXPLANATION_INVENTORY_SHA256 = (
     "3f6b21bc6ba7e508e63cfaa74b1bdb3fdefe3ab3968418d813be18a36275675e"
 )
@@ -1544,6 +1547,243 @@ def reconcile_explanation_inventory(
     }
 
 
+def reconcile_declaration_owners(
+    report: dict[str, Any],
+    *,
+    repository: Path = PROJECT_ROOT,
+    historical_commit: str = FROZEN_DECLARATION_COMMIT,
+) -> dict[str, Any]:
+    """Recover original category ownership; never infer rename from page numbers."""
+    if not re.fullmatch(r"[0-9a-f]{40}", historical_commit):
+        raise ReferenceBaselineError("Historical commit must be an exact SHA-1")
+    historical_file = "data/curated/rules/n5-core-v5.3.json"
+    result = subprocess.run(
+        ["git", "show", f"{historical_commit}:{historical_file}"],
+        cwd=repository, capture_output=True, text=True, check=False,
+        encoding="utf-8",
+    )
+    if result.returncode != 0:
+        raise ReferenceBaselineError(
+            f"Historical curated snapshot unavailable: {historical_commit} "
+            f"({result.stderr.strip()[:180]})"
+        )
+    try:
+        historical = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        raise ReferenceBaselineError("Historical curated snapshot has invalid JSON") from exc
+    from infinity_db.curated import load_curated_document
+
+    current = load_curated_document(CURRENT_EXPLANATION_COLLECTIONS[0])
+    original = {
+        row["id"]: row for row in historical["records"]
+        if row["kind"] == "declaration-category"
+    }
+    modern = {
+        row["id"]: row for row in current["records"]
+        if row["kind"] == "declaration-category"
+    }
+    if not modern:
+        raise ReferenceBaselineError("Current declaration categories are missing")
+    retired_ids = [row["id"] for row in report["retiredIdentityRows"]]
+    if not set(retired_ids) <= original.keys():
+        raise ReferenceBaselineError("Frozen identity absent from historical curated snapshot")
+    owner_index: dict[tuple[str, str], list[str]] = {}
+    for identifier, row in modern.items():
+        for link in row.get("armyLinks", []):
+            key = (str(link["entity"]), str(link["id"]))
+            owner_index.setdefault(key, []).append(identifier)
+
+    transitions = []
+    for identifier in sorted(retired_ids):
+        old = original[identifier]
+        owners = old.get("armyLinks") or []
+        if not owners:
+            raise ReferenceBaselineError(
+                f"Retired declaration has no historical owner: {identifier}"
+            )
+        owner_rows = []
+        for link in owners:
+            key = (str(link["entity"]), str(link["id"]))
+            candidates = [
+                {
+                    "id": cid,
+                    "typeId": modern[cid]["facts"]["typeId"],
+                    "page": modern[cid]["citations"][0]["page"],
+                }
+                for cid in sorted(owner_index.get(key, []))
+            ]
+            owner_rows.append({
+                "entity": key[0], "id": key[1],
+                "currentCategories": candidates,
+                "disposition": (
+                    "source-heading-and-meaning-review-required"
+                    if candidates else "unresolved-owner-no-current-category"
+                ),
+            })
+        transitions.append({
+            "retiredId": identifier,
+            "historicalCategory": old["facts"]["typeId"],
+            "historicalPage": old["citations"][0]["page"],
+            "ownerTransitions": owner_rows,
+            "status": "owner-crosswalk-not-approved-rename",
+        })
+    current_added = [
+        {"id": identifier, "owners": modern[identifier].get("armyLinks", []),
+         "typeId": modern[identifier]["facts"]["typeId"],
+         "sourceId": modern[identifier]["citations"][0]["sourceId"],
+         "page": modern[identifier]["citations"][0]["page"]}
+        for identifier in report["addedIds"] if identifier in modern
+    ]
+    return {
+        "historicalCommit": historical_commit,
+        "historicalFile": historical_file,
+        "retiredCount": len(transitions), "addedCount": len(current_added),
+        "transitions": transitions, "addedDeclarations": current_added,
+        "status": "owner-crosswalk-requires-source-heading-review",
+    }
+
+
+def verify_declaration_review(
+    crosswalk: dict[str, Any],
+    *,
+    manifest_path: Path = DECLARATION_REVIEW,
+    pdf_path: Path | None = None,
+) -> dict[str, Any]:
+    """Check exact historical owners, 20 current headings and optional PDF bytes."""
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise ReferenceBaselineError(f"Declaration review unavailable: {exc}") from exc
+    if manifest.get("formatVersion") != 1 or manifest.get("historicalCommit") != (
+        crosswalk["historicalCommit"]
+    ) or manifest.get("historicalInventorySha256") != (
+        FROZEN_EXPLANATION_INVENTORY_SHA256
+    ):
+        raise ReferenceBaselineError("Declaration review has mismatched historical scope")
+    retired = manifest.get("retiredTransitions")
+    added = manifest.get("addedHeadings")
+    if not isinstance(retired, list) or not isinstance(added, list):
+        raise ReferenceBaselineError("Declaration review entries must be arrays")
+    if len(retired) != len(crosswalk["transitions"]) or len(added) != (
+        len(crosswalk["addedDeclarations"])
+    ):
+        raise ReferenceBaselineError("Declaration review does not cover full migration")
+    review_by_id = {row["oldId"]: row for row in retired}
+    if len(review_by_id) != len(retired) or set(review_by_id) != {
+        row["retiredId"] for row in crosswalk["transitions"]
+    }:
+        raise ReferenceBaselineError("Retired declaration review IDs differ")
+    changed_kinds = 0
+    split_groups = 0
+    for row in crosswalk["transitions"]:
+        review = review_by_id[row["retiredId"]]
+        owners = {
+            f"{owner['entity']}:{owner['id']}" for owner in row["ownerTransitions"]
+        }
+        if len(set(review["historicalOwners"])) != len(review["historicalOwners"]) or (
+            set(review["historicalOwners"]) != owners
+        ):
+            raise ReferenceBaselineError(f"Historical owners differ: {row['retiredId']}")
+        targets = review["currentIds"]
+        if len(set(targets)) != len(targets) or not targets:
+            raise ReferenceBaselineError(f"Invalid current ID list: {row['retiredId']}")
+        target_owners: set[str] = set()
+        new_kinds: set[str] = set()
+        for target in targets:
+            matches = [
+                owner for owner in row["ownerTransitions"]
+                if any(category["id"] == target for category in owner["currentCategories"])
+            ]
+            if len(matches) != 1:
+                raise ReferenceBaselineError(
+                    f"Replacement lacks unique historical skill owner: {target}"
+                )
+            match = matches[0]
+            target_owners.add(f"{match['entity']}:{match['id']}")
+            category = next(
+                c for c in match["currentCategories"] if c["id"] == target
+            )
+            new_kinds.add(category["typeId"])
+        if target_owners != owners or len(new_kinds) != 1:
+            raise ReferenceBaselineError(
+                f"Retired category has missing or inconsistent owner: {row['retiredId']}"
+            )
+        old_kind = row["historicalCategory"]
+        if review["disposition"] == "corrected-source-page":
+            if new_kinds != {old_kind} or len(owners) != 1:
+                raise ReferenceBaselineError(f"Invalid page-only correction: {row['retiredId']}")
+        elif review["disposition"] == "corrected-classification":
+            if old_kind in new_kinds or len(owners) != 1:
+                raise ReferenceBaselineError(f"Invalid kind correction: {row['retiredId']}")
+            changed_kinds += 1
+        elif review["disposition"] == "split-by-skill-owner":
+            if new_kinds != {old_kind} or len(owners) <= 1:
+                raise ReferenceBaselineError(f"Invalid split correction: {row['retiredId']}")
+            split_groups += 1
+        else:
+            raise ReferenceBaselineError(f"Unrecognized resolution: {row['retiredId']}")
+    added_by_id = {row["id"]: row for row in added}
+    if len(added_by_id) != len(added) or set(added_by_id) != {
+        row["id"] for row in crosswalk["addedDeclarations"]
+    }:
+        raise ReferenceBaselineError("Added category review identities differ")
+    classes = {
+        "aro": "SHORT SKILL / ARO",
+        "basic-short-skill": "BASIC SHORT SKILL / ARO",
+        "short-skill": "SHORT SKILL",
+        "long-skill": "LONG SKILL",
+        "deployment-skill": "DEPLOYMENT SKILL",
+        "automatic": "AUTOMATIC SKILL",
+    }
+    for actual in crosswalk["addedDeclarations"]:
+        review = added_by_id[actual["id"]]
+        source_class = classes.get(actual["typeId"])
+        if actual["id"] == "declaration-category:aro:p77":
+            source_class = "BASIC SHORT SKILL / ARO"
+        if actual["typeId"] == "short-skill" and actual["id"] in {
+            "declaration-category:short-skill:p39",
+            "declaration-category:short-skill:p51",
+        }:
+            source_class = "SHORT SKILL / ARO"
+        if (review["owner"] not in {
+            f"{link['entity']}:{link['id']}" for link in actual["owners"]
+        } or len(actual["owners"]) != 1 or
+                actual["sourceId"] != manifest["currentSourceId"] or
+                review["printedClassification"] != source_class or
+                not isinstance(review["printedHeading"], str) or
+                not review["printedHeading"].strip() or
+                not actual["id"].endswith(f":p{actual['page']}")):
+            raise ReferenceBaselineError(f"Added source-heading review mismatch: {actual['id']}")
+    evidence = "curated-source-and-historical-owner-checked"
+    if pdf_path is not None:
+        if _sha256(pdf_path) != manifest["currentPdfSha256"]:
+            raise ReferenceBaselineError("Pinned declaration PDF SHA-256 mismatch")
+        try:
+            import pymupdf
+        except ImportError as exc:
+            raise ReferenceBaselineError("PyMuPDF required for source verification") from exc
+        with pymupdf.open(pdf_path) as document:
+            for actual in crosswalk["addedDeclarations"]:
+                review = added_by_id[actual["id"]]
+                heading = re.escape(review["printedHeading"])
+                classification = re.escape(review["printedClassification"])
+                page = " ".join(document[actual["page"] - 1].get_text().split())
+                if not re.search(rf"{heading}\s+{classification}", page, re.I):
+                    raise ReferenceBaselineError(
+                        f"Printed declaration heading mismatch: {actual['id']}"
+                    )
+        evidence = "pinned-n5.3-pdf-headings-verified"
+    return {
+        "status": evidence,
+        "retiredReviewed": len(retired),
+        "newHeadingsReviewed": len(added),
+        "kindCorrections": changed_kinds,
+        "multiOwnerSplits": split_groups,
+        "retiredCategoryAliasesCreated": 0,
+        "fullRecordApprovalsIssued": 0,
+    }
+
+
 def render_explanation_reconciliation(report: dict[str, Any]) -> str:
     """Compact work queue for reviewers, retaining exact IDs in the JSON."""
     lines = [
@@ -1581,6 +1821,50 @@ def render_explanation_reconciliation(report: dict[str, Any]) -> str:
             for identifier in ids
         )
         lines.append("")
+    if "declarationMigrations" in report:
+        crosswalk = report["declarationMigrations"]
+        lines.extend([
+            "## Historical declaration owner crosswalk",
+            "",
+            f"Historical source commit: `{crosswalk['historicalCommit']}`",
+            "",
+            "Old category IDs are historical grouped page markers, not stable "
+            "gameplay identities. Common owner labels identify candidates only.",
+            "",
+        ])
+        if "review" in crosswalk:
+            review = crosswalk["review"]
+            lines.extend([
+                f"Verified: {review['retiredReviewed']} historical retirements and "
+                f"{review['newHeadingsReviewed']} current source headings; "
+                f"{review['kindCorrections']} kind corrections and "
+                f"{review['multiOwnerSplits']} grouped-owner splits.",
+                f"Evidence: `{review['status']}`. No historical aliases or "
+                "whole-record approvals were created.",
+                "",
+            ])
+        for item in crosswalk["transitions"]:
+            lines.append(
+                f"### `{item['retiredId']}` "
+                f"({item['historicalCategory']}, p. {item['historicalPage']})"
+            )
+            for owner in item["ownerTransitions"]:
+                targets = ", ".join(
+                    f"`{entry['id']}` ({entry['typeId']}, p. {entry['page']})"
+                    for entry in owner["currentCategories"]
+                ) or "**no current declaration category**"
+                lines.append(f"- {owner['entity']} `{owner['id']}` → {targets}")
+            lines.append("")
+        lines.extend(["## New declaration-category records", ""])
+        for item in crosswalk["addedDeclarations"]:
+            owners = ", ".join(
+                f"{link['entity']}:{link['id']}" for link in item["owners"]
+            )
+            lines.append(
+                f"- `{item['id']}` ({item['typeId']}, p. {item['page']}) "
+                f"— {owners}"
+            )
+        lines.append("")
     lines.extend([
         "## Remaining acceptance",
         "",
@@ -1609,9 +1893,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--reconcile-explanation-inventory", action="store_true",
         help="Compare frozen 367-record explanation inventory to current Core/Hacking",
     )
+    parser.add_argument(
+        "--reconcile-declarations", action="store_true",
+        help="Include historical Git ownership crosswalk for retired declarations",
+    )
+    parser.add_argument(
+        "--verify-declaration-pdf", type=Path,
+        help="Verify the 20 added printed declaration headings against exact N5.3 PDF bytes",
+    )
     args = parser.parse_args(argv)
     if args.reconcile_explanation_inventory:
+        if args.verify_declaration_pdf is not None and not args.reconcile_declarations:
+            parser.error("--verify-declaration-pdf requires --reconcile-declarations")
         report = reconcile_explanation_inventory()
+        if args.reconcile_declarations:
+            crosswalk = reconcile_declaration_owners(report)
+            crosswalk["review"] = verify_declaration_review(
+                crosswalk, pdf_path=args.verify_declaration_pdf,
+            )
+            report["declarationMigrations"] = crosswalk
         for path, content in (
             (args.json_output, json.dumps(report, indent=2, ensure_ascii=False) + "\n"),
             (args.markdown_output, render_explanation_reconciliation(report)),
@@ -1626,6 +1926,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{report['sourceSectionCount']} source locators pending clause review"
         )
         return 0
+    if args.reconcile_declarations or args.verify_declaration_pdf is not None:
+        parser.error("declaration flags require --reconcile-explanation-inventory")
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,
     )
