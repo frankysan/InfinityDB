@@ -21,7 +21,7 @@ On Linux/macOS use `.venv/bin/python` instead.
 
 ## Profiles and stages
 
-The runner exposes six stages:
+The runner exposes seven stages:
 
 - `test` — pytest;
 - `lint` — Ruff;
@@ -29,7 +29,11 @@ The runner exposes six stages:
 - `type` — Pyright;
 - `build` — Army data/database build validation;
 - `rules` - interaction-review coverage and generated-checklist validation, followed by
-  curated rules validation/database build.
+  curated rules validation/database build;
+- `preflight` — CI-parity check: fails on untracked non-ignored files and verifies tracked package
+  files are shipped in a wheel built from the tracked export (see
+  [CI preflight](#ci-preflight-clean-checkout-and-wheel-contents); the clean-export pytest run is
+  not part of this stage).
 
 Named profiles are:
 
@@ -77,6 +81,20 @@ build step is part of the application's runtime or packaging.
 Requested stages continue after a failure by default so one run can report the complete failure set.
 Use `--fail-fast` when the first failure is sufficient.
 
+## CI preflight (clean checkout and wheel contents)
+
+A local working tree contains untracked and Git-ignored files that CI never sees. Before pushing, run:
+
+```text
+<venv-python> tools/ci_preflight.py -- -n auto
+```
+
+It fails on non-ignored untracked files (`--allow-untracked` downgrades this to a warning), exports
+only the staged/tracked content to a temporary directory, runs pytest there (arguments after `--`
+are passed to pytest), and builds a wheel from that export to verify every tracked file under a
+shipped `src/` package is in the wheel (the logo design-source directory is exempt). It complements
+but does not replace the installed-wheel smoke workflow described in `docs/ci.md`.
+
 ## Targeted checks
 
 For ordinary development, prefer the smallest check that exercises the changed contract before
@@ -90,7 +108,7 @@ python tools\run_checks.py --stage type
 ```
 
 Positional targets are passed to pytest/Ruff for their respective stages. The `docs` stage
-always checks the configured Markdown set; `docs`, `type`, `build`, and `rules` ignore positional
+always checks the configured Markdown set; `docs`, `type`, `build`, `rules`, and `preflight` ignore positional
 targets. The runner accepts its documented options and test paths/node IDs, not arbitrary
 pytest flags. For keyword selection or other pytest-specific options, invoke pytest directly.
 

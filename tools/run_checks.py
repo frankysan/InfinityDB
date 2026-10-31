@@ -32,7 +32,7 @@ except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
     )
     from test_sections import load_test_sections  # type: ignore[no-redef]
 
-STAGE_ORDER = ("test", "lint", "docs", "type", "build", "rules")
+STAGE_ORDER = ("test", "lint", "docs", "type", "build", "rules", "preflight")
 PROFILES = {
     "code": ("test", "lint", "type"),
     "data": ("build", "rules"),
@@ -273,6 +273,8 @@ def stage_definitions(
                 "--output",
                 str(Path(tempfile.mkdtemp(prefix="infinitydb-check-rules-")) / "rules.db"),
             ]
+        elif name == "preflight":
+            command = [python, str(REPO_ROOT / "tools" / "ci_preflight.py"), "--skip-pytest"]
         else:  # pragma: no cover - guarded by argparse/selected_stage_names
             raise ValueError(f"Unknown stage: {name}")
         stages.append(Stage(name=name, command=tuple(command)))

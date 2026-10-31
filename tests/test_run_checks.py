@@ -34,7 +34,7 @@ def test_all_profile_includes_code_and_data_stages() -> None:
     args = run_checks.build_parser().parse_args(["--profile", "all"])
 
     assert run_checks.selected_stage_names(args) == (
-        "test", "lint", "docs", "type", "build", "rules"
+        "test", "lint", "docs", "type", "build", "rules", "preflight"
     )
 
 
