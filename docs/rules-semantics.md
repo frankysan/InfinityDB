@@ -3862,10 +3862,11 @@ table-size recommendations are generic setup guidance. Basic Rules Game Modes
 also provide recommended table/deployment dimensions, while an individual
 scenario can define its own Forces and Deployment parameters.
 
-InfinityDB should therefore distinguish a generic **recommended setup** from a
-scenario's **scenario-scoped setup facts**. Future scenario or setup pages may
-present both, but should not turn the generic recommendations into universal
-list-legality rules or overwrite explicit scenario dimensions.
+InfinityDB distinguishes a generic **recommended setup** from a scenario's
+**scenario-scoped setup facts**. The N5.3 `/rules/game-modes` reference now
+publishes the six reviewed presets and independent Retreat! thresholds. A future
+scenario-aware setup tool may present both, but must never turn generic advice
+into universal list-legality rules or overwrite explicit scenario dimensions.
 
 Sources:
 

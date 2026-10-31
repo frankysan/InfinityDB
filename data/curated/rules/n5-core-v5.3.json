@@ -26114,6 +26114,153 @@
             }
         },
         {
+            "id": "rule:game-modes",
+            "kind": "rule",
+            "name": "Game Modes",
+            "aliases": [
+                "Game setup reference",
+                "Recommended Game Modes"
+            ],
+            "summary": "The N5.3 **Game Modes** chart provides six **recommended** game presets with Army Points, base SWC, table size, each player's Deployment Zone dimensions, and estimated duration in minutes. The adjacent columns below also show the independently reviewed **army-level [[rule:army-retreat|Retreat!]] thresholds** for the same point values.\n\n**Source boundaries:** The table and Deployment Zone dimensions are generic setup advice, **not mandatory scenario rules**. The SWC values are baseline allowances without Unit-specific adjustments; estimated minutes are not Game Round limits. Scenario and event rules or player agreement may specify other conditions.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "The six N5.3 mode presets are reviewed source values, not editable defaults or an Army List construction/legality check.",
+                    "The [[rule:army-retreat|Retreat!]] threshold is measured from surviving Trooper points during the active player's Tactical Phase under [[rule:army-retreat|Army Retreat!]], not a static Unit Attribute. The 150/250/350 thresholds use the printed upward-rounded values.",
+                    "For a [[rule:standard-game|Standard Game]], the three-Game-Round duration and end conditions are described separately; the 90-minute Standard Games row is only a recommended playing-time estimate."
+                ],
+                "restrictions": [
+                    "Dimensions and durations listed here are recommendations. Specific scenarios define their own table geometry, Deployment Zones, forces, objectives, and end conditions; the general reference must not overwrite them.",
+                    "These six rows are for the reviewed N5.3 Game Modes, not automatically binding for Reinforcements, ITS, Free Games, or tournament/event settings."
+                ],
+                "gameSetupTable": {
+                    "scope": "recommended-general-setup-with-independent-retreat-thresholds",
+                    "rows": [
+                        {
+                            "name": "Beginner Games",
+                            "armyPoints": 150,
+                            "baseSwc": 3,
+                            "tableInches": [
+                                24,
+                                32
+                            ],
+                            "deploymentZoneInches": [
+                                8,
+                                24
+                            ],
+                            "durationMinutes": 40,
+                            "retreatThresholdVictoryPoints": 38
+                        },
+                        {
+                            "name": "Raid Games",
+                            "armyPoints": 200,
+                            "baseSwc": 4,
+                            "tableInches": [
+                                32,
+                                48
+                            ],
+                            "deploymentZoneInches": [
+                                8,
+                                32
+                            ],
+                            "durationMinutes": 50,
+                            "retreatThresholdVictoryPoints": 50
+                        },
+                        {
+                            "name": "Intermediate Games",
+                            "armyPoints": 250,
+                            "baseSwc": 5,
+                            "tableInches": [
+                                32,
+                                48
+                            ],
+                            "deploymentZoneInches": [
+                                8,
+                                32
+                            ],
+                            "durationMinutes": 60,
+                            "retreatThresholdVictoryPoints": 63
+                        },
+                        {
+                            "name": "Standard Games",
+                            "armyPoints": 300,
+                            "baseSwc": 6,
+                            "tableInches": [
+                                48,
+                                48
+                            ],
+                            "deploymentZoneInches": [
+                                12,
+                                48
+                            ],
+                            "durationMinutes": 90,
+                            "retreatThresholdVictoryPoints": 75
+                        },
+                        {
+                            "name": "Magnum Games, and Games with Reinforcements",
+                            "armyPoints": 350,
+                            "baseSwc": 7,
+                            "tableInches": [
+                                48,
+                                48
+                            ],
+                            "deploymentZoneInches": [
+                                12,
+                                48
+                            ],
+                            "durationMinutes": 100,
+                            "retreatThresholdVictoryPoints": 88
+                        },
+                        {
+                            "name": "Large-Scale Games",
+                            "armyPoints": 400,
+                            "baseSwc": 8,
+                            "tableInches": [
+                                48,
+                                48
+                            ],
+                            "deploymentZoneInches": [
+                                12,
+                                48
+                            ],
+                            "durationMinutes": 120,
+                            "retreatThresholdVictoryPoints": 100
+                        }
+                    ]
+                }
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 6,
+                    "section": "Game Modes"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 146,
+                    "section": "End-Game: Retreat!"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 147,
+                    "section": "Setting up the Gaming Table"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-31"
+            }
+        },
+        {
             "id": "rule:standard-game",
             "kind": "rule",
             "name": "Standard Game",

@@ -2405,6 +2405,13 @@
       "note": "N5.3 English p.146, Spanish p.150, and archived Retreat Situation revision 3942 reconcile surviving points including undeployed Troopers, the 25% trigger/recovery threshold, automatic Loss of Lieutenant, Impetuous Phase, evacuation, State distinction, and scenario-owned end conditions. No live army state or roster calculator."
     },
     {
+      "recordId": "rule:game-modes",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-31",
+      "note": "N5.3 p. 6 six recommended Game Modes; independent p. 146 printed Retreat! thresholds and p. 147 advisory table sizes cross-checked against existing exact source manifests. A single general-reference table maintains six exact mode, Army Points, base SWC, table, Deployment Zone, estimated minutes and army/session Retreat threshold rows. Scenarios, tournaments and agreed Free Games may override suggested setup; no Army legality or game-state calculation."
+    },
+    {
       "recordId": "rule:standard-game",
       "targetRelease": "1.0.0",
       "status": "reviewed",

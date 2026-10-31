@@ -8,6 +8,7 @@ import sys
 
 import pytest
 
+from infinity_db.curated import load_curated_document
 from infinity_db.restriction_conditions import compile_restriction_conditions
 from tools.audit_game_mode_source_table import (
     MANIFEST,
@@ -15,6 +16,7 @@ from tools.audit_game_mode_source_table import (
     PINNED,
     SETUP_MANIFEST,
     audit_game_mode_source,
+    audit_published_game_setup,
     audit_source_files,
     main,
     verify_pinned_pdf,
@@ -63,6 +65,8 @@ def test_game_mode_chart_corresponds_to_independent_setup_tables() -> None:
     assert result["sourcePage"] == 6
     assert result["corroboratingSourcePages"] == [146, 147]
     assert result["rowCount"] == 6
+    assert result["publicRuleId"] == "rule:game-modes"
+    assert result["publishedRowCount"] == 6
     assert result["durationScope"] == "recommended-minutes-not-round-count"
     assert result["swcScope"] == "base-allowance-excludes-unit-specific-bonuses"
     assert result["deploymentZoneScope"] == "two-dimensional-per-player-inches"
@@ -100,6 +104,58 @@ def test_game_mode_chart_rejects_drift_or_scenario_overrides() -> None:
     changed_setup["rows"][0]["recommendedTableInches"] = [48, 48]
     with pytest.raises(ValueError, match="cross-check failed"):
         audit_game_mode_source(chart, changed_setup)
+
+
+def test_public_game_setup_rows_match_both_manifests_and_fail_closed() -> None:
+    chart, setup = _inputs()
+    curated = load_curated_document(
+        MANIFEST.parents[2] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    assert audit_published_game_setup(chart, setup, curated) == {
+        "publicRuleId": "rule:game-modes", "publishedRowCount": 6,
+    }
+    for index, field, value in (
+        (0, "baseSwc", 4),
+        (2, "deploymentZoneInches", [12, 32]),
+        (4, "retreatThresholdVictoryPoints", 87),
+        (5, "durationMinutes", 60),
+    ):
+        changed = copy.deepcopy(curated)
+        record = next(r for r in changed["records"] if r["id"] == "rule:game-modes")
+        record["facts"]["gameSetupTable"]["rows"][index][field] = value
+        with pytest.raises(ValueError, match="Published Game Modes rows"):
+            audit_published_game_setup(chart, setup, changed)
+    changed = copy.deepcopy(curated)
+    record = next(r for r in changed["records"] if r["id"] == "rule:game-modes")
+    record["facts"]["gameSetupTable"]["scope"] = "mandatory-scenario"
+    with pytest.raises(ValueError, match="advisory scope"):
+        audit_published_game_setup(chart, setup, changed)
+
+
+def test_curated_game_setup_table_rejects_malformed_rows(tmp_path) -> None:
+    source = MANIFEST.parents[2] / "data/curated/rules/n5-core-v5.3.json"
+    curated = load_curated_document(source)
+    for mutation in ("missing-row", "swc-boolean", "wrong-rounding",
+                     "missing-dimensions", "unknown-column", "wrong-scope"):
+        changed = copy.deepcopy(curated)
+        record = next(r for r in changed["records"] if r["id"] == "rule:game-modes")
+        table = record["facts"]["gameSetupTable"]
+        if mutation == "missing-row":
+            table["rows"].pop()
+        elif mutation == "swc-boolean":
+            table["rows"][0]["baseSwc"] = True
+        elif mutation == "wrong-rounding":
+            table["rows"][4]["retreatThresholdVictoryPoints"] = 87
+        elif mutation == "missing-dimensions":
+            table["rows"][2]["tableInches"] = [48]
+        elif mutation == "unknown-column":
+            table["rows"][3]["extra"] = "unreviewed"
+        elif mutation == "wrong-scope":
+            table["scope"] = "mandatory"
+        target = tmp_path / f"{mutation}.json"
+        target.write_text(json.dumps(changed), encoding="utf-8")
+        with pytest.raises(ValueError, match="gameSetupTable"):
+            load_curated_document(target)
 
 
 def test_optional_pdf_check_verifies_game_mode_rows() -> None:
@@ -166,9 +222,12 @@ def test_n53_restrictions_chart_six_subjects_and_fourteen_prohibitions() -> None
     assert len(report["curatedSha256"]) == 64
 
 
-def test_n53_seven_non_graph_restrictions_keep_source_scoped_api_and_browser_coverage() -> None:
-    """All seven absent generic edges are represented without invented identities."""
-    from infinity_db.rules_database import RulesDatabase
+def test_n53_seven_non_graph_restrictions_keep_source_scoped_api_and_browser_coverage(
+    tmp_path,
+) -> None:
+    """Test explicit v9 Restrictions without assuming tracked release schema v9."""
+    from infinity_db.curated import load_curated_directory
+    from infinity_db.rules_database import RulesDatabase, export_rules_database
     from tools.audit_restrictions_source_chart import ROOT
 
     manifest, records = _restriction_inputs()
@@ -195,7 +254,14 @@ def test_n53_seven_non_graph_restrictions_keep_source_scoped_api_and_browser_cov
         for row in published["rows"]
         for condition in row["conditions"]
     }
-    database = RulesDatabase(ROOT / "data/generated/rules.db")
+    # The tracked baseline is v8; exercise the explicitly reviewed v9 schema
+    # rather than treating a v8 compatibility response as a missing source row.
+    staged = tmp_path / "rules-v9.db"
+    export_rules_database(
+        load_curated_directory(ROOT / "data/curated/rules"), staged,
+        restrictions_manifest=manifest,
+    )
+    database = RulesDatabase(staged)
     database.validate()
     api = database.restrictions_payload()
     assert api["available"] is True

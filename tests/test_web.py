@@ -4838,11 +4838,12 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 28
+    assert len(general_rules) == 29
     assert general_rules["initiative-roll"]["name"] == "Initiative Roll"
     assert general_rules["combat-group"]["name"] == "Combat Group"
     assert general_rules["army-retreat"]["name"] == "Army Retreat!"
     assert general_rules["standard-game"]["name"] == "Standard Game"
+    assert general_rules["game-modes"]["name"] == "Game Modes"
     assert general_rules["specialist-troops-standard"]["name"] == "Specialist Troops"
     assert general_rules["modifiers-explained"]["name"] == "Modifiers Explained (MODs)"
     assert general_rules["deployment-phase"]["name"] == "Deployment Phase"
@@ -5401,6 +5402,43 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     status, _, body = request(app, "/api/search", query="q=alpha&q=beta")
     assert status == 400
     assert json.loads(body)["error"] == "Provide q exactly once"
+
+
+def test_game_modes_recommended_setup_is_public_and_searchable(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    for query in ("Game Modes", "Game"):
+        status, _, body = request(
+            rules_app, "/api/search", query=urlencode({"q": query}),
+        )
+        assert status == 200
+        assert {"domain": "General rule", "name": "Game Modes",
+                "href": "/rules/game-modes"} in json.loads(body)["items"]
+    status, _, body = request(rules_app, "/api/rules/game-modes")
+    assert status == 200
+    record = json.loads(body)["rules"][0]
+    assert record["id"] == "rule:game-modes"
+    assert record["facts"]["category"] == "basic-rule"
+    table = record["facts"]["gameSetupTable"]
+    assert table["scope"] == "recommended-general-setup-with-independent-retreat-thresholds"
+    assert len(table["rows"]) == 6
+    assert [
+        (r["armyPoints"], r["baseSwc"], r["retreatThresholdVictoryPoints"])
+        for r in table["rows"]
+    ] == [(150, 3, 38), (200, 4, 50), (250, 5, 63),
+          (300, 6, 75), (350, 7, 88), (400, 8, 100)]
+    assert [c["page"] for c in record["citations"]] == [6, 146, 147]
+    assert "scenario" in " ".join(record["facts"]["restrictions"])
+    assert "minutes" in record["summary"]
+    assert any(t.get("target") == "rule:army-retreat" and t.get("public_reference")
+               for t in record["summary_tokens"])
+    status, _, body = request(rules_app, "/rules/game-modes")
+    assert status == 200
+    assert b'id="item-content"' in body
 
 
 def test_army_retreat_and_standard_game_are_source_scoped_and_routable(

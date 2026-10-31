@@ -12,11 +12,13 @@ import json
 from pathlib import Path
 from typing import Any
 
+from infinity_db.curated import load_curated_document
 from tools.audit_standard_game_reference_tables import MANIFEST as SETUP_MANIFEST
 
 ROOT = Path(__file__).resolve().parents[1]
 PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
 MANIFEST = ROOT / "config/validation/game-mode-source-table.json"
+CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 PINNED = (
     ("Beginner Games", 150, 3, (24, 32), (8, 24), 40),
     ("Raid Games", 200, 4, (32, 48), (8, 32), 50),
@@ -99,6 +101,41 @@ def audit_game_mode_source(
         "swcScope": CLASSIFICATION["swc"],
         "rows": rows,
     }
+
+
+def audit_published_game_setup(
+    chart: dict[str, Any], setup: dict[str, Any], curated: dict[str, Any],
+) -> dict[str, Any]:
+    """Verify the public Game Modes reference exactly matches two source inventories."""
+    items = [r for r in curated["records"] if r["id"] == "rule:game-modes"]
+    if len(items) != 1:
+        raise ValueError("Exactly one reviewed public Game Modes reference is required")
+    record = items[0]
+    if (record["kind"] != "rule"
+            or record["review"]["status"] != "reviewed"
+            or {(c["sourceId"], c.get("page")) for c in record["citations"]} != {
+                ("n5-core-v5.3-pdf", 6),
+                ("n5-core-v5.3-pdf", 146),
+                ("n5-core-v5.3-pdf", 147),
+            }):
+        raise ValueError("Published Game Modes source scope or citations drift")
+    facts = record["facts"]
+    table = facts["gameSetupTable"]
+    if table["scope"] != "recommended-general-setup-with-independent-retreat-thresholds":
+        raise ValueError("Published Game Modes advisory scope drift")
+    expected = [
+        {
+            "name": mode["name"], "armyPoints": mode["armyPoints"],
+            "baseSwc": mode["swc"], "tableInches": mode["tableInches"],
+            "deploymentZoneInches": mode["deploymentZoneInches"],
+            "durationMinutes": mode["durationMinutes"],
+            "retreatThresholdVictoryPoints": independent["retreatThresholdVictoryPoints"],
+        }
+        for mode, independent in zip(chart["rows"], setup["rows"], strict=True)
+    ]
+    if table["rows"] != expected:
+        raise ValueError("Published Game Modes rows diverge from source manifests")
+    return {"publicRuleId": record["id"], "publishedRowCount": len(expected)}
 
 
 def verify_pinned_pdf(path: Path, manifest: dict[str, Any]) -> str:
@@ -189,9 +226,12 @@ def audit_source_files(
     raw = manifest_path.read_bytes()
     setup_raw = setup_path.read_bytes()
     manifest = json.loads(raw)
-    report = audit_game_mode_source(manifest, json.loads(setup_raw))
+    setup = json.loads(setup_raw)
+    report = audit_game_mode_source(manifest, setup)
+    published = audit_published_game_setup(manifest, setup, load_curated_document(CURATED))
     return {
         **report,
+        **published,
         "gameModesSha256": hashlib.sha256(raw).hexdigest(),
         "independentSetupSha256": hashlib.sha256(setup_raw).hexdigest(),
         "verifiedPdfSha256": verify_pinned_pdf(pdf_path, manifest) if pdf_path else None,

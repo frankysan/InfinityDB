@@ -172,6 +172,26 @@ applicable; these cases do not turn covered components into Normal.
 Do not generalize this finite reference set to a Weapon/target evaluator
 or Comms Attacks. See [rules semantics](../../docs/rules-semantics.md#rs-aw-imm-001--immunity-changes-covered-effects-not-the-attack-identity).
 
+### General game-setup source table
+
+Only `rule:game-modes` owns the optional closed
+`facts.gameSetupTable` reference structure. It has scope
+`recommended-general-setup-with-independent-retreat-thresholds` and
+exactly six ordered `rows` with mode name, `armyPoints`, `baseSwc`,
+`tableInches`, `deploymentZoneInches`, `durationMinutes` and
+`retreatThresholdVictoryPoints`. Values use integer inches/minutes/points;
+dimensions have two positive components. The curated loader validates
+shape and basic relationships; `tools.audit_game_mode_source_table`
+checks every published value, source citation and advisory classification
+against the independently reviewed N5.3 pp. 6, 146 and 147 manifests.
+
+This is one published General Rule, not new scenario entities, Unit
+attributes, list-legality evaluation or a live Retreat! threshold
+calculator. The table UI uses the standard horizontally scrollable
+reference-table component; the source text explicitly preserves scenario
+overrides and the distinction between recommended duration and Game
+Round count.
+
 ### Explaining rules interactions
 
 **Accepted authoring and review standard, not a new JSON schema or a rules engine.**

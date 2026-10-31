@@ -2087,22 +2087,25 @@ missing explanations: the existing shared-effects approvals must be reconciled.
               positions and consistency with the separate source
               manifests. Game Modes are recommendations, not
               mandatory scenario or Unit Profile rules.
-            - [x] Decide the immediate general-reference boundary:
-              retain **source-reviewed manifest-only data** for Game
-              Modes, Retreat! thresholds and generic table guidance
-              until a unified general-reference presentation contract
-              is designed. Do not duplicate these rows into a
-              scenario, Unit, Army, or deployed-object identity, or
-              treat advisory setup dimensions as scenario rules.
-            - [ ] Publish the **general game-setup reference** required by
+            - [x] Decide the initial general-reference boundary:
+              source-reviewed manifests remain independent evidence
+              rather than scenario, Unit, Army, or deployed-object data.
+              The later V1-A04 work published one reviewed General Rules
+              owner with a structured table, preserving this boundary
+              and rejecting drift against both original manifests.
+            - [x] Publish the **general game-setup reference** required by
               the 1.0 player-useful-data gate
               ([V1-A04](v1.0-source-coverage-audit.md#v1-a04--general-setup-tables-stop-at-audit-manifests)).
-              The six reviewed Game Modes and Retreat!/table-guidance rows
-              currently stop at audit manifests. Model them once, expose normal
-              navigation/API/browser access, identify recommendations and
-              scenario overrides, and keep session/Retreat! computation outside
-              static Unit data. Reuse the army-level Retreat source slice above;
-              a specialized setup tool is not required.
+              The six Game Modes rows now have one closed, reviewed
+              `rule:game-modes` source owner with all seven columns
+              (mode, Army Points, base SWC, recommended table and Deployment
+              Zone, estimated minutes, and independently reviewed Retreat!
+              thresholds). The audit cross-checks every public row against
+              both pinned source manifests; the normal `/rules/game-modes`
+              page, API/search and Chromium at 1440/390/320 px pass. Table
+              dimensions remain advisory and never override scenario geometry;
+              Army/session thresholds remain outside Unit attributes.
+              A matched rules DB/publication pair was refreshed with rollback.
             - [x] Reconcile the **N5.3 Silhouette Templates** table
               (p. 18) against the existing browser diagram geometry.
               The PDF pins **ten source rows** (SX, S0–S8); all eight

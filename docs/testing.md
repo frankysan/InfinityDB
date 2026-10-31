@@ -2342,11 +2342,16 @@ Retreat!/table-size manifest. Optional local-PDF verification checks
 the printed p. 6 headings and source words, uses positional cell
 alignment for Army Points/SWC/minutes and the table/Deployment
 dimensions, and reports its PDF SHA-256. The ignored PDF is not
-required by CI. No runtime entities or scenario overrides are added;
-the generic recommended setup is deliberately kept in reviewed
-source inventories pending a unified player-facing reference
-design. `tests/test_game_mode_source_table.py` includes source and
-failure-path coverage.
+required by CI. The reviewed `rule:game-modes` definition now publishes
+these six rows at `/rules/game-modes` and `/api/rules/game-modes`, using
+`facts.gameSetupTable.rows` as the structured normal-player source.
+The audit compares **every published value** to both pinned manifests
+and fails closed on changed data, source pages or advisory scope.
+The browser uses the shared horizontally scrollable reference-table
+primitive. Normal player search reaches the same record. Scenarios,
+Army List legality, Unit attributes, and live session state remain
+separate. `tests/test_game_mode_source_table.py` includes source,
+publication and negative-drift coverage.
 
 ### Independent Retreat! and generic game-setup source tables
 

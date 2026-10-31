@@ -49,6 +49,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Publish the six N5.3
+  Game Modes as one browsable, source-reviewed General Rules table.
+  Show Army Points, base SWC, recommended table/Deployment Zone sizes,
+  estimated minutes and independent Retreat! thresholds; validate every
+  row against both pinned manifests. Keep advisory setup separate from
+  scenario rules and army-session conditions.
 - **Data processing + Web backend:** Add source-scoped, bidirectional
   Isolated State links for Fireteam membership and Coordinated Order
   participation. Preserve the distinct Leader/member consequences, reuse

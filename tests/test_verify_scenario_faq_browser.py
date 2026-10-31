@@ -57,6 +57,53 @@ def chrome() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width", [1440, 390, 320])
+def test_game_modes_source_table_normal_reference_navigation(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1-A04: published source rows and advisory boundary in normal browser."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        link = page.locator('#catalog-list a[href="/rules/game-modes"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.click()
+        page.wait_for_url(f"{ORIGIN}/rules/game-modes", timeout=30000)
+        rule = page.locator("#rule-rule-game-modes")
+        rule.wait_for(state="visible", timeout=30000)
+        table = rule.locator(
+            "table[aria-label='Recommended Game Modes and source Retreat thresholds']"
+        )
+        table.wait_for(state="visible", timeout=30000)
+        assert table.locator("thead th").count() == 7
+        assert table.locator("tbody tr").count() == 6
+        first = table.locator("tbody tr").first.locator("th,td")
+        last = table.locator("tbody tr").last.locator("th,td")
+        assert [cell.inner_text() for cell in first.all()] == [
+            "Beginner Games", "150", "3", "24 × 32", "8 × 24", "40", "38",
+        ]
+        assert [cell.inner_text() for cell in last.all()] == [
+            "Large-Scale Games", "400", "8", "48 × 48", "12 × 48", "120", "100",
+        ]
+        assert "not mandatory scenario rules" in rule.inner_text().lower()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
+        scroll = rule.locator(".table-viewport")
+        assert scroll.evaluate("(el) => el.scrollWidth >= el.clientWidth")
+        target = rule.locator('a[href="/rules/army-retreat"]').first
+        target.wait_for(state="visible")
+        target.focus()
+        target.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/army-retreat")
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390, 320])
 @pytest.mark.parametrize(
     ("slug", "target", "expected"),
     [

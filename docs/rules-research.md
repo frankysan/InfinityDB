@@ -242,9 +242,10 @@ The Basic Rules publish named Game Modes with recommended table size, Deployment
 Zone, Army Points, SWC, and expected duration. The current N5.3 set is Beginner,
 Raid, Intermediate, Standard, Magnum/Reinforcements, and Large-scale.
 
-This may later support scenario/setup reference pages or saved-list defaults, but
-InfinityDB currently does not model game setup as a domain. Do not promote these
-presets into Army identity or list legality; missions, scenarios, events, and
+A source-reviewed General Rules reference now publishes these six presets
+at `/rules/game-modes`, with independent Retreat! thresholds from N5.3 p. 146
+and advisory table sizes from p. 147. This is **not** an Army identity,
+roster legality rule, or live setup tool; missions, scenarios, events, and
 player agreement can establish their own list size and setup.
 
 Sources:

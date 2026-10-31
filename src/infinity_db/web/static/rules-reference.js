@@ -194,6 +194,52 @@ function appendRuleFactGroup(container, rule, key, label) {
   container.append(group);
 }
 
+function appendGameSetupTable(container, rule) {
+  if (rule.id !== "rule:game-modes") return;
+  const setup = rule.facts?.gameSetupTable;
+  if (!Array.isArray(setup?.rows)) return;
+  const group = document.createElement("section");
+  group.className = "detail-fact-group game-setup-reference";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = "N5.3 recommended Game Modes and Retreat! thresholds";
+  const guidance = document.createElement("p");
+  guidance.className = "detail-copy";
+  guidance.textContent = "Table and Deployment Zone dimensions are in inches per player; duration is an estimate in minutes. Retreat! thresholds are army-level game conditions, not recommendations.";
+  const table = document.createElement("table");
+  table.className = "data-table--reference";
+  table.setAttribute("aria-label", "Recommended Game Modes and source Retreat thresholds");
+  const head = document.createElement("thead");
+  const headers = ["Game mode", "Army points", "Base SWC", "Table (in)", "Deployment Zone (in)", "Duration (min)", "Retreat! at or below (VP)"];
+  const headingRow = document.createElement("tr");
+  for (const label of headers) {
+    const th = document.createElement("th");
+    th.scope = "col";
+    th.textContent = label;
+    headingRow.append(th);
+  }
+  head.append(headingRow);
+  const body = document.createElement("tbody");
+  for (const mode of setup.rows) {
+    const row = document.createElement("tr");
+    const cells = [
+      mode.name, mode.armyPoints, mode.baseSwc,
+      mode.tableInches.join(" × "), mode.deploymentZoneInches.join(" × "),
+      mode.durationMinutes, mode.retreatThresholdVictoryPoints,
+    ];
+    for (const [index, value] of cells.entries()) {
+      const cell = document.createElement(index === 0 ? "th" : "td");
+      if (index === 0) cell.scope = "row";
+      cell.textContent = String(value);
+      row.append(cell);
+    }
+    body.append(row);
+  }
+  table.append(head, body);
+  group.append(heading, guidance, tableViewport(table));
+  container.append(group);
+}
+
 function appendAmmunitionFacts(container, rule) {
   if (rule.kind !== "ammunition") return;
   const states = new Map((rule.display_relations || [])
@@ -318,6 +364,7 @@ function appendRuleDetails(
   const facts = rule.facts || {};
   appendRuleFactGroup(container, rule, "requirements", "Requirements");
   appendRuleFactGroup(container, rule, "effects", "Effects");
+  appendGameSetupTable(container, rule);
   appendAmmunitionFacts(container, rule);
 
   const specialists = facts.specialists?.anyOfSkills;

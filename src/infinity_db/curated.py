@@ -1509,6 +1509,39 @@ def _validate_fireteam_level_facts(facts: object, context: str) -> None:
             )
 
 
+def _validate_game_setup_table(value: object, context: str) -> None:
+    """Closed, non-executable N5.3 general setup reference table."""
+    if not isinstance(value, dict) or set(value) != {"scope", "rows"}:
+        raise ValueError(f"{context}: expected scope and rows")
+    if value["scope"] != "recommended-general-setup-with-independent-retreat-thresholds":
+        raise ValueError(f"{context}: unsupported game setup scope")
+    rows = value["rows"]
+    if not isinstance(rows, list) or len(rows) != 6:
+        raise ValueError(f"{context}: expected six reviewed Game Modes")
+    expected_points = (150, 200, 250, 300, 350, 400)
+    for index, (row, points) in enumerate(zip(rows, expected_points, strict=True)):
+        row_context = f"{context}.rows[{index}]"
+        if not isinstance(row, dict) or set(row) != {
+            "name", "armyPoints", "baseSwc", "tableInches",
+            "deploymentZoneInches", "durationMinutes", "retreatThresholdVictoryPoints",
+        }:
+            raise ValueError(f"{row_context}: invalid game setup row schema")
+        if not isinstance(row["name"], str) or not row["name"].strip():
+            raise ValueError(f"{row_context}: missing game mode name")
+        for field in ("armyPoints", "baseSwc", "durationMinutes",
+                      "retreatThresholdVictoryPoints"):
+            if type(row[field]) is not int or row[field] <= 0:
+                raise ValueError(f"{row_context}.{field}: must be a positive integer")
+        if (row["armyPoints"] != points or row["baseSwc"] * 50 != points
+                or row["retreatThresholdVictoryPoints"] != (points + 3) // 4):
+            raise ValueError(f"{row_context}: point/SWC/Retreat threshold mismatch")
+        for field in ("tableInches", "deploymentZoneInches"):
+            dimensions = row[field]
+            if (not isinstance(dimensions, list) or len(dimensions) != 2
+                    or any(type(d) is not int or d <= 0 for d in dimensions)):
+                raise ValueError(f"{row_context}.{field}: expected two positive inches")
+
+
 def load_curated_document(path: Path) -> dict[str, Any]:
     """Load and validate one curated JSON document.
 
@@ -1792,6 +1825,17 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 raise ValueError(
                     f"{context}: Equipment supplements must not redefine declaration types"
                 )
+        if (record.get("facts") or {}).get("gameSetupTable") is not None:
+            if record["id"] != "rule:game-modes" or record["kind"] != "rule":
+                raise ValueError(f"{context}: only Game Modes may own gameSetupTable")
+            _validate_game_setup_table(
+                record["facts"]["gameSetupTable"], f"{context}.facts.gameSetupTable"
+            )
+        if record["id"] == "rule:game-modes" and (
+            not isinstance(record.get("facts"), dict)
+            or "gameSetupTable" not in record["facts"]
+        ):
+            raise ValueError(f"{context}: Game Modes requires gameSetupTable")
         if record["kind"] == "rule":
             facts = record.get("facts")
             if isinstance(facts, dict):
