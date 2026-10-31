@@ -1447,6 +1447,7 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
     assert [case["when"]["weaponId"] for case in reviewed] == [
         "weapon:flash-pulse", "weapon:e-mitter",
         "weapon:missile-launcher", "weapon:monofilament-cc-weapon",
+        "weapon:e-m-grenade-launcher",
     ]
     assert reviewed[0] == {
             "when": {

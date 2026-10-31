@@ -63,6 +63,7 @@
         "test_immunity_combined_saving_roll_example",
         "test_immunity_bts_em_cc",
         "test_immunity_bts_emitter",
+        "test_immunity_bts_em_grenade_launcher",
         "test_immunity_ap_silenced_pistol",
         "test_immunity_ap_t2_cc",
         "test_immunity_monofilament_example",

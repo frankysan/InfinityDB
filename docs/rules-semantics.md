@@ -2759,14 +2759,35 @@ rule-derived conditional reference, not a fifth printed
 Immunity example or a generic attack engine. The source
 Army profile and component identity remain unchanged.
 
-The Skill reference now presents **fifteen reviewed
-interactions**: six Combined Ammunition cases, four
+**E/M Grenade Launcher versus Immunity (BTS)** adds
+another strictly source-derived, *non-Comms* E/M
+Weapon case. N5.3 p. 179 shows the E/M Grenade
+Launcher with BTS/2 × 2, Non-Lethal, Speculative
+Attack and Circular Impact Template; p. 64 defines
+the Isolated and conditional Immobilized-B effects
+of E/M, and pp. 95–96 define the Immunity exceptions.
+For this exact attack, Immunity (BTS) treats E/M as
+Normal, reducing two BTS/2 rolls to **one full-BTS
+Saving Roll** (three to two on Critical absent
+Immunity (Critical)). The E/M State effects are
+ignored; the expressly exempt **Non-Lethal**
+Trait persists and prevents Wounds. Circular
+Impact Template and Speculative Attack remain
+independent source Traits: this Immunity reference
+does not adjudicate template placement or attack
+mechanics. This does not extend to Comms Attacks,
+all E/M Weapons, or the unresolved Armed Turret
+E/Mitter profile. The Army Weapon profile stays
+unchanged and no attack outcome is calculated.
+
+The Skill reference now presents **sixteen reviewed
+interactions**: six Combined Ammunition cases, five
 exact Weapon cases (Flash Pulse, E/Mitter, Missile
-Launcher Blast, Monofilament), two Plasma Combined
-Saving Roll cases, two exact Critical cases (AP+T2
-and AP+DA CC Weapons), and one Vulnerability example.
-Chromium acceptance at 1440/390/320 px verifies the
-fifteenth source-scoped case and its semantic links.
+Launcher Blast, Monofilament, E/M Grenade Launcher),
+two Plasma Combined Saving Roll cases, two exact
+Critical cases (AP+T2 and AP+DA CC Weapons), and
+one Vulnerability example. Chromium acceptance at
+1440/390/320 px verifies the sixteenth case and links.
 Other component-specific Immunities, BTS-based attacks, Comms Attack
 rules and conditional State interactions remain unresolved. Do not
 extrapolate an evaluator or project outcomes into Weapon profiles.

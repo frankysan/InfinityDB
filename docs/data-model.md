@@ -450,7 +450,18 @@ ARM survive; Anti-materiel is separate. The case is
 independent of both AP+T2's T2 Wound consequences and
 Immunity (ARM)/(AP) component effects. The original
 Weapon profile remains unchanged.
-The fifteen reviewed interactions are curated
+The fifth exact `reviewedWeaponCases` entry records
+the source-defined E/M Grenade Launcher against
+Immunity (BTS): source Ammunition 14 E/M, BTS/2
+× 2, Non-Lethal and separately listed Circular
+Impact Template/Speculative Attack Traits. A
+non-Comms hit becomes one full-BTS Saving Roll
+(two on Critical absent Immunity (Critical)),
+ignoring the E/M State effects while retaining
+Non-Lethal. The separate attack/template Traits
+remain visible but are not resolved; source
+Weapon fields and Comms mechanics are unchanged.
+The sixteen reviewed interactions are curated
 references, not a runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms

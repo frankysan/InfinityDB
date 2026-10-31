@@ -53,7 +53,7 @@ def test_printed_plasma_case_has_separate_normal_reference_without_overflow(
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         rows = page.locator(".immunity-reviewed-cases li")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         plasma = rows.filter(has_text="Immunity (Enhanced) vs Plasma Rifle")
@@ -85,7 +85,7 @@ def test_n53_bts_immunity_em_cc_weapon_is_exact_and_source_scoped(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -120,7 +120,7 @@ def test_standalone_emitter_immunity_keeps_nonlethal_and_turret_warning(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         rows = page.locator(".immunity-reviewed-cases li")
@@ -157,7 +157,7 @@ def test_silenced_pistol_ap_immunity_preserves_shock_bts_and_silent(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -197,7 +197,7 @@ def test_ap_t2_cc_immunity_keeps_two_wound_hit_and_one_wound_critical(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -238,7 +238,7 @@ def test_printed_monofilament_immunity_ignores_dead_trait_not_normal_wounds(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -278,7 +278,7 @@ def test_printed_missile_blast_immunity_does_not_merge_hit_mode(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -319,7 +319,7 @@ def test_printed_flash_pulse_example_4_has_pdf_provenance_and_stun_exception(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -356,7 +356,7 @@ def test_plasma_critical_immunity_removes_only_extra_arm_roll(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -392,7 +392,7 @@ def test_t2_critical_immunity_preserves_hit_and_suppresses_only_extra_roll(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -432,7 +432,7 @@ def test_ap_da_cc_critical_immunity_retains_both_da_rolls_and_arm_halving(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 15",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
             timeout=20000,
         )
         reviewed = page.locator(".immunity-reviewed-cases li").filter(
@@ -452,6 +452,49 @@ def test_ap_da_cc_critical_immunity_retains_both_da_rolls_and_arm_halving(
         assert reviewed.locator('a[href="/ammunition/ap"]').count() == 1
         assert reviewed.locator('a[href="/ammunition/da"]').count() == 1
         assert reviewed.locator('a[href="/traits/anti-materiel"]').count() == 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width,height", [
+    (1440, 900), (390, 844), (320, 640),
+])
+def test_em_grenade_bts_immunity_preserves_nonlethal_without_comms_leak(
+    app: Any, browser: Any, width: int, height: int,
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 16",
+            timeout=20000,
+        )
+        reviewed = page.locator(".immunity-reviewed-cases li").filter(
+            has_text="Immunity (BTS) vs E/M Grenade Launcher"
+        )
+        assert reviewed.count() == 1
+        detail = reviewed.inner_text()
+        assert "2 Saving Rolls on a hit (3 on a Critical) using BTS/2" in detail
+        assert "1 Saving Roll on a hit (2 on a Critical) using full BTS" in detail
+        assert "Isolated and conditional Immobilized-B State effects are ignored" in detail
+        assert "Non-Lethal still applies, preventing Wounds" in detail
+        assert "Circular Impact Template" in detail
+        assert "Speculative Attack" in detail
+        assert "not Comms Attacks or arbitrary E/M weapons" in detail
+        assert "Derived from reviewed general rules" in detail
+        for href in (
+            "/weapons/e-m-grenade-launcher", "/ammunition/em",
+            "/ammunition/normal", "/traits/non-lethal",
+            "/traits/impact-template", "/traits/speculative-attack",
+        ):
+            assert reviewed.locator(f'a[href="{href}"]').count() == 1
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         )

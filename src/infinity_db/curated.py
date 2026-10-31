@@ -763,6 +763,27 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
             },
             "evidence": "explicit-n5.3-pdf-p96-example-2",
         },
+        {
+            "when": {
+                "weaponId": "weapon:e-m-grenade-launcher",
+                "sourceAmmunitionId": 14,
+                "immunity": "BTS",
+                "savingAttribute": "BTS",
+                "attackClass": "non-comms",
+            },
+            "ammunitionTreatedAs": "ammunition:normal",
+            "survivingTraits": ["trait:non-lethal"],
+            "sourceProfileTraits": [
+                "trait:impact-template", "trait:speculative-attack",
+            ],
+            "withoutImmunity": {
+                "hitRolls": 2, "criticalRolls": 3, "savingAttribute": "BTS/2",
+            },
+            "withImmunity": {
+                "hitRolls": 1, "criticalRolls": 2, "savingAttribute": "BTS",
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
     ]:
         raise ValueError(f"{context}: unsupported reviewed Weapon Immunity examples")
     # The pinned Vulnerability example names a *weapon*, not just an

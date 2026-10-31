@@ -4148,6 +4148,26 @@ rule records. The full suite has 62 cases; all 11 base and five combined source
 identities are represented without inferred attack rules or a database rebuild.
 Future Weapon comparison views remain out of scope.
 
+**E/M Grenade Launcher / Immunity (BTS), 2026-10-31:**
+`tests/test_immunity_bts_em_grenade_launcher.py`
+pins N5.3 pp. 64, 95–96 and 179 and independently
+checks the exact non-Comms, Non-Lethal source
+E/M Weapon profile (BTS/2 × 2) and source
+Ammunition ID 14. It verifies the fifth fixed
+`reviewedWeaponCases` record through curated
+data, `rules.db` and the Skill API without
+modifying Weapon source Saving Rolls or
+interpreting template placement. Fail-closed
+schema mutations reject an altered Weapon,
+Comms classification, source ID, roll
+counts/attribute, independent Traits and
+source evidence. Renderer and Chromium checks
+at 1440/390/320 px cover the sixteenth reviewed
+card, conditional State suppression,
+Non-Lethal exemption and semantic links.
+Coordinated DB/publication promotion preserves
+17 reviewed deployed objects and rollback backup.
+
 **AP+DA CC Weapon / Immunity (Critical), 2026-10-31:**
 `tests/test_immunity_ap_da_critical.py` pins N5.3
 pp. 67, 95 and 177 and Army source Ammunition

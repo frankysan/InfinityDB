@@ -4994,6 +4994,26 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
         (lambda f: f["reviewedWeaponCases"][3].update(
             evidence="derived-from-pinned-general-rules"),
             "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][4]["when"].update(
+            weaponId="weapon:e-m-cc-weapon"),
+            "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][4]["when"].update(
+            sourceAmmunitionId=5), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][4]["when"].update(
+            attackClass="comms"), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][4].update(
+            survivingTraits=[]), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][4]["sourceProfileTraits"].reverse(),
+            "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][4]["withoutImmunity"].update(
+            criticalRolls=2), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][4]["withImmunity"].update(
+            savingAttribute="ARM"), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][4]["withImmunity"].update(
+            hitRolls=2), "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][4].update(
+            evidence="explicit-pinned-wiki-example"),
+            "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][0].update(
             evidence="explicit-pinned-wiki-example"),
             "reviewed Weapon Immunity examples"),

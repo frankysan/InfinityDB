@@ -119,6 +119,24 @@ export function immunityCaseRows(facts = {}) {
         ],
         evidence: evidence(item.evidence),
       });
+    } else if (item.when.weaponId === "weapon:e-m-grenade-launcher") {
+      rows.push({
+        title: [text("Immunity (BTS) vs "),
+          reference(item.when.weaponId, "E/M Grenade Launcher")],
+        detail: [
+          text(`The source's ${counts(item.withoutImmunity)} using ${item.withoutImmunity.savingAttribute} `),
+          text(`become ${counts(item.withImmunity)} using full ${item.withImmunity.savingAttribute}. `),
+          reference("ammunition:em", "E/M"), text(" is treated as "),
+          reference(item.ammunitionTreatedAs, "Normal"),
+          text(", so the E/M Isolated and conditional Immobilized-B State effects are ignored. "),
+          reference("trait:non-lethal", "Non-Lethal"),
+          text(" still applies, preventing Wounds. The listed "),
+          reference("trait:impact-template", "Circular Impact Template"),
+          text(" and "), reference("trait:speculative-attack", "Speculative Attack"),
+          text(" are separate Weapon Traits; this example does not adjudicate template or attack mechanics. Only the exact non-Comms E/M Grenade Launcher is reviewed, not Comms Attacks or arbitrary E/M weapons."),
+        ],
+        evidence: evidence(item.evidence),
+      });
     }
   }
   for (const item of cases.reviewedVulnerabilityCases || []) {

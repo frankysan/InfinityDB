@@ -1081,10 +1081,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         example identities, Skill API, renderer and Chromium labels;
         promote the synchronized rules/publication pair without
         changing any of the 17 reviewed deployed objects.
+      - [x] Add exact **E/M Grenade Launcher versus Immunity (BTS)**
+        source-derived case from N5.3 pp. 64, 95–96 and 179.
+        The non-Comms E/M source profile uses BTS/2 × 2
+        (three rolls on Critical); covered E/M becomes Normal
+        with one full-BTS roll (two on Critical without
+        Immunity (Critical)). Isolated and conditional
+        Immobilized-B effects are ignored; Non-Lethal remains,
+        so no Wounds. Source-listed Circular Impact Template
+        and Speculative Attack remain independent Traits, not
+        adjudicated by the immunity reference. Preserve the
+        Army Weapon profile, cite source ID 14, gate with
+        fail-closed schema mutations, public API and
+        1440/390/320 Chromium. Promote synchronized
+        rules/publication with backup, retaining 17 objects.
       - [ ] Review other BTS-component Immunity outcomes using exact
-        non-Comms Weapon/combined-Ammunition evidence. The four
-        reviewed BTS-based examples do not authorize generic E/M,
-        Comms Attack or arbitrary combined-effect adjudication.
+        non-Comms Weapon/combined-Ammunition evidence. The reviewed
+        cases do not authorize generic E/M, Comms Attack or
+        arbitrary combined-effect adjudication.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view
