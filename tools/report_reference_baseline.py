@@ -1539,8 +1539,8 @@ def reconcile_explanation_inventory(
             "from actual source headings; matching category/page labels are not rename proof",
             "Review current added records against their owning source clauses, later "
             "curation and exception evidence; existing reviewed status is not full approval",
-            "Resolve remaining historical screening-only identities, including numerical "
-            "attribute-replacement variants",
+            "Resolve remaining historical screening-only identities and their material "
+            "mechanics; numerical source-value evidence is separately scoped",
             "Assign each source section a signed-off clause and normal-browser disposition; "
             "same-page citations are only locator evidence",
         ],
@@ -1784,6 +1784,130 @@ def verify_declaration_review(
     }
 
 
+NUMERIC_ARMY_VARIANTS = {
+    279: ("skill:bs-11", "BS=11", "BS", 11, "skill:bs-attack", 39),
+    278: ("skill:bs-12", "BS=12", "BS", 12, "skill:bs-attack", 39),
+    274: ("skill:cc-21", "CC=21", "CC", 21, "skill:cc-attack", 51),
+}
+NUMERIC_ARMY_SNAPSHOT_SHA256 = (
+    "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75"
+)
+
+
+def audit_numeric_army_replacement_variants(
+    archive_path: Path, curated_path: Path = CURRENT_EXPLANATION_COLLECTIONS[0],
+) -> dict[str, Any]:
+    """Read-only exact Army source occurrence audit; no profile stat rewriting."""
+    import zipfile
+
+    from infinity_db.curated import load_curated_document
+
+    if _sha256(archive_path) != NUMERIC_ARMY_SNAPSHOT_SHA256:
+        raise ReferenceBaselineError("Pinned Army ZIP does not match numeric-variant source")
+    document = load_curated_document(curated_path)
+    records = {record["id"]: record for record in document["records"]}
+    expected_counts = {279: 2, 278: 9, 274: 6}
+    dictionaries: dict[int, set[str]] = {sid: set() for sid in NUMERIC_ARMY_VARIANTS}
+    occurrences: dict[int, list[dict[str, Any]]] = {
+        sid: [] for sid in NUMERIC_ARMY_VARIANTS
+    }
+    with zipfile.ZipFile(archive_path) as archive:
+        members = sorted(
+            name for name in archive.namelist() if name.endswith(".json")
+        )
+        if len(members) != 59:
+            raise ReferenceBaselineError("Pinned Army ZIP document count changed")
+        for member in members:
+            data = json.loads(archive.read(member))
+            for item in data.get("filters", {}).get("skills", []):
+                sid = item.get("id")
+                if sid in NUMERIC_ARMY_VARIANTS:
+                    dictionaries[sid].add(str(item.get("name")))
+            for unit in data.get("units", []):
+                for group in unit.get("profileGroups", []):
+                    profiles = group.get("profiles", [])
+                    for option in group.get("options", []):
+                        for occurrence in option.get("skills", []):
+                            sid = occurrence.get("id")
+                            if sid not in NUMERIC_ARMY_VARIANTS:
+                                continue
+                            if occurrence.get("q") != 1:
+                                raise ReferenceBaselineError(
+                                    f"Unexpected replacement multiplicity {sid} in {member}"
+                                )
+                            if not profiles:
+                                raise ReferenceBaselineError(
+                                    f"Replacement lacks parent profile in {member}"
+                                )
+                            attribute = NUMERIC_ARMY_VARIANTS[sid][2].lower()
+                            base_values = sorted({
+                                profile.get(attribute) for profile in profiles
+                            })
+                            if any(type(v) is not int for v in base_values):
+                                raise ReferenceBaselineError(
+                                    f"Non-numeric base {attribute} in {member}"
+                                )
+                            occurrences[sid].append({
+                                "sourceFile": member,
+                                "unitId": unit["id"],
+                                "unitName": unit["name"],
+                                "profileGroupId": group["id"],
+                                "optionId": option["id"],
+                                "optionName": option["name"],
+                                "profileBaseValues": base_values,
+                                "replacementAttribute": attribute.upper(),
+                                "sourceVariantQuantity": occurrence["q"],
+                            })
+    result = []
+    for sid, (rid, name, attribute, value, parent, page) in (
+        NUMERIC_ARMY_VARIANTS.items()
+    ):
+        record = records[rid]
+        if (
+            dictionaries[sid] != {name}
+            or record["name"] != name
+            or record.get("armyLinks") != [{"entity": "skill", "id": sid}]
+            or record.get("variantSemantics") != {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "attribute-replacement", "attribute": attribute,
+                    "value": value,
+                },
+            }
+            or record.get("relations") != [
+                {"type": "variant-of", "recordId": parent}
+            ]
+            or record.get("facts", {}).get("typeIds") != ["short-skill", "aro"]
+            or (record["citations"][0].get("sourceId"),
+                record["citations"][0].get("page")) != ("n5-core-v5.3-pdf", page)
+            or (record["citations"][1].get("sourceId"),
+                record["citations"][1].get("page")) != ("n5-core-v5.3-pdf", 75)
+        ):
+            raise ReferenceBaselineError(f"Source variant classification drift: {rid}")
+        if len(occurrences[sid]) != expected_counts[sid]:
+            raise ReferenceBaselineError(
+                f"Army replacement occurrences drift: {rid}="
+                f"{len(occurrences[sid])}, expected {expected_counts[sid]}"
+            )
+        result.append({
+            "id": rid, "armySourceId": sid, "name": name,
+            "baseAttribute": attribute, "replacementValue": value,
+            "sourceActionRule": parent, "rulesPages": [page, 75],
+            "factionFileOccurrences": len(occurrences[sid]),
+            "occurrences": occurrences[sid],
+            "sourceScope": "army-option-skill-not-permanent-profile-stat",
+            "scopeDisposition": "verified-source-variant-and-occurrence-not-broad-mechanics",
+        })
+    return {
+        "status": "pinned-army-numerical-variants-verified",
+        "armyArchiveSha256": NUMERIC_ARMY_SNAPSHOT_SHA256,
+        "variantCount": len(result),
+        "factionFileOccurrenceCount": sum(len(x["occurrences"]) for x in result),
+        "records": result,
+        "fullRecordApprovalsIssued": 0,
+    }
+
+
 def render_explanation_reconciliation(report: dict[str, Any]) -> str:
     """Compact work queue for reviewers, retaining exact IDs in the JSON."""
     lines = [
@@ -1865,6 +1989,35 @@ def render_explanation_reconciliation(report: dict[str, Any]) -> str:
                 f"— {owners}"
             )
         lines.append("")
+    if "numericArmyVariants" in report:
+        evidence = report["numericArmyVariants"]
+        lines.extend([
+            "## Pinned Army numerical Skill variants",
+            "",
+            f"Source: `{evidence['armyArchiveSha256']}`",
+            f"Verified: {evidence['variantCount']} Skill source variants, "
+            f"{evidence['factionFileOccurrenceCount']} faction-file occurrences.",
+            "All are loadout-specific Skills. Base Unit attributes remain unchanged.",
+            "",
+        ])
+        for entry in evidence["records"]:
+            bases = sorted({
+                value for item in entry["occurrences"]
+                for value in item["profileBaseValues"]
+            })
+            lines.append(
+                f"- `{entry['id']}`: {entry['baseAttribute']} = "
+                f"{entry['replacementValue']}, "
+                f"{entry['factionFileOccurrences']} source occurrences "
+                f"(parent profile values {bases}); source "
+                f"`{entry['sourceActionRule']}`"
+            )
+        lines.extend([
+            "",
+            "This is source-identity/occurrence verification, **not** a "
+            "runtime combat calculator or whole-record signoff.",
+            "",
+        ])
     lines.extend([
         "## Remaining acceptance",
         "",
@@ -1901,11 +2054,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--verify-declaration-pdf", type=Path,
         help="Verify the 20 added printed declaration headings against exact N5.3 PDF bytes",
     )
+    parser.add_argument(
+        "--verify-numeric-army-archive", type=Path,
+        help="Audit three source-native numerical replacement Skills in a pinned Army ZIP",
+    )
     args = parser.parse_args(argv)
     if args.reconcile_explanation_inventory:
         if args.verify_declaration_pdf is not None and not args.reconcile_declarations:
             parser.error("--verify-declaration-pdf requires --reconcile-declarations")
         report = reconcile_explanation_inventory()
+        if args.verify_numeric_army_archive is not None:
+            report["numericArmyVariants"] = audit_numeric_army_replacement_variants(
+                args.verify_numeric_army_archive,
+            )
         if args.reconcile_declarations:
             crosswalk = reconcile_declaration_owners(report)
             crosswalk["review"] = verify_declaration_review(
@@ -1926,8 +2087,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{report['sourceSectionCount']} source locators pending clause review"
         )
         return 0
-    if args.reconcile_declarations or args.verify_declaration_pdf is not None:
-        parser.error("declaration flags require --reconcile-explanation-inventory")
+    if (args.reconcile_declarations or args.verify_declaration_pdf is not None
+            or args.verify_numeric_army_archive is not None):
+        parser.error("reconciliation flags require --reconcile-explanation-inventory")
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,
     )

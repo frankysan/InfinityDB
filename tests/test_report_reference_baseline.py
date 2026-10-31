@@ -24,6 +24,7 @@ from tools.report_reference_baseline import (
     _verify_published_profile_extras,
     _verify_published_profile_references,
     _verify_published_unit_options,
+    audit_numeric_army_replacement_variants,
     build_baseline,
     main,
     parse_frozen_explanation_inventory,
@@ -170,6 +171,85 @@ def test_explanation_migration_cli_includes_verified_declaration_owners(
     assert "17 historical retirements" in markdown
     assert "skill `morpho-scan`" in markdown
     assert "No historical aliases or" in markdown
+
+
+def test_numeric_army_source_skill_replacements_do_not_modify_base_profiles() -> None:
+    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    if not archive.is_file():
+        pytest.skip("Pinned private Army source ZIP unavailable")
+    report = audit_numeric_army_replacement_variants(archive)
+    assert report["status"] == "pinned-army-numerical-variants-verified"
+    assert report["variantCount"] == 3
+    assert report["factionFileOccurrenceCount"] == 17
+    assert report["fullRecordApprovalsIssued"] == 0
+    values = {
+        item["id"]: (item["armySourceId"], item["replacementValue"],
+                     item["factionFileOccurrences"])
+        for item in report["records"]
+    }
+    assert values == {
+        "skill:bs-11": (279, 11, 2),
+        "skill:bs-12": (278, 12, 9),
+        "skill:cc-21": (274, 21, 6),
+    }
+    assert all(
+        source["sourceVariantQuantity"] == 1
+        and source["replacementAttribute"] == item["baseAttribute"]
+        and item["replacementValue"] not in source["profileBaseValues"]
+        for item in report["records"] for source in item["occurrences"]
+    )
+    assert {entry["unitName"] for item in report["records"]
+            for entry in item["occurrences"]} >= {
+        "POLARIS TEAM", "STEMPLER ZONDS", "SWISS GUARD",
+    }
+    for item in report["records"]:
+        assert item["sourceScope"] == "army-option-skill-not-permanent-profile-stat"
+        assert item["rulesPages"] in ([39, 75], [51, 75])
+
+
+def test_numeric_army_variants_reject_unverified_source_and_curated_drift(
+    tmp_path: Path,
+) -> None:
+    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    if not archive.is_file():
+        pytest.skip("Pinned private Army source ZIP unavailable")
+    curated = ROOT / "data/curated/rules/n5-core-v5.3.json"
+    document = json.loads(curated.read_text(encoding="utf-8"))
+    record = next(item for item in document["records"] if item["id"] == "skill:bs-12")
+    record["variantSemantics"]["sourceVariant"]["value"] = 13
+    changed = tmp_path / "changed-curated.json"
+    changed.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ReferenceBaselineError, match="variant classification drift"):
+        audit_numeric_army_replacement_variants(archive, curated_path=changed)
+
+    invalid = tmp_path / "changed-army.zip"
+    invalid.write_bytes(archive.read_bytes() + b"extra")
+    with pytest.raises(ReferenceBaselineError, match="Pinned Army ZIP"):
+        audit_numeric_army_replacement_variants(invalid)
+
+
+def test_numeric_army_replacement_cli_preserves_full_record_gate(
+    tmp_path: Path,
+) -> None:
+    archive = ROOT / "data/raw/JSON 20260929-114335.zip"
+    if not archive.is_file():
+        pytest.skip("Pinned private Army source ZIP unavailable")
+    json_output = tmp_path / "numeric.json"
+    markdown_output = tmp_path / "numeric.md"
+    assert main([
+        "--reconcile-explanation-inventory",
+        "--verify-numeric-army-archive", str(archive),
+        "--json-output", str(json_output),
+        "--markdown-output", str(markdown_output),
+    ]) == 0
+    report = json.loads(json_output.read_text(encoding="utf-8"))
+    assert report["numericArmyVariants"]["factionFileOccurrenceCount"] == 17
+    assert report["fullRecordApprovalsIssuedByThisAudit"] == 0
+    assert "fullRecordAcceptance" in report["currentRecords"][0]
+    markdown = markdown_output.read_text(encoding="utf-8")
+    assert "17 faction-file occurrences" in markdown
+    assert "Base Unit attributes remain unchanged" in markdown
+    assert "not a v1.0 release gate pass" in markdown
 
 
 def test_frozen_explanation_parser_rejects_duplicate_and_malformed_rows() -> None:

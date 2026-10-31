@@ -57,6 +57,43 @@ def chrome() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width", [1440, 390, 320])
+@pytest.mark.parametrize(
+    ("slug", "name", "attribute", "value"),
+    [
+        ("bs-attack", "BS Attack", "BS", 11),
+        ("bs-attack", "BS Attack", "BS", 12),
+        ("cc-attack", "CC Attack", "CC", 21),
+    ],
+    ids=["bs11", "bs12", "cc21"],
+)
+def test_numeric_replacement_skill_variants_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    slug: str, name: str, attribute: str, value: int,
+) -> None:
+    """V1-A08: Skill-scoped source replacements remain visible on parent pages."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/skills/{slug}", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        page.locator("#skill-content").wait_for(state="visible", timeout=8000)
+        assert page.locator("#skill-name").inner_text().strip().startswith(name)
+        assert f"{attribute} = {value}" in page.locator("#skill-content").inner_text()
+        parent_rule = page.locator(f"#rule-skill-{slug}")
+        parent_rule.wait_for(state="visible", timeout=8000)
+        assert attribute in parent_rule.inner_text()
+        assert page.locator("details.army-profile").count() >= 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390, 320])
 def test_game_modes_source_table_normal_reference_navigation(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

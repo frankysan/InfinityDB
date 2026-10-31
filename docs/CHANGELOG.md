@@ -49,6 +49,13 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web frontend + Project infrastructure:** Audit the
+  three Army-native numerical BS/CC replacement Skills against exact
+  pinned dictionary values and all 17 loadout occurrences, retaining
+  their original base-profile attributes. Verify the source-variant labels
+  on owning Skill pages at desktop and mobile widths; do not infer
+  universal attribute changes or mark historical S-tier explanations
+  fully approved.
 - **Data processing + Project infrastructure:** Verify historical N5.3
   declaration-category migration against the original Git snapshot and the
   pinned rules PDF. Reconcile 17 retired grouped page identities to their

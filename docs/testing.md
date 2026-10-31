@@ -950,6 +950,31 @@ acceptance remain separate work. Generate ignored review evidence with:
 .venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --reconcile-declarations --verify-declaration-pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json-output local/audits/v1-declaration-migration-reviewed.json --markdown-output local/audits/v1-declaration-migration-reviewed.md
 ```
 
+For the **three numerical Army replacement Skills**, a separate
+source-scoped audit verifies the pinned September 29 Army archive
+(SHA-256 pinned in the audit), source dictionary Skill IDs 279 / 278 /
+274, all 17 faction-file option occurrences and the original BS/CC
+values in their containing Unit Profile groups. It also checks the
+curated `sourceVariant` attribute/replacement, parent BS/CC action
+rules and printed N5.3 pp. 39 / 51 / 75 citations. No replacement
+is written into base Unit statistics or inferred from example statlines.
+Without the private Army ZIP this optional audit cannot claim source
+closure. Produce an ignored report with:
+
+```powershell
+.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --verify-numeric-army-archive "data/raw/JSON 20260929-114335.zip" --json-output local/audits/v1-numeric-attribute-replacements.json --markdown-output local/audits/v1-numeric-attribute-replacements.md
+```
+
+The historical source identities occur twice for Polaris Bearpode
+Beta (base BS 5 → BS=11), nine times across Strelok, Konduktor and
+Stempler Zond options (base BS 10–11 → BS=12), and six times for Swiss
+Guard variants (base CC 15 → CC=21); repetitions across faction files
+are **not distinct units**. The nine normal-browser cases test the
+owning `/skills/bs-attack` and `/skills/cc-attack` pages and
+the displayed source replacement labels at 1440/390/320 px. These
+are not independently routed `/skills/bs-11` or `/skills/bs-12`
+pages, nor full conditional-effect or profile-variant approval.
+
 The JSON contains the complete current identity crosswalk, D/S provenance
 where applicable, source pages/headings, curated review flags and five
 selected browser-test pointers for recently published general references.

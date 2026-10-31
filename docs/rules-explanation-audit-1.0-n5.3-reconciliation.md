@@ -699,6 +699,27 @@ bounded Short Skill heading and three named source-identity checks,
 but **does not** close conditional declaration semantics or the
 full 1.0 whole-corpus gate.
 
+## V1-A08 numerical replacement variant acceptance (2026-10-31)
+
+A follow-up read-only audit now records the **actual parent-profile
+BS/CC values** alongside each of the previously verified 17 option
+occurrences. The pinned Army source proves these are option Skills,
+not base-attribute changes: Polaris Bearpode Beta has BS 5 alongside
+BS=11; Strelok, Konduktor and Stempler Zond options have BS 10–11
+alongside BS=12; Swiss Guard has CC 15 alongside CC=21. All three
+maintained `sourceVariant` objects preserve exact source ID/name,
+replaced Attribute/value, parent BS/CC action and N5.3 pp. 39/51/75
+citations. The audit rejects source checksum, record identity, value
+or occurrence-count drift. Browser acceptance verifies visible
+BS=11, BS=12 and CC=21 labels on the owning BS Attack/CC Attack
+pages at 1440/390/320 px (9/9). These variants are not independent
+skill-detail routes or globally rewritten Unit Profile statistics.
+
+This closes **bounded source-value/occurrence and player-label
+verification**, not every active/reactive legality exception, a
+runtime modifier evaluator, or the 1.0 whole-record corpus gate.
+The frozen 367-record S/D inventory remains unchanged.
+
 ## Conditional movement declarations (2026-10-16)
 
 N5.3 p. 88 allows Climbing Plus to make Climb a Basic Short Skill

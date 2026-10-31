@@ -987,9 +987,24 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           categories and source sections under the release checklist, without
           converting historical D/S, current citations, or interaction-review
           flags into whole-record approval.
-      - [ ] Verify other conditional declaration permissions and
-        remaining numerical Army replacement variants. Selected
-        checks do not certify the full 1.0 corpus.
+      - [ ] Verify other **conditional declaration permissions** beyond
+        the source-backed exception slices already accepted. The whole
+        1.0 corpus and reactive eligibility/activation conditions still
+        require their own clause and normal-browser dispositions.
+        - [x] **Numerical Army source Skill variants (V1-A08):** Exact
+          pinned September 29 Army ZIP, Skill dictionaries, all **17**
+          faction-file option occurrences and parent-profile attributes
+          now verify `BS=11` (ID 279; two occurrences), `BS=12`
+          (278; nine), and `CC=21` (274; six). Their source-defined
+          values differ from the original profile BS/CC values; they
+          remain option-specific Skills with action clauses at N5.3
+          pp. 39/51 and notation at p. 75, not rewritten Unit stats.
+          Normal parent-Skill page labels and Rule context pass Chromium
+          at 1440, 390 and 320 px (9 cases). Audit using
+          `tools.report_reference_baseline --reconcile-explanation-inventory
+          --verify-numeric-army-archive "data/raw/JSON 20260929-114335.zip"`.
+          Historical S tiers, other declaration exceptions, and complete
+          source/mechanics acceptance remain open.
     - [ ] **Visibility Zone inventory additions:** Include the five
       newer Visibility Zone Game terms in final record acceptance;
       they postdate the frozen 367-record explanation-audit inventory.
