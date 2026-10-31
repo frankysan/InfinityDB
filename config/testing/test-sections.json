@@ -69,6 +69,7 @@
         "test_immunity_missile_launcher_example",
         "test_immunity_flash_pulse_pdf_example",
         "test_immunity_plasma_critical",
+        "test_immunity_t2_critical",
         "test_identities",
         "test_identity_database",
         "test_interim_reference_consistency",

@@ -4833,6 +4833,31 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
         (lambda f: f["reviewedSavingRollCases"].append(
             deepcopy(f["reviewedSavingRollCases"][0])),
             "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedCriticalCases"][0]["when"].update(
+            weaponId="weapon:t2-cc-weapon"),
+            "AP+T2 Critical immunity case"),
+        (lambda f: f["reviewedCriticalCases"][0]["when"].update(
+            immunity="AP"), "AP+T2 Critical immunity case"),
+        (lambda f: f["reviewedCriticalCases"][0]["when"].update(
+            attackClass="comms"), "AP+T2 Critical immunity case"),
+        (lambda f: f["reviewedCriticalCases"][0].update(
+            components=["ammunition:t2"]),
+            "AP+T2 Critical immunity case"),
+        (lambda f: f["reviewedCriticalCases"][0]["criticalWithoutImmunity"].update(
+            savingAttribute="ARM"), "AP+T2 Critical immunity case"),
+        (lambda f: f["reviewedCriticalCases"][0]["criticalWithoutImmunity"].update(
+            failedAdditionalCriticalRollWounds=2),
+            "AP+T2 Critical immunity case"),
+        (lambda f: f["reviewedCriticalCases"][0]["criticalWithImmunity"].update(
+            criticalRolls=2), "AP+T2 Critical immunity case"),
+        (lambda f: f["reviewedCriticalCases"][0]["criticalWithImmunity"].update(
+            failedHitRollWounds=1), "AP+T2 Critical immunity case"),
+        (lambda f: f["reviewedCriticalCases"][0]["criticalWithImmunity"].update(
+            additionalCriticalRollRemoved=False),
+            "AP+T2 Critical immunity case"),
+        (lambda f: f["reviewedCriticalCases"][0].update(
+            evidence="explicit-n5.3-pdf-p96-example-3"),
+            "AP+T2 Critical immunity case"),
         (lambda f: f["reviewedCombinedCases"][3]["when"].update(
             weaponId="weapon:multi-pistol"), "Immunity applicability"),
         (lambda f: f["reviewedCombinedCases"][3]["when"].update(
@@ -5002,7 +5027,7 @@ def test_immunity_interaction_rejects_unreviewed_semantics(
 
     change(record["facts"]["immunityInteraction"])
     path.write_text(json.dumps(doc), encoding="utf-8")
-    with pytest.raises(ValueError, match=message):
+    with pytest.raises(ValueError, match=re.escape(message)):
         load_curated_document(path)
 
 

@@ -553,7 +553,7 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
     if not isinstance(value, dict) or set(value) != {
         "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
         "reviewedCombinedCases", "reviewedVulnerabilityCases", "reviewedWeaponCases",
-        "reviewedSavingRollCases",
+        "reviewedSavingRollCases", "reviewedCriticalCases",
     }:
         raise ValueError(f"{context}: invalid Immunity interaction fields")
     # Printed Example 3 of N5.3 p. 96 is a Combined Saving Roll, NOT a
@@ -593,6 +593,37 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
         },
     ]:
         raise ValueError(f"{context}: unsupported Plasma Combined Saving Roll example")
+    # T2 hit-roll Wounds survive Immunity (Critical); the separate
+    # one-Wound extra Critical roll is absent. Scope to the exact Army
+    # AP+T2 CC Weapon, not a runtime immunity or damage calculator.
+    if value["reviewedCriticalCases"] != [
+        {
+            "when": {
+                "weaponId": "weapon:ap-t2-cc-weapon",
+                "sourceAmmunitionId": 40,
+                "ammunitionId": "ammunition:t2",
+                "immunity": "Critical",
+                "attackClass": "non-comms",
+            },
+            "components": ["ammunition:ap", "ammunition:t2"],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "failedHitRollWounds": 2,
+                "failedAdditionalCriticalRollWounds": 1,
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 1,
+                "criticalRolls": 1,
+                "failedHitRollWounds": 2,
+                "additionalCriticalRollRemoved": True,
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
+    ]:
+        raise ValueError(f"{context}: unsupported AP+T2 Critical immunity case")
     covered = value["coveredAmmunition"]
     if (
         not isinstance(covered, dict)

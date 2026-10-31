@@ -164,6 +164,32 @@ export function immunityCaseRows(facts = {}) {
       });
     }
   }
+  for (const item of cases.reviewedCriticalCases || []) {
+    // A source-reviewed Critical cancellation is neither partial
+    // Ammunition Immunity nor a Combined Saving Roll operation.
+    const original = item.criticalWithoutImmunity;
+    const applied = item.criticalWithImmunity;
+    rows.push({
+      title: [text("Immunity (Critical) vs "),
+        reference(item.when.weaponId, "AP+T2 CC Weapon")],
+      detail: [
+        text("The reviewed Critical normally adds one Saving Roll: "),
+        text(`${rollCount(original.criticalRolls)} using ${original.savingAttribute}. `),
+        text("With Immunity (Critical), only the extra Critical roll is removed: "),
+        text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute} remains. `),
+        text("The original failed hit Saving Roll still inflicts "),
+        text(`${applied.failedHitRollWounds} Wounds from `),
+        reference(item.when.ammunitionId, "T2"),
+        text("; the suppressed extra Critical roll would have inflicted "),
+        text(`${original.failedAdditionalCriticalRollWounds} Wound on failure. `),
+        reference("ammunition:ap", "AP"),
+        text(" still halves ARM, and "),
+        reference("trait:anti-materiel", "Anti-materiel"),
+        text(" remains a separate Weapon Trait. Applies to the exact non-Comms AP+T2 CC Weapon only; this is a derived reference, not an attack calculator."),
+      ],
+      evidence: evidence(item.evidence),
+    });
+  }
   for (const item of cases.reviewedCombinedCases || []) {
     const partial = Array.isArray(item.withImmunity.ignoredComponents);
     const applied = item.withImmunity;

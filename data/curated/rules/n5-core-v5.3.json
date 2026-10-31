@@ -21088,6 +21088,36 @@
                             "evidence": "derived-from-pinned-general-rules"
                         }
                     ],
+                    "reviewedCriticalCases": [
+                        {
+                            "when": {
+                                "weaponId": "weapon:ap-t2-cc-weapon",
+                                "sourceAmmunitionId": 40,
+                                "ammunitionId": "ammunition:t2",
+                                "immunity": "Critical",
+                                "attackClass": "non-comms"
+                            },
+                            "components": [
+                                "ammunition:ap",
+                                "ammunition:t2"
+                            ],
+                            "criticalWithoutImmunity": {
+                                "savingAttribute": "ARM/2",
+                                "hitRolls": 1,
+                                "criticalRolls": 2,
+                                "failedHitRollWounds": 2,
+                                "failedAdditionalCriticalRollWounds": 1
+                            },
+                            "criticalWithImmunity": {
+                                "savingAttribute": "ARM/2",
+                                "hitRolls": 1,
+                                "criticalRolls": 1,
+                                "failedHitRollWounds": 2,
+                                "additionalCriticalRollRemoved": true
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
+                        }
+                    ],
                     "reviewedCombinedCases": [
                         {
                             "sourceAmmunitionId": 10,

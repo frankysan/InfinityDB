@@ -1100,9 +1100,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Publish the exact reviewed case with source/API parity and
         desktop/mobile Chromium checks; retain coordinated database
         and deployed-object recovery and all 17 reviewed objects.
-      - [ ] Continue outstanding Critical/component effects and any
-        comparison-view use independently; do not extrapolate the
-        Plasma-specific source result into a general resolver.
+      - [x] Add a separate, exact **AP+T2 CC Weapon / Immunity (Critical)**
+        reference from pinned N5.3 pp. 63, 67, 95 and 177. The
+        non-Comms source profile keeps AP+T2, ARM/2 and one hit
+        Saving Roll; Immunity (Critical) removes the single
+        additional Critical Saving Roll and its possible 1-Wound
+        effect, while a failed original T2 hit roll still inflicts
+        2 Wounds. This differs from Immunity (AP), which instead
+        removes the halving and retains both rolls. Keep source
+        traits separate, reject changed applicability/effects and
+        preserve all Weapon profiles. Confirm pinned source,
+        public API, 1440/390/320 Chromium, and coordinated
+        rules/publication promotion with recovery backups.
+      - [ ] Continue other Critical/component effects and any
+        comparison-view use independently; do not generalize these
+        exact reviewed cases into a resolver.
     - [ ] Validate every published base identity and reviewed combined form against the pinned
       source; prove that weapon links, Ammunition detail, and later comparison views consume the
       same facts without conflating composition with roll notation.

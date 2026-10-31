@@ -4127,6 +4127,23 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**AP+T2 CC Weapon / Immunity (Critical), 2026-10-31:**
+`tests/test_immunity_t2_critical.py` pins N5.3 pp. 63,
+67, 95 and 177 and the exact Army `AP+T2`/ARM/2
+source profile (Ammunition ID 40). A new fixed
+`reviewedCriticalCases` record distinguishes the
+original failed T2 hit roll (2 Wounds) from the
+suppressed additional Critical roll (potentially
+1 Wound) without cancelling AP halving or modifying
+the Weapon API. The curated validator fails closed
+on unsupported identities, conditions and outcomes.
+The Skill renderer and Chromium acceptance at
+1440/390/320 px verify the separate fourteenth
+case with no overflow. The synchronized `rules.db`
+and deployed-object publication retain 17 reviewed
+objects and a local rollback backup; this is not an
+attack-calculation engine.
+
 **Plasma Combined Saving Roll / Immunity (Critical), 2026-10-31:**
 `tests/test_immunity_plasma_critical.py` checks English
 N5.3 pp. 67, 95 and 96 against the pinned PDF, the

@@ -2728,14 +2728,31 @@ this is a reviewed reference, not a general Critical or
 Immunity calculator. The Army Weapon's source annotation
 remains one ARM + one BTS with one additional ARM on Critical.
 
-The Skill reference now presents **thirteen reviewed
+**AP+T2 CC Weapon versus Immunity (Critical)** is a
+distinct rule-derived and tightly source-scoped case,
+not the previously reviewed Immunity (AP) outcome. The
+N5.3 p. 177 Weapon Chart defines one ARM/2 Saving Roll
+and AP+T2 Ammunition; p. 67 assigns a failed original
+T2 hit roll **2 Wounds**, but a failed additional
+Critical roll only **1 Wound**. Immunity (Critical)
+(p. 95) removes that additional roll entirely, leaving
+one ARM/2 Saving Roll; failing that hit roll still
+inflicts two Wounds. AP halving and the separately
+listed Anti-materiel Trait are not suppressed.
+The reviewed `reviewedCriticalCases` collection is
+separate from `reviewedCombinedCases` (component
+Immunity) and `reviewedSavingRollCases` (multiple
+defense Attributes). It does not execute an attack or
+infer combinations for unrelated Weapons.
+
+The Skill reference now presents **fourteen reviewed
 interactions**: six Combined Ammunition cases, four
 exact Weapon cases (Flash Pulse, E/Mitter, Missile
-Launcher Blast, Monofilament), two separately attributed
-Plasma Combined Saving Roll cases and one Vulnerability
-example. Chromium acceptance at 1440/390/320 px verifies
-the thirteenth source-scoped case, semantic links and
-mobile layout.
+Launcher Blast, Monofilament), two Plasma Combined
+Saving Roll cases, one T2 Critical case and one
+Vulnerability example. Chromium acceptance at
+1440/390/320 px verifies the fourteenth source-scoped
+case, semantic links and mobile layout.
 Other component-specific Immunities, BTS-based attacks, Comms Attack
 rules and conditional State interactions remain unresolved. Do not
 extrapolate an evaluator or project outcomes into Weapon profiles.

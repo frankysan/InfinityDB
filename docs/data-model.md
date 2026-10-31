@@ -413,9 +413,19 @@ acquires one extra ARM roll on a Critical, which this Immunity
 removes. The case preserves the printed p. 96 Immunity
 (Enhanced) example's distinct provenance, and neither
 changes the Army's `combined_saving_roll` source annotation
-nor implies Combined Ammunition. The thirteen reviewed
-interactions are curated references, not a runtime
-Weapon-resolution engine. Coordinated `rules.db` and
+nor implies Combined Ammunition. A separate exact
+`reviewedCriticalCases` entry records the N5.3
+AP+T2 CC Weapon (source Ammunition ID 40) versus
+Immunity (Critical): the ARM/2 hit roll and its
+two-Wound T2 failed-save effect remain, while only
+the extra Critical roll and its possible one-Wound
+effect are removed. That is not the existing
+Immunity (AP) outcome, which retains two Critical
+Saving Rolls at full ARM. The new category stays
+separate from combined-component and Combined Saving
+Roll references; Army profiles are unchanged.
+The fourteen reviewed interactions are curated
+references, not a runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms
 Attack coverage, BTS conditions and unreviewed combinations
