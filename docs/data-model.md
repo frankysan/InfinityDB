@@ -779,7 +779,12 @@ deterministic, read-only JSON inventory from `infinity.db`,
 (`python -m tools.audit_source_variant_inputs`). It inspects exact
 source IDs, direct profile/loadout/Unit-option relationship rows,
 ordered extra IDs/types/values, raw occurrence values and reviewed
-source-variant mappings. It does **not** calculate Unit usage.
+source-variant mappings. For targeted reviews, pass `--catalog skills`
+or `--catalog equipment` and repeat `--source-id N`; absent IDs fail
+rather than silently returning an empty result. The filtered response
+keeps `fullCatalogSummary` for the entire catalog and lists selected
+IDs separately, so global counts are never mistaken for subset counts.
+It does **not** calculate Unit usage.
 
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
@@ -864,8 +869,9 @@ metadata separately from the existing distance-only display API.
 The inventory verifies *every* extra signature against exact
 source IDs/types/values before classifying it as reviewed; even a
 reviewed family definition does not automatically certify an
-unmapped extra. A future occurrence with multiple extras must
-have **every** component reviewed before becoming countable.
+unmapped extra. A future occurrence with multiple extras requires
+review of the **complete combination**, not merely every component,
+before becoming countable.
 
 **Reviewed Dodge source-variant reconciliation:** The N5.3 curated
 Skill ID `40` now has 14 distinct, **single-extra** signatures

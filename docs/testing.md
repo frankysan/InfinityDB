@@ -379,6 +379,21 @@ then run these modules explicitly.
 A clean CI pass does **not** claim to have verified the full source-only
 occurrence counts.
 
+Inspect a specific source family without dumping the entire inventory:
+
+```powershell
+python -m tools.audit_source_variant_inputs --catalog skills `
+    --source-id 74 --source-id 263 --source-id 271
+python -m tools.audit_source_variant_inputs --catalog equipment --source-id 169
+```
+
+The first command selects Super-Jump, Jump and Climb; the second selects
+TinBot: Firewall. Output preserves the original full-catalog summary
+and every selected raw extra ID/type/value; unknown source IDs fail
+explicitly. Selection/combination guard tests work in CI without the
+raw database, while pinned occurrence-count regressions require the
+local archive.
+
 The reviewed Surprise Attack source gate covers Skill `191`, all 767 direct
 rows and the exact single-extra signatures 6/7 (`TEXT: -3/-6`, 762/5 rows).
 It checks both the tracked rules artifact and a fresh export, preserving the

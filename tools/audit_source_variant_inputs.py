@@ -206,13 +206,49 @@ def inventory_source_variants(
     return report
 
 
+def select_source_variants(
+    report: dict[str, Any], catalog: str, source_ids: list[int] | None = None
+) -> dict[str, Any]:
+    """Select exact source IDs without relabeling full-catalog summary counts."""
+    if catalog not in CATEGORIES:
+        raise ValueError(f"unsupported source catalog: {catalog}")
+    source = report["catalogs"][catalog]
+    items = source["items"]
+    if source_ids:
+        selected = set(source_ids)
+        available = {item["id"] for item in items}
+        missing = sorted(selected - available)
+        if missing:
+            raise ValueError(f"source IDs absent from {catalog}: {missing}")
+        items = [item for item in items if item["id"] in selected]
+    return {
+        "catalog": catalog,
+        "fullCatalogSummary": source["summary"],
+        "selectedSourceIds": [item["id"] for item in items],
+        "items": items,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--application", type=Path, default=Path("data/generated/infinity.db"))
     parser.add_argument("--raw", type=Path, default=Path("data/generated/infinity.raw.db"))
     parser.add_argument("--rules", type=Path, default=Path("data/generated/rules.db"))
+    parser.add_argument("--catalog", choices=CATEGORIES, help="limit output to one source catalog")
+    parser.add_argument(
+        "--source-id", type=int, action="append", default=[],
+        help="select an exact source ID (repeatable; requires --catalog)",
+    )
     args = parser.parse_args()
-    print(json.dumps(inventory_source_variants(args.application, args.raw, args.rules), indent=2))
+    if args.source_id and not args.catalog:
+        parser.error("--source-id requires --catalog")
+    report = inventory_source_variants(args.application, args.raw, args.rules)
+    if args.catalog:
+        try:
+            report = select_source_variants(report, args.catalog, args.source_id)
+        except ValueError as exc:
+            parser.error(str(exc))
+    print(json.dumps(report, indent=2))
 
 
 if __name__ == "__main__":

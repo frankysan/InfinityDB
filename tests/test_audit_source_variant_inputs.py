@@ -9,9 +9,41 @@ import pytest
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
-from tools.audit_source_variant_inputs import inventory_source_variants, reviewed_extra_signature
+from tools.audit_source_variant_inputs import (
+    inventory_source_variants,
+    reviewed_extra_signature,
+    select_source_variants,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_source_variant_selection_preserves_full_summary_and_exact_ids() -> None:
+    report = {"catalogs": {
+        "skills": {"summary": {"publishedSourceIds": 2}, "items": [
+            {"id": 28, "extraSignatures": [{"extras": [[6, "TEXT", "-3"]], "count": 5}]},
+            {"id": 40, "extraSignatures": [{"extras": [[11, "DISTANCE", "+2.5"]], "count": 3}]},
+        ]},
+        "equipment": {"summary": {"publishedSourceIds": 1}, "items": [
+            {"id": 169, "extraSignatures": [{"extras": [[7, "TEXT", "-6"]], "count": 2}]},
+        ]},
+    }}
+    selected = select_source_variants(report, "equipment", [169, 169])
+    assert selected == {
+        "catalog": "equipment",
+        "fullCatalogSummary": {"publishedSourceIds": 1},
+        "selectedSourceIds": [169],
+        "items": report["catalogs"]["equipment"]["items"],
+    }
+    selected = select_source_variants(report, "skills", [40])
+    assert selected["fullCatalogSummary"] == {"publishedSourceIds": 2}
+    assert selected["selectedSourceIds"] == [40]
+    assert selected["items"] == report["catalogs"]["skills"]["items"][1:]
+    assert select_source_variants(report, "skills")["selectedSourceIds"] == [28, 40]
+    with pytest.raises(ValueError, match="source IDs absent from equipment: \\[28\\]"):
+        select_source_variants(report, "equipment", [28, 169])
+    with pytest.raises(ValueError, match="unsupported source catalog"):
+        select_source_variants(report, "weapons", [169])
 
 
 def _inventory() -> dict:
@@ -351,6 +383,49 @@ def test_surprise_attack_signatures_preserve_conditional_target_mods(tmp_path: P
                    for c in rule["citations"])
         assert rule["variant_semantics"]["inheritance"] == "family"
         assert "surprise-attack" not in rules.skill_parameter_semantics()
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
+    """Separate N5.3 distance clauses, Jet Propulsion, and TinBot Firewall MODs."""
+    report = _inventory()
+    skills = select_source_variants(report, "skills", [74, 263, 271])["items"]
+    assert [item["id"] for item in skills] == [74, 263, 271]
+    assert [item["occurrences"] for item in skills] == [670, 26, 6]
+    assert all(item["status"] == "unresolved-occurrence-parameter" for item in skills)
+    assert {
+        item["id"]: [
+            (tuple(tuple(extra) for extra in signature["extras"]),
+             signature["count"], signature["reviewed"])
+            for signature in item["extraSignatures"]
+        ]
+        for item in skills
+    } == {
+        74: [
+            (((260, "DISTANCE", "+7.5"),), 4, True),
+            (((304, "TEXT", "Jet Propulsion"),), 198, False),
+            (((372, "DISTANCE", "7.5"),), 43, True),
+        ],
+        263: [(((372, "DISTANCE", "7.5"),), 26, False)],
+        271: [(((372, "DISTANCE", "7.5"),), 6, False)],
+    }
+    assert skills[0]["reviewedDistance"] == {"kind": "distance", "positive_sign": "omit"}
+    assert skills[1]["reviewedDistance"] is None
+    assert skills[2]["reviewedDistance"] is None
+
+    [tinbot] = select_source_variants(report, "equipment", [169])["items"]
+    assert tinbot["name"] == "TinBot: Firewall"
+    assert tinbot["status"] == "unresolved-occurrence-parameter"
+    assert tinbot["reviewedVariant"] == {"kind": "named", "label": "Firewall"}
+    assert tinbot["reviewedExtra"] is None
+    assert tinbot["occurrences"] == 147
+    assert [
+        (tuple(signature["extras"][0]), signature["count"], signature["reviewed"])
+        for signature in tinbot["extraSignatures"]
+    ] == [
+        ((6, "TEXT", "-3"), 92, False),
+        ((7, "TEXT", "-6"), 55, False),
+    ]
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

@@ -1708,6 +1708,19 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         explicit combination semantics. Keep the pinned source-ID baseline
         and add a CI-runnable pure signature regression without requiring
         the ignored raw archive.
+      - [x] **Data processing + Project infrastructure:** Add an exact
+        source-ID selector to the read-only variant auditor, retaining
+        full-catalog denominators separately from selected items.
+        Review the pinned N5.3 movement/TinBot families: Super-Jump
+        (74) has four `+7.5` distance, 43 `7.5` distance, and
+        198 Jet Propulsion extras; Jump (263) has 26 `7.5` and
+        Climb (271) six `7.5` extras; TinBot Firewall (169) has
+        92 `-3` and 55 `-6` extras. The cited N5.3 pp.
+        32/34/113/127 distinguish movement bonuses, Jet Propulsion
+        steering, and enemy Comms Attack MODs. The exact source
+        signatures now have a pinned-archive regression, but these
+        four source IDs **remain unresolved as typed occurrence
+        parameters**. No new variant/Unit use is published.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7
