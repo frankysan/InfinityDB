@@ -1690,9 +1690,9 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and 14 Equipment source IDs. The tracked
+      occurrence parameters and 13 Equipment source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
-      Super-Jump, Jump and Climb parameter mappings;
+      Super-Jump, Jump, Climb and TinBot Firewall parameter mappings;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
       the release-matched source pair before final certification.
@@ -1720,9 +1720,8 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         32/34/113/127 distinguish movement bonuses, Jet Propulsion
         steering, and enemy Comms Attack MODs. The exact source
         signatures have a pinned-archive regression. The Super-Jump,
-        Jump and Climb mappings were subsequently promoted below;
-        TinBot Firewall remains unresolved as a typed occurrence
-        parameter. No cross-Army Unit-use index is published.
+        Jump, Climb and TinBot Firewall mappings were subsequently
+        promoted below. No cross-Army Unit-use index is published.
       - [x] **Data processing:** Publish exact Super-Jump (Jet Propulsion)
         source extra 304 as a typed trajectory-control variant, separate
         from the existing `DISTANCE` parameter. The pinned Army source
@@ -1748,7 +1747,24 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         accounts for changed link-table statistics, synchronizes
         the deployed-object publication and preserves recovery copies.
         The audited Skill unresolved baseline is now **34**.
-        TinBot Firewall and the cross-Army usage index remain open.
+        TinBot Firewall was promoted in the following task; the
+        cross-Army usage index remains open.
+      - [x] **Data processing:** Publish exact TinBot Firewall source
+        Equipment 169 occurrence modifiers using N5.3 p. 127.
+        The pinned Army source has 147 direct relationships: 92 with
+        extra 6 (`TEXT: -3`) and 55 with extra 7
+        (`TEXT: -6`). Maintain the existing named Firewall source
+        variant; distinguish the enemy's Comms Attack against the
+        TinBot owner from generic enemy-roll or Dodge MODs.
+        The owning TinBot definition retains Null/Isolated and
+        Fireteam-sharing restrictions. The Equipment-specific typed
+        map is available to the future index, while other TinBot
+        named variants remain independent and no Unit use is inferred.
+        The guarded v9 refresh verifies exact raw signatures, modifies
+        only this source variant's added parameter, synchronizes the
+        deployed-object publication, and preserves ignored rollback
+        copies. The audit now reports **13 unresolved Equipment**
+        source IDs and 34 Skill source IDs.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

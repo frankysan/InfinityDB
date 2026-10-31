@@ -82,7 +82,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
         "statuses": {
             "family-only": 19,
             "reviewed-exact-source": 1,
-            "unresolved-occurrence-parameter": 14,
+            "reviewed-extra-parameter": 1,
+            "unresolved-occurrence-parameter": 13,
         },
         "extraTypes": {"TEXT": 14},
     }
@@ -121,12 +122,14 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     assert skills[74]["status"] == "reviewed-extra-parameter"
     for source_id in (24, 28, 40, 74):
         assert all(part["reviewed"] for part in skills[source_id]["extraSignatures"])
-    for source_id in (100, 101, 169, 244, 247):
+    for source_id in (100, 101, 244, 247):
         item = equipment[source_id]
         assert item["status"] == "unresolved-occurrence-parameter"
         assert item["extraTypes"] == ["TEXT"]
         assert item["extraSignatures"]
     assert equipment[169]["reviewedVariant"] == {"kind": "named", "label": "Firewall"}
+    assert equipment[169]["status"] == "reviewed-extra-parameter"
+    assert all(part["reviewed"] for part in equipment[169]["extraSignatures"])
     assert skills[28]["reviewedVariant"] is None
     assert any(
         part[2] == "-3"
@@ -420,17 +423,45 @@ def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
 
     [tinbot] = select_source_variants(report, "equipment", [169])["items"]
     assert tinbot["name"] == "TinBot: Firewall"
-    assert tinbot["status"] == "unresolved-occurrence-parameter"
+    assert tinbot["status"] == "reviewed-extra-parameter"
     assert tinbot["reviewedVariant"] == {"kind": "named", "label": "Firewall"}
-    assert tinbot["reviewedExtra"] is None
+    assert tinbot["reviewedExtra"] == RulesDatabase(
+        ROOT / "data/generated/rules.db"
+    ).equipment_reviewed_extra_semantics()[169]
     assert tinbot["occurrences"] == 147
     assert [
         (tuple(signature["extras"][0]), signature["count"], signature["reviewed"])
         for signature in tinbot["extraSignatures"]
     ] == [
-        ((6, "TEXT", "-3"), 92, False),
-        ((7, "TEXT", "-6"), 55, False),
+        ((6, "TEXT", "-3"), 92, True),
+        ((7, "TEXT", "-6"), 55, True),
     ]
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_tinbot_firewall_source_extras_match_fresh_export(tmp_path: Path) -> None:
+    """An edited tracked rules artifact cannot alone certify Equipment MODs."""
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    for path in (ROOT / "data/generated/rules.db", fresh):
+        rows = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db",
+            path,
+        )["catalogs"]["equipment"]["items"]
+        item = next(row for row in rows if row["id"] == 169)
+        assert item["status"] == "reviewed-extra-parameter"
+        assert item["reviewedVariant"] == {"kind": "named", "label": "Firewall"}
+        assert item["reviewedExtra"] == (
+            RulesDatabase(path).equipment_reviewed_extra_semantics()[169]
+        )
+        assert item["occurrences"] == 147
+        assert item["extraSignatures"] == [
+            {"extras": [[6, "TEXT", "-3"]], "reviewed": True, "count": 92},
+            {"extras": [[7, "TEXT", "-6"]], "reviewed": True, "count": 55},
+        ]
+        assert all(row["status"] == "unresolved-occurrence-parameter"
+                   for row in rows if row["id"] in (100, 101, 244, 247))
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

@@ -46,7 +46,10 @@ def inventory_source_variants(
     }
     distance_parameters = rules.skill_parameter_semantics()
     numeric_mods = rules.skill_numeric_mod_semantics()
-    reviewed_extras = rules.skill_reviewed_extra_semantics()
+    reviewed_extras = {
+        "skills": rules.skill_reviewed_extra_semantics(),
+        "equipment": rules.equipment_reviewed_extra_semantics(),
+    }
     report: dict[str, Any] = {"catalogs": {}}
 
     application_uri = application_path.resolve().as_uri() + "?mode=ro"
@@ -119,9 +122,9 @@ def inventory_source_variants(
                     or (numeric_mods.get(slug) if slug else None)
                 ) if catalog == "skills" else None
                 typed = (
-                    reviewed_extras.get(source_id)
-                    or (reviewed_extras.get(slug) if slug else None)
-                ) if catalog == "skills" else None
+                    reviewed_extras[catalog].get(source_id)
+                    or (reviewed_extras[catalog].get(slug) if slug else None)
+                )
                 reviewed_values = {
                     (item["extra_id"], item["extra_type"], item["raw_value"])
                     for semantics in (numeric, typed) if semantics is not None

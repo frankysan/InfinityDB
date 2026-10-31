@@ -96,6 +96,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--refresh-movement-distance-v9", action="store_true",
         help="Add verified Jump/Climb source links and distance metadata to a matched v9 pair",
     )
+    migration.add_argument(
+        "--refresh-tinbot-firewall-v9", action="store_true",
+        help="Promote exact TinBot Firewall Comms modifiers in a matched v9 pair",
+    )
     return parser
 
 
@@ -109,6 +113,7 @@ def main() -> int:
         or args.refresh_pdf_source_pins_v9
         or args.refresh_variant_semantics_v9 is not None
         or args.refresh_movement_distance_v9
+        or args.refresh_tinbot_firewall_v9
     ):
         if args.check:
             raise ValueError("--check cannot be combined with v9 migration operations")
@@ -118,10 +123,16 @@ def main() -> int:
             refresh_isolated_context_v9_release,
             refresh_movement_distance_v9_release,
             refresh_pdf_source_pins_v9_release,
+            refresh_tinbot_firewall_v9_release,
             refresh_variant_semantics_v9_release,
             stage_restrictions_v9,
         )
 
+        if args.refresh_tinbot_firewall_v9:
+            backup = refresh_tinbot_firewall_v9_release()
+            print("Refreshed reviewed TinBot Firewall source modifiers in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
         if args.refresh_movement_distance_v9:
             backup = refresh_movement_distance_v9_release()
             print("Refreshed reviewed Jump/Climb distance metadata in v9 release artifacts.")

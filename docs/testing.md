@@ -399,7 +399,7 @@ rows and the exact single-extra signatures 6/7 (`TEXT: -3/-6`, 762/5 rows).
 It checks both the tracked rules artifact and a fresh export, preserving the
 opponent-target Face to Face ARO scope separately from Mimetism and the
 distance-only display query. The current source inventory has 34 unresolved
-Skill IDs and 14 Equipment IDs; these are per-source review flags, not Unit counts.
+Skill IDs and 13 Equipment IDs; these are per-source review flags, not Unit counts.
 
 **Jump/Climb distance review:** Army source IDs 263/271 have 26/6
 exact single-extra `DISTANCE: 7.5` (extra ID 372) occurrences. The
@@ -416,6 +416,25 @@ it requires the matching ignored raw source and an unchanged
 tracked v9 rules database, retains ignored recovery copies, and
 updates `rules.db` with its paired deployed-object publication.
 Do not rerun against an already-promoted pair.
+
+**TinBot Firewall Equipment MOD review:** Source Equipment 169
+has 147 direct occurrences: 92 exact `TEXT: -3` (extra 6)
+and 55 exact `TEXT: -6` (extra 7). The mapped
+`enemy-comms-attack-mod` targets only a Comms Attack against
+the TinBot's owner (N5.3 p. 127); it is not a generic opponent
+MOD. `tests/test_audit_source_variant_inputs.py` checks the
+pinned raw source and both rules-export pathways, while
+`tests/test_curated.py` and
+`tests/test_restriction_storage_candidate.py` fail closed
+on altered source IDs, values, applicability, source identity
+and unrelated database changes. The exact source-only audit
+requires ignored `infinity.raw.db`, unlike the hermetic
+mutation and migration tests. The one-time guarded local refresh
+is `python -m tools.build_deployed_object_publication
+--refresh-tinbot-firewall-v9`; it requires a matching, unchanged
+tracked v9 rules artifact, updates the synchronized
+deployed-object publication and retains recovery copies under
+ignored `local/`. Do not rerun after promotion.
 
 ## Non-Skill Army source classification and Unit presentation
 

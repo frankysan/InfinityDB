@@ -12208,7 +12208,35 @@
                 "sourceVariant": {
                     "kind": "named",
                     "label": "Firewall"
-                }
+                },
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 6,
+                                "extraType": "TEXT",
+                                "rawValue": "-3",
+                                "effect": {
+                                    "kind": "enemy-comms-attack-mod",
+                                    "appliesTo": "comms-attack-targeting-tinbot-owner",
+                                    "modifier": -3
+                                }
+                            },
+                            {
+                                "extraId": 7,
+                                "extraType": "TEXT",
+                                "rawValue": "-6",
+                                "effect": {
+                                    "kind": "enemy-comms-attack-mod",
+                                    "appliesTo": "comms-attack-targeting-tinbot-owner",
+                                    "modifier": -6
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "relations": [
                 {

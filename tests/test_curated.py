@@ -1270,6 +1270,74 @@ def test_reviewed_dodge_extra_parameter_rejects_unscoped_or_mismatched_values(
         validate()
 
 
+def test_tinbot_firewall_requires_exact_enemy_comms_mods(tmp_path: Path) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record["id"] = "equipment:tinbot-firewall"
+    record["kind"] = "equipment"
+    record["armyLinks"] = [{"entity": "equipment", "id": 169}]
+    record["facts"] = {}
+    extras = [
+        {
+            "extraId": extra_id, "extraType": "TEXT", "rawValue": str(modifier),
+            "effect": {
+                "kind": "enemy-comms-attack-mod",
+                "appliesTo": "comms-attack-targeting-tinbot-owner",
+                "modifier": modifier,
+            },
+        }
+        for extra_id, modifier in ((6, -3), (7, -6))
+    ]
+    record["variantSemantics"] = {
+        "inheritance": "source",
+        "sourceVariant": {"kind": "named", "label": "Firewall"},
+        "occurrenceParameters": [{
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extraValues": deepcopy(extras),
+        }],
+    }
+    path = tmp_path / "firewall.json"
+
+    def validate() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    validate()
+    for index, changes in (
+        (0, {"extraId": 7}),
+        (0, {"extraId": 6.0}),
+        (0, {"extraType": "DISTANCE"}),
+        (0, {"rawValue": "+3"}),
+        (1, {"rawValue": "-3"}),
+        (1, {"effect": {"kind": "enemy-comms-attack-mod",
+                        "appliesTo": "comms-attack-targeting-tinbot-owner",
+                        "modifier": 3}}),
+        (1, {"effect": {"kind": "enemy-comms-attack-mod",
+                        "appliesTo": "all-enemy-rolls", "modifier": -6}}),
+        (1, {"effect": {"kind": "opponent-roll-mod",
+                        "appliesTo": "dodge-face-to-face", "modifier": -6}}),
+    ):
+        changed = deepcopy(extras)
+        changed[index].update(changes)
+        record["variantSemantics"]["occurrenceParameters"][0]["extraValues"] = changed
+        with pytest.raises(ValueError, match="invalid TinBot Firewall source extras"):
+            validate()
+
+    record["variantSemantics"]["occurrenceParameters"][0]["extraValues"] = deepcopy(extras)
+    for field, wrong in (
+        ("sourceVariant", {"kind": "named", "label": "Guided"}),
+        ("inheritance", "family"),
+    ):
+        original = record["variantSemantics"][field]
+        record["variantSemantics"][field] = wrong
+        with pytest.raises(ValueError):
+            validate()
+        record["variantSemantics"][field] = original
+    record["armyLinks"] = [{"entity": "equipment", "id": 244}]
+    with pytest.raises(ValueError, match="Dodge family"):
+        validate()
+
+
 def test_super_jump_jet_propulsion_requires_exact_source_extra(tmp_path: Path) -> None:
     document = valid_document()
     record = next(row for row in document["records"] if row["kind"] == "skill")

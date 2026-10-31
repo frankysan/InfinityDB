@@ -45,6 +45,30 @@ MOVEMENT_DISTANCE_VARIANT = {
         "source": "army-extra", "kind": "distance", "positiveSign": "omit",
     }],
 }
+TINBOT_FIREWALL = ("n5-core-v5.3", "equipment:tinbot-firewall")
+TINBOT_FIREWALL_BASE = {
+    "inheritance": "source", "sourceVariant": {"kind": "named", "label": "Firewall"},
+}
+TINBOT_FIREWALL_VARIANT = {
+    **TINBOT_FIREWALL_BASE,
+    "occurrenceParameters": [{
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id,
+                "extraType": "TEXT",
+                "rawValue": str(modifier),
+                "effect": {
+                    "kind": "enemy-comms-attack-mod",
+                    "appliesTo": "comms-attack-targeting-tinbot-owner",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((6, -3), (7, -6))
+        ],
+    }],
+}
 
 
 def _sha(path: Path) -> str:
@@ -485,12 +509,14 @@ def refresh_pdf_source_pins_v9_release(*, root: Path = ROOT) -> Path:
 
 def _check_variant_semantics_delta(
     previous: Path, proposed: Path, variants: dict[tuple[str, str], str],
-    *, initialize_movement_distance: bool = False,
+    *, initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
 ) -> None:
-    """Guard exact family-parameter additions and optional initial movement links."""
+    """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
     if initial and set(variants) != set(initial):
         raise ValueError("Movement distance refresh requires exactly Jump and Climb")
+    if tinbot_firewall and (initial or set(variants) != {TINBOT_FIREWALL}):
+        raise ValueError("TinBot refresh requires its exact source record")
     with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
         for pragma in ("user_version", "application_id"):
             if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
@@ -523,6 +549,13 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == TINBOT_FIREWALL and tinbot_firewall:
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != TINBOT_FIREWALL_BASE
+                            or after != TINBOT_FIREWALL_VARIANT
+                        ):
+                            raise ValueError("TinBot refresh changed named source identity")
                     else:
                         if row[index] is None:
                             raise ValueError("Variant refresh requires existing family metadata")
@@ -611,10 +644,43 @@ def refresh_movement_distance_v9_release(*, root: Path = ROOT) -> Path:
     )
 
 
+def refresh_tinbot_firewall_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote exact source 169 Firewall modifiers without publishing inferred uses."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["equipment"]["items"]
+        if row["id"] == 169
+    ]
+    if len(rows) != 1:
+        raise ValueError("Missing exact TinBot Firewall source")
+    item = rows[0]
+    if (
+        item["name"] != "TinBot: Firewall"
+        or item["applicationId"] != 235
+        or item["occurrences"] != 147
+        or item["status"] != "unresolved-occurrence-parameter"
+        or item["reviewedVariant"] != {"kind": "named", "label": "Firewall"}
+        or item["reviewedExtra"] is not None
+        or item["rawValues"]
+        or item["extraSignatures"] != [
+            {"extras": [[6, "TEXT", "-3"]], "reviewed": False, "count": 92},
+            {"extras": [[7, "TEXT", "-6"]], "reviewed": False, "count": 55},
+        ]
+    ):
+        raise ValueError("Unreviewed TinBot Firewall source signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={TINBOT_FIREWALL[1]}, tinbot_firewall=True,
+    )
+
+
 def _refresh_metadata_v9_release(
     *, root: Path, source_ids: set[str] | None = None, expected_count: int | None = None,
     variant_records: set[str] | None = None,
-    initialize_movement_distance: bool = False,
+    initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -696,6 +762,7 @@ def _refresh_metadata_v9_release(
             _check_variant_semantics_delta(
                 current_rules, next_rules, variants,
                 initialize_movement_distance=initialize_movement_distance,
+                tinbot_firewall=tinbot_firewall,
             )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)

@@ -1609,6 +1609,45 @@ def test_super_jump_jet_propulsion_is_typed_separately_from_distance(
                for c in record["citations"])
 
 
+def test_tinbot_firewall_source_mods_are_equipment_only(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    param = rules.equipment_reviewed_extra_semantics()[169]
+    assert param == {
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extra_values": [
+            {
+                "extra_id": extra_id,
+                "extra_type": "TEXT",
+                "raw_value": str(modifier),
+                "effect": {
+                    "kind": "enemy-comms-attack-mod",
+                    "applies_to": "comms-attack-targeting-tinbot-owner",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((6, -3), (7, -6))
+        ],
+    }
+    assert set(rules.equipment_reviewed_extra_semantics()) == {169}
+    assert 169 not in rules.skill_reviewed_extra_semantics()
+    assert 169 not in rules.skill_numeric_mod_semantics()
+    record = rules.composed_record("equipment:tinbot-firewall")
+    assert record is not None
+    assert record["variant_semantics"]["inheritance"] == "source"
+    assert record["variant_semantics"]["source_variant"] == {
+        "kind": "named", "label": "Firewall",
+    }
+    assert param in record["variant_semantics"]["occurrence_parameters"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 127
+               for c in record["citations"])
+    assert rules.catalog_source_variant_semantics("equipment")[169] == {
+        "kind": "named", "label": "Firewall",
+    }
+
+
 def test_rules_database_returns_reviewed_source_variant_semantics(
     current_rules_database: RulesDatabase,
 ) -> None:

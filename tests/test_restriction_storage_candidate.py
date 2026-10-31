@@ -335,6 +335,118 @@ def test_jump_climb_migration_requires_exact_pinned_army_source(
         assert calls[0]["initialize_movement_distance"] is True
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "modified-name", "modified-scope", "modified-modifier",
+               "other-record", "schema", "missing-record"),
+)
+def test_tinbot_firewall_variant_refresh_preserves_named_source(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        TINBOT_FIREWALL,
+        TINBOT_FIREWALL_BASE,
+        TINBOT_FIREWALL_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    old_path, new_path = tmp_path / "old.db", tmp_path / "new.db"
+    after = copy.deepcopy(TINBOT_FIREWALL_VARIANT)
+    if defect == "modified-name":
+        after["sourceVariant"]["label"] = "Guided"
+    elif defect == "modified-scope":
+        after["occurrenceParameters"][0]["extraValues"][0]["effect"]["appliesTo"] = (
+            "all-enemy-rolls"
+        )
+    elif defect == "modified-modifier":
+        after["occurrenceParameters"][0]["extraValues"][1]["effect"]["modifier"] = 3
+    with sqlite3.connect(old_path) as old, sqlite3.connect(new_path) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*TINBOT_FIREWALL, json.dumps(TINBOT_FIREWALL_BASE), "preserved"),
+            ("n5-core-v5.3", "equipment:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        if defect != "missing-record":
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE id=?",
+                (json.dumps(after), TINBOT_FIREWALL[1]),
+            )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+    variants: dict[tuple[str, str], str] = {TINBOT_FIREWALL: json.dumps(after)}
+    if defect is None:
+        _check_variant_semantics_delta(
+            old_path, new_path, variants, tinbot_firewall=True,
+        )
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                old_path, new_path, variants, tinbot_firewall=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(old_path, new_path, variants)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "application", "count", "extra", "status",
+               "variant", "raw"),
+)
+def test_tinbot_firewall_refresh_requires_exact_pinned_occurrences(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as source_audit
+    from tools import restrictions_v9_release as release
+
+    item = {
+        "id": 169, "name": "TinBot: Firewall", "applicationId": 235,
+        "occurrences": 147, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": {"kind": "named", "label": "Firewall"},
+        "reviewedExtra": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[6, "TEXT", "-3"]], "reviewed": False, "count": 92},
+            {"extras": [[7, "TEXT", "-6"]], "reviewed": False, "count": 55},
+        ],
+    }
+    if defect == "name":
+        item["name"] = "TinBot: Guided"
+    elif defect == "application":
+        item["applicationId"] = 999
+    elif defect == "count":
+        item["occurrences"] = 148
+    elif defect == "extra":
+        item["extraSignatures"][1]["extras"][0][0] = 999
+    elif defect == "status":
+        item["status"] = "reviewed-extra-parameter"
+    elif defect == "variant":
+        item["reviewedVariant"]["label"] = "Guided"
+    elif defect == "raw":
+        item["rawValues"] = ["unreviewed"]
+    monkeypatch.setattr(
+        source_audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": [item]}}},
+    )
+    calls: list[dict] = []
+
+    def migration(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migration)
+    if defect:
+        with pytest.raises(ValueError, match="source signature drift"):
+            release.refresh_tinbot_firewall_v9_release(root=tmp_path)
+        assert not calls
+    else:
+        assert release.refresh_tinbot_firewall_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls[0]["variant_records"] == {"equipment:tinbot-firewall"}
+        assert calls[0]["tinbot_firewall"] is True
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

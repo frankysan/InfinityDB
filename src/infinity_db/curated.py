@@ -61,7 +61,34 @@ def _validate_reviewed_extra_parameter(
     inheritance: str,
     army_links: list[object],
 ) -> None:
-    """Bound typed extra effects to exact, reviewed source Skill families."""
+    """Bound typed extra effects to exact, reviewed Army source families."""
+    if inheritance == "source" and army_links == [
+        {"entity": "equipment", "id": 169}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": extra_id,
+                "extraType": "TEXT",
+                "rawValue": str(modifier),
+                "effect": {
+                    "kind": "enemy-comms-attack-mod",
+                    "appliesTo": "comms-attack-targeting-tinbot-owner",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((6, -3), (7, -6))
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 2
+            or any(not isinstance(entry, dict)
+                   or type(entry.get("extraId")) is not int for entry in values)
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid TinBot Firewall source extras")
+        return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "super-jump"}
     ]:
@@ -391,6 +418,14 @@ def _validate_variant_semantics(
         raise ValueError(
             f"{context}: family semantics must not declare 'sourceVariant'"
         )
+    if army_links == [{"entity": "equipment", "id": 169}] and parameters:
+        if (
+            inheritance != "source"
+            or source_variant != {"kind": "named", "label": "Firewall"}
+            or len(parameters) != 1
+            or parameters[0].get("kind") != "reviewed-extra"
+        ):
+            raise ValueError(f"{context}: invalid TinBot Firewall source variant")
     return inheritance
 
 

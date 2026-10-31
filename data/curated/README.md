@@ -961,9 +961,10 @@ this metadata does not calculate stacking or an effective game-state MOD.
 
 The **`reviewed-extra`** kind adds explicit, per-source-ID typed effects
 without broadening numeric MODs or the distance-only browser projection.
-Its supported families are the reviewed `skill:dodge` and
-`skill:super-jump` identities. Each entry requires `extraId`,
-`extraType`, `rawValue`, and a discriminated `effect`:
+Its reviewed Skill families are `skill:dodge` and
+`skill:super-jump`; the exact source Equipment variant
+`equipment:tinbot-firewall` is also supported. Each entry requires
+`extraId`, `extraType`, `rawValue`, and a discriminated `effect`:
 
 ```json
 {
@@ -1003,8 +1004,19 @@ Unknown IDs, mismatched raw types/values, invalid action scopes and
 duplicate IDs across `numeric-mod` and `reviewed-extra` are rejected.
 `RulesDatabase.skill_reviewed_extra_semantics()` exposes the typed
 mapping to future index generation without creating a gameplay engine.
-No unreviewed Army source extra becomes a specific variant merely
-because its value resembles a known parameter.
+`RulesDatabase.equipment_reviewed_extra_semantics()` similarly exposes
+exact Equipment effects without folding them into Skill or numeric-MOD
+semantics. For TinBot Firewall (source Equipment 169), extra 6
+(`TEXT: -3`) and extra 7 (`TEXT: -6`) have the exact
+`enemy-comms-attack-mod` effect scoped to
+`comms-attack-targeting-tinbot-owner`, with respective modifiers
+-3 and -6. They apply to the enemy making a Comms Attack against
+the TinBot owner, subject to the owning TinBot's restrictions
+(N5.3 p. 127); neither the named Firewall identity nor
+Fireteam-sharing rules imply further direct occurrences. The source
+variant retains `inheritance: source` and its `named: Firewall`
+identity. No unreviewed Army source extra becomes a specific variant
+merely because its value resembles a known parameter.
 
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
