@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sqlite3
 import sys
 from collections import Counter
@@ -1354,6 +1355,245 @@ def render_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+FROZEN_EXPLANATION_INVENTORY = (
+    PROJECT_ROOT / "docs/rules-explanation-audit-1.0-inventory.md"
+)
+FROZEN_EXPLANATION_INVENTORY_SHA256 = (
+    "3f6b21bc6ba7e508e63cfaa74b1bdb3fdefe3ab3968418d813be18a36275675e"
+)
+SELECTED_EXPLANATION_BROWSER_TESTS = {
+    "rule:initiative-roll": "test_initiative_roll_normal_reference_navigation",
+    "rule:combat-group": "test_combat_group_normal_reference_navigation",
+    "rule:army-retreat": "test_army_retreat_standard_game_normal_reference_navigation",
+    "rule:standard-game": "test_army_retreat_standard_game_normal_reference_navigation",
+    "rule:game-modes": "test_game_modes_source_table_normal_reference_navigation",
+}
+CURRENT_EXPLANATION_COLLECTIONS = (
+    PROJECT_ROOT / "data/curated/rules/n5-core-v5.3.json",
+    PROJECT_ROOT / "data/curated/rules/n5-hacking-programs-v5.3.json",
+)
+_EXPLANATION_ROW = re.compile(r"^\| \x60([^\x60]+)\x60 \| ([CH]) \| ([DS]) \|")
+
+
+def parse_frozen_explanation_inventory(markdown: str) -> dict[str, dict[str, str]]:
+    """Read only the original record table; never infer approvals from its D/S tier."""
+    start = "## Record inventory"
+    end = "## Scenario component inventory"
+    if markdown.count(start) != 1 or markdown.count(end) != 1:
+        raise ReferenceBaselineError("Frozen explanation inventory boundaries changed")
+    section = markdown.split(start, 1)[1].split(end, 1)[0]
+    results: dict[str, dict[str, str]] = {}
+    for line in section.splitlines():
+        if not line.startswith("| `"):
+            continue
+        match = _EXPLANATION_ROW.match(line)
+        if match is None:
+            raise ReferenceBaselineError(f"Malformed frozen record inventory row: {line[:90]}")
+        identifier, collection, tier = match.groups()
+        if identifier in results:
+            raise ReferenceBaselineError(f"Duplicate frozen identity: {identifier}")
+        if ":" not in identifier:
+            raise ReferenceBaselineError(f"Invalid frozen identity: {identifier}")
+        results[identifier] = {"collection": collection, "historicalTier": tier}
+    if not results:
+        raise ReferenceBaselineError("Frozen record inventory is empty")
+    return results
+
+
+def reconcile_explanation_inventory(
+    inventory_path: Path = FROZEN_EXPLANATION_INVENTORY,
+    curated_paths: Sequence[Path] = CURRENT_EXPLANATION_COLLECTIONS,
+) -> dict[str, Any]:
+    """Bridge frozen 367-record evidence to today's Core/Hacking identities.
+
+    This proves identity coverage and preserves original tiers. Source locators,
+    curated review flags, and test names are evidence pointers, not full-record
+    acceptance or migration approval.
+    """
+    from infinity_db.curated import load_curated_document
+
+    if _sha256(inventory_path) != FROZEN_EXPLANATION_INVENTORY_SHA256:
+        raise ReferenceBaselineError("Frozen explanation inventory hash changed")
+    frozen = parse_frozen_explanation_inventory(
+        inventory_path.read_text(encoding="utf-8")
+    )
+    browser_test_source = (
+        PROJECT_ROOT / "tests/test_verify_scenario_faq_browser.py"
+    ).read_text(encoding="utf-8")
+    for identifier, test in SELECTED_EXPLANATION_BROWSER_TESTS.items():
+        if f"def {test}(" not in browser_test_source:
+            raise ReferenceBaselineError(
+                f"Selected browser evidence no longer exists: {identifier}"
+            )
+    historical_tiers = Counter(row["historicalTier"] for row in frozen.values())
+    if len(frozen) != 367 or historical_tiers != {"D": 304, "S": 63}:
+        raise ReferenceBaselineError("Historical explanation inventory drift (367/304/63)")
+    records: dict[str, tuple[str, dict[str, Any]]] = {}
+    curated_hashes: dict[str, str] = {}
+    for path, collection_code in zip(curated_paths, ("C", "H"), strict=True):
+        document = load_curated_document(path)
+        curated_hashes[document["collection"]["id"]] = _sha256(path)
+        for record in document["records"]:
+            identifier = record["id"]
+            if identifier in records:
+                raise ReferenceBaselineError(f"Duplicate current identity: {identifier}")
+            records[identifier] = (collection_code, record)
+    if not records:
+        raise ReferenceBaselineError("No current Core/Hacking records")
+    before, now = set(frozen), set(records)
+    retained = sorted(before & now)
+    removed = sorted(before - now)
+    added = sorted(now - before)
+    retired_rows = []
+    for identifier in removed:
+        row = frozen[identifier]
+        if not identifier.startswith("declaration-category:"):
+            raise ReferenceBaselineError(
+                f"Non-declaration frozen identity removed; manual migration required: {identifier}"
+            )
+        # A same-type/new-page candidate is a discovery hint, never proof of rename.
+        group = identifier.rsplit(":", 1)[0]
+        candidates = [
+            candidate for candidate in added
+            if candidate.startswith(group + ":")
+        ]
+        retired_rows.append({
+            "id": identifier, **row, "disposition": "retired-declaration-identity",
+            "possibleReplacementIds": candidates,
+            "replacementVerified": False,
+        })
+    current_rows: list[dict[str, Any]] = []
+    groups: dict[tuple[str, str, str], set[str]] = {}
+    for identifier in sorted(now):
+        collection, record = records[identifier]
+        previous = frozen.get(identifier)
+        review = record.get("review") or {}
+        citations = record.get("citations") or []
+        if not isinstance(citations, list):
+            raise ReferenceBaselineError(f"Current citations malformed: {identifier}")
+        locations = []
+        for citation in citations:
+            if not isinstance(citation, dict):
+                raise ReferenceBaselineError(f"Invalid citation: {identifier}")
+            source = citation.get("sourceId")
+            if not isinstance(source, str) or not source:
+                raise ReferenceBaselineError(f"Unattributed citation: {identifier}")
+            page = str(citation.get("page", "-"))
+            section = str(citation.get("section") or citation.get("heading") or
+                          citation.get("member") or "unspecified-heading")
+            key = (source, page, section)
+            groups.setdefault(key, set()).add(identifier)
+            locations.append({
+                "sourceId": source, "page": citation.get("page"),
+                "heading": section,
+                "status": "source-locator-not-clause-acceptance",
+            })
+        if not locations:
+            groups.setdefault(("unattributed", "-", "no-citations"), set()).add(identifier)
+        current_rows.append({
+            "id": identifier, "kind": record["kind"], "collection": collection,
+            "lineage": "retained" if previous else "added-after-frozen-inventory",
+            "historicalTier": previous["historicalTier"] if previous else None,
+            "curatedReviewStatus": review.get("status"),
+            "curatedReviewedOn": review.get("reviewedOn"),
+            "citations": locations,
+            "sourceDisposition": "pending-full-material-clause-reconciliation",
+            "browserDisposition": (
+                "selected-route-smoke-evidence-not-full-acceptance"
+                if identifier in SELECTED_EXPLANATION_BROWSER_TESTS
+                else "pending-full-normal-mode-acceptance"
+            ),
+            "selectedBrowserTest": SELECTED_EXPLANATION_BROWSER_TESTS.get(identifier),
+            "fullRecordAcceptance": "not-assessed-in-this-audit",
+        })
+    sections = [
+        {
+            "sourceId": source, "page": page, "heading": heading,
+            "currentRecordIds": sorted(ids), "recordCount": len(ids),
+            "disposition": "pending-section-specific-clause-and-browser-review",
+        }
+        for (source, page, heading), ids in sorted(groups.items())
+    ]
+    added_kinds = dict(sorted(Counter(records[rid][1]["kind"] for rid in added).items()))
+    retained_s = sorted(rid for rid in retained if frozen[rid]["historicalTier"] == "S")
+    return {
+        "format": "InfinityDB frozen/current explanation inventory reconciliation",
+        "formatVersion": 1,
+        "status": "identity-bridge-only-pending-clause-and-browser-acceptance",
+        "frozenInventorySha256": _sha256(inventory_path),
+        "currentCuratedSha256": curated_hashes,
+        "frozenCount": len(frozen), "frozenTiers": dict(sorted(historical_tiers.items())),
+        "currentCount": len(now), "retainedCount": len(retained),
+        "addedCount": len(added), "removedCount": len(removed),
+        "addedKinds": added_kinds, "retainedScreeningOnlyIds": retained_s,
+        "retiredIdentityRows": retired_rows,
+        "addedIds": added,
+        "currentRecords": current_rows, "sourceSections": sections,
+        "sourceSectionCount": len(sections),
+        "fullRecordApprovalsIssuedByThisAudit": 0,
+        "remainingWork": [
+            "Adjudicate each retired declaration identity and possible metadata replacement "
+            "from actual source headings; matching category/page labels are not rename proof",
+            "Review current added records against their owning source clauses, later "
+            "curation and exception evidence; existing reviewed status is not full approval",
+            "Resolve remaining historical screening-only identities, including numerical "
+            "attribute-replacement variants",
+            "Assign each source section a signed-off clause and normal-browser disposition; "
+            "same-page citations are only locator evidence",
+        ],
+    }
+
+
+def render_explanation_reconciliation(report: dict[str, Any]) -> str:
+    """Compact work queue for reviewers, retaining exact IDs in the JSON."""
+    lines = [
+        "# Current explanation inventory reconciliation",
+        "",
+        "Historical D/S tiers remain frozen; this is **not a v1.0 release gate pass**.",
+        "",
+        f"- Frozen: {report['frozenCount']} (D {report['frozenTiers']['D']}; "
+        f"S {report['frozenTiers']['S']})",
+        f"- Current Core + Hacking: {report['currentCount']}; "
+        f"{report['retainedCount']} retained, {report['addedCount']} added, "
+        f"{report['removedCount']} retired",
+        f"- Retained historical S: {len(report['retainedScreeningOnlyIds'])}",
+        "- Added kinds: " + ", ".join(
+            f"{key} {value}" for key, value in report["addedKinds"].items()
+        ),
+        f"- Source locators requiring clause/browser dispositions: "
+        f"{report['sourceSectionCount']}",
+        "",
+        "## Retired declaration metadata (replacement not inferred)",
+        "",
+    ]
+    for item in report["retiredIdentityRows"]:
+        candidates = ", ".join(item["possibleReplacementIds"]) or "none"
+        lines.append(f"- `{item['id']}` → possible new type peers: {candidates}; **not approved**")
+    lines.extend(["", "## Added current identities by kind", ""])
+    for kind in report["addedKinds"]:
+        ids = [
+            item["id"] for item in report["currentRecords"]
+            if item["lineage"] == "added-after-frozen-inventory" and item["kind"] == kind
+        ]
+        lines.append(f"### {kind} ({len(ids)})")
+        lines.extend(
+            f"- `{identifier}` — source and browser acceptance pending"
+            for identifier in ids
+        )
+        lines.append("")
+    lines.extend([
+        "## Remaining acceptance",
+        "",
+        *[f"- [ ] {item}" for item in report["remainingWork"]],
+        "",
+        "The JSON report contains every current identity, source locator, historical tier "
+        "and explicit pending disposition. Do not convert a reviewed curation flag, "
+        "a citation or a successful selected browser test into whole-record sign-off.",
+        "",
+    ])
+    return "\n".join(lines)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=REPORT_FORMAT)
     parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/infinity.db")
@@ -1365,7 +1605,27 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
+    parser.add_argument(
+        "--reconcile-explanation-inventory", action="store_true",
+        help="Compare frozen 367-record explanation inventory to current Core/Hacking",
+    )
     args = parser.parse_args(argv)
+    if args.reconcile_explanation_inventory:
+        report = reconcile_explanation_inventory()
+        for path, content in (
+            (args.json_output, json.dumps(report, indent=2, ensure_ascii=False) + "\n"),
+            (args.markdown_output, render_explanation_reconciliation(report)),
+        ):
+            if path is not None:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8", newline="\n")
+        print(
+            f"Explanation inventory: {report['frozenCount']} frozen, "
+            f"{report['currentCount']} current, {report['retainedCount']} retained, "
+            f"{report['addedCount']} added, {report['removedCount']} retired; "
+            f"{report['sourceSectionCount']} source locators pending clause review"
+        )
+        return 0
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,
     )

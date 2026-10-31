@@ -946,12 +946,37 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       - [ ] Reconcile the frozen inventory with the current Core/Hacking record
         set and later source/browser evidence
         ([V1-A08](v1.0-source-coverage-audit.md#v1-a08--the-frozen-inventory-does-not-cover-the-current-record-set)).
-        At the 2026-10-31 baseline there are 443 current records, 93 added and
-        17 removed identities relative to the frozen 367; the removals are
-        declaration-category identities. Preserve historical counts, identify
-        renames and separately accepted additions, and give current source
-        sections explicit dispositions. Same-page citations alone do not certify
-        every procedure on that page.
+        Preserve historical counts, independently verify metadata migrations and
+        later source-reviewed additions, and give every current in-scope source
+        section a clause/presentation disposition. Same-page citations alone do
+        not certify the procedures on that page.
+        - [x] **Current identity crosswalk and review queue:** Added the read-only
+          `tools.report_reference_baseline --reconcile-explanation-inventory`
+          audit with a pinned historical-inventory hash, exact current Core/Hacking
+          identities, source locators, curated review metadata, known selected
+          browser-test pointers, and explicitly pending full-record acceptance.
+          The current corpus has **448 records**, **350 retained**, **98 added**
+          (20 declaration categories, 53 Weapons, 17 Rules, five terms, two
+          Skills, one Equipment), and **17 retired declaration identities**;
+          46 historical S identities remain current. All 740 distinct cited
+          source locations are listed for further clause review. The original
+          **367 / 304 D / 63 S** stays frozen; this is not 448 approvals.
+          Ignored JSON/Markdown reports are under `local/audits/`.
+        - [ ] **Metadata migration review:** Compare the 17 retired declaration
+          identities with 20 added page/category identities against actual PDF
+          headings, declarations and restrictions. Same-type candidates in the
+          crosswalk are not accepted renames; decide genuine replacements,
+          retirement and any unsupported declaration coverage.
+        - [ ] **Clause and browser dispositions:** Reconcile each current source
+          section and record with later documented source/FAQ decisions,
+          reviewed conditional effects, and normal-player browser evidence.
+          Prior A01–04 browser tests cover selected routes, not all 448 records.
+          Prioritize added Skills, the five Visibility Zone terms, source-scoped
+          Rules, and Weapon family/mode cases; retain unresolved source conflicts.
+        - [ ] **Final completeness gate:** Sign off all relevant current
+          categories and source sections under the release checklist, without
+          converting historical D/S, current citations, or interaction-review
+          flags into whole-record approval.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

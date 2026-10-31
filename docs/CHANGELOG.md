@@ -49,6 +49,13 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Project infrastructure:** Add a reproducible V1-A08
+  reconciliation between the unchanged 367-record explanation inventory and
+  current Core/Hacking records. Preserve historical D/S tiers and source
+  fingerprints; classify 448 current identities (98 additions, 17 retired
+  declaration IDs), 740 cited source locators and selected browser evidence.
+  Generate ignored review queues without claiming whole-record approval or
+  applying undocumented metadata renames.
 - **Data processing + Web backend + Web frontend:** Publish the six N5.3
   Game Modes as one browsable, source-reviewed General Rules table.
   Show Army Points, base SWC, recommended table/Deployment Zone sizes,

@@ -904,6 +904,44 @@ certify the complete rules corpus, select random outcomes or persist game state.
 
 ## 1.0 source evidence baseline
 
+### Frozen explanation-inventory reconciliation (V1-A08)
+
+The original October 9 [367-record explanation inventory](rules-explanation-audit-1.0-inventory.md)
+remains historical evidence: 304 selected clause comparisons (D) and 63
+screening-only rows (S), **neither of which is full-record approval**. To
+reconcile its exact identities against the *current* N5 Core/Hacking curated
+collections without overwriting the original audit, run:
+
+```powershell
+.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --json-output local/audits/v1-current-explanation-inventory.json --markdown-output local/audits/v1-current-explanation-inventory.md
+```
+
+The report pins the frozen appendix's SHA-256, validates current curated
+documents, and lists all retained, newly added and retired identities.
+At the October 31 current checkout baseline: **448 total; 350 retained,
+98 added, 17 retired declaration categories**. The new IDs comprise 20
+declaration categories, 53 Weapons, 17 Rules, five Game terms, two
+Skills and one Equipment record. **46** historical S rows are still present.
+Its 740 source-locator groups are **review queue entries**, not 740
+unreviewed mechanics or independently confirmed defects. Identical
+source/page references may cover distinct procedures; source locations
+need their own clause-level dispositions. Metadata page/type peers are
+candidate discoveries, not approved identity renames.
+
+The JSON contains the complete current identity crosswalk, D/S provenance
+where applicable, source pages/headings, curated review flags and five
+selected browser-test pointers for recently published general references.
+Every current record retains an explicit *full acceptance not assessed*
+disposition, even when its curated source status is `reviewed` or a
+selected browser test exists. The Markdown is an ignored reviewer queue.
+Neither the CLI nor the frozen source record inventory is a new release
+gate pass. Actual source/material-clause reconciliation, verified
+renames/retirements, scenario applicability, and final normal-mode
+browser acceptance remain under [the TODO](TODO.md) and
+[the 1.0 release gate](releasing.md#version-10-data-completeness-gate).
+`tests/test_report_reference_baseline.py` covers identity counts,
+malformed/duplicate historical rows, fingerprint drift and report output.
+
 The offline `tools/report_reference_baseline.py` command inventories the published Army
 source snapshot identity, rules collections and source citations, and row counts by
 canonical family. Scenario membership evidence is separated by source collection,

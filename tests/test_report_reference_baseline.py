@@ -26,6 +26,8 @@ from tools.report_reference_baseline import (
     _verify_published_unit_options,
     build_baseline,
     main,
+    parse_frozen_explanation_inventory,
+    reconcile_explanation_inventory,
     render_markdown,
     verify_served_revision,
 )
@@ -33,6 +35,101 @@ from tools.report_reference_baseline import (
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/infinity.db"
 RULES_DB = ROOT / "data/generated/rules.db"
+
+
+def test_frozen_explanation_inventory_reconciles_current_source_identities() -> None:
+    result = reconcile_explanation_inventory()
+    assert result["status"] == "identity-bridge-only-pending-clause-and-browser-acceptance"
+    assert (result["frozenCount"], result["currentCount"]) == (367, 448)
+    assert (result["retainedCount"], result["addedCount"], result["removedCount"]) == (
+        350, 98, 17,
+    )
+    assert result["frozenTiers"] == {"D": 304, "S": 63}
+    assert len(result["retainedScreeningOnlyIds"]) == 46
+    assert result["addedKinds"] == {
+        "declaration-category": 20, "equipment": 1, "rule": 17,
+        "skill": 2, "term": 5, "weapon": 53,
+    }
+    assert len(result["currentRecords"]) == 448
+    assert all(row["id"].startswith("declaration-category:")
+               and row["replacementVerified"] is False
+               for row in result["retiredIdentityRows"])
+    assert all(row["fullRecordAcceptance"] == "not-assessed-in-this-audit"
+               for row in result["currentRecords"])
+    assert result["fullRecordApprovalsIssuedByThisAudit"] == 0
+    assert {identity for group in result["sourceSections"]
+            for identity in group["currentRecordIds"]} == {
+        row["id"] for row in result["currentRecords"]
+    }
+    assert result["sourceSectionCount"] > 100
+    selected = {
+        row["id"]: row["selectedBrowserTest"]
+        for row in result["currentRecords"] if row["selectedBrowserTest"]
+    }
+    assert set(selected) == {
+        "rule:initiative-roll", "rule:combat-group", "rule:army-retreat",
+        "rule:standard-game", "rule:game-modes",
+    }
+    for row in result["currentRecords"]:
+        assert row["sourceDisposition"] == "pending-full-material-clause-reconciliation"
+        assert row["browserDisposition"] in {
+            "pending-full-normal-mode-acceptance",
+            "selected-route-smoke-evidence-not-full-acceptance",
+        }
+
+
+def test_frozen_explanation_parser_rejects_duplicate_and_malformed_rows() -> None:
+    sample = (
+        "## Record inventory\n"
+        "| Record identity | File | Tier |\n"
+        "| --- | --- | --- |\n"
+        "| `skill:one` | C | D | 0 | - | S1 p. 5 |\n"
+        "## Scenario component inventory\n"
+    )
+    assert parse_frozen_explanation_inventory(sample) == {
+        "skill:one": {"collection": "C", "historicalTier": "D"},
+    }
+    duplicate = sample.replace(
+        "## Scenario component inventory",
+        "| `skill:one` | H | S | 0 | - | p. 5 |\n"
+        "## Scenario component inventory",
+    )
+    with pytest.raises(ReferenceBaselineError, match="Duplicate frozen identity"):
+        parse_frozen_explanation_inventory(duplicate)
+    broken = sample.replace("| C | D |", "| X | D |")
+    with pytest.raises(ReferenceBaselineError, match="Malformed frozen"):
+        parse_frozen_explanation_inventory(broken)
+
+
+def test_frozen_explanation_reconciliation_rejects_changed_historical_snapshot(
+    tmp_path: Path,
+) -> None:
+    source = ROOT / "docs/rules-explanation-audit-1.0-inventory.md"
+    modified = tmp_path / "changed-history.md"
+    modified.write_text(
+        source.read_text(encoding="utf-8").replace(
+            "`attribute:mov`", "`attribute:movement`", 1,
+        ), encoding="utf-8",
+    )
+    with pytest.raises(ReferenceBaselineError, match="hash changed"):
+        reconcile_explanation_inventory(inventory_path=modified)
+
+
+def test_explanation_reconciliation_cli_writes_ignored_style_reports(
+    tmp_path: Path,
+) -> None:
+    json_path, markdown_path = tmp_path / "crosswalk.json", tmp_path / "crosswalk.md"
+    assert main([
+        "--reconcile-explanation-inventory",
+        "--json-output", str(json_path),
+        "--markdown-output", str(markdown_path),
+    ]) == 0
+    result = json.loads(json_path.read_text(encoding="utf-8"))
+    assert (result["currentCount"], result["addedCount"]) == (448, 98)
+    markdown = markdown_path.read_text(encoding="utf-8")
+    assert "not a v1.0 release gate pass" in markdown
+    assert "declaration-category:aro:p40" in markdown
+    assert "rule:game-modes" in markdown
 
 
 def test_baseline_reports_pinned_publication_without_claiming_completeness() -> None:
