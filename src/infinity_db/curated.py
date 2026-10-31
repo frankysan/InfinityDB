@@ -622,8 +622,29 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
             },
             "evidence": "derived-from-pinned-general-rules",
         },
+        {
+            "when": {
+                "weaponId": "weapon:ap-da-cc-weapon",
+                "sourceAmmunitionId": 10,
+                "immunity": "Critical",
+                "attackClass": "non-comms",
+            },
+            "components": ["ammunition:ap", "ammunition:da"],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 2,
+                "criticalRolls": 3,
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 2,
+                "criticalRolls": 2,
+                "additionalCriticalRollRemoved": True,
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
     ]:
-        raise ValueError(f"{context}: unsupported AP+T2 Critical immunity case")
+        raise ValueError(f"{context}: unsupported source-scoped Critical immunity cases")
     covered = value["coveredAmmunition"]
     if (
         not isinstance(covered, dict)

@@ -165,30 +165,50 @@ export function immunityCaseRows(facts = {}) {
     }
   }
   for (const item of cases.reviewedCriticalCases || []) {
-    // A source-reviewed Critical cancellation is neither partial
-    // Ammunition Immunity nor a Combined Saving Roll operation.
+    // These reviewed cases cancel only the Critical-added roll, not the
+    // source Ammunition's own Saving Rolls or their effects.
     const original = item.criticalWithoutImmunity;
     const applied = item.criticalWithImmunity;
-    rows.push({
-      title: [text("Immunity (Critical) vs "),
-        reference(item.when.weaponId, "AP+T2 CC Weapon")],
-      detail: [
-        text("The reviewed Critical normally adds one Saving Roll: "),
-        text(`${rollCount(original.criticalRolls)} using ${original.savingAttribute}. `),
-        text("With Immunity (Critical), only the extra Critical roll is removed: "),
-        text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute} remains. `),
-        text("The original failed hit Saving Roll still inflicts "),
-        text(`${applied.failedHitRollWounds} Wounds from `),
-        reference(item.when.ammunitionId, "T2"),
-        text("; the suppressed extra Critical roll would have inflicted "),
-        text(`${original.failedAdditionalCriticalRollWounds} Wound on failure. `),
-        reference("ammunition:ap", "AP"),
-        text(" still halves ARM, and "),
-        reference("trait:anti-materiel", "Anti-materiel"),
-        text(" remains a separate Weapon Trait. Applies to the exact non-Comms AP+T2 CC Weapon only; this is a derived reference, not an attack calculator."),
-      ],
-      evidence: evidence(item.evidence),
-    });
+    if (item.when.weaponId === "weapon:ap-t2-cc-weapon") {
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, "AP+T2 CC Weapon")],
+        detail: [
+          text("The reviewed Critical normally adds one Saving Roll: "),
+          text(`${rollCount(original.criticalRolls)} using ${original.savingAttribute}. `),
+          text("With Immunity (Critical), only the extra Critical roll is removed: "),
+          text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute} remains. `),
+          text("The original failed hit Saving Roll still inflicts "),
+          text(`${applied.failedHitRollWounds} Wounds from `),
+          reference(item.when.ammunitionId, "T2"),
+          text("; the suppressed extra Critical roll would have inflicted "),
+          text(`${original.failedAdditionalCriticalRollWounds} Wound on failure. `),
+          reference("ammunition:ap", "AP"),
+          text(" still halves ARM, and "),
+          reference("trait:anti-materiel", "Anti-materiel"),
+          text(" remains a separate Weapon Trait. Applies to the exact non-Comms AP+T2 CC Weapon only; this is a derived reference, not an attack calculator."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:ap-da-cc-weapon") {
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, "AP+DA CC Weapon")],
+        detail: [
+          text(`A hit requires ${rollCount(original.hitRolls)} using ${original.savingAttribute}; `),
+          text(`a Critical normally requires ${rollCount(original.criticalRolls)}. `),
+          text("Immunity (Critical) cancels only the extra Critical Saving Roll: "),
+          text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute} remain because `),
+          reference("ammunition:da", "DA"),
+          text(" still requires two rolls per hit. "),
+          reference("ammunition:ap", "AP"),
+          text(" still halves ARM. "),
+          reference("trait:anti-materiel", "Anti-materiel"),
+          text(" remains a separate Weapon Trait. This is the exact non-Comms AP+DA CC Weapon profile, not a general attack calculator."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    }
   }
   for (const item of cases.reviewedCombinedCases || []) {
     const partial = Array.isArray(item.withImmunity.ignoredComponents);

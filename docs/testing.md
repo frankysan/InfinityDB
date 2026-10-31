@@ -4148,6 +4148,23 @@ rule records. The full suite has 62 cases; all 11 base and five combined source
 identities are represented without inferred attack rules or a database rebuild.
 Future Weapon comparison views remain out of scope.
 
+**AP+DA CC Weapon / Immunity (Critical), 2026-10-31:**
+`tests/test_immunity_ap_da_critical.py` pins N5.3
+pp. 67, 95 and 177 and Army source Ammunition
+ID 10 AP+DA, ARM/2 × 2 with Anti-materiel and CC
+Traits. It independently validates two Saving Rolls
+per hit, three on a Critical, and two with Immunity
+(Critical), preserving AP halving and the original
+Weapon API. The second exact `reviewedCriticalCases`
+entry fails closed on modified identity, source
+components, roll count, Attribute, evidence or
+Comms status. Chromium at 1440/390/320 px checks
+the fifteenth card, semantic links and mobile
+layout. Coordinated staging/promoting keeps
+`rules.db` and deployed-object publication
+synchronized, with 17 reviewed deployed objects
+unchanged and recovery backup available.
+
 **AP+T2 CC Weapon / Immunity (Critical), 2026-10-31:**
 `tests/test_immunity_t2_critical.py` pins N5.3 pp. 63,
 67, 95 and 177 and the exact Army `AP+T2`/ARM/2

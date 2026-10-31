@@ -1112,6 +1112,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         preserve all Weapon profiles. Confirm pinned source,
         public API, 1440/390/320 Chromium, and coordinated
         rules/publication promotion with recovery backups.
+      - [x] Add an exact non-Comms **AP+DA CC Weapon / Immunity
+        (Critical)** reference based on printed N5.3 p. 67
+        Combined Ammunition counts, p. 95 Immunity (Critical)
+        and p. 177 CC Weapon Chart. Its two ARM/2 hit rolls
+        become three on a Critical without the Immunity;
+        with Immunity (Critical), only the third roll is
+        removed. DA still requires two rolls and AP still
+        halves ARM. Anti-materiel remains an independent Trait.
+        Limit the case to source Ammunition ID 10 and exact
+        Weapon; prohibit calculating Wounds or altering
+        imported Weapon profiles. Gate with pinned source,
+        API, closed-schema mutations, 1440/390/320 Chromium,
+        and coordinated rules/publication promotion.
       - [ ] Continue other Critical/component effects and any
         comparison-view use independently; do not generalize these
         exact reviewed cases into a resolver.

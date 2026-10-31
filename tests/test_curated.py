@@ -4835,29 +4835,52 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
             "Plasma Combined Saving Roll example"),
         (lambda f: f["reviewedCriticalCases"][0]["when"].update(
             weaponId="weapon:t2-cc-weapon"),
-            "AP+T2 Critical immunity case"),
+            "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCriticalCases"][0]["when"].update(
-            immunity="AP"), "AP+T2 Critical immunity case"),
+            immunity="AP"), "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCriticalCases"][0]["when"].update(
-            attackClass="comms"), "AP+T2 Critical immunity case"),
+            attackClass="comms"), "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCriticalCases"][0].update(
             components=["ammunition:t2"]),
-            "AP+T2 Critical immunity case"),
+            "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCriticalCases"][0]["criticalWithoutImmunity"].update(
-            savingAttribute="ARM"), "AP+T2 Critical immunity case"),
+            savingAttribute="ARM"), "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCriticalCases"][0]["criticalWithoutImmunity"].update(
             failedAdditionalCriticalRollWounds=2),
-            "AP+T2 Critical immunity case"),
+            "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCriticalCases"][0]["criticalWithImmunity"].update(
-            criticalRolls=2), "AP+T2 Critical immunity case"),
+            criticalRolls=2), "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCriticalCases"][0]["criticalWithImmunity"].update(
-            failedHitRollWounds=1), "AP+T2 Critical immunity case"),
+            failedHitRollWounds=1), "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCriticalCases"][0]["criticalWithImmunity"].update(
             additionalCriticalRollRemoved=False),
-            "AP+T2 Critical immunity case"),
+            "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCriticalCases"][0].update(
             evidence="explicit-n5.3-pdf-p96-example-3"),
-            "AP+T2 Critical immunity case"),
+            "source-scoped Critical immunity cases"),
+        (lambda f: f["reviewedCriticalCases"][1]["when"].update(
+            weaponId="weapon:feuerbach"),
+            "source-scoped Critical immunity cases"),
+        (lambda f: f["reviewedCriticalCases"][1]["when"].update(
+            sourceAmmunitionId=13),
+            "source-scoped Critical immunity cases"),
+        (lambda f: f["reviewedCriticalCases"][1]["when"].update(
+            attackClass="comms"),
+            "source-scoped Critical immunity cases"),
+        (lambda f: f["reviewedCriticalCases"][1]["components"].reverse(),
+            "source-scoped Critical immunity cases"),
+        (lambda f: f["reviewedCriticalCases"][1]["criticalWithoutImmunity"].update(
+            criticalRolls=2),
+            "source-scoped Critical immunity cases"),
+        (lambda f: f["reviewedCriticalCases"][1]["criticalWithImmunity"].update(
+            criticalRolls=1),
+            "source-scoped Critical immunity cases"),
+        (lambda f: f["reviewedCriticalCases"][1]["criticalWithImmunity"].update(
+            savingAttribute="ARM"),
+            "source-scoped Critical immunity cases"),
+        (lambda f: f["reviewedCriticalCases"][1].update(
+            evidence="explicit-n5.3-pdf-p96-example-3"),
+            "source-scoped Critical immunity cases"),
         (lambda f: f["reviewedCombinedCases"][3]["when"].update(
             weaponId="weapon:multi-pistol"), "Immunity applicability"),
         (lambda f: f["reviewedCombinedCases"][3]["when"].update(

@@ -70,6 +70,7 @@
         "test_immunity_flash_pulse_pdf_example",
         "test_immunity_plasma_critical",
         "test_immunity_t2_critical",
+        "test_immunity_ap_da_critical",
         "test_identities",
         "test_identity_database",
         "test_interim_reference_consistency",

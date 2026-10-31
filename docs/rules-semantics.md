@@ -2745,14 +2745,28 @@ Immunity) and `reviewedSavingRollCases` (multiple
 defense Attributes). It does not execute an attack or
 infer combinations for unrelated Weapons.
 
-The Skill reference now presents **fourteen reviewed
+**AP+DA CC Weapon versus Immunity (Critical)** adds a
+second exact `reviewedCriticalCases` reference. N5.3 p. 67
+explicitly says that an AP+DA Critical requires three
+Saving Rolls: **two DA rolls and one Critical-added roll**,
+all with ARM/BTS halved by AP. The p. 177 AP+DA CC Weapon
+is a non-Comms ARM/2 × 2 profile, with Anti-materiel and CC
+Traits. Applying Immunity (Critical) from p. 95 removes
+**only the third roll**, leaving **two ARM/2 Saving Rolls**.
+It neither cancels DA's original two rolls nor restores
+full ARM; Anti-materiel remains independent. This is a
+rule-derived conditional reference, not a fifth printed
+Immunity example or a generic attack engine. The source
+Army profile and component identity remain unchanged.
+
+The Skill reference now presents **fifteen reviewed
 interactions**: six Combined Ammunition cases, four
 exact Weapon cases (Flash Pulse, E/Mitter, Missile
 Launcher Blast, Monofilament), two Plasma Combined
-Saving Roll cases, one T2 Critical case and one
-Vulnerability example. Chromium acceptance at
-1440/390/320 px verifies the fourteenth source-scoped
-case, semantic links and mobile layout.
+Saving Roll cases, two exact Critical cases (AP+T2
+and AP+DA CC Weapons), and one Vulnerability example.
+Chromium acceptance at 1440/390/320 px verifies the
+fifteenth source-scoped case and its semantic links.
 Other component-specific Immunities, BTS-based attacks, Comms Attack
 rules and conditional State interactions remain unresolved. Do not
 extrapolate an evaluator or project outcomes into Weapon profiles.

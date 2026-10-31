@@ -74,7 +74,7 @@ def test_t2_critical_extra_roll_and_arm_halving_are_separately_sourced() -> None
     )["records"]}
     assert records["skill:immunity"]["facts"]["immunityInteraction"][
         "reviewedCriticalCases"
-    ] == [EXPECTED]
+    ][0] == EXPECTED
     t2 = records["ammunition:t2"]["facts"]["ammunitionResolution"]
     assert t2["woundsPerFailedSave"] == {
         "hit": 2, "criticalAdditionalRoll": 1,
@@ -106,9 +106,7 @@ def test_t2_critical_reference_publishes_only_on_immunity_skill() -> None:
     rules = RulesDatabase(RULES)
     immunity = rules.composed_record("skill:immunity")
     assert immunity is not None
-    assert immunity["facts"]["immunityInteraction"]["reviewedCriticalCases"] == [
-        EXPECTED
-    ]
+    assert immunity["facts"]["immunityInteraction"]["reviewedCriticalCases"][0] == EXPECTED
     app = create_app(ARMY, rules_database_path=RULES)
 
     def get(path: str) -> dict:
@@ -127,7 +125,8 @@ def test_t2_critical_reference_publishes_only_on_immunity_skill() -> None:
     facts = get("/api/skills/immunity")["rules"][0]["facts"][
         "immunityInteraction"
     ]
-    assert facts["reviewedCriticalCases"] == [EXPECTED]
+    assert facts["reviewedCriticalCases"][0] == EXPECTED
+    assert len(facts["reviewedCriticalCases"]) == 2
     assert len(facts["reviewedCombinedCases"]) == 6
     assert facts["reviewedCombinedCases"][4]["when"]["immunity"] == "AP"
     weapon = get("/api/weapons/ap-t2-cc-weapon")

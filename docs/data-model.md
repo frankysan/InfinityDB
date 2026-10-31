@@ -441,7 +441,16 @@ Immunity (AP) outcome, which retains two Critical
 Saving Rolls at full ARM. The new category stays
 separate from combined-component and Combined Saving
 Roll references; Army profiles are unchanged.
-The fourteen reviewed interactions are curated
+The second exact `reviewedCriticalCases` record covers
+AP+DA CC Weapon (Army source Ammunition ID 10): two
+ARM/2 Saving Rolls on hit, three on Critical, but two
+on Critical when Immunity (Critical) removes only the
+extra roll. DA's two underlying rolls and AP's halved
+ARM survive; Anti-materiel is separate. The case is
+independent of both AP+T2's T2 Wound consequences and
+Immunity (ARM)/(AP) component effects. The original
+Weapon profile remains unchanged.
+The fifteen reviewed interactions are curated
 references, not a runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms
