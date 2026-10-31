@@ -1167,6 +1167,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         imported Weapon profiles. Gate with pinned source,
         API, closed-schema mutations, 1440/390/320 Chromium,
         and coordinated rules/publication promotion.
+      - [x] Complete exact **Immunity (Critical)** examples for all five
+        reviewed Combined Ammunition forms by adding AP+EXP CC Weapon
+        (source Ammunition 13), Silenced Pistol/AP+Shock (30) and E/M
+        CC Weapon/N+E/M (5). Pinned N5.3 pp. 63–65, 67, 95, 177 and
+        182 support removing only the extra Critical roll: four to
+        three ARM/2 rolls, two to one BTS/2 roll, and three to two
+        BTS/2 rolls, respectively. Retain AP, Shock's VITA=1 condition,
+        and N+E/M's Wound/conditional State effects. Validate exact
+        source profiles, all-five coverage, rejected schema mutations,
+        API publication and 1440/390/320 Chromium; promote the coordinated
+        rules/publication pair with recovery copies and 17 objects intact.
+        This covers one exact non-Comms Weapon per form, not arbitrary
+        Weapons, target Immunities, Comms or all Critical interactions.
       - [ ] Continue other Critical/component effects and any
         comparison-view use independently; do not generalize these
         exact reviewed cases into a resolver.

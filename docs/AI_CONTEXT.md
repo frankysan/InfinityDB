@@ -50,8 +50,8 @@ release/audit narrative belongs in the changelog and Git history.
   additional ARM roll for a Critical. Do not infer this from display punctuation
   or transfer it to base `ammunition:*` facts. See `docs/data-model.md`.
 - `skill:immunity` owns the non-executable, source-scoped Immunity
-  exceptions and reviewed cases. **Do not generalize** derived AP+DA/AP+Exp
-  examples, the conditional Flash Pulse/Non-Lethal/Stunned case, or the
+  exceptions and reviewed cases. **Do not generalize** source-scoped component
+  or Critical examples, the conditional Flash Pulse/Non-Lethal/Stunned case, or the
   weapon-name-scoped Viral Vulnerability case into a target evaluator.
   `docs/rules-semantics.md` RS-AW-IMM-001 owns exact rolls, provenance
   and scope; curated `facts.immunityInteraction` owns typed publication.

@@ -147,6 +147,17 @@ while Non-Lethal and the failed-Saving-Roll Stunned condition survive. The Weapo
 Chart (`oldid=4083`) separately grounds Flash Pulse's printed profile. Do not
 extrapolate these reviewed, non-executable examples to unreviewed combinations.
 
+The separate closed `reviewedCriticalCases` array covers one exact
+non-Comms Weapon for each of the five reviewed combined forms:
+AP+DA, AP+Exp, AP+Shock, AP+T2 and N+E/M. Each fixes the source
+Ammunition ID, Weapon identity, ordered canonical components, original
+hit/Critical counts and remaining counts when only the extra Critical
+roll is removed. AP+T2 additionally preserves its distinct hit/extra-roll
+Wound consequences. The other canonical Ammunition effects remain
+applicable; these cases do not turn covered components into Normal.
+Do not generalize this finite reference set to a Weapon/target evaluator
+or Comms Attacks. See [rules semantics](../../docs/rules-semantics.md#rs-aw-imm-001--immunity-changes-covered-effects-not-the-attack-identity).
+
 ### Explaining rules interactions
 
 **Accepted authoring and review standard, not a new JSON schema or a rules engine.**

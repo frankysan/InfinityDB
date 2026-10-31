@@ -231,21 +231,58 @@ export function immunityCaseRows(facts = {}) {
         ],
         evidence: evidence(item.evidence),
       });
-    } else if (item.when.weaponId === "weapon:ap-da-cc-weapon") {
+    } else if (["weapon:ap-da-cc-weapon", "weapon:ap-exp-cc-weapon"].includes(item.when.weaponId)) {
+      const exp = item.when.weaponId === "weapon:ap-exp-cc-weapon";
       rows.push({
         title: [text("Immunity (Critical) vs "),
-          reference(item.when.weaponId, "AP+DA CC Weapon")],
+          reference(item.when.weaponId, exp ? "AP+EXP CC Weapon" : "AP+DA CC Weapon")],
         detail: [
           text(`A hit requires ${rollCount(original.hitRolls)} using ${original.savingAttribute}; `),
           text(`a Critical normally requires ${rollCount(original.criticalRolls)}. `),
           text("Immunity (Critical) cancels only the extra Critical Saving Roll: "),
           text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute} remain because `),
-          reference("ammunition:da", "DA"),
-          text(" still requires two rolls per hit. "),
+          reference(exp ? "ammunition:exp" : "ammunition:da", exp ? "EXP" : "DA"),
+          text(exp ? " still requires three rolls per hit. " : " still requires two rolls per hit. "),
           reference("ammunition:ap", "AP"),
           text(" still halves ARM. "),
           reference("trait:anti-materiel", "Anti-materiel"),
-          text(" remains a separate Weapon Trait. This is the exact non-Comms AP+DA CC Weapon profile, not a general attack calculator."),
+          text(` remains a separate Weapon Trait. This is the exact non-Comms AP+${exp ? "EXP" : "DA"} CC Weapon profile, not a general attack calculator.`),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:silenced-pistol") {
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, "Silenced Pistol")],
+        detail: [
+          text(`A Critical normally requires ${rollCount(original.criticalRolls)} using ${original.savingAttribute}. `),
+          text("Immunity (Critical) removes only the extra Critical Saving Roll, leaving "),
+          text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute}. `),
+          reference("ammunition:ap", "AP"), text(" still halves BTS, and "),
+          reference("ammunition:shock", "Shock"),
+          text(" still inflicts 1 Wound per failed Saving Roll and sends a VITA 1 target directly to "),
+          reference("state:dead", "Dead"), text(" on failure, bypassing "),
+          reference("state:unconscious", "Unconscious"), text(". "),
+          reference("trait:silent-x", "Silent (-6)"),
+          text(" is a separate reaction mechanic, not adjudicated by this Saving Roll example. Applies to the exact non-Comms Silenced Pistol only; this is a derived reference, not an attack calculator."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.weaponId === "weapon:e-m-cc-weapon") {
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, "E/M CC Weapon")],
+        detail: [
+          text(`A Critical normally requires ${rollCount(original.criticalRolls)} using ${original.savingAttribute}. `),
+          text("Immunity (Critical) removes only the extra Critical Saving Roll, leaving "),
+          text(`${rollCount(applied.criticalRolls)} using ${applied.savingAttribute}. `),
+          reference("ammunition:normal", "Normal"),
+          text(" still inflicts 1 Wound per failed Saving Roll; "),
+          reference("ammunition:em", "E/M"),
+          text(" still halves BTS and causes "), reference("state:isolated", "Isolated"),
+          text(" on a failed Saving Roll, plus "),
+          reference("state:immobilized-b", "Immobilized-B"),
+          text(" for HI, TAG, REM or VH targets. There is no additional ARM Saving Roll. Applies to the exact non-Comms N+E/M CC Weapon only; this is a derived reference, not an attack calculator."),
         ],
         evidence: evidence(item.evidence),
       });

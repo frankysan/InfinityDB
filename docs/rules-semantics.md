@@ -2596,12 +2596,11 @@ between the Spanish Wiki and both PDFs, not between the published rulebooks.
 The source-scoped `reviewedWeaponCases` preserves the confirmed interaction
 without providing a general BTS attack or component evaluator.
 
-The shared Skill reference card now presents **six source-bounded interactions**:
-the five previously reviewed `reviewedWeaponCases`,
-`reviewedVulnerabilityCases` and `reviewedCombinedCases`, plus the
+**Historical six-case acceptance.** The earlier Skill card combined five
+reviewed Weapon, Vulnerability and Combined Ammunition examples with the
 independent `reviewedSavingRollCases` entry for N5.3 p. 96, Example 3.
-It keeps conditions, roll counts, source-evidence classification and owning
-rule links visible, without evaluating new attacks.
+That review checked conditions, roll counts, source-evidence classification
+and owning rule links. The expanded current set is summarized below.
 
 **Plasma Rifle versus Immunity (Enhanced)** is explicitly printed, not a
 deduction. The Plasma Rifle uses Normal Ammunition and a **Combined Saving
@@ -2610,9 +2609,10 @@ remove either roll; this does not imply Combined Ammunition components or
 determine a new Critical outcome. The authored case is tied to that printed
 Weapon and reviewed source-profile contract, not generalized to other Weapons
 or BTS-based combined Ammunition. The earlier REA-011 five-card browser
-acceptance remains historical. The six-card renderer, source/API regression,
-and real-Chromium verification at 1440/390/320 px now pass, including evidence
-labels, semantic links, error-free rendering and no horizontal overflow.
+acceptance and subsequent six-case renderer, source/API and Chromium
+acceptance at 1440/390/320 px remain historical. Current regressions
+verify the expanded reference set, including evidence labels, semantic
+links, error-free rendering and no horizontal overflow.
 
 **E/M CC Weapon versus Immunity (BTS)** is a *rule-derived* fourth
 `reviewedCombinedCases` interaction, distinct from the printed Plasma
@@ -2772,6 +2772,28 @@ rule-derived conditional reference, not a fifth printed
 Immunity example or a generic attack engine. The source
 Army profile and component identity remain unchanged.
 
+**Remaining reviewed Combined Ammunition versus Immunity (Critical)**
+adds three exact, rule-derived examples from pinned N5.3 pp. 63–65,
+67, 95, 177 and 182. The Critical rule adds **one** Saving Roll to
+the combined effect, rather than one per component. Immunity (Critical)
+removes that extra roll without treating the underlying Ammunition as
+Normal or ignoring its effects:
+
+| Exact non-Comms Weapon | Source Ammunition | Ordinary Critical | With Immunity (Critical) | Effects retained |
+| --- | --- | --- | --- | --- |
+| AP+EXP CC Weapon | 13, AP+Exp | 4 ARM/2 rolls | 3 ARM/2 rolls | AP halves ARM; EXP requires three rolls per hit |
+| Silenced Pistol | 30, AP+Shock | 2 BTS/2 rolls | 1 BTS/2 roll | AP halves BTS; Shock inflicts one Wound per failed roll and bypasses Unconscious for VITA=1 targets |
+| E/M CC Weapon | 5, N+E/M | 3 BTS/2 rolls | 2 BTS/2 rolls | Normal inflicts one Wound per failed roll; E/M halves BTS and causes Isolated, plus Immobilized-B for HI/TAG/REM/VH targets |
+
+Shock's State effect and both E/M State effects require a **failed**
+Saving Roll; Immunity (Critical) alone does not prevent them. N+E/M
+adds no ARM Saving Roll. Silent (-6) and Anti-materiel remain linked
+source Traits whose separate mechanics are not adjudicated here.
+Together with AP+DA and AP+T2, these cases cover one exact Weapon
+for every reviewed combined form. They do not establish every Weapon,
+Comms Attack, target-specific exception or Critical interaction.
+The printed p. 96 Immunity examples retain their separate evidence labels.
+
 **E/M Grenade Launcher versus Immunity (BTS)** adds
 another strictly source-derived, *non-Comms* E/M
 Weapon case. N5.3 p. 179 shows the E/M Grenade
@@ -2815,10 +2837,10 @@ generalize to every Comms Attack or other
 Hacking Programs. Source Hacking Program
 fields and published attributes stay unchanged.
 
-The Skill reference now presents **seventeen
-reviewed interactions**: six Combined Ammunition,
+The Skill reference now presents **21
+reviewed interactions**: seven Combined Ammunition,
 five exact Weapon, two Plasma Combined Saving Roll,
-two exact Critical, one Vulnerability and one
+five exact Critical, one Vulnerability and one
 Oblivion Comms-exception reference. Chromium at
 1440/390/320 px verifies the distinct exception
 and semantic links.

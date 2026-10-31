@@ -459,6 +459,18 @@ ARM survive; Anti-materiel is separate. The case is
 independent of both AP+T2's T2 Wound consequences and
 Immunity (ARM)/(AP) component effects. The original
 Weapon profile remains unchanged.
+The remaining three exact `reviewedCriticalCases` complete one reviewed
+non-Comms Weapon example for each of the five published combined forms:
+AP+EXP CC Weapon (source Ammunition 13) retains three ARM/2 rolls instead
+of four on Critical; Silenced Pistol (30, AP+Shock) retains one BTS/2
+roll instead of two; E/M CC Weapon (5, N+E/M) retains two BTS/2 rolls
+instead of three. These records reuse the closed original/applied count
+shape, ordered canonical components and rule-derived evidence class.
+They cancel only the extra Critical roll. AP/EXP effects, Shock's
+VITA=1 failed-roll Dead condition, and N+E/M's Wounds and conditional
+Isolated/Immobilized-B effects remain owned by their canonical Ammunition
+facts. Silent's separate reaction mechanic is not adjudicated. Coverage
+of those five forms does not authorize a general target or Weapon evaluator.
 The fifth exact `reviewedWeaponCases` entry records
 the source-defined E/M Grenade Launcher against
 Immunity (BTS): source Ammunition 14 E/M, BTS/2
@@ -481,7 +493,7 @@ count. The Hacking Program source, AP Ammunition,
 Non-Lethal Trait and Program API remain unchanged.
 This is a source-scoped negative/positive Immunity
 boundary, not a general Hacking Program evaluator.
-The seventeen reviewed interactions are curated
+The 21 reviewed interactions are curated
 references, not a runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms

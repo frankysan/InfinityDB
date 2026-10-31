@@ -67,7 +67,7 @@ const groups = descendants(article, (node) => node.className === "detail-fact-gr
 assert.equal(groups.length, 1);
 const group = groups[0];
 const allCases = descendants(group, (node) => node.tag === "li");
-assert.equal(allCases.length, 18);
+assert.equal(allCases.length, 21);
 const grenade = allCases[4];
 assert.match(grenade.textContent, /Immunity \(BTS\) vs E\/M Grenade Launcher/);
 assert.match(grenade.textContent, /2 Saving Rolls on a hit \(3 on a Critical\) using BTS\/2/);
@@ -85,7 +85,7 @@ assert.match(comms.textContent, /without cancelling the underlying Saving Roll/)
 assert.match(comms.textContent, /Burst 2 counts attack dice, not Saving Rolls/);
 assert.match(comms.textContent, /not all hacking or Comms effects/);
 const cases = [...allCases.slice(0, 4), ...allCases.slice(6)];
-assert.equal(cases.length, 16);
+assert.equal(cases.length, 19);
 // Every reviewed case uses the same semantic list-item structure with
 // a navigable title, an outcome, and its own source-evidence classification.
 for (const item of cases) {
@@ -105,9 +105,11 @@ assert.deepEqual(labels, [
   "Derived from reviewed general rules", "Derived from reviewed general rules",
   "Derived from reviewed general rules", "Derived from reviewed general rules",
   "Derived from reviewed general rules", "Derived from reviewed general rules",
+  "Derived from reviewed general rules", "Derived from reviewed general rules",
+  "Derived from reviewed general rules",
 ]);
 assert.match(cases[0].textContent, /non-Comms attacks/);
-for (const item of cases.slice(9)) {
+for (const item of cases.slice(12)) {
   assert.match(item.textContent, /Applies to the reviewed non-Comms attack only/);
 }
 assert.match(cases[2].textContent, /Immunity \(ARM\) vs Missile Launcher \(Blast Mode\)/);
@@ -139,6 +141,23 @@ assert.match(cases[8].textContent, /2 Saving Rolls using ARM\/2 remain because D
 assert.match(cases[8].textContent, /AP still halves ARM/);
 assert.match(cases[8].textContent, /Anti-materiel remains a separate Weapon Trait/);
 const combined = cases.map((node) => node.textContent);
+assert.match(combined[9], /Immunity \(Critical\) vs AP\+EXP CC Weapon/);
+assert.match(combined[9], /a Critical normally requires 4 Saving Rolls/);
+assert.match(combined[9], /3 Saving Rolls using ARM\/2 remain because EXP/);
+assert.match(combined[9], /AP still halves ARM/);
+assert.match(combined[10], /Immunity \(Critical\) vs Silenced Pistol/);
+assert.match(combined[10], /2 Saving Rolls using BTS\/2/);
+assert.match(combined[10], /leaving 1 Saving Roll using BTS\/2/);
+assert.match(combined[10], /Shock still inflicts 1 Wound per failed Saving Roll/);
+assert.match(combined[10], /VITA 1 target directly to Dead on failure/);
+assert.match(combined[10], /not adjudicated by this Saving Roll example/);
+assert.match(combined[11], /Immunity \(Critical\) vs E\/M CC Weapon/);
+assert.match(combined[11], /3 Saving Rolls using BTS\/2/);
+assert.match(combined[11], /leaving 2 Saving Rolls using BTS\/2/);
+assert.match(combined[11], /Normal still inflicts 1 Wound per failed Saving Roll/);
+assert.match(combined[11], /Immobilized-B for HI, TAG, REM or VH targets/);
+assert.match(combined[11], /There is no additional ARM Saving Roll/);
+
 assert.match(combined[0], /failed BTS Saving Roll still causes Stunned without Wounds/);
 assert.match(combined[0], /the Saving Roll remains BTS/);
 assert.match(combined[0], /Explicit N5\.3 p\. 96, Example 4/);
@@ -149,29 +168,29 @@ assert.match(combined[1], /Non-Lethal.*inflicts no Wounds/);
 assert.match(combined[1], /Armed Turret E\/Mitter discrepancy is not adjudicated/);
 assert.match(combined[4], /weapon with “Viral” in its name/);
 assert.match(combined[4], /not a rule for individual Ammunition components/);
-assert.match(combined[9], /1 Saving Roll on a hit \(2 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
-assert.match(combined[10], /1 Saving Roll on a hit \(2 on a Critical\).*3 Saving Rolls on a hit \(4 on a Critical\)/);
-assert.match(combined[11], /2 Saving Rolls on a hit \(3 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
-assert.match(combined[11], /AP component is ignored; DA still applies/);
-assert.match(combined[12], /Immunity \(AP\) vs AP \+ SHOCK.*Silenced Pistol/);
-assert.match(combined[12], /1 Saving Roll on a hit \(2 on a Critical\) using BTS, rather than 1 Saving Roll on a hit \(2 on a Critical\) using BTS\/2/);
-assert.match(combined[12], /Shock effect still sends a VITA 1 target directly to Dead/);
-assert.match(combined[12], /Silent \(-6\) remains a separately conditional Trait/);
-assert.match(combined[13], /Immunity \(AP\) vs AP \+ T2.*AP\+T2 CC Weapon/);
-assert.match(combined[13], /1 Saving Roll on a hit \(2 on a Critical\) using ARM, rather than 1 Saving Roll on a hit \(2 on a Critical\) using ARM\/2/);
-assert.match(combined[13], /failed hit Saving Roll still inflicts 2 Wounds/);
-assert.match(combined[13], /failed additional Critical Saving Roll inflicts only 1 Wound/);
-assert.match(combined[13], /Identify which die is the hit roll/);
-assert.match(combined[13], /Anti-materiel Trait remains a separate Weapon property/);
-assert.match(combined[14], /Immunity \(BTS\) vs N \+ E\/M.*E\/M CC Weapon/);
-assert.match(combined[14], /1 Saving Roll on a hit \(2 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
-assert.match(combined[15], /Immunity \(BTS\) vs AP \+ SHOCK.*Silenced Pistol/);
+assert.match(combined[12], /1 Saving Roll on a hit \(2 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
+assert.match(combined[13], /1 Saving Roll on a hit \(2 on a Critical\).*3 Saving Rolls on a hit \(4 on a Critical\)/);
+assert.match(combined[14], /2 Saving Rolls on a hit \(3 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
+assert.match(combined[14], /AP component is ignored; DA still applies/);
+assert.match(combined[15], /Immunity \(AP\) vs AP \+ SHOCK.*Silenced Pistol/);
 assert.match(combined[15], /1 Saving Roll on a hit \(2 on a Critical\) using BTS, rather than 1 Saving Roll on a hit \(2 on a Critical\) using BTS\/2/);
-assert.match(combined[15], /Both AP and Shock special effects are ignored/);
-assert.match(combined[15], /failed Normal Saving Roll can still inflict a Wound/);
-assert.match(combined[15], /Silent \(-6\) concerns conditional Face to Face Dodge Rolls/);
-assert.match(combined[15], /does not adjudicate its interaction with Immunity/);
-assert.doesNotMatch(combined[15], /Shock effect still sends/);
+assert.match(combined[15], /Shock effect still sends a VITA 1 target directly to Dead/);
+assert.match(combined[15], /Silent \(-6\) remains a separately conditional Trait/);
+assert.match(combined[16], /Immunity \(AP\) vs AP \+ T2.*AP\+T2 CC Weapon/);
+assert.match(combined[16], /1 Saving Roll on a hit \(2 on a Critical\) using ARM, rather than 1 Saving Roll on a hit \(2 on a Critical\) using ARM\/2/);
+assert.match(combined[16], /failed hit Saving Roll still inflicts 2 Wounds/);
+assert.match(combined[16], /failed additional Critical Saving Roll inflicts only 1 Wound/);
+assert.match(combined[16], /Identify which die is the hit roll/);
+assert.match(combined[16], /Anti-materiel Trait remains a separate Weapon property/);
+assert.match(combined[17], /Immunity \(BTS\) vs N \+ E\/M.*E\/M CC Weapon/);
+assert.match(combined[17], /1 Saving Roll on a hit \(2 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
+assert.match(combined[18], /Immunity \(BTS\) vs AP \+ SHOCK.*Silenced Pistol/);
+assert.match(combined[18], /1 Saving Roll on a hit \(2 on a Critical\) using BTS, rather than 1 Saving Roll on a hit \(2 on a Critical\) using BTS\/2/);
+assert.match(combined[18], /Both AP and Shock special effects are ignored/);
+assert.match(combined[18], /failed Normal Saving Roll can still inflict a Wound/);
+assert.match(combined[18], /Silent \(-6\) concerns conditional Face to Face Dodge Rolls/);
+assert.match(combined[18], /does not adjudicate its interaction with Immunity/);
+assert.doesNotMatch(combined[18], /Shock effect still sends/);
 for (const item of cases.slice(9)) assert.match(item.textContent, /Derived from reviewed general rules/);
 assert.match(group.textContent, /Critical counts assume no Immunity \(Critical\)/);
 const links = descendants(group, (node) => node.tag === "a");
@@ -181,7 +200,8 @@ for (const url of ["/weapons/flash-pulse", "/weapons/e-mitter", "/weapons/plasma
   "/hacking-programs/oblivion", "/states/isolated",
   "/weapons/e-m-cc-weapon", "/weapons/e-m-grenade-launcher",
   "/traits/speculative-attack", "/weapons/ap-t2-cc-weapon",
-  "/weapons/ap-da-cc-weapon", "/ammunition/t2",
+  "/weapons/ap-da-cc-weapon", "/weapons/ap-exp-cc-weapon", "/ammunition/t2",
+  "/states/immobilized-b", "/states/unconscious",
   "/weapons/missile-launcher", "/traits/impact-template",
   "/weapons/monofilament-cc-weapon", "/traits/arm-0",
   "/traits/anti-materiel", "/states/stunned",
@@ -198,4 +218,4 @@ assert.deepEqual(descendants(generic, (node) => node.className === "detail-fact-
   .map((node) => node.textContent), [
   "Requirements", "Effects", "Restrictions", "Clarifications and examples",
 ]);
-console.log("18 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");
+console.log("21 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");

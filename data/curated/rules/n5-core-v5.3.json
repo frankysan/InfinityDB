@@ -21195,6 +21195,78 @@
                                 "additionalCriticalRollRemoved": true
                             },
                             "evidence": "derived-from-pinned-general-rules"
+                        },
+                        {
+                            "when": {
+                                "weaponId": "weapon:ap-exp-cc-weapon",
+                                "sourceAmmunitionId": 13,
+                                "immunity": "Critical",
+                                "attackClass": "non-comms"
+                            },
+                            "components": [
+                                "ammunition:ap",
+                                "ammunition:exp"
+                            ],
+                            "criticalWithoutImmunity": {
+                                "savingAttribute": "ARM/2",
+                                "hitRolls": 3,
+                                "criticalRolls": 4
+                            },
+                            "criticalWithImmunity": {
+                                "savingAttribute": "ARM/2",
+                                "hitRolls": 3,
+                                "criticalRolls": 3,
+                                "additionalCriticalRollRemoved": true
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
+                        },
+                        {
+                            "when": {
+                                "weaponId": "weapon:silenced-pistol",
+                                "sourceAmmunitionId": 30,
+                                "immunity": "Critical",
+                                "attackClass": "non-comms"
+                            },
+                            "components": [
+                                "ammunition:ap",
+                                "ammunition:shock"
+                            ],
+                            "criticalWithoutImmunity": {
+                                "savingAttribute": "BTS/2",
+                                "hitRolls": 1,
+                                "criticalRolls": 2
+                            },
+                            "criticalWithImmunity": {
+                                "savingAttribute": "BTS/2",
+                                "hitRolls": 1,
+                                "criticalRolls": 1,
+                                "additionalCriticalRollRemoved": true
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
+                        },
+                        {
+                            "when": {
+                                "weaponId": "weapon:e-m-cc-weapon",
+                                "sourceAmmunitionId": 5,
+                                "immunity": "Critical",
+                                "attackClass": "non-comms"
+                            },
+                            "components": [
+                                "ammunition:normal",
+                                "ammunition:em"
+                            ],
+                            "criticalWithoutImmunity": {
+                                "savingAttribute": "BTS/2",
+                                "hitRolls": 2,
+                                "criticalRolls": 3
+                            },
+                            "criticalWithImmunity": {
+                                "savingAttribute": "BTS/2",
+                                "hitRolls": 2,
+                                "criticalRolls": 2,
+                                "additionalCriticalRollRemoved": true
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
                         }
                     ],
                     "reviewedCombinedCases": [

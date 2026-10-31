@@ -4148,6 +4148,22 @@ rule records. The full suite has 62 cases; all 11 base and five combined source
 identities are represented without inferred attack rules or a database rebuild.
 Future Weapon comparison views remain out of scope.
 
+**Five combined-form Critical-Immunity examples, 2026-10-31:**
+`tests/test_immunity_combined_critical_completion.py` independently pins
+the N5.3 PDF, exact chart rows and Army profiles for AP+EXP CC Weapon,
+Silenced Pistol (AP+Shock) and E/M CC Weapon (N+E/M). It checks authored,
+stored and public API cases while preserving source Saving Roll fields
+and ordered component references. A corpus assertion requires one exact
+example per reviewed combined form (IDs 5/10/13/30/40); it is not a
+general Weapon/target completeness verdict. Mutation tests reject altered
+Weapon, Comms scope, source ID, components, roll counts, Attribute,
+Critical suppression and evidence. Nine additional Chromium checks at
+1440/390/320 px verify the three new explanations, conditional Shock/E/M
+effects, canonical links, source API parity, request/page errors and overflow.
+The shared renderer covers 21 reviewed interactions; the full Immunity
+browser module has 51 cases. Rules/publication refresh preserves all 17
+deployed objects and recovery copies. Final release acceptance stays separate.
+
 **Silenced Pistol / Immunity (BTS), 2026-10-31:**
 `tests/test_immunity_bts_silenced_pistol.py` pins English N5.3
 pp. 63, 65, 67, 95–96, 175 and 182 and checks the exact Army
