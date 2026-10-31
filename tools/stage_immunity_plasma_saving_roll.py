@@ -69,8 +69,26 @@ def check_rules(path: Path) -> None:
         ],
         "result": "combined-saving-roll-preserved",
         "evidence": "explicit-n5.3-pdf-p96-example-3",
+    }, {
+        "when": {
+            "weaponId": "weapon:plasma-rifle",
+            "immunity": "Critical",
+            "attackClass": "non-comms",
+            "ammunitionId": "ammunition:normal",
+        },
+        "criticalWithoutImmunity": [
+            {"attribute": "ARM", "count": 2},
+            {"attribute": "BTS", "count": 1},
+        ],
+        "criticalWithImmunity": [
+            {"attribute": "ARM", "count": 1},
+            {"attribute": "BTS", "count": 1},
+        ],
+        "removedCriticalRoll": {"attribute": "ARM", "count": 1},
+        "result": "critical-extra-arm-roll-removed",
+        "evidence": "derived-from-pinned-general-rules",
     }]:
-        raise ValueError("Unsupported Plasma/Enhanced case")
+        raise ValueError("Unsupported Plasma Combined Saving Roll cases")
     if not any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 96
                for c in immunity["citations"]):
         raise ValueError("No pinned Immunity source citation")

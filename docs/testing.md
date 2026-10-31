@@ -4127,6 +4127,25 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Plasma Combined Saving Roll / Immunity (Critical), 2026-10-31:**
+`tests/test_immunity_plasma_critical.py` checks English
+N5.3 pp. 67, 95 and 96 against the pinned PDF, the
+exact Plasma Rifle Army Combined Saving Roll annotation,
+and the new, separately rule-derived Skill API case.
+It proves a Critical requires two ARM + one BTS rolls
+without Immunity (Critical), but one ARM + one BTS
+with the Immunity. It rejects any implied attack
+resolution or changes to the Weapon profile.
+The curated mutation suite rejects altered rolls,
+applicability, result or source classification.
+`tests/test_immunity_combined_saving_roll_example.py`
+continues to verify the distinct printed Enhanced
+example; the renderer and Chromium check the
+thirteenth case at 1440/390/320 px. Coordinated
+`rules.db`/deployed-object publication staging
+retains all 17 reviewed objects with recovery backup.
+Full CI and hosted deployment remain separate.
+
 **Immunity printed Example 4 PDF provenance, 2026-10-30:**
 `tests/test_immunity_flash_pulse_pdf_example.py` verifies the
 pinned N5.3 English pp. 95–96 and 186, the published Flash Pulse

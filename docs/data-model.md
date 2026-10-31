@@ -406,8 +406,16 @@ despite having primary PDF citations on both Immunity and
 Flash Pulse records. Its conditional BTS saving roll,
 Non-Lethal and State: Stunned exception remain unchanged;
 the Spanish Wiki chart discrepancy remains independently
-documented. The twelve reviewed interactions are curated
-references, not a runtime Weapon-resolution engine. Coordinated `rules.db` and
+documented. A separate Plasma Rifle `reviewedSavingRollCases`
+entry derives the **Immunity (Critical)** exception from N5.3
+pp. 67 and 95: the original one ARM and one BTS Saving Roll
+acquires one extra ARM roll on a Critical, which this Immunity
+removes. The case preserves the printed p. 96 Immunity
+(Enhanced) example's distinct provenance, and neither
+changes the Army's `combined_saving_roll` source annotation
+nor implies Combined Ammunition. The thirteen reviewed
+interactions are curated references, not a runtime
+Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms
 Attack coverage, BTS conditions and unreviewed combinations

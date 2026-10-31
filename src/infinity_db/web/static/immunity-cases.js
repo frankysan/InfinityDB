@@ -134,19 +134,35 @@ export function immunityCaseRows(facts = {}) {
     // Printed Plasma/Enhanced case is a Combined Saving Roll, not combined
     // Ammunition. These fixed source-reviewed rolls are not a calculator.
     if (item.when.weaponId !== "weapon:plasma-rifle") continue;
-    const rolls = item.savingRolls.map(
+    const describeRolls = (rolls) => rolls.map(
       (roll) => `${roll.count} ${roll.attribute} Saving Roll${roll.count === 1 ? "" : "s"}`
     ).join(" and ");
-    rows.push({
-      title: [text(`Immunity (${item.when.immunity}) vs `),
-        reference(item.when.weaponId, "Plasma Rifle")],
-      detail: [
-        text(`Still requires ${rolls}. `),
-        reference(item.when.ammunitionId, "Normal Ammunition"),
-        text(" is not a combined Ammunition type; treating it as Normal does not eliminate either Saving Roll Attribute. This is the exact printed example, not a general immunity calculation."),
-      ],
-      evidence: evidence(item.evidence),
-    });
+    if (item.when.immunity === "Enhanced") {
+      rows.push({
+        title: [text(`Immunity (${item.when.immunity}) vs `),
+          reference(item.when.weaponId, "Plasma Rifle")],
+        detail: [
+          text(`Still requires ${describeRolls(item.savingRolls)}. `),
+          reference(item.when.ammunitionId, "Normal Ammunition"),
+          text(" is not a combined Ammunition type; treating it as Normal does not eliminate either Saving Roll Attribute. This is the exact printed example, not a general immunity calculation."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    } else if (item.when.immunity === "Critical") {
+      rows.push({
+        title: [text("Immunity (Critical) vs "),
+          reference(item.when.weaponId, "Plasma Rifle")],
+        detail: [
+          text(`A Critical normally requires ${describeRolls(item.criticalWithoutImmunity)}. `),
+          text("Immunity (Critical) removes only the additional "),
+          text(`${item.removedCriticalRoll.attribute} Saving Roll, leaving `),
+          text(`${describeRolls(item.criticalWithImmunity)}. `),
+          reference(item.when.ammunitionId, "Normal Ammunition"),
+          text(" still uses a Combined Saving Roll, not Combined Ammunition. Applies only to the reviewed non-Comms Plasma Rifle profile; this is derived from N5.3 pp. 67 and 95, not a printed Immunity example or an attack calculator."),
+        ],
+        evidence: evidence(item.evidence),
+      });
+    }
   }
   for (const item of cases.reviewedCombinedCases || []) {
     const partial = Array.isArray(item.withImmunity.ignoredComponents);

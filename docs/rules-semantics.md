@@ -2713,13 +2713,29 @@ remove template placement. It is **not** a published
 Immunity ruling for the AP+EXP Hit Mode, and neither
 Army source mode is altered.
 
-The Skill reference now presents **twelve reviewed
+**Plasma Rifle versus Immunity (Critical)** is a distinct
+*rule-derived* Combined Saving Roll case, not an additional
+printed Immunity example. N5.3 p. 67 requires one ARM and
+one BTS roll for the underlying Combined Saving Roll and
+**one extra ARM roll** on a Critical. With Immunity (Critical)
+(p. 95), the Critical-added ARM roll is removed, leaving
+**one ARM and one BTS roll**, not zero rolls or two BTS
+rolls. The p. 96 printed Immunity (Enhanced) Example 3
+continues to describe a different protection and retains
+its explicit-PDF classification. The scoped condition is a
+non-Comms Plasma Rifle attack with source Normal Ammunition;
+this is a reviewed reference, not a general Critical or
+Immunity calculator. The Army Weapon's source annotation
+remains one ARM + one BTS with one additional ARM on Critical.
+
+The Skill reference now presents **thirteen reviewed
 interactions**: six Combined Ammunition cases, four
 exact Weapon cases (Flash Pulse, E/Mitter, Missile
-Launcher Blast, Monofilament), one Plasma Combined
-Saving Roll and one Vulnerability example. Chromium
-acceptance at 1440/390/320 px verifies the twelfth
-source-labeled case, semantic links and mobile layout.
+Launcher Blast, Monofilament), two separately attributed
+Plasma Combined Saving Roll cases and one Vulnerability
+example. Chromium acceptance at 1440/390/320 px verifies
+the thirteenth source-scoped case, semantic links and
+mobile layout.
 Other component-specific Immunities, BTS-based attacks, Comms Attack
 rules and conditional State interactions remain unresolved. Do not
 extrapolate an evaluator or project outcomes into Weapon profiles.

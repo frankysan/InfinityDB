@@ -4815,6 +4815,21 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
         (lambda f: f["reviewedSavingRollCases"][0].update(
             evidence="derived-from-pinned-general-rules"),
             "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][1]["when"].update(
+            immunity="Enhanced"), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][1]["when"].update(
+            attackClass="comms"), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][1]["criticalWithoutImmunity"][0].update(
+            count=3), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][1]["criticalWithImmunity"][1].update(
+            attribute="ARM"), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][1]["removedCriticalRoll"].update(
+            attribute="BTS"), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][1].update(
+            result="cancel-all-rolls"), "Plasma Combined Saving Roll example"),
+        (lambda f: f["reviewedSavingRollCases"][1].update(
+            evidence="explicit-n5.3-pdf-p96-example-3"),
+            "Plasma Combined Saving Roll example"),
         (lambda f: f["reviewedSavingRollCases"].append(
             deepcopy(f["reviewedSavingRollCases"][0])),
             "Plasma Combined Saving Roll example"),

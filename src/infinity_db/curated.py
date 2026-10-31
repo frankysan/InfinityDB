@@ -571,7 +571,26 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
             ],
             "result": "combined-saving-roll-preserved",
             "evidence": "explicit-n5.3-pdf-p96-example-3",
-        }
+        },
+        {
+            "when": {
+                "weaponId": "weapon:plasma-rifle",
+                "immunity": "Critical",
+                "attackClass": "non-comms",
+                "ammunitionId": "ammunition:normal",
+            },
+            "criticalWithoutImmunity": [
+                {"attribute": "ARM", "count": 2},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "criticalWithImmunity": [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "removedCriticalRoll": {"attribute": "ARM", "count": 1},
+            "result": "critical-extra-arm-roll-removed",
+            "evidence": "derived-from-pinned-general-rules",
+        },
     ]:
         raise ValueError(f"{context}: unsupported Plasma Combined Saving Roll example")
     covered = value["coveredAmmunition"]

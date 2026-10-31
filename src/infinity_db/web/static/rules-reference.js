@@ -260,7 +260,7 @@ function appendImmunityCases(container, rule) {
   }
   const caveat = document.createElement("p");
   caveat.className = "detail-source";
-  caveat.textContent = "Only these conditions are reviewed. Critical counts assume no Immunity (Critical); see the cited rules below.";
+  caveat.textContent = "Only these conditions are reviewed. Critical counts assume no Immunity (Critical) unless a case explicitly covers it; see the cited rules below.";
   group.append(heading, list, caveat);
   container.append(group);
 }

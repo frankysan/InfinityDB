@@ -73,7 +73,8 @@ def test_plasma_immunity_case_matches_weapon_metadata_and_stays_distinct() -> No
     rules = RulesDatabase(RULES)
     immunity = rules.composed_record("skill:immunity")
     assert immunity is not None
-    assert immunity["facts"]["immunityInteraction"]["reviewedSavingRollCases"] == [case]
+    assert immunity["facts"]["immunityInteraction"]["reviewedSavingRollCases"][0] == case
+    assert len(immunity["facts"]["immunityInteraction"]["reviewedSavingRollCases"]) == 2
     normal = rules.composed_record("ammunition:normal")
     assert normal is not None
     assert "ammunition_composition" not in case
@@ -99,7 +100,7 @@ def test_plasma_case_reaches_immunity_api_but_not_weapon_attack_results() -> Non
     case = reviewed_case()
     assert detail("/api/skills/immunity")["rules"][0]["facts"][
         "immunityInteraction"
-    ]["reviewedSavingRollCases"] == [case]
+    ]["reviewedSavingRollCases"][0] == case
     weapon = detail("/api/weapons/plasma-rifle")
     for profile in weapon["profiles"]:
         assert "immunity_result" not in profile

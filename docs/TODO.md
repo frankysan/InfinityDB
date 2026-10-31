@@ -1089,6 +1089,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view
       consumption. Do not infer executable mechanics from reviewed reference facts.
+      - [x] Add a separately *rule-derived*, source-scoped **Immunity (Critical)**
+        interaction for Plasma Rifle's Combined Saving Roll. N5.3 p. 67
+        adds one **ARM** roll on a Critical, not one roll per Attribute;
+        Immunity (Critical) p. 95 removes exactly that additional roll.
+        Verify two ARM and one BTS without the Immunity versus one ARM
+        and one BTS with it. Keep the printed Immunity (Enhanced)
+        p. 96 Example 3 separately attributed, preserve the source
+        Weapon profile, and exclude arbitrary weapons and Comms Attacks.
+        Publish the exact reviewed case with source/API parity and
+        desktop/mobile Chromium checks; retain coordinated database
+        and deployed-object recovery and all 17 reviewed objects.
+      - [ ] Continue outstanding Critical/component effects and any
+        comparison-view use independently; do not extrapolate the
+        Plasma-specific source result into a general resolver.
     - [ ] Validate every published base identity and reviewed combined form against the pinned
       source; prove that weapon links, Ammunition detail, and later comparison views consume the
       same facts without conflating composition with roll notation.
