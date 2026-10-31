@@ -5,8 +5,9 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
-from infinity_db.domain_slugs import route_slug_from_typed_domain_id
+from infinity_db.domain_slugs import require_domain_slug, route_slug_from_typed_domain_id
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.scenario_geometry import MarkerElement, marker_diameter_mm, parse_scenario_geometry
 
 
 def _scenario_slug(record: dict[str, Any]) -> str:
@@ -65,6 +66,45 @@ def _supported_army_points(record: dict[str, Any]) -> list[int]:
     return points
 
 
+# Source: pinned official ITS Season 18 v2026.09.01, printed p. 17
+# ("Diameter of ITS Tokens"). Core N5.3 pp. 151/153 identify the
+# corresponding Console A and Supply Box markers, but do not print mm sizes.
+_MARKER_SIZE_CITATION = {
+    "source_id": "its-season-18-en-pdf",
+    "source_title": "ITS Season 18: Overheat (English)",
+    "source_version": "2026.09.01",
+    "source_url": "https://experience.corvusbelli.com/en/infinity/its-rules",
+    "page": 17,
+}
+_MARKER_LABELS = {
+    "console": "Console A Marker",
+    "supply-box": "Supply Box Marker",
+}
+
+
+def _marker_dimensions(geometry: dict[str, Any]) -> list[dict[str, Any]]:
+    """Project marker counts and *physical* footprints from canonical geometry."""
+    parsed = parse_scenario_geometry(geometry)
+    counts: dict[str, int] = {}
+    for element in parsed.elements:
+        if isinstance(element, MarkerElement):
+            counts[element.marker_type] = counts.get(element.marker_type, 0) + 1
+    result: list[dict[str, Any]] = []
+    for marker_type, count in counts.items():
+        diameter = marker_diameter_mm(marker_type)
+        label = _MARKER_LABELS.get(marker_type)
+        if diameter is None or label is None:
+            raise ValueError(f"Missing reviewed marker dimensions for {marker_type!r}")
+        result.append({
+            "marker_type": marker_type,
+            "name": label,
+            "count": count,
+            "diameter_mm": diameter,
+            "citation": dict(_MARKER_SIZE_CITATION),
+        })
+    return result
+
+
 class ScenarioCatalog:
     """Expose current scenario publications as explicit configuration-aware read models."""
 
@@ -103,8 +143,53 @@ class ScenarioCatalog:
         self._records_cache = records
         return records
 
-    def list_scenarios(self) -> list[dict[str, Any]]:
-        """Return current scenario identities in maintained collection order."""
+    def _selected_records(
+        self, *, collection: str | None, revision: str | None
+    ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+        """Select one exact published set without falling back to Core or another season."""
+        if (collection is None) != (revision is None):
+            raise ValueError("Scenario collection and revision must be provided together")
+        if collection is not None:
+            require_domain_slug(collection, context="scenario collection")
+        if revision is not None and (
+            not isinstance(revision, str) or not revision.strip() or revision != revision.strip()
+        ):
+            raise ValueError("scenario revision must be a non-empty trimmed string")
+        return [
+            (record, publication)
+            for record, publication in self._records()
+            if (
+                publication["collection"] == "n5-core"
+                if collection is None
+                else (
+                    publication["collection"] == collection
+                    and publication["revision"] == revision
+                )
+            )
+        ]
+
+    def list_collections(self) -> list[dict[str, Any]]:
+        """Return only current scenario sets with readable published missions."""
+        collections: dict[tuple[str, str], dict[str, Any]] = {}
+        for _record, publication in self._records():
+            key = (publication["collection"], publication["revision"])
+            if key not in collections:
+                collections[key] = {
+                    "id": key[0],
+                    "revision": key[1],
+                    "title": publication["collection_title"],
+                    "scenario_count": 0,
+                }
+            collections[key]["scenario_count"] += 1
+        return sorted(
+            collections.values(),
+            key=lambda item: (item["id"] != "n5-core", item["title"], item["revision"]),
+        )
+
+    def list_scenarios(
+        self, *, collection: str | None = None, revision: str | None = None
+    ) -> list[dict[str, Any]]:
+        """Return current scenarios; explicit selection never falls back to another set."""
 
         return [
             {
@@ -115,10 +200,15 @@ class ScenarioCatalog:
                 "supported_army_points": _supported_army_points(record),
                 "publication": _publication_model(publication),
             }
-            for record, publication in self._records()
+            for record, publication in self._selected_records(
+                collection=collection, revision=revision
+            )
         ]
 
-    def get_scenario(self, slug: str, *, army_points: int) -> dict[str, Any] | None:
+    def get_scenario(
+        self, slug: str, *, army_points: int,
+        collection: str | None = None, revision: str | None = None,
+    ) -> dict[str, Any] | None:
         """Return one current scenario projected to one exact supported Army Points value."""
 
         rules_database = self.rules_database
@@ -126,7 +216,9 @@ class ScenarioCatalog:
             return None
 
         selected: tuple[dict[str, Any], dict[str, Any]] | None = None
-        for record, publication in self._records():
+        for record, publication in self._selected_records(
+            collection=collection, revision=revision
+        ):
             if _scenario_slug(record) == slug:
                 selected = (record, publication)
                 break
@@ -227,6 +319,7 @@ class ScenarioCatalog:
                 "configuration_id": configuration_id,
                 "configuration_army_points": deepcopy(configuration_points),
                 "geometry": deepcopy(configuration["geometry"]),
+                "marker_dimensions": _marker_dimensions(configuration["geometry"]),
             },
             "objectives": objectives,
             "special_rules": special_rules,

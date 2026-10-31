@@ -47,8 +47,11 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 "share/infinity-db/config/catalogs" = [
   "config/catalogs/weapon-categories.json",
   "config/catalogs/weapon-overrides.json",
+  "config/catalogs/metadata-only-weapons.json",
   "config/catalogs/weapon-ammunition-references.json",
   "config/catalogs/weapon-combined-saving-rolls.json",
+  "config/catalogs/weapon-properties.json",
+  "config/catalogs/trait-wiki-references.json",
   "config/catalogs/skill-source-classifications.json",
   "config/catalogs/equipment-presentation-encodings.json",
   "config/catalogs/unit-filter-semantics.json",
@@ -77,6 +80,7 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
   "static/*.css",
   "static/themes/*.css",
   "static/*.js",
+  "static/*.json",
   "static/*.svg",
   "static/*.png",
   "static/silhouettes/*.svg",
@@ -93,11 +97,13 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = ["-m", "not full_assets"]
+addopts = ["-m", "not full_assets", "--durations=20"]
 markers = [
   "full_assets: requires the complete validated local Corvus Belli graphical asset set",
   "section_model: data model, canonical rules, semantic audits, and database behavior",
-  "section_web: web application, HTTP/API behavior, browser runtime, and web metrics",
+  "section_web: web application, HTTP/API behavior, and web metrics",
+  "section_browser: Chromium acceptance and browser verifier contract tests",
+  "xdist_group(name): keep related tests on the same worker under --dist loadgroup",
   "section_build: Army acquisition, normalization, deterministic build, and ingestion",
   "section_ops: development checks, deployment, archives, reports, and operational tooling",
   "section_assets: symbols, SVG/font tooling, and processed graphical asset publication",

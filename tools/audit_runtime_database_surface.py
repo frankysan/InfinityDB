@@ -172,6 +172,7 @@ _register(
 _register(
     [
         "application_peripheral_sources",
+        "application_peripheral_source_labels",
         "application_peripheral_unit_sources",
         "application_peripheral_controller_access",
         "application_peripheral_controller_targets",
@@ -180,8 +181,9 @@ _register(
     ],
     CONTEXTUAL,
     reason=(
-        "Reviewed or source-context Peripheral relationships preserve exact Army/profile/"
-        "loadout occurrence context while resolving canonical application targets."
+        "Reviewed Peripheral mappings and unreviewed Army-local source labels preserve "
+        "the original attachment context without inferring a Peripheral type or "
+        "Controller assignment."
     ),
 )
 _register(
@@ -248,6 +250,15 @@ _register(
     ],
     CONTEXTUAL,
     reason="Explicit occurrence, relationship, presentation, or metadata context.",
+)
+_register(
+    ["logical_unit_spectables"],
+    CONTEXTUAL,
+    reason=(
+        "Materialized source-identified Spec-Ops/TEAM-OPS selection and SpecBall charts "
+        "retain ordered grouped source choices and source Unit provenance; they are "
+        "not immutable Unit profiles or configured Army List selections."
+    ),
 )
 _register(
     ["unit_factions"],

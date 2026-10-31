@@ -1,0 +1,438 @@
+"""Characterize pinned source-level Skill/Equipment parameters before usage indexing."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from infinity_db.curated import load_curated_directory
+from infinity_db.rules_database import RulesDatabase, export_rules_database
+from tools.audit_source_variant_inputs import (
+    inventory_source_variants,
+    reviewed_extra_signature,
+    select_source_variants,
+)
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_source_variant_selection_preserves_full_summary_and_exact_ids() -> None:
+    report = {"catalogs": {
+        "skills": {"summary": {"publishedSourceIds": 2}, "items": [
+            {"id": 28, "extraSignatures": [{"extras": [[6, "TEXT", "-3"]], "count": 5}]},
+            {"id": 40, "extraSignatures": [{"extras": [[11, "DISTANCE", "+2.5"]], "count": 3}]},
+        ]},
+        "equipment": {"summary": {"publishedSourceIds": 1}, "items": [
+            {"id": 169, "extraSignatures": [{"extras": [[7, "TEXT", "-6"]], "count": 2}]},
+        ]},
+    }}
+    selected = select_source_variants(report, "equipment", [169, 169])
+    assert selected == {
+        "catalog": "equipment",
+        "fullCatalogSummary": {"publishedSourceIds": 1},
+        "selectedSourceIds": [169],
+        "items": report["catalogs"]["equipment"]["items"],
+    }
+    selected = select_source_variants(report, "skills", [40])
+    assert selected["fullCatalogSummary"] == {"publishedSourceIds": 2}
+    assert selected["selectedSourceIds"] == [40]
+    assert selected["items"] == report["catalogs"]["skills"]["items"][1:]
+    assert select_source_variants(report, "skills")["selectedSourceIds"] == [28, 40]
+    with pytest.raises(ValueError, match="source IDs absent from equipment: \\[28\\]"):
+        select_source_variants(report, "equipment", [28, 169])
+    with pytest.raises(ValueError, match="unsupported source catalog"):
+        select_source_variants(report, "weapons", [169])
+
+
+def _inventory() -> dict:
+    return inventory_source_variants(
+        ROOT / "data/generated/infinity.db",
+        ROOT / "data/generated/infinity.raw.db",
+        ROOT / "data/generated/rules.db",
+    )
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
+    report = _inventory()
+    skills = report["catalogs"]["skills"]
+    equipment = report["catalogs"]["equipment"]
+    assert skills["summary"] == {
+        "publishedSourceIds": 96,
+        "sourceIdsWithDirectRows": 96,
+        "directSourceRows": 33153,
+        "reviewedExactSourceIds": 10,
+        "statuses": {
+            "family-only": 44,
+            "reviewed-distance-parameter": 1,
+            "reviewed-exact-source": 10,
+            "reviewed-numeric-parameter": 3,
+            "reviewed-extra-parameter": 2,
+            "unresolved-occurrence-parameter": 36,
+        },
+        "extraTypes": {"DISTANCE": 5, "TEXT": 39},
+    }
+    assert equipment["summary"] == {
+        "publishedSourceIds": 34,
+        "sourceIdsWithDirectRows": 34,
+        "directSourceRows": 5427,
+        "reviewedExactSourceIds": 4,
+        "statuses": {
+            "family-only": 19,
+            "reviewed-exact-source": 1,
+            "unresolved-occurrence-parameter": 14,
+        },
+        "extraTypes": {"TEXT": 14},
+    }
+    for catalog in (skills, equipment):
+        rows = catalog["items"]
+        assert rows == sorted(rows, key=lambda item: item["id"])
+        assert all(item["occurrences"] > 0 for item in rows)
+        assert all(item["applicationId"] is not None for item in rows)
+        assert not any(item["rawValues"] for item in rows)
+        assert set(item["status"] for item in rows) <= {
+            "family-only",
+            "reviewed-distance-parameter",
+            "reviewed-exact-source",
+            "reviewed-numeric-parameter",
+            "reviewed-extra-parameter",
+            "unresolved-occurrence-parameter",
+        }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
+    report = _inventory()["catalogs"]
+    skills = {item["id"]: item for item in report["skills"]["items"]}
+    equipment = {item["id"]: item for item in report["equipment"]["items"]}
+
+    # A TEXT extra is not automatically a reviewed modifier. Three
+    # source IDs now have exact typed mappings; the others remain open.
+    for source_id in (25, 55, 1000):
+        item = skills[source_id]
+        assert item["status"] == "unresolved-occurrence-parameter"
+        assert "TEXT" in item["extraTypes"]
+        assert item["extraSignatures"]
+    assert skills[24]["status"] == "reviewed-numeric-parameter"
+    assert skills[28]["status"] == "reviewed-numeric-parameter"
+    assert skills[40]["status"] == "reviewed-extra-parameter"
+    assert skills[74]["status"] == "reviewed-extra-parameter"
+    for source_id in (24, 28, 40, 74):
+        assert all(part["reviewed"] for part in skills[source_id]["extraSignatures"])
+    for source_id in (100, 101, 169, 244, 247):
+        item = equipment[source_id]
+        assert item["status"] == "unresolved-occurrence-parameter"
+        assert item["extraTypes"] == ["TEXT"]
+        assert item["extraSignatures"]
+    assert equipment[169]["reviewedVariant"] == {"kind": "named", "label": "Firewall"}
+    assert skills[28]["reviewedVariant"] is None
+    assert any(
+        part[2] == "-3"
+        for signature in skills[28]["extraSignatures"]
+        for part in signature["extras"]
+    )
+
+    # Source-typed DISTANCE is not sufficient by itself. Forward Deployment
+    # has reviewed distance semantics, but Jump and Climb are not certified.
+    assert skills[161]["status"] == "reviewed-distance-parameter"
+    assert skills[161]["extraTypes"] == ["DISTANCE"]
+    for source_id in (263, 271):
+        assert skills[source_id]["status"] == "unresolved-occurrence-parameter"
+        assert skills[source_id]["extraTypes"] == ["DISTANCE"]
+    assert skills[74]["extraTypes"] == ["DISTANCE", "TEXT"]
+
+    # No direct source occurrence is manufactured from curated-only TinBot variants.
+    assert 188 not in equipment and 193 not in equipment
+    assert equipment[248]["status"] == "reviewed-exact-source"
+
+
+@pytest.mark.parametrize(
+    ("extras", "distance_allowed", "expected"),
+    [
+        ([], False, False),
+        ([(0, 6, "TEXT", "-3")], False, True),
+        ([(0, 11, "DISTANCE", "+2.5")], True, True),
+        ([(0, 11, "DISTANCE", "+2.5")], False, False),
+        ([(0, 99, "TEXT", "unreviewed")], False, False),
+        ([(0, 6, "TEXT", "-3"), (1, 7, "TEXT", "-6")], False, False),
+        ([(0, 6, "TEXT", "-3"), (1, 11, "DISTANCE", "+2.5")], True, False),
+    ],
+)
+def test_reviewed_extra_signatures_require_explicit_combination_review(
+    extras: list[tuple[int, int, str, str]],
+    distance_allowed: bool,
+    expected: bool,
+) -> None:
+    """Recognized individual extras cannot silently approve a new combination."""
+    assert reviewed_extra_signature(
+        extras,
+        reviewed_values={(6, "TEXT", "-3"), (7, "TEXT", "-6")},
+        distance_allowed=distance_allowed,
+    ) is expected
+
+
+def _single_extra_counts(item: dict) -> dict[tuple[int, str, str], int]:
+    return {
+        tuple(signature["extras"][0]): signature["count"]
+        for signature in item["extraSignatures"]
+        if len(signature["extras"]) == 1
+    }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_n53_numeric_skill_modifiers_preserve_exact_source_meaning() -> None:
+    """Pinned Army extras against N5.3 pp. 23, 79, 86, and 102."""
+    skills = {
+        item["id"]: item for item in _inventory()["catalogs"]["skills"]["items"]
+    }
+    mimetism = skills[28]
+    # N5.3 p. 102: these target enemy LoF-dependent BS Attacks/Discover,
+    # never the owner's roll or CC Attacks. TEXT is the upstream type.
+    assert _single_extra_counts(mimetism) == {
+        (6, "TEXT", "-3"): 1612,
+        (7, "TEXT", "-6"): 392,
+    }
+    assert mimetism["occurrences"] == 2004
+    assert mimetism["status"] == "reviewed-numeric-parameter"
+
+    berserk = skills[24]
+    # N5.3 p. 86: bracketed positive MODs affect the owner's Berserk
+    # CC Attack. They do not become a generic modifier on every CC roll.
+    berserk_extras = _single_extra_counts(berserk)
+    assert berserk_extras[(1, "TEXT", "+3")] == 243
+    assert berserk_extras[(2, "TEXT", "+6")] == 3
+    assert berserk["status"] == "reviewed-numeric-parameter"
+
+    dodge = skills[40]
+    # N5.3 pp. 23, 79: a Dodge Skill's bracketed MOD is distinct from
+    # situational -3 PH penalties; movement distances are another axis.
+    dodge_extras = _single_extra_counts(dodge)
+    assert dodge_extras[(1, "TEXT", "+3")] == 613
+    assert dodge_extras[(2, "TEXT", "+6")] == 7
+    assert dodge["extraTypes"] == ["DISTANCE", "TEXT"]
+    assert dodge["status"] == "reviewed-extra-parameter"
+    # Dodge has explicitly reviewed PH/MOV/extra signatures. Do not infer
+    # generic MOD meaning from other source TEXT labels.
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_numeric_mod_signatures_require_exact_reviewed_ids_and_values(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Only explicitly mapped source extras become countable variants."""
+    monkeypatch.setattr(
+        RulesDatabase, "skill_numeric_mod_semantics",
+        lambda self: {
+            "mimetism": {
+                "kind": "numeric-mod", "owner": "skill-holder", "target": "opponent",
+                "applies_to": ["bs-attack-requiring-lof", "discover"],
+                "extra_values": [
+                    {"extra_id": 6, "extra_type": "TEXT", "raw_value": "-3", "modifier": -3},
+                    {"extra_id": 7, "extra_type": "TEXT", "raw_value": "-6", "modifier": -6},
+                ],
+            },
+            "dodge": {
+                "kind": "numeric-mod", "owner": "skill-holder", "target": "skill-holder",
+                "applies_to": ["dodge-ph-roll"],
+                "extra_values": [
+                    {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
+                    {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
+                ],
+            },
+        },
+    )
+    # Deliberately withhold the reviewed typed-extra map: partial numeric
+    # coverage must not certify Dodge's unrelated PH/MOV/SD/ARM signatures.
+    monkeypatch.setattr(RulesDatabase, "skill_reviewed_extra_semantics", lambda self: {})
+    skills = {item["id"]: item for item in _inventory()["catalogs"]["skills"]["items"]}
+    mimetism = skills[28]
+    assert mimetism["status"] == "reviewed-numeric-parameter"
+    assert all(entry["reviewed"] for entry in mimetism["extraSignatures"])
+    assert skills[24]["status"] == "unresolved-occurrence-parameter"
+    assert skills[40]["status"] == "unresolved-occurrence-parameter"
+    assert skills[40]["reviewedNumericMod"] is not None
+    assert any(not entry["reviewed"] for entry in skills[40]["extraSignatures"])
+    # The tested mapping cannot accidentally certify unrelated source extras.
+    assert skills[25]["status"] == "unresolved-occurrence-parameter"
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
+    tmp_path: Path,
+) -> None:
+    """The edited curated source, not stale generated rules.db, governs eligibility."""
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        load_curated_directory(ROOT / "data/curated"), output, finalize=False,
+    )
+    rules = RulesDatabase(output)
+    parameters = rules.skill_numeric_mod_semantics()
+    assert set(parameters) == {"mimetism", "berserk", "dodge", "surprise-attack"}
+    assert {
+        ref: {
+            (value["extra_id"], value["extra_type"], value["raw_value"], value["modifier"])
+            for value in parameters[ref]["extra_values"]
+        }
+        for ref in parameters
+    } == {
+        "mimetism": {(6, "TEXT", "-3", -3), (7, "TEXT", "-6", -6)},
+        "berserk": {(1, "TEXT", "+3", 3), (2, "TEXT", "+6", 6)},
+        "dodge": {(1, "TEXT", "+3", 3), (2, "TEXT", "+6", 6)},
+        "surprise-attack": {(6, "TEXT", "-3", -3), (7, "TEXT", "-6", -6)},
+    }
+    assert parameters["mimetism"]["target"] == "opponent"
+    assert parameters["mimetism"]["applies_to"] == [
+        "bs-attack-requiring-lof", "discover",
+    ]
+    assert parameters["berserk"]["applies_to"] == ["berserk-cc-attack"]
+    assert parameters["dodge"]["applies_to"] == ["dodge-ph-roll"]
+    # Mimetism is fully resolved. Dodge has DISTANCE and other potential
+    # extra signatures: reviewed PH MODs do not certify those combinations.
+    report = inventory_source_variants(
+        ROOT / "data/generated/infinity.db",
+        ROOT / "data/generated/infinity.raw.db", output,
+    )["catalogs"]["skills"]
+    sources = {item["id"]: item for item in report["items"]}
+    assert report["summary"]["statuses"] == {
+        "family-only": 44,
+        "reviewed-distance-parameter": 1,
+        "reviewed-exact-source": 10,
+        "reviewed-numeric-parameter": 3,
+        "reviewed-extra-parameter": 2,
+        "unresolved-occurrence-parameter": 36,
+    }
+    assert sources[28]["status"] == "reviewed-numeric-parameter"
+    assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
+    assert sources[24]["reviewedNumericMod"] is not None
+    assert sources[24]["status"] == "reviewed-numeric-parameter"
+    assert sources[40]["status"] == "reviewed-extra-parameter"
+    assert all(s["reviewed"] for s in sources[40]["extraSignatures"])
+    assert sources[25]["status"] == "unresolved-occurrence-parameter"
+    # Existing distance-only projection remains independent of numeric MODs.
+    assert rules.skill_parameter_semantics() == {
+        "super-jump": {"kind": "distance", "positive_sign": "omit"},
+        "forward-deployment": {"kind": "distance", "positive_sign": "force"},
+    }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_dodge_source_signatures_are_exact_and_independent(tmp_path: Path) -> None:
+    """Pin every distinct Army Dodge extra; none may inherit another's semantics."""
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        load_curated_directory(ROOT / "data/curated"), output, finalize=False,
+    )
+    inventory = inventory_source_variants(
+        ROOT / "data/generated/infinity.db",
+        ROOT / "data/generated/infinity.raw.db",
+        output,
+    )["catalogs"]["skills"]["items"]
+    dodge = next(item for item in inventory if item["id"] == 40)
+    signatures = dodge["extraSignatures"]
+    assert all(len(signature["extras"]) == 1 for signature in signatures)
+    assert {
+        tuple(signature["extras"][0]): signature["count"]
+        for signature in signatures
+    } == {
+        (1, "TEXT", "+3"): 613,
+        (2, "TEXT", "+6"): 7,
+        (6, "TEXT", "-3"): 30,
+        (7, "TEXT", "-6"): 1,
+        (11, "DISTANCE", "+2.5"): 633,
+        (23, "DISTANCE", "+5"): 808,
+        (27, "TEXT", "PH=11"): 151,
+        (32, "TEXT", "PH=10"): 3,
+        (46, "TEXT", "PH=9"): 110,
+        (52, "TEXT", "PH=13"): 5,
+        (250, "TEXT", "PH=12"): 6,
+        (260, "DISTANCE", "+7.5"): 4,
+        (308, "TEXT", "+1SD"): 9,
+        (379, "TEXT", "ARM +3"): 2,
+    }
+    assert dodge["occurrences"] == 2382
+    # A source-ID-wide status must not promote the remaining exact signatures.
+    assert dodge["status"] == "reviewed-extra-parameter"
+    assert all(signature["reviewed"] for signature in signatures)
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_surprise_attack_signatures_preserve_conditional_target_mods(tmp_path: Path) -> None:
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), output)
+    for path in (output, ROOT / "data/generated/rules.db"):
+        rules = RulesDatabase(path)
+        parameters = rules.skill_numeric_mod_semantics()["surprise-attack"]
+        assert parameters["owner"] == "skill-holder"
+        assert parameters["target"] == "opponent"
+        assert parameters["applies_to"] == ["surprise-attack-target-face-to-face-aro"]
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db", ROOT / "data/generated/infinity.raw.db", path,
+        )
+        source = next(row for row in report["catalogs"]["skills"]["items"] if row["id"] == 191)
+        assert source["status"] == "reviewed-numeric-parameter"
+        assert source["occurrences"] == 767
+        assert {
+            tuple(signature["extras"][0]): signature["count"]
+            for signature in source["extraSignatures"]
+        } == {(6, "TEXT", "-3"): 762, (7, "TEXT", "-6"): 5}
+        assert all(len(s["extras"]) == 1 and s["reviewed"] for s in source["extraSignatures"])
+        rule = rules.composed_record("skill:surprise-attack")
+        assert rule is not None
+        assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 114
+                   for c in rule["citations"])
+        assert rule["variant_semantics"]["inheritance"] == "family"
+        assert "surprise-attack" not in rules.skill_parameter_semantics()
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
+    """Separate N5.3 distance clauses, Jet Propulsion, and TinBot Firewall MODs."""
+    report = _inventory()
+    skills = select_source_variants(report, "skills", [74, 263, 271])["items"]
+    assert [item["id"] for item in skills] == [74, 263, 271]
+    assert [item["occurrences"] for item in skills] == [670, 26, 6]
+    assert [item["status"] for item in skills] == [
+        "reviewed-extra-parameter", "unresolved-occurrence-parameter",
+        "unresolved-occurrence-parameter",
+    ]
+    assert {
+        item["id"]: [
+            (tuple(tuple(extra) for extra in signature["extras"]),
+             signature["count"], signature["reviewed"])
+            for signature in item["extraSignatures"]
+        ]
+        for item in skills
+    } == {
+        74: [
+            (((260, "DISTANCE", "+7.5"),), 4, True),
+            (((304, "TEXT", "Jet Propulsion"),), 198, True),
+            (((372, "DISTANCE", "7.5"),), 43, True),
+        ],
+        263: [(((372, "DISTANCE", "7.5"),), 26, False)],
+        271: [(((372, "DISTANCE", "7.5"),), 6, False)],
+    }
+    assert skills[0]["reviewedDistance"] == {"kind": "distance", "positive_sign": "omit"}
+    assert skills[1]["reviewedDistance"] is None
+    assert skills[2]["reviewedDistance"] is None
+
+    [tinbot] = select_source_variants(report, "equipment", [169])["items"]
+    assert tinbot["name"] == "TinBot: Firewall"
+    assert tinbot["status"] == "unresolved-occurrence-parameter"
+    assert tinbot["reviewedVariant"] == {"kind": "named", "label": "Firewall"}
+    assert tinbot["reviewedExtra"] is None
+    assert tinbot["occurrences"] == 147
+    assert [
+        (tuple(signature["extras"][0]), signature["count"], signature["reviewed"])
+        for signature in tinbot["extraSignatures"]
+    ] == [
+        ((6, "TEXT", "-3"), 92, False),
+        ((7, "TEXT", "-6"), 55, False),
+    ]
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_source_inventory_is_deterministic() -> None:
+    first = _inventory()
+    assert json.dumps(first, sort_keys=True) == json.dumps(_inventory(), sort_keys=True)

@@ -1,0 +1,98 @@
+{
+  "formatVersion": 1,
+  "sourceId": "n5-core-v5.3-pdf",
+  "sourcePage": 6,
+  "reviewStatus": "source-reviewed-audit-only",
+  "classification": {
+    "scope": "recommended-game-modes-not-mandatory-scenario-rules",
+    "deploymentZone": "two-dimensional-per-player-inches",
+    "gameDuration": "recommended-minutes-not-round-count",
+    "swc": "base-allowance-excludes-unit-specific-bonuses"
+  },
+  "rows": [
+    {
+      "name": "Beginner Games",
+      "armyPoints": 150,
+      "swc": 3,
+      "tableInches": [
+        24,
+        32
+      ],
+      "deploymentZoneInches": [
+        8,
+        24
+      ],
+      "durationMinutes": 40
+    },
+    {
+      "name": "Raid Games",
+      "armyPoints": 200,
+      "swc": 4,
+      "tableInches": [
+        32,
+        48
+      ],
+      "deploymentZoneInches": [
+        8,
+        32
+      ],
+      "durationMinutes": 50
+    },
+    {
+      "name": "Intermediate Games",
+      "armyPoints": 250,
+      "swc": 5,
+      "tableInches": [
+        32,
+        48
+      ],
+      "deploymentZoneInches": [
+        8,
+        32
+      ],
+      "durationMinutes": 60
+    },
+    {
+      "name": "Standard Games",
+      "armyPoints": 300,
+      "swc": 6,
+      "tableInches": [
+        48,
+        48
+      ],
+      "deploymentZoneInches": [
+        12,
+        48
+      ],
+      "durationMinutes": 90
+    },
+    {
+      "name": "Magnum Games, and Games with Reinforcements",
+      "armyPoints": 350,
+      "swc": 7,
+      "tableInches": [
+        48,
+        48
+      ],
+      "deploymentZoneInches": [
+        12,
+        48
+      ],
+      "durationMinutes": 100
+    },
+    {
+      "name": "Large-Scale Games",
+      "armyPoints": 400,
+      "swc": 8,
+      "tableInches": [
+        48,
+        48
+      ],
+      "deploymentZoneInches": [
+        12,
+        48
+      ],
+      "durationMinutes": 120
+    }
+  ]
+}

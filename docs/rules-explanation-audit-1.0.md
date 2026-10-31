@@ -7,47 +7,64 @@
 **Examined commit (follow-up):** `c5400ab1b950990fdacc509be91c110fe85431fb`
 
 **Original audit commit:** `859823f8d2899405a40cf126883d2adf5763db7c`
-**Status:** Assessment for review; no rules, code, schemas, tests, databases, or runtime configuration changed.
+**Original audit status:** Documentation-only assessment at the examined
+commit; no rules, code, schemas, tests, databases or runtime configuration
+were changed **by that assessment**. Follow-up entries below document
+subsequent implementation and acceptance work.
 
 **Snapshot scope:** Findings and totals describe the examined commits above, not the
 current release candidate. Later implementation notes record selected corrections;
 the original findings remain evidence for the still-open 1.0 review. Current release
 status and remaining acceptance belong in [the backlog](TODO.md#current-milestone).
 
+**Reading this frozen audit:** The executive summary, proposed batches and
+statement of potential blockers below describe the **2026-10-09 baseline**, not
+the current severity/status of those findings. For example, later curated and
+browser work has addressed the initial recovery, Intuitive Attack, and
+Immunity-card defects, while some independent source-publication discrepancies
+remain unresolved. Do not re-open a completed finding merely because its
+original assessment is preserved here. Treat the [finding inventory](rules-explanation-audit-1.0-inventory.md)
+as historical evidence, [source manifest](rules-explanation-audit-1.0-sources.md)
+as versioned provenance, and `docs/TODO.md` and the maintained
+`rules-semantics.md` as the current work/status and semantic authorities.
+This does not certify the final 1.0 release gate.
+
 ## Executive summary
 
-The existing curation does **not yet meet the 1.0 rules interaction explanation
-standard**. Its identities, source separation, and many recent explanations are
-sound, but several older summaries omit conditions that change gameplay. A
-relationship marked reviewed is often a navigation decision rather than a
-complete explanation. Passing the existing interaction audit therefore does not
-establish rules correctness or explanation completeness.
+At the examined commits, the existing curation did **not meet the 1.0 rules
+interaction explanation standard**. Its identities, source separation, and
+many recent explanations were sound, but several older summaries omitted
+conditions that change gameplay. A
+reviewed relationship often recorded a navigation decision rather than a
+complete explanation. Passing the interaction audit alone did not establish
+rules correctness or explanation completeness.
 
-The most urgent examples are Engineer's incorrect STR-only requirement for
-State cancellation (REA-001), Doctor's omitted recovery gate and failure result
-(REA-002), Intuitive Attack's apparent second attack roll (REA-003), Continuous
-Damage's missing extra-Critical-roll exception (REA-004), and the missing
-BS Weapon (WIP) restrictions (REA-005). Controlled Jump omits immediate ARO
-application and opposing-program cancellation (REA-006). These findings arise
+The highest-priority examples identified at that baseline included Engineer's
+incorrect STR-only requirement for State cancellation (REA-001), Doctor's
+omitted recovery gate and failure result (REA-002), Intuitive Attack's apparent
+second attack roll (REA-003), Continuous Damage's missing extra-Critical-roll
+exception (REA-004), missing BS Weapon (WIP) restrictions (REA-005), and
+Controlled Jump's omitted immediate ARO application and opposing-program
+cancellation (REA-006). These findings arose
 from actual authored text compared with identified official clauses, rather than
 from counting absent graph edges.
 
-Other material gaps concern simultaneous recovery, cumulative State MODs,
-Marker cancellation, Peripheral subtype exceptions, Fireteam integrity and
-Special Dice, Supportware, and placement restrictions. Simple individually
-correct cards do not always explain what happens when read together. Existing
+Other baseline findings concerned simultaneous recovery, cumulative State
+MODs, Marker cancellation, Peripheral subtype exceptions, Fireteam
+integrity and Special Dice, Supportware, and placement restrictions.
+Individually correct cards did not always explain what happened together. Existing
 Army tables already supply Martial Arts values and Hacking Program statlines;
 their absence from curated facts is **not** reported as missing numeric data.
 
 The Flash Pulse benchmark's outcome is verified against English N5.3 printed
 pp. 95-96 and 186, exact archived English Wiki revisions, and Spanish Wiki
 wording. It correctly retains BTS, Non-Lethal, and failed-roll Stunned. However,
-the curated Immunity family omits the ordinary ARM/BTS protection against
-State/Wound/Attribute Traits, leaving the reason for the exception incomplete
-(REA-010). Spanish Weapon Chart revision 3987 still lists two rolls and omits
-State: Stunned; the English chart and Army list one roll and the Trait. The
-the official Spanish N5.3 PDF p. 196 agrees with English on one
-Saving Roll and both Traits. The unresolved discrepancy is specifically the
+the curated Immunity family at the examined commit omitted the ordinary
+ARM/BTS protection against State/Wound/Attribute Traits, leaving the reason
+for the exception incomplete (REA-010). Spanish Weapon Chart revision 3987
+lists two rolls and omits State: Stunned; the English chart and Army list
+one roll and the Trait. The official Spanish N5.3 PDF p. 196 agrees with
+English on one Saving Roll and both Traits. The discrepancy is specifically the
 Spanish Wiki chart versus the two published N5.3 PDFs (REA-027).
 
 Kobra Pistol's DA/two-roll interpretation is supported while Anti-materiel
@@ -59,12 +76,14 @@ It also contains a conflicting six-dice Fireteam reminder (REA-041), even
 though its general Special Dice rule agrees with English. Neither disagreement
 authorizes silently rewriting source data.
 
-Reproducibility is also limited: the exact September 18 Wiki ZIP named by both
-collections is missing locally. Seventy-four record citations, across 72
-records, depend on it. Later ZIPs and exact archived revisions were used as
-**separate comparison evidence**, not replacements (REA-029). FAQ v0.1 is
-available locally but has no curated publication; its ITS headings require
-scope adjudication before applying rulings to core scenarios (REA-030).
+The examined source set also had a reproducibility limitation: the exact
+September 18 Wiki ZIP named by both collections was missing locally.
+Seventy-four citations across 72 records depended on it. Later ZIPs and
+exact archived revisions were used as **separate comparison evidence**,
+not replacements (REA-029). The [source manifest](rules-explanation-audit-1.0-sources.md)
+documents the subsequent deliberate Wiki-source migration. FAQ v0.1
+was available locally, but its ITS headings required scope adjudication
+before applying rulings to core scenarios (REA-030).
 
 All **367 records** were screened. The original **217 selected clause reviews**
 and **150 screening-only records** reconcile exactly to the unchanged inputs.
@@ -78,20 +97,22 @@ and now registers **44 findings: 31 High, 12 Medium, 1 Low, and 0 Critical**.
 The precise review-tier totals are recorded in the inventory. It does not certify every Weapon profile,
 Spanish publication, Wiki member, or browser surface.
 
-Start with a focused **recovery and Intuitive Attack correction batch**:
-REA-001, REA-002, REA-003, REA-009, and REA-022. These have direct English PDF
-evidence and can largely be addressed using existing prose fields and links.
-Resolve source conflicts separately; retain the positive patterns below. The
-remediation plan is a proposal, not accepted replacement semantics.
+The original proposed first batch covered **recovery and Intuitive Attack**:
+REA-001, REA-002, REA-003, REA-009, and REA-022. These had direct English PDF
+evidence and could largely be addressed using existing prose fields and links.
+Source conflicts required separate decisions. This historic remediation plan
+is not the current backlog or accepted replacement semantics.
 
 **Follow-up qualification:** REA-038 adds a source-decision gate for the friendly
 target qualifier. No universal Allied-only restriction was established, but
 absence of a prohibition is not treated as explicit permission for every
 enemy/neutral case. Do not widen target allegiance while fixing independently
-verified recovery mechanics. Counterintelligence's reversed Command Token actor
-(REA-043) is a new confirmed P0 correction. TinBot sharing (REA-039), missing
-SpecBall procedure (REA-040), Spanish PDF/Wiki conflicts (REA-041/042), and
-the metadata-only Breaker Marksman reference (REA-044) add focused follow-ups.
+verified recovery mechanics. The Counterintelligence Command Token actor
+(REA-043) was corrected in curated rules and its player-facing presentation
+verified on 2026-10-14; it is no longer an open P0 correction. TinBot sharing
+(REA-039), missing SpecBall procedure (REA-040), and Spanish PDF/Wiki
+conflicts (REA-041/042) remain focused follow-ups. The metadata-only
+Breaker Marksman publication gap (REA-044) is also resolved.
 
 Use the [source manifest](rules-explanation-audit-1.0-sources.md) for portable
 provenance and the [complete notice reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md)
@@ -315,6 +336,32 @@ the STR-only State-cancellation error without making a universal claim about
 enemy treatment. Allied examples remain supported, but do not prove an Allied-only
 restriction. Full closure of eligibility requires the recorded allegiance decision.
 
+**Acceptance follow-up (2026-10-14): Locally resolved as a player-facing
+Engineer reference; REA-038 remains an independent external rule question.**
+The original "Current" paragraph above describes an early draft and no
+longer matches the curated requirements. The existing `skill:engineer`
+reference already separates STR Wound repair (failure inflicts a Wound)
+from successful cancellation of eligible conditions regardless of the
+target's STR (failure has no negative consequence). Remote Presence,
+Engineer ReRoll WIP=X, Command Token use, self-use, Engaged restrictions,
+and the distinction between direct and delegated contact remain present.
+
+The player-facing Clarifications now explicitly work through an **allied
+VITA Trooper in Targeted State**, legally cancelable via an Engineer WIP
+Roll without STR or Wound repair, and contrast the **Stunned exception**:
+VITA uses Doctor; STR uses Engineer. English N5.3 pp. 91, 170 and 171
+are cited in the Engineer record, along with its earlier sources. The
+IMM-A, IMM-B, Isolated and Targeted graph edges and underlying rules
+were not altered. No broad permission for non-Allied direct targets was
+inferred; that unresolved applicability is separately tracked as REA-038.
+
+Focused curated/published rules checks passed 279 tests; Chromium browser
+acceptance passed 18/18 at 1440, 390, and 320 px, including the Engineer,
+Targeted and Stunned cards and links to Targeted, Stunned and Doctor.
+No JavaScript errors or page-level horizontal overflow were observed.
+This completes the remaining REA-001 **reference acceptance** requirement;
+it does not assert a complete recovery game-state evaluator.
+
 ### REA-002 - Doctor omits its ordinary recovery gate and lethal failure
 
 **Classification:** correctness, completeness. **Severity:** High. **Priority:** P0.
@@ -347,6 +394,34 @@ ordinary recovery requirements but do not establish the universal friendly quali
 REA-038 separates direct treatment, delegated Allied use, self-use and Engaged
 prohibitions; the neutral recovery proposal above deliberately leaves it open.
 
+**Acceptance follow-up (2026-10-14): Locally resolved for the player-facing
+Doctor reference; REA-038 remains an independent external rule question.**
+The original "Current" text above describes an older draft. The curated
+Doctor card already restricts ordinary recovery to a target with VITA in
+Unconscious State and Silhouette contact (English N5.3 p. 90), with a
+successful WIP Roll removing one Wound and canceling Unconscious, while
+failure directly causes Dead State. Its existing Doctor (2W), ReRoll
+WIP=X, separate Command Token reroll, non-Null self-use, and Engaged
+restrictions were preserved unchanged.
+
+The card now explains four scoped interactions in Clarifications:
+(1) an operational wounded VITA Trooper is not ordinarily eligible;
+(2) Stunned can be canceled by Doctor for VITA or Engineer for STR;
+(3) a Trooper with NWI and Doctor can treat itself under NWI's special
+Null-effect exception, with lethal failure; and (4) a Technorganic
+Unconscious STR target can receive Doctor recovery despite lacking VITA,
+but cannot continue STR Wound healing by Doctor after leaving
+Unconscious. These are not universal exceptions for every recovery case.
+English N5.3 pp. 104, 116 and 170 are now cited alongside p. 90.
+
+Curated/composed rules acceptance tests passed **281/281** and Chromium
+browser acceptance passed **21/21** content/navigation checks at 1440,
+390 and 320 px on Doctor, NWI, Technorganic and Stunned, including the
+three direct exception links; no JS errors or horizontal overflow.
+No recovery simulation, Army profile rewrite or new non-Allied target
+eligibility rule was introduced. This resolves REA-002's local reference
+acceptance, not the unresolved REA-038 source-decision dependency.
+
 ### REA-003 - Intuitive Attack appears to require a second attack roll
 
 **Classification:** correctness, clarity, completeness. **Severity:** High.
@@ -368,6 +443,29 @@ eligible Attack or Dodge ARO opposes that roll; do not make another BS roll.
 A Critical affects only the Main Target as a Critical." Explain placement as a
 separate use. **Fix:** text, links, future regression. **Dependencies:** REA-023.
 
+**Reference acceptance (2026-10-14): Completed locally; no mechanics change.**
+The original "Current" paragraph describes an earlier text baseline:
+`skill:intuitive-attack` already resolves the Burst 1 BS Attack with
+**one unmodified WIP Roll** (not another BS Roll after a WIP gate).
+Eligible Attack or Dodge AROs oppose that Roll when Face to Face applies;
+critical effects attach only to the selected Main Target. A Deployable
+whose Trigger Area includes an enemy CAMO Marker requires Intuitive Attack
+unless there is also a valid non-camouflaged enemy Model in that area;
+failed WIP prevents placement and consumes a Disposable use when applicable.
+
+The Skill's new Clarifications show (1) an unreacting CAMO Marker and the
+one-Roll hit/Saving Roll resolution, (2) eligible opposing reactions to
+that WIP Roll including a second Template-affected Trooper and Main
+Target-only Critical, and (3) the separate Deployable placement branch
+with the non-CAMO exception and loss of Disposable use. The source
+record now cites both English N5.3 p. 49 and Spanish N5.3 p. 48 alongside
+the pinned Wiki. Source text and composed-record regressions protect
+all three cases; target eligibility, Burst, and the underlying Trait,
+Weapon and placement rules remain unchanged.
+
+This closes the **player-facing REA-003 acceptance**, not a generic
+multi-target Face to Face Roll or Deployable-placement simulation.
+
 ### REA-004 - Continuous Damage omits the extra Critical roll exception
 
 **Classification:** completeness, correctness risk. **Severity:** High.
@@ -388,6 +486,34 @@ deferred indirect Dead edge does not supply this missing exception.
 **Fix:** text/links; avoid a direct unconditional Dead transition.
 **Dependencies:** REA-010 and REA-013 for shared Critical context.
 
+**Acceptance follow-up (2026-10-14): Resolved for the player-facing
+Trait; no unverified mechanics or graph edges.** The original "Current"
+paragraph describes an earlier baseline. At `69710e5` the reviewed
+`trait:continuous-damage` summary already distinguished ordinary failed
+Saving Rolls (Wound followed by more Saves until success or Dead) from
+the additional Critical Saving Roll, whose failure does **not** repeat
+Continuous Damage. The missing work was player-facing worked examples.
+
+The Trait now publishes two `facts.clarifications` examples: (1) a
+Critical hit with one ordinary hit Saving Roll plus an additional Critical
+roll, where failing the ordinary hit roll triggers repeated saves, but
+failing *only* the additional Critical roll does not; and (2) matching
+Immunity variants that remove the Trait effect for covered non-Comms
+Attacks without automatically canceling the ordinary or extra Critical
+Saving Roll. Only Immunity (Critical) removes the Critical-added roll.
+The examples link to `rule:saving-rolls`, `skill:immunity`, and
+`state:dead`, preserving the correct State transition as a conditional
+outcome rather than an unconditional `causes-state` edge.
+
+English N5.3 Continuous Damage p. 175 and Immunity p. 95 agree with
+Spanish N5.3 Da?o Continuo p. 182 and Inmunidad p. 99. All four pages
+are cited on the Trait. The existing Summary, Immunity mechanics,
+weapon profiles and interaction ledger were not changed. Focused
+curated/composed-rules regressions passed **285/285** and headless
+Chrome **15/15** render/navigation checks at 1440/390/320 px, without
+JavaScript errors or horizontal overflow. This closes REA-004 reference
+acceptance; a generic damage/Immunity simulation is out of scope.
+
 ### REA-005 - BS Weapon (WIP) omits explicit prohibited combinations
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P0.
@@ -407,6 +533,34 @@ defer a precise typed edge only if the exact variant has no identity. A missing
 graph endpoint need not defer an intelligible warning on the owning card.
 **Fix:** text/links; structured variant/edge work separately. **Dependencies:**
 REA-033; no general ban on Shock Ammunition is inferred.
+
+**Reference acceptance (2026-10-14): Locally resolved; exact-variant
+relation modeling remains deferred.** The initial "Current" finding is
+historical: `trait:bs-weapon-wip` already stated both restrictions in
+its reviewed summary at `e619ff3`. English N5.3 p. 175 explicitly
+prohibits **BS Attack (Shock)** with BS Weapon (WIP); its p. 39 Guided
+rule excludes WIP/PH weapons. Spanish N5.3 p. 39 independently confirms
+the Guided prohibition. These do **not** prohibit the ordinary BS Attack
+Skill or automatically exclude **Shock Ammunition** from all WIP weapons.
+
+The Trait now carries three structured clarifications: normal WIP
+attribute substitution illustrated by Flash Pulse (still a BS Attack,
+not Discover), the named Shock Skill versus ammunition distinction,
+and the Guided exclusion even for a Targeted enemy without LoF.
+All are linked to existing Skill, State, Trait and Ammunition identities.
+The summary, `modifies-rolls-for` BS Attack relation, Army profiles,
+and Fireteam Attribute modifier behavior were not changed. Exact
+`BS Attack (Shock)`/`BS Attack (Guided)` variant identities and their
+`restricts-use-of` edges stay in the deferred interaction ledger; no
+blanket ban on ordinary BS Attack was added.
+
+Curated/composed-record regression tests exercise the prohibitions,
+exception boundaries, source pages, and unchanged relation. Browser
+acceptance passed **21/21** content/navigation checks at 1440/390/320 px
+for BS Weapon (WIP), Flash Pulse and BS Attack, including links to Shock
+Ammunition and Targeted; no JS errors or horizontal overflow. This
+resolves the REA-005 player-facing explanation, not full typed
+attack-variant eligibility evaluation.
 
 ### REA-006 - Controlled Jump lacks declaration timing and opposing cancellation
 
@@ -429,6 +583,36 @@ scope, and the exact opposing-program exception. **Fix:** H text and links;
 timing facts only after a deliberate schema decision. **Dependencies:** REA-007,
 REA-018; do not invent a general "opposing MODs cancel" rule.
 
+**Reference acceptance (2026-10-14): Locally resolved; no timing
+schema or mechanics change.** The original "Current" description was an
+older baseline. At `ba20557`, the Controlled Jump Hacking Program
+already explains immediate activation before Resolution, optional ARO
+against any table-wide enemy Combat Jump, the same-landing-roll -3,
+non-Hackable targets, per-player exclusivity, cancellation when both
+Programs are active, and Firefight's independent cumulative +3.
+The existing FAQ v0.1 citation already restricts Controlled Jump to
+Troopers and excludes Speedball Tokens.
+
+The public Program card now includes three separately structured
+examples: a Hacker reacting to the *current* Combat Jump (not a later
+Order), both Programs canceling their *own* effects while leaving
+Designated Landing Area +3 intact, and the distinction between
+non-Hackable Troopers and Speedball Tokens using Combat Jump placement.
+English N5.3 p. 59 and Spanish N5.3 p. 61 agree on declaration timing,
+optional ARO, table-wide scope and opposing cancellation. The Spanish
+source is now registered directly on the Hacking Programs collection;
+Firefight p. 155 and FAQ v0.1 p. 1 remain cited. No general
+opposing-MOD cancellation rule was created, and no Supportware,
+Combat Jump, scenario bonus or Speedball mechanics were rewritten.
+
+Curated/composed-program tests cover the full branch and source IDs.
+Responsive Chromium acceptance passed **18/18** render/navigation
+checks at 1440, 390 and 320 px on the Program, Combat Jump and
+Request Speedball, with working links to Combat Jump, Hacker and
+Speedball, no JavaScript errors and no horizontal overflow. The exact
+Speedball FAQ exception is also tracked separately for REA-007's
+player-facing acceptance; REA-006 itself is complete.
+
 ### REA-007 - Speedball's reuse of Combat Jump needs the FAQ exclusion
 
 **Classification:** completeness, clarity. **Severity:** Medium. **Priority:** P1.
@@ -445,6 +629,31 @@ Controlled Jump does not affect Speedballs and only applies to Troopers.
 **Fix:** text/links and versioned FAQ evidence. **Dependencies:** REA-006,
 REA-030. This is missing explanation, not a confirmed existing numerical error.
 
+**Acceptance follow-up (2026-10-14): Locally resolved; no rules or
+modifier engine change.** The original "Current" finding was superseded:
+`skill:request-speedball` already cites the official N5 FAQ v0.1 p. 1,
+links Controlled Jump and Combat Jump, and explicitly states that its
+two 55 mm Tokens use PH 15 placement Rolls without Controlled Jump
++3/-3. The reciprocal `hacking-program:controlled-jump` restriction
+and its REA-006 example also explicitly distinguish Troopers from
+Speedball Tokens; both cards cite the same versioned FAQ ruling.
+
+One player-facing example was added to the Speedball Skill's
+`facts.clarifications`: **PH 15 remains the base Roll**, not PH 18 or
+PH 12 because of an allied/enemy Controlled Jump. The note is scoped
+to *those Program MODs*; it does not imply that all other scenario,
+placement, or external modifiers are inapplicable. Neither the two-token
+placement/usage rule, shared Combat Jump relation, nor original
+Controlled Jump effect was altered. The authoritative source is FAQ
+v0.1, printed p. 1: Controlled Jump only applies to Troopers.
+
+Regression tests now verify the displayed example, FAQ identity and
+page on both records, reciprocal semantic links, and unchanged Combat
+Jump relation. Headless Chromium passed **18/18** content/navigation
+checks across 1440/390/320 px, with no JavaScript errors or horizontal
+overflow. REA-007 is complete as player reference
+acceptance, not a general MOD calculation engine.
+
 ### REA-008 - Protheion needs the overkill limit and profile MOD
 
 **Classification:** completeness. **Severity:** High. **Priority:** P1.
@@ -460,9 +669,16 @@ Face to Face Attribute. S2 printed p. 2, Protheion question, says additional
 failed Saving Rolls beyond those needed for Dead have no effect or benefit.
 Do not turn an overkill failed save into a recovered Wound or VITA increase.
 
-**Action:** Preserve the existing sequence; add those two conditions and a
-short example of attacking an Unconscious target. **Fix:** text/links and FAQ
-citation. **Dependencies:** REA-009, REA-030.
+**Original action:** Preserve the existing sequence; add those two
+conditions and an Unconscious-target example, with a FAQ citation.
+**Dependencies:** REA-009, REA-030.
+
+**Status:** Complete for the reviewed Protheion explanation (2026-10-13).
+The current curated `skill:protheion` record includes the profile-listed
+opponent Attribute MOD, the Dead/overkill limitation, a two-Saving-Roll example,
+and the N5.3 and FAQ v0.1 citations. The regression test
+`test_protheion_overkill_and_opponent_mod_are_published` covers these details.
+Other recovery and FAQ scope issues remain under REA-009/030.
 
 ### REA-009 - Recovery and re-infliction in the same Order are unexplained
 
@@ -482,6 +698,39 @@ repeats that example. This is sequencing, not mutual cancellation.
 **Action:** Add one reusable, cited timing explanation and targeted recovery
 links. **Fix:** prose/links; an optional canonical timing record is future work.
 **Dependencies:** REA-001, REA-002, REA-026; preserve Protheion's already correct sequence.
+
+**Reference acceptance (2026-10-15): Local explanation reconciled;
+no executable timing changes.** The original "Current" passage above
+reflects a prior data state: by commit `cf8a00e`, the Order Expenditure
+Sequence, Engineer and Doctor cards already mentioned positive effects
+preceding simultaneous negative effects. The missing player-facing
+piece was the complete sequence and end states, reusable from each
+relevant reference.
+
+The shared `rule:order-expenditure-sequence` now explains that
+simultaneously declared effects stay simultaneous, but beneficial
+cancellation/recovery is resolved before harmful effects. It works
+through the bilingual English/Spanish N5.3 p. 15 Engineer/Riotstopper
+example: first the Engineer WIP Roll, then the hit's PH-6 PARA Saving
+Roll. If Engineer fails, the original IMM-A remains; if Engineer
+succeeds and the PARA Saving Roll succeeds, IMM-A stays canceled; if
+Engineer succeeds but the PARA Saving Roll fails, a **new IMM-A** is
+inflicted. Successful cancellation therefore provides no temporary
+immunity to re-infliction.
+
+Both `skill:doctor` and `skill:engineer` retain their already correct
+recovery mechanics and now link to the canonical timing rule. The
+`state:immobilized-a` card also links to it and to Engineer/PARA;
+versioned English and Spanish PDF p. 15 citations are attached to the
+shared Order rule and IMM-A, with English p. 15 on both Skills.
+`ammunition:para` retains its existing `failed-saving-roll` IMM-A
+condition, and no `causes-state` timing edge, runtime resolver or
+mandatory generic immunity behavior was introduced. Chromium passed
+**33/33** content/navigation checks at 1440/390/320 px, with no JS
+errors or new horizontal overflow. PARA at 320 px retains an unrelated
+6 px catalog-tag overflow, reproduced identically against the checked-in
+release and rebuilt rules databases. This completes REA-009's
+player-facing acceptance, not state-machine simulation.
 
 ### REA-010 - Immunity omits the ordinary Trait protection behind its exceptions
 
@@ -505,6 +754,35 @@ Saving Attribute and non-Comms attack. Then link the exceptions and examples.
 **Fix:** text/links; broader typed Trait protection would require validation
 design, not an invented generic algorithm. **Dependencies:** REA-004, REA-011,
 REA-024, REA-027. Flash Pulse's current outcome is a positive finding.
+
+**Acceptance follow-up (2026-10-15): Locally resolved for the general
+Immunity reference; no new combat logic.** The original "Current"
+description predates the checked-in `skill:immunity` `facts.effects`:
+Immunity (ARM)/(BTS) already treats ammunition using the matching
+Saving Roll Attribute as Normal, and **independently** ignores covered
+Weapon/Skill/Equipment Traits causing States, inflicting Wounds or
+reducing Attributes on eligible non-Comms Attacks. It retains the
+ordinary Saving Roll; neither general Immunity nor ammunition conversion
+alone suppresses the Critical-added Saving Roll.
+
+The existing baseline now explicitly links representative covered Traits:
+State, Continuous Damage, ARM=0 for ARM saves and BTS=0 for BTS saves.
+The player-facing **printed Monofilament example** confirms that Immunity
+(ARM) ignores ARM=0 and State: Dead while still requiring one ARM save,
+or **two ARM saves for a Critical** unless Immunity (Critical) applies
+(English N5.3 p. 96; Spanish N5.3 p. 99). The preexisting Flash Pulse
+example remains the counterexample to general Trait protection:
+Non-Lethal prevents Wounds and State: Stunned applies only if the BTS
+Saving Roll fails, despite covered STUN becoming Normal. The result is
+explicit in both language editions (English p. 96; Spanish p. 99).
+
+All five previously stored reviewed Immunity interactions and evidence
+labels remain unchanged, as do Army profiles, source-conflict notes and
+typed relations. Chromium acceptance passed **30/30** content/navigation
+checks at 1440/390/320 px across the Immunity and Flash Pulse cards,
+linked Traits and reciprocal references, with no JavaScript errors or
+horizontal overflow. This is source-backed explanation and reference
+acceptance, not a general Immunity/Weapon eligibility algorithm.
 
 ### REA-011 - Stored Immunity cases are only partly presented
 
@@ -538,6 +816,45 @@ there is no such entry in these reviewed-case arrays. Plasma's independent
 ARM+BTS Saving Roll rules are documented elsewhere and must not be synthesized
 as an additional reviewed Immunity outcome.
 
+**Browser acceptance (2026-10-15): Resolved without a runtime or
+curated rules change.** The implementation follow-up above already
+superseded the original finding: the shared `rules-reference.js`
+renderer calls `immunityCaseRows` for `skill:immunity`, yielding exactly
+five source-reviewed cases with individual applicability, normal and
+Critical counts, evidence labels and semantic links. The full group
+appears after Clarifications and examples. No Plasma/Enhanced case is
+stored or displayed: its ordinary ARM+BTS profile remains separate.
+
+Headless Chromium against a freshly rebuilt local rules DB accepted
+all five cases at desktop (1440 px) and narrow widths (390/320 px):
+
+- Flash Pulse/BTS, including the failed BTS save, Stunned, Non-Lethal
+  exception, and **explicit source** evidence label;
+- Enhanced plus Vulnerability (Viral), scoped to Viral in the **weapon
+  name**, not merely an Ammunition component (**explicit source**);
+- ARM versus AP+DA (1 hit/2 Critical instead of 2/3), and ARM versus
+  AP+EXP (1/2 instead of 3/4), both **derived** from general rules;
+- AP versus AP+DA (2 hit/3 Critical both before and after), with only
+  AP ignored and DA retained (**derived**).
+
+The cases display a shared caveat that Critical counts assume no
+Immunity (Critical), and the three combined cases remain restricted to
+their reviewed non-Comms attack conditions. All case titles, evidence
+labels and destinations are visible in normal player mode. Links are
+native anchors: Tab reaches them, the standard visible keyboard focus
+ring is applied, and Enter navigates successfully. No JavaScript errors
+or horizontal overflow occurred at any checked width. The existing
+Node renderer harness was strengthened to assert semantic card
+structure, per-case evidence counts, applicability and the absence of a
+synthesized Plasma case. The quoted Viral weapon-name text contains
+valid curly quotation marks in the actual UTF-8 JavaScript source;
+PowerShell output encoding alone can render them incorrectly.
+
+This closes **REA-011 acceptance**. No change to source semantics,
+Immunity computation, stored interaction arrays or the shared frontend
+renderer was warranted. Evidence and private screenshots are retained
+in ignored `local/audits/`.
+
 ### REA-012 - Smoke and Eclipse describe zones without sufficient resolution
 
 **Classification:** completeness, clarity. **Severity:** High. **Priority:** P1.
@@ -570,6 +887,43 @@ English and Spanish N5.3 PDF citations are included. Source-specific Sixth
 Sense/MSV1 interactions (REA-019) and all scenery geometries remain separate.
 Browser acceptance is pending.
 
+**Browser acceptance (2026-10-15): Resolved; no new mechanics or curated
+text required.** The 2026-10-10 implementation follow-up already
+superseded the initial finding: both `ammunition:smoke` and
+`ammunition:eclipse` publish three maintained clarifications with shared
+semantic links and separate `facts.visibilityZone` properties. Direct
+source review of official English N5.3 pp. 64, 66 and 125 confirms:
+
+- Ordinary Smoke opposes only an enemy Attack requiring a Roll and LoF
+  through its Template's Zero Visibility Zone; an enemy shooter without
+  crossing LoF makes a Normal Roll, and a Visor user is not opposed.
+- Smoke must win **every** applicable Face to Face Roll to leave its
+  Template; an unopposed failure removes it. Smoke Critical adds no
+  effect beyond winning opposition. An enemy Dodge within the Template
+  makes a Normal Roll, not Face to Face against Smoke.
+- Eclipse otherwise follows Smoke but Reflective explicitly allows
+  opposition to qualifying MSV attacks crossing its zone. Once
+  established it blocks LoF even for MSV, irrespective of Level, and
+  prevents the Visor reducing the relevant Poor Visibility MOD.
+
+The real player-facing pages for Smoke, Eclipse, MSV, Reflective and
+Dodge passed **33/33 Chromium content/navigation checks** at 1440,
+390 and 320 px. Their required explanations, cross-references and
+linked glossary Poor Visibility term were visible, with no JavaScript
+errors. The sole narrow-layout issue was the **pre-existing 6 px
+`catalog-tag`/breadcrumb overflow** on Smoke/Eclipse at 320 px;
+release and rebuilt rules databases reproduce it identically. It is
+already tracked under the separate shared-layout acceptance checklist
+in `docs/TODO.md`, not an Ammunition rule defect.
+
+An extended API regression protects exact rolled-LoF, MSV, Dodge,
+Critical, all-opponents, unopposed and zone-expiry branches. No
+new roll evaluator, changes to scenery geometry or unverified broad
+protection from attacks were introduced. The FAQ's separately scoped
+Sixth Sense/MSV1 case remains independent (REA-019/REA-030).
+This closes **REA-012 reference acceptance**, not final shared-layout
+acceptance.
+
 ### REA-013 - AP rounding and T2 die identification are missing player actions
 
 **Classification:** completeness, clarity. **Severity:** Medium. **Priority:** P1.
@@ -595,6 +949,40 @@ Attribute. T2 explains which Critical die to identify before rolling and
 why the failed saves inflict different numbers of Wounds. Existing typed
 resolution facts remain unchanged. Both English and Spanish N5.3 PDFs
 are cited. Browser acceptance remains pending.
+
+**Browser acceptance (2026-10-15): Complete; no new curated text or
+calculation.** The 2026-10-10 implementation follow-up already
+superseded the original "Current" finding. AP's maintained
+clarification tells the player to select the ARM or BTS Attribute
+specified by the weapon, halve it and **round up** (5/2 to 3), never
+reducing a positive defense below 1. E/M explicitly halves BTS,
+rounding up, for **both** hit Saving Rolls; the Critical adds one
+additional roll and State effects still require a failed save.
+
+T2's existing player-facing clarification requires **identifying the
+original-hit die and additional Critical die before rolling**: a
+failed original-hit Saving Roll causes 2 Wounds, whereas failure on
+the extra Critical Saving Roll causes 1 Wound. The typed
+`facts.ammunitionResolution` already expresses those two effects
+separately. No general damage calculator, extra Critical effects or
+weapon-profile override was introduced.
+
+English N5.3 pp. 63-64, 67 and Spanish N5.3 pp. 64, 66-67 agree on
+these rules; the existing curated citations retain those printed
+pages. The AP, E/M and T2 pages passed **18/18 Chromium render/API
+checks** across 1440/390/320 px, including the published
+clarifications, fetched rules facts, and absence of JavaScript errors.
+At 320 px, all three share a **pre-existing 6 px breadcrumb
+`catalog-tag` overflow**, reproduced identically against the release
+and newly generated rules databases. The issue is already tracked in
+the final shared-layout acceptance task in `docs/TODO.md` and was
+not introduced or fixed here.
+
+Existing published/API regression coverage was extended to assert
+E/M's two hit rolls, conditional State effects, the single extra
+Critical roll, and AP/E/M defense modifiers. The maintained data,
+weapon rules and renderer are unchanged. This closes **REA-013
+rules-reference acceptance**, not final narrow-screen UI acceptance.
 
 ### REA-014 - Dodge and Reset lack multi-effect conditions
 
@@ -627,6 +1015,41 @@ requirement to leave Engaged, additive Reset State penalties capped at -12,
 and the Sixth Sense exception. They cite both N5.3 PDF languages; the existing
 typed cancellation relations remain conditional. Curated/API regression coverage
 added. Browser acceptance remains pending; REA-015/026 remain separate.
+
+**Browser acceptance (2026-10-15): Complete; existing behavior
+preserved.** The 2026-10-10 implementation follow-up superseded the
+original "Current" finding. Dodge, Reset, Engaged and Bangbomb already
+explain their conditional multi-attack resolution, while IMM-B, Isolated,
+Targeted and Sixth Sense publish the corresponding State and Skill
+conditions. The reviewed source boundaries are:
+
+- A single Dodge die is compared separately against simultaneous attacks
+  and may evade a shot while failing to evade a Template attack. A
+  non-evaded applicable Attack prevents the Dodge move. The three listed
+  Dodge -3 situations give **one -3**, not a stacking -9; other independent
+  State MODs still apply.
+- Passing Dodge alone does not cancel Engaged: a valid move outside
+  Silhouette contact with **every** enemy is also required; with no valid
+  final position the Trooper remains Engaged and does not relocate.
+- Reset's IMM-B -3, Isolated -9 and Targeted -3 WIP penalties add together
+  subject to the normal -12 MOD limit. Sixth Sense can ignore Targeted's
+  penalty but expressly retains IMM-B/Isolated (and IMM-A where relevant).
+- Bangbomb's printed +4 can modify an eligible Dodge against the Combi
+  Rifle while not applying to the E/Marat Template in the same Order;
+  the example's unavoided Template prevents Dodge movement.
+
+Official English/Spanish N5.3 source pages remain attached to the
+respective maintained cards and unchanged (English Dodge pp. 79-80,
+Engaged p. 160, Reset/State pp. 24, 85, 111, 165, 168, 171,
+Bangbomb p. 120; the curated Spanish citations are preserved).
+A published/API regression was extended to protect all eight records,
+State-specific penalties, Sixth Sense exceptions and the Bangbomb
+mixed-attack example. Headless Chromium passed **48/48** render and
+semantic navigation checks at 1440, 390 and 320 px across all eight
+pages, with no JavaScript exceptions or page overflow. No State
+transition engine, unconditional `cancels-state` inference or source
+text rewrite was introduced. This completes REA-014 **reference
+acceptance**; REA-015 and REA-026 retain their separate boundaries.
 
 ### REA-015 - Several State cards lack their operative cancellation conditions
 
@@ -676,14 +1099,34 @@ and Impetuous-specific Prone transitions retain their source scopes. Existing
 structured relations remain unchanged. API regression coverage added; browser
 acceptance pending. REA-017, REA-020, REA-026 and REA-035 remain separate.
 
+**Reference acceptance (2026-10-15): Complete.** The October 10
+implementation already provides State-specific cancellation triggers,
+exception conditions, links and bilingual citations on all ten cards.
+Chrome checked Camouflaged, Hidden Deployment, Holoecho, HoloMask,
+IMP-1, IMP-2, Prone, Disconnected, Retreat! and Suppressive Fire at
+1440/390/320 px, including twelve navigation routes per viewport:
+**66/66 checks passed**, without JS errors or horizontal overflow.
+The published/API regression now guards Marker ARO lists and whole-Order
+revelation, IMP-1 versus IMP-2, real Holoecho bearer versus decoy,
+Hidden Deployment's independent Marker condition, Prone cancellation,
+Disconnected's Controller/Coherency/Engineer routes, Retreat!, and
+Suppressive Fire termination. An IMP-1 grammar correction changed
+"an disguised Marker" to "a disguised Marker"; the single reviewed-plain
+`AROs` occurrence fingerprint was refreshed, preserving its existing
+`game-action-not-trait` classification. The rules DB builds without
+altering any typed State transition or N5.3 citation. REA-026 remains
+separate, as do REA-017/020/035.
+
 **Interim implementation note (2026-10-10):** The 0.10.1 correction batch addresses
 REA-016's Stealth/Deployable exception and mixed-activation text; the Fireteam
 formation-count portion of REA-020; REA-031's Kobra CC Attribute link;
 REA-035's misleading IMP-2 Discover wording; REA-036's Vitroferro cap,
 Cover eligibility and placement note; and REA-039's TinBot family baseline.
-These are implemented corrections, not closure of their wider 1.0 review
-scope. The historical findings below remain as evidence; see
-[`TODO.md`](TODO.md#0101--interim-reference-consistency) for remaining release work.
+REA-035 and REA-036 received additional source-owned restrictions and traits,
+and full player-facing browser verification on 2026-10-14; both findings
+are now closed. Other referenced work retains its own 1.0 review scope.
+The historical findings below remain as evidence; see
+[`TODO.md`](TODO.md#current-milestone) for remaining 1.0 work.
 
 ### REA-016 - Stealth omits Deployables and multi-Trooper reaction reasoning
 
@@ -706,16 +1149,45 @@ when used in Marker State. Mine triggering and ARO entitlement are independent.
 example, retaining Sixth Sense/Combat Instinct links. **Fix:** text/links,
 future regressions. **Dependencies:** REA-015, REA-017, REA-020, REA-030.
 
+**Reference acceptance (2026-10-15): Resolved for REA-016's Stealth
+presentation.** The 0.10.1 effects and restrictions already state the
+underlying exception and FAQ conditions. New Stealth clarifications
+explain why an enemy Mine can trigger despite the absence of a normal
+Stealth-generated ARO, why another activated Trooper can create an ARO
+that targets the Stealth Controller yet becomes Idle if that Controller
+only uses Stealth-protected declarations, and why optional Stealth must
+be announced when used in Marker form. The Mine example explicitly
+qualifies Sixth Sense and Combat Instinct counters and retains the
+Mine-specific triggering/ally-safety rules. English N5.3 p. 112 and
+Spanish N5.3 p. 114 agree on the Deployable exception; English and
+Spanish FAQ v0.1 printed p. 2 support mixed activation and Marker
+announcements. The authored Skill gained these exact citations.
+
+No new typed relation or automatic ARO evaluator was added; the
+pre-existing Stealth/Cautious Movement and counter-Skill semantics
+remain unchanged. Source and published-rules regressions assert these
+conditions and citations. Chromium passed **39/39** content/navigation
+checks on Stealth, Deployable, Boost, Sixth Sense, Combat Instinct,
+Peripheral and Cautious Movement at 1440, 390 and 320 px; no JS errors
+or horizontal overflow. Existing `weapon:mines` semantic links still
+open an Army Weapon page whose API returns 404: this *independent*
+weapon-family navigation problem is tracked under final 1.0 browser
+acceptance. No new broken weapon-family link was added here.
+
 ### REA-017 - Peripheral subtype identities do not explain their operation
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P1.
 **Evidence:** Explicit; high confidence. **Affected:** `skill:peripheral`,
 all five `rule:peripheral-type:*` records, `skill:cyberplug`, `state:disconnected`.
 
-**Current:** The family says the type defines behavior; subtype facts largely
-cover Controller eligibility, maximum count, distance, and Cyberplug profile
-names. They omit the actions, cancellations, and exceptions those identities
-need to explain. This is incomplete existing content, not absent identities.
+**Status:** Complete for the shared Peripheral-reference scope (2026-10-13).
+
+**Current:** The shared Peripheral reference and all five subtype identities
+explain source-backed activation, Coherency, disconnection, delegated contact
+and Roll ownership, Control Spearhead, Ancillary exceptions, and Cyberplug
+Connected/Autonomous profiles. No Army identities or typed simulation
+relations changed. Real-browser acceptance passed; dependent source-specific
+interactions remain owned by their individual audit findings.
 
 **Evidence/result:** S1 pp. 106-108 distinguish shared activation/Idle behavior,
 Servant contact delegation and single active Servant, Synchronized Coherency,
@@ -725,10 +1197,15 @@ Doctor/Engineer is an explicit exception to the Controller's usual Idle.
 S2 p. 2 confirms one participant unable to perform a Skill Idles while others
 can perform it. Generic Disconnected propagation cannot override Cyberplug.
 
-**Action:** Add a concise common baseline plus subtype-local exceptions;
-explain Controller/Peripheral roll ownership. **Fix:** text/links; subtype
-facts/relations and browser support only where deliberately needed.
-**Dependencies:** REA-001, REA-009, REA-015, REA-020, REA-030.
+**Acceptance evidence:** Headless Chrome 155 on Windows checked the shared
+Peripheral and five subtype pages, Cyberplug, and Disconnected at 1440, 390
+and 320 pixels (24 combinations). Six cross-reference navigation paths,
+keyboard Enter and two-tap touch behavior, rendered citations and mobile
+readability passed without JavaScript errors or horizontal overflow.
+See [testing](testing.md#10-peripheral-rea-017-browser-acceptance).
+This does not resolve REA-001/009/015/020/030 or their separate conditions.
+**Fix:** reviewed maintained text with validated subtype fact groups, not a
+rules-execution engine.
 
 ### REA-018 - Firewall, Hacking Area, and Supportware have no adequate baseline owner
 
@@ -738,11 +1215,22 @@ facts/relations and browser support only where deliberately needed.
 H `hacking-program:assisted-fire`, `hacking-program:enhanced-reaction`,
 `hacking-program:fairy-dust`, `hacking-program:controlled-jump`.
 
-**Current:** Several Programs say "normal Supportware exclusivity and
-cancellation rules apply," but no curated Supportware baseline supplies them.
-Firewall cards refer to a Firewall without a corresponding definition.
-Repeater describes enemy use but not the complete targeting/ARO distinction.
-No authored `equipment:firewall` or `rule:hacking-area` exists in C/H.
+**Original gap:** Several Programs referred to Supportware exclusivity,
+cancellation and Firewall without owned baseline definitions. The Repeater
+description omitted parts of enemy use and ARO scope.
+
+**Current implementation (verified 2026-10-14):** Canonical
+`rule:hacking-area`, `equipment:firewall` and `rule:supportware` are
+published alongside their related Repeater, Fairy Dust and Enhanced Reaction
+references. The Hacking Area card covers enemy-Repeater Hacker-only
+targeting, failed Requirements becoming Idle, 8-inch ARO checks along
+movement paths and Repeater measurements, and fake HoloMask Repeaters.
+Firewall explains the listed attacker WIP penalty, fixed +3 Saving Roll
+bonus, one chosen non-stacking protection source, and the FAQ's disabled
+Hacking Device exception. Supportware explains one sustained Program per
+Hacker, one beneficiary Program per Trooper, cancel-on-replacement and
+Isolated/Null termination, including the printed Fairy Dust versus Enhanced
+Reaction example in which all other REMs lose the prior protection.
 
 **Evidence/result:** S1 pp. 55-56 specify one Supportware per benefitting Trooper
 and one sustained Program per Hacker, replacement/cancellation, and loss on
@@ -752,10 +1240,15 @@ arbitrary enemy non-Hackers; invalid requirements become Idle. Page 60's
 example replaces the entire Fairy Dust Program on targeting one covered REM
 with Enhanced Reaction. S2 p. 1 explains disabled Device Firewalls.
 
-**Action:** Supply cited baseline reference prose and linked, Program-specific
-exceptions. Preserve Army's Program tables and Device associations; no numeric
-duplication is needed. **Fix:** new curated content/links, potential publication
-work for new owners. **Dependencies:** REA-006, REA-019, REA-026, REA-030.
+**Disposition:** Resolved. Current English N5.3 pp. 55–56 and 60, and
+N5 FAQ v0.1 p. 1 agree with the published baselines. Focused rules-contract
+assertions passed; Chromium acceptance checked six reference pages at
+1440, 390 and 320 px (18/18 checks; no JavaScript errors or horizontal
+overflow). The 320 px Hacking Area and Supportware pages were visually
+inspected. No gameplay interpretation, source data, or generated DB change
+was required for this acceptance pass. Source/FAQ conflicts, NFB, and
+Program-local interactions remain independently tracked by REA-006,
+REA-019, REA-026 and REA-030.
 
 ### REA-019 - NFB's label does not explain suppression and duration
 
@@ -764,19 +1257,37 @@ work for new owners. **Dependencies:** REA-006, REA-019, REA-026, REA-030.
 `negative-feedback`, `skill:mimetism`, `equipment:albedo`, `equipment:holoprojector`;
 H `hacking-program:cybermask`, `hacking-program:white-noise`.
 
-**Current:** The Label says only that another NFB element is incompatible.
-Program facts do not explain which effects stop or when their restriction ends.
-The player must reconstruct this from external rules.
+**Original gap:** The shared Label stated incompatibility but did not
+explain which active effects were overridden, their owner or lifetime.
+Program cards did not describe the specific duration of the NFB restriction.
+
+**Current implementation (verified 2026-10-14):** The shared Negative
+Feedback Label explains that activating a new NFB Skill, Equipment,
+Program or rule overrides active NFB effects **on the same Trooper**,
+allowing one active effect at a time until cancellation or voluntary
+deactivation. The Cybermask card identifies its Hacker as the owner:
+other NFB effects remain unavailable while that Hacker is in IMP-2,
+ending when the State is canceled. The White Noise card separately
+applies NFB to the Hacker who placed its Template until the Template
+is removed at the start of the States Phase. Neither program suppresses
+NFB Equipment held by unrelated allies. The Label's Used by section
+links to both Programs as well as Mimetism, Impersonation, Albedo and
+Holoprojector.
 
 **Evidence/result:** S1 pp. 59, 61, 76 and 174 make the new NFB effect override
 other NFB effects for its duration. Cybermask's restriction persists while in
 IMP-2; White Noise's applies to its Hacker while the Template is present.
 That does not cancel every allied Trooper's Equipment or the whole army's effects.
 
-**Action:** Expand the shared definition with duration/owner scope and link it
-from affected Program prose. Separate Label definition from Program-specific
-lifetimes. **Fix:** Label/curated text and links. **Dependencies:** REA-015,
-REA-018; no pairwise universal negation edges.
+**Disposition:** Resolved. Official N5.3 pp. 59, 61, 76 and 174
+support the existing owner/lifetime split. Existing rules and API
+contract tests cover the baseline, Cybermask and White Noise; Chromium
+acceptance passed 15/15 card/viewport and Label-to-Program navigation
+checks at 1440, 390 and 320 px. All three 320 px screenshots were
+visually inspected with no page-level clipping or JavaScript errors.
+No new cross-Trooper cancellation relationships, gameplay logic, or
+curated-data changes are warranted. Further interaction cases remain
+separately scoped to REA-015 and related findings.
 
 ### REA-020 - Fireteam basics omit action ownership and integrity exceptions
 
@@ -785,11 +1296,12 @@ REA-018; no pairwise universal negation edges.
 `skill:ft-master`, `skill:number-2`, `skill:nco`, `skill:tactical-awareness`,
 `state:suppressive-fire`, Peripheral types.
 
-**Current:** General facts cover chart authority, Coherency, group membership,
-and activation, but not who performs an attack, differing AROs, leaving/rejoining,
-or cancellation. Type badges show Haris 3 and Core 3-5 without creation-only
-qualification. FT Master/Number 2 and Peripheral exceptions are not connected
-to a readable common integrity baseline.
+**Original gap:** The General Rules covered chart authority, Coherency and
+activation, but omitted which member performs a declared Skill, distinct ARO
+choices, ordinary departure versus whole-team cancellation and automatic
+rejoining. Type counts appeared without adequate creation-only context, and
+FT Master, Number 2, Peripheral and NCO/Tactical Awareness exceptions were
+not connected to a readable common integrity baseline.
 
 **Evidence/result:** S1 pp. 132-136 distinguish leader-only attacks from shared
 Movement/Reset, majority ARO, member departure, whole-team cancellation, and
@@ -798,10 +1310,30 @@ chart minimums apply to creation, with FT Master's exception. Ancillary
 eligibility has its own conditions (p. 107); Number 2 can replace a disabled
 leader (p. 105). The two forms of removal must not be conflated.
 
-**Action:** Add a concise creation/activation/integrity reference and link the
-exceptions. Qualify type counts as formation requirements. **Fix:** curated
-text/facts/links; renderer changes if new fact groups are adopted.
-**Dependencies:** REA-017, REA-021, REA-030, REA-034.
+**Disposition (verified 2026-10-14): Resolved for the shared Fireteam baseline.**
+The published General Rules now distinguish creation-eligible Troopers;
+Movement/Reset versus Leader-only Active Turn actions; individual ARO rolls,
+targets and team-wide ARO selection; dissenting member departure versus
+Leader-caused cancellation; automatic cancellation conditions; the timing
+and consequences of member departure; automatic rejoining at the end of
+the next States Phase; and Type remaining unchanged after losses.
+DUO/HARIS/CORE badges explicitly indicate **formation** limits, not an
+ongoing member minimum, except rules that expressly require otherwise.
+
+The shared reference links the owning FT Master, Number 2, NCO, Tactical
+Awareness, Peripheral, Suppressive Fire, Isolated and Retreat! rules
+without reproducing their full mechanics. N5.3 pp. 132-136 and the linked
+source-specific references support these distinctions. The maintained-text
+gate retains exactly one reviewed literal `States Phase` occurrence:
+it is a turn phase, not the unrelated weapon Trait called State.
+The existing responsive renderer publishes all reviewed rules with typed
+cross-links; no new schema or evaluator was required.
+
+Broader Fireteam chart-specific eligibility and source conflicts remain
+separately owned (REA-030/034), as do Peripheral subtype interactions
+(REA-017). The final Army selection/Wildcard/keyboard/touch Fireteam
+browser workflow remains an independent release acceptance item; this
+finding closes only the shared reference's completeness.
 
 ### REA-021 - Fireteam and Martial Arts bonuses need Special Dice reasoning
 
@@ -810,10 +1342,11 @@ text/facts/links; renderer changes if new fact groups are adopted.
 `skill:martial-arts` and L1-L5, `skill:bs-attack`, `trait:disposable-x`,
 `equipment:medikit`, `equipment:gizmokit`, `trait:bs-weapon-ph`, `trait:bs-weapon-wip`.
 
-**Current:** Fireteam bonuses list +1 SD and +1 BS but do not explain allocation,
-discard timing, Disposable uses, or no-roll/Long Skill limits. Martial Arts
-numeric values already exist in the Army table and browser; the explanation is
-missing, not the chart. The label +1 BS can obscure its WIP/PH weapon applicability.
+**Original gap:** Fireteam bonuses listed +1 SD and +1 BS without the
+allocation, discard timing, Disposable spending, Long Skill or no-roll
+restrictions. Martial Arts numeric modifiers existed in the source table,
+but lacked a shared player-readable procedure. Fireteam Level 4's
+Attribute modifier could be mistaken for BS only, omitting PH/WIP weapons.
 
 **Evidence/result:** S1 pp. 75, 100 and 136 say SD adds a die to roll/discard
 without increasing Burst or consuming uses, in both turns. Fireteam SD does not
@@ -828,6 +1361,22 @@ Martial Arts/Berserk exceptions. **Fix:** prose/links, possibly explanatory
 table captions; retain imported tables. **Dependencies:** REA-005, REA-022,
 REA-026, REA-034.
 
+**Disposition (verified 2026-10-14): Resolved.** The shared
+`rule:special-dice` General Rule now explains SD as an extra rolled
+then discarded die, without increasing Burst or spending charges; its
+examples distinguish divided Burst, reactive timing, Face to Face
+selection and the Active Player's first discard. Martial Arts L3/L5,
+Berserk, ranged Kits, Disposable and BS Attack link the same baseline.
+The Fireteam Level 2 table now links its +1 SD bonus directly to that
+rule. Level 4 modifies the Attribute of the BS Attack (including PH/WIP
+weapons), while Discover receives Level 3's +3 but not Levels 2/4.
+N5.3 pp. 75, 86, 100 and 136 and FAQ v0.1 p. 3 support these
+distinctions; browser acceptance passed 39/39 cases, including
+Fireteam-to-Special-Dice navigation at 1440, 390 and 320 px.
+The duplicated Coordinated Orders FAQ clarification was consolidated.
+The Spanish N5.3 Fireteam dice-cap wording contradiction remains
+separately open under REA-041; this acceptance does not adjudicate it.
+
 ### REA-022 - Kit recovery and Disposable spending need multi-roll rules
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P1.
@@ -835,11 +1384,10 @@ REA-026, REA-034.
 `equipment:gizmokit`, `trait:disposable-x`, `trait:double-shot`, `weapon:pt-endgame`,
 `skill:remote-presence`, `skill:technorganic`, `skill:no-wound-incapacitation`.
 
-**Current:** Kits describe success and failure per PH roll, but omit the
-same-Order multi-hit aggregation. Disposable describes each use, not how Burst
-spends uses or is capped by remaining uses. Double Shot omits the requirement
-that both Disposable (2) charges remain. These omissions become misleading
-when bonuses produce several hits/rolls.
+**Original gap:** Kits described success and failure per PH Roll but omitted
+same-Order multiple-hit aggregation. Disposable described charges without
+connecting Burst increases, remaining uses, and Special Dice; Double Shot
+omitted the two-unspent-charge condition.
 
 **Evidence/result:** S1 pp. 123-124 say any successful Kit PH roll means recovery
 and still only one Wound is removed under the ordinary multi-hit rule; Remote
@@ -847,10 +1395,26 @@ Presence separately removes enough to leave either Unconscious level (p. 110).
 Pages 175 and 75 distinguish Burst spending from SD. Double Shot's +1B is
 available with Disposable (2) only while both uses remain.
 
-**Action:** Separate remote hit, target PH, same-Order aggregation, and special
-recovery exceptions. Add remaining-use conditions and an SD-versus-B example.
-**Fix:** text/links and future regression cases. **Dependencies:** REA-001,
-REA-002, REA-021; do not infer success/failure aggregation for unrelated attacks.
+**Disposition (verified 2026-10-14): Resolved.** The curated MediKit and
+GizmoKit references already separate remote BS Attack hits from the target's
+PH Roll and contain the official any-success, one-Wound-per-Order rule.
+The cards now include concrete two-hit examples showing that one successful
+PH Roll and one failed PH Roll recover one Wound in total, not one per hit.
+GizmoKit retains its `Remote Presence` exception: a single
+success cancels either level of Unconscious, removing the necessary Wounds.
+
+Disposable now has a source-grounded B1/Disposable (2) example contrasting
++1B (two shots and two uses) against +1 SD (one retained shot and one use).
+Double Shot explicitly requires both unspent uses for its +1B bonus and
+enters Unloaded after consuming both; with one remaining use that bonus
+cannot apply. The printed PT: Endgame exception remains tied only to its
+own source profile; no Army data were rewritten. These explanations use
+N5.3 pp. 75, 123-124, 175 and 182 and reuse canonical Special Dice,
+Disposable, Unconscious and Remote Presence links.
+
+The correction is scoped to **Kits and Disposable**; no universal
+multiple-hit aggregation or dice-resolution engine has been inferred.
+REA-001, REA-002 and REA-021 retain their independent interaction scope.
 
 ### REA-023 - Placement cards defer essential geometry and deployment restrictions
 
@@ -859,11 +1423,10 @@ REA-002, REA-021; do not infer success/failure aggregation for unrelated attacks
 `trait:perimeter`, `skill:minelayer`, `weapon:wildparrot`, `weapon:armed-turret`,
 `equipment:fastpanda`, `equipment:deployable-repeater`, `trait:deployable`.
 
-**Current:** Place Deployable refers to unspecified active/reactive placement
-restrictions. Perimeter supplies ZoC placement but not its required path.
-Minelayer refers to enemy-presence restrictions without naming them. Armed
-Turret says it reacts to enemy Orders, without the Model-not-Marker limit.
-Deployable's card also omits immediate removal on reaching Unconscious.
+**Original gap:** Place Deployable deferred active/reactive geometry,
+surface support, and Conclusion timing. Perimeter's path rule, Minelayer's
+two enemy-presence checks, Armed Turret's Model-only restriction and
+Deployable's Unconscious consequence were missing or implicit.
 
 **Evidence/result:** S1 p. 82 permits Active placement along the moved route,
 requires contact in Reactive placement, a supported horizontal surface, and
@@ -874,11 +1437,34 @@ general exclusions. Page 70 limits Armed Turret reactions to an enemy Model.
 Page 175 sends a Deployable entering Unconscious directly to Dead and excludes
 Deployable-trigger chains. S2 p. 2 addresses an occupied intended position.
 
-**Action:** Put short baseline restrictions on their owners and item exceptions
-on their cards. Keep Mine trigger area distinct from Boost ZoC and Perimeter
-placement. **Fix:** text/links, possible conditional facts. **Dependencies:**
-REA-003, REA-017, REA-030, REA-037. The reviewed Mines/Drop Bears exceptions
-are positive evidence, not proof that all Deployables are complete.
+**Disposition (verified 2026-10-14): Resolved for scoped placement owners.**
+`skill:place-deployable` now explains contact on the Active Trooper's
+movement path versus reactive contact, full support on a horizontal surface,
+activation at Conclusion, and the FAQ's alternate location if occupied
+(otherwise the item is lost). `trait:perimeter` links its complete ZoC
+placement and passable Silhouette-wide path, distinct from Mine Trigger Area
+and Boost. `skill:minelayer` spells out no enemy Troopers or Camouflage
+Markers in the Trigger Area, or anywhere inside a Perimeter item's ZoC,
+plus Deployment-area constraints, Minelayer (X) quantity, and lost
+Disposable uses after a failed Superior Deployment Roll.
+
+`trait:deployable` now explains direct Dead State/removal on entering
+Unconscious and its prohibition on triggering other Deployables.
+Indiscriminate explicitly allows placement despite Camouflage and no
+otherwise-valid target, without automatically removing Minelayer's
+separate Deployment Requirements. Deployable Repeater, FastPanda and
+WildParrot explain their different contact or path placement. Armed
+Turret declares against an active **enemy Model, not a Marker**, within
+LoF/contact; its position, removal and non-triggering behavior are
+explained without changing its imported E/Mitter mode or its competing
+printed S1/S2 Silhouette values.
+
+Official N5.3 English pp. 70, 74, 82, 102, 175 and FAQ v0.1
+pp. 2-3 provide the cited baseline. The focused rules test and responsive
+browser checks verify the references. **Source precedence is not
+resolved** for the separate Armed Turret S1/S2 (REA-037) and E/Mitter
+(REA-045) conflicts, and other FAQ applicability work remains with REA-030.
+No generic placement geometry evaluator was introduced.
 
 ### REA-024 - BioWeapon needs a target-conditioned explanation alongside the chart
 
@@ -887,11 +1473,11 @@ are positive evidence, not proof that all Deployables are complete.
 **Affected:** `trait:bioweapon`, `weapon:mines`, `ammunition:normal`,
 `ammunition:da`, `ammunition:shock`, `skill:vulnerability`.
 
-**Current:** The Trait says DA+Shock applies to VITA, with no semantic component
-links. Viral Mine's profile says N/BTS/one save; its related rules point to
-BioWeapon but do not explain how the extra effect changes the VITA case.
-This can be mistaken for one save universally or for Viral being its own
-current Ammunition identity.
+**Original gap:** BioWeapon described DA+Shock against VITA without links
+to the two Ammunition rules. Viral Mine's N/BTS/one-save source fields did
+not explain that BioWeapon is target-conditioned. A previously reviewed
+Viral CC Weapon definition and shared Viral Weapon Property had already
+captured the derived VITA-versus-STR comparison.
 
 **Evidence/result:** S1 pp. 174 and 181 and S6 metadata weapon 63 distinguish
 the profile from the target-conditioned Trait. DA supplies two saves against a
@@ -900,11 +1486,31 @@ save. Against STR, BioWeapon does not supply DA+Shock. The one-save chart field
 is not automatically a typo: it is the baseline before applying that Trait.
 Vulnerability (Viral) is separately weapon-name-scoped (S1 p. 118).
 
-**Action:** Add a short VITA/STR comparison and component links, explicitly
-marking the combined reasoning Derived. Keep source profile values.
-**Fix:** prose/links and the already deferred reuse edges if appropriate.
-**Dependencies:** REA-010, REA-013, REA-025. Broader partial Immunity cases
-remain research, not a certified general algorithm.
+**Disposition (verified 2026-10-14): Resolved for the published baseline.**
+The canonical BioWeapon Trait links [[ammunition:da|DA]] and
+[[ammunition:shock|Shock]], limiting their combined effect to VITA targets.
+The Trait distinguishes the source-stated condition from its **derived**
+Saving Roll implications: DA supplies two rolls per hit; Shock's direct-Dead
+effect additionally requires VITA 1 and a failed Saving Roll. Against STR,
+the conditional Trait does not apply and the weapon's printed Ammunition
+and Saving Roll fields remain the baseline.
+
+The shared Mines reference now specifically identifies Viral Mine's printed
+N/BTS/one-roll baseline and points to the existing
+`weapon-property:viral` for the detailed VITA-versus-STR comparison.
+The exact Army Viral Mine (weapon 63) profile and the Property's reviewed
+source identity are unchanged. The published trait, mine and shared
+Property remain navigable alongside the relevant Ammunition references.
+Vulnerability (Viral) still checks the weapon's **name**, not an invented
+Viral Ammunition type. N5.3 pp. 63-65, 118, 174 and 181 support these
+distinct conditions; the combination is explicitly Derived.
+
+No unconditional DA/Shock composition edges, universal two-save profile
+change or general partial-Immunity evaluator were introduced. Unresolved
+Immunity and other conditional interactions remain under REA-010/013.
+The separate 320 px Ammunition-page header badge overflow discovered
+during browser acceptance is tracked in the final UI gate, not silently
+folded into this rules finding.
 
 ### REA-025 - N+E/M is absent from the reviewed composition map
 
@@ -913,10 +1519,10 @@ remain research, not a certified general algorithm.
 `ammunition:em`, `skill:immunity`; Army E/M CC Weapon, source weapon 7,
 Ammunition source 5 `N+E/M`.
 
-**Current:** The map covers AP+DA, AP+Exp, AP+Shock and AP+T2, not N+E/M.
-The Army source is preserved, but its components and joint Wound/State result
-are not explained by a reviewed shared example. E/M's standalone State-only
-card cannot explain the Normal component's Wounds.
+**Initial gap (before resolution):** The map covered AP+DA, AP+Exp, AP+Shock
+and AP+T2, but not N+E/M. The Army source was preserved, but its components
+and joint Wound/State result had no reviewed shared explanation. E/M's
+standalone State-only card did not explain the Normal component's Wounds.
 
 **Evidence/result:** S1 p. 67 explicitly gives two halved-BTS saves, Wounds
 from the Normal component, and Isolated plus conditional IMM-B from E/M;
@@ -924,36 +1530,47 @@ a Critical adds one save. S6 confirms source IDs and fields. This is an
 explicit printed combined example, unlike the derived partial-Immunity case.
 Non-Lethal, when actually present, has its own overriding rule (p. 175).
 
-**Action:** Review source 5 and its actual profiles, link both components, and
-provide the printed reasoning. Preserve the original Saving fields and do not
-calculate arbitrary compositions in JavaScript. **Fix:** mapping/curated
-content/links and future validation; no such edits made here.
-**Dependencies:** REA-010, REA-011, REA-013, REA-026.
+**Status (2026-10-14): resolved for the printed source-profile case.** Exact
+Army Ammunition source 5 now maps ordered Normal and E/M components. A reviewed
+`weapon-property:n-em` links both canonical rules and the printed p. 67
+example; the E/M CC Weapon reference links to that explanation. The original
+BTS/2 × 2 source fields remain authoritative, and no general combined outcome
+or partial-Immunity evaluator has been introduced. E/M-only weapons retain
+their distinct source profiles. Broader combination and Immunity resolution
+remain dependencies of REA-010, REA-011, REA-013 and REA-026.
 
-### REA-026 - Useful general mechanics remain research rather than linked reference content
+### REA-026 - Complete shared General Rules mechanics
 
 **Classification:** completeness, clarity. **Severity:** Medium. **Priority:** P1.
-**Evidence:** Explicit absence from C/H; official mechanics Explicit.
+**Evidence:** Initially absent from C/H; published reference mechanics follow the official rules.
 **Affected:** General Rules domain, `skill:bs-attack`, `skill:cc-attack`,
 `skill:move`, `skill:idle`, `rule:command-token-strategic-use`, recovery references.
 
-**Current:** No canonical baseline records cover Saving Roll/PS, Face to Face
-resolution, Guts, ordinary declaration timing, or Coordinated Orders. The
-34 `rule` records are peripheral types, orders, Fireteams, profile help, and
-scenario rules. Maintained research describes many mechanics, but it is not
-the normal player reference. Attribute definitions alone do not provide them.
+**Status:** Complete for the scoped shared-reference baseline (2026-10-13).
+
+**Current:** Five canonical, source-cited General Rules are published and
+cross-linked: Face to Face Rolls, Saving Rolls, Guts Rolls, Order Expenditure
+Sequence and Coordinated Orders. They explain ordinary resolution, declaration
+and shared-action mechanics without implementing a universal rules engine.
+Source-specific exceptions and disputes remain in their own review findings.
 
 **Evidence/result:** S1 pp. 14-15, 24-25, 37-38, 75-76 and 129-131 establish
 these baselines. Useful examples include an unopposed save using PS plus
 protection, capped cumulative MODs, simultaneous effects, illegal declarations
 still spending Disposable uses, and Coordinated recovery's any-success rule.
-This is absent curated content, distinct from incomplete existing Skill cards.
+All five shared references are now curated.
 
-**Action:** Scope concise, source-cited General Rules to the explanations
-needed by current catalogs. Link repeated baselines instead of copying whole
-procedures into each Skill. **Fix:** new curated definitions and publication
-integration; not a game engine. **Dependencies:** supports REA-009, REA-013,
-REA-014, REA-018, REA-021, REA-025. Full procedural simulation is outside scope.
+**Browser evidence:** Chrome 155 on Windows with a temporary, freshly
+built rules database verified all five rule cards at 1440, 390 and 320 pixels
+(15 cases), five outgoing and seven incoming reference links, Enter-key and
+two-tap touch navigation, citations, and zero JavaScript errors or horizontal
+overflow. The 320-pixel Guts and Coordinated Orders screenshots were visually
+reviewed; see [development checks](testing.md#10-general-rules-rea-026-browser-acceptance).
+This does not replace broader release acceptance.
+
+**Action:** REA-026's shared-reference baseline and browser scope are complete.
+Track remaining special-case interactions under REA-009/013/014/018/021/025
+and their other owning findings. Full procedural simulation remains out of scope.
 
 **Follow-up evidence:** Follow-up selects the parameter rules on S1 p. 75: Dodge (ARM+3) and
 PARA CCW (-6) need a shared modifier baseline distinguishing the user's Attribute,
@@ -968,27 +1585,47 @@ these are linked-baseline work, not a request for an execution engine.
 **Evidence:** Profile baseline confirmed in both N5.3 PDFs; Wiki conflict Explicit.
 **Affected:** `weapon:flash-pulse`, `skill:immunity`, `ammunition:stun`.
 
-**Current:** C uses the English one-BTS-save profile and records the competing
-Spanish Wiki numbers/Traits in its source notes. Its described gameplay outcome
-is supported and should be preserved.
+**Current (2026-10-14):** The application retains pinned Army weapon 72's
+one-BTS-save profile, Non-Lethal and State: Stunned, with a failed-save-only
+Stunned effect. The published weapon reference now cites both N5.3 PDFs'
+weapon rows and Immunity examples and records both conflicting Spanish Wiki
+chart revisions, without silently modifying Army data.
 
 **Evidence/result:** S1 p. 186 and **S17 p. 196** both print Flash Pulse / Pulso
 Flash with STUN/Aturdidora, **one BTS/PB Saving Roll**, and the separate
 **Non-Lethal/No Letal** and **State: Stunned/Estado: Aturdido** Traits. The
 English archived Weapon Chart 4083 and Army S6 weapon 72 agree. Spanish Wiki
 revision 3987, timestamp **2026-08-27T14:20:08Z** from S21, instead prints two
-PB rolls and omits the State Trait. S1 p. 96 and S17 p. 99 explicitly preserve
-failed-save Stunned under Immunity (BTS/PB). Thus the *PDF-language* comparison
-is resolved; the **Spanish Wiki publication discrepancy** is not. The Wiki
+PB rolls and omits the State Trait. The **Spanish alternative weapon chart,
+revision 3988**, reproduces the same row. On 2026-10-14, direct requests to
+both current Wiki pages and the exact `oldid=3987` and `oldid=3988`
+pages returned these conflicting results and matching revision markers.
+S21's history archive independently pins revision 3988 at
+**2026-08-27T14:21:00Z** with the same conflicting row (exact SHA-256 in
+the [source manifest](rules-explanation-audit-1.0-sources.md)).
+Spanish Immunity revision 3677 likewise still confirms Stunned on a failed
+roll. S1 p. 96 and S17 p. 99 independently preserve that condition under
+Immunity (BTS/PB). The pinned Army metadata (weapon 72) also retains
+STUN/BTS/one roll and both Traits.
+
+This establishes the **current bilingual PDF/Army baseline** but not a
+correction to the **English and Spanish Wiki publication discrepancy**. The Wiki
 revision being later than the PDF's creation metadata does not establish a
 superseding official rule or prove the reason for the difference.
 
-**Action:** Preserve the verified one-BTS-save curated explanation and cite
-both language PDFs plus the Immunity exception. Document the Spanish Wiki
-conflict as a separate source issue and seek an official Wiki correction or
-erratum where feasible. **Fix:** evidence/source-note maintenance only unless
-later authoritative evidence changes the result. **Dependencies:** REA-010,
-REA-029. Do not infer that every hit automatically Stuns.
+**Disposition (reviewed 2026-10-14):** The local adjudication is complete.
+The curated weapon's printed profile and resolved Immunity interaction have
+bilingual PDF, pinned Army and source-revision provenance. Source notes and
+regression tests retain the conflicting Spanish Wiki rows, including revision
+3988 from the separately inspected alternative chart. Browser acceptance
+verified the weapon and related rule cards. No roll-count or gameplay change
+is justified by the currently checked evidence.
+
+**Open external follow-up:** Seek an authoritative Wiki correction or explicit
+erratum for both Spanish charts. Until then, label this **publication conflict
+unresolved**; do not change the one-roll source profile, assume a later
+revision supersedes the PDFs, or infer that every hit automatically Stuns.
+**Dependencies:** REA-010 and REA-029 remain independent.
 
 ### REA-028 - Kobra's two issues require separate source decisions
 
@@ -997,26 +1634,47 @@ REA-029. Do not infer that every hit automatically Stuns.
 **Affected:** `weapon:kobra-pistol`, `weapon:kobra-pistol-cc`,
 `ammunition:da`, `trait:anti-materiel`.
 
-**Current:** The CC-specific card already explains two saves while recording
-the one-save PDF and missing Anti-materiel. Its source note correctly retains
-the disagreement, but puts both the supported roll correction and uncertain
-Trait into one secondary paragraph.
+**Current (reviewed 2026-10-14):** The CC-only reference now separates
+the supported **two ARM Saving Rolls per DA hit** (three on a Critical)
+from **unresolved Anti-materiel** applicability in both its primary summary
+and two distinct source notes. The imported Army 221 CC profile is unchanged;
+the BS Shock sibling does not inherit CC-only effects.
 
-**Evidence/result:** S1 pp. 68/182 print DA with one save; DA p. 64 requires
-two. S4 chart 4083 and S6 weapon 221 CC show two and Anti-materiel. S3 p. 68
-had Shock CC and Normal BS with one save; S11 explicitly changes ammunition
-to DA CC / Shock BS. This supports historical supersession and the DA roll
-interpretation. Neither the announcement nor DA itself establishes Anti-materiel.
+**Evidence/result:** English S1 pp. 68/182 and Spanish S17 pp. 68/191
+both print Kobra CC DA/ARM with **one** Saving Roll and omit Anti-materiel;
+both contradictions are in the published cells, not PDF text-extraction
+artifacts. S1 p. 64 specifies **two** rolls for DA (three on a Critical).
+S6 Army weapon 221, Wiki S4 Weapon Chart revision 4083, and Mixed Weapons
+revision 4082 publish two rolls and Anti-materiel. The Wiki edit history
+separates the changes:
 
-**Action:** Keep the supported two-save explanation; make Trait uncertainty
-easy to identify alongside the CC profile and investigate its source history.
-Do not change the BS sibling mode. **Fix:** source research/prose/presentation
-review, not a guessed profile repair. **Dependencies:** REA-031.
+- Revision **4021**, 2026-08-10: DA CC, one roll, no Anti-materiel.
+- Revision **4077**, 2026-08-24: DA CC, two rolls, still no Anti-materiel.
+- Revision **4082**, 2026-08-27: DA CC, two rolls, **adds Anti-materiel**.
 
-**Follow-up evidence:** Follow-up visual check: S1 p. 182 actually prints CC DA, one save and no
-Anti-materiel; extraction was not the cause. S6/S4 corroborate two DA saves;
-that stronger mechanical interpretation does not adjudicate Anti-materiel.
-The edition, mode and Trait decisions remain separate.
+Exact HTML hashes and timestamps are pinned in the
+[source manifest](rules-explanation-audit-1.0-sources.md). Historical
+S3 v5.2 pp. 68/181 instead print Shock CC/Normal BS, and official S11's
+2026-09-01 change notice explicitly identifies the move to DA CC/Shock BS.
+It does **not** announce any Anti-materiel Trait change. Neither DA
+Ammunition nor the dated Wiki revisions independently establishes the
+reason for or authority of the added Trait.
+
+**Disposition (2026-10-14):** REA-028's local source adjudication and
+player-facing explanation are complete. Two DA rolls are a supported
+rule interpretation, while Anti-materiel remains an **unresolved external
+publication discrepancy**. The displayed imported Army Trait is retained
+rather than silently removing it or treating it as newly proven.
+The CC reference links its DA source and both the English and Spanish
+printed cells, plus three exact Wiki Mixed Weapons revisions and the
+separate Weapon Chart. The BS sibling is unaffected. Browser and API
+checks enforce the distinction.
+
+**External follow-up:** Obtain an explicit Corvus Belli clarification
+about whether Kobra CC should have Anti-materiel and whether the
+English/Spanish PDF omission is an error. Do not infer it merely from DA,
+from the Wiki chronology, or from the fact that other DA CC Weapons have
+the Trait. **REA-031 remains independently scoped.**
 
 ### REA-029 - The collections' exact Wiki archive is unavailable locally
 
@@ -1024,7 +1682,7 @@ The edition, mode and Trait decisions remain separate.
 **Priority:** P1. **Evidence:** Observed missing file; high confidence.
 **Affected:** C/H source `wiki-en-20260918-130233` and 72 citing records.
 
-**Current:** Both collections identify an 812-member ZIP acquired 2026-09-18
+**At the original audit:** Both collections identified an 812-member ZIP acquired 2026-09-18
 13:02:33 +02:00, expected SHA-256
 `aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a`.
 `data/wiki/WIKI-en 20260918-130233.zip` does not exist in this checkout.
@@ -1042,43 +1700,78 @@ REA-027; it is an environment/evidence gap, not proof that 72 rules are wrong.
 
 **Follow-up evidence:** Follow-up provenance: the ignored September 18 acquisition manifest was
 located and its expected ZIP hash agrees with C/H. The ZIP itself is still absent.
-No artifact mismatch or recovery was claimed; 72 records / 74 citations retain
-their original dependency. S14 is separately identified Spanish evidence and
-neither it nor S4/S5 repairs the missing English capture.
+No artifact mismatch or recovery was claimed; at that audit baseline, 72
+records / 74 citations retained their original dependency. S14 is separately
+identified Spanish evidence and neither it nor S4/S5 recovered the missing
+English capture.
+
+**Later source replacement (2026-10-13):** The curated C/H source declarations
+and their 74 citations were repinned to the available
+`WIKI-en 20260926-200832.zip` after resolving all 64 referenced page members
+and all cited headings. Three legacy member names were corrected to paths in
+that archive. The same referenced pages have matching embedded Wiki revision
+IDs in the 2026-09-28 history archive. The deleted September 18 bytes remain
+unavailable, so exact historical equivalence is not claimed. This resolves
+the missing *active* citation archive, not historical S18 recovery or the
+separate rules-interpretation review. See the updated source evidence ledger.
 
 ### REA-030 - FAQ publication and scenario applicability remain uncurated
 
 **Classification:** completeness, source discrepancy. **Severity:** Medium.
-**Priority:** P1. **Evidence:** Publication absence Observed; FAQ outcomes
-Explicit within their scope; core applicability of ITS-only answers Unresolved.
+**Priority:** P1. **Evidence:** Earlier publication registration finding
+superseded; FAQ outcomes Explicit within their scope; core applicability
+of ITS-only answers Unresolved.
 **Affected:** C/H sources; `rule:scenario:killing`, `rule:scenario:carrying-supply-boxes`,
 `rule:peripheral-type:ancillary`, `scenario:annihilation`, `scenario:firefight`.
 
-**Current:** Neither collection registers S2 or FAQ-ruling records. Core Killing
-counts undeployed Troopers as killed; Ancillary does not state an exception.
-The core Supply Box rule says only Models carry boxes, without spelling out
-the attempted Marker-State transition.
+**Current (verified 2026-10-14):** The English FAQ v0.1 source was
+already registered in both the core and Hacking collections; the earlier
+"not registered" finding is obsolete. The official Spanish FAQ v0.1
+is now separately registered in the core collection and pinned to its exact
+local PDF. This work does **not** create a standalone FAQ-ruling collection
+or silently merge ITS scenario rules into the core scenario set.
 
-**Evidence/result:** S2 printed p. 4 exempts an undeployed Ancillary from Killed
-objectives. Page 3 says a scenario-element carrier cannot enter Marker State.
-Both are under the **ITS** heading. They are not automatically core amendments.
-S1 pp. 150/155 establish core Killing; p. 153 forbids Marker carriers. The core
-restriction is a useful baseline, but the FAQ's publication and applicable
-mission/season need review before asserting its full scope.
+**General ruling — published:** N5 FAQ v0.1 printed p. 2 (both languages)
+states that a target of a BS Attack through a Zero Visibility Zone who has
+**both** Sixth Sense and MSV Level 1 ignores the -6 LoF MOD for that Zone.
+This condition now appears on the canonical Sixth Sense card and is linked
+from Multispectral Visor. MSV1 alone retains its printed -6; no universal
+visibility or MOD cancellation is inferred.
 
-**Action:** Register/pin the FAQ publication in a future batch, classify each
-ruling, and decide applicability explicitly. Present the Ancillary question
-as unresolved for core until that decision. **Fix:** source/collection/scoped
-content and links. **Dependencies:** REA-007, REA-008, REA-016, REA-017,
-REA-020, REA-023. No ITS-only wording was applied to core data here.
+**ITS-specific answers — scoped, not generalized:**
 
-**Follow-up evidence:** Follow-up compared all English FAQ v0.0/v0.1 pages: 28 common Q&A blocks
-and nine additions account for 37 current blocks (eight outside ITS, one ITS).
-No material answer change in the common blocks was observed. The new Ancillary
-scoring answer is under ITS; core-scenario applicability remains unresolved.
-S16 Season 18 pp. 26/28 confirms the scoped ordinary Spec-Ops ban versus TEAM-OPS;
-this does not establish all historical/core ITS applicability. Publication date
-remains unverified despite PDF creation metadata and the notice's release context.
+- FAQ printed p. 3: Telemetry and HVT: Designation Classified Objectives
+  use the required successful Spotlight Rolls, without needing Targeted State
+  to be entered. Targeted State retains its general rules; its source note
+  identifies the ITS scoring condition.
+- FAQ printed p. 3: a carrier of an ITS scenario element cannot enter
+  Marker State. Core Supplies separately allows only Models to carry a
+  Supply Box (S1 p. 153). Whether an attempted transition is prohibited
+  rather than causing the box to be dropped is not established for core
+  Supplies solely by the ITS FAQ.
+- FAQ printed p. 4: an Ancillary that never deployed does not count as
+  Killed for the stated ITS objectives. After deployment, Dead or
+  end-game Null condition qualifies. The Ancillary card explicitly marks
+  this **ITS-only FAQ context**, without modifying core Annihilation or
+  Firefight Killing (S1 pp. 150, 155).
+
+**FAQ provenance and disposition:** English v0.0/v0.1 review found
+28 common Q&A blocks and nine additions, 37 in v0.1, with one ITS addition.
+The English and Spanish v0.1 PDFs corroborate all four selected answers
+above. The PDFs' 2026-08-25 creation metadata does not establish their
+publication date; the N5.3 update notice has its own September date.
+Exact PDF hashes and printed-page mapping are in the
+[source manifest](rules-explanation-audit-1.0-sources.md).
+
+**Local adjudication complete, with open boundaries:** Selected general
+rules and explicitly scoped ITS evidence are now source-cited and tested.
+Core mission effects and scoring remain unchanged. A fully indexed,
+versioned FAQ/ITS collection is separate future curation, not implied by
+these owning-card references. Whether ITS Ancillary or scenario-element
+answers apply verbatim to core missions still requires an authoritative
+decision; no cross-season inheritance is certified.
+**Dependencies:** REA-007/008/016/017/020/023 remain independently scoped.
+The Spanish Fireteam example disagreement stays under REA-034.
 
 ### REA-031 - Kobra's CC Attribute link points to the Weapon Trait
 
@@ -1169,6 +1862,31 @@ the conflicting examples; seek an official correction if practical.
 Fireteam Level for the example. **Dependencies:** REA-020/021. Not a confirmed
 curated-level-table defect.
 
+**Follow-up verified 2026-10-14 ? player-facing example and source
+conflict documented; authoritative correction outstanding.** The printed
+Morat CORE Case 2 contains three Morat Vanguard (Morat), one Kyosot and
+one Zabuk. Both English N5.3 p. 138 and Spanish N5.3 p. 142 explicitly
+call this a **Level 3** Fireteam, yet include **+1 BS/CD Attack** among
+its bonuses. The printed level tables on English pp. 135?136 and
+Spanish pp. 139?140 require **four matching/equivalent members** for
+Level 4 and its +1 BS/CD; a five-member CORE does not automatically
+receive Level 5 or Level 4 bonuses. No scoped FAQ correction was
+established from the reviewed English/Spanish v0.1 documents.
+
+`rule:fireteam-level-bonuses` now publishes a concrete Level 3 Morat
+example in its `facts.basis`: cumulative Level 2 +1 SD, Level 3 +3
+Discover and +1 Dodge, but not Level 4 +1 BS. A distinct secondary
+`facts.sourceNotes` entry documents the contradictory bilingual Case 2
+examples, independently of REA-041's Spanish extra-dice reminder.
+The curated Level 1?5 table and Fireteam runtime calculations are
+unchanged; the new references link to the two printed examples.
+
+The content and level table were verified by 277 focused source/database
+tests and 9/9 headless Chrome render/navigation checks at 1440, 390 and
+320 px, without JavaScript errors or horizontal overflow. Official
+example correction remains a separately tracked external task, not a
+reason to replace table-based gameplay with an unverified bonus.
+
 ### REA-035 - Impersonation-2's "unmodified" Discover wording overstates the exception
 
 **Classification:** correctness, clarity. **Severity:** High. **Priority:** P0.
@@ -1176,9 +1894,18 @@ curated-level-table defect.
 **Affected:** `state:impersonation-2`, `state:impersonation-1`, `skill:discover`,
 `equipment:biometric-visor`.
 
-**Current:** IMP-2's summary calls its successful Discover roll unmodified.
-The Discover card delegates MODs generally, without explaining its own Range
-bands or the distinction between no IMP-1 penalty and no modifiers at all.
+**Original defect:** IMP-2's summary called its successful Discover roll
+unmodified. Discover delegated MODs generally, without explaining its own
+Range bands or distinguishing the missing IMP-1 penalty from ordinary modifiers.
+
+**Current implementation (verified 2026-10-14):** IMP-2 explicitly states
+that it imposes no additional IMP-1 -3 WIP penalty, while Discover applies
+its own Range bands plus applicable Cover, Mimetism and other modifiers.
+Discover now specifies that a Marker may not be discovered twice in one
+Order; a failed attempt against an IMP Marker prevents that Trooper from
+retrying the same Marker until the next Player Turn. A revealed Trooper that
+re-enters Impersonation counts as a different Marker. The original IMP-1
+two-stage transition and Biometric Visor exception remain distinct.
 
 **Evidence/result:** S1 p. 77 applies Discover's Range/Cover/Mimetism rules.
 Page 166 supplies IMP-1's -3 and no equivalent IMP-2 State penalty; it does not
@@ -1186,10 +1913,11 @@ erase ordinary Discover MODs. Page 167's multiple-success example changes IMP-1
 only to IMP-2. Biometric Visor p. 120 explicitly bypasses that ordinary
 two-stage transition.
 
-**Action:** Say "without IMP-1's -3 State penalty" and explain ordinary MODs,
-the failed-attempt limit, two-stage discovery and Biometric's exception.
-**Fix:** text/links and future regression examples. **Dependencies:** REA-015,
-REA-026; do not label every IMP-2 Discover roll as flat WIP.
+**Disposition:** Resolved. Current N5.3 p. 77/166-167 and Biometric
+Visor p. 120 support the reviewed card text. Rules tests cover modifiers,
+first-versus-second Discover and retry timing; Chromium browser acceptance
+passed at 1440, 390 and 320 px. Other State and rules interactions remain
+independently scoped under REA-015 and REA-026.
 
 ### REA-036 - Deployable Cover names a cap without giving its value or conditions
 
@@ -1197,9 +1925,18 @@ REA-026; do not label every IMP-2 Discover roll as flat WIP.
 **Evidence:** Explicit; high confidence. **Affected:** `equipment:deployable-cover`,
 `skill:place-deployable`, Cover reference.
 
-**Current:** Vitroferro provides +6 "subject to the documented cap," but the
-record contains no cap, contact/obscuration condition, or non-stacking explanation.
-The player cannot determine the save from the curated card.
+**Original defect:** Vitroferro provided +6 "subject to the documented cap,"
+but omitted the cap value, Cover geometry and non-stacking explanation.
+
+**Current implementation (verified 2026-10-14):** Deployable Cover states
+that a benefiting Trooper must be in Silhouette contact and meet normal
+Partial Cover obscuration conditions. Vitroferro replaces the ordinary
+-3 to the attacker's BS Attack with +6 to the target's ARM/BTS Saving
+Roll modifier, with ARM/BTS plus modifiers capped at 12 **before PS**.
+Examples cover ARM 5 and 9, the choice between Vitroferro and Cutting
+Foam, variant restrictions, non-stacking and the FAQ's movement/placement
+restriction. The source-listed S3, Disposable (2), Indiscriminate and
+Perimeter properties are now explicit and linked.
 
 **Evidence/result:** S1 p. 122 requires Silhouette contact and applicable
 Partial Cover geometry. Cap ARM/BTS plus saving MODs at 12, **then** add PS.
@@ -1207,15 +1944,12 @@ The saving benefit does not stack with another scenery Partial Cover bonus.
 Profile-listed variants constrain the choice. S2 p. 2 says nothing may be
 placed on or end movement on the Cover; that restriction needs its FAQ scope.
 
-**Action:** Give the exact cap order and conditions, with a short calculation
-example, retaining ordinary Cover as a separate selectable benefit.
-**Fix:** text/links and optionally reviewed facts. **Dependencies:** REA-023,
-REA-026, REA-030; do not cap the final PS-inclusive Success Value at 12.
-
-**Follow-up evidence:** S1 p. 122 also identifies Disposable (2) and Perimeter.
-The authored Deployable Cover definition states ZoC placement but omits those
-explicit properties; review their player-visible ownership with the cap and
-placement baseline, rather than assuming a named metadata profile supplies them.
+**Disposition:** Resolved. The N5.3 p. 122 ownership and existing FAQ
+restriction were retained, now with a printed-page citation and complete
+listed properties. Browser acceptance passed at 1440, 390 and 320 px.
+Broader placement geometry and FAQ applicability remain separately
+tracked under REA-023 and REA-030; this finding no longer blocks the
+Deployable Cover card's essential Saving Roll explanation.
 
 ### REA-037 - Armed Turret has conflicting Silhouette values within the PDF
 
@@ -1238,6 +1972,31 @@ rather than silently changing the stat. Seek an applicable official erratum;
 **do not** assume either the detailed profile or summary always prevails.
 **Fix:** source research and a visible note following review.
 **Dependencies:** REA-023.
+
+**Follow-up (2026-10-14): player-facing conflict disclosure complete;
+authoritative Silhouette ruling remains open.** Both official N5.3
+translations were checked against their detailed Armed Turret/Torreta
+Artillada profiles (English p. 70; Spanish p. 74), giving **S2**.
+Both translations also list **S1** in their deployable summaries:
+English pp. 74/195; Spanish p. 203. English and Spanish pinned Wiki
+detailed profiles corroborate S2, but neither corrects the PDF
+summary tables. N5.3 English p. 18 establishes S1 = 25 mm base and
+25 mm height versus S2 = 25 mm base and 40 mm height; this is material
+to Line of Fire and clearance, not merely a display label.
+
+The published `weapon:armed-turret` special profile retains the existing
+S2 detailed value and now includes a source note that identifies the
+opposing S1 cells and explicitly avoids a precedence claim. Ten source
+citations cover the detailed/summary English and Spanish PDF pages,
+pinned Wiki detailed pages, and Silhouette dimensions; the separate
+REA-045 E/Mitter discrepancy remains independently tracked. No Army
+source metadata or variant stats were overwritten. Source/database
+regressions passed, and Chromium confirmed the statline and note at
+1440, 390 and 320 px (3/3, no JS errors or horizontal overflow).
+
+An official scoped ruling or agreed source-precedence decision is still
+necessary before replacing S2 with S1 or claiming either is definitive;
+that external dependency is tracked separately in `TODO.md`.
 
 ### REA-038 - Direct Doctor/Engineer target allegiance is not established
 
@@ -1294,6 +2053,35 @@ and not every enemy is declared a legal treatment target.
 **1.0 relevance:** Adjudicate this qualifier before accepting the complete
 target-eligibility explanation; confirmed recovery clauses can proceed separately.
 
+**Follow-up (2026-10-14): Direct/delegated source scope clarified;
+universal non-Allied applicability remains unresolved.** The current
+curated Doctor and Engineer requirements *already* omit the alleged
+friendly-only direct gate: Doctor specifies Silhouette contact and
+Unconscious VITA recovery, while Engineer specifies contact plus STR
+for Wound removal or condition-specific cancellation. The audit's
+initial "Current: Both direct Skill requirements add a friendly target
+gate" describes an earlier draft, not the checkout at `c626cba`.
+
+English N5.3 pp. 90-91 and archived English/Spanish Wiki Skill pages do
+not add a direct Allied-only condition; pp. 123-124 explicitly restrict
+MediKit/GizmoKit targets to Allied Models and pp. 106-107 restrict
+Servant/Connected Cyberplug contact delegation to allied Models. In
+Close Combat, p. 51 forbids Doctor/Engineer treatment in contact with an
+allied Engaged Model; p. 160 prevents a Trooper in Engaged State from
+declaring these Skills. Ordinary enemy contact often activates Engaged,
+but its Null/Immobilized exceptions do not independently establish
+permission to treat enemy or Neutral targets. The captured historical
+N3 forum discussion is not a binding current N5 ruling.
+
+The player-facing `skill:doctor` and `skill:engineer` cards now state
+these separate conditions, retain their own Skill requirements, link
+Kit and Peripheral-specific Allied provisions, and show source notes
+explicitly rejecting a blanket permission inferred from missing text.
+Both include a Close Combat p. 51 citation. No rule implementation or
+Army profile changed; no enemy eligibility engine was introduced.
+The missing official direct-target ruling remains open in `TODO.md`
+rather than being falsely closed by the improved reference copy.
+
 ### REA-039 - TinBot omits operational eligibility and Fireteam sharing
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P1.
@@ -1317,6 +2105,25 @@ presentation if needed. **Dependencies:** REA-018/020. Future cases should cover
 owner Isolation, membership loss, shared Firewall, identical buffs and different strengths.
 **1.0 relevance:** TinBot is supported Equipment; its shared/disabled conditions
 are material to gameplay, independently of optional exhaustive variant research.
+
+**Disposition (verified 2026-10-14): Resolved for supported TinBot family.**
+English N5.3 p. 127 confirms that the owner must not be Isolated or in
+any Null State; the equipment grants only the option listed in its Unit
+Profile. The existing shared family baseline already covered Fireteam
+benefits and non-stacking. The published reference now also states that
+TinBot Models/Tokens do not obstruct Movement or LoF, cannot be chosen
+as targets for Skills, and are removed when the owner enters Dead State.
+A reviewed example distinguishes Firewall (-3) from (-6), the most
+advantageous applicable WIP MOD, and Firewall's fixed +3 Saving Roll
+bonus. A Fireteam cross-link explains benefit sharing and departure;
+all six named TinBot options retain their own sourced effects.
+
+Curated rules/database tests passed and Chromium checks verified the
+TinBot, Firewall and Fireteam references and Fireteam-to-TinBot
+navigation at 1440, 390 and 320 px (12/12, no JavaScript errors or
+horizontal overflow). No universal MOD stacking engine or source
+profile rewrite was added. Owner eligibility, Fireteam membership and
+single-advantage selection remain scoped to the cited TinBot rules.
 
 ### REA-040 - Infinity Spec-Ops links an absent SpecBall procedure
 
@@ -1349,6 +2156,36 @@ and cover round, Null and once-per-game conditions.
 **1.0 relevance:** Explain the supported new core procedure; complete ITS season
 tools and all customization options are outside this focused requirement.
 
+**Disposition (verified 2026-10-14): Resolved for the core procedure.**
+The new `skill:request-specball` is a standalone published Automatic
+Skill, directly linked from `skill:infinity-spec-ops` and through the
+shared `skill:combat-jump` placement reference. It covers an eligible
+non-Null Spec-Ops in the Active Turn of Game Round 2 or 3, a single
+55 mm SpecBall Token with PH 15 placement outside Order expenditure,
+two distinct non-transferable items, contact pickup and cancellation
+of the collecting Trooper's Marker form. Profile and Model replacement
+occur at the end of the collecting Order; Wounds and applicable States
+carry over, the Token is removed, and an optional SpecBot is placed in
+contact. The one-use-per-player limit, placement contact restrictions
+and Deactivator exclusion are explicit.
+
+English N5.3 p. 98 calls the action "Requesting a Speedball" once inside
+the SpecBall Effects; Spanish N5.3 p. 98 calls it "Solicitar un SpecBall".
+The contradiction is retained as a source note and does not replace or
+merge `skill:request-speedball`. Season 18 ITS pp. 26/28 are separately
+pinned for its *official tournament* Spec-Ops prohibition and optional
+TEAM-OPS/Tacball distinction; these do not delete the core N5.3 rule.
+The SpecBall Chart remains an upstream printed selection table; full
+roster choice storage and TEAM-OPS session tooling are post-1.0 tasks.
+No immutable Unit Profile mutation, combined simulator or generic
+airdrop resolver was introduced.
+
+Review policy and generated interaction checklist now recognize the
+authored Spec-Ops-to-Request and Request-to-Combat-Jump relations.
+Focused curated/database/ledger tests passed (272/272) and Chromium
+browser checks passed 24/24 at 1440, 390 and 320 px, including
+reference cross-links, with no JS errors or horizontal overflow.
+
 ### REA-041 - Spanish Fireteam dice reminder conflicts with its general SD rule
 
 **Classification:** source discrepancy. **Severity:** High. **Priority:** P1.
@@ -1378,35 +2215,74 @@ reviewed source note after adjudication. **Dependencies:** REA-021/029/034.
 **1.0 relevance:** Player explanations should be clear about the adopted
 sourced interpretation and outstanding source contradiction.
 
+**Follow-up verified 2026-10-14 ? local player-facing handling complete;
+upstream ruling still unresolved.** Independently compared S1 pp. 75/136
+with S17 pp. 75/140. Both PDFs agree on B6 excluding +1 SD at their
+general Modifiers section; English Fireteam p. 136 repeats the exclusion.
+Spanish Fireteam p. 140 uniquely asserts an inclusive six-dice ceiling.
+The Sep 1, 2026 official N5.3 English/Spanish update notices reviewed in
+the source audit do not supply a scoped correction or any stated reason
+for retaining this language. This is not resolved by assigning priority
+to a later Wiki revision without an official interpretation.
+
+`rule:special-dice` now carries the adopted B6/SD rule, a B6+1 SD example
+(seven rolled, one discarded, six retained), and explicit bilingual source
+notes and citations. `rule:fireteam-level-bonuses` carries a linked
+secondary source note, shown on the Fireteams quick reference using the
+shared note styling. The level bonuses, Burst cap, Army source profiles,
+and computation behavior are unchanged. Focused curated/rules tests and
+responsive headless browser checks passed 15/15 at 1440, 390 and 320 px,
+including navigation from Fireteams to Special Dice, with no JavaScript
+errors or horizontal overflow. A formal CB erratum remains the only open
+part of REA-041, now tracked separately in the TODO; it is not represented
+as a new local gameplay rule or a 1.0 implementation blocker.
+
 ### REA-042 - Dodge (ARM+3) has incompatible English/Spanish conditions
 
-**Classification:** source discrepancy, completeness. **Severity:** High.
-**Priority:** P1. **Evidence:** PDF/Wiki conflict Explicit; cause Unresolved.
-**Confidence:** High about compared clauses. **Affected:** `skill:dodge`,
-modifier baseline REA-026 and profile-listed Dodge (ARM+3).
+**Classification:** source discrepancy, player-reference completeness.
+**Severity:** High. **Priority:** P1 for source clarity; authoritative ruling
+remains external. **Evidence:** explicit PDF/Wiki conflict in both languages.
+**Affected:** `skill:dodge`, profile-listed Dodge (ARM+3), modifier
+baseline REA-026 and simultaneous Dodge resolution REA-014.
 
-**Current:** No complete curated explanation defines this parameter's effect.
-A generic +3-to-Dodge-PH explanation or an undocumented conditional rule would
-be misleading.
+**Original gap:** The curated Dodge card described its PH Roll but did not
+explain what the optional Unit Profile (ARM+3) modifier affects. Treating
+it as +3 PH or as a universal benefit of ordinary Dodge would be wrong.
 
-**Evidence/result:** **Both N5.3 PDFs agree:** English S1 p. 75 says Dodge
-(ARM+3) always provides +3 ARM when Dodge is declared and the relevant Saving
-Roll occurs; Spanish S17 p. 75 says Esquivar (BLI+3) *siempre* gives +3 BLI
-when Esquivar is declared. Spanish Wiki revision 4012 (timestamp
-2026-09-08T10:04:10Z in S21) instead uses a condition involving a failed PH
-roll in a May-update paragraph. Thus this is no longer an unverified bilingual
-PDF alignment; it is a **Spanish Wiki-versus-two-PDF** conflict. That Wiki
-revision postdates the PDFs' creation metadata, but no explicit supersession
-or erratum was verified.
+**Verified source comparison (2026-10-14):** English PDF N5.3 S1 p. 75
+says Dodge (ARM+3) always grants +3 ARM for relevant Saving Rolls after
+Dodge is declared. Spanish PDF N5.3 S17 p. 75 likewise uses *siempre*
+for Esquivar (BLI+3). English Wiki snapshot 2026-09-26 (Template:
+Modifiers-explained) and Spanish Wiki snapshot 2026-10-09 (Plantilla:
+Modifiers-explained) instead require that the PH/FIS Roll fail. Spanish
+Wiki revision 4012, dated 2026-09-08T10:04:10Z, confirms this already
+appeared under a May 2026 Mazebreaker update. This is a *two-PDF versus
+two-Wiki-language* contradiction, not a disagreement between the two
+N5.3 PDF translations. The September 1, 2026 official N5.3 English and
+Spanish update articles explicitly list a Dodge (ARM+3)/(BLI+3)
+clarification but do not adjudicate the two wordings or identify an
+intentional failed-roll restriction. No scoped erratum was established.
 
-**Action:** Preserve the common PDF-based interpretation as supported while
-recording the Wiki conflict; seek a scoped correction/erratum. Future prose
-must distinguish Dodge PH, ARM/BLI protection, failed rolls and simultaneous
-Order resolution. **Fix:** evidence, then modifier text/links and focused
-regressions. **Dependencies:** REA-014/026. Do not infer a universal ordinary
-Dodge ARM bonus.
-**1.0 relevance:** A sourced player-facing conditional explanation remains
-necessary; the upstream discrepancy should be visible rather than hidden.
+**Implemented player-facing disposition (2026-10-14):** `skill:dodge`
+now explains that only a Unit Profile listing Dodge (ARM+3) receives
++3 ARM on an ARM Saving Roll required after declaring Dodge, under the
+consistent PDF text. The modifier does not add +3 PH or affect BTS;
+ordinary Dodge does not gain armor. The explanation covers a successful
+PH Dodge Roll that still fails to evade another simultaneous Attack,
+requiring an ARM Saving Roll. The card displays separate source notes
+and citations for both PDFs (p. 75) and the two archived Wiki templates,
+without pretending the discrepancy has been resolved. No underlying
+rules engine, imported Unit Profile or other Dodge effects were changed.
+
+The English Wiki ZIP `WIKI-en 20260926-200832.zip` and Spanish
+`WIKI-es 20261009-211304.zip` are pinned source snapshots; the latter
+has SHA-256 `8e4d40f0ad60d9a42c276f90a07253d8bcdbb61ed7839506cf9f91b7c8270be4`
+(786 members). The historical Spanish oldid 4012 remains indexed in S21.
+Curated and composed-record tests passed; local Chromium checks passed
+12/12 at 1440, 390, and 320 px without page errors/overflow, including
+Dodge-to-Saving-Rolls navigation. **Outstanding:** seek Corvus Belli's
+scoped correction for the failed-PH Wiki condition. Treat as external
+source reconciliation rather than a 1.0 local feature blocker.
 
 ### REA-043 - Counterintelligence gives the relaxed limit to the wrong player
 
@@ -1414,8 +2290,18 @@ necessary; the upstream discrepancy should be visible rather than hidden.
 **Evidence:** Explicit clauses combined; high confidence. **Affected:** C
 `skill:counterintelligence`, `rule:command-token-strategic-use`.
 
-**Current:** Its alternative effect increases the Command Tokens the **adversary**
-may use to two, reversing who benefits.
+**Original defect:** Its alternative effect increased the Command Tokens
+the **adversary** could use to two, reversing who benefits.
+
+**Current implementation (verified 2026-10-14):** The checked-in curated
+Skill description correctly states that the opponent imposes Strategic Use
+and Counterintelligence lets **the Skill owner** spend up to two Command
+Tokens in their first Turn. The separate Order-removal effect reduces two
+removed Regular Orders to one, subject to the more-than-ten-Orders threshold.
+A focused regression test covers both actors, timing, and their source
+relation. Real Chromium browser acceptance confirmed the same explanations
+on the Skill page and search visibility at 1440, 390 and 320 px (6/6
+checks, no JavaScript errors or horizontal overflow).
 
 **Evidence/result:** S1 p. 128 lets the second-turn player limit the opponent's
 first-turn Command Tokens to one. Counterintelligence p. 90 counteracts the
@@ -1423,13 +2309,11 @@ limit imposed by the adversary, allowing the affected player's allowance of two.
 The other option separately reduces the adversary's Order removal from two to
 one. Neither grants that adversary an extra allowance.
 
-**Action:** Explain both options from the correct perspectives. Proposed text:
-when your opponent limits your first-turn Command Tokens, Counterintelligence
-lets you use two instead of one. Preserve timing and the separate Order-removal
-option. **Fix:** text/links and a future actor/timing regression. **Dependencies:**
-REA-026 for the shared Strategic Use baseline; no unresolved source conflict is needed.
-**1.0 relevance:** Confirmed wrong beneficiary is a P0 gameplay correction and
-can be the smallest independent first implementation slice.
+**Disposition:** Resolved. N5.3 pp. 90 and 128 support the existing corrected
+rules text; no further gameplay or UI change was needed for this browser
+acceptance task. The original P0 issue is closed. General completion of the
+Strategic Use rule coverage remains independently tracked under REA-026,
+not a blocker for the now-correct actor attribution.
 
 ### REA-044 - Breaker Marksman is metadata-only despite its current official profile
 
@@ -1439,10 +2323,10 @@ publication absence Observed; notice terminology reconciliation Derived.
 **Confidence:** High about the examined runtime baseline. **Affected:** Army
 Weapon source 225, public Weapons domain; no corresponding C definition.
 
-**Current:** S6 preserves Breaker Marksman Rifle (AP, BTS/2, PS 7, B3, one save,
-Suppressive Fire), but the application identity graph/getter does not publish
-it. Numeric 225 and slug lookups return None. This is preserved-but-inaccessible
-content, not a missing source profile.
+**Original gap:** S6 preserved Breaker Marksman Rifle (AP, BTS/2, PS 7,
+B3, one save, Suppressive Fire), but the application identity graph/getter
+did not publish it. Numeric 225 and slug lookups originally returned None.
+This was preserved-but-inaccessible content, not a missing source profile.
 
 **Evidence/result:** Rendered S1 p. 180 shows the new blue Marksman row; p. 185
 has no distinct Breaker Sniper row. S14's matching profile is under FUSILES DE
@@ -1452,14 +2336,72 @@ translation interpretation, not inventing a second Sniper or aliasing by name
 alone. S20's embedded metadata pins S6. Read-only central resolver, list and
 getter confirm the publication gap; no browser was launched.
 
-**Action:** Review a current metadata-only Weapon publication slice with explicit
-profile/provenance and without requiring a referencing Army Unit. Keep unused
-historical metadata separately scoped, instead of publishing every legacy row.
-**Fix:** future processing/backend/reference publication and validation.
-**Dependencies:** source completeness and REA-026. Do not fabricate raw Army
-fields or an unsupported Sniper statline.
-**1.0 relevance:** The current supported Weapon reference needs this preserved
-official profile to be reachable; publishing every unused historical row is not required.
+**Resolved (2026-10-14):** The generated application catalog now publishes
+source ID 225 directly from reviewed metadata using a validated, exact-profile
+manifest. The public numeric `225` and slug `breaker-marksman-rifle`
+both resolve, even without a Unit use or `weapons` source-table entry.
+The reference preserves its original PS, Burst, Saving Roll, ranges, Trait,
+category and source identity, links the shared Breaker rules and cites the
+current chart. Its source note distinguishes the English update notice's
+Sniper wording from the authoritative Marksman profile; no fabricated
+Sniper weapon or Unit use was introduced. Historical unused metadata stays
+unpublished. Full database rebuild required for existing deployments.
+
+**Follow-up:** Broader optional metadata inventory remains separate;
+REA-044's current-profile publication gap is closed.
+
+### REA-045 - Armed Turret E/Mitter disagrees with standard E/M Saving Rolls
+
+**Classification:** cross-source profile discrepancy. **Severity:** Medium.
+**Priority:** P1. **Evidence:** Explicit profile fields; precedence Unresolved.
+**Affected:** Army weapon 226 (mode E/Mitter), weapon 25 (E/Mitter),
+`weapon:armed-turret`, `weapon:e-mitter`, `ammunition:em`.
+
+**Verified sources:** All six preserved official Army metadata captures
+(2026-09-10, 09-18 twice, 09-25 twice and 09-29) list Armed Turret's
+E/Mitter mode with source Ammunition 14 E/M, BTS/2 and **one** Saving Roll.
+Those same captures list standalone E/Mitter source weapon 25 with BTS/2
+and **two** Saving Rolls. English N5.3 Weapon Chart p. 186, Spanish N5.3
+p. 195, and both captured Wiki weapon charts agree on two for standalone
+E/Mitter. Canonical E/M Ammunition requires two rolls per hit. English
+N5.3 p. 70 identifies the turret's parenthesized BS Weapon but gives
+no overriding Saving Roll rule. The examined English/Spanish FAQ v0.1
+texts contain no Armed Turret/E/Mitter ruling.
+
+**Decision (2026-10-14):** The discrepancy is confirmed, but an intentional
+turret exception or an Army data error is **not established**. InfinityDB
+keeps the imported source mode's one Saving Roll and adds a visible
+cross-linked, bilingual-source-cited warning to `weapon:armed-turret`.
+It does not change E/M Ammunition, overwrite the source profile or infer
+a special immunity/combined-Ammunition rule.
+
+**Next action:** Seek applicable official correction/FAQ or Corvus Belli
+clarification before adjudicating which roll count governs the turret.
+This is independent of REA-037's S1/S2 Silhouette disagreement.
+
+**Follow-up (2026-10-14): local publication and validation complete;
+source adjudication remains open.** The existing two-paragraph
+Army-versus-Weapon-Chart warning was embedded in the normal weapon
+summary. It is now a dedicated `facts.sourceNotes` entry on
+`weapon:armed-turret` alongside, but separate from, REA-037's
+Silhouette note, following the curated prose hierarchy. The note
+identifies the six Army captures, source weapon 226/25, E/M 14,
+the differing one versus two BTS/2 Saving Rolls, English/Spanish
+N5.3 pp. 186/195, the canonical E/M rule, and the absence of an
+applicable turret-specific FAQ ruling. Its E/Mitter and E/M Ammunition
+links are navigable. Neither the imported Turret profile nor
+standalone E/Mitter's ordinary two-roll definition was modified.
+
+Focused tests now use a freshly exported rules DB to prevent stale
+release-db assumptions and assert both modes independently.
+Browser acceptance passed **15/15 content/navigation checks** at
+1440/390/320 px for Turret, E/Mitter, E/M Ammunition and cross-links.
+No JS errors; Turret and E/Mitter had no overflow. The E/M Ammunition
+page reproduces an existing **6 px 320-width overflow** in both the
+baseline release DB and rebuilt DB, traced to the Rules reference
+catalog tag; already noted in TODO under REA-024 and unrelated to
+REA-045. Only an official scoped answer can settle whether one or two
+saves should apply for the deployed Turret mode.
 
 ## Flash Pulse benchmark and positive findings
 
@@ -1532,7 +2474,7 @@ The families deliberately overlap when an outcome needs several rules.
 | 13. Fireteam creation, action, integrity | Type/Level distinction; chart equivalence; FT Master; Number 2; NCO/Tactical Orders; Ancillary | REA-017, REA-020, REA-034; every Army chart's special notes not audited here |
 | 14. Burst, SD, charges and multiple Kit hits | Martial Arts/Fireteam SD; ranged Kits; Double Shot; shared mode uses | REA-021, REA-022; no arbitrary Burst calculator inferred |
 | 15. Peripherals and profile transitions | Five subtype baselines; Cyberplug exceptions; AI Motorcycle; Transmutation; SymbioMate | REA-017, REA-032; all Unit-backed Peripheral identity decisions outside this explanation audit |
-| 16. Deployables and named Weapon families | Mines/Cybermine/Chest Mine; WildParrot; Armed Turret; delivery objects | REA-023, REA-024, REA-037; D-Charges, Disco Baller/activation, Mine Dispenser, Pitcher and SymbioBomb have no dedicated C definitions and need an owner/publication review |
+| 16. Deployables and named Weapon families | Mines/Cybermine/Chest Mine; WildParrot; Armed Turret; delivery objects | REA-023, REA-024, REA-037; D-Charges, Disco Baller and SymbioBomb now have dedicated C definitions (2026-10-13); D-Charges and Disco Baller have browser render checks; Activate Disco Ball now has a source-only Common Skill reference and confirmed Disco Baller navigation; Mine Dispenser/Pitcher still need an owner/publication review |
 | 17. Orders, command, morale and glossary | Regular/Irregular/Tactical/Lieutenant; Strategos/NCO; Courage/Religious/Warhorse; Protheion and Victory Points | REA-008, REA-026; full Strategic/Executive/Operational Command procedures, Retreat thresholds and list choices remain incomplete |
 | 18. Scenarios and general-rule exceptions | Four core missions; Specialist restrictions; Shasvastii scoring; Killing; Supply Box carrier; Firefight deployment | REA-030; 20 components screened, map visuals not reaccepted, ITS library/reinforcement annex not certified |
 
@@ -1553,14 +2495,14 @@ unverified inference. "Unresolved" preserves the actual competing claims.
 
 | Case | Sources/values | Disposition and consequence |
 | --- | --- | --- |
-| Flash Pulse saves and State Trait | S1 p. 186 and S17 p. 196: one BTS/PB save, Non-Lethal and State: Stunned; Spanish Wiki S8/S21 3987: two PB saves without State Trait | **Current PDF baseline verified in both languages**; **Spanish Wiki publication conflict remains**, REA-027; Immunity example in both PDFs confirms failed-save Stunned |
+| Flash Pulse saves and State Trait | S1 p. 186 and S17 p. 196: one BTS/PB save, Non-Lethal and State: Stunned; Spanish Wiki S8/S21 3987 and alternative S22 3988: two PB saves without State Trait | **Gameplay baseline corroborated by both PDFs and Army weapon 72; external Spanish Wiki publication conflict unresolved**, REA-027. Both bilingual Immunity examples retain failed-save Stunned; live rows rechecked 2026-10-14 |
 | Kobra CC save count | S1 pp. 68/182: DA, one save; DA p. 64 / S4 4083 / S6: two | **Resolved interpretation**: DA requires two; preserve contradictory chart bytes. S3/S11 establish ammunition change, not an independently published chart correction |
 | Kobra Anti-materiel | S1 omits; S4/S6 include | **Unresolved**, REA-028; DA is insufficient evidence for this Trait |
 | Fireteam Level 3 example | S1 p. 138 and S17 p. 142 include Level 4 +1 BS/CD in a Level 3 example; both languages' tables place it at Level 4 | **Confirmed within-PDF contradiction in both languages; intended correction unresolved**, REA-034 |
 | Armed Turret Silhouette | S1 detailed p. 70 / S17 detailed p. 74: S2; S1 summaries pp. 74/195 / S17 summaries pp. 74/203: S1 | **Confirmed within-PDF conflict in both languages; precedence unresolved**, REA-037; affects silhouette height |
 | Direct Doctor/Engineer allegiance | S1/S4/S14 direct requirements lack a universal Allied gate; Kits/delegation explicitly impose it | **Unresolved universal interpretation**, REA-038; no general rule supplying the gate found, no universal enemy permission inferred |
 | Spanish Fireteam dice reminder | S17 p. 75 excludes Special Dice from Burst-6; S17 p. 140 Fireteam reminder includes extra dice in six total; S14 Wiki mirrors split | **Confirmed internal contradiction in official Spanish PDF; ruling precedence unresolved**, REA-041; do not invent a separate Fireteam cap |
-| Dodge (ARM+3) condition | S1 and S17 p. 75 agree on always +3 ARM/BLI for applicable Saving Rolls when declared; S14/S21 4012 conditions on failed PH | **PDF-language alignment verified; Spanish Wiki publication discrepancy remains**, REA-042; not +3 PH |
+| Dodge (ARM+3) condition | S1 and S17 p. 75 agree on always +3 ARM/BLI for applicable Saving Rolls when declared; S14/S21 4012 conditions on failed PH | **PDF-language alignment verified; English and Spanish Wiki publication discrepancy remains**, REA-042; not +3 PH |
 | Breaker notice weapon label | English S11 says Sniper; rendered S1 p. 180/S6 225/S14 Spanish section match Marksman | **Derived terminology reconciliation**, REA-044; profile-backed match, no separate Sniper invented; public reference still absent |
 | Prone/Berserk | S1 general movement p. 29 excludes Berserk; Prone p. 169 repeats only Jump | **Resolved current exception** by p. 29 and S2 p. 1; record-level Prone prose still needs it in the lifecycle batch |
 | Old Kobra ammunition | S3 p. 68: Normal BS / Shock CC; S1/S11: Shock BS / DA CC | **Resolved historical supersession**; do not use the old one-save CC row as current authority |
@@ -1630,7 +2572,7 @@ documentation-only audit.
 | C. Hacking, NFB, visibility | REA-006, REA-007, REA-012, REA-018, REA-019 | Shared baseline content then Program-local timing; FAQ scope from F | Immediate Controlled Jump ARO; opposing Programs cancel each other's effects while Firefight +3 remains; Speedball no benefit; one Supportware/Hacker and beneficiary; replacement Fairy Dust example; one chosen Firewall; active versus disabled Device; MSV ordinary Smoke/Eclipse difference; White Noise owner NFB duration |
 | D. States, declarations and general baselines | REA-008, REA-014, REA-015, REA-016, REA-026, REA-035 | Reusable baseline references before broad cross-links; preserve per-State differences | IMM-B+Isolated and Targeted/capped MODs; Sixth Sense retained penalties; valid/blocked Engaged exit; simultaneous Mine and gun Dodge; Prone/Berserk and recovery cancellation; Hidden Deployment Order/ARO; Marker full-Order revelation; Stealth mixed activation; IMP-2 Range MOD and IMP-1 multiple successes; Protheion overkill |
 | E. Fireteams, Peripherals and placement | REA-017, REA-020, REA-021, REA-023, REA-032, REA-036, REA-039, REA-040 | Common action/placement baselines then subtype/variant exceptions; depends on D for lifecycle context | Controller/Peripheral mixed Idle; Servant and Cyberplug Doctor roll ownership; Ancillary eligibility/recovery; leader versus member departure and Number 2; Haris remains Haris at two members; original profile Training versus FT Master conversion; SD/BS bonuses versus Discover and WIP/PH; Perimeter blocked path; occupied placement fallback; Vitroferro cap before PS; AI remount contact; after-Guts Transmutation; TinBot owner disabled/sharing/identical versus different-strength benefits; SpecBall round/once/Null/Enhanced Profile and Marker conditions; TEAM-OPS scoped separately |
-| F. Sources and scoped FAQ | REA-027, REA-028, REA-029, REA-030, REA-034, REA-037, REA-041, REA-042 | Recover S18; integrate verified Spanish PDF/oldid provenance, classify FAQ by scope; adjudicate remaining publication contradictions individually | Exact archive hash/member; verified PDF one-save Flash Pulse versus conflicting Spanish Wiki; Kobra DA separate from Anti-materiel; FAQ Ancillary applicability; bilingual Fireteam Level 3 example; bilingual Armed Turret S2/S1; Spanish PDF internal B6 versus B6+SD reminder; bilingual PDF Dodge modifier versus Spanish Wiki; document any official correction without overriding evidence |
+| F. Sources and scoped FAQ | REA-027, REA-028, REA-029, REA-030, REA-034, REA-037, REA-041, REA-042 | Recover S18; integrate verified Spanish PDF/oldid provenance, classify FAQ by scope; adjudicate remaining publication contradictions individually | Exact archive hash/member; verified PDF one-save Flash Pulse versus conflicting Spanish Wiki; Kobra DA separate from Anti-materiel; FAQ Ancillary applicability; bilingual Fireteam Level 3 example; bilingual Armed Turret S2/S1; Spanish PDF internal B6 versus B6+SD reminder; bilingual PDF Dodge modifier versus both language Wikis; document any official correction without overriding evidence |
 | G. Presentation, links and acceptance evidence | REA-011, REA-031, REA-033 | Follow content decisions; current prose rendering first; optional structured display later | AP+DA before/after conditions visible; Derived versus Explicit labels; correct CC Attribute target; material uncertainty visible in normal mode; keyboard/narrow-screen links and citations; actual explanation review cannot pass solely on graph count |
 | H. Command Token actor | REA-043 | Small independent P0 correction; share Strategic Use baseline from D | Opponent imposes limit on user's first turn; Counterintelligence allows user two; separate enemy Order-removal branch and >10 threshold |
 | I. Current Weapon publication | REA-044 | Target current metadata-only profiles; source 225 does not require a referencing Unit; no blanket publication of historical rows | Numeric/slug public lookup, matched Marksman profile/ranges, name/source-note visibility; no fabricated Sniper or raw data mutation |

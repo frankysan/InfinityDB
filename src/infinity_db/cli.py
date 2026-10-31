@@ -184,7 +184,18 @@ def cmd_validate_curated(args: argparse.Namespace) -> int:
 
 def cmd_build_rules(args: argparse.Namespace) -> int:
     documents = load_curated_directory(args.input)
-    export_rules_database(documents, args.output)
+    if args.restrictions_manifest is not None:
+        if args.output.resolve() == DEFAULT_RULES_DATABASE.resolve():
+            raise ValueError(
+                "v9 Restrictions export requires an explicit staging --output path; "
+                "do not replace the tracked release rules.db before publication review"
+            )
+        manifest = json.loads(args.restrictions_manifest.read_text(encoding="utf-8"))
+        export_rules_database(
+            documents, args.output, restrictions_manifest=manifest,
+        )
+    else:
+        export_rules_database(documents, args.output)
     print(f"Rules database ready: {args.output}")
     print(f"Collections: {len(documents)}")
     return 0
@@ -343,6 +354,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_rules.add_argument("input", nargs="?", type=Path, default=DEFAULT_CURATED_RULES)
     p_rules.add_argument("--output", type=Path, default=DEFAULT_RULES_DATABASE)
+    p_rules.add_argument(
+        "--restrictions-manifest", type=Path,
+        help="Explicit opt-in to v9 conditional Restrictions export; stage outside release paths",
+    )
     p_rules.set_defaults(func=cmd_build_rules)
 
     p_scenario_map = sub.add_parser(

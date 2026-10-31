@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
+from infinity_db.faq_rulings import validate_faq_ruling_facts
 from infinity_db.maintained_text import validate_maintained_text_syntax
 from infinity_db.rule_relations import RULE_RELATION_TYPES
 from infinity_db.scenario_definition import (
@@ -43,9 +45,132 @@ ARMY_LINK_SLUG_DOMAINS = {
 CATALOG_RULE_KINDS = frozenset({"skill", "equipment", "weapon"})
 VARIANT_INHERITANCE_MODES = frozenset({"family", "source"})
 VARIANT_PARAMETER_SOURCES = frozenset({"army-extra"})
-VARIANT_PARAMETER_KINDS = frozenset({"distance"})
+VARIANT_PARAMETER_KINDS = frozenset({"distance", "numeric-mod", "reviewed-extra"})
+VARIANT_MOD_TARGETS = frozenset({"skill-holder", "opponent"})
+VARIANT_MOD_APPLICATIONS = frozenset(
+    {"bs-attack-requiring-lof", "discover", "berserk-cc-attack", "dodge-ph-roll",
+     "surprise-attack-target-face-to-face-aro"}
+)
 SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
+
+
+def _validate_reviewed_extra_parameter(
+    parameter: dict[str, Any],
+    context: str,
+    inheritance: str,
+    army_links: list[object],
+) -> None:
+    """Bound typed extra effects to exact, reviewed source Skill families."""
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "super-jump"}
+    ]:
+        values = parameter.get("extraValues")
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != [{
+                "extraId": 304,
+                "extraType": "TEXT",
+                "rawValue": "Jet Propulsion",
+                "effect": {
+                    "kind": "trajectory-control",
+                    "appliesTo": "super-jump-jet-propulsion",
+                },
+            }]
+        ):
+            raise ValueError(f"{context}: invalid Super-Jump Jet Propulsion extra")
+        return
+    if (
+        inheritance != "family"
+        or len(army_links) != 1
+        or not isinstance(army_links[0], dict)
+        or army_links[0].get("entity") != "skill"
+        or army_links[0].get("id") != "dodge"
+    ):
+        raise ValueError(f"{context}: reviewed-extra currently requires the Dodge family")
+    if set(parameter) != {"source", "kind", "extraValues"}:
+        raise ValueError(f"{context}: reviewed-extra requires source, kind and extraValues")
+    values = parameter["extraValues"]
+    if not isinstance(values, list) or not values:
+        raise ValueError(f"{context}: extraValues must be nonempty")
+    seen_ids: set[int] = set()
+    for index, entry in enumerate(values):
+        prefix = f"{context}.extraValues[{index}]"
+        if not isinstance(entry, dict) or set(entry) != {
+            "extraId", "extraType", "rawValue", "effect"
+        }:
+            raise ValueError(f"{prefix}: invalid extraValues entry")
+        extra_id = entry["extraId"]
+        if type(extra_id) is not int or extra_id <= 0 or extra_id in seen_ids:
+            raise ValueError(f"{prefix}: invalid or duplicate extraId")
+        seen_ids.add(extra_id)
+        raw = entry["rawValue"]
+        effect = entry["effect"]
+        if not isinstance(raw, str) or not isinstance(effect, dict):
+            raise ValueError(f"{prefix}: rawValue and effect must be typed")
+        kind = effect.get("kind")
+        if kind == "opponent-roll-mod":
+            if set(effect) != {"kind", "appliesTo", "modifier"} or (
+                effect["appliesTo"] != "dodge-face-to-face"
+                or type(effect["modifier"]) is not int
+                or effect["modifier"] not in range(-12, 0)
+            ):
+                raise ValueError(f"{prefix}: invalid opponent-roll-mod")
+            expected_raw = f"{effect['modifier']:+d}"
+            expected_type = "TEXT"
+        elif kind == "roll-attribute-replacement":
+            if set(effect) != {"kind", "appliesTo", "attribute", "value"} or (
+                effect["appliesTo"] != "dodge-ph-roll"
+                or effect["attribute"] != "PH"
+                or type(effect["value"]) is not int
+                or not 1 <= effect["value"] <= 20
+            ):
+                raise ValueError(f"{prefix}: invalid roll-attribute-replacement")
+            expected_raw = f"PH={effect['value']}"
+            expected_type = "TEXT"
+        elif kind == "movement-bonus":
+            if set(effect) != {"kind", "appliesTo", "centimeters"} or (
+                effect["appliesTo"] != "successful-dodge-movement"
+                or type(effect["centimeters"]) not in (int, float)
+            ):
+                raise ValueError(f"{prefix}: invalid movement-bonus")
+            try:
+                cm = Decimal(str(effect["centimeters"]))
+            except InvalidOperation as exc:
+                raise ValueError(f"{prefix}: invalid centimeters") from exc
+            if not cm.is_finite() or not 0 < cm <= 30 or cm % Decimal("2.5") != 0:
+                raise ValueError(f"{prefix}: invalid game distance")
+            expected_raw = f"+{cm.normalize():f}"
+            expected_type = "DISTANCE"
+        elif kind == "special-die":
+            if set(effect) != {"kind", "appliesTo", "count"} or (
+                effect["appliesTo"] != "dodge-roll"
+                or type(effect["count"]) is not int
+                or effect["count"] != 1
+            ):
+                raise ValueError(f"{prefix}: invalid special-die")
+            expected_raw = "+1SD"
+            expected_type = "TEXT"
+        elif kind == "saving-attribute-mod":
+            if set(effect) != {"kind", "appliesTo", "attribute", "modifier"} or (
+                effect["appliesTo"] != "arm-saving-roll-after-dodge"
+                or effect["attribute"] != "ARM"
+                or type(effect["modifier"]) is not int
+                or effect["modifier"] != 3
+            ):
+                raise ValueError(f"{prefix}: invalid saving-attribute-mod")
+            expected_raw = "ARM +3"
+            expected_type = "TEXT"
+        else:
+            raise ValueError(f"{prefix}: unsupported reviewed effect {kind!r}")
+        if entry["extraType"] != expected_type or raw != expected_raw:
+            raise ValueError(
+                f"{prefix}: extraType/rawValue conflicts with reviewed effect"
+            )
 
 
 def _validate_variant_semantics(
@@ -68,6 +193,7 @@ def _validate_variant_semantics(
     if not isinstance(parameters, list):
         raise ValueError(f"{context}: 'occurrenceParameters' must be an array")
     seen_parameters: set[tuple[str, str]] = set()
+    seen_extra_ids: set[int] = set()
     for index, parameter in enumerate(parameters):
         parameter_context = f"{context}.occurrenceParameters[{index}]"
         if not isinstance(parameter, dict):
@@ -84,17 +210,111 @@ def _validate_variant_semantics(
                 f"{parameter_context}: unsupported parameter kind {kind!r}; "
                 f"expected one of {sorted(VARIANT_PARAMETER_KINDS)}"
             )
-        expected_fields = {"source", "kind", "positiveSign"}
-        if set(parameter) != expected_fields:
-            raise ValueError(
-                f"{parameter_context}: distance parameters must contain only "
-                "'source', 'kind', and 'positiveSign'"
+        if kind == "reviewed-extra":
+            _validate_reviewed_extra_parameter(
+                parameter, parameter_context, inheritance, army_links
             )
-        if parameter["positiveSign"] not in {"preserve", "omit", "force"}:
-            raise ValueError(
-                f"{parameter_context}: 'positiveSign' must be one of "
-                "'preserve', 'omit', or 'force'"
-            )
+        elif kind == "distance":
+            expected_fields = {"source", "kind", "positiveSign"}
+            if set(parameter) != expected_fields:
+                raise ValueError(
+                    f"{parameter_context}: distance parameters must contain only "
+                    "'source', 'kind', and 'positiveSign'"
+                )
+            if parameter["positiveSign"] not in {"preserve", "omit", "force"}:
+                raise ValueError(
+                    f"{parameter_context}: 'positiveSign' must be one of "
+                    "'preserve', 'omit', or 'force'"
+                )
+        else:
+            if (
+                inheritance != "family"
+                or len(army_links) != 1
+                or not isinstance(army_links[0], dict)
+                or army_links[0].get("entity") != "skill"
+            ):
+                raise ValueError(
+                    f"{parameter_context}: numeric-mod currently requires a family Skill link"
+                )
+            expected_fields = {
+                "source", "kind", "owner", "target", "appliesTo", "extraValues"
+            }
+            if set(parameter) != expected_fields:
+                raise ValueError(
+                    f"{parameter_context}: numeric-mod parameters require exactly "
+                    f"{sorted(expected_fields)}"
+                )
+            if parameter["owner"] != "skill-holder":
+                raise ValueError(f"{parameter_context}: owner must be 'skill-holder'")
+            if parameter["target"] not in VARIANT_MOD_TARGETS:
+                raise ValueError(
+                    f"{parameter_context}: invalid numeric-mod target"
+                )
+            applies_to = parameter["appliesTo"]
+            if (
+                not isinstance(applies_to, list)
+                or not applies_to
+                or any(
+                    not isinstance(scope, str) or scope not in VARIANT_MOD_APPLICATIONS
+                    for scope in applies_to
+                )
+                or len(set(applies_to)) != len(applies_to)
+            ):
+                raise ValueError(f"{parameter_context}: invalid appliesTo scopes")
+            if (
+                parameter["target"] == "opponent"
+                and set(applies_to) not in (
+                    {"bs-attack-requiring-lof", "discover"},
+                    {"surprise-attack-target-face-to-face-aro"},
+                )
+            ) or (
+                parameter["target"] == "skill-holder"
+                and not set(applies_to) <= {"berserk-cc-attack", "dodge-ph-roll"}
+            ):
+                raise ValueError(
+                    f"{parameter_context}: target conflicts with appliesTo scope"
+                )
+            if "surprise-attack-target-face-to-face-aro" in applies_to and (
+                army_links != [{"entity": "skill", "id": "surprise-attack"}]
+            ):
+                raise ValueError(
+                    f"{parameter_context}: Surprise Attack scope requires its exact family link"
+                )
+            values = parameter["extraValues"]
+            if not isinstance(values, list) or not values:
+                raise ValueError(f"{parameter_context}: extraValues must be nonempty")
+            seen_numeric_ids: set[int] = set()
+            for entry in values:
+                if not isinstance(entry, dict) or set(entry) != {
+                    "extraId", "extraType", "rawValue", "modifier"
+                }:
+                    raise ValueError(f"{parameter_context}: invalid extraValues entry")
+                extra_id, modifier = entry["extraId"], entry["modifier"]
+                if type(extra_id) is not int or extra_id < 1 or extra_id in seen_numeric_ids:
+                    raise ValueError(f"{parameter_context}: duplicate/invalid extraId")
+                seen_numeric_ids.add(extra_id)
+                if type(modifier) is not int or not (-12 <= modifier <= 12) or modifier == 0:
+                    raise ValueError(f"{parameter_context}: invalid numeric modifier")
+                if (
+                    entry["extraType"] != "TEXT"
+                    or entry["rawValue"] != f"{modifier:+d}"
+                ):
+                    raise ValueError(
+                        f"{parameter_context}: extraType/rawValue must match modifier"
+                    )
+                if (
+                    (parameter["target"] == "opponent" and modifier >= 0)
+                    or (parameter["target"] == "skill-holder" and modifier <= 0)
+                ):
+                    raise ValueError(f"{parameter_context}: modifier sign conflicts with target")
+        if kind in {"numeric-mod", "reviewed-extra"}:
+            for entry in parameter["extraValues"]:
+                extra_id = entry["extraId"]
+                if extra_id in seen_extra_ids:
+                    raise ValueError(
+                        f"{parameter_context}: duplicate occurrence extraId {extra_id}"
+                    )
+                seen_extra_ids.add(extra_id)
         key = (source, kind)
         if key in seen_parameters:
             raise ValueError(f"{parameter_context}: duplicate parameter {key!r}")
@@ -208,12 +428,28 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
     """Validate conditional reviewed examples, never a general roll evaluator."""
     if not isinstance(value, list) or not value:
         raise ValueError(f"{context}: expected reviewed combined examples")
-    seen: set[tuple[int, str]] = set()
+    seen: set[tuple[int, str, str]] = set()
     arm_when = {
         "immunity": "ARM", "savingAttribute": "ARM", "attackClass": "non-comms"
     }
     ap_when = {
         "immunity": "AP", "savingAttribute": "ARM", "attackClass": "non-comms"
+    }
+    bts_cc_when = {
+        "immunity": "BTS", "savingAttribute": "BTS",
+        "attackClass": "non-comms", "weaponId": "weapon:e-m-cc-weapon",
+    }
+    em_cc_when = {**bts_cc_when, "immunity": "E/M"}
+    silenced_ap_when = {
+        "immunity": "AP", "savingAttribute": "BTS",
+        "attackClass": "non-comms", "weaponId": "weapon:silenced-pistol",
+    }
+    silenced_bts_when = {**silenced_ap_when, "immunity": "BTS"}
+    silenced_shock_when = {**silenced_ap_when, "immunity": "Shock"}
+    silenced_whens = (silenced_ap_when, silenced_bts_when, silenced_shock_when)
+    ap_t2_when = {
+        "immunity": "AP", "savingAttribute": "ARM",
+        "attackClass": "non-comms", "weaponId": "weapon:ap-t2-cc-weapon",
     }
     for index, case in enumerate(value):
         item = f"{context}[{index}]"
@@ -224,9 +460,12 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
             raise ValueError(f"{item}: invalid combined Immunity case fields")
         source_id = case["sourceAmmunitionId"]
         when = case["when"]
-        if when not in (arm_when, ap_when):
+        if when not in (
+            arm_when, ap_when, bts_cc_when, silenced_ap_when, silenced_bts_when,
+            ap_t2_when, silenced_shock_when, em_cc_when,
+        ):
             raise ValueError(f"{item}: unsupported Immunity applicability")
-        identity = (source_id, when["immunity"])
+        identity = (source_id, when["immunity"], when.get("weaponId", ""))
         if type(source_id) is not int or source_id < 1 or identity in seen:
             raise ValueError(f"{item}: invalid or duplicate source Ammunition ID")
         seen.add(identity)
@@ -243,9 +482,15 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
         original = case["withoutImmunity"]
         if (
             not isinstance(original, dict)
-            or set(original) != {"hitRolls", "criticalRolls"}
+            or set(original) != (
+                {"hitRolls", "criticalRolls", "savingAttribute"}
+                if when in (*silenced_whens, ap_t2_when, em_cc_when)
+                else {"hitRolls", "criticalRolls"}
+            )
             or type(original["hitRolls"]) is not int
-            or original["hitRolls"] < 2
+            or original["hitRolls"] < (
+                1 if when in (*silenced_whens, ap_t2_when) else 2
+            )
             or type(original["criticalRolls"]) is not int
             or original["criticalRolls"] != original["hitRolls"] + 1
         ):
@@ -253,6 +498,84 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
         if when == arm_when:
             expected = {
                 "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
+            }
+        elif when in (bts_cc_when, em_cc_when):
+            # N5.3 pp. 67, 95, 177: E/M CC Weapon is a non-Comms CC
+            # attack with N+E/M and BTS/2 x2, never an arbitrary E/M attack.
+            if (
+                source_id != 5
+                or case["sourceAmmunitionName"] != "N+E/M"
+                or components != ["ammunition:normal", "ammunition:em"]
+                or original != {
+                    "hitRolls": 2, "criticalRolls": 3,
+                    **({"savingAttribute": "BTS/2"} if when == em_cc_when else {}),
+                }
+            ):
+                raise ValueError(f"{item}: unsupported BTS Weapon applicability")
+            expected = {
+                "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
+            }
+            if when == em_cc_when:
+                expected = {
+                    **expected, "savingAttribute": "BTS",
+                    "ignoredComponents": ["ammunition:em"],
+                    "remainingComponents": ["ammunition:normal"],
+                }
+        elif when in silenced_whens:
+            # Silenced Pistol is the reviewed AP+Shock/BTS/2 profile.
+            # AP-only Immunity leaves Shock's VITA=1 failed-save rule intact.
+            if (
+                source_id != 30
+                or case["sourceAmmunitionName"] != "AP+Shock"
+                or components != ["ammunition:ap", "ammunition:shock"]
+                or original != {
+                    "hitRolls": 1, "criticalRolls": 2, "savingAttribute": "BTS/2",
+                }
+            ):
+                raise ValueError(f"{item}: unsupported Silenced Pistol applicability")
+            expected = {
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "savingAttribute": "BTS",
+                "treatedAs": "ammunition:shock",
+                "ignoredComponents": ["ammunition:ap"],
+                "remainingComponents": ["ammunition:shock"],
+            }
+            if when == silenced_bts_when:
+                # Attribute Immunity covers BOTH AP and Shock here, unlike
+                # the AP-only case. Silent's interaction is not adjudicated.
+                expected = {
+                    "hitRolls": 1, "criticalRolls": 2,
+                    "savingAttribute": "BTS", "treatedAs": "ammunition:normal",
+                }
+            elif when == silenced_shock_when:
+                expected = {
+                    "hitRolls": 1, "criticalRolls": 2,
+                    "savingAttribute": "BTS/2", "treatedAs": "ammunition:ap",
+                    "ignoredComponents": ["ammunition:shock"],
+                    "remainingComponents": ["ammunition:ap"],
+                }
+        elif when == ap_t2_when:
+            # N5.3 pp. 63, 67, 95-96, 177: AP+T2 CC Weapon only.
+            # Hit and extra-Critical failed rolls inflict DIFFERENT Wounds.
+            if (
+                source_id != 40
+                or case["sourceAmmunitionName"] != "AP+T2"
+                or components != ["ammunition:ap", "ammunition:t2"]
+                or original != {
+                    "hitRolls": 1, "criticalRolls": 2,
+                    "savingAttribute": "ARM/2",
+                }
+            ):
+                raise ValueError(f"{item}: unsupported AP+T2 CC applicability")
+            expected = {
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "savingAttribute": "ARM",
+                "treatedAs": "ammunition:t2",
+                "ignoredComponents": ["ammunition:ap"],
+                "remainingComponents": ["ammunition:t2"],
+                "failedRollWounds": {"hit": 2, "criticalAdditionalRoll": 1},
             }
         else:
             # Only this specific AP+DA example has been reviewed; retaining DA
@@ -271,7 +594,12 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
                 "ignoredComponents": ["ammunition:ap"],
                 "remainingComponents": ["ammunition:da"],
             }
-        if case["withImmunity"] != expected:
+        applied = case["withImmunity"]
+        if (
+            not isinstance(applied, dict)
+            or any(type(applied.get(key)) is not int for key in ("hitRolls", "criticalRolls"))
+            or applied != expected
+        ):
             raise ValueError(f"{item}: unsupported covered-attack result")
         if case["evidence"] != "derived-from-pinned-general-rules":
             raise ValueError(f"{item}: evidence must identify the rule-derived conclusion")
@@ -282,8 +610,200 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
     if not isinstance(value, dict) or set(value) != {
         "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
         "reviewedCombinedCases", "reviewedVulnerabilityCases", "reviewedWeaponCases",
+        "reviewedSavingRollCases", "reviewedCriticalCases", "reviewedCommsCases",
     }:
         raise ValueError(f"{context}: invalid Immunity interaction fields")
+    # The pinned p. 95 Comms exclusion is distinct from ordinary BTS
+    # Immunity. Oblivion p. 58 is the exact reviewed Comms Attack, and
+    # Immunity (State: Isolated) can prevent only the named State.
+    # Burst is an attack die count, NOT a Saving Roll count.
+    if value["reviewedCommsCases"] != [{
+        "when": {
+            "programId": "hacking-program:oblivion",
+            "attackClass": "comms",
+            "stateId": "state:isolated",
+        },
+        "sourceProfile": {
+            "ammunitionId": "ammunition:ap",
+            "savingAttribute": "BTS",
+            "nonLethalTrait": "trait:non-lethal",
+            "failedSaveState": "state:isolated",
+            "burst": 2,
+        },
+        "immunityBts": {
+            "applies": False,
+            "apModifierIgnored": False,
+            "isolatedStatePrevented": False,
+        },
+        "immunityStateIsolated": {
+            "applies": True,
+            "isolatedStatePrevented": True,
+            "savingRollCancelled": False,
+        },
+        "evidence": "derived-from-pinned-general-rules",
+    }]:
+        raise ValueError(f"{context}: unsupported Oblivion Comms Immunity case")
+    # Printed Example 3 of N5.3 p. 96 is a Combined Saving Roll, NOT a
+    # combination of ammunition effects. Preserve both attribute rolls.
+    if value["reviewedSavingRollCases"] != [
+        {
+            "when": {
+                "weaponId": "weapon:plasma-rifle",
+                "immunity": "Enhanced",
+                "ammunitionId": "ammunition:normal",
+            },
+            "savingRolls": [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "result": "combined-saving-roll-preserved",
+            "evidence": "explicit-n5.3-pdf-p96-example-3",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:plasma-rifle",
+                "immunity": "Critical",
+                "attackClass": "non-comms",
+                "ammunitionId": "ammunition:normal",
+            },
+            "criticalWithoutImmunity": [
+                {"attribute": "ARM", "count": 2},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "criticalWithImmunity": [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "removedCriticalRoll": {"attribute": "ARM", "count": 1},
+            "result": "critical-extra-arm-roll-removed",
+            "evidence": "derived-from-pinned-general-rules",
+        },
+    ]:
+        raise ValueError(f"{context}: unsupported Plasma Combined Saving Roll example")
+    # T2 hit-roll Wounds survive Immunity (Critical); the separate
+    # one-Wound extra Critical roll is absent. Scope to the exact Army
+    # AP+T2 CC Weapon, not a runtime immunity or damage calculator.
+    if value["reviewedCriticalCases"] != [
+        {
+            "when": {
+                "weaponId": "weapon:ap-t2-cc-weapon",
+                "sourceAmmunitionId": 40,
+                "ammunitionId": "ammunition:t2",
+                "immunity": "Critical",
+                "attackClass": "non-comms",
+            },
+            "components": ["ammunition:ap", "ammunition:t2"],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "failedHitRollWounds": 2,
+                "failedAdditionalCriticalRollWounds": 1,
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 1,
+                "criticalRolls": 1,
+                "failedHitRollWounds": 2,
+                "additionalCriticalRollRemoved": True,
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:ap-da-cc-weapon",
+                "sourceAmmunitionId": 10,
+                "immunity": "Critical",
+                "attackClass": "non-comms",
+            },
+            "components": ["ammunition:ap", "ammunition:da"],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 2,
+                "criticalRolls": 3,
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 2,
+                "criticalRolls": 2,
+                "additionalCriticalRollRemoved": True,
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:ap-exp-cc-weapon",
+                "sourceAmmunitionId": 13,
+                "immunity": "Critical",
+                "attackClass": "non-comms"
+            },
+            "components": [
+                "ammunition:ap",
+                "ammunition:exp"
+            ],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 3,
+                "criticalRolls": 4
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "ARM/2",
+                "hitRolls": 3,
+                "criticalRolls": 3,
+                "additionalCriticalRollRemoved": True
+            },
+            "evidence": "derived-from-pinned-general-rules"
+        },
+        {
+            "when": {
+                "weaponId": "weapon:silenced-pistol",
+                "sourceAmmunitionId": 30,
+                "immunity": "Critical",
+                "attackClass": "non-comms"
+            },
+            "components": [
+                "ammunition:ap",
+                "ammunition:shock"
+            ],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "BTS/2",
+                "hitRolls": 1,
+                "criticalRolls": 2
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "BTS/2",
+                "hitRolls": 1,
+                "criticalRolls": 1,
+                "additionalCriticalRollRemoved": True
+            },
+            "evidence": "derived-from-pinned-general-rules"
+        },
+        {
+            "when": {
+                "weaponId": "weapon:e-m-cc-weapon",
+                "sourceAmmunitionId": 5,
+                "immunity": "Critical",
+                "attackClass": "non-comms"
+            },
+            "components": [
+                "ammunition:normal",
+                "ammunition:em"
+            ],
+            "criticalWithoutImmunity": {
+                "savingAttribute": "BTS/2",
+                "hitRolls": 2,
+                "criticalRolls": 3
+            },
+            "criticalWithImmunity": {
+                "savingAttribute": "BTS/2",
+                "hitRolls": 2,
+                "criticalRolls": 2,
+                "additionalCriticalRollRemoved": True
+            },
+            "evidence": "derived-from-pinned-general-rules"
+        },
+    ]:
+        raise ValueError(f"{context}: unsupported source-scoped Critical immunity cases")
     covered = value["coveredAmmunition"]
     if (
         not isinstance(covered, dict)
@@ -315,8 +835,9 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
         ]
     ):
         raise ValueError(f"{context}: invalid Immunity exceptions")
-    # This is the one printed Flash Pulse example, not a weapon/trait evaluator.
-    # In particular, the stunned condition must not be inferred for other weapons.
+    # Fixed source-reviewed cases only: Flash Pulse, standalone E/Mitter,
+    # printed Missile Launcher (Blast Mode), and printed Monofilament.
+    # Do not generalize to Hit Mode or other Weapon Traits.
     if value["reviewedWeaponCases"] != [
         {
             "when": {
@@ -331,10 +852,99 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
                 "stateId": "state:stunned",
                 "condition": "failed-saving-roll",
             },
-            "evidence": "explicit-pinned-wiki-example",
-        }
+            "evidence": "explicit-n5.3-pdf-p96-example-4",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:e-mitter",
+                "sourceWeaponId": 25,
+                "sourceAmmunitionId": 14,
+                "immunity": "BTS",
+                "savingAttribute": "BTS",
+                "attackClass": "non-comms",
+            },
+            "ammunitionTreatedAs": "ammunition:normal",
+            "survivingTraits": ["trait:non-lethal"],
+            "withoutImmunity": {
+                "hitRolls": 2,
+                "criticalRolls": 3,
+                "savingAttribute": "BTS/2",
+            },
+            "withImmunity": {
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "savingAttribute": "BTS",
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:missile-launcher",
+                "mode": "Blast Mode",
+                "immunity": "ARM",
+                "savingAttribute": "ARM",
+                "attackClass": "non-comms",
+            },
+            "sourceProfile": {
+                "ammunitionId": "ammunition:exp",
+                "savingRoll": "ARM",
+                "hitRolls": 3,
+                "traits": ["trait:anti-materiel", "trait:impact-template"],
+            },
+            "withImmunity": {
+                "savingAttribute": "ARM",
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "treatedAs": "ammunition:normal",
+            },
+            "evidence": "explicit-n5.3-pdf-p96-example-1",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:monofilament-cc-weapon",
+                "immunity": "ARM",
+                "savingAttribute": "ARM",
+                "attackClass": "non-comms",
+            },
+            "sourceProfile": {
+                "ammunitionId": "ammunition:normal",
+                "savingRoll": "ARM=0",
+                "hitRolls": 1,
+                "traits": ["trait:arm-0", "trait:state"],
+                "stateId": "state:dead",
+            },
+            "withImmunity": {
+                "savingAttribute": "ARM",
+                "hitRolls": 1,
+                "criticalRolls": 2,
+                "ignoredTraits": ["trait:arm-0", "trait:state"],
+                "stateAppliedOnFailedRoll": False,
+            },
+            "evidence": "explicit-n5.3-pdf-p96-example-2",
+        },
+        {
+            "when": {
+                "weaponId": "weapon:e-m-grenade-launcher",
+                "sourceAmmunitionId": 14,
+                "immunity": "BTS",
+                "savingAttribute": "BTS",
+                "attackClass": "non-comms",
+            },
+            "ammunitionTreatedAs": "ammunition:normal",
+            "survivingTraits": ["trait:non-lethal"],
+            "sourceProfileTraits": [
+                "trait:impact-template", "trait:speculative-attack",
+            ],
+            "withoutImmunity": {
+                "hitRolls": 2, "criticalRolls": 3, "savingAttribute": "BTS/2",
+            },
+            "withImmunity": {
+                "hitRolls": 1, "criticalRolls": 2, "savingAttribute": "BTS",
+            },
+            "evidence": "derived-from-pinned-general-rules",
+        },
     ]:
-        raise ValueError(f"{context}: unsupported Flash Pulse Immunity example")
+        raise ValueError(f"{context}: unsupported reviewed Weapon Immunity examples")
     # The pinned Vulnerability example names a *weapon*, not just an
     # Ammunition component. Do not turn this into substring-based runtime logic.
     if value["reviewedVulnerabilityCases"] != [
@@ -463,9 +1073,10 @@ def _validate_ammunition_visibility_zone(value: object, context: str) -> None:
     """Keep non-damaging visibility facts separate from Saving Roll resolution."""
     if (
         not isinstance(value, dict)
-        or set(value) != {
-            "visibility", "template", "height", "expires", "multispectralVisor"
-        }
+        or set(value) not in (
+            {"visibility", "template", "height", "expires", "multispectralVisor"},
+            {"visibility", "template", "height", "expires", "multispectralVisor", "opposition"},
+        )
         or value["visibility"] != "zero"
         or value["template"] != "circular"
         or value["height"] != "infinite"
@@ -474,6 +1085,18 @@ def _validate_ammunition_visibility_zone(value: object, context: str) -> None:
         or value["multispectralVisor"] not in {"can-draw-lof", "blocked"}
     ):
         raise ValueError(f"{context}: unsupported Ammunition visibility zone")
+    if "opposition" in value and value["opposition"] != {
+        "ruleId": "rule:face-to-face-rolls",
+        "attackRequirements": ["requires-roll", "requires-lof", "lof-crosses-zone"],
+        "visorAttack": (
+            "face-to-face-if-qualifying" if value["multispectralVisor"] == "blocked"
+            else "normal-roll"
+        ),
+        "enemyDodge": "normal-roll",
+        "templateRetention": "win-every-opposed-or-pass-unopposed",
+        "critical": "no-additional-effect",
+    }:
+        raise ValueError(f"{context}.opposition: unsupported visibility opposition facts")
 
 
 def _validate_scope(value: object, context: str) -> None:
@@ -608,6 +1231,11 @@ def _validate_source(source: dict[str, Any], context: str) -> None:
         _require_string(source.get("publishedDate"), "publishedDate", context)
         _require_string(source.get("localPath"), "localPath", context)
         _require_positive_int(source.get("pageCount"), "pageCount", context)
+        if "sha256" in source:
+            _require_string(source["sha256"], "sha256", context)
+            digest = source["sha256"]
+            if len(digest) != 64 or any(char not in "0123456789abcdefABCDEF" for char in digest):
+                raise ValueError(f"{context}: 'sha256' must be a 64-character hexadecimal digest")
         return
 
     if source.get("localPath") is not None:
@@ -734,6 +1362,9 @@ def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
         "maxPerController",
         "operatingDistance",
         "profileModes",
+        "effects",
+        "restrictions",
+        "clarifications",
     }
     unknown = set(facts) - allowed
     if unknown:
@@ -764,6 +1395,18 @@ def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
             raise ValueError(
                 f"{context}.profileModes: must be a unique non-empty subset of "
                 "['connected', 'autonomous']"
+            )
+    for field in ("effects", "restrictions", "clarifications"):
+        clauses = facts.get(field)
+        if clauses is None:
+            continue
+        if (
+            not isinstance(clauses, list)
+            or not clauses
+            or any(not isinstance(clause, str) or not clause.strip() for clause in clauses)
+        ):
+            raise ValueError(
+                f"{context}.{field}: expected non-empty maintained-text strings"
             )
     return skill_ids
 
@@ -851,10 +1494,12 @@ def _validate_fireteam_general_facts(facts: object, context: str) -> None:
 def _validate_fireteam_level_facts(facts: object, context: str) -> None:
     if not isinstance(facts, dict):
         raise ValueError(f"{context}: Fireteam Level facts must be an object")
-    expected = {"category", "basis", "cumulative", "levels"}
-    if set(facts) != expected:
+    required = {"category", "basis", "cumulative", "levels"}
+    allowed = required | {"sourceNotes"}
+    if not required.issubset(facts) or set(facts) - allowed:
         raise ValueError(
-            f"{context}: Fireteam Level facts must contain exactly {sorted(expected)}"
+            f"{context}: Fireteam Level facts require {sorted(required)}; "
+            "only optional 'sourceNotes' is supported"
         )
     if facts["category"] != "fireteam-level-bonuses":
         raise ValueError(f"{context}.category: must be 'fireteam-level-bonuses'")
@@ -884,6 +1529,39 @@ def _validate_fireteam_level_facts(facts: object, context: str) -> None:
             raise ValueError(
                 f"{item_context}.bonuses: must be a unique non-empty array of strings"
             )
+
+
+def _validate_game_setup_table(value: object, context: str) -> None:
+    """Closed, non-executable N5.3 general setup reference table."""
+    if not isinstance(value, dict) or set(value) != {"scope", "rows"}:
+        raise ValueError(f"{context}: expected scope and rows")
+    if value["scope"] != "recommended-general-setup-with-independent-retreat-thresholds":
+        raise ValueError(f"{context}: unsupported game setup scope")
+    rows = value["rows"]
+    if not isinstance(rows, list) or len(rows) != 6:
+        raise ValueError(f"{context}: expected six reviewed Game Modes")
+    expected_points = (150, 200, 250, 300, 350, 400)
+    for index, (row, points) in enumerate(zip(rows, expected_points, strict=True)):
+        row_context = f"{context}.rows[{index}]"
+        if not isinstance(row, dict) or set(row) != {
+            "name", "armyPoints", "baseSwc", "tableInches",
+            "deploymentZoneInches", "durationMinutes", "retreatThresholdVictoryPoints",
+        }:
+            raise ValueError(f"{row_context}: invalid game setup row schema")
+        if not isinstance(row["name"], str) or not row["name"].strip():
+            raise ValueError(f"{row_context}: missing game mode name")
+        for field in ("armyPoints", "baseSwc", "durationMinutes",
+                      "retreatThresholdVictoryPoints"):
+            if type(row[field]) is not int or row[field] <= 0:
+                raise ValueError(f"{row_context}.{field}: must be a positive integer")
+        if (row["armyPoints"] != points or row["baseSwc"] * 50 != points
+                or row["retreatThresholdVictoryPoints"] != (points + 3) // 4):
+            raise ValueError(f"{row_context}: point/SWC/Retreat threshold mismatch")
+        for field in ("tableInches", "deploymentZoneInches"):
+            dimensions = row[field]
+            if (not isinstance(dimensions, list) or len(dimensions) != 2
+                    or any(type(d) is not int or d <= 0 for d in dimensions)):
+                raise ValueError(f"{row_context}.{field}: expected two positive inches")
 
 
 def load_curated_document(path: Path) -> dict[str, Any]:
@@ -1114,31 +1792,72 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                         f"{context}.facts.visibilityZone: must not mix with Saving Roll facts"
                     )
                 _validate_ammunition_visibility_zone(zone, f"{context}.facts.visibilityZone")
-        if record["kind"] == "skill":
-            facts = record.get("facts")
-            if composition_role == "definition":
-                type_ids = facts.get("typeIds") if isinstance(facts, dict) else None
-                if (
-                    not isinstance(type_ids, list)
-                    or not type_ids
-                    or any(
-                        not isinstance(type_id, str) or type_id not in skill_type_ids
-                        for type_id in type_ids
-                    )
+                if "opposition" in zone and not any(
+                    isinstance(r, dict) and r.get("type") == "uses-effects-of"
+                    and r.get("recordId") == zone["opposition"]["ruleId"]
+                    for r in (record.get("relations") or [])
                 ):
                     raise ValueError(
-                        f"{context}: skill 'facts.typeIds' must be a non-empty array "
-                        "referencing skillTypes"
+                        f"{context}.facts.visibilityZone.opposition: missing owning rule relation"
                     )
-                if len(type_ids) != len(set(type_ids)):
-                    raise ValueError(
-                        f"{context}: skill 'facts.typeIds' must not contain duplicates"
-                    )
+        if record["kind"] == "faq-ruling":
+            validate_faq_ruling_facts(
+                record.get("facts"),
+                record_id=record["id"],
+                record_role=composition_role,
+                citations=record["citations"],
+                sources=sources,
+                context=f"{context}.facts",
+            )
+        if record["kind"] in {"skill", "equipment"}:
+            facts = record.get("facts")
+            kind = record["kind"]
+            if composition_role == "definition":
+                type_ids = facts.get("typeIds") if isinstance(facts, dict) else None
+                # All Skills require categories. Equipment may declare an action
+                # category only when its official source identifies one; passive
+                # Equipment is not silently classified as a declarable Skill.
+                if kind == "skill" or (
+                    isinstance(facts, dict) and "typeIds" in facts
+                ):
+                    if (
+                        not isinstance(type_ids, list)
+                        or not type_ids
+                        or any(
+                            not isinstance(type_id, str) or type_id not in skill_type_ids
+                            for type_id in type_ids
+                        )
+                    ):
+                        raise ValueError(
+                            f"{context}: {kind} 'facts.typeIds' must be a non-empty array "
+                            "referencing skillTypes"
+                        )
+                    if len(type_ids) != len(set(type_ids)):
+                        raise ValueError(
+                            f"{context}: {kind} 'facts.typeIds' must not contain duplicates"
+                        )
                 if isinstance(facts, dict) and "typeId" in facts:
                     raise ValueError(
-                        f"{context}: skill definitions must use 'facts.typeIds', "
+                        f"{context}: {kind} definitions must use 'facts.typeIds', "
                         "not singular 'facts.typeId'"
                     )
+            elif isinstance(facts, dict) and (
+                "typeIds" in facts or "typeId" in facts
+            ) and kind == "equipment":
+                raise ValueError(
+                    f"{context}: Equipment supplements must not redefine declaration types"
+                )
+        if (record.get("facts") or {}).get("gameSetupTable") is not None:
+            if record["id"] != "rule:game-modes" or record["kind"] != "rule":
+                raise ValueError(f"{context}: only Game Modes may own gameSetupTable")
+            _validate_game_setup_table(
+                record["facts"]["gameSetupTable"], f"{context}.facts.gameSetupTable"
+            )
+        if record["id"] == "rule:game-modes" and (
+            not isinstance(record.get("facts"), dict)
+            or "gameSetupTable" not in record["facts"]
+        ):
+            raise ValueError(f"{context}: Game Modes requires gameSetupTable")
         if record["kind"] == "rule":
             facts = record.get("facts")
             if isinstance(facts, dict):
@@ -1531,20 +2250,24 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             for scenario_id in scoped:
                 for skill_id in facts.get("definesSkills", []):
                     registry.record(skill_id, "skill", scenario_id)
-            if "specialists" in facts:
-                baseline = facts["specialists"]
-                if not isinstance(baseline, dict) or set(baseline) != {"anyOfSkills"}:
-                    raise ValueError("Specialist baseline requires anyOfSkills")
-                qualifiers = baseline["anyOfSkills"]
-                if (
-                    not isinstance(qualifiers, list)
-                    or not qualifiers
-                    or len(set(qualifiers)) != len(qualifiers)
-                ):
-                    raise ValueError("Specialist qualifiers must be a unique non-empty array")
-                for skill_id in qualifiers:
-                    if record_kind_by_id.get(skill_id) != "skill":
-                        raise ValueError(f"Unknown Specialist Skill {skill_id!r}")
+        if "specialists" in facts:
+            if record["kind"] != "rule" or facts.get("category") not in {
+                "basic-rule", "scenario-rule",
+            }:
+                raise ValueError("Specialist qualifiers require a general or scenario Rule")
+            baseline = facts["specialists"]
+            if not isinstance(baseline, dict) or set(baseline) != {"anyOfSkills"}:
+                raise ValueError("Specialist baseline requires anyOfSkills")
+            qualifiers = baseline["anyOfSkills"]
+            if (
+                not isinstance(qualifiers, list)
+                or not qualifiers
+                or len(set(qualifiers)) != len(qualifiers)
+            ):
+                raise ValueError("Specialist qualifiers must be a unique non-empty array")
+            for skill_id in qualifiers:
+                if record_kind_by_id.get(skill_id) != "skill":
+                    raise ValueError(f"Unknown Specialist Skill {skill_id!r}")
     if "scenarioComponents" in document:
         for component in document["scenarioComponents"]["definitions"]:
             for citation in component["citations"]:

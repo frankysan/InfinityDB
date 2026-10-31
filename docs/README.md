@@ -40,9 +40,19 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
 - `rules-research.md` — verified source findings retained for possible future product/model work.
 - `n5-source-history.md` — N5 official update-post index, historical Army evidence, and
   cross-source reconciliation procedure; an index, not a verified completeness ledger.
-- [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — active, documentation-only assessment of curated
-  interaction explanations, source conflicts, and proposed correction batches; its
-  linked inventory distinguishes screening from selected clause review.
+- [v1.0-source-coverage-audit.md](v1.0-source-coverage-audit.md) — dated 2026-10-31
+  evidence for active v1.0 source omissions and reproducible audit/test defects.
+  It preserves the current-input triage and explains why catalog/page-citation
+  counts do not certify whole-source coverage. Retain while these findings guide
+  unresolved work; `TODO.md` owns their open tasks, not this assessment.
+- [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
+  source/interaction assessment with implementation follow-ups and remaining
+  source conflicts. Its linked inventory, N5.3 reconciliation and source manifest
+  retain unique finding IDs, exact source hashes/revisions and unresolved
+  publication discrepancies; they remain **frozen baseline evidence**, not a
+  current defects list or proof of 1.0 completion. Keep these linked appendices
+  until the final source reconciliation and citation migration is accepted;
+  use `TODO.md` for current work and `rules-semantics.md` for reviewed meaning.
 - `rules-interaction-checklist.md` — generated cross-release interaction-review ledger. Regenerate
   it with `tools/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
   original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`
@@ -60,17 +70,22 @@ only when it contains unique rationale that still guides active work.
 - `AI_CONTEXT.md` — compact agent-oriented index of non-obvious current invariants and pointers to
   canonical documentation. It is not a second architecture or data-model specification.
 
-## Local audit workspace
+## Private local workspace
 
-`docs/audits/` is intentionally ignored by Git. Use it for generated matrices, command output,
-comparison results, screenshots, exploratory notes, and machine/deployment-specific evidence.
-Nothing in normal builds, tests, CI, or runtime behavior may depend on this directory.
+`local/` is Git-ignored and excluded from Docker build contexts. Use it for private audit evidence,
+server-specific operational notes, command output, screenshots, diagnostics, and other untracked
+material. For example, `local/audits/` and `local/operations/` can hold private findings without
+placing them in public project documentation.
+
+Existing ignored locations such as `docs/audits/` and `reports/` remain supported for compatibility.
+New private operational evidence should be kept under `local/`. No build, test, CI, runtime, or
+release step may depend on its contents.
 
 A normal audit therefore has three steps:
 
-1. collect transient evidence under `docs/audits/`;
-2. correct code/data/documentation and validate the result; and
-3. promote only durable conclusions into the canonical documents above.
+1. collect private evidence under `local/`;
+2. correct and validate code, data, or documentation as needed; and
+3. publish only generalized, reviewed product contracts or development tasks in tracked files.
 
-This keeps the repository documentation useful as a current technical reference instead of an
-archive of every completed review.
+Git ignore rules and Docker context exclusions are publication safeguards, not encryption or access
+controls. Protect local file permissions and review staging, archives, and diffs before publication.

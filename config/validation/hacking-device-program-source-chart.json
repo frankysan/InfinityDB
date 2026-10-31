@@ -1,0 +1,55 @@
+{
+  "formatVersion": 1,
+  "sourceId": "n5-core-v5.3-pdf",
+  "sourcePage": 58,
+  "reviewStatus": "source-reviewed-audit-only",
+  "classification": {
+    "domain": "hacking-device-program-access",
+    "scope": "equipment-granted-program-sets-not-individual-program-statistics",
+    "relationship": "device-to-program-entitlement-not-army-carrier-or-target",
+    "order": "printed-chart-column-order",
+    "authority": "source-chart-versus-maintained-device-definitions"
+  },
+  "deviceRows": [
+    {
+      "deviceId": "equipment:hacking-device",
+      "name": "Hacking Device",
+      "programIds": [
+        "hacking-program:carbonite",
+        "hacking-program:spotlight",
+        "hacking-program:total-control",
+        "hacking-program:oblivion"
+      ]
+    },
+    {
+      "deviceId": "equipment:hacking-device-plus",
+      "name": "Hacking Device Plus",
+      "programIds": [
+        "hacking-program:carbonite",
+        "hacking-program:spotlight",
+        "hacking-program:total-control",
+        "hacking-program:oblivion",
+        "hacking-program:white-noise",
+        "hacking-program:cybermask"
+      ]
+    },
+    {
+      "deviceId": "equipment:killer-hacking-device",
+      "name": "Killer Hacking Device",
+      "programIds": [
+        "hacking-program:trinity",
+        "hacking-program:cybermask"
+      ]
+    },
+    {
+      "deviceId": "equipment:evo-hacking-device",
+      "name": "EVO Hacking Device",
+      "programIds": [
+        "hacking-program:assisted-fire",
+        "hacking-program:enhanced-reaction",
+        "hacking-program:fairy-dust",
+        "hacking-program:controlled-jump"
+      ]
+    }
+  ]
+}

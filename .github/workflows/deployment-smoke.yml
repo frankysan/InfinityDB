@@ -17,8 +17,127 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v7
 
-      - name: Build application image from tracked release artifacts
+      - name: Set up Python for deterministic publication build
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Generate and verify release-paired deployed-object publication
+        run: |
+          PYTHONPATH=src python -m tools.build_deployed_object_publication
+          PYTHONPATH=src python -m tools.build_deployed_object_publication --check
+          PYTHONPATH=src python - <<'PY'
+          from pathlib import Path
+
+          from infinity_db.deployed_object_publication import load_deployed_object_publication
+          from infinity_db.rules_database import RulesDatabase
+
+          army = Path("data/generated/infinity.db")
+          rules_path = Path("data/generated/rules.db")
+          publication = Path("data/generated/deployed-objects.json")
+          rules = RulesDatabase(rules_path)
+          rules.validate()
+          restrictions = rules.restrictions_payload()
+          assert restrictions["available"] and len(restrictions["items"]) == 14
+          assert restrictions["evaluationSupported"] is False
+          paired = load_deployed_object_publication(publication, army, rules_path)
+          assert paired is not None and len(paired["objects"]) == 17
+          PY
+
+      - name: Build application image from tracked databases and generated publication
         run: docker build --tag infinity-db:deployment-smoke .
 
       - name: Validate image and production startup
+        run: sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets
+
+      - name: Generate independent v8 rollback rules and publication
+        # Build only disposable artifacts. Never replace the tracked v9
+        # rules.db or its release-matched publication in this checkout.
+        run: |
+          mkdir -p local/restrictions-v8-ci
+          PYTHONPATH=src python -m infinity_db build-rules --output local/restrictions-v8-ci/rules.db
+          PYTHONPATH=src python -m tools.build_deployed_object_publication --rules-db local/restrictions-v8-ci/rules.db --output local/restrictions-v8-ci/deployed-objects.json
+          PYTHONPATH=src python -m tools.build_deployed_object_publication --rules-db local/restrictions-v8-ci/rules.db --output local/restrictions-v8-ci/deployed-objects.json --check
+
+      - name: Verify rollback source compatibility and paired provenance
+        run: |
+          PYTHONPATH=src python - <<'PY'
+          from copy import deepcopy
+          from pathlib import Path
+          import sqlite3
+
+          from infinity_db.deployed_object_publication import load_deployed_object_publication
+          from infinity_db.rules_database import RulesDatabase
+
+          army = Path("data/generated/infinity.db")
+          current = Path("data/generated/rules.db")
+          previous = Path("local/restrictions-v8-ci/rules.db")
+          current_publication = load_deployed_object_publication(
+              Path("data/generated/deployed-objects.json"), army, current,
+          )
+          previous_publication = load_deployed_object_publication(
+              Path("local/restrictions-v8-ci/deployed-objects.json"), army, previous,
+          )
+          if current_publication is None or previous_publication is None:
+              raise SystemExit("A release-paired deployed-object publication is missing")
+
+          v9 = RulesDatabase(current)
+          v8 = RulesDatabase(previous)
+          v9.validate()
+          v8.validate()
+          if (not v9.restrictions_payload()["available"]
+              or len(v9.restrictions_payload()["items"]) != 14):
+              raise SystemExit("Current release is not the reviewed v9 Restrictions database")
+          if v8.restrictions_payload() != {
+              "formatVersion": 1, "available": False, "source": None,
+              "polarity": "prohibition", "items": [], "evaluationSupported": False,
+          }:
+              raise SystemExit("v8 rollback must report unavailable, never inferred permissions")
+
+          expected = deepcopy(previous_publication)
+          expected["sourceSnapshot"]["rulesDatabaseSha256"] = (
+              current_publication["sourceSnapshot"]["rulesDatabaseSha256"]
+          )
+          if expected != current_publication:
+              raise SystemExit("v8 rollback changed reviewed objects or non-rules provenance")
+          query = (
+              "SELECT collection_id, record_id, position, relation_type, related_record_id "
+              "FROM record_relations ORDER BY collection_id, record_id, position"
+          )
+          with sqlite3.connect(previous) as old, sqlite3.connect(current) as new:
+              if old.execute("PRAGMA user_version").fetchone()[0] != 8:
+                  raise SystemExit("Rollback artifact does not use schema v8")
+              if new.execute("PRAGMA user_version").fetchone()[0] != 9:
+                  raise SystemExit("Forward artifact does not use schema v9")
+              if old.execute(query).fetchall() != new.execute(query).fetchall():
+                  raise SystemExit("Rollback modified the canonical legacy relationship graph")
+          PY
+
+      - name: Build disposable v8 rollback image from the validated v9 image
+        # Only the rules database and its bound publication change in the
+        # derived image. The installed application, Army database and SVGs
+        # remain the exact bytes tested above.
+        run: |
+          cat > local/restrictions-v8-ci/Dockerfile <<'DOCKERFILE'
+          ARG BASE_IMAGE
+          FROM ${BASE_IMAGE}
+          COPY --chown=appuser:appuser rules.db /app/data/rules.db
+          COPY --chown=appuser:appuser deployed-objects.json /app/data/deployed-objects.json
+          DOCKERFILE
+          docker build --build-arg BASE_IMAGE=infinity-db:deployment-smoke --tag infinity-db:rollback-v8 local/restrictions-v8-ci
+
+      - name: Validate v8 rollback image schema
+        run: >-
+          docker run --rm --entrypoint python infinity-db:rollback-v8 -c
+          'from pathlib import Path; import sqlite3;
+          from infinity_db.rules_database import RulesDatabase;
+          p = Path("/app/data/rules.db");
+          r = RulesDatabase(p); r.validate();
+          assert sqlite3.connect(p).execute("PRAGMA user_version").fetchone()[0] == 8;
+          assert r.restrictions_payload()["available"] is False'
+
+      - name: Validate v8 rollback image and production startup
+        run: sh scripts/verify-container-image.sh infinity-db:rollback-v8 --published-assets
+
+      - name: Verify v9 image remains valid after rollback rehearsal
         run: sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets

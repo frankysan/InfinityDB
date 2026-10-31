@@ -5,7 +5,9 @@ import sqlite3
 
 from infinity_db.database.peripheral_relationships import (
     materialize_peripheral_relationships,
+    materialize_peripheral_source_labels,
     validate_peripheral_relationships,
+    validate_peripheral_source_labels,
 )
 from infinity_db.database.schema import create_schema
 from infinity_db.peripheral_identities import (
@@ -134,6 +136,62 @@ def _connection() -> tuple[sqlite3.Connection, PeripheralIdentityCurated]:
         "VALUES (2, 101, 20, 1, 1, 1, 277)"
     )
     return connection, curated
+
+
+def test_source_only_peripheral_labels_preserve_army_names_without_inferred_types() -> None:
+    connection, _ = _connection()
+    try:
+        connection.executemany(
+            "INSERT INTO peripherals (army_id, id, name) VALUES (?, ?, ?)",
+            [(101, 7, "Servant Bot"), (101, 8, "Auxiliary Drone")],
+        )
+        connection.execute(
+            "INSERT INTO profile_peripherals "
+            "(occurrence_id, army_id, unit_id, group_id, profile_id, position, item_id, quantity) "
+            "VALUES (1, 101, 30, 1, 1, 1, 7, 2)"
+        )
+        connection.execute(
+            "INSERT INTO option_peripherals "
+            "(occurrence_id, army_id, unit_id, group_id, option_id, position, item_id, quantity) "
+            "VALUES (2, 101, 20, 1, 1, 1, 8, 3)"
+        )
+        materialize_peripheral_source_labels(connection)
+        assert connection.execute(
+            "SELECT army_id, peripheral_id, source_name "
+            "FROM application_peripheral_source_labels ORDER BY peripheral_id"
+        ).fetchall() == [
+            (101, 7, "Servant Bot"), (101, 8, "Auxiliary Drone"),
+        ]
+        assert connection.execute(
+            "SELECT COUNT(*) FROM application_peripheral_entities"
+        ).fetchone()[0] == 0
+        validate_peripheral_source_labels(connection)
+        connection.execute(
+            "UPDATE application_peripheral_source_labels SET source_name = 'Wrong' "
+            "WHERE peripheral_id = 7"
+        )
+        import pytest
+
+        with pytest.raises(ValueError, match="drifted"):
+            validate_peripheral_source_labels(connection)
+    finally:
+        connection.close()
+
+
+def test_source_peripheral_attachment_without_definition_fails_publication() -> None:
+    import pytest
+
+    connection, _ = _connection()
+    try:
+        connection.execute(
+            "INSERT INTO option_peripherals "
+            "(occurrence_id, army_id, unit_id, group_id, option_id, position, item_id) "
+            "VALUES (1, 101, 20, 1, 1, 1, 999)"
+        )
+        with pytest.raises(ValueError, match="missing a source name"):
+            materialize_peripheral_source_labels(connection)
+    finally:
+        connection.close()
 
 
 def test_materialize_peripheral_controller_access_pool() -> None:

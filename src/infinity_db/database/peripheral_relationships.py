@@ -332,6 +332,39 @@ def _insert_rows(
     )
 
 
+def materialize_peripheral_source_labels(connection: sqlite3.Connection) -> None:
+    """Publish source-local Peripheral names without assigning curated identities.
+
+    Only attached source definitions are required at runtime. All names come
+    from the validated source table; missing or blank names must fail the build.
+    """
+    missing = connection.execute(
+        "SELECT p.army_id, p.item_id FROM ("
+        "SELECT army_id, item_id FROM profile_peripherals "
+        "UNION SELECT army_id, item_id FROM option_peripherals"
+        ") AS p LEFT JOIN peripherals AS s "
+        "ON s.army_id = p.army_id AND s.id = p.item_id "
+        "WHERE s.name IS NULL OR trim(s.name) = '' LIMIT 1"
+    ).fetchone()
+    if missing is not None:
+        raise ValueError(
+            "Attached Peripheral is missing a source name: "
+            f"army {missing[0]} peripheral {missing[1]}"
+        )
+    connection.execute(
+        "INSERT INTO application_peripheral_source_labels "
+        "(army_id, peripheral_id, source_name) "
+        "SELECT DISTINCT s.army_id, s.id, s.name FROM peripherals AS s "
+        "WHERE EXISTS ("
+        "SELECT 1 FROM profile_peripherals AS p "
+        "WHERE p.army_id = s.army_id AND p.item_id = s.id"
+        ") OR EXISTS ("
+        "SELECT 1 FROM option_peripherals AS o "
+        "WHERE o.army_id = s.army_id AND o.item_id = s.id"
+        ") ORDER BY s.army_id, s.id"
+    )
+
+
 def materialize_peripheral_relationships(
     connection: sqlite3.Connection, curated: PeripheralIdentityCurated | None
 ) -> None:
@@ -397,8 +430,57 @@ def _table_rows(
     return [tuple(row) for row in rows]
 
 
+def validate_peripheral_source_labels(connection: sqlite3.Connection) -> None:
+    """Require a named, Army-scoped runtime label for every source attachment."""
+    missing = connection.execute(
+        "SELECT o.army_id, o.item_id FROM ("
+        "SELECT army_id, item_id FROM profile_peripherals "
+        "UNION SELECT army_id, item_id FROM option_peripherals"
+        ") AS o LEFT JOIN application_peripheral_source_labels AS s "
+        "ON s.army_id = o.army_id AND s.peripheral_id = o.item_id "
+        "WHERE s.source_name IS NULL OR trim(s.source_name) = '' LIMIT 1"
+    ).fetchone()
+    if missing is not None:
+        raise ValueError(
+            "Published Peripheral attachment has no source label: "
+            f"army {missing[0]} peripheral {missing[1]}"
+        )
+    extra = connection.execute(
+        "SELECT s.army_id, s.peripheral_id FROM application_peripheral_source_labels AS s "
+        "WHERE NOT EXISTS ("
+        "SELECT 1 FROM profile_peripherals AS p "
+        "WHERE p.army_id = s.army_id AND p.item_id = s.peripheral_id"
+        ") AND NOT EXISTS ("
+        "SELECT 1 FROM option_peripherals AS o "
+        "WHERE o.army_id = s.army_id AND o.item_id = s.peripheral_id"
+        ") LIMIT 1"
+    ).fetchone()
+    if extra is not None:
+        raise ValueError(
+            "Published Peripheral label has no source attachment: "
+            f"army {extra[0]} peripheral {extra[1]}"
+        )
+    source_exists = connection.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'peripherals'"
+    ).fetchone()
+    if source_exists:
+        drift = connection.execute(
+            "SELECT s.army_id, s.peripheral_id "
+            "FROM application_peripheral_source_labels AS s "
+            "LEFT JOIN peripherals AS p "
+            "ON p.army_id = s.army_id AND p.id = s.peripheral_id "
+            "WHERE p.name IS NULL OR p.name != s.source_name LIMIT 1"
+        ).fetchone()
+        if drift is not None:
+            raise ValueError(
+                "Published Peripheral source label drifted from original definition: "
+                f"army {drift[0]} peripheral {drift[1]}"
+            )
+
+
 def validate_peripheral_relationships(connection: sqlite3.Connection) -> None:
-    """Ensure materialized Peripheral rows match pinned reviewed data and source context."""
+    """Ensure Peripheral source labels and reviewed relationships remain consistent."""
+    validate_peripheral_source_labels(connection)
     curated = _curated_from_connection(connection)
     if curated is None:
         if any(

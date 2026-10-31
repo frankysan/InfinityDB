@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import importlib.util
 import io
+import os
+import subprocess
 import sys
+import zipfile
 from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -22,6 +26,18 @@ def load_run_checks():
 run_checks = load_run_checks()
 
 
+def load_ci_preflight():
+    path = Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"
+    spec = importlib.util.spec_from_file_location("infinitydb_ci_preflight", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+ci_preflight = load_ci_preflight()
+
+
 def test_stage_selection_uses_canonical_order() -> None:
     args = run_checks.build_parser().parse_args(
         ["--stage", "lint", "--stage", "test", "tests/test_cli.py"]
@@ -33,7 +49,14 @@ def test_stage_selection_uses_canonical_order() -> None:
 def test_all_profile_includes_code_and_data_stages() -> None:
     args = run_checks.build_parser().parse_args(["--profile", "all"])
 
-    assert run_checks.selected_stage_names(args) == ("test", "lint", "type", "build", "rules")
+    assert run_checks.selected_stage_names(args) == (
+        "test", "lint", "docs", "type", "build", "rules", "preflight"
+    )
+
+
+def test_code_profile_remains_python_only() -> None:
+    args = run_checks.build_parser().parse_args(["--profile", "code"])
+    assert run_checks.selected_stage_names(args) == ("test", "lint", "type")
 
 
 def test_data_profile_builds_army_and_rules_databases() -> None:
@@ -44,7 +67,7 @@ def test_data_profile_builds_army_and_rules_databases() -> None:
 
 def test_stage_commands_use_current_python_and_forward_targets() -> None:
     stages = run_checks.stage_definitions(
-        ("test", "lint", "type", "build", "rules"),
+        ("test", "lint", "docs", "type", "build", "rules"),
         ["tests/test_cli.py"],
         build_source=Path("data/raw/example.zip"),
     )
@@ -69,33 +92,45 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         "check",
         "tests/test_cli.py",
     )
-    assert stages[2].command == (
+    assert Path(stages[2].command[0]).name.lower().startswith("npm")
+    assert stages[2].command[1:] == ("run", "lint:docs")
+    assert stages[3].command == (
         sys.executable,
         "-m",
         "pyright",
         "--pythonpath",
         sys.executable,
     )
-    assert stages[3].command == (
+    assert stages[4].command == (
         sys.executable,
         "-m",
         "infinity_db",
         "build",
         str(Path("data/raw/example.zip")),
         "--output-dir",
-        stages[3].command[6],
+        stages[4].command[6],
         "--compact",
     )
-    assert Path(stages[3].command[6]).parent != Path("data/generated")
-    assert stages[4].command == (
+    assert Path(stages[4].command[6]).parent != Path("data/generated")
+    assert stages[5].command == (
         sys.executable,
         "-m",
         "infinity_db",
         "build-rules",
         "--output",
-        stages[4].command[5],
+        stages[5].command[5],
     )
-    assert Path(stages[4].command[5]).parent != Path("data/generated")
+    assert Path(stages[5].command[5]).parent != Path("data/generated")
+
+
+def test_docs_stage_uses_locked_local_cli_and_ignores_pytest_targets() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("docs",), ["tests/test_run_checks.py"], build_source=None
+    )
+    assert stage.name == "docs"
+    assert Path(stage.command[0]).name.lower().startswith("npm")
+    assert stage.command[1:] == ("run", "lint:docs")
+    assert "npx" not in stage.command
 
 
 def test_test_stage_can_include_full_asset_tests() -> None:
@@ -153,6 +188,33 @@ def test_test_stage_can_enable_xdist_workers() -> None:
         "not full_assets",
         "-q",
     )
+
+
+def test_test_stage_can_group_browser_modules_without_changing_default() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",), [], build_source=None,
+        test_workers="4", test_distribution="loadgroup",
+    )
+    assert stage.command[3:7] == ("-n", "4", "--dist", "loadgroup")
+
+
+def test_test_stage_can_schedule_two_browser_lanes() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",), [], build_source=None,
+        test_workers="8", test_distribution="browserlanes",
+    )
+    assert stage.command[3:8] == (
+        "-n", "8", "--dist", "loadgroup", "--browser-lanes",
+    )
+    assert stage.command[8:] == ("-m", "not full_assets", "-q")
+
+
+def test_test_distribution_requires_test_stage(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    result = run_checks.main(["--stage", "lint", "--test-dist", "loadgroup"])
+    assert result == run_checks.EXIT_RUNNER_ERROR
+    assert "--test-dist requires the test stage" in capsys.readouterr().err
 
 
 def test_test_stage_can_force_serial_execution() -> None:
@@ -332,6 +394,218 @@ def test_run_stage_streams_output_and_reports_failure(
     assert "Result: FAIL" in output
 
 
+def test_test_stage_passes_launch_clock_only_to_pytest(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    environments: list[dict[str, str]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("ok\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        environments.append(kwargs["env"])
+        return FakeProcess()
+
+    monkeypatch.setenv("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", "stale")
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        assert run_checks.run_stage(
+            run_checks.Stage("test", (sys.executable, "-m", "pytest")), reporter,
+        ).status == "PASS"
+        assert run_checks.run_stage(
+            run_checks.Stage("lint", (sys.executable, "-m", "ruff")), reporter,
+        ).status == "PASS"
+
+    assert float(environments[0]["INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER"]) > 0
+    assert environments[0]["INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER"] != "stale"
+    assert "INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER" not in environments[1]
+
+
+def test_docs_stage_runs_markdownlint_before_local_link_validation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("docs", ("npm", "run", "lint:docs")),
+            reporter,
+        )
+
+    assert result.status == "PASS"
+    assert commands == [
+        ("npm", "run", "lint:docs"),
+        (sys.executable, "-m", "tools.check_doc_links"),
+    ]
+
+
+def test_rules_stage_runs_interaction_audit_before_database_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+        )
+
+    assert result.status == "PASS"
+    assert commands[0] == (
+        sys.executable, "-m", "tools.audit_rules_interactions",
+        "--check-output", "docs/rules-interaction-checklist.md",
+        "--require-release", "1.0.0",
+    )
+    assert commands[1] == (sys.executable, "-m", "infinity_db", "build-rules")
+
+
+def test_source_occupancy_gate_requires_rules_stage(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    result = run_checks.main(["--stage", "lint", "--source-occupancy-gate"])
+
+    assert result == run_checks.EXIT_RUNNER_ERROR
+    assert "--source-occupancy-gate requires the rules stage" in capsys.readouterr().err
+
+
+def test_opt_in_source_occupancy_gate_runs_before_rules_review_and_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def wait(self) -> int:
+            return 0
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+            source_occupancy_gate=True,
+        )
+
+    assert result.status == "PASS"
+    assert commands == [
+        (
+            sys.executable, "-m", "tools.audit_source_presentation",
+            "data/generated/infinity.db", "--require-no-occupied-gaps",
+        ),
+        (
+            sys.executable, "-m", "tools.audit_rules_interactions",
+            "--check-output", "docs/rules-interaction-checklist.md",
+            "--require-release", "1.0.0",
+        ),
+        (sys.executable, "-m", "infinity_db", "build-rules"),
+    ]
+
+
+def test_source_occupancy_cli_flag_reaches_rules_stage(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    invoked: list[tuple[str, bool]] = []
+
+    def fake_run_stage(stage, reporter, *, source_occupancy_gate=False):
+        invoked.append((stage.name, source_occupancy_gate))
+        return run_checks.StageResult(stage.name, "PASS", 0, 0.0)
+
+    monkeypatch.setattr(run_checks, "run_stage", fake_run_stage)
+    assert run_checks.main(["--stage", "rules", "--source-occupancy-gate"]) == 0
+    assert invoked == [("rules", True)]
+
+    invoked.clear()
+    assert run_checks.main(["--stage", "rules"]) == 0
+    assert invoked == [("rules", False)]
+
+
+def test_source_occupancy_failure_blocks_rules_review_and_build(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("Source-field gate: FAIL (paired raw source database unavailable)\n")
+
+        def wait(self) -> int:
+            return 1
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+            source_occupancy_gate=True,
+        )
+
+    assert result.status == "FAIL"
+    assert result.returncode == 1
+    assert len(commands) == 1
+    assert commands[0][2] == "tools.audit_source_presentation"
+
+
+def test_rules_stage_stops_before_build_when_review_audit_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("Interaction-review coverage mismatch; missing=['test']\n")
+
+        def wait(self) -> int:
+            return 2
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess()
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("rules", (sys.executable, "-m", "infinity_db", "build-rules")),
+            reporter,
+        )
+
+    assert result.status == "FAIL"
+    assert result.returncode == 2
+    assert len(commands) == 1
+    assert commands[0][2] == "tools.audit_rules_interactions"
+
+
 def test_build_source_without_build_stage_is_configuration_error(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -339,6 +613,268 @@ def test_build_source_without_build_stage_is_configuration_error(
 
     assert result == run_checks.EXIT_RUNNER_ERROR
     assert "--build-source requires the build stage" in capsys.readouterr().err
+
+
+def _git_preflight_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    root = tmp_path / "checkout"
+    root.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+    source = root / "src" / "demo" / "__init__.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("staged = True\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=root, check=True)
+    monkeypatch.setattr(ci_preflight, "REPO_ROOT", root)
+    return root, source
+
+
+def test_ci_preflight_exports_index_not_unstaged_working_content(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _root, source = _git_preflight_fixture(tmp_path, monkeypatch)
+    source.write_text("unstaged = True\n", encoding="utf-8")
+    output = tmp_path / "export"
+    assert ci_preflight.export_tracked(output) == 1
+    assert (output / "src/demo/__init__.py").read_text(encoding="utf-8") == (
+        "staged = True\n"
+    )
+    assert ci_preflight.untracked_files() == []
+
+
+def test_ci_preflight_reports_nonignored_untracked_files(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, _ = _git_preflight_fixture(tmp_path, monkeypatch)
+    (root / "not-in-ci.py").write_text("surprise\n", encoding="utf-8")
+    (root / ".gitignore").write_text("ignored.log\n", encoding="utf-8")
+    (root / "ignored.log").write_text("ignored\n", encoding="utf-8")
+    assert ci_preflight.untracked_files() == [".gitignore", "not-in-ci.py"]
+
+
+def test_ci_preflight_preserves_executable_index_mode(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, _ = _git_preflight_fixture(tmp_path, monkeypatch)
+    subprocess.run(
+        ["git", "update-index", "--chmod=+x", "src/demo/__init__.py"],
+        cwd=root, check=True,
+    )
+    assert ci_preflight.tracked_entries() == [
+        ("src/demo/__init__.py", "100755"),
+    ]
+    output = tmp_path / "export"
+    ci_preflight.export_tracked(output)
+    if os.name != "nt":
+        assert (output / "src/demo/__init__.py").stat().st_mode & 0o111
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Windows symlink privilege depends on host policy")
+def test_ci_preflight_recreates_git_symlinks(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, _ = _git_preflight_fixture(tmp_path, monkeypatch)
+    shortcut = root / "src" / "demo" / "link.py"
+    shortcut.symlink_to("__init__.py")
+    subprocess.run(["git", "add", "src/demo/link.py"], cwd=root, check=True)
+    output = tmp_path / "export"
+    assert ci_preflight.export_tracked(output) == 2
+    restored = output / "src/demo/link.py"
+    assert restored.is_symlink()
+    assert os.readlink(restored) == "__init__.py"
+
+
+def _fake_preflight_wheel(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, wheel_members: list[str],
+):
+    export = tmp_path / "export"
+    source = export / "src" / "infinity_db"
+    source.mkdir(parents=True)
+    (source / "__init__.py").write_text("", encoding="utf-8")
+    logo = source / "web" / "static" / "logo"
+    logo.mkdir(parents=True)
+    (logo / "design.svg").write_text("design", encoding="utf-8")
+    config = export / "config" / "catalogs"
+    config.mkdir(parents=True)
+    (config / "catalog.json").write_text("{}", encoding="utf-8")
+    (export / "pyproject.toml").write_text(
+        '[tool.setuptools.data-files]\n'
+        '"share/infinity-db/config/catalogs" = ["config/catalogs/catalog.json"]\n',
+        encoding="utf-8",
+    )
+    wheel_dir = tmp_path / "wheels"
+    wheel_dir.mkdir()
+    with zipfile.ZipFile(wheel_dir / "infinity_db-0.1-py3-none-any.whl", "w") as zipfile_:
+        for member in wheel_members:
+            zipfile_.writestr(member, "data")
+    monkeypatch.setattr(
+        ci_preflight, "tracked_files",
+        lambda: [
+            "src/infinity_db/__init__.py",
+            "src/infinity_db/web/static/logo/design.svg",
+            "config/catalogs/catalog.json",
+        ],
+    )
+    monkeypatch.setattr(
+        ci_preflight.subprocess, "run",
+        lambda *_args, **_kwargs: SimpleNamespace(returncode=0),
+    )
+    return export, wheel_dir
+
+
+def test_ci_preflight_stage_is_wheel_only_because_test_stage_runs_pytest() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("preflight",), ["tests/test_run_checks.py"], build_source=None,
+    )
+    assert stage.name == "preflight"
+    assert stage.command == (
+        sys.executable,
+        str(Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"),
+        "--skip-pytest",
+    )
+
+
+def test_ci_preflight_rejects_unresolved_index_and_gitlink_modes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    entries = (
+        (b"100644 " + b"0" * 40 + b" 2\tsrc/demo.py\0", "unresolved index entry"),
+        (b"160000 " + b"0" * 40 + b" 0\tsrc/submodule\0", "unsupported Git index mode"),
+    )
+    for output, reason in entries:
+        monkeypatch.setattr(ci_preflight, "_git", lambda *_args, data=output: data)
+        with pytest.raises(ValueError, match=reason):
+            ci_preflight.export_tracked(tmp_path / "export")
+
+
+def test_ci_preflight_wheel_rejects_multiple_outputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        ["infinity_db/__init__.py"],
+    )
+    with zipfile.ZipFile(wheels / "another-0.1-py3-none-any.whl", "w") as archive:
+        archive.writestr("another/__init__.py", "")
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        "expected one wheel, found 2",
+    ]
+
+
+def test_ci_preflight_wheel_checks_package_and_configured_shared_data(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        [
+            "infinity_db/__init__.py",
+            "infinity_db-0.1.data/data/share/infinity-db/config/catalogs/catalog.json",
+        ],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == []
+
+
+def test_ci_preflight_wheel_rejects_missing_configured_data_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch, ["infinity_db/__init__.py"],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        "configured data file not shipped in wheel: share/infinity-db/config/catalogs/catalog.json",
+    ]
+
+
+def test_ci_preflight_wheel_rejects_missing_python_package_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        ["infinity_db-0.1.data/data/share/infinity-db/config/catalogs/catalog.json"],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        "tracked source file not shipped in wheel: infinity_db/__init__.py",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "content"),
+    [
+        ("namespace_pkg/module.py", "value = 1\n"),
+        ("standalone_module.py", "value = 1\n"),
+    ],
+)
+def test_ci_preflight_wheel_rejects_unshipped_sources_without_init(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    relative_path: str,
+    content: str,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        [
+            "infinity_db/__init__.py",
+            "infinity_db-0.1.data/data/share/infinity-db/config/catalogs/catalog.json",
+        ],
+    )
+    source = export / "src" / relative_path
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(content, encoding="utf-8")
+    monkeypatch.setattr(
+        ci_preflight, "tracked_files",
+        lambda: [
+            "src/infinity_db/__init__.py",
+            "src/infinity_db/web/static/logo/design.svg",
+            f"src/{relative_path}",
+            "config/catalogs/catalog.json",
+        ],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        f"tracked source file not shipped in wheel: {relative_path}",
+    ]
+
+
+def test_ci_preflight_wheel_rejects_configured_untracked_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        [
+            "infinity_db/__init__.py",
+            "infinity_db-0.1.data/data/share/infinity-db/config/catalogs/catalog.json",
+        ],
+    )
+    monkeypatch.setattr(
+        ci_preflight, "tracked_files",
+        lambda: ["src/infinity_db/__init__.py"],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        "configured data file absent from Git index: config/catalogs/catalog.json",
+    ]
+
+
+def test_ci_preflight_main_enforces_untracked_check_even_without_build_or_pytest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(ci_preflight, "untracked_files", lambda: ["missing.py"])
+    monkeypatch.setattr(ci_preflight, "export_tracked", lambda _path: 2)
+    assert ci_preflight.main(["--skip-wheel", "--skip-pytest"]) == 1
+    assert "untracked files" in capsys.readouterr().out
+    assert ci_preflight.main(["--skip-wheel", "--skip-pytest", "--allow-untracked"]) == 0
+
+
+def test_ci_preflight_main_propagates_clean_export_pytest_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(ci_preflight, "untracked_files", lambda: [])
+    monkeypatch.setattr(ci_preflight, "export_tracked", lambda _path: 2)
+    calls = []
+    def fake_run(command, **_kwargs):
+        calls.append(command)
+        return SimpleNamespace(returncode=2)
+
+    monkeypatch.setattr(ci_preflight.subprocess, "run", fake_run)
+    assert ci_preflight.main(["--skip-wheel", "--", "-k", "smoke"]) == 1
+    assert calls[0][-2:] == ["-k", "smoke"]
 
 
 def test_fixture_build_stage_never_replaces_runtime_database(

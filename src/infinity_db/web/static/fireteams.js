@@ -1,7 +1,8 @@
 import { getFireteamArmies, getFireteamChart } from "./api.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { fireteamsIncludeWildcards } from "./preferences.js";
-import { readShareState, writeShareState } from "./share-state.js";
+import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { createPanelSwitcher, tableViewport } from "./view-components.js";
 
 const number = new Intl.NumberFormat();
@@ -18,12 +19,15 @@ const elements = {
   content: byId("fireteam-content"),
   reference: byId("fireteam-reference"),
   referenceContent: byId("fireteam-reference-content"),
+  faq: byId("fireteam-faq"),
   chartName: byId("fireteam-chart-name"),
   description: byId("fireteam-chart-description"),
   limits: byId("fireteam-chart-limits"),
   source: byId("fireteam-chart-source"),
   sourceDetail: byId("fireteam-chart-source-detail"),
   list: byId("fireteam-list"),
+  parents: byId("fireteam-parent-charts"),
+  parentList: byId("fireteam-parent-list"),
 };
 
 let armies = [];
@@ -138,10 +142,10 @@ function appendMemberDetails(cell, member) {
     cell.append(group);
   }
   if (labels.length) {
-    const countsAs = document.createElement("span");
-    countsAs.className = "fireteam-member-note";
-    countsAs.textContent = `Counts as: ${labels.join(", ")}`;
-    cell.append(countsAs);
+    const terms = document.createElement("span");
+    terms.className = "fireteam-member-note";
+    terms.textContent = `Chart terms: ${labels.join(", ")}`;
+    cell.append(terms);
   }
   if (!requirements.length && !labels.length) cell.textContent = "—";
 }
@@ -166,6 +170,20 @@ function appendFtoDetails(cell, member) {
     }
     cell.append(list);
   }
+}
+
+function appendVerifiedFtoSummary(cell, member) {
+  // FTO eligibility is scoped to this Army-local member and its matching
+  // loadout occurrences. Unresolved chart annotations are not entitlements.
+  if (member.resolution !== "army" || member.source_unit_id == null
+      || !member.unit || !member.fto_marker || !(member.loadouts || []).length) return;
+  const marker = member.fto_marker === "generic" ? "FTO" : `FTO-${member.fto_marker}`;
+  const summary = document.createElement("span");
+  summary.className = "fireteam-member-fto-summary";
+  const names = member.loadouts.map((loadout) => loadout.name).filter(Boolean);
+  if (!names.length) return;
+  summary.textContent = `${marker} profile${names.length === 1 ? "" : "s"}: ${names.join("; ")}`;
+  cell.append(summary);
 }
 
 function renderTeam(team) {
@@ -225,7 +243,20 @@ function renderTeam(team) {
     name.scope = "row";
     name.className = "table-column--primary";
     name.append(memberName(member));
+    if (member.comment) {
+      const annotation = document.createElement("span");
+      annotation.className = "fireteam-member-note fireteam-member-annotation";
+      annotation.textContent = `Chart note: ${member.comment}`;
+      name.append(annotation);
+    }
+    for (const issue of member.reference_issues || []) {
+      const notice = document.createElement("span");
+      notice.className = "fireteam-member-note fireteam-member-verification";
+      notice.textContent = `Needs verification: ${issue.message}`;
+      name.append(notice);
+    }
     if (wildcard) name.append(badge("Wildcard"));
+    if (!wildcard) appendVerifiedFtoSummary(name, member);
     const requirements = document.createElement("td");
     requirements.className = "table-column--descriptor fireteam-member-requirements";
     appendMemberDetails(requirements, member);
@@ -249,15 +280,40 @@ function renderTeam(team) {
   return article;
 }
 
-function fireteamLimitBadge(limit) {
+function fireteamLimitBadge(limit, { showUnavailable = false } = {}) {
   const kind = String(limit.limit_kind || "maximum");
   let label;
   if (kind === "unavailable") label = `${limit.type}: unavailable`;
   else if (kind === "unlimited") label = `${limit.type}: unlimited`;
   else label = `${limit.type}: max ${limit.max_count}`;
   const element = badge(label);
-  if (kind === "unavailable") element.classList.add("developer-only");
+  if (kind === "unavailable" && !showUnavailable) element.classList.add("developer-only");
   return element;
+}
+
+function renderParentCharts(chart) {
+  elements.parentList.replaceChildren();
+  for (const parent of chart.parent_charts || []) {
+    const item = document.createElement("li");
+    const linked = parent.source && parent.selectable;
+    const link = document.createElement(linked ? "a" : "span");
+    if (linked) link.href = shareStateHref("/fireteams", "fireteams", {
+      army: armyValue(parent.army),
+    });
+    link.textContent = parent.army.name;
+    item.append(link);
+    const limits = document.createElement("div");
+    limits.className = "detail-badges";
+    for (const limit of parent.limits || []) {
+      limits.append(fireteamLimitBadge(limit, { showUnavailable: true }));
+    }
+    if (!(parent.limits || []).length) limits.textContent = parent.source
+      ? "No Fireteam type limits are listed."
+      : "Chart limits unavailable.";
+    item.append(limits);
+    elements.parentList.append(item);
+  }
+  elements.parents.hidden = !(chart.parent_charts || []).length;
 }
 
 function teamsForDisplay(chart) {
@@ -268,9 +324,17 @@ function teamsForDisplay(chart) {
   if (wildcardTeams.length !== 1) return teams;
 
   const wildcardMembers = wildcardTeams[0].members || [];
-  return teams
+  const ordinaryTeams = teams
     .filter((team) => !team.is_wildcard)
-    .map((team) => ({ ...team, wildcard_members: wildcardMembers }));
+    .map((team) => ({
+      ...team,
+      wildcard_members: team.wildcards_excluded ? [] : wildcardMembers,
+    }));
+  // Keep the pool discoverable when it cannot be included in any team.
+  if (!ordinaryTeams.some((team) => !team.wildcards_excluded)) {
+    return [...ordinaryTeams, wildcardTeams[0]];
+  }
+  return ordinaryTeams;
 }
 
 function fireteamTypeLabel(type) {
@@ -415,6 +479,13 @@ function renderReference(reference) {
     cumulative,
   );
 
+  for (const [index, note] of (levelFacts.sourceNotes || []).entries()) {
+    const paragraph = document.createElement("p");
+    paragraph.className = "rules-source-note";
+    appendMaintainedText(paragraph, levels.fact_tokens?.sourceNotes?.[index], note);
+    fragment.append(paragraph);
+  }
+
   const terminology = generalFacts.terminology || [];
   if (terminology.length) {
     const terminologyHeading = document.createElement("h4");
@@ -471,6 +542,7 @@ function renderChart(chart) {
   if (chart.source.file) sourceDetails.push(chart.source.file);
   if (chart.source.sha256) sourceDetails.push(chart.source.sha256);
   elements.sourceDetail.textContent = sourceDetails.join(" · ");
+  renderParentCharts(chart);
   const teams = teamsForDisplay(chart);
   elements.list.replaceChildren(...teams.map(renderTeam));
   elements.count.textContent = `${teams.length} chart entries`;
@@ -495,13 +567,28 @@ async function loadChart(value) {
 
 async function initialize() {
   show(elements.loading);
+  Promise.all([
+    fetchReviewedFaqRulings("rule:fireteam-general", { signal: pageController.signal }),
+    fetchReviewedFaqRulings("rule:fireteam-level-bonuses", { signal: pageController.signal }),
+  ])
+    .then((payloads) => {
+      if (pageController.signal.aborted) return;
+      const rulings = new Map();
+      for (const payload of payloads) {
+        for (const ruling of payload.items || []) rulings.set(ruling.id, ruling);
+      }
+      const section = faqRulingsSection([...rulings.values()]);
+      if (section) elements.faq.replaceChildren(section);
+    })
+    .catch((error) => {
+      if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+    });
   try {
     const payload = await getFireteamArmies(pageController.signal);
     populateArmies(payload.items || []);
     currentReference = payload.reference || null;
     if (!armies.length) {
-      elements.count.textContent = "0 armies";
-      return show(elements.empty);
+      return renderOverview();
     }
     const selection = normalizeSelection();
     if (selection) await loadChart(selection);

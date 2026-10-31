@@ -12,6 +12,23 @@ and Spanish Wiki revision-history ZIP were inspected without changing curated da
 At those examined commits, the two curated collections retained their original hashes
 and contained 367 records. These are frozen audit inputs, not current-candidate counts.
 
+## Subsequent curated Wiki replacement (2026-10-13)
+
+As of that replacement, the C/H collections cite `wiki-en-20260926-200832`, acquired
+2026-09-26T20:08:32+02:00. The available
+`data/wiki/WIKI-en 20260926-200832.zip` has SHA-256
+`c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987`
+(812 members). All 74 citations and both vocabulary references resolve to
+64 page members, with headings present; three original member locators were
+corrected to `Electromagnetic_(E/M)_Ammunition`, `G__Jumper`, and
+`Transmutation` (heading `Transmutation (Escape System-X)`).
+Each referenced page has the same embedded revision ID in
+`WIKI-en-history 20260928-165727.zip`
+(SHA-256 `d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`).
+The earlier September 18 ZIP was not recovered and cannot be byte-compared.
+The S18 row above remains historical evidence, not current curated provenance;
+the newer archive is a deliberate source substitution, not the original capture.
+
 ## Evidence classes and portability
 
 - **Tracked:** C/H curated text, source declarations, review policy, validation
@@ -55,8 +72,8 @@ used as publication evidence. Original source IDs S1-S12 remain stable.
 | S4 | Infinity Wiki, English revision-history acquisition | No single publication date/version for the archive; each revision has its own timestamp | Manifest: 2026-09-28T16:57:27+02:00 | `data/wiki/WIKI-en-history 20260928-165727.zip`; acquisition origin `https://infinitythewiki.com/`; 3592 members; `_history/index.json` identifies each revision URL/member | Original exact revisions plus Doctor 3979, Engineer 3980 and Fireteams Chart 4116 checked in follow-up. Supports REA-010/027/028/035/038 and FTO coverage |
 | S5 | Infinity Wiki, English capture | Capture is not an effective rules publication | Manifest: 2026-09-26T20:08:32+02:00 | `data/wiki/WIKI-en 20260926-200832.zip`; Wiki acquisition, 812 members | Hash/availability independently checked; not a replacement for S18 and not a substantive full-member review |
 | S6 | Official Infinity Army API, English snapshot; 59 documents including metadata | Manifest reports source `dataChangedOn=2026-09-03`; not inferred to be every profile's publication date | 2026-09-29T11:43:35+02:00 | `data/raw/JSON 20260929-114335.zip`; acquisition origin `https://api.corvusbelli.com/army`; `metadata.json` plus 58 faction members | Exact selected weapon profiles and Army update context checked. Member versions: 36 files `7.26246.158`, 22 files `7.26246.159`. Supports REA-025/027/028/044; current presence is not proof of a historical addition |
-| S7 | Wiki Inmunidad, Spanish, revision 3677 | S21 revision timestamp 2025-07-15T14:34:59Z | Original URL read 2026-10-09; exact time not logged. Follow-up bytes independently inspected within S14 | [official page](https://infinitythewiki.com/es/Inmunidad); exact member `es/Inmunidad` in S14 | Example 4 and IMPORTANT clauses corroborate Flash Pulse result; do not settle S8's profile conflict. REA-010/027 |
-| S8 | Wiki Tabla de Armas, Spanish, revision 3987 | S21 revision timestamp 2026-08-27T14:20:08Z | Original URL read 2026-10-09; follow-up S14 member inspection | [official page](https://infinitythewiki.com/es/Tabla_de_Armas); member `es/Tabla_de_Armas` | Flash Pulse still has two PB rolls and lacks State: Stunned. Breaker Marksman equivalent is under FUSILES DE PRECISIÓN. REA-027/044 |
+| S7 | Wiki Inmunidad, Spanish, revision 3677 | S21 revision timestamp 2025-07-15T14:34:59Z | Original URL read 2026-10-09; exact time not logged. Rechecked live and exact oldid 2026-10-14; follow-up bytes independently inspected within S14 | [official page](https://infinitythewiki.com/es/Inmunidad); exact member `es/Inmunidad` in S14 | Example 4 and IMPORTANT clauses corroborate Flash Pulse's failed-save Stunned; do not settle S8's chart conflict. REA-010/027 |
+| S8 | Wiki Tabla de Armas, Spanish, revision 3987 | S21 revision timestamp 2026-08-27T14:20:08Z | Original URL read 2026-10-09; rechecked live and exact oldid 2026-10-14; follow-up S14 member inspection | [exact revision](https://infinitythewiki.com/es/Tabla_de_Armas?oldid=3987); member `es/Tabla_de_Armas` | Flash Pulse still has two PB rolls and lacks State: Stunned. The alternative chart S22 reproduces this. REA-027/044 |
 | S9 | Wiki Ingeniero, Spanish, revision 3823 | S21 revision timestamp 2025-11-26T15:07:04Z | Original URL read 2026-10-09; follow-up S14 bytes | [official page](https://infinitythewiki.com/es/Ingeniero); member `es/Ingeniero` | Contact/STR repair/other-State branches and absence of an explicit universal Allied clause inspected. REA-001/009/038 |
 | S10 | Wiki Ataque Intuitivo, Spanish, revision 3882 | S21 revision timestamp 2025-11-28T15:32:42Z; original web response had N5.2 banner | Original URL read 2026-10-09; exact time not logged | [official page](https://infinitythewiki.com/es/Ataque_Intuitivo); original URL-backed evidence | WIP resolution example supports REA-003. Not newly certified as a Spanish PDF clause |
 | S11 | ITS Season 18 + N5.3 Rules Update, English, official publication notice | 2026-09-01, displayed publication date | Original and follow-up URL reads 2026-10-09; exact times not logged | [official notice](https://infinityuniverse.com/en/news/infinity-rules-update-5-3); rules and Army list items identified by ordinal in the reconciliation | All 26 English rules bullets and 20 Army bullets inventoried. Notice cannot override a rule/PDF/profile. English Breaker weapon label needs reconciliation, REA-044 |
@@ -66,9 +83,11 @@ used as publication evidence. Original source IDs S1-S12 remain stable.
 | S15 | N5 FAQs, English, cover v0.0; 4 file pages / 3 printed content pages | Creation metadata 2025-10-15; exact publication date unverified | Original download time unknown | `data/pdf/faq/n5-faqs-v0-0-en.pdf`; preserved official FAQ publication | Entire content compared with S2: 28 earlier Q&A blocks; S2 has 37, including nine additions. Historical FAQ scope remains separate |
 | S16 | ITS Season 18: Overheat, English, version 2026.09.01; 132 pages | Cover explicitly says last updated September 1, 2026 | Original acquisition time unknown | `data/pdf/its/Its-rules-season-18-en.pdf`; cover gives current digital owner [ITS rules](https://experience.corvusbelli.com/en/infinity/its-rules) | Selected pp. 26, 28-29 inspected: ordinary Spec-Ops prohibited, TEAM-OPS is a distinct optional Extra and does not permit the Spec-Ops Skill. Supports REA-040's scope clarification; not a complete ITS audit |
 | S17 | Infinity N5 Core Rules, Spanish, v5.3; 204 file/printed pages | PDF creation metadata 2026-08-10; **publication date not established by metadata**. S13 announcement 2026-09-01 | Operator supplied 2026-10-09; original download timestamp and authoritative direct URL unknown | Uploaded `esp-n5-update-5-3.pdf`; original portal [official resources](https://experience.corvusbelli.com/en/infinity/resources); retain the failed candidate URL only as earlier research history | **Verified SHA-256 and relevant rendered cells/clauses:** pp. 74, 75, 99, 140, 142, 191, 196, 203. The official Spanish PDF resolves the Flash Pulse *PDF-versus-PDF* question (REA-027); it repeats the Level 3 example error (REA-034), Armed Turret S2/S1 conflict (REA-037), and contradicts itself on Special Dice (REA-041). Its Dodge (BLI+3) wording agrees with English S1 (REA-042). No full-book bilingual audit claimed |
-| S18 | Curated source `wiki-en-20260918-130233`, English capture, declared 812 members | Not a rules publication date | Declared 2026-09-18T13:02:33+02:00 | Expected `data/wiki/WIKI-en 20260918-130233.zip`; origin Wiki acquisition. Exact original operator archive required | **Still unavailable.** Expected hash agrees between tracked C/H declarations and ignored acquisition manifest; no ZIP bytes recovered. 72 records / 74 citations depend on it, REA-029 |
+| S18 | Curated source `wiki-en-20260918-130233`, English capture, declared 812 members | Not a rules publication date | Declared 2026-09-18T13:02:33+02:00 | Expected `data/wiki/WIKI-en 20260918-130233.zip`; origin Wiki acquisition. Exact original operator archive required | **Still unavailable.** At that audit baseline the two tracked declarations agreed on the expected hash; the local manifest was later removed after the archive disappeared, and the active declarations were repinned. No ZIP bytes recovered. At the audit baseline, 72 records / 74 citations depended on it, REA-029 |
 | S19 | Wiki Doctor, English, revision 3979; Médico, Spanish, revision 3822 | English: S4 index 2025-10-31T11:38:00Z; Spanish: S21 index 2025-11-26T15:03:51Z | Follow-up exact English bytes in S4 and Spanish bytes in S14 inspected; live URLs also read | [Doctor](https://infinitythewiki.com/Doctor), [Médico](https://infinitythewiki.com/es/M%C3%A9dico); `_history/oldid/3979.html` and `es/Medico` | Requirement/allegiance comparison, REA-002/038. Both distinguish older collapsed wording; no universal Allied target restriction located |
 | S21 | Infinity Wiki Spanish revision-history archive; 2503 revisions, 3290 ZIP members | Each oldid has its own revision timestamp; no single effective rules date | Operator supplied 2026-10-09; archive filename includes `20261009-215316`, independently supplied download metadata not verified | `WIKI-es-history 20261009-215316.zip`; revision acquisition via `https://infinitythewiki.com/wiki-es/api.php`, `_history/index.json` plus `_history/oldid/*.html` | **Exact revision timestamps and payload hashes inspected**, with selected revisions below; historical content not automatically identical to S14 rendered current page bytes; corroborates REA-027/034/037/041/042. Not a replacement for missing S18 English archive |
+| S22 | Wiki Tabla de Armas Alternativas, Spanish, revision 3988 | **S21 revision timestamp 2026-08-27T14:21:00Z** | Direct public-page and exact-oldid responses fetched 2026-10-14; **S21 historical member independently SHA-256 checked** | [exact revision](https://infinitythewiki.com/es/Tabla_de_Armas_Alternativas?oldid=3988); S21 `_history/oldid/3988.html` | Pulso Flash repeats S8's two PB Saving Rolls and omission of State: Stunned. Pinned historical and URL-backed corroboration, **not** a PDF change or official correction; REA-027 |
+| S23 | N5 FAQs, Spanish, cover v0.1; 5 file pages, 4 printed content pages | Exact release date unverified; PDF creation metadata 2026-08-25T13:41:43Z; S13 September 1 update notice is separate | Available locally and independently SHA-256 checked 2026-10-14; acquisition date unavailable | `data/pdf/faq/esp-faqs-n5-v0-1.pdf`; official resources portal, Spanish FAQ category | Printed p. 2 jointly confirms Sixth Sense/MSV1 target-only -6 exception. ITS printed p. 3 confirms Spotlight Classified scoring and carried scenario-element Marker restriction; p. 4 confirms undeployed Ancillary not Killed for ITS. Also includes a different Fireteam example wording, left to REA-034 |
 
 ## Supplementary Spanish PDF and revision-history checks
 
@@ -84,21 +103,41 @@ These additional sources clarify the **scope** of the five disputed findings:
 
 - REA-027: S17 p. 196 prints Pulso Flash / Aturdidora / PB / **one** Saving
   Roll, including Estado: Aturdido and No Letal; S1 p. 186 matches. S8/S14/S21
-  revision 3987 (2026-08-27) differs with two and without the State Trait.
+  revisions 3987 and 3988 (2026-08-27) differ with two and without the
+  State Trait. Both exact S21 revision payloads were checked and the
+  publicly served pages still matched on 2026-10-14.
   The supported **gameplay reference** is one PB/BTS roll; the discrepancy
   persists as a Spanish Wiki publication error/conflict, not a Spanish PDF one.
-- REA-034: S17 p. 142 repeats the Level 3 Fireteam example including its
-  Level 4 +1 CD bonus. Both official PDFs contain the conflicting example.
+- REA-034: S17 p. 142 and S1 p. 138 both show Morat CORE Case 2 as
+  three matching members in a five-member CORE, properly **Level 3**,
+  yet include Level 4's +1 CD/BS Attack bonus. The corresponding level
+  tables on S1 pp. 135?136 and S17 pp. 139?140 reserve that bonus for
+  four matching/equivalent members. The published Fireteam reference
+  follows the tables, gives a checked Level 3 example, and retains the
+  bilingual conflict in a separate source note; an official correction
+  has not been established.
 - REA-037: S17 p. 74 detailed Armed Turret S2 versus p. 74 deployable summary
   S1 and p. 203 summary S1. This is a **within-PDF contradiction in both
   languages**, not a version-independent resolution in favor of S2.
 - REA-041: S17 p. 75 says +1DE does not count toward maximum Burst 6, but
   p. 140 Fireteam reminder includes extra dice in a total-six limit; the
   contradiction occurs inside the Spanish PDF, not just S14 Wiki pages.
-- REA-042: S17 p. 75 says Esquivar (BLI+3) **always** adds +3 BLI on the
-  Saving Roll when Dodge is declared, matching S1 p. 75. S14/S21 revision
-  4012 (2026-09-08) retains a different condition. A source conflict remains,
-  but is now **Wiki versus both current N5.3 PDFs**.
+- REA-041 local acceptance (2026-10-14): Both `rule:special-dice`
+  and `rule:fireteam-level-bonuses` now cite Spanish N5.3 pp. 75/140
+  alongside English pp. 75/136; the player-visible note preserves their
+  contradictory wording. A B6+1 SD example follows the general rule.
+  No direct official erratum addressing the Spanish Fireteam reminder
+  was established from the September 2026 N5.3 release notices; a
+  scoped ruling remains an external open item.
+- REA-042: Both current N5.3 PDFs use unconditional wording after Dodge
+  declaration: S1 p. 75 Dodge (ARM+3) *always* applies to ARM Saving Rolls,
+  and S17 p. 75 Esquivar (BLI+3) uses *siempre*. The pinned **English Wiki
+  2026-09-26** `Template_Modifiers-explained` and **Spanish Wiki
+  2026-10-09** `es/Plantilla_Modifiers-explained` both instead require a
+  failed PH/FIS Roll. S14/S21 oldid 4012 (2026-09-08) preserves that
+  Spanish May-2026 wording. Both PDFs conflict with both Wiki languages;
+  official intent/erratum remains unresolved. Reviewed Dodge text follows
+  the PDFs while publishing the source discrepancy.
 
 ## Checksums and selected members
 
@@ -110,6 +149,7 @@ S18 remains an **expected** hash only, without verified ZIP bytes.
 ```text
 S1  53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f
 S2  7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa
+S23 7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a
 S3  643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b
 S4  d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d
 S5  c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987
@@ -135,6 +175,9 @@ the ZIP hash above is the verified artifact identity.
 | Archive | Exact member | Revision / timestamp where verified | Payload SHA-256 |
 | --- | --- | --- | --- |
 | S4 | `_history/oldid/3643.html` | Immunity 3643 / 2025-04-28T09:04:03Z | `7014821db88a6725addd6e1c354952e5a2ac017a15a6d2ddb695a5de6333dfa8` |
+| S4 | `_history/oldid/4021.html` | Mixed Weapons 4021 / 2026-08-10T14:59:26Z; Kobra CC DA/one-roll/no Anti-materiel | `5e14e368a8cf12797199fccf1ff7dd310b31b73411d99e7c43a38dd3aad4e313` |
+| S4 | `_history/oldid/4077.html` | Mixed Weapons 4077 / 2026-08-24T10:49:10Z; DA/two rolls/no Anti-materiel | `dc15b37bd0ea520e830ad5188a3ec4bfb3881c463fc2a5ce2814e7685e6fa73f` |
+| S4 | `_history/oldid/4082.html` | Mixed Weapons 4082 / 2026-08-27T14:25:59Z; DA/two rolls/**Anti-materiel added** | `d845afd55a96956e0d7fd2dd18daaceb640911048a4de02508ca7f8b1f85fef5` |
 | S4 | `_history/oldid/4083.html` | Weapon Chart 4083 / 2026-08-27T14:26:38Z | `b08f1eb349d4ed35055755fde6222f7461dbbf1a33a402cd8dc45c2cfbae7ba3` |
 | S4 | `_history/oldid/3000.html` | Combined Ammunition 3000 / 2025-03-28T15:15:11Z | `1ad611ee7d66293387922c7755aa97dbab167cd44c8f1a76ee87518dc5bd7abd` |
 | S4 | `_history/oldid/3156.html` | Vulnerability 3156 / 2025-04-08T10:35:35Z | `a92fddb42c092cb1cc67f64c613eafff01b64f7b3a0ed10e78c252bf23d3a2f7` |
@@ -160,6 +203,7 @@ the ZIP hash above is the verified artifact identity.
 | --- | --- | --- |
 | 3677 / Inmunidad | 2025-07-15T14:34:59Z | `_history/oldid/3677.html` / `2ac16b93221c59756de397334a3e1d82f07930c3c493d828223bff1da2c87305` |
 | 3987 / Tablas de Armas | 2026-08-27T14:20:08Z | `_history/oldid/3987.html` / `7f0d1899d469077baf51a93216ca34ed6d6ccd32ebfe7d54bd141e6b94a6b0a1` |
+| 3988 / Tablas de Armas Alternativas | 2026-08-27T14:21:00Z | `_history/oldid/3988.html` / `63003e04c983cef37343490b5a9fbd9bc8cfacd519bb8830fbb73adc53b754dd` |
 | 3822 / Médico | 2025-11-26T15:03:51Z | `_history/oldid/3822.html` / `a690c8f8c2334706696521767b0da0b6540903e96fa8efca6fb2804cda3e91d1` |
 | 3823 / Ingeniero | 2025-11-26T15:07:04Z | `_history/oldid/3823.html` / `063b05c98db95867f8a1f6535a5c9aa376fc6fea048477fd81afe517fd702029` |
 | 3882 / Ataque Intuitivo | 2025-11-28T15:32:42Z | `_history/oldid/3882.html` / `2632c9ee022706a05917fae75c6b10cfa89daa71c0fc44ad79693eaea529722a` |
@@ -226,9 +270,12 @@ The final protected-input check pins S20's unchanged bytes separately from sourc
   deployable summary; a source decision remains necessary.
 - **REA-041:** S17 **itself** contradicts its general SD/Burst explanation
   (p. 75) in a Fireteam reminder (p. 140). Keep both printed clauses.
-- **REA-042:** both official v5.3 PDFs grant the Dodge ARM/BLI +3 when
-  declared; the captured Spanish Wiki 4012 uses a different condition. The
-  missing-PDF rationale is superseded, but an upstream Wiki discrepancy remains.
+- **REA-042:** both official v5.3 PDFs grant the Dodge ARM/BLI +3 for
+  applicable Saving Rolls after declaration, while archived English and
+  Spanish Wiki modifier templates require a failed PH/FIS Roll. Spanish
+  revision 4012 independently pins the conflicting historical wording.
+  The player card publishes the PDF interpretation with visible provenance;
+  an official erratum remains external.
 
 Eleven locally supplied/available primary source artifacts are accounted for:
 S1-S6, S14-S17, and S21. S1/S2/S4/S5/S6/S14/S17/S21 are now directly

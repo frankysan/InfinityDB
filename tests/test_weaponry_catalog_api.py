@@ -15,7 +15,8 @@ from wsgiref.util import setup_testing_defaults
 
 import pytest
 
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.curated import load_curated_directory
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.web import create_app
 
 
@@ -28,10 +29,12 @@ def weaponry_app() -> Callable:
     )
 
 
-def _weapon_detail(app: Callable, slug: str) -> dict[str, Any]:
+def _weapon_detail(
+    app: Callable, slug: str, *, catalog: str = "weapons"
+) -> dict[str, Any]:
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
-    environ.update(PATH_INFO=f"/api/weapons/{slug}", REQUEST_METHOD="GET")
+    environ.update(PATH_INFO=f"/api/{catalog}/{slug}", REQUEST_METHOD="GET")
     observed: dict[str, Any] = {}
 
     def start_response(
@@ -308,6 +311,1489 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     assert profiles[203]["burst"] == "1"
 
 
+@pytest.mark.parametrize(
+    ("slug", "record_id", "pages", "phrases", "relations"),
+    [
+        (
+            "d-charges",
+            "weapon:d-charges",
+            {70, 186},
+            (
+                "Demolition Mode",
+                "[[trait:cc|CC]] Mode",
+                "same three charges",
+                "cannot be used",
+                "detonates in the Resolution Step",
+                "does not affect the user",
+            ),
+            {"skill:place-deployable", "trait:disposable-x", "trait:improvised"},
+        ),
+        (
+            "disco-baller",
+            "weapon:disco-baller",
+            {71, 186},
+            (
+                "Conclusion Step",
+                "States Phase",
+                "Eclipse",
+                "Activate Disco Ball",
+                "enemy Ball",
+                "Double Shot",
+            ),
+            {"ammunition:eclipse", "equipment:deactivator", "trait:double-shot"},
+        ),
+    ],
+)
+def test_reviewed_weapon_source_prose_has_separate_modes_and_sources(
+    weaponry_app: Callable,
+    slug: str,
+    record_id: str,
+    pages: set[int],
+    phrases: tuple[str, ...],
+    relations: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    rules = _weapon_rules(payload)
+    assert record_id in rules
+    record = rules[record_id]
+    assert all(phrase in record["summary"] for phrase in phrases)
+    assert pages <= {
+        citation["page"] for citation in record["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert relations <= {
+        relation["record"]["id"]
+        for relation in record["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+    assert any(
+        citation["source_id"] == "wiki-en-20260926-200832"
+        for citation in record["citations"]
+    )
+
+
+def test_d_charges_and_disco_baller_keep_army_modes_separate(
+    weaponry_app: Callable,
+) -> None:
+    charges = _weapon_detail(weaponry_app, "d-charges")
+    assert {profile["mode"] for profile in charges["profiles"]} == {
+        "CC Mode", "Demolition Mode"
+    }
+    assert all(profile["ammunition"] == "AP+Exp" for profile in charges["profiles"])
+    assert all(profile["saving_num"] == "3" for profile in charges["profiles"])
+    assert all(profile["damage"] == "6" for profile in charges["profiles"])
+    assert all("Disposable (3)" in profile["traits"] for profile in charges["profiles"])
+    assert all(
+        rule["id"] == "weapon:d-charges" for rule in charges.get("rules", [])
+    )
+    disco = _weapon_detail(weaponry_app, "disco-baller")
+    launcher = next(profile for profile in disco["profiles"] if profile["mode"] is None)
+    ball = next(profile for profile in disco["profiles"] if profile["mode"] == "Disco Ball")
+    assert "Double Shot" in launcher["traits"]
+    assert "Disposable (2)" in launcher["traits"]
+    assert ball["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+    assert ball["ammunition"] == 0
+    assert ball["saving_num"] == "-"
+
+
+@pytest.mark.parametrize(
+    ("slug", "page", "ammunition", "saving", "template", "linked_rules"),
+    [
+        ("chain-colt", 186, "N", "ARM", "Small Teardrop",
+         {"ammunition:normal", "trait:direct-template", "skill:intuitive-attack"}),
+        ("chain-rifle", 186, "N", "ARM", "Large Teardrop",
+         {"ammunition:normal", "trait:direct-template", "skill:intuitive-attack"}),
+        ("nanopulser", 187, "N", "BTS", "Small Teardrop",
+         {"ammunition:normal", "trait:direct-template", "skill:intuitive-attack"}),
+        ("pulzar", 187, "N", "BTS", "Large Teardrop",
+         {"ammunition:normal", "trait:direct-template", "skill:intuitive-attack"}),
+        ("e-mitter", 186, "E/M", "BTS/2", "two BTS/2 Saving Rolls",
+         {"ammunition:em", "trait:non-lethal"}),
+    ],
+)
+def test_first_weapon_batch_links_printed_profiles_and_applicable_effects(
+    weaponry_app: Callable, slug: str, page: int, ammunition: str,
+    saving: str, template: str, linked_rules: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == 1
+    assert payload["profiles"][0]["ammunition"] == ammunition
+    assert payload["profiles"][0]["saving"] == saving
+    record = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert template in record["summary"]
+    assert {reference["record"]["id"] for reference in record["display_relations"]
+            if reference["direction"] == "outbound"} >= linked_rules
+    assert any(source["source_id"] == "n5-core-v5.3-pdf"
+               and source["page"] == page for source in record["citations"])
+
+
+def test_missile_launcher_preserves_distinct_hit_and_blast_mode_effects(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "missile-launcher")
+    profiles = {profile["mode"]: profile for profile in payload["profiles"]}
+    assert set(profiles) == {"Blast Mode", "Hit Mode"}
+    assert profiles["Blast Mode"]["ammunition"] == "Exp"
+    assert profiles["Blast Mode"]["saving"] == "ARM"
+    assert profiles["Blast Mode"]["saving_num"] == "3"
+    assert "Impact Template (Circular)" in profiles["Blast Mode"]["traits"]
+    assert profiles["Hit Mode"]["ammunition"] == "AP+Exp"
+    assert profiles["Hit Mode"]["saving"] == "ARM/2"
+    assert profiles["Hit Mode"]["saving_num"] == "3"
+    assert "Impact Template (Circular)" not in profiles["Hit Mode"]["traits"]
+    record = _weapon_rules(payload)["weapon:missile-launcher"]
+    assert "Blast Mode" in record["summary"] and "Hit Mode" in record["summary"]
+    assert {r["record"]["id"] for r in record["display_relations"]
+            if r["direction"] == "outbound"} >= {
+                "ammunition:exp", "ammunition:ap",
+                "trait:impact-template", "trait:anti-materiel",
+            }
+
+
+def test_activate_disco_ball_is_source_only_skill_with_working_weapon_link(
+    weaponry_app: Callable,
+) -> None:
+    skill = _weapon_detail(weaponry_app, "activate-disco-ball", catalog="skills")
+    assert skill["name"] == "Activate Disco Ball"
+    assert skill["variants"] == []
+    record = {r["id"]: r for r in skill["rules"]}["skill:activate-disco-ball"]
+    assert "WIP +3" in record["summary"]
+    assert "Enemy Disco Balls cannot be activated" in record["summary"]
+    assert "Conclusion Step" in record["summary"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 71
+               for c in record["citations"])
+    assert any(c["source_id"] == "wiki-en-20260926-200832"
+               and c["member"] == "Activate_Disco_Ball"
+               for c in record["citations"])
+    disco = _weapon_rules(_weapon_detail(weaponry_app, "disco-baller"))[
+        "weapon:disco-baller"
+    ]
+    assert any(token["type"] == "reference"
+               and token["target"] == "skill:activate-disco-ball"
+               for token in disco["summary_tokens"])
+    assert any(rel["record"]["id"] == "skill:activate-disco-ball"
+               and rel["direction"] == "outbound"
+               for rel in disco["display_relations"])
+
+
+@pytest.mark.parametrize(
+    ("slug", "ammo", "saving", "count", "ps"),
+    [
+        ("cc-weapon", "N", "ARM", "1", "8"),
+        ("para-cc-weapon", "PARA", "PH-6", "1", "-"),
+        ("da-cc-weapon", "DA", "ARM", "2", "8"),
+        ("ap-cc-weapon", "AP", "ARM/2", "1", "8"),
+        ("shock-cc-weapon", "Shock", "ARM", "1", "8"),
+        ("e-m-cc-weapon", "N+E/M", "BTS/2", "2", "8"),
+        ("exp-cc-weapon", "Exp", "ARM", "3", "8"),
+        ("viral-cc-weapon", "N", "BTS", "1", "8"),
+    ],
+)
+def test_cc_weapon_rules_have_pinned_chart_source(
+    weaponry_app: Callable, slug: str, ammo: str, saving: str,
+    count: str, ps: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+        profile["damage"], profile["burst"],
+    ) == (ammo, saving, count, ps, "1")
+    record = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert any(
+        c["page"] == 177 and c["source_id"] == "n5-core-v5.3-pdf"
+        for c in record["citations"]
+    )
+
+
+def test_exp_and_viral_cc_weapons_preserve_profile_and_conditioned_effects(
+    weaponry_app: Callable,
+) -> None:
+    exp = _weapon_detail(weaponry_app, "exp-cc-weapon")
+    exp_profile = exp["profiles"][0]
+    assert (exp_profile["ammunition"], exp_profile["saving"],
+            exp_profile["saving_num"]) == ("Exp", "ARM", "3")
+    assert "Anti-materiel" in exp_profile["traits"]
+    exp_rule = _weapon_rules(exp)["weapon:exp-cc-weapon"]
+    assert {"ammunition:exp", "trait:anti-materiel", "trait:cc"} <= {
+        relation["record"]["id"]
+        for relation in exp_rule["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+    assert "three ARM Saving Rolls" in exp_rule["summary"]
+
+    viral = _weapon_detail(weaponry_app, "viral-cc-weapon")
+    viral_profile = viral["profiles"][0]
+    assert (viral_profile["ammunition"], viral_profile["saving"],
+            viral_profile["saving_num"]) == ("N", "BTS", "1")
+    assert "Bioweapon (DA+SHOCK)" in viral_profile["traits"]
+    viral_rule = _weapon_rules(viral)["weapon:viral-cc-weapon"]
+    assert {"ammunition:normal", "ammunition:da", "ammunition:shock",
+            "trait:bioweapon", "trait:cc"} <= {
+        relation["record"]["id"]
+        for relation in viral_rule["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+    assert "shared Viral Weapon Property" in viral_rule["summary"]
+    assert "VITA/STR" in viral_rule["summary"]
+    shared = viral_profile["weapon_properties"][0]
+    assert shared["id"] == "weapon-property:viral"
+    assert "two BTS Saving Rolls" in shared["summary"]
+    assert "Against STR" in shared["summary"]
+    assert any(
+        citation["source_id"] == "wiki-traits-oldid-4110"
+        and citation["heading"] == "BioWeapon"
+        for citation in viral_rule["citations"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("slug", "modes", "linked_rules"),
+    [
+        ("pistol", [(None, "N", "ARM", "1", "9", "2", [])],
+         {"ammunition:normal", "skill:bs-attack"}),
+        ("heavy-pistol", [(None, "Shock", "ARM", "1", "6", "2", [])],
+         {"ammunition:shock", "skill:bs-attack"}),
+        ("boarding-pistol", [
+            ("Blast Mode", "N", "ARM", "1", "7", "1",
+             ["Intuitive Attack", "Direct Template (Small Teardrop)"]),
+            ("Hit Mode", "N", "ARM", "1", "7", "2", []),
+        ], {"ammunition:normal", "trait:direct-template",
+            "skill:intuitive-attack", "skill:bs-attack"}),
+        ("breaker-pistol", [(None, "AP", "BTS/2", "1", "8", "2", [])],
+         {"ammunition:ap"}),
+        ("assault-pistol", [(None, "N", "ARM", "1", "7", "4", [])],
+         {"ammunition:normal", "skill:bs-attack"}),
+        ("ap-heavy-pistol", [(None, "AP", "ARM/2", "1", "6", "2", [])],
+         {"ammunition:ap"}),
+        ("silenced-pistol", [
+            (None, "AP+Shock", "BTS/2", "1", "8", "2", ["Silent (-6)"]),
+        ], {"ammunition:ap", "ammunition:shock", "trait:silent-x",
+            "skill:dodge"}),
+        ("multi-pistol", [
+            ("Anti-Material Mode", "DA", "ARM", "2", "7", "1",
+             ["Anti-materiel"]),
+            ("AP Mode", "AP", "ARM/2", "1", "7", "2", []),
+            ("Shock Mode", "Shock", "ARM", "1", "7", "2", []),
+        ], {"ammunition:ap", "ammunition:da", "ammunition:shock",
+            "trait:anti-materiel"}),
+    ],
+)
+def test_pistol_rules_match_exact_army_mode_profiles(
+    weaponry_app: Callable,
+    slug: str,
+    modes: list[tuple],
+    linked_rules: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    actual_modes = [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in payload["profiles"]
+    ]
+    assert actual_modes == modes
+    record = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert linked_rules <= {
+        relation["record"]["id"]
+        for relation in record["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == 182
+        for citation in record["citations"]
+    )
+
+
+def test_boarding_multi_and_silenced_pistol_mode_exceptions(
+    weaponry_app: Callable,
+) -> None:
+    boarding = _weapon_detail(weaponry_app, "boarding-pistol")
+    assert boarding["profiles"][0]["ranges"] == {}
+    assert boarding["profiles"][1]["ranges"]
+    summary = _weapon_rules(boarding)["weapon:boarding-pistol"]["summary"]
+    assert "Blast Mode" in summary and "Hit Mode" in summary
+    assert "not Hit Mode" in summary
+
+    multi = _weapon_detail(weaponry_app, "multi-pistol")
+    summary = _weapon_rules(multi)["weapon:multi-pistol"]["summary"]
+    assert "effects are not combined" in summary
+    assert "Anti-Materiel" in summary
+    assert "two ARM Saving Rolls" in summary
+
+    silenced = _weapon_detail(weaponry_app, "silenced-pistol")
+    summary = _weapon_rules(silenced)["weapon:silenced-pistol"]["summary"]
+    assert "one BTS/2 Saving Roll" in summary
+    assert "outside their LoF" in summary
+    assert "Face to Face" in summary
+    assert "not a general -6" in summary
+    assert {c["page"] for c in _weapon_rules(silenced)[
+        "weapon:silenced-pistol"]["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    } == {67, 95, 175, 182}
+
+
+def test_shared_ammunition_effects_are_canonical_across_weapon_categories(
+    weaponry_app: Callable,
+) -> None:
+    canonical_ap = _weapon_detail(weaponry_app, "ap", catalog="ammunition")[
+        "rules"
+    ][0]
+    profiles = {}
+    for slug in ("ap-cc-weapon", "ap-heavy-pistol", "breaker-pistol", "ap-rifle"):
+        payload = _weapon_detail(weaponry_app, slug)
+        profile = payload["profiles"][0]
+        profiles[slug] = profile
+        effects = profile["ammunition_effects"]
+        assert len(effects) == 1
+        assert effects[0]["record_id"] == "ammunition:ap"
+        assert effects[0]["summary"] == canonical_ap["summary"]
+        assert effects[0]["citations"] == canonical_ap["citations"]
+    assert profiles["ap-cc-weapon"]["saving"] == "ARM/2"
+    assert profiles["ap-heavy-pistol"]["saving"] == "ARM/2"
+    assert profiles["breaker-pistol"]["saving"] == "BTS/2"
+    assert profiles["ap-rifle"]["saving"] == "ARM/2"
+    assert "rules" not in _weapon_detail(weaponry_app, "ap-rifle")
+
+    silenced = _weapon_detail(weaponry_app, "silenced-pistol")
+    profile = silenced["profiles"][0]
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        "AP+Shock", "BTS/2", "1",
+    )
+    assert [
+        effect["record_id"] for effect in profile["ammunition_effects"]
+    ] == ["ammunition:ap", "ammunition:shock"]
+    assert all("saving_num" not in e for e in profile["ammunition_effects"])
+
+    pitcher = _weapon_detail(weaponry_app, "pitcher")
+    assert all("ammunition_effects" not in p for p in pitcher["profiles"])
+
+
+@pytest.mark.parametrize(
+    ("slug", "expected_modes", "expected_rules"),
+    [
+        ("combi-rifle", [
+            (None, "N", "ARM", "1", "7", "3", ["Suppressive Fire"]),
+        ], set()),
+        ("multi-rifle", [
+            ("Anti-Materiel Mode", "DA", "ARM", "2", "7", "1", ["Anti-materiel"]),
+            ("AP Mode", "AP", "ARM/2", "1", "7", "3", ["Suppressive Fire"]),
+            ("Shock Mode", "Shock", "ARM", "1", "7", "3", ["Suppressive Fire"]),
+        ], {"weapon:multi-rifle"}),
+        ("rifle", [
+            (None, "N", "ARM", "1", "7", "3", ["Suppressive Fire"]),
+        ], set()),
+        ("adhesive-launcher-rifle", [
+            (None, "PARA", "PH-6", "1", "-", "2", ["Non-lethal"]),
+        ], set()),
+        ("breaker-combi-rifle", [
+            (None, "AP", "BTS/2", "1", "7", "3", ["Suppressive Fire"]),
+        ], set()),
+        ("ap-rifle", [
+            (None, "AP", "ARM/2", "1", "7", "3", ["Suppressive Fire"]),
+        ], set()),
+        ("t2-rifle", [
+            (None, "T2", "ARM", "1", "7", "3",
+             ["Anti-materiel", "Suppressive Fire"]),
+        ], set()),
+        ("k1-combi-rifle", [
+            (None, "N", "ARM=0", "1", "7", "3",
+             ["Anti-materiel", "Suppressive Fire"]),
+        ], {"weapon:k1-combi-rifle"}),
+    ],
+)
+def test_rifle_batch_preserves_published_profiles_and_reuses_ammunition(
+    weaponry_app: Callable,
+    slug: str,
+    expected_modes: list[tuple],
+    expected_rules: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == len(expected_modes)
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in payload["profiles"]
+    ] == expected_modes
+    assert set(_weapon_rules(payload)) == expected_rules
+    for profile in payload["profiles"]:
+        assert len(profile["ammunition_effects"]) == 1
+        assert profile["ammunition_effects"][0]["record_id"].startswith("ammunition:")
+        assert profile["ammunition_effects"][0]["citations"]
+        assert len(profile["trait_references"]) == len(profile["traits"])
+        assert all(trait["slug"] for trait in profile["trait_references"])
+
+
+def test_rifle_special_mode_and_k1_explanations_are_source_specific(
+    weaponry_app: Callable,
+) -> None:
+    multi = _weapon_detail(weaponry_app, "multi-rifle")
+    profiles = {p["mode"]: p for p in multi["profiles"]}
+    assert profiles["AP Mode"]["saving"] == "ARM/2"
+    assert profiles["Shock Mode"]["saving"] == "ARM"
+    assert profiles["Anti-Materiel Mode"]["saving_num"] == "2"
+    assert "Suppressive Fire" not in profiles["Anti-Materiel Mode"]["traits"]
+    assert "Anti-materiel" not in profiles["AP Mode"]["traits"]
+    rule = _weapon_rules(multi)["weapon:multi-rifle"]
+    assert "not combined" in rule["summary"]
+    assert "Anti-Materiel" in rule["summary"]
+    assert {link["record"]["id"] for link in rule["display_relations"]
+            if link["direction"] == "outbound"} >= {
+        "ammunition:da", "ammunition:ap", "ammunition:shock",
+        "trait:suppressive-fire", "trait:anti-materiel",
+    }
+    assert any(c["page"] == 183 and c["source_id"] == "n5-core-v5.3-pdf"
+               for c in rule["citations"])
+
+    k1 = _weapon_detail(weaponry_app, "k1-combi-rifle")
+    k1rule = _weapon_rules(k1)["weapon:k1-combi-rifle"]
+    assert k1["profiles"][0]["ammunition"] == "N"
+    assert k1["profiles"][0]["saving"] == "ARM=0"
+    assert "not a separate K1 Ammunition identity" in k1rule["summary"]
+    assert {link["record"]["id"] for link in k1rule["display_relations"]
+            if link["direction"] == "outbound"} >= {
+        "ammunition:normal", "trait:anti-materiel", "trait:suppressive-fire",
+    }
+    assert any(c["page"] == 183 and c["source_id"] == "n5-core-v5.3-pdf"
+               for c in k1rule["citations"])
+
+    combi = _weapon_detail(weaponry_app, "combi-rifle")["profiles"][0]
+    rifle = _weapon_detail(weaponry_app, "rifle")["profiles"][0]
+    assert combi["ranges"] != rifle["ranges"]
+    assert combi["ranges"]["short"]["mod"] == "+3"
+    assert rifle["ranges"]["short"]["mod"] == "0"
+
+
+@pytest.mark.parametrize(
+    ("slug", "ammo", "saving", "ps", "traits", "expected_ammo"),
+    [
+        ("boarding-shotgun", "AP", "ARM/2", "6", [], "ammunition:ap"),
+        ("light-shotgun", "N", "ARM", "7", [], "ammunition:normal"),
+        ("vulkan-shotgun", "AP", "ARM/2", "6",
+         ["Continous Damage"], "ammunition:ap"),
+        ("heavy-shotgun", "AP", "ARM/2", "5", [], "ammunition:ap"),
+        ("t2-boarding-shotgun", "T2", "ARM", "6",
+         ["Anti-materiel"], "ammunition:t2"),
+    ],
+)
+def test_shotguns_reuse_source_ammunition_without_invented_templates(
+    weaponry_app: Callable,
+    slug: str, ammo: str, saving: str, ps: str,
+    traits: list[str], expected_ammo: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload["profiles"] and len(payload["profiles"]) == 1
+    assert payload.get("rules", []) == []
+    profile = payload["profiles"][0]
+    assert (
+        profile["mode"], profile["ammunition"], profile["saving"],
+        profile["saving_num"], profile["damage"], profile["burst"],
+        profile["traits"],
+    ) == (None, ammo, saving, "1", ps, "2", traits)
+    assert profile["ranges"]["short"] == {"max": 20, "mod": "+6"}
+    assert profile["ranges"]["med"] == {"max": 40, "mod": "0"}
+    assert profile["ranges"]["long"] == {"max": 60, "mod": "-3"}
+    effect = profile["ammunition_effects"]
+    assert len(effect) == 1
+    assert effect[0]["record_id"] == expected_ammo
+    assert effect[0]["citations"]
+    assert len(profile["trait_references"]) == len(traits)
+    assert all(ref["slug"] for ref in profile["trait_references"])
+    assert all("Template" not in trait for trait in profile["traits"])
+
+
+def test_vulkan_and_t2_shotgun_traits_remain_distinct_from_ammunition(
+    weaponry_app: Callable,
+) -> None:
+    vulkan = _weapon_detail(weaponry_app, "vulkan-shotgun")["profiles"][0]
+    t2 = _weapon_detail(weaponry_app, "t2-boarding-shotgun")["profiles"][0]
+    assert vulkan["traits"] == ["Continous Damage"]
+    assert vulkan["trait_references"] == [{
+        "label": "Continous Damage",
+        "name": "Continuous Damage",
+        "slug": "continuous-damage",
+        "source_alias": True,
+    }]
+    assert vulkan["ammunition_effects"][0]["record_id"] == "ammunition:ap"
+    assert t2["trait_references"][0]["slug"] == "anti-materiel"
+    assert t2["ammunition_effects"][0]["record_id"] == "ammunition:t2"
+    assert "Anti-materiel" not in vulkan["traits"]
+    assert "Continous Damage" not in t2["traits"]
+
+
+@pytest.mark.parametrize(
+    ("slug", "ammo", "saving", "ps", "burst", "traits", "property_id", "range_set"),
+    [
+        ("breaker-rifle", "AP", "BTS/2", "7", "3", ["Suppressive Fire"],
+         "weapon-property:breaker", "rifle"),
+        ("viral-combi-rifle", "N", "BTS", "7", "3",
+         ["Bioweapon (DA+SHOCK)", "Suppressive Fire"],
+         "weapon-property:viral", "combi"),
+        ("viral-rifle", "N", "BTS", "7", "3",
+         ["Bioweapon (DA+SHOCK)", "Suppressive Fire"],
+         "weapon-property:viral", "rifle"),
+        ("viral-pistol", "N", "BTS", "8", "2",
+         ["Bioweapon (DA+SHOCK)"], "weapon-property:viral", "short"),
+        ("viral-tactical-bow", "N", "BTS", "8", "1",
+         ["Bioweapon (DA+SHOCK)", "Silent (-6)"],
+         "weapon-property:viral", "short"),
+    ],
+)
+def test_reviewed_breaker_and_viral_source_profiles_use_shared_rules(
+    weaponry_app: Callable, slug: str, ammo: str, saving: str, ps: str,
+    burst: str, traits: list[str], property_id: str, range_set: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []  # No duplicated Weapon rule card.
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        ammo, saving, "1",
+    )
+    assert profile["traits"] == traits
+    assert [ref["label"] for ref in profile["trait_references"]] == traits
+    assert [prop["id"] for prop in profile["weapon_properties"]] == [property_id]
+    assert [effect["record_id"] for effect in profile["ammunition_effects"]] == [
+        "ammunition:ap" if ammo == "AP" else "ammunition:normal"
+    ]
+    assert all(
+        effect["summary"] and effect["citations"]
+        for effect in profile["ammunition_effects"]
+    )
+    ranges = {
+        "rifle": {
+            "short": {"max": 20, "mod": "0"},
+            "med": {"max": 40, "mod": "+3"},
+            "long": {"max": 80, "mod": "-3"},
+            "max": {"max": 120, "mod": "-6"},
+        },
+        "combi": {
+            "short": {"max": 40, "mod": "+3"},
+            "med": {"max": 80, "mod": "-3"},
+            "long": {"max": 120, "mod": "-6"},
+            "max": None,
+        },
+        "short": {
+            "short": {"max": 20, "mod": "+3"},
+            "med": {"max": 40, "mod": "0"},
+            "long": {"max": 60, "mod": "-6"},
+        },
+    }
+    assert profile["ranges"] == ranges[range_set]
+    if property_id == "weapon-property:viral":
+        assert profile["ammunition"] == "N" and profile["saving"] == "BTS"
+        assert ("Suppressive Fire" in traits) == slug.endswith("rifle")
+
+
+def test_reviewed_katyusha_range_notation_uses_verified_plus_three(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "katyusha-mrl")
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["damage"], profile["burst"], profile["ammunition"]) == (
+        "6", "1", "DA",
+    )
+    assert (profile["saving"], profile["saving_num"]) == ("ARM", "2")
+    assert profile["traits"] == [
+        "Anti-materiel", "Speculative Attack", "Impact Template (Circular)",
+    ]
+    assert profile["ranges"] == {
+        "short": {"max": 20, "mod": "-3"},
+        "med": {"max": 60, "mod": "+3"},
+        "long": {"max": 100, "mod": "0"},
+        "max": {"max": 120, "mod": "-6"},
+    }
+    assert [effect["record_id"] for effect in profile["ammunition_effects"]] == [
+        "ammunition:da",
+    ]
+    assert all(
+        ref.get("slug") or ref.get("public_reference")
+        for ref in profile["trait_references"]
+    )
+
+
+def test_reviewed_jammer_uses_label_and_state_links_not_trait_slugs(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "jammer")
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["damage"], profile["burst"], profile["ammunition"]) == (
+        "7", "1", "N",
+    )
+    assert (profile["saving"], profile["saving_num"]) == ("BTS", "1")
+    assert profile["ranges"] == {}
+    assert profile["traits"] == [
+        "BS Weapon (WIP)", "Comms. Attack", "Intuitive Attack",
+        "Disposable (2)", "State: Isolated", "Non-lethal",
+        "No LoF", "Zone of Control",
+    ]
+    refs = {ref["label"]: ref for ref in profile["trait_references"]}
+    assert refs["Comms. Attack"]["public_reference"] == {
+        "catalog": "labels", "id": "comms-attack",
+    }
+    assert refs["No LoF"]["public_reference"] == {
+        "catalog": "labels", "id": "no-lof",
+    }
+    assert refs["State: Isolated"]["public_reference"] == {
+        "catalog": "states", "id": "isolated",
+    }
+    assert all(refs[label]["slug"] is None for label in (
+        "Comms. Attack", "No LoF", "State: Isolated",
+    ))
+    for label in (
+        "BS Weapon (WIP)", "Intuitive Attack", "Disposable (2)",
+        "Non-lethal", "Zone of Control",
+    ):
+        assert refs[label]["slug"]
+    assert [effect["record_id"] for effect in profile["ammunition_effects"]] == [
+        "ammunition:normal",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("slug", "ps", "burst", "ammo", "save", "rolls",
+     "traits", "effects", "property_id", "ranges"),
+    [
+        ("smoke-grenade-launcher", "-", "1", "Smoke", "-", "-",
+         ["Speculative Attack", "Non-lethal", "Impact Template (Circular)",
+          "Targetless", "[**]"],
+         ["ammunition:smoke"], None,
+         {"med": {"max": 60, "mod": "0"},
+          "long": {"max": 80, "mod": "-3"},
+          "max": {"max": 120, "mod": "-6"}}),
+        ("grenade-launcher", "7", "1", "N", "ARM", "1",
+         ["Speculative Attack", "Impact Template (Circular)"],
+         ["ammunition:normal"], None,
+         {"med": {"max": 60, "mod": "0"},
+          "long": {"max": 80, "mod": "-3"},
+          "max": {"max": 120, "mod": "-6"}}),
+        ("e-m-grenade-launcher", "7", "1", "E/M", "BTS/2", "2",
+         ["Speculative Attack", "Non-lethal", "Impact Template (Circular)",
+          "[**]"], ["ammunition:em"], None,
+         {"med": {"max": 60, "mod": "0"},
+          "long": {"max": 80, "mod": "-3"},
+          "max": {"max": 120, "mod": "-6"}}),
+        ("eclipse-grenade-launcher", "-", "1", "Eclipse", "-", "1",
+         ["Speculative Attack", "Non-lethal", "Impact Template (Circular)",
+          "Reflective", "Targetless", "[**]"],
+         ["ammunition:eclipse"], None,
+         {"med": {"max": 60, "mod": "0"},
+          "long": {"max": 80, "mod": "-3"},
+          "max": {"max": 120, "mod": "-6"}}),
+        ("portable-autocannon", "5", "2", "AP+Exp", "ARM/2", "3",
+         ["Anti-materiel"], ["ammunition:ap", "ammunition:exp"],
+         "weapon-property:ap-exp",
+         {"short": {"max": 20, "mod": "-3"},
+          "med": {"max": 40, "mod": "0"},
+          "long": {"max": 80, "mod": "+3"},
+          "max": {"max": 120, "mod": "-3"}}),
+    ],
+)
+def test_reviewed_grenade_launchers_and_portable_autocannon_reuse_rules(
+    weaponry_app: Callable, slug: str, ps: str, burst: str,
+    ammo: str, save: str, rolls: str, traits: list[str],
+    effects: list[str], property_id: str | None,
+    ranges: dict[str, dict[str, int | str]],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []  # Canonical rules own effects.
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+    ) == (ammo, save, rolls)
+    assert profile["traits"] == traits
+    assert profile["ranges"] == ranges
+    assert [ref["label"] for ref in profile["trait_references"]] == traits
+    assert [ref["record_id"] for ref in profile["ammunition_effects"]] == effects
+    assert all(ref["summary"] and ref["citations"]
+               for ref in profile["ammunition_effects"])
+    assert [ref["id"] for ref in profile.get("weapon_properties", [])] == (
+        [property_id] if property_id else []
+    )
+    if slug in ("smoke-grenade-launcher", "eclipse-grenade-launcher"):
+        # Source has no Saving Roll, despite Army's non-operative
+        # savingNum=1 field on Eclipse.
+        assert profile["damage"] == "-" and profile["saving"] == "-"
+        assert "Targetless" in profile["traits"]
+
+
+@pytest.mark.parametrize(
+    ("slug", "ps", "burst", "ammo", "saving", "rolls",
+     "traits", "effect", "property_id", "ranges"),
+    [
+        ("e-m-carbine", "7", "2", "E/M", "BTS/2", "2",
+         ["Non-lethal", "[**]"], "ammunition:em", None,
+         {"short": {"max": 40, "mod": "+3"},
+          "med": {"max": 80, "mod": "-3"},
+          "long": {"max": 100, "mod": "-6"}}),
+        ("ap-t2-cc-weapon", "8", "1", "AP+T2", "ARM/2", "1",
+         ["Anti-materiel", "CC"], ["ammunition:ap", "ammunition:t2"],
+         "weapon-property:ap-t2", {}),
+        ("monofilament-cc-weapon", "8", "1", "N", "ARM=0", "1",
+         ["CC", "State: Dead"], "ammunition:normal",
+         "weapon-property:monofilament", {}),
+        ("light-riotstopper", "-", "1", "PARA", "PH-6", "1",
+         ["State: IMM-A", "Non-lethal",
+          "Direct Template (Small Teardrop)", "Intuitive Attack"],
+         "ammunition:para", None, {}),
+        ("heavy-riotstopper", "-", "1", "PARA", "PH-6", "1",
+         ["State: IMM-A", "Non-lethal",
+          "Direct Template (Large Teardrop)", "Intuitive Attack"],
+         "ammunition:para", None, {}),
+    ],
+)
+def test_reviewed_em_cc_and_riotstopper_profiles_reuse_effects(
+    weaponry_app: Callable, slug: str, ps: str, burst: str,
+    ammo: str, saving: str, rolls: str, traits: list[str],
+    effect: str | list[str], property_id: str | None,
+    ranges: dict[str, dict[str, int | str]],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+    ) == (ammo, saving, rolls)
+    assert profile["traits"] == traits
+    assert profile["ranges"] == ranges
+    assert [ref["label"] for ref in profile["trait_references"]] == traits
+    expected_effects = effect if isinstance(effect, list) else [effect]
+    assert [ref["record_id"] for ref in profile["ammunition_effects"]] == (
+        expected_effects
+    )
+    assert all(ref["summary"] for ref in profile["ammunition_effects"])
+    assert [prop["id"] for prop in profile.get("weapon_properties", [])] == (
+        [property_id] if property_id else []
+    )
+
+
+def test_spanish_conflicts_do_not_change_stun_or_ap_exp_profiles(
+    weaponry_app: Callable,
+) -> None:
+    # English official N5.3 and Army agree; the archived Spanish Wiki
+    # reports two rather than three rolls for AP+EXP and two rather
+    # than one for Stun Pistol, omitting Stunned from the latter.
+    for slug, expected in (
+        ("ap-exp-cc-weapon", ("AP+Exp", "ARM/2", "3")),
+        ("stun-pistol", ("Stun", "BTS", "1")),
+    ):
+        weapon = _weapon_detail(weaponry_app, slug)
+        (profile,) = weapon["profiles"]
+        assert (
+            profile["ammunition"], profile["saving"], profile["saving_num"],
+        ) == expected
+        assert weapon["profiles"][0]["ammunition_effects"]
+
+
+@pytest.mark.parametrize(
+    ("slug", "ps", "burst", "ammo", "save", "rolls", "traits",
+     "effects", "property_id", "ranges"),
+    [
+        ("tactical-bow", "8", "1", "DA", "ARM", "2",
+         ["Anti-materiel", "Silent (-6)"], ["ammunition:da"], None,
+         {"short": {"max": 20, "mod": "+3"},
+          "med": {"max": 40, "mod": "0"},
+          "long": {"max": 60, "mod": "-6"}}),
+        ("t2-cc-weapon", "8", "1", "T2", "ARM", "1",
+         ["Anti-materiel", "CC"], ["ammunition:t2"], None, {}),
+        ("ohotnik", "6", "2", "T2", "ARM", "1",
+         ["Anti-materiel"], ["ammunition:t2"], None,
+         {"short": {"max": 20, "mod": "0"},
+          "med": {"max": 80, "mod": "+3"},
+          "long": {"max": 100, "mod": "0"},
+          "xlong": {"max": 120, "mod": "-3"},
+          "max": {"max": 240, "mod": "-6"}}),
+        ("ap-da-cc-weapon", "8", "1", "AP+DA", "ARM/2", "2",
+         ["Anti-materiel", "CC"], ["ammunition:ap", "ammunition:da"],
+         "weapon-property:ap-da", {}),
+        ("ap-shock-cc-weapon", "8", "1", "AP+Shock", "ARM/2", "1",
+         ["CC"], ["ammunition:ap", "ammunition:shock"],
+         "weapon-property:ap-shock", {}),
+    ],
+)
+def test_reviewed_tactical_bow_t2_and_combined_cc_profiles_use_shared_effects(
+    weaponry_app: Callable, slug: str, ps: str, burst: str,
+    ammo: str, save: str, rolls: str, traits: list[str],
+    effects: list[str], property_id: str | None,
+    ranges: dict[str, dict[str, int | str]],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+    ) == (ammo, save, rolls)
+    assert profile["ranges"] == ranges
+    assert profile["traits"] == traits
+    assert [t["label"] for t in profile["trait_references"]] == traits
+    assert [e["record_id"] for e in profile["ammunition_effects"]] == effects
+    assert all(e["summary"] and e["citations"] for e in profile["ammunition_effects"])
+    assert [p["id"] for p in profile.get("weapon_properties", [])] == (
+        [property_id] if property_id else []
+    )
+
+
+@pytest.mark.parametrize(
+    ("slug", "ps", "burst", "ammo", "saving", "traits", "ranges", "effect"),
+    [
+        ("red-fury", "7", "4", "Shock", "ARM", ["Suppressive Fire"],
+         {"short": {"max": 20, "mod": "0"}, "med": {"max": 60, "mod": "+3"},
+          "long": {"max": 100, "mod": "-3"}, "max": {"max": 120, "mod": "-6"}},
+         "ammunition:shock"),
+        ("ap-red-fury", "7", "4", "AP", "ARM/2", ["Suppressive Fire"],
+         {"short": {"max": 20, "mod": "0"}, "med": {"max": 60, "mod": "+3"},
+          "long": {"max": 100, "mod": "-3"}, "max": {"max": 120, "mod": "-6"}},
+         "ammunition:ap"),
+        ("thunderbolt", "6", "2", "N", "ARM", [],
+         {"short": {"max": 20, "mod": "-3"}, "med": {"max": 40, "mod": "0"},
+          "long": {"max": 80, "mod": "+3"}, "max": {"max": 120, "mod": "0"}},
+         "ammunition:normal"),
+    ],
+)
+def test_reviewed_red_fury_and_thunderbolt_preserve_source_only_profiles(
+    weaponry_app: Callable, slug: str, ps: str, burst: str,
+    ammo: str, saving: str, traits: list[str],
+    ranges: dict[str, dict[str, int | str]], effect: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+    ) == (ammo, saving, "1")
+    assert profile["ranges"] == ranges
+    assert profile["traits"] == traits
+    assert [r["label"] for r in profile["trait_references"]] == traits
+    assert [r["record_id"] for r in profile["ammunition_effects"]] == [effect]
+    assert profile["ammunition_effects"][0]["citations"]
+    assert not profile.get("weapon_properties")
+
+
+def test_ap_thunderbolt_keeps_official_source_profile_despite_wiki_conflict(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "ap-thunderbolt")
+    (profile,) = payload["profiles"]
+    # Official N5.3 and imported Army agree on AP/ARM/2, but the
+    # September 26 EN Wiki and October 9 ES Wiki both print N/ARM/2.
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        "AP", "ARM/2", "1",
+    )
+    assert profile["ammunition_effects"][0]["record_id"] == "ammunition:ap"
+
+
+@pytest.mark.parametrize(
+    ("slug", "ammo", "saving", "rule_id"),
+    [
+        ("submachine-gun", "N", "ARM", "ammunition:normal"),
+        ("ap-submachine-gun", "AP", "ARM/2", "ammunition:ap"),
+    ],
+)
+def test_submachine_guns_reuse_canonical_ammunition_and_suppressive_fire(
+    weaponry_app: Callable, slug: str, ammo: str, saving: str, rule_id: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (
+        profile["mode"], profile["ammunition"], profile["saving"],
+        profile["saving_num"], profile["damage"], profile["burst"],
+        profile["traits"],
+    ) == (None, ammo, saving, "1", "7", "3", ["Suppressive Fire"])
+    assert profile["ranges"] == {
+        "short": {"max": 20, "mod": "+3"},
+        "med": {"max": 40, "mod": "0"},
+        "long": {"max": 60, "mod": "-3"},
+        "max": {"max": 80, "mod": "-6"},
+    }
+    assert len(profile["ammunition_effects"]) == 1
+    effect = profile["ammunition_effects"][0]
+    assert effect["record_id"] == rule_id
+    assert effect["citations"] and effect["summary"]
+    assert profile["trait_references"][0]["slug"] == "suppressive-fire"
+    assert len(profile["trait_references"]) == 1
+
+
+def test_submachine_gun_profile_variants_keep_source_only_differences(
+    weaponry_app: Callable,
+) -> None:
+    basic = _weapon_detail(weaponry_app, "submachine-gun")["profiles"][0]
+    ap = _weapon_detail(weaponry_app, "ap-submachine-gun")["profiles"][0]
+    assert basic["ranges"] == ap["ranges"]
+    assert basic["damage"] == ap["damage"]
+    assert basic["burst"] == ap["burst"]
+    assert basic["saving"] == "ARM"
+    assert ap["saving"] == "ARM/2"
+    assert basic["ammunition_effects"][0]["record_id"] == "ammunition:normal"
+    assert ap["ammunition_effects"][0]["record_id"] == "ammunition:ap"
+
+
+@pytest.mark.parametrize(
+    ("slug", "page", "modes", "effects"),
+    [
+        ("e-marat", 186, [
+            (None, "E/M", "BTS/2", "2", "7", "1"),
+        ], [["ammunition:em"]]),
+        ("mk12", 187, [
+            (None, "N", "ARM", "1", "5", "3"),
+        ], [["ammunition:normal"]]),
+        ("zapper", 188, [
+            (None, "E/M", "BTS/2", "2", "7", "1"),
+        ], [["ammunition:em"]]),
+        ("contender", 186, [
+            (None, "T2", "ARM", "1", "7", "2"),
+        ], [["ammunition:t2"]]),
+        ("feuerbach", 186, [
+            ("Burst Mode", "AP+DA", "ARM/2", "2", "6", "2"),
+            ("Explosive Mode", "Exp", "ARM", "3", "6", "1"),
+        ], [["ammunition:ap", "ammunition:da"], ["ammunition:exp"]]),
+        ("crazykoala", 186, [
+            (None, "Shock", "ARM", "1", "5", "1"),
+        ], [["ammunition:shock"]]),
+        ("madtraps", 187, [
+            (None, "PARA", "PH-6", "1", "-", "1"),
+        ], [["ammunition:para"]]),
+        ("hyper-rapid-magnetic-cannon", 187, [
+            ("Anti-Materiel Mode", "DA", "ARM", "2", "5", "1"),
+            ("AP Mode", "AP", "ARM/2", "1", "5", "5"),
+            ("Shock Mode", "Shock", "ARM", "1", "5", "5"),
+        ], [["ammunition:da"], ["ammunition:ap"], ["ammunition:shock"]]),
+    ],
+)
+def test_uncategorized_weapon_source_profiles_and_reusable_ammunition(
+    weaponry_app: Callable, slug: str, page: int,
+    modes: list[tuple], effects: list[list[str]],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert [
+        (p["mode"], p["ammunition"], p["saving"],
+         p["saving_num"], p["damage"], p["burst"])
+        for p in payload["profiles"]
+    ] == modes
+    assert [
+        [effect["record_id"] for effect in p["ammunition_effects"]]
+        for p in payload["profiles"]
+    ] == effects
+    for p in payload["profiles"]:
+        assert all(effect["citations"] for effect in p["ammunition_effects"])
+    specific = slug in {
+        "feuerbach", "hyper-rapid-magnetic-cannon", "crazykoala", "madtraps",
+    }
+    assert bool(payload.get("rules")) == specific
+    if specific:
+        record = _weapon_rules(payload)[f"weapon:{slug}"]
+        assert any(
+            citation["page"] == page and citation["source_id"] == "n5-core-v5.3-pdf"
+            for citation in record["citations"]
+        )
+        if slug in {"crazykoala", "madtraps"}:
+            assert "[[trait:boost|Boost]]" in record["summary"]
+            assert "[[trait:perimeter|Perimeter]]" in record["summary"]
+            assert "[[skill:place-deployable|Place Deployable]]" in record["summary"]
+        else:
+            assert "modes" in record["summary"] and "Saving Rolls" in record["summary"]
+
+
+def test_feuerbach_and_hrmc_preserve_mode_specific_traits(
+    weaponry_app: Callable,
+) -> None:
+    feuerbach = _weapon_detail(weaponry_app, "feuerbach")
+    assert len(feuerbach["profiles"]) == 2
+    assert all(p["traits"] == ["Anti-materiel"] for p in feuerbach["profiles"])
+    assert feuerbach["profiles"][0]["ranges"] == feuerbach["profiles"][1]["ranges"]
+    assert feuerbach["profiles"][0]["ammunition"] == "AP+DA"
+    assert feuerbach["profiles"][1]["ammunition"] == "Exp"
+
+    cannon = _weapon_detail(weaponry_app, "hyper-rapid-magnetic-cannon")
+    assert [p["traits"] for p in cannon["profiles"]] == [
+        ["Anti-materiel"], ["Suppressive Fire"], ["Suppressive Fire"],
+    ]
+    assert cannon["profiles"][0]["burst"] == "1"
+    assert cannon["profiles"][1]["burst"] == cannon["profiles"][2]["burst"] == "5"
+    assert all(
+        p["ranges"] == cannon["profiles"][0]["ranges"]
+        for p in cannon["profiles"][1:]
+    )
+
+
+def test_em_templates_and_perimeter_boost_keep_distinct_rules(
+    weaponry_app: Callable,
+) -> None:
+    e_marat = _weapon_detail(weaponry_app, "e-marat")["profiles"][0]
+    zapper = _weapon_detail(weaponry_app, "zapper")["profiles"][0]
+    assert "Direct Template (Large Teardrop)" in e_marat["traits"]
+    assert "Direct Template (Small Teardrop)" in zapper["traits"]
+    assert {"Intuitive Attack", "Non-lethal"} <= set(e_marat["traits"])
+    assert {"Intuitive Attack", "Non-lethal"} <= set(zapper["traits"])
+    assert "trait:direct-template" not in [
+        e["record_id"] for e in e_marat["ammunition_effects"]
+    ]
+
+    for slug, ammunition, saving in (
+        ("crazykoala", "Shock", "ARM"),
+        ("madtraps", "PARA", "PH-6"),
+    ):
+        payload = _weapon_detail(weaponry_app, slug)
+        profile = payload["profiles"][0]
+        assert profile["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+        assert profile["ammunition"] == ammunition
+        assert profile["saving"] == saving
+        assert {"Boost", "Perimeter", "Deployable"} <= set(profile["traits"])
+        assert {"boost", "perimeter", "deployable"} <= {
+            ref["slug"] for ref in profile["trait_references"] if ref["slug"]
+        }
+        assert {"weapon:wildparrot", "weapon:mines"}.isdisjoint(
+            _weapon_rules(payload)
+        )
+
+
+@pytest.mark.parametrize(
+    ("slug", "expected_modes", "effect_ids", "has_own_rule"),
+    [
+        (
+            "heavy-machine-gun",
+            [(None, "N", "ARM", "1", "5", "4", ["Suppressive Fire"])],
+            [["ammunition:normal"]], False,
+        ),
+        (
+            "ap-heavy-machine-gun",
+            [(None, "AP", "ARM/2", "1", "5", "4", ["Suppressive Fire"])],
+            [["ammunition:ap"]], False,
+        ),
+        (
+            "multi-heavy-machine-gun",
+            [
+                ("Anti-materiel Mode", "Exp", "ARM", "3", "5", "1",
+                 ["Anti-materiel"]),
+                ("AP Mode", "AP", "ARM/2", "1", "5", "4", ["Suppressive Fire"]),
+                ("Shock Mode", "Shock", "ARM", "1", "5", "4", ["Suppressive Fire"]),
+            ],
+            [["ammunition:exp"], ["ammunition:ap"], ["ammunition:shock"]], True,
+        ),
+    ],
+)
+def test_hmg_family_preserves_printed_modes_and_reuses_ammunition(
+    weaponry_app: Callable,
+    slug: str,
+    expected_modes: list[tuple],
+    effect_ids: list[list[str]],
+    has_own_rule: bool,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in profiles
+    ] == expected_modes
+    assert [
+        [effect["record_id"] for effect in p["ammunition_effects"]]
+        for p in profiles
+    ] == effect_ids
+    assert all(effect["citations"]
+               for p in profiles for effect in p["ammunition_effects"])
+    assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+    assert all(len(p["trait_references"]) == len(p["traits"]) for p in profiles)
+    assert bool(payload.get("rules")) == has_own_rule
+    if has_own_rule:
+        rules = _weapon_rules(payload)
+        assert set(rules) == {"weapon:multi-heavy-machine-gun"}
+        rule = rules["weapon:multi-heavy-machine-gun"]
+        assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 179
+                   for c in rule["citations"])
+        assert {
+            relation["record"]["id"]
+            for relation in rule["display_relations"]
+            if relation["direction"] == "outbound"
+        } >= {
+            "ammunition:exp", "ammunition:ap", "ammunition:shock",
+            "trait:anti-materiel", "trait:suppressive-fire",
+        }
+
+
+def test_multi_hmg_modes_do_not_transfer_burst_or_traits(
+    weaponry_app: Callable,
+) -> None:
+    multi = _weapon_detail(weaponry_app, "multi-heavy-machine-gun")
+    profiles = {p["mode"]: p for p in multi["profiles"]}
+    anti = profiles["Anti-materiel Mode"]
+    ap = profiles["AP Mode"]
+    shock = profiles["Shock Mode"]
+    assert anti["burst"] == "1" and anti["saving_num"] == "3"
+    assert anti["traits"] == ["Anti-materiel"]
+    assert "Suppressive Fire" not in anti["traits"]
+    assert ap["burst"] == shock["burst"] == "4"
+    assert ap["saving"] == "ARM/2"
+    assert shock["saving"] == "ARM"
+    assert ap["traits"] == shock["traits"] == ["Suppressive Fire"]
+    assert "Anti-materiel" not in ap["traits"]
+
+    base = _weapon_detail(weaponry_app, "heavy-machine-gun")["profiles"][0]
+    armor = _weapon_detail(weaponry_app, "ap-heavy-machine-gun")["profiles"][0]
+    assert base["ranges"] == armor["ranges"] == anti["ranges"]
+    assert base["saving"] == "ARM" and armor["saving"] == "ARM/2"
+    assert base["burst"] == armor["burst"] == "4"
+
+
+@pytest.mark.parametrize(
+    ("slug", "modes", "effect_ids", "own_rule"),
+    [
+        ("panzerfaust", [
+            (None, "AP+Exp", "ARM/2", "3", "6", "1",
+             ["Anti-materiel", "Disposable (2)"]),
+        ], [["ammunition:ap", "ammunition:exp"]], False),
+        ("blitzen", [
+            (None, "E/M", "BTS/2", "2", "6", "1",
+             ["Disposable (2)", "Non-lethal", "[**]"]),
+        ], [["ammunition:em"]], False),
+        ("flammenspeer", [
+            ("Blast Mode", "N", "ARM", "1", "6", "1",
+             ["Continous Damage", "Disposable (2)",
+              "Impact Template (Circular)"]),
+            ("Hit Mode", "AP", "ARM/2", "1", "6", "1",
+             ["Continous Damage", "Disposable (2)"]),
+        ], [["ammunition:normal"], ["ammunition:ap"]], True),
+        ("akrylat-kanone", [
+            (None, "PARA", "PH-6", "1", "-", "1",
+             ["Disposable (2)", "State: IMM-A", "Non-lethal"]),
+        ], [["ammunition:para"]], False),
+    ],
+)
+def test_disposable_support_weapon_profiles_reuse_canonical_effects(
+    weaponry_app: Callable,
+    slug: str, modes: list[tuple], effect_ids: list[list[str]],
+    own_rule: bool,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in profiles
+    ] == modes
+    assert [
+        [effect["record_id"] for effect in p["ammunition_effects"]]
+        for p in profiles
+    ] == effect_ids
+    assert all(effect["citations"]
+               for p in profiles for effect in p["ammunition_effects"])
+    assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+    assert all(p["ranges"] == {
+        "short": {"max": 20, "mod": "-3"},
+        "med": {"max": 40, "mod": "0"},
+        "long": {"max": 80, "mod": "+3"},
+        "max": {"max": 120, "mod": "-3"},
+    } for p in profiles)
+    assert bool(payload.get("rules")) == own_rule
+    if own_rule:
+        rule = _weapon_rules(payload)["weapon:flammenspeer"]
+        assert any(
+            c["page"] == 178 and c["source_id"] == "n5-core-v5.3-pdf"
+            for c in rule["citations"]
+        )
+        assert {
+            relation["record"]["id"]
+            for relation in rule["display_relations"]
+            if relation["direction"] == "outbound"
+        } >= {
+            "ammunition:normal", "ammunition:ap", "trait:impact-template",
+            "trait:continuous-damage", "trait:disposable-x",
+        }
+
+
+def test_flammenspeer_modes_keep_template_ap_and_shared_charge_rules(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "flammenspeer")
+    blast, hit = payload["profiles"]
+    assert blast["mode"] == "Blast Mode" and hit["mode"] == "Hit Mode"
+    assert blast["saving"] == "ARM" and hit["saving"] == "ARM/2"
+    assert "Impact Template (Circular)" in blast["traits"]
+    assert "Impact Template (Circular)" not in hit["traits"]
+    assert {"Continous Damage", "Disposable (2)"} <= set(blast["traits"])
+    assert {"Continous Damage", "Disposable (2)"} <= set(hit["traits"])
+    assert {
+        ref["slug"] for ref in blast["trait_references"] if ref.get("slug")
+    } >= {"continuous-damage", "disposable-x", "impact-template"}
+    assert {
+        ref["slug"] for ref in hit["trait_references"] if ref.get("slug")
+    } >= {"continuous-damage", "disposable-x"}
+    summary = _weapon_rules(payload)["weapon:flammenspeer"]["summary"]
+    assert "alternative attacks" in summary
+    assert "same" in summary and "Disposable (2)" in summary
+
+
+def test_disposable_support_footnotes_and_states_remain_source_notation(
+    weaponry_app: Callable,
+) -> None:
+    panzerfaust = _weapon_detail(weaponry_app, "panzerfaust")["profiles"][0]
+    assert (panzerfaust["ammunition"], panzerfaust["saving"],
+            panzerfaust["saving_num"]) == ("AP+Exp", "ARM/2", "3")
+    assert [e["record_id"] for e in panzerfaust["ammunition_effects"]] == [
+        "ammunition:ap", "ammunition:exp",
+    ]
+    blitzen = _weapon_detail(weaponry_app, "blitzen")["profiles"][0]
+    assert "[**]" in blitzen["traits"]
+    assert blitzen["ammunition_effects"][0]["record_id"] == "ammunition:em"
+    akrylat = _weapon_detail(weaponry_app, "akrylat-kanone")["profiles"][0]
+    assert "State: IMM-A" in akrylat["traits"]
+    assert akrylat["ammunition_effects"][0]["record_id"] == "ammunition:para"
+    assert any(ref["slug"] == "disposable-x" for ref in akrylat["trait_references"])
+
+
+@pytest.mark.parametrize(
+    ("slug", "expected_modes", "effects", "has_rule"),
+    [
+        (
+            "spitfire",
+            [(None, "N", "ARM", "1", "6", "4", ["Suppressive Fire"])],
+            [["ammunition:normal"]], False,
+        ),
+        (
+            "ap-spitfire",
+            [(None, "AP", "ARM/2", "1", "6", "4", ["Suppressive Fire"])],
+            [["ammunition:ap"]], False,
+        ),
+        (
+            "multi-spitfire",
+            [
+                ("Anti-Material Mode", "DA", "ARM", "2", "6", "1",
+                 ["Anti-materiel"]),
+                ("AP Mode", "AP", "ARM/2", "1", "6", "4",
+                 ["Suppressive Fire"]),
+                ("Shock Mode", "Shock", "ARM", "1", "6", "4",
+                 ["Suppressive Fire"]),
+            ],
+            [["ammunition:da"], ["ammunition:ap"], ["ammunition:shock"]],
+            True,
+        ),
+    ],
+)
+def test_spitfire_family_preserves_source_modes_and_reuses_ammunition(
+    weaponry_app: Callable,
+    slug: str,
+    expected_modes: list[tuple],
+    effects: list[list[str]],
+    has_rule: bool,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in profiles
+    ] == expected_modes
+    assert [
+        [effect["record_id"] for effect in p["ammunition_effects"]]
+        for p in profiles
+    ] == effects
+    assert all(effect["citations"]
+               for p in profiles for effect in p["ammunition_effects"])
+    expected_ranges = {
+        "short": {"max": 20, "mod": "0"},
+        "med": {"max": 60, "mod": "+3"},
+        "long": {"max": 80, "mod": "-3"},
+        "max": {"max": 120, "mod": "-6"},
+    }
+    assert all(p["ranges"] == expected_ranges for p in profiles)
+    assert all(len(p["trait_references"]) == len(p["traits"]) for p in profiles)
+    assert bool(payload.get("rules")) == has_rule
+    if has_rule:
+        rule = _weapon_rules(payload)["weapon:multi-spitfire"]
+        assert any(
+            c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 185
+            for c in rule["citations"]
+        )
+        assert {
+            relation["record"]["id"]
+            for relation in rule["display_relations"]
+            if relation["direction"] == "outbound"
+        } >= {
+            "ammunition:da", "ammunition:ap", "ammunition:shock",
+            "trait:anti-materiel", "trait:suppressive-fire",
+        }
+
+
+def test_multi_spitfire_mode_specific_traits_and_source_label(
+    weaponry_app: Callable,
+) -> None:
+    multi = _weapon_detail(weaponry_app, "multi-spitfire")
+    profiles = {p["mode"]: p for p in multi["profiles"]}
+    anti = profiles["Anti-Material Mode"]
+    ap = profiles["AP Mode"]
+    shock = profiles["Shock Mode"]
+    assert anti["burst"] == "1" and anti["saving_num"] == "2"
+    assert anti["traits"] == ["Anti-materiel"]
+    assert "Suppressive Fire" not in anti["traits"]
+    assert ap["burst"] == shock["burst"] == "4"
+    assert ap["saving"] == "ARM/2" and shock["saving"] == "ARM"
+    assert ap["traits"] == shock["traits"] == ["Suppressive Fire"]
+    assert "Anti-materiel" not in ap["traits"]
+
+    rules = _weapon_rules(multi)["weapon:multi-spitfire"]
+    assert "Anti-Materiel" in rules["summary"]
+    assert "Anti-Material Mode" in rules["summary"]
+    assert "alternative firing modes" in rules["summary"]
+
+    normal = _weapon_detail(weaponry_app, "spitfire")["profiles"][0]
+    armor = _weapon_detail(weaponry_app, "ap-spitfire")["profiles"][0]
+    assert normal["ranges"] == armor["ranges"] == anti["ranges"]
+    assert normal["burst"] == armor["burst"] == "4"
+    assert normal["saving"] == "ARM" and armor["saving"] == "ARM/2"
+
+
+@pytest.mark.parametrize(
+    ("slug", "ammunition", "saving", "rolls", "ps", "short_mod",
+     "traits", "effect_id"),
+    [
+        ("smoke-grenades", "Smoke", "-", "-", "-", "0", [
+            "Speculative Attack", "BS Weapon (PH)", "Impact Template (Circular)",
+            "Non-lethal", "Targetless", "[**]",
+        ], "ammunition:smoke"),
+        ("grenades", "N", "ARM", "1", "7", "+3", [
+            "Speculative Attack", "BS Weapon (PH)", "Impact Template (Circular)",
+        ], "ammunition:normal"),
+        ("e-m-grenades", "E/M", "BTS/2", "2", "7", "+3", [
+            "Speculative Attack", "BS Weapon (PH)", "Impact Template (Circular)",
+            "Non-lethal", "[**]",
+        ], "ammunition:em"),
+        ("eclipse-grenades", "Eclipse", "-", "-", "-", "0", [
+            "Speculative Attack", "BS Weapon (PH)", "Impact Template (Circular)",
+            "Non-lethal", "Reflective", "Targetless", "[**]",
+        ], "ammunition:eclipse"),
+    ],
+)
+def test_grenades_reuse_exact_source_ammunition_and_traits(
+    weaponry_app: Callable,
+    slug: str, ammunition: str, saving: str, rolls: str, ps: str,
+    short_mod: str, traits: list[str], effect_id: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (
+        profile["mode"], profile["ammunition"], profile["saving"],
+        profile["saving_num"], profile["damage"], profile["burst"],
+        profile["traits"],
+    ) == (None, ammunition, saving, rolls, ps, "1", traits)
+    assert profile["ranges"] == {
+        "short": {"max": 20, "mod": short_mod},
+        "med": {"max": 40, "mod": "-3"},
+    }
+    assert len(profile["ammunition_effects"]) == 1
+    assert profile["ammunition_effects"][0]["record_id"] == effect_id
+    assert profile["ammunition_effects"][0]["citations"]
+    assert len(profile["trait_references"]) == len(traits)
+    links = {
+        r["slug"] for r in profile["trait_references"] if r["slug"]
+    }
+    assert {"speculative-attack", "bs-weapon-ph", "impact-template"} <= links
+    assert ("reflective" in links) == (slug == "eclipse-grenades")
+    assert ("targetless" in links) == (slug in {
+        "smoke-grenades", "eclipse-grenades",
+    })
+    assert ("non-lethal" in links) == (slug != "grenades")
+    assert ("[**]" in traits) == (slug != "grenades")
+
+
+def test_smoke_eclipse_visibility_is_not_em_damage_or_saving_roll(
+    weaponry_app: Callable,
+) -> None:
+    smoke = _weapon_detail(weaponry_app, "smoke-grenades")["profiles"][0]
+    eclipse = _weapon_detail(weaponry_app, "eclipse-grenades")["profiles"][0]
+    em = _weapon_detail(weaponry_app, "e-m-grenades")["profiles"][0]
+    grenades = _weapon_detail(weaponry_app, "grenades")["profiles"][0]
+
+    assert smoke["saving"] == eclipse["saving"] == "-"
+    assert smoke["saving_num"] == eclipse["saving_num"] == "-"
+    assert smoke["damage"] == eclipse["damage"] == "-"
+    assert smoke["ranges"] == eclipse["ranges"]
+    assert smoke["ammunition_effects"][0]["record_id"] == "ammunition:smoke"
+    assert eclipse["ammunition_effects"][0]["record_id"] == "ammunition:eclipse"
+    assert "Reflective" not in smoke["traits"]
+    assert "Reflective" in eclipse["traits"]
+    assert em["saving"] == "BTS/2" and em["saving_num"] == "2"
+    assert em["ammunition_effects"][0]["record_id"] == "ammunition:em"
+    assert grenades["saving"] == "ARM" and grenades["saving_num"] == "1"
+    assert grenades["ammunition_effects"][0]["record_id"] == "ammunition:normal"
+    assert "[**]" not in grenades["traits"]
+
+    # Shared ammunition prose must use resolved maintained-text tokens,
+    # not display raw [[...]] references on the Weapon details page.
+    assert [
+        t["target"] for t in smoke["ammunition_effects"][0]["summary_tokens"]
+        if t["type"] == "reference"
+    ] == ["term:zero-visibility-zone"]
+    assert [
+        t["target"] for t in eclipse["ammunition_effects"][0]["summary_tokens"]
+        if t["type"] == "reference"
+    ] == [
+        "ammunition:smoke", "trait:reflective", "term:zero-visibility-zone",
+        "equipment:multispectral-visor",
+    ]
+    for profile in (smoke, eclipse, em, grenades):
+        effect = profile["ammunition_effects"][0]
+        assert effect["summary_tokens"]
+        assert all(
+            token["public_reference"] for token in effect["summary_tokens"]
+            if token["type"] == "reference"
+        )
+
+
+def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "symbiobomb")
+    assert payload["name"] == "SymbioBomb"
+    assert payload["profiles"] == []
+    assert payload["weapon_variants"] == []
+    assert set(_weapon_rules(payload)) == {"weapon:symbiobomb"}
+    rule = _weapon_rules(payload)["weapon:symbiobomb"]
+    assert "During Deployment" in rule["summary"]
+    assert "Endgame, Eraser, or Mirrorball" in rule["summary"]
+    assert "this MOD does not apply to Mirrorball" in rule["summary"]
+    assert "at the end of the Order" in rule["summary"]
+    assert "no separate attack profile" in rule["summary"]
+    assert {
+        (citation["source_id"], citation["page"])
+        for citation in rule["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    } == {("n5-core-v5.3-pdf", 74)}
+    assert any(
+        citation["source_id"] == "wiki-en-20260926-200832"
+        and citation["member"] == "SymbioBomb"
+        for citation in rule["citations"]
+    )
+    assert any(
+        relation["record"]["id"] == "weapon:pt"
+        and relation["direction"] == "outbound"
+        for relation in rule["display_relations"]
+    )
+    assert any(
+        token.get("target") == "weapon:pt"
+        and token["type"] == "reference"
+        for token in rule["summary_tokens"]
+    )
+
+
 def test_para_mine_has_own_reference_without_rewriting_source_marker(
     weaponry_app: Callable,
 ) -> None:
@@ -340,11 +1826,11 @@ def test_para_mine_has_own_reference_without_rewriting_source_marker(
 
 
 def test_kobra_cc_mode_reference_preserves_anti_materiel_conflict(
-    weaponry_app: Callable,
+    mixed_weapons_app: Callable,
 ) -> None:
-    payload = _weapon_detail(weaponry_app, "kobra-pistol")
+    payload = _weapon_detail(mixed_weapons_app, "kobra-pistol")
     shared = _weapon_rules(payload)
-    assert set(shared) == {"weapon:kobra-pistol"}
+    assert set(shared) == {"weapon:kobra-pistol", "weapon:mixed-weapons"}
     assert "Shock Ammunition" in shared["weapon:kobra-pistol"]["summary"]
 
     profiles = {profile["mode"]: profile for profile in payload["profiles"]}
@@ -361,14 +1847,35 @@ def test_kobra_cc_mode_reference_preserves_anti_materiel_conflict(
     assert record["variant_semantics"] == {
         "inheritance": "source", "source_mode": "CC Mode"
     }
-    assert "unresolved source discrepancy" in record["facts"]["sourceNotes"][0]
     assert "two ARM Saving Rolls" in record["summary"]
+    assert "three on a Critical" in record["summary"]
+    assert "Unresolved" in record["summary"]
+    assert "DA itself does not grant" in record["summary"]
+    assert len(record["facts"]["sourceNotes"]) == 2
+    assert "Saving Rolls — mechanically established" in record["facts"]["sourceNotes"][0]
+    assert "publication conflict unresolved" in record["facts"]["sourceNotes"][1]
+    assert "revision 4082 adds it" in record["facts"]["sourceNotes"][1]
     assert any(
         token["target"] == "trait:anti-materiel"
-        for token in record["fact_tokens"]["sourceNotes"][0]
+        for token in record["fact_tokens"]["sourceNotes"][1]
         if token["type"] == "reference"
     )
-    assert {64, 68, 182} == {citation["page"] for citation in record["citations"]}
+    assert {64, 68, 182} == {
+        citation["page"] for citation in record["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert {68, 191} == {
+        citation["page"] for citation in record["citations"]
+        if citation["source_id"] == "n5-core-v5.3-es-pdf"
+    }
+    assert {
+        citation["source_id"] for citation in record["citations"]
+    } >= {
+        "wiki-mixed-weapons-oldid-4021",
+        "wiki-mixed-weapons-oldid-4077",
+        "wiki-mixed-weapons-oldid-4082",
+        "wiki-weapon-chart-oldid-4083",
+    }
     assert {
         (relation["type"], relation["record"]["id"])
         for relation in record["display_relations"]
@@ -432,7 +1939,7 @@ def test_drop_bears_keeps_two_modes_and_explains_n5_throwing_terminology(
         "Trigger Area", "BS Weapon (PH)",
     ):
         assert phrase in summary
-    assert summary.count("\n\n") == 3
+    assert summary.count("\n\n") >= 3
     assert "**BS Mode:**" in summary
     assert "Throwing Weapon" not in summary
     assert len(card["facts"]["sourceNotes"]) == 1
@@ -548,6 +2055,48 @@ def test_ammunition_metadata_links_are_reviewed_base_types(
         ]
 
 
+def test_esx04_ap_t2_cc_row_in_bilingual_current_n53_charts() -> None:
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    english = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    spanish = root / "data/pdf/rules/esp-n5-update-5-3.pdf"
+    if not english.exists() or not spanish.exists():
+        pytest.skip("Pinned bilingual N5.3 rulebook PDFs unavailable")
+    with pdf.open(english) as book:
+        en_chart = " ".join(book[176].get_text().split())
+    with pdf.open(spanish) as book:
+        es_chart = " ".join(book[183].get_text().split())
+    for expected in ("AP+T2 CC", "AP+T2", "ARM/2", "ANTI-MATERIEL, CC"):
+        assert expected in en_chart
+    for expected in ("ARMA CC AP+T2", "AP+T2", "BLI/2", "ANTIMATERIAL, CC"):
+        assert expected in es_chart
+
+
+def test_esx04_ap_t2_cc_profile_matches_pinned_weapon_row(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "ap-t2-cc-weapon")
+    assert payload["slug"] == "ap-t2-cc-weapon"
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (profile["damage"], profile["burst"]) == ("8", "1")
+    assert (profile["ammunition"], profile["saving"], str(profile["saving_num"])) == (
+        "AP+T2", "ARM/2", "1",
+    )
+    assert profile["traits"] == ["Anti-materiel", "CC"]
+    assert {ref["slug"] for ref in profile["trait_references"]} == {
+        "anti-materiel", "cc",
+    }
+    assert profile["ammunition_source_id"] == 40
+    assert [component["record_id"] for component in
+            profile["ammunition_composition"]["components"]] == [
+        "ammunition:ap", "ammunition:t2",
+    ]
+    assert [prop["id"] for prop in profile["weapon_properties"]] == [
+        "weapon-property:ap-t2",
+    ]
+
+
 def test_combined_ammunition_components_do_not_change_saving_rolls(
     weaponry_app: Callable,
 ) -> None:
@@ -615,3 +2164,1022 @@ def test_unreviewed_ammunition_identity_is_not_inferred_from_punctuation(
     assert profile["saving"] == "ARM/2"
     # A matching Saving Roll expression is not an additional ammunition component.
     assert len(profile["ammunition_composition"]["components"]) == 2
+
+
+
+@pytest.mark.parametrize(
+    ("slug", "modes", "links"),
+    [
+        (
+            "multi-sniper-rifle",
+            [
+                ("Anti-Materiel Mode", "DA", "ARM", "2", "5", "2", ["Anti-materiel"]),
+                ("AP Mode", "AP", "ARM/2", "1", "5", "2", []),
+                ("Shock Mode", "Shock", "ARM", "1", "5", "2", []),
+            ],
+            {"ammunition:da", "ammunition:ap", "ammunition:shock",
+             "trait:anti-materiel"},
+        ),
+        (
+            "k1-sniper-rifle",
+            [(None, "N", "ARM=0", "1", "7", "2", ["Anti-materiel"])],
+            {"ammunition:normal", "trait:anti-materiel"},
+        ),
+        (
+            "viral-sniper-rifle",
+            [(None, "N", "BTS", "1", "5", "2", ["Bioweapon (DA+SHOCK)"])],
+            {"ammunition:normal", "ammunition:da", "ammunition:shock",
+             "trait:bioweapon"},
+        ),
+        (
+            "plasma-sniper-rifle",
+            [
+                ("Blast Mode", "N", "ARM and BTS", "1 and 1", "6", "2",
+                 ["Impact Template (Circular)"]),
+                ("Hit Mode", "N", "ARM and BTS", "1 and 1", "5", "2", []),
+            ],
+            {"ammunition:normal", "trait:impact-template"},
+        ),
+    ],
+)
+def test_sniper_specific_rules_keep_exact_modes_and_source_links(
+    weaponry_app: Callable,
+    slug: str,
+    modes: list[tuple],
+    links: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in profiles
+    ] == modes
+    assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+    assert all(p["ammunition_effects"] for p in profiles)
+    assert all(len(p["trait_references"]) == len(p["traits"])
+               for p in profiles)
+
+    rule = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert any(
+        c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 185
+        for c in rule["citations"]
+    )
+    assert {
+        relation["record"]["id"]
+        for relation in rule["display_relations"]
+        if relation["direction"] == "outbound"
+    } >= links
+    assert rule["summary_tokens"]
+    for linked in links:
+        assert any(
+            token["type"] == "reference" and token["target"] == linked
+            for token in rule["summary_tokens"]
+        ), linked
+
+
+def test_multi_k1_viral_snipers_preserve_source_specific_exceptions(
+    weaponry_app: Callable,
+) -> None:
+    multi = _weapon_detail(weaponry_app, "multi-sniper-rifle")
+    modes = {p["mode"]: p for p in multi["profiles"]}
+    assert modes["Anti-Materiel Mode"]["traits"] == ["Anti-materiel"]
+    assert modes["AP Mode"]["traits"] == modes["Shock Mode"]["traits"] == []
+    assert "Suppressive Fire" not in {
+        trait for profile in multi["profiles"] for trait in profile["traits"]
+    }
+    assert "alternative" in _weapon_rules(multi)["weapon:multi-sniper-rifle"]["summary"]
+
+    k1 = _weapon_detail(weaponry_app, "k1-sniper-rifle")
+    assert k1["profiles"][0]["ammunition_effects"][0]["record_id"] == "ammunition:normal"
+    assert k1["profiles"][0]["saving"] == "ARM=0"
+    assert "Suppressive Fire" not in k1["profiles"][0]["traits"]
+    assert "not a separate K1 Ammunition type" in (
+        _weapon_rules(k1)["weapon:k1-sniper-rifle"]["summary"]
+    )
+
+    viral = _weapon_detail(weaponry_app, "viral-sniper-rifle")
+    record = _weapon_rules(viral)["weapon:viral-sniper-rifle"]
+    assert "shared Viral Weapon Property" in record["summary"]
+    shared = viral["profiles"][0]["weapon_properties"][0]
+    assert shared["id"] == "weapon-property:viral"
+    assert "two BTS Saving Rolls" in shared["summary"]
+    assert "Against STR" in shared["summary"]
+    assert any(
+        c["source_id"] == "wiki-traits-oldid-4110"
+        and c["heading"] == "BioWeapon"
+        for c in record["citations"]
+    )
+
+
+def test_plasma_sniper_combined_saves_do_not_become_combined_ammunition(
+    weaponry_app: Callable,
+) -> None:
+    plasma = _weapon_detail(weaponry_app, "plasma-sniper-rifle")
+    assert len(plasma["profiles"]) == 2
+    blast, hit = plasma["profiles"]
+    assert blast["mode"] == "Blast Mode" and hit["mode"] == "Hit Mode"
+    assert blast["traits"] == ["Impact Template (Circular)"] and hit["traits"] == []
+    for profile in (blast, hit):
+        assert profile["combined_saving_roll"] == {
+            "kind": "combined-saving-roll",
+            "rolls": [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "critical": {"additionalRolls": 1, "attribute": "ARM"},
+            "source": {"sourceId": "n5-core-v5.3", "page": 67},
+        }
+        assert profile["ammunition"] == "N"
+        assert "ammunition_composition" not in profile
+    rule = _weapon_rules(plasma)["weapon:plasma-sniper-rifle"]
+    assert "shared Plasma Weapon Property" in rule["summary"]
+    assert all(p["weapon_properties"][0]["id"] == "weapon-property:plasma"
+               for p in plasma["profiles"])
+    assert "not another BTS roll" in plasma["profiles"][0]["weapon_properties"][0]["summary"]
+    assert any(c["page"] == 67 for c in rule["citations"])
+
+
+def test_flash_pulse_keeps_army_one_bts_roll_and_publishes_wiki_discrepancy(
+    weaponry_app: Callable,
+) -> None:
+    """Do not replace the pinned Army profile with conflicting Spanish Wiki numbers."""
+    payload = _weapon_detail(weaponry_app, "flash-pulse")
+    assert payload["id"] == 72
+    assert payload["name"] == "Flash Pulse"
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert profile["id"] == 72
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        "Stun", "BTS", "1"
+    )
+    assert {"Non-lethal", "State: Stunned", "BS Weapon (WIP)"} <= set(
+        profile["traits"]
+    )
+    rules = _weapon_rules(payload)
+    flash = rules["weapon:flash-pulse"]
+    assert "one BTS Saving Roll per hit" in flash["summary"]
+    assert "revision 3987" in " ".join(flash["facts"]["sourceNotes"])
+    assert "revision 3988" in " ".join(flash["facts"]["sourceNotes"])
+    assert {
+        citation["source_id"]
+        for citation in flash["citations"]
+    } >= {
+        "n5-core-v5.3-pdf",
+        "n5-core-v5.3-es-pdf",
+        "wiki-es-weapon-chart-oldid-3987",
+        "wiki-es-weapon-chart-alternatives-oldid-3988",
+    }
+
+@pytest.mark.parametrize(
+    ("slug", "ps", "burst", "saves", "traits", "ranges"),
+    [
+        ("heavy-rocket-launcher", ("6", "5"), "2", ("ARM", "1"),
+         (["Continous Damage", "Impact Template (Circular)"],
+          ["Continous Damage"]),
+         ("-3", "0", "+3", "-3")),
+        ("light-rocket-launcher", ("7", "6"), "2", ("ARM", "1"),
+         (["Continous Damage", "Impact Template (Circular)"],
+          ["Continous Damage"]),
+         ("0", "+3", "-3", "-6")),
+        ("plasma-rifle", ("7", "6"), "3", ("ARM and BTS", "1 and 1"),
+         (["Suppressive Fire", "Impact Template (Circular)"],
+          ["Suppressive Fire"]),
+         ("+3", "-3", "-6")),
+        ("plasma-carbine", ("7", "6"), "2", ("ARM and BTS", "1 and 1"),
+         (["Impact Template (Circular)"], []),
+         ("+3", "-3", "-6")),
+    ],
+)
+def test_reviewed_rocket_and_plasma_modes(
+    weaponry_app: Callable, slug: str, ps: tuple[str, str],
+    burst: str, saves: tuple[str, str], traits: tuple[list[str], list[str]],
+    ranges: tuple[str, ...],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == 2
+    blast, hit = payload["profiles"]
+    for index, profile in enumerate((blast, hit)):
+        assert profile["mode"] == ("Blast Mode", "Hit Mode")[index]
+        assert profile["damage"] == ps[index]
+        assert profile["burst"] == burst
+        assert (profile["saving"], profile["saving_num"]) == saves
+        assert profile["ammunition"] == "N"
+        assert profile["traits"] == traits[index]
+        assert [e["record_id"] for e in profile["ammunition_effects"]] == [
+            "ammunition:normal",
+        ]
+        assert len(profile["trait_references"]) == len(profile["traits"])
+        assert tuple(band["mod"] for band in profile["ranges"].values()) != ()
+        if slug.startswith("plasma-"):
+            assert profile["weapon_properties"][0]["id"] == "weapon-property:plasma"
+            assert profile["combined_saving_roll"]["rolls"] == [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ]
+            assert profile["combined_saving_roll"]["critical"] == {
+                "additionalRolls": 1, "attribute": "ARM",
+            }
+        else:
+            assert [
+                r["slug"] for r in profile["trait_references"]
+            ] == (
+                ["continuous-damage", "impact-template"]
+                if index == 0 else ["continuous-damage"]
+            )
+    assert all(blast["ranges"][key] == hit["ranges"][key] for key in blast["ranges"])
+    assert set(band["mod"] for band in blast["ranges"].values()) == set(ranges)
+    assert not _weapon_rules(payload)
+
+@pytest.mark.parametrize(
+    ("slug", "expected"),
+    [
+        ("trench-hammer", [
+            ("BS Mode", "6", "1", "DA", "ARM", "2",
+             ["Anti-materiel", "BS Weapon (PH)", "[*]"],
+             ["ammunition:da"]),
+            ("CC Mode", "6", "1", "DA", "ARM", "2",
+             ["Anti-materiel", "CC", "[*]"], ["ammunition:da"]),
+        ]),
+        ("vorpal-cc-weapon", [
+            ("BS Mode", "8", "1", "N", "ARM=0", "1",
+             ["BS Weapon (PH)", "State: Dead", "[*]"], ["ammunition:normal"]),
+            ("CC Mode", "8", "1", "N", "ARM=0", "1",
+             ["CC", "State: Dead", "[*]"], ["ammunition:normal"]),
+        ]),
+        ("multi-red-fury", [
+            ("Antimaterial Mode", "7", "1", "DA", "ARM", "2",
+             ["Anti-materiel"], ["ammunition:da"]),
+            ("AP Mode", "7", "4", "AP", "ARM/2", "1",
+             ["Suppressive Fire"], ["ammunition:ap"]),
+            ("Shock Mode", "7", "4", "Shock", "ARM", "1",
+             ["Suppressive Fire"], ["ammunition:shock"]),
+        ]),
+        ("uragan-mrl", [
+            ("Blast Mode", "6", "3", "AP+Shock", "ARM/2", "1",
+             ["Speculative Attack", "Impact Template (Circular)",
+              "Burst: Single Target"], ["ammunition:ap", "ammunition:shock"]),
+            ("Hit Mode", "5", "3", "AP+Shock", "ARM/2", "1",
+             ["Burst: Single Target"], ["ammunition:ap", "ammunition:shock"]),
+        ]),
+    ],
+)
+def test_remaining_multimode_shared_reviews_preserve_exact_profiles(
+    weaponry_app: Callable, mixed_weapons_app: Callable,
+    slug: str, expected: list[tuple],
+) -> None:
+    payload = _weapon_detail(
+        mixed_weapons_app if slug == "trench-hammer" else weaponry_app, slug
+    )
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["damage"], p["burst"], p["ammunition"],
+         p["saving"], p["saving_num"], p["traits"],
+         [a["record_id"] for a in p["ammunition_effects"]])
+        for p in profiles
+    ] == expected
+    assert all(a["citations"] for p in profiles for a in p["ammunition_effects"])
+    assert set(_weapon_rules(payload)) == (
+        {"weapon:mixed-weapons"}
+        if slug in {"trench-hammer", "vorpal-cc-weapon"} else set()
+    )
+    if slug == "trench-hammer":
+        assert all("Disposable (3)" not in p["traits"] for p in profiles)
+        assert profiles[0]["ranges"]["short"]["mod"] == "0"
+        assert profiles[1]["ranges"] == {}
+        assert [
+            [r["slug"] for r in p["trait_references"]]
+            for p in profiles
+        ] == [
+            ["anti-materiel", "bs-weapon-ph", None],
+            ["anti-materiel", "cc", None],
+        ]
+    elif slug == "vorpal-cc-weapon":
+        assert profiles[0]["ranges"]["short"]["mod"] == "+3"
+        assert profiles[1]["ranges"] == {}
+        assert all(
+            any(r.get("public_reference") == {"catalog": "states", "id": "dead"}
+                for r in p["trait_references"])
+            for p in profiles
+        )
+    elif slug == "multi-red-fury":
+        assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+        assert all(p["weapon_properties"][0]["id"] == "weapon-property:multi"
+                   for p in profiles)
+        assert "Suppressive Fire" not in profiles[0]["traits"]
+    else:
+        assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+        assert all(p["burst"] == "3" and
+                   p["weapon_properties"][0]["id"] == "weapon-property:ap-shock"
+                   for p in profiles)
+        assert all(
+            p["ammunition_composition"]["components"] == [
+                {"record_id": "ammunition:ap",
+                 "public_reference": {"catalog": "ammunition", "id": "ap"}},
+                {"record_id": "ammunition:shock",
+                 "public_reference": {"catalog": "ammunition", "id": "shock"}},
+            ]
+            for p in profiles
+        )
+        assert [r["slug"] for r in profiles[1]["trait_references"]] == [
+            "burst-single-target",
+        ]
+
+@pytest.fixture(scope="module")
+def source_discrepancy_app(tmp_path_factory: pytest.TempPathFactory) -> Callable:
+    """Exercise the current curated corpus, not an older generated rules.db."""
+    root = Path(__file__).resolve().parents[1]
+    output = tmp_path_factory.mktemp("weapon-discrepancy-rules") / "rules.db"
+    export_rules_database(
+        load_curated_directory(root / "data/curated"), output, finalize=False,
+    )
+    RulesDatabase(output).validate()
+    return create_app(
+        root / "data/generated/infinity.db", rules_database_path=output,
+    )
+
+
+@pytest.mark.parametrize(
+    ("slug", "pages", "effects", "discrepancy"),
+    [
+        ("ap-thunderbolt", (186, 193), {"ammunition:ap"}, "N Ammunition"),
+        ("ap-exp-cc-weapon", (177, 184),
+         {"ammunition:ap", "ammunition:exp", "trait:cc", "trait:anti-materiel"},
+         "two BLI/2"),
+        ("stun-pistol", (182, 191),
+         {"ammunition:stun", "trait:non-lethal", "trait:state"},
+         "two PB/BTS"),
+    ],
+)
+def test_published_weapon_source_conflicts_preserve_official_profiles(
+    source_discrepancy_app: Callable, slug: str, pages: tuple[int, int],
+    effects: set[str], discrepancy: str,
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, slug)
+    rule = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert rule["facts"]["sourceNotes"]
+    assert len(rule["facts"]["sourceNotes"]) == 3
+    assert discrepancy in rule["facts"]["sourceNotes"][0]
+    assert "Unresolved" in rule["facts"]["sourceNotes"][-1]
+    assert {("n5-core-v5.3-pdf", pages[0]),
+            ("n5-core-v5.3-es-pdf", pages[1])} <= {
+        (c["source_id"], c["page"]) for c in rule["citations"]
+    }
+    assert {
+        "wiki-weapon-chart-oldid-4083", "wiki-es-weapon-chart-oldid-3987",
+    } <= {c["source_id"] for c in rule["citations"]}
+    assert effects <= {
+        r["record"]["id"] for r in rule["display_relations"]
+        if r["direction"] == "outbound"
+    }
+    assert all(
+        t["public_reference"] for t in rule["summary_tokens"]
+        if t["type"] == "reference"
+    )
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    if slug == "ap-thunderbolt":
+        assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+            "AP", "ARM/2", "1",
+        )
+    elif slug == "ap-exp-cc-weapon":
+        assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+            "AP+Exp", "ARM/2", "3",
+        )
+    else:
+        assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+            "Stun", "BTS", "1",
+        )
+        assert {"Non-lethal", "State: Stunned"} <= set(profile["traits"])
+
+@pytest.mark.parametrize(
+    "slug",
+    (
+        "ap-mine", "e-m-mine", "monofilament-mine", "para-mine",
+        "shock-mine", "viral-mine", "cybermine",
+    ),
+)
+def test_mines_camouflage_marker_s2_is_separate_from_object_silhouette(
+    source_discrepancy_app: Callable, slug: str,
+) -> None:
+    """A concealing Marker is S2; the object is a separate source conflict."""
+    payload = _weapon_detail(source_discrepancy_app, slug)
+    record = _weapon_rules(payload)["weapon:mines"]
+    summary = record["summary"]
+    assert "that Marker uses Silhouette S2" in summary
+    assert "not automatically to the revealed MINE (-3) Token" in summary
+    assert "The object profile has a separate published Silhouette value" in summary
+    note = record["facts"]["sourceNotes"][0]
+    assert "S0 for AP, E/M, Monofilament, PARA, Shock, and [[weapon:viral-mine|Viral Mine]]" in note
+    assert "Army metadata gives S1" in note
+    assert "No official correction or source precedence has been confirmed" in note
+    assert {
+        ("n5-core-v5.3-pdf", 157),
+        ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-es-pdf", 190),
+        ("n5-core-v5.3-es-pdf", 191),
+    } <= {(c["source_id"], c["page"]) for c in record["citations"]}
+    assert any(
+        r["direction"] == "outbound"
+        and r["record"]["id"] == "state:camouflaged"
+        for r in record["display_relations"]
+    )
+    assert any(
+        t["type"] == "reference"
+        and t["target"] == "state:camouflaged"
+        and t["public_reference"]
+        for t in record["summary_tokens"]
+    )
+    assert len(payload["profiles"]) == 1
+
+
+def test_chest_mine_does_not_inherit_camouflaged_mines_silhouette_guidance(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, "chest-mine")
+    assert "weapon:mines" not in _weapon_rules(payload)
+    assert len(payload["profiles"]) == 2
+    assert "Silhouette S2" not in _weapon_rules(payload)["weapon:chest-mine"]["summary"]
+
+@pytest.mark.parametrize("slug", (
+    "ap-mine", "e-m-mine", "monofilament-mine", "para-mine",
+    "shock-mine", "viral-mine", "cybermine",
+))
+def test_mines_declaration_vs_movement_cross_rule_links(
+    source_discrepancy_app: Callable, slug: str,
+) -> None:
+    rule = _weapon_rules(_weapon_detail(source_discrepancy_app, slug))["weapon:mines"]
+    assert "Declaring [[skill:dodge|Dodge]] as an [[trait:aro|ARO]]" in rule["summary"]
+    assert "movement does **not** itself trigger" in rule["summary"]
+    assert "failed [[rule:guts-roll|Guts Roll]]" in rule["summary"]
+    targets = {
+        t["target"] for t in rule["summary_tokens"]
+        if t["type"] == "reference" and t["public_reference"]
+    }
+    assert {"skill:dodge", "rule:guts-roll", "skill:stealth", "trait:deployable"} <= targets
+    assert {38, 79, 80, 112} <= {
+        c["page"] for c in rule["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+
+
+def test_drop_bears_current_roll_failure_and_activation_rules_are_published(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, "drop-bears")
+    rule = _weapon_rules(payload)["weapon:drop-bears"]
+    summary = rule["summary"]
+    assert "**Rolls and failed uses:**" in summary
+    assert "Mode** needs no Roll" in summary
+    assert (
+        "a legal [[skill:intuitive-attack|Intuitive Attack]] "
+        "uses an unmodified WIP Roll"
+    ) in summary
+    assert "A failed [[skill:intuitive-attack|Intuitive Attack]] places no Token" in summary
+    assert "a [[trait:bs-weapon-ph|PH-based BS Attack]] Roll" in summary
+    assert "A failed throw also spends one use" in summary
+    assert "a successful placement becomes active" in summary.lower()
+    assert "cannot detonate during the same Order" in summary
+
+    assert {49, 71, 82, 175, 181} <= {
+        cite["page"] for cite in rule["citations"]
+        if cite["source_id"] == "n5-core-v5.3-pdf"
+    }
+    targets = {
+        token["target"]
+        for token in rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "skill:place-deployable",
+        "skill:intuitive-attack",
+        "trait:bs-weapon-ph",
+        "trait:disposable-x",
+        "state:camouflaged",
+    } <= targets
+
+    profiles = {profile["mode"]: profile for profile in payload["profiles"]}
+    assert set(profiles) == {"BS Mode", "Deployable Mode"}
+    assert "BS Weapon (PH)" in profiles["BS Mode"]["traits"]
+    assert "Throwing Weapon" in profiles["BS Mode"]["traits"]  # imported alias preserved
+    assert profiles["Deployable Mode"]["ammunition"] == "Shock"
+    assert "weapon:mines" not in _weapon_rules(payload)
+
+
+
+def test_mine_dispenser_only_inherits_drop_bears_bs_placement(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, "mine-dispenser")
+    assert set(_weapon_rules(payload)) == {"weapon:mine-dispenser"}
+    record = _weapon_rules(payload)["weapon:mine-dispenser"]
+    summary = record["summary"]
+    assert "**Failed shot and charges:**" in summary
+    assert "places no Mine Token for that Roll" in summary
+    assert "even if the Rolls fail" in summary
+    assert "**BS Mode inheritance only:**" in summary
+    assert "no-Roll [[skill:place-deployable|Place Deployable]] action" in summary
+    assert "or [[skill:intuitive-attack|Intuitive Attack]]" in summary
+    assert "not [[trait:bs-weapon-ph|BS Weapon (PH)]]" in summary
+    assert {49, 71, 72, 82, 175, 181} <= {
+        c["page"] for c in record["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    refs = {
+        token["target"]
+        for token in record["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "weapon:drop-bears", "weapon:mines",
+        "trait:double-shot", "trait:disposable-x",
+        "skill:place-deployable", "skill:intuitive-attack",
+    } <= refs
+    outbound = {
+        (rel["type"], rel["record"]["id"])
+        for rel in record["display_relations"]
+        if rel["direction"] == "outbound"
+    }
+    assert ("modifies-use-of", "weapon:drop-bears") in outbound
+    assert ("enables-use-of", "skill:intuitive-attack") not in outbound
+    assert ("enables-use-of", "skill:place-deployable") not in outbound
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert profile["mode"] in ("", None)
+    assert "Double Shot" in profile["traits"]
+    assert "Disposable (2)" in profile["traits"]
+    assert "Intuitive Attack" not in profile["traits"]
+    assert "BS Weapon (PH)" not in profile["traits"]
+    assert "Deployable" not in profile["traits"]
+
+
+
+@pytest.mark.parametrize(
+    ("slug", "expected_rules", "expected_cites"),
+    (
+        ("pitcher", "weapon:pitcher", {2, 3}),
+        ("disco-baller", "weapon:disco-baller", {2, 3}),
+    ),
+)
+def test_delivery_weapons_keep_launcher_and_deployed_object_distinct(
+    source_discrepancy_app: Callable,
+    slug: str,
+    expected_rules: str,
+    expected_cites: set[int],
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, slug)
+    rules = _weapon_rules(payload)
+    assert expected_rules in rules
+    rule = rules[expected_rules]
+    summary = rule["summary"]
+    assert "vertical surface" in summary
+    assert "Conclusion" in summary
+    assert "lost" in summary
+    assert expected_cites <= {
+        c["page"] for c in rule["citations"]
+        if c["source_id"] == "n5-faq-v0.1-en-pdf"
+    }
+    refs = {
+        token["target"]
+        for token in rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert "trait:disposable-x" in refs
+    outgoing = {
+        (rel["type"],rel["record"]["id"])
+        for rel in rule["display_relations"]
+        if rel["direction"] == "outbound"
+    }
+    assert ("enables-use-of", "skill:place-deployable") not in outgoing
+    assert len(payload["profiles"]) == (1 if slug == "pitcher" else 2)
+    if slug == "pitcher":
+        assert "A failed BS Roll places no" in summary
+        assert "ARM 0, BTS 0, STR 1 and S 1" in summary
+        assert ("uses-effects-of", "equipment:deployable-repeater") in outgoing
+        assert "equipment:deployable-repeater" in refs
+        assert payload["profiles"][0]["saving"] == "-"
+    else:
+        assert "A failed launcher BS Roll places no Disco Ball" in summary
+        assert "both are spent even if the Rolls fail" in summary
+        assert "not another launcher charge" in summary
+        assert "skill:activate-disco-ball" in refs
+        modes = {p["mode"] for p in payload["profiles"]}
+        assert modes == {None, "Disco Ball"}
+        ball = next(p for p in payload["profiles"] if p["mode"] == "Disco Ball")
+        assert ball["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+
+
+def test_activate_disco_ball_does_not_reuse_launcher_charges(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "activate-disco-ball", catalog="skills"
+    )
+    record = _weapon_rules(payload)["skill:activate-disco-ball"]
+    assert "WIP +3" in record["summary"]
+    assert "Deactivator" in record["summary"]
+    assert "Disposable" not in record["summary"]
+    assert any(
+        r["record"]["id"] == "equipment:deactivator"
+        for r in record["display_relations"]
+    )
+
+
+
+def test_deployed_repeater_equipment_page_links_both_delivery_routes(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "deployable-repeater", catalog="equipment"
+    )
+    record = _weapon_rules(payload)["equipment:deployable-repeater"]
+    summary = record["summary"]
+    assert "A [[skill:place-deployable|Place Deployable]] action" in summary
+    assert "[[weapon:pitcher|Pitcher]]" in summary
+    assert "without declaring [[skill:place-deployable|Place Deployable]]" in summary
+    assert "The Token itself does not declare Hacking Programs" in summary
+    assert "The destroyed Token no longer extends a Hacking Area" in summary
+    assert "ARM 0, BTS 0, STR 1 and S 1" in summary
+    refs = {
+        token["target"]
+        for token in record["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "weapon:pitcher", "skill:place-deployable", "skill:bs-attack",
+        "rule:hacking-area", "equipment:repeater", "equipment:firewall",
+        "state:dead", "state:unconscious", "trait:deployable",
+    } <= refs
+    assert {55, 56, 73, 175, 186} <= {
+        c["page"] for c in record["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    outgoing = {
+        (edge["type"], edge["record"]["id"])
+        for edge in record["display_relations"]
+        if edge["direction"] == "outbound"
+    }
+    assert ("uses-effects-of", "equipment:repeater") in outgoing
+    assert ("enables-use-of", "skill:place-deployable") not in outgoing
+    assert ("enables-use-of", "skill:bs-attack") not in outgoing
+
+
+
+def test_fastpanda_and_wildparrot_api_preserve_distinct_deployed_effects(
+    source_discrepancy_app: Callable,
+) -> None:
+    panda = _weapon_detail(
+        source_discrepancy_app, "fastpanda", catalog="equipment"
+    )
+    panda_rule = _weapon_rules(panda)["equipment:fastpanda"]
+    assert len(panda["profiles"]) == 1
+    panda_profile = panda["profiles"][0]
+    assert panda_profile["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+    assert {"Disposable (1)", "Indiscriminate", "Perimeter",
+            "Deployable", "Zone of Control"} <= set(panda_profile["traits"])
+    assert "Boost" not in panda_profile["traits"]
+    assert "Intuitive Attack" not in panda_profile["traits"]
+    assert "Placement needs no Roll" in panda_rule["summary"]
+    assert "Hacking Area extension cease" in panda_rule["summary"]
+    panda_refs = {
+        token["target"] for token in panda_rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "equipment:repeater", "rule:hacking-area",
+        "skill:place-deployable", "trait:indiscriminate",
+        "trait:perimeter", "trait:boost",
+    } <= panda_refs
+    assert {56, 82, 175, 186} <= {
+        c["page"] for c in panda_rule["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+
+    wild = _weapon_detail(source_discrepancy_app, "wildparrot")
+    wild_rule = _weapon_rules(wild)["weapon:wildparrot"]
+    assert len(wild["profiles"]) == 1
+    wild_profile = wild["profiles"][0]
+    assert wild_profile["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+    assert wild_profile["ammunition"] == "E/M"
+    assert wild_profile["saving"] == "BTS/2"
+    assert wild_profile["saving_num"] == "2"
+    assert "Intuitive Attack" in wild_profile["traits"]
+    assert "Disposable (1)" in wild_profile["traits"]
+    assert "Non-Lethal" not in wild_profile["traits"]
+    assert "Boost" not in wild_profile["traits"]
+    assert "failure places no Token" in wild_rule["summary"]
+    assert "cannot trigger during its own placement Order" in wild_rule["summary"]
+    assert "source discrepancy" in wild_rule["facts"]["sourceNotes"][0]
+    assert {49, 74, 82, 175} <= {
+        c["page"] for c in wild_rule["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    wild_refs = {
+        token["target"] for token in wild_rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "weapon:mines", "trait:boost", "trait:perimeter",
+        "trait:disposable-x", "skill:intuitive-attack",
+    } <= wild_refs
+    assert "equipment:repeater" not in wild_refs
+
+
+
+def test_dazer_equipment_api_preserves_army_silhouette_discrepancy(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "dazer", catalog="equipment"
+    )
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert profile["profile"] == "ARM=0, BTS=0, STR=1, S=0"
+    assert "Disposable (3)" in profile["traits"]
+    assert "Deployable" in profile["traits"]
+    assert "Zone of Control" in profile["traits"]
+    assert "Perimeter" not in profile["traits"]
+    assert "Boost" not in profile["traits"]
+    assert "Intuitive Attack" not in profile["traits"]
+
+    rule = _weapon_rules(payload)["equipment:dazer"]
+    summary = rule["summary"]
+    assert "**Placement:**" in summary
+    assert "in Silhouette contact without a Roll" in summary
+    assert "not the placement distance" in summary
+    assert "at the Order's Conclusion" in summary
+    assert "Difficult Terrain of infinite height" in summary
+    assert "After removal, it no longer generates Difficult Terrain" in summary
+    assert "No official correction or precedence is established" in (
+        rule["facts"]["sourceNotes"][0]
+    )
+    refs = {
+        token["target"]
+        for token in rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "skill:place-deployable", "skill:terrain",
+        "trait:disposable-x", "trait:perimeter",
+        "trait:zone-of-control-zc", "equipment:deactivator",
+    } <= refs
+    assert {82, 121, 175, 186} <= {
+        cite["page"] for cite in rule["citations"]
+        if cite["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert not any(
+        edge["type"] == "uses-effects-of"
+        and edge["record"]["id"] == "trait:perimeter"
+        for edge in rule.get("display_relations", [])
+    )
+
+
+
+def test_deactivator_api_separates_enemy_removal_and_allied_reactivation(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "deactivator", catalog="equipment"
+    )
+    rule = _weapon_rules(payload)["equipment:deactivator"]
+    summary = rule["summary"]
+    assert "**Enemy removal:**" in summary
+    assert "never a [[state:camouflaged|Camouflage Marker]]" in summary
+    assert "Range MODs only" in summary
+    assert "does **not** prevent" in summary
+    assert "triggering during that same Order" in summary
+    assert "[[equipment:dazer|Dazer]]" in summary
+    assert "[[equipment:fastpanda|FastPanda]]" in summary
+    assert "[[equipment:deployable-repeater|Deployable Repeater]]" in summary
+    assert "[[equipment:deployable-cover|Deployable Cover]]" in summary
+    assert "[[skill:activate-disco-ball|Activate Disco Ball]]" in summary
+    assert "reactivate an **allied** Ball" in summary
+    assert {56, 71, 121, 122} <= {
+        c["page"] for c in rule["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    refs = {
+        token["target"]
+        for token in rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "trait:deployable", "trait:zone-of-control-zc",
+        "state:camouflaged", "skill:place-deployable",
+        "skill:mimetism", "equipment:dazer", "equipment:fastpanda",
+        "equipment:deployable-repeater", "equipment:deployable-cover",
+        "equipment:repeater", "skill:activate-disco-ball",
+    } <= refs
+    assert len(payload["profiles"]) == 1
+    assert "BS Weapon (WIP)" in payload["profiles"][0]["traits"]
+    assert "Disposable" not in payload["profiles"][0]["traits"]
+    outbound = {
+        (edge["type"], edge["record"]["id"])
+        for edge in rule.get("display_relations", [])
+        if edge["direction"] == "outbound"
+    }
+    assert ("ignores-modifiers-from", "skill:mimetism") in outbound
+    assert ("enables-use-of", "skill:activate-disco-ball") not in outbound
+
+
+
+def test_deactivator_api_keeps_same_order_device_trigger_families_separate(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "deactivator", catalog="equipment"
+    )
+    record = _weapon_rules(payload)["equipment:deactivator"]
+    summary = record["summary"]
+    assert "**Template triggers:**" in summary
+    assert "A revealed [[weapon:mines|Mine]] may still trigger" in summary
+    assert "[[weapon:cybermine|Cybermines]]" in summary
+    assert "**Contact-seeking devices:**" in summary
+    assert "Exempt Markers do not trigger it" in summary
+    assert "**Automated turret reactions:**" in summary
+    assert "active enemy **Model**, never a Marker" in summary
+    assert "does **not** prevent an eligible device from triggering" in summary
+
+    refs = {
+        token["target"] for token in record["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "weapon:mines", "weapon:cybermine", "weapon:armed-turret",
+        "trait:boost", "skill:reset", "skill:dodge", "skill:bs-attack",
+        "skill:cc-attack", "state:camouflaged",
+        "rule:face-to-face-rolls",
+    } <= refs
+    assert {69, 70, 72, 121} <= {
+        c["page"] for c in record["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    outgoing = {
+        (edge["type"], edge["record"]["id"])
+        for edge in record.get("display_relations", [])
+        if edge["direction"] == "outbound"
+    }
+    assert outgoing == {("ignores-modifiers-from", "skill:mimetism")}
+    assert len(payload["profiles"]) == 1
+    assert "BS Weapon (WIP)" in payload["profiles"][0]["traits"]
+
+
+
+@pytest.fixture(scope="module")
+def mixed_weapons_app(tmp_path_factory: pytest.TempPathFactory) -> Callable:
+    """A fresh curated rules build, not the previously generated deployment snapshot."""
+    root = Path(__file__).resolve().parents[1]
+    rules_path = tmp_path_factory.mktemp("mixed-weapons") / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    return create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+
+
+def test_mixed_weapons_shared_modes_and_source_provenance(
+    mixed_weapons_app: Callable,
+) -> None:
+    trench = _weapon_detail(mixed_weapons_app, "trench-hammer")
+    kobra = _weapon_detail(mixed_weapons_app, "kobra-pistol")
+    assert {r["id"] for r in trench["rules"]} == {"weapon:mixed-weapons"}
+    assert {r["id"] for r in kobra["rules"]} == {
+        "weapon:mixed-weapons", "weapon:kobra-pistol"
+    }
+    shared = _weapon_rules(trench)["weapon:mixed-weapons"]
+    summary = shared["summary"]
+    assert "**two different attack Modes**" in summary
+    assert "**[[trait:cc|CC]] Weapon Mode:**" in summary
+    assert "[[attribute:cc|CC]] Attribute" in summary
+    assert "counts as a [[trait:cc|CC]] Weapon" in summary
+    assert "**BS Weapon Mode:**" in summary
+    assert "[[attribute:bs|BS]] Attribute" in summary
+    assert "printed Range MODs" in summary
+    assert "different Attribute" in summary
+    assert "**PH-based BS Modes:**" in summary
+    assert "[[trait:bs-weapon-ph|BS Weapon (PH)]]" in summary
+    assert "[[weapon:kobra-pistol|Kobra Pistol]]" in summary
+    assert max(map(len, summary.split("\n\n"))) <= 350
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["page"] == 68 for citation in shared["citations"]
+    )
+    assert {
+        (r["type"], r["record"]["id"])
+        for r in shared["display_relations"] if r["direction"] == "outbound"
+    } == {
+        ("uses-effects-of", "skill:bs-attack"),
+        ("uses-effects-of", "skill:cc-attack"),
+        ("uses-effects-of", "trait:cc"),
+        ("uses-effects-of", "rule:modifiers-explained"),
+    }
+    assert {
+        (r["type"], r["record"]["id"])
+        for r in _weapon_rules(kobra)["weapon:kobra-pistol"]["display_relations"]
+        if r["direction"] == "outbound"
+    } == {("uses-effects-of", "weapon:mixed-weapons")}
+    assert [p["mode"] for p in trench["profiles"]] == ["BS Mode", "CC Mode"]
+    assert all(p["ammunition"] == "DA" and p["saving_num"] == "2"
+               for p in trench["profiles"])
+    assert "BS Weapon (PH)" in trench["profiles"][0]["traits"]
+    assert "CC" in trench["profiles"][1]["traits"]
+    assert all("Disposable (3)" not in p["traits"] for p in trench["profiles"])
+    assert "Shock" == kobra["profiles"][0]["ammunition"]
+    assert "DA" == kobra["profiles"][1]["ammunition"]
+    assert "2" == kobra["profiles"][1]["saving_num"]
+    assert "Anti-materiel" in kobra["profiles"][1]["traits"]
+    assert [r["id"] for r in kobra["profiles"][1]["rules"]] == [
+        "weapon:kobra-pistol-cc"
+    ]
+    assert len(kobra["profiles"][1]["rules"][0]["facts"]["sourceNotes"]) == 2
+
+
+
+def test_modifiers_explained_player_reference_and_mixed_weapon_navigation(
+    mixed_weapons_app: Callable,
+) -> None:
+    source = _weapon_detail(
+        mixed_weapons_app, "modifiers-explained", catalog="rules"
+    )
+    rule = source["rules"][0]
+    assert rule["id"] == "rule:modifiers-explained"
+    assert rule["name"] == "Modifiers Explained (MODs)"
+    summary = rule["summary"]
+    assert isinstance(summary, str)
+    for fragment in (
+        "round brackets", "**only while using that entry**",
+        "Positive MODs benefit the user", "Negative MODs apply to enemies",
+        "Automatic Skills or Equipment", "**only during Face to Face Rolls**",
+        "**ReRoll:**", "reroll **one die**", "Active Turn",
+        "[[rule:special-dice|+1 SD]]",
+    ):
+        assert fragment in summary, fragment
+    assert {c["page"] for c in rule["citations"]
+            if c["source_id"] == "n5-core-v5.3-pdf"} == {68, 75}
+    assert rule["facts"]["category"] == "basic-rule"
+    assert len(rule["facts"]["restrictions"]) == 2
+    assert len(rule["facts"]["clarifications"]) == 3
+    assert "[[weapon:para-cc-weapon|PARA CC Weapon]] (-6)" in (
+        rule["facts"]["clarifications"][2]
+    )
+    assert "do not apply the weapon's Face-to-Face penalty again" in (
+        rule["facts"]["clarifications"][2]
+    )
+    for slug in ("trench-hammer", "kobra-pistol", "vorpal-cc-weapon"):
+        payload = _weapon_detail(mixed_weapons_app, slug)
+        family = _weapon_rules(payload)["weapon:mixed-weapons"]
+        linked_modifiers = [
+            token for token in family["summary_tokens"]
+            if token.get("target") == "rule:modifiers-explained"
+        ]
+        assert len(linked_modifiers) == 1
+        assert linked_modifiers[0]["public_reference"] == {
+            "catalog": "rules", "id": "modifiers-explained"
+        }
+        assert any(
+            edge["direction"] == "outbound"
+            and edge["type"] == "uses-effects-of"
+            and edge["record"]["id"] == "rule:modifiers-explained"
+            for edge in family["display_relations"]
+        )
+    vorpal = _weapon_detail(mixed_weapons_app, "vorpal-cc-weapon")
+    assert [p["mode"] for p in vorpal["profiles"]] == [
+        "BS Mode", "CC Mode"
+    ]
+    bs, cc = vorpal["profiles"]
+    assert (bs["ammunition"], bs["saving"], bs["saving_num"]) == (
+        "N", "ARM=0", "1"
+    )
+    assert "BS Weapon (PH)" in bs["traits"]
+    assert (cc["ammunition"], cc["saving"], cc["saving_num"]) == (
+        "N", "ARM=0", "1"
+    )
+    assert "CC" in cc["traits"]
+    assert all("State: Dead" in p["traits"] for p in vorpal["profiles"])
+    assert "Vorpal" in family["summary"]
+
+
+def test_modifiers_explained_pinned_page75_scope() -> None:
+    import hashlib
+
+    pymupdf = pytest.importorskip("pymupdf")
+
+    pdf = Path(__file__).resolve().parents[1] / (
+        "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    )
+    if not pdf.exists():
+        pytest.skip("Pinned official N5.3 PDF unavailable")
+    expected = json.loads(
+        (pdf.parents[3] / "config/validation/weaponry-family-clauses.json")
+        .read_text(encoding="utf8")
+    )["corePdfSha256"]
+    assert hashlib.sha256(pdf.read_bytes()).hexdigest() == expected
+    with pymupdf.open(pdf) as document:
+        page_text = document[74].get_text()
+    assert isinstance(page_text, str)
+    text = " ".join(page_text.split()).casefold()
+    for excerpt in (
+        "Negative MODs for Automatic Skills and Equipment",
+        "Negative MODs for other Skills, Weapons, and Equipment",
+        "only apply during Face to Face Rolls",
+        "allow the user to reroll one die from the Roll",
+        "the maximum Burst (B) value of any Attack is 6",
+    ):
+        assert excerpt.casefold() in text, excerpt

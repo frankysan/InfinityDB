@@ -61,6 +61,25 @@ jobs:
       - name: Verify symbol Python dependencies
         run: python -c "import cssselect2, fontTools.ttLib, PIL.Image, tinycss2"
 
+      - name: Set up Node.js for documentation linting
+        if: matrix.check_args == '--all'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install pinned documentation lint dependencies
+        if: matrix.check_args == '--all'
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Generate source-test deployed-object publication
+        # This release-paired JSON is intentionally Git-ignored. All source
+        # tests must run against the same deterministic publication as the
+        # deployment-smoke image rather than relying on a developer's local copy.
+        run: |
+          python -m tools.build_deployed_object_publication
+          python -m tools.build_deployed_object_publication --check
+
       - name: Run source checks
         env:
           PYTEST_ADDOPTS: "--durations=20 -ra"

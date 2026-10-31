@@ -9,7 +9,9 @@ provenance under `data/manifests/`.
 
 ## Current curated data
 
-- `rules/` contains validated rules-reference collections consumed by `infinity-db build-rules`.
+- `rules/` contains validated rules-reference collections, including the
+  source-verified `n5-faq-v0.1.json` FAQ pilot, consumed by
+  `infinity-db build-rules`.
 - `identities/` contains reviewed source-derived presentation and historical identity
   relationships consumed by the Army build/runtime surfaces that own them.
   `army-overview.json` contains short editorial gameplay summaries keyed by public Army slug;
@@ -34,19 +36,27 @@ identities.
   application-domain slug, with slugs preferred in maintained rules data. Numeric references
   remain valid for compatibility, provenance, and explicit disambiguation.
 
+Weapon Properties are a distinct, reviewed player-facing vocabulary maintained in
+`config/catalogs/weapon-properties.json`, not additional Ammunition records or
+source Army `properties` (Traits). Each explicitly associated source Weapon
+profile is signature-matched, and its Property names their canonical rule
+owners/source sections; see `docs/data-model.md` for the current projection
+contract. Do not duplicate those source rules as new Property mechanics.
+
 The sections below document the implemented `curated/rules/` contract.
 
 ### Maintained rules-text semantic-link policy
 
 Maintained rules prose must use typed `[[kind:slug]]` references when it names an existing
 supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program,
-Attribute, or reviewed Game term. `[[term:zero-visibility-zone]]` resolves to the corresponding
+General Rule (`rule:*`), Attribute, or reviewed Game term. `[[term:zero-visibility-zone]]` resolves to the corresponding
 Glossary definition and the existing inline preview tooltip, including on keyboard focus and touch.
 Visibility Zone variants are explicitly linked throughout current curated rules text.
 The broad Game-term vocabulary also includes common nouns (e.g. Model and Token), so a full
 term-name/plain-prose migration is not claimed; those cases must be curated deliberately.
 The pre-token migration is complete: `maintained-text-link-reviews.json` records explicit
-completed review coverage for the previously supported reference namespaces, and the rules
+completed review coverage for the previously supported reference namespaces; new General Rule
+references are supported, but are not claimed as a completed plain-text scan. The rules
 build rejects any new plain semantic candidate in those fully reviewed namespaces directly.
 
 Completed scopes receive a case-insensitive scan with conservative plural matching. A residual is an
@@ -108,20 +118,38 @@ Wounds inflicted on failure of that extra roll. Smoke/Eclipse use
 `facts.visibilityZone` and no Saving Roll facts. Other
 Ammunition effects remain independent of these State links.
 
+Smoke/Eclipse's optional `facts.visibilityZone.opposition` object fixes
+the reviewed Attack requirements, Visor exception, Normal enemy Dodge,
+template-retention condition and Critical-effect boundary. Its `ruleId`
+must have a corresponding `uses-effects-of` relation to the canonical
+Face to Face rule. The closed validator rejects missing Roll/LoF/crossing
+conditions, unsupported opposition or Critical results, and computed
+target outcomes. Older zone objects without this additive member remain
+valid; visibility facts still cannot mix with Saving Roll resolution.
+
 The `skill:immunity` definition may also carry the closed
 `facts.immunityInteraction` object. It records the reviewed N5.3 boundary for
 covered Ammunition (treat as Normal and ignore its special effects, Saving
 Roll Attribute MODs and Saving Roll-count MODs), the remaining single Critical
 roll unless Immunity (Critical) applies, and the exceptions for Comms Attacks,
 Non-Lethal and State: Stunned. Only `skill:immunity` may own this fact family.
-The optional `reviewedCombinedCases` array records source-qualified, derived
-examples for an Immunity (ARM) defender against an ARM-based, non-Comms combined
-attack. Every case must specify the Army source Ammunition ID/name, two typed
+The `reviewedCombinedCases` array records source-qualified, derived
+examples for reviewed ARM, BTS and component-specific Immunities against
+non-Comms combined attacks. Every case must specify the Army source Ammunition ID/name, two typed
 component IDs, applicability, original and covered hit/Critical Saving Roll
-counts, Normal treatment, and evidence class `derived-from-pinned-general-rules`.
-The validator rejects unsupported conditions, duplicate IDs, and impossible
-Critical counts. These examples cite Wiki Immunity `oldid=3643` together with
-Combined Ammunition `oldid=3000`. The closed `reviewedVulnerabilityCases`
+counts, treatment or surviving components, and evidence class `derived-from-pinned-general-rules`.
+The validator rejects unsupported conditions, duplicate case identities, and impossible
+Critical counts. For the exact Silenced Pistol AP+Shock/BTS profile, Immunity (AP)
+preserves Shock, Immunity (Shock) preserves AP and its halved-BTS roll, while
+Immunity (BTS) covers both components and treats them as Normal.
+The exact N+E/M CC Weapon case with Immunity (E/M) separately preserves
+Normal's possible Wounds while suppressing E/M's Attribute/count modifiers
+and State effects. Original and covered Saving Roll counts must be integers;
+Boolean and floating-point substitutes are rejected. None of these cases
+cancels the Saving Roll or adjudicates Silent's separate
+conditions. Pinned N5.3 pp. 63, 65, 67, 95–96, 175 and 182 ground that distinction;
+Wiki Immunity `oldid=3643` and Combined Ammunition `oldid=3000` corroborate the
+general rules. The closed `reviewedVulnerabilityCases`
 array records a **separate explicit Wiki example** (`Vulnerability` `oldid=3156`):
 Immunity (Enhanced) cannot be used against weapons with `Viral` in their names
 when the defender also has Vulnerability (Viral). Its predicate refers to a
@@ -132,6 +160,37 @@ Flash Pulse, Immunity (BTS) treats Stun Ammunition as Normal,
 while Non-Lethal and the failed-Saving-Roll Stunned condition survive. The Weapon
 Chart (`oldid=4083`) separately grounds Flash Pulse's printed profile. Do not
 extrapolate these reviewed, non-executable examples to unreviewed combinations.
+
+The separate closed `reviewedCriticalCases` array covers one exact
+non-Comms Weapon for each of the five reviewed combined forms:
+AP+DA, AP+Exp, AP+Shock, AP+T2 and N+E/M. Each fixes the source
+Ammunition ID, Weapon identity, ordered canonical components, original
+hit/Critical counts and remaining counts when only the extra Critical
+roll is removed. AP+T2 additionally preserves its distinct hit/extra-roll
+Wound consequences. The other canonical Ammunition effects remain
+applicable; these cases do not turn covered components into Normal.
+Do not generalize this finite reference set to a Weapon/target evaluator
+or Comms Attacks. See [rules semantics](../../docs/rules-semantics.md#rs-aw-imm-001--immunity-changes-covered-effects-not-the-attack-identity).
+
+### General game-setup source table
+
+Only `rule:game-modes` owns the optional closed
+`facts.gameSetupTable` reference structure. It has scope
+`recommended-general-setup-with-independent-retreat-thresholds` and
+exactly six ordered `rows` with mode name, `armyPoints`, `baseSwc`,
+`tableInches`, `deploymentZoneInches`, `durationMinutes` and
+`retreatThresholdVictoryPoints`. Values use integer inches/minutes/points;
+dimensions have two positive components. The curated loader validates
+shape and basic relationships; `tools.audit_game_mode_source_table`
+checks every published value, source citation and advisory classification
+against the independently reviewed N5.3 pp. 6, 146 and 147 manifests.
+
+This is one published General Rule, not new scenario entities, Unit
+attributes, list-legality evaluation or a live Retreat! threshold
+calculator. The table UI uses the standard horizontally scrollable
+reference-table component; the source text explicitly preserves scenario
+overrides and the distinction between recommended duration and Game
+Round count.
 
 ### Explaining rules interactions
 
@@ -210,7 +269,10 @@ ontology or application runtime behavior.
 the interaction review. It lists every public Skill, Equipment item, and Trait targeted by
 the release named in that scope file, including catalog identities that do not yet have a
 curated rules definition. `rules-interactions/reviews.json` separately tracks every semantic
-rules identity other than `declaration-category` projection records. Entries record the target
+rules identity other than `declaration-category` projection records and
+`faq-ruling` dated clarification overlays. FAQ records have separate source,
+target, applicability and supersession validation and cannot introduce new
+canonical outgoing rule mechanics through this ledger. Entries record the target
 release whose outgoing interactions are being reviewed, whether that review is
 pending/reviewed/inherited, and known future interactions that should survive beyond that
 release. The top-level
@@ -381,7 +443,11 @@ example `rules/n5-core-v5.3.json`. Each file contains:
 - `formatVersion`: `23`
 - `collection`: publication/source collection identity, scope, status, and authority
 - optional `scenarioCollection`: stable scenario-set identity, exact set revision, and ordered members
-- `sources`: source-specific PDF or wiki provenance
+- `sources`: source-specific PDF or wiki provenance. PDF sources may declare
+  an optional 64-character hexadecimal `sha256`; malformed declarations fail
+  validation. The source-evidence auditor verifies supplied bytes separately.
+  Normal rules builds validate the declaration without opening or downloading
+  research PDFs.
 - `vocabularySources`: source references for maintained vocabularies
 - `skillTypes`, `labels`, and typed `records`
 
@@ -414,6 +480,142 @@ retain their own scope, facts, citations, relations, and publication provenance 
 than being field-merged by load order. Related concepts use typed one-way `relations`;
 reverse navigation is derived by `rules.db`.
 
+### Dated FAQ ruling authoring contract (published subset)
+
+`faq-ruling:<stable-slug>` is a canonical ruling identity, independent of
+the page on which it first appeared. FAQ material lives in its own versioned
+source collection rather than inside a core Rule summary. Validated
+`faq-ruling` definitions have a required `facts` object:
+
+- `question` and concise `answer`: non-empty authored text, distinct
+  from the canonical topic's definition/Effects.
+- `topicIds`: unique typed references to the affected rule, Skill,
+  State, Hacking Program, scenario, or other supported topic.
+- `applicability`: non-empty exact scope entries with `rulesRevision`,
+  `effectiveFrom` (ISO date), optional `effectiveUntil` (not before the
+  start), optional `season: {id, revision}`, and optional
+  `scenarioIds`. Missing season/scenario restrictions mean the author
+  deliberately chose general applicability **at the named Rules revision**,
+  not applicability to every edition or future ITS season.
+- `originalPublication`: `collectionId`, `sourceId`, `version`,
+  `publishedDate` and positive printed `page`. The source must be a
+  declared PDF and the original page must be in the record's citations;
+  the version/date must match the source metadata.
+- `selectedCitation: {sourceId, page}` and non-empty `selectionReason`:
+  exact manually reviewed current official primary PDF evidence.
+  `conflictingCitations` lists any other individually cited conflicting
+  pages, rather than silently joining their answers or automatically
+  preferring the newest upload.
+- `supersedes`: unique stable `faq-ruling:*` IDs. Self-supersession
+  and unknown predecessors are rejected at export. Historical predecessor
+  definitions are allowed; every predecessor must have a potentially
+  overlapping rules revision, time window and season/scenario scope.
+  Cycles are rejected. A predecessor is superseded only within the
+  verified overlap, not across its entire history.
+
+**Precedence policy:** The source-native core definition remains intact.
+An applicable official FAQ/erratum is a dated clarification layer, not a
+field-wise overwrite. A source is eligible only after exact rules-revision
+and effective-date matching, plus matching season revision and scenario
+where declared. Cross-posting/carry-forward must preserve the same ruling
+identity and original publication, with additional citations; creating a
+new ruling ID merely because another PDF repeats the answer is prohibited.
+An expressly superseding ruling can replace another only for its verified
+overlapping scope; otherwise both remain evidence. Conflicting answers
+without a reviewed selected citation and reason are **not** resolved by
+document order, language, or publication recency.
+
+**Implementation status:** `src/infinity_db/faq_rulings.py` validates this
+authored contract during curated-document loading. Rules export additionally
+checks that each current ruling's `topicIds` and `scenarioIds` resolve to
+current canonical definitions (scenario IDs must reference actual Scenarios),
+that predecessor IDs exist in retained current/historical definitions,
+that original publication metadata does not drift across editions of one
+ruling, and that supersession is acyclic and has an overlapping
+rules-revision/season/scenario/date scope. Missing ITS scenarios are rejected
+rather than silently accepted as published targets.
+
+**Applicability-aware read model:** `RulesDatabase.faq_rulings_for_topic`
+selects reviewed current FAQ definitions for an explicit typed `topic_id`,
+exact `rules_revision`, and ISO `as_of` date. Optional season ID/revision
+must be provided as a pair; optional scenario identity restricts
+mission-specific rulings. A rule applies only when at least one authored
+scope matches the supplied context, the selected official PDF source is
+published, the original ruling has been published, and its current collection
+is effective by the requested date. A season- or scenario-scoped ruling never
+appears in an unspecified context. Only an applicable reviewed successor
+for the same topic suppresses an applicable predecessor, never a newer
+publication merely by date. Current selections retain question/answer,
+matched scope, original publication, selected source version/date/page,
+selection reason, conflicts, citations and `supersedes` references.
+They do not rewrite a canonical Skill or Rule summary.
+
+`GET /api/faq-rulings?topic_id=skill:camouflage&rules_revision=5.3&as_of=2026-10-15`
+exposes that exact read model; optional `season_id`, `season_revision`,
+`scenario_id`, and `cache_bust` are accepted. Unknown, repeated, missing
+or invalid parameters receive HTTP 400. The API requires explicit context
+and never assumes the newest rules, current season or today's date.
+The default read model does not replay superseded historical collections;
+historical publication selection and verification of ITS season revisions
+not yet present in the corpus remain future work.
+
+Twenty-eight source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
+Nine were introduced in FAQ v0.1: Hacking Device Firewall, undeployed
+Peripherals (Ancillary) counted as Killed (initially Annihilation only),
+Skill declaration details, fired Deployables on vertical surfaces,
+Peripheral declarations, Camouflaged Markers in Total Cover, Special Dice
+in Coordinated Orders, Fireteam minimums after creation, and Fireteam Type
+persistence after member loss.
+
+Nineteen more were **first recorded in official English FAQ v0.0**
+and carried into v0.1. The first eight cover: Prone entry restrictions; vaulting while Climbing or
+Jumping; Direct Template line-of-fire limits; occupied Place Deployable
+locations; multiple Surprise Attack MODs; Sixth Sense with MSV1 in Zero
+Visibility; Protheion overkill; and Camouflage (1 Use) after Infiltration.
+The additional ten cover private ZoC/Coherency deployment checks,
+Prone movement distance, BS Attack MODs and Long Skill Special Dice,
+Controlled Jump/Speedballs, Automatic Skills in Marker State,
+Aerial/Boost restrictions, Stealth and simultaneous AROs,
+Deployable Cover, Disconnected/Unconscious and Cautious Movement,
+and Discover versus Fireteam bonuses. The nineteenth explains the
+main Deployment Phase repositioning restriction and belongs to
+`rule:deployment-phase`, a canonical N5.3 Basic Rules identity.
+All nineteen v0.0 carry-forwards retain three citations **per ruling**:
+original v0.0 English at its
+own printed page, and current v0.1 English/Spanish at their
+respective actual printed pages. `originalPublication` names v0.0,
+while `selectedCitation` names reviewed current v0.1; no new identity
+is created merely because a publication repeats a ruling. The v0.0
+source date uses the 2025-10-15 version-associated official update
+anchor, not an independently verified PDF upload/publication day.
+
+The shared **FAQ clarifications** cards appear beside affected Equipment,
+Scenario, Skill, Trait, State, General Rule, Hacking Program, and
+Fireteam references.
+The Fireteam quick-reference page owns Fireteam FAQs; there is no
+parallel General Rules route for `rule:fireteam-general`.
+The browser's explicit N5.3/v0.1 source snapshot uses
+`as_of=2026-09-01`, not the viewer's clock. Source `publishedDate`
+uses the documented official announcement-era date, not a separately
+verified PDF publication day.
+
+**Published source discrepancy:** The Fireteam *type after member loss*
+ruling uses the consistent English HARIS three-to-two-member example.
+The Spanish v0.1 example has inconsistent member counts; its cited conflict
+is disclosed separately rather than changing the shared Type-persistence rule.
+An official correction remains outstanding; publication does not settle it.
+The main Deployment Phase question belongs to `rule:deployment-phase`,
+not a specialized Skill. The ITS FAQ source audit confirms Area of
+Interest, Crossing Lines and Akial Interference as Season 18 source
+missions; these mission identities are not yet published in the
+current N5 Core scenario catalog. Do not bypass the exporter's
+current-scenario target validation or omit explicit ITS season context
+to force those rulings into the browser. See the private audit in
+`local/audits/faq-its-season18-source-scope-20261015.md`.
+No general-rule cards are created from ITS-only answers without a
+verified season context. Synthetic test rulings are never published.
+FAQ records remain distinct from base definitions.
+
 Collections that contain scenario definitions also require `scenarioCollection`. Its `id` is the
 stable scenario-set identity (for example `n5-core`), `revision` is the exact revision within that
 set (for example `5.3`), and ordered `members` must match the scenario definitions in that source
@@ -430,6 +632,27 @@ list of typed base `ammunition:*` IDs matching the linked segments exactly, sepa
 only by `+`. This source projection is not a curated effect relationship, nor is
 Saving Roll notation parsed to infer composition. See `docs/data-model.md` for the
 current runtime boundary and remaining 1.0 work.
+
+Authoring policy for Weapons: reuse canonical `ammunition:*` summaries
+and their citations via exact profile mappings, rather than repeating
+AP/DA/Shock/other generic mechanics in every Weapon summary. Keep curated
+Weapon text for source-specific attack modes, applicable Saving Roll fields,
+Traits, requirements, and genuinely conditional exceptions. The runtime
+projects shared component summaries as `ammunition_effects`, but does not
+adjudicate combinations or allow the lack of an individual Weapon definition
+to certify complete behavior. The 1.0 Weapon triage keeps such cases pending
+under shared-effects and exception review instead of treating every absent
+Weapon paragraph as a confirmed gameplay fact gap.
+
+`weapon-shared-effect-reviews.json` records explicit source-reviewed cases that
+require **no separate Weapon-specific text**. Each decision identifies the
+published Weapon, N5 Core Rules chart page, rationale, and a SHA-256 of its
+complete Army source profiles. The v3 Weapon audit checks that the source
+identity, chart page, profile fingerprint, absence of source discrepancies,
+and full reviewed ammunition-link coverage still match. Any drift reopens
+review rather than silently preserving acceptance. These approvals concern
+Weapon-specific explanation needs, **not** gameplay resolution or release-wide
+browser acceptance.
 
 Ammunition definitions may additionally publish reviewed, **non-executable**
 `facts.ammunitionResolution` operations. This is a bounded typed-effects pilot; the
@@ -580,7 +803,7 @@ Acceptance by the generic record envelope does not imply a published application
 scenario authoring uses `facts.definitionVersion: 2` and composes explicit references from the same
 collection. Inline v1 records remain supported; export resolves v2 into self-contained v1-shaped
 runtime records. The canonical component/data contract is documented in
-[the scenario model](../../docs/data-model.md#planned-scenario-model-10).
+[the scenario model](../../docs/data-model.md#scenario-model-implemented-core-and-future-extensions).
 
 An optional `scenarioComponents` object has `formatVersion: 1` and a `definitions` array. Each
 definition has a typed `id`, `kind` (`setup`, `geometry`, `objective`, or `end-condition`), `payload`,
@@ -676,14 +899,108 @@ published reference routes. Other source profiles and facts remain unchanged.
 Supplements inherit Army routing from their definition and therefore do not declare
 their own `armyLinks`.
 
-Rule-derived occurrence-parameter display behavior lives under
-`variantSemantics.occurrenceParameters`. The currently standardized parameter is an
-Army extra with `kind: "distance"` and `positiveSign: "preserve|omit|force"`. This
-does not decide whether an Army extra is a distance: imported
-`extras.type == "DISTANCE"` remains authoritative for that source semantic. Reviewed
-exact-source Attribute replacements are kept on `sourceVariant`, not as generic
-occurrence parameters. Other MOD/value forms remain opaque until their semantics are
-reviewed.
+Reviewed occurrence-parameter metadata lives under
+`variantSemantics.occurrenceParameters`. A distance parameter uses
+`{"source":"army-extra","kind":"distance","positiveSign":"preserve|omit|force"}`.
+The imported `extras.type == "DISTANCE"` remains authoritative for distance
+classification; display formatting continues to use the distance-only
+`skill_parameter_semantics()` query.
+
+An opt-in, source-bound numeric Skill modifier uses the following **non-executable**
+contract (not a general parser for `TEXT` extras):
+
+```json
+{
+  "source": "army-extra",
+  "kind": "numeric-mod",
+  "owner": "skill-holder",
+  "target": "opponent",
+  "appliesTo": ["bs-attack-requiring-lof", "discover"],
+  "extraValues": [
+    {"extraId": 6, "extraType": "TEXT", "rawValue": "-3", "modifier": -3}
+  ]
+}
+```
+
+Numeric modifiers currently require a family Skill Army link and a reviewed
+mapping of every recognized `extraId`, exact `extraType` and `rawValue`.
+Allowed targets are `skill-holder` and `opponent`; allowed applications
+are `bs-attack-requiring-lof`, `discover`, `berserk-cc-attack`,
+`dodge-ph-roll`, and `surprise-attack-target-face-to-face-aro`.
+An opponent-target modifier must apply either to the two Mimetism scopes
+or to the single Surprise Attack scope. The latter requires exactly the
+`skill:surprise-attack` family Army link and cannot be combined with the
+Mimetism scopes. It identifies the attacked target's Face to Face ARO Roll;
+the owning rule retains activation conditions and exceptions. It does not
+grant an unconditional negative MOD to enemy rolls. A skill-holder modifier may apply to a Berserk CC Attack
+or Dodge PH Roll. Each mapped source modifier is a nonzero signed integer
+within -12 to +12. Unknown extra signatures, other gameplay scopes and
+unreviewed combinations stay unresolved. A single Skill family can specify
+both numeric-MOD and distance entries; the index must verify every
+co-occurring extra before calling a combined variant reviewed. Generic
+situational Dodge penalties and Dodge (ARM+3) are **not** equivalent to a
+Dodge PH-roll occurrence MOD. The new query
+`RulesDatabase.skill_numeric_mod_semantics()` preserves the full curated
+typed map without exposing it through the legacy distance-only browser
+projection. Schema support alone does not certify any current Army
+occurrence: the source-inventory audit must match the current reviewed
+extra IDs, types and values, and reject unmapped co-occurring extras.
+The N5.3 core collection reviews Mimetism (-3/-6), Berserk (+3/+6),
+and Dodge PH-roll (+3/+6) as `numeric-mod` entries. Surprise Attack now
+maps exact extras 6/7 (`TEXT: -3/-6`) to the target's Face to Face ARO
+scope. The existing FAQ keeps different attackers' modifiers separate;
+this metadata does not calculate stacking or an effective game-state MOD.
+
+The **`reviewed-extra`** kind adds explicit, per-source-ID typed effects
+without broadening numeric MODs or the distance-only browser projection.
+Its supported families are the reviewed `skill:dodge` and
+`skill:super-jump` identities. Each entry requires `extraId`,
+`extraType`, `rawValue`, and a discriminated `effect`:
+
+```json
+{
+  "source": "army-extra",
+  "kind": "reviewed-extra",
+  "extraValues": [
+    {
+      "extraId": 11,
+      "extraType": "DISTANCE",
+      "rawValue": "+2.5",
+      "effect": {
+        "kind": "movement-bonus",
+        "appliesTo": "successful-dodge-movement",
+        "centimeters": 2.5
+      }
+    }
+  ]
+}
+```
+
+The Super-Jump family has one separate, exact `reviewed-extra`:
+source extra ID 304, `TEXT: Jet Propulsion`, with
+`effect: {"kind":"trajectory-control","appliesTo":"super-jump-jet-propulsion"}`.
+It denotes repeated direction/heading changes along a predeclared
+trajectory (N5.3 p. 113), never a distance bonus. The existing distance
+parameter remains independently owned, and no combination is inferred.
+
+The bounded Dodge effects are `opponent-roll-mod` (negative opponent
+Face to Face MOD), `roll-attribute-replacement` (PH value for Dodge),
+`movement-bonus` (positive centimeters, measured using 2.5 cm per
+inch), `special-die` (one extra die on a Dodge Roll), and
+`saving-attribute-mod` (+3 ARM to Saving Rolls after declaring Dodge).
+The latter follows the English/Spanish N5.3 PDFs; their conflict
+with the archived Wiki remains separately documented on the Dodge rule.
+The source's exact spelling (`+1SD`, `ARM +3`, etc.) is retained.
+Unknown IDs, mismatched raw types/values, invalid action scopes and
+duplicate IDs across `numeric-mod` and `reviewed-extra` are rejected.
+`RulesDatabase.skill_reviewed_extra_semantics()` exposes the typed
+mapping to future index generation without creating a gameplay engine.
+No unreviewed Army source extra becomes a specific variant merely
+because its value resembles a known parameter.
+
+Reviewed exact-source Attribute replacements are kept on
+`sourceVariant`, not as generic occurrence parameters. Other MOD/value
+forms remain opaque until their semantics are reviewed.
 
 Skill and State records always carry a `labelIds` array, but it may be empty when the reviewed
 rule does not assign any maintained rules Label. Do not invent a Label merely to satisfy
@@ -696,9 +1013,14 @@ type uses `facts.category = "peripheral-type"` and a validated
 `{"anyOf": [...]}` list containing two or more `hasSkill` predicates. Optional
 structured facts currently cover positive `maxPerController`, reviewed
 `operatingDistance: "unlimited"`, and the Cyberplug `connected` / `autonomous`
-profile modes. Eligibility references must resolve to Skill records in the same
-collection. These facts describe rules semantics only; they do not map Army-local
-Peripheral definitions to canonical Peripheral entities.
+profile modes. Optional effects, restrictions, and clarifications are
+non-empty arrays of maintained-text clauses rendered by the existing General
+Rules reference cards. Keep the shared activation and Disconnected baseline
+with the Peripheral Skill; subtype-local clauses explain Coherency, delegation,
+and exceptions without adding inferred typed relations. Eligibility references
+must resolve to Skill records in the same collection. These facts describe
+rules semantics only; they do not map Army-local Peripheral definitions to
+canonical Peripheral entities.
 
 Trait records may use `facts.sourceIdentity.prefixes` for source labels whose
 parameter value is part of the Army text, for example `Disposable (2)` mapping
@@ -722,18 +1044,22 @@ example:
 
 ```json
 {
-    "sourceId": "wiki-en-20260918-130233",
+    "sourceId": "wiki-en-20260926-200832",
     "member": "Camouflaged_State",
     "heading": "Camouflaged State"
 }
 ```
 
-The checked-in N5 v5.3 collection is bound to
-`data/wiki/WIKI-en 20260918-130233.zip` with SHA-256
-`aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a`,
-acquired 2026-09-18 at 13:02:33 +02:00 with 812 members. Pinned `oldid=` wiki
-sources remain URL-backed because the current mirror intentionally does not
-preserve query-selected historical revisions as separate archive members.
+The checked-in N5 v5.3 collections are bound to
+`data/wiki/WIKI-en 20260926-200832.zip` with SHA-256
+`c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987`,
+acquired 2026-09-26 at 20:08:32 +02:00 with 812 members. This replaces the
+unavailable 2026-09-18 capture: all 74 archived citations and two vocabulary
+references were checked against the newer archive; three citation members needed
+path corrections. The original September 18 bytes are unavailable, so exact
+content equivalence cannot be established. Individually pinned `oldid=`
+revisions remain separate URL-backed source identities, even when archived
+revision payloads can be verified against the history-enabled Wiki capture.
 
 Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was

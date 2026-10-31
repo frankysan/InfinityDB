@@ -90,6 +90,11 @@
   margin: 14px 0 16px;
 }
 
+.army-overview-relationships {
+  margin: 0 0 16px;
+  overflow-wrap: anywhere;
+}
+
 .army-overview-card-footer {
   display: flex;
   align-items: center;
@@ -286,7 +291,8 @@ html:not([data-developer-mode="true"])
 }
 
 .fireteam-member-note,
-.fireteam-member-developer {
+.fireteam-member-developer,
+.fireteam-member-fto-summary {
   display: block;
   margin-top: 5px;
   color: var(--color-text-secondary);
@@ -581,9 +587,47 @@ html:not([data-developer-mode="true"])
   }
 }
 
+/* Dated FAQ clarifications are source publications, not generic "new" rules. */
+.faq-dated-clarification {
+  border-inline-start: 3px solid var(--color-border-strong);
+}
+
+.faq-publication-source {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-2);
+}
+
+.faq-source-discrepancy {
+  margin-top: 12px;
+  border-inline-start: 3px solid var(--color-status-warning-indicator);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-status-warning-surface);
+  color: var(--color-status-warning-text);
+  font-size: var(--font-size-sm);
+}
+
+.faq-source-discrepancy summary {
+  cursor: pointer;
+  color: inherit;
+  font-weight: 650;
+}
+
+.faq-source-discrepancy .detail-source {
+  margin: 8px 0 0;
+  color: inherit;
+}
+
 /* Scenario browser */
 .scenario-catalog {
   width: min(1040px, 100%);
+}
+
+.scenario-collection-controls {
+  padding: 20px 24px 0;
+}
+
+.scenario-collection-field {
+  width: min(100%, 400px);
 }
 
 .scenario-grid {
@@ -754,8 +798,58 @@ html:not([data-developer-mode="true"])
   overflow-wrap: anywhere;
 }
 
+.scenario-fact--source-conflict {
+  box-shadow: inset 3px 0 var(--color-status-warning-indicator);
+}
+
+.scenario-swc-source-conflict {
+  display: block;
+  margin-top: 4px;
+  color: var(--color-status-warning-text);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+.scenario-source-issue[id] {
+  scroll-margin-top: 100px;
+}
+
 .scenario-map-card {
   margin: 0;
+}
+
+.scenario-map-placement-note {
+  margin: 0;
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.scenario-marker-dimensions {
+  display: grid;
+  gap: 8px;
+  padding: 10px 16px 16px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.scenario-marker-dimensions h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.scenario-marker-dimensions .detail-list {
+  margin: 0;
+  padding-inline-start: 22px;
+  font-size: var(--font-size-sm);
+}
+
+.scenario-marker-dimensions .detail-source {
+  margin: 0;
+  line-height: 1.5;
 }
 
 .scenario-map {
@@ -805,6 +899,13 @@ svg.scenario-map .measurement {
   fill: none;
   stroke: var(--color-scenario-map-measurement);
   stroke-width: .05;
+}
+
+svg.scenario-map .center-measurement {
+  fill: none;
+  stroke: var(--color-scenario-map-measurement);
+  stroke-width: .075;
+  stroke-dasharray: .3 .16;
 }
 svg.scenario-map .dimension-label,
 svg.scenario-map .area-size {

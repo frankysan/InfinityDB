@@ -1,0 +1,386 @@
+{
+  "description": "Audit-only question-level inventory of pinned N5 FAQ v0.1 (English printed pages 1–4, cross-checked against Spanish v0.1), with original English v0.0 question/page pins. No new gameplay semantics or historical publication date claims.",
+  "reviewedOn": "2026-10-29",
+  "sourceIds": {
+    "english": "n5-faq-v0.1-en-pdf",
+    "spanish": "n5-faq-v0.1-es-pdf"
+  },
+  "sourceArtifacts": {
+    "n5-faq-v0.0-en-pdf": {
+      "version": "0.0",
+      "localPath": "data/pdf/faq/n5-faqs-v0-0-en.pdf",
+      "filePages": 4,
+      "sha256": "a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043"
+    },
+    "n5-faq-v0.1-en-pdf": {
+      "version": "0.1",
+      "localPath": "data/pdf/faq/n5-faqs-v0-1-en.pdf",
+      "filePages": 5,
+      "sha256": "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa"
+    },
+    "n5-faq-v0.1-es-pdf": {
+      "version": "0.1",
+      "localPath": "data/pdf/faq/esp-faqs-n5-v0-1.pdf",
+      "filePages": 5,
+      "sha256": "7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a"
+    }
+  },
+  "historicalV00CoreQuestions": [
+    ["deployment-phase-reposition-after-measurement", 1],
+    ["deployment-private-zoc-coherency", 1],
+    ["prone-movement-label", 1],
+    ["prone-at-end-of-move-distance", 1],
+    ["vault-during-climb-and-jump", 1],
+    ["bs-attack-roll-label-mods", 1],
+    ["direct-template-secondary-target-los", 1],
+    ["controlled-jump-speedball", 1],
+    ["place-deployable-space-occupied", 1],
+    ["surprise-attack-multiple-users", 1],
+    ["sixth-sense-msv1-zero-visibility", 2],
+    ["marker-automatic-skill-declarations", 2],
+    ["protheion-excess-saving-rolls", 2],
+    ["camouflage-one-use-infiltration-failure", 2],
+    ["aerial-boost-no-silhouette-contact", 2],
+    ["stealth-aro-multiple-activations", 2],
+    ["deployable-cover-no-placement", 2],
+    ["null-state-marker-and-cautious-movement", 2],
+    ["discover-fireteam-sd-bonuses", 2],
+    ["scenario-element-carrier-marker-state", 2]
+  ],
+  "coreQuestions": [
+    [
+      "deployment-phase-reposition-after-measurement",
+      1
+    ],
+    [
+      "deployment-private-zoc-coherency",
+      1
+    ],
+    [
+      "skill-declaration-target-position",
+      1
+    ],
+    [
+      "prone-movement-label",
+      1
+    ],
+    [
+      "prone-at-end-of-move-distance",
+      1
+    ],
+    [
+      "vault-during-climb-and-jump",
+      1
+    ],
+    [
+      "bs-attack-roll-label-mods",
+      1
+    ],
+    [
+      "direct-template-secondary-target-los",
+      1
+    ],
+    [
+      "controlled-jump-speedball",
+      1
+    ],
+    [
+      "hacking-device-firewall-disabled",
+      1
+    ],
+    [
+      "fired-deployable-vertical-surface",
+      1
+    ],
+    [
+      "place-deployable-space-occupied",
+      2
+    ],
+    [
+      "surprise-attack-multiple-users",
+      2
+    ],
+    [
+      "sixth-sense-msv1-zero-visibility",
+      2
+    ],
+    [
+      "marker-automatic-skill-declarations",
+      2
+    ],
+    [
+      "protheion-excess-saving-rolls",
+      2
+    ],
+    [
+      "camouflage-one-use-infiltration-failure",
+      2
+    ],
+    [
+      "aerial-boost-no-silhouette-contact",
+      2
+    ],
+    [
+      "stealth-aro-multiple-activations",
+      2
+    ],
+    [
+      "peripheral-controller-unable-to-declare",
+      2
+    ],
+    [
+      "deployable-cover-no-placement",
+      2
+    ],
+    [
+      "coordinated-order-special-dice",
+      2
+    ],
+    [
+      "null-state-marker-and-cautious-movement",
+      2
+    ],
+    [
+      "camouflaged-marker-total-cover",
+      3
+    ],
+    [
+      "discover-fireteam-sd-bonuses",
+      3
+    ],
+    [
+      "fireteam-type-after-member-loss",
+      3
+    ],
+    [
+      "fireteam-required-member-lost",
+      3
+    ],
+    [
+      "scenario-element-carrier-marker-state",
+      3
+    ],
+    [
+      "undeployed-ancillary-not-killed",
+      4
+    ]
+  ],
+  "historicalV00CarriedSpanishPages": {
+    "deployment-phase-reposition-after-measurement": 1,
+    "deployment-private-zoc-coherency": 1,
+    "prone-movement-label": 1,
+    "prone-at-end-of-move-distance": 1,
+    "vault-during-climb-and-jump": 1,
+    "bs-attack-roll-label-mods": 1,
+    "direct-template-secondary-target-los": 1,
+    "controlled-jump-speedball": 1,
+    "place-deployable-space-occupied": 2,
+    "surprise-attack-multiple-users": 2,
+    "sixth-sense-msv1-zero-visibility": 2,
+    "marker-automatic-skill-declarations": 2,
+    "protheion-excess-saving-rolls": 2,
+    "camouflage-one-use-infiltration-failure": 2,
+    "aerial-boost-no-silhouette-contact": 2,
+    "stealth-aro-multiple-activations": 2,
+    "deployable-cover-no-placement": 3,
+    "null-state-marker-and-cautious-movement": 3,
+    "discover-fireteam-sd-bonuses": 3,
+    "scenario-element-carrier-marker-state": 3
+  },
+  "currentV01NewSpanishPages": {
+    "skill-declaration-target-position": 1,
+    "hacking-device-firewall-disabled": 1,
+    "fired-deployable-vertical-surface": 2,
+    "peripheral-controller-unable-to-declare": 2,
+    "coordinated-order-special-dice": 3,
+    "camouflaged-marker-total-cover": 3,
+    "fireteam-type-after-member-loss": 3,
+    "fireteam-required-member-lost": 3,
+    "undeployed-ancillary-not-killed": 4
+  },
+  "currentV01NewAnswerAnchors": {
+    "skill-declaration-target-position": [
+      "except for the target's position",
+      "Resolution, before measuring Ranges",
+      "active player chooses who declares first"
+    ],
+    "hacking-device-firewall-disabled": [
+      "Comms Attacks against the Trooper",
+      "Hacking Device is operational",
+      "Device is disabled",
+      "Isolated or in any Null State"
+    ],
+    "fired-deployable-vertical-surface": [
+      "placed Token must be fully supported by its surface",
+      "vertical surface cannot support that placement",
+      "addresses firing a Deployable"
+    ],
+    "peripheral-controller-unable-to-declare": [
+      "Controller and all their Peripherals declare the same Skill",
+      "participant that cannot declare the Skill",
+      "declares Idle instead"
+    ],
+    "coordinated-order-special-dice": [
+      "Special Dice MODs do not change a Burst value",
+      "still apply during a Coordinated Order"
+    ],
+    "camouflaged-marker-total-cover": [
+      "Attack forces a Saving Roll",
+      "Camouflaged Marker is revealed",
+      "underlying game element is not hit because it is in Total Cover"
+    ],
+    "fireteam-type-after-member-loss": [
+      "three-member HARIS",
+      "two-member HARIS, not a DUO",
+      "does not override separate rules that cancel the Fireteam"
+    ],
+    "fireteam-required-member-lost": [
+      "minimum membership requirements in Fireteam Charts apply when creating",
+      "FT Master Special Skill has its own rules"
+    ],
+    "undeployed-ancillary-not-killed": [
+      "only counts as Killed if it was deployed during the game",
+      "either entered Dead State or remains in a Null State at the end of the game",
+      "scenario objectives"
+    ]
+  },
+  "historicalV00StableAnswerAnchors": {
+    "deployment-phase-reposition-after-measurement": [
+      "Roll or measurement",
+      "Fireteam Coherency Check"
+    ],
+    "deployment-private-zoc-coherency": [
+      "opponent looking away",
+      "Private Information"
+    ],
+    "prone-movement-label": [
+      "Movement Label",
+      "Jump and Berserk"
+    ],
+    "prone-at-end-of-move-distance": [
+      "moves normally",
+      "end of the movement"
+    ],
+    "vault-during-climb-and-jump": [
+      "General Movement Rules",
+      "including vaulting"
+    ],
+    "bs-attack-roll-label-mods": [
+      "Intuitive Attack and Speculative Attack",
+      "+1 SD MODs do not apply to Long Skills"
+    ],
+    "direct-template-secondary-target-los": [
+      "cannot fire around a corner",
+      "outside the firing Trooper's Line of Fire"
+    ],
+    "controlled-jump-speedball": [
+      "Controlled Jump affects Troopers, not Speedballs"
+    ],
+    "place-deployable-space-occupied": [
+      "another legal position",
+      "Deployable is lost",
+      "Drop Bears (BS Mode)"
+    ],
+    "surprise-attack-multiple-users": [
+      "applies separately",
+      "Coordinated Order",
+      "Controller and Peripheral"
+    ],
+    "sixth-sense-msv1-zero-visibility": [
+      "both Sixth Sense and Multispectral Visor Level 1",
+      "-6 MOD"
+    ],
+    "marker-automatic-skill-declarations": [
+      "changes how an Order activates a Trooper",
+      "restricts AROs"
+    ],
+    "protheion-excess-saving-rolls": [
+      "Further failed Saving Rolls have no effect",
+      "no additional benefit"
+    ],
+    "camouflage-one-use-infiltration-failure": [
+      "Deploying as a Model",
+      "failing an Infiltration Roll uses up the one use"
+    ],
+    "aerial-boost-no-silhouette-contact": [
+      "cannot enter Silhouette contact",
+      "do not activate Boost"
+    ],
+    "stealth-aro-multiple-activations": [
+      "ARO can target",
+      "ARO becomes Idle"
+    ],
+    "deployable-cover-no-placement": [
+      "Nothing can be placed on Deployable Cover",
+      "cannot end a move"
+    ],
+    "null-state-marker-and-cautious-movement": [
+      "Disconnected or Unconscious State",
+      "re-entering Marker State",
+      "Cautious Movement"
+    ],
+    "discover-fireteam-sd-bonuses": [
+      "Neither BS Attack (+1 SD) nor the +1 BS Fireteam bonus applies to Discover"
+    ],
+    "scenario-element-carrier-marker-state": [
+      "scenario element such as a Supply Box",
+      "cannot enter Marker State"
+    ]
+  },
+  "coreScenarioOverlaps": {
+    "scenario-element-carrier-marker-state": [
+      "scenario:supplies"
+    ],
+    "undeployed-ancillary-not-killed": [
+      "scenario:annihilation"
+    ]
+  },
+  "deferredItsOnlyQuestions": [
+    {
+      "page": 3,
+      "subject": "Neutral Troopers such as HVTs blocking movement",
+      "v00Page": 2
+    },
+    {
+      "page": 3,
+      "subject": "Spotlight for Telemetry and HVT: Designation Classified Objectives",
+      "v00Page": 2
+    },
+    {
+      "page": 3,
+      "subject": "Area of Interest: Activate Communication Antenna and Oppose Activation ARO",
+      "v00Page": 3
+    },
+    {
+      "page": 3,
+      "subject": "Crossing Lines: Superior Deployment of Netrods and Imetrons",
+      "v00Page": 3
+    },
+    {
+      "page": 3,
+      "subject": "Akial Interference: retrying a card after a failed Skill Roll",
+      "v00Page": 3
+    },
+    {
+      "page": 3,
+      "subject": "Akial Interference: Predator kills before drawing the card",
+      "v00Page": 3
+    },
+    {
+      "page": 3,
+      "subject": "Akial Interference: tracking cards already used",
+      "v00Page": 3
+    },
+    {
+      "page": 4,
+      "subject": "Crossing Lines: Impetuous movement towards nearest enemy Deployment Zone",
+      "v00Page": 3
+    }
+  ],
+  "notes": [
+    "Page numbers are printed PDF page labels; the PDF cover is file page 1.",
+    "The two core-scenario overlaps appear under ITS in the FAQ but have separately reviewed narrow core applicability. They do not make other ITS FAQ rulings universal.",
+    "This inventory reviews the questions in the pinned FAQ v0.1 PDFs. It does not establish an independently dated PDF publication or full historical ITS applicability.",
+    "No official resolution is inferred from the different English/Spanish Fireteam Haris example."
+  ]
+}

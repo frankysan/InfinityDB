@@ -70,10 +70,10 @@ html:not([data-developer-mode="true"]) .id-column {
 }
 
 .sidebar {
-  --sidebar-section-gap: clamp(28px, 6.5vh, 70px);
-  --sidebar-edge-padding-top: clamp(18px, 3.2vh, 34px);
-  --sidebar-edge-padding-bottom: clamp(18px, 2.8vh, 28px);
-  --sidebar-body-padding: clamp(24px, 6vh, 66px);
+  --sidebar-section-gap: clamp(12px, 2vh, 24px);
+  --sidebar-edge-padding-top: clamp(14px, 2vh, 24px);
+  --sidebar-edge-padding-bottom: clamp(14px, 2vh, 24px);
+  --sidebar-body-padding: clamp(12px, 2.5vh, 24px);
   position: fixed;
   inset: 0 auto 0 0;
   width: 244px;
@@ -117,7 +117,7 @@ html:not([data-developer-mode="true"]) .id-column {
 }
 
 .global-search {
-  margin: 0 0 clamp(18px, 2.6vh, 28px);
+  margin: 0 0 clamp(12px, 1.6vh, 18px);
 }
 
 .global-search input {
@@ -172,7 +172,7 @@ html:not([data-developer-mode="true"]) .id-column {
 }
 
 .settings-menu {
-  margin-top: clamp(20px, 3vh, 32px);
+  margin-top: clamp(12px, 2vh, 20px);
 }
 
 .menu-button {
@@ -212,16 +212,16 @@ html:not([data-developer-mode="true"]) .id-column {
 
 .nav-label {
   padding-left: 14px;
-  margin: 0 0 17px;
+  margin: 0 0 8px;
 }
 
 .nav-item {
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9px;
   color: var(--color-nav-text);
-  padding: clamp(9px, 1.3vh, 13px) 12px;
+  padding: clamp(7px, 0.9vh, 9px) 10px;
   border: 1px solid transparent;
   border-radius: 6px;
   font-size: var(--font-size-md);
@@ -399,7 +399,7 @@ html[data-distance-unit="in"] .setting-choice>span:last-child {
   font-size: var(--font-size-2xl);
   line-height: 1.5;
   letter-spacing: -.3px;
-  margin: 18px 0 28px;
+  margin: 12px 0 16px;
   color: var(--color-nav-text-detail);
 }
 
@@ -1336,11 +1336,41 @@ h1>span {
   margin: 0;
 }
 
-/* Editorial source discrepancies remain readable without competing with rules. */
+/* Provenance is named in text, not inferred from color or publication age. */
+.rules-card-provenance,
+.rules-provenance-caption {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.rules-card-provenance {
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.rules-provenance-label {
+  color: var(--color-text-secondary);
+  font-weight: 650;
+}
+
+.detail-fact-group[data-provenance="reviewed-explanation"] {
+  border-inline-start: 2px solid var(--color-border-muted);
+  padding-inline-start: var(--space-3);
+}
+
 .rules-source-note {
   color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
   line-height: 1.5;
+  border-inline-start: 2px solid var(--color-border-default);
+  padding-inline-start: var(--space-3);
+}
+
+.rules-source-citations {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-2);
 }
 
 .rules-card-titlebar {
@@ -1371,6 +1401,39 @@ h1>span {
 
 .immunity-reviewed-cases li > .detail-source {
   margin: var(--space-1) 0 0;
+}
+
+.weapon-ammunition-effects {
+  display: block;
+  min-width: 0;
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--space-2);
+}
+
+.weapon-ammunition-effects > summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.weapon-ammunition-effect-list {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+}
+
+.weapon-ammunition-effect {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.weapon-ammunition-effect h5,
+.weapon-ammunition-effect p {
+  margin: 0;
+}
+
+.weapon-ammunition-effects > .detail-source {
+  margin-top: var(--space-2);
 }
 
 .ammunition-mechanics-list {
@@ -2759,6 +2822,16 @@ input::placeholder {
   width: 100%;
 }
 
+/* Preserve distinct TAG / other Troop Type outcomes in Booty chart cells. */
+.chart-outcome-branches {
+  white-space: pre-line;
+}
+
+/* Keep compound MetaChemistry effect names legible while allowing wrapping. */
+.chart-outcome-component {
+  display: inline-block;
+}
+
 .data-table--profile .table-column--descriptor {
   width: 100%;
 }
@@ -3511,11 +3584,110 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
 .page-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 15px;
+  gap: 12px 15px;
   padding: 26px 0 32px;
   font-size: var(--font-size-xs);
   color: var(--color-text-footer);
+}
+
+/* Floating notice: visible by default, compact icon when collapsed.
+   Its position is viewport-relative, not anchored to the document footer. */
+.page-footer-notice {
+  position: fixed;
+  z-index: 6;
+  inset-inline-end: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: min(460px, calc(100vw - 24px));
+  max-height: min(60dvh, 420px);
+  overflow-y: auto;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-menu);
+  font-size: var(--font-size-sm);
+}
+
+.page-footer-notice:not([open]) {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.page-footer-notice summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 9px 12px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--color-text-primary);
+  font-weight: 650;
+}
+
+.page-footer-notice summary::-webkit-details-marker {
+  display: none;
+}
+
+.page-footer-notice summary:hover {
+  background: var(--color-surface-interactive-hover);
+}
+
+.page-footer-notice-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.page-footer-notice-title {
+  flex: 1 1 auto;
+}
+
+.page-footer-notice-collapse {
+  font-size: var(--font-size-lg);
+}
+
+.page-footer-notice:not([open]) summary {
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.page-footer-notice:not([open]) .page-footer-notice-title,
+.page-footer-notice:not([open]) .page-footer-notice-collapse {
+  display: none;
+}
+
+.page-footer-notice-body {
+  padding: 0 14px 14px;
+}
+
+.page-footer-notice p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.page-footer:has(.page-footer-notice[open]) {
+  /* Allow the end of the document to scroll clear of the floating panel. */
+  padding-bottom: clamp(190px, 30vh, 270px);
+}
+
+@media (max-width: 700px) {
+  .page-footer-notice[open] {
+    inset-inline-start: max(12px, env(safe-area-inset-left));
+    width: auto;
+  }
 }
 
 .version {
@@ -3632,6 +3804,11 @@ html[data-distance-unit="in"] .unit-extended-statline {
 }
 
 @media (max-width: 920px) {
+  /* The compact sticky navigation must not obscure glossary hash targets. */
+  .glossary-entry {
+    scroll-margin-top: 6rem;
+  }
+
   .unit-extended-profile-body {
     grid-template-columns: 1fr;
   }
@@ -3717,6 +3894,9 @@ html[data-distance-unit="in"] .unit-extended-statline {
     right: 0;
     display: none;
     min-width: 190px;
+    max-height: calc(100dvh - 100px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 12px;
     border: 1px solid var(--color-nav-border);
     border-radius: 6px;
@@ -4227,6 +4407,27 @@ html[data-distance-unit="in"] .unit-extended-statline {
     height: 20px;
   }
 
+  /* Composite option names must not be clipped by the mobile table grid. */
+  .unit-detail .composite-option-table,
+  .unit-detail .composite-option-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .unit-detail .composite-option-table .profile-summary {
+    width: 100%;
+  }
+
+  .unit-detail .composite-option-table .profile-summary> :first-child {
+    width: auto;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  .unit-detail .composite-option-table .order-symbol-name {
+    flex-wrap: wrap;
+  }
+
   .unit-detail .army-profile .loadout-table,
   .unit-detail .army-profile .loadout-table tbody {
     display: block;
@@ -4268,9 +4469,25 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
   .unit-detail .army-profile .loadout-table .profile-summary> :first-child {
     grid-column: auto;
+    width: auto;
     padding-top: 8px;
     color: inherit;
     font-size: var(--font-size-xs);
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  .unit-detail .army-profile .loadout-table .order-symbol-name {
+    flex-wrap: wrap;
+  }
+
+  .unit-detail .army-profile .profile-item-label,
+  .unit-detail .army-profile .profile-attributes-label {
+    padding-left: 12px;
+  }
+
+  .unit-detail .army-profile .loadout-table .profile-item-label {
+    width: auto;
   }
 
   .profile-attributes-label {
@@ -4396,7 +4613,66 @@ html[data-distance-unit="in"] .unit-extended-statline {
 }
 
 @media (max-width: 400px) {
+  /* Preserve both breadcrumbs and the reference tag on narrow detail pages. */
+  .breadcrumb {
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .catalog-tag {
+    flex-shrink: 0;
+  }
+
   h1 {
+    overflow-wrap: break-word;
+  }
+
+  /* Narrow Army profile details need their own full-width value rows. */
+  .unit-detail .army-profile .profile-details-table,
+  .unit-detail .army-profile .profile-details-table tbody,
+  .unit-detail .army-profile .loadout-table,
+  .unit-detail .army-profile .loadout-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .unit-detail .army-profile .loadout-table {
+    margin-left: 0;
+  }
+
+  .unit-detail .army-profile .profile-details-table tbody tr:not(.profile-summary),
+  .unit-detail .army-profile .loadout-table tbody tr:not(.profile-summary) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .unit-detail .army-profile .profile-details-table tbody tr:not(.profile-summary)>*,
+  .unit-detail .army-profile .loadout-table tbody tr:not(.profile-summary)>* {
+    min-width: 0;
+    width: auto;
+  }
+
+  .unit-detail .army-profile .profile-details-table .profile-item-label,
+  .unit-detail .army-profile .loadout-table .profile-item-label,
+  .unit-detail .army-profile .profile-details-table .profile-attributes-label {
+    padding: 10px 12px 2px;
+  }
+
+  .unit-detail .army-profile .profile-details-table .profile-item-list,
+  .unit-detail .army-profile .loadout-table .profile-item-list,
+  .unit-detail .army-profile .profile-details-table .profile-attributes {
+    padding: 4px 12px 12px;
+  }
+
+  .unit-detail .army-profile .loadout-table .profile-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .unit-detail .army-profile .loadout-table .profile-summary> :first-child {
+    grid-column: 1 / -1;
+    width: auto;
+    white-space: normal;
     overflow-wrap: break-word;
   }
 

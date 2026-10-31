@@ -12,6 +12,7 @@ from infinity_db.application_domains import (
 from infinity_db.database.repository import Database, accent_insensitive_key
 from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.weapon_properties import WeaponProperties
 
 
 class GlossaryCatalog:
@@ -21,6 +22,9 @@ class GlossaryCatalog:
         self.database = database
         self.rules_database = rules_database
         self._entries_cache: list[dict[str, Any]] | None = None
+        self._weapon_properties = (
+            WeaponProperties(rules_database) if rules_database is not None else None
+        )
 
     @staticmethod
     def _href(reference: dict[str, str] | None) -> str | None:
@@ -42,7 +46,9 @@ class GlossaryCatalog:
             if not domain.published or not domain.glossary:
                 continue
             for kind in domain.record_kinds:
-                for record in self.rules_database.composed_records_by_kind(kind):
+                for record in self.rules_database.composed_records_by_kind(
+                    kind, include_army_links=(kind == "weapon")
+                ):
                     if not record_matches_domain(domain, record):
                         continue
                     if (record.get("variant_semantics") or {}).get("inheritance") == "source":
@@ -141,6 +147,23 @@ class GlossaryCatalog:
             )
         return entries
 
+    def _weapon_property_entries(self) -> list[dict[str, Any]]:
+        if self._weapon_properties is None:
+            return []
+        return [
+            {
+                "id": item["id"], "kind": "weapon-property",
+                "domain": "Weapon Property",
+                "domain_slug": "weapon-properties",
+                "name": item["name"],
+                "description": item["summary"],
+                "origins": item["origins"],
+                "aliases": [], "embedded": True,
+                "href": item["public_reference"]["href"],
+            }
+            for item in self._weapon_properties.entries()
+        ]
+
     def entries(self) -> list[dict[str, Any]]:
         """Return current canonical Glossary entries in stable display order."""
 
@@ -150,6 +173,7 @@ class GlossaryCatalog:
                     *self._record_entries(),
                     *self._profile_help_entries(),
                     *self._label_entries(),
+                    *self._weapon_property_entries(),
                 ],
                 key=lambda item: (
                     accent_insensitive_key(item["name"]),

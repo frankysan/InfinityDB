@@ -1,0 +1,273 @@
+"""Read-only discovery of non-catalog rules that mention deployed game elements.
+
+The existing deployed-object review only scans Weapon/Equipment definitions.
+Skills, rules, traits, terms and states can describe additional battlefield
+elements or placement methods. Keyword matches are investigation leads, not
+object identities or authority to add delivery edges or Unit uses.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+KINDS = frozenset({"skill", "rule", "trait", "term", "state"})
+FIELDS = ("requirements", "effects", "restrictions", "clarifications", "sourceNotes")
+TERMS = re.compile(r"\b(?:deployables?|tokens?|scenery elements?)\b", re.IGNORECASE)
+# These are source-reviewed decisions, not a generic classification heuristic.
+# Adding another decision requires explicit review of its exact source clause.
+CLASSIFICATIONS = {
+    "skill:minelayer": ("skill", "skill-deployment-method-not-object"),
+    "skill:place-deployable": ("skill", "skill-delivery-method-not-object"),
+    "skill:request-speedball": ("skill", "support-state-token-not-standard-deployable"),
+    "skill:request-specball": ("skill", "support-state-token-not-standard-deployable"),
+    "skill:remdriver": ("skill", "assignment-token-not-independent-object"),
+    "skill:pick-up-supply-boxes": ("skill", "scenario-interaction-not-object-identity"),
+    "rule:peripheral-type:ancillary": ("rule", "deployed-peripheral-trooper-separate-domain"),
+    "rule:scenario:carrying-supply-boxes": ("rule", "scenario-object-outside-weapon-equipment"),
+    "term:token": ("term", "game-element-type-not-instance"),
+    "term:state-token": ("term", "state-indicator-type-not-object-profile"),
+    "term:deployable-equipment": ("term", "game-element-type-not-instance"),
+    "term:deployable-weapon": ("term", "game-element-type-not-instance"),
+    "term:scenery-element": ("term", "game-element-type-not-instance"),
+    "trait:deployable": ("trait", "object-classification-trait-not-instance"),
+    "trait:perimeter": ("trait", "placement-trait-not-object-identity"),
+    "trait:boost": ("trait", "trigger-trait-not-object-identity"),
+    "skill:intuitive-attack": ("skill", "conditional-delivery-skill-not-object"),
+    "skill:dodge": ("skill", "movement-exception-not-object"),
+    "skill:stealth": ("skill", "trigger-interaction-not-object"),
+    "skill:cautious-movement": ("skill", "trigger-interaction-not-object"),
+    "rule:guts-roll": ("rule", "movement-exception-not-object"),
+    "rule:peripheral-type:control": ("rule", "peripheral-role-token-not-object"),
+    "rule:peripheral-type:cyberplug": ("rule", "peripheral-mode-token-not-object"),
+    "state:camouflaged": ("state", "representation-state-not-object-identity"),
+    "state:holomask": ("state", "representation-state-not-object-identity"),
+    "skill:doctor": ("skill", "recovery-roll-not-object"),
+    "skill:engineer": ("skill", "recovery-roll-not-object"),
+    "skill:strategos-l2": ("skill", "command-resource-action-not-object"),
+    "skill:combat-jump": ("skill", "deployment-failure-removes-existing-deployables"),
+    "skill:impersonation": ("skill", "deployment-failure-removes-existing-deployables"),
+    "skill:infiltration": ("skill", "deployment-failure-removes-existing-deployables"),
+    "skill:impetuous": ("skill", "activation-token-not-object"),
+    "state:retreat": ("state", "state-reminder-and-command-spend-not-object"),
+    "skill:no-wound-incapacitation": ("skill", "state-indicator-not-object"),
+    "skill:remote-presence": ("skill", "recovery-reroll-not-object"),
+    "skill:protheion": ("skill", "attribute-tracker-token-not-object"),
+    "skill:g-jumper": ("skill", "active-proxy-token-not-object"),
+    "rule:scenario:dominate-quadrants": ("rule", "scenario-scoring-excludes-deployables"),
+    "rule:hacking-area": ("rule", "existing-repeater-interaction-not-object"),
+    "rule:modifiers-explained": ("rule", "command-token-terminology-not-object"),
+    "rule:coordinated-orders": ("rule", "role-token-and-delivery-choice-not-object"),
+    "rule:deployment-phase": ("rule", "deployment-procedure-not-object"),
+    "rule:army-retreat": ("rule", "army-state-reminder-not-object"),
+    "rule:combat-group": ("rule", "existing-deployable-affiliation-not-object"),
+    "skill:frenzy": ("skill", "indirect-deployable-wounds-not-eligible"),
+    "state:possessed": ("state", "state-profile-and-command-resource-not-object"),
+    "rule:command-token-strategic-use": ("rule", "command-resource-and-support-state-token"),
+    "skill:counterintelligence": ("skill", "command-resource-counteraction-not-object"),
+    "skill:inspiring-leadership": ("skill", "command-order-benefit-not-object"),
+    "skill:transmutation": ("skill", "trooper-profile-representation-not-deployable"),
+    "rule:access-width": ("rule", "scenery-access-gate-label-not-deployed-object"),
+}
+
+# Manually checked against the locally pinned English N5.3 PDF. These six
+# definitions still cite older Wiki revisions in maintained rules data.
+# Keep this audit-only provenance distinct from a published rules citation.
+# After a coordinated rules DB rebuild, migrate the citations to the
+# definitions, then remove the corresponding exceptions here.
+PDF_ONLY_REVIEWS = {
+    "skill:frenzy": (93, "The Trooper’s Deployable Weapons are not taken"),
+    "state:possessed": (169, "by spending 1 Command Token."),
+    "rule:command-token-strategic-use": (128, "to gain 2 Speedball Tokens"),
+    "skill:counterintelligence": (90, "reducing to one the number of Orders the"),
+    "skill:inspiring-leadership": (99, "Command Tokens or extra Orders."),
+    "skill:transmutation": (117, "place a Transmuted (TRANSMUTED) Token"),
+}
+
+
+def candidate_mentions(curated: dict[str, Any]) -> list[dict[str, Any]]:
+    """Retain exact maintained text and citations for conservative manual review."""
+    candidates: list[dict[str, Any]] = []
+    for record in curated["records"]:
+        if record.get("kind") not in KINDS:
+            continue
+        if (record.get("composition") or {}).get("role") != "definition":
+            continue
+        summary = record.get("summary", "")
+        if not isinstance(summary, str):
+            continue
+        facts = record.get("facts") or {}
+        if not isinstance(facts, dict):
+            continue
+        details: dict[str, list[str]] = {}
+        for key in FIELDS:
+            values = facts.get(key, [])
+            if not isinstance(values, list):
+                continue
+            found = [value for value in values if isinstance(value, str) and TERMS.search(value)]
+            if found:
+                details[key] = found
+        if not TERMS.search(summary) and not details:
+            continue
+        candidates.append({
+            "recordId": record["id"],
+            "kind": record["kind"],
+            "summary": summary,
+            "summaryMatches": bool(TERMS.search(summary)),
+            "details": details,
+            "citations": [
+                {"sourceId": cite["sourceId"], "page": cite.get("page")}
+                for cite in record.get("citations", [])
+            ],
+        })
+    return sorted(candidates, key=lambda row: row["recordId"])
+
+
+def validate_reviews(
+    manifest: dict[str, Any],
+    curated: dict[str, Any],
+    candidates: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Validate narrow negative/exception classifications against cited source text."""
+    if manifest.get("formatVersion") != 1:
+        raise ValueError("Unsupported non-catalog game-element review format")
+    indexed = {record["id"]: record for record in curated["records"]}
+    candidate_ids = {entry["recordId"] for entry in candidates}
+    decisions: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for decision in manifest["reviews"]:
+        record_id = decision["recordId"]
+        if record_id in seen:
+            raise ValueError(f"Duplicate non-catalog candidate review: {record_id}")
+        seen.add(record_id)
+        if record_id not in candidate_ids:
+            raise ValueError(f"No current non-catalog candidate mention: {record_id}")
+        record = indexed[record_id]
+        if (record.get("kind"), decision["classification"]) != CLASSIFICATIONS.get(record_id):
+            raise ValueError(f"Unsupported non-catalog classification: {record_id}")
+        summary = record.get("summary", "")
+        if not decision["summaryEvidence"] or decision["summaryEvidence"] not in summary:
+            raise ValueError(f"Non-catalog summary evidence drift: {record_id}")
+        facts = record.get("facts") or {}
+        detail = "\n".join(
+            text for key in FIELDS for text in facts.get(key, [])
+            if isinstance(text, str)
+        )
+        evidence = decision["factsEvidence"]
+        # Some glossary/trait definitions contain only a cited summary.
+        # Any record with structured text must pin at least one exact clause.
+        if not isinstance(evidence, list) or (
+            not evidence and bool(detail.strip())
+        ) or any(not isinstance(text, str) or not text or text not in detail for text in evidence):
+            raise ValueError(f"Non-catalog detailed evidence drift: {record_id}")
+        pages = {
+            cite.get("page") for cite in record.get("citations", [])
+            if cite.get("sourceId") == "n5-core-v5.3-pdf"
+        }
+        pdf_only = PDF_ONLY_REVIEWS.get(record_id)
+        if pdf_only is None:
+            if (
+                decision.get("citationStatus") is not None
+                or decision.get("pdfExcerpt") is not None
+                or not decision["sourcePages"]
+                or not set(decision["sourcePages"]) <= pages
+            ):
+                raise ValueError(f"Missing exact N5.3 non-catalog citation: {record_id}")
+        elif (
+            decision["sourcePages"] != [pdf_only[0]]
+            or (
+                not pages and (
+                    decision.get("citationStatus") != "pdf-verified-manifest-only"
+                    or decision.get("pdfExcerpt") != pdf_only[1]
+                )
+            )
+            or (
+                bool(pages) and (
+                    pages != {pdf_only[0]}
+                    or decision.get("citationStatus") is not None
+                    or decision.get("pdfExcerpt") is not None
+                )
+            )
+        ):
+            raise ValueError(f"Missing reviewed PDF-only provenance: {record_id}")
+        if not decision.get("caveat") or decision.get("objectProfile") is not None:
+            raise ValueError(f"Invalid non-catalog review scope: {record_id}")
+        decisions.append(decision)
+    return decisions
+
+
+def audit_non_catalog_candidates(curated_source: Path, reviews_source: Path) -> dict[str, Any]:
+    """Report current rule-domain discovery and reviewed classification boundaries."""
+    curated_bytes = curated_source.read_bytes()
+    curated = json.loads(curated_bytes)
+    candidates = candidate_mentions(curated)
+    reviews = validate_reviews(
+        json.loads(reviews_source.read_text(encoding="utf-8")), curated, candidates,
+    )
+    reviewed_ids = {item["recordId"] for item in reviews}
+    unreviewed = [
+        candidate for candidate in candidates if candidate["recordId"] not in reviewed_ids
+    ]
+    missing_primary_citation = [
+        candidate for candidate in candidates
+        if not any(
+            citation["sourceId"] == "n5-core-v5.3-pdf"
+            and isinstance(citation["page"], int)
+            for citation in candidate["citations"]
+        )
+    ]
+    reviewed_pdf_only = [
+        decision for decision in reviews
+        if decision.get("citationStatus") == "pdf-verified-manifest-only"
+    ]
+    return {
+        "scope": "non-catalog-keyword-discovery-not-object-inventory",
+        "curatedSourceSha256": hashlib.sha256(curated_bytes).hexdigest(),
+        "reviewedCount": len(reviewed_ids),
+        "candidateCount": len(candidates),
+        "candidates": [
+            {**candidate, "reviewed": candidate["recordId"] in reviewed_ids}
+            for candidate in candidates
+        ],
+        "unreviewed": unreviewed,
+        "reviewedPdfOnly": reviewed_pdf_only,
+        "missingMaintainedN5Citation": missing_primary_citation,
+        "reviews": reviews,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--curated-source", type=Path, default=ROOT / "data/curated/rules/n5-core-v5.3.json",
+    )
+    parser.add_argument(
+        "--reviews", type=Path,
+        default=ROOT / "config/validation/deployed-object-non-catalog-reviews.json",
+    )
+    parser.add_argument("--json", action="store_true", help="Print all candidate evidence")
+    args = parser.parse_args()
+    report = audit_non_catalog_candidates(args.curated_source, args.reviews)
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        print(f"Candidate definitions: {report['candidateCount']}")
+        print(f"Reviewed classifications: {report['reviewedCount']}")
+        print(f"Awaiting manual review: {len(report['unreviewed'])}")
+        print(f"Reviewed with audit-only PDF citation: {len(report['reviewedPdfOnly'])}")
+        print(
+            "Definitions missing maintained N5.3 PDF citation: "
+            f"{len(report['missingMaintainedN5Citation'])}"
+        )
+        for entry in report["unreviewed"]:
+            print(f"  {entry['recordId']}: {', '.join(entry['details']) or 'summary'}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

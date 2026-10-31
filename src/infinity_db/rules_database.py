@@ -225,6 +225,8 @@ def _create_schema(connection: sqlite3.Connection) -> None:
 
 
 def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
+    from infinity_db.faq_rulings import validate_faq_ruling_references
+
     collection_ids: set[str] = set()
     scenario_collection_titles: dict[str, tuple[str, Path]] = {}
     scenario_collection_revisions: dict[tuple[str, str], Path] = {}
@@ -317,12 +319,22 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                             f"{target_id!r} in {path} does not resolve"
                         )
 
+    validate_faq_ruling_references(documents, definitions_by_id)
+
+    # Weapon Properties are reviewed application vocabulary, not rules records.
+    # Validate these explicit references against their maintained registry,
+    # without silently creating additional canonical Ammunition definitions.
+    from infinity_db.weapon_properties import load_weapon_properties
+
+    current_property_ids = {
+        f"weapon-property:{entry['id']}" for entry in load_weapon_properties()
+    }
     for path, document in documents:
         if document["collection"]["status"] != "current":
             continue
         for text_context, text in maintained_text_fields(document):
             for target_id in maintained_text_targets(text, context=f"{path}:{text_context}"):
-                if target_id not in current_ids:
+                if target_id not in current_ids and target_id not in current_property_ids:
                     raise ValueError(
                         f"Maintained-text reference {target_id!r} in "
                         f"{path}:{text_context} does not resolve to a current semantic record"
@@ -579,6 +591,7 @@ def export_rules_database(
     path: Path,
     *,
     finalize: bool = True,
+    restrictions_manifest: dict[str, Any] | None = None,
 ) -> None:
     """Atomically replace a rules database from validated curated documents.
 
@@ -614,6 +627,37 @@ def export_rules_database(
                     f"INSERT INTO {RULES_METADATA_TABLE} (key, value) VALUES (?, ?)",
                     [(key, _json_text(value)) for key, value in metadata.items()],
                 )
+                if restrictions_manifest is not None:
+                    # Explicit opt-in: legacy builds keep byte-identical schema v8.
+                    from infinity_db.restriction_storage import (
+                        CANDIDATE_COMPATIBILITY_VERSION,
+                        CANDIDATE_SCHEMA_VERSION,
+                        stage_candidate_restrictions,
+                    )
+
+                    core = next(
+                        (doc for _, doc in documents
+                         if doc["collection"]["id"] == "n5-core-v5.3"
+                         and doc["collection"]["status"] == "current"),
+                        None,
+                    )
+                    if core is None or not any(
+                        source["id"] == restrictions_manifest.get("sourceId")
+                        for source in core["sources"]
+                    ):
+                        raise ValueError("Restrictions source is not in current core collection")
+                    records = {record["id"]: record for record in core["records"]}
+                    stage_candidate_restrictions(connection, restrictions_manifest, records)
+                    connection.execute(f"PRAGMA user_version = {CANDIDATE_SCHEMA_VERSION}")
+                    connection.execute(
+                        f"UPDATE {RULES_METADATA_TABLE} SET value = ? WHERE key = ?",
+                        (_json_text(CANDIDATE_SCHEMA_VERSION), "formatVersion"),
+                    )
+                    connection.execute(
+                        f"UPDATE {RULES_METADATA_TABLE} SET value = ? WHERE key = ?",
+                        (_json_text(CANDIDATE_COMPATIBILITY_VERSION),
+                         "databaseCompatibilityVersion"),
+                    )
                 connection.execute("ANALYZE")
             if finalize:
                 vacuum_deterministic_sqlite(connection)
@@ -655,6 +699,36 @@ def _variant_semantics(value: str | None) -> dict[str, Any] | None:
         }
         if "positiveSign" in parameter:
             item["positive_sign"] = parameter["positiveSign"]
+        if parameter["kind"] == "reviewed-extra":
+            item["extra_values"] = [
+                {
+                    "extra_id": entry["extraId"],
+                    "extra_type": entry["extraType"],
+                    "raw_value": entry["rawValue"],
+                    "effect": {
+                        **{
+                            key: value
+                            for key, value in entry["effect"].items()
+                            if key != "appliesTo"
+                        },
+                        "applies_to": entry["effect"]["appliesTo"],
+                    },
+                }
+                for entry in parameter["extraValues"]
+            ]
+        if parameter["kind"] == "numeric-mod":
+            item["owner"] = parameter["owner"]
+            item["target"] = parameter["target"]
+            item["applies_to"] = list(parameter["appliesTo"])
+            item["extra_values"] = [
+                {
+                    "extra_id": entry["extraId"],
+                    "extra_type": entry["extraType"],
+                    "raw_value": entry["rawValue"],
+                    "modifier": entry["modifier"],
+                }
+                for entry in parameter["extraValues"]
+            ]
         parameters.append(item)
     result: dict[str, Any] = {"inheritance": raw["inheritance"]}
     if parameters:
@@ -689,21 +763,66 @@ class RulesDatabase:
         with self._connect() as connection:
             if connection.execute("PRAGMA application_id").fetchone()[0] != RULES_APPLICATION_ID:
                 raise ValueError("Unsupported rules database application ID")
-            if connection.execute("PRAGMA user_version").fetchone()[0] != RULES_SCHEMA_VERSION:
+            schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
+            if schema_version not in {RULES_SCHEMA_VERSION, 9}:
                 raise ValueError("Unsupported rules database schema; rebuild rules.db")
-            metadata = connection.execute(
-                f"SELECT value FROM {RULES_METADATA_TABLE} WHERE key = ?",
-                ("databaseCompatibilityVersion",),
-            ).fetchone()
+            metadata_rows = connection.execute(
+                f"SELECT key, value FROM {RULES_METADATA_TABLE} "
+                "WHERE key IN ('formatVersion', 'databaseCompatibilityVersion')"
+            ).fetchall()
+            metadata = {row["key"]: _decode_json(row["value"], None) for row in metadata_rows}
+            expected_compatibility = (
+                RULES_COMPATIBILITY_VERSION if schema_version == RULES_SCHEMA_VERSION else 11
+            )
             if (
-                metadata is None
-                or _decode_json(metadata["value"], None) != RULES_COMPATIBILITY_VERSION
+                metadata.get("databaseCompatibilityVersion") != expected_compatibility
+                or (
+                    schema_version == 9
+                    and metadata.get("formatVersion") != schema_version
+                )
             ):
                 raise ValueError(
                     "Rules database compatibility revision does not match this application"
                 )
+            if schema_version == 9:
+                from infinity_db.restriction_storage import validate_restriction_snapshot
+
+                try:
+                    validate_restriction_snapshot(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError(
+                        "Invalid v9 Restrictions snapshot: missing or damaged table"
+                    ) from exc
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Rules database integrity check failed")
+
+    def restrictions_payload(
+        self, *, subject: str | None = None, record_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Version-aware, negative-only restrictions; never synthesize from v8 relations."""
+        from infinity_db.restriction_storage import (
+            candidate_restrictions_payload,
+            validate_restriction_filters,
+        )
+
+        validate_restriction_filters(subject, record_id)
+        with self._connect() as connection:
+            schema = connection.execute("PRAGMA user_version").fetchone()[0]
+            if schema == RULES_SCHEMA_VERSION:
+                return {
+                    "formatVersion": 1,
+                    "available": False,
+                    "source": None,
+                    "polarity": "prohibition",
+                    "items": [],
+                    "evaluationSupported": False,
+                }
+            if schema != 9:
+                raise ValueError("Unsupported rules database schema")
+            payload = candidate_restrictions_payload(
+                connection, subject=subject, record_id=record_id,
+            )
+            return {**payload, "available": True}
 
     def _records_from_rows(
         self, connection: sqlite3.Connection, rows: list[sqlite3.Row]
@@ -1002,7 +1121,15 @@ class RulesDatabase:
                 if endpoint is None:
                     continue
                 item = {**relation, "record": endpoint}
-                presentation = relation_presentation(relation["type"], relation["direction"])
+                # Source/target IDs are directional even for reverse links. Only
+                # presentation copy is qualified; raw legacy relations remain intact.
+                outbound = relation["direction"] == "outbound"
+                presentation = relation_presentation(
+                    relation["type"],
+                    relation["direction"],
+                    source_record_id=record["id"] if outbound else relation["record_id"],
+                    target_record_id=relation["record_id"] if outbound else record["id"],
+                )
                 if presentation is not None:
                     item["presentation"] = presentation
                 display_relations.append(item)
@@ -1108,9 +1235,10 @@ class RulesDatabase:
             return records[0]
 
     def composed_records_by_kind(
-        self, kind: str, *, scenario_id: str | None = None
+        self, kind: str, *, scenario_id: str | None = None,
+        include_army_links: bool = False,
     ) -> list[dict[str, Any]]:
-        """Return current semantic records of one kind with supplements attached."""
+        """Return current records of a kind, optionally including Army route links."""
         with self._connect() as connection:
             rows = connection.execute(
                 "SELECT r.* FROM records AS r JOIN collections AS c "
@@ -1121,6 +1249,8 @@ class RulesDatabase:
             ).fetchall()
             records = self._compose_records(self._records_from_rows(connection, rows))
             self._attach_reverse_relations(connection, records)
+            if include_army_links:
+                self._attach_current_army_links(connection, records)
             return records
 
     def scenario_publications(self, reference: str) -> list[dict[str, Any]]:
@@ -1431,6 +1561,66 @@ class RulesDatabase:
                 result[skill_ref] = value
             return result
 
+    def skill_numeric_mod_semantics(self) -> dict[ArmyLinkRef, dict[str, Any]]:
+        """Return explicit, reviewed numeric-MOD extra maps; never parse Army labels."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.external_id AS skill_ref, r.variant_json "
+                "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = 'skill' AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND l.entity = 'skill' "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id"
+            ).fetchall()
+            result: dict[ArmyLinkRef, dict[str, Any]] = {}
+            for row in rows:
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict):
+                    continue
+                for parameter in variant.get("occurrence_parameters", []):
+                    if parameter.get("kind") != "numeric-mod":
+                        continue
+                    skill_ref = _army_link_ref(row["skill_ref"])
+                    existing = result.get(skill_ref)
+                    if existing is not None and existing != parameter:
+                        raise ValueError(
+                            f"Skill {skill_ref!r} has conflicting numeric-MOD semantics"
+                        )
+                    result[skill_ref] = dict(parameter)
+            return result
+
+    def skill_reviewed_extra_semantics(self) -> dict[ArmyLinkRef, dict[str, Any]]:
+        """Return source-ID-bound typed extra effects, without interpreting raw labels."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.external_id AS skill_ref, r.variant_json "
+                "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = 'skill' AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND l.entity = 'skill' "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id"
+            ).fetchall()
+            result: dict[ArmyLinkRef, dict[str, Any]] = {}
+            for row in rows:
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict):
+                    continue
+                for parameter in variant.get("occurrence_parameters", []):
+                    if parameter.get("kind") != "reviewed-extra":
+                        continue
+                    skill_ref = _army_link_ref(row["skill_ref"])
+                    existing = result.get(skill_ref)
+                    if existing is not None and existing != parameter:
+                        raise ValueError(
+                            f"Skill {skill_ref!r} has conflicting reviewed-extra semantics"
+                        )
+                    result[skill_ref] = dict(parameter)
+            return result
+
     def catalog_source_variant_semantics(self, entity: str) -> dict[ArmyLinkRef, dict[str, Any]]:
         """Return reviewed exact-source variant semantics for one catalog domain."""
         if entity not in {"skill", "equipment", "weapon"}:
@@ -1625,6 +1815,43 @@ class RulesDatabase:
             }
             for item in self.declaration_categories("skill")
         ]
+
+    def faq_rulings_for_topic(
+        self,
+        topic_id: str,
+        *,
+        rules_revision: str,
+        as_of: str,
+        season_id: str | None = None,
+        season_revision: str | None = None,
+        scenario_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return reviewed FAQ clarifications scoped to the explicit game context."""
+        from infinity_db.faq_rulings import select_applicable_faq_rulings
+
+        records = self.records_by_kind("faq-ruling")
+        with self._connect() as connection:
+            for record in records:
+                selected = record["facts"]["selectedCitation"]
+                source = connection.execute(
+                    "SELECT id, title, version, published_date, url, language "
+                    "FROM sources WHERE collection_id = ? AND id = ?",
+                    (record["collection"]["id"], selected["sourceId"]),
+                ).fetchone()
+                if source is None:
+                    raise ValueError(
+                        f"FAQ ruling {record['id']!r} has no selected source"
+                    )
+                record["selected_source"] = dict(source)
+        return select_applicable_faq_rulings(
+            records,
+            topic_id=topic_id,
+            rules_revision=rules_revision,
+            as_of=as_of,
+            season_id=season_id,
+            season_revision=season_revision,
+            scenario_id=scenario_id,
+        )
 
     def records_by_kind(self, kind: str, *, current_only: bool = True) -> list[dict[str, Any]]:
         """Return curated records of one kind, preferring current collections."""

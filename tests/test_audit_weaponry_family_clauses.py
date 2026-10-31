@@ -88,17 +88,26 @@ def test_markdown_report_does_not_assert_semantic_completeness() -> None:
     assert 'Not verified in the browser' in text
 
 
-def test_checked_in_policy_has_21_distinct_reviewed_source_clauses() -> None:
+def test_checked_in_policy_has_90_distinct_reviewed_source_clauses() -> None:
     path = Path(__file__).resolve().parents[1] / (
         'config/validation/weaponry-family-clauses.json'
     )
     raw = json.loads(path.read_text(encoding='utf-8'))
     policy = _read_policy(path, raw['corePdfSha256'])
     assert [family['name'] for family in policy['families']] == [
-        'Perimeter Weapons', 'Mines',
+        'Perimeter Weapons', 'Mines', 'Armed Turret', 'D-Charges',
+        'Disco Baller', 'Drop Bears', 'Mine Dispenser',
+         'Sepsitor', 'SymbioBomb', 'WildParrot', 'Pitcher', 'Mixed Weapons', 'Weaponry',
     ]
-    assert [len(family['clauses']) for family in policy['families']] == [7, 14]
-    assert len({clause['id'] for f in policy['families'] for clause in f['clauses']}) == 21
+    assert [len(family['clauses']) for family in policy['families']] == [
+        7, 16, 8, 9, 8, 6, 2, 5, 6, 3, 7, 8, 5,
+    ]
+    assert len({clause['id'] for f in policy['families'] for clause in f['clauses']}) == 90
+    assert sum(len(f.get('requiredRelations', [])) for f in policy['families']) == 17
+    assert all(
+        clause['semanticReview']['status'] == 'represented'
+        for family in policy['families'] for clause in family['clauses']
+    )
 
 
 def test_represented_clause_requires_current_curated_summary_anchor() -> None:
@@ -131,12 +140,17 @@ def test_checked_in_semantic_review_separates_full_and_partial_coverage() -> Non
     statuses = [clause['semanticReview']['status']
                 for family in raw['families'] for clause in family['clauses']]
     assert {status: statuses.count(status) for status in set(statuses)} == {
-        'represented': 21,
+        'represented': 90,
     }
 
 
-def test_curated_boost_rules_are_published_with_source_provenance() -> None:
+def test_curated_boost_rules_are_published_with_source_provenance(
+    tmp_path: Path,
+) -> None:
     import sqlite3
+
+    from infinity_db.curated import load_curated_directory
+    from infinity_db.rules_database import export_rules_database
 
     root = Path(__file__).resolve().parents[1]
     curated = json.loads((root / 'data/curated/rules/n5-core-v5.3.json').read_text(
@@ -149,7 +163,9 @@ def test_curated_boost_rules_are_published_with_source_provenance() -> None:
         assert phrase in summary
     assert {'sourceId': 'n5-core-v5.3-pdf', 'page': 69,
             'section': 'Perimeter Weapons and the Boost Trait'} in boost['citations']
-    with sqlite3.connect(root / 'data/generated/rules.db') as db:
+    generated = tmp_path / "current_rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), generated)
+    with sqlite3.connect(generated) as db:
         assert db.execute(
             "SELECT summary FROM records WHERE id = 'trait:boost'"
         ).fetchone()[0] == summary
@@ -199,14 +215,14 @@ def test_mine_family_rules_apply_to_correct_army_weapon_profiles() -> None:
             'weapons', {'id': slug, 'slug': slug, 'variants': []})
         actual = {r['id'] for r in payload.get('rules', [])}
         expected = ({'weapon:mines'} if slug in mine_slugs else set())
-        if slug == 'cybermine':
-            expected.add('weapon:cybermine')
-        if slug == 'para-mine':
-            expected.add('weapon:para-mine')
+        if slug in mine_slugs:
+            expected.add(f'weapon:{slug}')
         if slug == 'chest-mine':
             expected.add('weapon:chest-mine')
         if slug == 'drop-bears':
             expected.add('weapon:drop-bears')
+        if slug == 'mine-dispenser':
+            expected.add('weapon:mine-dispenser')
         assert actual == expected, slug
 
     chest = composed.enrich_catalog_item('weapons', {
@@ -238,3 +254,151 @@ def test_mines_family_summaries_cover_general_and_exception_mechanics() -> None:
                  '[[skill:cc-attack|CC attack]]', 'two uses',
                  'does not affect the bearer'):
         assert text in chest
+
+
+def test_turret_and_d_charges_clauses_are_pinned_to_distinct_family_records() -> None:
+    root = Path(__file__).resolve().parents[1]
+    policy = json.loads((root / 'config/validation/weaponry-family-clauses.json').read_text(
+        encoding='utf-8'
+    ))
+    families = {f['name']: f for f in policy['families']}
+    for name, record_id in (
+        ('Armed Turret', 'weapon:armed-turret'),
+        ('D-Charges', 'weapon:d-charges'),
+    ):
+        family = families[name]
+        assert family['page'] == 70
+        assert len(family['clauses']) >= 8
+        assert all(record_id in clause['relatedCuratedIds'] for clause in family['clauses'])
+        assert all(
+            clause['semanticReview']['curatedId'] == record_id
+            for clause in family['clauses']
+        )
+    ids = {c['id'] for c in families['Armed Turret']['clauses']}
+    assert {'turret-deployable-traits', 'turret-place-in-zoc',
+            'turret-model-not-marker', 'turret-stationary'} <= ids
+    dc_ids = {c['id'] for c in families['D-Charges']['clauses']}
+    assert {'dcharges-share-disposable', 'dcharges-resolution-no-roll',
+            'dcharges-improvised-mod'} <= dc_ids
+
+
+def test_selected_special_weapon_clauses_have_distinct_source_owners() -> None:
+    """Do not conflate the six family mechanics or invent a SymbioBomb profile."""
+    policy = json.loads(Path('config/validation/weaponry-family-clauses.json').read_text(
+        encoding='utf-8'
+    ))
+    families = {f['name']: f for f in policy['families']}
+    expected = {
+        'Disco Baller': (71, 8),
+        'Drop Bears': (71, 6),
+        'Mine Dispenser': (72, 2),
+        'Sepsitor': (73, 5),
+        'SymbioBomb': (74, 6),
+        'WildParrot': (74, 3),
+    }
+    for name, (page, count) in expected.items():
+        family = families[name]
+        assert family['page'] == page
+        assert len(family['clauses']) == count
+        assert all(clause['semanticReview']['status'] == 'represented'
+                   for clause in family['clauses'])
+    symbio = families['SymbioBomb']
+    assert symbio['armyExamples'] == ['SymbioBomb']
+    assert {c['semanticReview']['curatedId'] for c in symbio['clauses']} == {
+        'weapon:symbiobomb',
+    }
+    disco = families['Disco Baller']['clauses']
+    assert {c['semanticReview']['curatedId'] for c in disco} == {
+        'weapon:disco-baller', 'skill:activate-disco-ball',
+    }
+
+
+def test_symbiobomb_printed_traits_have_cited_nonprofile_reference() -> None:
+    root = Path(__file__).resolve().parents[1]
+    curated = json.loads((root / 'data/curated/rules/n5-core-v5.3.json').read_text(
+        encoding='utf-8'
+    ))
+    record = next(r for r in curated['records'] if r['id'] == 'weapon:symbiobomb')
+    summary = record['summary']
+    assert 'Assignable ([[skill:transmutation|Transmutation]])' in summary
+    assert '**Comms Attack**' in summary
+    assert '**Optional**' in summary
+    assert 'no separate attack profile in the Weapon Chart' in summary
+    # The link provides a stable detail page, not an imported attack profile.
+    assert record['armyLinks'] == [{'entity': 'weapon', 'id': 'symbiobomb'}]
+    assert any(
+        c['sourceId'] == 'n5-core-v5.3-pdf' and c['page'] == 74
+        for c in record['citations']
+    )
+
+
+def test_required_typed_relation_is_reported_when_missing() -> None:
+    policy, pages = _fixture()
+    policy['families'][0]['requiredRelations'] = [
+        {'from': 'weapon:pitcher', 'type': 'uses-effects-of',
+         'to': 'equipment:deployable-repeater'},
+    ]
+    with pytest.raises(WeaponryFamilyAuditError, match='typed-relation input'):
+        compare_family_clauses(policy, pages, [], [])
+    unrelated = [
+        ('n5-core-v5.3', 'weapon:pitcher', 'uses-effects-of', 'equipment:repeater')
+    ]
+    result = compare_family_clauses(policy, pages, [], [], unrelated)
+    assert result[0]['requiredRelationChecks'] == [
+        {'from': 'weapon:pitcher', 'type': 'uses-effects-of',
+         'to': 'equipment:deployable-repeater', 'present': False},
+    ]
+    present = [
+        ('n5-core-v5.3', 'weapon:pitcher', 'uses-effects-of',
+         'equipment:deployable-repeater'),
+    ]
+    assert compare_family_clauses(
+        policy, pages, [], [], present
+    )[0]['requiredRelationChecks'][0]['present']
+
+
+def test_required_relation_schema_rejects_malformed_and_duplicate_edges(
+    tmp_path: Path,
+) -> None:
+    policy, _ = _fixture()
+    policy['corePdfSha256'] = 'a' * 64
+    path = tmp_path / 'relation_policy.json'
+    relation = {'from': 'weapon:pitcher', 'type': 'uses-effects-of',
+                'to': 'equipment:deployable-repeater'}
+    policy['families'][0]['requiredRelations'] = [relation, relation]
+    path.write_text(json.dumps(policy), encoding='utf-8', newline='\n')
+    with pytest.raises(WeaponryFamilyAuditError, match='Duplicate required relation'):
+        _read_policy(path, 'a' * 64)
+    policy['families'][0]['requiredRelations'] = [{'from': 'weapon:pitcher'}]
+    path.write_text(json.dumps(policy), encoding='utf-8', newline='\n')
+    with pytest.raises(WeaponryFamilyAuditError, match='Invalid relation evidence'):
+        _read_policy(path, 'a' * 64)
+
+
+def test_checked_in_required_relations_exist_in_current_curated_data() -> None:
+    root = Path(__file__).resolve().parents[1]
+    policy = json.loads((root / 'config/validation/weaponry-family-clauses.json').read_text(
+        encoding='utf-8'
+    ))
+    curated = json.loads((root / 'data/curated/rules/n5-core-v5.3.json').read_text(
+        encoding='utf-8'
+    ))
+    actual = {
+        (record['id'], rel['type'], rel['recordId'])
+        for record in curated['records'] for rel in record.get('relations', [])
+    }
+    required = {
+        (r['from'], r['type'], r['to'])
+        for family in policy['families'] for r in family.get('requiredRelations', [])
+    }
+    assert len(required) == 17
+    assert required <= actual
+    assert {
+        ('weapon:pitcher', 'uses-effects-of', 'equipment:deployable-repeater'),
+        ('weapon:mine-dispenser', 'modifies-use-of', 'weapon:drop-bears'),
+        ('weapon:symbiobomb', 'uses-effects-of', 'weapon:pt'),
+        ('weapon:sepsitor', 'causes-state', 'state:sepsitorized'),
+    } <= required
+    pitcher = next(f for f in policy['families'] if f['name'] == 'Pitcher')
+    assert pitcher['page'] == 73 and len(pitcher['clauses']) == 7
+    assert pitcher['armyExamples'] == ['Pitcher']

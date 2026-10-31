@@ -9,11 +9,13 @@ from urllib.parse import quote
 from infinity_db.application_domains import (
     public_rule_record_domain,
     semantic_record_domain,
+    semantic_record_owner,
 )
 from infinity_db.domain_slugs import (
     route_slug_from_qualified_typed_domain_id,
     route_slug_from_typed_domain_id,
 )
+from infinity_db.equipment_config import CURATED_ONLY_EQUIPMENT_SLUGS
 
 if TYPE_CHECKING:
     from infinity_db.database.repository import Database
@@ -48,6 +50,9 @@ def rule_record_public_reference(
         return None
     domain = public_rule_record_domain(record)
     if domain is None:
+        owner = semantic_record_owner(record)
+        if owner is not None and owner.landing and owner.route is not None:
+            return {"href": owner.route}
         semantic_domain = semantic_record_domain(kind)
         if (
             semantic_domain is None
@@ -102,7 +107,12 @@ def rule_record_public_reference(
                 return {"href": f"/{catalog}/{quote(slug, safe='')}#rule-{fragment}"}
             return {"catalog": catalog, "id": slug}
 
-        if has_army_link or kind != "skill":
+        if has_army_link or kind not in {"skill", "equipment"}:
+            return None
+        # Only explicitly source-independent Equipment has a standalone route.
+        if kind == "equipment" and record.get("id") not in {
+            f"equipment:{slug}" for slug in CURATED_ONLY_EQUIPMENT_SLUGS
+        }:
             return None
 
     record_id = record.get("id")

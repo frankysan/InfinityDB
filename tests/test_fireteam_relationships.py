@@ -11,7 +11,55 @@ from infinity_db.database.fireteam_relationships import (
     validate_application_fireteams,
 )
 from infinity_db.database.schema import create_schema
-from infinity_db.fireteam_semantics import fireteam_limit_kind
+from infinity_db.fireteam_semantics import (
+    excludes_wildcards,
+    fireteam_limit_kind,
+    fto_reference_status,
+    member_reference_issues,
+)
+
+
+@pytest.mark.parametrize(
+    ("resolution", "source_id", "marker", "has_loadouts", "fto_status", "codes"),
+    [
+        ("army", 1, None, False, "not-applicable", []),
+        ("army", 1, "generic", True, "resolved", []),
+        ("army", 1, "2", False, "no-matching-fto-option", ["fto-option-unresolved"]),
+        ("global", 1, "generic", True, "source-unit-context-mismatch",
+         ["unit-not-in-army", "fto-unit-context-mismatch"]),
+        ("unresolved", None, None, False, "not-applicable", ["unit-reference-unresolved"]),
+        ("ambiguous", None, None, False, "not-applicable", ["unit-reference-ambiguous"]),
+        ("army", None, "generic", True, "source-unit-context-mismatch",
+         ["unit-reference-unresolved", "fto-unit-context-mismatch"]),
+    ],
+)
+def test_member_reference_evidence_does_not_grant_unverified_eligibility(
+    resolution: str, source_id: int | None, marker: str | None,
+    has_loadouts: bool, fto_status: str, codes: list[str],
+) -> None:
+    assert fto_reference_status(resolution, source_id, marker, has_loadouts) == fto_status
+    issues = member_reference_issues(resolution, source_id, marker, has_loadouts)
+    assert [issue["code"] for issue in issues] == codes
+    assert all(issue["message"] for issue in issues)
+
+
+@pytest.mark.parametrize(
+    ("observation", "expected"),
+    [
+        ("No Wildcards", True),
+        ("No Wildcards Special Fireteam", True),
+        ("  no WILDCARDS.\n", True),
+        (None, False),
+        ("", False),
+        ("No Wildcards unless specified", False),
+        ("No Wildcards Special Fireteam; other conditions apply", False),
+        ("The Fireteam is automatically Cancelled if its leader leaves.", False),
+    ],
+)
+def test_explicit_wildcard_exclusion_notes(
+    observation: str | None, expected: bool,
+) -> None:
+    assert excludes_wildcards(observation) is expected
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: object) -> None:

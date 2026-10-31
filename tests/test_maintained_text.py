@@ -60,6 +60,18 @@ def test_maintained_text_parser_supports_glossary_game_terms() -> None:
     ]
 
 
+def test_maintained_text_parser_supports_public_general_rules() -> None:
+    assert parse_maintained_text("See [[rule:hacking-area|Hacking Area]].") == [
+        {"type": "text", "text": "See "},
+        {
+            "type": "reference",
+            "target": "rule:hacking-area",
+            "display_text": "Hacking Area",
+        },
+        {"type": "text", "text": "."},
+    ]
+
+
 def test_maintained_text_parser_preserves_explicit_review_markers() -> None:
     tokens = parse_maintained_text(
         "Check [[review-needed:ambiguous-target|HoloMask]] and "
@@ -438,7 +450,11 @@ def test_reviewed_batch_audit_catches_case_and_plural_omissions(
 def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidates() -> None:
     root = Path(__file__).parents[1]
     current = load_curated_directory(root / "data" / "curated")
-    assert collect_review_needed_markers(current) == {}
+    assert collect_review_needed_markers(current) == {
+        "n5-core-v5.3|trait:silent-x": {
+            ("facts.clarifications[]", "scope-unclear", None): 1,
+        },
+    }
 
     documents = copy.deepcopy(current)
     for _, document in documents:

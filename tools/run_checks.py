@@ -7,6 +7,7 @@ import argparse
 import importlib.util
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -31,13 +32,15 @@ except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
     )
     from test_sections import load_test_sections  # type: ignore[no-redef]
 
-STAGE_ORDER = ("test", "lint", "type", "build", "rules")
+STAGE_ORDER = ("test", "lint", "docs", "type", "build", "rules", "preflight")
 PROFILES = {
     "code": ("test", "lint", "type"),
     "data": ("build", "rules"),
     "all": STAGE_ORDER,
 }
 DEFAULT_TEST_WORKERS = "auto"
+DEFAULT_TEST_DISTRIBUTION = "worksteal"
+TEST_DISTRIBUTIONS = ("worksteal", "loadgroup", "browserlanes")
 TEST_SECTIONS = load_test_sections()
 TEST_SECTION_NAMES = tuple(TEST_SECTIONS)
 DEFAULT_LINT_TARGETS = (
@@ -101,7 +104,10 @@ class Reporter:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run InfinityDB tests, linting, type checks, and database-build validation.",
+        description=(
+            "Run InfinityDB tests, linting, Markdown checks, "
+            "type checks, and database builds."
+        ),
     )
     selection = parser.add_mutually_exclusive_group(required=True)
     selection.add_argument(
@@ -125,7 +131,7 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="*",
         help=(
             "Optional pytest/Ruff targets. Test targets should be pytest-compatible "
-            "paths or node IDs; build/rules stages ignore these targets."
+            "paths or node IDs; docs/type/build/rules stages ignore these targets."
         ),
     )
     parser.add_argument(
@@ -153,6 +159,16 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--test-dist",
+        choices=TEST_DISTRIBUTIONS,
+        default=None,
+        help=(
+            "pytest-xdist scheduling strategy; defaults to worksteal. "
+            "Use loadgroup for browser modules or browserlanes to consolidate "
+            "Chromium acceptance into two opt-in worker groups."
+        ),
+    )
+    parser.add_argument(
         "--test-section",
         action="append",
         choices=TEST_SECTION_NAMES,
@@ -170,6 +186,14 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "Also write the complete console transcript to a UTF-8 text file. "
             "With no PATH, use reports/CHECKS YYYYMMDD-HHMMSS.txt."
+        ),
+    )
+    parser.add_argument(
+        "--source-occupancy-gate",
+        action="store_true",
+        help=(
+            "Before the rules stage, require a verified paired Army raw database "
+            "with no populated unrepresented source fields (1.0 release review)."
         ),
     )
     parser.add_argument(
@@ -196,6 +220,7 @@ def stage_definitions(
     build_source: Path | None,
     include_full_assets: bool = False,
     test_workers: str = DEFAULT_TEST_WORKERS,
+    test_distribution: str = DEFAULT_TEST_DISTRIBUTION,
     test_sections: tuple[str, ...] = (),
 ) -> list[Stage]:
     python = sys.executable
@@ -204,7 +229,12 @@ def stage_definitions(
         if name == "test":
             command = [python, "-m", "pytest"]
             if test_workers != "0":
-                command.extend(("-n", test_workers, "--dist", "worksteal"))
+                distribution = (
+                    "loadgroup" if test_distribution == "browserlanes" else test_distribution
+                )
+                command.extend(("-n", test_workers, "--dist", distribution))
+                if test_distribution == "browserlanes":
+                    command.append("--browser-lanes")
             if targets:
                 command.extend(targets)
             asset_marker = (
@@ -221,6 +251,10 @@ def stage_definitions(
         elif name == "lint":
             command = [python, "-m", "ruff", "check"]
             command.extend(targets or DEFAULT_LINT_TARGETS)
+        elif name == "docs":
+            # npm run only invokes the locally pinned dependency; it does not
+            # install packages or contact the registry. Bootstrap with npm ci.
+            command = [shutil.which("npm") or "npm", "run", "lint:docs"]
         elif name == "type":
             command = [python, "-m", "pyright", "--pythonpath", python]
         elif name == "build":
@@ -239,6 +273,8 @@ def stage_definitions(
                 "--output",
                 str(Path(tempfile.mkdtemp(prefix="infinitydb-check-rules-")) / "rules.db"),
             ]
+        elif name == "preflight":
+            command = [python, str(REPO_ROOT / "tools" / "ci_preflight.py"), "--skip-pytest"]
         else:  # pragma: no cover - guarded by argparse/selected_stage_names
             raise ValueError(f"Unknown stage: {name}")
         stages.append(Stage(name=name, command=tuple(command)))
@@ -277,10 +313,11 @@ def git_value(*args: str) -> str:
     return value if completed.returncode == 0 and value else "unknown"
 
 
-def run_stage(stage: Stage, reporter: Reporter) -> StageResult:
+def run_stage(
+    stage: Stage, reporter: Reporter, *, source_occupancy_gate: bool = False
+) -> StageResult:
     reporter.write()
     reporter.write(f"[{stage.name.upper()}]")
-    reporter.write(f"Command: {format_command(stage.command)}")
     reporter.write()
 
     started = time.perf_counter()
@@ -291,29 +328,57 @@ def run_stage(stage: Stage, reporter: Reporter) -> StageResult:
         if not pythonpath
         else str(MODULE_ROOT) + (os.pathsep + pythonpath)
     )
-    try:
-        process = subprocess.Popen(
-            stage.command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            errors="replace",
-            bufsize=1,
-            cwd=REPO_ROOT,
-            env=env,
-        )
-    except OSError as exc:
-        duration = time.perf_counter() - started
-        reporter.write(f"ERROR: could not start command: {exc}")
+    commands: list[tuple[str, ...]] = []
+    if stage.name == "rules":
+        if source_occupancy_gate:
+            commands.append((
+                sys.executable, "-m", "tools.audit_source_presentation",
+                "data/generated/infinity.db", "--require-no-occupied-gaps",
+            ))
+        commands.append((
+            sys.executable, "-m", "tools.audit_rules_interactions",
+            "--check-output", "docs/rules-interaction-checklist.md",
+            "--require-release", "1.0.0",
+        ))
+    commands.append(stage.command)
+    if stage.name == "docs":
+        commands.append((sys.executable, "-m", "tools.check_doc_links"))
+    for command in commands:
+        reporter.write(f"Command: {format_command(command)}")
         reporter.write()
-        reporter.write("Result: ERROR")
-        reporter.write(f"Duration: {duration:.2f} s")
-        return StageResult(stage.name, "ERROR", None, duration)
+        # Python's perf_counter shares a system-wide clock across processes.
+        # Pass the timestamp immediately before spawning pytest so its xdist
+        # plugin can report interpreter and pytest startup separately.
+        command_env = dict(env)
+        if stage.name == "test":
+            command_env["INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER"] = repr(time.perf_counter())
+        else:
+            command_env.pop("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", None)
+        try:
+            process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                errors="replace",
+                bufsize=1,
+                cwd=REPO_ROOT,
+                env=command_env,
+            )
+        except OSError as exc:
+            duration = time.perf_counter() - started
+            reporter.write(f"ERROR: could not start command: {exc}")
+            reporter.write()
+            reporter.write("Result: ERROR")
+            reporter.write(f"Duration: {duration:.2f} s")
+            return StageResult(stage.name, "ERROR", None, duration)
 
-    assert process.stdout is not None
-    for line in process.stdout:
-        reporter.write(line, end="")
-    returncode = process.wait()
+        assert process.stdout is not None
+        for line in process.stdout:
+            reporter.write(line, end="")
+        returncode = process.wait()
+        if returncode != 0:
+            break
     duration = time.perf_counter() - started
     status = "PASS" if returncode == 0 else "FAIL"
     reporter.write()
@@ -358,8 +423,12 @@ def main(argv: list[str] | None = None) -> int:
             build_parser().error("--build-source requires the build stage")
         if args.test_workers is not None and "test" not in stage_names:
             build_parser().error("--test-workers requires the test stage")
+        if args.test_dist is not None and "test" not in stage_names:
+            build_parser().error("--test-dist requires the test stage")
         if args.test_section and "test" not in stage_names:
             build_parser().error("--test-section requires the test stage")
+        if args.source_occupancy_gate and "rules" not in stage_names:
+            build_parser().error("--source-occupancy-gate requires the rules stage")
         test_workers = (
             args.test_workers
             if args.test_workers is not None
@@ -396,6 +465,7 @@ def main(argv: list[str] | None = None) -> int:
                 asset_selection is not None and asset_selection.include_full_assets
             ),
             test_workers=test_workers,
+            test_distribution=args.test_dist or DEFAULT_TEST_DISTRIBUTION,
             test_sections=test_sections,
         )
     except SystemExit as exc:
@@ -410,15 +480,18 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with Reporter(report_path) as reporter:
             write_header(reporter, stages, args.targets, started_at, asset_selection)
-            if args.targets and ({"type", "build", "rules"} & set(stage_names)):
+            if args.targets and ({"docs", "type", "build", "rules"} & set(stage_names)):
                 reporter.write(
                     "Note: positional targets apply to pytest/Ruff only; "
-                    "type uses project Pyright configuration, build uses --build-source, "
-                    "and rules uses curated defaults."
+                    "docs checks repository Markdown, type uses Pyright, "
+                    "build uses --build-source, and rules uses curated defaults."
                 )
             results: list[StageResult] = []
             for stage in stages:
-                result = run_stage(stage, reporter)
+                result = run_stage(
+                    stage, reporter,
+                    source_occupancy_gate=args.source_occupancy_gate and stage.name == "rules",
+                )
                 results.append(result)
                 if args.fail_fast and result.status != "PASS":
                     break

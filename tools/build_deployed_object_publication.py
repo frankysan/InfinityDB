@@ -1,0 +1,169 @@
+"""Build the pinned deployed-object reference JSON for release packaging.
+
+Developer/release build only. Production consumes the generated artifact
+without reading the raw Army normalized tables or working-tree curated JSON.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
+
+from infinity_db.deployed_object_reference import project_deployed_references
+from infinity_db.deployed_object_usage import attach_reviewed_unit_uses
+from tools.audit_deployed_object_inventory import audit_inventory
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def _digest(path: Path) -> str:
+    with path.open("rb") as file:
+        return hashlib.file_digest(file, "sha256").hexdigest()
+
+
+def build_publication(
+    army_db: Path,
+    rules_db: Path,
+    curated_source: Path,
+    delivery_reviews: Path,
+    candidate_reviews: Path,
+) -> dict[str, Any]:
+    """Project only validated review evidence; pin both shipped databases."""
+    report = audit_inventory(army_db, curated_source, delivery_reviews, candidate_reviews)
+    publication = project_deployed_references(report)
+    attach_reviewed_unit_uses(army_db, publication)
+    publication["sourceSnapshot"]["rulesDatabaseSha256"] = _digest(rules_db)
+    publication["sourceSnapshot"]["deliveryReviewSha256"] = report["deliveryReviewSha256"]
+    publication["sourceSnapshot"]["candidateReviewSha256"] = report["candidateReviewSha256"]
+    return publication
+
+
+def publication_bytes(publication: dict[str, Any]) -> bytes:
+    return (json.dumps(
+        publication, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ) + "\n").encode("utf-8")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--army-db", type=Path, default=ROOT / "data/generated/infinity.db")
+    parser.add_argument("--rules-db", type=Path, default=ROOT / "data/generated/rules.db")
+    parser.add_argument(
+        "--curated-source", type=Path,
+        default=ROOT / "data/curated/rules/n5-core-v5.3.json",
+    )
+    parser.add_argument(
+        "--delivery-reviews", type=Path,
+        default=ROOT / "config/validation/deployed-object-delivery-reviews.json",
+    )
+    parser.add_argument(
+        "--candidate-reviews", type=Path,
+        default=ROOT / "config/validation/deployed-object-candidate-reviews.json",
+    )
+    parser.add_argument(
+        "--output", type=Path, default=ROOT / "data/generated/deployed-objects.json"
+    )
+    parser.add_argument("--check", action="store_true", help="Verify an existing artifact only")
+    migration = parser.add_mutually_exclusive_group()
+    migration.add_argument(
+        "--stage-restrictions-v9", type=Path,
+        help="Stage v9 rules.db and paired publication under ignored local/",
+    )
+    migration.add_argument(
+        "--promote-restrictions-v9", type=Path,
+        help="Promote a verified v9 pair with v8 recovery copies",
+    )
+    migration.add_argument(
+        "--refresh-isolated-context-v9", action="store_true",
+        help="Refresh the exact reviewed Isolated State contextual links in a matched v9 pair",
+    )
+    migration.add_argument(
+        "--refresh-core-pdf-pin-v9", action="store_true",
+        help="Pin the reviewed English N5.3 PDF in the matched v9 release pair",
+    )
+    migration.add_argument(
+        "--refresh-pdf-source-pins-v9", action="store_true",
+        help="Verify and publish missing byte pins for already-cataloged PDFs in a v9 pair",
+    )
+    migration.add_argument(
+        "--refresh-variant-semantics-v9", nargs="+", metavar="RECORD_ID",
+        help="Append reviewed occurrence metadata for explicit records in a matched v9 pair",
+    )
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    if (
+        args.stage_restrictions_v9 is not None
+        or args.promote_restrictions_v9 is not None
+        or args.refresh_isolated_context_v9
+        or args.refresh_core_pdf_pin_v9
+        or args.refresh_pdf_source_pins_v9
+        or args.refresh_variant_semantics_v9 is not None
+    ):
+        if args.check:
+            raise ValueError("--check cannot be combined with v9 migration operations")
+        from tools.restrictions_v9_release import (
+            promote_restrictions_v9,
+            refresh_core_pdf_pin_v9_release,
+            refresh_isolated_context_v9_release,
+            refresh_pdf_source_pins_v9_release,
+            refresh_variant_semantics_v9_release,
+            stage_restrictions_v9,
+        )
+
+        if args.refresh_variant_semantics_v9 is not None:
+            backup = refresh_variant_semantics_v9_release(set(args.refresh_variant_semantics_v9))
+            print("Refreshed reviewed variant metadata in v9 release artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_pdf_source_pins_v9:
+            backup = refresh_pdf_source_pins_v9_release()
+            print("Refreshed verified PDF source pins in v9 release artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_core_pdf_pin_v9:
+            backup = refresh_core_pdf_pin_v9_release()
+            print("Refreshed the reviewed English N5.3 source pin in v9 release artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_isolated_context_v9:
+            backup = refresh_isolated_context_v9_release()
+            print("Refreshed the reviewed Isolated links in v9 release artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.stage_restrictions_v9 is not None:
+            report = stage_restrictions_v9(args.stage_restrictions_v9)
+            print("Staged verified v9 rules database and paired deployed-object publication.")
+            print(f"Staged rules SHA-256: {report['staged']['data/generated/rules.db']}")
+            print(f"Staging report: {args.stage_restrictions_v9 / 'staging-report.json'}")
+            print("No tracked artifacts were modified.")
+            return 0
+        if args.promote_restrictions_v9 is None:
+            raise ValueError("Missing v9 promotion staging directory")
+        backup = promote_restrictions_v9(args.promote_restrictions_v9)
+        print("Promoted v9 rules database and matching deployed-object publication.")
+        print(f"Original v8 release pair retained: {backup}")
+        return 0
+    publication = build_publication(
+        args.army_db, args.rules_db, args.curated_source,
+        args.delivery_reviews, args.candidate_reviews,
+    )
+    expected = publication_bytes(publication)
+    if args.check:
+        if not args.output.is_file() or args.output.read_bytes() != expected:
+            raise SystemExit("Deployed-object publication missing or stale; rebuild it")
+        print(f"Deployed-object publication verified: {args.output}")
+    else:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_bytes(expected)
+        print(f"Deployed-object publication built: {args.output}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

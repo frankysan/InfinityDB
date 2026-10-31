@@ -1,0 +1,608 @@
+{
+  "format": "InfinityDB non-catalog game-element candidate reviews",
+  "formatVersion": 1,
+  "scope": "audit-only; does not authorize object identity, attributes, delivery edges, or Unit uses",
+  "reviews": [
+    {
+      "recordId": "skill:minelayer",
+      "classification": "skill-deployment-method-not-object",
+      "sourcePages": [102],
+      "summaryEvidence": "A Deployment Skill that lets the user place carried Weapons or Equipment",
+      "factsEvidence": [
+        "When the user deploys, they may place the allowed number of carried Weapons or Equipment"
+      ],
+      "caveat": "Minelayer is a deployment method for the user's source-listed items, not a separate deployed-object identity. It cannot authorize a generic Mine variant or reverse Unit ownership."
+    },
+    {
+      "recordId": "skill:place-deployable",
+      "classification": "skill-delivery-method-not-object",
+      "sourcePages": [82],
+      "summaryEvidence": "A Common Skill used to place eligible",
+      "factsEvidence": [
+        "The user places one eligible Token or Model without a Roll"
+      ],
+      "caveat": "Place Deployable defines a placement method for eligible source-listed items; its generic Token/Model wording is not a new object identity or a blanket delivery edge."
+    },
+    {
+      "recordId": "skill:request-speedball",
+      "classification": "support-state-token-not-standard-deployable",
+      "sourcePages": [84],
+      "summaryEvidence": "Call two Speedball Tokens",
+      "factsEvidence": [
+        "During the Active Turn, place two 55 mm Speedball Tokens",
+        "Request Speedball cannot be performed partway through the Order Expenditure Sequence."
+      ],
+      "caveat": "N5.3 p. 84 explicitly defines Speedball Tokens as State Tokens for support drops, not as standard targetable Deployable Weapon/Equipment profiles. The Tokens and their single-use contents have no reviewed ARM/BTS/STR/S source profile here and must not receive inferred reverse uses."
+    },
+    {
+      "recordId": "term:token",
+      "classification": "game-element-type-not-instance",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "A Token represents a [[trait:deployable|Deployable]] Weapon or piece of Equipment on the battlefield.",
+      "factsEvidence": [],
+      "caveat": "Glossary term for an on-table representation, not a separate object profile. Resolve any particular Token to its actual source Weapon or Equipment and reviewed delivery before publishing uses."
+    },
+    {
+      "recordId": "term:state-token",
+      "classification": "state-indicator-type-not-object-profile",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "This token is a reminder placed to indicate the effect of a rule, Skill, or game state",
+      "factsEvidence": [],
+      "caveat": "A State Token indicates an effect and is not automatically a targetable Deployable. Specific Speedball and SpecBall tokens are classified by their own source clauses."
+    },
+    {
+      "recordId": "term:deployable-equipment",
+      "classification": "game-element-type-not-instance",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "Equipment with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element",
+      "factsEvidence": [],
+      "caveat": "Generic Deployable Equipment terminology provides neither a concrete Equipment identity nor four-attribute values; review each source item separately."
+    },
+    {
+      "recordId": "term:deployable-weapon",
+      "classification": "game-element-type-not-instance",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "A Weapon with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element",
+      "factsEvidence": [],
+      "caveat": "Generic Deployable Weapon terminology is not an object instance or source-specific delivery edge; source Weapon and mode must be verified separately."
+    },
+    {
+      "recordId": "term:scenery-element",
+      "classification": "game-element-type-not-instance",
+      "sourcePages": [
+        173
+      ],
+      "summaryEvidence": "A Scenery Element is a battlefield game element representing scenery or terrain",
+      "factsEvidence": [],
+      "caveat": "Scenery Element is a class of battlefield game elements, not one universal scenery profile. Deployable Cover remains a separately reviewed S3 example; other scenery requires its own source evidence."
+    },
+    {
+      "recordId": "skill:request-specball",
+      "classification": "support-state-token-not-standard-deployable",
+      "sourcePages": [
+        98
+      ],
+      "summaryEvidence": "Place the 55 mm Token via [[skill:combat-jump|Combat Jump]] with PH 15",
+      "factsEvidence": [
+        "Outside the [[rule:order-expenditure-sequence|Order Expenditure Sequence]], place one 55 mm SpecBall Token",
+        "SpecBall Tokens are [[term:state-token|State Tokens]]: they do not block enemy Movement and cannot be selected as targets for [[equipment:deactivator|Deactivators]]."
+      ],
+      "caveat": "N5.3 p. 98 describes one SpecBall State Token collected by an eligible Spec-Ops Trooper; it is distinct from the two Speedballs in Request Speedball (p. 84). Neither drop Token is a standard targetable four-attribute Deployable. A SpecBot selected as a SpecBall item requires separate evidence and is not classified here."
+    },
+    {
+      "recordId": "skill:remdriver",
+      "classification": "assignment-token-not-independent-object",
+      "sourcePages": [
+        110
+      ],
+      "summaryEvidence": "assigns the user's profile-listed MODs to one deployed Remote",
+      "factsEvidence": [
+        "When the user is deployed, the player places a RemDriver Token beside one Remote already deployed on the game table.",
+        "The RemDriver Token is removed at the end of the Order in which the user enters any Null State."
+      ],
+      "caveat": "RemDriver Token marks a Remote receiving MODs from a separate Trooper. It is not an independently deployed Weapon/Equipment profile, delivery edge or additional Remote carrier."
+    },
+    {
+      "recordId": "rule:peripheral-type:ancillary",
+      "classification": "deployed-peripheral-trooper-separate-domain",
+      "sourcePages": [
+        107,
+        108
+      ],
+      "summaryEvidence": "A Peripheral type with unlimited operating distance that starts undeployed",
+      "factsEvidence": [
+        "An Ancillary [[skill:peripheral|Peripheral]] does not deploy with its Controller. The Controller may place it later using [[skill:place-deployable|Place Deployable]]"
+      ],
+      "caveat": "N5.3 pp. 107-108 explicitly allow a Controller to place its Ancillary Peripheral, which then uses Peripheral activation rules. This is a Peripheral Trooper with its own source Unit/Profile relationships, not a Weapon/Equipment four-stat object or generic source-weapon reverse use. Whether a dedicated peripheral-object reference is needed remains open."
+    },
+    {
+      "recordId": "rule:scenario:carrying-supply-boxes",
+      "classification": "scenario-object-outside-weapon-equipment",
+      "sourcePages": [
+        153
+      ],
+      "summaryEvidence": "Rules for Carrying Supply Boxes.",
+      "factsEvidence": [
+        "Keep the Supply Box Token on the table even if its carrier becomes classified as Null."
+      ],
+      "caveat": "Supply Box Tokens belong to the core Supplies scenario, with scenario-specific representation, carrying and control rules. They are concrete objective elements, not source Weapon/Equipment Deployables or Army roster items; an objective catalog would need separate provenance and presentation."
+    },
+    {
+      "recordId": "skill:pick-up-supply-boxes",
+      "classification": "scenario-interaction-not-object-identity",
+      "sourcePages": [
+        153
+      ],
+      "summaryEvidence": "A Short Skill used by Specialist Troops to collect a Supply Box.",
+      "factsEvidence": [
+        "The Specialist must be in Silhouette contact with a Supply Box Token not being carried by a Model"
+      ],
+      "caveat": "Pick Up Supply Boxes is a scenario Skill acting on a Supplies objective. It creates no additional Supply Box identity, general Deployable placement edge, or Weapon/Equipment Unit use."
+    },
+    {
+      "recordId": "trait:deployable",
+      "classification": "object-classification-trait-not-instance",
+      "sourcePages": [
+        175
+      ],
+      "summaryEvidence": "A [[trait:deployable|Deployable]] Weapon or Equipment is placed as an independent battlefield element",
+      "factsEvidence": [],
+      "caveat": "Deployable describes an eligible Weapon/Equipment class and its general consequences; it does not establish a concrete deployed object, carrier, mode or four-stat profile. Existing reviewed objects remain individually identified."
+    },
+    {
+      "recordId": "trait:perimeter",
+      "classification": "placement-trait-not-object-identity",
+      "sourcePages": [
+        82
+      ],
+      "summaryEvidence": "When placed, applies [[trait:deployable|Deployable]] and Perimeter",
+      "factsEvidence": [
+        "When using [[skill:place-deployable|Place Deployable]], a destination wholly inside the user's [[trait:zone-of-control-zc|Zone of Control]] replaces the usual Silhouette contact.",
+        "The placed item becomes active at the Conclusion of the Order and remains stationary."
+      ],
+      "caveat": "Perimeter changes placement and subsequent behavior for an eligible item. It is not a canonical object identity and cannot equate Crazykoala, Madtraps, WildParrot, FastPanda or other items."
+    },
+    {
+      "recordId": "trait:boost",
+      "classification": "trigger-trait-not-object-identity",
+      "sourcePages": [
+        69,
+        49,
+        72,
+        82
+      ],
+      "summaryEvidence": "Once in play, a Boost weapon must trigger",
+      "factsEvidence": [],
+      "caveat": "Boost describes how an already placed eligible Weapon triggers, moves, detonates and is removed. It does not establish another object or authorize equivalence with Mines; placement, CAMO exceptions and source-specific effects remain separate."
+    },
+    {
+      "recordId": "skill:intuitive-attack",
+      "classification": "conditional-delivery-skill-not-object",
+      "sourcePages": [
+        49
+      ],
+      "summaryEvidence": "or placing a [[trait:deployable|Deployable]] Weapon under its specific conditions",
+      "factsEvidence": [
+        "To place a [[trait:deployable|Deployable]] Weapon whose Trigger Area contains an enemy [[state:camouflaged|Camouflaged]] Marker"
+      ],
+      "caveat": "Intuitive Attack is a conditional declaration and WIP-based delivery method, not a Weapon subtype or a new deployed object. Whether it applies must be reviewed for each item and its placement requirements."
+    },
+    {
+      "recordId": "skill:dodge",
+      "classification": "movement-exception-not-object",
+      "sourcePages": [
+        79,
+        80
+      ],
+      "summaryEvidence": "A Common Skill for evading applicable Attacks and repositioning",
+      "factsEvidence": [
+        "Dodge movement occurs in the Effects step, follows the General Movement Rules, and does not generate reactions or trigger [[trait:deployable|Deployable]] Weapons or Equipment."
+      ],
+      "caveat": "Dodge defines an evasion and movement exception to Deployable triggering; a Dodge-related Token or MOD mention does not introduce a separate battlefield object."
+    },
+    {
+      "recordId": "skill:stealth",
+      "classification": "trigger-interaction-not-object",
+      "sourcePages": [
+        112
+      ],
+      "summaryEvidence": "An Automatic Special Skill that limits ARO generation",
+      "factsEvidence": [
+        "Stealth does not prevent [[trait:deployable|Deployable]] Weapons or Equipment from triggering."
+      ],
+      "caveat": "Stealth affects reaction eligibility, not the identity, activation or delivery edge of a Deployable. Its triggering exception must not be interpreted as an additional source carrier."
+    },
+    {
+      "recordId": "skill:cautious-movement",
+      "classification": "trigger-interaction-not-object",
+      "sourcePages": [
+        32,
+        112
+      ],
+      "summaryEvidence": "A Long Common Skill that can move a Trooper without generating enemy AROs",
+      "factsEvidence": [
+        "With [[skill:stealth|Stealth]] in the Active Turn, the user may declare [[skill:cautious-movement|Cautious Movement]]"
+      ],
+      "caveat": "Cautious Movement's ARO and Stealth interactions do not suppress eligible Deployable triggering or define a deployed object."
+    },
+    {
+      "recordId": "rule:guts-roll",
+      "classification": "movement-exception-not-object",
+      "sourcePages": [
+        38
+      ],
+      "summaryEvidence": "After surviving one or more successful Attacks",
+      "factsEvidence": [
+        "Movement after failing a Guts Roll follows general movement and measuring requirements. It does not generate [[trait:aro|AROs]], trigger [[trait:deployable|Deployable]] Weapons or Equipment"
+      ],
+      "caveat": "Guts Roll movement is a rule-specific exemption from triggering Deployables, not another battlefield object, delivery route or carrier context."
+    },
+    {
+      "recordId": "rule:peripheral-type:control",
+      "classification": "peripheral-role-token-not-object",
+      "sourcePages": [
+        107
+      ],
+      "summaryEvidence": "A Peripheral type with unlimited operating distance and a maximum of three per Controller",
+      "factsEvidence": [
+        "Up to three Control [[skill:peripheral|Peripherals]] form a Control Unit. Designate one [[skill:peripheral|Peripheral]] as Spearhead with a Spearhead Token"
+      ],
+      "caveat": "The Spearhead Token indicates a Control Unit role held by a Peripheral Trooper, not an additional independent Weapon/Equipment Deployable or troop profile."
+    },
+    {
+      "recordId": "rule:peripheral-type:cyberplug",
+      "classification": "peripheral-mode-token-not-object",
+      "sourcePages": [
+        107,
+        108
+      ],
+      "summaryEvidence": "A Peripheral type granted by [[skill:cyberplug]]",
+      "factsEvidence": [
+        "If two deploy, one must be Connected and the other Autonomous. Mark Autonomous units with an Autonomous Token."
+      ],
+      "caveat": "The Autonomous Token marks which Cyberplug Peripheral Trooper operates in the Autonomous Profile. It is not a separate deployed object or an excuse to derive Controller/Army ownership from the Token."
+    },
+    {
+      "recordId": "state:camouflaged",
+      "classification": "representation-state-not-object-identity",
+      "sourcePages": [
+        157
+      ],
+      "summaryEvidence": "A Marker State that hides the represented Trooper, Weapon, or Equipment",
+      "factsEvidence": [
+        "A successful [[skill:discover]] Roll reveals the Marker and replaces it with the corresponding Model or Token."
+      ],
+      "caveat": "A Camouflaged Marker is a representation of an existing Trooper, Weapon or Equipment. The Marker does not define a generic Mine or a new independent object identity; its represented item must be resolved separately."
+    },
+    {
+      "recordId": "state:holomask",
+      "classification": "representation-state-not-object-identity",
+      "sourcePages": [
+        164
+      ],
+      "summaryEvidence": "A disguise State that represents the bearer as another same-faction Trooper",
+      "factsEvidence": [
+        "A Trooper in [[state:holomask|HoloMask State]] cannot copy [[skill:hacker]] or Hackable status or items with the [[trait:deployable]] Trait represented by Tokens or Models."
+      ],
+      "caveat": "HoloMask changes a Trooper's presentation and explicitly excludes copying Deployable items represented by Tokens or Models. Neither the disguise nor its restriction creates a new deployed-object profile."
+    },
+    {
+      "recordId": "skill:combat-jump",
+      "classification": "deployment-failure-removes-existing-deployables",
+      "sourcePages": [
+        89
+      ],
+      "summaryEvidence": "A Long Special Skill that keeps the user off-table",
+      "factsEvidence": [
+        "A failed landing moves the user to the player's Deployment Zone edge"
+      ],
+      "caveat": "Combat Jump affects the Trooper and independently sourced carried deployables. A failed landing removes placed eligible items; no generic object identity or carrier link is created."
+    },
+    {
+      "recordId": "skill:impersonation",
+      "classification": "deployment-failure-removes-existing-deployables",
+      "sourcePages": [
+        96
+      ],
+      "summaryEvidence": "A Deployment Skill that lets the user deploy forward while disguised",
+      "factsEvidence": [
+        "A failed WIP Roll places the user in their own Deployment Zone"
+      ],
+      "caveat": "Impersonation's failed deployment removes eligible carried Deployables and changes the Trooper's representation; no new object profile follows."
+    },
+    {
+      "recordId": "skill:infiltration",
+      "classification": "deployment-failure-removes-existing-deployables",
+      "sourcePages": [
+        97
+      ],
+      "summaryEvidence": "A Deployment Skill that allows forward deployment",
+      "factsEvidence": [
+        "If the Roll fails, the user is moved to their own Deployment Zone edge"
+      ],
+      "caveat": "Failed Infiltration removes independently sourced deployed equipment/weapons accompanying the Trooper; it does not define a device variant or ownership edge."
+    },
+    {
+      "recordId": "skill:impetuous",
+      "classification": "activation-token-not-object",
+      "sourcePages": [
+        97
+      ],
+      "summaryEvidence": "An obligatory Automatic Special Skill that grants one activation",
+      "factsEvidence": [
+        "During the Tactical Phase, place an Impetuous Token next to the user"
+      ],
+      "caveat": "Impetuous Tokens mark a Trooper's activation entitlement and are removed when spent; they are not independent deployed Weapon or Equipment profiles."
+    },
+    {
+      "recordId": "state:retreat",
+      "classification": "state-reminder-and-command-spend-not-object",
+      "sourcePages": [
+        170
+      ],
+      "summaryEvidence": "A State applied when an army enters Retreat!",
+      "factsEvidence": [
+        "[[state:retreat|Retreat! State]] ends when the army leaves the [[rule:army-retreat|Retreat!]] situation"
+      ],
+      "caveat": "Retreat! and Command Token references govern an existing Trooper/Army State, not a separate deployed game element; Marker cancellation changes representation only."
+    },
+    {
+      "recordId": "skill:no-wound-incapacitation",
+      "classification": "state-indicator-not-object",
+      "sourcePages": [
+        104
+      ],
+      "summaryEvidence": "An optional Automatic Special Skill that lets an [[state:unconscious|Unconscious]] Trooper",
+      "factsEvidence": [
+        "The user can be healed; removing one Wound returns it to [[state:normal]] and removes the NWI Token."
+      ],
+      "caveat": "NWI Token indicates an existing Trooper's condition and is removed on recovery. It is not a targetable deployed object."
+    },
+    {
+      "recordId": "skill:protheion",
+      "classification": "attribute-tracker-token-not-object",
+      "sourcePages": [
+        109
+      ],
+      "summaryEvidence": "Protheion uses Wounds inflicted through a [[skill:cc-attack]]",
+      "factsEvidence": [
+        "Indicate the increase with a Power-Up 1 or Power-Up 2 Token."
+      ],
+      "caveat": "Power-Up Tokens track an existing Trooper's increased VITA; they do not define new Weapon/Equipment or Trooper identities."
+    },
+    {
+      "recordId": "skill:g-jumper",
+      "classification": "active-proxy-token-not-object",
+      "sourcePages": [
+        93
+      ],
+      "summaryEvidence": "An obligatory Automatic Special Skill that represents one Trooper through two or three Proxy Models",
+      "factsEvidence": [
+        "Marker and [[state:hidden-deployment|Hidden Deployment]] status are not canceled merely by placing or assigning the Active Proxy Token."
+      ],
+      "caveat": "The Active Proxy Token identifies the active Proxy of an existing G: Jumper Trooper. It is a status/role indicator, not an independent object or Unit."
+    },
+    {
+      "recordId": "rule:scenario:dominate-quadrants",
+      "classification": "scenario-scoring-excludes-deployables",
+      "sourcePages": [
+        151
+      ],
+      "summaryEvidence": "Rules for Dominate Quadrants.",
+      "factsEvidence": [
+        "Tokens and Markers for weapons, Equipment, or anything other than a Trooper do not contribute Victory Points."
+      ],
+      "caveat": "Domination excludes Weapon/Equipment Tokens and Markers from the scoring rule. This is an objective eligibility restriction, not a new deployed object."
+    },
+    {
+      "recordId": "skill:doctor",
+      "classification": "recovery-roll-not-object",
+      "sourcePages": [
+        90
+      ],
+      "summaryEvidence": "A Short Special Skill that normally recovers a [[state:unconscious|Unconscious]] VITA Trooper",
+      "factsEvidence": [
+        "Doctor (2W) removes two Wounds on successful ordinary recovery."
+      ],
+      "caveat": "Doctor is recovery and State cancellation; its Command Token rerolls concern a spendable resource, not a deployed Token or newly created target identity."
+    },
+    {
+      "recordId": "skill:engineer",
+      "classification": "recovery-roll-not-object",
+      "sourcePages": [
+        91
+      ],
+      "summaryEvidence": "A Short Special Skill that repairs STR targets",
+      "factsEvidence": [
+        "With [[skill:remote-presence|Remote Presence]], one successful repair Roll removes enough Wounds"
+      ],
+      "caveat": "Engineer repairs existing STR targets or cancels States. Command Token rerolls do not create an object or establish a carrier."
+    },
+    {
+      "recordId": "skill:strategos-l2",
+      "classification": "command-resource-action-not-object",
+      "sourcePages": [
+        113
+      ],
+      "summaryEvidence": "Level 2 of [[skill:strategos]].",
+      "factsEvidence": [
+        "During the Tactical Phase's Executive Use of Command Tokens step"
+      ],
+      "caveat": "Strategos L2 moves Troopers and Peripherals between Combat Groups without Command Token expenditure. This is a command effect, not a Token or deployed object."
+    },
+    {
+      "recordId": "skill:remote-presence",
+      "classification": "recovery-reroll-not-object",
+      "sourcePages": [
+        110
+      ],
+      "summaryEvidence": "An obligatory Automatic Special Skill for STR Troopers",
+      "factsEvidence": [
+        "When [[skill:engineer]] or another rule explicitly permits it, Command Tokens may reroll the failed repair Roll."
+      ],
+      "caveat": "Remote Presence changes a STR Trooper's Unconscious behavior; the Command Token reroll refers to a resource rather than a standalone battlefield object."
+    },
+    {
+      "recordId": "rule:hacking-area",
+      "classification": "existing-repeater-interaction-not-object",
+      "sourcePages": [
+        55,
+        57
+      ],
+      "summaryEvidence": "A [[skill:hacker]] can use Hacking Programs within their Hacking Area",
+      "factsEvidence": [
+        "The Hacking Area includes the [[skill:hacker]]'s own [[trait:zone-of-control-zc|Zone of Control]]"
+      ],
+      "caveat": "Hacking Area uses existing Repeater and Deployable Repeater equipment; this does not add a new Repeater object or Army carrier relationship."
+    },
+    {
+      "recordId": "rule:modifiers-explained",
+      "classification": "command-token-terminology-not-object",
+      "sourcePages": [
+        68
+      ],
+      "summaryEvidence": "A Modifier (**MOD**) is a bonus (+) or penalty (-)",
+      "factsEvidence": [
+        "A named ReRoll is one die from the relevant Roll, not a Command Token reroll"
+      ],
+      "caveat": "Modifier and ReRoll terminology distinguishes a named reroll from Command Token expenditure; it describes no physical Token or deployed object."
+    },
+    {
+      "recordId": "rule:coordinated-orders",
+      "classification": "role-token-and-delivery-choice-not-object",
+      "sourcePages": [
+        129,
+        130
+      ],
+      "summaryEvidence": "A Coordinated Order lets up to four eligible Troopers act together",
+      "factsEvidence": [
+        "Name one participating Trooper as Spearhead and place a Spearhead Token beside them."
+      ],
+      "caveat": "A Spearhead Token marks the role of an existing participant. The Targetless/Deployable exception allows different target points, not inferred object identities or sources."
+    },
+    {
+      "recordId": "rule:deployment-phase",
+      "classification": "deployment-procedure-not-object",
+      "sourcePages": [
+        15
+      ],
+      "summaryEvidence": "After the [[rule:initiative-roll|Initiative Roll]], the players deploy their Troopers before the game begins",
+      "factsEvidence": [
+        "Rules such as [[skill:forward-deployment|Forward Deployment]]"
+      ],
+      "caveat": "Deployment Phase governs reserve ordering and adjustments such as Command Tokens. It does not define new deployed objects or deliveries."
+    },
+    {
+      "recordId": "skill:frenzy",
+      "classification": "indirect-deployable-wounds-not-eligible",
+      "sourcePages": [
+        93
+      ],
+      "summaryEvidence": "An obligatory Automatic Special Skill that, after the user directly wounds or kills an enemy",
+      "factsEvidence": [
+        "Wounds caused by the user’s Weapons with the [[trait:deployable]] Trait do not satisfy the Requirement."
+      ],
+      "caveat": "N5.3 p. 93 excludes wounds from the user's Deployable Weapons from qualifying Frenzy. This distinction concerns ownership and a Skill trigger, not a new object or implicit carrier edge; the maintained definition still cites a Wiki revision only."
+    },
+    {
+      "recordId": "state:possessed",
+      "classification": "state-profile-and-command-resource-not-object",
+      "sourcePages": [
+        169
+      ],
+      "summaryEvidence": "A Null State in which control of the affected Trooper passes to the opposing player",
+      "factsEvidence": [
+        "The owning player may cancel Possessed State with a Command Token in the specified Tactical Phase step"
+      ],
+      "caveat": "N5.3 p. 169 changes control and the profile used by an existing Trooper. The Command Token cancels that State; it is not an independently deployed item or another owner/carrier."
+    },
+    {
+      "recordId": "rule:command-token-strategic-use",
+      "classification": "command-resource-and-support-state-token",
+      "sourcePages": [
+        128
+      ],
+      "summaryEvidence": "The Strategic Use mode of Command Tokens",
+      "factsEvidence": [
+        "Strategic Use can alter Deployment, remove Regular Orders, limit enemy Command Token use, place a Trooper into [[state:suppressive-fire]], or grant Speedball Tokens"
+      ],
+      "caveat": "N5.3 p. 128 Strategic Use spends resource Command Tokens and optionally grants two Speedball State Tokens. The reviewed Speedball classification is separate; Strategic Use does not establish a conventional Deployable object or source Weapon/Equipment carrier."
+    },
+    {
+      "recordId": "skill:counterintelligence",
+      "classification": "command-resource-counteraction-not-object",
+      "sourcePages": [
+        90
+      ],
+      "summaryEvidence": "An optional private Automatic Special Skill that counters either of two effects",
+      "factsEvidence": [
+        "Alternatively, if the opponent uses Strategic Use to limit your Command Token spending to one during your first Turn"
+      ],
+      "caveat": "N5.3 p. 90 Counterintelligence modifies opponents' Strategic Command Token effects on Orders or Command Token spending. It neither places a battlefield Token nor creates a Weapon/Equipment identity."
+    },
+    {
+      "recordId": "skill:inspiring-leadership",
+      "classification": "command-order-benefit-not-object",
+      "sourcePages": [
+        99
+      ],
+      "summaryEvidence": "An obligatory Automatic Special Skill that, while its user is the active [[skill:lieutenant]]",
+      "factsEvidence": [
+        "The Special Lieutenant Order may be used to declare a Coordinated Order including the user without the normal Command Token or extra Order expenditure."
+      ],
+      "caveat": "N5.3 p. 99 permits a Coordinated Order using the Special Lieutenant Order without spending additional Command Tokens. This is an Order/resource benefit, not a deployed object or carrier relationship."
+    },
+    {
+      "recordId": "rule:access-width",
+      "classification": "scenery-access-gate-label-not-deployed-object",
+      "sourcePages": [145],
+      "summaryEvidence": "Their gate Tokens label scenery openings, not deployed Weapons or Equipment.",
+      "factsEvidence": [
+        "Players agree on the Access Width of scenery openings during table setup and mark each as a Narrow Gate or Wide Gate Token.",
+        "Access Width restrictions take priority over the General Movement Rules and the Requirements of Skills with the Movement Label. A Trooper lacking the required Silhouette cannot pass.",
+        "Troopers in [[state:prone|Prone State]] with Silhouette X use the Silhouette Attribute on their Unit Profile when checking access restrictions."
+      ],
+      "caveat": "N5.3 p. 145 uses Narrow Gate and Wide Gate Tokens to label agreed scenery openings. They are not independent deployed Weapon or Equipment profiles, nor reviewed delivery edges or Army Unit carriers. A Prone Trooper still checks the Unit Profile Silhouette Attribute; no additional can-pass attribute is inferred."
+    },
+    {
+      "recordId": "rule:army-retreat",
+      "classification": "army-state-reminder-not-object",
+      "sourcePages": [146],
+      "summaryEvidence": "[[rule:army-retreat|Retreat!]] is an **army-level situation**",
+      "factsEvidence": [
+        "cancel the army's [[rule:army-retreat|Retreat!]], remove its Tokens and cancel the Troopers' [[state:retreat|Retreat! States]]"
+      ],
+      "caveat": "N5.3 p. 146 removes Retreat Tokens when the army recovers. These indicate an army/Trooper condition, not an independent deployed Weapon or Equipment profile or a delivery relationship."
+    },
+    {
+      "recordId": "rule:combat-group",
+      "classification": "existing-deployable-affiliation-not-object",
+      "sourcePages": [10],
+      "summaryEvidence": "A Combat Group is a closed group of Troopers assigned when creating an Army List.",
+      "factsEvidence": [
+        "A Marker representing a [[trait:deployable|Deployable]] Weapon or piece of Equipment belongs to the Combat Group of the Trooper that deployed it."
+      ],
+      "caveat": "N5.3 p. 10 assigns an existing deployed Weapon or Equipment Marker to its placing Trooper's Combat Group. This is affiliation and Open Information, not a new object identity or a rule permitting deployment. Command Token transfer exceptions concern existing Troopers."
+    },
+    {
+      "recordId": "skill:transmutation",
+      "classification": "trooper-profile-representation-not-deployable",
+      "sourcePages": [
+        117
+      ],
+      "summaryEvidence": "An Automatic Special Skill family that changes a Trooper between Unit Profiles",
+      "factsEvidence": [
+        "When Transmutation occurs, the first Unit Profile and its Model or representation are replaced by the second Unit Profile and corresponding Model or Token."
+      ],
+      "caveat": "N5.3 p. 117 describes replacement of an existing Trooper's profile/Model or indication of its new form using a Transmuted/Seed-Embryo Token. This is a Trooper representation, not a Weapon/Equipment Deployable; variant-specific behavior must not be collapsed into a single object identity."
+    }
+  ]
+}

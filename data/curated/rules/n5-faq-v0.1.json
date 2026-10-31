@@ -1,0 +1,1792 @@
+{
+  "format": "InfinityDB curated reference",
+  "formatVersion": 23,
+  "collection": {
+    "id": "n5-faq-v0.1",
+    "title": "N5 FAQ v0.1",
+    "domain": "faq",
+    "status": "current",
+    "effectiveFrom": "2026-09-01",
+    "authority": "primary"
+  },
+  "vocabularySources": {
+    "skillTypes": [],
+    "labels": []
+  },
+  "skillTypes": [],
+  "labels": [],
+  "sources": [
+    {
+      "id": "n5-faq-v0.1-en-pdf",
+      "kind": "pdf",
+      "title": "N5 FAQs — English",
+      "version": "0.1",
+      "publishedDate": "2026-09-01",
+      "localPath": "data/pdf/faq/n5-faqs-v0-1-en.pdf",
+      "sha256": "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa",
+      "pageCount": 5,
+      "authority": "primary",
+      "url": "https://experience.corvusbelli.com/en/infinity/resources"
+    },
+    {
+      "id": "n5-faq-v0.1-es-pdf",
+      "kind": "pdf",
+      "title": "N5 FAQs — Spanish",
+      "version": "0.1",
+      "publishedDate": "2026-09-01",
+      "localPath": "data/pdf/faq/esp-faqs-n5-v0-1.pdf",
+      "sha256": "7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a",
+      "pageCount": 5,
+      "authority": "primary",
+      "url": "https://experience.corvusbelli.com/en/infinity/resources"
+    },
+    {
+      "id": "n5-faq-v0.0-en-pdf",
+      "kind": "pdf",
+      "title": "N5 FAQs — English (historical)",
+      "version": "0.0",
+      "publishedDate": "2025-10-15",
+      "localPath": "data/pdf/faq/n5-faqs-v0-0-en.pdf",
+      "sha256": "a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043",
+      "pageCount": 4,
+      "authority": "primary",
+      "url": "https://downloads.corvusbelli.com/infinity/rules/infinity-faq-n5-en-v5.0.0.pdf"
+    }
+  ],
+  "records": [
+    {
+      "id": "faq-ruling:aerial-boost-no-silhouette-contact",
+      "kind": "faq-ruling",
+      "name": "Aerial Troopers cannot trigger Boost",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Do Aerial Troopers activate weapons with the Boost Trait?",
+        "answer": "No. Aerial Troopers cannot enter Silhouette contact with those weapons, so they do not activate Boost.",
+        "topicIds": [
+          "skill:aerial",
+          "trait:boost"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:bs-attack-roll-label-mods",
+      "kind": "faq-ruling",
+      "name": "BS Attack MODs on labelled Skills and Attack Rolls",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Do Skills that make a BS Attack Roll or have the BS Attack Label count as BS Attacks for BS Attack MODs?",
+        "answer": "Yes. The corresponding BS Attack MODs apply to those Skills, including Intuitive Attack and Speculative Attack, but +1 SD MODs do not apply to Long Skills.",
+        "topicIds": [
+          "skill:bs-attack",
+          "skill:intuitive-attack",
+          "skill:speculative-attack"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:camouflage-one-use-infiltration-failure",
+      "kind": "faq-ruling",
+      "name": "Camouflage (1 Use) and failed Infiltration",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Can Camouflage (1 Use) be used later after deploying as a Model or failing Infiltration?",
+        "answer": "Deploying as a Model preserves the ability to enter Camouflaged State later. Attempting to deploy as a Camouflaged Marker and failing an Infiltration Roll uses up the one use, so the Trooper cannot enter the State later.",
+        "topicIds": [
+          "skill:camouflage",
+          "skill:infiltration"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:camouflaged-marker-total-cover",
+      "kind": "faq-ruling",
+      "name": "Camouflaged Marker hit in Total Cover",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "What happens when a BS Attack hits a Camouflaged Marker but its game element has Total Cover?",
+        "answer": "If the Attack forces a Saving Roll, the Camouflaged Marker is revealed. The underlying game element is not hit because it is in Total Cover. Revealing the Marker does not make the covered element take the hit.",
+        "topicIds": [
+          "state:camouflaged"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 3
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        "selectionReason": "Official English FAQ v0.1 selected and independently cross-checked against the corresponding Spanish FAQ v0.1 answer; no material conflict identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:controlled-jump-speedball",
+      "kind": "faq-ruling",
+      "name": "Controlled Jump does not affect Speedballs",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Does Controlled Jump affect the deployment of Speedballs?",
+        "answer": "No. Controlled Jump affects Troopers, not Speedballs.",
+        "topicIds": [
+          "hacking-program:controlled-jump",
+          "skill:request-speedball"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:coordinated-order-special-dice",
+      "kind": "faq-ruling",
+      "name": "Special Dice MODs in Coordinated Orders",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "Do Special Dice (+1 SD, etc.) MODs apply in a Coordinated Order?",
+        "answer": "Yes. Special Dice MODs do not change a Burst value, so they still apply during a Coordinated Order.",
+        "topicIds": [
+          "rule:coordinated-orders",
+          "rule:special-dice"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Official English FAQ v0.1 selected and independently cross-checked against the corresponding Spanish FAQ v0.1 answer; no material conflict identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:deployable-cover-no-placement",
+      "kind": "faq-ruling",
+      "name": "Deployable Cover cannot support other elements",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "Can anything be placed on Deployable Cover, or can a move end on it?",
+        "answer": "No. Nothing can be placed on Deployable Cover, and a Trooper cannot end a move on it.",
+        "topicIds": [
+          "equipment:deployable-cover"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:deployment-phase-reposition-after-measurement",
+      "kind": "faq-ruling",
+      "name": "Repositioning during the main Deployment Phase",
+      "summary": "Official FAQ clarification of Deployment Phase repositioning before Roll or measurement fixes a game element in place.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Can players reposition Troopers, Deployables, or other game elements during their main Deployment Phase step?",
+        "answer": "Yes. A player may reposition those game elements during their main Deployment Phase step until a Roll or measurement is made for them. Once that occurs, the affected element's position is fixed for the remainder of the Deployment Phase. For example, once a Fireteam Coherency Check is measured and its members are adjusted, those members can no longer be repositioned.",
+        "topicIds": [
+          "rule:deployment-phase"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Original English N5 FAQ v0.0 wording agrees with English and Spanish FAQ v0.1 p. 1. The historical date is an associated update anchor, not a verified PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:deployment-private-zoc-coherency",
+      "kind": "faq-ruling",
+      "name": "Private deployment checks for Minelayer, Decoys and Holoechoes",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Are ZoC and Coherency checked when deploying Minelayer, Decoys, or Holoechoes?",
+        "answer": "Yes. Check the required ZoC or Coherency during the Deployment Phase, with the opponent looking away so that Private Information is not revealed.",
+        "topicIds": [
+          "skill:minelayer",
+          "skill:decoy",
+          "state:holoecho"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:direct-template-secondary-target-los",
+      "kind": "faq-ruling",
+      "name": "Direct Template Weapons and corners",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Can a Direct Template Weapon hit secondary targets around corners outside the attacker's Line of Fire?",
+        "answer": "No. A Direct Template Weapon cannot fire around a corner to hit a secondary target that is outside the firing Trooper's Line of Fire.",
+        "topicIds": [
+          "trait:direct-template"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:discover-fireteam-sd-bonuses",
+      "kind": "faq-ruling",
+      "name": "BS Attack and Fireteam bonuses do not apply to Discover",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "Do BS Attack (+1 SD) and +1 BS Fireteam bonuses apply to Discover?",
+        "answer": "No. Neither BS Attack (+1 SD) nor the +1 BS Fireteam bonus applies to Discover.",
+        "topicIds": [
+          "skill:discover",
+          "rule:fireteam-level-bonuses"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:fired-deployable-vertical-surface",
+      "kind": "faq-ruling",
+      "name": "Fired Deployables need supporting surfaces",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Can a Deployable be fired onto a vertical surface?",
+        "answer": "No. The placed Token must be fully supported by its surface; a vertical surface cannot support that placement. This FAQ addresses firing a Deployable, not a general exception to other placement requirements.",
+        "topicIds": [
+          "trait:deployable"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Official English FAQ v0.1 p. 1 selected and cross-checked against Spanish FAQ v0.1 p. 2. Both forbid placement on vertical surfaces and require a fully supporting surface. The English question specifically concerns firing a Deployable, whereas the Spanish question broadly asks about placing Deployables; keep the narrower English question scope without treating the Spanish phrasing as an expansion of all placement rules. This difference in question breadth is not a contradictory answer.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:fireteam-type-after-member-loss",
+      "kind": "faq-ruling",
+      "name": "Fireteam Type remains unchanged when members are lost",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1; the Spanish example has an inconsistent member count.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "Does a Fireteam change Type when it loses members?",
+        "answer": "No. A Fireteam keeps its original Type as members are lost. For example, a three-member HARIS that loses one Trooper remains a two-member HARIS, not a DUO. This does not override separate rules that cancel the Fireteam.",
+        "topicIds": [
+          "rule:fireteam-general"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 3
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        "selectionReason": "Official English FAQ v0.1 gives a three-to-two-member HARIS example. Spanish FAQ v0.1 agrees that Type does not change, but its example says a two-member HARIS loses one Trooper and remains a two-member HARIS. Preserve this numerical source discrepancy without inventing a different Type rule. This answer is not present in the reviewed English v0.0 FAQ.",
+        "conflictingCitations": [
+          {
+            "sourceId": "n5-faq-v0.1-es-pdf",
+            "page": 3
+          }
+        ],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:fireteam-required-member-lost",
+      "kind": "faq-ruling",
+      "name": "Fireteam minimum requirements apply at creation",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "Is a Fireteam cancelled when it loses a Trooper required to create that Fireteam?",
+        "answer": "No. The minimum membership requirements in Fireteam Charts apply when creating the Fireteam, not whenever it loses members. The FT Master Special Skill has its own rules that may override this.",
+        "topicIds": [
+          "rule:fireteam-general"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 3
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        "selectionReason": "Official English FAQ v0.1 selected and cross-checked against Spanish FAQ v0.1. The Spanish answer agrees that chart minimums apply at Fireteam creation, but omits the English answer\u0027s explicit FT Master exception. The independently maintained FT Master rule confirms the separate cancellation condition; the omission is not a contradictory Spanish ruling, so no conflicting citation is asserted.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:hacking-device-firewall-disabled",
+      "kind": "faq-ruling",
+      "name": "Firewall while the Hacking Device is disabled",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "When does a Hacking Device Firewall apply to incoming Comms Attacks?",
+        "answer": "The Firewall MODs apply to Comms Attacks against the Trooper while the Hacking Device is operational. They do not apply while that Device is disabled, including when the Trooper is Isolated or in any Null State.",
+        "topicIds": [
+          "equipment:hacking-device",
+          "state:isolated"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "English FAQ v0.1 primary text cross-checked against Spanish FAQ v0.1 at the same printed page; no contradictory interpretation identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:marker-automatic-skill-declarations",
+      "kind": "faq-ruling",
+      "name": "Automatic Skills and Equipment in Marker State",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Which Automatic Skills and Equipment must be declared when used in Marker State?",
+        "answer": "An Automatic Skill or Equipment must be declared when used in Marker State if it changes how an Order activates a Trooper or restricts AROs. Stealth is an example.",
+        "topicIds": [
+          "state:camouflaged",
+          "skill:stealth"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:null-state-marker-and-cautious-movement",
+      "kind": "faq-ruling",
+      "name": "Disconnected and Unconscious do not block Marker re-entry or Cautious Movement",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "Does a Disconnected or Unconscious Trooper prevent an enemy from re-entering Marker State or cancel Cautious Movement?",
+        "answer": "No. A Trooper in Disconnected or Unconscious State does not prevent an enemy from re-entering Marker State or cancel their Cautious Movement.",
+        "topicIds": [
+          "state:disconnected",
+          "state:unconscious",
+          "skill:cautious-movement"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:peripheral-controller-unable-to-declare",
+      "kind": "faq-ruling",
+      "name": "Peripheral Skill declaration when Controller is restricted",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Can a Peripheral declare a Skill if its Controller is unable to declare it?",
+        "answer": "Yes. The Controller and all their Peripherals declare the same Skill; any participant that cannot declare the Skill, for example because it is Stunned or Immobilized, declares Idle instead.",
+        "topicIds": [
+          "skill:peripheral"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Official English FAQ v0.1 selected and independently cross-checked against the corresponding Spanish FAQ v0.1 answer; no material conflict identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:place-deployable-space-occupied",
+      "kind": "faq-ruling",
+      "name": "Place Deployable position occupied before Conclusion",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "What if another Trooper occupies the declared Place Deployable location before the Order concludes?",
+        "answer": "The Trooper declaring Place Deployable may place the Deployable in another legal position. If no legal placement is possible, the Deployable is lost. The same applies to successful weapon attacks that place a Deployable, including Disco Ballers, Pitchers and Drop Bears (BS Mode).",
+        "topicIds": [
+          "skill:place-deployable"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:prone-at-end-of-move-distance",
+      "kind": "faq-ruling",
+      "name": "Entering Prone State at the end of a move",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Does becoming Prone at the end of a move reduce the distance the Trooper can move?",
+        "answer": "No. The Trooper moves normally and enters Prone State at the end of the movement.",
+        "topicIds": [
+          "state:prone"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "First verified in English N5 FAQ v0.0 and carried forward without substantive change in English/Spanish v0.1. 2025-10-15 is the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:prone-movement-label",
+      "kind": "faq-ruling",
+      "name": "Prone State and Movement declarations",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Which Skills and AROs allow a Trooper to enter or cancel Prone State?",
+        "answer": "A Trooper can enter or cancel Prone State through a Skill or ARO with the Movement Label, except Jump and Berserk.",
+        "topicIds": [
+          "state:prone",
+          "skill:jump",
+          "skill:berserk"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:protheion-excess-saving-rolls",
+      "kind": "faq-ruling",
+      "name": "Protheion and excess failed Saving Rolls",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Does Protheion benefit from failed Saving Rolls beyond those needed to put its target into Dead State?",
+        "answer": "No. Further failed Saving Rolls have no effect after the target enters Dead State and provide no additional benefit to the Protheion user.",
+        "topicIds": [
+          "skill:protheion"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:scenario-element-carrier-marker-state",
+      "kind": "faq-ruling",
+      "name": "Carrying a Supply Box prevents entering Marker State",
+      "summary": "Source-reviewed N5 FAQ clarification applied only to the core Supplies scenario, whose printed rules independently restrict Supply Box carriers to Models.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-28"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "Can a Trooper carrying a scenario element, such as a Supply Box, enter Marker State?",
+        "answer": "No. A Trooper carrying a scenario element such as a Supply Box cannot enter Marker State.",
+        "topicIds": [
+          "scenario:supplies",
+          "rule:scenario:carrying-supply-boxes"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            "scenarioIds": [
+              "scenario:supplies"
+            ]
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        "selectionReason": "First verified in English FAQ v0.0 printed p. 2, carried without substantive change to English/Spanish v0.1 printed p. 3. The 2025-10-15 date is a version-associated update anchor, not a verified PDF publication day. Core N5.3 Supplies p. 153 independently restricts Supply Box carriers to Models rather than Markers. Apply this FAQ to scenario:supplies only; do not infer broader ITS-scenario or unscoped Marker-State applicability.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:sixth-sense-msv1-zero-visibility",
+      "kind": "faq-ruling",
+      "name": "Sixth Sense with Multispectral Visor Level 1",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "How do Sixth Sense and Multispectral Visor Level 1 interact with a Zero Visibility Zone?",
+        "answer": "When a Trooper with both Sixth Sense and Multispectral Visor Level 1 is targeted by a BS Attack through a Zero Visibility Zone, they ignore the -6 MOD for drawing Line of Fire through the zone.",
+        "topicIds": [
+          "skill:sixth-sense",
+          "equipment:multispectral-visor"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:skill-declaration-target-position",
+      "kind": "faq-ruling",
+      "name": "Skill declaration details and target position",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Which Skill details must be specified on declaration?",
+        "answer": "Declare the Skill details, including a BS Attack or template placement, except for the target's position. Choose the target position in Resolution, before measuring Ranges. If declaration order matters, the active player chooses who declares first.",
+        "topicIds": [
+          "skill:bs-attack"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Official English FAQ v0.1 selected and independently cross-checked against the corresponding Spanish FAQ v0.1 answer; no material conflict identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:stealth-aro-multiple-activations",
+      "kind": "faq-ruling",
+      "name": "ARO targeting a Stealth user during multiple activations",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Can an ARO target a Stealth-using Trooper when multiple Troopers activate together?",
+        "answer": "Yes, an ARO can target that active Trooper, but the ARO becomes Idle if the Stealth user does not declare a Skill that allows AROs.",
+        "topicIds": [
+          "skill:stealth"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "English FAQ v0.0 p. 2 carried forward without substantive answer change in English FAQ v0.1 p. 2. Spanish FAQ v0.1 p. 2 asks specifically about multiple activations where a Stealth user is outside the reactive Trooper's Zone of Control or Hacking Area; the English question is not framed with that additional positional condition. Both answers say the ARO becomes Idle if the Stealth user declares no Skill allowing AROs, so this is a difference in question context, not a contradictory answer. Preserve English as the selected current source without inferring any new permission inside the Zone of Control/Hacking Area. The 2025-10-15 original-source date is an official update anchor, not a verified PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:surprise-attack-multiple-users",
+      "kind": "faq-ruling",
+      "name": "Surprise Attack MODs from multiple Troopers",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Do Surprise Attack MODs from multiple attacking Troopers stack on one target?",
+        "answer": "No. Each Trooper's Surprise Attack MOD applies separately, including during a Coordinated Order or when a Controller and Peripheral attack the same target.",
+        "topicIds": [
+          "skill:surprise-attack"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:undeployed-ancillary-not-killed",
+      "kind": "faq-ruling",
+      "name": "Undeployed Ancillary and scenario kill scoring",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 4
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 4
+        }
+      ],
+      "facts": {
+        "question": "Does an undeployed Peripheral (Ancillary) count as Killed for scenario objectives?",
+        "answer": "No. An Ancillary only counts as Killed if it was deployed during the game and either entered Dead State or remains in a Null State at the end of the game. This is a specific exception when counting Killed units in scenario objectives.",
+        "topicIds": [
+          "scenario:annihilation",
+          "rule:scenario:killing"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            "scenarioIds": [
+              "scenario:annihilation"
+            ]
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 4
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 4
+        },
+        "selectionReason": "English FAQ v0.1 primary text cross-checked against Spanish FAQ v0.1 at the same printed page; no contradictory interpretation identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:vault-during-climb-and-jump",
+      "kind": "faq-ruling",
+      "name": "Vaulting while Climbing or Jumping",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Can a Trooper vault while Climbing or Jumping?",
+        "answer": "Yes. Climb and Jump follow the General Movement Rules, including vaulting.",
+        "topicIds": [
+          "skill:climb",
+          "skill:jump"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    }
+  ]
+}

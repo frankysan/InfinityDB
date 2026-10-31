@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Source-backed Infinity N5.3 deployed-object profiles and reviewed delivery paths.">
+    <title>Deployed objects · InfinityDB</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="module" src="/static/deployed-objects.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to deployed objects</a>
+    <!-- navigation -->
+    <main id="main" class="main" tabindex="-1">
+      <!-- page-header -->
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Rules reference</p>
+          <h1 id="page-title">Deployed objects<span>.</span></h1>
+          <p class="intro-copy">Review deployed Model, Token and Scenery profiles without choosing a carrier. Source disagreements remain visible; listed delivery paths do not establish Army List legality.</p>
+        </div>
+      </section>
+      <section class="surface surface--clipped content-frame" aria-labelledby="deployed-heading">
+        <div class="section-heading">
+          <h2 id="deployed-heading">Reviewed object profiles</h2>
+          <span id="deployed-count" class="section-index">Loading…</span>
+        </div>
+        <p id="deployed-loading" class="detail-copy" role="status">Loading the reviewed reference.</p>
+        <p id="deployed-error" class="detail-copy" role="alert" hidden></p>
+        <div id="deployed-list" class="detail-section-stack" hidden></div>
+        <p id="deployed-unresolved" class="detail-source" hidden></p>
+      </section>
+      <!-- page-footer -->
+    </main>
+  </body>
+</html>

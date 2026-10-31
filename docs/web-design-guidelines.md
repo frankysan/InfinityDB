@@ -38,7 +38,11 @@ Restrictions. Put explanatory examples and clarifying interpretations in a separ
 When reviewed, condition-scoped interaction cases are available, display
 **Reviewed interactions** after those clarifications, retaining their evidence
 labels. Do not infer new interactions from presentation markup; all these
-sections use the same shared rules-card renderer.
+sections use the same shared rules-card renderer. In a reference card, omit
+a summary that only repeats its title as `Rules for Title` (with optional
+final period). Preserve the maintained source value, meaningful summaries,
+linked summary text, facts, source notes, applicability and citations.
+Apply this in the shared renderer, not by deleting source data.
 
 **Separate gameplay rules from editorial provenance.** Keep rules players act on
 at normal body size. Source-history, Army/PDF mismatches, and legacy terminology
@@ -74,6 +78,68 @@ reference preview provides the explanation on hover, keyboard focus, or touch,
 with navigation to the Glossary on activation. Do not match and link arbitrary
 common nouns automatically; the full Game-term vocabulary needs separate review.
 
+**Unspecified Hacking Program targets.** On Program profiles, retain the
+source `Targets` dash when the Army chart supplies no Troop Type, but explain
+that the player must consult the Program rules for eligibility and effect
+scope. Do not convert a missing source category to `No valid targets`, infer
+`Any Trooper` for every Program, or add a target identity not present in Army.
+The explanatory note is conditional; explicit source Troop Types need no
+fallback. The shared rules card remains the authority for requirements and
+effects (English N5.3 pp. 57–61).
+
+### Distinguish rules provenance without implying new authority
+
+**Source identity is not publication recency.** Use the available cited
+publication, source revision, dated FAQ applicability and explicit discrepancy
+metadata. Never infer an official erratum or a "recently updated" status from
+a modified local record, an Army snapshot date, a missing citation or the
+viewer's clock. A dated update label requires a verified upstream change,
+the source/version and its effective date.
+
+Use the following text-first visual vocabulary across player-facing
+references, with theme tokens and a second cue beyond color:
+
+- **Official/source-native data:** retain source values in ordinary statlines
+  and source citations. Do not recolor an Army profile into "updated rules"
+  merely because its values differ from a maintained summary. Display a
+  specific authoritative revision/change only when a verified publication
+  record identifies it.
+- **InfinityDB-maintained reference:** the shared Rule card labels curated
+  summaries, requirements and effects as an **InfinityDB-maintained reference**,
+  explicitly pointing to citations for source wording. This label identifies
+  editorial ownership, **not** a claim that the rules are unofficial or
+  mechanically different.
+- **Explanations, examples and reviewed interpretations:** keep gameplay
+  requirements/effects at body size. Distinguish explanations under
+  **Clarifications and examples**, with an explicit InfinityDB-reviewed
+  caption and a neutral left border. Keep reviewed interaction provenance.
+  A curation review date alone is not an official rules effective date.
+- **Source history/context:** label editorial `facts.sourceNotes` as
+  **Source context**, in secondary type with a neutral divider, preserving
+  maintained links. Cite sources as **Sources**, without conflating Wiki
+  evidence, PDFs and official Army data.
+- **Dated FAQ/errata:** render an actual source-reviewed FAQ in its own
+  **FAQ clarifications** section with selected version, publication date and
+  linked citation. The date describes this source publication; it is
+  not an automatically assigned "new" or "changed" badge. Future official
+  errata must have equally explicit publication evidence before adopting
+  a distinct revision status.
+- **Unresolved conflict:** when structured competing citations exist, show
+  **Source discrepancy — cited publications differ** in the ordinary
+  interface even while explanatory detail remains collapsible. The warning
+  uses readable text, a leading border and accessible warning theme colors.
+  Inline `[[review-needed:source-conflict]]` markers retain their own
+  visible uncertainty labels. Do not silently select a winner or hide
+  material gameplay ambiguity in Developer Mode.
+
+The shared renderer owns the first four presentation roles, and the
+source-reviewed FAQ renderer owns the last two. This is a provenance
+**presentation contract**; it does not authorize invented source
+classifications or complete an audit of every Army statline, scenario
+discrepancy, or possible historical update. Maintain the source-model
+boundaries in [data-model.md](data-model.md) and test both light/dark,
+desktop/mobile layouts and non-color text cues.
+
 ### Explain rules interactions, not just outcomes
 
 **Target design direction:** When showing a reviewed interaction, give the
@@ -105,6 +171,21 @@ components from Saving Roll notation such as `ARM/2 × 2`. If the server has no
 reviewed component reference, leave the source name readable without fabricating
 a destination. The Ammunition detail page remains the canonical semantic owner.
 
+### Weapon Properties and their rules origins
+
+On reviewed Weapon profiles, show linked **Weapon Properties** separately from
+the source-provided Traits, Labels and States. Use the same inline rule-preview
+interaction (including touch) as other canonical references. Curated rules prose
+may use explicit `[[weapon-property:slug]]` links, resolved to the same
+Glossary entry and summary preview without creating separate rules ownership.
+Link to the embedded Glossary
+entry rather than duplicating a new rules detail page. Each Property entry
+must expose the actual rules-domain and source-section origins, with links
+to canonical rules wherever available; role labels distinguish baselines,
+conditional effects and combinations. Do not derive membership by parsing
+weapon names, Ammunition punctuation, or Saving Roll notation. Keep source
+profile statistics, modes and existing Ammunition explanations authoritative.
+
 ### Present reviewed Ammunition mechanics without calculating outcomes
 
 The eleven canonical Ammunition reference cards show the existing source-cited
@@ -128,6 +209,19 @@ When a layout problem appears, first look for unnecessary width, spacing, wrappe
 
 An exception should exist because the information has different requirements, not because the current cascade makes the common structure inconvenient to reuse.
 
+### Specialist Troops filtering is contextual
+
+The Unit Explorer exposes an optional Specialist Troops selector with an
+**InfinityDB Standard** baseline and explicitly named reviewed scenarios.
+Filtering shows Units that have at least one qualifying Skill occurrence
+across their source profiles, loadouts or Unit options. Explain that this
+does not certify every profile or Army context and that the selected
+scenario governs qualification. Chain of Command (Non Specialist) is
+not a qualifying occurrence through that Skill; other qualifying Skills
+remain valid. Link to the reviewed General Rule instead of embedding
+a separate Skill list in presentation code. Keep the selector compatible
+with other advanced filters, pagination, reset, and versioned share URLs.
+
 ### Optimize for lookup, comparison, and scanning
 
 InfinityDB is a dense reference application. The interface should make names, values, relationships, and differences easy to scan without feeling cramped. Decorative complexity must not compete with data hierarchy.
@@ -145,6 +239,22 @@ Stable geometry is especially important for side-by-side comparison and repeated
 Player-facing information should dominate the normal view. Provenance, internal identifiers, source diagnostics, and developer metadata should remain available without distorting the ordinary layout.
 
 Developer mode should add technical depth rather than redefine the primary presentation.
+
+The accuracy and independence notice is a **floating, viewport-bottom
+section** in the shared page shell, rather than an ordinary footer row.
+It starts **expanded** in each new browsing session, reiterating InfinityDB's
+non-commercial, non-affiliated status and potential inaccuracies, and links to
+the existing About/attribution page. Native `details`/`summary` permits
+keyboard/touch collapse to a **44px icon-only control** that remains reachable
+at the bottom corner. The open panel is viewport-bounded, adapts to narrow
+widths, and leaves scroll clearance at the end of the document. A collapse
+choice persists only in the current tab's session storage, including soft
+navigation and reload; it is not a cookie, permanent dismissal, or consent
+control. When session storage is disabled, the native disclosure still works.
+Keep visible focus and accessible expanded/collapsed state, avoid obscuring
+mobile navigation or other fixed controls, and do not invent a feedback
+collection destination. Dedicated assistive-technology testing remains part
+of final accessibility acceptance.
 
 ### Write player-facing copy for players
 
@@ -179,6 +289,15 @@ compare, or do before explaining how InfinityDB stores or derives it.
 ### Make responsiveness a content-priority decision
 
 Responsive design is not simply shrinking desktop geometry. At narrower widths, preserve the most important information and relationships first, then deliberately choose whether secondary content should wrap, scroll, collapse, or transform.
+
+The shared sidebar should keep every navigation destination directly discoverable on
+desktop without excessive viewport-scaled gaps. Use compact but readable link
+rows and retain visible focus, current-page identity and scroll-to-focus
+behavior. The existing compact navigation and Settings popovers retain the
+same links and controls below the sidebar breakpoint; bound their height to
+the viewport and allow their contents to scroll rather than letting the last
+options become inaccessible on short touch screens. Do not hide desktop
+navigation destinations in new disclosures simply to reduce empty space.
 
 Breakpoints should correspond to layout failure or content need rather than arbitrary device categories.
 

@@ -57,6 +57,127 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
     assert _field(report, "peripherals", "mercs")["status"] == audit.REDUNDANT
 
 
+def test_pinned_published_army_has_no_occupied_unrepresented_source_fields() -> None:
+    """Validate actual published/raw source pairing, not just synthetic fixtures.
+
+    The raw database is intentionally ignored and absent in clean CI. A
+    release's explicit --source-occupancy-gate is still required there.
+    """
+    published = ROOT / "data/generated/infinity.db"
+    raw = raw_database_path(published)
+    if not raw.is_file():
+        pytest.skip("Ignored raw Army database is unavailable in clean CI")
+    report = audit.audit_database(published)
+    evidence = report["rawEvidence"]
+    assert evidence["status"] == "available"
+    assert evidence["normalizedTableCount"] == 70
+    assert len(evidence["unrepresentedFieldOccupancy"]) == 39
+    assert report["summary"]["occupiedUnrepresentedFieldCount"] == 0
+    assert report["summary"]["occupiedUnrepresentedTableCount"] == 0
+    assert all(
+        item["occupiedCount"] == 0
+        for item in evidence["unrepresentedFieldOccupancy"]
+    )
+    assert sum(
+        batch["occupiedValueCount"] for batch in evidence["potentialGapBatches"]
+    ) == 0
+    # This must inspect real source rows rather than an empty fixture.
+    assert report["applicationEvidence"]["unitOptionCount"] > 0
+    assert report["applicationEvidence"]["includeRelationshipCount"] > 0
+
+
+def test_source_presentation_audit_distinguishes_empty_source_from_missing_ui(
+    tmp_path: Path,
+) -> None:
+    """The synthetic source deliberately populates option fields, so flag them."""
+    report = audit.audit_database(_runtime_database(tmp_path))
+    evidence = report["rawEvidence"]
+    candidates = evidence["unrepresentedFieldOccupancy"]
+    assert len(candidates) == 39
+    assert evidence["occupiedUnrepresentedFieldCount"] == 24
+    assert report["summary"]["occupiedUnrepresentedFieldCount"] == 24
+    assert ("profiles", "notes") in {
+        (entry["table"], entry["field"]) for entry in candidates
+    }
+    assert ("unit_option_skills", "item_id") in {
+        (entry["table"], entry["field"]) for entry in candidates
+    }
+    occupied = {
+        (entry["table"], entry["field"])
+        for entry in candidates if entry["occupiedCount"] > 0
+    }
+    assert ("unit_option_skills", "item_id") in occupied
+    assert ("unit_option_weapons", "item_id") in occupied
+    assert ("unit_option_equipment", "item_id") in occupied
+    assert ("profiles", "notes") not in occupied
+
+    batches = evidence["potentialGapBatches"]
+    assert sum(batch["occupiedFieldCount"] > 0 for batch in batches) == (
+        report["summary"]["occupiedUnrepresentedTableCount"]
+    )
+    assert sum(batch["occupiedFieldCount"] for batch in batches) == 24
+    assert batches == sorted(
+        batches,
+        key=lambda batch: (
+            -batch["occupiedFieldCount"],
+            -batch["occupiedValueCount"],
+            batch["table"],
+        ),
+    )
+    skills = next(batch for batch in batches if batch["table"] == "unit_option_skills")
+    assert skills["occupiedFieldCount"] > 0
+    notes = next(batch for batch in batches if batch["table"] == "profiles")
+    assert notes["occupiedFieldCount"] == 0
+
+
+def test_potential_gap_batches_keep_empty_fields_and_group_source_rows() -> None:
+    batches = audit._potential_gap_batches([
+        {"table": "empty", "field": "notes", "sourceRowCount": 9, "occupiedCount": 0},
+        {"table": "used", "field": "id", "sourceRowCount": 3, "occupiedCount": 2},
+        {"table": "used", "field": "extra", "sourceRowCount": 3, "occupiedCount": 1},
+    ])
+    assert batches == [
+        {
+            "table": "used",
+            "sourceRowCount": 3,
+            "fields": [
+                {"field": "id", "occupiedCount": 2},
+                {"field": "extra", "occupiedCount": 1},
+            ],
+            "occupiedFieldCount": 2,
+            "occupiedValueCount": 3,
+        },
+        {
+            "table": "empty",
+            "sourceRowCount": 9,
+            "fields": [{"field": "notes", "occupiedCount": 0}],
+            "occupiedFieldCount": 0,
+            "occupiedValueCount": 0,
+        },
+    ]
+
+
+def test_source_presentation_occupancy_distinguishes_zero_empty_and_value() -> None:
+    connection = sqlite3.connect(":memory:")
+    try:
+        connection.execute('CREATE TABLE profiles (notes TEXT)')
+        connection.executemany(
+            'INSERT INTO profiles (notes) VALUES (?)',
+            [(None,), ("",), ("   ",), ("Source note",)],
+        )
+        assert audit._occupied_field_count(connection, "profiles", "notes") == 1
+        connection.execute('CREATE TABLE unit_option_skills (quantity INTEGER)')
+        connection.executemany(
+            'INSERT INTO unit_option_skills (quantity) VALUES (?)',
+            [(None,), (0,), (1,)],
+        )
+        assert audit._occupied_field_count(
+            connection, "unit_option_skills", "quantity"
+        ) == 2
+    finally:
+        connection.close()
+
+
 def test_source_presentation_audit_rejects_mismatched_raw_generation(
     tmp_path: Path,
 ) -> None:
@@ -106,3 +227,44 @@ def test_source_presentation_cli_writes_report(
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["formatVersion"] == 2
     assert payload["summary"]["deferredOutOfScopeCount"] == 2
+
+
+def test_source_presentation_cli_gate_rejects_populated_candidates(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    database = _runtime_database(tmp_path)
+    output = tmp_path / "gaps.json"
+
+    assert audit.main([
+        str(database), "--require-no-occupied-gaps", "--output", str(output)
+    ]) == 1
+    assert "Source-field gate: FAIL (24 occupied unrepresented fields" in (
+        capsys.readouterr().out
+    )
+    assert json.loads(output.read_text(encoding="utf-8"))["rawEvidence"][
+        "potentialGapBatches"
+    ]
+
+
+def test_source_presentation_cli_gate_rejects_missing_raw_evidence(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    database = _runtime_database(tmp_path)
+    raw_database_path(database).unlink()
+
+    assert audit.main([str(database), "--require-no-occupied-gaps"]) == 1
+    assert "paired raw source database unavailable" in capsys.readouterr().out
+
+
+def test_source_presentation_cli_gate_accepts_empty_candidates(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    database = _runtime_database(tmp_path)
+    monkeypatch.setattr(audit, "_occupied_field_count", lambda *_: 0)
+
+    assert audit.main([str(database), "--require-no-occupied-gaps"]) == 0
+    output = capsys.readouterr().out
+    assert "Source occupancy: 0 of 39" in output
+    assert "Source-field gate: PASS" in output

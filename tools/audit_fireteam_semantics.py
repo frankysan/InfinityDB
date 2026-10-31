@@ -14,6 +14,7 @@ from typing import Any
 from infinity_db.fireteam_semantics import (
     decode_fireteam_spec,
     equivalence_labels,
+    fto_reference_status,
     member_fto_marker,
 )
 
@@ -418,8 +419,9 @@ def _level_equivalence_evidence(connection: sqlite3.Connection) -> dict[str, Any
         "projectionMismatchCount": len(mismatches),
         "projectionMismatches": mismatches,
         "policy": (
-            "Bracketed terms are preserved as Fireteam-Level equivalence wording. They must "
-            "not feed logical-Unit identity or generic Unit aliasing."
+            "Parenthetical source terms retain the legacy equivalence field name. "
+            "They do not independently establish Fireteam-Level equivalence, profile "
+            "eligibility, logical-Unit identity or generic Unit aliasing."
         ),
     }
 
@@ -510,20 +512,20 @@ def _fto_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
             "resolvedUnitId": row["source_unit_id"],
             "logicalUnitId": row["logical_unit_id"],
         }
-        if row["resolution"] != "army" or row["source_unit_id"] is None:
-            status = "source-unit-context-mismatch"
+        matches = loadouts.get(key, [])
+        status = fto_reference_status(
+            row["resolution"], row["source_unit_id"], marker, bool(matches),
+        )
+        if status == "source-unit-context-mismatch":
             status_counts[status] += 1
             details.append({**base, "status": status, "resolution": row["resolution"]})
             continue
 
-        matches = loadouts.get(key, [])
-        if not matches:
-            status = "no-matching-fto-option"
+        if status == "no-matching-fto-option":
             status_counts[status] += 1
             details.append({**base, "status": status})
             continue
 
-        status = "resolved"
         status_counts[status] += 1
         eligible_option_count += len(matches)
         details.append(

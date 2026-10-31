@@ -55,6 +55,7 @@ const context = vm.createContext({
   },
   getScenario() { throw new Error("Unexpected detail request"); },
   distanceUnit: () => "in",
+  readShareState: () => ({ params: new URLSearchParams(), source: "none" }),
   createPanelSwitcher: () => () => {},
   DOMParser: class {
     parseFromString() {

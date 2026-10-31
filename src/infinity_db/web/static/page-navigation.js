@@ -43,6 +43,7 @@ function syncBody(nextBody) {
 async function runPageModules(nextDocument) {
   const persistentModules = new Set([
     "/static/settings.js", "/static/navigation.js", "/static/page-navigation.js",
+    "/static/page-footer-notice.js",
   ]);
   const modules = [...nextDocument.querySelectorAll('script[type="module"][src]')]
     .filter((script) => !persistentModules.has(new URL(script.src).pathname));

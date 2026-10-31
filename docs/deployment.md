@@ -3,8 +3,8 @@
 **Project domain:** Deployment
 
 InfinityDB is deployed as an immutable Docker image containing the web application,
-tracked processed graphical assets, and the release-matched `infinity.db` and `rules.db`
-snapshots. Caddy listens on HTTP and proxies traffic to the application, which is not
+tracked processed graphical assets, the release-matched `infinity.db` and `rules.db`
+snapshots, and their generated `deployed-objects.json` reference publication. Caddy listens on HTTP and proxies traffic to the application, which is not
 exposed directly on the host. Put Caddy behind an external TLS reverse proxy for public
 HTTPS.
 
@@ -17,8 +17,9 @@ tracked release artifacts. See
 [third-party notices](../THIRD_PARTY_NOTICES.md).
 
 Deployment is intentionally **release-only**. Database and symbol generation happen in a
-development/release checkout. A tagged server checkout consumes the exact artifacts already
-reviewed and committed for that release; it does not acquire raw data or rebuild databases.
+development/release checkout. A tagged server checkout consumes the exact tracked databases and
+symbols reviewed for that release, and deterministically produces the matching deployed-object
+publication from tracked curated reviews; it does not acquire raw data or rebuild databases.
 For moving an installation to a new host, see the
 [server migration guide](server-migration.md).
 
@@ -84,8 +85,15 @@ SHA-256, and compares `infinity.db`'s embedded `snapshotArchiveSha256` with
 data and graphical publication to the same exact source ZIP without requiring that raw archive
 or the terminal `army-symbol-build.json` on the server.
 
+Before building the Docker image, `deploy.sh` deterministically generates and
+checks the ignored `data/generated/deployed-objects.json` publication from the
+tracked database pair and reviewed curated source files. It fails rather than
+ship a missing or mismatched publication. No raw snapshots or database rebuilds
+are needed on the deployment host. A direct `docker build` requires that
+publication to have been generated in the checkout first.
+
 The Docker image explicitly configures both runtime database paths. Missing, invalid, or
-incompatible tracked databases fail before activation. After building the image,
+incompatible tracked databases or deployed-object publication fail before activation. After building the image,
 `scripts/verify-container-image.sh --published-assets` revalidates the installed publication,
 the embedded database/publication provenance, package contents, representative symbol routes,
 and production startup. Compose is started with `--no-build` only after that exact image has

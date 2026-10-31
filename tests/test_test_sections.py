@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+from tools.pytest_startup_profile import XdistStartupProfile, _runner_launch_timestamp
 from tools.test_sections import load_test_sections, section_for_module
 
 
@@ -18,9 +21,109 @@ def test_test_section_config_covers_every_test_module_exactly_once() -> None:
 def test_test_section_markers_are_stable_and_named_from_sections() -> None:
     sections = load_test_sections()
 
-    assert tuple(sections) == ("model", "web", "build", "ops", "assets")
+    assert tuple(sections) == ("model", "web", "browser", "build", "ops", "assets")
+    assert sections["browser"].marker == "section_browser"
+    assert "test_verify_scenario_faq_browser" in sections["browser"].modules
+    assert "test_verify_weapon_source_cards_browser" in sections["browser"].modules
+    assert "test_verify_scenario_faq_browser" not in sections["web"].modules
     assert sections["model"].marker == "section_model"
     assert sections["web"].marker == "section_web"
     assert section_for_module("test_database", sections) == sections["model"]
     assert section_for_module("test_web", sections) == sections["web"]
     assert section_for_module("test_symbol_manifest", sections) == sections["assets"]
+
+
+def test_xdist_startup_timing_tracks_ready_collection_and_first_test() -> None:
+    profile = XdistStartupProfile()
+    assert profile.summary_lines() == ()
+    profile.start(2, 100.0)
+    profile.ready("gw0", 101.5)
+    profile.ready("gw1", 103.0)
+    profile.collected("gw0", 104.0)
+    profile.collected("gw1", 106.0)
+    profile.first_test(106.25)
+    profile.first_test(109.0)
+    assert profile.summary_lines()[:3] == (
+        "Workers ready: 2/2; first +1.50s, last +3.00s",
+        "Collections complete: 2/2; first +4.00s, last +6.00s",
+        "First test started: +6.25s",
+    )
+    assert "unavailable" in profile.summary_lines()[3]
+
+
+def test_xdist_browser_lanes_report_start_and_last_teardown() -> None:
+    profile = XdistStartupProfile()
+    profile.start(8, 100.0)
+    profile.test_started("tests/test_web.py::test_api", 104.0)
+    profile.test_started(
+        "tests/test_verify_scenario_faq_browser.py::test_browser@chromium-a", 105.0
+    )
+    profile.test_started(
+        "tests/test_verify_weapon_source_cards_browser.py::test_browser@chromium-b",
+        105.5,
+    )
+    profile.test_started(
+        "tests/test_verify_scenario_faq_browser.py::test_other@chromium-a", 108.0
+    )
+    profile.test_finished(
+        "tests/test_verify_scenario_faq_browser.py::test_browser@chromium-a", 111.0
+    )
+    profile.test_finished(
+        "tests/test_verify_scenario_faq_browser.py::test_other@chromium-a", 115.0
+    )
+    profile.test_finished(
+        "tests/test_verify_weapon_source_cards_browser.py::test_browser@chromium-b",
+        117.0,
+    )
+    assert profile.summary_lines()[-4:-1] == (
+        "First non-lane test started: +4.00s",
+        "Browser lane chromium-a: first +5.00s, last teardown +15.00s",
+        "Browser lane chromium-b: first +5.50s, last teardown +17.00s",
+    )
+    profile.start(2, 200.0)
+    assert not any("Browser lane" in line for line in profile.summary_lines())
+
+
+def test_xdist_launch_includes_python_and_pytest_initialization() -> None:
+    profile = XdistStartupProfile()
+    profile.start(2, 100.0, launch_at=97.5)
+    profile.ready("gw0", 100.5)
+    profile.collected("gw0", 101.5)
+    profile.first_test(102.0)
+    assert profile.summary_lines()[3:5] == (
+        "Runner process launch to xdist worker spawn: 2.50s",
+        "Runner process launch to first test: 4.50s",
+    )
+    profile.start(1, 200.0, launch_at=205.0)
+    assert "unavailable" in profile.summary_lines()[3]
+
+
+def test_xdist_runner_launch_env_is_optional_and_validated(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", raising=False)
+    assert _runner_launch_timestamp() is None
+    monkeypatch.setenv("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", "invalid")
+    assert _runner_launch_timestamp() is None
+    monkeypatch.setenv("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", "42.5")
+    assert _runner_launch_timestamp() == 42.5
+
+
+def test_xdist_startup_timing_handles_incomplete_and_restarted_runs() -> None:
+    profile = XdistStartupProfile()
+    profile.start(3, 10.0)
+    profile.ready("gw0", 11.0)
+    assert profile.summary_lines()[:3] == (
+        "Workers ready: 1/3; first +1.00s, last +1.00s",
+        "Collections complete: 0/3",
+        "First test started: not observed",
+    )
+    profile.start(1, 20.0)
+    profile.ready("gw0", 21.0)
+    profile.collected("gw0", 22.0)
+    profile.first_test(23.0)
+    assert profile.summary_lines()[:3] == (
+        "Workers ready: 1/1; first +1.00s, last +1.00s",
+        "Collections complete: 1/1; first +2.00s, last +2.00s",
+        "First test started: +3.00s",
+    )

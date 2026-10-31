@@ -23,6 +23,17 @@ export function getFireteamChart(armyId, signal) {
   return getJson(`/api/fireteams?${params}`, signal);
 }
 
+export function getFaqRulings(topicId, context, signal) {
+  const params = new URLSearchParams({ topic_id: topicId, ...context });
+  return getJson(`/api/faq-rulings?${params}`, signal);
+}
+
+export function getOrdersAros(signal, scenario = "") {
+  const params = new URLSearchParams();
+  if (scenario) params.set("scenario", scenario);
+  return getJson(`/api/orders-aros${params.size ? `?${params}` : ""}`, signal);
+}
+
 export function getCatalogItems(catalog, signal) {
   return getJson(`/api/${encodeURIComponent(catalog)}`, signal);
 }
@@ -55,21 +66,32 @@ export function getGlossary(signal) {
   return getJson("/api/glossary", signal);
 }
 
-export function getScenarios(signal) {
-  return getJson("/api/scenarios", signal);
+export function getRestrictionsReference(signal) {
+  return getJson("/static/restrictions-reference.json", signal);
 }
 
-export function getScenario(scenarioId, armyPoints, signal) {
+export function getScenarios(signal, { collection = "", revision = "" } = {}) {
+  const params = new URLSearchParams();
+  if (collection) params.set("collection", collection);
+  if (revision) params.set("revision", revision);
+  const query = params.toString();
+  return getJson(`/api/scenarios${query ? `?${query}` : ""}`, signal);
+}
+
+export function getScenario(scenarioId, armyPoints, signal, { collection = "", revision = "" } = {}) {
   const params = new URLSearchParams({ army_points: String(armyPoints) });
+  if (collection) params.set("collection", collection);
+  if (revision) params.set("revision", revision);
   return getJson(`/api/scenarios/${encodeURIComponent(scenarioId)}?${params}`, signal);
 }
 
-export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, troopType, classification, characteristic, ava, avaMin, avaMax, points, pointsMin, pointsMax, swc, swcMin, swcMax, limit, offset, mercs, specops, teamops, reinforcement, descending, extended }, signal) {
+export function getUnits({ armyId, declaredFactionId, search, skillId, specialist, equipmentId, weaponId, troopType, classification, characteristic, ava, avaMin, avaMax, points, pointsMin, pointsMax, swc, swcMin, swcMax, limit, offset, mercs, specops, teamops, reinforcement, descending, extended }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);
   if (declaredFactionId) params.set("declared_faction_id", declaredFactionId);
   if (search) params.set("search", search);
   if (skillId) params.set("skill_id", skillId);
+  if (specialist) params.set("specialist", specialist);
   if (equipmentId) params.set("equipment_id", equipmentId);
   if (weaponId) params.set("weapon_id", weaponId);
   if (troopType) params.set("troop_type", troopType);

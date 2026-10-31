@@ -20,6 +20,9 @@ EQUIPMENT_API_PATH = re.compile(
 )
 WEAPON_PAGE_PATH = re.compile(rf"/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 WEAPON_API_PATH = re.compile(rf"/api/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+DEPLOYED_OBJECT_API_PATH = re.compile(
+    rf"/api/deployed-objects/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
+)
 STATE_PAGE_PATH = re.compile(rf"/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATE_API_PATH = re.compile(rf"/api/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 HACKING_PROGRAM_PAGE_PATH = re.compile(
@@ -68,6 +71,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/armies",
         "/units",
         "/skills",
+        "/orders-aros",
         "/equipment",
         "/weapons",
         "/traits",
@@ -82,12 +86,17 @@ _METRIC_FIXED_PATHS = frozenset(
         "/search",
         "/glossary",
         "/api/version",
+        "/api/faq-rulings",
+        "/api/restrictions",
         "/api/armies",
         "/api/units",
         "/api/visible-unit-ids",
         "/api/skills",
+        "/api/orders-aros",
         "/api/equipment",
         "/api/weapons",
+        "/api/deployed-objects",
+        "/deployed-objects",
         "/api/traits",
         "/api/states",
         "/api/hacking-programs",
@@ -118,6 +127,7 @@ _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (
     (SKILL_API_PATH, "/api/skills/:id"),
     (EQUIPMENT_API_PATH, "/api/equipment/:id"),
     (WEAPON_API_PATH, "/api/weapons/:id"),
+    (DEPLOYED_OBJECT_API_PATH, "/api/deployed-objects/:id"),
     (TRAIT_API_PATH, "/api/traits/:id"),
     (STATE_API_PATH, "/api/states/:id"),
     (HACKING_PROGRAM_API_PATH, "/api/hacking-programs/:id"),

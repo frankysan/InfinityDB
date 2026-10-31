@@ -62,6 +62,28 @@ function entryNode(item) {
   appendMaintainedText(description, item.description_tokens, item.description);
   article.append(header, description);
 
+  if (Array.isArray(item.origins) && item.origins.length) {
+    const origins = document.createElement("p");
+    origins.className = "detail-source glossary-property-origins";
+    origins.append("Rules origins: ");
+    for (const [index, origin] of item.origins.entries()) {
+      if (index) origins.append(" · ");
+      origins.append(origin.domain + " (" + origin.role.replaceAll("-", " ") + "): ");
+      const reference = origin.public_reference;
+      const href = reference?.href || (reference?.catalog && reference?.id
+        ? "/" + reference.catalog + "/" + encodeURIComponent(reference.id) : null);
+      if (href) {
+        const link = document.createElement("a");
+        link.href = href;
+        link.textContent = origin.name;
+        origins.append(link);
+      } else {
+        origins.append(origin.name || origin.sourceSection);
+      }
+    }
+    article.append(origins);
+  }
+
   if (item.id === "attribute:s") article.append(silhouetteReferenceSet());
 
   if (item.aliases?.length) {

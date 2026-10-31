@@ -21,6 +21,10 @@ from infinity_db.army_slugs import attach_public_army_slug, enrich_army_referenc
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
 from infinity_db.database import ArmySelectionError, Database
+from infinity_db.declaration_matrix import (
+    core_declaration_matrix,
+    core_scenario_declaration_extension,
+)
 from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
@@ -42,6 +46,7 @@ from infinity_db.scenario_geometry import parse_scenario_geometry
 from infinity_db.scenario_map_svg import render_scenario_map_svg
 from infinity_db.search_catalog import SearchCatalog
 from infinity_db.skill_catalog import SkillCatalog
+from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.trait_catalog import TraitCatalog
@@ -59,6 +64,7 @@ from infinity_db.unit_slugs import (
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import (
     AMMUNITION_API_PATH,
+    DEPLOYED_OBJECT_API_PATH,
     EQUIPMENT_API_PATH,
     HACKING_PROGRAM_API_PATH,
     LABEL_API_PATH,
@@ -190,34 +196,60 @@ def _enrich_scenario_api_item(
     return result
 
 
-def _scenario_army_points(query_string: str) -> int:
-    params = _validated_query_params(query_string, {"army_points", "cache_bust"})
-    if "army_points" not in params:
-        raise ValueError("Provide army_points exactly once")
+def _scenario_selection(params: dict[str, list[str]]) -> tuple[str | None, str | None]:
+    """Require an exact collection/revision pair; never infer the current ITS season."""
+    collection = params.get("collection", [None])[0]
+    revision = params.get("revision", [None])[0]
+    if (collection is None) != (revision is None):
+        raise ValueError("Provide collection and revision together")
+    if collection is not None:
+        require_domain_slug(collection, context="scenario collection")
+        if not revision or revision.strip() != revision:
+            raise ValueError("scenario revision must be a non-empty trimmed string")
+    return collection, revision
+
+
+def _scenario_army_points(
+    query_string: str,
+) -> tuple[int, str | None, str | None]:
+    params = _validated_query_params(
+        query_string, {"army_points", "collection", "revision", "cache_bust"}
+    )
     army_points = _integer(params, "army_points", None, 1, 10000)
     if army_points is None:
         raise ValueError("Provide army_points exactly once")
-    return army_points
+    return army_points, *_scenario_selection(params)
 
 
-def _scenario_map_options(query_string: str) -> tuple[int, Literal["in", "cm"]]:
+def _scenario_map_options(
+    query_string: str,
+) -> tuple[int, Literal["in", "cm"], str | None, str | None]:
     params = _validated_query_params(
-        query_string, {"army_points", "distance_unit", "cache_bust"}
+        query_string, {"army_points", "distance_unit", "collection", "revision", "cache_bust"}
     )
     army_points = _integer(params, "army_points", None, 1, 10000)
     if army_points is None:
         raise ValueError("Provide army_points exactly once")
     distance_unit = params.get("distance_unit", ["in"])[0]
     if distance_unit == "in":
-        return army_points, "in"
-    if distance_unit == "cm":
-        return army_points, "cm"
-    raise ValueError("distance_unit must be in or cm")
+        unit: Literal["in", "cm"] = "in"
+    elif distance_unit == "cm":
+        unit = "cm"
+    else:
+        raise ValueError("distance_unit must be in or cm")
+    return army_points, unit, *_scenario_selection(params)
 
 
-def _scenario_summary(catalog: ScenarioCatalog, identifier: str) -> dict[str, Any] | None:
+def _scenario_summary(
+    catalog: ScenarioCatalog, identifier: str,
+    *, collection: str | None = None, revision: str | None = None,
+) -> dict[str, Any] | None:
     return next(
-        (item for item in catalog.list_scenarios() if item["slug"] == identifier),
+        (
+            item
+            for item in catalog.list_scenarios(collection=collection, revision=revision)
+            if item["slug"] == identifier
+        ),
         None,
     )
 
@@ -332,6 +364,7 @@ def _unit_query(query: str) -> dict:
             "declared_faction_id",
             "search",
             "skill_id",
+            "specialist",
             "equipment_id",
             "weapon_id",
             "troop_type",
@@ -359,6 +392,9 @@ def _unit_query(query: str) -> dict:
             raise ValueError(f"Unknown query parameter: {key}")
         if len(values) != 1:
             raise ValueError(f"Provide {key} only once")
+    specialist = params.get("specialist", [""])[0]
+    if specialist and specialist not in SPECIALIST_CONTEXTS:
+        raise ValueError("Unknown Specialist Troops filter context")
     search = params.get("search", [""])[0].strip()
     if len(search) > 200:
         raise ValueError("search must be at most 200 characters")
@@ -394,6 +430,7 @@ def _unit_query(query: str) -> dict:
         "declared_faction_id": declared_faction_id,
         "search": search,
         "skill_id": _domain_filter_identifier(params, "skill_id"),
+        "specialist": specialist,
         "equipment_id": _domain_filter_identifier(params, "equipment_id"),
         "weapon_id": _domain_filter_identifier(params, "weapon_id"),
         "troop_type": _domain_filter_identifier(params, "troop_type"),
@@ -429,11 +466,17 @@ class ApiHandler:
         *,
         static_revision: str,
         snapshot_revision: str,
+        deployed_objects: dict[str, Any] | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
         self.static_revision = static_revision
         self.snapshot_revision = snapshot_revision
+        self.deployed_objects = deployed_objects
+        self._deployed_by_id = (
+            {obj["id"]: obj for obj in deployed_objects["objects"]}
+            if deployed_objects is not None else {}
+        )
         self.trait_catalog = TraitCatalog(database, rules_database)
         self.state_catalog = StateCatalog(rules_database)
         self.skill_catalog = SkillCatalog(database, rules_database)
@@ -483,7 +526,120 @@ class ApiHandler:
         status = HTTPStatus.OK
         cache_control = "no-cache"
         payload = None
-        if path == "/api/version":
+        if path == "/api/orders-aros":
+            cache_control = API_CACHE_CONTROL
+            try:
+                params = _validated_query_params(
+                    query_string, {"scenario", "cache_bust"},
+                )
+                scenario_slug = params.get("scenario", [None])[0]
+                if scenario_slug is not None:
+                    require_domain_slug(scenario_slug, context="core scenario")
+                    if (
+                        self.rules_database is not None
+                        and self.rules_database.resolve_scenario_publication(
+                            scenario_slug, collection="n5-core",
+                        ) is None
+                    ):
+                        raise ValueError(f"Unsupported current core scenario: {scenario_slug}")
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                if self.rules_database is None:
+                    raise ValueError("Core rules reference unavailable")
+                payload = core_declaration_matrix(self.database, self.rules_database)
+                if scenario_slug is not None:
+                    payload["scenario"] = core_scenario_declaration_extension(
+                        self.rules_database, scenario_slug,
+                    )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not project scoped Orders/AROs")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The Orders/AROs reference is unavailable."}
+        elif path == "/api/restrictions":
+            cache_control = API_CACHE_CONTROL
+            try:
+                params = _validated_query_params(
+                    query_string, {"subject", "record_id", "cache_bust"},
+                )
+                subject = params.get("subject", [None])[0]
+                record_id = params.get("record_id", [None])[0]
+                from infinity_db.restriction_storage import validate_restriction_filters
+
+                validate_restriction_filters(subject, record_id)
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                if self.rules_database is None:
+                    payload = {
+                        "formatVersion": 1, "available": False, "source": None,
+                        "polarity": "prohibition", "items": [],
+                        "evaluationSupported": False,
+                    }
+                else:
+                    payload = self.rules_database.restrictions_payload(
+                        subject=subject, record_id=record_id,
+                    )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Restrictions reference")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "Restrictions reference is unavailable. Please try again."}
+        elif path == "/api/faq-rulings":
+            cache_control = API_CACHE_CONTROL
+            try:
+                params = _validated_query_params(
+                    query_string,
+                    {"topic_id", "rules_revision", "as_of",
+                     "season_id", "season_revision", "scenario_id", "cache_bust"},
+                )
+                required = ("topic_id", "rules_revision", "as_of")
+                for key in required:
+                    if key not in params or not params[key][0]:
+                        raise ValueError(f"Provide {key} exactly once")
+                context = {key: values[0] for key, values in params.items()
+                           if key != "cache_bust"}
+                # Validate against the same date/revision/identity contract
+                # even when the installed rules DB contains no FAQ entries.
+                from infinity_db.faq_rulings import select_applicable_faq_rulings
+
+                select_applicable_faq_rulings(
+                    [],
+                    topic_id=context["topic_id"],
+                    rules_revision=context["rules_revision"],
+                    as_of=context["as_of"],
+                    season_id=context.get("season_id"),
+                    season_revision=context.get("season_revision"),
+                    scenario_id=context.get("scenario_id"),
+                )
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                items = (
+                    self.rules_database.faq_rulings_for_topic(
+                        context["topic_id"],
+                        rules_revision=context["rules_revision"],
+                        as_of=context["as_of"],
+                        season_id=context.get("season_id"),
+                        season_revision=context.get("season_revision"),
+                        scenario_id=context.get("scenario_id"),
+                    )
+                    if self.rules_database is not None else []
+                )
+                payload = {"context": context, "items": items}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read FAQ rulings")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "FAQ rulings are unavailable. Please try again."}
+        elif path == "/api/version":
             payload = {
                 "version": __version__,
                 "static_revision": self.static_revision,
@@ -555,6 +711,8 @@ class ApiHandler:
                         payload = {"error": "Fireteam chart not found"}
                     else:
                         attach_public_army_slug(self.database, payload["army"])
+                        for parent in payload["parent_charts"]:
+                            attach_public_army_slug(self.database, parent["army"])
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Fireteam chart")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -594,6 +752,31 @@ class ApiHandler:
                 LOGGER.exception("Could not read skill modifiers")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The skill modifiers are unavailable. Please try again."}
+        elif path == "/api/deployed-objects":
+            cache_control = API_CACHE_CONTROL
+            if self.deployed_objects is None:
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "Deployed-object references are not published for this release."
+                }
+            else:
+                payload = {
+                    "items": self.deployed_objects["objects"],
+                    "scope": self.deployed_objects["scope"],
+                    "unresolved_deliveries": self.deployed_objects["unresolvedDeliveries"],
+                }
+        elif match := DEPLOYED_OBJECT_API_PATH.fullmatch(path):
+            cache_control = API_CACHE_CONTROL
+            if self.deployed_objects is None:
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "Deployed-object references are not published for this release."
+                }
+            else:
+                payload = self._deployed_by_id.get(match.group("identifier"))
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Deployed-object reference not found"}
         elif path in {"/api/skills", "/api/equipment", "/api/weapons"}:
             cache_control = API_CACHE_CONTROL
             try:
@@ -870,7 +1053,10 @@ class ApiHandler:
         elif path == "/api/scenarios":
             cache_control = API_CACHE_CONTROL
             try:
-                _validated_query_params(query_string, {"cache_bust"})
+                params = _validated_query_params(
+                    query_string, {"collection", "revision", "cache_bust"}
+                )
+                collection, revision = _scenario_selection(params)
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -884,9 +1070,14 @@ class ApiHandler:
                         self.rules_database,
                         item,
                     )
-                    for item in self.scenario_catalog.list_scenarios()
+                    for item in self.scenario_catalog.list_scenarios(
+                        collection=collection, revision=revision
+                    )
                 ]
-                payload = {"items": items}
+                payload = {
+                    "items": items,
+                    "collections": self.scenario_catalog.list_collections(),
+                }
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read scenarios")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -896,7 +1087,9 @@ class ApiHandler:
         elif match := SCENARIO_MAP_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
-                army_points, distance_unit = _scenario_map_options(query_string)
+                army_points, distance_unit, collection, revision = _scenario_map_options(
+                    query_string
+                )
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -905,7 +1098,10 @@ class ApiHandler:
                 )
             try:
                 identifier = match.group("identifier")
-                summary = _scenario_summary(self.scenario_catalog, identifier)
+                summary = _scenario_summary(
+                    self.scenario_catalog, identifier,
+                    collection=collection, revision=revision,
+                )
                 if summary is None:
                     return WebResponse.json(
                         {"error": "Scenario not found"},
@@ -929,6 +1125,8 @@ class ApiHandler:
                 scenario = self.scenario_catalog.get_scenario(
                     identifier,
                     army_points=army_points,
+                    collection=collection,
+                    revision=revision,
                 )
                 if scenario is None:
                     return WebResponse.json(
@@ -953,7 +1151,7 @@ class ApiHandler:
         elif match := SCENARIO_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
-                army_points = _scenario_army_points(query_string)
+                army_points, collection, revision = _scenario_army_points(query_string)
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -962,7 +1160,10 @@ class ApiHandler:
                 )
             try:
                 identifier = match.group("identifier")
-                summary = _scenario_summary(self.scenario_catalog, identifier)
+                summary = _scenario_summary(
+                    self.scenario_catalog, identifier,
+                    collection=collection, revision=revision,
+                )
                 if summary is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Scenario not found"}
@@ -981,6 +1182,8 @@ class ApiHandler:
                     payload = self.scenario_catalog.get_scenario(
                         identifier,
                         army_points=army_points,
+                        collection=collection,
+                        revision=revision,
                     )
                     if payload is None:
                         status = HTTPStatus.NOT_FOUND
@@ -1078,7 +1281,19 @@ class ApiHandler:
                     )
                     if logical_unit_ids is not None:
                         query["equipment_id"] = None
-                        query["_logical_unit_ids"] = logical_unit_ids
+                    specialist = query.pop("specialist")
+                    if specialist:
+                        if self.rules_database is None:
+                            raise ValueError("Specialist filter requires published rules data")
+                        qualifying = candidate_unit_ids(
+                            self.database, self.rules_database, specialist,
+                        )
+                        logical_unit_ids = (
+                            qualifying if logical_unit_ids is None
+                            else logical_unit_ids & qualifying
+                        )
+                    if logical_unit_ids is not None:
+                        query["_logical_unit_ids"] = frozenset(logical_unit_ids)
                     payload = self.database.list_units(**query)
                     payload = {
                         **payload,

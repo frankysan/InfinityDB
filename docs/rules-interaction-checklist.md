@@ -31,9 +31,9 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **116/131** complete, **15** pending.
-- Current authored outgoing relations: **314**.
-- Explicitly tracked future/deferred interactions: **113**.
+- Supporting semantic identities: **205/205** complete, **0** pending.
+- Current authored outgoing relations: **514**.
+- Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
 
@@ -72,7 +72,7 @@ review. `declaration-category` projection records are excluded.
   - `applies-effects-to` → Move (`skill:move`)
   - `applies-effects-to` → Dodge (`skill:dodge`)
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:partial-cover` — Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation.
-  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
+  - future [post-0.7.0; planned]: `applies-effects-to` → Guts Roll (`rule:guts-roll`) — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
 - [x] **Combat Instinct** (`skill:combat-instinct`) — reviewed
   - `ignores-modifiers-from` → Surprise Attack (`skill:surprise-attack`)
   - `negates-effects-of` → Stealth (`skill:stealth`)
@@ -85,7 +85,7 @@ review. `declaration-category` projection records are excluded.
   - `applies-effects-to` → Command Token: Strategic Use (`rule:command-token-strategic-use`)
 - [x] **Courage** (`skill:courage`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
+  - future [post-0.7.0; planned]: `applies-effects-to` → Guts Roll (`rule:guts-roll`) — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation.
 - [x] **Cyberplug** (`skill:cyberplug`) — reviewed
   - `controller-eligible-for` → Peripheral (Cyberplug) (`rule:peripheral-type:cyberplug`)
@@ -155,12 +155,12 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:null-state` — G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together.
   - future [post-0.7.0; deferred]: `relation type TBD` → Dodge (`skill:dodge`) — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
   - future [post-0.7.0; deferred]: `relation type TBD` → Reset (`skill:reset`) — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
-  - future [post-0.7.0; planned]: `relation type TBD` → `rule:combat-group` — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
+  - future [post-0.7.0; planned]: `relation type TBD` → Combat Group (`rule:combat-group`) — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
 - [x] **Guard** (`skill:guard`) — reviewed
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
 - [x] **Hacker** (`skill:hacker`) — reviewed
   - `enables-use-of` → Hacking Device (`equipment:hacking-device`)
-  - future [post-0.7.0; planned]: `relation type TBD` → `rule:hacking-area` — A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Hacking Area (`rule:hacking-area`) — The canonical Hacking Area reference now exists. A typed geometry/network edge still cannot express activation-time reach, enemy-Repeater eligibility, or ARO measurement conditions; keep the semantic link in Hacker prose without inventing unconditional network relations.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:upgrade-program` — Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; Hacking Programs are now first-class identities, but Upgrade Program identity and source-specific grant semantics remain unresolved.
 - [x] **Hidden Deployment** (`skill:hidden-deployment`) — reviewed
   - `enters-state` → Hidden Deployment State (`state:hidden-deployment`)
@@ -187,9 +187,8 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
   - future [post-0.7.0; deferred]: `relation type TBD` → Hidden Deployment State (`state:hidden-deployment`) — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
 - [x] **Infinity Spec-Ops** (`skill:infinity-spec-ops`) — reviewed
-  - outgoing: none
+  - `enables-use-of` → Request SpecBall (`skill:request-specball`)
   - future [post-0.7.0; planned]: `uses-effects-of` → `rule:spec-ops-chart` — Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts.
-  - future [post-0.7.0; planned]: `enables-use-of` → `skill:request-specball` — Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity.
 - [x] **Inspiring Leadership** (`skill:inspiring-leadership`) — reviewed
   - `uses-effects-of` → Regular (`training:regular`)
   - `uses-effects-of` → Courage (`skill:courage`)
@@ -201,7 +200,7 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
 - [x] **Journalist** (`skill:journalist`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:guts-roll` — Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved.
+  - future [post-0.7.0; planned]: `modifies-rolls-for` → Guts Roll (`rule:guts-roll`) — Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved.
   - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:cubevac-roll` — Journalist grants a campaign-only CUBEVAC Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
   - future [post-0.7.0; planned]: `modifies-rolls-for` → `rule:promotion-roll` — Journalist grants a campaign-only Promotion Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
 - [x] **Jump** (`skill:jump`) — reviewed
@@ -291,7 +290,7 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:wound` — Regeneration removes one Wound on success and inflicts one additional Wound on failure; model the bidirectional Wound outcome once Wound is a canonical event/rules identity.
 - [x] **Religious Troop** (`skill:religious-troop`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; planned]: `applies-effects-to` → `rule:guts-roll` — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
+  - future [post-0.7.0; planned]: `applies-effects-to` → Guts Roll (`rule:guts-roll`) — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat` — Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics.
 - [x] **Reload** (`skill:reload`) — reviewed
   - `cancels-state` → Unloaded State (`state:unloaded`)
@@ -368,7 +367,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Terrain** (`skill:terrain`) — reviewed
   - outgoing: none
   - future [post-0.7.0; planned]: `applies-effects-to` → `rule:movement-label` — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
-  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:special-terrain` — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Special Terrain (`rule:special-terrain`) — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
 - [x] **Total Reaction** (`skill:total-reaction`) — reviewed
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
 - [x] **Transmutation** (`skill:transmutation`) — reviewed
@@ -462,7 +461,7 @@ review. `declaration-category` projection records are excluded.
   - `imposes-modifiers-on` → BS Attack (`skill:bs-attack`)
 - [x] **Repeater** (`equipment:repeater`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:hacking-area` — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Hacking Area (`rule:hacking-area`) — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
 - [x] **SymbioMate** (`equipment:symbiomate`) — reviewed
   - `uses-effects-of` → Immunity (`skill:immunity`)
 - [x] **TinBot** (`equipment:tinbot`) — reviewed: TinBot is a family container; exact source variants carry their own reviewed interaction semantics.
@@ -590,6 +589,8 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → Reset (`skill:reset`)
   - `cancels-state` → Suppressive Fire State (`state:suppressive-fire`)
   - `restricts-use-of` → NCO (`skill:nco`)
+  - `prevents-membership-in` → Fireteams: General Rules (`rule:fireteam-general`)
+  - `prevents-participation-in` → Coordinated Orders (`rule:coordinated-orders`)
   - future [post-0.7.0; deferred]: `causes-state` → Disconnected State (`state:disconnected`) — Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition.
 - [x] **Normal State** (`state:normal`) — reviewed
   - outgoing: none
@@ -661,7 +662,7 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → ECM (`equipment:ecm`)
 - [x] **TinBot: Firewall** (`equipment:tinbot-firewall`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
-  - future [post-0.7.0; planned]: `uses-effects-of` → `equipment:firewall` — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
+  - future [post-0.7.0; planned]: `uses-effects-of` → Firewall (`equipment:firewall`) — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
 - [x] **TinBot: Neurocinetics** (`equipment:tinbot-neurocinetics`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
   - `uses-effects-of` → Neurocinetics (`skill:neurocinetics`)
@@ -732,6 +733,7 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → 360º Visor (`equipment:360o-visor`)
   - `enables-use-of` → BS Attack (`skill:bs-attack`)
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
   - `uses-effects-of` → Total Reaction (`skill:total-reaction`)
 
 ### 0.8.0
@@ -873,70 +875,117 @@ review. `declaration-category` projection records are excluded.
 
 ### 1.0.0
 
-#### Ammunition (0/11)
+#### Ammunition (11/11)
 
-- [ ] **Armor Piercing (AP) Ammunition** (`ammunition:ap`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Armor Piercing (AP) Ammunition** (`ammunition:ap`) — reviewed: English N5.3 p. 63, Spanish N5.3 p. 66 and pinned English Wiki AP revision 2990 confirm one ARM/2 or BTS/2 Saving Roll per hit, upward rounding with positive minimum 1, one Wound per failed roll and an additional modified roll for a Critical. The owning Immunity rule conditionally covers AP for applicable non-Comms attacks: Immunity (AP) leaves DA rolls intact on AP+DA, whereas Immunity (ARM/BTS) may treat covered Ammunition as Normal. No unconditional outgoing relation from AP to Immunity or combined components is warranted.
   - outgoing: none
-- [ ] **Double Action (DA) Ammunition** (`ammunition:da`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Double Action (DA) Ammunition** (`ammunition:da`) — reviewed: N5.3 English p. 64 and pinned English Wiki DA revision 2991 confirm two mandatory Saving Rolls per hit even after a failed first roll or Unconscious, one Wound per failed roll and a third roll for a Critical. Related BioWeapon/Immunity/combined-Ammunition behavior remains owned and conditioned by those rules; DA itself has no additional outgoing graph edge.
   - outgoing: none
-- [ ] **Eclipse Ammunition** (`ammunition:eclipse`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
-- [ ] **Electromagnetic (E/M) Ammunition** (`ammunition:em`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Eclipse Ammunition** (`ammunition:eclipse`) — reviewed: N5.3 English pp. 64/66, Spanish p. 64 and the retained pinned English Wiki Eclipse revision 3789 review establish Smoke inheritance, Reflective zero-visibility/MSV exception and BS Attack visibility-MOD exception. The uses-effects-of references point to Smoke and the general Face to Face rule. Typed opposition facts require a rolled Attack and crossing LoF, preserve Eclipse's Visor exception, Normal enemy Dodge, all-oppositions retention and no additional Critical effect; no unconditional Visor-negation edge or calculated outcome is implied.
+  - `uses-effects-of` → Smoke Ammunition (`ammunition:smoke`)
+  - `uses-effects-of` → Face to Face Rolls (`rule:face-to-face-rolls`)
+- [x] **Electromagnetic (E/M) Ammunition** (`ammunition:em`) — reviewed: English/Spanish N5.3 p. 64 and pinned English Wiki E/M revision 3418 confirm two BTS/2 rolls per hit (a third for a Critical), Isolated on a failed roll and additional Immobilized-B only for HI, TAG, REM, VH. Those conditional causes-state relations remain in the graph. E/M alone does not inflict Wounds; Normal in N+E/M has separate effects. After a failed E/M roll a usual Guts Roll applies unless inapplicable: affected HI/TAG/REM/VH now IMM-B cannot roll, while Courage/equivalent can ignore it. Immunity depends on matching type and attack classification, not an unconditional E/M relationship.
   - `causes-state` → Isolated State (`state:isolated`)
   - `causes-state` → Immobilized-B State (`state:immobilized-b`)
-- [ ] **Explosive (EXP) Ammunition** (`ammunition:exp`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Explosive (EXP) Ammunition** (`ammunition:exp`) — reviewed: English and Spanish N5.3 p. 65 and pinned Wiki EXP revision 2994 confirm three mandatory Saving Rolls per hit even after Unconscious; each failed roll inflicts one Wound, and a Critical adds one roll (four total). N5.3 p. 67 combined AP+EXP example applies AP's half ARM/BTS to all four rolls. The existing conditional Immunity (ARM) AP+EXP case replaces covered ammunition effects with Normal for a non-Comms ARM attack; Critical remains unless Immunity (Critical) applies. There is no unconditional outgoing relation from base EXP to AP or Immunity.
   - outgoing: none
-- [ ] **Normal (N) Ammunition** (`ammunition:normal`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Normal (N) Ammunition** (`ammunition:normal`) — reviewed: N5.3 English p. 63 and pinned English Wiki Normal revision 2989 confirm one Saving Roll per hit, one Wound per failed roll and one extra Saving Roll for a Critical. The weapon specifies ARM/BTS/other Saving Attribute; Normal adds no further condition or outgoing rules relation. Combined Saving Rolls and Immunity exceptions belong to their owning rules, not this base Ammunition.
   - outgoing: none
-- [ ] **Paralysis (PARA) Ammunition** (`ammunition:para`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Paralysis (PARA) Ammunition** (`ammunition:para`) — reviewed: English N5.3 p. 65, Spanish p. 66 and pinned English Wiki PARA revision 3419 confirm one PH-6 Saving Roll per hit and one additional roll for a Critical, IMM-A only after failure, and no roll/effect where PH does not exist. The Heavy Riotstopper PH 12 example and the order-sequencing Engineer/Dodge re-infliction case remain conditional. The existing causes-state relation to Immobilized-A is intentionally qualified by the typed condition and missing-PH rule, not unconditional; PARA does not inflict a Wound.
   - `causes-state` → Immobilized-A State (`state:immobilized-a`)
-- [ ] **Shock Ammunition** (`ammunition:shock`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Shock Ammunition** (`ammunition:shock`) — reviewed: English N5.3 p. 65, Spanish p. 67 and pinned English Wiki Shock revision 3074 confirm one Saving Roll per hit, one Wound per failure, and one extra roll for a Critical. Direct-to-Dead via bypassing Unconscious forms, Dogged and NWI applies only when a target with VITA 1 fails a Shock save; it is not a blanket outcome for STR or other VITA values. Pinned Wiki also says Explode does not activate on direct Dead. Conditional Immunity (Shock) can treat this as Normal on eligible non-Comms Attacks while a Critical bonus persists unless Immunity (Critical) applies. The outgoing causes-state edge remains conditioned, with no unconditional relation to those Skills.
   - `causes-state` → Dead State (`state:dead`)
-- [ ] **Smoke Ammunition** (`ammunition:smoke`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
-- [ ] **Stun Ammunition** (`ammunition:stun`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Smoke Ammunition** (`ammunition:smoke`) — reviewed: N5.3 English p. 66, Spanish p. 65 and the retained pinned English Wiki Smoke revision 3642 review establish the unopposed/Face-to-Face conditions, MSV exclusion, Dodge exception, Critical, removal, infinite-height volume and horizontal/vertical scenery clipping. The uses-effects-of reference points to the general Face to Face rule; typed opposition facts preserve the Roll, LoF and crossing conditions without calculating outcomes. Eclipse's distinct MSV exception remains separately reviewed.
+  - `uses-effects-of` → Face to Face Rolls (`rule:face-to-face-rolls`)
+- [x] **Stun Ammunition** (`ammunition:stun`) — reviewed: English N5.3 p. 67, Spanish p. 63 and pinned English Wiki Stun revision 3420 confirm one Saving Roll per hit, an extra roll for a Critical, Stunned on failure, and automatically failed subsequent eligible Guts Roll absent Courage/equivalent. Stun alone does not grant a Guts Roll to ineligible targets. The printed pinned Immunity (BTS) versus Flash Pulse case is weapon-specific: a BTS roll still occurs; Non-Lethal prevents Wounds and State: Stunned survives the normal Immunity trait protection. Do not generalize that printed weapon case to all Stun attacks; the outgoing causes-state relation remains conditional.
   - `causes-state` → Stunned State (`state:stunned`)
-- [ ] **T2 Ammunition** (`ammunition:t2`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **T2 Ammunition** (`ammunition:t2`) — reviewed: English N5.3 p. 67, Spanish p. 67 and pinned Wiki T2 revision 2999 confirm two Wounds on a failed hit Saving Roll and only one on failure of the additional Critical roll; players must identify dice before rolling. Cross-source wording differs: English PDF specifies ARM Roll, Spanish PDF and English Wiki say Saving Roll without an Attribute. Retain the weapon's authoritative printed Saving Roll Attribute and expose the discrepancy in sourceNotes. Applicable Immunity (T2) reduces covered failed-hit effects to Normal, without automatically removing a Critical roll; this is derived, not printed specifically for T2. No unconditional outgoing relation is justified.
   - outgoing: none
 
-#### Rule (9/9)
+#### Equipment (1/1)
 
+- [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
+  - outgoing: none
+
+#### Rule (26/26)
+
+- [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
+  - outgoing: none
+- [x] **Army Retreat!** (`rule:army-retreat`) — reviewed: N5.3 English p.146, Spanish p.150, and archived Retreat Situation revision 3942 reconcile surviving points including undeployed Troopers, the 25% trigger/recovery threshold, automatic Loss of Lieutenant, Impetuous Phase, evacuation, State distinction, and scenario-owned end conditions. No live army state or roster calculator.
+  - outgoing: none
 - [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Combat Group** (`rule:combat-group`) — reviewed: English/Spanish N5.3 p.10 and archived Army List Wiki revision 3847 substantiate initial assignment, ten Order-contributing/spending member slots, Peripheral/Controller grouping, non-transfer baseline and Open Marker membership; Order Pool context is N5.3 p.11. Published as source-scoped reference only, not list legality or live group calculation.
   - outgoing: none
 - [x] **Consoles** (`rule:scenario:consoles`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Controlling Supply Boxes** (`rule:scenario:controlling-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
+- [x] **Coordinated Orders** (`rule:coordinated-orders`) — reviewed: N5.3 pp.129-131 and N5 FAQ v0.1 p.3 baseline for Command Token cost, Spearhead, Burst, targeting, recovery, Hacking and Special Dice; no unqualified simulation relations.
+  - outgoing: none
+- [x] **Deployment Phase** (`rule:deployment-phase`) — reviewed: General N5.3 Deployment Phase sequence authored from official printed page 15. The dated FAQ repositioning/measurement boundary has its own FAQ ruling and never changes the core rule or any particular Deployment Skill. Scenario-specific deployment rules remain scoped separately.
+  - outgoing: none
 - [x] **Designated Landing Area** (`rule:scenario:designated-landing-area`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Dominate Quadrants** (`rule:scenario:dominate-quadrants`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
+- [x] **Face to Face Rolls** (`rule:face-to-face-rolls`) — reviewed: N5.3 p.25 baseline for opposed successes, ties and Criticals; linked mechanics do not infer generic Attack resolution edges.
+  - outgoing: none
+- [x] **Game Modes** (`rule:game-modes`) — reviewed: N5.3 p. 6 six recommended Game Modes; independent p. 146 printed Retreat! thresholds and p. 147 advisory table sizes cross-checked against existing exact source manifests. A single general-reference table maintains six exact mode, Army Points, base SWC, table, Deployment Zone, estimated minutes and army/session Retreat threshold rows. Scenarios, tournaments and agreed Free Games may override suggested setup; no Army legality or game-state calculation.
+  - outgoing: none
+- [x] **Guts Roll** (`rule:guts-roll`) — reviewed: N5.3 p.38 baseline for Guts timing, movement hierarchy and exception-scoped linked references; no state-transition evaluator is implied.
+  - outgoing: none
+- [x] **Hacking Area** (`rule:hacking-area`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
+  - outgoing: none
+- [x] **Initiative Roll** (`rule:initiative-roll`) — reviewed: N5.3 p.15 Initiative Roll and Keeping Initiative/Deployment describe Lieutenant WIP, ties and failures, open Attribute information, and the two distinct pregame choices. Source-specific pregame resolution, not a general attack contest or deployment modifier.
+  - outgoing: none
 - [x] **Killing** (`rule:scenario:killing`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Modifiers Explained (MODs)** (`rule:modifiers-explained`) — reviewed: N5.3 pp. 68/75 distinguishes entry-local MODs, positive/negative MOD recipients, Automatic versus non-Automatic negative MODs, one-die ReRoll, and Burst versus Special Dice. Linked explanations preserve mode selection and FTF conditions.
+  - outgoing: none
+- [x] **Order Expenditure Sequence** (`rule:order-expenditure-sequence`) — reviewed: N5.3 pp.14-15 declaration, ARO checks, requirements and simultaneous effects; descriptive timing links do not implement a universal declaration evaluator.
   - outgoing: none
 - [x] **Reinforced Tactical Link** (`rule:scenario:reinforced-tactical-link`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
+- [x] **Saving Rolls** (`rule:saving-rolls`) — reviewed: N5.3 p.37 baseline for PS, defense and Critical Saving Rolls; Profile-specific Ammunition exceptions remain separate reviewed facts.
+  - outgoing: none
+- [x] **Special Dice (+1 SD)** (`rule:special-dice`) — reviewed: Shared N5.3 SD resolution, Fireteam/CC applicability and Berserk exception are source-cited prose; no universal Burst or Disposable relation is inferred.
+  - outgoing: none
+- [x] **Special Terrain** (`rule:special-terrain`) — reviewed: N5.3 p.143 optional table context: Special Terrain combines one of five Terrain Types with at least one Difficult/Saturation/Visibility characteristic. Locations, composition, current affected Troopers and Terrain Skill eligibility remain table/session scoped; no unconditional outgoing Skill or Equipment edge is inferred.
+  - outgoing: none
 - [x] **Specialist Troops** (`rule:specialist-troops:standard`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Standard Game** (`rule:standard-game`) — reviewed: Official N5.3 English pp.146-147 and Spanish p.150 distinguish three-round Standard Game scoring and Retreat-based early ending from scenarios and their objective/end conditions; no universal scenario scoring assertion.
   - outgoing: none
 - [x] **Supply Boxes** (`rule:scenario:supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
-
-#### Scenario (0/4)
-
-- [ ] **Annihilation** (`scenario:annihilation`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, force-destruction objectives, and other scenario rule semantics remains 1.0 work.
-  - outgoing: none
-- [ ] **Domination** (`scenario:domination`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, objective interactions, and other scenario rule semantics remains 1.0 work.
-  - outgoing: none
-- [ ] **Firefight** (`scenario:firefight`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Classified Objective interactions, and other scenario rule semantics remains 1.0 work.
-  - outgoing: none
-- [ ] **Supplies** (`scenario:supplies`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work.
+- [x] **Supportware** (`rule:supportware`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Skill (2/2)
+#### Scenario (5/5)
 
+- [x] **Annihilation** (`scenario:annihilation`) — reviewed: English N5.3 pp. 149-150 verify all six Army Points configurations (150/200/250/300/350/400), SWC and deployment references, three exclusive end-of-game bands for killed enemy Army Points (maximum 4 OP), three for surviving Victory Points (maximum 4 OP), and 2 OP for the enemy Lieutenant killed. Shared Killing correctly includes entering Dead, remaining Null at game end and never-deployed enemy Troopers. The three-round limit and tactical-phase all-Null early ending remain separate shared conditions. The English 350-point survival table has a gap at 151-175 and overlap at 251-270; official Spanish N5.3 Aniquilación (printed p. 153) explicitly prints 85-175/176-270/more-than-270. The maintained reviewed-resolution is thus corroborated by the other N5.3 language edition, not solely inferred from continuity. No new graph edges are implied by typed mission component references; scoring requires game-state context.
+  - outgoing: none
+- [x] **Battleground** (`scenario:battleground`) — reviewed: Official ITS Season 18: Overheat English version 2026.09.01, printed pp. 121-123. Battleground is a distinct Direct Action mission: three end-of-game Zones of Operations with 2 OP near, 3 OP central and 5 OP far from the player's own Deployment Zone; the opposite side's near/far semantics are explicitly separated in the read model. The Sectors are identified only at the end of the game. At 150 Army Points each is 4 inches deep, with two outer Sectors 2 inches from the central line; at 200-400 each is 8 inches deep, with two outer Sectors 4 inches from the central line. Source diagram shows the three 24x32, 32x48 and 48x48 table sizes; rear Deployment Zones follow normal 8/12-inch sizes. Scoring relies on correct Zone Domination (Models/Markers, Proxies, Peripherals, Null exclusion except Shasvastii) plus Baggage +20 VP; Killing, HVT/Classified exclusion, and end-of-third-Round remain scenario-local prose. Current revision/source identity remains distinct from Core; no claimed historical replay or ITS FAQ publication.
+  - outgoing: none
+- [x] **Domination** (`scenario:domination`) — reviewed: N5.3 pp. 151-152 and pinned Wiki Domination revision 3264 confirm the six Army Points sizes and all Quadrant, Console, Specialist and mission-ending conditions. Quadrants use round-end Victory Points: equal with at least one held scores 1 OP, greater scores 2, maximum 6 across three rounds. Consoles score 1 OP each at game end and ownership goes to the last successful Hacker or other Specialist using Hack Consoles; the Skill needs Silhouette contact, Normal WIP, repeatable attempts and gives Hackers +3. Shasvastii Embryo is counted despite the ordinary Null exclusion; equipment does not count. The seven qualifying Specialist Skills and Peripheral restriction are shared references. English N5.2 p. 150, English N5.3 p. 151 and the pinned Wiki print 6 SWC at 350 points, but official Spanish N5.3 Domination p. 155 prints 7. The explicit cross-language source conflict remains unresolved; the maintained game-size value remains the English 6 pending authoritative clarification. No unconditional global graph edges are implied by scoped mission components.
+  - outgoing: none
+- [x] **Firefight** (`scenario:firefight`) — reviewed: English N5.3 pp. 155-156, N5.2 p. 154 and pinned English Wiki Firefight revision 3267 agree on all six deployment configurations and four end-game comparative objectives: more surviving Specialists (2 OP), more enemy Specialists killed (1 OP), more enemy Lieutenants killed (3 OP), and more enemy Army Points killed (4 OP). All comparisons require strictly greater values, not ties. There is no Classified Objective in these sources. Shared Killing counts Dead, remaining Null at end of game and never-deployed enemy Troopers. Reinforced Tactical Link is Firefight-only: Lieutenant identity always Open, must deploy at first Round start, replacement at the start of the active Tactical Phase if absent or Null costs no Order, and the replacement must be on-table. Designated Landing Area applies to the whole table, grants cumulative +3 on Combat Jump PH, and removes enemy Deployment Zone restrictions for Airborne Deployment-labeled Skills. The seven Specialist qualifiers, Non Specialist Chain of Command exclusion and Doctor/Engineer Peripheral restriction remain shared. Three-round and all-Null Tactical Phase/end-of-turn ending conditions remain distinct. The scenario-only overlays do not modify the canonical Lieutenant or Combat Jump rules and require no unconditional outgoing graph edges.
+  - outgoing: none
+- [x] **Supplies** (`scenario:supplies`) — reviewed: English N5.3 pp. 153-154, N5.2 p. 152 and pinned English Wiki Supplies revision 3266 agree on the three additive end-game objectives: 2 OP per controlled box (maximum 6), 2 for controlling strictly more than the opponent, and 2 extra for controlling all three. Placement is three 25 mm Supply Box Markers on the center line, the outer two 8 inches measured from table edge to marker edge; the diagram's 12-inch label is not a competing box-placement rule. Deployment in Silhouette contact is forbidden. The scenario-only Pick Up Supply Boxes Attack Short Skill is restricted to Specialists in contact with an uncarried Token, any Null Model carrying one, or an allied Normal Model carrying one; it costs a Short Skill without a Roll. Only Models can carry boxes (one per Specialist), and Tokens persist when their carriers become Null. At game end control requires a non-Null Model carrier not in Silhouette contact with an enemy Model; merely picking up, carrying while Null, or representing the carrier by a Marker does not score. The seven Specialist qualifiers, Non Specialist Chain of Command exception and Doctor/Engineer Peripheral restriction are shared. Three-round expiration and the game-size minimum-VP Tactical Phase/end-of-Player-Turn early ending are distinct. All six Army Points, SWC and minimum-VP rows are supported. Interactions are scoped through typed mission components and do not require unconditional graph relations or game-state persistence.
+  - outgoing: none
+
+#### Skill (4/4)
+
+- [x] **Activate Disco Ball** (`skill:activate-disco-ball`) — reviewed: N5.3 p. 71 and matching archived Wiki page: source-only Short Skill, Deactivator and allied-ball requirements, LoF/ZoC, WIP+3 Normal Roll with range MODs, Eclipse placement/removal. No Army Skill identity synthesized.
+  - `uses-effects-of` → Deactivator (`equipment:deactivator`)
+  - `uses-effects-of` → Eclipse Ammunition (`ammunition:eclipse`)
 - [x] **Hack Consoles** (`skill:hack-consoles`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
+- [x] **Request SpecBall** (`skill:request-specball`) — reviewed: Standalone core N5.3 Request SpecBall procedure published with Combat Jump relation and reviewed bilingual PDF/ITS scope.
+  - `uses-effects-of` → Combat Jump (`skill:combat-jump`)
 
 #### Term (5/5)
 
@@ -951,16 +1000,81 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (13/13)
+#### Weapon (66/66)
 
+- [x] **AP + EXP CC Weapon** (`weapon:ap-exp-cc-weapon`) — reviewed: N5.3 English p. 177, Spanish p. 184 and pinned Army 227 agree on AP+EXP with three ARM/2 Saving Rolls; archived Spanish Wiki charts report two, a retained unresolved source conflict. AP and EXP remain separate canonical Ammunition effects, not independent attack modes.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → CC (`trait:cc`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → CC (`trait:cc`)
+- [x] **AP Heavy Pistol** (`weapon:ap-heavy-pistol`) — reviewed: N5.3 p. 182: AP/ARM/2 with PS 6, B2, and one Saving Roll. Contrast Breaker Pistol BTS/2 without transferring defense attributes.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+- [x] **AP Mine** (`weapon:ap-mine`) — reviewed: N5.3 p. 181: AP Mine prints PS 7, B1, AP with one ARM/2 Saving Roll. Ordinary Place Deployable and conditional Intuitive Attack follow pp. 49/72/82. Army S1 vs printed object S0 remains disputed; no default Mine Dispenser subtype.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+- [x] **AP Thunderbolt** (`weapon:ap-thunderbolt`) — reviewed: N5.3 English p. 186, Spanish p. 193 and pinned Army 230 specify AP Ammunition, PS 6, Burst 2, ARM/2. Archived English and Spanish Wiki chart entries instead name N Ammunition; discrepancy retained without inventing another effect.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+- [x] **Assault Pistol** (`weapon:assault-pistol`) — reviewed: N5.3 p. 182: N/ARM, PS 7 and B4. Burst is not additional Saving Rolls on one hit.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Boarding Pistol** (`weapon:boarding-pistol`) — reviewed: N5.3 p. 182: Blast Mode has small Direct Template, Intuitive Attack and B1; Hit Mode has range bands, B2 and no Blast-only Traits. Both use N/ARM/one roll.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`trait:intuitive-attack`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Breaker Marksman Rifle** (`weapon:breaker-marksman-rifle`) — reviewed: N5.3 p. 180 and pinned Army metadata source 225: AP applies against BTS/2 (not ARM/2), PS 7, B3, one Saving Roll, Suppressive Fire. The English update's Sniper label does not establish another source profile. Shared AP and Suppressive Fire links cover effects; do not invent unit usage or a new ammunition type.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
+- [x] **Breaker Pistol** (`weapon:breaker-pistol`) — reviewed: N5.3 p. 182: AP applies to BTS/2 rather than ARM/2, B2 with one Saving Roll; do not infer a second roll.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+- [x] **CC Weapon** (`weapon:cc-weapon`) — reviewed: N5.3 p.177: PS 8, Burst 1, Normal N, one ARM Saving Roll and CC; generic CC Weapon requirements elsewhere do not mean this specific catalog identity.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → CC (`trait:cc`)
+  - `uses-effects-of` → CC Attack (`skill:cc-attack`)
+- [x] **Chain Rifle** (`weapon:chain-rifle`) — reviewed: N5.3 p. 186: Large Teardrop Direct Template with Normal N ammunition and ARM saves; distinct from Chain-colt's small template. Retains Intuitive Attack and Army statistics.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
+- [x] **Chain-colt** (`weapon:chain-colt`) — reviewed: N5.3 p. 186: Small Teardrop Direct Template, Normal N ammunition with ARM Saving Roll; Intuitive Attack linked to its actual Common Skill. No added or inferred ammunition effect.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+- [x] **Crazykoala** (`weapon:crazykoala`) — reviewed: N5.3 pp. 69 and 186: Place Deployable with Perimeter positioning, then Boost only after activation; Shock/PS 5/B1/one ARM Saving Roll is source-specific. Camouflage/Impersonation markers do not trigger Boost, and blocked paths prevent contact. No Mine or WildParrot effect is inherited.
+  - `uses-effects-of` → Perimeter (`trait:perimeter`)
+  - `uses-effects-of` → Boost (`trait:boost`)
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
 - [x] **Cybermine** (`weapon:cybermine`) — reviewed: Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose.
   - `uses-effects-of` → Mines (`weapon:mines`)
   - `modifies-use-of` → Reset (`skill:reset`)
   - `causes-state` → Stunned State (`state:stunned`)
   - `causes-state` → Immobilized-B State (`state:immobilized-b`)
+- [x] **D-Charges** (`weapon:d-charges`) — reviewed: The N5.3 printed p. 70 rules distinguish Demolition and CC contact requirements, Demolition-only Place Deployable, the ARO restriction and no-roll resolution, and a shared three-charge pool. The CC Improvised -6 modifier is mode-specific; the user's immunity to detonation applies to both. Profile ammunition and attack rolls remain in the two Army mode profiles.
+  - `uses-effects-of` → Place Deployable (`skill:place-deployable`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Improvised (`trait:improvised`)
+- [x] **DA CC Weapon** (`weapon:da-cc-weapon`) — reviewed: N5.3 p.177: DA requires two ARM Saving Rolls; PS 8 and Anti-materiel/CC Traits remain distinct from the roll count.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → CC (`trait:cc`)
+- [x] **Disco Baller** (`weapon:disco-baller`) — reviewed: N5.3 p. 71 governs targetless BS deployment, Eclipse placement and States Phase expiry, the persistent deployed Ball, and allied-only Deactivator activation with its own WIP+3 and range conditions. Its chart profile, Double Shot, and Disposable (2) remain distinct from the deployed ARM/BTS/STR/S profile. Activate Disco Ball is still prose rather than a standalone catalog Skill.
+  - `uses-effects-of` → Eclipse Ammunition (`ammunition:eclipse`)
+  - `uses-effects-of` → Speculative Attack (`trait:speculative-attack`)
+  - `uses-effects-of` → Targetless (`trait:targetless`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → Double Shot (`trait:double-shot`)
+  - `uses-effects-of` → Deactivator (`equipment:deactivator`)
+  - `uses-effects-of` → Activate Disco Ball (`skill:activate-disco-ball`)
 - [x] **Drop Bears** (`weapon:drop-bears`) — reviewed: N5.3 Drop Bears BS/Deployable modes share three charges but have different placement restrictions; typed relationships connect PH throwing, Targetless, Deployable/Intuitive placement, Shock and the modified Mines behavior. Imported legacy Throwing Weapon remains source data, not an additional N5 effect.
   - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
   - `uses-effects-of` → BS Weapon (PH) (`trait:bs-weapon-ph`)
@@ -969,31 +1083,177 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `modifies-use-of` → Mines (`weapon:mines`)
+- [x] **E/M CC Weapon** (`weapon:e-m-cc-weapon`) — reviewed: N5.3 p.177: preserve N+E/M printed notation and two BTS/2 rolls; E/M target-dependent states remain linked. Do not synthesize an unlisted extra ARM roll.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
+  - `uses-effects-of` → CC (`trait:cc`)
+  - `causes-state` → Isolated State (`state:isolated`)
+  - `causes-state` → Immobilized-B State (`state:immobilized-b`)
+- [x] **E/M Mine** (`weapon:e-m-mine`) — reviewed: N5.3 p. 181: E/M Mine prints PS 7, B1, E/M with two BTS/2 Saving Rolls and Non-Lethal. Source [**] refers to ammunition rules, not an exemption from shared Mine placement; retain S0/S1 conflict.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+- [x] **E/Mitter** (`weapon:e-mitter`) — reviewed: N5.3 p. 186: printed E/M with two BTS/2 Saving Rolls and Non-Lethal; the ammunition reference controls target-specific effects. Source ranges/Burst retained.
+  - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+- [x] **EXP CC Weapon** (`weapon:exp-cc-weapon`) — reviewed: N5.3 Weapon Chart p. 177: the EXP close-combat profile keeps PS 8 and three ARM Saving Rolls per hit. EXP and Anti-materiel are separate effects; no profile changes or additional roll mechanics inferred.
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → CC (`trait:cc`)
+- [x] **Feuerbach** (`weapon:feuerbach`) — reviewed: N5.3 Weapon Chart p. 186: Burst Mode uses B2 AP+DA with two ARM/2 Saving Rolls, Explosive Mode uses B1 EXP with three ARM Saving Rolls. PS 6 and Anti-materiel apply to each; ammunition and roll counts never combine across modes.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **Flamethrowers** (`weapon:flamethrowers`) — reviewed: N5.3 Flamethrowers chart p. 178 and pinned English Wiki Weapon Chart agree with Army profiles: Heavy is PS 6 / Large Teardrop, Light is PS 7 / Small Teardrop; both use N, B1, one ARM Saving Roll, Intuitive Attack and Continuous Damage. Shared canonical links own the underlying template, activation and repeat-roll mechanics. No additional variant effects or Army source corrections are inferred.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Intuitive Attack (`trait:intuitive-attack`)
+  - `uses-effects-of` → Continuous Damage (`trait:continuous-damage`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+- [x] **Flammenspeer** (`weapon:flammenspeer`) — reviewed: N5.3 chart p. 178: Blast Mode N/ARM, one Saving Roll, circular Impact Template; Hit Mode AP/ARM/2, one Saving Roll, no Template. Both have PS 6, Burst 1, Continuous Damage, shared Disposable (2) charges. Modes are alternatives; template does not transfer.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Impact Template (`trait:impact-template`)
+  - `uses-effects-of` → Continuous Damage (`trait:continuous-damage`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
 - [x] **Flash Pulse** (`weapon:flash-pulse`) — reviewed: Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred.
   - `uses-effects-of` → Stun Ammunition (`ammunition:stun`)
   - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
   - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
   - `uses-effects-of` → State (`trait:state`)
   - `causes-state` → Stunned State (`state:stunned`)
+- [x] **Heavy Pistol** (`weapon:heavy-pistol`) — reviewed: N5.3 p. 182: PS 6 and B2 with Shock ammo and one ARM Saving Roll. Source distinguishes Shock effects from PS.
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Hyper-Rapid Magnetic Cannon** (`weapon:hyper-rapid-magnetic-cannon`) — reviewed: N5.3 Weapon Chart p. 187: DA Anti-Materiel Mode uses B1 and two ARM Saving Rolls; AP and Shock modes use B5 with Suppressive Fire and one ARM/2 or ARM Saving Roll respectively. PS 5 throughout, with mode-dependent Traits.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
+- [x] **K1 Combi Rifle** (`weapon:k1-combi-rifle`) — reviewed: N5.3 Weapon Chart p. 183: preserves N Ammunition with ARM=0, one Saving Roll, PS 7/B3, Anti-materiel and Suppressive Fire. K1 is no distinct Ammunition identity; Immunity must be separately evaluated.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
+- [x] **K1 Sniper Rifle** (`weapon:k1-sniper-rifle`) — reviewed: N5.3 chart p. 185: one Saving Roll at ARM=0 and printed N Ammunition, PS 7/B2, Anti-materiel but no Suppressive Fire. Do not invent K1 Ammunition, AP halving or transfer K1 Combi Rifle Traits.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
 - [x] **Kobra Pistol** (`weapon:kobra-pistol`) — reviewed: N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls.
-  - outgoing: none
+  - `uses-effects-of` → Mixed Weapons (`weapon:mixed-weapons`)
 - [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
   - `variant-of` → Kobra Pistol (`weapon:kobra-pistol`)
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+- [x] **Madtraps** (`weapon:madtraps`) — reviewed: N5.3 pp. 69 and 187: Place Deployable with Perimeter positioning, then Boost; the printed PARA/PH-6/one-roll Non-Lethal effect is separate from Crazykoala Shock and WildParrot E/M. No automatic Mine mechanics or unreviewed carrier relationships.
+  - `uses-effects-of` → Perimeter (`trait:perimeter`)
+  - `uses-effects-of` → Boost (`trait:boost`)
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+  - `uses-effects-of` → Paralysis (PARA) Ammunition (`ammunition:para`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `causes-state` → Immobilized-A State (`state:immobilized-a`)
+- [x] **Marksman Rifles** (`weapon:marksman-rifles`) — reviewed: N5.3 chart p. 180, September 26 archived English Weapon Chart and pinned Army: all eight Marksman types have PS 7 and identical range bands; six previously undefined single-mode variants now link to this shared family. Each of those six retains its own Ammunition, Saving Roll Attribute, Trait and scoped navigation associations. Breaker and MULTI retain separate authoritative Weapon definitions to avoid ambiguous family mappings. No ammunition or Trait is inherited universally, especially not by MULTI Anti-Material Mode.
+  - outgoing: none
+- [x] **Mine Dispenser** (`weapon:mine-dispenser`) — reviewed: N5.3 pp. 71-72/181 and pinned Wiki: Mine Dispenser uses its own BS Weapon Chart profile, but adopts the Drop Bears BS Mode Mine Token placement procedure, including Conclusion timing, no same-Order detonation and placement restrictions. Mine subtype is supplied by bracketed Unit Profile; do not inherit Drop Bears PH roll or Shock subtype. Double Shot optionally expends both Disposable (2) charges for B2. Army savingNum=1 is non-operative with no Saving Roll Attribute or Ammunition; no damaging launcher attack is inferred.
+  - `modifies-use-of` → Drop Bears (`weapon:drop-bears`)
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Targetless (`trait:targetless`)
+  - `uses-effects-of` → Speculative Attack (`trait:speculative-attack`)
+  - `uses-effects-of` → Double Shot (`trait:double-shot`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `enables-use-of` → Speculative Attack (`skill:speculative-attack`)
 - [x] **Mines** (`weapon:mines`) — reviewed: Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary.
   - `uses-effects-of` → Deployable (`trait:deployable`)
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Camouflaged State (`state:camouflaged`)
   - `uses-effects-of` → Mimetism (`skill:mimetism`)
   - `uses-effects-of` → Place Deployable (`skill:place-deployable`)
+- [x] **Missile Launcher** (`weapon:missile-launcher`) — reviewed: N5.3 p. 187: Blast EXP/Impact Template three ARM saves versus Hit AP+EXP without circular template and three ARM/2 saves. Profiles stay separate and both retain Anti-materiel.
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Impact Template (`trait:impact-template`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **Mixed Weapons** (`weapon:mixed-weapons`) — reviewed: N5.3 p. 68 gives distinct BS and CC Weapon Modes; their printed profiles do not combine. CC uses CC, BS uses BS unless a specific Trait such as BS Weapon (PH) changes its Attribute. Links to MOD rules and Kobra are descriptive, not inheritance of profile effects.
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+  - `uses-effects-of` → CC Attack (`skill:cc-attack`)
+  - `uses-effects-of` → CC (`trait:cc`)
+  - `uses-effects-of` → Modifiers Explained (MODs) (`rule:modifiers-explained`)
+- [x] **Monofilament Mine** (`weapon:monofilament-mine`) — reviewed: N5.3 p. 181: Monofilament Mine prints PS 8, B1, N with one ARM=0 Saving Roll and Dead State. Shares Mine delivery/trigger procedure without inheriting AP, Shock, PARA, E/M or Viral outcomes.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `causes-state` → Dead State (`state:dead`)
+- [x] **MULTI Heavy Machine Gun** (`weapon:multi-heavy-machine-gun`) — reviewed: N5.3 Weapon Chart p. 179: EXP Anti-materiel mode has B1, 3 ARM Saving Rolls; AP and Shock modes have B4 and Suppressive Fire, with ARM/2 and ARM respectively for one Saving Roll. All are PS 5 with identical ranges. Do not combine modes or transfer Traits.
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
+- [x] **MULTI Marksman Rifle** (`weapon:multi-marksman-rifle`) — reviewed: N5.3 Weapon Chart p. 180: Anti-Materiel (Army spells Anti-Material) Mode uses B1 DA, two ARM Saving Rolls, Anti-materiel and no Suppressive Fire; AP/Shock alternatives use B3, one ARM/2 or ARM roll and Suppressive Fire. All PS 7, same range breaks; profiles do not stack modes or receive generic family variant-link inheritance.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
+- [x] **MULTI Pistol** (`weapon:multi-pistol`) — reviewed: N5.3 p. 182: AP B2 ARM/2 one roll, Shock B2 ARM one roll, Anti-Materiel DA B1 ARM two rolls with mode-specific Anti-materiel. Modes are alternatives and their effects do not stack.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **MULTI Rifle** (`weapon:multi-rifle`) — reviewed: N5.3 Weapon Chart p. 183: AP and Shock modes B3 with Suppressive Fire, Anti-Materiel DA mode B1 with two ARM Saving Rolls and no Suppressive Fire; all PS 7. Source mode traits do not transfer.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **MULTI Sniper Rifle** (`weapon:multi-sniper-rifle`) — reviewed: N5.3 chart p. 185: all three alternative modes use PS 5/B2; Anti-Materiel uses DA, two ARM Saving Rolls and the mode-only Anti-materiel Trait, AP uses one ARM/2 roll, Shock one ARM roll. No mode combines Ammunition or inherits another mode's Trait.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **MULTI Spitfire** (`weapon:multi-spitfire`) — reviewed: N5.3 Weapon Chart p. 185: Anti-Materiel Mode has DA, Burst 1, two ARM Saving Rolls and Anti-materiel. Army labels the mode Anti-Material Mode; its spelling is retained in source profiles. AP and Shock modes use Burst 4, one ARM/2 or ARM Saving Roll respectively, and Suppressive Fire. All are PS 6 with identical ranges; never combine modes or transfer their Traits.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
+- [x] **Nanopulser** (`weapon:nanopulser`) — reviewed: N5.3 p. 187: Small Direct Template with Normal N ammo but BTS Saving Roll from the printed profile. Do not infer ARM from Normal ammo or add Bioweapon effects.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
+- [x] **PARA CC Weapon** (`weapon:para-cc-weapon`) — reviewed: N5.3 p.177: PARA uses a PH-6 Saving Roll and Immobilized-A rather than Wounds; printed PS is a dash, with Non-Lethal and CC retained.
+  - `uses-effects-of` → Paralysis (PARA) Ammunition (`ammunition:para`)
+  - `causes-state` → Immobilized-A State (`state:immobilized-a`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `uses-effects-of` → CC (`trait:cc`)
 - [x] **PARA Mine** (`weapon:para-mine`) — reviewed: Source-pinned PARA Mine reference connects shared Mines, PARA Ammunition and Immobilized-A; the N5.3 chart and Army marker discrepancy remains explicitly unresolved, not a gameplay change.
   - `uses-effects-of` → Mines (`weapon:mines`)
   - `uses-effects-of` → Paralysis (PARA) Ammunition (`ammunition:para`)
   - `causes-state` → Immobilized-A State (`state:immobilized-a`)
 - [x] **Pheroware Tactics (PT)** (`weapon:pt`) — reviewed: The shared PT chart classification is BS Weapon (WIP), while individual PT variant effects stay separate. Army retains legacy Technical Weapon wording.
   - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
+- [x] **Pistol** (`weapon:pistol`) — reviewed: N5.3 p. 182: PS 9, B2, Normal ammo and one ARM Saving Roll. No special effect inferred.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Pitcher** (`weapon:pitcher`) — reviewed: N5.3 pp. 73/187 and pinned Wiki Pitcher (N5.2 corrected ranges): successful BS/Targetless shot places a Deployable Repeater Token at impact. No damaging PS, Ammunition or Saving Rolls; the Repeater equipment owns its Hacking Area effect. Disposable (2), Speculative Attack, Indiscriminate, Non-Lethal and the carried-forward FAQ on occupied placement apply. A Pitcher shot is not Place Deployable.
+  - `uses-effects-of` → Deployable Repeater (`equipment:deployable-repeater`)
+  - `uses-effects-of` → Targetless (`trait:targetless`)
+  - `uses-effects-of` → Speculative Attack (`trait:speculative-attack`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → Indiscriminate (`trait:indiscriminate`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `enables-use-of` → Speculative Attack (`skill:speculative-attack`)
+- [x] **Plasma Sniper Rifle** (`weapon:plasma-sniper-rifle`) — reviewed: N5.3 chart p. 185 and Combined Saving Roll p. 67: Blast Mode has N, PS 6/B2, ARM and BTS one roll each, circular Impact Template; Hit Mode has N, PS 5/B2, one ARM and one BTS roll and no Template. A Critical adds one ARM roll only. This is Combined Saving Roll, not combined Ammunition.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Impact Template (`trait:impact-template`)
 - [x] **PT: Endgame** (`weapon:pt-endgame`) — reviewed: N5 v5.3 chart and the April 2025 update explicitly add Double Shot to Endgame only. Source-specific Army id 203 prevents applying it to Eraser or Mirrorball; current Army omits Double Shot.
   - `variant-of` → Pheroware Tactics (PT) (`weapon:pt`)
   - `uses-effects-of` → Double Shot (`trait:double-shot`)
+- [x] **Pulzar** (`weapon:pulzar`) — reviewed: N5.3 p. 187: Large Direct Template with Normal N ammo and BTS Saving Roll; explicit template and save-attribute distinctions without invented special effects.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
 - [x] **Sepsitor** (`weapon:sepsitor`) — reviewed: Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
@@ -1005,6 +1265,38 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
   - `causes-state` → Sepsitorized State (`state:sepsitorized`)
   - `uses-effects-of` → Cube (`equipment:cube`)
+- [x] **Shock CC Weapon** (`weapon:shock-cc-weapon`) — reviewed: N5.3 p.177: Shock uses the printed one ARM Saving Roll; conditional Shock effects belong to the linked Ammunition definition.
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → CC (`trait:cc`)
+- [x] **Shock Mine** (`weapon:shock-mine`) — reviewed: N5.3 p. 181: Shock Mine prints PS 7, B1, Shock with one ARM Saving Roll. Its ordinary Place Deployable and conditional Intuitive Attack are separate reviewed delivery paths; S0/S1 object conflict remains.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+- [x] **Silenced Pistol** (`weapon:silenced-pistol`) — reviewed: N5.3 pp. 67, 175, 182: combined AP+Shock yields one BTS/2 Saving Roll with conditional Shock effect; Silent (-6) affects enemy Face to Face Dodge only while user is in ZoC and outside LoF.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Silent (X) (`trait:silent-x`)
+  - `uses-effects-of` → Dodge (`skill:dodge`)
+- [x] **Stun Pistol** (`weapon:stun-pistol`) — reviewed: N5.3 English p. 182, Spanish p. 191 and Army 92 specify one BTS/PB Saving Roll with Non-Lethal and State: Stunned. Archived Spanish Wiki charts list two rolls and omit the State Trait; documented as unresolved publication conflict without changing canonical Stun mechanics.
+  - `uses-effects-of` → Stun Ammunition (`ammunition:stun`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `uses-effects-of` → State (`trait:state`)
+- [x] **SymbioBomb** (`weapon:symbiobomb`) — reviewed: N5.3 p. 74 and the archived English Wiki distinguish the listed owner from the Deployment-assigned user. The single use permits Endgame, Eraser or Mirrorball; the -3 target MOD applies only to Endgame/Eraser. Only the selected Pheroware Tactic supplies attack-profile facts; no stand-alone SymbioBomb chart statistics or lasting assignment relationship are inferred.
+  - `uses-effects-of` → Pheroware Tactics (PT) (`weapon:pt`)
+- [x] **Viral CC Weapon** (`weapon:viral-cc-weapon`) — reviewed: N5.3 p. 177 and archived BioWeapon Trait distinguish the printed N/BTS/one-save baseline from DA+Shock against VITA. Two BTS saves versus VITA and the STR exception are derived from the component rules, not independently printed modes. Shock applies only under its conditions. Preserve unresolved Immunity subtleties and the exact Army profile.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BioWeapon (`trait:bioweapon`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → CC (`trait:cc`)
+- [x] **Viral Mine** (`weapon:viral-mine`) — reviewed: N5.3 p. 181: Viral Mine prints PS 7, B1, N/BTS/one Saving Roll and BioWeapon (DA+Shock), with target-specific outcomes referenced through the Viral Weapon Property. No invented Viral Ammo or extra printed Saving Roll.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BioWeapon (`trait:bioweapon`)
+- [x] **VIRAL Sniper Rifle** (`weapon:viral-sniper-rifle`) — reviewed: N5.3 p. 185 prints N/BTS/one roll, PS 5/B2 and BioWeapon; archived BioWeapon Trait applies DA+Shock only to VITA. Two BTS rolls against VITA is a rule-derived consequence, not a printed second firing mode; against STR, one BTS roll remains. Shock and Immunity exceptions require their own conditions.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BioWeapon (`trait:bioweapon`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
 - [x] **WildParrot** (`weapon:wildparrot`) — reviewed: Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait.
   - `uses-effects-of` → Perimeter (`trait:perimeter`)
   - `uses-effects-of` → Deployable (`trait:deployable`)
@@ -1025,18 +1317,18 @@ review. `declaration-category` projection records are excluded.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
 - [ ] Deployable Cover (`equipment:deployable-cover`) → `rule:partial-cover`; `uses-effects-of`; **post-0.7.0 / planned** — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
-- [ ] Repeater (`equipment:repeater`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / deferred** — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
-- [ ] TinBot: Firewall (`equipment:tinbot-firewall`) → `equipment:firewall`; `uses-effects-of`; **post-0.7.0 / planned** — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
+- [ ] Repeater (`equipment:repeater`) → Hacking Area (`rule:hacking-area`); `relation type TBD`; **post-0.7.0 / deferred** — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
+- [ ] TinBot: Firewall (`equipment:tinbot-firewall`) → Firewall (`equipment:firewall`); `uses-effects-of`; **post-0.7.0 / planned** — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
 - [ ] White Noise (`hacking-program:white-noise`) → Multispectral Visor (`equipment:multispectral-visor`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation.
 - [ ] White Noise (`hacking-program:white-noise`) → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation.
 - [ ] `rule:marker-form` → Surprise Attack (`skill:surprise-attack`); `enables-use-of`; **post-0.7.0 / planned** — Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State.
 - [ ] `rule:null-state` → Disconnected State (`state:disconnected`); `causes-state`; **post-0.7.0 / deferred** — A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role.
 - [ ] Booty (`skill:booty`) → `rule:booty-chart`; `uses-effects-of`; **post-0.7.0 / planned** — Booty resolves its randomized extra item or profile bonus through the Booty Chart. Model the chart as a structured rules/reference identity before materializing this edge so conditional TAG-versus-other-Troop-Type outcomes remain explicit.
 - [ ] Climb (`skill:climb`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climb explicitly prevents the user from benefiting from Partial Cover MODs, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary does not distinguish loss of beneficial MODs cleanly.
-- [ ] Climbing Plus (`skill:climbing-plus`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
+- [ ] Climbing Plus (`skill:climbing-plus`) → Guts Roll (`rule:guts-roll`); `applies-effects-to`; **post-0.7.0 / planned** — Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity.
 - [ ] Climbing Plus (`skill:climbing-plus`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Climbing Plus denies Partial Cover MODs while the user is on a vertical surface; Partial Cover still lacks a canonical rules identity and a precise benefit-suppression relation.
 - [ ] Combat Jump (`skill:combat-jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
-- [ ] Courage (`skill:courage`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
+- [ ] Courage (`skill:courage`) → Guts Roll (`rule:guts-roll`); `applies-effects-to`; **post-0.7.0 / planned** — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
 - [ ] Courage (`skill:courage`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation.
 - [ ] Dogged (`skill:dogged`) → `rule:healing`; `relation type TBD`; **post-0.7.0 / deferred** — Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules.
 - [ ] Explode (`skill:explode`) → `rule:direct-template-attack`; `uses-effects-of`; **post-0.7.0 / planned** — Explode explicitly performs a Direct Template Attack; retain the dependency until Direct Template Attack has a canonical rules identity.
@@ -1046,12 +1338,12 @@ review. `declaration-category` projection records are excluded.
 - [ ] Frenzy (`skill:frenzy`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled.
 - [ ] FT Master (`skill:ft-master`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely.
 - [ ] FT Master (`skill:ft-master`) → Regular (`training:regular`); `applies-effects-to`; **post-0.7.0 / deferred** — FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself.
-- [ ] G: Jumper (`skill:g-jumper`) → `rule:combat-group`; `relation type TBD`; **post-0.7.0 / planned** — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
+- [ ] G: Jumper (`skill:g-jumper`) → Combat Group (`rule:combat-group`); `relation type TBD`; **post-0.7.0 / planned** — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
 - [ ] G: Jumper (`skill:g-jumper`) → `rule:null-state`; `relation type TBD`; **post-0.7.0 / deferred** — G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together.
 - [ ] G: Jumper (`skill:g-jumper`) → Dodge (`skill:dodge`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
 - [ ] G: Jumper (`skill:g-jumper`) → Reset (`skill:reset`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
 - [ ] G: Jumper (`skill:g-jumper`) → Isolated State (`state:isolated`); `relation type TBD`; **post-0.7.0 / deferred** — G: Jumper prevents activation of an individual Proxy in Isolated State and may move the Active Proxy role when a Proxy becomes Isolated; the current graph cannot express that participant-specific Proxy trigger without implying that Isolated applies to the G: Jumper identity as a whole.
-- [ ] Hacker (`skill:hacker`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / planned** — A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity.
+- [ ] Hacker (`skill:hacker`) → Hacking Area (`rule:hacking-area`); `relation type TBD`; **post-0.7.0 / deferred** — The canonical Hacking Area reference now exists. A typed geometry/network edge still cannot express activation-time reach, enemy-Repeater eligibility, or ARO measurement conditions; keep the semantic link in Hacker prose without inventing unconditional network relations.
 - [ ] Hacker (`skill:hacker`) → `rule:upgrade-program`; `relation type TBD`; **post-0.7.0 / planned** — Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; Hacking Programs are now first-class identities, but Upgrade Program identity and source-specific grant semantics remain unresolved.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
 - [ ] Immunity (`skill:immunity`) → `rule:saving-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity.
@@ -1062,12 +1354,11 @@ review. `declaration-category` projection records are excluded.
 - [ ] Infiltration (`skill:infiltration`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
 - [ ] Infiltration (`skill:infiltration`) → Hidden Deployment State (`state:hidden-deployment`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
 - [ ] Infinity Spec-Ops (`skill:infinity-spec-ops`) → `rule:spec-ops-chart`; `uses-effects-of`; **post-0.7.0 / planned** — Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts.
-- [ ] Infinity Spec-Ops (`skill:infinity-spec-ops`) → `skill:request-specball`; `enables-use-of`; **post-0.7.0 / planned** — Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity.
 - [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership grants a Fireteam Coherency Zone of Control bonus when its Regular-Training condition is met; retain this until Fireteam Coherency has a canonical rules identity and scoped modifier relation.
 - [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet.
 - [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
 - [ ] Journalist (`skill:journalist`) → `rule:cubevac-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist grants a campaign-only CUBEVAC Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
-- [ ] Journalist (`skill:journalist`) → `rule:guts-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved.
+- [ ] Journalist (`skill:journalist`) → Guts Roll (`rule:guts-roll`); `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved.
 - [ ] Journalist (`skill:journalist`) → `rule:promotion-roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Journalist grants a campaign-only Promotion Roll bonus when its end-of-scenario operational requirement is met; retain this until campaign rolls are modeled as separately scoped identities.
 - [ ] Jump (`skill:jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — A Trooper that declares Jump cannot benefit from Partial Cover MODs during that Order; Partial Cover and the appropriate benefit-suppression relation need canonical modeling first.
 - [ ] Limited Cover (`skill:limited-cover`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Limited Cover removes only the -3 BS MOD from Partial Cover while leaving its other effects intact; Partial Cover needs a canonical identity and the graph needs a relation more precise than globally negating the rule.
@@ -1090,13 +1381,12 @@ review. `declaration-category` projection records are excluded.
 - [ ] Parachutist (`skill:parachutist`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Parachutist explicitly denies Partial Cover during the arrival Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] Protheion (`skill:protheion`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / planned** — Protheion converts Wounds inflicted by CC Attack or Coup de Grâce into recovery or temporary VITA increases; retain this event/value interaction until Wound and VITA changes have canonical targets.
 - [ ] Regeneration (`skill:regeneration`) → `rule:wound`; `relation type TBD`; **post-0.7.0 / planned** — Regeneration removes one Wound on success and inflicts one additional Wound on failure; model the bidirectional Wound outcome once Wound is a canonical event/rules identity.
-- [ ] Religious Troop (`skill:religious-troop`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
+- [ ] Religious Troop (`skill:religious-troop`) → Guts Roll (`rule:guts-roll`); `applies-effects-to`; **post-0.7.0 / planned** — Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical.
 - [ ] Religious Troop (`skill:religious-troop`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics.
 - [ ] RemDriver (`skill:remdriver`) → `rule:null-state`; `relation type TBD`; **post-0.7.0 / deferred** — A RemDriver Token is removed when the RemDriver user enters any Null State; retain this trigger until Null State is modeled as a canonical umbrella concept with event/timing semantics.
 - [ ] RemDriver (`skill:remdriver`) → `rule:troop-type:rem`; `applies-effects-to`; **post-0.7.0 / deferred** — RemDriver applies occurrence-specific profile MODs to a Remote recipient in the same Army List; Troop Types are not yet canonical rules identities and the current graph cannot preserve the recipient role or parameterized MOD values.
 - [ ] Remote Presence (`skill:remote-presence`) → `rule:command-token`; `relation type TBD`; **post-0.7.0 / planned** — Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target.
 - [ ] Remote Presence (`skill:remote-presence`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation.
-- [ ] `skill:request-specball` → Combat Jump (`skill:combat-jump`); `uses-effects-of`; **post-0.7.0 / planned** — Request SpecBall explicitly deploys the SpecBall by applying Combat Jump rules; materialize this edge when Request SpecBall receives its own canonical action identity.
 - [ ] Shasvastii (`skill:shasvastii`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
 - [ ] Specialist Operative (`skill:specialist-operative`) → `rule:specialist-troop`; `uses-effects-of`; **post-0.7.0 / planned** — Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity.
 - [ ] Stealth (`skill:stealth`) → Idle (`skill:idle`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
@@ -1104,7 +1394,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] Surprise Attack (`skill:surprise-attack`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills.
 - [ ] TAGCom (`skill:tagcom`) → `rule:troop-type:tag`; `applies-effects-to`; **post-0.7.0 / deferred** — TAGCom applies occurrence-specific profile MODs to TAGs in the user's Combat Group while the user is operational; Troop Types are not yet canonical rules identities and the current graph cannot preserve the participant/Combat Group scope or parameterized MOD.
 - [ ] Terrain (`skill:terrain`) → `rule:movement-label`; `applies-effects-to`; **post-0.7.0 / planned** — Terrain grants its MOV bonus to any Skill with the Movement Label; model that generic labeled-Skill interaction once the graph has a canonical target for Movement-labeled declarations.
-- [ ] Terrain (`skill:terrain`) → `rule:special-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
+- [ ] Terrain (`skill:terrain`) → Special Terrain (`rule:special-terrain`); `relation type TBD`; **post-0.7.0 / deferred** — Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge.
 - [ ] Transmutation (`skill:transmutation`) → `rule:movement-label`; `relation type TBD`; **post-0.7.0 / deferred** — Transmutation (Hatching) and Transmutation (Auto) use Skills with the Movement Label as profile-change triggers; the current graph cannot express a variant-specific trigger against a Label rather than a Skill identity.
 - [ ] Transmutation (`skill:transmutation`) → `rule:unit-profile`; `relation type TBD`; **post-0.7.0 / planned** — All Transmutation variants replace or select between Unit Profiles while sharing Wounds and applicable States. Model this explicitly when Unit Profile transition/session-state semantics become a first-class rules domain.
 - [ ] Transmutation (`skill:transmutation`) → Possessed State (`state:possessed`); `cancels-state`; **post-0.7.0 / deferred** — Transmutation (Escape System-X) cancels Possessed State when the profile changes, but this is variant-specific and the current family-level graph cannot qualify the edge to only Escape System-X.

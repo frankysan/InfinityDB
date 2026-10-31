@@ -1,0 +1,111 @@
+{
+  "format": "InfinityDB source-domain clause review",
+  "formatVersion": 1,
+  "scope": "audit-only; never promotes lexical leads to deployed object profiles or delivery/Unit ownership",
+  "reviews": [
+    {
+      "recordId": "weapon:chest-mine",
+      "classification": "carried-attack-not-mines-deployment",
+      "sourcePages": [
+        72
+      ],
+      "summaryEvidence": "This weapon does not use the shared [[weapon:mines|Mines]] placement or triggering rules in either mode.",
+      "factsEvidence": [],
+      "caveat": "Chest Mine has BS Direct Template and CC attack modes, both drawing on its owner's Disposable (2) uses. Despite its name it is not placed via the Mines/Place Deployable rules and has no independently deployed four-stat profile."
+    },
+    {
+      "recordId": "weapon:sepsitor-plus",
+      "classification": "chart-footnote-not-object",
+      "sourcePages": [
+        73,
+        176,
+        187
+      ],
+      "summaryEvidence": "Sepsitor Plus uses the [[trait:direct-template|Direct Template]] rules",
+      "factsEvidence": [
+        "The N5 v5.3 Weapon Chart includes a [*] reference to the N5 Weaponry rules"
+      ],
+      "caveat": "The [*] marker is a printed chart cross-reference, not a battlefield Marker. Sepsitor Plus is a Direct Template attack causing Sepsitorized State; no independent deployed device is described."
+    },
+    {
+      "recordId": "weapon:flammenspeer",
+      "classification": "impact-template-not-persistent-object",
+      "sourcePages": [
+        178
+      ],
+      "summaryEvidence": "Only this mode places a circular [[trait:impact-template|Impact Template]] at the point of impact.",
+      "factsEvidence": [],
+      "caveat": "Only Blast Mode uses an Impact Template; Hit Mode does not. The attack template resolves the shot, not a persistent independently targetable deployed object, and the two modes share disposable uses."
+    },
+    {
+      "recordId": "weapon:chain-rifle",
+      "classification": "direct-template-not-persistent-object",
+      "sourcePages": [
+        186
+      ],
+      "summaryEvidence": "Template placement, not a range-band modifier, determines the affected area.",
+      "factsEvidence": [],
+      "caveat": "Chain Rifle's Large Teardrop Direct Template is the attack area, not a targetable deployed item. Do not equate template placement or Intuitive Attack permission with Place Deployable."
+    },
+    {
+      "recordId": "equipment:multispectral-visor",
+      "classification": "marker-targeting-not-object",
+      "sourcePages": [
+        125
+      ],
+      "summaryEvidence": "Automatic Equipment whose Level reduces [[skill:mimetism]]",
+      "factsEvidence": [
+        "**Level 3 targeting versus revelation:**"
+      ],
+      "caveat": "Multispectral Visor Level 3 can attack an existing Camouflage Marker in LoF in the Active Turn without a prior Discover Roll; this does not create, place or automatically reveal a separate game object for the army."
+    },
+    {
+      "recordId": "equipment:baggage",
+      "classification": "reload-effect-not-deployment",
+      "sourcePages": [
+        120
+      ],
+      "summaryEvidence": "Automatic Equipment that lets nearby Allied Troopers reload eligible Disposable items",
+      "factsEvidence": [
+        "Recovering uses does not affect items already deployed on the table."
+      ],
+      "caveat": "Baggage restores eligible unused/expended uses for existing carriers; it cannot recreate or alter objects already deployed on the battlefield and defines no new deployed device."
+    },
+    {
+      "recordId": "equipment:escape-system",
+      "classification": "trooper-transformation-template",
+      "sourcePages": [
+        117
+      ],
+      "summaryEvidence": "Army Equipment identity whose game effect is defined by the [[skill:transmutation]]",
+      "factsEvidence": [
+        "The profile change places an Eclipse Special Ammo Circular Template centered on the replacement Model."
+      ],
+      "caveat": "N5.3 p.117 Transmutation (Escape System-X) replaces an existing Trooper's Unit Profile/Model and places a temporary Eclipse Template; neither a distinct persistent equipment object nor its carrier is created."
+    },
+    {
+      "recordId": "equipment:holomask",
+      "classification": "existing-trooper-disguise",
+      "sourcePages": [
+        124
+      ],
+      "summaryEvidence": "Optional Automatic Equipment that lets its user deploy in or enter [[state:holomask]].",
+      "factsEvidence": [
+        "During Deployment, the user may deploy in [[state:holomask]]."
+      ],
+      "caveat": "N5.3 p.124 Holomask makes an existing Trooper appear as another Model; it does not create a second Trooper or permit copying the imitated Trooper's deployed Weapon/Equipment."
+    },
+    {
+      "recordId": "equipment:holoprojector",
+      "classification": "existing-trooper-holoechoes",
+      "sourcePages": [
+        124
+      ],
+      "summaryEvidence": "Optional NFB Automatic Equipment that lets its user deploy in or enter [[state:holoecho]].",
+      "factsEvidence": [
+        "When placed on the table, the bearer may deploy in [[state:holoecho]]."
+      ],
+      "caveat": "N5.3 p.124 Holoprojector enables Holoecho State of one existing bearer. Holoecho replicas can trigger Mines and CrazyKoalas under their State rules, but are not independently deployed Weapon/Equipment objects."
+    }
+  ]
+}

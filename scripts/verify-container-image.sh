@@ -33,6 +33,7 @@ import os
 from pathlib import Path
 
 from infinity_db.database import Database
+from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 
 expected_environment = {
@@ -48,7 +49,7 @@ if hasattr(os, "geteuid") and os.geteuid() == 0:
     raise SystemExit("Application image must not run as root")
 
 data_dir = Path("/app/data")
-expected_files = {"infinity.db", "rules.db"}
+expected_files = {"infinity.db", "rules.db", "deployed-objects.json"}
 actual_files = {path.name for path in data_dir.iterdir()}
 if actual_files != expected_files:
     raise SystemExit(
@@ -57,7 +58,26 @@ if actual_files != expected_files:
     )
 
 Database(data_dir / "infinity.db").validate()
-RulesDatabase(data_dir / "rules.db").validate()
+rules = RulesDatabase(data_dir / "rules.db")
+rules.validate()
+restrictions = rules.restrictions_payload()
+if restrictions["available"]:
+    if (
+        restrictions["source"]["id"] != "n5-core-v5.3-pdf"
+        or restrictions["source"]["page"] != 194
+        or len(restrictions["items"]) != 14
+        or restrictions["evaluationSupported"] is not False
+    ):
+        raise SystemExit("Release image has incomplete v9 Restrictions data")
+elif restrictions["items"] or restrictions["evaluationSupported"] is not False:
+    raise SystemExit("Legacy release image invented positive Restrictions data")
+publication = load_deployed_object_publication(
+    data_dir / "deployed-objects.json", data_dir / "infinity.db", data_dir / "rules.db"
+)
+if publication is None or len(publication["objects"]) != 17:
+    raise SystemExit("Release image has no complete reviewed deployed-object publication")
+if len(publication["unresolvedDeliveries"]) != 1:
+    raise SystemExit("Release image lost the unresolved deployed-object delivery")
 '
 
 if [ "$published_assets" -eq 1 ]; then
@@ -223,6 +243,48 @@ with urlopen("http://127.0.0.1:8000/api/skills/74", timeout=3) as response:
     skill = json.load(response)
 if not skill.get("rules"):
     raise SystemExit("/api/skills/74 did not include curated rules data")
+
+with urlopen("http://127.0.0.1:8000/api/deployed-objects", timeout=3) as response:
+    deployed = json.load(response)
+if len(deployed.get("items", [])) != 17 or len(deployed.get("unresolved_deliveries", [])) != 1:
+    raise SystemExit("/api/deployed-objects did not publish the reviewed release objects")
+with urlopen("http://127.0.0.1:8000/deployed-objects", timeout=3) as response:
+    if b"deployed" not in response.read().lower():
+        raise SystemExit("/deployed-objects browser entry point unavailable")
+
+with urlopen("http://127.0.0.1:8000/api/restrictions", timeout=3) as response:
+    restrictions = json.load(response)
+if restrictions.get("evaluationSupported") is not False:
+    raise SystemExit("/api/restrictions incorrectly claims legality evaluation")
+if restrictions.get("available"):
+    if len(restrictions.get("items", [])) != 14:
+        raise SystemExit("/api/restrictions has incomplete v9 source conditions")
+    jump = next(
+        (row for row in restrictions["items"] if
+         row["subject"] == "Motorcycle" and row["action"] == "upward-jump"),
+        None,
+    )
+    if (
+        jump is None
+        or jump["scope"] != "while-mounted-upwards-only"
+        or jump["operation"] != {
+            "kind": "directional-skill-movement", "qualifier": {"direction": "upward"}
+        }
+    ):
+        raise SystemExit("/api/restrictions lost the mounted upward-Jump condition")
+    chosen = [
+        row for row in restrictions["items"]
+        if row["action"] == "lieutenant-selection"
+    ]
+    if len(chosen) != 2 or any(
+        row["operation"] != {
+            "kind": "army-role-selection", "qualifier": {"role": "lieutenant"}
+        }
+        for row in chosen
+    ):
+        raise SystemExit("/api/restrictions lost Lieutenant selection-only scope")
+elif restrictions.get("items") != []:
+    raise SystemExit("/api/restrictions legacy snapshot must not imply permissions")
 
 with urlopen("http://127.0.0.1:8000/api/version", timeout=3) as response:
     version = json.load(response)

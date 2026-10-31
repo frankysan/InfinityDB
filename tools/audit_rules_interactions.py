@@ -32,7 +32,10 @@ DEFAULT_CHECKLIST_PATH = PROJECT_ROOT / "docs" / "rules-interaction-checklist.md
 DEFAULT_CATALOG_SCOPE_PATH = (
     PROJECT_ROOT / "data" / "curated" / "rules-interactions" / "catalog-scope.json"
 )
-EXCLUDED_RECORD_KINDS = frozenset({"declaration-category"})
+# FAQ rulings are dated, scoped explanatory overlays, not independent
+# source-native mechanics or outgoing graph edges. The FAQ contract and
+# applicable-topic links have their own validated publication/selection tests.
+EXCLUDED_RECORD_KINDS = frozenset({"declaration-category", "faq-ruling"})
 REVIEW_STATUSES = frozenset({"pending", "reviewed", "inherited"})
 FUTURE_STATUSES = frozenset({"deferred", "planned", "blocked"})
 COMPLETE_STATUSES = frozenset({"reviewed", "inherited"})
@@ -217,6 +220,37 @@ def _catalog_scope_from_databases(
             ),
         },
         "releaseExceptions": release_exceptions,
+    }
+
+
+def _catalog_scope_drift(
+    maintained: dict[str, Any],
+    runtime: dict[str, Any],
+) -> dict[str, Any]:
+    """Describe catalog changes without promoting current entries into review scope."""
+    catalogs: dict[str, dict[str, list[dict[str, str]]]] = {}
+    for catalog in PRIMARY_CATALOGS:
+        old = {item["id"]: item["name"] for item in maintained["catalogs"][catalog]}
+        new = {item["id"]: item["name"] for item in runtime["catalogs"][catalog]}
+        catalogs[catalog] = {
+            "added": [
+                {"id": identifier, "name": new[identifier]}
+                for identifier in sorted(new.keys() - old.keys())
+            ],
+            "removed": [
+                {"id": identifier, "name": old[identifier]}
+                for identifier in sorted(old.keys() - new.keys())
+            ],
+            "renamed": [
+                {"id": identifier, "name": new[identifier], "previousName": old[identifier]}
+                for identifier in sorted(new.keys() & old.keys())
+                if old[identifier] != new[identifier]
+            ],
+        }
+    return {
+        "targetRelease": maintained["targetRelease"],
+        "catalogs": catalogs,
+        "releaseExceptions": maintained["releaseExceptions"],
     }
 
 
@@ -495,11 +529,22 @@ def audit_rules_interactions(
                         "definition now exists"
                     )
                 review = policy[record_id]
-                if review["targetRelease"] != target_release:
-                    raise RulesInteractionAuditError(
-                        f"{record_id}: primary {catalog} catalog review targets "
-                        f"{review['targetRelease']!r}, expected {target_release!r}"
-                    )
+                # The primary release is a coverage target, not a rewrite of
+                # historical reviewedOn/targetRelease provenance. Existing
+                # completed reviews may carry forward from an earlier release.
+                review_release = review["targetRelease"]
+                if review_release != target_release:
+                    old_parts = review_release.split(".")
+                    new_parts = target_release.split(".")
+                    if (
+                        len(old_parts) != 3 or len(new_parts) != 3
+                        or not all(part.isdigit() for part in old_parts + new_parts)
+                        or tuple(map(int, old_parts)) > tuple(map(int, new_parts))
+                    ):
+                        raise RulesInteractionAuditError(
+                            f"{record_id}: primary {catalog} catalog review targets "
+                            f"{review_release!r}, expected no later than {target_release!r}"
+                        )
                 if review["status"] == "inherited":
                     raise RulesInteractionAuditError(
                         f"{record_id}: primary catalog identities cannot use inherited status"
@@ -807,6 +852,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fail if the named release still has pending catalog/supporting reviews.",
     )
     parser.add_argument(
+        "--require-primary-release",
+        help=(
+            "Fail unless the maintained primary catalog explicitly targets this "
+            "release and has no pending reviews; a supporting-only pass is insufficient."
+        ),
+    )
+    parser.add_argument(
         "--database",
         type=Path,
         help="Validate the maintained catalog scope against this application database.",
@@ -821,14 +873,33 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Rewrite --catalog-scope from --database and --rules-database before auditing.",
     )
+    parser.add_argument(
+        "--report-catalog-scope-drift",
+        action="store_true",
+        help=(
+            "Report exact public-catalog additions, removals, renamed entries and "
+            "retained release exceptions from the paired databases without editing."
+        ),
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.report_catalog_scope_drift and (
+            args.refresh_catalog_scope
+            or args.output is not None
+            or args.check_output is not None
+            or args.require_release is not None
+            or args.require_primary_release is not None
+        ):
+            raise RulesInteractionAuditError(
+                "--report-catalog-scope-drift cannot be combined with write or release gates"
+            )
         if (
             args.refresh_catalog_scope
+            or args.report_catalog_scope_drift
             or args.database is not None
             or args.rules_database is not None
         ):
@@ -843,6 +914,15 @@ def main(argv: list[str] | None = None) -> int:
                 target_release=current_scope["targetRelease"],
                 release_exceptions=current_scope["releaseExceptions"],
             )
+            if args.report_catalog_scope_drift:
+                print(
+                    json.dumps(
+                        _catalog_scope_drift(current_scope, runtime_scope),
+                        ensure_ascii=False,
+                        indent=2,
+                    )
+                )
+                return 0
             if args.refresh_catalog_scope:
                 _write_catalog_scope(args.catalog_scope, runtime_scope)
                 print(f"Rules interaction catalog scope written: {args.catalog_scope}")
@@ -890,7 +970,38 @@ def main(argv: list[str] | None = None) -> int:
         f"Outgoing relations: {report['summary']['authoredOutgoingRelationCount']}; "
         f"future interactions: {report['summary']['futureInteractionCount']}"
     )
+    if args.require_primary_release is not None:
+        required = args.require_primary_release
+        if primary["targetRelease"] != required:
+            print(
+                f"Primary catalog does not target {required}: maintained scope targets "
+                f"{primary['targetRelease']}; supporting reviews do not certify "
+                "the primary catalog for a later release"
+            )
+            return 1
+        if primary["pending"]:
+            print(
+                f"Primary catalog for {required} has {primary['pending']} pending items"
+            )
+            print(
+                "Pending primary identities: " + ", ".join(sorted(
+                    item["id"] for item in report["primaryCatalogItems"]
+                    if item["status"] == "pending"
+                ))
+            )
+            return 1
     if args.require_release is not None:
+        pending_ids = sorted({
+            item["id"]
+            for item in report["items"]
+            if item["targetRelease"] == args.require_release
+            and item["status"] == "pending"
+        } | {
+            item["id"]
+            for item in report["primaryCatalogItems"]
+            if primary["targetRelease"] == args.require_release
+            and item["status"] == "pending"
+        })
         if args.require_release != primary["targetRelease"]:
             releases = report["summary"]["supporting"]["releases"]
             release = releases.get(args.require_release)
@@ -902,6 +1013,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"Release {args.require_release} is not interaction-review complete: "
                     f"{release['pending']} supporting identities pending"
                 )
+                print("Pending identities: " + ", ".join(pending_ids))
                 return 1
         else:
             support_release = report["summary"]["supporting"]["releases"].get(
@@ -915,6 +1027,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"{primary_pending} primary catalog items and "
                     f"{supporting_pending} supporting identities pending"
                 )
+                print("Pending identities: " + ", ".join(pending_ids))
                 return 1
     return 0
 

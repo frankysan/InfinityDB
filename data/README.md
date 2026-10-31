@@ -57,9 +57,11 @@ provenance/state, and build outputs.
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the application `infinity.db`, development-only `infinity.raw.db`, and the
-  separate curated-rules `rules.db`. `infinity.db` and `rules.db` are tracked release
-  artifacts; the intermediate JSON/raw archive and other generated build products remain
-  ignored.
+  separate curated-rules `rules.db` and deterministic `deployed-objects.json`
+  reference publication. The two SQLite databases are tracked release artifacts;
+  the reference publication remains ignored and is regenerated from the pinned
+  databases and reviewed sources before being packaged in the Docker image.
+  Intermediate JSON/raw archives and other generated build products remain ignored.
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
 source control so machine-local snapshot state does not obscure code changes. The two

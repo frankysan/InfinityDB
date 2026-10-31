@@ -47,6 +47,7 @@ ASSETS = {
     "/static/units.js": ("units.js", "text/javascript; charset=utf-8"),
     "/static/share-state.js": ("share-state.js", "text/javascript; charset=utf-8"),
     "/static/armies.js": ("armies.js", "text/javascript; charset=utf-8"),
+    "/static/deployed-objects.js": ("deployed-objects.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
     "/static/api-transport.js": ("api-transport.js", "text/javascript; charset=utf-8"),
     "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
@@ -60,8 +61,10 @@ ASSETS = {
     "/static/distance.js": ("distance.js", "text/javascript; charset=utf-8"),
     "/static/navigation.js": ("navigation.js", "text/javascript; charset=utf-8"),
     "/static/page-navigation.js": ("page-navigation.js", "text/javascript; charset=utf-8"),
+    "/static/page-footer-notice.js": ("page-footer-notice.js", "text/javascript; charset=utf-8"),
     "/static/themed-logo.js": ("themed-logo.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
+    "/static/orders-aros.js": ("orders-aros.js", "text/javascript; charset=utf-8"),
     "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),
     "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-search-state.js": (
@@ -72,6 +75,14 @@ ASSETS = {
         "reference-catalog.js",
         "text/javascript; charset=utf-8",
     ),
+    "/static/restrictions-reference.js": (
+        "restrictions-reference.js",
+        "text/javascript; charset=utf-8",
+    ),
+    "/static/restrictions-reference.json": (
+        "restrictions-reference.json",
+        "application/json; charset=utf-8",
+    ),
     "/static/reference-detail.js": (
         "reference-detail.js",
         "text/javascript; charset=utf-8",
@@ -79,6 +90,7 @@ ASSETS = {
     "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
+    "/static/faq-rulings.js": ("faq-rulings.js", "text/javascript; charset=utf-8"),
     "/static/search.js": ("search.js", "text/javascript; charset=utf-8"),
     "/static/scenarios.js": ("scenarios.js", "text/javascript; charset=utf-8"),
     "/static/scenario.js": ("scenario.js", "text/javascript; charset=utf-8"),
@@ -237,6 +249,12 @@ _FIXED_PAGES = {
         "Reference data",
         "skills",
     ),
+    "/orders-aros": PageSpec(
+        "orders-aros.html",
+        (("InfinityDB", "/"), ("Skills", "/skills"), ("Orders & AROs", None)),
+        "Rules reference",
+        "orders-aros",
+    ),
     "/skills": PageSpec(
         "skills.html",
         (("InfinityDB", "/"), ("Skills", None)),
@@ -252,6 +270,12 @@ _FIXED_PAGES = {
     "/weapons": PageSpec(
         "weapons.html",
         (("InfinityDB", "/"), ("Weapons", None)),
+        "Rules reference",
+        "weapons",
+    ),
+    "/deployed-objects": PageSpec(
+        "deployed-objects.html",
+        (("InfinityDB", "/"), ("Weapons", "/weapons"), ("Deployed objects", None)),
         "Rules reference",
         "weapons",
     ),
@@ -544,6 +568,7 @@ def _render_page(
         "armies": "ARMIES_CURRENT",
         "units": "UNIT_EXPLORER_CURRENT",
         "skills": "SKILLS_CURRENT",
+        "orders-aros": "ORDERS_AROS_CURRENT",
         "equipment": "EQUIPMENT_CURRENT",
         "weapons": "WEAPONS_CURRENT",
         "traits": "TRAITS_CURRENT",

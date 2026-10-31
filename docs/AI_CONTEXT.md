@@ -35,23 +35,26 @@ release/audit narrative belongs in the changelog and Git history.
   not to Army source-ID navigation mappings. The initial AP/DA/E/M typed pilot
   is descriptive and non-executable; combined Ammunition components and
   Combined Saving Roll notation are separate source/profile dimensions.
+- Weapon Properties (`weapon-property:*`) are a reviewed, searchable embedded
+  vocabulary projected from exact Army profile signatures. Their explicit
+  origin references point back to canonical Ammunition/Traits/Rules or pinned
+  source sections; the Property itself never owns new game mechanics. Do not
+  confuse these with Army's existing source `properties` Trait field or
+  infer membership from prefixes. Explicit `[[weapon-property:...]]`
+  links in curated prose resolve against the validated registry, not rules
+  record IDs; the exporter checks IDs and runtime links to Glossary.
+  See `docs/data-model.md`.
 - Combined Saving Roll Criticals are distinct from combined Ammunition
   Criticals. The six reviewed Plasma Hit/Blast profiles have source-exact
   `combined_saving_roll` annotations: one ARM and one BTS roll, plus one
   additional ARM roll for a Critical. Do not infer this from display punctuation
   or transfer it to base `ammunition:*` facts. See `docs/data-model.md`.
-- The N5.3 Immunity exception boundary lives on `skill:immunity` as validated,
-  non-executable `facts.immunityInteraction`; do not apply it automatically to
-  combined components, Weapon profiles, or Critical outcomes. Three conditioned
-  examples are rule-derived: AP+DA/AP+Exp versus Immunity (ARM), and AP+DA
-  versus Immunity (AP), which ignores AP while retaining DA and its two rolls.
-  These are **not** a general component-level Immunity evaluator. A printed
-  Immunity (BTS) versus Flash Pulse example preserves Non-Lethal and the
-  failed-Saving-Roll Stunned effect; it is recorded under `reviewedWeaponCases`
-  and is not generalized to other BTS weapons. A separate pinned,
-  explicit Vulnerability (Viral) example is **weapon-name-scoped** and prevents
-  Immunity (Enhanced) for that attack; it does not imply component parsing or
-  automatic target-specific outcomes. See `docs/rules-semantics.md` RS-AW-IMM-001.
+- `skill:immunity` owns the non-executable, source-scoped Immunity
+  exceptions and reviewed cases. **Do not generalize** source-scoped component
+  or Critical examples, the conditional Flash Pulse/Non-Lethal/Stunned case, or the
+  weapon-name-scoped Viral Vulnerability case into a target evaluator.
+  `docs/rules-semantics.md` RS-AW-IMM-001 owns exact rolls, provenance
+  and scope; curated `facts.immunityInteraction` owns typed publication.
 - For any material player-facing rules interaction, the curated explanation must
   identify its applicable conditions, ordinary mechanism, modifying rule,
   explicit exception, conditional outcome, and evidence. A correct outcome or
@@ -59,44 +62,27 @@ release/audit narrative belongs in the changelog and Git history.
   deductions and leave conflicts explicit. This is a curation/review standard,
   not an executable interaction resolver. See `data/curated/README.md` and
   `docs/web-design-guidelines.md` for the canonical contracts.
-- Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
-  geometry-schema v1 target only the four N5.3 core scenarios. All four core scenario records now
-  own their geometry configurations; renderer tests consume those maintained definitions and must
-  not maintain a second map-geometry corpus. Semantic point markers retain a `markerType`, whose canonical
-  marker metadata may include a physical diameter. N5.3 Domination
-  makes the Console diameter rules-relevant by requiring a Console A Marker or same-diameter scenery;
-  the ITS token table supplies the explicit 40 mm value. Scenario placement distances are edge-to-edge
-  unless a source explicitly names a center/reference point; marker footprint therefore participates in
-  “X inches from” placement. Map measurement annotations are reference-based: the renderer derives
-  rectangle dimensions, area-size labels, and element-to-table-edge clearances from semantic geometry
-  rather than maintaining duplicate numeric measurements. The map API supports `distance_unit=in|cm`;
-  inline SVG labels carry canonical inch data attributes and follow the existing in/cm preference
-  without a geometry refetch. Table dimensions switch too, but marker diameters remain physical mm.
-  Geometry v1 permits asymmetric and multiple Deployment Zone regions and keeps semantic style/marker identities open; SVG renderer
-  v1 separately fails closed when it lacks a supported presentation style or canonical marker metadata.
-  ITS variation informs extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See
-  `docs/data-model.md`.
-- Scenario authoring v2 composes shared, explicitly identified Rules/Skills and typed components.
-  Export resolves them into self-contained payloads in `rules.db`; runtime must not read curation
-  files. Same names do not select/merge definitions. `scope.scenarios` is an explicit activation
-  boundary; default core composition excludes scoped records, and scoped records cannot have Army
-  links. The shared Specialist baseline uses full Skill-ID arrays plus explicit inclusion deltas;
-  rendering consumes resolved qualifiers, not an authoring mini-language. Preserve its Non Specialist
-  qualification exception, Annihilation's reviewed-resolution note for the corrected 350-point
-  survival bands, and Domination's needs-verification 350-point SWC note. Supplies has no
-  placement source issue: its outer Supply Boxes are 8 inches from the table edges at every supported
-  game size; the 12-inch mark in the large-table illustration is a guide ruler, not the box offset.
-  Stable scenario-set
-  identity/revision and source publication revision are separate runtime concepts. Current
-  `ScenarioCatalog` detail reads require an explicit supported Army Points value; do not invent a
-  default configuration in backend composition. The browser defaults a state-less scenario detail
-  visit to 300 Army Points, immediately writes that choice through the common versioned `s=` share-state
-  codec, and lets explicit valid shared/legacy state win. Maps render through the canonical SVG endpoint backed by the selected
-  maintained geometry. The browser inlines the generated SVG to inherit semantic map colors from
-  the current theme; its standalone `<style>` must be removed on injection because of the app CSP,
-  with browser styling provided by the external page CSS. Map labels scale with table width without
-  changing canonical geometry. Do not recreate scenario geometry or scoring semantics in JavaScript.
-  See the scenario model in `docs/data-model.md`.
+- Scenario geometry and scoring are maintained semantics, not SVG pixels
+  or browser formulas. The four N5.3 core scenarios own their geometry;
+  tests and the SVG renderer must consume that single corpus. Marker
+  footprints, source-defined edge/center measurement references and
+  physical mm diameters affect placement; displayed inches/centimeters
+  and annotations derive from the geometry. Unknown marker styles fail
+  closed. A reviewed ITS Season 18 Battleground map already uses this
+  shared geometry; a full ITS map library and interactive editor remain
+  post-1.0 and are not part of the mandatory Core-scenario gate.
+- Scenario authoring composes exact shared Rules/Skills and typed components
+  into self-contained `rules.db` output. Scoped records do not leak into
+  core rules or acquire Army links. Browser and API use the selected
+  versioned scenario identity; backend detail requires explicit Army
+  Points, while an unshared browser visit defaults to 300 via the common
+  `s=` codec. Source disagreements remain explicit: Domination's
+  350-point SWC note is unresolved; Supplies' outer boxes are **8 inches**
+  from edges, not the diagram's 12-inch guide line.
+- Scenario SVG uses canonical geometry and semantic colors. On inlining,
+  remove the SVG's embedded `<style>` for CSP and use page CSS; never
+  recalculate geometry or scoring in JavaScript. For precise
+  marker, Specialist and source-review contracts, see `docs/data-model.md`.
 
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.
@@ -105,14 +91,36 @@ release/audit narrative belongs in the changelog and Git history.
 - Slugs are the preferred application-facing identifiers when a domain has a stable slug; numeric
   IDs remain compatibility/provenance forms.
 - Browser code renders backend-owned semantics rather than recreating data-model policy.
+- The Weapons catalog normally derives identities from the upstream usage
+  table, but explicitly reviewed metadata-only source profiles may be
+  published through `config/catalogs/metadata-only-weapons.json`, with
+  exact ID, name, ammo, Saving, Trait and range matching at build time.
+  Current pinned exception: Breaker Marksman Rifle source 225, even with
+  no Unit usage. Do not publish all unused metadata or fabricate a
+  Breaker Sniper profile from a conflicting English update label.
 - Weapon Ammunition navigation maps exact Army metadata identity/name pairs to
   reviewed base reference segments, without client-side parsing or inference from
   Saving Roll notation. The maintained map (version 2) records ordered components
-  for the four reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`);
+  for five reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`,
+  `AP+T2`, `N+E/M`);
   their API `ammunition_composition` field is only present on exact matching
-  source profiles. Alternatives remain unlinked. Curated `ammunitionResolution`
-  remains a non-executable, source-cited fact contract: all eleven base
-  Ammunition identities are reviewed. PARA's no-PH exception, T2's reduced Wound
+  source profiles. `N+E/M` source ID 5 is supported by the printed N5.3
+  Combined Ammunition example (p. 67); its two BTS/2 Saving Rolls, Normal
+  Wounds and E/M States remain separately source-cited, not calculated.
+  E/M-only source profiles, including the Armed Turret E/Mitter mode with
+  one listed roll, are not mapped to `N+E/M`. That imported mode's one
+  BTS/2 roll conflicts with the standard E/Mitter's two in both N5.3
+  charts and six historical Army snapshots; the visible warning is
+  source-cited and **not** a confirmed gameplay exception (REA-045).
+  Alternatives remain unlinked.
+  Those same exact source matches
+  project canonical summaries/citations as `ammunition_effects` for Weapon pages,
+  not resolved combined effects or automatic completeness. Omitting a standalone
+  Weapon definition requires an explicit source-profile-pinned review recorded
+  in `data/curated/weapon-shared-effect-reviews.json`, not just linked ammunition.
+  Curated `ammunitionResolution` remains a non-executable, source-cited fact
+  contract: all eleven base Ammunition identities are reviewed. PARA's no-PH
+  exception, T2's reduced Wound
   outcome for an *additional Critical roll*, Shock's VITA-1 exception, and Stun's
   Guts/Courage exception cannot be dropped when consuming facts. Smoke/Eclipse
   use separate `facts.visibilityZone` data with distinct MSV behavior; do not
@@ -172,6 +180,17 @@ validated set. Production must not substitute a server-side rebuild.
   relationships. Do not infer ownership from names.
 - Fireteam chart limit sentinels are source encoding, not browser semantics. Preserve the raw limit
   for provenance/compatibility and expose the interpreted limit kind from the backend.
+- Fireteam `equivalence_labels` is a legacy field for parenthetical source terms.
+  Parentheses alone do not prove counts-as equivalence or profile eligibility;
+  preserve the original note and the neutral **Chart terms** caption.
+  See `docs/data-model.md#fireteams` for annotation scope.
+- Fireteam combined-view Wildcard exclusions come from the backend's reviewed note decoding
+  (`wildcards_excluded`); JavaScript must not interpret chart prose. A false flag does not certify
+  eligibility. See `docs/data-model.md#fireteams` for the bounded observation contract.
+- Fireteam `reference_issues` expose incomplete Unit/FTO evidence in normal rows; retain
+  global-only links as navigation without implying Army-local eligibility. Original member
+  comments stay visible. Reinforcement `parent_charts` retain independent parent limits;
+  only parents eligible for the ordinary Fireteam picker receive chart links.
 
 ## Query-coherence invariant
 
@@ -217,10 +236,15 @@ because the source does not attach them to a profile group.
 
 ## Application-domain and browser invariants
 
+- Semantic record ownership does not require a detail page. Fireteam Rule categories
+  resolve to the Fireteams landing route through the central registry; detail-only
+  record lookup remains separate. Maintained-text references still fail closed when
+  no published owner/destination exists.
+
 `src/infinity_db/application_domains.py` is the canonical capability registry. Published top-level
 application domains are Armies, Units, Skills, Equipment, Weapons, Ammunition, Traits, States,
-Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Embedded vocabularies are Attributes and
-Game terms.
+Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Embedded vocabularies are Attributes,
+Game terms and Weapon Properties.
 
 Browser state rules:
 
@@ -311,8 +335,10 @@ When a change alters a durable contract:
 - update the canonical owner, not every document that happens to mention the topic;
 - keep `AI_CONTEXT.md` to non-obvious invariants and links;
 - add unfinished work only to `docs/TODO.md`;
-- add meaningful user/operator outcomes to `docs/CHANGELOG.md` under `Unreleased` during normal
-  development;
+- record meaningful user/operator outcomes in `docs/CHANGELOG.md` under `Unreleased`
+  when the corresponding work is completed, not only at release time; verify
+  documentation impact against the actual diff before handing off (see
+  `AGENTS.md` for the canonical workflow);
 - update README only for public capabilities/setup/major workflow changes; and
 - prefer a small explicit compatibility layer to silently breaking old identifiers, URLs, or source
   artifacts.
