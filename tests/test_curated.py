@@ -1271,6 +1271,72 @@ def test_reviewed_dodge_extra_parameter_rejects_unscoped_or_mismatched_values(
 
 
 @pytest.mark.parametrize(
+    ("source_id", "grants"),
+    [
+        ("hacking-device", [
+            (12, "UPGRADE:\u00a0Trinity", "trinity"),
+            (20, "UPGRADE:\u00a0White Noise", "white-noise"),
+            (25, "UPGRADE: Cybermask", "cybermask"),
+            (287, "UPGRADE: Zero Pain", "zero-pain"),
+        ]),
+        ("hacking-device-plus", [
+            (17, "UPGRADE:\u00a0Fairy Dust", "fairy-dust"),
+        ]),
+    ],
+)
+def test_hacking_program_grants_require_exact_device_and_raw_signature(
+    tmp_path: Path, source_id: str, grants: list[tuple[int, str, str]],
+) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": f"equipment:{source_id}", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": source_id}],
+    })
+    values = [{
+        "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+        "effect": {
+            "kind": "hacking-program-grant",
+            "program": f"hacking-program:{program}",
+        },
+    } for extra_id, raw, program in grants]
+    record["variantSemantics"] = {
+        "inheritance": "family",
+        "occurrenceParameters": [{
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extraValues": deepcopy(values),
+        }],
+    }
+    path = tmp_path / "hacking-upgrades.json"
+
+    def validate() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    validate()
+    for change in (
+        {"extraId": values[0]["extraId"] + 1},
+        {"extraId": float(values[0]["extraId"])},
+        {"extraType": "DISTANCE"},
+        {"rawValue": values[0]["rawValue"].replace("\u00a0", " ")},
+        {"effect": {"kind": "hacking-program-grant",
+                    "program": "hacking-program:carbonite"}},
+        {"effect": {"kind": "hacking-program-mod",
+                    "program": values[0]["effect"]["program"]}},
+    ):
+        changed = deepcopy(values)
+        changed[0].update(change)
+        record["variantSemantics"]["occurrenceParameters"][0]["extraValues"] = changed
+        with pytest.raises(ValueError, match="program-grant extras"):
+            validate()
+    record["variantSemantics"]["occurrenceParameters"][0]["extraValues"] = deepcopy(values)
+    other = "hacking-device-plus" if source_id == "hacking-device" else "hacking-device"
+    record["armyLinks"] = [{"entity": "equipment", "id": other}]
+    with pytest.raises(ValueError, match="program-grant extras"):
+        validate()
+
+
+@pytest.mark.parametrize(
     ("source_id", "label", "extras"),
     [
         (244, "Discover", [{

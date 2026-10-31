@@ -1631,7 +1631,9 @@ def test_tinbot_firewall_source_mods_are_equipment_only(
             for extra_id, modifier in ((6, -3), (7, -6))
         ],
     }
-    assert set(rules.equipment_reviewed_extra_semantics()) == {169, 244, 247}
+    assert set(rules.equipment_reviewed_extra_semantics()) == {
+        169, 244, 247, "hacking-device", "hacking-device-plus",
+    }
     assert 169 not in rules.skill_reviewed_extra_semantics()
     assert 169 not in rules.skill_numeric_mod_semantics()
     record = rules.composed_record("equipment:tinbot-firewall")
@@ -1686,6 +1688,48 @@ def test_tinbot_discover_and_ecm_guided_extras_are_source_specific(
         assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == page
                    for c in record["citations"])
         assert source_id not in rules.skill_reviewed_extra_semantics()
+
+
+def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    mapping = rules.equipment_reviewed_extra_semantics()
+    expected = {
+        "hacking-device": [
+            (12, "UPGRADE:\u00a0Trinity", "trinity"),
+            (20, "UPGRADE:\u00a0White Noise", "white-noise"),
+            (25, "UPGRADE: Cybermask", "cybermask"),
+            (287, "UPGRADE: Zero Pain", "zero-pain"),
+        ],
+        "hacking-device-plus": [(17, "UPGRADE:\u00a0Fairy Dust", "fairy-dust")],
+    }
+    for slug, grants in expected.items():
+        parameter = mapping[slug]
+        assert parameter == {
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extra_values": [
+                {
+                    "extra_id": extra_id, "extra_type": "TEXT", "raw_value": raw,
+                    "effect": {
+                        "kind": "hacking-program-grant",
+                        "program": f"hacking-program:{program}",
+                    },
+                }
+                for extra_id, raw, program in grants
+            ],
+        }
+        record = rules.composed_record(f"equipment:{slug}")
+        assert record is not None
+        assert parameter in record["variant_semantics"]["occurrence_parameters"]
+        assert record["variant_semantics"]["inheritance"] == "family"
+        assert any(c["source_id"] == "n5-core-v5.3-pdf" for c in record["citations"])
+        for entry in parameter["extra_values"]:
+            assert "applies_to" not in entry["effect"]
+            program_id = entry["effect"]["program"]
+            assert rules.composed_record(program_id) is not None
+    assert "hacking-device" not in rules.skill_reviewed_extra_semantics()
+    assert "hacking-device-plus" not in rules.skill_numeric_mod_semantics()
 
 
 def test_rules_database_returns_reviewed_source_variant_semantics(

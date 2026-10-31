@@ -501,6 +501,54 @@ def test_tinbot_discover_ecm_extras_match_tracked_and_fresh_rules(tmp_path: Path
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_hacking_device_program_grants_preserve_unreviewed_overrides(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = {
+        100: {
+            (12, "UPGRADE:\u00a0Trinity"): 17,
+            (20, "UPGRADE:\u00a0White Noise"): 12,
+            (25, "UPGRADE: Cybermask"): 1,
+            (287, "UPGRADE: Zero Pain"): 120,
+        },
+        101: {(17, "UPGRADE:\u00a0Fairy Dust"): 46},
+    }
+    for path in (ROOT / "data/generated/rules.db", fresh):
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db",
+            path,
+        )
+        reviewed = RulesDatabase(path).equipment_reviewed_extra_semantics()
+        for source_id, grants in expected.items():
+            [item] = select_source_variants(report, "equipment", [source_id])["items"]
+            slug = "hacking-device" if source_id == 100 else "hacking-device-plus"
+            assert item["reviewedExtra"] == reviewed[slug]
+            assert item["status"] == "unresolved-occurrence-parameter"
+            assert item["reviewedVariant"] is None
+            checked = {
+                (sig["extras"][0][0], sig["extras"][0][2]): sig["count"]
+                for sig in item["extraSignatures"]
+                if sig["reviewed"]
+            }
+            assert checked == grants
+            assert all(
+                len(sig["extras"]) == 1 and sig["extras"][0][1] == "TEXT"
+                for sig in item["extraSignatures"] if sig["reviewed"]
+            )
+            assert any(
+                not sig["reviewed"] and len(sig["extras"]) > 1
+                for sig in item["extraSignatures"]
+            )
+        assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
+            "family-only": 19, "reviewed-exact-source": 1,
+            "reviewed-extra-parameter": 3, "unresolved-occurrence-parameter": 11,
+        }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_source_inventory_is_deterministic() -> None:
     first = _inventory()
     assert json.dumps(first, sort_keys=True) == json.dumps(_inventory(), sort_keys=True)

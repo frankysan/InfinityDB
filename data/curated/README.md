@@ -1031,6 +1031,23 @@ retain their exact named source variants; no inferred effects
 or Fireteam-wide Unit occurrences are created. Exact source
 signature tests are required for future updates.
 
+Hacking Device source Equipment `100` and Hacking Device Plus
+`101` can carry narrowly reviewed `hacking-program-grant`
+extras. Each effect has only `kind` and a canonical
+`program` ID (for example
+`{"kind":"hacking-program-grant","program":"hacking-program:zero-pain"}`);
+unlike attack/roll modifiers, it has no `appliesTo` target.
+The exact approved grants are Trinity, White Noise, Cybermask,
+Zero Pain (Device `100`) and Fairy Dust (Device Plus `101`).
+These grant access to the named program; they do not clone
+program-specific mechanics or override a baseline program.
+Future program-specific B/PS/SR/SD and Firewall upgrades, as
+well as multiple co-occurring extras, need separate exact
+semantic reviews. Raw `UPGRADE:` spellings, including
+nonbreaking spaces, remain source evidence rather than a
+generic parser contract. See
+[the source-parameter audit](../../docs/data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
+
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
 forms remain opaque until their semantics are reviewed.

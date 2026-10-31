@@ -113,6 +113,35 @@ TINBOT_OTHER_VARIANTS = {
 }
 
 
+# Only unmodified program-grant UPGRADE values have been reviewed here.
+# Other Hacking Device program overrides, Firewall, and combinations remain opaque.
+HACKING_GRANT_SOURCES = {
+    100: {
+        "record": "equipment:hacking-device",
+        "name": "Hacking Device",
+        "occurrences": 653,
+        "singles": {
+            12: ("UPGRADE:\u00a0Trinity", 17),
+            20: ("UPGRADE:\u00a0White Noise", 12),
+            25: ("UPGRADE: Cybermask", 1),
+            287: ("UPGRADE: Zero Pain", 120),
+        },
+        "combined": [
+            {"extras": [[25, "TEXT", "UPGRADE: Cybermask"],
+                        [12, "TEXT", "UPGRADE:\u00a0Trinity"]],
+             "reviewed": False, "count": 1},
+        ],
+    },
+    101: {
+        "record": "equipment:hacking-device-plus",
+        "name": "Hacking Device Plus",
+        "occurrences": 126,
+        "singles": {17: ("UPGRADE:\u00a0Fairy Dust", 46)},
+        "combined": [],
+    },
+}
+
+
 def _sha(path: Path) -> str:
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -765,6 +794,46 @@ def refresh_tinbot_other_v9_release(*, root: Path = ROOT) -> Path:
         root=root,
         variant_records={key[1] for key in TINBOT_OTHER_SOURCES},
         tinbot_other=True,
+    )
+
+
+def refresh_hacking_program_grants_v9_release(*, root: Path = ROOT) -> Path:
+    """Review unmodified program grants only, never a compound UPGRADE signature."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    items = {row["id"]: row for row in report["catalogs"]["equipment"]["items"]}
+    for source_id, expected in HACKING_GRANT_SOURCES.items():
+        item = items.get(source_id)
+        if (
+            item is None
+            or item["name"] != expected["name"]
+            or item["applicationId"] != source_id
+            or item["occurrences"] != expected["occurrences"]
+            or item["status"] != "unresolved-occurrence-parameter"
+            or item["reviewedExtra"] is not None
+            or item["rawValues"]
+        ):
+            raise ValueError(f"Unreviewed Hacking Device source drift: {source_id}")
+        signatures = item["extraSignatures"]
+        singles = {
+            parts[0][0]: (parts[0][2], sig["count"])
+            for sig in signatures
+            if len(parts := sig["extras"]) == 1 and parts[0][0] in expected["singles"]
+            and parts[0][1] == "TEXT" and sig["reviewed"] is False
+        }
+        combined = [
+            sig for sig in signatures
+            if len(sig["extras"]) > 1
+            and any(part[0] in expected["singles"] for part in sig["extras"])
+        ]
+        if singles != expected["singles"] or combined != expected["combined"]:
+            raise ValueError(f"Hacking Device grant signature drift: {source_id}")
+    return _refresh_metadata_v9_release(
+        root=root,
+        variant_records={source["record"] for source in HACKING_GRANT_SOURCES.values()},
     )
 
 

@@ -1784,6 +1784,24 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         Fresh/export and pinned-raw regressions agree; the Equipment
         unresolved baseline is now **11**. The cross-Army usage
         index remains unimplemented.
+      - [x] **Data processing:** Review unmodified Hacking Device
+        program-grant UPGRADE extras without conflating program access
+        with the program's intrinsic effects. The pinned Army source
+        has 653 Hacking Device (100) and 126 Hacking Device Plus
+        (101) occurrences. Exact single extras grant Trinity
+        (12, 17 rows), White Noise (20, 12), Cybermask (25, 1),
+        Zero Pain (287, 120), and Fairy Dust (17, 46). English
+        N5.3 pp. 54/58/123 distinguishes Upgrade Programs from
+        the device's baseline program sets; the canonical Hacking
+        Program records own effects. A guarded matched-v9 refresh
+        publishes these five exact `hacking-program-grant` values
+        (196 single-extra occurrences), and preserves rollback
+        artifacts. The overlapping Cybermask+Trinity combination
+        (one source-100 occurrence), plus all program-specific
+        B/PS/SR/Special Dice and Firewall upgrades, remain
+        unreviewed. Both Equipment IDs remain unresolved at the
+        source-level audit; the **34 Skill / 11 Equipment** baseline
+        does not change, and no Unit-use index is published.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

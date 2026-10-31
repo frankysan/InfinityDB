@@ -711,7 +711,10 @@ def _variant_semantics(value: str | None) -> dict[str, Any] | None:
                             for key, value in entry["effect"].items()
                             if key != "appliesTo"
                         },
-                        "applies_to": entry["effect"]["appliesTo"],
+                        **(
+                            {"applies_to": entry["effect"]["appliesTo"]}
+                            if "appliesTo" in entry["effect"] else {}
+                        ),
                     },
                 }
                 for entry in parameter["extraValues"]

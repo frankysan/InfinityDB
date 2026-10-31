@@ -62,6 +62,46 @@ def _validate_reviewed_extra_parameter(
     army_links: list[object],
 ) -> None:
     """Bound typed extra effects to exact, reviewed Army source families."""
+    hacking_grants = {
+        "hacking-device": [
+            (12, "UPGRADE:\u00a0Trinity", "trinity"),
+            (20, "UPGRADE:\u00a0White Noise", "white-noise"),
+            (25, "UPGRADE: Cybermask", "cybermask"),
+            (287, "UPGRADE: Zero Pain", "zero-pain"),
+        ],
+        "hacking-device-plus": [
+            (17, "UPGRADE:\u00a0Fairy Dust", "fairy-dust"),
+        ],
+    }
+    for device, grants in hacking_grants.items():
+        if inheritance != "family" or army_links != [
+            {"entity": "equipment", "id": device}
+        ]:
+            continue
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "hacking-program-grant",
+                    "program": f"hacking-program:{program}",
+                },
+            }
+            for extra_id, raw, program in grants
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != len(expected)
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                for entry in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid {device} program-grant extras")
+        return
     if inheritance == "source" and army_links == [
         {"entity": "equipment", "id": 244}
     ]:

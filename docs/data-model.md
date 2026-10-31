@@ -812,6 +812,35 @@ the matched rules database/publication, and retains ignored
 recovery copies. The Equipment unresolved count is now **11**,
 with no Unit-usage index yet produced.
 
+**Partially reviewed Hacking Device program grants (2026-10-31):**
+The pinned Army source has Hacking Device `100` with 653 direct
+occurrences and Hacking Device Plus `101` with 126. English
+N5.3 pp. 54, 58 and 123 distinguish an Upgrade that grants a
+program from a device's standard program set and that program's
+own effects. The guarded `reviewed-extra` source mapping recognizes
+only five *unmodified* program grants:
+Hacking Device `12` (`UPGRADE: Trinity`, 17 occurrences),
+`20` (`UPGRADE: White Noise`, 12),
+`25` (`UPGRADE: Cybermask`, 1),
+`287` (`UPGRADE: Zero Pain`, 120);
+and Hacking Device Plus `17`
+(`UPGRADE: Fairy Dust`, 46). The raw
+nonbreaking spaces are retained in the exact signatures.
+Each typed `hacking-program-grant` carries the canonical
+`hacking-program:*` identity, not a copied Hacking Program
+effect, roll modifier or replacement attribute. The database
+reader retains `program` without inventing an `applies_to`
+scope. The guarded release migration pins these source values,
+synchronizes the rules/publication pair and retains ignored
+rollback artifacts. The Cybermask + Trinity combined source-100
+signature (one occurrence) is **not** approved by the
+individually reviewed extras. Other `UPGRADE` strings with
+B/PS/SR/Special Dice/Firewall changes and the source-101
+Trinity (PS=5) + Zero Pain combination remain unresolved.
+Both source IDs therefore keep their unresolved audit status,
+and the Equipment unresolved count stays **11**. Neither
+Hacking Program evaluation nor cross-Army Unit use is generated.
+
 **Remaining source-parameter inventory (pinned Army source and current
 generated rules database):** `tools/audit_source_variant_inputs.py` produces a
 deterministic, read-only JSON inventory from `infinity.db`,
@@ -829,7 +858,8 @@ It does **not** calculate Unit usage.
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
 application/raw databases. The tracked artifact includes reviewed
-Mimetism, Berserk, Dodge, Surprise Attack, Super-Jump, Jump and Climb
+Mimetism, Berserk, Dodge, Surprise Attack, Super-Jump, Jump,
+Climb, TinBot variants, and the partial Hacking Device program-grant
 occurrence-parameter mappings.
 This baseline contains **96 Skill** source identities across
 **33,153 direct rows** and **34 Equipment** source identities across
@@ -866,8 +896,9 @@ multiple extras remain unresolved even if each has a reviewed individual
 meaning, until that exact combination has its own semantic review.
 In particular, Booty/MetaChemistry `ReRoll`, Mimetism
 `-3/-6`, unreviewed TinBot variants outside the exact source
-IDs `169`/`244`/`247`, and Hacking Device `UPGRADE` text
-must not be promoted to typed variant keys on string parsing alone. The audit retains separate
+IDs `169`/`244`/`247`, and unreviewed Hacking Device
+`UPGRADE` variants beyond the five exact program grants must
+not be promoted to typed variant keys on string parsing alone. The audit retains separate
 signatures for each extra combination and detects source
 drift via `tests/test_audit_source_variant_inputs.py` **when the
 paired, Git-ignored raw Army archive is available**. This source-only

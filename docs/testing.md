@@ -457,6 +457,31 @@ is `python -m tools.build_deployed_object_publication
 and synchronizes the rules database with the deployed-object
 publication. Do not rerun after promotion.
 
+**Hacking Device unmodified program-grant review:** Pinned source
+Equipment `100`/`101` has 653/126 direct relationships.
+The five exact single-extra `hacking-program-grant` mappings
+cover 150 Hacking Device and 46 Hacking Device Plus occurrences.
+The audited `UPGRADE:` source text is matched by exact
+ID/type/value, including nonbreaking spaces, rather than
+parsed from display labels. N5.3 pp. 54/58/123 supplies the
+program-upgrade and baseline-device distinction; individual
+program effects stay owned by their canonical `hacking-program:*`
+records. `tests/test_audit_source_variant_inputs.py` compares
+the local raw source against tracked and freshly exported
+rules metadata and asserts that multi-extra combinations
+remain unreviewed. The hermetic curated validator rejects
+wrong device, type, source value and program target; the
+guarded v9 source preflight rejects drift before promotion.
+The one-time local refresh was
+`python -m tools.build_deployed_object_publication
+--refresh-hacking-program-grants-v9`; the previous matched
+rules/publication pair is preserved in ignored `local/`.
+The normalized program-grant effect has a `program` identity
+without a synthetic `applies_to` field. Neither Equipment
+source ID is fully reconciled: modified programs, Firewall
+variants and exact combined upgrades remain unresolved.
+Do not rerun the one-time migration on an already-promoted pair.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

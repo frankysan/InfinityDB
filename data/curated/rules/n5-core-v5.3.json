@@ -16490,7 +16490,51 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 12,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE:\u00a0Trinity",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:trinity"
+                                }
+                            },
+                            {
+                                "extraId": 20,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE:\u00a0White Noise",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:white-noise"
+                                }
+                            },
+                            {
+                                "extraId": 25,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Cybermask",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:cybermask"
+                                }
+                            },
+                            {
+                                "extraId": 287,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Zero Pain",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:zero-pain"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {
@@ -16537,7 +16581,24 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 17,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE:\u00a0Fairy Dust",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:fairy-dust"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

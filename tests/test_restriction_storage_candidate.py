@@ -580,6 +580,80 @@ def test_tinbot_other_refresh_checks_exact_pinned_source(
         assert calls[0]["tinbot_other"] is True
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "name", "count", "grant-text", "grant-count",
+               "combined", "reviewed", "raw", "device"),
+)
+def test_hacking_program_grant_refresh_requires_exact_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    items = []
+    for source_id, source in release.HACKING_GRANT_SOURCES.items():
+        signatures = [
+            {
+                "extras": [[extra_id, "TEXT", raw]],
+                "reviewed": False, "count": count,
+            }
+            for extra_id, (raw, count) in source["singles"].items()
+        ]
+        signatures.extend(copy.deepcopy(source["combined"]))
+        items.append({
+            "id": source_id,
+            "name": source["name"],
+            "applicationId": source_id,
+            "occurrences": source["occurrences"],
+            "status": "unresolved-occurrence-parameter",
+            "reviewedExtra": None,
+            "rawValues": [],
+            "extraSignatures": signatures,
+        })
+    first = items[0]
+    if defect == "name":
+        first["name"] = "Unexpected device"
+    elif defect == "count":
+        first["occurrences"] += 1
+    elif defect == "grant-text":
+        first["extraSignatures"][0]["extras"][0][2] = "UPGRADE: Wrong"
+    elif defect == "grant-count":
+        first["extraSignatures"][0]["count"] += 1
+    elif defect == "combined":
+        first["extraSignatures"][-1]["reviewed"] = True
+    elif defect == "reviewed":
+        first["reviewedExtra"] = {"kind": "reviewed-extra"}
+    elif defect == "raw":
+        first["rawValues"] = ["unreviewed"]
+    elif defect == "device":
+        first["applicationId"] = 999
+
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": items}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is not None:
+        with pytest.raises(ValueError, match="source drift|signature drift"):
+            release.refresh_hacking_program_grants_v9_release(root=tmp_path)
+        assert not calls
+    else:
+        assert release.refresh_hacking_program_grants_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path,
+            "variant_records": {"equipment:hacking-device",
+                                "equipment:hacking-device-plus"},
+        }]
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
