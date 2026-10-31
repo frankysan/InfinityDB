@@ -991,6 +991,20 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         the source-backed exception slices already accepted. The whole
         1.0 corpus and reactive eligibility/activation conditions still
         require their own clause and normal-browser dispositions.
+        - [x] **Selected declaration/ARO evidence crosswalk (V1-A08):**
+          `config/validation/conditional-declaration-evidence-v1.json`
+          identifies ten bounded cases covering Order declaration-time
+          Requirements, Look Out!, Discover, Place Deployable, Reload,
+          Alert!, Guard/Aerial, Hacking Area, Cyberplug and Stealth.
+          `tools.report_reference_baseline --reconcile-explanation-inventory
+          --audit-conditional-declarations --verify-conditional-pdf
+          data/pdf/rules/n5-rules-v5-3-en.pdf` checks cited current
+          records, material prose, pinned PDF text and existing test
+          anchors. Normal Rule/Skill pages for Order Expenditure and
+          Look Out! pass Chromium at 1440/390/320 px (6/6). **This is
+          selected-clause provenance and rendering only**, not a signoff
+          for all reactions, linked scenarios, conditional permissions
+          or the 448-record whole-corpus gate.
         - [x] **Numerical Army source Skill variants (V1-A08):** Exact
           pinned September 29 Army ZIP, Skill dictionaries, all **17**
           faction-file option occurrences and parent-profile attributes

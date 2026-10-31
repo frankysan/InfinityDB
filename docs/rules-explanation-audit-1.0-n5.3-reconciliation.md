@@ -720,6 +720,36 @@ verification**, not every active/reactive legality exception, a
 runtime modifier evaluator, or the 1.0 whole-record corpus gate.
 The frozen 367-record S/D inventory remains unchanged.
 
+## V1-A08 conditional declaration evidence crosswalk (2026-10-31)
+
+The October 31 follow-up cross-references **ten selected** declaration
+and reactive-eligibility exceptions with their exact curated owner,
+printed N5.3 English PDF page/phrase, maintained explanation and
+existing test anchor. The source-checked cases cover the Order
+Expenditure declaration versus Resolution Requirement timing,
+Look Out!'s allied Dodge-only ARO, Discover retries/revelation,
+reactive Place Deployable and Reload restrictions, Alert!'s
+automatic Conclusion, Guard versus Aerial, Hacking Area's separate
+reaction windows, Cyberplug Controller choices and Stealth mixed
+activation.
+
+The maintained source-scope inventory is
+`config/validation/conditional-declaration-evidence-v1.json`, verified
+by `tools.report_reference_baseline --reconcile-explanation-inventory
+--audit-conditional-declarations --verify-conditional-pdf
+data/pdf/rules/n5-rules-v5-3-en.pdf`. Its PDF hash, citations, selected
+clauses and test anchors fail closed on drift. The player-facing
+Order Expenditure Sequence and Look Out! pages passed six new
+Chromium checks at 1440, 390 and 320 px, including citations,
+readable mechanics and no horizontal overflow.
+
+The crosswalk does not create or modify a rule, grant new AROs,
+approve unexamined Skills, or convert prior selected source/browser
+tests into **whole-record** acceptance. Existing cases retain
+their original source-backed interpretation. The frozen 367-record
+D/S inventory and current 448-record v1.0 acceptance work stay
+separate; the remaining conditional eligibility set is open.
+
 ## Conditional movement declarations (2026-10-16)
 
 N5.3 p. 88 allows Climbing Plus to make Climb a Basic Short Skill

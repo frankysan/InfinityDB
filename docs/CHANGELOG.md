@@ -49,6 +49,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Project infrastructure + Web frontend:** Add a
+  source-pinned V1-A08 conditional declaration/ARO evidence crosswalk
+  for ten previously reviewed exceptions. Guard current source pages,
+  curated clauses and test anchors against drift; verify Order
+  Expenditure and Look Out! player pages at three viewport widths.
+  Preserve the remaining eligibility and whole-record acceptance gate.
 - **Data processing + Web frontend + Project infrastructure:** Audit the
   three Army-native numerical BS/CC replacement Skills against exact
   pinned dictionary values and all 17 loadout occurrences, retaining

@@ -24,6 +24,7 @@ from tools.report_reference_baseline import (
     _verify_published_profile_extras,
     _verify_published_profile_references,
     _verify_published_unit_options,
+    audit_conditional_declaration_evidence,
     audit_numeric_army_replacement_variants,
     build_baseline,
     main,
@@ -72,6 +73,7 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
     assert set(selected) == {
         "rule:initiative-roll", "rule:combat-group", "rule:army-retreat",
         "rule:standard-game", "rule:game-modes",
+        "rule:order-expenditure-sequence", "skill:look-out",
     }
     for row in result["currentRecords"]:
         assert row["sourceDisposition"] == "pending-full-material-clause-reconciliation"
@@ -171,6 +173,93 @@ def test_explanation_migration_cli_includes_verified_declaration_owners(
     assert "17 historical retirements" in markdown
     assert "skill `morpho-scan`" in markdown
     assert "No historical aliases or" in markdown
+
+
+def test_conditional_declaration_crosswalk_validates_selected_source_evidence() -> None:
+    result = audit_conditional_declaration_evidence()
+    assert result["selectedCaseCount"] == 10
+    assert result["status"] == "curated-clause-citation-and-test-anchor-verified"
+    assert not result["globalAroEligibilityReviewed"]
+    assert result["fullRecordApprovalsIssued"] == 0
+    assert len({row["key"] for row in result["cases"]}) == 10
+    assert {item["recordId"] for item in result["cases"]} >= {
+        "rule:order-expenditure-sequence", "skill:look-out",
+        "skill:place-deployable", "skill:reload", "skill:alert",
+        "skill:discover", "skill:guard", "skill:stealth",
+        "rule:hacking-area", "rule:peripheral-type:cyberplug",
+    }
+    assert all(row["disposition"] ==
+               "selected-evidence-only-pending-full-record-review"
+               for row in result["cases"])
+
+
+def test_conditional_declaration_crosswalk_checks_pinned_pdf_when_present() -> None:
+    source = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.is_file():
+        pytest.skip("Pinned N5.3 source PDF is unavailable")
+    pytest.importorskip("pymupdf")
+    result = audit_conditional_declaration_evidence(pdf_path=source)
+    assert result["status"] == "pinned-source-clause-and-curated-evidence-verified"
+    assert result["selectedCaseCount"] == 10
+
+
+def test_conditional_declaration_crosswalk_fails_closed_on_scope_and_clause_drift(
+    tmp_path: Path,
+) -> None:
+    original = json.loads((
+        ROOT / "config/validation/conditional-declaration-evidence-v1.json"
+    ).read_text(encoding="utf-8"))
+    mutations = (
+        ("removed-case", lambda d: d["entries"].pop()),
+        ("duplicate-case", lambda d: d["entries"][1].update(
+            key=d["entries"][0]["key"]
+        )),
+        ("wrong-record", lambda d: d["entries"][0].update(
+            recordId="skill:nonexistent"
+        )),
+        ("wrong-clause", lambda d: d["entries"][0].update(
+            factNeedle="a made-up unsupported declaration rule"
+        )),
+        ("wrong-page", lambda d: d["entries"][0].update(page=3)),
+        ("missing-test", lambda d: d["entries"][0].update(
+            testName="test_nonexistent_source_review"
+        )),
+        ("unsafe-test-path", lambda d: d["entries"][0].update(
+            testFile="../other.py"
+        )),
+        ("changed-scope", lambda d: d.update(
+            disposition="globally-approved-all-aro"
+        )),
+    )
+    for label, mutate in mutations:
+        changed = json.loads(json.dumps(original))
+        mutate(changed)
+        path = tmp_path / f"{label}.json"
+        path.write_text(json.dumps(changed), encoding="utf-8")
+        with pytest.raises(ReferenceBaselineError):
+            audit_conditional_declaration_evidence(manifest_path=path)
+
+
+def test_conditional_declaration_crosswalk_cli_does_not_approve_whole_corpus(
+    tmp_path: Path,
+) -> None:
+    json_path = tmp_path / "evidence.json"
+    markdown_path = tmp_path / "evidence.md"
+    assert main([
+        "--reconcile-explanation-inventory", "--audit-conditional-declarations",
+        "--json-output", str(json_path),
+        "--markdown-output", str(markdown_path),
+    ]) == 0
+    report = json.loads(json_path.read_text(encoding="utf-8"))
+    evidence = report["conditionalDeclarations"]
+    assert evidence["selectedCaseCount"] == 10
+    assert report["fullRecordApprovalsIssuedByThisAudit"] == 0
+    assert "pending-full-material-clause-reconciliation" == (
+        report["currentRecords"][0]["sourceDisposition"]
+    )
+    markdown = markdown_path.read_text(encoding="utf-8")
+    assert "Selected declaration and reaction exception evidence" in markdown
+    assert "not a v1.0 release gate pass" in markdown
 
 
 def test_numeric_army_source_skill_replacements_do_not_modify_base_profiles() -> None:

@@ -1,0 +1,122 @@
+{
+  "format": "InfinityDB V1-A08 conditional declaration evidence crosswalk",
+  "formatVersion": 1,
+  "sourceId": "n5-core-v5.3-pdf",
+  "sourcePdf": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+  "sourceSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "curatedCollection": "n5-core-v5.3",
+  "disposition": "selected-clause-source-prose-and-test-anchor-not-full-record-approval",
+  "reviewedOn": "2026-10-31",
+  "entries": [
+    {
+      "key": "order-declaration-validation",
+      "recordId": "rule:order-expenditure-sequence",
+      "page": 15,
+      "field": "restrictions",
+      "factNeedle": "Check the Requirements of [[skill:alert|Alert!]], all Basic Short Skills",
+      "pdfNeedle": "When declaring Alert!",
+      "testFile": "tests/test_rules_database.py",
+      "testName": "test_order_expenditure_sequence_mechanics_are_composed",
+      "scope": "Alert, Basic Short Skills, Jump and Climb checked at declaration; others at Resolution"
+    },
+    {
+      "key": "look-out-special-aro",
+      "recordId": "skill:look-out",
+      "page": 81,
+      "field": "effects",
+      "factNeedle": "even if the active enemy is outside their LoF",
+      "pdfNeedle": "Normal or Face to Face Dodge (PH-3) Roll",
+      "testFile": "tests/test_curated.py",
+      "testName": "test_n5_look_out_aro_procedure_matches_pinned_pdf",
+      "scope": "Eligible allied PH-3 Dodge only, not unrestricted ARO"
+    },
+    {
+      "key": "discover-retry",
+      "recordId": "skill:discover",
+      "page": 77,
+      "field": "restrictions",
+      "factNeedle": "cannot attempt to Discover the same Marker again until the next Player Turn",
+      "pdfNeedle": "cannot attempt to Discover the same Marker until the next Player Turn",
+      "testFile": "tests/test_curated.py",
+      "testName": "test_n5_discover_retry_and_aro_exception_match_pinned_pdf",
+      "scope": "Same-marker retry restriction and reveal procedure"
+    },
+    {
+      "key": "place-deployable-reactive",
+      "recordId": "skill:place-deployable",
+      "page": 82,
+      "field": "clarifications",
+      "factNeedle": "does not remove this reactive LoF requirement",
+      "pdfNeedle": "In the Reactive Turn, LoF to the Active Trooper is required",
+      "testFile": "tests/test_curated.py",
+      "testName": "test_n5_reload_place_deployable_aro_clauses_match_pinned_pdf",
+      "scope": "Reactive LoF and independent Perimeter placement"
+    },
+    {
+      "key": "reload-reactive",
+      "recordId": "skill:reload",
+      "page": 83,
+      "field": "clarifications",
+      "factNeedle": "does not bypass ordinary [[trait:aro|ARO]] eligibility",
+      "pdfNeedle": "The Trooper must be inside the Zone of Control",
+      "testFile": "tests/test_curated.py",
+      "testName": "test_n5_reload_place_deployable_aro_clauses_match_pinned_pdf",
+      "scope": "Valid ARO trigger still needed; allied Baggage and expended-item requirements"
+    },
+    {
+      "key": "alert-automatic-conclusion",
+      "recordId": "skill:alert",
+      "page": 77,
+      "field": "clarifications",
+      "factNeedle": "not a declared [[trait:aro|ARO]]",
+      "pdfNeedle": "At the end of the Order, during its Conclusion",
+      "testFile": "tests/test_curated.py",
+      "testName": "test_n5_alert_conclusion_and_activation_rules_match_pinned_pdf",
+      "scope": "Automatic Conclusion facing, not an ARO declaration"
+    },
+    {
+      "key": "guard-aerial",
+      "recordId": "skill:guard",
+      "page": 86,
+      "field": "clarifications",
+      "factNeedle": "The exception does not independently grant an [[trait:aro|ARO]]",
+      "pdfNeedle": "Guard",
+      "testFile": "tests/test_curated.py",
+      "testName": "test_n5_guard_aerial_exception_matches_pinned_pdf",
+      "scope": "Aerial prohibition except Unconscious; no new reaction window"
+    },
+    {
+      "key": "hacking-area-two-windows",
+      "recordId": "rule:hacking-area",
+      "page": 57,
+      "field": "clarifications",
+      "factNeedle": "A different enemy Trooper outside both LoF and ZoC cannot react",
+      "pdfNeedle": "Hacker",
+      "testFile": "tests/test_curated.py",
+      "testName": "test_n5_hacking_area_source_heading_and_aro_examples_match_pdf",
+      "scope": "First Idle Hacking Area ARO differs from later targeted Reset; Marker reveal delay"
+    },
+    {
+      "key": "cyberplug-controller",
+      "recordId": "rule:peripheral-type:cyberplug",
+      "page": 108,
+      "field": "clarifications",
+      "factNeedle": "Neither Profile grants an [[trait:aro|ARO]] without ordinary reaction eligibility",
+      "pdfNeedle": "Cyberplug",
+      "testFile": "tests/test_curated.py",
+      "testName": "test_n5_cyberplug_aro_examples_match_pinned_pdf",
+      "scope": "Connected controller Idle and independently eligible Autonomous reactions"
+    },
+    {
+      "key": "stealth-mixed-activation",
+      "recordId": "skill:stealth",
+      "page": 112,
+      "field": "clarifications",
+      "factNeedle": "A [[trait:aro|ARO]] generated by a different active Trooper is not by itself an exception to Stealth",
+      "pdfNeedle": "STEALTH",
+      "testFile": "tests/test_curated.py",
+      "testName": "test_n5_stealth_counter_scope_matches_pinned_pdf",
+      "scope": "Stealth suppression is tied to target's declarations, not any co-activated Trooper"
+    }
+  ]
+}

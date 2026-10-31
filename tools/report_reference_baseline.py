@@ -1370,6 +1370,10 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:army-retreat": "test_army_retreat_standard_game_normal_reference_navigation",
     "rule:standard-game": "test_army_retreat_standard_game_normal_reference_navigation",
     "rule:game-modes": "test_game_modes_source_table_normal_reference_navigation",
+    "rule:order-expenditure-sequence": (
+        "test_conditional_reaction_source_slices_visible_in_normal_browser"
+    ),
+    "skill:look-out": "test_conditional_reaction_source_slices_visible_in_normal_browser",
 }
 CURRENT_EXPLANATION_COLLECTIONS = (
     PROJECT_ROOT / "data/curated/rules/n5-core-v5.3.json",
@@ -1908,6 +1912,116 @@ def audit_numeric_army_replacement_variants(
     }
 
 
+CONDITIONAL_DECLARATION_EVIDENCE = (
+    PROJECT_ROOT / "config/validation/conditional-declaration-evidence-v1.json"
+)
+
+
+def audit_conditional_declaration_evidence(
+    manifest_path: Path = CONDITIONAL_DECLARATION_EVIDENCE,
+    *,
+    pdf_path: Path | None = None,
+    root: Path = PROJECT_ROOT,
+) -> dict[str, Any]:
+    """Verify selected clause locators, player facts and test anchors, not global AROs."""
+    from infinity_db.curated import load_curated_document
+
+    config = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if config.get("formatVersion") != 1 or config.get("format") != (
+        "InfinityDB V1-A08 conditional declaration evidence crosswalk"
+    ) or config.get("sourceId") != "n5-core-v5.3-pdf" or (
+        config.get("disposition") != (
+            "selected-clause-source-prose-and-test-anchor-not-full-record-approval"
+        )
+    ):
+        raise ReferenceBaselineError("Unexpected conditional declaration audit scope")
+    rows = config.get("entries")
+    if not isinstance(rows, list) or len(rows) != 10:
+        raise ReferenceBaselineError("Expected 10 selected conditional evidence cases")
+    curated = load_curated_document(root / "data/curated/rules/n5-core-v5.3.json")
+    records = {row["id"]: row for row in curated["records"]}
+    seen: set[str] = set()
+    verified = []
+    document = None
+    if pdf_path is not None:
+        if _sha256(pdf_path) != config.get("sourceSha256"):
+            raise ReferenceBaselineError("Conditional declaration PDF fingerprint mismatch")
+        try:
+            import pymupdf
+        except ImportError as exc:
+            raise ReferenceBaselineError("PyMuPDF required for PDF clause checks") from exc
+        document = pymupdf.open(pdf_path)
+    try:
+        for entry in rows:
+            key = entry.get("key")
+            if not isinstance(key, str) or key in seen:
+                raise ReferenceBaselineError(f"Duplicate/invalid conditional case: {key}")
+            seen.add(key)
+            record_id = entry["recordId"]
+            page = entry["page"]
+            field = entry["field"]
+            needle = entry["factNeedle"]
+            test_file = entry["testFile"]
+            test_name = entry["testName"]
+            record = records.get(record_id)
+            if (record is None or record.get("review", {}).get("status") != "reviewed"
+                    or not isinstance(page, int) or type(page) is not int
+                    or field not in ("requirements", "effects", "restrictions",
+                                     "clarifications")
+                    or not isinstance(needle, str) or len(needle) < 15):
+                raise ReferenceBaselineError(f"Invalid reviewed clause: {key}")
+            facts = record.get("facts", {}).get(field, [])
+            if not isinstance(facts, list) or not any(
+                isinstance(clause, str) and needle in clause for clause in facts
+            ):
+                raise ReferenceBaselineError(f"Conditional fact clause drift: {key}")
+            if not any(
+                citation.get("sourceId") == config["sourceId"]
+                and citation.get("page") == page
+                for citation in record.get("citations", [])
+            ):
+                raise ReferenceBaselineError(f"Conditional citation drift: {key}")
+            if not re.fullmatch(r"tests/test_[a-z0-9_]+\.py", test_file):
+                raise ReferenceBaselineError(f"Unsafe conditional test path: {key}")
+            if not re.fullmatch(r"test_[a-z0-9_]+", test_name):
+                raise ReferenceBaselineError(f"Unsafe conditional test name: {key}")
+            source = (root / test_file).read_text(encoding="utf-8")
+            if not re.search(rf"^def {test_name}\(", source, re.M):
+                raise ReferenceBaselineError(f"Missing conditional test anchor: {key}")
+            if document is not None:
+                if page < 1 or page > len(document):
+                    raise ReferenceBaselineError(f"Invalid conditional source page: {key}")
+                page_text = document[page - 1].get_text()
+                if not isinstance(page_text, str):
+                    raise ReferenceBaselineError(f"Invalid conditional PDF text: {key}")
+                source_text = " ".join(page_text.split())
+                raw_needle = entry.get("pdfNeedle")
+                if not isinstance(raw_needle, str) or not raw_needle.strip():
+                    raise ReferenceBaselineError(f"Invalid conditional PDF clause: {key}")
+                pdf_needle = " ".join(raw_needle.split())
+                if pdf_needle.casefold() not in source_text.casefold():
+                    raise ReferenceBaselineError(f"Conditional PDF clause missing: {key}")
+            verified.append({
+                "key": key, "recordId": record_id, "sourcePage": page,
+                "sourceField": field, "supportingTest": f"{test_file}::{test_name}",
+                "scope": entry["scope"],
+                "disposition": "selected-evidence-only-pending-full-record-review",
+            })
+    finally:
+        if document is not None:
+            document.close()
+    return {
+        "status": (
+            "pinned-source-clause-and-curated-evidence-verified" if pdf_path
+            else "curated-clause-citation-and-test-anchor-verified"
+        ),
+        "selectedCaseCount": len(verified),
+        "cases": verified,
+        "globalAroEligibilityReviewed": False,
+        "fullRecordApprovalsIssued": 0,
+    }
+
+
 def render_explanation_reconciliation(report: dict[str, Any]) -> str:
     """Compact work queue for reviewers, retaining exact IDs in the JSON."""
     lines = [
@@ -2018,6 +2132,22 @@ def render_explanation_reconciliation(report: dict[str, Any]) -> str:
             "runtime combat calculator or whole-record signoff.",
             "",
         ])
+    if "conditionalDeclarations" in report:
+        evidence = report["conditionalDeclarations"]
+        lines.extend([
+            "## Selected declaration and reaction exception evidence",
+            "",
+            f"Verified {evidence['selectedCaseCount']} source-scoped clauses: "
+            f"`{evidence['status']}`.",
+            "This does not verify general ARO eligibility or certify all records.",
+            "",
+        ])
+        for entry in evidence["cases"]:
+            lines.append(
+                f"- `{entry['recordId']}` (p. {entry['sourcePage']}): "
+                f"{entry['scope']} — {entry['supportingTest']}"
+            )
+        lines.append("")
     lines.extend([
         "## Remaining acceptance",
         "",
@@ -2058,11 +2188,25 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--verify-numeric-army-archive", type=Path,
         help="Audit three source-native numerical replacement Skills in a pinned Army ZIP",
     )
+    parser.add_argument(
+        "--audit-conditional-declarations", action="store_true",
+        help="Cross-check selected ARO and declaration exceptions without global acceptance",
+    )
+    parser.add_argument(
+        "--verify-conditional-pdf", type=Path,
+        help="Check selected conditional clauses against pinned N5.3 PDF",
+    )
     args = parser.parse_args(argv)
     if args.reconcile_explanation_inventory:
         if args.verify_declaration_pdf is not None and not args.reconcile_declarations:
             parser.error("--verify-declaration-pdf requires --reconcile-declarations")
+        if args.verify_conditional_pdf is not None and not args.audit_conditional_declarations:
+            parser.error("--verify-conditional-pdf requires --audit-conditional-declarations")
         report = reconcile_explanation_inventory()
+        if args.audit_conditional_declarations:
+            report["conditionalDeclarations"] = audit_conditional_declaration_evidence(
+                pdf_path=args.verify_conditional_pdf,
+            )
         if args.verify_numeric_army_archive is not None:
             report["numericArmyVariants"] = audit_numeric_army_replacement_variants(
                 args.verify_numeric_army_archive,
@@ -2088,7 +2232,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 0
     if (args.reconcile_declarations or args.verify_declaration_pdf is not None
-            or args.verify_numeric_army_archive is not None):
+            or args.verify_numeric_army_archive is not None
+            or args.audit_conditional_declarations or args.verify_conditional_pdf is not None):
         parser.error("reconciliation flags require --reconcile-explanation-inventory")
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,

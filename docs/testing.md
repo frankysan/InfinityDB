@@ -975,8 +975,34 @@ the displayed source replacement labels at 1440/390/320 px. These
 are not independently routed `/skills/bs-11` or `/skills/bs-12`
 pages, nor full conditional-effect or profile-variant approval.
 
+For the selected **conditional declaration and reactive eligibility**
+evidence matrix, the maintained
+`config/validation/conditional-declaration-evidence-v1.json` identifies
+ten bounded source/record/test anchors. The reference baseline audit
+checks each actual curated fact clause, versioned source citation and
+existing test name against a closed manifest; with the source PDF
+available, it additionally verifies the exact pinned PDF fingerprint
+and the selected printed clause text. Reproduce its ignored JSON/Markdown
+evidence with:
+
+```powershell
+.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --audit-conditional-declarations --verify-conditional-pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json-output local/audits/v1-conditional-declaration-evidence.json --markdown-output local/audits/v1-conditional-declaration-evidence.md
+```
+
+The ten entries cover Order declaration/Resolution timing, Look Out!,
+Discover, Place Deployable, Reload, Alert!, Guard versus Aerial,
+Hacking Area, Cyberplug Controller and Stealth mixed activations.
+The normal `/rules/order-expenditure-sequence` and
+`/skills/look-out` pages additionally passed six Chromium cases at
+1440/390/320px; existing source tests provide bounded evidence for
+the other cases. This is neither all possible ARO triggers nor a
+complete matrix of Skill-specific conditional permissions. Each
+record and its source sections retain pending whole-record acceptance,
+including where previously reviewed curation facts or selected
+browser tests are available.
+
 The JSON contains the complete current identity crosswalk, D/S provenance
-where applicable, source pages/headings, curated review flags and five
+where applicable, source pages/headings, curated review flags and seven
 selected browser-test pointers for recently published general references.
 Every current record retains an explicit *full acceptance not assessed*
 disposition, even when its curated source status is `reviewed` or a

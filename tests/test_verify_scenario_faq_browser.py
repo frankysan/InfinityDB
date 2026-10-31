@@ -58,6 +58,48 @@ def chrome() -> Iterator[Any]:
 
 @pytest.mark.parametrize("width", [1440, 390, 320])
 @pytest.mark.parametrize(
+    ("path", "card_id", "expected"),
+    [
+        (
+            "/rules/order-expenditure-sequence",
+            "#rule-rule-order-expenditure-sequence",
+            ("all Basic Short Skills", "Resolution instead", "Disposable"),
+        ),
+        (
+            "/skills/look-out",
+            "#rule-skill-look-out",
+            ("Dodge", "PH-3", "outside their LoF"),
+        ),
+    ],
+)
+def test_conditional_reaction_source_slices_visible_in_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    path: str, card_id: str, expected: tuple[str, ...],
+) -> None:
+    """V1-A08: two selected timing/exception explanations, not global ARO approval."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}{path}", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        card = page.locator(card_id)
+        card.wait_for(state="visible", timeout=10000)
+        visible = card.inner_text()
+        for fragment in expected:
+            assert fragment in visible, (path, fragment)
+        assert card.locator(".rules-source-citations").count() == 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390, 320])
+@pytest.mark.parametrize(
     ("slug", "name", "attribute", "value"),
     [
         ("bs-attack", "BS Attack", "BS", 11),
