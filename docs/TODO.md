@@ -1701,6 +1701,13 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       variants with extra MODs; preserve raw signatures and exclude
       unreviewed specific combinations from index counts. Fail closed
       rather than parsing numeric-looking display strings.
+      - [x] **Data processing:** Harden the source-variant inventory against
+        unreviewed combinations of individually recognized extras. Only a
+        single reviewed extra or typed distance can currently certify an
+        occurrence signature; multiple extras remain unresolved pending
+        explicit combination semantics. Keep the pinned source-ID baseline
+        and add a CI-runnable pure signature regression without requiring
+        the ignored raw archive.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

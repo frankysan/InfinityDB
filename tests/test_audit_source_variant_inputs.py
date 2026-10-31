@@ -9,9 +9,7 @@ import pytest
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
-from tools.audit_source_variant_inputs import inventory_source_variants
-
-pytestmark = pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+from tools.audit_source_variant_inputs import inventory_source_variants, reviewed_extra_signature
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -24,6 +22,7 @@ def _inventory() -> dict:
     )
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
     report = _inventory()
     skills = report["catalogs"]["skills"]
@@ -71,6 +70,7 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
         }
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     report = _inventory()["catalogs"]
     skills = {item["id"]: item for item in report["skills"]["items"]}
@@ -115,6 +115,31 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     assert equipment[248]["status"] == "reviewed-exact-source"
 
 
+@pytest.mark.parametrize(
+    ("extras", "distance_allowed", "expected"),
+    [
+        ([], False, False),
+        ([(0, 6, "TEXT", "-3")], False, True),
+        ([(0, 11, "DISTANCE", "+2.5")], True, True),
+        ([(0, 11, "DISTANCE", "+2.5")], False, False),
+        ([(0, 99, "TEXT", "unreviewed")], False, False),
+        ([(0, 6, "TEXT", "-3"), (1, 7, "TEXT", "-6")], False, False),
+        ([(0, 6, "TEXT", "-3"), (1, 11, "DISTANCE", "+2.5")], True, False),
+    ],
+)
+def test_reviewed_extra_signatures_require_explicit_combination_review(
+    extras: list[tuple[int, int, str, str]],
+    distance_allowed: bool,
+    expected: bool,
+) -> None:
+    """Recognized individual extras cannot silently approve a new combination."""
+    assert reviewed_extra_signature(
+        extras,
+        reviewed_values={(6, "TEXT", "-3"), (7, "TEXT", "-6")},
+        distance_allowed=distance_allowed,
+    ) is expected
+
+
 def _single_extra_counts(item: dict) -> dict[tuple[int, str, str], int]:
     return {
         tuple(signature["extras"][0]): signature["count"]
@@ -123,6 +148,7 @@ def _single_extra_counts(item: dict) -> dict[tuple[int, str, str], int]:
     }
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_n53_numeric_skill_modifiers_preserve_exact_source_meaning() -> None:
     """Pinned Army extras against N5.3 pp. 23, 79, 86, and 102."""
     skills = {
@@ -158,6 +184,7 @@ def test_n53_numeric_skill_modifiers_preserve_exact_source_meaning() -> None:
     # generic MOD meaning from other source TEXT labels.
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_numeric_mod_signatures_require_exact_reviewed_ids_and_values(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -198,6 +225,7 @@ def test_numeric_mod_signatures_require_exact_reviewed_ids_and_values(
     assert skills[25]["status"] == "unresolved-occurrence-parameter"
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
     tmp_path: Path,
 ) -> None:
@@ -256,6 +284,7 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
     }
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_dodge_source_signatures_are_exact_and_independent(tmp_path: Path) -> None:
     """Pin every distinct Army Dodge extra; none may inherit another's semantics."""
     output = tmp_path / "rules.db"
@@ -295,6 +324,7 @@ def test_dodge_source_signatures_are_exact_and_independent(tmp_path: Path) -> No
     assert all(signature["reviewed"] for signature in signatures)
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_surprise_attack_signatures_preserve_conditional_target_mods(tmp_path: Path) -> None:
     output = tmp_path / "rules.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), output)
@@ -323,6 +353,7 @@ def test_surprise_attack_signatures_preserve_conditional_target_mods(tmp_path: P
         assert "surprise-attack" not in rules.skill_parameter_semantics()
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_source_inventory_is_deterministic() -> None:
     first = _inventory()
     assert json.dumps(first, sort_keys=True) == json.dumps(_inventory(), sort_keys=True)

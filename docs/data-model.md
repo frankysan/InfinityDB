@@ -813,7 +813,11 @@ These statuses are conservative **per-source-ID audit flags**.
 A flagged source may also have valid, unparameterized occurrences,
 and reviewed family rules remain available. An exact reviewed
 source variant with an unreviewed occurrence extra is *not*
-a reviewed combined variant. In particular, Booty/MetaChemistry
+a reviewed combined variant. The audit accepts a single reviewed extra
+(or a single typed distance for a Skill with reviewed distance semantics);
+multiple extras remain unresolved even if each has a reviewed individual
+meaning, until that exact combination has its own semantic review.
+In particular, Booty/MetaChemistry
 `ReRoll`, Mimetism `-3/-6`, TinBot `-3/-6`, and Hacking
 Device `UPGRADE` source text must not be promoted to typed
 variant keys on string parsing alone. The audit retains separate

@@ -19,6 +19,22 @@ CATEGORIES = ("skills", "equipment")
 OWNERS = ("profile", "option", "unit_option")
 
 
+def reviewed_extra_signature(
+    items: list[tuple[int, int, str, str]],
+    *,
+    reviewed_values: set[tuple[int, str, str]],
+    distance_allowed: bool,
+) -> bool:
+    """Accept only single extras; reviewed values do not certify combinations."""
+    if len(items) != 1:
+        return False
+    _position, extra_id, extra_type, extra_name = items[0]
+    return (
+        (extra_id, extra_type, extra_name) in reviewed_values
+        or (extra_type == "DISTANCE" and distance_allowed)
+    )
+
+
 def inventory_source_variants(
     application_path: Path, raw_path: Path, rules_path: Path
 ) -> dict[str, Any]:
@@ -117,10 +133,10 @@ def inventory_source_variants(
                     allowed_values: set[tuple[int, str, str]] = reviewed_values,
                     distance_allowed: bool = distance is not None,
                 ) -> bool:
-                    return bool(items) and all(
-                        (extra_id, extra_type, extra_name) in allowed_values
-                        or (extra_type == "DISTANCE" and distance_allowed)
-                        for _position, extra_id, extra_type, extra_name in items
+                    return reviewed_extra_signature(
+                        items,
+                        reviewed_values=allowed_values,
+                        distance_allowed=distance_allowed,
                     )
 
                 unresolved = (
