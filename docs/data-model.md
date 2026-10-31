@@ -308,6 +308,16 @@ profiles, Ammunition composition, Combined Saving Roll, and Traits remain
 independent. This maintained configuration is included in installed packages,
 following the existing runtime catalog-configuration pattern.
 
+**Browser publication parity (2026-10-31):** All five reviewed combined
+forms additionally have real Chromium Weapon-detail acceptance at
+1440/390/320 px. The existing profile UI displays linked ordered
+Ammunition components, canonical shared-rule summaries (maintained
+links rendered as text/anchors), citations and the unchanged source
+Saving Roll cells. Plasma Rifle is a negative control for the
+separate Combined Saving Roll notation. This validates the current
+Weapon-detail *consumer*, not a Weapon comparison feature or a
+damage/Immunity calculator.
+
 A bounded Immunity cross-reference now publishes `skill:immunity`'s validated
 `facts.immunityInteraction` (N5.3 Wiki Immunity `oldid=3643`). It describes
 covered Ammunition as Normal, the loss of special effects and Saving Roll
@@ -315,10 +325,11 @@ modifiers, the default additional Critical Saving Roll (unless the defender has
 Immunity (Critical)), and the Comms Attack/Non-Lethal/Stunned exceptions. These
 facts belong to Immunity, **not** to the ordered Combined Ammunition mapping:
 checking whether a defender's particular Immunity covers an entire attack or
-one or more constituent effects remains unimplemented. Five `reviewedCombinedCases`
+one or more constituent effects remains unimplemented. Six `reviewedCombinedCases`
 now give **rule-derived, conditional** examples: Immunity (ARM) against source
-IDs 10 (AP+DA) and 13 (AP+Exp), plus Immunity (AP) against AP+DA and
-the exact non-Comms E/M CC Weapon's Immunity (BTS) interaction.
+IDs 10 (AP+DA) and 13 (AP+Exp), Immunity (AP) against AP+DA,
+Silenced Pistol (AP+Shock) and AP+T2 CC Weapon, and Immunity (BTS)
+against the exact non-Comms E/M CC Weapon (N+E/M).
 The AP case records its ignored AP component and surviving DA effect, retaining
 two full-ARM rolls (three on Critical), instead of collapsing to Normal.
 Each example preserves before/after hit and Critical counts with source IDs,

@@ -4127,6 +4127,19 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Weapon-detail reviewed Ammunition browser parity, 2026-10-31:**
+`tests/test_verify_ammunition_publication_browser.py` cross-checks
+the published Weapon API with the existing UI for all five reviewed
+Combined Ammunition identities (source IDs 5, 10, 13, 30 and 40).
+At 1440/390/320 px, 15 Chromium cases require ordered canonical
+component links, exact displayed canonical summaries (resolving
+maintained `[[target|label]]` text), source citation counts and
+unchanged Saving Roll cells, with no overflow. Three additional
+Plasma Rifle checks confirm a Combined Saving Roll (`ARM and BTS`)
+is not turned into Combined Ammunition. No application source,
+curated data, Army profile or published database is changed.
+Future Weapon comparison views remain out of scope.
+
 **AP+T2 CC Weapon / Immunity (Critical), 2026-10-31:**
 `tests/test_immunity_t2_critical.py` pins N5.3 pp. 63,
 67, 95 and 177 and the exact Army `AP+T2`/ARM/2

@@ -1129,9 +1129,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         examples (including the distinct Combined Saving Roll discussion).
         Source-defined AP+Shock and AP+T2 remain grounded in exact Army
         metadata, not misattributed to the p. 67 examples.
-      - [ ] Review any remaining component-level precedence, exceptions, and
-        future comparison-view consumers independently. Identity/transport
-        parity is not an executable attack or Critical resolution model.
+      - [x] Verify **actual Weapon-detail rendering** against the published
+        source API for all five reviewed combined Ammunition forms
+        (N+E/M, AP+DA, AP+Exp, AP+Shock, AP+T2). Chromium at
+        1440/390/320 px checks ordered canonical links, full rendered
+        shared-rule summaries and citation counts, unchanged source
+        Saving Roll cells, and mobile overflow. Plasma Rifle is the
+        negative control: its ARM+BTS Combined Saving Roll must not
+        become Combined Ammunition. The existing renderer needs no
+        implementation change; tests enforce its transport contract.
+      - [ ] Review remaining component-level precedence/exception
+        semantics and a **future** comparison-view consumer separately.
+        There is currently no Weapon comparison view; do not turn
+        link/source parity into executable attack or Critical mechanics.
   - [ ] Include scenario-defined catalog concepts needed for the core-rules
     scenario reference, including core-scenario Skills, contextual roles such as
     Specialist Troop, and the scenario elements those concepts act on. Preserve
