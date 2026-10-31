@@ -384,13 +384,14 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
 
     general_rules = RulesRecordCatalog(rules_database, "rules")
     general_rule_items = general_rules.list_items()
-    assert len(general_rule_items) == 24
+    assert len(general_rule_items) == 25
     assert {item["slug"] for item in general_rule_items} == {
         "access-width",
         "command-token-strategic-use",
         "coordinated-orders",
         "deployment-phase",
         "face-to-face-rolls",
+        "initiative-roll",
         "guts-roll",
         "hacking-area",
         "irregular-order",
@@ -656,7 +657,7 @@ def test_all_current_general_rules_preserve_category_scoped_publication() -> Non
         for record in document["records"]
         if record_matches_domain(domain, record)
     }
-    assert len(sources) == 24
+    assert len(sources) == 25
     slugs = {
         route_slug_from_qualified_typed_domain_id(
             record_id, expected_domain="rule", context="General Rule source identity"

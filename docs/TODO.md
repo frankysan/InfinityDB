@@ -970,10 +970,15 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       [V1-A01–03](v1.0-source-coverage-audit.md#v1-a01--initiative-roll-reference-is-missing).
       Each slice needs source/FAQ/Wiki reconciliation, maintained facts/citations,
       generated storage, public API, normal discovery and browser acceptance:
-      - [ ] **Initiative Roll:** English/Spanish N5.3 p. 15 and archived Wiki
-        revision 3955. Explain the roll/repeat procedure, open Attribute and
-        separate Initiative/Deployment choices; link the existing Deployment
-        reference without treating its page citation as coverage of Initiative.
+      - [x] **Initiative Roll:** The N5.3 English/Spanish p. 15 procedure now has
+        its own reviewed General Rule with Lieutenant WIP, rerolls, Open
+        Information, and the two separate Initiative/Deployment choices.
+        Deployment and Lieutenant link to the new rule; the generated
+        rules.db and deployed-object publication were updated as a matched
+        pair. Search/API and real Chromium catalog/detail navigation at
+        1440px and 390px pass. The October 31 audit retained the archived
+        Wiki revision 3955 as corroborating source evidence; no match-state
+        simulator or unreviewed deployment inference was added.
       - [ ] **Combat Groups:** English/Spanish p. 10 and archived Wiki revision
         3847. Explain the ten-member capacity, initial assignment, ordinary
         separation, Peripheral counting and source-owned group information;

@@ -19936,7 +19936,7 @@
             "id": "skill:lieutenant",
             "kind": "skill",
             "name": "Lieutenant",
-            "summary": "An obligatory private Automatic Special Skill identifying the army's commanding officer and granting the Special Lieutenant Order.",
+            "summary": "An obligatory private Automatic Special Skill identifying the army's commanding officer and granting the Special Lieutenant Order. During the pregame [[rule:initiative-roll|Initiative Roll]], both players use their Lieutenants' [[attribute:wip|WIP]] Attributes.",
             "composition": {
                 "role": "definition"
             },
@@ -19956,6 +19956,9 @@
                     "The user has a Special Lieutenant Order.",
                     "If the Lieutenant is absent from the table, [[state:isolated|Isolated]], or in a Null State during the Tactical Phase, Loss of Lieutenant applies.",
                     "The Lieutenant Skill remains active while its owner is in a Null State until a new Lieutenant is appointed."
+                ],
+                "clarifications": [
+                    "The Lieutenant's [[attribute:wip|WIP]] is Open Information for the [[rule:initiative-roll|Initiative Roll]], although the Lieutenant Skill itself is Private Information. The Initiative and Deployment choices are resolved before the [[rule:deployment-phase|Deployment Phase]]."
                 ],
                 "restrictions": [
                     "An Army List must include exactly one Lieutenant.",
@@ -26025,10 +26028,15 @@
             }
         },
         {
-            "id": "rule:deployment-phase",
+            "id": "rule:initiative-roll",
             "kind": "rule",
-            "name": "Deployment Phase",
-            "summary": "After the Initiative Roll, the players deploy their Troopers before the game begins, in the order determined by the player who kept Deployment. Each player deploys their main force and then the Trooper or Troopers kept back under applicable reserve rules.",
+            "name": "Initiative Roll",
+            "aliases": [
+                "Initiative and Deployment",
+                "Keeping Initiative",
+                "Keeping Deployment"
+            ],
+            "summary": "Before [[rule:deployment-phase|Deployment]], both players roll a d20 using their respective [[skill:lieutenant|Lieutenant]]'s [[attribute:wip|WIP]]. The higher successful result wins; ties and two failed Rolls are repeated. The [[skill:lieutenant|Lieutenant]]'s [[attribute:wip|WIP]] is Open Information for this Roll.\n\n**Two separate choices:** The winner keeps either Initiative (choosing Player Turn order) or Deployment (choosing Deployment order and Deployment Zones). The other player receives whichever choice the winner did not keep.",
             "composition": {
                 "role": "definition"
             },
@@ -26041,7 +26049,59 @@
             "facts": {
                 "category": "basic-rule",
                 "requirements": [
-                    "Complete the Initiative Roll and resolve the Initiative and Deployment choices before starting Deployment."
+                    "Before the game begins, both players use the [[attribute:wip|WIP]] Attribute of their respective [[skill:lieutenant|Lieutenant]]. The [[skill:lieutenant|Lieutenant]]'s [[attribute:wip|WIP]] is Open Information during the Initiative Roll."
+                ],
+                "effects": [
+                    "**Initiative Roll.** Each player rolls one d20. Compare successful results (not exceeding that player's [[skill:lieutenant|Lieutenant]] [[attribute:wip|WIP]]); the higher successful result wins. If the results are tied or both players fail, repeat the Roll.",
+                    "**Choice after the Roll.** The winner chooses to keep Initiative or to keep Deployment. The other player keeps the unchosen option.",
+                    "**Keeping Initiative.** Choose who takes the first and second Player Turns in each Game Round. This turn order is fixed for the entire game.",
+                    "**Keeping Deployment.** Choose which player deploys first and which Deployment Zone each player uses. Apply the separate [[rule:deployment-phase|Deployment Phase]] sequence afterward."
+                ],
+                "clarifications": [
+                    "Keeping Initiative does not also award control of Deployment, and keeping Deployment does not determine who takes the first Player Turn. The choices are assigned to different players.",
+                    "This pregame Initiative Roll is a specific contest using [[skill:lieutenant|Lieutenant]] [[attribute:wip|WIP]]; it does not resolve attacks, grant Orders, or determine individual Trooper activation."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 15,
+                    "section": "Initiative Roll"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 15,
+                    "section": "Keeping Initiative"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 15,
+                    "section": "Keeping Deployment"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-31"
+            }
+        },
+        {
+            "id": "rule:deployment-phase",
+            "kind": "rule",
+            "name": "Deployment Phase",
+            "summary": "After the [[rule:initiative-roll|Initiative Roll]], the players deploy their Troopers before the game begins, in the order determined by the player who kept Deployment. Each player deploys their main force and then the Trooper or Troopers kept back under applicable reserve rules.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "Complete the [[rule:initiative-roll|Initiative Roll]] and resolve the separate Initiative and Deployment choices before starting Deployment."
                 ],
                 "effects": [
                     "The first player places their Troopers in their Deployment Zone, holding back the reserve permitted by baseline and applicable exceptional rules. The second player then deploys their main force.",

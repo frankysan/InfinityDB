@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **200/200** complete, **0** pending.
+- Supporting semantic identities: **201/201** complete, **0** pending.
 - Current authored outgoing relations: **514**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -907,7 +907,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (21/21)
+#### Rule (22/22)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
@@ -930,6 +930,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Guts Roll** (`rule:guts-roll`) — reviewed: N5.3 p.38 baseline for Guts timing, movement hierarchy and exception-scoped linked references; no state-transition evaluator is implied.
   - outgoing: none
 - [x] **Hacking Area** (`rule:hacking-area`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
+  - outgoing: none
+- [x] **Initiative Roll** (`rule:initiative-roll`) — reviewed: N5.3 p.15 Initiative Roll and Keeping Initiative/Deployment describe Lieutenant WIP, ties and failures, open Attribute information, and the two distinct pregame choices. Source-specific pregame resolution, not a general attack contest or deployment modifier.
   - outgoing: none
 - [x] **Killing** (`rule:scenario:killing`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none

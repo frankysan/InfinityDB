@@ -48,7 +48,7 @@ def verify(
     if catalog not in {"ammunition", "labels", "rules", "states", "traits"}:
         raise ValueError(f"Unsupported reference catalog: {catalog}")
     expected = source_names() if expected_names is None else expected_names
-    required = {"ammunition": 11, "labels": 24, "rules": 24, "states": 24, "traits": 33}[catalog]
+    required = {"ammunition": 11, "labels": 24, "rules": 25, "states": 24, "traits": 33}[catalog]
     if len(expected) != required:
         raise ValueError(f"Expected {required} reviewed {catalog} entries; found {len(expected)}")
     if catalog == "rules" and (

@@ -57,6 +57,43 @@ def chrome() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width", [1440, 390])
+def test_initiative_roll_normal_reference_navigation(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1-A01: source-backed Initiative is usable through ordinary player navigation."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        link = page.locator('#catalog-list a[href="/rules/initiative-roll"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.click()
+        page.wait_for_url(f"{ORIGIN}/rules/initiative-roll", timeout=30000)
+        rule = page.locator("#rule-rule-initiative-roll")
+        rule.wait_for(state="visible", timeout=30000)
+        visible = rule.inner_text()
+        assert "Keeping Initiative" in visible
+        assert "Keeping Deployment" in visible
+        assert "Open Information" in visible
+        assert "Lieutenant" in visible
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
+        deployment = rule.locator('a[href="/rules/deployment-phase"]').first
+        deployment.wait_for(state="visible")
+        deployment.focus()
+        deployment.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/deployment-phase")
+        return_link = page.locator('a[href="/rules/initiative-roll"]').first
+        return_link.wait_for(state="visible")
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
 @pytest.mark.parametrize("response", ["empty", "error"])
 def test_core_scenario_catalog_controlled_empty_and_error_states(
     scenario_app: Callable[..., Any], chrome: Any, width: int, response: str,

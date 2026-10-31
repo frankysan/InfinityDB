@@ -2398,6 +2398,13 @@
       "note": "Standalone core N5.3 Request SpecBall procedure published with Combat Jump relation and reviewed bilingual PDF/ITS scope."
     },
     {
+      "recordId": "rule:initiative-roll",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-31",
+      "note": "N5.3 p.15 Initiative Roll and Keeping Initiative/Deployment describe Lieutenant WIP, ties and failures, open Attribute information, and the two distinct pregame choices. Source-specific pregame resolution, not a general attack contest or deployment modifier."
+    },
+    {
       "recordId": "rule:deployment-phase",
       "targetRelease": "1.0.0",
       "status": "reviewed",

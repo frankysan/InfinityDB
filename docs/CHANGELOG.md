@@ -54,6 +54,11 @@ are not retroactively relabeled.
   participation. Preserve the distinct Leader/member consequences, reuse
   the Fireteams landing and coordinated-rule detail, and synchronize the
   v9 rules database with the deployed-object publication.
+- **Data processing + Web backend + Web frontend:** Add the source-reviewed
+  Initiative Roll reference, distinguishing Lieutenant WIP, rerolls,
+  choosing Player Turn order and choosing Deployment. Link it to the
+  existing Deployment Phase and Lieutenant, and include it in normal
+  General Rules navigation and search.
 - **Data processing + Web backend + Web frontend:** Publish the N5.3
   Restrictions chart as a deterministic reference under General Rules.
   Reconcile its six subjects and 14 negative conditions with the pinned
