@@ -1300,13 +1300,17 @@ def test_hacking_program_grants_require_exact_device_and_raw_signature(
             "program": f"hacking-program:{program}",
         },
     } for extra_id, raw, program in grants]
-    record["variantSemantics"] = {
-        "inheritance": "family",
-        "occurrenceParameters": [{
-            "source": "army-extra", "kind": "reviewed-extra",
-            "extraValues": deepcopy(values),
-        }],
-    }
+    root = Path(__file__).resolve().parents[1]
+    source = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(
+        row for row in source["records"] if row["id"] == f"equipment:{source_id}"
+    )
+    record["variantSemantics"] = deepcopy(curated["variantSemantics"])
+    full_values = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"]
+    assert full_values[:len(values)] == values
+    values = deepcopy(full_values)
     path = tmp_path / "hacking-upgrades.json"
 
     def validate() -> None:
@@ -1327,13 +1331,56 @@ def test_hacking_program_grants_require_exact_device_and_raw_signature(
         changed = deepcopy(values)
         changed[0].update(change)
         record["variantSemantics"]["occurrenceParameters"][0]["extraValues"] = changed
-        with pytest.raises(ValueError, match="program-grant extras"):
+        with pytest.raises(ValueError, match="reviewed hacking extras"):
             validate()
     record["variantSemantics"]["occurrenceParameters"][0]["extraValues"] = deepcopy(values)
     other = "hacking-device-plus" if source_id == "hacking-device" else "hacking-device"
     record["armyLinks"] = [{"entity": "equipment", "id": other}]
-    with pytest.raises(ValueError, match="program-grant extras"):
+    with pytest.raises(ValueError, match="reviewed hacking extras"):
         validate()
+
+
+@pytest.mark.parametrize(
+    ("device", "extra_id", "mutation"),
+    [
+        ("hacking-device", 269, {"modifier": 2}),
+        ("hacking-device", 278, {"program": "hacking-program:oblivion"}),
+        ("hacking-device", 285, {"kind": "program-special-die"}),
+        ("hacking-device", 363, {"value": 7}),
+        ("hacking-device", 363, {"kind": "program-burst-mod"}),
+        ("hacking-device", 378, {"count": 2}),
+        ("hacking-device", 383, {"program": "hacking-program:trinity"}),
+        ("hacking-device-plus", 269, {"modifier": -1}),
+        ("hacking-device-plus", 378, {"count": 2}),
+    ],
+)
+def test_hacking_program_modifiers_reject_wrong_effects(
+    tmp_path: Path, device: str, extra_id: int, mutation: dict,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(
+        row for row in source["records"] if row["id"] == f"equipment:{device}"
+    )
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": f"equipment:{device}", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": device}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "wrong-program-mod.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+
+    values = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"]
+    entry = next(row for row in values if row["extraId"] == extra_id)
+    entry["effect"].update(mutation)
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid .* reviewed hacking extras"):
+        load_curated_document(path)
 
 
 @pytest.mark.parametrize(

@@ -515,6 +515,19 @@ def test_hacking_device_program_grants_preserve_unreviewed_overrides(
         },
         101: {(17, "UPGRADE:\u00a0Fairy Dust"): 46},
     }
+    expected[100].update({
+        (269, "UPGRADE: Oblivion (+1B)"): 7,
+        (278, "UPGRADE: Total Control (+1B)"): 46,
+        (285, "UPGRADE: Carbonite (+1 B)"): 7,
+        (290, "UPGRADE: Trinity (+1B)"): 3,
+        (363, "UPGRADE: Carbonite (PS=6)"): 8,
+        (378, "UPGRADE: Trinity (+1SD)"): 1,
+        (383, "UPGRADE: Carbonite (+1SD)"): 3,
+    })
+    expected[101].update({
+        (269, "UPGRADE: Oblivion (+1B)"): 3,
+        (378, "UPGRADE: Trinity (+1SD)"): 3,
+    })
     for path in (ROOT / "data/generated/rules.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/infinity.db",

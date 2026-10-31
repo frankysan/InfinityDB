@@ -142,6 +142,40 @@ HACKING_GRANT_SOURCES = {
 }
 
 
+# Pinned single-extra program modifiers only; saving-roll and compound
+# signatures remain unreviewed until their exact effects are established.
+HACKING_MOD_SOURCES = {
+    100: [
+        (269, "UPGRADE: Oblivion (+1B)", "oblivion", "program-burst-mod", "modifier", 1, 7),
+        (278, "UPGRADE: Total Control (+1B)", "total-control",
+             "program-burst-mod", "modifier", 1, 46),
+        (285, "UPGRADE: Carbonite (+1 B)", "carbonite", "program-burst-mod", "modifier", 1, 7),
+        (290, "UPGRADE: Trinity (+1B)", "trinity", "program-burst-mod", "modifier", 1, 3),
+        (363, "UPGRADE: Carbonite (PS=6)", "carbonite", "program-ps-replacement", "value", 6, 8),
+        (378, "UPGRADE: Trinity (+1SD)", "trinity", "program-special-die", "count", 1, 1),
+        (383, "UPGRADE: Carbonite (+1SD)", "carbonite", "program-special-die", "count", 1, 3),
+    ],
+    101: [
+        (269, "UPGRADE: Oblivion (+1B)", "oblivion", "program-burst-mod", "modifier", 1, 3),
+        (378, "UPGRADE: Trinity (+1SD)", "trinity", "program-special-die", "count", 1, 3),
+    ],
+}
+
+
+def _hacking_mod_values(source_id: int) -> list[dict[str, Any]]:
+    return [
+        {
+            "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+            "effect": {
+                "kind": kind, "program": f"hacking-program:{program}",
+                field: value,
+            },
+        }
+        for extra_id, raw, program, kind, field, value, _count
+        in HACKING_MOD_SOURCES[source_id]
+    ]
+
+
 def _sha(path: Path) -> str:
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -581,7 +615,7 @@ def refresh_pdf_source_pins_v9_release(*, root: Path = ROOT) -> Path:
 def _check_variant_semantics_delta(
     previous: Path, proposed: Path, variants: dict[tuple[str, str], str],
     *, initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
-    tinbot_other: bool = False,
+    tinbot_other: bool = False, hacking_mods: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
@@ -591,6 +625,14 @@ def _check_variant_semantics_delta(
         raise ValueError("TinBot refresh requires its exact source record")
     if tinbot_other and (initial or set(variants) != set(TINBOT_OTHER_SOURCES)):
         raise ValueError("TinBot additional variants require exactly Discover and ECM Guided")
+    hacking_keys = {
+        ("n5-core-v5.3", source["record"]): source_id
+        for source_id, source in HACKING_GRANT_SOURCES.items()
+    }
+    if hacking_mods and (
+        initial or tinbot_other or tinbot_firewall or set(variants) != set(hacking_keys)
+    ):
+        raise ValueError("Hacking modifiers require precisely the two device records")
     with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
         for pragma in ("user_version", "application_id"):
             if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
@@ -643,6 +685,35 @@ def _check_variant_semantics_delta(
                             or after != TINBOT_OTHER_VARIANTS[key]
                         ):
                             raise ValueError("TinBot refresh changed additional named source")
+                    elif hacking_mods and key in hacking_keys:
+                        if row[index] is None:
+                            raise ValueError("Hacking modifier refresh requires existing grants")
+                        before = json.loads(row[index])
+                        source_id = hacking_keys[key]
+                        if (
+                            before.get("inheritance") != "family"
+                            or set(before) != {"inheritance", "occurrenceParameters"}
+                            or len(before["occurrenceParameters"]) != 1
+                            or len(after.get("occurrenceParameters", [])) != 1
+                        ):
+                            raise ValueError(
+                                "Hacking modifiers require existing single family parameter"
+                            )
+                        prior = before["occurrenceParameters"][0]
+                        proposed_param = after["occurrenceParameters"][0]
+                        expected = _hacking_mod_values(source_id)
+                        if (
+                            prior.get("kind") != "reviewed-extra"
+                            or prior.get("source") != "army-extra"
+                            or set(prior) != {"source", "kind", "extraValues"}
+                            or set(proposed_param) != set(prior)
+                            or proposed_param["source"] != prior["source"]
+                            or proposed_param["kind"] != prior["kind"]
+                            or proposed_param["extraValues"] != prior["extraValues"] + expected
+                        ):
+                            raise ValueError(
+                                "Hacking modifiers must append only exact reviewed values"
+                            )
                     else:
                         if row[index] is None:
                             raise ValueError("Variant refresh requires existing family metadata")
@@ -837,11 +908,66 @@ def refresh_hacking_program_grants_v9_release(*, root: Path = ROOT) -> Path:
     )
 
 
+def refresh_hacking_program_mods_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only pinned single-extra B/PS/SD program changes."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    items = {row["id"]: row for row in report["catalogs"]["equipment"]["items"]}
+    for source_id, specs in HACKING_MOD_SOURCES.items():
+        item = items.get(source_id)
+        source = HACKING_GRANT_SOURCES[source_id]
+        if (
+            item is None
+            or item["name"] != source["name"]
+            or item["applicationId"] != source_id
+            or item["occurrences"] != source["occurrences"]
+            or item["status"] != "unresolved-occurrence-parameter"
+            or item["reviewedVariant"] is not None
+            or item["reviewedDistance"] is not None
+            or item["reviewedNumericMod"] is not None
+            or item["rawValues"]
+        ):
+            raise ValueError(f"Hacking modifier source drift: {source_id}")
+        reviewed = item["reviewedExtra"]
+        if not isinstance(reviewed, dict):
+            raise ValueError(f"Missing reviewed Hacking grants: {source_id}")
+        old_values = reviewed.get("extra_values")
+        if (
+            not isinstance(old_values, list)
+            or [(row["extra_id"], row["raw_value"]) for row in old_values]
+            != [(extra_id, raw) for extra_id, (raw, _count) in source["singles"].items()]
+        ):
+            raise ValueError(f"Reviewed Hacking grants changed: {source_id}")
+        signatures = item["extraSignatures"]
+        selected = [
+            sig for sig in signatures if len(sig["extras"]) == 1
+            and sig["extras"][0][0] in {spec[0] for spec in specs}
+        ]
+        expected = [
+            {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": count}
+            for extra_id, raw, _program, _kind, _field, _value, count in specs
+        ]
+        combined = [
+            sig for sig in signatures if len(sig["extras"]) > 1
+            and any(part[0] in {spec[0] for spec in specs} for part in sig["extras"])
+        ]
+        if sorted(selected, key=str) != sorted(expected, key=str) or combined:
+            raise ValueError(f"Hacking modifier signatures changed: {source_id}")
+    return _refresh_metadata_v9_release(
+        root=root,
+        variant_records={source["record"] for source in HACKING_GRANT_SOURCES.values()},
+        hacking_mods=True,
+    )
+
+
 def _refresh_metadata_v9_release(
     *, root: Path, source_ids: set[str] | None = None, expected_count: int | None = None,
     variant_records: set[str] | None = None,
     initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
-    tinbot_other: bool = False,
+    tinbot_other: bool = False, hacking_mods: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -925,6 +1051,7 @@ def _refresh_metadata_v9_release(
                 initialize_movement_distance=initialize_movement_distance,
                 tinbot_firewall=tinbot_firewall,
                 tinbot_other=tinbot_other,
+                hacking_mods=hacking_mods,
             )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)

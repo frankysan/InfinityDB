@@ -482,6 +482,25 @@ source ID is fully reconciled: modified programs, Firewall
 variants and exact combined upgrades remain unresolved.
 Do not rerun the one-time migration on an already-promoted pair.
 
+**Hacking Device B/PS/Special Die upgrade review:** Source
+Equipment `100`/`101` now has nine additional exact
+`reviewed-extra` mappings (81 single-extra occurrences:
+66 `+1B`, eight Carbonite `PS=6`, seven `+1SD`).
+The pinned-source audit distinguishes these from `SR-1/SR-2`,
+Firewall strings and compound signatures. The mappings
+retain program identity and separate the `modifier`, `value`
+and `count` fields instead of inferring a full modified
+Hacking Program profile. The hermetic migration regressions
+reject altered scopes, program identities, reordered/removed
+grants, schema changes, altered source counts and unauthorized
+combinations; the raw-source audit compares tracked
+`rules.db` with a fresh curated export when the local
+raw archive is available. The one-time guarded refresh is
+`python -m tools.build_deployed_object_publication
+--refresh-hacking-program-mods-v9`. It synchronizes the
+matched publication and retains ignored rollback artifacts.
+Do not rerun after promotion.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

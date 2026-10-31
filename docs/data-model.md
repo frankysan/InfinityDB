@@ -841,6 +841,33 @@ Both source IDs therefore keep their unresolved audit status,
 and the Equipment unresolved count stays **11**. Neither
 Hacking Program evaluation nor cross-Army Unit use is generated.
 
+**Reviewed Hacking Program B/PS/Special Die upgrades (2026-10-31):**
+The exact pinned source signatures add **81 single-extra reviewed
+occurrences** to the preceding program grants: 66 with `+1B`
+(including Army's alternate `+1 B` spelling), eight with
+`Carbonite (PS=6)`, and seven with `+1SD`. These belong
+to Hacking Device `100` (75 direct rows) and Hacking Device Plus
+`101` (six). N5.3 pp. 54/57/58 and the maintained combat
+semantics distinguish adding a die to Burst, replacing a
+program's PS value, and selecting an additional Special Die
+without increasing Burst. The exact reviewed effects
+`program-burst-mod` (`modifier: 1`),
+`program-ps-replacement` (`value: 6`) and
+`program-special-die` (`count: 1`) each carry the
+owning canonical `hacking-program:*` ID. They do not alter
+the base program's facts or define runtime Burst in ARO.
+The guarded v9 migration permits only append-only changes
+to the existing reviewed Hacking Device extras, checks exact
+source values/counts and excludes mixtures. The synchronized
+rules database/deployed-object publication was promoted with an
+ignored rollback pair. `SR-1`/`SR-2`, unqualified `SR-1`,
+unreviewed PS replacements inside combined signatures, and
+Firewall upgrades remain unresolved pending exact applicability
+review. Both Equipment source IDs therefore remain unresolved;
+the baseline of **34 Skill / 11 Equipment source IDs** is
+unchanged. No Unit-use index or Hacking Program evaluation
+was introduced.
+
 **Remaining source-parameter inventory (pinned Army source and current
 generated rules database):** `tools/audit_source_variant_inputs.py` produces a
 deterministic, read-only JSON inventory from `infinity.db`,

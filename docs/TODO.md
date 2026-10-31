@@ -1802,6 +1802,23 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         unreviewed. Both Equipment IDs remain unresolved at the
         source-level audit; the **34 Skill / 11 Equipment** baseline
         does not change, and no Unit-use index is published.
+      - [x] **Data processing:** Type exact, single-extra Hacking Device
+        Burst/PS/Special Die upgrades without reinterpreting the
+        owning Hacking Programs. Pinned Equipment IDs 100/101 yield
+        **81 additional reviewed occurrences**: 66 +1B, eight
+        Carbonite PS=6 replacements, and seven +1SD. The source
+        strings differ in spaces (`+1B` versus `+1 B`) and are
+        verified by ID, TEXT type, exact raw value and count. N5.3
+        pp. 54/57/58 and the maintained combat-rule review distinguish
+        Burst, PS replacement and Special Dice. Append these nine
+        exact reviewed entries to the existing five program grants.
+        The guarded matched-v9 refresh preserves earlier semantics,
+        unrelated records and synchronized publication with rollback.
+        Saving-Roll labels (`SR-1`/`SR-2`), unqualified `SR-1`,
+        Firewall variants, and all combined extras remain unreviewed.
+        Equipment source IDs 100/101 remain unresolved in the audit:
+        the **34 Skill / 11 Equipment** baseline is unchanged, and
+        no cross-Army Unit-use index is published.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

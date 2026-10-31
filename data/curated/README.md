@@ -1048,6 +1048,21 @@ nonbreaking spaces, remain source evidence rather than a
 generic parser contract. See
 [the source-parameter audit](../../docs/data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
 
+For Hacking Device `100` and Plus `101`, reviewed program-specific
+single extras may also use `program-burst-mod` with
+`modifier: 1`, `program-ps-replacement` with
+`value: 6` (Carbonite only), and `program-special-die`
+with `count: 1`. Every effect includes its exact
+`program: "hacking-program:..."` owner; it is not a
+standalone rule record and does not overwrite the owning
+program's base facts. `+1B` and `+1SD` are distinct;
+a Special Die does not raise Burst. The validator requires
+the exact approved source ID, raw spelling, field, numeric
+value and program target. Compound signatures and the
+`SR`/Firewall forms remain unresolved and must not be
+approved by generic substring parsing or by reviewed
+component membership.
+
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
 forms remain opaque until their semantics are reviewed.

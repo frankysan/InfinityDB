@@ -16531,6 +16531,76 @@
                                     "kind": "hacking-program-grant",
                                     "program": "hacking-program:zero-pain"
                                 }
+                            },
+                            {
+                                "extraId": 269,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Oblivion (+1B)",
+                                "effect": {
+                                    "kind": "program-burst-mod",
+                                    "program": "hacking-program:oblivion",
+                                    "modifier": 1
+                                }
+                            },
+                            {
+                                "extraId": 278,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Total Control (+1B)",
+                                "effect": {
+                                    "kind": "program-burst-mod",
+                                    "program": "hacking-program:total-control",
+                                    "modifier": 1
+                                }
+                            },
+                            {
+                                "extraId": 285,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Carbonite (+1 B)",
+                                "effect": {
+                                    "kind": "program-burst-mod",
+                                    "program": "hacking-program:carbonite",
+                                    "modifier": 1
+                                }
+                            },
+                            {
+                                "extraId": 290,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (+1B)",
+                                "effect": {
+                                    "kind": "program-burst-mod",
+                                    "program": "hacking-program:trinity",
+                                    "modifier": 1
+                                }
+                            },
+                            {
+                                "extraId": 363,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Carbonite (PS=6)",
+                                "effect": {
+                                    "kind": "program-ps-replacement",
+                                    "program": "hacking-program:carbonite",
+                                    "value": 6
+                                }
+                            },
+                            {
+                                "extraId": 378,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (+1SD)",
+                                "effect": {
+                                    "kind": "program-special-die",
+                                    "program": "hacking-program:trinity",
+                                    "count": 1
+                                }
+                            },
+                            {
+                                "extraId": 383,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Carbonite (+1SD)",
+                                "effect": {
+                                    "kind": "program-special-die",
+                                    "program": "hacking-program:carbonite",
+                                    "count": 1
+                                }
                             }
                         ]
                     }
@@ -16594,6 +16664,26 @@
                                 "effect": {
                                     "kind": "hacking-program-grant",
                                     "program": "hacking-program:fairy-dust"
+                                }
+                            },
+                            {
+                                "extraId": 269,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Oblivion (+1B)",
+                                "effect": {
+                                    "kind": "program-burst-mod",
+                                    "program": "hacking-program:oblivion",
+                                    "modifier": 1
+                                }
+                            },
+                            {
+                                "extraId": 378,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (+1SD)",
+                                "effect": {
+                                    "kind": "program-special-die",
+                                    "program": "hacking-program:trinity",
+                                    "count": 1
                                 }
                             }
                         ]

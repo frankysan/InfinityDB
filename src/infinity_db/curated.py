@@ -73,6 +73,22 @@ def _validate_reviewed_extra_parameter(
             (17, "UPGRADE:\u00a0Fairy Dust", "fairy-dust"),
         ],
     }
+    hacking_mods = {
+        "hacking-device": [
+            (269, "UPGRADE: Oblivion (+1B)", "oblivion", "program-burst-mod", "modifier", 1),
+            (278, "UPGRADE: Total Control (+1B)", "total-control",
+             "program-burst-mod", "modifier", 1),
+            (285, "UPGRADE: Carbonite (+1 B)", "carbonite", "program-burst-mod", "modifier", 1),
+            (290, "UPGRADE: Trinity (+1B)", "trinity", "program-burst-mod", "modifier", 1),
+            (363, "UPGRADE: Carbonite (PS=6)", "carbonite", "program-ps-replacement", "value", 6),
+            (378, "UPGRADE: Trinity (+1SD)", "trinity", "program-special-die", "count", 1),
+            (383, "UPGRADE: Carbonite (+1SD)", "carbonite", "program-special-die", "count", 1),
+        ],
+        "hacking-device-plus": [
+            (269, "UPGRADE: Oblivion (+1B)", "oblivion", "program-burst-mod", "modifier", 1),
+            (378, "UPGRADE: Trinity (+1SD)", "trinity", "program-special-die", "count", 1),
+        ],
+    }
     for device, grants in hacking_grants.items():
         if inheritance != "family" or army_links != [
             {"entity": "equipment", "id": device}
@@ -89,6 +105,16 @@ def _validate_reviewed_extra_parameter(
             }
             for extra_id, raw, program in grants
         ]
+        expected += [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": kind, "program": f"hacking-program:{program}",
+                    field: value,
+                },
+            }
+            for extra_id, raw, program, kind, field, value in hacking_mods[device]
+        ]
         if (
             set(parameter) != {"source", "kind", "extraValues"}
             or not isinstance(values, list)
@@ -100,7 +126,7 @@ def _validate_reviewed_extra_parameter(
             )
             or values != expected
         ):
-            raise ValueError(f"{context}: invalid {device} program-grant extras")
+            raise ValueError(f"{context}: invalid {device} reviewed hacking extras")
         return
     if inheritance == "source" and army_links == [
         {"entity": "equipment", "id": 244}
