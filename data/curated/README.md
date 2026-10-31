@@ -131,8 +131,13 @@ component IDs, applicability, original and covered hit/Critical Saving Roll
 counts, treatment or surviving components, and evidence class `derived-from-pinned-general-rules`.
 The validator rejects unsupported conditions, duplicate case identities, and impossible
 Critical counts. For the exact Silenced Pistol AP+Shock/BTS profile, Immunity (AP)
-preserves Shock while Immunity (BTS) covers both components and treats them as
-Normal. Neither case cancels the Saving Roll or adjudicates Silent's separate
+preserves Shock, Immunity (Shock) preserves AP and its halved-BTS roll, while
+Immunity (BTS) covers both components and treats them as Normal.
+The exact N+E/M CC Weapon case with Immunity (E/M) separately preserves
+Normal's possible Wounds while suppressing E/M's Attribute/count modifiers
+and State effects. Original and covered Saving Roll counts must be integers;
+Boolean and floating-point substitutes are rejected. None of these cases
+cancels the Saving Roll or adjudicates Silent's separate
 conditions. Pinned N5.3 pp. 63, 65, 67, 95–96, 175 and 182 ground that distinction;
 Wiki Immunity `oldid=3643` and Combined Ammunition `oldid=3000` corroborate the
 general rules. The closed `reviewedVulnerabilityCases`

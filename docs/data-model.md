@@ -331,11 +331,12 @@ modifiers, the default additional Critical Saving Roll (unless the defender has
 Immunity (Critical)), and the Comms Attack/Non-Lethal/Stunned exceptions. These
 facts belong to Immunity, **not** to the ordered Combined Ammunition mapping:
 checking whether a defender's particular Immunity covers an entire attack or
-one or more constituent effects remains unimplemented. Seven `reviewedCombinedCases`
+one or more constituent effects remains unimplemented. Nine `reviewedCombinedCases`
 now give **rule-derived, conditional** examples: Immunity (ARM) against source
 IDs 10 (AP+DA) and 13 (AP+Exp), Immunity (AP) against AP+DA,
 Silenced Pistol (AP+Shock) and AP+T2 CC Weapon, and Immunity (BTS)
-against the exact non-Comms E/M CC Weapon (N+E/M) and Silenced Pistol (AP+Shock).
+against the exact non-Comms E/M CC Weapon (N+E/M) and Silenced Pistol (AP+Shock),
+plus the exact Shock-only and E/M-only cases below.
 The AP case records its ignored AP component and surviving DA effect, retaining
 two full-ARM rolls (three on Critical), instead of collapsing to Normal.
 Each example preserves before/after hit and Critical counts with source IDs,
@@ -392,6 +393,17 @@ ordinary failed Normal Saving Rolls can still inflict Wounds. Silent
 Immunity. This rule-derived record does not generalize to other
 Weapons or Comms Attacks and leaves the
 Army profile and AP-only case unchanged.
+Two additional partial-component cases distinguish the covered Ammunition
+from the surviving component. Silenced Pistol with **Immunity (Shock)**
+ignores Shock's conditional direct-Dead effect while AP still requires
+one BTS/2 Saving Roll (two on Critical). E/M CC Weapon with **Immunity
+(E/M)** ignores E/M's BTS reduction, roll-count modifier and State
+effects while Normal remains: one full-BTS roll (two on Critical),
+with a possible Wound on failure and no additional ARM roll.
+Both explicitly store `ignoredComponents`, `remainingComponents`,
+original/covered Saving Roll Attributes and integer hit/Critical counts.
+The extra Critical roll remains unless Immunity (Critical) also applies.
+No Weapon/target evaluator or Silent reaction ruling is introduced.
 The **sixth** combined case is narrowly scoped to the
 `weapon:ap-t2-cc-weapon` non-Comms source profile (Army
 Ammunition ID 40). With Immunity (AP), the one ARM/2
@@ -493,7 +505,7 @@ count. The Hacking Program source, AP Ammunition,
 Non-Lethal Trait and Program API remain unchanged.
 This is a source-scoped negative/positive Immunity
 boundary, not a general Hacking Program evaluator.
-The 21 reviewed interactions are curated
+The 23 reviewed interactions are curated
 references, not a runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms

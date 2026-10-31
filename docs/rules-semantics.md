@@ -2676,6 +2676,25 @@ with Immunity. The published case is distinct from the AP-only example and does 
 rewrite the source BTS/2 profile, resolve target outcomes or grant
 protection against Comms Attacks.
 
+**BTS partial-component examples: Immunity (Shock) and Immunity (E/M)**
+are two additional rule-derived cases from pinned N5.3 pp. 63–65,
+67, 95–96, 177 and 182. They apply the listed Ammunition protection
+only to the reviewed component, preserving the other component:
+
+| Exact non-Comms Weapon | Protection | Remaining hit / Critical rolls | Effects retained |
+| --- | --- | --- | --- |
+| Silenced Pistol, source Ammunition 30 AP+Shock | Immunity (Shock) | 1 / 2 using BTS/2 | AP still halves BTS and can inflict one Wound per failed roll; Shock's VITA=1 direct-Dead effect is ignored |
+| E/M CC Weapon, source Ammunition 5 N+E/M | Immunity (E/M) | 1 / 2 using full BTS | Normal can still inflict one Wound per failed roll; E/M's BTS reduction, extra hit roll, Isolated and conditional Immobilized-B effects are ignored |
+
+Neither case removes the Saving Roll or grants immunity to ordinary
+Wounds. The Critical counts assume the defender does **not** also have
+Immunity (Critical); if that separate protection applies, it removes
+the one extra Critical roll. The E/M CC Weapon case does not add an
+ARM Saving Roll or grant protection against Comms Attacks. These are
+conditional references, not printed Immunity examples, Weapon rewrites
+or calculated target outcomes. The Silent reaction/Attribute-Immunity
+timing question remains a separate review.
+
 **AP+T2 CC Weapon versus Immunity (AP)** is the sixth strictly
 reviewed Combined Ammunition example. The N5.3 p. 177 Weapon
 Chart specifies one ARM/2 Saving Roll using AP+T2 with
@@ -2837,8 +2856,8 @@ generalize to every Comms Attack or other
 Hacking Programs. Source Hacking Program
 fields and published attributes stay unchanged.
 
-The Skill reference now presents **21
-reviewed interactions**: seven Combined Ammunition,
+The Skill reference now presents **23
+reviewed interactions**: nine Combined Ammunition,
 five exact Weapon, two Plasma Combined Saving Roll,
 five exact Critical, one Vulnerability and one
 Oblivion Comms-exception reference. Chromium at

@@ -3946,7 +3946,7 @@ def test_rea010_immunity_arm_bts_trait_baseline_and_printed_examples() -> None:
     assert immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"][0][
         "evidence"
     ] == "explicit-n5.3-pdf-p96-example-4"
-    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 7
+    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 9
     cited = {(c["sourceId"], c.get("page")) for c in immunity["citations"]}
     assert cited >= {
         ("n5-core-v5.3-pdf", 95), ("n5-core-v5.3-pdf", 96),

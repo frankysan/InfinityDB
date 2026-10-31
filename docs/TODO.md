@@ -1127,6 +1127,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         combined-effect adjudication. Review Silent (-6)'s conditional
         Dodge mechanic and Attribute-Immunity timing independently
         of the Silenced Pistol Saving Roll examples.
+      - [x] Review two exact **BTS partial-component Immunities**:
+        Silenced Pistol/AP+Shock (source Ammunition 30) with Immunity
+        (Shock) retains AP and one BTS/2 Saving Roll; E/M CC Weapon/
+        N+E/M (5) with Immunity (E/M) retains Normal and one full-BTS
+        roll. Both retain one extra Critical roll unless Immunity
+        (Critical) also applies, and neither prevents ordinary Wounds.
+        N5.3 pp. 63–65, 67, 95–96, 177 and 182 ground the derived
+        examples. Validate exact profiles, component identities,
+        original/covered counts and Attributes, strict integer counts,
+        public API and 1440/390/320 Chromium; promote the synchronized
+        rules/publication pair with recovery copies and 17 objects intact.
+        Other BTS outcomes and Silent's reaction timing remain open.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

@@ -312,22 +312,39 @@ export function immunityCaseRows(facts = {}) {
           text(" component is ignored; "), ...componentTokens(applied.remainingComponents),
           text(" still applies.")] : [text("The covered combined Ammunition counts as "),
           reference(applied.treatedAs, "Normal"), text(".")]),
-        ...(item.when.weaponId === "weapon:silenced-pistol"
-          ? [...(item.when.immunity === "AP" ? [text(" On a failed Saving Roll, the "),
+        ...(item.when.weaponId === "weapon:silenced-pistol" && item.when.immunity === "AP"
+          ? [text(" On a failed Saving Roll, the "),
             reference("ammunition:shock", "Shock"),
             text(" effect still sends a VITA 1 target directly to "),
             reference("state:dead", "Dead"),
-            text(" instead of Unconscious.")]
-            : [text(" Both "), reference("ammunition:ap", "AP"),
+            text(" instead of Unconscious.")] : []),
+        ...(item.when.weaponId === "weapon:silenced-pistol" && item.when.immunity === "BTS"
+          ? [text(" Both "), reference("ammunition:ap", "AP"),
               text(" and "), reference("ammunition:shock", "Shock"),
               text(" special effects are ignored: BTS is not halved and Shock's VITA 1 direct-to-"),
               reference("state:dead", "Dead"),
-              text(" effect does not apply. A failed Normal Saving Roll can still inflict a Wound; Immunity (BTS) does not cancel the roll.")]),
-            text(" The weapon's "),
+              text(" effect does not apply. A failed Normal Saving Roll can still inflict a Wound; Immunity (BTS) does not cancel the roll.")] : []),
+        ...(item.when.weaponId === "weapon:silenced-pistol" && item.when.immunity === "Shock"
+          ? [text(" Only "), reference("ammunition:shock", "Shock"),
+            text(" is treated as "), reference("ammunition:normal", "Normal"),
+            text("; its VITA 1 direct-to-"), reference("state:dead", "Dead"),
+            text(" effect is ignored. "), reference("ammunition:ap", "AP"),
+            text(" still halves BTS, and each failed Saving Roll can still inflict 1 Wound. This does not grant Immunity (AP), (BTS) or (Critical).")]
+          : []),
+        ...(item.when.weaponId === "weapon:silenced-pistol"
+          ? [text(" The weapon's "),
             reference("trait:silent-x", "Silent (-6)"),
             text(item.when.immunity === "AP"
               ? " remains a separately conditional Trait."
               : " concerns conditional Face to Face Dodge Rolls; this Saving Roll example does not adjudicate its interaction with Immunity.")] : []),
+        ...(item.when.weaponId === "weapon:e-m-cc-weapon" && item.when.immunity === "E/M"
+          ? [text(" Ignoring "), reference("ammunition:em", "E/M"),
+            text(" removes its BTS reduction, additional Saving Roll per hit and "),
+            reference("state:isolated", "Isolated"), text(" / "),
+            reference("state:immobilized-b", "Immobilized-B"),
+            text(" effects. "), reference("ammunition:normal", "Normal"),
+            text(" remains: each failed Saving Roll can still inflict 1 Wound. The Saving Roll stays BTS, with no additional ARM roll. The extra Critical roll remains unless Immunity (Critical) also applies.")]
+          : []),
         ...(item.when.weaponId === "weapon:ap-t2-cc-weapon"
           ? [text(" A failed hit Saving Roll still inflicts "),
             text(`${applied.failedRollWounds.hit} Wounds`),

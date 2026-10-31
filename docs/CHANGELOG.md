@@ -223,10 +223,11 @@ are not retroactively relabeled.
   with separate source notes. Immunity keeps Requirements, Effects and Restrictions in order,
   followed by clarifications, examples and reviewed interactions with conditional outcomes
   and evidence labels. Explain AP+DA protection, the Flash Pulse exception and
-  the different AP-only and BTS Immunities against Silenced Pistol without implying
+  the different AP-only, Shock-only and BTS Immunities against Silenced Pistol without implying
   that unreviewed combinations have been resolved. Critical-Immunity examples
   cover all five reviewed combined Ammunition forms, keeping their original
-  effects and target conditions explicit.
+  effects and target conditions explicit. E/M-only protection against the
+  E/M CC Weapon also distinguishes suppressed E/M effects from remaining Normal Wounds.
 - **Web backend + Web frontend:** Group Weapon properties under Traits, Labels or States,
   linking each to its owning reference. Use reviewed N5 names for legacy Army labels;
   original wording remains available in Developer Mode and unknown properties remain visible.

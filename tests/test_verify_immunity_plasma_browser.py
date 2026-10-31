@@ -40,6 +40,71 @@ def browser() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width,height", [(1440, 900), (390, 844), (320, 640)])
+@pytest.mark.parametrize("immunity,slug,combination,attribute,ignored,remaining,phrases,paths", [
+    ("Shock", "silenced-pistol", "AP + SHOCK", "BTS/2", "ammunition:shock", "ammunition:ap",
+     ("SHOCK component is ignored; AP still applies", "VITA 1 direct-to-Dead effect is ignored",
+      "AP still halves BTS", "each failed Saving Roll can still inflict 1 Wound",
+      "does not grant Immunity (AP), (BTS) or (Critical)"),
+     ("/ammunition/ap", "/ammunition/shock", "/ammunition/normal", "/states/dead",
+      "/traits/silent-x")),
+    ("E/M", "e-m-cc-weapon", "N + E/M", "BTS", "ammunition:em", "ammunition:normal",
+     ("E/M component is ignored; N still applies", "Isolated / Immobilized-B effects",
+      "each failed Saving Roll can still inflict 1 Wound", "additional Saving Roll per hit",
+      "no additional ARM roll",
+      "unless Immunity (Critical) also applies"),
+     ("/ammunition/em", "/ammunition/normal", "/states/isolated", "/states/immobilized-b")),
+])
+def test_partial_bts_immunity_preserves_only_the_uncovered_component(
+    app: Any, browser: Any, width: int, height: int, immunity: str, slug: str,
+    combination: str, attribute: str, ignored: str, remaining: str,
+    phrases: tuple[str, ...], paths: tuple[str, ...],
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    failed: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed.append(request.url))
+    page.on("response", lambda response: failed.append(
+        f"{response.status} {response.url}"
+    ) if response.status >= 400 else None)
+    try:
+        response = page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
+        assert response.status == 200
+        page.wait_for_function(
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
+            timeout=20000,
+        )
+        reviewed = page.locator(".immunity-reviewed-cases li").filter(
+            has_text=f"Immunity ({immunity}) vs {combination}"
+        )
+        assert reviewed.count() == 1
+        actual = reviewed.inner_text()
+        assert f"1 Saving Roll on a hit (2 on a Critical) using {attribute}" in actual
+        assert "reviewed non-Comms attack only" in actual
+        assert "Derived from reviewed general rules" in actual
+        for phrase in phrases:
+            assert phrase in actual
+        for path in (*paths, f"/weapons/{slug}"):
+            assert reviewed.locator(f'a[href="{path}"]').count() >= 1
+        payload = page.evaluate("async () => (await fetch('/api/skills/immunity')).json()")
+        cases = payload["rules"][0]["facts"]["immunityInteraction"]["reviewedCombinedCases"]
+        case = next(c for c in cases if c["when"].get("weaponId") == f"weapon:{slug}"
+                    and c["when"]["immunity"] == immunity)
+        assert case["withImmunity"]["ignoredComponents"] == [ignored]
+        assert case["withImmunity"]["remainingComponents"] == [remaining]
+        assert case["withImmunity"]["savingAttribute"] == attribute
+        assert case["withImmunity"]["criticalRolls"] == 2
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+        assert not failed, failed
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width,height", [(1440, 900), (390, 844), (320, 640)])
 @pytest.mark.parametrize("slug,title,attribute,original,remaining,paths,phrases", [
     ("ap-exp-cc-weapon", "AP+EXP CC Weapon", "ARM/2", 4, 3,
      ("/ammunition/ap", "/ammunition/exp", "/traits/anti-materiel"),
@@ -74,7 +139,7 @@ def test_remaining_combined_critical_cases_preserve_constituent_effects(
         response = page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         assert response.status == 200
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         reviewed = page.locator(".immunity-reviewed-cases li").filter(
@@ -128,7 +193,7 @@ def test_bts_immunity_covers_both_silenced_pistol_components(
         response = page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         assert response.status == 200
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -183,7 +248,7 @@ def test_printed_plasma_case_has_separate_normal_reference_without_overflow(
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         rows = page.locator(".immunity-reviewed-cases li")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         plasma = rows.filter(has_text="Immunity (Enhanced) vs Plasma Rifle")
@@ -215,7 +280,7 @@ def test_n53_bts_immunity_em_cc_weapon_is_exact_and_source_scoped(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -250,7 +315,7 @@ def test_standalone_emitter_immunity_keeps_nonlethal_and_turret_warning(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         rows = page.locator(".immunity-reviewed-cases li")
@@ -287,7 +352,7 @@ def test_silenced_pistol_ap_immunity_preserves_shock_bts_and_silent(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -327,7 +392,7 @@ def test_ap_t2_cc_immunity_keeps_two_wound_hit_and_one_wound_critical(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -368,7 +433,7 @@ def test_printed_monofilament_immunity_ignores_dead_trait_not_normal_wounds(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -408,7 +473,7 @@ def test_printed_missile_blast_immunity_does_not_merge_hit_mode(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -449,7 +514,7 @@ def test_printed_flash_pulse_example_4_has_pdf_provenance_and_stun_exception(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -486,7 +551,7 @@ def test_plasma_critical_immunity_removes_only_extra_arm_roll(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -522,7 +587,7 @@ def test_t2_critical_immunity_preserves_hit_and_suppresses_only_extra_roll(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         cases = page.locator(".immunity-reviewed-cases li")
@@ -562,7 +627,7 @@ def test_ap_da_cc_critical_immunity_retains_both_da_rolls_and_arm_halving(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         reviewed = page.locator(".immunity-reviewed-cases li").filter(
@@ -603,7 +668,7 @@ def test_em_grenade_bts_immunity_preserves_nonlethal_without_comms_leak(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         reviewed = page.locator(".immunity-reviewed-cases li").filter(
@@ -646,7 +711,7 @@ def test_oblivion_comms_bts_exclusion_and_isolated_state_exception(
     try:
         page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
         page.wait_for_function(
-            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 21",
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 23",
             timeout=20000,
         )
         reviewed = page.locator(".immunity-reviewed-cases li").filter(

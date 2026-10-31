@@ -417,11 +417,14 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
         "immunity": "BTS", "savingAttribute": "BTS",
         "attackClass": "non-comms", "weaponId": "weapon:e-m-cc-weapon",
     }
+    em_cc_when = {**bts_cc_when, "immunity": "E/M"}
     silenced_ap_when = {
         "immunity": "AP", "savingAttribute": "BTS",
         "attackClass": "non-comms", "weaponId": "weapon:silenced-pistol",
     }
     silenced_bts_when = {**silenced_ap_when, "immunity": "BTS"}
+    silenced_shock_when = {**silenced_ap_when, "immunity": "Shock"}
+    silenced_whens = (silenced_ap_when, silenced_bts_when, silenced_shock_when)
     ap_t2_when = {
         "immunity": "AP", "savingAttribute": "ARM",
         "attackClass": "non-comms", "weaponId": "weapon:ap-t2-cc-weapon",
@@ -437,7 +440,7 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
         when = case["when"]
         if when not in (
             arm_when, ap_when, bts_cc_when, silenced_ap_when, silenced_bts_when,
-            ap_t2_when,
+            ap_t2_when, silenced_shock_when, em_cc_when,
         ):
             raise ValueError(f"{item}: unsupported Immunity applicability")
         identity = (source_id, when["immunity"], when.get("weaponId", ""))
@@ -459,12 +462,12 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
             not isinstance(original, dict)
             or set(original) != (
                 {"hitRolls", "criticalRolls", "savingAttribute"}
-                if when in (silenced_ap_when, silenced_bts_when, ap_t2_when)
+                if when in (*silenced_whens, ap_t2_when, em_cc_when)
                 else {"hitRolls", "criticalRolls"}
             )
             or type(original["hitRolls"]) is not int
             or original["hitRolls"] < (
-                1 if when in (silenced_ap_when, silenced_bts_when, ap_t2_when) else 2
+                1 if when in (*silenced_whens, ap_t2_when) else 2
             )
             or type(original["criticalRolls"]) is not int
             or original["criticalRolls"] != original["hitRolls"] + 1
@@ -474,20 +477,29 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
             expected = {
                 "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
             }
-        elif when == bts_cc_when:
+        elif when in (bts_cc_when, em_cc_when):
             # N5.3 pp. 67, 95, 177: E/M CC Weapon is a non-Comms CC
             # attack with N+E/M and BTS/2 x2, never an arbitrary E/M attack.
             if (
                 source_id != 5
                 or case["sourceAmmunitionName"] != "N+E/M"
                 or components != ["ammunition:normal", "ammunition:em"]
-                or original != {"hitRolls": 2, "criticalRolls": 3}
+                or original != {
+                    "hitRolls": 2, "criticalRolls": 3,
+                    **({"savingAttribute": "BTS/2"} if when == em_cc_when else {}),
+                }
             ):
                 raise ValueError(f"{item}: unsupported BTS Weapon applicability")
             expected = {
                 "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
             }
-        elif when in (silenced_ap_when, silenced_bts_when):
+            if when == em_cc_when:
+                expected = {
+                    **expected, "savingAttribute": "BTS",
+                    "ignoredComponents": ["ammunition:em"],
+                    "remainingComponents": ["ammunition:normal"],
+                }
+        elif when in silenced_whens:
             # Silenced Pistol is the reviewed AP+Shock/BTS/2 profile.
             # AP-only Immunity leaves Shock's VITA=1 failed-save rule intact.
             if (
@@ -513,6 +525,13 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
                 expected = {
                     "hitRolls": 1, "criticalRolls": 2,
                     "savingAttribute": "BTS", "treatedAs": "ammunition:normal",
+                }
+            elif when == silenced_shock_when:
+                expected = {
+                    "hitRolls": 1, "criticalRolls": 2,
+                    "savingAttribute": "BTS/2", "treatedAs": "ammunition:ap",
+                    "ignoredComponents": ["ammunition:shock"],
+                    "remainingComponents": ["ammunition:ap"],
                 }
         elif when == ap_t2_when:
             # N5.3 pp. 63, 67, 95-96, 177: AP+T2 CC Weapon only.
@@ -553,7 +572,12 @@ def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> N
                 "ignoredComponents": ["ammunition:ap"],
                 "remainingComponents": ["ammunition:da"],
             }
-        if case["withImmunity"] != expected:
+        applied = case["withImmunity"]
+        if (
+            not isinstance(applied, dict)
+            or any(type(applied.get(key)) is not int for key in ("hitRolls", "criticalRolls"))
+            or applied != expected
+        ):
             raise ValueError(f"{item}: unsupported covered-attack result")
         if case["evidence"] != "derived-from-pinned-general-rules":
             raise ValueError(f"{item}: evidence must identify the rule-derived conclusion")

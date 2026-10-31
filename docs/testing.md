@@ -4148,6 +4148,21 @@ rule records. The full suite has 62 cases; all 11 base and five combined source
 identities are represented without inferred attack rules or a database rebuild.
 Future Weapon comparison views remain out of scope.
 
+**BTS partial-component Immunity examples, 2026-10-31:**
+`tests/test_immunity_bts_component_exceptions.py` pins N5.3 pp. 63–65,
+67, 95–96, 177 and 182, exact Army Weapon identities and Ammunition
+IDs 30/5. Source, stored-rule and public API checks distinguish
+Immunity (Shock) leaving AP/BTS/2 from Immunity (E/M) leaving Normal/BTS.
+Earlier AP-only, full-BTS and Critical cases remain separate; the Weapon
+API retains its original profiles. Mutations reject altered scope,
+components, source values, outcomes and evidence, including Boolean/float
+Saving Roll counts. Six new Chromium checks at 1440/390/320 px verify
+the explanations, remaining Wound possibility, unchanged extra Critical
+roll, canonical links, API agreement, errors and overflow. The full Immunity
+browser module now has 57 cases and the renderer has 23 reviewed interactions.
+Coordinated rules/publication promotion retains all 17 deployed objects
+and recovery copies; this remains local acceptance.
+
 **Five combined-form Critical-Immunity examples, 2026-10-31:**
 `tests/test_immunity_combined_critical_completion.py` independently pins
 the N5.3 PDF, exact chart rows and Army profiles for AP+EXP CC Weapon,

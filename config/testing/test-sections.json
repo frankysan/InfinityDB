@@ -67,6 +67,7 @@
         "test_immunity_oblivion_comms",
         "test_immunity_ap_silenced_pistol",
         "test_immunity_bts_silenced_pistol",
+        "test_immunity_bts_component_exceptions",
         "test_immunity_ap_t2_cc",
         "test_immunity_monofilament_example",
         "test_immunity_missile_launcher_example",
