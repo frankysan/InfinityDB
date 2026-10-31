@@ -133,10 +133,15 @@ missing explanations: the existing shared-effects approvals must be reconciled.
   - [x] Reconcile the enrichment test's exact supporting set: source-owned Isolated
     links include `rule:coordinated-orders` and `rule:fireteam-general`. The test
     now asserts all 13 targets by identity and retains unresolved-link/gap checks.
-  - [ ] Reconcile the enrichment policy's 0.10-to-1.0 deferrals with the reviewed
-    shared-effect omissions and unresolved Commlink scope. A zero blocker count
-    under the historical policy must not be presented as 1.0 completeness; do not
-    reclassify every missing standalone Weapon definition as missing gameplay data.
+  - [x] Reconcile the historical 0.10 enrichment deferrals in a distinct opt-in
+    1.0 source-triage assessment, without changing the default historical policy.
+    The pinned October 31 evidence distinguishes 62 reviewed shared-effect Weapon
+    omissions, two historical approvals with current definitions, one accepted
+    historical Flash Pulse citation, and **Commlink as the sole pending 1.0
+    enrichment gap**. `--require-release 1.0.0` fails on Commlink even though the
+    historical classifier reports zero blockers. This establishes neither N5
+    Reinforcements authority nor broader 1.0 source/browser completeness; the
+    strict primary-interaction candidate and the annex source blocker remain open.
 
 - [ ] **Data processing + Project infrastructure:** Establish the 1.0 completeness baseline
   against the final intended input set; existing bounded reviews are prerequisites.

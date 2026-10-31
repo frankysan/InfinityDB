@@ -2705,6 +2705,19 @@ is triage evidence, not whole-Weapon or v1.0 completeness acceptance. The origin
 finding and reproduction remain documented in
 [V1-A05](v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions).
 
+For the opt-in **1.0 enrichment source-triage assessment**, add
+`--assess-release 1.0.0` to the triage command. It cross-checks the same pinned
+Army/rules fingerprints and current enrichment gap identities with the source-
+reviewed Weapon results, preserving the historical policy's blocker count only as
+historical context. `releaseAssessment.pending` lists all remaining unreviewed
+catalog/link gaps; source-reviewed shared Weapon omissions and explicitly accepted
+historical citations do not become missing definitions. For a nonzero exit until
+this bounded assessment has no pending gaps, use `--require-release 1.0.0` instead.
+The October 31 source pair reports **one pending Skill (Commlink)** despite zero
+historical-policy blockers. The strict gate therefore intentionally exits 1. This
+assessment does not replace the separate 1.0 primary-interaction gate, annex
+source-applicability review, whole-source explanation review, or browser acceptance.
+
 The triage rejects mismatched Army database hashes, incomplete/deferred chart
 alignment, and invalid coverage or PDF report identities. It reports separate
 cases for chart-listed Weapons without a standalone curated definition, stale

@@ -362,7 +362,90 @@ def load_shared_reviews(
     return accepted
 
 
-def build_report(army_db: Path, enrichment_path: Path, chart_path: Path) -> dict[str, Any]:
+def assess_1_0_enrichment(
+    enrichment: dict[str, Any], triage: dict[str, Any],
+) -> dict[str, Any]:
+    """Interpret current gaps for 1.0 without rewriting historical classifications.
+
+    A reviewed shared effect is not a missing Weapon definition, but neither it
+    nor this source triage certifies full rules or browser completeness.
+    """
+    if (
+        enrichment.get("format") != ENRICHMENT_FORMAT
+        or enrichment.get("formatVersion") != 3
+        or enrichment.get("database", {}).get("sha256") != triage["armySha256"]
+        or enrichment.get("rulesDatabase", {}).get("sha256") != triage["rulesSha256"]
+    ):
+        raise WeaponGapTriageError("1.0 assessment needs matching enrichment evidence")
+    domains = enrichment.get("domains", {})
+    weapons = domains.get("weapons", {})
+    weapon_rows = weapons.get("items", [])
+    if len(weapon_rows) != weapons.get("gapCount"):
+        raise WeaponGapTriageError("1.0 assessment requires gap-only Weapon enrichment")
+    triaged = {row["id"]: row for row in triage["items"]}
+    if len(triaged) != len(triage["items"]) or set(triaged) != {
+        row["id"] for row in weapon_rows
+    }:
+        raise WeaponGapTriageError("1.0 Weapon triage identities differ from enrichment")
+
+    pending: list[dict[str, Any]] = []
+    reviewed_shared = 0
+    reviewed_historical = 0
+    for item in weapon_rows:
+        row = triaged[item["id"]]
+        if (row["name"] != item["name"] or row["gapCodes"] != item["gapCodes"]):
+            raise WeaponGapTriageError("1.0 Weapon triage classification drift")
+        disposition = row["disposition"]
+        if disposition == "reviewed-shared-effects":
+            if not row.get("sharedReview"):
+                raise WeaponGapTriageError("Reviewed Weapon lacks source review")
+            reviewed_shared += 1
+        elif (disposition == "reviewed-historical-citation"
+                and item.get("gapClassifications")
+                and all(
+                    decision["classification"] == "intentional-omission"
+                    and decision["source"] == "override"
+                    for decision in item["gapClassifications"]
+                )):
+            reviewed_historical += 1
+        else:
+            pending.append({
+                "catalog": "weapons", "id": item["id"], "name": item["name"],
+                "gapCodes": item["gapCodes"], "disposition": disposition,
+            })
+    for catalog in sorted(set(domains) - {"weapons"}):
+        for item in domains[catalog]["items"]:
+            if item["gapCodes"]:
+                pending.append({
+                    "catalog": catalog, "id": item["id"], "name": item["name"],
+                    "gapCodes": item["gapCodes"],
+                    "disposition": (
+                        "unverified-n5-reinforcements-authority"
+                        if catalog == "skills" and item["name"] == "Commlink"
+                        else "unresolved-catalog-gap"
+                    ),
+                })
+    for link in enrichment.get("relationCoverage", {}).get("unresolved", []):
+        pending.append({
+            "catalog": "relations", "id": link["recordId"],
+            "name": link["targetRecordId"], "gapCodes": ["unresolved_related_item_link"],
+            "disposition": link["reason"],
+        })
+    return {
+        "targetRelease": "1.0.0",
+        "status": "pending" if pending else "source-triage-clear-not-release-acceptance",
+        "historicalPolicyReleaseBlockerCount": enrichment["summary"]["releaseBlockerCount"],
+        "reviewedSharedWeaponCount": reviewed_shared,
+        "reviewedHistoricalCitationCount": reviewed_historical,
+        "resolvedHistoricalWeaponReviewCount": triage["summary"]["resolvedSharedReviewCount"],
+        "pendingCount": len(pending), "pending": pending,
+    }
+
+
+def build_report(
+    army_db: Path, enrichment_path: Path, chart_path: Path,
+    *, assess_release: str | None = None,
+) -> dict[str, Any]:
     if not army_db.is_file():
         raise WeaponGapTriageError(f"Army database is unavailable: {army_db}")
     db = Database(army_db)
@@ -427,6 +510,8 @@ def build_report(army_db: Path, enrichment_path: Path, chart_path: Path) -> dict
             raise WeaponGapTriageError(
                 f"Resolved shared Weapon chart conditions changed: {resolved['name']}"
             )
+    if assess_release == "1.0.0":
+        report["releaseAssessment"] = assess_1_0_enrichment(enrichment, report)
     return report
 
 
@@ -474,6 +559,25 @@ def markdown_report(report: dict[str, Any]) -> str:
             "Names: " + "; ".join(batch["weaponNames"]) + ".",
             batch["evidenceRequirement"], "",
         ]
+    if "releaseAssessment" in report:
+        release = report["releaseAssessment"]
+        lines += [
+            "## 1.0 enrichment source-triage assessment", "",
+            "This assessment does not certify full rules, gameplay or browser completeness.", "",
+            f"- Historical-policy blocker count (not a 1.0 verdict): "
+            f"**{release['historicalPolicyReleaseBlockerCount']}**.",
+            f"- Reviewed shared-effect omissions: **{release['reviewedSharedWeaponCount']}**.",
+            f"- Accepted historical citations: **{release['reviewedHistoricalCitationCount']}**.",
+            f"- Historical approvals with current definitions: "
+            f"**{release['resolvedHistoricalWeaponReviewCount']}**.",
+            f"- Pending for 1.0: **{release['pendingCount']}**.", "",
+        ]
+        for item in release["pending"]:
+            lines.append(
+                f"- {item['catalog']}: {item['name']} ({item['id']}) — "
+                f"{item['disposition']} ({', '.join(item['gapCodes'])})"
+            )
+        lines.append("")
     lines += ["## Chart-profile source differences", ""]
     for row in report["chartProfileDiscrepancies"]:
         lines += [f"- {row['name']} ({row['mode']}), chart p. {row['page']}: "
@@ -490,9 +594,14 @@ def main() -> int:
     parser.add_argument("--chart", type=Path, required=True)
     parser.add_argument("--json-output", type=Path, required=True)
     parser.add_argument("--markdown-output", type=Path)
+    parser.add_argument("--assess-release", choices=["1.0.0"])
+    parser.add_argument("--require-release", choices=["1.0.0"])
     args = parser.parse_args()
     try:
-        report = build_report(args.army_db, args.enrichment, args.chart)
+        report = build_report(
+            args.army_db, args.enrichment, args.chart,
+            assess_release=args.require_release or args.assess_release,
+        )
     except (WeaponGapTriageError, ValueError, OSError) as exc:
         parser.error(str(exc))
     args.json_output.parent.mkdir(parents=True, exist_ok=True)
@@ -507,6 +616,13 @@ def main() -> int:
             markdown_report(report), encoding="utf-8", newline="\n"
         )
     print("Weapon gap triage written:", args.json_output)
+    if args.require_release and report["releaseAssessment"]["pendingCount"]:
+        print(
+            f"Release {args.require_release} enrichment triage has "
+            f"{report['releaseAssessment']['pendingCount']} pending gaps; "
+            "historical classification deferrals do not clear the release gate"
+        )
+        return 1
     return 0
 
 

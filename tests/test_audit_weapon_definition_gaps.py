@@ -11,6 +11,7 @@ from infinity_db.rules_database import RulesDatabase
 from tools.audit_enrichment_coverage import audit_coverage
 from tools.audit_weapon_definition_gaps import (
     WeaponGapTriageError,
+    assess_1_0_enrichment,
     load_shared_reviews,
     markdown_report,
     reconcile,
@@ -208,6 +209,61 @@ def test_source_review_acceptance_requires_explicit_matching_chart_and_links() -
             shared_effect_coverage={1: {"total": 2, "linked": 1}},
             reviewed_shared=accepted,
         )
+
+
+def test_1_0_enrichment_assessment_keeps_commlink_and_unreviewed_weapons_pending() -> None:
+    enrichment, chart, categories = _reports()
+    enrichment["domains"]["skills"] = {"items": [{
+        "id": 260, "name": "Commlink", "gapCodes": ["missing_rule_definition"],
+    }]}
+    enrichment["summary"] = {"releaseBlockerCount": 0}
+    enrichment["relationCoverage"] = {"unresolved": []}
+    enrichment["domains"]["weapons"]["items"][-1]["gapClassifications"] = [{
+        "code": "stale_citation_source", "classification": "intentional-omission",
+        "source": "override",
+    }]
+    report = reconcile(
+        enrichment, chart, categories, "a" * 64,
+        shared_effect_coverage={
+            1: {"total": 2, "linked": 2},
+            2: {"total": 1, "linked": 0},
+        },
+        reviewed_shared={1: {
+            "sourceId": "n5-core-v5.3-pdf", "chartPage": 182,
+            "reason": "Reviewed shared effects",
+        }},
+    )
+    report["summary"]["resolvedSharedReviewCount"] = 2
+    assessment = assess_1_0_enrichment(enrichment, report)
+    assert assessment["targetRelease"] == "1.0.0"
+    assert assessment["status"] == "pending"
+    assert assessment["historicalPolicyReleaseBlockerCount"] == 0
+    assert assessment["reviewedSharedWeaponCount"] == 1
+    assert assessment["reviewedHistoricalCitationCount"] == 1
+    assert assessment["resolvedHistoricalWeaponReviewCount"] == 2
+    assert assessment["pendingCount"] == 3
+    assert {(item["catalog"], item["name"], item["disposition"])
+            for item in assessment["pending"]} == {
+        ("skills", "Commlink", "unverified-n5-reinforcements-authority"),
+        ("weapons", "SymbioBomb", "outside-chart-review"),
+        ("weapons", "Cybermine", "ambiguous-rule-mapping"),
+    }
+
+    wrong_hash = deepcopy(enrichment)
+    wrong_hash["database"]["sha256"] = "0" * 64
+    with pytest.raises(WeaponGapTriageError, match="matching enrichment"):
+        assess_1_0_enrichment(wrong_hash, report)
+    missing_weapon = deepcopy(report)
+    missing_weapon["items"] = missing_weapon["items"][:-1]
+    with pytest.raises(WeaponGapTriageError, match="identities differ"):
+        assess_1_0_enrichment(enrichment, missing_weapon)
+    no_review = deepcopy(report)
+    next(row for row in no_review["items"] if row["id"] == 1).pop("sharedReview")
+    with pytest.raises(WeaponGapTriageError, match="lacks source review"):
+        assess_1_0_enrichment(enrichment, no_review)
+    unapproved_history = deepcopy(enrichment)
+    unapproved_history["domains"]["weapons"]["items"][-1]["gapClassifications"] = []
+    assert assess_1_0_enrichment(unapproved_history, report)["pendingCount"] == 4
 
 
 def test_current_enrichment_preserves_reviews_after_definitions_are_published() -> None:
