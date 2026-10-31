@@ -2398,6 +2398,13 @@
       "note": "Standalone core N5.3 Request SpecBall procedure published with Combat Jump relation and reviewed bilingual PDF/ITS scope."
     },
     {
+      "recordId": "rule:combat-group",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-31",
+      "note": "English/Spanish N5.3 p.10 and archived Army List Wiki revision 3847 substantiate initial assignment, ten Order-contributing/spending member slots, Peripheral/Controller grouping, non-transfer baseline and Open Marker membership; Order Pool context is N5.3 p.11. Published as source-scoped reference only, not list legality or live group calculation."
+    },
+    {
       "recordId": "rule:initiative-roll",
       "targetRelease": "1.0.0",
       "status": "reviewed",

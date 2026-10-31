@@ -1039,6 +1039,15 @@
             "retrievedDate": "2026-09-24"
         },
         {
+            "id": "wiki-army-list-oldid-3847",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Army List revision 3847",
+            "version": "N5.3 / oldid 3847",
+            "url": "https://infinitythewiki.com/index.php?title=Army_List&oldid=3847",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-28"
+        },
+        {
             "id": "wiki-orders-order-pool-oldid-3589",
             "kind": "wiki",
             "title": "Infinity Wiki — Orders and the Order Pool revision 3589",
@@ -10728,7 +10737,7 @@
                 "requirements": [],
                 "effects": [
                     "The rule defines the Controller and Peripheral behavior for the applicable Peripheral type.",
-                    "For Army List construction and Combat Group size, the Controller and all [[skill:peripheral|Peripherals]] count as one Trooper. They normally deploy together and remain in the same Combat Group; when the Controller changes groups, its subordinates transfer with it.",
+                    "For Army List construction and [[rule:combat-group|Combat Group]] size, the Controller and all [[skill:peripheral|Peripherals]] count as one Trooper. They normally deploy together and remain in the same Combat Group; when the Controller changes groups, its subordinates transfer with it.",
                     "Except where a subtype explicitly allows independent activation, the Controller and its [[skill:peripheral|Peripherals]] activate with the same Order and declare the same Short Skills or Long Skill, though they may choose different targets. A participant who cannot satisfy a declared Skill's Requirements performs [[skill:idle|Idle]]; others act normally.",
                     "In the Reactive Turn, both Controller and subordinates have separate [[trait:aro|ARO]] entitlements, but normally must declare the same reaction Skill. Each enemy reacting to their activation chooses only one of the activated Troopers as its target.",
                     "If a [[skill:peripheral|Peripheral]] enters [[state:isolated|Isolated]] or its Controller enters [[state:isolated|Isolated]] or a Null condition, the [[skill:peripheral|Peripheral]] enters [[state:disconnected|Disconnected]] at the end of the Order, except where a subtype provides a different rule."
@@ -11504,7 +11513,7 @@
                     "The user must be the army's [[skill:lieutenant]]."
                 ],
                 "effects": [
-                    "The Strategos Level listed in the Unit Profile supplies its defined Deployment Phase and Order Count effects; Level 2 also supplies its Tactical Phase Combat Group transfer effect."
+                    "The Strategos Level listed in the Unit Profile supplies its defined Deployment Phase and Order Count effects; Level 2 also supplies its Tactical Phase [[rule:combat-group|Combat Group]] transfer effect."
                 ],
                 "restrictions": [
                     "Only the exact Level listed for the user applies."
@@ -11626,7 +11635,7 @@
                     "The user must be the army's [[skill:lieutenant]]."
                 ],
                 "effects": [
-                    "During the Tactical Phase's Executive Use of Command Tokens step, the user may transfer one Trooper and their [[skill:peripheral|Peripherals]] to a different Combat Group without spending a Command Token.",
+                    "During the Tactical Phase's Executive Use of Command Tokens step, the user may transfer one Trooper and their [[skill:peripheral|Peripherals]] to a different [[rule:combat-group|Combat Group]] without spending a Command Token.",
                     "During the Deployment Phase, the player may set aside two Troopers and their [[skill:peripheral|Peripherals]] to deploy after the opponent instead of the usual one.",
                     "At the beginning of the Active Turn, during Order Count, replace any Special Lieutenant Orders with Regular Orders and add them to the Order Pool of the [[skill:lieutenant]]'s Combat Group."
                 ]
@@ -19541,7 +19550,7 @@
             "id": "rule:regular-order",
             "kind": "rule",
             "name": "Regular Order",
-            "summary": "An Order contributed by a Regular Trooper to its Combat Group's Order Pool, where it may be spent to activate Troopers in that Combat Group.",
+            "summary": "An Order contributed by a Regular Trooper to its [[rule:combat-group|Combat Group]]'s Order Pool, where it may be spent to activate Troopers in that same group.",
             "composition": {
                 "role": "definition"
             },
@@ -19554,7 +19563,7 @@
             "facts": {
                 "category": "order-type",
                 "effects": [
-                    "The Order contributed by a Regular Trooper is added to its Combat Group's Order Pool.",
+                    "The Order contributed by a Regular Trooper is added to its [[rule:combat-group|Combat Group]]'s Order Pool.",
                     "A Regular Order in that Order Pool may be spent to activate any Trooper in the same Combat Group."
                 ],
                 "requirements": [],
@@ -19576,7 +19585,7 @@
             "id": "rule:irregular-order",
             "kind": "rule",
             "name": "Irregular Order",
-            "summary": "An Order contributed by an Irregular Trooper and kept separate from the Combat Group Order Pool for that Trooper's own use.",
+            "summary": "An Order contributed by an Irregular Trooper and kept separate from the [[rule:combat-group|Combat Group]] Order Pool for that Trooper's own use.",
             "composition": {
                 "role": "definition"
             },
@@ -19590,7 +19599,7 @@
                 "category": "order-type",
                 "effects": [
                     "The Order contributed by an Irregular Trooper is kept by that Trooper for their own use.",
-                    "An Irregular Trooper may still spend Regular Orders from its Combat Group's Order Pool."
+                    "An Irregular Trooper may still spend Regular Orders from its [[rule:combat-group|Combat Group]]'s Order Pool."
                 ],
                 "requirements": [],
                 "restrictions": [
@@ -26025,6 +26034,72 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:combat-group",
+            "kind": "rule",
+            "name": "Combat Group",
+            "aliases": [
+                "Combat Groups",
+                "Combat Group membership"
+            ],
+            "summary": "A Combat Group is a closed group of Troopers assigned when creating an Army List. Each group can have at most **10 Troopers that contribute or spend Orders**; [[skill:peripheral|Peripherals]] do not use additional group slots. Groups have separate [[rule:regular-order|Regular Order]] Pools and normally cannot exchange Troopers or Orders during play.\n\n**Group capacity is not Army List capacity:** the Army List's separate 15-Trooper maximum, Points, Availability and other list restrictions still apply.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "**Initial assignment.** Assign every Trooper to a Combat Group when creating the Army List. If the list contains more than ten Troopers, divide them among separate groups; additional groups may be created within the other Army List limits."
+                ],
+                "effects": [
+                    "**Capacity.** A Combat Group holds no more than ten Troopers that contribute or spend Orders. [[skill:peripheral|Peripherals]] do not contribute or spend their own Orders, so they do not occupy additional group slots; the Controller and its [[skill:peripheral|Peripherals]] count as one Trooper for group size.",
+                    "**Order ownership.** Each Combat Group has its own [[rule:regular-order|Regular Order]] Pool, usable by Troopers in that group. [[rule:irregular-order|Irregular Orders]] remain outside that Pool for their owner's use; [[rule:special-lieutenant-order|Special Lieutenant]] and [[rule:tactical-order|Tactical]] Orders follow their own rules.",
+                    "**Open group identity.** A Marker's contents may be Private Information, but which Combat Group it belongs to is Open Information. A Marker representing a [[trait:deployable|Deployable]] Weapon or piece of Equipment belongs to the Combat Group of the Trooper that deployed it."
+                ],
+                "restrictions": [
+                    "Ordinarily, neither Troopers nor their Orders can be transferred between Combat Groups after the game starts. A rule explicitly permitting transfer, such as Executive Use of a Command Token or [[skill:strategos|Strategos Level 2]], is an exception; it does not cancel the ten-slot limit.",
+                    "Group size does not replace the separate Army List limit of 15 Troopers, or the agreed Points, Availability, and faction restrictions. This reference does not validate a constructed Army List or calculate current Order Pools."
+                ],
+                "clarifications": [
+                    "[[skill:peripheral|Peripherals]] normally remain in their Controller's Combat Group and accompany a permitted Controller transfer; consult the specific [[skill:peripheral|Peripheral]] type for its activation rules.",
+                    "Combat Group affiliation is distinct from a Trooper's current ability to contribute an Order. For example, the archived official Wiki explicitly retains [[state:unconscious|Unconscious]] Troopers in their groups and removes [[state:dead|Dead]] Troopers from theirs."
+                ],
+                "sourceNotes": [
+                    "Spanish N5.3 p. 10 also names non-Trooper Markers (including [[skill:decoy|Decoys]]) as belonging to the placing Trooper's group; English N5.3 p. 10 explicitly identifies placed Weapons and Equipment. The shared rule above describes the documented overlap rather than generalizing all Marker subtypes."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 10,
+                    "section": "Combat Group"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 10,
+                    "section": "Grupos de Combate"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 11,
+                    "section": "Types of Orders"
+                },
+                {
+                    "sourceId": "wiki-army-list-oldid-3847",
+                    "heading": "Combat Group"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-31"
             }
         },
         {

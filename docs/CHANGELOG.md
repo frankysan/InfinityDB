@@ -54,6 +54,11 @@ are not retroactively relabeled.
   participation. Preserve the distinct Leader/member consequences, reuse
   the Fireteams landing and coordinated-rule detail, and synchronize the
   v9 rules database with the deployed-object publication.
+- **Data processing + Web backend + Web frontend:** Add a reviewed Combat
+  Group reference explaining the ten-member limit, initial assignment,
+  Peripheral capacity, Marker group information and scoped transfer
+  exceptions. Link it from Order, Peripheral and Strategos references,
+  keeping Army-wide list limits and runtime Order Pools distinct.
 - **Data processing + Web backend + Web frontend:** Add the source-reviewed
   Initiative Roll reference, distinguishing Lieutenant WIP, rerolls,
   choosing Player Turn order and choosing Deployment. Link it to the

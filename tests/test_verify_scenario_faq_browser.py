@@ -56,6 +56,43 @@ def chrome() -> Iterator[Any]:
             browser.close()
 
 
+@pytest.mark.parametrize("width", [1440, 390, 320])
+def test_combat_group_normal_reference_navigation(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1-A02: Combat Group is readable and navigable in the shipped rules pair."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        link = page.locator('#catalog-list a[href="/rules/combat-group"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.click()
+        page.wait_for_url(f"{ORIGIN}/rules/combat-group", timeout=30000)
+        rule = page.locator("#rule-rule-combat-group")
+        rule.wait_for(state="visible", timeout=30000)
+        visible = rule.inner_text()
+        assert "10 Troopers" in visible
+        assert "15-Trooper" in visible
+        assert "Open Information" in visible
+        assert "Peripherals" in visible
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
+        order = rule.locator('a[href="/rules/regular-order"]').first
+        order.wait_for(state="visible")
+        order.focus()
+        order.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/regular-order")
+        return_link = page.locator('a[href="/rules/combat-group"]').first
+        return_link.wait_for(state="visible")
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390])
 def test_initiative_roll_normal_reference_navigation(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,

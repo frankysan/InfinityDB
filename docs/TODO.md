@@ -979,10 +979,17 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         1440px and 390px pass. The October 31 audit retained the archived
         Wiki revision 3955 as corroborating source evidence; no match-state
         simulator or unreviewed deployment inference was added.
-      - [ ] **Combat Groups:** English/Spanish p. 10 and archived Wiki revision
-        3847. Explain the ten-member capacity, initial assignment, ordinary
-        separation, Peripheral counting and source-owned group information;
-        keep Army-wide limits and roster legality separate.
+      - [x] **Combat Groups:** Publish the English/Spanish N5.3 p. 10 and
+        archived Army List Wiki revision 3847 baseline under
+        `/rules/combat-group`: ten Order-contributing/spending Trooper
+        slots, initial assignment, normally separate groups, Peripheral
+        counting, open Marker group identity and deploying Trooper
+        ownership for Deployable Weapon/Equipment Markers. Keep
+        exceptional transfers scoped to their owning rules and the
+        separate Army List capacity/legality out of this reference.
+        Normal search/API and Chromium navigation at 1440/390/320 px
+        pass; the rules DB and deployed-object publication were promoted
+        together with a retained ignored recovery pair.
       - [ ] **Army Retreat / Standard Game:** English p. 146, Spanish p. 150
         and archived Retreat situation revision 3942. Cover survivor counting,
         army/Trooper distinction, Lieutenant/Impetuous consequences, recovery and

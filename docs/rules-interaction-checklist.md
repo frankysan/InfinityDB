@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **201/201** complete, **0** pending.
+- Supporting semantic identities: **202/202** complete, **0** pending.
 - Current authored outgoing relations: **514**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -155,7 +155,7 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:null-state` — G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together.
   - future [post-0.7.0; deferred]: `relation type TBD` → Dodge (`skill:dodge`) — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
   - future [post-0.7.0; deferred]: `relation type TBD` → Reset (`skill:reset`) — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
-  - future [post-0.7.0; planned]: `relation type TBD` → `rule:combat-group` — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
+  - future [post-0.7.0; planned]: `relation type TBD` → Combat Group (`rule:combat-group`) — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
 - [x] **Guard** (`skill:guard`) — reviewed
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
 - [x] **Hacker** (`skill:hacker`) — reviewed
@@ -907,11 +907,13 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (22/22)
+#### Rule (23/23)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
 - [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Combat Group** (`rule:combat-group`) — reviewed: English/Spanish N5.3 p.10 and archived Army List Wiki revision 3847 substantiate initial assignment, ten Order-contributing/spending member slots, Peripheral/Controller grouping, non-transfer baseline and Open Marker membership; Order Pool context is N5.3 p.11. Published as source-scoped reference only, not list legality or live group calculation.
   - outgoing: none
 - [x] **Consoles** (`rule:scenario:consoles`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
@@ -1330,7 +1332,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] Frenzy (`skill:frenzy`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Frenzy can also be triggered by directly causing an Enemy Trooper to enter Dead State; retain this until trigger semantics are canonically modeled.
 - [ ] FT Master (`skill:ft-master`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — FT Master can extend the Team Leader's Zone of Control for Fireteam Coherency Checks; retain this until Fireteam Coherency is a canonical rules identity and the scoped bonus can be represented precisely.
 - [ ] FT Master (`skill:ft-master`) → Regular (`training:regular`); `applies-effects-to`; **post-0.7.0 / deferred** — FT Master makes the other members of its Fireteam Regular during Order Count, but the current graph cannot express that the effect applies to related participants rather than to the FT Master itself.
-- [ ] G: Jumper (`skill:g-jumper`) → `rule:combat-group`; `relation type TBD`; **post-0.7.0 / planned** — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
+- [ ] G: Jumper (`skill:g-jumper`) → Combat Group (`rule:combat-group`); `relation type TBD`; **post-0.7.0 / planned** — All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities.
 - [ ] G: Jumper (`skill:g-jumper`) → `rule:null-state`; `relation type TBD`; **post-0.7.0 / deferred** — G: Jumper applies the same activation/casualty logic when individual Proxies enter any Null State; retain the generic Null-State dependency until proxy participant roles and the Null-State abstraction are modeled together.
 - [ ] G: Jumper (`skill:g-jumper`) → Dodge (`skill:dodge`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
 - [ ] G: Jumper (`skill:g-jumper`) → Reset (`skill:reset`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.

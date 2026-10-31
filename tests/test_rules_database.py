@@ -607,9 +607,9 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 4
-        # Special Terrain, Access Width and Initiative Roll are General Rules,
+        # Special Terrain, Access Width Initiative Roll and Combat Group are General Rules,
         # not deployed-object identities.
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 474
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 475
         assert connection.execute(
             "SELECT id FROM records WHERE id IN (?, ?) ORDER BY id",
             ("rule:access-width", "rule:special-terrain"),

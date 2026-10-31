@@ -4838,8 +4838,9 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 25
+    assert len(general_rules) == 26
     assert general_rules["initiative-roll"]["name"] == "Initiative Roll"
+    assert general_rules["combat-group"]["name"] == "Combat Group"
     assert general_rules["specialist-troops-standard"]["name"] == "Specialist Troops"
     assert general_rules["modifiers-explained"]["name"] == "Modifiers Explained (MODs)"
     assert general_rules["deployment-phase"]["name"] == "Deployment Phase"
@@ -5398,6 +5399,65 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     status, _, body = request(app, "/api/search", query="q=alpha&q=beta")
     assert status == 400
     assert json.loads(body)["error"] == "Provide q exactly once"
+
+
+def test_combat_group_source_limit_and_links_are_searchable(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    expected = {
+        "domain": "General rule", "name": "Combat Group",
+        "href": "/rules/combat-group",
+    }
+    for query in ("Combat Group", "Combat"):
+        status, _, body = request(
+            rules_app, "/api/search", query=urlencode({"q": query}),
+        )
+        assert status == 200
+        assert expected in json.loads(body)["items"]
+    status, _, body = request(rules_app, "/api/rules/combat-group")
+    assert status == 200
+    detail = json.loads(body)
+    record = detail["rules"][0]
+    assert record["id"] == "rule:combat-group"
+    assert record["facts"]["category"] == "basic-rule"
+    assert "10 Troopers" in record["summary"]
+    assert "15-Trooper" in record["summary"]
+    assert {c["source_id"] for c in record["citations"]} == {
+        "n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf",
+        "wiki-army-list-oldid-3847",
+    }
+    assert any(c["page"] == 10 for c in record["citations"])
+    for target in ("skill:peripheral", "rule:regular-order", "rule:irregular-order"):
+        assert any(
+            token.get("target") == target and token.get("public_reference")
+            for clause in record["fact_tokens"]["effects"] for token in clause
+        ), target
+    for path, target in (
+        ("/api/rules/regular-order", "rule:combat-group"),
+        ("/api/rules/irregular-order", "rule:combat-group"),
+        ("/api/skills/peripheral", "rule:combat-group"),
+        ("/api/skills/strategos", "rule:combat-group"),
+    ):
+        status, _, body = request(rules_app, path)
+        assert status == 200, path
+        payload = json.loads(body)
+        assert any(
+            token.get("target") == target and token.get("public_reference")
+            for item in payload["rules"]
+            for clause in item.get("fact_tokens", {}).get("effects", [])
+            for token in clause
+        ) or any(
+            token.get("target") == target and token.get("public_reference")
+            for item in payload["rules"]
+            for token in item.get("summary_tokens", [])
+        ), path
+    status, _, body = request(rules_app, "/rules/combat-group")
+    assert status == 200
+    assert b'id="item-content"' in body
 
 
 def test_initiative_roll_is_linked_and_searchable_in_normal_mode(
