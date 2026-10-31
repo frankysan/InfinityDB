@@ -27,6 +27,7 @@ closeout and release readiness, not the feature itself.
 3. Reconcile backlog status: remove or mark only work that the delivered change truly completes,
    preserve real remaining dependencies, and keep future design explicitly distinguished from
    implemented behavior. Apply exact project-domain labels to new or materially revised entries.
+   Preserve unrelated proposals unless the requested task includes them.
 4. Add an Unreleased changelog entry only for a meaningful user/operator-visible outcome. Write
    from the user's or operator's perspective, consolidate related outcomes, and keep implementation
    details in code/tests/history. If the change is internal-only and warrants no entry, state that
@@ -34,13 +35,11 @@ closeout and release readiness, not the feature itself.
 5. Update `README.md` for user-visible behavior, setup, or major capabilities. Update architecture,
    data-model, AI context, or TODO only when the change affects the responsibilities those documents
    own. Check current schema/compatibility values and rebuild guidance together when either changes.
-6. Do not convert ideas in `local/thoughtspace.md` under **Proposed** into tasks, commitments, or
-   implementation without explicit user approval. Do not rewrite, reorder, or silently edit
-   thoughtspace content.
+6. For every closeout, run the smallest relevant documentation and code checks from
+   [development checks](../../../docs/testing.md) against the final changes, and record precise
+   results. Reuse applicable validation from the feature workflow when it covers the final state.
 7. For an actual release, complete every applicable gate in `docs/releasing.md`, including its
    project-wide maintained-documentation audit; a recent diff review alone is not sufficient.
-   Run the smallest relevant documentation and code checks from
-   [development checks](../../../docs/testing.md), and record precise results.
 8. Inspect the final diff and Git status. Preserve unrelated changes; do not stage, commit, push,
    deploy, tag, or publish without explicit authorization. Report any release gate or validation
    that remains incomplete.

@@ -1,6 +1,6 @@
 ---
 name: infinity-browser-acceptance
-description: "Use for InfinityDB browser UI changes involving layout, responsive behavior, accessibility, navigation, filtering, themes, or interaction, and when diagnosing flaky or incomplete browser acceptance."
+description: "Use for InfinityDB browser UI changes involving player-facing copy, layout, responsive behavior, accessibility, navigation, filtering, themes, or interaction, and when diagnosing flaky or incomplete browser acceptance."
 ---
 
 # InfinityDB browser acceptance
