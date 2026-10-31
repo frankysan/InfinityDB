@@ -2692,6 +2692,14 @@ source-to-reference triage:
 .venv\Scripts\python.exe tools/audit_weapon_definition_gaps.py --army-db data/generated/infinity.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
 ```
 
+**Known current-input failure (2026-10-31):** the final triage command aborts on
+Crazykoala because its earlier shared-effects approval remains in the policy after
+it acquired a definition; Madtraps has the same lifecycle mismatch. The source and
+profile fingerprints still match. See
+[V1-A05](v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions)
+for the isolated evidence join and the owning backlog repair. A local filtered
+evidence report is not a passing result for this documented command.
+
 The triage rejects mismatched Army database hashes, incomplete/deferred chart
 alignment, and invalid coverage or PDF report identities. It reports separate
 cases for chart-listed Weapons without a standalone curated definition, stale

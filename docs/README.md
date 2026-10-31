@@ -40,6 +40,11 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
 - `rules-research.md` — verified source findings retained for possible future product/model work.
 - `n5-source-history.md` — N5 official update-post index, historical Army evidence, and
   cross-source reconciliation procedure; an index, not a verified completeness ledger.
+- [v1.0-source-coverage-audit.md](v1.0-source-coverage-audit.md) — dated 2026-10-31
+  evidence for active v1.0 source omissions and reproducible audit/test defects.
+  It preserves the current-input triage and explains why catalog/page-citation
+  counts do not certify whole-source coverage. Retain while these findings guide
+  unresolved work; `TODO.md` owns their open tasks, not this assessment.
 - [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
   source/interaction assessment with implementation follow-ups and remaining
   source conflicts. Its linked inventory, N5.3 reconciliation and source manifest

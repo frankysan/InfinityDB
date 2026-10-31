@@ -71,8 +71,9 @@ These foundations are implemented; final source-to-browser acceptance remains se
 - Reviewed exact source variants, including Mimetism, Berserk and Dodge mappings;
   the cross-army usage index remains unimplemented:
   [variant contract](data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
-- The 1.0 interaction-review ledger passes for 198 supporting identities with
-  zero pending entries. This is a separate gate from full clause/source review:
+- The interaction-review ledger passes its current supporting-identity slice with
+  zero pending entries. Its default primary scope is historical; strict 1.0 primary
+  acceptance remains separate, as does full clause/source review:
   [generated checklist](rules-interaction-checklist.md).
 - Source archive/storage/API parity checks, optional Chromium verifiers and an
   exact-runtime hosted candidate verifier exist:
@@ -112,6 +113,29 @@ canonical owners as implementation lands; keep remaining design extensions expli
 as unimplemented and distinguish them from the published core-scenario foundation.
 
 ### Source inventory and gap batches
+
+The [2026-10-31 source-coverage assessment](v1.0-source-coverage-audit.md)
+records four confirmed core-reference/presentation gaps, two reproducible audit/test
+defects and four quantified existing dependencies against `9d820602`. Its findings
+are dated evidence; the unchecked tasks here own their resolution. In particular,
+the enrichment report's missing standalone Weapon definitions are not 62 confirmed
+missing explanations: the existing shared-effects approvals must be reconciled.
+
+- [ ] **Data processing + Project infrastructure:** Repair the current-input
+  coverage audit path before using it as 1.0 acceptance evidence
+  ([V1-A05–07](v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions)).
+  - [ ] Make Weapon-definition triage accept the reviewed-policy lifecycle when
+    Crazykoala/Madtraps acquire definitions, preserving all exact profile checks
+    and historical approvals. Add a regression joining the actual current
+    enrichment report and review policy; the documented command currently aborts.
+  - [ ] Reconcile the enrichment test's exact supporting set: current source-owned
+    Isolated links add `rule:coordinated-orders` and `rule:fireteam-general`, making
+    13 targets rather than the expected 11. Restore the count and identity-set
+    assertions together without dropping valid relations or weakening gap checks.
+  - [ ] Reconcile the enrichment policy's 0.10-to-1.0 deferrals with the reviewed
+    shared-effect omissions and unresolved Commlink scope. A zero blocker count
+    under the historical policy must not be presented as 1.0 completeness; do not
+    reclassify every missing standalone Weapon definition as missing gameplay data.
 
 - [ ] **Data processing + Project infrastructure:** Establish the 1.0 completeness baseline
   against the final intended input set; existing bounded reviews are prerequisites.
@@ -913,6 +937,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       [inventory gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate).
       The 304 selected clause reviews and 63 screening-only records
       do not constitute 367 full approvals.
+      - [ ] Reconcile the frozen inventory with the current Core/Hacking record
+        set and later source/browser evidence
+        ([V1-A08](v1.0-source-coverage-audit.md#v1-a08--the-frozen-inventory-does-not-cover-the-current-record-set)).
+        At the 2026-10-31 baseline there are 443 current records, 93 added and
+        17 removed identities relative to the frozen 367; the removals are
+        declaration-category identities. Preserve historical counts, identify
+        renames and separately accepted additions, and give current source
+        sections explicit dispositions. Same-page citations alone do not certify
+        every procedure on that page.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.
@@ -927,6 +960,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     rule domains, retaining rulebook version and printed-page citation. Do not
     duplicate Hacking Program facts already owned by the current Hacking Program
     domain.
+    - [ ] Close the confirmed **basic-rules source gaps** in
+      [V1-A01–03](v1.0-source-coverage-audit.md#v1-a01--initiative-roll-reference-is-missing).
+      Each slice needs source/FAQ/Wiki reconciliation, maintained facts/citations,
+      generated storage, public API, normal discovery and browser acceptance:
+      - [ ] **Initiative Roll:** English/Spanish N5.3 p. 15 and archived Wiki
+        revision 3955. Explain the roll/repeat procedure, open Attribute and
+        separate Initiative/Deployment choices; link the existing Deployment
+        reference without treating its page citation as coverage of Initiative.
+      - [ ] **Combat Groups:** English/Spanish p. 10 and archived Wiki revision
+        3847. Explain the ten-member capacity, initial assignment, ordinary
+        separation, Peripheral counting and source-owned group information;
+        keep Army-wide limits and roster legality separate.
+      - [ ] **Army Retreat / Standard Game:** English p. 146, Spanish p. 150
+        and archived Retreat situation revision 3942. Cover survivor counting,
+        army/Trooper distinction, Lieutenant/Impetuous consequences, recovery and
+        applicable end-game rules. Link the existing State and Loss of Lieutenant
+        references; preserve scenario overrides and avoid live-state calculation.
   - [x] Generate a current-core **Orders/AROs declaration matrix** from
     composed Skill rules and Army-backed Hacking Program declarations, published
     at `/orders-aros` and `/api/orders-aros`. Its 57 category occurrences
@@ -2021,10 +2071,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
               is designed. Do not duplicate these rows into a
               scenario, Unit, Army, or deployed-object identity, or
               treat advisory setup dimensions as scenario rules.
-            - [ ] Design a general game-setup reference presentation
-              if required by the 1.0 player-useful-data inventory;
-              model the source rows once, identify authority/overrides,
-              and keep session/Retreat! computation outside static data.
+            - [ ] Publish the **general game-setup reference** required by
+              the 1.0 player-useful-data gate
+              ([V1-A04](v1.0-source-coverage-audit.md#v1-a04--general-setup-tables-stop-at-audit-manifests)).
+              The six reviewed Game Modes and Retreat!/table-guidance rows
+              currently stop at audit manifests. Model them once, expose normal
+              navigation/API/browser access, identify recommendations and
+              scenario overrides, and keep session/Retreat! computation outside
+              static Unit data. Reuse the army-level Retreat source slice above;
+              a specialized setup tool is not required.
             - [x] Reconcile the **N5.3 Silhouette Templates** table
               (p. 18) against the existing browser diagram geometry.
               The PDF pins **ten source rows** (SX, S0–S8); all eight
