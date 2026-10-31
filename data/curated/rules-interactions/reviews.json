@@ -2398,6 +2398,20 @@
       "note": "Standalone core N5.3 Request SpecBall procedure published with Combat Jump relation and reviewed bilingual PDF/ITS scope."
     },
     {
+      "recordId": "rule:army-retreat",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-31",
+      "note": "N5.3 English p.146, Spanish p.150, and archived Retreat Situation revision 3942 reconcile surviving points including undeployed Troopers, the 25% trigger/recovery threshold, automatic Loss of Lieutenant, Impetuous Phase, evacuation, State distinction, and scenario-owned end conditions. No live army state or roster calculator."
+    },
+    {
+      "recordId": "rule:standard-game",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-31",
+      "note": "Official N5.3 English pp.146-147 and Spanish p.150 distinguish three-round Standard Game scoring and Retreat-based early ending from scenarios and their objective/end conditions; no universal scenario scoring assertion."
+    },
+    {
       "recordId": "rule:combat-group",
       "targetRelease": "1.0.0",
       "status": "reviewed",

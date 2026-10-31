@@ -54,6 +54,12 @@ are not retroactively relabeled.
   participation. Preserve the distinct Leader/member consequences, reuse
   the Fireteams landing and coordinated-rule detail, and synchronize the
   v9 rules database with the deployed-object publication.
+- **Data processing + Web backend + Web frontend:** Publish distinct,
+  source-reviewed Army Retreat! and Standard Game references. Explain the
+  25% survivor check, undeployed Troopers, Loss of Lieutenant, State
+  restrictions, recovery and evacuation alongside the separate three-round
+  Standard Game scoring and ending conditions. Link existing State and
+  Lieutenant rules without applying Standard Game endings to scenarios.
 - **Data processing + Web backend + Web frontend:** Add a reviewed Combat
   Group reference explaining the ten-member limit, initial assignment,
   Peripheral capacity, Marker group information and scoped transfer

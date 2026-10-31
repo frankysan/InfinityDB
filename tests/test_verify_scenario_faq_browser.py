@@ -57,6 +57,47 @@ def chrome() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width", [1440, 390, 320])
+@pytest.mark.parametrize(
+    ("slug", "target", "expected"),
+    [
+        ("army-retreat", "/states/retreat", ("25%", "Lieutenant", "survivors")),
+        ("standard-game", "/rules/army-retreat", ("Game Round", "Victory Points", "Retreat")),
+    ],
+)
+def test_army_retreat_standard_game_normal_reference_navigation(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    slug: str, target: str, expected: tuple[str, ...],
+) -> None:
+    """V1-A03: source-backed rules remain usable on player-facing browsers."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        link = page.locator(f'#catalog-list a[href="/rules/{slug}"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.click()
+        page.wait_for_url(f"{ORIGIN}/rules/{slug}", timeout=30000)
+        card = page.locator(f"#rule-rule-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        visible = card.inner_text()
+        for fragment in expected:
+            assert fragment in visible
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
+        reference = card.locator(f'a[href="{target}"]').first
+        reference.wait_for(state="visible")
+        reference.focus()
+        reference.press("Enter")
+        page.wait_for_url(f"{ORIGIN}{target}")
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390, 320])
 def test_combat_group_normal_reference_navigation(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

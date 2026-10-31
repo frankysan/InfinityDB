@@ -966,7 +966,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     rule domains, retaining rulebook version and printed-page citation. Do not
     duplicate Hacking Program facts already owned by the current Hacking Program
     domain.
-    - [ ] Close the confirmed **basic-rules source gaps** in
+    - [x] Close the confirmed **basic-rules source gaps** in
       [V1-A01–03](v1.0-source-coverage-audit.md#v1-a01--initiative-roll-reference-is-missing).
       Each slice needs source/FAQ/Wiki reconciliation, maintained facts/citations,
       generated storage, public API, normal discovery and browser acceptance:
@@ -990,11 +990,16 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         Normal search/API and Chromium navigation at 1440/390/320 px
         pass; the rules DB and deployed-object publication were promoted
         together with a retained ignored recovery pair.
-      - [ ] **Army Retreat / Standard Game:** English p. 146, Spanish p. 150
-        and archived Retreat situation revision 3942. Cover survivor counting,
-        army/Trooper distinction, Lieutenant/Impetuous consequences, recovery and
-        applicable end-game rules. Link the existing State and Loss of Lieutenant
-        references; preserve scenario overrides and avoid live-state calculation.
+      - [x] **Army Retreat / Standard Game:** Separate reviewed General Rules
+        `/rules/army-retreat` and `/rules/standard-game` publish English N5.3
+        pp. 146–147, Spanish p. 150 and archived Retreat Situation oldid 3942.
+        They explain undeployed survivors, 25% threshold (including printed
+        rounding), army-level Loss of Lieutenant and Impetuous consequences,
+        Trooper State exceptions, recovery, evacuation, and Standard Game
+        duration, Victory Points and early ending. State/Lieutenant cross-links,
+        matched generated rules/publication and normal search/API pass;
+        Chromium at 1440/390/320 px passes for both pages. Scenario-specific
+        endings remain authoritative; no live-state calculator was added.
   - [x] Generate a current-core **Orders/AROs declaration matrix** from
     composed Skill rules and Army-backed Hacking Program declarations, published
     at `/orders-aros` and `/api/orders-aros`. Its 57 category occurrences

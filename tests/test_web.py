@@ -4838,9 +4838,11 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 26
+    assert len(general_rules) == 28
     assert general_rules["initiative-roll"]["name"] == "Initiative Roll"
     assert general_rules["combat-group"]["name"] == "Combat Group"
+    assert general_rules["army-retreat"]["name"] == "Army Retreat!"
+    assert general_rules["standard-game"]["name"] == "Standard Game"
     assert general_rules["specialist-troops-standard"]["name"] == "Specialist Troops"
     assert general_rules["modifiers-explained"]["name"] == "Modifiers Explained (MODs)"
     assert general_rules["deployment-phase"]["name"] == "Deployment Phase"
@@ -5399,6 +5401,65 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     status, _, body = request(app, "/api/search", query="q=alpha&q=beta")
     assert status == 400
     assert json.loads(body)["error"] == "Provide q exactly once"
+
+
+def test_army_retreat_and_standard_game_are_source_scoped_and_routable(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    for query, name, href in (
+        ("Army Retreat", "Army Retreat!", "/rules/army-retreat"),
+        ("Retreat", "Army Retreat!", "/rules/army-retreat"),
+        ("Standard Game", "Standard Game", "/rules/standard-game"),
+    ):
+        status, _, body = request(
+            rules_app, "/api/search", query=urlencode({"q": query}),
+        )
+        assert status == 200
+        assert {"domain": "General rule", "name": name, "href": href} in (
+            json.loads(body)["items"]
+        )
+    for slug, expected_citations in (
+        ("army-retreat", {"n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf",
+                          "wiki-retreat-situation-oldid-3942"}),
+        ("standard-game", {"n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf"}),
+    ):
+        status, _, body = request(rules_app, f"/api/rules/{slug}")
+        assert status == 200
+        record = json.loads(body)["rules"][0]
+        assert record["id"] == f"rule:{slug}"
+        assert record["facts"]["category"] == "basic-rule"
+        assert {c["source_id"] for c in record["citations"]} == expected_citations
+        assert any(
+            token.get("target") == ("state:retreat" if slug == "army-retreat"
+                                     else "rule:army-retreat")
+            and token.get("public_reference")
+            for token in record["summary_tokens"]
+        )
+        status, _, body = request(rules_app, f"/rules/{slug}")
+        assert status == 200
+        assert b'id="item-content"' in body
+
+    status, _, body = request(rules_app, "/api/rules/army-retreat")
+    retreat = json.loads(body)["rules"][0]
+    assert "25%" in retreat["summary"]
+    assert "not yet placed" in retreat["summary"]
+    assert "equal to or below" in " ".join(retreat["facts"]["requirements"])
+    assert "scenario" in " ".join(retreat["facts"]["restrictions"])
+    status, _, body = request(rules_app, "/api/rules/standard-game")
+    standard = json.loads(body)["rules"][0]
+    assert "three-Game-Round" in standard["summary"]
+    assert "Victory Points" in standard["summary"]
+    assert "scenario" in " ".join(standard["facts"]["restrictions"])
+
+    for path in ("/api/states/retreat", "/api/rules/loss-of-lieutenant"):
+        status, _, body = request(rules_app, path)
+        assert status == 200, path
+        item = json.loads(body)["rules"][0]
+        assert "rule:army-retreat" in json.dumps(item), path
 
 
 def test_combat_group_source_limit_and_links_are_searchable(

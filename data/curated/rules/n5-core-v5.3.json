@@ -886,6 +886,15 @@
             "retrievedDate": "2026-09-24"
         },
         {
+            "id": "wiki-retreat-situation-oldid-3942",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Retreat Situation revision 3942",
+            "version": "N5.3 / oldid 3942",
+            "url": "https://infinitythewiki.com/index.php?title=Retreat_Situation&oldid=3942",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-28"
+        },
+        {
             "id": "wiki-retreat-state-oldid-3622",
             "kind": "wiki",
             "title": "Infinity Wiki — Retreat! State revision 3622",
@@ -18907,13 +18916,13 @@
                     "Entering Retreat! cancels [[equipment:holoprojector]] and [[state:holomask|HoloMask State]] presentation and Marker States."
                 ],
                 "requirements": [
-                    "The Trooper’s army enters the Retreat! situation at the beginning of the Player Turn."
+                    "The Trooper’s army enters the [[rule:army-retreat|Retreat!]] situation at the beginning of the Player Turn."
                 ],
                 "restrictions": [
                     "Troopers protected by [[skill:courage]], [[skill:religious-troop]], [[skill:warhorse]], or another applicable rule do not enter Retreat! State."
                 ],
                 "clarifications": [
-                    "[[state:retreat|Retreat!]] ends when the army leaves the Retreat! situation at the beginning of its Player Turn. Alternatively, spending a Command Token cancels Retreat! for one Trooper; that Trooper ignores the condition for the rest of the game.",
+                    "[[state:retreat|Retreat! State]] ends when the army leaves the [[rule:army-retreat|Retreat!]] situation at the beginning of its Player Turn. Alternatively, spending a Command Token cancels Retreat! for one Trooper; that Trooper ignores the condition for the rest of the game.",
                     "Entering Retreat! removes Marker conditions, [[state:holoecho|Holoecho]], and [[state:holomask|HoloMask]]; this is not the same as permitting one Trooper to ignore Retreat! by spending a Command Token."
                 ]
             },
@@ -19502,7 +19511,7 @@
             "id": "rule:loss-of-lieutenant",
             "kind": "rule",
             "name": "Loss of Lieutenant",
-            "summary": "An army-level situation declared when the active player lacks an operational deployed [[skill:lieutenant]] during the Tactical Phase.",
+            "summary": "An army-level situation declared when the active player lacks an operational deployed [[skill:lieutenant]] during the Tactical Phase. An army in [[rule:army-retreat|Retreat!]] also enters [[rule:loss-of-lieutenant|Loss of Lieutenant]] automatically.",
             "composition": {
                 "role": "definition"
             },
@@ -19519,10 +19528,11 @@
                 ],
                 "effects": [
                     "All Troopers in the Army List are Irregular while the Loss of Lieutenant situation applies.",
-                    "At the end of the Turn, the player appoints a new eligible [[skill:lieutenant]] at no cost, canceling the situation."
+                    "Outside [[rule:army-retreat|Retreat!]], at the end of the Turn the player appoints a new eligible [[skill:lieutenant]] at no cost, canceling the situation."
                 ],
                 "restrictions": [
-                    "Troopers with Irregular Training or the REM Troop Type cannot be appointed as the replacement [[skill:lieutenant]]."
+                    "Troopers with Irregular Training or the REM Troop Type cannot be appointed as the replacement [[skill:lieutenant]].",
+                    "While the army is in [[rule:army-retreat|Retreat!]], a replacement [[skill:lieutenant|Lieutenant]] cannot be appointed; ending [[rule:army-retreat|Retreat!]] cancels the resulting [[rule:loss-of-lieutenant|Loss of Lieutenant]] only if the army has a [[skill:lieutenant|Lieutenant]]."
                 ]
             },
             "relations": [
@@ -26034,6 +26044,129 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:army-retreat",
+            "kind": "rule",
+            "name": "Army Retreat!",
+            "aliases": [
+                "Retreat Situation",
+                "Army Retreat",
+                "Retreat threshold"
+            ],
+            "summary": "[[rule:army-retreat|Retreat!]] is an **army-level situation**, distinct from a Trooper's [[state:retreat|Retreat! State]]. At the start of the player's Active Turn, during the Tactical Phase, compare the surviving Troopers' total points with the **25% threshold of the points available to build the Army List**. Include Troopers not yet placed on the table as survivors. At or below that threshold, the army enters [[rule:army-retreat|Retreat!]]; above it, the situation is cancelled.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "**When to check.** At the beginning of each of the player's Active Turns, during the Tactical Phase, count surviving Trooper points. Troopers not yet deployed (for example Airborne or [[state:hidden-deployment|Hidden Deployment]]) count as survivors.",
+                    "**Threshold.** The army enters [[rule:army-retreat|Retreat!]] when those surviving points are **equal to or below 25%** of the points available to construct the Army List; the published source chart rounds the listed threshold values up where needed (for example, 88 at 350 points). Do not use the [[rule:combat-group|Combat Group]] capacity or remaining Orders as the threshold."
+                ],
+                "effects": [
+                    "**Army-level [[rule:loss-of-lieutenant|Loss of Lieutenant]].** The army automatically enters that situation while in [[rule:army-retreat|Retreat!]]; the player may not appoint a replacement [[skill:lieutenant|Lieutenant]] while the army's [[rule:army-retreat|Retreat!]] continues.",
+                    "**No [[skill:impetuous|Impetuous]] Phase.** Skip the [[skill:impetuous|Impetuous]] Phase of the Player Turn; neither [[skill:impetuous|Impetuous]] nor [[skill:frenzy|Frenzy]] Troopers activate in that phase.",
+                    "**Trooper-level consequences.** Applicable Troopers enter [[state:retreat|Retreat! State]], with its own declaration restrictions and exemptions. Exceptions such as [[skill:courage|Courage]], [[skill:religious-troop|Religious Troop]] and [[skill:warhorse|Warhorse]] do not cancel the army-level situation or its separate [[rule:loss-of-lieutenant|Loss of Lieutenant]] consequences.",
+                    "**Surviving by evacuation.** Troopers leaving the table through the widest side of their Deployment Zone while their army is in [[rule:army-retreat|Retreat!]] count as survivors for Victory Points.",
+                    "**Recovery.** Recount at the beginning of each Active Turn. If surviving points exceed the 25% threshold (for example after an [[state:unconscious|Unconscious]] Trooper recovers), cancel the army's [[rule:army-retreat|Retreat!]], remove its Tokens and cancel the Troopers' [[state:retreat|Retreat! States]]. If the army has a [[skill:lieutenant|Lieutenant]], the Retreat-induced [[rule:loss-of-lieutenant|Loss of Lieutenant]] also ends."
+                ],
+                "restrictions": [
+                    "When all Troopers in an army in [[rule:army-retreat|Retreat!]] have been lost or evacuated, the game ends unless the scenario's own end-game rules specify otherwise.",
+                    "For the distinct [[rule:standard-game|Standard Game]], beginning an Active Turn in [[rule:army-retreat|Retreat!]] causes the game to end at the end of that Turn; do not apply this ending condition automatically to scenarios or free games."
+                ],
+                "clarifications": [
+                    "[[rule:army-retreat|Retreat!]] belongs to the army, not to a Unit Profile. A Trooper can be exempt from [[state:retreat|Retreat! State]] while the army is still in [[rule:army-retreat|Retreat!]] and subject to its army-wide consequences.",
+                    "The starting threshold uses available Army List points; the survivor count uses surviving Trooper costs, including qualifying undeployed Troopers. Neither is a live database attribute. Specific scenario end-game conditions remain authoritative."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 146,
+                    "section": "Retreat!"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 146,
+                    "section": "Characteristics of an Army in the Retreat! Situation"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 150,
+                    "section": "Características de un Ejército en Situación de Retirada"
+                },
+                {
+                    "sourceId": "wiki-retreat-situation-oldid-3942",
+                    "heading": "Retreat Situation"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-31"
+            }
+        },
+        {
+            "id": "rule:standard-game",
+            "kind": "rule",
+            "name": "Standard Game",
+            "aliases": [
+                "Standard Game victory",
+                "Standard Game end conditions"
+            ],
+            "summary": "A Standard Game is a three-Game-Round battle of attrition. After the third Game Round, each player totals the Cost of Troopers in their Army List who are not in a [[term:null-state|Null State]]; the higher total of Victory Points wins, and equal totals are a tie. A Standard Game also ends at the end of a Player Turn that began with that player's army in [[rule:army-retreat|Retreat!]].",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "**Duration.** A Standard Game lasts three Game Rounds, unless a source-specified earlier end condition applies.",
+                    "**Victory.** At the end of the third Game Round, compare each player's Victory Points: the total Cost of Troopers in their Army List who are not in a [[term:null-state|Null State]]. The higher total wins; equal totals are a draw.",
+                    "**Early end.** If a player starts their Active Turn in [[rule:army-retreat|Retreat!]], the Standard Game ends at the end of that Player Turn."
+                ],
+                "restrictions": [
+                    "These duration, scoring and [[rule:army-retreat|Retreat!]] ending conditions belong to a Standard Game. Missions and scenarios have their own objective, scoring and end-game conditions; do not replace those with Standard Game conditions.",
+                    "Victory Points may serve as a tiebreaker when a scenario awards equal Objective Points, subject to that scenario's stated scoring rules."
+                ],
+                "clarifications": [
+                    "An army's [[rule:army-retreat|Retreat!]] check occurs during its Tactical Phase; the Standard Game early-ending rule applies when the Player Turn starts with the army already in that situation. A [[state:retreat|Retreat! State]] on an individual Trooper is not itself the Standard Game ending test.",
+                    "The three-round limit and VP comparison describe a Standard Game, not a universal assumption for all published scenarios."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 146,
+                    "section": "Standard Game"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 150,
+                    "section": "Partida Estándar"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 147,
+                    "section": "Mission or Scenario"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-31"
             }
         },
         {
