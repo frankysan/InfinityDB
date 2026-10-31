@@ -124,14 +124,18 @@ covered Ammunition (treat as Normal and ignore its special effects, Saving
 Roll Attribute MODs and Saving Roll-count MODs), the remaining single Critical
 roll unless Immunity (Critical) applies, and the exceptions for Comms Attacks,
 Non-Lethal and State: Stunned. Only `skill:immunity` may own this fact family.
-The optional `reviewedCombinedCases` array records source-qualified, derived
-examples for an Immunity (ARM) defender against an ARM-based, non-Comms combined
-attack. Every case must specify the Army source Ammunition ID/name, two typed
+The `reviewedCombinedCases` array records source-qualified, derived
+examples for reviewed ARM, BTS and component-specific Immunities against
+non-Comms combined attacks. Every case must specify the Army source Ammunition ID/name, two typed
 component IDs, applicability, original and covered hit/Critical Saving Roll
-counts, Normal treatment, and evidence class `derived-from-pinned-general-rules`.
-The validator rejects unsupported conditions, duplicate IDs, and impossible
-Critical counts. These examples cite Wiki Immunity `oldid=3643` together with
-Combined Ammunition `oldid=3000`. The closed `reviewedVulnerabilityCases`
+counts, treatment or surviving components, and evidence class `derived-from-pinned-general-rules`.
+The validator rejects unsupported conditions, duplicate case identities, and impossible
+Critical counts. For the exact Silenced Pistol AP+Shock/BTS profile, Immunity (AP)
+preserves Shock while Immunity (BTS) covers both components and treats them as
+Normal. Neither case cancels the Saving Roll or adjudicates Silent's separate
+conditions. Pinned N5.3 pp. 63, 65, 67, 95–96, 175 and 182 ground that distinction;
+Wiki Immunity `oldid=3643` and Combined Ammunition `oldid=3000` corroborate the
+general rules. The closed `reviewedVulnerabilityCases`
 array records a **separate explicit Wiki example** (`Vulnerability` `oldid=3156`):
 Immunity (Enhanced) cannot be used against weapons with `Viral` in their names
 when the defender also has Vulnerability (Viral). Its predicate refers to a

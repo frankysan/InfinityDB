@@ -3946,7 +3946,7 @@ def test_rea010_immunity_arm_bts_trait_baseline_and_printed_examples() -> None:
     assert immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"][0][
         "evidence"
     ] == "explicit-n5.3-pdf-p96-example-4"
-    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 6
+    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 7
     cited = {(c["sourceId"], c.get("page")) for c in immunity["citations"]}
     assert cited >= {
         ("n5-core-v5.3-pdf", 95), ("n5-core-v5.3-pdf", 96),
@@ -4936,6 +4936,32 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
             criticalRolls=1), "covered-attack result"),
         (lambda f: f["reviewedCombinedCases"][0]["when"].update(immunity="DA"),
          "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][6]["when"].update(
+            weaponId="weapon:viral-pistol"), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][6]["when"].update(
+            attackClass="comms"), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][6]["when"].update(
+            savingAttribute="ARM"), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][6].update(
+            sourceAmmunitionId=10), "Silenced Pistol applicability"),
+        (lambda f: f["reviewedCombinedCases"][6].update(
+            sourceAmmunitionName="AP"), "Silenced Pistol applicability"),
+        (lambda f: f["reviewedCombinedCases"][6]["components"].reverse(),
+            "Silenced Pistol applicability"),
+        (lambda f: f["reviewedCombinedCases"][6]["withoutImmunity"].update(
+            savingAttribute="ARM/2"), "Silenced Pistol applicability"),
+        (lambda f: f["reviewedCombinedCases"][6]["withImmunity"].update(
+            savingAttribute="BTS/2"), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][6]["withImmunity"].update(
+            treatedAs="ammunition:shock"), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][6]["withImmunity"].update(
+            hitRolls=0), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][6]["withImmunity"].update(
+            criticalRolls=1), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][6]["withImmunity"].update(
+            remainingComponents=["ammunition:shock"]), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][6].update(
+            evidence="explicit-pinned-wiki-example"), "rule-derived conclusion"),
         (lambda f: f["reviewedWeaponCases"][1]["when"].update(
             sourceWeaponId=226), "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][1]["when"].update(

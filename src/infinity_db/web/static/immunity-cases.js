@@ -276,13 +276,21 @@ export function immunityCaseRows(facts = {}) {
           text(" still applies.")] : [text("The covered combined Ammunition counts as "),
           reference(applied.treatedAs, "Normal"), text(".")]),
         ...(item.when.weaponId === "weapon:silenced-pistol"
-          ? [text(" On a failed Saving Roll, the "),
+          ? [...(item.when.immunity === "AP" ? [text(" On a failed Saving Roll, the "),
             reference("ammunition:shock", "Shock"),
             text(" effect still sends a VITA 1 target directly to "),
             reference("state:dead", "Dead"),
-            text(" instead of Unconscious. The weapon's "),
+            text(" instead of Unconscious.")]
+            : [text(" Both "), reference("ammunition:ap", "AP"),
+              text(" and "), reference("ammunition:shock", "Shock"),
+              text(" special effects are ignored: BTS is not halved and Shock's VITA 1 direct-to-"),
+              reference("state:dead", "Dead"),
+              text(" effect does not apply. A failed Normal Saving Roll can still inflict a Wound; Immunity (BTS) does not cancel the roll.")]),
+            text(" The weapon's "),
             reference("trait:silent-x", "Silent (-6)"),
-            text(" remains a separately conditional Trait.")] : []),
+            text(item.when.immunity === "AP"
+              ? " remains a separately conditional Trait."
+              : " concerns conditional Face to Face Dodge Rolls; this Saving Roll example does not adjudicate its interaction with Immunity.")] : []),
         ...(item.when.weaponId === "weapon:ap-t2-cc-weapon"
           ? [text(" A failed hit Saving Roll still inflicts "),
             text(`${applied.failedRollWounds.hit} Wounds`),

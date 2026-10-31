@@ -67,7 +67,7 @@ const groups = descendants(article, (node) => node.className === "detail-fact-gr
 assert.equal(groups.length, 1);
 const group = groups[0];
 const allCases = descendants(group, (node) => node.tag === "li");
-assert.equal(allCases.length, 17);
+assert.equal(allCases.length, 18);
 const grenade = allCases[4];
 assert.match(grenade.textContent, /Immunity \(BTS\) vs E\/M Grenade Launcher/);
 assert.match(grenade.textContent, /2 Saving Rolls on a hit \(3 on a Critical\) using BTS\/2/);
@@ -85,7 +85,7 @@ assert.match(comms.textContent, /without cancelling the underlying Saving Roll/)
 assert.match(comms.textContent, /Burst 2 counts attack dice, not Saving Rolls/);
 assert.match(comms.textContent, /not all hacking or Comms effects/);
 const cases = [...allCases.slice(0, 4), ...allCases.slice(6)];
-assert.equal(cases.length, 15);
+assert.equal(cases.length, 16);
 // Every reviewed case uses the same semantic list-item structure with
 // a navigable title, an outcome, and its own source-evidence classification.
 for (const item of cases) {
@@ -104,7 +104,7 @@ assert.deepEqual(labels, [
   "Derived from reviewed general rules", "Derived from reviewed general rules",
   "Derived from reviewed general rules", "Derived from reviewed general rules",
   "Derived from reviewed general rules", "Derived from reviewed general rules",
-  "Derived from reviewed general rules",
+  "Derived from reviewed general rules", "Derived from reviewed general rules",
 ]);
 assert.match(cases[0].textContent, /non-Comms attacks/);
 for (const item of cases.slice(9)) {
@@ -165,6 +165,13 @@ assert.match(combined[13], /Identify which die is the hit roll/);
 assert.match(combined[13], /Anti-materiel Trait remains a separate Weapon property/);
 assert.match(combined[14], /Immunity \(BTS\) vs N \+ E\/M.*E\/M CC Weapon/);
 assert.match(combined[14], /1 Saving Roll on a hit \(2 on a Critical\).*2 Saving Rolls on a hit \(3 on a Critical\)/);
+assert.match(combined[15], /Immunity \(BTS\) vs AP \+ SHOCK.*Silenced Pistol/);
+assert.match(combined[15], /1 Saving Roll on a hit \(2 on a Critical\) using BTS, rather than 1 Saving Roll on a hit \(2 on a Critical\) using BTS\/2/);
+assert.match(combined[15], /Both AP and Shock special effects are ignored/);
+assert.match(combined[15], /failed Normal Saving Roll can still inflict a Wound/);
+assert.match(combined[15], /Silent \(-6\) concerns conditional Face to Face Dodge Rolls/);
+assert.match(combined[15], /does not adjudicate its interaction with Immunity/);
+assert.doesNotMatch(combined[15], /Shock effect still sends/);
 for (const item of cases.slice(9)) assert.match(item.textContent, /Derived from reviewed general rules/);
 assert.match(group.textContent, /Critical counts assume no Immunity \(Critical\)/);
 const links = descendants(group, (node) => node.tag === "a");
@@ -191,4 +198,4 @@ assert.deepEqual(descendants(generic, (node) => node.className === "detail-fact-
   .map((node) => node.textContent), [
   "Requirements", "Effects", "Restrictions", "Clarifications and examples",
 ]);
-console.log("17 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");
+console.log("18 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");

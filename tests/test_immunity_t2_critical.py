@@ -127,7 +127,7 @@ def test_t2_critical_reference_publishes_only_on_immunity_skill() -> None:
     ]
     assert facts["reviewedCriticalCases"][0] == EXPECTED
     assert len(facts["reviewedCriticalCases"]) == 2
-    assert len(facts["reviewedCombinedCases"]) == 6
+    assert len(facts["reviewedCombinedCases"]) == 7
     assert facts["reviewedCombinedCases"][4]["when"]["immunity"] == "AP"
     weapon = get("/api/weapons/ap-t2-cc-weapon")
     profiles = weapon.get("profiles", []) + [

@@ -4148,6 +4148,23 @@ rule records. The full suite has 62 cases; all 11 base and five combined source
 identities are represented without inferred attack rules or a database rebuild.
 Future Weapon comparison views remain out of scope.
 
+**Silenced Pistol / Immunity (BTS), 2026-10-31:**
+`tests/test_immunity_bts_silenced_pistol.py` pins English N5.3
+pp. 63, 65, 67, 95–96, 175 and 182 and checks the exact Army
+AP+Shock/BTS/2 profile against the seventh fixed combined case.
+Source/API parity preserves the original Weapon profile and the
+AP-only case: BTS Immunity covers both components and retains one
+full-BTS Saving Roll, plus the extra Critical roll unless Immunity
+(Critical) applies. Shock's special effect is ignored; ordinary failed
+Normal rolls can still inflict Wounds; Silent's separate reaction
+mechanic is linked without adjudicating its Immunity interaction.
+Closed-schema mutations reject altered applicability, components,
+source values, outcomes and evidence. The shared renderer and Chromium
+at 1440/390/320 px verify the eighteenth interaction, canonical links,
+API agreement, request/page errors and overflow. The coordinated
+rules/publication refresh retains all 17 reviewed deployed objects
+and recovery copies. This is local acceptance, not hosted release approval.
+
 **Oblivion Comms exception / Immunity (State), 2026-10-31:**
 `tests/test_immunity_oblivion_comms.py` pins English
 N5.3 pp. 57–58/95, checks the curated Oblivion

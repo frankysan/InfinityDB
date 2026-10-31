@@ -1110,10 +1110,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         to other Hacking Programs, infer combat results, or
         rewrite the source Program. Promote synchronized rules
         DB/publication with backup; preserve 17 deployed objects.
+      - [x] Review **Silenced Pistol versus Immunity (BTS)** using
+        N5.3 pp. 63, 65, 67, 95–96, 175 and 182 and exact Army
+        Ammunition ID 30. Both AP and Shock become Normal, leaving
+        one full-BTS roll (two on Critical absent Immunity
+        (Critical)); Shock's direct-Dead effect is ignored, while
+        a failed ordinary roll can still inflict a Wound. Link Silent
+        (-6) separately without adjudicating its Immunity interaction.
+        Preserve the existing AP-only case and source Weapon profile; validate the closed
+        schema, source/API parity and 1440/390/320 Chromium output.
+        Promote the synchronized rules/publication pair with recovery
+        copies, retaining all 17 reviewed deployed objects.
       - [ ] Review other BTS-component Immunity outcomes using exact
         non-Comms Weapon/combined-Ammunition evidence. The reviewed
         cases do not authorize arbitrary E/M, Comms Attack or
-        combined-effect adjudication.
+        combined-effect adjudication. Review Silent (-6)'s conditional
+        Dodge mechanic and Attribute-Immunity timing independently
+        of the Silenced Pistol Saving Roll examples.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

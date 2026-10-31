@@ -331,11 +331,11 @@ modifiers, the default additional Critical Saving Roll (unless the defender has
 Immunity (Critical)), and the Comms Attack/Non-Lethal/Stunned exceptions. These
 facts belong to Immunity, **not** to the ordered Combined Ammunition mapping:
 checking whether a defender's particular Immunity covers an entire attack or
-one or more constituent effects remains unimplemented. Six `reviewedCombinedCases`
+one or more constituent effects remains unimplemented. Seven `reviewedCombinedCases`
 now give **rule-derived, conditional** examples: Immunity (ARM) against source
 IDs 10 (AP+DA) and 13 (AP+Exp), Immunity (AP) against AP+DA,
 Silenced Pistol (AP+Shock) and AP+T2 CC Weapon, and Immunity (BTS)
-against the exact non-Comms E/M CC Weapon (N+E/M).
+against the exact non-Comms E/M CC Weapon (N+E/M) and Silenced Pistol (AP+Shock).
 The AP case records its ignored AP component and surviving DA effect, retaining
 two full-ARM rolls (three on Critical), instead of collapsing to Normal.
 Each example preserves before/after hit and Critical counts with source IDs,
@@ -383,6 +383,15 @@ VITA=1 failed-roll Dead condition. Silent (-6) remains a
 separately conditional Trait. The Army profile and Ammunition
 component mapping remain unchanged; this is not a generalized
 partial-Immunity algorithm.
+The seventh combined case uses that same exact Silenced Pistol profile
+with **Immunity (BTS)**: both AP and Shock are treated as Normal,
+leaving one full-BTS Saving Roll (two on Critical absent Immunity
+(Critical)). Shock's VITA=1 direct-Dead effect is ignored, while
+ordinary failed Normal Saving Rolls can still inflict Wounds. Silent
+(-6) is linked separately without adjudicating its interaction with
+Immunity. This rule-derived record does not generalize to other
+Weapons or Comms Attacks and leaves the
+Army profile and AP-only case unchanged.
 The **sixth** combined case is narrowly scoped to the
 `weapon:ap-t2-cc-weapon` non-Comms source profile (Army
 Ammunition ID 40). With Immunity (AP), the one ARM/2

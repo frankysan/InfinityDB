@@ -2663,6 +2663,19 @@ example. It neither changes the Army Silenced Pistol's
 BTS/2 source profile nor adjudicates arbitrary AP+Shock
 or mixed-Attribute attacks.
 
+**Silenced Pistol versus Immunity (BTS)** is a separate, rule-derived
+whole-combination case, supported by the same pinned N5.3 pp. 63,
+65, 67, 95–96, 175 and 182. Attribute-based Immunity covers both
+AP and Shock on this exact non-Comms BTS profile: one unmodified
+BTS Saving Roll remains on a hit, two on a Critical without
+Immunity (Critical). Shock's VITA=1 direct-to-Dead effect is ignored;
+a failed ordinary Normal Saving Roll can still inflict a Wound.
+Silent (-6) concerns conditional Face to Face Dodge Rolls rather
+than Saving Rolls; this case does not adjudicate its interaction
+with Immunity. The published case is distinct from the AP-only example and does not
+rewrite the source BTS/2 profile, resolve target outcomes or grant
+protection against Comms Attacks.
+
 **AP+T2 CC Weapon versus Immunity (AP)** is the sixth strictly
 reviewed Combined Ammunition example. The N5.3 p. 177 Weapon
 Chart specifies one ARM/2 Saving Roll using AP+T2 with
