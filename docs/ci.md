@@ -56,11 +56,11 @@ matrix test stage, so CI does not run the full suite twice. The other
 The preflight detects non-ignored untracked files and exports exactly the
 Git-index snapshot, preserving executable modes and symlink entries.
 In normal hosted CI this index corresponds to the checked-out commit.
-Its wheel audit checks presence of all tracked files in detected `src/`
-packages (except the intentional logo design-source directory) **and**
-all configured `[tool.setuptools.data-files]` sources at their expected
-wheel `.data/data/` destinations. Missing files, unsupported Git modes,
-unresolved index entries, build failures, or unexpected wheel counts fail
+Its wheel audit checks presence of **every tracked `src/` file** (except the
+intentional logo design-source directory), including standalone modules and
+implicit namespace packages, **and** all configured `[tool.setuptools.data-files]`
+sources at their expected wheel `.data/data/` destinations. Missing files,
+unsupported Git modes, unresolved index entries, build failures, or unexpected wheel counts fail
 the stage. The wheel audit does not install or execute the wheel and does
 not guarantee that unrelated undeclared external files were packaged.
 The independent installed-wheel workflow owns execution and resource

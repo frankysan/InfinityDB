@@ -65,8 +65,9 @@ The docs check stage itself works offline and does not install packages.
 The `preflight` stage instead builds a wheel using pip, which may acquire
 uncached build-backend dependencies. It compares the Git **index**, not
 unstaged tracked edits; use it after staging the proposed commit. It checks
-tracked package and configured shared data-file presence without substituting
-for installed-wheel CI. The `code` profile remains Python-only.
+all tracked `src/` files except explicit design-source exemptions, plus configured
+shared data-files, without substituting for installed-wheel CI. The `code`
+profile remains Python-only.
 See `docs/testing.md` for the complete contract.
 
 Direct pytest/Ruff/Pyright commands remain appropriate when debugging those

@@ -5,8 +5,8 @@ Local working trees contain Git-ignored and untracked files that CI never sees. 
 
 1. fails when non-ignored files are untracked (CI would not have them);
 2. exports only Git-tracked files (index content) to a temporary directory and runs pytest there;
-3. builds a wheel from that export and checks tracked package files plus configured
-   setuptools shared data-files for presence in the wheel.
+3. builds a wheel from that export and checks all tracked src/ files (except
+   explicit design-source exemptions) plus configured setuptools shared data-files.
 
 It does not replace the installed-wheel smoke workflow; see docs/ci.md.
 """
@@ -90,10 +90,6 @@ def audit_wheel(export: Path, wheel_dir: Path) -> list[str]:
         return [f"expected one wheel, found {len(wheels)}"]
     with zipfile.ZipFile(wheels[0]) as archive:
         members = set(archive.namelist())
-    packages = {
-        p.parent.relative_to(export / "src").parts[0]
-        for p in (export / "src").glob("*/__init__.py")
-    }
     tracked = set(tracked_files())
     missing = []
     for name in sorted(tracked):
@@ -102,8 +98,8 @@ def audit_wheel(export: Path, wheel_dir: Path) -> list[str]:
         relative = name[len(PACKAGE_ROOT) :]
         if relative.startswith(WHEEL_EXEMPT_PREFIXES):
             continue
-        if relative.split("/")[0] in packages and relative not in members:
-            missing.append(f"tracked package file not shipped in wheel: {relative}")
+        if relative not in members:
+            missing.append(f"tracked source file not shipped in wheel: {relative}")
 
     # Setuptools' data-files are installed in the wheel's .data/data/ tree,
     # not alongside the importable packages under src/.

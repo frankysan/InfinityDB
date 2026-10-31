@@ -408,7 +408,7 @@ python tools/run_checks.py --stage docs
 # All stages (including Markdownlint and CI preflight)
 python tools/run_checks.py --all
 
-# CI preflight: Git-index export and wheel-content validation, without rerunning pytest
+# CI preflight: staged src/ files and configured wheel data, without rerunning pytest
 python tools/ci_preflight.py --skip-pytest
 
 # Targeted checks

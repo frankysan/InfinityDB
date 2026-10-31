@@ -791,7 +791,44 @@ def test_ci_preflight_wheel_rejects_missing_python_package_file(
         ["infinity_db-0.1.data/data/share/infinity-db/config/catalogs/catalog.json"],
     )
     assert ci_preflight.audit_wheel(export, wheels) == [
-        "tracked package file not shipped in wheel: infinity_db/__init__.py",
+        "tracked source file not shipped in wheel: infinity_db/__init__.py",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "content"),
+    [
+        ("namespace_pkg/module.py", "value = 1\n"),
+        ("standalone_module.py", "value = 1\n"),
+    ],
+)
+def test_ci_preflight_wheel_rejects_unshipped_sources_without_init(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    relative_path: str,
+    content: str,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        [
+            "infinity_db/__init__.py",
+            "infinity_db-0.1.data/data/share/infinity-db/config/catalogs/catalog.json",
+        ],
+    )
+    source = export / "src" / relative_path
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(content, encoding="utf-8")
+    monkeypatch.setattr(
+        ci_preflight, "tracked_files",
+        lambda: [
+            "src/infinity_db/__init__.py",
+            "src/infinity_db/web/static/logo/design.svg",
+            f"src/{relative_path}",
+            "config/catalogs/catalog.json",
+        ],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        f"tracked source file not shipped in wheel: {relative_path}",
     ]
 
 

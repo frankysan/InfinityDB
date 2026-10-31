@@ -101,11 +101,11 @@ Use `.venv/bin/python` on Linux/macOS. The preflight:
    Symlink export on Windows requires the permissions needed to create links.
 3. Runs pytest inside that index export, using the invoking environment's Python
    and dependencies. Arguments following `--` are forwarded to pytest.
-4. Builds one wheel from the same export and checks that every indexed file under a
-   detected importable `src/` package is present, except the explicit
-   `src/infinity_db/web/static/logo/` design-source exemption. It also checks
-   every source named by `[tool.setuptools.data-files]` in `pyproject.toml`
-   is in the index and has a corresponding `.data/data/` wheel member.
+4. Builds one wheel from the same export and checks that every indexed file under
+   `src/` is present, including standalone modules and implicit namespace packages,
+   except the explicit `src/infinity_db/web/static/logo/` design-source exemption.
+   It also checks every source named by `[tool.setuptools.data-files]` in
+   `pyproject.toml` is in the index and has a corresponding `.data/data/` wheel member.
 
 For a quick packaging/untracked check without repeating pytest:
 
