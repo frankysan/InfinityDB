@@ -44,6 +44,37 @@ For the `--all` leg, CI sets up Node.js 24 and explicitly runs
 check runner starts. The `docs` stage uses this local installation without acquiring dependencies
 at execution time; other matrix legs do not require npm.
 
+### Git-index preflight and wheel-content audit
+
+The primary Ubuntu 3.11 `--all` leg includes the `preflight` stage
+(after the ordinary test/build/rules stages). It invokes
+`tools/ci_preflight.py --skip-pytest`: pytest is already executed by the
+matrix test stage, so CI does not run the full suite twice. The other
+`Source checks` legs do not run this packaging stage; the separate
+`Installed wheel smoke` job builds and tests an installed wheel on Ubuntu.
+
+The preflight detects non-ignored untracked files and exports exactly the
+Git-index snapshot, preserving executable modes and symlink entries.
+In normal hosted CI this index corresponds to the checked-out commit.
+Its wheel audit checks presence of all tracked files in detected `src/`
+packages (except the intentional logo design-source directory) **and**
+all configured `[tool.setuptools.data-files]` sources at their expected
+wheel `.data/data/` destinations. Missing files, unsupported Git modes,
+unresolved index entries, build failures, or unexpected wheel counts fail
+the stage. The wheel audit does not install or execute the wheel and does
+not guarantee that unrelated undeclared external files were packaged.
+The independent installed-wheel workflow owns execution and resource
+resolution after installation.
+
+Local Git-index preflight, including an optional clean-export pytest run,
+is documented in [development checks](testing.md#ci-preflight-clean-checkout-and-wheel-contents).
+It cannot validate unstaged tracked edits; stage a proposed change or
+review the index before relying on a green preflight. Pip's isolated wheel
+build may obtain its setuptools backend if not already cached; no upstream
+Infinity game-data acquisition is performed. Focused tests for export,
+file modes, missing wheel members, and error paths reside in
+`tests/test_run_checks.py`.
+
 The full Army occurrence archive `data/generated/infinity.raw.db` is
 Git-ignored and absent in clean CI. Three source-variant provenance test
 modules require it and explicitly skip there; they still run against the

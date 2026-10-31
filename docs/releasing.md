@@ -212,7 +212,11 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 - [ ] Install the pinned Markdownlint dependency with
   `npm ci --ignore-scripts --no-audit --no-fund` (Node.js 22+), then run the complete local
   validation suite with `python tools/run_checks.py --all` (for 1.0, include
-  `--source-occupancy-gate` as described above), including the `docs` stage.
+  `--source-occupancy-gate` as described above), including the `docs`
+  and Git-index `preflight` stages. The preflight checks the staged release
+  content and wheel members, **not unstaged tracked edits**. Run it again after
+  staging the final candidate when the index changes; the separate
+  `Installed wheel smoke` workflow remains mandatory for runtime validation.
 - [ ] When the release is intended for a local/full-asset deployment, validate the
   complete published asset set with the `required` asset mode as documented in
   `docs/testing.md`.

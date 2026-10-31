@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import importlib.util
 import io
+import os
+import subprocess
 import sys
+import zipfile
 from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -20,6 +24,18 @@ def load_run_checks():
 
 
 run_checks = load_run_checks()
+
+
+def load_ci_preflight():
+    path = Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"
+    spec = importlib.util.spec_from_file_location("infinitydb_ci_preflight", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+ci_preflight = load_ci_preflight()
 
 
 def test_stage_selection_uses_canonical_order() -> None:
@@ -597,6 +613,231 @@ def test_build_source_without_build_stage_is_configuration_error(
 
     assert result == run_checks.EXIT_RUNNER_ERROR
     assert "--build-source requires the build stage" in capsys.readouterr().err
+
+
+def _git_preflight_fixture(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    root = tmp_path / "checkout"
+    root.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+    source = root / "src" / "demo" / "__init__.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("staged = True\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=root, check=True)
+    monkeypatch.setattr(ci_preflight, "REPO_ROOT", root)
+    return root, source
+
+
+def test_ci_preflight_exports_index_not_unstaged_working_content(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _root, source = _git_preflight_fixture(tmp_path, monkeypatch)
+    source.write_text("unstaged = True\n", encoding="utf-8")
+    output = tmp_path / "export"
+    assert ci_preflight.export_tracked(output) == 1
+    assert (output / "src/demo/__init__.py").read_text(encoding="utf-8") == (
+        "staged = True\n"
+    )
+    assert ci_preflight.untracked_files() == []
+
+
+def test_ci_preflight_reports_nonignored_untracked_files(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, _ = _git_preflight_fixture(tmp_path, monkeypatch)
+    (root / "not-in-ci.py").write_text("surprise\n", encoding="utf-8")
+    (root / ".gitignore").write_text("ignored.log\n", encoding="utf-8")
+    (root / "ignored.log").write_text("ignored\n", encoding="utf-8")
+    assert ci_preflight.untracked_files() == [".gitignore", "not-in-ci.py"]
+
+
+def test_ci_preflight_preserves_executable_index_mode(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, _ = _git_preflight_fixture(tmp_path, monkeypatch)
+    subprocess.run(
+        ["git", "update-index", "--chmod=+x", "src/demo/__init__.py"],
+        cwd=root, check=True,
+    )
+    assert ci_preflight.tracked_entries() == [
+        ("src/demo/__init__.py", "100755"),
+    ]
+    output = tmp_path / "export"
+    ci_preflight.export_tracked(output)
+    if os.name != "nt":
+        assert (output / "src/demo/__init__.py").stat().st_mode & 0o111
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Windows symlink privilege depends on host policy")
+def test_ci_preflight_recreates_git_symlinks(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root, _ = _git_preflight_fixture(tmp_path, monkeypatch)
+    shortcut = root / "src" / "demo" / "link.py"
+    shortcut.symlink_to("__init__.py")
+    subprocess.run(["git", "add", "src/demo/link.py"], cwd=root, check=True)
+    output = tmp_path / "export"
+    assert ci_preflight.export_tracked(output) == 2
+    restored = output / "src/demo/link.py"
+    assert restored.is_symlink()
+    assert os.readlink(restored) == "__init__.py"
+
+
+def _fake_preflight_wheel(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, wheel_members: list[str],
+):
+    export = tmp_path / "export"
+    source = export / "src" / "infinity_db"
+    source.mkdir(parents=True)
+    (source / "__init__.py").write_text("", encoding="utf-8")
+    logo = source / "web" / "static" / "logo"
+    logo.mkdir(parents=True)
+    (logo / "design.svg").write_text("design", encoding="utf-8")
+    config = export / "config" / "catalogs"
+    config.mkdir(parents=True)
+    (config / "catalog.json").write_text("{}", encoding="utf-8")
+    (export / "pyproject.toml").write_text(
+        '[tool.setuptools.data-files]\n'
+        '"share/infinity-db/config/catalogs" = ["config/catalogs/catalog.json"]\n',
+        encoding="utf-8",
+    )
+    wheel_dir = tmp_path / "wheels"
+    wheel_dir.mkdir()
+    with zipfile.ZipFile(wheel_dir / "infinity_db-0.1-py3-none-any.whl", "w") as zipfile_:
+        for member in wheel_members:
+            zipfile_.writestr(member, "data")
+    monkeypatch.setattr(
+        ci_preflight, "tracked_files",
+        lambda: [
+            "src/infinity_db/__init__.py",
+            "src/infinity_db/web/static/logo/design.svg",
+            "config/catalogs/catalog.json",
+        ],
+    )
+    monkeypatch.setattr(
+        ci_preflight.subprocess, "run",
+        lambda *_args, **_kwargs: SimpleNamespace(returncode=0),
+    )
+    return export, wheel_dir
+
+
+def test_ci_preflight_stage_is_wheel_only_because_test_stage_runs_pytest() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("preflight",), ["tests/test_run_checks.py"], build_source=None,
+    )
+    assert stage.name == "preflight"
+    assert stage.command == (
+        sys.executable,
+        str(Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"),
+        "--skip-pytest",
+    )
+
+
+def test_ci_preflight_rejects_unresolved_index_and_gitlink_modes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    entries = (
+        (b"100644 " + b"0" * 40 + b" 2\tsrc/demo.py\0", "unresolved index entry"),
+        (b"160000 " + b"0" * 40 + b" 0\tsrc/submodule\0", "unsupported Git index mode"),
+    )
+    for output, reason in entries:
+        monkeypatch.setattr(ci_preflight, "_git", lambda *_args, data=output: data)
+        with pytest.raises(ValueError, match=reason):
+            ci_preflight.export_tracked(tmp_path / "export")
+
+
+def test_ci_preflight_wheel_rejects_multiple_outputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        ["infinity_db/__init__.py"],
+    )
+    with zipfile.ZipFile(wheels / "another-0.1-py3-none-any.whl", "w") as archive:
+        archive.writestr("another/__init__.py", "")
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        "expected one wheel, found 2",
+    ]
+
+
+def test_ci_preflight_wheel_checks_package_and_configured_shared_data(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        [
+            "infinity_db/__init__.py",
+            "infinity_db-0.1.data/data/share/infinity-db/config/catalogs/catalog.json",
+        ],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == []
+
+
+def test_ci_preflight_wheel_rejects_missing_configured_data_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch, ["infinity_db/__init__.py"],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        "configured data file not shipped in wheel: share/infinity-db/config/catalogs/catalog.json",
+    ]
+
+
+def test_ci_preflight_wheel_rejects_missing_python_package_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        ["infinity_db-0.1.data/data/share/infinity-db/config/catalogs/catalog.json"],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        "tracked package file not shipped in wheel: infinity_db/__init__.py",
+    ]
+
+
+def test_ci_preflight_wheel_rejects_configured_untracked_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    export, wheels = _fake_preflight_wheel(
+        tmp_path, monkeypatch,
+        [
+            "infinity_db/__init__.py",
+            "infinity_db-0.1.data/data/share/infinity-db/config/catalogs/catalog.json",
+        ],
+    )
+    monkeypatch.setattr(
+        ci_preflight, "tracked_files",
+        lambda: ["src/infinity_db/__init__.py"],
+    )
+    assert ci_preflight.audit_wheel(export, wheels) == [
+        "configured data file absent from Git index: config/catalogs/catalog.json",
+    ]
+
+
+def test_ci_preflight_main_enforces_untracked_check_even_without_build_or_pytest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(ci_preflight, "untracked_files", lambda: ["missing.py"])
+    monkeypatch.setattr(ci_preflight, "export_tracked", lambda _path: 2)
+    assert ci_preflight.main(["--skip-wheel", "--skip-pytest"]) == 1
+    assert "untracked files" in capsys.readouterr().out
+    assert ci_preflight.main(["--skip-wheel", "--skip-pytest", "--allow-untracked"]) == 0
+
+
+def test_ci_preflight_main_propagates_clean_export_pytest_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(ci_preflight, "untracked_files", lambda: [])
+    monkeypatch.setattr(ci_preflight, "export_tracked", lambda _path: 2)
+    calls = []
+    def fake_run(command, **_kwargs):
+        calls.append(command)
+        return SimpleNamespace(returncode=2)
+
+    monkeypatch.setattr(ci_preflight.subprocess, "run", fake_run)
+    assert ci_preflight.main(["--skip-wheel", "--", "-k", "smoke"]) == 1
+    assert calls[0][-2:] == ["-k", "smoke"]
 
 
 def test_fixture_build_stage_never_replaces_runtime_database(

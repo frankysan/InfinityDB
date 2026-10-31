@@ -48,6 +48,7 @@ and agent handoffs. Examples:
 <venv-python> tools/run_checks.py --profile data
 <venv-python> tools/run_checks.py --all
 <venv-python> tools/run_checks.py --stage docs
+<venv-python> tools/run_checks.py --stage preflight
 <venv-python> tools/run_checks.py --stage test tests/test_availability.py
 <venv-python> tools/run_checks.py --profile code --report
 <venv-python> tools/run_checks.py --stage test --assets off
@@ -60,8 +61,13 @@ the report header. An explicit report path overrides that convention. Requested
 stages continue after failures by default; use `--fail-fast` when appropriate.
 For `--stage docs` or `--all`, bootstrap the lockfile-pinned Node.js Markdownlint
 dependency with `npm ci --ignore-scripts --no-audit --no-fund` first (Node.js 22+).
-The check stage itself works offline and does not install packages. The `code`
-profile remains Python-only. See `docs/testing.md` for the complete contract.
+The docs check stage itself works offline and does not install packages.
+The `preflight` stage instead builds a wheel using pip, which may acquire
+uncached build-backend dependencies. It compares the Git **index**, not
+unstaged tracked edits; use it after staging the proposed commit. It checks
+tracked package and configured shared data-file presence without substituting
+for installed-wheel CI. The `code` profile remains Python-only.
+See `docs/testing.md` for the complete contract.
 
 Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
 tools in isolation, and package installation still runs through the virtual-environment

@@ -403,8 +403,11 @@ npm ci --ignore-scripts --no-audit --no-fund
 # Markdown documentation checks
 python tools/run_checks.py --stage docs
 
-# All stages (including Markdownlint)
+# All stages (including Markdownlint and CI preflight)
 python tools/run_checks.py --all
+
+# CI preflight: Git-index export and wheel-content validation, without rerunning pytest
+python tools/ci_preflight.py --skip-pytest
 
 # Targeted checks
 python tools/run_checks.py --stage test tests/test_availability.py
@@ -426,8 +429,10 @@ python tools/run_checks.py --stage test --test-workers 4
 python tools/run_checks.py --stage test --test-workers 0
 ```
 
-See [development checks](docs/testing.md) for worker-selection guidance and the
-current test-runner contract.
+See [development checks](docs/testing.md) for worker-selection guidance,
+Git-index preflight behavior and the current test-runner contract.
+Preflight checks the **staged index**, not unstaged tracked modifications,
+and complements the separate [installed-wheel CI check](docs/ci.md#installed-wheel-smoke).
 
 Requested stages continue after a failure by default; add `--fail-fast` to stop
 at the first failure. See [development checks](docs/testing.md) for stage and

@@ -83,17 +83,50 @@ Use `--fail-fast` when the first failure is sufficient.
 
 ## CI preflight (clean checkout and wheel contents)
 
-A local working tree contains untracked and Git-ignored files that CI never sees. Before pushing, run:
+A local working tree can contain files that a fresh CI checkout never sees. Before
+pushing a candidate, run the full Git-index preflight using the project virtual environment:
 
-```text
-<venv-python> tools/ci_preflight.py -- -n auto
+```powershell
+.\.venv\Scripts\python.exe tools/ci_preflight.py -- -n auto
 ```
 
-It fails on non-ignored untracked files (`--allow-untracked` downgrades this to a warning), exports
-only the staged/tracked content to a temporary directory, runs pytest there (arguments after `--`
-are passed to pytest), and builds a wheel from that export to verify every tracked file under a
-shipped `src/` package is in the wheel (the logo design-source directory is exempt). It complements
-but does not replace the installed-wheel smoke workflow described in `docs/ci.md`.
+Use `.venv/bin/python` on Linux/macOS. The preflight:
+
+1. Rejects **non-ignored untracked files** (`--allow-untracked` only warns).
+   Git-ignored files are deliberately excluded.
+2. Exports the **Git index**, including staged additions and staged content, to a
+   temporary directory. It does **not** incorporate unstaged modifications to
+   already-tracked files. Git executable modes and symlinks are retained; unresolved
+   merges or unsupported Git index modes fail rather than being silently flattened.
+   Symlink export on Windows requires the permissions needed to create links.
+3. Runs pytest inside that index export, using the invoking environment's Python
+   and dependencies. Arguments following `--` are forwarded to pytest.
+4. Builds one wheel from the same export and checks that every indexed file under a
+   detected importable `src/` package is present, except the explicit
+   `src/infinity_db/web/static/logo/` design-source exemption. It also checks
+   every source named by `[tool.setuptools.data-files]` in `pyproject.toml`
+   is in the index and has a corresponding `.data/data/` wheel member.
+
+For a quick packaging/untracked check without repeating pytest:
+
+```powershell
+.\.venv\Scripts\python.exe tools/ci_preflight.py --skip-pytest
+```
+
+`--skip-wheel` omits the wheel audit; combining the skip switches exercises
+only index export and untracked-file checks. The standard `preflight` stage
+in `tools/run_checks.py --stage preflight` uses `--skip-pytest` because the
+normal `test` stage already runs pytest. The `--all` profile includes both.
+
+**Limits:** Preflight audits wheel member *presence*, not byte-level equivalence,
+installed runtime behavior, or files that are not declared as package data.
+The installed-wheel smoke workflow tests installed behavior separately.
+The wheel command uses pip's PEP 517 build isolation; it may require network
+access for build requirements when those are not cached. It does not acquire
+Infinity Army or wiki sources. Run the preflight again after staging intended
+changes; a pass against the index does **not** validate unstaged code. The
+dedicated regression cases are maintained in `tests/test_run_checks.py`;
+see [the hosted CI contract](ci.md).
 
 ## Targeted checks
 
