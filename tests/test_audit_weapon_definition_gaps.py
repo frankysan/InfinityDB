@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 
 from infinity_db.database.repository import Database
+from infinity_db.rules_database import RulesDatabase
+from tools.audit_enrichment_coverage import audit_coverage
 from tools.audit_weapon_definition_gaps import (
     WeaponGapTriageError,
     load_shared_reviews,
@@ -206,6 +208,37 @@ def test_source_review_acceptance_requires_explicit_matching_chart_and_links() -
             shared_effect_coverage={1: {"total": 2, "linked": 1}},
             reviewed_shared=accepted,
         )
+
+
+def test_current_enrichment_preserves_reviews_after_definitions_are_published() -> None:
+    root = Path(__file__).resolve().parents[1]
+    army_path = root / "data/generated/infinity.db"
+    rules_path = root / "data/generated/rules.db"
+    policy_path = root / "data/curated/weapon-shared-effect-reviews.json"
+    db = Database(army_path)
+    rules = RulesDatabase(rules_path)
+    enrichment = audit_coverage(army_path, rules_path)
+    reviewed = load_shared_reviews(db, enrichment, policy_path, rules=rules)
+    policy = json.loads(policy_path.read_text(encoding="utf-8"))
+    assert len(reviewed) == len(policy["reviews"]) == 64
+
+    catalog = {int(row["id"]): row["name"] for row in db.list_catalog_items("weapons")}
+    unresolved_ids = {
+        row["id"] for row in enrichment["domains"]["weapons"]["items"]
+    }
+    assert {catalog[weapon_id] for weapon_id in reviewed if weapon_id not in unresolved_ids} == {
+        "Crazykoala", "Madtraps",
+    }
+    # Omitting a gap is not sufficient evidence for relaxing a source review.
+    with pytest.raises(WeaponGapTriageError, match="no verified definition"):
+        load_shared_reviews(db, enrichment, policy_path)
+    missing = deepcopy(enrichment)
+    missing["domains"]["weapons"]["items"] = [
+        row for row in missing["domains"]["weapons"]["items"]
+        if row["name"] != "Combi Rifle"
+    ]
+    with pytest.raises(WeaponGapTriageError, match="no verified definition: Combi Rifle"):
+        load_shared_reviews(db, missing, policy_path, rules=rules)
 
 
 def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> None:

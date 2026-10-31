@@ -124,14 +124,15 @@ missing explanations: the existing shared-effects approvals must be reconciled.
 - [ ] **Data processing + Project infrastructure:** Repair the current-input
   coverage audit path before using it as 1.0 acceptance evidence
   ([V1-A05–07](v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions)).
-  - [ ] Make Weapon-definition triage accept the reviewed-policy lifecycle when
-    Crazykoala/Madtraps acquire definitions, preserving all exact profile checks
-    and historical approvals. Add a regression joining the actual current
-    enrichment report and review policy; the documented command currently aborts.
-  - [ ] Reconcile the enrichment test's exact supporting set: current source-owned
-    Isolated links add `rule:coordinated-orders` and `rule:fireteam-general`, making
-    13 targets rather than the expected 11. Restore the count and identity-set
-    assertions together without dropping valid relations or weakening gap checks.
+  - [x] Make Weapon-definition triage accept the reviewed-policy lifecycle when
+    Crazykoala/Madtraps acquire definitions, preserving exact source-profile hashes
+    and historical approvals. The current-input enrichment/policy regression passes;
+    the documented triage command runs against the October 31 source reports.
+    It distinguishes 62 active shared-effect reviews from two reviews now backed
+    by published definitions, without treating either as a new missing rule.
+  - [x] Reconcile the enrichment test's exact supporting set: source-owned Isolated
+    links include `rule:coordinated-orders` and `rule:fireteam-general`. The test
+    now asserts all 13 targets by identity and retains unresolved-link/gap checks.
   - [ ] Reconcile the enrichment policy's 0.10-to-1.0 deferrals with the reviewed
     shared-effect omissions and unresolved Commlink scope. A zero blocker count
     under the historical policy must not be presented as 1.0 completeness; do not

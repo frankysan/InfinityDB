@@ -2692,13 +2692,18 @@ source-to-reference triage:
 .venv\Scripts\python.exe tools/audit_weapon_definition_gaps.py --army-db data/generated/infinity.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
 ```
 
-**Known current-input failure (2026-10-31):** the final triage command aborts on
-Crazykoala because its earlier shared-effects approval remains in the policy after
-it acquired a definition; Madtraps has the same lifecycle mismatch. The source and
-profile fingerprints still match. See
-[V1-A05](v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions)
-for the isolated evidence join and the owning backlog repair. A local filtered
-evidence report is not a passing result for this documented command.
+**Current-input regression (2026-10-31):** the triage now retains historical
+shared-effect approvals for Weapons that subsequently acquired their own published
+family definitions. A resolved review still requires its original profile hash,
+source identity and canonical Weapon link to match; a missing unresolved row alone
+is insufficient. The unfiltered October 31 source reports now reconcile **62**
+active shared-effect reviews and **2** superseded approvals (Crazykoala and
+Madtraps); Flash Pulse remains a separately accepted historical citation. The
+output includes `resolvedSharedReviews` and `resolvedSharedReviewCount` so those
+two approvals remain auditable without counting them as missing definitions. This
+is triage evidence, not whole-Weapon or v1.0 completeness acceptance. The original
+finding and reproduction remain documented in
+[V1-A05](v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions).
 
 The triage rejects mismatched Army database hashes, incomplete/deferred chart
 alignment, and invalid coverage or PDF report identities. It reports separate

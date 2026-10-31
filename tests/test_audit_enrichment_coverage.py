@@ -267,7 +267,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert states["Targeted State"]["gapCodes"] == []
 
     assert report["summary"]["unresolvedRelatedItemLinkCount"] == 11
-    assert report["summary"]["supportingRelationTargetCount"] == 11
+    # Isolated State also reaches the coordinated-order and Fireteam rule pages.
+    assert report["summary"]["supportingRelationTargetCount"] == 13
     assert {
         item["targetRecordId"] for item in report["relationCoverage"]["unresolved"]
     } == {
@@ -290,6 +291,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         "rule:peripheral-type:synchronized",
         "rule:command-token-strategic-use",
         "rule:loss-of-lieutenant",
+        "rule:coordinated-orders",
+        "rule:fireteam-general",
         "rule:special-lieutenant-order",
         "rule:tactical-order",
         "training:regular",

@@ -287,8 +287,9 @@ def reconcile(
 
 def load_shared_reviews(
     db: Database, enrichment: dict[str, Any], policy_path: Path,
+    *, rules: RulesDatabase | None = None,
 ) -> dict[int, dict[str, Any]]:
-    """Pin explicit no-standalone-rule decisions to exact source Weapon profiles."""
+    """Pin shared-effect decisions, including those superseded by a published rule."""
     policy = _load(policy_path)
     if (
         policy.get("format") != "InfinityDB Weapon shared-effects source reviews"
@@ -324,11 +325,21 @@ def load_shared_reviews(
             raise WeaponGapTriageError(f"Incomplete reviewed Weapon entry: {name!r}")
         entry = catalogue.get(name)
         pending = unresolved.get(name)
-        if entry is None or pending is None or pending["slug"] != slug:
-            raise WeaponGapTriageError(f"Reviewed Weapon is not an unresolved identity: {name}")
+        if entry is None or db.application_slug("weapons", int(entry["id"])) != slug:
+            raise WeaponGapTriageError(f"Reviewed Weapon identity changed: {name}")
         weapon_id = int(entry["id"])
-        if pending["id"] != weapon_id or pending["gapCodes"] != ["missing_rule_definition"]:
-            raise WeaponGapTriageError(f"Reviewed Weapon gap classification changed: {name}")
+        if pending is not None:
+            if (pending["id"] != weapon_id or pending["slug"] != slug
+                    or pending["gapCodes"] != ["missing_rule_definition"]):
+                raise WeaponGapTriageError(f"Reviewed Weapon gap classification changed: {name}")
+        elif rules is None or not any(
+            record["id"] == f"weapon:{slug}" and record["kind"] == "weapon"
+            and (record.get("variant_semantics") or {}).get("inheritance") != "source"
+            for record in rules.composed_records_for_army_link("weapon", slug)
+        ):
+            # An absent unresolved row is only acceptable when that exact Weapon
+            # acquired a published family definition, not merely shared effects.
+            raise WeaponGapTriageError(f"Reviewed Weapon has no verified definition: {name}")
         if weapon_id in accepted:
             raise WeaponGapTriageError(f"Duplicate reviewed Weapon: {name}")
         details = db.get_catalog_item("weapons", weapon_id)
@@ -368,7 +379,9 @@ def build_report(army_db: Path, enrichment_path: Path, chart_path: Path) -> dict
     rules_path = Path(rules_path_text)
     if not rules_path.is_file() or _sha256(rules_path) != rules_info.get("sha256"):
         raise WeaponGapTriageError("Enrichment report rules database fingerprint differs")
-    references = WeaponAmmunitionReferences(RulesDatabase(rules_path))
+    rules = RulesDatabase(rules_path)
+    rules.validate()
+    references = WeaponAmmunitionReferences(rules)
     coverage: dict[int, dict[str, int]] = {}
     for item in enrichment.get("domains", {}).get("weapons", {}).get("items", []):
         details = db.get_catalog_item("weapons", item["id"])
@@ -388,11 +401,33 @@ def build_report(army_db: Path, enrichment_path: Path, chart_path: Path) -> dict
                 for profile in profiles
             ),
         }
-    reviews = load_shared_reviews(db, enrichment, SHARED_REVIEWS_PATH)
-    return reconcile(
-        enrichment, _load(chart_path), categories, _sha256(army_db),
+    reviews = load_shared_reviews(db, enrichment, SHARED_REVIEWS_PATH, rules=rules)
+    chart = _load(chart_path)
+    report = reconcile(
+        enrichment, chart, categories, _sha256(army_db),
         shared_effect_coverage=coverage, reviewed_shared=reviews,
     )
+    unresolved_ids = set(coverage)
+    names = {int(row["id"]): str(row["name"])
+             for row in db.list_catalog_items("weapons")}
+    report["resolvedSharedReviews"] = [
+        {"id": weapon_id, "name": names[weapon_id], "sourceReview": review}
+        for weapon_id, review in sorted(reviews.items())
+        if weapon_id not in unresolved_ids
+    ]
+    report["summary"]["resolvedSharedReviewCount"] = len(report["resolvedSharedReviews"])
+    for resolved in report["resolvedSharedReviews"]:
+        rows = [
+            row for row in chart["comparison"]["compared"]
+            if _identity(str(row["name"])) == _identity(resolved["name"])
+        ]
+        if (not rows
+                or resolved["sourceReview"]["chartPage"] not in {row["page"] for row in rows}
+                or any(row["differences"] for row in rows)):
+            raise WeaponGapTriageError(
+                f"Resolved shared Weapon chart conditions changed: {resolved['name']}"
+            )
+    return report
 
 
 def markdown_report(report: dict[str, Any]) -> str:
@@ -413,6 +448,11 @@ def markdown_report(report: dict[str, Any]) -> str:
                 f"**{summary['remainingSourceReviews']}**.",
             ]
             if "reviewedSharedEffects" in summary else []
+        ),
+        *(
+            [f"- Historical shared-effect reviews now backed by a published definition: "
+             f"**{summary['resolvedSharedReviewCount']}**."]
+            if "resolvedSharedReviewCount" in summary else []
         ),
         *(
             [
