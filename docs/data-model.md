@@ -218,8 +218,21 @@ separate `facts.visibilityZone` shape recording the Circular Zero Visibility
 Zone, infinite height, expiration, and the distinction between Smoke's MSV
 exception and Eclipse's Reflective blocking of all MSV Levels. This is
 visibility reference data, never a synthetic Saving Roll or a guarantee
-that a Smoke Template succeeds against all attacks. The
-Weapon API separately exposes source-authored profiles and reviewed combined
+that a Smoke Template succeeds against all attacks.
+
+The optional `visibilityZone.opposition` object now records the reviewed
+enemy-Attack requirements (a Roll, LoF, and LoF crossing the zone),
+Smoke/Eclipse's distinct Visor opposition, Normal enemy Dodge Rolls,
+the requirement to win every applicable opposition or pass an unopposed
+Roll, and the absence of an additional Critical effect. Its canonical
+`ruleId` requires a matching `uses-effects-of` relation to
+`rule:face-to-face-rolls`; the compact reference rows reuse that public
+rule link. Eclipse inherits Smoke's common placement rules through its
+existing relation and cited N5.3 pp. 64/66. Older five-field zone facts
+remain valid without the optional object. This is descriptive reference
+data, separate from Saving Roll counts or any attack-outcome evaluation.
+
+The Weapon API separately exposes source-authored profiles and reviewed combined
 component IDs. It does **not** merge these facts into an inferred roll result:
 Feuerbach's AP+DA source combination remains distinct from its `ARM/2` and `2`
 fields, and Plasma Carbine's `ARM and BTS` / `1 and 1` remains a Combined Saving

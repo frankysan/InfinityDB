@@ -1149,9 +1149,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         rules/publication pair with recovery copies and 17 objects intact.
         Other BTS outcomes and Silent's reaction timing remain open.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
-      precedence, full Critical interactions, affected Attributes, visibility Face
-      to Face outcomes, conditional State cross-links, and comparison-view
+      precedence, full Critical interactions, affected Attributes,
+      conditional State cross-links, and comparison-view
       consumption. Do not infer executable mechanics from reviewed reference facts.
+      - [x] Publish **Smoke/Eclipse placement opposition** as typed visibility
+        reference facts and compact browser help. Pin the N5.3 pp. 64/66
+        Roll/LoF/crossing conditions, distinct Visor branches, Normal enemy
+        Dodge, all-oppositions/unopposed retention and no-extra-effect Criticals.
+        Require the canonical Face to Face relation and preserve older zone
+        objects without the additive member. Source, rejection, export/API,
+        shared-renderer and 1440/390/320 Chromium checks cover both pages,
+        keyboard rule navigation/back, errors and overflow. Promote the
+        synchronized rules/publication pair with recovery copies and all 17
+        objects intact. This publishes conditions, not calculated outcomes;
+        broader component and target exceptions remain separate.
       - [x] Add a separately *rule-derived*, source-scoped **Immunity (Critical)**
         interaction for Plasma Rifle's Combined Saving Roll. N5.3 p. 67
         adds one **ARM** roll on a Critical, not one roll per Attribute;

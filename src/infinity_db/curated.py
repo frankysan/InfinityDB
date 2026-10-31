@@ -1051,9 +1051,10 @@ def _validate_ammunition_visibility_zone(value: object, context: str) -> None:
     """Keep non-damaging visibility facts separate from Saving Roll resolution."""
     if (
         not isinstance(value, dict)
-        or set(value) != {
-            "visibility", "template", "height", "expires", "multispectralVisor"
-        }
+        or set(value) not in (
+            {"visibility", "template", "height", "expires", "multispectralVisor"},
+            {"visibility", "template", "height", "expires", "multispectralVisor", "opposition"},
+        )
         or value["visibility"] != "zero"
         or value["template"] != "circular"
         or value["height"] != "infinite"
@@ -1062,6 +1063,18 @@ def _validate_ammunition_visibility_zone(value: object, context: str) -> None:
         or value["multispectralVisor"] not in {"can-draw-lof", "blocked"}
     ):
         raise ValueError(f"{context}: unsupported Ammunition visibility zone")
+    if "opposition" in value and value["opposition"] != {
+        "ruleId": "rule:face-to-face-rolls",
+        "attackRequirements": ["requires-roll", "requires-lof", "lof-crosses-zone"],
+        "visorAttack": (
+            "face-to-face-if-qualifying" if value["multispectralVisor"] == "blocked"
+            else "normal-roll"
+        ),
+        "enemyDodge": "normal-roll",
+        "templateRetention": "win-every-opposed-or-pass-unopposed",
+        "critical": "no-additional-effect",
+    }:
+        raise ValueError(f"{context}.opposition: unsupported visibility opposition facts")
 
 
 def _validate_scope(value: object, context: str) -> None:
@@ -1724,6 +1737,14 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                         f"{context}.facts.visibilityZone: must not mix with Saving Roll facts"
                     )
                 _validate_ammunition_visibility_zone(zone, f"{context}.facts.visibilityZone")
+                if "opposition" in zone and not any(
+                    isinstance(r, dict) and r.get("type") == "uses-effects-of"
+                    and r.get("recordId") == zone["opposition"]["ruleId"]
+                    for r in (record.get("relations") or [])
+                ):
+                    raise ValueError(
+                        f"{context}.facts.visibilityZone.opposition: missing owning rule relation"
+                    )
         if record["kind"] == "faq-ruling":
             validate_faq_ruling_facts(
                 record.get("facts"),

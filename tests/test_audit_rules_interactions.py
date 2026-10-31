@@ -22,7 +22,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
 
     assert report["summary"]["recordCount"] == 381
     assert not any(item["id"].startswith("faq-ruling:") for item in report["items"])
-    assert report["summary"]["authoredOutgoingRelationCount"] == 510
+    assert report["summary"]["authoredOutgoingRelationCount"] == 514
     assert report["summary"]["futureInteractionCount"] == 111
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,
@@ -294,7 +294,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         assert items[record_id]["status"] == "reviewed"
         assert items[record_id]["targetRelease"] == "1.0.0"
     assert items["ammunition:eclipse"]["relations"] == [
-        ("uses-effects-of", "ammunition:smoke")
+        ("uses-effects-of", "ammunition:smoke"),
+        ("uses-effects-of", "rule:face-to-face-rolls"),
+    ]
+    assert items["ammunition:smoke"]["relations"] == [
+        ("uses-effects-of", "rule:face-to-face-rolls"),
     ]
 
     for record_id in {

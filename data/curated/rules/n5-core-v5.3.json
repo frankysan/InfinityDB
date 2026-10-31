@@ -22929,11 +22929,16 @@
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 64,
                     "heading": "Munición Eclipse"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 66,
+                    "section": "Smoke rules inherited by Eclipse"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-09"
+                "reviewedOn": "2026-10-31"
             },
             "facts": {
                 "clarifications": [
@@ -22946,13 +22951,29 @@
                     "template": "circular",
                     "height": "infinite",
                     "expires": "start-of-states-phase",
-                    "multispectralVisor": "blocked"
+                    "multispectralVisor": "blocked",
+                    "opposition": {
+                        "ruleId": "rule:face-to-face-rolls",
+                        "attackRequirements": [
+                            "requires-roll",
+                            "requires-lof",
+                            "lof-crosses-zone"
+                        ],
+                        "visorAttack": "face-to-face-if-qualifying",
+                        "enemyDodge": "normal-roll",
+                        "templateRetention": "win-every-opposed-or-pass-unopposed",
+                        "critical": "no-additional-effect"
+                    }
                 }
             },
             "relations": [
                 {
                     "type": "uses-effects-of",
                     "recordId": "ammunition:smoke"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "rule:face-to-face-rolls"
                 }
             ]
         },
@@ -23245,7 +23266,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-09"
+                "reviewedOn": "2026-10-31"
             },
             "facts": {
                 "clarifications": [
@@ -23259,9 +23280,27 @@
                     "template": "circular",
                     "height": "infinite",
                     "expires": "start-of-states-phase",
-                    "multispectralVisor": "can-draw-lof"
+                    "multispectralVisor": "can-draw-lof",
+                    "opposition": {
+                        "ruleId": "rule:face-to-face-rolls",
+                        "attackRequirements": [
+                            "requires-roll",
+                            "requires-lof",
+                            "lof-crosses-zone"
+                        ],
+                        "visorAttack": "normal-roll",
+                        "enemyDodge": "normal-roll",
+                        "templateRetention": "win-every-opposed-or-pass-unopposed",
+                        "critical": "no-additional-effect"
+                    }
                 }
-            }
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "rule:face-to-face-rolls"
+                }
+            ]
         },
         {
             "id": "ammunition:stun",

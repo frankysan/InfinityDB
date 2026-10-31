@@ -2093,8 +2093,8 @@
       "recordId": "ammunition:eclipse",
       "targetRelease": "1.0.0",
       "status": "reviewed",
-      "reviewedOn": "2026-10-15",
-      "note": "N5.3 English p. 64, Spanish p. 64 and pinned English Wiki Eclipse revision 3789 confirm Smoke inheritance, Reflective zero-visibility/MSV exception and BS Attack visibility-MOD exception. The outgoing uses-effects-of relation targets Smoke while the explicit clarifications and typed visibility facts preserve Eclipse's visor exception; no unconditional visor-negation edge is implied."
+      "reviewedOn": "2026-10-31",
+      "note": "N5.3 English pp. 64/66, Spanish p. 64 and the retained pinned English Wiki Eclipse revision 3789 review establish Smoke inheritance, Reflective zero-visibility/MSV exception and BS Attack visibility-MOD exception. The uses-effects-of references point to Smoke and the general Face to Face rule. Typed opposition facts require a rolled Attack and crossing LoF, preserve Eclipse's Visor exception, Normal enemy Dodge, all-oppositions retention and no additional Critical effect; no unconditional Visor-negation edge or calculated outcome is implied."
     },
     {
       "recordId": "ammunition:em",
@@ -2135,8 +2135,8 @@
       "recordId": "ammunition:smoke",
       "targetRelease": "1.0.0",
       "status": "reviewed",
-      "reviewedOn": "2026-10-15",
-      "note": "N5.3 English p. 66, Spanish p. 65 and pinned English Wiki Smoke revision 3642 confirm the unopposed/Face-to-Face conditions, MSV exclusion, Dodge exception, Critical, removal, infinite-height volume and horizontal/vertical scenery clipping. Conditional LoF interactions are described with linked references; no blanket outgoing effect edge is justified. Eclipse's distinct MSV exception is reviewed separately."
+      "reviewedOn": "2026-10-31",
+      "note": "N5.3 English p. 66, Spanish p. 65 and the retained pinned English Wiki Smoke revision 3642 review establish the unopposed/Face-to-Face conditions, MSV exclusion, Dodge exception, Critical, removal, infinite-height volume and horizontal/vertical scenery clipping. The uses-effects-of reference points to the general Face to Face rule; typed opposition facts preserve the Roll, LoF and crossing conditions without calculating outcomes. Eclipse's distinct MSV exception remains separately reviewed."
     },
     {
       "recordId": "ammunition:stun",

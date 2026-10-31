@@ -56,6 +56,66 @@ def browser() -> Iterator[Any]:
             chrome.close()
 
 
+@pytest.mark.parametrize("width,height", [(1440, 900), (390, 844), (320, 640)])
+@pytest.mark.parametrize("slug", ["smoke", "eclipse"])
+def test_visibility_opposition_rows_match_api_and_link_to_roll_rules(
+    app: Any, browser: Any, width: int, height: int, slug: str,
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    failed: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed.append(request.url))
+    page.on("response", lambda response: failed.append(
+        f"{response.status} {response.url}"
+    ) if response.status >= 400 else None)
+    try:
+        response = page.goto(f"{ORIGIN}/ammunition/{slug}", wait_until="domcontentloaded")
+        assert response.status == 200
+        group = page.locator(".ammunition-mechanics")
+        group.get_by_text("Opposing Attacks", exact=True).wait_for()
+        payload = page.evaluate(
+            "async () => (await fetch('/api' + location.pathname)).json()"
+        )
+        record = next(r for r in payload["rules"] if r["id"] == f"ammunition:{slug}")
+        opposition = record["facts"]["visibilityZone"]["opposition"]
+        assert opposition["attackRequirements"] == [
+            "requires-roll", "requires-lof", "lof-crosses-zone",
+        ]
+        assert opposition["enemyDodge"] == "normal-roll"
+        assert opposition["critical"] == "no-additional-effect"
+        actual = group.inner_text()
+        assert "enemy Attacks requiring a Roll and LoF crossing the zone" in actual
+        assert "Dodge inside the Template is a Normal Roll" in actual
+        assert "Win every applicable Face to Face Roll" in actual
+        assert "pass the unopposed Normal Roll" in actual
+        assert "No additional effect; apply the Face to Face rules" in actual
+        assert "Saving Roll" not in actual and "ammunitionResolution" not in record["facts"]
+        if slug == "smoke":
+            assert opposition["visorAttack"] == "normal-roll"
+            assert "Smoke does not oppose these Attacks" in actual
+        else:
+            assert opposition["visorAttack"] == "face-to-face-if-qualifying"
+            assert "Qualifying rolled Attacks through Eclipse can be Face to Face" in actual
+        links = group.locator('a[href="/rules/face-to-face-rolls"]')
+        assert links.count() == 2
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
+        links.first.focus()
+        page.keyboard.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/face-to-face-rolls")
+        page.get_by_role("heading", name="Face to Face Rolls", exact=True).first.wait_for()
+        page.go_back()
+        page.wait_for_url(f"{ORIGIN}/ammunition/{slug}")
+        page.locator(".ammunition-mechanics").get_by_text("Opposing Attacks", exact=True).wait_for()
+        assert not errors, errors
+        assert not failed, failed
+    finally:
+        page.close()
+
+
 def _display_summary(
     summary: str, tokens: list[dict[str, Any]] | None = None,
 ) -> str:

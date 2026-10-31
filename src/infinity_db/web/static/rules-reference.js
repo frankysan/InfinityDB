@@ -203,6 +203,9 @@ function appendAmmunitionFacts(container, rule) {
     [...states].map(([id, state]) => [id, state.name])
   );
   const rows = ammunitionFactRows(rule.facts, stateNames);
+  const references = new Map((rule.display_relations || [])
+    .filter((relation) => relation.record)
+    .map((relation) => [relation.record.id, relation.record]));
   if (!rows.length) return;
   const group = document.createElement("div");
   group.className = "detail-fact-group ammunition-mechanics";
@@ -211,10 +214,10 @@ function appendAmmunitionFacts(container, rule) {
   heading.textContent = "Reviewed mechanics";
   const list = document.createElement("dl");
   list.className = "ammunition-mechanics-list";
-  for (const [label, value, stateId] of rows) {
+  for (const [label, value, referenceId] of rows) {
     const term = document.createElement("dt");
-    const state = stateId ? states.get(stateId) : null;
-    const href = state ? relationHref(state) : null;
+    const reference = referenceId ? references.get(referenceId) : null;
+    const href = reference ? relationHref(reference) : null;
     if (href) {
       const link = document.createElement("a");
       link.href = href;

@@ -18,7 +18,8 @@ are not retroactively relabeled.
   carrying Weapon or Equipment; disputed and unavailable attributes remain visible.
 - Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties
   such as Plasma, Viral, MULTI and combined Ammunition. Shared Weapon rules are also
-  discoverable through the Glossary.
+  discoverable through the Glossary. Smoke and Eclipse cards show when placement
+  opposes Attacks and how Visors affect that opposition.
 - Dated FAQ clarifications now appear beside the rules and scenarios they affect,
   keeping their source versions and scenario restrictions visible.
 - The Scenario browser can select published ITS missions as well as N5 Core.
@@ -158,6 +159,8 @@ are not retroactively relabeled.
 - **Data processing + Web frontend:** Clarify base Ammunition Saving Rolls, Criticals,
   conditional State effects and Immunity exceptions, including PARA's missing-PH case,
   Shock's VITA condition, T2's additional Critical roll, Stun/Guts and Smoke/Eclipse scenery.
+  Compact Smoke/Eclipse help separates opposing Attacks, Visors, Dodge, template
+  retention and Critical effects, with links to the Face to Face rules.
   Keep Combined Ammunition distinct from Combined Saving Rolls.
 - **Data processing + Web frontend:** Clarify Mine Trigger Area measurement, Total Cover,
   concealed Markers versus revealed objects and exceptional movement. Put Mine-specific

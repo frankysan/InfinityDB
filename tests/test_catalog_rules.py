@@ -905,7 +905,7 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
     assert [(case["sourceAmmunitionId"], case["when"]["immunity"])
             for case in cases] == [
                 (10, "ARM"), (13, "ARM"), (10, "AP"), (30, "AP"),
-                (40, "AP"), (5, "BTS"),
+                (40, "AP"), (5, "BTS"), (30, "BTS"), (30, "Shock"), (5, "E/M"),
             ]
     for case, normal, critical in zip(cases[:2], (2, 3), (3, 4), strict=True):
         source = source_map[case["sourceAmmunitionId"]]
@@ -1363,7 +1363,7 @@ def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
         assert fragment in eclipse_text, fragment
     for record, visor in ((smoke, "can-draw-lof"), (eclipse, "blocked")):
         zone = record["facts"]["visibilityZone"]
-        assert zone == {
+        assert {k: v for k, v in zone.items() if k != "opposition"} == {
             "visibility": "zero", "template": "circular", "height": "infinite",
             "expires": "start-of-states-phase", "multispectralVisor": visor,
         }
@@ -1400,7 +1400,7 @@ def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
         citation["page"]
         for citation in immunity["citations"]
         if citation["source_id"] == "n5-core-v5.3-pdf"
-    } == {95, 96}
+    } == {14, 95, 96, 175}
     assert {
         citation["page"]
         for citation in immunity["citations"]
@@ -1428,7 +1428,7 @@ def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
         payload["rules"][0]["facts"]["clarifications"]
     )
     clarifications_tokens = payload["rules"][0]["fact_tokens"]["clarifications"]
-    assert len(clarifications_tokens) == 3
+    assert len(clarifications_tokens) == 4
     assert any(
         token["target"] == "trait:arm-0"
         for token in clarifications_tokens[0]
@@ -1650,7 +1650,7 @@ def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
     )
     assert [case["sourceAmmunitionId"] for case in rules[0]["facts"][
         "immunityInteraction"
-    ]["reviewedCombinedCases"]] == [10, 13, 10, 30, 40, 5]
+    ]["reviewedCombinedCases"]] == [10, 13, 10, 30, 40, 5, 30, 30, 5]
 
 
 def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(

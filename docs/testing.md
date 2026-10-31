@@ -4127,6 +4127,22 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Typed Smoke/Eclipse opposition reference, 2026-10-31:**
+`tests/test_ammunition_visibility_opposition.py` pins N5.3 pp. 64/66
+and verifies the exact optional opposition facts, canonical rule relation,
+stored/public API parity and compatibility with older zone objects.
+Mutations reject omitted Roll/LoF/crossing conditions, universal Visor
+opposition, opposed enemy Dodge, win-any retention, additional Critical
+Saving Rolls and calculated target outcomes. The shared renderer preserves
+State links while linking opposition rows to the canonical Face to Face rule.
+Six Chromium checks in `test_verify_ammunition_publication_browser.py`
+cover Smoke/Eclipse at 1440/390/320 px, API agreement, exact conditional
+rows, keyboard rule navigation/back, request/page errors and overflow.
+The module now has 68 cases. The older REA-012 6 px overflow observation
+is historical; these current checks require no horizontal overflow.
+Rules/publication promotion retains the same 17 deployed objects and
+recovery copies. This is reference acceptance, not an attack calculator.
+
 **Weapon-detail reviewed Ammunition browser parity, 2026-10-31:**
 `tests/test_verify_ammunition_publication_browser.py` cross-checks
 the published Weapon API with the existing UI for all five reviewed
@@ -4144,7 +4160,7 @@ single-component canonical links, shared summaries with resolved maintained-text
 display forms (including plural references), citation counts, source Saving Roll
 notation, and no horizontal overflow. Eleven more Chromium cases at 390 px
 visit the canonical Ammunition detail routes, verify matching titles and cited
-rule records. The full suite has 62 cases; all 11 base and five combined source
+rule records. That parity-only batch covered 62 cases; all 11 base and five combined source
 identities are represented without inferred attack rules or a database rebuild.
 Future Weapon comparison views remain out of scope.
 

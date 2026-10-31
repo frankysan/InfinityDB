@@ -118,6 +118,15 @@ Wounds inflicted on failure of that extra roll. Smoke/Eclipse use
 `facts.visibilityZone` and no Saving Roll facts. Other
 Ammunition effects remain independent of these State links.
 
+Smoke/Eclipse's optional `facts.visibilityZone.opposition` object fixes
+the reviewed Attack requirements, Visor exception, Normal enemy Dodge,
+template-retention condition and Critical-effect boundary. Its `ruleId`
+must have a corresponding `uses-effects-of` relation to the canonical
+Face to Face rule. The closed validator rejects missing Roll/LoF/crossing
+conditions, unsupported opposition or Critical results, and computed
+target outcomes. Older zone objects without this additive member remain
+valid; visibility facts still cannot mix with Saving Roll resolution.
+
 The `skill:immunity` definition may also carry the closed
 `facts.immunityInteraction` object. It records the reviewed N5.3 boundary for
 covered Ammunition (treat as Normal and ignore its special effects, Saving

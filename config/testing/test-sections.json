@@ -7,6 +7,7 @@
         "test_application_rule_references",
         "test_audit_1_0_reference_inputs",
         "test_ammunition_publication_parity",
+        "test_ammunition_visibility_opposition",
         "test_audit_auxiliary_silhouette_provenance",
         "test_audit_army_faction_semantics",
         "test_audit_database_separation",
