@@ -1270,6 +1270,52 @@ def test_reviewed_dodge_extra_parameter_rejects_unscoped_or_mismatched_values(
         validate()
 
 
+def test_super_jump_jet_propulsion_requires_exact_source_extra(tmp_path: Path) -> None:
+    document = valid_document()
+    record = next(row for row in document["records"] if row["kind"] == "skill")
+    record["id"] = "skill:super-jump"
+    record["armyLinks"] = [{"entity": "skill", "id": "super-jump"}]
+    jet = {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [{
+            "extraId": 304, "extraType": "TEXT", "rawValue": "Jet Propulsion",
+            "effect": {"kind": "trajectory-control",
+                       "appliesTo": "super-jump-jet-propulsion"},
+        }],
+    }
+    record["variantSemantics"] = {
+        "inheritance": "family",
+        "occurrenceParameters": [
+            {"source": "army-extra", "kind": "distance", "positiveSign": "omit"},
+            deepcopy(jet),
+        ],
+    }
+    path = tmp_path / "jet-propulsion.json"
+
+    def validate() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    validate()
+    for changes in (
+        {"extraId": 303},
+        {"extraId": 304.0},
+        {"extraType": "DISTANCE"},
+        {"rawValue": "Jet propulsion"},
+        {"effect": {"kind": "movement-bonus", "appliesTo": "super-jump-jet-propulsion"}},
+        {"effect": {"kind": "trajectory-control", "appliesTo": "jump-distance"}},
+    ):
+        invalid = deepcopy(jet)
+        invalid["extraValues"][0].update(changes)
+        record["variantSemantics"]["occurrenceParameters"][1] = invalid
+        with pytest.raises(ValueError, match="invalid Super-Jump Jet Propulsion extra"):
+            validate()
+    record["variantSemantics"]["occurrenceParameters"][1] = deepcopy(jet)
+    record["armyLinks"] = [{"entity": "skill", "id": "jump"}]
+    with pytest.raises(ValueError, match="Dodge family"):
+        validate()
+
+
 def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: Path) -> None:
     document = valid_document()
     document["records"] = [

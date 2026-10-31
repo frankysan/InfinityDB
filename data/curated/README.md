@@ -953,8 +953,9 @@ this metadata does not calculate stacking or an effective game-state MOD.
 
 The **`reviewed-extra`** kind adds explicit, per-source-ID typed effects
 without broadening numeric MODs or the distance-only browser projection.
-Its first supported family is exactly `skill:dodge`. Each entry requires
-`extraId`, `extraType`, `rawValue`, and a discriminated `effect`:
+Its supported families are the reviewed `skill:dodge` and
+`skill:super-jump` identities. Each entry requires `extraId`,
+`extraType`, `rawValue`, and a discriminated `effect`:
 
 ```json
 {
@@ -974,6 +975,13 @@ Its first supported family is exactly `skill:dodge`. Each entry requires
   ]
 }
 ```
+
+The Super-Jump family has one separate, exact `reviewed-extra`:
+source extra ID 304, `TEXT: Jet Propulsion`, with
+`effect: {"kind":"trajectory-control","appliesTo":"super-jump-jet-propulsion"}`.
+It denotes repeated direction/heading changes along a predeclared
+trajectory (N5.3 p. 113), never a distance bonus. The existing distance
+parameter remains independently owned, and no combination is inferred.
 
 The bounded Dodge effects are `opponent-roll-mod` (negative opponent
 Face to Face MOD), `roll-attribute-replacement` (PH value for Dodge),

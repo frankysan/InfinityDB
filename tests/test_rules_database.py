@@ -1517,7 +1517,7 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     current_rules_database: RulesDatabase,
 ) -> None:
     mappings = current_rules_database.skill_reviewed_extra_semantics()
-    assert set(mappings) == {"dodge"}
+    assert set(mappings) == {"dodge", "super-jump"}
     param = mappings["dodge"]
     assert param["kind"] == "reviewed-extra"
     assert param["source"] == "army-extra"
@@ -1574,6 +1574,35 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
         {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
     ]
+
+
+def test_super_jump_jet_propulsion_is_typed_separately_from_distance(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    param = rules.skill_reviewed_extra_semantics()["super-jump"]
+    assert param == {
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 304,
+            "extra_type": "TEXT",
+            "raw_value": "Jet Propulsion",
+            "effect": {
+                "kind": "trajectory-control",
+                "applies_to": "super-jump-jet-propulsion",
+            },
+        }],
+    }
+    assert rules.skill_parameter_semantics()["super-jump"] == {
+        "kind": "distance", "positive_sign": "omit",
+    }
+    assert "super-jump" not in rules.skill_numeric_mod_semantics()
+    record = rules.composed_record("skill:super-jump")
+    assert record is not None
+    assert param in record["variant_semantics"]["occurrence_parameters"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 113
+               for c in record["citations"])
 
 
 def test_rules_database_returns_reviewed_source_variant_semantics(

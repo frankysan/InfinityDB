@@ -398,7 +398,7 @@ The reviewed Surprise Attack source gate covers Skill `191`, all 767 direct
 rows and the exact single-extra signatures 6/7 (`TEXT: -3/-6`, 762/5 rows).
 It checks both the tracked rules artifact and a fresh export, preserving the
 opponent-target Face to Face ARO scope separately from Mimetism and the
-distance-only display query. The current source inventory has 37 unresolved
+distance-only display query. The current source inventory has 36 unresolved
 Skill IDs and 14 Equipment IDs; these are per-source review flags, not Unit counts.
 
 ## Non-Skill Army source classification and Unit presentation

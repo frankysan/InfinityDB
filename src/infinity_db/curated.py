@@ -61,7 +61,29 @@ def _validate_reviewed_extra_parameter(
     inheritance: str,
     army_links: list[object],
 ) -> None:
-    """Bound the first typed-effect vocabulary to reviewed Dodge source extras."""
+    """Bound typed extra effects to exact, reviewed source Skill families."""
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "super-jump"}
+    ]:
+        values = parameter.get("extraValues")
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != [{
+                "extraId": 304,
+                "extraType": "TEXT",
+                "rawValue": "Jet Propulsion",
+                "effect": {
+                    "kind": "trajectory-control",
+                    "appliesTo": "super-jump-jet-propulsion",
+                },
+            }]
+        ):
+            raise ValueError(f"{context}: invalid Super-Jump Jet Propulsion extra")
+        return
     if (
         inheritance != "family"
         or len(army_links) != 1

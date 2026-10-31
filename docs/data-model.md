@@ -798,8 +798,8 @@ This baseline contains **96 Skill** source identities across
   44 family-only IDs; 1 reviewed distance-parameter source
   (Forward Deployment, `161`); 3 reviewed numeric-parameter
   sources (Mimetism `28`, Berserk `24` and Surprise Attack `191`); 1 reviewed
-  extra-parameter source (Dodge `40`); and **37** IDs with
-  unresolved occurrence parameters.
+  extra-parameter sources (Dodge `40` and Super-Jump `74`); and
+  **36** IDs with unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
   19 family-only IDs; and 14 IDs with unresolved occurrence parameters.
   Four currently published Equipment source IDs have reviewed
@@ -810,8 +810,8 @@ This baseline contains **96 Skill** source identities across
   Forward Deployment `161` is the only source with exclusively
   `DISTANCE` extras and matching reviewed distance semantics.
   Dodge `40` and Super-Jump `74` mix `TEXT` with `DISTANCE`;
-  Dodge's exact observed signatures are reviewed; Super-Jump, Jump
-  `263`, and Climb `271` are not certified at the same level.
+  both now have exact reviewed signatures. Jump `263` and Climb
+  `271` retain unresolved occurrence-distance parameters.
   Do not infer coverage from source type or player-facing prose.
 
 These statuses are conservative **per-source-ID audit flags**.
@@ -903,13 +903,30 @@ distance-only display query and `skill_numeric_mod_semantics()`.
 Source ID `40` is now `reviewed-extra-parameter` in the
 tracked `rules.db` and in a freshly exported database from
 curated sources. With the Surprise Attack review below, both inventories
-report **3 reviewed-numeric, 1 reviewed-extra, and 37 unresolved** Skill source IDs.
+report **3 reviewed-numeric, 2 reviewed-extra, and 36 unresolved** Skill source IDs.
 The inventory is read-only and does not overwrite either database.
 `tests/test_audit_source_variant_inputs.py` checks the tracked
 artifact and independently exports current curation into a
 temporary rules database to verify the exact source signatures.
 Certification is per observed source signature, not a new
 player-visible variant index or a game-state simulator.
+
+**Reviewed Super-Jump Jet Propulsion extra (2026-10-31):** Source
+Skill `74` has 670 direct Army occurrences: 198 with
+`TEXT: Jet Propulsion` (extra ID `304`), four with
+`DISTANCE: +7.5` (ID `260`), 43 with `DISTANCE: 7.5`
+(ID `372`), and the rest with no extra. N5.3 p. 113 explicitly
+grants repeated changes of direction and heading along a predeclared
+trajectory for Jet Propulsion; that is **not** a distance modifier.
+The exact `reviewed-extra` effect
+`trajectory-control/super-jump-jet-propulsion` is distinct from the
+existing family `distance` parameter and does not grant new movement
+or extrapolate combined extras. The reviewed typed map is serialized
+in the synchronized v9 rules database and available through
+`RulesDatabase.skill_reviewed_extra_semantics()`. The 36 remaining
+Skill source IDs, including Jump and Climb, retain their unresolved
+parameter status; TinBot Firewall remains an independently unresolved
+Equipment occurrence parameter. No Unit-use index has been published.
 
 **Reviewed Surprise Attack occurrence MODs (2026-10-30):** Source Skill
 `191` has 767 direct relationships, all with one exact extra: `TEXT: -3`

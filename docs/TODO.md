@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **37 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **36 Skill** source IDs with unresolved
       occurrence parameters and 14 Equipment source IDs. The tracked
       rules.db now includes the reviewed Mimetism/Berserk/Dodge/Surprise Attack mappings;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
@@ -1718,9 +1718,21 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         92 `-3` and 55 `-6` extras. The cited N5.3 pp.
         32/34/113/127 distinguish movement bonuses, Jet Propulsion
         steering, and enemy Comms Attack MODs. The exact source
-        signatures now have a pinned-archive regression, but these
-        four source IDs **remain unresolved as typed occurrence
-        parameters**. No new variant/Unit use is published.
+        signatures have a pinned-archive regression. Super-Jump's Jet
+        Propulsion mapping was subsequently promoted below; Jump,
+        Climb and TinBot Firewall remain unresolved as typed occurrence
+        parameters. No new variant/Unit use is published.
+      - [x] **Data processing:** Publish exact Super-Jump (Jet Propulsion)
+        source extra 304 as a typed trajectory-control variant, separate
+        from the existing `DISTANCE` parameter. The pinned Army source
+        reports 198 Jet Propulsion occurrences, four `+7.5` distance
+        occurrences and 43 `7.5` distance occurrences among 670
+        Super-Jump source rows; no combinations occur. N5.3 p. 113
+        establishes maneuverability, not extra distance. Fail-closed
+        validation, tracked v9 rules metadata and matching deployed-object
+        publication are synchronized, with ignored rollback copies.
+        The source-variant audit now reports 36 unresolved Skill IDs.
+        Jump, Climb, TinBot and all Unit-usage index work remain open.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

@@ -69,8 +69,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-distance-parameter": 1,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 1,
-            "unresolved-occurrence-parameter": 37,
+            "reviewed-extra-parameter": 2,
+            "unresolved-occurrence-parameter": 36,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -110,7 +110,7 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
 
     # A TEXT extra is not automatically a reviewed modifier. Three
     # source IDs now have exact typed mappings; the others remain open.
-    for source_id in (25, 55, 74, 1000):
+    for source_id in (25, 55, 1000):
         item = skills[source_id]
         assert item["status"] == "unresolved-occurrence-parameter"
         assert "TEXT" in item["extraTypes"]
@@ -118,7 +118,8 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     assert skills[24]["status"] == "reviewed-numeric-parameter"
     assert skills[28]["status"] == "reviewed-numeric-parameter"
     assert skills[40]["status"] == "reviewed-extra-parameter"
-    for source_id in (24, 28, 40):
+    assert skills[74]["status"] == "reviewed-extra-parameter"
+    for source_id in (24, 28, 40, 74):
         assert all(part["reviewed"] for part in skills[source_id]["extraSignatures"])
     for source_id in (100, 101, 169, 244, 247):
         item = equipment[source_id]
@@ -299,8 +300,8 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 1,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 1,
-        "unresolved-occurrence-parameter": 37,
+        "reviewed-extra-parameter": 2,
+        "unresolved-occurrence-parameter": 36,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -392,7 +393,10 @@ def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
     skills = select_source_variants(report, "skills", [74, 263, 271])["items"]
     assert [item["id"] for item in skills] == [74, 263, 271]
     assert [item["occurrences"] for item in skills] == [670, 26, 6]
-    assert all(item["status"] == "unresolved-occurrence-parameter" for item in skills)
+    assert [item["status"] for item in skills] == [
+        "reviewed-extra-parameter", "unresolved-occurrence-parameter",
+        "unresolved-occurrence-parameter",
+    ]
     assert {
         item["id"]: [
             (tuple(tuple(extra) for extra in signature["extras"]),
@@ -403,7 +407,7 @@ def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
     } == {
         74: [
             (((260, "DISTANCE", "+7.5"),), 4, True),
-            (((304, "TEXT", "Jet Propulsion"),), 198, False),
+            (((304, "TEXT", "Jet Propulsion"),), 198, True),
             (((372, "DISTANCE", "7.5"),), 43, True),
         ],
         263: [(((372, "DISTANCE", "7.5"),), 26, False)],

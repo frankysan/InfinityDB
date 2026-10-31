@@ -2785,6 +2785,21 @@
                         "source": "army-extra",
                         "kind": "distance",
                         "positiveSign": "omit"
+                    },
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 304,
+                                "extraType": "TEXT",
+                                "rawValue": "Jet Propulsion",
+                                "effect": {
+                                    "kind": "trajectory-control",
+                                    "appliesTo": "super-jump-jet-propulsion"
+                                }
+                            }
+                        ]
                     }
                 ]
             },
