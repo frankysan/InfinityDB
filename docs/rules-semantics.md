@@ -2695,6 +2695,32 @@ conditional references, not printed Immunity examples, Weapon rewrites
 or calculated target outcomes. The Silent reaction/Attribute-Immunity
 timing question remains a separate review.
 
+**Silent and Attribute-Immunity timing — unresolved application.**
+English N5.3 p. 14 determines MODs and opposing Rolls in Resolution,
+then applies Saving Rolls in Effects. Immunity p. 95 lists the relevant
+Saving Roll trigger and Attribute-specific Trait protection. Silent p. 175
+applies its conditional MOD to a **Face to Face Dodge Roll** inside the
+target's ZoC and outside its LoF. The reviewed clauses do not explicitly
+settle how that Trait protection applies to the earlier Dodge MOD.
+InfinityDB has no adopted ruling for this interaction, and its Saving
+Roll examples do not decide it.
+
+Spanish N5.3 pp. 14 and 99 preserve the sequence and activation evidence;
+its Silent text on p. 182 says Dodge without the English Face to Face
+qualifier. The reference follows the explicit English scope without treating
+the Spanish omission as permission to modify every reaction. The supplied
+English FAQ v0.0/v0.1 and Spanish FAQ v0.1 contain no direct named
+Silent/Immunity entry; that bounded term inventory is not a claim about all
+possible or later official rulings. Exact PDF byte identities are retained in
+the curated source declarations and source regressions.
+
+`trait:silent-x` owns the visible clarification, primary-source citations,
+bilingual note and `review-needed:scope-unclear` marker. Immunity and
+Silenced Pistol link to that owner in their ordinary Clarifications sections.
+All 23 typed Saving Roll references remain unchanged. The disclosure closes
+the local source review; authoritative resolution remains an external
+clarification, with final release-matched disclosure acceptance separate.
+
 **AP+T2 CC Weapon versus Immunity (AP)** is the sixth strictly
 reviewed Combined Ammunition example. The N5.3 p. 177 Weapon
 Chart specifies one ARM/2 Saving Roll using AP+T2 with

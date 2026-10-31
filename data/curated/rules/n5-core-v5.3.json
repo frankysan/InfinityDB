@@ -3740,18 +3740,49 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Silent (X)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 14
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 95
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 14
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 99
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 182
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-10-31"
             },
             "facts": {
                 "sourceIdentity": {
                     "prefixes": [
                         "Silent ("
                     ]
-                }
+                },
+                "clarifications": [
+                    "The [[rule:order-expenditure-sequence|Order Expenditure Sequence]] determines MODs and opposing Rolls in Resolution, with [[rule:saving-rolls|Saving Rolls]] following in Effects (N5.3 p. 14). The relevant [[skill:immunity|Attribute Immunity]] trigger is being required to make a [[rule:saving-rolls|Saving Roll]]; its text also protects against certain Attribute-reducing Traits (p. 95).",
+                    "[[review-needed:scope-unclear]] **Unresolved timing question:** The reviewed clauses do not explicitly settle whether [[skill:immunity|Immunity (ARM)/(BTS)]] negates the conditional [[skill:dodge|Dodge]] MOD from [[trait:silent-x|Silent]] at the earlier opposing Roll. InfinityDB has no adopted ruling for this interaction. Its [[skill:immunity|Saving Roll examples]] do not decide this MOD."
+                ],
+                "sourceNotes": [
+                    "**Bilingual source wording:** English N5.3 p. 175 expressly limits this MOD to Face to Face [[skill:dodge|Dodge]] Rolls. Spanish N5.3 p. 182 says [[skill:dodge|Dodge]] without that express qualifier. This reference follows the English scope; the Spanish omission is not treated as permission to modify every reaction or as a ruling on [[skill:immunity|Immunity]]."
+                ]
             },
             "relations": [
                 {
@@ -6650,13 +6681,17 @@
                     "current"
                 ]
             },
-            "facts": {},
+            "facts": {
+                "clarifications": [
+                    "**Unresolved timing question:** Whether [[skill:immunity|Immunity (ARM)/(BTS)]] negates this Weapon's [[trait:silent-x|Silent (-6)]] [[skill:dodge|Dodge]] MOD is not adjudicated here. The [[trait:silent-x|Silent reference]] records the source clauses and open scope. The reviewed [[ammunition:ap|AP]]/[[ammunition:shock|Shock]] Saving Roll examples remain separately scoped."
+                ]
+            },
             "variantSemantics": {
                 "inheritance": "family"
             },
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-14"
+                "reviewedOn": "2026-10-31"
             },
             "armyLinks": [
                 {
@@ -6697,6 +6732,10 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 182,
                     "section": "Weapon Chart: Silenced Pistol"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 95
                 }
             ]
         },
@@ -20912,7 +20951,8 @@
                 "clarifications": [
                     "Printed Example 2: Against a [[weapon-property:monofilament|Monofilament]] weapon that requires an ARM Saving Roll, Immunity (ARM) ignores its [[trait:arm-0|ARM = 0]] and [[trait:state|State: Dead]] Traits. The target makes the Saving Roll using full ARM and does not enter [[state:dead|Dead]] from that Trait on failure. On a Critical, the defender instead makes two ARM Saving Rolls unless it also has [[skill:immunity|Immunity (Critical)]] (English N5.3 p. 96; Spanish N5.3 p. 99).",
                     "The printed [[weapon:flash-pulse|Flash Pulse]] example: [[skill:immunity|Immunity (BTS)]] treats [[ammunition:stun|Stun Ammunition]] as [[ammunition:normal|Normal]], but the Saving Roll stays BTS, not ARM. Despite the ordinary protection against State-causing Traits, the explicit exception preserves [[trait:non-lethal|Non-Lethal]] (no Wounds) and [[trait:state|State: Stunned]] ([[state:stunned|Stunned]] only on a failed BTS roll).",
-                    "For the reviewed [[ammunition:ap|AP]]+[[ammunition:da|DA]] case, Immunity (AP) negates AP’s ARM modifier, but not DA’s two Saving Rolls: the attack has two rolls against full ARM, or three for a Critical. This is a rule-derived case, not a separately printed example."
+                    "For the reviewed [[ammunition:ap|AP]]+[[ammunition:da|DA]] case, Immunity (AP) negates AP’s ARM modifier, but not DA’s two Saving Rolls: the attack has two rolls against full ARM, or three for a Critical. This is a rule-derived case, not a separately printed example.",
+                    "**Unresolved timing question:** The [[trait:silent-x|Silent]] MOD to a Face to Face [[skill:dodge|Dodge]] Roll has a separate, unresolved application question for Attribute-based protection. The [[trait:silent-x|Silent reference]] records the source clauses; these Saving Roll examples do not decide that earlier MOD."
                 ],
                 "immunityInteraction": {
                     "coveredAmmunition": {
@@ -21563,11 +21603,19 @@
                 {
                     "sourceId": "wiki-vulnerability-oldid-3156",
                     "heading": "Vulnerability"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 14
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-09"
+                "reviewedOn": "2026-10-31"
             },
             "variantSemantics": {
                 "inheritance": "family"

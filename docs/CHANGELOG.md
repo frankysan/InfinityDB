@@ -228,6 +228,8 @@ are not retroactively relabeled.
   cover all five reviewed combined Ammunition forms, keeping their original
   effects and target conditions explicit. E/M-only protection against the
   E/M CC Weapon also distinguishes suppressed E/M effects from remaining Normal Wounds.
+  Silent's unresolved Attribute-Immunity timing and English/Spanish wording
+  difference are explained on its Trait page and linked from the relevant references.
 - **Web backend + Web frontend:** Group Weapon properties under Traits, Labels or States,
   linking each to its owning reference. Use reviewed N5 names for legacy Army labels;
   original wording remains available in Developer Mode and unknown properties remain visible.

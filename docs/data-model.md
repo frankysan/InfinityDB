@@ -512,6 +512,14 @@ deployed objects are unchanged. Other component Immunities, Comms
 Attack coverage, BTS conditions and unreviewed combinations
 remain unresolved.
 
+The separate **Silent / Attribute-Immunity timing** question is published as
+ordinary `facts.clarifications`, with a `review-needed:scope-unclear` marker on
+the owning `trait:silent-x` record. Immunity and Silenced Pistol cross-link the
+disclosure instead of adding a computed case. Source citations distinguish
+the opposing-Roll/Saving-Roll sequence and English/Spanish Trait wording;
+the existing English Face to Face scope is retained. No adopted ruling,
+retroactive MOD change or new typed Immunity outcome is implied.
+
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;
 its specific rules are separately curated, and missing Army Trait notation is

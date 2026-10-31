@@ -60,7 +60,7 @@ assert.doesNotMatch(effects.textContent, /Printed Example 2|The printed Flash Pu
 const clarifications = allGroups.find((node) => descendants(node, (c) => c.className === "detail-fact-heading")
   .some((heading) => heading.textContent === "Clarifications and examples"));
 assert.ok(clarifications);
-assert.equal(descendants(clarifications, (node) => node.tag === "li").length, 3);
+assert.equal(descendants(clarifications, (node) => node.tag === "li").length, 4);
 assert.match(clarifications.textContent, /Printed Example 2/);
 assert.match(clarifications.textContent, /The printed \[\[weapon:flash-pulse\|Flash Pulse\]\] example/);
 const groups = descendants(article, (node) => node.className === "detail-fact-group immunity-reviewed-cases");

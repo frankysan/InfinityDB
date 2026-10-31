@@ -4148,6 +4148,22 @@ rule records. The full suite has 62 cases; all 11 base and five combined source
 identities are represented without inferred attack rules or a database rebuild.
 Future Weapon comparison views remain out of scope.
 
+**Silent / Attribute-Immunity source disclosure, 2026-10-31:**
+`tests/test_silent_immunity_source_scope.py` pins English and Spanish
+N5.3 PDF bytes and selected printed pages (14/95/175 and 14/99/182),
+plus the three supplied FAQ input hashes. The source checks separate
+opposing Rolls from Saving Rolls, retain the bilingual Face to Face
+qualifier difference and bound the FAQ term inventory to those exact inputs.
+Source/stored/API assertions verify visible Clarifications, canonical links,
+primary citations and the explicit `scope-unclear` marker on Silent, with
+links from Immunity and Silenced Pistol. Nine Chromium checks at 1440/390/320
+px cover those ordinary pages, visible uncertainty, keyboard-accessible
+marker help, page/request errors and overflow. The Immunity browser module
+now has 66 cases; its 23 typed interactions remain unchanged. Maintained-text
+auditing retains zero unlinked candidates/residuals and one explicit marker.
+The synchronized rules/publication pair retains all 17 objects and recovery
+copies; this is local disclosure acceptance, not an authoritative ruling.
+
 **BTS partial-component Immunity examples, 2026-10-31:**
 `tests/test_immunity_bts_component_exceptions.py` pins N5.3 pp. 63–65,
 67, 95–96, 177 and 182, exact Army Weapon identities and Ammunition
@@ -4159,7 +4175,7 @@ components, source values, outcomes and evidence, including Boolean/float
 Saving Roll counts. Six new Chromium checks at 1440/390/320 px verify
 the explanations, remaining Wound possibility, unchanged extra Critical
 roll, canonical links, API agreement, errors and overflow. The full Immunity
-browser module now has 57 cases and the renderer has 23 reviewed interactions.
+browser module reached 57 cases in that batch, with 23 reviewed interactions.
 Coordinated rules/publication promotion retains all 17 deployed objects
 and recovery copies; this remains local acceptance.
 
@@ -4176,7 +4192,7 @@ Critical suppression and evidence. Nine additional Chromium checks at
 1440/390/320 px verify the three new explanations, conditional Shock/E/M
 effects, canonical links, source API parity, request/page errors and overflow.
 The shared renderer covers 21 reviewed interactions; the full Immunity
-browser module has 51 cases. Rules/publication refresh preserves all 17
+browser module reached 51 cases in that batch. Rules/publication refresh preserves all 17
 deployed objects and recovery copies. Final release acceptance stays separate.
 
 **Silenced Pistol / Immunity (BTS), 2026-10-31:**

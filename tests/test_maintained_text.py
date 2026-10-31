@@ -450,7 +450,11 @@ def test_reviewed_batch_audit_catches_case_and_plural_omissions(
 def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidates() -> None:
     root = Path(__file__).parents[1]
     current = load_curated_directory(root / "data" / "curated")
-    assert collect_review_needed_markers(current) == {}
+    assert collect_review_needed_markers(current) == {
+        "n5-core-v5.3|trait:silent-x": {
+            ("facts.clarifications[]", "scope-unclear", None): 1,
+        },
+    }
 
     documents = copy.deepcopy(current)
     for _, document in documents:

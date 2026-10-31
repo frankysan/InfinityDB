@@ -1124,9 +1124,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       - [ ] Review other BTS-component Immunity outcomes using exact
         non-Comms Weapon/combined-Ammunition evidence. The reviewed
         cases do not authorize arbitrary E/M, Comms Attack or
-        combined-effect adjudication. Review Silent (-6)'s conditional
-        Dodge mechanic and Attribute-Immunity timing independently
-        of the Silenced Pistol Saving Roll examples.
+        combined-effect adjudication.
+      - [x] Review and disclose **Silent / Attribute-Immunity timing**
+        separately from Saving Roll examples. English N5.3 pp. 14,
+        95 and 175 and Spanish pp. 14, 99 and 182 establish the
+        selected timing/wording evidence; supplied English FAQ v0.0/v0.1
+        and Spanish FAQ v0.1 have no direct named entry. Publish the
+        unresolved application and bilingual qualifier difference on
+        Silent, with visible links from Immunity and Silenced Pistol.
+        A `scope-unclear` marker preserves uncertainty without adding a
+        ruling or changing the 23 typed examples. Source/API and responsive
+        Chromium acceptance close this bounded local disclosure task;
+        authoritative resolution remains under External source clarifications.
       - [x] Review two exact **BTS partial-component Immunities**:
         Silenced Pistol/AP+Shock (source Ammunition 30) with Immunity
         (Shock) retains AP and one BTS/2 Saving Roll; E/M CC Weapon/
@@ -2566,6 +2575,15 @@ owns disclosure and accurate scope; this section owns later authoritative
 resolution. Preserve reviewed source values and uncertainty while waiting.
 An external correction can be incorporated earlier when available without
 making its arrival a release prerequisite.
+
+- [ ] Seek an applicable official **Silent / Attribute-Immunity** clarification:
+  whether the Saving-Roll-triggered Trait protection of Immunity (ARM)/(BTS)
+  negates Silent's earlier conditional Dodge MOD, and whether Spanish N5.3
+  p. 182's omitted Face to Face qualifier is intentional. The current reference
+  follows the explicit English Trait scope and discloses the application question
+  on Silent, Immunity and Silenced Pistol; no ruling or retroactive roll change is
+  inferred. This source follow-up is non-blocking while the disclosure is accurate;
+  final release-matched acceptance remains separate.
 
 - [ ] Seek source corrections or clarification for the pinned Fireteam chart
   references disclosed under ARMY-01: 11 rows referencing eight exact slugs

@@ -40,6 +40,59 @@ def browser() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width,height", [(1440, 900), (390, 844), (320, 640)])
+@pytest.mark.parametrize("path", [
+    "/traits/silent-x", "/skills/immunity", "/weapons/silenced-pistol",
+])
+def test_silent_immunity_scope_is_visible_without_adopting_a_ruling(
+    app: Any, browser: Any, width: int, height: int, path: str,
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    failed: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed.append(request.url))
+    page.on("response", lambda response: failed.append(
+        f"{response.status} {response.url}"
+    ) if response.status >= 400 else None)
+    try:
+        response = page.goto(f"{ORIGIN}{path}", wait_until="domcontentloaded")
+        assert response.status == 200
+        page.get_by_text("Unresolved timing question:", exact=True).wait_for()
+        group = page.locator(".detail-fact-group").filter(has_text="Unresolved timing question")
+        assert group.count() == 1 and group.is_visible()
+        assert group.locator('a[href="/traits/silent-x"]').count() >= 1
+        assert "Saving Roll examples" in group.inner_text()
+        if path == "/traits/silent-x":
+            assert "InfinityDB has no adopted ruling" in group.inner_text()
+            assert "Resolution" in group.inner_text() and "Effects" in group.inner_text()
+            for route in ("/skills/immunity", "/skills/dodge", "/rules/order-expenditure-sequence"):
+                assert group.locator(f'a[href="{route}"]').count() >= 1
+            page.get_by_text("Bilingual source wording:", exact=True).wait_for()
+            assert "Spanish N5.3 p. 182" in page.locator("body").inner_text()
+            marker = group.locator(".maintained-review-needed")
+            assert marker.count() == 1 and marker.is_visible()
+            badge = marker.locator(".maintained-review-needed-badge")
+            assert badge.is_visible() and badge.inner_text().casefold() == "uncertain"
+            marker.focus()
+            tooltip_id = marker.get_attribute("aria-describedby")
+            assert tooltip_id
+            tooltip = page.locator(f'[id="{tooltip_id}"]')
+            tooltip.wait_for(state="visible")
+            assert tooltip.is_visible()
+            assert "scope of this rule is unclear" in tooltip.inner_text()
+        if path == "/skills/immunity":
+            assert page.locator(".immunity-reviewed-cases li").count() == 23
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+        assert not failed, failed
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width,height", [(1440, 900), (390, 844), (320, 640)])
 @pytest.mark.parametrize("immunity,slug,combination,attribute,ignored,remaining,phrases,paths", [
     ("Shock", "silenced-pistol", "AP + SHOCK", "BTS/2", "ammunition:shock", "ammunition:ap",
      ("SHOCK component is ignored; AP still applies", "VITA 1 direct-to-Dead effect is ignored",
