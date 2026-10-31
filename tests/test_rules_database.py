@@ -1631,7 +1631,7 @@ def test_tinbot_firewall_source_mods_are_equipment_only(
             for extra_id, modifier in ((6, -3), (7, -6))
         ],
     }
-    assert set(rules.equipment_reviewed_extra_semantics()) == {169}
+    assert set(rules.equipment_reviewed_extra_semantics()) == {169, 244, 247}
     assert 169 not in rules.skill_reviewed_extra_semantics()
     assert 169 not in rules.skill_numeric_mod_semantics()
     record = rules.composed_record("equipment:tinbot-firewall")
@@ -1646,6 +1646,46 @@ def test_tinbot_firewall_source_mods_are_equipment_only(
     assert rules.catalog_source_variant_semantics("equipment")[169] == {
         "kind": "named", "label": "Firewall",
     }
+
+
+def test_tinbot_discover_and_ecm_guided_extras_are_source_specific(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    reviewed = rules.equipment_reviewed_extra_semantics()
+    assert reviewed[244] == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 277, "extra_type": "TEXT", "raw_value": "ReRoll",
+            "effect": {"kind": "reroll-one-die", "applies_to": "tinbot-discover-roll"},
+        }],
+    }
+    assert reviewed[247] == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [
+            {
+                "extra_id": extra_id, "extra_type": "TEXT", "raw_value": str(mod),
+                "effect": {
+                    "kind": "enemy-guided-attack-mod",
+                    "applies_to": "guided-attack-targeting-tinbot-owner",
+                    "modifier": mod,
+                },
+            }
+            for extra_id, mod in ((7, -6), (259, -9))
+        ],
+    }
+    named = rules.catalog_source_variant_semantics("equipment")
+    for source_id, record_id, label, page in (
+        (244, "equipment:tinbot-discover", "Discover", 127),
+        (247, "equipment:tinbot-ecm-guided", "ECM Guided", 127),
+    ):
+        assert named[source_id] == {"kind": "named", "label": label}
+        record = rules.composed_record(record_id)
+        assert record is not None
+        assert reviewed[source_id] in record["variant_semantics"]["occurrence_parameters"]
+        assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == page
+                   for c in record["citations"])
+        assert source_id not in rules.skill_reviewed_extra_semantics()
 
 
 def test_rules_database_returns_reviewed_source_variant_semantics(

@@ -12394,7 +12394,24 @@
                 "sourceVariant": {
                     "kind": "named",
                     "label": "Discover"
-                }
+                },
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 277,
+                                "extraType": "TEXT",
+                                "rawValue": "ReRoll",
+                                "effect": {
+                                    "kind": "reroll-one-die",
+                                    "appliesTo": "tinbot-discover-roll"
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "relations": [
                 {
@@ -12448,7 +12465,35 @@
                 "sourceVariant": {
                     "kind": "named",
                     "label": "ECM Guided"
-                }
+                },
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 7,
+                                "extraType": "TEXT",
+                                "rawValue": "-6",
+                                "effect": {
+                                    "kind": "enemy-guided-attack-mod",
+                                    "appliesTo": "guided-attack-targeting-tinbot-owner",
+                                    "modifier": -6
+                                }
+                            },
+                            {
+                                "extraId": 259,
+                                "extraType": "TEXT",
+                                "rawValue": "-9",
+                                "effect": {
+                                    "kind": "enemy-guided-attack-mod",
+                                    "appliesTo": "guided-attack-targeting-tinbot-owner",
+                                    "modifier": -9
+                                }
+                            }
+                        ]
+                    }
+                ]
             },
             "relations": [
                 {

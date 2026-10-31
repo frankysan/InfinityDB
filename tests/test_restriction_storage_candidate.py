@@ -447,6 +447,139 @@ def test_tinbot_firewall_refresh_requires_exact_pinned_occurrences(
         assert calls[0]["tinbot_firewall"] is True
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "source", "modifier", "scope", "other-record", "schema", "missing"),
+)
+def test_tinbot_other_refresh_rejects_unrelated_database_changes(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        TINBOT_OTHER_SOURCES,
+        TINBOT_OTHER_VARIANTS,
+        _check_variant_semantics_delta,
+    )
+
+    previous, proposed = tmp_path / "old.db", tmp_path / "next.db"
+    variants: dict[tuple[str, str], str] = {
+        key: json.dumps(value) for key, value in TINBOT_OTHER_VARIANTS.items()
+    }
+    with sqlite3.connect(previous) as old, sqlite3.connect(proposed) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (
+                key[0], key[1],
+                json.dumps({
+                    "inheritance": "source",
+                    "sourceVariant": {"kind": "named", "label": source["label"]},
+                }),
+                "unchanged",
+            )
+            for key, source in TINBOT_OTHER_SOURCES.items()
+        ] + [("n5-core-v5.3", "equipment:other", None, "unchanged")])
+        old.commit()
+        old.backup(new)
+        for key, payload in variants.items():
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE collection_id=? AND id=?",
+                (payload, *key),
+            )
+        if defect == "source":
+            changed = json.loads(variants[("n5-core-v5.3", "equipment:tinbot-discover")])
+            changed["sourceVariant"]["label"] = "Firewall"
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE id='equipment:tinbot-discover'",
+                (json.dumps(changed),),
+            )
+        elif defect in {"modifier", "scope"}:
+            key = ("n5-core-v5.3", "equipment:tinbot-ecm-guided")
+            changed = json.loads(variants[key])
+            effect = changed["occurrenceParameters"][0]["extraValues"][1]["effect"]
+            if defect == "modifier":
+                effect["modifier"] = -3
+            else:
+                effect["appliesTo"] = "all-attacks"
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE id='equipment:tinbot-ecm-guided'",
+                (json.dumps(changed),),
+            )
+        elif defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='equipment:tinbot-discover'")
+    if defect is None:
+        _check_variant_semantics_delta(
+            previous, proposed, variants, tinbot_other=True,
+        )
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                previous, proposed, variants, tinbot_other=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(previous, proposed, variants)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "application", "count", "extra", "status", "variant", "raw"),
+)
+def test_tinbot_other_refresh_checks_exact_pinned_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as source_audit
+    from tools import restrictions_v9_release as release
+
+    items = [
+        {
+            "id": source["sourceId"], "name": source["name"], "applicationId": 235,
+            "occurrences": source["count"], "status": "unresolved-occurrence-parameter",
+            "reviewedVariant": {"kind": "named", "label": source["label"]},
+            "reviewedExtra": None, "rawValues": [],
+            "extraSignatures": copy.deepcopy(source["signatures"]),
+        }
+        for source in release.TINBOT_OTHER_SOURCES.values()
+    ]
+    item = items[0]
+    if defect == "name":
+        item["name"] = "Different"
+    elif defect == "application":
+        item["applicationId"] = 999
+    elif defect == "count":
+        item["occurrences"] += 1
+    elif defect == "extra":
+        item["extraSignatures"][0]["extras"][0][0] = 999
+    elif defect == "status":
+        item["status"] = "reviewed-extra-parameter"
+    elif defect == "variant":
+        item["reviewedVariant"]["label"] = "Firewall"
+    elif defect == "raw":
+        item["rawValues"] = ["unreviewed"]
+    monkeypatch.setattr(
+        source_audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": items}}},
+    )
+    calls: list[dict] = []
+
+    def migration(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migration)
+    if defect:
+        with pytest.raises(ValueError, match="source drift"):
+            release.refresh_tinbot_other_v9_release(root=tmp_path)
+        assert not calls
+    else:
+        assert release.refresh_tinbot_other_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls[0]["variant_records"] == {
+            "equipment:tinbot-discover", "equipment:tinbot-ecm-guided",
+        }
+        assert calls[0]["tinbot_other"] is True
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

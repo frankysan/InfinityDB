@@ -63,6 +63,58 @@ def _validate_reviewed_extra_parameter(
 ) -> None:
     """Bound typed extra effects to exact, reviewed Army source families."""
     if inheritance == "source" and army_links == [
+        {"entity": "equipment", "id": 244}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 277,
+            "extraType": "TEXT",
+            "rawValue": "ReRoll",
+            "effect": {
+                "kind": "reroll-one-die",
+                "appliesTo": "tinbot-discover-roll",
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid TinBot Discover source extras")
+        return
+    if inheritance == "source" and army_links == [
+        {"entity": "equipment", "id": 247}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": extra_id,
+                "extraType": "TEXT",
+                "rawValue": str(modifier),
+                "effect": {
+                    "kind": "enemy-guided-attack-mod",
+                    "appliesTo": "guided-attack-targeting-tinbot-owner",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((7, -6), (259, -9))
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 2
+            or any(
+                not isinstance(entry, dict) or type(entry.get("extraId")) is not int
+                for entry in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid TinBot ECM Guided source extras")
+        return
+    if inheritance == "source" and army_links == [
         {"entity": "equipment", "id": 169}
     ]:
         values = parameter.get("extraValues")
@@ -418,14 +470,18 @@ def _validate_variant_semantics(
         raise ValueError(
             f"{context}: family semantics must not declare 'sourceVariant'"
         )
-    if army_links == [{"entity": "equipment", "id": 169}] and parameters:
-        if (
-            inheritance != "source"
-            or source_variant != {"kind": "named", "label": "Firewall"}
-            or len(parameters) != 1
-            or parameters[0].get("kind") != "reviewed-extra"
-        ):
-            raise ValueError(f"{context}: invalid TinBot Firewall source variant")
+    tinbot_labels = {169: "Firewall", 244: "Discover", 247: "ECM Guided"}
+    if parameters and len(army_links) == 1 and isinstance(army_links[0], dict):
+        link = army_links[0]
+        source_id = link.get("id") if link.get("entity") == "equipment" else None
+        if type(source_id) is int and source_id in tinbot_labels:
+            if (
+                inheritance != "source"
+                or source_variant != {"kind": "named", "label": tinbot_labels[source_id]}
+                or len(parameters) != 1
+                or parameters[0].get("kind") != "reviewed-extra"
+            ):
+                raise ValueError(f"{context}: invalid TinBot source variant")
     return inheritance
 
 

@@ -962,8 +962,10 @@ this metadata does not calculate stacking or an effective game-state MOD.
 The **`reviewed-extra`** kind adds explicit, per-source-ID typed effects
 without broadening numeric MODs or the distance-only browser projection.
 Its reviewed Skill families are `skill:dodge` and
-`skill:super-jump`; the exact source Equipment variant
-`equipment:tinbot-firewall` is also supported. Each entry requires
+`skill:super-jump`; the exact source Equipment variants
+`equipment:tinbot-firewall`, `equipment:tinbot-discover`
+and `equipment:tinbot-ecm-guided` are also supported.
+Each entry requires
 `extraId`, `extraType`, `rawValue`, and a discriminated `effect`:
 
 ```json
@@ -1017,6 +1019,17 @@ Fireteam-sharing rules imply further direct occurrences. The source
 variant retains `inheritance: source` and its `named: Firewall`
 identity. No unreviewed Army source extra becomes a specific variant
 merely because its value resembles a known parameter.
+
+TinBot Discover source Equipment 244 accepts only extra 277
+(`TEXT: ReRoll`) as `reroll-one-die`, scoped to
+`tinbot-discover-roll`. This never silently adds the distinct
+`+3 WIP` example printed in N5.3 p. 127. TinBot ECM Guided
+source Equipment 247 accepts only extra 7 (`TEXT: -6`) and
+extra 259 (`TEXT: -9`) as `enemy-guided-attack-mod`,
+scoped to `guided-attack-targeting-tinbot-owner`. Both
+retain their exact named source variants; no inferred effects
+or Fireteam-wide Unit occurrences are created. Exact source
+signature tests are required for future updates.
 
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value

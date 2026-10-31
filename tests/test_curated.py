@@ -1270,6 +1270,73 @@ def test_reviewed_dodge_extra_parameter_rejects_unscoped_or_mismatched_values(
         validate()
 
 
+@pytest.mark.parametrize(
+    ("source_id", "label", "extras"),
+    [
+        (244, "Discover", [{
+            "extraId": 277, "extraType": "TEXT", "rawValue": "ReRoll",
+            "effect": {"kind": "reroll-one-die", "appliesTo": "tinbot-discover-roll"},
+        }]),
+        (247, "ECM Guided", [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": str(mod),
+                "effect": {
+                    "kind": "enemy-guided-attack-mod",
+                    "appliesTo": "guided-attack-targeting-tinbot-owner",
+                    "modifier": mod,
+                },
+            }
+            for extra_id, mod in ((7, -6), (259, -9))
+        ]),
+    ],
+)
+def test_tinbot_other_extras_require_exact_source_and_scope(
+    tmp_path: Path, source_id: int, label: str, extras: list[dict],
+) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record["id"] = f"equipment:tinbot-{label.lower().replace(' ', '-')}"
+    record["kind"] = "equipment"
+    record["armyLinks"] = [{"entity": "equipment", "id": source_id}]
+    record["facts"] = {}
+    record["variantSemantics"] = {
+        "inheritance": "source",
+        "sourceVariant": {"kind": "named", "label": label},
+        "occurrenceParameters": [{
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extraValues": deepcopy(extras),
+        }],
+    }
+    path = tmp_path / "tinbot-other.json"
+
+    def validate() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    validate()
+    for mutation in (
+        {"extraId": extras[0]["extraId"] + 1},
+        {"extraId": float(extras[0]["extraId"])},
+        {"extraType": "DISTANCE"},
+        {"rawValue": "+3"},
+        {"effect": {"kind": "reroll-one-die", "appliesTo": "unrelated"}},
+    ):
+        values = deepcopy(extras)
+        values[0].update(mutation)
+        record["variantSemantics"]["occurrenceParameters"][0]["extraValues"] = values
+        with pytest.raises(ValueError, match=f"invalid TinBot {label} source extras"):
+            validate()
+    record["variantSemantics"]["occurrenceParameters"][0]["extraValues"] = deepcopy(extras)
+    original = record["variantSemantics"]["sourceVariant"]
+    record["variantSemantics"]["sourceVariant"] = {"kind": "named", "label": "Firewall"}
+    with pytest.raises(ValueError, match="invalid TinBot source variant"):
+        validate()
+    record["variantSemantics"]["sourceVariant"] = original
+    record["armyLinks"] = [{"entity": "equipment", "id": 169}]
+    with pytest.raises(ValueError, match="invalid TinBot Firewall source extras"):
+        validate()
+
+
 def test_tinbot_firewall_requires_exact_enemy_comms_mods(tmp_path: Path) -> None:
     document = valid_document()
     record = document["records"][0]
@@ -1334,7 +1401,7 @@ def test_tinbot_firewall_requires_exact_enemy_comms_mods(tmp_path: Path) -> None
             validate()
         record["variantSemantics"][field] = original
     record["armyLinks"] = [{"entity": "equipment", "id": 244}]
-    with pytest.raises(ValueError, match="Dodge family"):
+    with pytest.raises(ValueError, match="invalid TinBot Discover source extras"):
         validate()
 
 

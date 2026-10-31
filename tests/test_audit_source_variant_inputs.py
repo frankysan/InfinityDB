@@ -82,8 +82,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
         "statuses": {
             "family-only": 19,
             "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 1,
-            "unresolved-occurrence-parameter": 13,
+            "reviewed-extra-parameter": 3,
+            "unresolved-occurrence-parameter": 11,
         },
         "extraTypes": {"TEXT": 14},
     }
@@ -122,11 +122,14 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     assert skills[74]["status"] == "reviewed-extra-parameter"
     for source_id in (24, 28, 40, 74):
         assert all(part["reviewed"] for part in skills[source_id]["extraSignatures"])
-    for source_id in (100, 101, 244, 247):
+    for source_id in (100, 101):
         item = equipment[source_id]
         assert item["status"] == "unresolved-occurrence-parameter"
         assert item["extraTypes"] == ["TEXT"]
         assert item["extraSignatures"]
+    for source_id in (169, 244, 247):
+        assert equipment[source_id]["status"] == "reviewed-extra-parameter"
+        assert all(part["reviewed"] for part in equipment[source_id]["extraSignatures"])
     assert equipment[169]["reviewedVariant"] == {"kind": "named", "label": "Firewall"}
     assert equipment[169]["status"] == "reviewed-extra-parameter"
     assert all(part["reviewed"] for part in equipment[169]["extraSignatures"])
@@ -461,7 +464,40 @@ def test_tinbot_firewall_source_extras_match_fresh_export(tmp_path: Path) -> Non
             {"extras": [[7, "TEXT", "-6"]], "reviewed": True, "count": 55},
         ]
         assert all(row["status"] == "unresolved-occurrence-parameter"
-                   for row in rows if row["id"] in (100, 101, 244, 247))
+                   for row in rows if row["id"] in (100, 101))
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_tinbot_discover_ecm_extras_match_tracked_and_fresh_rules(tmp_path: Path) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = {
+        244: ("Discover", 2, [
+            {"extras": [[277, "TEXT", "ReRoll"]], "reviewed": True, "count": 2},
+        ]),
+        247: ("ECM Guided", 4, [
+            {"extras": [[7, "TEXT", "-6"]], "reviewed": True, "count": 2},
+            {"extras": [[259, "TEXT", "-9"]], "reviewed": True, "count": 2},
+        ]),
+    }
+    for rules_path in (ROOT / "data/generated/rules.db", fresh):
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db",
+            rules_path,
+        )
+        reviewed = RulesDatabase(rules_path).equipment_reviewed_extra_semantics()
+        for source_id, (label, count, signatures) in expected.items():
+            [row] = select_source_variants(report, "equipment", [source_id])["items"]
+            assert row["reviewedVariant"] == {"kind": "named", "label": label}
+            assert row["status"] == "reviewed-extra-parameter"
+            assert row["reviewedExtra"] == reviewed[source_id]
+            assert row["occurrences"] == count
+            assert row["extraSignatures"] == signatures
+        assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
+            "family-only": 19, "reviewed-exact-source": 1,
+            "reviewed-extra-parameter": 3, "unresolved-occurrence-parameter": 11,
+        }
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

@@ -1690,9 +1690,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and 13 Equipment source IDs. The tracked
+      occurrence parameters and 11 Equipment source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
-      Super-Jump, Jump, Climb and TinBot Firewall parameter mappings;
+      Super-Jump, Jump, Climb and TinBot Firewall/Discover/ECM Guided
+      parameter mappings;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
       the release-matched source pair before final certification.
@@ -1765,6 +1766,24 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         deployed-object publication, and preserves ignored rollback
         copies. The audit now reports **13 unresolved Equipment**
         source IDs and 34 Skill source IDs.
+      - [x] **Data processing:** Promote the two remaining TinBot
+        Equipment source variants with extras, keeping their scopes
+        distinct from Firewall. Discover (244) has two exact
+        `TEXT: ReRoll` (extra 277) direct occurrences: N5.3 p. 68
+        defines a one-die reroll on the relevant Discover Roll;
+        this does not imply the separate `+3 WIP` example on p. 127.
+        ECM Guided (247) has two `TEXT: -6` (extra 7) and two
+        `TEXT: -9` (extra 259) direct occurrences; N5.3 p. 127
+        gives the Guided -6 example, while reviewed ECM and TinBot
+        rules bind the source-listed negative MOD to Guided
+        Attacks targeting the TinBot owner. Retain the observed -9
+        without extrapolating it to unrelated attacks. The guarded
+        v9 migration admits only these two named variants' added
+        reviewed extras and exact source counts, synchronizes the
+        matched publication and retains ignored rollback copies.
+        Fresh/export and pinned-raw regressions agree; the Equipment
+        unresolved baseline is now **11**. The cross-Army usage
+        index remains unimplemented.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

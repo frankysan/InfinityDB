@@ -399,7 +399,7 @@ rows and the exact single-extra signatures 6/7 (`TEXT: -3/-6`, 762/5 rows).
 It checks both the tracked rules artifact and a fresh export, preserving the
 opponent-target Face to Face ARO scope separately from Mimetism and the
 distance-only display query. The current source inventory has 34 unresolved
-Skill IDs and 13 Equipment IDs; these are per-source review flags, not Unit counts.
+Skill IDs and 11 Equipment IDs; these are per-source review flags, not Unit counts.
 
 **Jump/Climb distance review:** Army source IDs 263/271 have 26/6
 exact single-extra `DISTANCE: 7.5` (extra ID 372) occurrences. The
@@ -435,6 +435,27 @@ is `python -m tools.build_deployed_object_publication
 tracked v9 rules artifact, updates the synchronized
 deployed-object publication and retains recovery copies under
 ignored `local/`. Do not rerun after promotion.
+
+**TinBot Discover and ECM Guided review:** Source Equipment
+`244` has two `TEXT: ReRoll` (extra `277`) occurrences;
+source `247` has two `TEXT: -6` (extra `7`) and two
+`TEXT: -9` (extra `259`) occurrences. The reviewed effects
+respectively mean a one-die Discover reroll (N5.3 p. 68)
+and a negative enemy Guided Attack MOD against the TinBot
+owner (N5.3 p. 127 and the maintained ECM rule). The
+`+3 WIP` Discover example is **not** inferred from `ReRoll`.
+The typed maps are available via
+`RulesDatabase.equipment_reviewed_extra_semantics()`.
+`tests/test_audit_source_variant_inputs.py` verifies exact
+pinned raw signatures against the tracked rules DB **and a fresh
+export**; the raw archive is required for these tests.
+The hermetic curated and v9 release migration tests reject
+source drift, incorrect scopes, altered named variants and
+unrelated database changes. The one-time guarded local refresh
+is `python -m tools.build_deployed_object_publication
+--refresh-tinbot-other-v9`; it retains ignored recovery copies
+and synchronizes the rules database with the deployed-object
+publication. Do not rerun after promotion.
 
 ## Non-Skill Army source classification and Unit presentation
 

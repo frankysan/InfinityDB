@@ -1917,9 +1917,10 @@ This supports the current application/catalog policy of retaining
 The current curated model preserves this distinction for the TinBot identity group.
 The Firewall, Neurocinetics, Albedo, Discover, ECM Guided, and Repeater source records
 are typed `named` exact-source variants of the TinBot family. Their Army occurrence
-extras remain separate source data: this classification identifies the named advantage
-without interpreting a parenthetical `-3`, `+3`, or other modifier as part of the
-variant identity. The unqualified TinBot source record remains represented by the family
+extras remain separate source data: the exact `Firewall`, `Discover` and
+`ECM Guided` source parameters are now reviewed without making their
+parenthetical modifiers part of the named variant identities. Other variants
+remain independently scoped. The unqualified TinBot source record remains represented by the family
 rule because it carries no additional named advantage.
 
 Sources:

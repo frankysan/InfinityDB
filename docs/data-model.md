@@ -792,6 +792,26 @@ parameter and the paired rules/publication fingerprints,
 retaining ignored recovery copies. Other named TinBot variants
 and cross-Army Unit usage remain unresolved independently.
 
+**Reviewed TinBot Discover and ECM Guided extras (2026-10-31):**
+TinBot Discover source Equipment `244` carries two occurrences of
+extra `277` (`TEXT: ReRoll`). Per N5.3 p. 68, the effect is a
+**one-die reroll when using the TinBot's Discover benefit**. This
+does not certify the `+3 WIP` printed Discover example on p. 127
+as an effect of these occurrences. TinBot ECM Guided source `247`
+has four occurrences: two with extra `7` (`TEXT: -6`) and two
+with extra `259` (`TEXT: -9`). N5.3 p. 127 supplies an example
+of a `-6` Guided Attack penalty. The maintained ECM definition
+specifies that the negative MOD has the listed value and applies
+against the owner for the named attack type. The two values are
+mapped as `enemy-guided-attack-mod` scoped to
+`guided-attack-targeting-tinbot-owner`, without a wider attack
+penalty or inferred Fireteam occurrences. Both `sourceVariant`
+named identities remain unchanged. The guarded v9 refresh verifies
+the exact source signatures, preserves unrelated records, updates
+the matched rules database/publication, and retains ignored
+recovery copies. The Equipment unresolved count is now **11**,
+with no Unit-usage index yet produced.
+
 **Remaining source-parameter inventory (pinned Army source and current
 generated rules database):** `tools/audit_source_variant_inputs.py` produces a
 deterministic, read-only JSON inventory from `infinity.db`,
@@ -823,11 +843,11 @@ This baseline contains **96 Skill** source identities across
   (Dodge `40` and Super-Jump `74`); and **34** IDs with
   unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
-  19 family-only IDs; 1 reviewed extra-parameter source
-  (TinBot Firewall `169`); and **13** IDs with unresolved occurrence
-  parameters. Four currently published Equipment source IDs have reviewed
-  exact-source named variants; the remaining two with extra parameters
-  are **separately unresolved** for usage-index classification.
+  19 family-only IDs; 3 reviewed extra-parameter sources
+  (TinBot Firewall `169`, Discover `244`, ECM Guided `247`);
+  and **11** IDs with unresolved occurrence parameters. Four
+  currently published Equipment source IDs have reviewed exact-source
+  named variants, of which Repeater `248` has no occurrence extras.
 - `TEXT` extras occur across 39 Skill source IDs and 14 Equipment
   source IDs. `DISTANCE` occurs across 5 Skill source IDs;
   Forward Deployment `161`, Jump `263` and Climb `271` have
@@ -845,9 +865,9 @@ a reviewed combined variant. The audit accepts a single reviewed extra
 multiple extras remain unresolved even if each has a reviewed individual
 meaning, until that exact combination has its own semantic review.
 In particular, Booty/MetaChemistry `ReRoll`, Mimetism
-`-3/-6`, TinBot modifiers outside the exact reviewed Firewall
-source `169`, and Hacking Device `UPGRADE` source text must not
-be promoted to typed variant keys on string parsing alone. The audit retains separate
+`-3/-6`, unreviewed TinBot variants outside the exact source
+IDs `169`/`244`/`247`, and Hacking Device `UPGRADE` text
+must not be promoted to typed variant keys on string parsing alone. The audit retains separate
 signatures for each extra combination and detects source
 drift via `tests/test_audit_source_variant_inputs.py` **when the
 paired, Git-ignored raw Army archive is available**. This source-only

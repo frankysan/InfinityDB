@@ -69,6 +69,48 @@ TINBOT_FIREWALL_VARIANT = {
         ],
     }],
 }
+TINBOT_OTHER_SOURCES = {
+    ("n5-core-v5.3", "equipment:tinbot-discover"): {
+        "sourceId": 244, "name": "TinBot: Discover", "count": 2, "label": "Discover",
+        "signatures": [
+            {"extras": [[277, "TEXT", "ReRoll"]], "reviewed": False, "count": 2},
+        ],
+        "values": [{
+            "extraId": 277, "extraType": "TEXT", "rawValue": "ReRoll",
+            "effect": {"kind": "reroll-one-die", "appliesTo": "tinbot-discover-roll"},
+        }],
+    },
+    ("n5-core-v5.3", "equipment:tinbot-ecm-guided"): {
+        "sourceId": 247, "name": "TinBot: ECM Guided", "count": 4,
+        "label": "ECM Guided",
+        "signatures": [
+            {"extras": [[7, "TEXT", "-6"]], "reviewed": False, "count": 2},
+            {"extras": [[259, "TEXT", "-9"]], "reviewed": False, "count": 2},
+        ],
+        "values": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": str(modifier),
+                "effect": {
+                    "kind": "enemy-guided-attack-mod",
+                    "appliesTo": "guided-attack-targeting-tinbot-owner",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((7, -6), (259, -9))
+        ],
+    },
+}
+TINBOT_OTHER_VARIANTS = {
+    key: {
+        "inheritance": "source",
+        "sourceVariant": {"kind": "named", "label": source["label"]},
+        "occurrenceParameters": [{
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extraValues": source["values"],
+        }],
+    }
+    for key, source in TINBOT_OTHER_SOURCES.items()
+}
 
 
 def _sha(path: Path) -> str:
@@ -510,13 +552,16 @@ def refresh_pdf_source_pins_v9_release(*, root: Path = ROOT) -> Path:
 def _check_variant_semantics_delta(
     previous: Path, proposed: Path, variants: dict[tuple[str, str], str],
     *, initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
+    tinbot_other: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
     if initial and set(variants) != set(initial):
         raise ValueError("Movement distance refresh requires exactly Jump and Climb")
-    if tinbot_firewall and (initial or set(variants) != {TINBOT_FIREWALL}):
+    if tinbot_firewall and (initial or tinbot_other or set(variants) != {TINBOT_FIREWALL}):
         raise ValueError("TinBot refresh requires its exact source record")
+    if tinbot_other and (initial or set(variants) != set(TINBOT_OTHER_SOURCES)):
+        raise ValueError("TinBot additional variants require exactly Discover and ECM Guided")
     with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
         for pragma in ("user_version", "application_id"):
             if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
@@ -556,6 +601,19 @@ def _check_variant_semantics_delta(
                             or after != TINBOT_FIREWALL_VARIANT
                         ):
                             raise ValueError("TinBot refresh changed named source identity")
+                    elif key in TINBOT_OTHER_SOURCES and tinbot_other:
+                        base = {
+                            "inheritance": "source",
+                            "sourceVariant": {
+                                "kind": "named", "label": TINBOT_OTHER_SOURCES[key]["label"],
+                            },
+                        }
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != base
+                            or after != TINBOT_OTHER_VARIANTS[key]
+                        ):
+                            raise ValueError("TinBot refresh changed additional named source")
                     else:
                         if row[index] is None:
                             raise ValueError("Variant refresh requires existing family metadata")
@@ -677,10 +735,44 @@ def refresh_tinbot_firewall_v9_release(*, root: Path = ROOT) -> Path:
     )
 
 
+def refresh_tinbot_other_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote exact Discover reroll and Guided attack MODs in a matched v9 pair."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    items = {
+        row["id"]: row for row in report["catalogs"]["equipment"]["items"]
+    }
+    for source in TINBOT_OTHER_SOURCES.values():
+        item = items.get(source["sourceId"])
+        if (
+            item is None
+            or item["name"] != source["name"]
+            or item["applicationId"] != 235
+            or item["occurrences"] != source["count"]
+            or item["status"] != "unresolved-occurrence-parameter"
+            or item["reviewedVariant"] != {
+                "kind": "named", "label": source["label"],
+            }
+            or item["reviewedExtra"] is not None
+            or item["extraSignatures"] != source["signatures"]
+            or item["rawValues"]
+        ):
+            raise ValueError(f"Unreviewed TinBot source drift: {source['sourceId']}")
+    return _refresh_metadata_v9_release(
+        root=root,
+        variant_records={key[1] for key in TINBOT_OTHER_SOURCES},
+        tinbot_other=True,
+    )
+
+
 def _refresh_metadata_v9_release(
     *, root: Path, source_ids: set[str] | None = None, expected_count: int | None = None,
     variant_records: set[str] | None = None,
     initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
+    tinbot_other: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -763,6 +855,7 @@ def _refresh_metadata_v9_release(
                 current_rules, next_rules, variants,
                 initialize_movement_distance=initialize_movement_distance,
                 tinbot_firewall=tinbot_firewall,
+                tinbot_other=tinbot_other,
             )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)
