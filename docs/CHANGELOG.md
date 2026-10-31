@@ -49,6 +49,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Project infrastructure + Web frontend:** Reconcile
+  the five post-inventory Visibility Zone terms with pinned bilingual
+  N5.3 source clauses and repeatable Glossary navigation/browser tests.
+  Preserve the frozen 367-record audit and pending whole-corpus gate.
 - **Data processing + Project infrastructure + Web frontend:** Add a
   source-pinned V1-A08 conditional declaration/ARO evidence crosswalk
   for ten previously reviewed exceptions. Guard current source pages,

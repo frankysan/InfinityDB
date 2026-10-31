@@ -1022,6 +1022,16 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     - [ ] **Visibility Zone inventory additions:** Include the five
       newer Visibility Zone Game terms in final record acceptance;
       they postdate the frozen 367-record explanation-audit inventory.
+      - [x] **V1-A08 bounded source and browser reconciliation:** Added
+        `config/validation/visibility-zone-terms-v1.json` and the
+        `--audit-visibility-zones --verify-visibility-pdfs` reference
+        audit. All five current identities, reviewed clauses, source
+        pages and Glossary targets now have a source-scoped crosswalk.
+        English N5.3 p. 144 and Spanish p. 148 are hash-pinned and
+        checked; prior browser acceptance is documented, and the
+        normal Glossary hash URLs are covered by repeatable Chromium
+        tests at 1440/390/320 px. This is five selected clauses and
+        navigation evidence, not whole-record approvals.
       - [ ] Include these five post-inventory records explicitly in
         final 1.0 whole-corpus acceptance; do not silently expand
         the frozen 367-record explanation-audit denominator.

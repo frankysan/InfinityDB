@@ -1374,6 +1374,14 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
         "test_conditional_reaction_source_slices_visible_in_normal_browser"
     ),
     "skill:look-out": "test_conditional_reaction_source_slices_visible_in_normal_browser",
+    **{
+        identifier: "test_visibility_zone_terms_normal_browser"
+        for identifier in (
+            "term:visibility-zone", "term:low-visibility-zone",
+            "term:poor-visibility-zone", "term:zero-visibility-zone",
+            "term:white-noise-zone",
+        )
+    },
 }
 CURRENT_EXPLANATION_COLLECTIONS = (
     PROJECT_ROOT / "data/curated/rules/n5-core-v5.3.json",
@@ -2022,6 +2030,131 @@ def audit_conditional_declaration_evidence(
     }
 
 
+VISIBILITY_ZONE_REVIEW = (
+    PROJECT_ROOT / "config/validation/visibility-zone-terms-v1.json"
+)
+VISIBILITY_ZONE_IDS = frozenset({
+    "term:visibility-zone", "term:low-visibility-zone",
+    "term:poor-visibility-zone", "term:zero-visibility-zone",
+    "term:white-noise-zone",
+})
+
+
+def audit_visibility_zone_evidence(
+    manifest_path: Path = VISIBILITY_ZONE_REVIEW,
+    *,
+    root: Path = PROJECT_ROOT,
+    verify_pdfs: bool = False,
+) -> dict[str, Any]:
+    """Selected bilingual source/term/browser evidence, without whole-record approval."""
+    from infinity_db.curated import load_curated_document
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if (manifest.get("formatVersion") != 1
+            or manifest.get("format") != (
+                "InfinityDB V1-A08 five Visibility Zone term source and presentation evidence"
+            )
+            or manifest.get("scope") != (
+                "five-post-inventory-terms-selected-clause-and-normal-browser-evidence-"
+                "not-whole-corpus-acceptance"
+            )
+            or manifest.get("frozenInventoryCount") != 367
+            or manifest.get("sourcePages") != {"english": 144, "spanish": 148}):
+        raise ReferenceBaselineError("Unexpected Visibility Zone evidence scope")
+    entries = manifest.get("entries")
+    if not isinstance(entries, list) or len(entries) != 5:
+        raise ReferenceBaselineError("Visibility evidence must contain five terms")
+    ids = [row.get("id") for row in entries if isinstance(row, dict)]
+    if len(ids) != 5 or set(ids) != VISIBILITY_ZONE_IDS:
+        raise ReferenceBaselineError("Visibility evidence identity drift")
+    records = {
+        record["id"]: record
+        for record in load_curated_document(
+            root / "data/curated/rules/n5-core-v5.3.json"
+        )["records"]
+    }
+    required_tests = (
+        "tests/test_web.py::test_visibility_zones_are_discoverable_in_glossary_and_global_search",
+        "tests/test_web.py::test_visibility_zone_five_term_explanations_match_pinned_n5_3_source",
+    )
+    source_code = (root / "tests/test_web.py").read_text(encoding="utf-8")
+    for test in required_tests:
+        if f"def {test.split('::')[1]}(" not in source_code:
+            raise ReferenceBaselineError(f"Visibility source test missing: {test}")
+    verified_pages: list[str] = []
+    pages: dict[str, str] = {}
+    if verify_pdfs:
+        import pymupdf
+
+        expected_pins = {
+            "data/pdf/rules/n5-rules-v5-3-en.pdf":
+                "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+            "data/pdf/rules/esp-n5-update-5-3.pdf":
+                "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f",
+        }
+        if manifest.get("sourcePins") != expected_pins:
+            raise ReferenceBaselineError("Visibility source pin definitions changed")
+        for language, (relative, pin) in zip(
+            ("english", "spanish"), expected_pins.items(), strict=True
+        ):
+            path = root / relative
+            if _sha256(path) != pin:
+                raise ReferenceBaselineError(f"Visibility PDF hash mismatch: {language}")
+            with pymupdf.open(path) as pdf:
+                value = pdf[manifest["sourcePages"][language] - 1].get_text()
+                if not isinstance(value, str):
+                    raise ReferenceBaselineError(f"Visibility PDF text missing: {language}")
+                pages[language] = " ".join(value.split()).casefold()
+            verified_pages.append(language)
+    verified_rows = []
+    for entry in entries:
+        identifier = entry["id"]
+        record = records[identifier]
+        if (
+            record["kind"] != "term"
+            or record["name"] != entry["name"]
+            or record.get("review", {}).get("status") != "reviewed"
+            or record.get("facts", {}).get("scope") != "visibility-condition"
+            or entry["scope"] != "visibility-condition"
+            or entry["sourceCitation"] != "n5-core-v5.3-pdf"
+            or entry["sourcePage"] != 144
+            or not any(
+                c.get("sourceId") == "n5-core-v5.3-pdf" and c.get("page") == 144
+                for c in record["citations"]
+            )
+            or entry["href"] != f"/glossary#{identifier.replace(':', '-')}"
+            or not isinstance(entry["summaryClause"], str)
+            or entry["summaryClause"] not in record["summary"]
+            or entry["existingTests"] != list(required_tests)
+        ):
+            raise ReferenceBaselineError(f"Visibility term review drift: {identifier}")
+        if verify_pdfs:
+            for language in ("english", "spanish"):
+                clause = entry[language + "Clause"]
+                if not isinstance(clause, str) or (
+                    " ".join(clause.split()).casefold() not in pages[language]
+                ):
+                    raise ReferenceBaselineError(
+                        f"Visibility {language} source clause drift: {identifier}"
+                    )
+        verified_rows.append({
+            "id": identifier, "name": record["name"], "href": entry["href"],
+            "curatedReviewStatus": record["review"]["status"],
+            "sourcePages": manifest["sourcePages"],
+            "sourceDisposition": "selected-bilingual-clauses-reviewed",
+            "browserDisposition": "selected-glossary-route-and-hash-test-evidence",
+            "fullRecordAcceptance": "pending-whole-corpus-acceptance",
+        })
+    return {
+        "status": "five-visibility-zone-terms-source-and-route-reconciled",
+        "reviewedTermCount": len(verified_rows),
+        "verifiedPdfLanguages": verified_pages,
+        "records": verified_rows,
+        "historicalInventoryExtended": False,
+        "fullRecordApprovalsIssued": 0,
+    }
+
+
 def render_explanation_reconciliation(report: dict[str, Any]) -> str:
     """Compact work queue for reviewers, retaining exact IDs in the JSON."""
     lines = [
@@ -2148,6 +2281,25 @@ def render_explanation_reconciliation(report: dict[str, Any]) -> str:
                 f"{entry['scope']} — {entry['supportingTest']}"
             )
         lines.append("")
+    if "visibilityZones" in report:
+        evidence = report["visibilityZones"]
+        lines.extend([
+            "## Five post-inventory Visibility Zone Game terms",
+            "",
+            f"Reviewed: {evidence['reviewedTermCount']} source-specific term definitions.",
+            f"Bilingual PDF clauses verified: "
+            f"{', '.join(evidence['verifiedPdfLanguages']) or 'not requested'}.",
+            "Previously reviewed browser routes are selected evidence, "
+            "**not full-record approval**.",
+            "",
+        ])
+        for entry in evidence["records"]:
+            lines.append(
+                f"- `{entry['id']}` — `{entry['href']}`; "
+                f"{entry['sourceDisposition']}; "
+                f"{entry['browserDisposition']}; full gate pending"
+            )
+        lines.append("")
     lines.extend([
         "## Remaining acceptance",
         "",
@@ -2196,13 +2348,32 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--verify-conditional-pdf", type=Path,
         help="Check selected conditional clauses against pinned N5.3 PDF",
     )
+    parser.add_argument(
+        "--audit-visibility-zones", action="store_true",
+        help="Reconcile five post-inventory visibility terms and selected evidence",
+    )
+    parser.add_argument(
+        "--verify-visibility-pdfs", action="store_true",
+        help="Verify exact pinned English and Spanish Visibility Zone clauses",
+    )
     args = parser.parse_args(argv)
     if args.reconcile_explanation_inventory:
         if args.verify_declaration_pdf is not None and not args.reconcile_declarations:
             parser.error("--verify-declaration-pdf requires --reconcile-declarations")
         if args.verify_conditional_pdf is not None and not args.audit_conditional_declarations:
             parser.error("--verify-conditional-pdf requires --audit-conditional-declarations")
+        if args.verify_visibility_pdfs and not args.audit_visibility_zones:
+            parser.error("--verify-visibility-pdfs requires --audit-visibility-zones")
         report = reconcile_explanation_inventory()
+        if args.audit_visibility_zones:
+            evidence = audit_visibility_zone_evidence(
+                verify_pdfs=args.verify_visibility_pdfs,
+            )
+            ids = {record["id"] for record in evidence["records"]}
+            added = set(report["addedIds"])
+            if ids != VISIBILITY_ZONE_IDS or not ids <= added:
+                raise ReferenceBaselineError("Visibility identities are not post-inventory")
+            report["visibilityZones"] = evidence
         if args.audit_conditional_declarations:
             report["conditionalDeclarations"] = audit_conditional_declaration_evidence(
                 pdf_path=args.verify_conditional_pdf,
@@ -2233,7 +2404,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if (args.reconcile_declarations or args.verify_declaration_pdf is not None
             or args.verify_numeric_army_archive is not None
-            or args.audit_conditional_declarations or args.verify_conditional_pdf is not None):
+            or args.audit_conditional_declarations or args.verify_conditional_pdf is not None
+            or args.audit_visibility_zones or args.verify_visibility_pdfs):
         parser.error("reconciliation flags require --reconcile-explanation-inventory")
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,

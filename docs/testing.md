@@ -4978,6 +4978,26 @@ completeness gate or change any curated rules interpretations.
 
 ## 1.0 five Visibility Zone Game terms browser acceptance
 
+**V1-A08 follow-up (2026-10-31).** The maintained evidence crosswalk at
+`config/validation/visibility-zone-terms-v1.json` lists the five current
+`term:*` identities, their reviewed N5.3 p. 144 definitions, exact
+`/glossary#term-*` routes, source clause excerpts in English p. 144 and
+Spanish p. 148, and existing API/source regressions. The frozen
+historical 367-record D/S denominator is not changed. Reproduce the
+selected bilingual-source and identity audit with:
+
+```powershell
+.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --audit-visibility-zones --verify-visibility-pdfs --json-output local/audits/v1-visibility-zone-reconciliation.json --markdown-output local/audits/v1-visibility-zone-reconciliation.md
+```
+
+The audit rejects changed identities, curated clauses, citation pages,
+Glossary targets, evidence scope and source hashes. New Chromium tests
+exercise all five current normal-mode Glossary URLs at 1440/390/320 px;
+the historical acceptance below remains useful independent evidence.
+The generated reports reside in ignored `local/audits/`. These checks
+do not automatically approve all conditional MOD exceptions, every
+related Skill, or the final 448-record source/presentation gate.
+
 **Verified 2026-10-16 on `dev/v1.0.0`.** A freshly rebuilt rules database
 was used with the current application and Army snapshot. The five
 post-inventory N5.3 p. 144 Game terms (Visibility, Low, Poor, Zero and

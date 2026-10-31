@@ -1,0 +1,91 @@
+{
+  "format": "InfinityDB V1-A08 five Visibility Zone term source and presentation evidence",
+  "formatVersion": 1,
+  "sourcePins": {
+    "data/pdf/rules/n5-rules-v5-3-en.pdf": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+    "data/pdf/rules/esp-n5-update-5-3.pdf": "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
+  },
+  "sourcePages": {
+    "english": 144,
+    "spanish": 148
+  },
+  "frozenInventoryCount": 367,
+  "scope": "five-post-inventory-terms-selected-clause-and-normal-browser-evidence-not-whole-corpus-acceptance",
+  "entries": [
+    {
+      "id": "term:visibility-zone",
+      "name": "Visibility Zone",
+      "summaryClause": "never stack with other [[term:visibility-zone|Visibility Zone]] MODs",
+      "englishClause": "Visibility Zone MODs never stack with other Visibility Zone MODs",
+      "spanishClause": "Los MOD de Zona de Visibilidad no son acumulables entre sí",
+      "href": "/glossary#term-visibility-zone",
+      "sourceCitation": "n5-core-v5.3-pdf",
+      "sourcePage": 144,
+      "scope": "visibility-condition",
+      "existingTests": [
+        "tests/test_web.py::test_visibility_zones_are_discoverable_in_glossary_and_global_search",
+        "tests/test_web.py::test_visibility_zone_five_term_explanations_match_pinned_n5_3_source"
+      ]
+    },
+    {
+      "id": "term:low-visibility-zone",
+      "name": "Low Visibility Zone",
+      "summaryClause": "imposes a -3 MOD",
+      "englishClause": "Low Visibility Zones apply a MOD of -3",
+      "spanishClause": "Zona de Baja Visibilidad aplicará un MOD de -3",
+      "href": "/glossary#term-low-visibility-zone",
+      "sourceCitation": "n5-core-v5.3-pdf",
+      "sourcePage": 144,
+      "scope": "visibility-condition",
+      "existingTests": [
+        "tests/test_web.py::test_visibility_zones_are_discoverable_in_glossary_and_global_search",
+        "tests/test_web.py::test_visibility_zone_five_term_explanations_match_pinned_n5_3_source"
+      ]
+    },
+    {
+      "id": "term:poor-visibility-zone",
+      "name": "Poor Visibility Zone",
+      "summaryClause": "imposes a -6 MOD",
+      "englishClause": "Poor Visibility Zones apply a MOD of -6",
+      "spanishClause": "Zona de Mala Visibilidad aplicará un MOD de -6",
+      "href": "/glossary#term-poor-visibility-zone",
+      "sourceCitation": "n5-core-v5.3-pdf",
+      "sourcePage": 144,
+      "scope": "visibility-condition",
+      "existingTests": [
+        "tests/test_web.py::test_visibility_zones_are_discoverable_in_glossary_and_global_search",
+        "tests/test_web.py::test_visibility_zone_five_term_explanations_match_pinned_n5_3_source"
+      ]
+    },
+    {
+      "id": "term:zero-visibility-zone",
+      "name": "Zero Visibility Zone",
+      "summaryClause": "target of a [[skill:bs-attack]] crossing the Zone",
+      "englishClause": "LoF cannot be drawn into, through, or out of a Zero Visibility Zone",
+      "spanishClause": "No se puede trazar LDT hacia el interior, a través o desde una Zona de Visibilidad Nula",
+      "href": "/glossary#term-zero-visibility-zone",
+      "sourceCitation": "n5-core-v5.3-pdf",
+      "sourcePage": 144,
+      "scope": "visibility-condition",
+      "existingTests": [
+        "tests/test_web.py::test_visibility_zones_are_discoverable_in_glossary_and_global_search",
+        "tests/test_web.py::test_visibility_zone_five_term_explanations_match_pinned_n5_3_source"
+      ]
+    },
+    {
+      "id": "term:white-noise-zone",
+      "name": "White Noise Zone",
+      "summaryClause": "only for Troopers with [[skill:marksmanship]]",
+      "englishClause": "A White Noise Zone acts as a Zero Visibility Zone",
+      "spanishClause": "Zona de Ruido Blanco funciona como una Zona de Visibilidad Nula",
+      "href": "/glossary#term-white-noise-zone",
+      "sourceCitation": "n5-core-v5.3-pdf",
+      "sourcePage": 144,
+      "scope": "visibility-condition",
+      "existingTests": [
+        "tests/test_web.py::test_visibility_zones_are_discoverable_in_glossary_and_global_search",
+        "tests/test_web.py::test_visibility_zone_five_term_explanations_match_pinned_n5_3_source"
+      ]
+    }
+  ]
+}

@@ -57,6 +57,56 @@ def chrome() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width", [1440, 390, 320])
+def test_visibility_zone_terms_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1-A08: all five post-inventory term hashes use one responsive Glossary."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        cases = (
+            ("visibility-zone", "Visibility Zone", "never stack"),
+            ("low-visibility-zone", "Low Visibility Zone", "-3 MOD"),
+            ("poor-visibility-zone", "Poor Visibility Zone", "-6 MOD"),
+            ("zero-visibility-zone", "Zero Visibility Zone", "Line of Fire"),
+            ("white-noise-zone", "White Noise Zone", "Multispectral Visor"),
+        )
+        response = page.goto(
+            f"{ORIGIN}/glossary#term-visibility-zone", wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        page.locator("#term-visibility-zone").wait_for(
+            state="visible", timeout=15000,
+        )
+        snapshots = page.evaluate(
+            """(slugs) => slugs.map((slug) => {
+                const anchor = `term-${slug}`;
+                window.location.hash = anchor;
+                const node = document.getElementById(anchor);
+                return {
+                    hash: window.location.hash,
+                    heading: node?.querySelector("h3")?.textContent?.trim(),
+                    text: node?.querySelector(".glossary-description")?.textContent || "",
+                    domain: node?.querySelector(".glossary-domain")?.textContent?.trim(),
+                    overflow: document.documentElement.scrollWidth > innerWidth + 1,
+                };
+            })""",
+            [slug for slug, _, _ in cases],
+        )
+        for (slug, name, fragment), snapshot in zip(cases, snapshots, strict=True):
+            assert snapshot["hash"] == f"#term-{slug}"
+            assert snapshot["heading"] == name
+            assert fragment in snapshot["text"]
+            assert snapshot["domain"] == "Game term"
+            assert not snapshot["overflow"], (width, slug)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390, 320])
 @pytest.mark.parametrize(
     ("path", "card_id", "expected"),
     [

@@ -26,6 +26,7 @@ from tools.report_reference_baseline import (
     _verify_published_unit_options,
     audit_conditional_declaration_evidence,
     audit_numeric_army_replacement_variants,
+    audit_visibility_zone_evidence,
     build_baseline,
     main,
     parse_frozen_explanation_inventory,
@@ -74,6 +75,9 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
         "rule:initiative-roll", "rule:combat-group", "rule:army-retreat",
         "rule:standard-game", "rule:game-modes",
         "rule:order-expenditure-sequence", "skill:look-out",
+        "term:visibility-zone", "term:low-visibility-zone",
+        "term:poor-visibility-zone", "term:zero-visibility-zone",
+        "term:white-noise-zone",
     }
     for row in result["currentRecords"]:
         assert row["sourceDisposition"] == "pending-full-material-clause-reconciliation"
@@ -173,6 +177,104 @@ def test_explanation_migration_cli_includes_verified_declaration_owners(
     assert "17 historical retirements" in markdown
     assert "skill `morpho-scan`" in markdown
     assert "No historical aliases or" in markdown
+
+
+def test_five_visibility_zone_terms_are_reviewed_post_inventory_additions() -> None:
+    evidence = audit_visibility_zone_evidence()
+    assert evidence["reviewedTermCount"] == 5
+    assert evidence["verifiedPdfLanguages"] == []
+    assert evidence["historicalInventoryExtended"] is False
+    assert evidence["fullRecordApprovalsIssued"] == 0
+    expected = {
+        "term:visibility-zone", "term:low-visibility-zone",
+        "term:poor-visibility-zone", "term:zero-visibility-zone",
+        "term:white-noise-zone",
+    }
+    assert {row["id"] for row in evidence["records"]} == expected
+    assert {row["href"] for row in evidence["records"]} == {
+        f"/glossary#{identity.replace(':', '-')}" for identity in expected
+    }
+    report = reconcile_explanation_inventory()
+    assert expected <= set(report["addedIds"])
+    assert all(row["fullRecordAcceptance"] == "pending-whole-corpus-acceptance"
+               for row in evidence["records"])
+
+
+def test_five_visibility_zone_terms_match_bilingual_pinned_pdfs() -> None:
+    for relative in (
+        "data/pdf/rules/n5-rules-v5-3-en.pdf",
+        "data/pdf/rules/esp-n5-update-5-3.pdf",
+    ):
+        if not (ROOT / relative).is_file():
+            pytest.skip(f"Pinned source unavailable: {relative}")
+    pytest.importorskip("pymupdf")
+    evidence = audit_visibility_zone_evidence(verify_pdfs=True)
+    assert evidence["verifiedPdfLanguages"] == ["english", "spanish"]
+    assert evidence["reviewedTermCount"] == 5
+
+
+def test_five_visibility_zone_evidence_rejects_identity_clause_scope_and_pin_drift(
+    tmp_path: Path,
+) -> None:
+    original = json.loads((
+        ROOT / "config/validation/visibility-zone-terms-v1.json"
+    ).read_text(encoding="utf-8"))
+    changes = (
+        ("missing-term", lambda c: c["entries"].pop()),
+        ("duplicate-id", lambda c: c["entries"][1].update(
+            id=c["entries"][0]["id"]
+        )),
+        ("changed-summary", lambda c: c["entries"][0].update(
+            summaryClause="an invented Visibility Zone explanation"
+        )),
+        ("changed-source-page", lambda c: c["entries"][0].update(
+            sourcePage=111
+        )),
+        ("changed-route", lambda c: c["entries"][0].update(
+            href="/glossary#term-nonexistent"
+        )),
+        ("unapproved-scope", lambda c: c.update(
+            scope="all-records-complete"
+        )),
+        ("missing-test", lambda c: c["entries"][0].update(
+            existingTests=[]
+        )),
+    )
+    for label, mutate in changes:
+        changed = json.loads(json.dumps(original))
+        mutate(changed)
+        path = tmp_path / f"{label}.json"
+        path.write_text(json.dumps(changed), encoding="utf-8")
+        with pytest.raises(ReferenceBaselineError):
+            audit_visibility_zone_evidence(manifest_path=path)
+    changed = json.loads(json.dumps(original))
+    changed["sourcePins"]["data/pdf/rules/esp-n5-update-5-3.pdf"] = "0" * 64
+    path = tmp_path / "bad-pin.json"
+    path.write_text(json.dumps(changed), encoding="utf-8")
+    with pytest.raises(ReferenceBaselineError, match="pin definitions"):
+        audit_visibility_zone_evidence(manifest_path=path, verify_pdfs=True)
+
+
+def test_five_visibility_zone_cli_keeps_whole_corpus_gate_open(tmp_path: Path) -> None:
+    path = tmp_path / "evidence.json"
+    markdown = tmp_path / "evidence.md"
+    assert main([
+        "--reconcile-explanation-inventory", "--audit-visibility-zones",
+        "--json-output", str(path), "--markdown-output", str(markdown),
+    ]) == 0
+    report = json.loads(path.read_text(encoding="utf-8"))
+    assert report["visibilityZones"]["reviewedTermCount"] == 5
+    assert report["fullRecordApprovalsIssuedByThisAudit"] == 0
+    assert report["frozenCount"] == 367
+    assert report["currentCount"] == 448
+    assert "Five post-inventory Visibility Zone" in markdown.read_text(encoding="utf-8")
+    assert all(
+        row["sourceDisposition"] == "pending-full-material-clause-reconciliation"
+        for row in report["currentRecords"]
+        if row["id"].startswith("term:") and row["id"] in {
+            item["id"] for item in report["visibilityZones"]["records"]
+        }
+    )
 
 
 def test_conditional_declaration_crosswalk_validates_selected_source_evidence() -> None:
