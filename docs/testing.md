@@ -486,8 +486,10 @@ Do not rerun the one-time migration on an already-promoted pair.
 Equipment `100`/`101` now has nine additional exact
 `reviewed-extra` mappings (81 single-extra occurrences:
 66 `+1B`, eight Carbonite `PS=6`, seven `+1SD`).
-The pinned-source audit distinguishes these from `SR-1/SR-2`,
-Firewall strings and compound signatures. The mappings
+At that stage, the pinned-source audit still distinguished
+these from unreviewed `SR-1/SR-2`, Firewall strings and
+compound signatures; the named-program SR forms were
+reviewed separately below. The mappings
 retain program identity and separate the `modifier`, `value`
 and `count` fields instead of inferring a full modified
 Hacking Program profile. The hermetic migration regressions
@@ -500,6 +502,26 @@ raw archive is available. The one-time guarded refresh is
 --refresh-hacking-program-mods-v9`. It synchronizes the
 matched publication and retains ignored rollback artifacts.
 Do not rerun after promotion.
+
+**Hacking Device named-program SR review:** Source IDs
+`100`/`101` have five newly reviewed exact single
+extras totaling 55 occurrences. The curated
+`program-saving-roll-mod` effect records a `-1` or
+`-2` target Saving Roll modifier only for its named
+Hacking Program. The source gate requires the pinned
+TEXT extra ID, raw spelling, count and previous
+reviewed grant/B/PS/SD ordering, and excludes
+unqualified `SR-1`, Firewall and multi-extra combinations.
+The hermetic v9 migration delta tests reject modified
+program effects, absent older entries, unrelated table
+changes and schema drift; the full raw-source inventory
+compares current and freshly exported rules metadata
+when the pinned local raw archive is available.
+The one-time guarded promotion was
+`python -m tools.build_deployed_object_publication
+--refresh-hacking-saving-rolls-v9`. It retains the
+earlier matched release pair under ignored `local/`.
+Do not rerun on the already promoted pair.
 
 ## Non-Skill Army source classification and Unit presentation
 

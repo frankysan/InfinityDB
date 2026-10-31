@@ -1819,6 +1819,26 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         Equipment source IDs 100/101 remain unresolved in the audit:
         the **34 Skill / 11 Equipment** baseline is unchanged, and
         no cross-Army Unit-use index is published.
+      - [x] **Data processing:** Review five exact named-program
+        Hacking Device Saving Roll modifiers. N5.3 p. 37
+        establishes that negative SR modifiers lower the
+        target's Saving Roll Success Value, distinct from the
+        number of Saving Rolls. The pinned Army signatures
+        certify Carbonite (SR-2) once, Trinity (SR-1)
+        twice and Trinity (SR-2) four times on Device 100;
+        Total Control (SR-2) 46 times and Trinity (SR-1)
+        twice on Device Plus 101. The 55 direct single-extra
+        occurrences are typed as `program-saving-roll-mod`
+        with exact canonical program ID, modifier (-1 or -2)
+        and `target-saving-roll-against-program` scope.
+        The guarded matched-v9 refresh preserves all prior
+        grants/B/PS/SD mappings and related publication
+        fingerprints, with ignored rollback copies. The
+        unqualified Device Plus `UPGRADE: SR-1` (two rows)
+        remains unresolved because it names no owning
+        program. Firewall and compound extras remain open,
+        as does the cross-Army usage index. The unresolved
+        baseline stays **34 Skill / 11 Equipment source IDs**.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

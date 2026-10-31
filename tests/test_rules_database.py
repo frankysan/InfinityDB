@@ -1720,6 +1720,17 @@ def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
             (378, "UPGRADE: Trinity (+1SD)", "trinity", "program-special-die", "count", 1),
         ],
     }
+    expected_srs = {
+        "hacking-device": [
+            (331, "UPGRADE: Carbonite (SR-2)", "carbonite", -2),
+            (339, "UPGRADE: Trinity (SR-1)", "trinity", -1),
+            (352, "UPGRADE: Trinity (SR-2)", "trinity", -2),
+        ],
+        "hacking-device-plus": [
+            (314, "UPGRADE: Total Control (SR-2)", "total-control", -2),
+            (339, "UPGRADE: Trinity (SR-1)", "trinity", -1),
+        ],
+    }
     for slug, grants in expected.items():
         parameter = mapping[slug]
         assert parameter == {
@@ -1742,6 +1753,17 @@ def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
                     },
                 }
                 for extra_id, raw, program, kind, field, value in expected_mods[slug]
+            ] + [
+                {
+                    "extra_id": extra_id, "extra_type": "TEXT", "raw_value": raw,
+                    "effect": {
+                        "kind": "program-saving-roll-mod",
+                        "program": f"hacking-program:{program}",
+                        "modifier": modifier,
+                        "applies_to": "target-saving-roll-against-program",
+                    },
+                }
+                for extra_id, raw, program, modifier in expected_srs[slug]
             ],
         }
         record = rules.composed_record(f"equipment:{slug}")
@@ -1750,7 +1772,12 @@ def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
         assert record["variant_semantics"]["inheritance"] == "family"
         assert any(c["source_id"] == "n5-core-v5.3-pdf" for c in record["citations"])
         for entry in parameter["extra_values"]:
-            assert "applies_to" not in entry["effect"]
+            if entry["effect"]["kind"] == "program-saving-roll-mod":
+                assert entry["effect"]["applies_to"] == (
+                    "target-saving-roll-against-program"
+                )
+            else:
+                assert "applies_to" not in entry["effect"]
             program_id = entry["effect"]["program"]
             assert rules.composed_record(program_id) is not None
     assert "hacking-device" not in rules.skill_reviewed_extra_semantics()

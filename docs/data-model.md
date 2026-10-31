@@ -834,10 +834,10 @@ scope. The guarded release migration pins these source values,
 synchronizes the rules/publication pair and retains ignored
 rollback artifacts. The Cybermask + Trinity combined source-100
 signature (one occurrence) is **not** approved by the
-individually reviewed extras. Other `UPGRADE` strings with
-B/PS/SR/Special Dice/Firewall changes and the source-101
-Trinity (PS=5) + Zero Pain combination remain unresolved.
-Both source IDs therefore keep their unresolved audit status,
+individually reviewed extras. At this initial grant-only
+milestone, the B/PS/SR/Special Dice/Firewall forms and the
+source-101 Trinity (PS=5) + Zero Pain combination were
+still unreviewed. Both source IDs therefore retained their unresolved audit status,
 and the Equipment unresolved count stays **11**. Neither
 Hacking Program evaluation nor cross-Army Unit use is generated.
 
@@ -860,13 +860,41 @@ The guarded v9 migration permits only append-only changes
 to the existing reviewed Hacking Device extras, checks exact
 source values/counts and excludes mixtures. The synchronized
 rules database/deployed-object publication was promoted with an
-ignored rollback pair. `SR-1`/`SR-2`, unqualified `SR-1`,
-unreviewed PS replacements inside combined signatures, and
-Firewall upgrades remain unresolved pending exact applicability
-review. Both Equipment source IDs therefore remain unresolved;
+ignored rollback pair. At that milestone the `SR-1`/`SR-2`
+forms had not yet been reviewed; the subsequent named-program
+SR review below supersedes that open item. Unqualified
+`SR-1`, PS replacements inside combinations and Firewall
+upgrades remain unresolved. Both Equipment source IDs therefore remain unresolved;
 the baseline of **34 Skill / 11 Equipment source IDs** is
 unchanged. No Unit-use index or Hacking Program evaluation
 was introduced.
+
+**Reviewed named-program Saving Roll upgrades (2026-10-31):**
+Five exact Hacking Device signatures add **55 reviewed
+single-extra occurrences**, preserving their owning Hacking
+Program identity. Source Equipment `100`: Carbonite
+`SR-2` (extra 331, one occurrence), Trinity `SR-1`
+(extra 339, two) and Trinity `SR-2` (extra 352, four).
+Source Equipment `101`: Total Control `SR-2`
+(extra 314, 46) and Trinity `SR-1` (extra 339, two).
+N5.3 p. 37 and the N5 modifier examples confirm that
+a negative Saving Roll modifier reduces the target's
+Saving Roll Success Value; it does not reduce the number
+of Saving Rolls. The `program-saving-roll-mod` effect
+carries `program: "hacking-program:*"`,
+`appliesTo: "target-saving-roll-against-program"`,
+and an exact `modifier` of -1 or -2. These source
+extras do not replace the program's base PS or produce
+a runtime combat calculation. The guarded v9 migration
+requires the previously reviewed program grants and
+B/PS/Special Die modifiers to remain unchanged, and
+synchronizes the matched rules/publication pair with
+rollback copies in ignored `local/`. The unqualified
+source `101` extra `344` (`UPGRADE: SR-1`,
+two occurrences) remains unresolved because no program
+target is identified. Firewall and multi-extra
+signatures remain unresolved. The source-ID baseline
+remains **34 Skills / 11 Equipment**.
 
 **Remaining source-parameter inventory (pinned Army source and current
 generated rules database):** `tools/audit_source_variant_inputs.py` produces a

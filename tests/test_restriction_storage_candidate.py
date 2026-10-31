@@ -809,6 +809,154 @@ def test_hacking_program_mods_refresh_checks_pinned_source(
         }]
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "value", "scope", "removed-prior", "other-record", "schema"),
+)
+def test_hacking_sr_delta_preserves_existing_modifiers(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        HACKING_GRANT_SOURCES,
+        _check_variant_semantics_delta,
+        _hacking_mod_values,
+        _hacking_sr_values,
+    )
+
+    old_db, new_db = tmp_path / "old.db", tmp_path / "new.db"
+    existing = []
+    proposed: dict[tuple[str, str], str] = {}
+    for source_id, source in HACKING_GRANT_SOURCES.items():
+        grants = [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "hacking-program-grant",
+                    "program": "hacking-program:trinity",
+                },
+            }
+            for extra_id, (raw, _count) in source["singles"].items()
+        ]
+        old_param = {
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extraValues": grants + _hacking_mod_values(source_id),
+        }
+        before = {"inheritance": "family", "occurrenceParameters": [old_param]}
+        after = copy.deepcopy(before)
+        after["occurrenceParameters"][0]["extraValues"].extend(
+            _hacking_sr_values(source_id)
+        )
+        key = ("n5-core-v5.3", source["record"])
+        existing.append((*key, json.dumps(before), "untouched"))
+        proposed[key] = json.dumps(after)
+    key = ("n5-core-v5.3", "equipment:hacking-device")
+    if defect in {"value", "scope", "removed-prior"}:
+        changed = json.loads(proposed[key])
+        values = changed["occurrenceParameters"][0]["extraValues"]
+        if defect == "value":
+            values[-1]["effect"]["modifier"] = 2
+        elif defect == "scope":
+            values[-1]["effect"]["appliesTo"] = "all-rolls"
+        else:
+            values.pop(len(HACKING_GRANT_SOURCES[100]["singles"]))
+        proposed[key] = json.dumps(changed)
+    with sqlite3.connect(old_db) as old, sqlite3.connect(new_db) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", existing + [
+            ("n5-core-v5.3", "equipment:other", None, "untouched"),
+        ])
+        old.commit()
+        old.backup(new)
+        for key, variant in proposed.items():
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE collection_id=? AND id=?",
+                (variant, *key),
+            )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX unexpected ON records(id)")
+    if defect is None:
+        _check_variant_semantics_delta(old_db, new_db, proposed, hacking_srs=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(old_db, new_db, proposed, hacking_srs=True)
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(old_db, new_db, proposed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "source", "raw", "count", "compound", "prior", "already-reviewed"),
+)
+def test_hacking_sr_source_gate_rejects_drift(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    items = []
+    for source_id, specs in release.HACKING_SR_SOURCES.items():
+        source = release.HACKING_GRANT_SOURCES[source_id]
+        previous = [
+            {"extra_id": extra_id, "raw_value": raw}
+            for extra_id, (raw, _count) in source["singles"].items()
+        ] + [
+            {"extra_id": extra_id, "raw_value": raw}
+            for extra_id, raw, _program, _kind, _field, _value, _count
+            in release.HACKING_MOD_SOURCES[source_id]
+        ]
+        items.append({
+            "id": source_id, "name": source["name"], "applicationId": source_id,
+            "occurrences": source["occurrences"],
+            "status": "unresolved-occurrence-parameter",
+            "reviewedVariant": None, "rawValues": [],
+            "reviewedExtra": {"extra_values": previous},
+            "extraSignatures": [
+                {"extras": [[extra_id, "TEXT", raw]], "count": count, "reviewed": False}
+                for extra_id, raw, _program, _modifier, count in specs
+            ],
+        })
+    row = items[0]
+    if defect == "source":
+        row["applicationId"] = 999
+    elif defect == "raw":
+        row["extraSignatures"][0]["extras"][0][2] = "WRONG"
+    elif defect == "count":
+        row["extraSignatures"][0]["count"] += 1
+    elif defect == "compound":
+        row["extraSignatures"].append({
+            "extras": [[331, "TEXT", "UPGRADE: Carbonite (SR-2)"],
+                       [12, "TEXT", "UPGRADE:\u00a0Trinity"]],
+            "count": 1, "reviewed": False,
+        })
+    elif defect == "prior":
+        row["reviewedExtra"]["extra_values"][0]["extra_id"] = 999
+    elif defect == "already-reviewed":
+        row["extraSignatures"][0]["reviewed"] = True
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": items}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_hacking_saving_rolls_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls[0]["hacking_srs"] is True
+        assert calls[0]["variant_records"] == {
+            "equipment:hacking-device", "equipment:hacking-device-plus",
+        }
+    else:
+        with pytest.raises(ValueError, match="drift|changed"):
+            release.refresh_hacking_saving_rolls_v9_release(root=tmp_path)
+        assert not calls
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

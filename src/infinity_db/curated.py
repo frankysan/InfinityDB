@@ -89,6 +89,17 @@ def _validate_reviewed_extra_parameter(
             (378, "UPGRADE: Trinity (+1SD)", "trinity", "program-special-die", "count", 1),
         ],
     }
+    hacking_srs = {
+        "hacking-device": [
+            (331, "UPGRADE: Carbonite (SR-2)", "carbonite", -2),
+            (339, "UPGRADE: Trinity (SR-1)", "trinity", -1),
+            (352, "UPGRADE: Trinity (SR-2)", "trinity", -2),
+        ],
+        "hacking-device-plus": [
+            (314, "UPGRADE: Total Control (SR-2)", "total-control", -2),
+            (339, "UPGRADE: Trinity (SR-1)", "trinity", -1),
+        ],
+    }
     for device, grants in hacking_grants.items():
         if inheritance != "family" or army_links != [
             {"entity": "equipment", "id": device}
@@ -114,6 +125,18 @@ def _validate_reviewed_extra_parameter(
                 },
             }
             for extra_id, raw, program, kind, field, value in hacking_mods[device]
+        ]
+        expected += [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "program-saving-roll-mod",
+                    "program": f"hacking-program:{program}",
+                    "appliesTo": "target-saving-roll-against-program",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, raw, program, modifier in hacking_srs[device]
         ]
         if (
             set(parameter) != {"source", "kind", "extraValues"}

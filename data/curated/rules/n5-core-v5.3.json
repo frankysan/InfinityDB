@@ -16601,6 +16601,39 @@
                                     "program": "hacking-program:carbonite",
                                     "count": 1
                                 }
+                            },
+                            {
+                                "extraId": 331,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Carbonite (SR-2)",
+                                "effect": {
+                                    "kind": "program-saving-roll-mod",
+                                    "program": "hacking-program:carbonite",
+                                    "appliesTo": "target-saving-roll-against-program",
+                                    "modifier": -2
+                                }
+                            },
+                            {
+                                "extraId": 339,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (SR-1)",
+                                "effect": {
+                                    "kind": "program-saving-roll-mod",
+                                    "program": "hacking-program:trinity",
+                                    "appliesTo": "target-saving-roll-against-program",
+                                    "modifier": -1
+                                }
+                            },
+                            {
+                                "extraId": 352,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (SR-2)",
+                                "effect": {
+                                    "kind": "program-saving-roll-mod",
+                                    "program": "hacking-program:trinity",
+                                    "appliesTo": "target-saving-roll-against-program",
+                                    "modifier": -2
+                                }
                             }
                         ]
                     }
@@ -16684,6 +16717,28 @@
                                     "kind": "program-special-die",
                                     "program": "hacking-program:trinity",
                                     "count": 1
+                                }
+                            },
+                            {
+                                "extraId": 314,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Total Control (SR-2)",
+                                "effect": {
+                                    "kind": "program-saving-roll-mod",
+                                    "program": "hacking-program:total-control",
+                                    "appliesTo": "target-saving-roll-against-program",
+                                    "modifier": -2
+                                }
+                            },
+                            {
+                                "extraId": 339,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (SR-1)",
+                                "effect": {
+                                    "kind": "program-saving-roll-mod",
+                                    "program": "hacking-program:trinity",
+                                    "appliesTo": "target-saving-roll-against-program",
+                                    "modifier": -1
                                 }
                             }
                         ]

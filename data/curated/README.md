@@ -1041,9 +1041,9 @@ The exact approved grants are Trinity, White Noise, Cybermask,
 Zero Pain (Device `100`) and Fairy Dust (Device Plus `101`).
 These grant access to the named program; they do not clone
 program-specific mechanics or override a baseline program.
-Future program-specific B/PS/SR/SD and Firewall upgrades, as
-well as multiple co-occurring extras, need separate exact
-semantic reviews. Raw `UPGRADE:` spellings, including
+The program-specific B/PS/SD and named SR forms were reviewed
+separately below. Firewall upgrades, unqualified SR and
+multiple co-occurring extras still require exact semantic review. Raw `UPGRADE:` spellings, including
 nonbreaking spaces, remain source evidence rather than a
 generic parser contract. See
 [the source-parameter audit](../../docs/data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
@@ -1058,10 +1058,24 @@ standalone rule record and does not overwrite the owning
 program's base facts. `+1B` and `+1SD` are distinct;
 a Special Die does not raise Burst. The validator requires
 the exact approved source ID, raw spelling, field, numeric
-value and program target. Compound signatures and the
-`SR`/Firewall forms remain unresolved and must not be
-approved by generic substring parsing or by reviewed
-component membership.
+value and program target. Compound signatures, unqualified `SR` and Firewall
+forms remain unresolved and must not be approved by
+generic substring parsing or reviewed component membership.
+
+Named-program Saving Roll upgrades on Hacking Device
+source IDs `100`/`101` use `program-saving-roll-mod`
+with the exact `hacking-program:*` owner,
+`appliesTo: "target-saving-roll-against-program"`
+and `modifier: -1` or `-2`. This lowers the
+target's Saving Roll Success Value against the
+named Hacking Program; it does not change how
+many Saving Rolls are made or modify the Program's
+base PS. The reviewed mapping is source-ID-specific
+and covers only the exact Carbonite, Trinity and
+Total Control `SR-1/SR-2` spellings. Unqualified
+`UPGRADE: SR-1`, Firewall variants and compound
+extras must remain unresolved without their own
+scope and source review.
 
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value

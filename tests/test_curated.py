@@ -1352,6 +1352,11 @@ def test_hacking_program_grants_require_exact_device_and_raw_signature(
         ("hacking-device", 383, {"program": "hacking-program:trinity"}),
         ("hacking-device-plus", 269, {"modifier": -1}),
         ("hacking-device-plus", 378, {"count": 2}),
+        ("hacking-device", 331, {"modifier": -1}),
+        ("hacking-device", 339, {"program": "hacking-program:carbonite"}),
+        ("hacking-device", 352, {"appliesTo": "all-target-rolls"}),
+        ("hacking-device-plus", 314, {"modifier": 2}),
+        ("hacking-device-plus", 339, {"kind": "program-ps-replacement"}),
     ],
 )
 def test_hacking_program_modifiers_reject_wrong_effects(
