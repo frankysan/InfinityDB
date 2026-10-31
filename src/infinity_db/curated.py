@@ -622,7 +622,7 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
                 "stateId": "state:stunned",
                 "condition": "failed-saving-roll",
             },
-            "evidence": "explicit-pinned-wiki-example",
+            "evidence": "explicit-n5.3-pdf-p96-example-4",
         },
         {
             "when": {

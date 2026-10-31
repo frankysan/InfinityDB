@@ -3945,7 +3945,7 @@ def test_rea010_immunity_arm_bts_trait_baseline_and_printed_examples() -> None:
     assert "[[state:stunned|Stunned]] only on a failed BTS roll" in flash
     assert immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"][0][
         "evidence"
-    ] == "explicit-pinned-wiki-example"
+    ] == "explicit-n5.3-pdf-p96-example-4"
     assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 6
     cited = {(c["sourceId"], c.get("page")) for c in immunity["citations"]}
     assert cited >= {
@@ -4930,6 +4930,9 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
             stateAppliedOnFailedRoll=True), "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][3].update(
             evidence="derived-from-pinned-general-rules"),
+            "reviewed Weapon Immunity examples"),
+        (lambda f: f["reviewedWeaponCases"][0].update(
+            evidence="explicit-pinned-wiki-example"),
             "reviewed Weapon Immunity examples"),
         (lambda f: f["reviewedWeaponCases"][0]["when"].update(
             immunity="Enhanced"), "reviewed Weapon Immunity examples"),

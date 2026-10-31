@@ -1071,6 +1071,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         closed validation mutations and 1440/390/320 Chromium
         acceptance; promote the synchronized database/publication
         pair with recovery backup and 17 reviewed objects intact.
+      - [x] Reconcile evidence provenance of all **four printed N5.3
+        p. 96 Immunity examples**. Promote Flash Pulse (Example 4)
+        from the historical Wiki-only evidence label to the pinned
+        English PDF, retaining its source-backed one-BTS-roll
+        Non-Lethal/State: Stunned exception, canonical Army fields
+        and independently documented Spanish Wiki discrepancy.
+        Check the exact p. 96 and p. 186 PDF text, all four
+        example identities, Skill API, renderer and Chromium labels;
+        promote the synchronized rules/publication pair without
+        changing any of the 17 reviewed deployed objects.
       - [ ] Review other BTS-component Immunity outcomes using exact
         non-Comms Weapon/combined-Ammunition evidence. The four
         reviewed BTS-based examples do not authorize generic E/M,

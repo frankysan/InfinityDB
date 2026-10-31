@@ -78,7 +78,7 @@ for (const item of cases) {
 const labels = cases.map((item) => descendants(item,
   (node) => node.className === "detail-source")[0].textContent);
 assert.deepEqual(labels, [
-  "Explicit source example", "Derived from reviewed general rules",
+  "Explicit N5.3 p. 96, Example 4", "Derived from reviewed general rules",
   "Explicit N5.3 p. 96, Example 1",
   "Explicit N5.3 p. 96, Example 2",
   "Explicit source example", "Explicit N5.3 p. 96, Example 3",
@@ -104,7 +104,7 @@ assert.doesNotMatch(cases[5].textContent, /Critical/);
 const combined = cases.map((node) => node.textContent);
 assert.match(combined[0], /failed BTS Saving Roll still causes Stunned without Wounds/);
 assert.match(combined[0], /the Saving Roll remains BTS/);
-assert.match(combined[0], /Explicit source example/);
+assert.match(combined[0], /Explicit N5\.3 p\. 96, Example 4/);
 assert.match(combined[1], /Immunity \(BTS\) vs standalone E\/Mitter/);
 assert.match(combined[1], /2 Saving Rolls on a hit \(3 on a Critical\) at BTS\/2/);
 assert.match(combined[1], /1 Saving Roll on a hit \(2 on a Critical\) at BTS/);

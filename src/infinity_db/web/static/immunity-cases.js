@@ -20,7 +20,9 @@ const evidence = (value) => value === "derived-from-pinned-general-rules"
         ? "Explicit N5.3 p. 96, Example 2"
         : value === "explicit-n5.3-pdf-p96-example-1"
           ? "Explicit N5.3 p. 96, Example 1"
-          : "Evidence classification unavailable";
+          : value === "explicit-n5.3-pdf-p96-example-4"
+            ? "Explicit N5.3 p. 96, Example 4"
+            : "Evidence classification unavailable";
 const rollCount = (count) => `${count} Saving Roll${count === 1 ? "" : "s"}`;
 const counts = (rolls) => `${rollCount(rolls.hitRolls)} on a hit (${rolls.criticalRolls} on a Critical)`;
 

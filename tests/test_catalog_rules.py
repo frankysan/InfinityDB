@@ -1460,7 +1460,7 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
             "stateEffect": {
                 "stateId": "state:stunned", "condition": "failed-saving-roll"
             },
-            "evidence": "explicit-pinned-wiki-example",
+            "evidence": "explicit-n5.3-pdf-p96-example-4",
     }
     assert {relation["record_id"] for relation in flash["relations"]} == {
         "ammunition:stun", "trait:bs-weapon-wip", "trait:non-lethal",

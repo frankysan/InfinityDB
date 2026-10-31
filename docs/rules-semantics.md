@@ -2580,10 +2580,12 @@ Immunity (ARM) example, this does **not** collapse the hit to one roll. The
 original Army source identity remains AP+DA; the DA-only result describes the
 conditional effect, not a mutation to Army data or an official named example.
 
-The **explicitly printed** Immunity (BTS) versus Flash Pulse example (Wiki Immunity
-`oldid=3643`, Example 4; Weapon Chart `oldid=4083`) separately confirms that
+The **explicitly printed** Immunity (BTS) versus Flash Pulse example
+(English N5.3 PDF p. 96, Example 4; Weapon Chart p. 186) confirms that
 covered STUN Ammunition is treated as Normal **without changing the BTS Saving
-Roll to ARM**. The rule's **IMPORTANT** exception explicitly preserves the weapon's
+Roll to ARM**. The reviewed interaction now carries the direct pinned-PDF
+Example 4 evidence classification; Wiki Immunity `oldid=3643` and Weapon
+Chart `oldid=4083` remain corroborating citations. The rule's **IMPORTANT** exception explicitly preserves the weapon's
 Non-Lethal Trait (no Wounds) and State: Stunned Trait (**Stunned only if the BTS
 Saving Roll fails**). The [Spanish Immunity rule](https://infinitythewiki.com/wiki-es/index.php?title=Inmunidad&oldid=3677)
 (N5.2, Example 4) confirms the outcome. The [Spanish N5.3 Weapon Chart](https://infinitythewiki.com/wiki-es/index.php?title=Tabla_de_Armas&oldid=3987)
@@ -2727,8 +2729,12 @@ Sources: N5.3 English PDF printed pp. 95-96; Spanish PDF printed p. 99
 [Immunity](https://infinitythewiki.com/Immunity) (`oldid=3643`),
 [Combined Ammunition](https://infinitythewiki.com/Combined_Ammunition)
 (`oldid=3000`), and [Vulnerability](https://infinitythewiki.com/Vulnerability)
-(`oldid=3156`). The ARM cases are reviewed deductions; the named Viral example
-is printed in the Wiki. Broader precedence remains open.
+(`oldid=3156`). All four numbered N5.3 p. 96 Immunity examples have
+their own direct pinned-PDF evidence classifications: Missile Launcher,
+Monofilament, Plasma Rifle, and Flash Pulse. The additional combined
+Ammunition cases are explicitly marked rule-derived; the named Viral
+Vulnerability example remains pinned to the Wiki. Broader precedence
+remains open.
 
 ### RS-AW-AMMO-003 — Combined Ammunition is explicit composition
 

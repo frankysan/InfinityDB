@@ -398,8 +398,16 @@ links the printed Blast Mode's Circular Impact
 Template and Anti-materiel Traits without deciding
 their separate applicability; both original Army
 profiles remain unchanged.
-The twelve reviewed interactions are curated references,
-not a runtime Weapon-resolution engine. Coordinated `rules.db` and
+All four numbered N5.3 p. 96 **printed** Immunity examples now carry
+explicit pinned-PDF evidence labels: Missile Launcher Blast,
+Monofilament CC Weapon, Plasma Rifle and Flash Pulse.
+The latter was previously labelled as a pinned-Wiki example,
+despite having primary PDF citations on both Immunity and
+Flash Pulse records. Its conditional BTS saving roll,
+Non-Lethal and State: Stunned exception remain unchanged;
+the Spanish Wiki chart discrepancy remains independently
+documented. The twelve reviewed interactions are curated
+references, not a runtime Weapon-resolution engine. Coordinated `rules.db` and
 deployed-object publication remain synchronized; 17 reviewed
 deployed objects are unchanged. Other component Immunities, Comms
 Attack coverage, BTS conditions and unreviewed combinations

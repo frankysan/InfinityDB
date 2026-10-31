@@ -304,3 +304,40 @@ def test_printed_missile_blast_immunity_does_not_merge_hit_mode(
         assert not errors, errors
     finally:
         page.close()
+
+
+@pytest.mark.parametrize("width,height", [
+    (1440, 900), (390, 844), (320, 640),
+])
+def test_printed_flash_pulse_example_4_has_pdf_provenance_and_stun_exception(
+    app: Any, browser: Any, width: int, height: int,
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/skills/immunity", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelectorAll('.immunity-reviewed-cases li').length === 12",
+            timeout=20000,
+        )
+        cases = page.locator(".immunity-reviewed-cases li")
+        flash = cases.filter(has_text="Immunity (BTS) vs Flash Pulse")
+        assert flash.count() == 1
+        rendered = flash.inner_text()
+        assert "Explicit N5.3 p. 96, Example 4" in rendered
+        assert "failed BTS Saving Roll still causes Stunned without Wounds" in rendered
+        assert "Saving Roll remains BTS" in rendered
+        assert "Non-Lethal" in rendered
+        assert "State: Stunned" in rendered
+        assert flash.locator('a[href="/weapons/flash-pulse"]').count() == 1
+        assert flash.locator('a[href="/ammunition/stun"]').count() == 1
+        assert flash.locator('a[href="/ammunition/normal"]').count() == 1
+        assert flash.locator('a[href="/states/stunned"]').count() == 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()

@@ -4127,6 +4127,21 @@ each of the four current Core scenario selections, distinct scopes, unchanged
 Core payloads and rejection of unsupported/season-only contexts. This is
 local Chromium acceptance, not deployed browser verification.
 
+**Immunity printed Example 4 PDF provenance, 2026-10-30:**
+`tests/test_immunity_flash_pulse_pdf_example.py` verifies the
+pinned N5.3 English pp. 95–96 and 186, the published Flash Pulse
+source profile (STUN, one BTS roll, Non-Lethal, State: Stunned)
+and the direct Example 4 evidence classification in maintained
+curated data, `rules.db` and the Skill API. The Spanish Wiki
+two-roll / missing-State discrepancy remains source-noted,
+not imported as a Weapon profile mutation. The same test
+audits distinct pinned PDF labels for all four printed p. 96
+Immunity examples. The maintained-text renderer and Chromium
+at 1440/390/320 px check the Example 4 evidence label and
+conditional State exception, without changing the twelve-case
+count. Coordinated rules/publication promotion retains the
+17 reviewed deployed objects and rollback backup.
+
 **Missile Launcher / printed Immunity (ARM) Example 1, 2026-10-30:**
 `tests/test_immunity_missile_launcher_example.py` verifies
 the pinned N5.3 pp. 95–96/187, differentiates Blast
