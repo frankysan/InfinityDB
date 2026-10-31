@@ -1230,11 +1230,14 @@ a guarded paired refresh permitted only the nine remaining NULL-to-hash
 cells. Every other stored row and the complete database schema, including
 indexes, remained identical, as did typed Restrictions and reviewed objects.
 Two independent exports were byte-identical. The rules SHA-256 is
-`4a7da9a6237bca26ccfd453fc07d7e40b5e57a59b92da6b84de3ac4b9ab7b255`;
+`983aa2d86220120fc9fce9b50ba4a1ba00c600ee052d904517e20de49383a18a`;
 the matching ignored publication SHA-256 is
-`b680f0bf1e55d119fc0590ea35a04fc917eafc22244715ef64a6bcc1e8b8131d`.
+`d6d67811a6a14f5a03976d13e656f46829f14be18594ead8efcc620fce0fe670`.
 These current fingerprints include the subsequent Surprise Attack
-occurrence-metadata refresh described above.
+occurrence-metadata refresh and 2026-10-31 source-reference additions.
+The paired v9 rebuild restores the fourteen typed Restrictions after an
+ordinary v8 rebuild replaced the release database; legacy relations and
+reviewed deployed-object content remain unchanged.
 The original matched v9 pair is retained under ignored `local/`; the retained
 local audit evidence records its recovery location. The publication changes only
 its rules-database and curated-source fingerprints. This is local provenance

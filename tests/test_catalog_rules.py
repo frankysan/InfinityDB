@@ -1826,7 +1826,9 @@ def test_state_cancellation_clarifications_are_scoped_and_published(
         "state:prone": ("[[skill:berserk|Berserk]]", "automatically canceled"),
         "state:disconnected": ("Controller recovers", "passing a Coherency Check",
                                "Autonomous instead"),
-        "state:retreat": ("army leaves the Retreat! situation", "Command Token"),
+        "state:retreat": (
+            "army leaves the [[rule:army-retreat|Retreat!]] situation", "Command Token",
+        ),
         "state:suppressive-fire": ("[[rule:guts-roll|Guts Roll]]",
                                      "joins a Fireteam"),
     }

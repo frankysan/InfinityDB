@@ -59,7 +59,7 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = candidate_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 49
+    assert len(validate_reviews(manifest, curated, candidates)) == 51
 
     for key, bad_value, error in (
         ("classification", "fully-reviewed-four-stat-object", "classification"),
@@ -147,8 +147,8 @@ def test_pinned_non_catalog_discovery_closes_bounded_review_queue() -> None:
     report = audit_non_catalog_candidates(CURATED, REVIEWS)
     assert report["scope"] == "non-catalog-keyword-discovery-not-object-inventory"
     assert len(report["curatedSourceSha256"]) == 64
-    assert report["reviewedCount"] == 49
-    assert report["candidateCount"] == 49
+    assert report["reviewedCount"] == 51
+    assert report["candidateCount"] == 51
     assert report["unreviewed"] == []
     access = next(
         entry for entry in report["candidates"]
@@ -253,8 +253,8 @@ def test_non_catalog_cli_reports_reviewed_queue_without_publishing_objects(
     assert main() == 0
     output = capsys.readouterr().out
     assert "Candidate definitions:" in output
-    assert "Candidate definitions: 49" in output
-    assert "Reviewed classifications: 49" in output
+    assert "Candidate definitions: 51" in output
+    assert "Reviewed classifications: 51" in output
     assert "Awaiting manual review: 0" in output
     assert "rule:access-width:" not in output
     count = 6 if any(

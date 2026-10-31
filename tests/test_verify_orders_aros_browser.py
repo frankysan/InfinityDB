@@ -54,10 +54,24 @@ def test_orders_aros_page_renders_and_filters_without_overflow(
     page = chrome.new_page(viewport={"width": width, "height": height})
     route_browser_page(page, app, ORIGIN)
     errors: list[str] = []
+    failed_requests: list[str] = []
+    http_errors: list[str] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed_requests.append(request.url))
+    page.on("response", lambda response: http_errors.append(
+        f"{response.status} {response.url}",
+    ) if response.status >= 400 else None)
     try:
-        response = page.goto(f"{ORIGIN}/orders-aros", wait_until="domcontentloaded")
+        response = page.goto(f"{ORIGIN}/", wait_until="domcontentloaded")
         assert response is not None and response.status == 200
+        landing_link = page.locator('a.landing-link[href="/orders-aros"]')
+        assert landing_link.is_visible()
+        assert "Orders and AROs" in landing_link.inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        ), width
+        landing_link.click()
+        page.wait_for_url(f"{ORIGIN}/orders-aros")
         page.wait_for_function(
             "() => document.querySelector('#matrix-count')?.textContent === "
             "'57 declarations'",
@@ -104,6 +118,8 @@ def test_orders_aros_page_renders_and_filters_without_overflow(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         ), width
         assert not errors, errors
+        assert not failed_requests, failed_requests
+        assert not http_errors, http_errors
     finally:
         page.close()
 

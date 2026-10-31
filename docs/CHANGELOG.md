@@ -184,6 +184,14 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing + Web backend:** Restore the fourteen source-scoped
+  Restrictions in the shipped rules database and `/api/restrictions`,
+  preserving the reviewed deployed-object profiles and legacy relationships.
+- **Web frontend:** Include Orders and AROs among the home page reference links
+  and split long Army Retreat, Standard Game and Combat Group summaries into
+  readable paragraphs.
+- **Deployment:** Allow aggregate metrics history to retain the bounded
+  Orders and AROs page/API route labels.
 - **Web frontend:** Explain Hacking Program profiles with an unspecified
   source Target Troop Type without treating the original dash as no valid
   target. Keep Army profile data and Program-specific rules unchanged.

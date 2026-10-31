@@ -133,6 +133,18 @@ def test_promoted_citations_are_consistent_with_rules_database() -> None:
     assert published["sourceSnapshot"]["rulesDatabaseSha256"] == hashlib.sha256(
         rules_db.read_bytes()
     ).hexdigest()
+    citation_sql = (
+        "SELECT record_id, source_id, page FROM record_citations "
+        "WHERE record_id IN (?, ?, ?, ?) "
+        "AND source_id = ? ORDER BY record_id, page"
+    )
+    params = (*tuple(entry[0] for entry in PINNED), SOURCE_CITATION["sourceId"])
+    expected = sorted(
+        (entry[0], SOURCE_CITATION["sourceId"], SOURCE_CITATION["page"])
+        for entry in PINNED
+    )
+    with sqlite3.connect(rules_db) as current:
+        assert current.execute(citation_sql, params).fetchall() == expected
     stage = CURATED.parents[3] / "local/hacking-device-citations-n53"
     report_file = stage / "staging-report.json"
     if report_file.is_file():
@@ -141,21 +153,14 @@ def test_promoted_citations_are_consistent_with_rules_database() -> None:
         assert report["sourcePage"] == 58
         # The citation stage is historical evidence: later schema migrations
         # may rebuild rules.db without removing the four reviewed citations.
-        assert CURATED.read_bytes() == (stage / STAGED_PATHS[0]).read_bytes()
-        assert hashlib.sha256(CURATED.read_bytes()).hexdigest() == (
+        assert hashlib.sha256((stage / STAGED_PATHS[0]).read_bytes()).hexdigest() == (
             report["stagedSha256"]["curated"]
         )
+        staged_source = json.loads((stage / STAGED_PATHS[0]).read_text(encoding="utf-8"))
+        staged_records = {record["id"]: record for record in staged_source["records"]}
+        assert all(SOURCE_CITATION in staged_records[row[0]]["citations"] for row in PINNED)
         staged_rules = stage / STAGED_PATHS[1]
         with sqlite3.connect(rules_db) as current, sqlite3.connect(staged_rules) as old:
-            citation_sql = (
-                "SELECT record_id, source_id, page FROM record_citations "
-                "WHERE record_id IN (?, ?, ?, ?) "
-                "AND source_id = ? ORDER BY record_id, page"
-            )
-            params = (*tuple(entry[0] for entry in PINNED), SOURCE_CITATION["sourceId"])
-            expected = [(entry[0], SOURCE_CITATION["sourceId"], SOURCE_CITATION["page"])
-                        for entry in PINNED]
-            assert current.execute(citation_sql, params).fetchall() == sorted(expected)
             assert current.execute(citation_sql, params).fetchall() == (
                 old.execute(citation_sql, params).fetchall()
             )
@@ -164,8 +169,10 @@ def test_promoted_citations_are_consistent_with_rules_database() -> None:
         assert published["unresolvedDeliveries"] == old_publication["unresolvedDeliveries"]
         old_source = dict(old_publication["sourceSnapshot"])
         old_source.pop("rulesDatabaseSha256")
+        old_source.pop("curatedSourceSha256")
         current_source = dict(published["sourceSnapshot"])
         current_source.pop("rulesDatabaseSha256")
+        current_source.pop("curatedSourceSha256")
         assert current_source == old_source
 
 

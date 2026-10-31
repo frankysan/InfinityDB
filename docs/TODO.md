@@ -2404,8 +2404,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
                 they are not deployed Weapon/Equipment profiles or
                 reverse Unit uses. The Prone/Silhouette X exception and
                 Movement priority remain rule-level constraints. The
-                non-catalog keyword queue now has **49/49 reviewed**
-                classifications; this does not establish complete N5.3
+                non-catalog keyword queue has **51/51 reviewed**
+                classifications after also checking Army Retreat's State
+                Tokens (p. 146) and Combat Group affiliation for existing
+                deployed Markers (p. 10); neither creates an object profile.
+                This does not establish complete N5.3
                 game-element coverage beyond the bounded keyword scan.
               - [ ] Extend object discovery beyond the bounded
                 non-catalog keyword/definition-fields scan, checking

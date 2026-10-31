@@ -140,7 +140,7 @@ def stage(output: Path) -> dict[str, Any]:
         "deployedObjectCount": len(updated["objects"]),
     }
     (stage_dir / "report.json").write_text(
-        json.dumps(report, indent=2) + "\n", encoding="utf-8"
+        json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n"
     )
     return report
 

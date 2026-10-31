@@ -281,6 +281,9 @@ browser-dependent cases. Unrelated tests continue on available workers.
 Locks release even if a worker process exits unexpectedly; normal serial tests
 and environments without Playwright do not acquire them.
 `tests/test_browser_test_capacity.py` covers cross-process exclusion and reuse.
+The lane registry also includes Orders/AROs, Ammunition publication, and
+Immunity/Plasma browser acceptance; its coverage test requires every real
+Chromium module in the maintained browser section to have a lane.
 
 The Unit Skill acceptance matrix is split into independently scheduled
 pytest cases for default Units, complex profiles, optional flags, source-backed
@@ -1823,12 +1826,12 @@ structured detail fields without turning keyword mentions into object IDs:
 ```
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
-manifest pins **48 source-reviewed definitions** in this bounded keyword scan.
-There are currently **49 candidates**: `rule:access-width` was added with
-the reviewed Scenery Structure source and explicitly remains an **unreviewed
-keyword hit**, not evidence for an additional deployed-object profile.
-Its gate Tokens describe scenery access openings, not automatically Weapon/
-Equipment devices. A deliberate classification decision remains pending.
+manifest pins **51 source-reviewed definitions** in this bounded keyword scan,
+with no unreviewed candidates. Access Width gate Tokens label scenery
+openings (p. 145); Army Retreat Tokens indicate existing Trooper conditions
+(p. 146); Combat Group affiliation identifies the group of an existing
+deployed Weapon or Equipment Marker (p. 10). None creates an additional
+deployed-object profile or delivery permission.
 Six earlier decisions initially had PDF-only evidence recorded in the
 audit manifest. Their verified N5.3 citations have since been migrated to
 maintained rules records and synchronized with the rules database/publication;

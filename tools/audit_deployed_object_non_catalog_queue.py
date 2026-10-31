@@ -64,6 +64,8 @@ CLASSIFICATIONS = {
     "rule:modifiers-explained": ("rule", "command-token-terminology-not-object"),
     "rule:coordinated-orders": ("rule", "role-token-and-delivery-choice-not-object"),
     "rule:deployment-phase": ("rule", "deployment-procedure-not-object"),
+    "rule:army-retreat": ("rule", "army-state-reminder-not-object"),
+    "rule:combat-group": ("rule", "existing-deployable-affiliation-not-object"),
     "skill:frenzy": ("skill", "indirect-deployable-wounds-not-eligible"),
     "state:possessed": ("state", "state-profile-and-command-resource-not-object"),
     "rule:command-token-strategic-use": ("rule", "command-resource-and-support-state-token"),

@@ -81,6 +81,8 @@ its application metrics.
   embedded Attributes, scoped Game terms and searchable Weapon Properties (such as Viral,
   Plasma and combined Ammunition). Weapon Properties link to their underlying canonical
   rules instead of redefining the effects.
+- Links to **Orders and AROs** from the home page and navigation, with searchable
+  declarations by Order type and links to their rules and scenario context.
 - Includes a browsable **Scenarios** reference with four N5.3 Core missions
   and a separately selectable ITS Season 18 Battleground pilot. Explicit
   Army Points selection, structured setup/objectives/scoring, scenario Rules

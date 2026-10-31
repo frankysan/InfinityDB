@@ -26055,7 +26055,7 @@
                 "Army Retreat",
                 "Retreat threshold"
             ],
-            "summary": "[[rule:army-retreat|Retreat!]] is an **army-level situation**, distinct from a Trooper's [[state:retreat|Retreat! State]]. At the start of the player's Active Turn, during the Tactical Phase, compare the surviving Troopers' total points with the **25% threshold of the points available to build the Army List**. Include Troopers not yet placed on the table as survivors. At or below that threshold, the army enters [[rule:army-retreat|Retreat!]]; above it, the situation is cancelled.",
+      "summary": "[[rule:army-retreat|Retreat!]] is an **army-level situation**, distinct from a Trooper's [[state:retreat|Retreat! State]].\n\nAt the start of the player's Active Turn, during the Tactical Phase, compare the surviving Troopers' total points with the **25% threshold of the points available to build the Army List**. Include Troopers not yet placed on the table as survivors.\n\nAt or below that threshold, the army enters [[rule:army-retreat|Retreat!]]; above it, the situation is cancelled.",
             "composition": {
                 "role": "definition"
             },
@@ -26268,7 +26268,7 @@
                 "Standard Game victory",
                 "Standard Game end conditions"
             ],
-            "summary": "A Standard Game is a three-Game-Round battle of attrition. After the third Game Round, each player totals the Cost of Troopers in their Army List who are not in a [[term:null-state|Null State]]; the higher total of Victory Points wins, and equal totals are a tie. A Standard Game also ends at the end of a Player Turn that began with that player's army in [[rule:army-retreat|Retreat!]].",
+            "summary": "A Standard Game is a three-Game-Round battle of attrition. After the third Game Round, each player totals the Cost of Troopers in their Army List who are not in a [[term:null-state|Null State]]; the higher total of Victory Points wins, and equal totals are a tie.\n\nA Standard Game also ends at the end of a Player Turn that began with that player's army in [[rule:army-retreat|Retreat!]].",
             "composition": {
                 "role": "definition"
             },
@@ -26324,7 +26324,7 @@
                 "Combat Groups",
                 "Combat Group membership"
             ],
-            "summary": "A Combat Group is a closed group of Troopers assigned when creating an Army List. Each group can have at most **10 Troopers that contribute or spend Orders**; [[skill:peripheral|Peripherals]] do not use additional group slots. Groups have separate [[rule:regular-order|Regular Order]] Pools and normally cannot exchange Troopers or Orders during play.\n\n**Group capacity is not Army List capacity:** the Army List's separate 15-Trooper maximum, Points, Availability and other list restrictions still apply.",
+            "summary": "A Combat Group is a closed group of Troopers assigned when creating an Army List. Each group can have at most **10 Troopers that contribute or spend Orders**; [[skill:peripheral|Peripherals]] do not use additional group slots.\n\nGroups have separate [[rule:regular-order|Regular Order]] Pools and normally cannot exchange Troopers or Orders during play.\n\n**Group capacity is not Army List capacity:** the Army List's separate 15-Trooper maximum, Points, Availability and other list restrictions still apply.",
             "composition": {
                 "role": "definition"
             },

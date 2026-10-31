@@ -350,7 +350,7 @@
       ],
       "summaryEvidence": "A State applied when an army enters Retreat!",
       "factsEvidence": [
-        "[[state:retreat|Retreat!]] ends when the army leaves the Retreat! situation"
+        "[[state:retreat|Retreat! State]] ends when the army leaves the [[rule:army-retreat|Retreat!]] situation"
       ],
       "caveat": "Retreat! and Command Token references govern an existing Trooper/Army State, not a separate deployed game element; Marker cancellation changes representation only."
     },
@@ -494,7 +494,7 @@
       "sourcePages": [
         15
       ],
-      "summaryEvidence": "After the Initiative Roll, the players deploy their Troopers before the game begins",
+      "summaryEvidence": "After the [[rule:initiative-roll|Initiative Roll]], the players deploy their Troopers before the game begins",
       "factsEvidence": [
         "Rules such as [[skill:forward-deployment|Forward Deployment]]"
       ],
@@ -571,6 +571,26 @@
         "Troopers in [[state:prone|Prone State]] with Silhouette X use the Silhouette Attribute on their Unit Profile when checking access restrictions."
       ],
       "caveat": "N5.3 p. 145 uses Narrow Gate and Wide Gate Tokens to label agreed scenery openings. They are not independent deployed Weapon or Equipment profiles, nor reviewed delivery edges or Army Unit carriers. A Prone Trooper still checks the Unit Profile Silhouette Attribute; no additional can-pass attribute is inferred."
+    },
+    {
+      "recordId": "rule:army-retreat",
+      "classification": "army-state-reminder-not-object",
+      "sourcePages": [146],
+      "summaryEvidence": "[[rule:army-retreat|Retreat!]] is an **army-level situation**",
+      "factsEvidence": [
+        "cancel the army's [[rule:army-retreat|Retreat!]], remove its Tokens and cancel the Troopers' [[state:retreat|Retreat! States]]"
+      ],
+      "caveat": "N5.3 p. 146 removes Retreat Tokens when the army recovers. These indicate an army/Trooper condition, not an independent deployed Weapon or Equipment profile or a delivery relationship."
+    },
+    {
+      "recordId": "rule:combat-group",
+      "classification": "existing-deployable-affiliation-not-object",
+      "sourcePages": [10],
+      "summaryEvidence": "A Combat Group is a closed group of Troopers assigned when creating an Army List.",
+      "factsEvidence": [
+        "A Marker representing a [[trait:deployable|Deployable]] Weapon or piece of Equipment belongs to the Combat Group of the Trooper that deployed it."
+      ],
+      "caveat": "N5.3 p. 10 assigns an existing deployed Weapon or Equipment Marker to its placing Trooper's Combat Group. This is affiliation and Open Information, not a new object identity or a rule permitting deployment. Command Token transfer exceptions concern existing Troopers."
     },
     {
       "recordId": "skill:transmutation",

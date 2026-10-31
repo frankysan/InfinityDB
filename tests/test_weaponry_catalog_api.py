@@ -630,7 +630,7 @@ def test_boarding_multi_and_silenced_pistol_mode_exceptions(
     assert {c["page"] for c in _weapon_rules(silenced)[
         "weapon:silenced-pistol"]["citations"]
         if c["source_id"] == "n5-core-v5.3-pdf"
-    } == {67, 175, 182}
+    } == {67, 95, 175, 182}
 
 
 def test_shared_ammunition_effects_are_canonical_across_weapon_categories(

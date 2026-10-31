@@ -142,7 +142,9 @@ def stage(relative: Path) -> dict[str, Any]:
         "newPublicationSha256": digest(path / "deployed-objects.json"),
         "deployedObjects": len(updated["objects"]),
     }
-    (path / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    (path / "report.json").write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n",
+    )
     return report
 
 
