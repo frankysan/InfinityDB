@@ -1138,6 +1138,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         negative control: its ARM+BTS Combined Saving Roll must not
         become Combined Ammunition. The existing renderer needs no
         implementation change; tests enforce its transport contract.
+      - [x] Extend real Chromium parity to **all 11 reviewed base
+        Ammunition identities** as well as the five combined forms.
+        Select one real published Weapon profile per source ID and
+        verify its canonical link, shared-rule summary, citation
+        count and unchanged Saving Roll field at 1440/390/320 px.
+        Use the resolved maintained-text tokens, including display
+        forms such as plural Equipment references. At 390 px,
+        verify each canonical `/ammunition/<slug>` detail page
+        renders the matching rule and citations. Keep Plasma
+        as the Combined Saving Roll negative control; do not change
+        application logic, curated data or generated databases.
       - [ ] Review remaining component-level precedence/exception
         semantics and a **future** comparison-view consumer separately.
         There is currently no Weapon comparison view; do not turn

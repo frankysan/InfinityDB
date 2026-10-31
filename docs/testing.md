@@ -4138,6 +4138,14 @@ unchanged Saving Roll cells, with no overflow. Three additional
 Plasma Rifle checks confirm a Combined Saving Roll (`ARM and BTS`)
 is not turned into Combined Ammunition. No application source,
 curated data, Army profile or published database is changed.
+The extension covers one real source-backed Weapon profile for each of the
+11 base Ammunition identities: 33 Chromium cases at 1440/390/320 px verify
+single-component canonical links, shared summaries with resolved maintained-text
+display forms (including plural references), citation counts, source Saving Roll
+notation, and no horizontal overflow. Eleven more Chromium cases at 390 px
+visit the canonical Ammunition detail routes, verify matching titles and cited
+rule records. The full suite has 62 cases; all 11 base and five combined source
+identities are represented without inferred attack rules or a database rebuild.
 Future Weapon comparison views remain out of scope.
 
 **AP+T2 CC Weapon / Immunity (Critical), 2026-10-31:**

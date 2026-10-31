@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+import sqlite3
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,8 @@ from wsgiref.util import setup_testing_defaults
 
 import pytest
 
+from infinity_db.database.repository import Database
+from infinity_db.weapon_ammunition_references import load_ammunition_reference_map
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import route_browser_page
 
@@ -53,8 +56,16 @@ def browser() -> Iterator[Any]:
             chrome.close()
 
 
-def _display_summary(summary: str) -> str:
-    """The browser renders maintained [[target|label]] references as labels."""
+def _display_summary(
+    summary: str, tokens: list[dict[str, Any]] | None = None,
+) -> str:
+    """Use published resolved labels, including canonical plural forms."""
+    if tokens is not None:
+        assert all(token["type"] in {"text", "reference"} for token in tokens)
+        return "".join(
+            token["label"] if token["type"] == "reference" else token["text"]
+            for token in tokens
+        ).strip()
     return re.sub(r"\[\[[^\]|]+\|([^\]]+)\]\]", r"\1", summary).strip()
 
 
@@ -82,6 +93,184 @@ def _profile(payload: dict[str, Any], source_id: int) -> dict[str, Any]:
     ]
     assert matches
     return matches[0]
+
+
+BASE_SOURCE_IDS = (2, 3, 6, 8, 9, 14, 18, 21, 22, 29, 37)
+
+
+@pytest.fixture(scope="module")
+def base_samples(app: Any) -> dict[int, tuple[str, dict[str, Any]]]:
+    """Select one unambiguous real Weapon profile for every reviewed base ID."""
+    database = Database(ROOT / "data/generated/infinity.db")
+    mapping = load_ammunition_reference_map()
+    assert all("components" not in mapping[source_id] for source_id in BASE_SOURCE_IDS)
+    with sqlite3.connect(ROOT / "data/generated/infinity.db") as connection:
+        candidates = {
+            source_id: [
+                row[0] for row in connection.execute(
+                    "SELECT DISTINCT id FROM metadata_weapons "
+                    "WHERE ammunition = ? AND (type IS NULL OR type != 'EQUIPMENT') "
+                    "ORDER BY id",
+                    (source_id,),
+                )
+            ] for source_id in BASE_SOURCE_IDS
+        }
+    selected: dict[int, tuple[str, dict[str, Any]]] = {}
+    for source_id, weapon_ids in candidates.items():
+        for weapon_id in weapon_ids:
+            slug = database.application_slug("weapons", weapon_id)
+            if not slug:
+                continue
+            payload = _api(app, f"/api/weapons/{slug}")
+            profiles = payload.get("profiles", []) + [
+                profile for variant in payload.get("weapon_variants", [])
+                for profile in variant.get("profiles", [])
+            ]
+            matches = [
+                profile for profile in profiles
+                if profile.get("ammunition_source_id") == source_id
+            ]
+            if not matches:
+                continue
+            profile = matches[0]
+            if profile.get("ammunition") != mapping[source_id]["name"]:
+                continue
+            selected[source_id] = (slug, profile)
+            break
+    assert set(selected) == set(BASE_SOURCE_IDS), (
+        "No unambiguous published Weapon for base source IDs",
+        sorted(set(BASE_SOURCE_IDS) - set(selected)),
+    )
+    return selected
+
+
+@pytest.mark.parametrize("width,height", [(1440, 900), (390, 844), (320, 640)])
+@pytest.mark.parametrize("source_id", BASE_SOURCE_IDS)
+def test_reviewed_base_ammunition_is_linked_without_rewriting_weapon_rolls(
+    app: Any, browser: Any, base_samples: dict[int, tuple[str, dict[str, Any]]],
+    source_id: int, width: int, height: int,
+) -> None:
+    slug, profile = base_samples[source_id]
+    mapping = load_ammunition_reference_map()[source_id]
+    identity = mapping["segments"][0]["ruleId"]
+    name = identity.split(":", 1)[1]
+    assert profile["ammunition_parts"][0]["public_reference"] == {
+        "catalog": "ammunition", "id": name,
+    }
+    assert len(profile["ammunition_parts"]) == 1
+    assert "ammunition_composition" not in profile
+    effects = profile["ammunition_effects"]
+    assert len(effects) == 1
+    assert effects[0]["record_id"] == identity
+    assert effects[0]["citations"]
+
+    page = browser.new_page(viewport={"width": width, "height": height})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/weapons/{slug}", wait_until="domcontentloaded")
+        page.wait_for_function(
+            "() => document.querySelector("
+            "'.weapon-profile .weapon-statline tbody tr') !== null",
+            timeout=20000,
+        )
+        card = page.locator(".weapon-profile").filter(
+            has=page.locator(".weapon-statline td[data-label='Ammunition']")
+            .filter(has_text=profile["ammunition"])
+        )
+        if profile.get("mode"):
+            card = card.filter(has=page.locator("h4").filter(
+                has_text=profile["mode"]
+            ))
+        assert card.count() >= 1, (source_id, slug, profile.get("mode"))
+        card = card.first
+        ammo_cell = card.locator(".weapon-statline td[data-label='Ammunition']")
+        assert ammo_cell.inner_text().strip() == profile["ammunition"]
+        assert ammo_cell.locator("a").evaluate_all(
+            "(links) => links.map((link) => link.getAttribute('href'))"
+        ) == [f"/ammunition/{name}"]
+        raw_saving = profile.get("saving")
+        if raw_saving is None or str(raw_saving).strip() in ("", "-", "--"):
+            displayed_saving = "--"
+        else:
+            displayed_saving = " × ".join(
+                str(value) for value in (raw_saving, profile.get("saving_num"))
+                if value is not None and str(value) != ""
+            )
+        assert card.locator(
+            ".weapon-statline td[data-label='Saving']"
+        ).inner_text() == displayed_saving
+        detail = card.locator(".weapon-ammunition-effects")
+        assert detail.count() == 1
+        detail.evaluate("(element) => element.open = true")
+        effect = detail.locator(".weapon-ammunition-effect")
+        assert effect.count() == 1
+        assert effect.locator("h5 a").get_attribute("href") == f"/ammunition/{name}"
+        assert effect.locator("h5").inner_text().strip() == effects[0]["name"]
+        summary_tokens = effects[0]["summary_tokens"]
+        assert effect.locator("p.detail-copy").inner_text().strip() == (
+            _display_summary(effects[0]["summary"], summary_tokens)
+        )
+        for token in summary_tokens:
+            if token["type"] != "reference":
+                continue
+            reference = token["public_reference"]
+            href = reference.get("href") or (
+                f"/{reference['catalog']}/{reference['id']}"
+            )
+            assert effect.locator(
+                f'p.detail-copy a[href="{href}"]'
+            ).filter(has_text=token["label"]).count() >= 1
+        assert effect.locator(".detail-source a").count() == len(
+            effects[0]["citations"]
+        )
+        assert "Follow the printed Weapon profile" in detail.inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("source_id", BASE_SOURCE_IDS)
+def test_every_base_weapon_link_has_cited_player_ammunition_detail(
+    app: Any, browser: Any, source_id: int,
+) -> None:
+    """The linked canonical destination must itself render the reviewed rule."""
+    mapping = load_ammunition_reference_map()[source_id]
+    slug = mapping["segments"][0]["ruleId"].split(":", 1)[1]
+    published = _api(app, f"/api/ammunition/{slug}")
+    assert len(published["rules"]) == 1
+    rule = published["rules"][0]
+    assert rule["id"] == f"ammunition:{slug}"
+    assert rule["citations"]
+
+    page = browser.new_page(viewport={"width": 390, "height": 844})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/ammunition/{slug}", wait_until="domcontentloaded")
+        article = page.locator(
+            f"#item-content article#rule-ammunition-{slug}"
+        )
+        article.wait_for(state="visible", timeout=20000)
+        assert page.locator("#item-name").inner_text().strip().removesuffix(".") == (
+            published["name"]
+        )
+        assert article.locator("header h3").inner_text().strip() == rule["name"]
+        assert article.locator(".rules-source-citations a").count() == len(
+            rule["citations"]
+        )
+        assert "InfinityDB-maintained reference" in article.inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
 
 
 @pytest.mark.parametrize("width,height", [(1440, 900), (390, 844), (320, 640)])

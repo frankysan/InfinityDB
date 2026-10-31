@@ -282,7 +282,13 @@ examples for AP+DA, AP+Exp, and N+E/M; the other two combinations are
 verified against exact Army metadata and public profiles instead. This is
 a completeness gate for the *reviewed map*, not coverage of all source
 Ammunition IDs, combined effect precedence, full Critical mechanics, or
-a future Weapon comparison view.
+a future Weapon comparison view. The browser-level gate in
+`tests/test_verify_ammunition_publication_browser.py` additionally
+covers real Weapon profiles for all 11 base and five combined
+source identities, the complete canonical Ammunition detail route
+set, and Plasma as a Combined Saving Roll negative control.
+It compares published summaries/citations and source Saving Roll
+notation rather than synthesizing runtime combat effects.
 
 **Weapon Properties (current):** InfinityDB maintains a separate, descriptive
 `weapon-property:*` vocabulary in `config/catalogs/weapon-properties.json`.
