@@ -943,6 +943,24 @@ database, publication and rules-build validation were run
 immediately. Additional mutation cases and cumulative test-suite
 execution are deferred in `docs/validation-queue.md`.
 
+**Chain of Command Non Specialist publication (2026-11-01):**
+The source audit identifies exactly 11 source-26 `375/TEXT:Non Specialist`
+occurrences, all option-level, across Joan of Arc/Joan of Arc v2
+and William Wallace; 151 Chain of Command occurrences in total.
+The `reviewed-extra` effect excludes only Chain of
+Command-derived Specialist Troop qualification. The targeted
+source-inventory regression pins all 11 occurrences and the typed
+rules database; `test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills`
+protects the existing independent-qualifier behavior.
+`tools.stage_chain_of_command_non_specialist --output-dir local/<unique-name>`
+stages guarded matching rules/publication artifacts;
+`--promote-staged` verifies input hashes and retains rollback
+copies. No deployed-object record was changed (17 unchanged).
+Focused source, rules-map, Specialist filter, publication and
+rules-build tests passed; source audit count is **18 unresolved
+Skill IDs**. Mutation/edge-case tests and cumulative suite
+execution are deferred in `docs/validation-queue.md`.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

@@ -940,6 +940,27 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid Neurocinetics reactive Burst extra")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "chain-of-command"}
+    ]:
+        # N5.3 p. 87: this annotation suppresses Specialist status granted
+        # by Chain of Command only; other qualifying Skills still apply.
+        expected = [{
+            "extraId": 375,
+            "extraType": "TEXT",
+            "rawValue": "Non Specialist",
+            "effect": {
+                "kind": "specialist-qualification-exclusion",
+                "appliesTo": "specialist-troop-qualification-from-chain-of-command",
+                "excluded": True,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+        ):
+            raise ValueError(f"{context}: invalid Chain of Command Non Specialist extra")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "minelayer"}
     ]:
         # N5.3 p. 102: the bracketed quantity is the number of deployable

@@ -857,6 +857,28 @@ The source-variant audit now reports **19 unresolved Skill IDs**;
 the cross-Army variant usage index remains unimplemented.
 Broader tests and mutation coverage remain queued.
 
+**Reviewed Chain of Command (Non Specialist) (2026-11-01):**
+The pinned Army source has 151 direct Chain of Command (source `26`)
+occurrences. Exactly 11 option-level occurrences carry source extra
+`375/TEXT:Non Specialist`: Joan of Arc and Joan of Arc v2 in
+PanOceania/Military Orders, and William Wallace in Ariadna,
+Caledonian Highlander Army and Kosmoflot. N5.3 p. 87 explicitly
+excludes Specialist status from *this Skill* in scenarios where
+ordinary Chain of Command would grant it. The `reviewed-extra`
+effect is `specialist-qualification-exclusion` with
+`appliesTo: specialist-troop-qualification-from-chain-of-command`
+and `excluded: true`. It does **not** override a different
+qualifying Skill. The pre-existing Specialist Troops filter
+continues to use the Army variant label; this migration only
+publishes matching structured semantics for future consumers.
+The guarded `tools.stage_chain_of_command_non_specialist`
+migration matched the curated source, Army and PDF fingerprints,
+promoted the synchronized rules/publication artifacts, retained
+rollback copies, and verified that 17 published deployed objects
+remain unchanged. The source audit has **18 unresolved Skill IDs**,
+with cumulative tests and additional negative tests tracked in
+the validation queue. No cross-Army usage index is generated.
+
 **Partially reviewed Hacking Device program grants (2026-10-31):**
 The pinned Army source has Hacking Device `100` with 653 direct
 occurrences and Hacking Device Plus `101` with 126. English

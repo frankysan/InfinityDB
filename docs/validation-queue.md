@@ -84,6 +84,29 @@ Each item records:
   validator accepts only `267/TEXT:2`. Risk: moderate;
   linked execution: VR-0003. Outcome: test design deferred.
 
+- [ ] **VD-0002** (2026-11-01; needs-design): Add negative
+  curated-source validation cases for Chain of Command
+  `375/TEXT:Non Specialist`: altered extra ID, raw value/type,
+  effect kind/scope and `excluded` (including a non-boolean).
+  Assert only the exact source-26 annotation is accepted.
+  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
+  change: `dev/v1.0.0` after `980fb6b3`; existing coverage:
+  `test_chain_of_command_non_specialist_matches_exact_source_owners`
+  and the closed curated validator. Risk: moderate; linked
+  execution: VR-0004. Outcome: design deferred.
+
+- [ ] **VD-0003** (2026-11-01; needs-design): Add a pinned
+  Army-to-filter parity check for Chain of Command (Non Specialist):
+  the 11 exact options must never qualify through Chain of
+  Command alone, while other qualifying Specialist Skills remain
+  independently valid in the supported contexts. Keep candidate
+  Unit aggregation distinct from per-profile qualification.
+  Work: [Specialist Troops filter](TODO.md#rules-and-reference-completeness);
+  change: `dev/v1.0.0` after `980fb6b3`; existing coverage:
+  `test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills`
+  uses synthetic variants. Risk: moderate; linked execution:
+  VR-0004. Outcome: design deferred.
+
 ## Pending deferred execution
 
 Each item records:
@@ -165,6 +188,33 @@ Each item records:
   `tools/run_checks.py --stage test` / normal mandatory CI and
   release gates on the final reviewed state. Outcome: awaiting design
   and broader execution; immediate publication integrity verified.
+
+- [ ] **VR-0004** (2026-11-01; awaiting-design): Publish
+  source-26 Chain of Command (Non Specialist) as a typed
+  `specialist-qualification-exclusion` on the exact
+  `375/TEXT:Non Specialist` source extra.
+  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree based on `980fb6b3`;
+  risk: elevated for the synchronized curated/rules/publication
+  migration, and moderate for scenario Specialist qualification.
+  Immediate: staged and promoted with
+  `tools.stage_chain_of_command_non_specialist` under ignored
+  `local/chain-of-command-non-specialist-20261101/` using pinned
+  Army/PDF/source checks and retained rollback. All 17 deployed
+  objects unchanged. Focused source-26 owner regression **1 passed**,
+  rules-database exact map **1 passed**, Specialist filter
+  independent-qualifier test **1 passed**, deployed-publication
+  determinism test **1 passed**. Publication `--check`, rules
+  stage and targeted Ruff **PASS**. Staged SHA-256: rules
+  `eb6b83fe9554a0b9aaad52caa7012bc57e4e3f59aa40e45baedc9fb29d8ea3cf`;
+  publication
+  `f18996a7034ac5d84844912d53c38f80bc688e3ba18162058407f5cc339ee606`.
+  Design: VD-0002 and VD-0003, both nonessential further coverage.
+  Deferred: their designed cases plus one cumulative
+  `tools/run_checks.py --stage test` and normal mandatory
+  CI/release gates against the reviewed state. Outcome: awaiting
+  design and broader verification; publication integrity
+  immediately validated.
 
 ## Recording template
 

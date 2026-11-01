@@ -1524,7 +1524,19 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     assert set(mappings) == {
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
         "vulnerability", "hacker", "booty", "metachemistry", "regeneration",
-        "neurocinetics", "minelayer",
+        "neurocinetics", "minelayer", "chain-of-command",
+    }
+    assert mappings["chain-of-command"] == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 375, "extra_type": "TEXT",
+            "raw_value": "Non Specialist",
+            "effect": {
+                "kind": "specialist-qualification-exclusion",
+                "applies_to": "specialist-troop-qualification-from-chain-of-command",
+                "excluded": True,
+            },
+        }],
     }
     assert mappings["neurocinetics"] == {
         "source": "army-extra",

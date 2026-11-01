@@ -20943,7 +20943,25 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 375,
+                                "extraType": "TEXT",
+                                "rawValue": "Non Specialist",
+                                "effect": {
+                                    "kind": "specialist-qualification-exclusion",
+                                    "appliesTo": "specialist-troop-qualification-from-chain-of-command",
+                                    "excluded": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

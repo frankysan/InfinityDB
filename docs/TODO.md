@@ -1693,7 +1693,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **19 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **18 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1753,6 +1753,21 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         additional mutation tests are tracked in the validation
         queue. This does not generate Unit usage or calculate
         the legality of specific placements.
+      - [x] **Data processing — Chain of Command (Non Specialist), source 26:**
+        Publish exact Army source extra `375/TEXT:Non Specialist`
+        as a typed `specialist-qualification-exclusion`, scoped
+        solely to Specialist Troop status granted by Chain of
+        Command (N5.3 p. 87). The pinned archive contains **11**
+        option-level occurrences across Joan of Arc, Joan of Arc
+        v2, and William Wallace, from 151 direct occurrences.
+        The guarded matched rules/publication promotion preserves
+        the 17 deployed objects and retained ignored rollback copies.
+        The existing Specialist candidate filter still excludes
+        this variant without excluding independent Specialist Skills;
+        focused source/database/filter/publication tests pass.
+        The source audit now reports **18** unresolved Skill IDs.
+        Deferred edge-case tests and cumulative execution are in
+        the [validation queue](validation-queue.md).
       - [x] **Data processing:** Audit the lone Journalist
         source-272 `1/TEXT:+3` on the Tohaa Diplomatic Delegate.
         N5.3 already defines Journalist's Guts Roll and campaign
