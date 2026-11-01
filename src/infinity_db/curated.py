@@ -259,6 +259,27 @@ KILLER_HACKING_VARIANT: dict[str, Any] = {
 }
 
 
+# Decoy (1)/(2) counts additional replica Markers on deployment, not
+# the total number of representations or an Attribute modifier.
+DECOY_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": str(count),
+                "effect": {
+                    "kind": "decoy-replica-marker-count",
+                    "appliesTo": "decoy-state-deployment",
+                    "count": count,
+                },
+            }
+            for extra_id, count in ((44, 1), (267, 2))
+        ],
+    }],
+}
+
+
 # Bracketed FT Master Unit names are the source-listed cancellation triggers,
 # not inferred unit slugs. One Army TEXT extra can name multiple Units.
 FT_MASTER_UNIT_SIGNATURES: tuple[tuple[int, str, tuple[str, ...]], ...] = (
@@ -772,6 +793,25 @@ def _validate_reviewed_extra_parameter(
             or values != expected
         ):
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "decoy"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = DECOY_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or type(entry["effect"].get("count")) is not int
+                for entry in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid Decoy replica count extras")
         return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "ft-master"}

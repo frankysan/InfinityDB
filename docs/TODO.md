@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **27 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **26 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1700,6 +1700,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Bangbomb Skill source-266 restricted Dodge +4,
       TAGCom source-270 recipient-side Dodge/GizmoKit PH modifiers,
       FT Master source-261 named Unit dependency,
+      Decoy source-215 exact additional replica Marker counts,
       RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
@@ -2243,7 +2244,22 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         Exact-source guards, typed validation, tracked/fresh rules
         export tests, and metadata-only v9 promotion retain the
         existing family and unrelated records. Current baseline:
-        **27 Skill / 1 Equipment**.
+        **27 Skill / 1 Equipment** at that point.
+      - [x] **Data processing:** Certify Decoy Skill source-215
+        numbered replicas using exact `44/TEXT:1` (132
+        occurrences) and `267/TEXT:2` (24), with
+        six additional family-only occurrences. N5.3
+        Decoy State explicitly defines these as the
+        maximum number of additional replica Markers
+        permitted during deployment, not total
+        representations or general numeric MODs.
+        Add source-specific typed count semantics on
+        the existing `skill:decoy` definition; retain
+        the State's independent cancellations and
+        Fireteam restrictions. Exact raw source
+        signatures, negative tests and guarded paired
+        publication preserve all unrelated metadata.
+        Current baseline: **26 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

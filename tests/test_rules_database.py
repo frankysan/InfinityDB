@@ -1521,7 +1521,9 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     current_rules_database: RulesDatabase,
 ) -> None:
     mappings = current_rules_database.skill_reviewed_extra_semantics()
-    assert set(mappings) == {"dodge", "super-jump", "impersonation", "ft-master"}
+    assert set(mappings) == {
+        "dodge", "super-jump", "impersonation", "ft-master", "decoy",
+    }
     param = mappings["dodge"]
     assert param["kind"] == "reviewed-extra"
     assert param["source"] == "army-extra"
@@ -1578,6 +1580,41 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
         {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
     ]
+
+
+def test_decoy_source_counts_add_replicas_not_total_representations(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    params = rules.skill_reviewed_extra_semantics()["decoy"]
+    assert params["source"] == "army-extra"
+    assert params["kind"] == "reviewed-extra"
+    assert params["extra_values"] == [
+        {
+            "extra_id": extra_id, "extra_type": "TEXT",
+            "raw_value": str(count),
+            "effect": {
+                "kind": "decoy-replica-marker-count",
+                "applies_to": "decoy-state-deployment", "count": count,
+            },
+        }
+        for extra_id, count in ((44, 1), (267, 2))
+    ]
+    record = rules.composed_record("skill:decoy")
+    assert record is not None
+    assert record["variant_semantics"]["occurrence_parameters"][0][
+        "extra_values"
+    ] == params["extra_values"]
+    assert any(
+        c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 90
+        for c in record["citations"]
+    )
+    state = rules.composed_record("state:decoy")
+    assert state is not None
+    assert any(
+        c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 159
+        for c in state["citations"]
+    )
 
 
 def test_ft_master_source_unit_names_are_not_inferred_as_army_unit_ids(

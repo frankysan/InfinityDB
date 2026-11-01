@@ -18,6 +18,7 @@ from typing import Any
 
 from infinity_db.curated import (
     BANGBOMB_SKILL_PARAMETERS,
+    DECOY_VARIANT,
     FT_MASTER_UNIT_SIGNATURES,
     FT_MASTER_VARIANT,
     GIZMOKIT_TARGET_PH_PARAMETERS,
@@ -113,6 +114,7 @@ GIZMOKIT_TARGET_PH_VARIANT = {
     **GIZMOKIT_VARIANT,
     "sourceCatalogParameters": GIZMOKIT_TARGET_PH_PARAMETERS,
 }
+DECOY = ("n5-core-v5.3", "skill:decoy")
 FT_MASTER = ("n5-core-v5.3", "skill:ft-master")
 TAGCOM = ("n5-core-v5.3", "skill:tagcom")
 TAGCOM_VARIANT = {
@@ -1016,9 +1018,20 @@ def _check_variant_semantics_delta(
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
     remdriver: bool = False, bangbomb_skill: bool = False,
     tagcom: bool = False, ft_master: bool = False,
+    decoy: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if decoy and (
+        initial or bangbomb or bangbomb_skill or medikit or gizmokit
+        or deactivator or gizmokit_target_ph or medikit_target_ph
+        or remdriver or ft_master or tagcom or evo_trinity
+        or killer_hacking or impersonation or tinbot_firewall or tinbot_other
+        or hacking_mods or hacking_srs or hacking_firewall
+        or hacking_combinations or hacking_trinity_access
+        or set(variants) != {DECOY}
+    ):
+        raise ValueError("Decoy refresh requires exactly Skill source 215")
     if ft_master and (
         initial or bangbomb or bangbomb_skill or medikit or gizmokit
         or deactivator or gizmokit_target_ph or medikit_target_ph or remdriver
@@ -1183,6 +1196,20 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == DECOY:
+                        if not decoy:
+                            raise ValueError("Decoy requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != DECOY_VARIANT
+                            or any(
+                                type(entry["extraId"]) is not int
+                                or type(entry["effect"]["count"]) is not int
+                                for entry in after["occurrenceParameters"][0]["extraValues"]
+                            )
+                        ):
+                            raise ValueError("Decoy refresh changed source-only semantics")
                     elif key == FT_MASTER:
                         if not ft_master:
                             raise ValueError("FT Master requires source-verified refresh")
@@ -1608,6 +1635,38 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_decoy_v9_release(*, root: Path = ROOT) -> Path:
+    """Certify only the exact Decoy (1)/(2) additional replica counts."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["skills"]["items"] if row["id"] == 215
+    ]
+    expected = [
+        {"extras": [[44, "TEXT", "1"]], "reviewed": False, "count": 132},
+        {"extras": [[267, "TEXT", "2"]], "reviewed": False, "count": 24},
+    ]
+    if (
+        len(rows) != 1 or rows[0]["name"] != "Decoy"
+        or rows[0]["applicationId"] != 215
+        or rows[0]["occurrences"] != 162
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"] or rows[0]["extraSignatures"] != expected
+    ):
+        raise ValueError("Decoy source-215 signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={DECOY[1]}, decoy=True,
     )
 
 
@@ -2405,6 +2464,7 @@ def _refresh_metadata_v9_release(
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
     remdriver: bool = False, bangbomb_skill: bool = False,
     tagcom: bool = False, ft_master: bool = False,
+    decoy: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2506,6 +2566,7 @@ def _refresh_metadata_v9_release(
                 bangbomb_skill=bangbomb_skill,
                 tagcom=tagcom,
                 ft_master=ft_master,
+                decoy=decoy,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,

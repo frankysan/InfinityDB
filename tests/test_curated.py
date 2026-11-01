@@ -1435,6 +1435,88 @@ def test_khd_requires_exact_pinned_upgrade_semantics(
 
 @pytest.mark.parametrize(
     ("index", "field", "wrong"), [
+        (0, "extraId", 45),
+        (0, "extraId", 44.0),
+        (0, "extraType", "DISTANCE"),
+        (0, "rawValue", "2"),
+        (1, "effect", {
+            "kind": "decoy-replica-marker-count",
+            "appliesTo": "decoy-state-deployment", "count": 1,
+        }),
+        (1, "effect", {
+            "kind": "decoy-replica-marker-count",
+            "appliesTo": "all-deployment", "count": 2,
+        }),
+        (1, "effect", {
+            "kind": "decoy-replica-marker-count",
+            "appliesTo": "decoy-state-deployment", "count": 2.0,
+        }),
+    ],
+)
+def test_decoy_replica_count_extras_are_exact(
+    tmp_path: Path, index: int, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"] if row["id"] == "skill:decoy")
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "deployment-skill"
+    record = document["records"][0]
+    record.update({
+        "id": "skill:decoy", "kind": "skill",
+        "facts": {"typeIds": ["deployment-skill"]},
+        "armyLinks": [{"entity": "skill", "id": "decoy"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "decoy.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    entry = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"][
+        index
+    ]
+    entry[field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Decoy replica count extras"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    "mode", ("missing", "reversed", "duplicate"),
+)
+def test_decoy_rejects_incomplete_or_reordered_extra_set(
+    tmp_path: Path, mode: str,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"] if row["id"] == "skill:decoy")
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "deployment-skill"
+    record = document["records"][0]
+    record.update({
+        "id": "skill:decoy", "kind": "skill",
+        "facts": {"typeIds": ["deployment-skill"]},
+        "armyLinks": [{"entity": "skill", "id": "decoy"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    values = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"]
+    if mode == "missing":
+        values.pop()
+    elif mode == "reversed":
+        values.reverse()
+    else:
+        values.append(deepcopy(values[0]))
+    path = tmp_path / "decoy.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Decoy replica count extras"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    ("index", "field", "wrong"), [
         (0, "extraId", 326),
         (0, "extraId", 325.0),
         (0, "extraType", "DISTANCE"),

@@ -1143,6 +1143,39 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**Decoy replica-marker counts (2026-11-01):**
+The N5.3 Decoy State rules explicitly define
+`Decoy (1)` and `Decoy (2)` as permitting up to
+one or two **additional replica Markers**,
+respectively, at deployment. The real user is
+not part of this numeric count. The pinned Army
+Skill source `215` has 162 direct occurrences:
+`44/TEXT:1` on 132, `267/TEXT:2` on 24, and
+six without an extra. The six plain occurrences
+retain family-only semantics, without an
+invented default count.
+
+The canonical `skill:decoy` definition retains
+its Decoy State relation and ordinary effects.
+Its exact `occurrenceParameters` entries are
+typed as `decoy-replica-marker-count`, scoped to
+`decoy-state-deployment`, with `count: 1` or
+`count: 2`. Counts do not confer any other
+movement, Marker-state cancellation, Fireteam
+or Coordinated Order exception. `state:decoy`
+continues to own those restrictions.
+
+The curated validator rejects altered IDs,
+raw source text, primitive count types,
+values and order. A guarded matched-v9
+metadata refresh checks both source signature
+frequencies, preserves the family-only prior
+record and all unrelated rows/schema, and
+retains a recovery copy under ignored `local/`.
+The pinned Army audit checks the tracked rules
+export and a fresh curated export. Remaining:
+**26 Skill / 1 Equipment** unresolved source IDs.
+
 **FT Master listed-Unit source dependencies (2026-11-01):**
 Current official N5.3 Wiki revision 4114 specifies that when
 an FT Master profile names one or more Units in brackets,

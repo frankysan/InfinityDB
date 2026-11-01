@@ -1512,6 +1512,128 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "wrong-count", "wrong-scope", "wrong-extra-id",
+               "float-count", "reordered", "other-record", "schema", "missing"),
+)
+def test_decoy_v9_refresh_only_adds_exact_replica_counts(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        DECOY,
+        DECOY_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    before, after = tmp_path / "before.db", tmp_path / "after.db"
+    variant = copy.deepcopy(DECOY_VARIANT)
+    extras = variant["occurrenceParameters"][0]["extraValues"]
+    if defect == "wrong-count":
+        extras[0]["effect"]["count"] = 2
+    elif defect == "wrong-scope":
+        extras[1]["effect"]["appliesTo"] = "all-deployment"
+    elif defect == "wrong-extra-id":
+        extras[0]["extraId"] = 267
+    elif defect == "float-count":
+        extras[1]["effect"]["count"] = 2.0
+    elif defect == "reordered":
+        extras.reverse()
+    with sqlite3.connect(before) as old, sqlite3.connect(after) as new:
+        old.execute(
+            "CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)"
+        )
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*DECOY, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "skill:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), DECOY[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:decoy'")
+    changed: dict[tuple[str, str], str] = {DECOY: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(before, after, changed, decoy=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(before, after, changed, decoy=True)
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(before, after, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "count", "name", "app-id", "extra-id",
+               "raw", "count-per-extra", "status", "previous", "additional"),
+)
+def test_decoy_v9_refresh_checks_pinned_source_signatures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 215, "name": "Decoy", "applicationId": 215,
+        "occurrences": 162, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None,
+        "reviewedNumericMod": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[44, "TEXT", "1"]], "reviewed": False, "count": 132},
+            {"extras": [[267, "TEXT", "2"]], "reviewed": False, "count": 24},
+        ],
+    }
+    if defect == "count":
+        source["occurrences"] = 161
+    elif defect == "name":
+        source["name"] = "Decoys"
+    elif defect == "app-id":
+        source["applicationId"] = 220
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 45
+    elif defect == "raw":
+        source["extraSignatures"][1]["extras"][0][2] = "1"
+    elif defect == "count-per-extra":
+        source["extraSignatures"][0]["count"] = 131
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "additional":
+        source["extraSignatures"].append({
+            "extras": [[99, "TEXT", "3"]], "reviewed": False, "count": 1,
+        })
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_decoy_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"skill:decoy"},
+            "decoy": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="Decoy source-215 signature drift"):
+            release.refresh_decoy_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
     "defect", (None, "wrong-unit", "wrong-scope", "wrong-raw",
                "wrong-extra-id", "other-record", "schema", "missing"),
 )
