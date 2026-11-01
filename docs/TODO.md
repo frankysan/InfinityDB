@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **25 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **24 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1702,6 +1702,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       FT Master source-261 named Unit dependency,
       Decoy source-215 exact additional replica Marker counts,
       Vulnerability source-220 weapon-name-scoped Viral Immunity restriction,
+      Hacker Skill source-1000 direct programs and exact Upgrades,
       RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
@@ -2282,7 +2283,27 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         scope or unrelated v9 database changes.
         No weapon-name parsing or attack engine
         is published. Current baseline:
-        **25 Skill / 1 Equipment**.
+        **25 Skill / 1 Equipment** at that point.
+      - [x] **Data processing:** Certify exact Hacker Skill
+        source-1000 profile extras: `265/Zero Pain` (4),
+        `314/UPGRADE: Total Control (SR-2)` (3),
+        `334/UPGRADE: Firewall (-3)` (2), and the
+        **ordered pair** `386/Carbonite` +
+        `387/Spotlight` (12), among 1094 source
+        occurrences. N5.3 p. 54 permits direct
+        program assignments without a Hacking Device
+        and separate Upgrades for a Hacker.
+        Store owner-scoped direct program grants
+        and exact Saving Roll / Firewall changes
+        on the existing `skill:hacker` record.
+        Preserve the two-program pair as one
+        full reviewed source signature, never
+        independently certify its components.
+        Source-1000 guards, negative validators,
+        and matched-v9 metadata-only promotion
+        leave Equipment devices unaffected and
+        reject unobserved signatures. Current
+        baseline: **24 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

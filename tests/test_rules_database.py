@@ -1523,7 +1523,7 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     mappings = current_rules_database.skill_reviewed_extra_semantics()
     assert set(mappings) == {
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
-        "vulnerability",
+        "vulnerability", "hacker",
     }
     param = mappings["dodge"]
     assert param["kind"] == "reviewed-extra"
@@ -1581,6 +1581,55 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
         {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
     ]
+
+
+def test_hacker_source_programs_and_upgrade_effects_are_skill_owned(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    parameters = rules.skill_reviewed_extra_semantics()["hacker"]
+    assert (parameters["source"], parameters["kind"]) == (
+        "army-extra", "reviewed-extra",
+    )
+    values = {item["extra_id"]: item for item in parameters["extra_values"]}
+    assert set(values) == {265, 314, 334}
+    assert values[265]["effect"] == {
+        "kind": "hacking-program-grant",
+        "program": "hacking-program:zero-pain",
+        "owner": "hacker-skill-holder",
+    }
+    assert values[314]["effect"] == {
+        "kind": "program-saving-roll-mod",
+        "program": "hacking-program:total-control",
+        "owner": "hacker-skill-holder", "grantsProgram": True,
+        "applies_to": "target-saving-roll-against-program",
+        "modifier": -2,
+    }
+    assert values[334]["effect"] == {
+        "kind": "firewall-comms-defense",
+        "rule": "equipment:firewall",
+        "owner": "hacker-skill-holder",
+        "applies_to": "comms-attack-targeting-hacker",
+        "attackerWipMod": -3, "defenderSavingRollMod": 3,
+    }
+    combo = rules.skill_reviewed_combination_semantics()["hacker"]
+    assert len(combo) == 1
+    assert [(x["extra_id"], x["raw_value"]) for x in combo[0]["extras"]] == [
+        (386, "Carbonite"), (387, "Spotlight"),
+    ]
+    assert combo[0]["effects"] == [
+        {"kind": "hacking-program-grant", "program": f"hacking-program:{slug}",
+         "owner": "hacker-skill-holder"}
+        for slug in ("carbonite", "spotlight")
+    ]
+    record = rules.composed_record("skill:hacker")
+    assert record is not None
+    assert record["variant_semantics"]["occurrence_combinations"] == combo
+    assert record["variant_semantics"]["occurrence_parameters"][0][
+        "extra_values"
+    ] == parameters["extra_values"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 54
+               for c in record["citations"])
 
 
 def test_vulnerability_viral_uses_weapon_name_not_ammunition_component(
@@ -1699,7 +1748,7 @@ def test_tagcom_exact_combat_group_ph_modifiers_preserve_source_signatures(
 
     rules = current_rules_database
     reviewed = rules.skill_reviewed_combination_semantics()
-    assert set(reviewed) == {"remdriver", "tagcom"}
+    assert set(reviewed) == {"remdriver", "tagcom", "hacker"}
     assert reviewed["tagcom"] == [
         {
             "extras": [

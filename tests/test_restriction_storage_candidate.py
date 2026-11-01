@@ -1512,6 +1512,141 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "extra-id",
+               "extra-type", "raw", "pair-order", "status", "previous",
+               "extra-combination"),
+)
+def test_hacker_skill_v9_source_gate_pins_all_four_exact_signatures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 1000, "name": "Hacker", "applicationId": 1000,
+        "occurrences": 1094, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None,
+        "reviewedNumericMod": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[265, "TEXT", "Zero Pain"]], "reviewed": False, "count": 4},
+            {"extras": [[314, "TEXT", "UPGRADE: Total Control (SR-2)"]],
+             "reviewed": False, "count": 3},
+            {"extras": [[334, "TEXT", "UPGRADE: Firewall (-3)"]],
+             "reviewed": False, "count": 2},
+            {"extras": [[386, "TEXT", "Carbonite"], [387, "TEXT", "Spotlight"]],
+             "reviewed": False, "count": 12},
+        ],
+    }
+    if defect == "name":
+        source["name"] = "Hackers"
+    elif defect == "app-id":
+        source["applicationId"] = 100
+    elif defect == "count":
+        source["occurrences"] = 1093
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 266
+    elif defect == "extra-type":
+        source["extraSignatures"][0]["extras"][0][1] = "DISTANCE"
+    elif defect == "raw":
+        source["extraSignatures"][1]["extras"][0][2] = "Total Control"
+    elif defect == "pair-order":
+        source["extraSignatures"][3]["extras"].reverse()
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "extra-combination":
+        source["extraSignatures"].append({
+            "extras": [[386, "TEXT", "Carbonite"]],
+            "reviewed": False, "count": 1,
+        })
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_hacker_skill_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"skill:hacker"},
+            "hacker_skill": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="Hacker Skill source-1000 signature drift"):
+            release.refresh_hacker_skill_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "wrong-owner", "wrong-sr", "float-sr", "wrong-firewall",
+               "wrong-grant", "wrong-program", "reordered", "other-record",
+               "schema", "missing"),
+)
+def test_hacker_skill_v9_delta_only_certifies_direct_source_programs(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        HACKER_SKILL,
+        HACKER_SOURCE_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    before, after = tmp_path / "before.db", tmp_path / "after.db"
+    variant = copy.deepcopy(HACKER_SOURCE_VARIANT)
+    values = variant["occurrenceParameters"][0]["extraValues"]
+    pair = variant["occurrenceCombinations"][0]
+    if defect == "wrong-owner":
+        values[0]["effect"]["owner"] = "hacking-device"
+    elif defect == "wrong-sr":
+        values[1]["effect"]["modifier"] = -1
+    elif defect == "float-sr":
+        values[1]["effect"]["modifier"] = -2.0
+    elif defect == "wrong-firewall":
+        values[2]["effect"]["appliesTo"] = "comms-attack-targeting-device-owner"
+    elif defect == "wrong-grant":
+        values[1]["effect"]["grantsProgram"] = False
+    elif defect == "wrong-program":
+        pair["effects"][0]["program"] = "hacking-program:trinity"
+    elif defect == "reordered":
+        pair["extras"].reverse()
+    with sqlite3.connect(before) as old, sqlite3.connect(after) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*HACKER_SKILL, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "skill:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute("UPDATE records SET variant_json=? WHERE id=?",
+                    (json.dumps(variant), HACKER_SKILL[1]))
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:hacker'")
+    changed: dict[tuple[str, str], str] = {HACKER_SKILL: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(before, after, changed, hacker_skill=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                before, after, changed, hacker_skill=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(before, after, changed)
+
+
+@pytest.mark.parametrize(
     "defect", (None, "wrong-name", "ammunition-component", "wrong-immunity",
                "wrong-extra", "float-id", "other-record", "schema", "missing"),
 )

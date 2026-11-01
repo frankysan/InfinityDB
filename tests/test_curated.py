@@ -1434,6 +1434,100 @@ def test_khd_requires_exact_pinned_upgrade_semantics(
 
 
 @pytest.mark.parametrize(
+    "defect", ("partial", "reordered", "duplicate", "wrong-owner",
+               "wrong-grant", "wrong-extra-id"),
+)
+def test_hacker_skill_pair_requires_exact_ordered_programs(
+    tmp_path: Path, defect: str,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"] if row["id"] == "skill:hacker")
+    doc = valid_document()
+    doc["skillTypes"][0]["id"] = "automatic"
+    record = doc["records"][0]
+    record.update({
+        "id": "skill:hacker", "kind": "skill",
+        "facts": {"typeIds": ["automatic"]},
+        "armyLinks": [{"entity": "skill", "id": "hacker"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "hacker.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    load_curated_document(path)
+    combos = record["variantSemantics"]["occurrenceCombinations"]
+    if defect == "partial":
+        combos[0]["extras"].pop()
+    elif defect == "reordered":
+        combos[0]["extras"].reverse()
+    elif defect == "duplicate":
+        combos.append(deepcopy(combos[0]))
+    elif defect == "wrong-owner":
+        combos[0]["effects"][0]["owner"] = "hacking-device"
+    elif defect == "wrong-grant":
+        combos[0]["effects"][1]["program"] = "hacking-program:trinity"
+    else:
+        combos[0]["extras"][0]["extraId"] = 387
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid exact Hacker Skill combination"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    ("index", "field", "wrong"), [
+        (0, "extraId", 266),
+        (0, "extraId", 265.0),
+        (0, "rawValue", "UPGRADE: Zero Pain"),
+        (0, "effect", {
+            "kind": "hacking-program-grant",
+            "program": "hacking-program:trinity", "owner": "hacker-skill-holder",
+        }),
+        (1, "effect", {
+            "kind": "program-saving-roll-mod",
+            "program": "hacking-program:total-control",
+            "owner": "hacker-skill-holder",
+            "grantsProgram": False,
+            "appliesTo": "target-saving-roll-against-program", "modifier": -2,
+        }),
+        (2, "effect", {
+            "kind": "firewall-comms-defense", "rule": "equipment:firewall",
+            "owner": "hacker-skill-holder",
+            "appliesTo": "comms-attack-targeting-device-owner",
+            "attackerWipMod": -3, "defenderSavingRollMod": 3,
+        }),
+    ],
+)
+def test_hacker_skill_direct_extra_types_and_scope_are_exact(
+    tmp_path: Path, index: int, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"] if row["id"] == "skill:hacker")
+    doc = valid_document()
+    doc["skillTypes"][0]["id"] = "automatic"
+    record = doc["records"][0]
+    record.update({
+        "id": "skill:hacker", "kind": "skill",
+        "facts": {"typeIds": ["automatic"]},
+        "armyLinks": [{"entity": "skill", "id": "hacker"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "hacker.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    load_curated_document(path)
+    record["variantSemantics"]["occurrenceParameters"][0]["extraValues"][
+        index
+    ][field] = wrong
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid exact Hacker Skill extras"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("field", "wrong"), [
         ("extraId", 40),
         ("extraId", 39.0),

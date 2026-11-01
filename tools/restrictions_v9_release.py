@@ -22,6 +22,7 @@ from infinity_db.curated import (
     FT_MASTER_UNIT_SIGNATURES,
     FT_MASTER_VARIANT,
     GIZMOKIT_TARGET_PH_PARAMETERS,
+    HACKER_SOURCE_VARIANT,
     KILLER_HACKING_VARIANT,
     MEDIKIT_TARGET_PH_PARAMETERS,
     REMDRIVER_COMBINATIONS,
@@ -115,6 +116,7 @@ GIZMOKIT_TARGET_PH_VARIANT = {
     **GIZMOKIT_VARIANT,
     "sourceCatalogParameters": GIZMOKIT_TARGET_PH_PARAMETERS,
 }
+HACKER_SKILL = ("n5-core-v5.3", "skill:hacker")
 VULNERABILITY = ("n5-core-v5.3", "skill:vulnerability")
 DECOY = ("n5-core-v5.3", "skill:decoy")
 FT_MASTER = ("n5-core-v5.3", "skill:ft-master")
@@ -1021,9 +1023,20 @@ def _check_variant_semantics_delta(
     remdriver: bool = False, bangbomb_skill: bool = False,
     tagcom: bool = False, ft_master: bool = False,
     decoy: bool = False, vulnerability: bool = False,
+    hacker_skill: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if hacker_skill and (
+        initial or bangbomb or bangbomb_skill or medikit or gizmokit
+        or deactivator or gizmokit_target_ph or medikit_target_ph
+        or remdriver or ft_master or tagcom or decoy or vulnerability
+        or evo_trinity or killer_hacking or impersonation
+        or tinbot_firewall or tinbot_other or hacking_mods or hacking_srs
+        or hacking_firewall or hacking_combinations or hacking_trinity_access
+        or set(variants) != {HACKER_SKILL}
+    ):
+        raise ValueError("Hacker Skill refresh requires only source 1000")
     if vulnerability and (
         initial or bangbomb or bangbomb_skill or medikit or gizmokit
         or deactivator or gizmokit_target_ph or medikit_target_ph or remdriver
@@ -1208,6 +1221,32 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == HACKER_SKILL:
+                        if not hacker_skill:
+                            raise ValueError("Hacker Skill requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != HACKER_SOURCE_VARIANT
+                            or any(
+                                type(item["extraId"]) is not int
+                                for item in after["occurrenceParameters"][0]["extraValues"]
+                            )
+                            or any(
+                                type(item["extraId"]) is not int
+                                for combo in after["occurrenceCombinations"]
+                                for item in combo["extras"]
+                            )
+                            or type(after["occurrenceParameters"][0]["extraValues"][1][
+                                "effect"]["modifier"]) is not int
+                            or type(after["occurrenceParameters"][0]["extraValues"][1][
+                                "effect"]["grantsProgram"]) is not bool
+                            or type(after["occurrenceParameters"][0]["extraValues"][2][
+                                "effect"]["attackerWipMod"]) is not int
+                            or type(after["occurrenceParameters"][0]["extraValues"][2][
+                                "effect"]["defenderSavingRollMod"]) is not int
+                        ):
+                            raise ValueError("Hacker Skill refresh changed source-only semantics")
                     elif key == VULNERABILITY:
                         if not vulnerability:
                             raise ValueError("Vulnerability requires source-verified refresh")
@@ -1660,6 +1699,43 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_hacker_skill_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote direct Hacker assignments without granting Device programs."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["skills"]["items"] if row["id"] == 1000
+    ]
+    expected = [
+        {"extras": [[265, "TEXT", "Zero Pain"]], "reviewed": False, "count": 4},
+        {"extras": [[314, "TEXT", "UPGRADE: Total Control (SR-2)"]],
+         "reviewed": False, "count": 3},
+        {"extras": [[334, "TEXT", "UPGRADE: Firewall (-3)"]],
+         "reviewed": False, "count": 2},
+        {"extras": [[386, "TEXT", "Carbonite"], [387, "TEXT", "Spotlight"]],
+         "reviewed": False, "count": 12},
+    ]
+    if (
+        len(rows) != 1 or rows[0]["name"] != "Hacker"
+        or rows[0]["applicationId"] != 1000
+        or rows[0]["occurrences"] != 1094
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"] or rows[0]["extraSignatures"] != expected
+    ):
+        raise ValueError("Hacker Skill source-1000 signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={HACKER_SKILL[1]}, hacker_skill=True,
     )
 
 
@@ -2521,6 +2597,7 @@ def _refresh_metadata_v9_release(
     remdriver: bool = False, bangbomb_skill: bool = False,
     tagcom: bool = False, ft_master: bool = False,
     decoy: bool = False, vulnerability: bool = False,
+    hacker_skill: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2624,6 +2701,7 @@ def _refresh_metadata_v9_release(
                 ft_master=ft_master,
                 decoy=decoy,
                 vulnerability=vulnerability,
+                hacker_skill=hacker_skill,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,

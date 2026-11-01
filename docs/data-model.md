@@ -1143,6 +1143,50 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**Hacker Skill source-1000 direct Hacking Programs (2026-11-01):**
+Pinned Army Skill source `1000` has **1094** direct occurrences;
+only **21** have extras, using four exact signatures:
+`265/TEXT:Zero Pain` (4),
+`314/TEXT:UPGRADE: Total Control (SR-2)` (3),
+`334/TEXT:UPGRADE: Firewall (-3)` (2), and the
+ordered pair `386/TEXT:Carbonite` followed by
+`387/TEXT:Spotlight` (12). The unannotated
+occurrences retain the ordinary Hacker family.
+N5.3 p. 54 and reviewed Hacker Wiki revision
+`3646` explicitly permit direct program use
+without a Hacking Device and separate Upgrade
+Programs assigned to the Hacker.
+
+The canonical `skill:hacker` receives three
+reviewed standalone `occurrenceParameters`
+and one exact `occurrenceCombinations` pair.
+Zero Pain is a direct program grant;
+the named Total Control upgrade grants that
+program with a `-2` target Saving Roll MOD;
+Firewall (-3) imposes a `-3` enemy Comms
+Attack WIP MOD and grants `+3` to the
+Hacker's Comms Attack Saving Rolls, following
+the general Firewall rule. The pair grants
+direct use of Carbonite and Spotlight **together**
+on the exact source signature. Every effect is
+scoped to `hacker-skill-holder`, not a
+Hacking Device; this does not add capabilities
+to any Equipment family.
+
+Source signatures retain their ordered Army IDs
+and literal text; no partial, reordered or
+unobserved pair is published as reviewed.
+The validator and matched-v9 metadata-only
+migration require exact effects and source
+counts, and preserve unrelated records,
+schema and the paired publication. A recovery
+copy remains in ignored `local/`. The
+source auditor and rules database expose
+typed metadata; neither infers live Unit
+ownership, program access in a game state,
+or new Hacking rules. Unresolved baseline:
+**24 Skill / 1 Equipment**.
+
 **Vulnerability (Viral) source semantics (2026-11-01):**
 Pinned Army Skill source `220` contains exactly two
 profile-level `39/TEXT:Viral` extras, both for

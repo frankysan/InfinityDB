@@ -259,6 +259,65 @@ KILLER_HACKING_VARIANT: dict[str, Any] = {
 }
 
 
+# Source Skill 1000 attaches directly assigned programs/Upgrades to the Hacker.
+# These are not automatically Hacking Device extras. One profile variant has
+# two ordered program grants: neither standalone component is certified.
+HACKER_SOURCE_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": 265, "extraType": "TEXT", "rawValue": "Zero Pain",
+                "effect": {
+                    "kind": "hacking-program-grant",
+                    "program": "hacking-program:zero-pain",
+                    "owner": "hacker-skill-holder",
+                },
+            },
+            {
+                "extraId": 314, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Total Control (SR-2)",
+                "effect": {
+                    "kind": "program-saving-roll-mod",
+                    "program": "hacking-program:total-control",
+                    "owner": "hacker-skill-holder",
+                    "grantsProgram": True,
+                    "appliesTo": "target-saving-roll-against-program",
+                    "modifier": -2,
+                },
+            },
+            {
+                "extraId": 334, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Firewall (-3)",
+                "effect": {
+                    "kind": "firewall-comms-defense",
+                    "rule": "equipment:firewall",
+                    "owner": "hacker-skill-holder",
+                    "appliesTo": "comms-attack-targeting-hacker",
+                    "attackerWipMod": -3,
+                    "defenderSavingRollMod": 3,
+                },
+            },
+        ],
+    }],
+    "occurrenceCombinations": [{
+        "extras": [
+            {"extraId": 386, "extraType": "TEXT", "rawValue": "Carbonite"},
+            {"extraId": 387, "extraType": "TEXT", "rawValue": "Spotlight"},
+        ],
+        "effects": [
+            {
+                "kind": "hacking-program-grant",
+                "program": f"hacking-program:{program}",
+                "owner": "hacker-skill-holder",
+            }
+            for program in ("carbonite", "spotlight")
+        ],
+    }],
+}
+
+
 # The pinned Viral Vulnerability example matches *weapon names*, not
 # Ammunition identities/components. This metadata is not a runtime matcher.
 VULNERABILITY_VIRAL_VARIANT: dict[str, Any] = {
@@ -814,6 +873,25 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "hacker"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = HACKER_SOURCE_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(item, dict) or type(item.get("extraId")) is not int
+                for item in values
+            )
+            or type(values[1]["effect"].get("modifier")) is not int
+            or type(values[1]["effect"].get("grantsProgram")) is not bool
+            or type(values[2]["effect"].get("attackerWipMod")) is not int
+            or type(values[2]["effect"].get("defenderSavingRollMod")) is not int
+        ):
+            raise ValueError(f"{context}: invalid exact Hacker Skill extras")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "vulnerability"}
     ]:
         values = parameter.get("extraValues")
@@ -1205,7 +1283,20 @@ def _validate_variant_semantics(
             and army_links[0].get("entity") == "equipment"
             else None
         )
-        if army_links == [{"entity": "skill", "id": "tagcom"}]:
+        if army_links == [{"entity": "skill", "id": "hacker"}]:
+            if (
+                inheritance != "family"
+                or not isinstance(combinations, list)
+                or combinations != HACKER_SOURCE_VARIANT["occurrenceCombinations"]
+                or any(
+                    not isinstance(entry, dict)
+                    or type(entry.get("extraId")) is not int
+                    for combo in combinations
+                    for entry in combo["extras"]
+                )
+            ):
+                raise ValueError(f"{context}: invalid exact Hacker Skill combination")
+        elif army_links == [{"entity": "skill", "id": "tagcom"}]:
             if (
                 inheritance != "family"
                 or not isinstance(combinations, list)

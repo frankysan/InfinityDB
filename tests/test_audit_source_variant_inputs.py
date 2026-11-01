@@ -71,6 +71,49 @@ def test_extra_owner_lookup_rejects_invalid_scope(
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_hacker_skill_source_1000_exact_direct_programs_in_both_exports(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    signatures = [
+        {"extras": [[265, "TEXT", "Zero Pain"]], "reviewed": True, "count": 4},
+        {"extras": [[314, "TEXT", "UPGRADE: Total Control (SR-2)"]],
+         "reviewed": True, "count": 3},
+        {"extras": [[334, "TEXT", "UPGRADE: Firewall (-3)"]],
+         "reviewed": True, "count": 2},
+        {"extras": [[386, "TEXT", "Carbonite"], [387, "TEXT", "Spotlight"]],
+         "reviewed": True, "count": 12},
+    ]
+    assert sum(row["count"] for row in signatures) == 21
+    for path in (ROOT / "data/generated/rules.db", fresh):
+        rules = RulesDatabase(path)
+        params = rules.skill_reviewed_extra_semantics()["hacker"]
+        combos = rules.skill_reviewed_combination_semantics()["hacker"]
+        assert len(params["extra_values"]) == 3
+        assert len(combos) == 1
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", path,
+        )
+        [item] = select_source_variants(report, "skills", [1000])["items"]
+        assert (item["name"], item["applicationId"], item["occurrences"]) == (
+            "Hacker", 1000, 1094,
+        )
+        assert item["status"] == "reviewed-extra-parameter"
+        assert item["reviewedExtra"] == params
+        assert item["reviewedCombinations"] == combos
+        assert item["extraSignatures"] == signatures
+        assert item["rawValues"] == []
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
+            "family-only": 44, "reviewed-distance-parameter": 3,
+            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
+            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 24,
+        }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_journalist_plus_three_stays_unreviewed_pending_src_027() -> None:
     owners = source_extra_owner_context(
         ROOT / "data/generated/infinity.raw.db",
@@ -161,9 +204,9 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 9,
+            "reviewed-extra-parameter": 10,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 25,
+            "unresolved-occurrence-parameter": 24,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -203,9 +246,10 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     skills = {item["id"]: item for item in report["skills"]["items"]}
     equipment = {item["id"]: item for item in report["equipment"]["items"]}
 
-    # A TEXT extra is not automatically a reviewed modifier. Three
-    # source IDs now have exact typed mappings; the others remain open.
-    for source_id in (25, 55, 1000):
+    # A TEXT extra is not automatically a reviewed modifier.
+    # Hacker source 1000 now has independently certified exact signatures;
+    # these other source IDs remain unresolved.
+    for source_id in (25, 55):
         item = skills[source_id]
         assert item["status"] == "unresolved-occurrence-parameter"
         assert "TEXT" in item["extraTypes"]
@@ -441,9 +485,9 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 9,
+        "reviewed-extra-parameter": 10,
         "reviewed-combination-parameter": 2,
-        "unresolved-occurrence-parameter": 25,
+        "unresolved-occurrence-parameter": 24,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -526,8 +570,8 @@ def test_decoy_215_exact_deployment_replica_counts_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 9, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 25,
+            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 24,
         }
 
 
@@ -569,8 +613,8 @@ def test_ft_master_261_lists_exact_cancellation_trigger_units_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 9, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 25,
+            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 24,
         }
 
 
@@ -608,7 +652,7 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
     for path in (ROOT / "data/generated/rules.db", fresh):
         rules = RulesDatabase(path)
         combos = rules.skill_reviewed_combination_semantics()
-        assert set(combos) == {"remdriver", "tagcom"}
+        assert set(combos) == {"remdriver", "tagcom", "hacker"}
         assert "tagcom" not in rules.skill_reviewed_extra_semantics()
         report = inventory_source_variants(
             ROOT / "data/generated/infinity.db",
@@ -626,8 +670,8 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 9, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 25,
+            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 24,
         }
 
 
@@ -663,7 +707,7 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
     for path in (ROOT / "data/generated/rules.db", fresh):
         rules = RulesDatabase(path)
         combos = rules.skill_reviewed_combination_semantics()
-        assert set(combos) == {"remdriver", "tagcom"}
+        assert set(combos) == {"remdriver", "tagcom", "hacker"}
         result = inventory_source_variants(
             ROOT / "data/generated/infinity.db",
             ROOT / "data/generated/infinity.raw.db", path,
@@ -680,8 +724,8 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 9, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 25,
+            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 24,
         }
 
 
@@ -724,8 +768,8 @@ def test_bangbomb_skill_266_reuses_equipment_scope_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 9, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 25,
+            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 24,
         }
 
 
@@ -770,8 +814,8 @@ def test_medikit_target_ph_skill_273_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 9, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 25,
+            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 24,
         }
 
 
@@ -815,8 +859,8 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 9, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 25,
+            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 24,
         }
 
 
@@ -861,9 +905,9 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 9,
+            "reviewed-extra-parameter": 10,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 25,
+            "unresolved-occurrence-parameter": 24,
         }
 
 

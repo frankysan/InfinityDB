@@ -23529,7 +23529,79 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 265,
+                                "extraType": "TEXT",
+                                "rawValue": "Zero Pain",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:zero-pain",
+                                    "owner": "hacker-skill-holder"
+                                }
+                            },
+                            {
+                                "extraId": 314,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Total Control (SR-2)",
+                                "effect": {
+                                    "kind": "program-saving-roll-mod",
+                                    "program": "hacking-program:total-control",
+                                    "owner": "hacker-skill-holder",
+                                    "grantsProgram": true,
+                                    "appliesTo": "target-saving-roll-against-program",
+                                    "modifier": -2
+                                }
+                            },
+                            {
+                                "extraId": 334,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Firewall (-3)",
+                                "effect": {
+                                    "kind": "firewall-comms-defense",
+                                    "rule": "equipment:firewall",
+                                    "owner": "hacker-skill-holder",
+                                    "appliesTo": "comms-attack-targeting-hacker",
+                                    "attackerWipMod": -3,
+                                    "defenderSavingRollMod": 3
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "occurrenceCombinations": [
+                    {
+                        "extras": [
+                            {
+                                "extraId": 386,
+                                "extraType": "TEXT",
+                                "rawValue": "Carbonite"
+                            },
+                            {
+                                "extraId": 387,
+                                "extraType": "TEXT",
+                                "rawValue": "Spotlight"
+                            }
+                        ],
+                        "effects": [
+                            {
+                                "kind": "hacking-program-grant",
+                                "program": "hacking-program:carbonite",
+                                "owner": "hacker-skill-holder"
+                            },
+                            {
+                                "kind": "hacking-program-grant",
+                                "program": "hacking-program:spotlight",
+                                "owner": "hacker-skill-holder"
+                            }
+                        ]
+                    }
+                ]
             },
             "relations": [
                 {
