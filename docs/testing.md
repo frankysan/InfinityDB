@@ -302,13 +302,16 @@ subsequent full auto-worker run also passed.
 
 Long-running catalog render checks retain bounded deadlines and report HTTP,
 JavaScript, failed-request and page-status evidence on failure; none silently
-retry a failed page. The Weapon, deployed-object and Fireteam FTO browser suites
-intercept same-origin page requests and serve them directly from the application
+retry a failed page. The Army overview, Weapon, deployed-object and Fireteam FTO
+browser suites intercept same-origin page requests and serve them directly from the application
 WSGI callable using `tools/browser_wsgi_transport.py`. This keeps real HTML,
 JS module execution, API responses, and browser assertions, but removes
 dependence on a transient local TCP listener for browser rendering. Dedicated
 HTTP/API tests still exercise the socket/transport boundary. The WSGI adapter
-has separate routing/response regression tests.
+has separate routing/response regression tests. Army overview acceptance also retains
+an independent HTTP `/api/armies` request for its expected-data comparison, checks
+relationship links and keyboard focus at desktop/mobile widths, and reports page
+status, JavaScript, failed-request and HTTP-error evidence on failure.
 
 The cross-domain relation destination gate is divided by its eight **public
 route catalogs** (distinct from singular source record kinds). All discovered
