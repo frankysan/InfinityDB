@@ -49,279 +49,66 @@ IDs here and link the owning task instead of duplicating its description.
   open until the relevant checks pass on a corrected state.
 - Include sufficient version/commit or artifact identity for results to be
   reproducible. A green result from an older state cannot verify a later edit.
-  Store bulky reports under ignored `local/`; record only commands, summary,
-  and evidence pointers here. Prune verified records after the relevant
-  acceptance has been recorded and the milestone is closed; keep IDs stable,
-  never reuse them.
+  Store bulky reports under ignored `local/`; retain concise durable acceptance
+  evidence in its canonical document when required.
+- **Retire completed entries immediately after processing:** remove a VD item
+  once its tests are designed and the direct sanity checks pass; carry any
+  relevant selector/dependency into its open VR item. Remove a VR item when
+  its required execution has passed on the intended state and the outcome is
+  recorded. Keep failed, blocked, or unrun work open; independent hosted CI
+  and release gates are not implicitly accepted.
+- This is an **active queue, not a completion log**. Git history retains
+  retired detail; do not copy finished items into another running diary.
+  Advance the next-unused-ID counters on creation and never reuse an ID.
 
 ## Pending test design
 
-Each item records:
+Only open VD requirements belong here. **No pending entries.**
 
-- **ID / recorded date / status:** `needs-design`, `blocked`, or `designed`.
-- **Owning work and change:** link to `docs/TODO.md` section and relevant
-  commit, branch, or tracked files.
-- **Required behavior:** a concrete *additional* observable setup, action,
-  expected result and edge/negative case; identify existing tests to extend.
-  Essential direct coverage belongs in the implementation pass, not the VD
-  queue. Do not create a VD item just to rerun an existing test.
-- **Priority/dependency:** risk and linked VR item.
-- **Result:** new or modified test selectors, their individual design-sanity
-  results, and date. Broader regression execution remains in VR.
-
-- [x] **VD-0001** (2026-11-01; designed): Extend source-56
-  Minelayer variant validation with negative cases that mutate the
-  extra ID, raw type/value, `count` (including boolean), effect kind
-  and action scope, asserting each malformed curated document is
-  rejected. Separately check that an ordinary unparameterized
-  Minelayer occurrence does not receive an inferred numeric count
-  and that the source's one profile-level owner is retained.
-  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
-  change: `dev/v1.0.0` after `16653b16`, files
-  `src/infinity_db/curated.py` and `data/curated/rules/n5-core-v5.3.json`.
-  Existing coverage: essential exact-signature and 15-owner test in
-  `tests/test_audit_source_variant_inputs.py`; current closed
-  validator accepts only `267/TEXT:2`. Risk: moderate;
-  linked execution: VR-0003. Outcome (2026-11-01):
-  `test_minelayer_deployment_count_rejects_unreviewed_extras` **9 passed**;
-  `test_minelayer_unparameterized_rows_do_not_inherit_two_items`
-  **1 passed**. All 531 unparameterized rows remain distinct from
-  the 15 source-specific occurrences; one profile owner retained.
-
-- [x] **VD-0002** (2026-11-01; designed): Add negative
-  curated-source validation cases for Chain of Command
-  `375/TEXT:Non Specialist`: altered extra ID, raw value/type,
-  effect kind/scope and `excluded` (including a non-boolean).
-  Assert only the exact source-26 annotation is accepted.
-  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
-  change: `dev/v1.0.0` after `980fb6b3`; existing coverage:
-  `test_chain_of_command_non_specialist_matches_exact_source_owners`
-  and the closed curated validator. Risk: moderate; linked
-  execution: VR-0004. Outcome (2026-11-01):
-  `test_chain_of_command_non_specialist_rejects_unreviewed_extras`
-  **8 passed** after the strict `excluded: 1` guard was fixed;
-  xfail marker removed. Ruff **PASS**. No remaining design blocker.
-
-- [x] **VD-0003** (2026-11-01; designed): Add a pinned
-  Army-to-filter parity check for Chain of Command (Non Specialist):
-  the 11 exact options must never qualify through Chain of
-  Command alone, while other qualifying Specialist Skills remain
-  independently valid in the supported contexts. Keep candidate
-  Unit aggregation distinct from per-profile qualification.
-  Work: [Specialist Troops filter](TODO.md#rules-and-reference-completeness);
-  change: `dev/v1.0.0` after `980fb6b3`; existing coverage:
-  `test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills`
-  uses synthetic variants. Risk: moderate; linked execution:
-  VR-0004. Outcome (2026-11-01):
-  `test_pinned_chain_of_command_non_specialist_owners_do_not_qualify_alone`
-  **4 passed** (standard, domination, supplies, firefight).
-  Eleven pinned source options map to three Unit identities, but
-  candidate status remains scenario- and Skill-dependent.
-
-- [x] **VD-0004** (2026-11-01; designed): Add
-  curated-source negative cases for Forward Observer source `59`
-  `308/TEXT:+1SD`: altered extra ID, raw type/value,
-  `special-die` kind, WIP attack scope and count (including
-  boolean and zero). Each must fail closed rather than become
-  a Burst MOD or an unscoped additional die.
-  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
-  change: `dev/v1.0.0` after `0b7fe7a5`; existing
-  coverage: `test_forward_observer_special_die_exact_profile_owners`
-  and the exact curated validator. Risk: moderate; linked
-  execution: VR-0005. Outcome (2026-11-01):
-  `test_forward_observer_special_die_rejects_unreviewed_extras`
-  **9 passed** after the strict `count: true` guard was fixed;
-  xfail marker removed. Ruff **PASS**. No remaining design blocker.
-
-- [x] **VD-0005** (2026-11-01; designed): Add
-  tracked/fresh rules export parity for the exact
-  Forward Observer (+1SD) profile occurrences, including
-  confirmation that the two TARKSHYA profile rows do not
-  imply `+1SD` on ordinary unparameterized Forward
-  Observer occurrences or a generic BS Attack Burst bonus.
-  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
-  change: `dev/v1.0.0` after `0b7fe7a5`; existing
-  coverage: the pinned two-owner test and stage-time
-  rules/publication fingerprints. Risk: moderate;
-  linked execution: VR-0005. Outcome (2026-11-01):
-  `test_forward_observer_special_die_fresh_export_preserves_exact_scope`
-  **1 passed**. Tracked and fresh exports agree; 607 ordinary
-  occurrences receive no inferred Burst or Special Die.
+A VD entry records its ID/date/status (`needs-design` or `blocked`),
+owning TODO work and revision, concrete missing assertion/edge case,
+existing coverage, risk, linked VR ID, and test selector/sanity-check
+outcome as it is processed. Retire the entry once designed and checked;
+retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Each item records:
+Only open VR obligations belong here. **No pending entries.**
 
-- **ID / recorded date / status:** `awaiting-design`, `ready-to-run`,
-  `blocked`, or `verified`.
-- **Owning work and change:** one distinct implementation change, linked
-  TODO section and precise revision/artifact identity.
-- **Immediate evidence:** direct existing or newly created regression
-  selector(s), required risk-critical lint/data/schema/publication checks,
-  pass/fail/skip and date; note why any full module was immediately necessary.
-- **Deferred checks:** existing module suite selectors, integration/browser
-  acceptance or full profiles, plus any blocking VD IDs. Defer only checks
-  that do not undermine the correctness/safety of the current implementation.
-- **Result:** executed commands, revision, pass/fail/skip and report location;
-  close only after the required checks pass.
+A VR entry records its ID/date/status (`awaiting-design`,
+`ready-to-run` or `blocked`), the implementation revision/artifact,
+immediate focused checks and results, any required VD dependencies,
+deferred test selectors/gates, and the final execution outcome.
+Retire it once required checks pass on the intended state and the outcome
+is recorded. Failed or incomplete verification remains open.
 
-### Shared execution evidence — 2026-11-01
+## Next unused IDs
 
-All five VR items below are **verified** by one cumulative full-suite run on
-`dev/v1.0.0` at HEAD `84f82f7e4c35d285bea2679d1c62b70543fa5783`,
-including the uncommitted Chain of Command / Forward Observer scalar guards
-and the restored schema-v9 rules/publication pair (14 typed Restrictions;
-17 unchanged reviewed deployed objects).
+- Design: `VD-0006` (through `VD-0005` retired).
+- Execution: `VR-0006` (through `VR-0005` retired).
 
-- **Final full suite:** asynchronous `tools.run_checks --stage test
-  --test-workers 8 --test-dist browserlanes`; **4,698 passed, 25 skipped,
-  0 failed** in **595.85 s**, exit code **0**, job
-  `e0806dee270e45638f1f348cea85d223`. Full output:
-  `local/validation-queue-vr0001-vr0005-browserlanes-20261101.txt`.
-- **Earlier failed full run:** ordinary `loadgroup` scheduling yielded
-  **4,697 passed, 25 skipped, 1 failed** in **462.38 s**: one Chromium
-  verification encountered localhost `ERR_CONNECTION_REFUSED`.
-  The failing selector passed in isolation (**1 passed, 6.81 s**) and
-  in the final browser-lane full run. Retain failure evidence in
-  `local/validation-queue-vr0001-vr0005-async-20261101.txt` and
-  `local/vr0001-vr0005-browser-retry-20261101.txt`.
-- The earlier interrupted MCP full-suite calls are **not** counted as
-  passing executions. Restoring v9 after a staging exporter produced v8
-  also resolved the previous rollback-contract failure; the complete
-  restriction-storage module passed **523 tests** before the final run.
-  Mandatory hosted CI and release acceptance remain separate.
-
-- [x] **VR-0001** (2026-11-01; verified): Source-only
-  Neurocinetics `+1B` occurrence review and pinned regression.
-  Work: [Rule-variant usage index](TODO.md#rules-and-reference-completeness)
-  (source-ID 109 under the unresolved-parameter inventory);
-  revision: `dev/v1.0.0`, working tree based on `75a618bc`,
-  `tests/test_audit_source_variant_inputs.py`,
-  `docs/TODO.md`, `docs/data-model.md`. Risk: low
-  (test and docs only; no schema, runtime, curated record or generated artifact
-  change). Immediate: focused test **1 passed**; full affected
-  `tests/test_audit_source_variant_inputs.py` **50 passed**;
-  Ruff targeted **PASS**, docs **PASS**, `git diff --check HEAD`
-  **PASS** (2026-11-01). Design: none pending.
-  Deferred: one ordinary full project test run against the
-  cumulative implementation state, before the next mandatory merge/release
-  acceptance. Exact check: `tools/run_checks.py --stage test`.
-  Outcome: **verified** by the shared 2026-11-01 cumulative run recorded
-  below. The later typed source-109 migration remains VR-0002.
-
-- [x] **VR-0002** (2026-11-01; verified): Publish typed source-109
-  Neurocinetics `+1B` in the curated rules, matched v9 `rules.db`,
-  and deployed-object publication, without changing the 17 objects.
-  Work: [Rule-variant usage index](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree based on `7cb11e9b`.
-  Risk: elevated for artifact synchronization (therefore guarded staging,
-  pinned-source verification, rollback, and immediate rules/publication checks).
-  Immediate: staged and promoted using `tools.stage_neurocinetics_burst`
-  from ignored `local/neurocinetics-burst-n53-20261101/`;
-  rules sha256 `9f8b482413d39fd7596da4aec63f0a9c2d14525e01c635965763fdec44e7fa08`,
-  objects sha256 `3d02fbda90f39b35e33cbaf74300309ecbc969867e1725d41570bb04f50eaa72`;
-  source-variant tests **51 passed**, curated negative mutations
-  **7 passed**, rules database **166 passed**, deployed-object publication
-  **12 passed**; rules stage **PASS**, targeted Ruff **PASS**, Pyright
-  **0 errors**, Markdownlint/docs links **PASS**, diff check **PASS**.
-  A stale exact-set expectation in the rules database suite was corrected
-  and all 166 tests then passed. The three promoted file hashes were
-  independently reverified. Design: none pending; tests implemented
-  in this pass.
-  Deferred: ordinary full project test run (`tools/run_checks.py --stage test`)
-  against the cumulative state and the regular mandatory hosted CI/release
-  acceptance. Outcome: **verified** by the shared 2026-11-01 cumulative run.
-
-- [x] **VR-0003** (2026-11-01; verified): Publish
-  source-56 Minelayer (2) deployment item-count semantics using
-  `267/TEXT:2`, without changing deployed-object identities.
-  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree based on `16653b16`;
-  risk: elevated for coordinated generated publication.
-  Immediate: `tools.stage_minelayer_count` stage/promote with
-  exact curated/Army/PDF fingerprints and 17 unchanged objects;
-  stored pair SHA-256: rules
-  `4e9c3493338ec4bf3067ab3838f0ca5bda9879469f9f506c6749854175b6453f`,
-  objects `9db94143da110c3ff86703a2cf40c4f3f8e77100004b0da5094520488a9835d2`.
-  `test_minelayer_two_deployment_count_matches_pinned_source`
-  **1 passed**; `test_current_dodge_reviewed_extra_effects_keep_exact_source_types`
-  **1 passed**; `test_pinned_publication_is_deterministic_and_source_complete`
-  **1 passed**. Rules stage, publication `--check`, and targeted
-  Ruff **PASS** (2026-11-01). The generic v9 refresh declined to run
-  because its schema-version precondition was not met, before any
-  artifact mutation; the guarded script was used instead.
-  Design: VD-0001 designed (9 mutation cases plus one no-inference
-  test passed at `0e7dc16b`). Deferred: cumulative
-  `tools/run_checks.py --stage test` and mandatory CI/release
-  gates. Outcome: **verified** by the shared 2026-11-01 cumulative run;
-  immediate publication integrity was independently verified.
-
-- [x] **VR-0004** (2026-11-01; verified): Publish
-  source-26 Chain of Command (Non Specialist) as a typed
-  `specialist-qualification-exclusion` on the exact
-  `375/TEXT:Non Specialist` source extra.
-  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree based on `980fb6b3`;
-  risk: elevated for the synchronized curated/rules/publication
-  migration, and moderate for scenario Specialist qualification.
-  Immediate: staged and promoted with
-  `tools.stage_chain_of_command_non_specialist` under ignored
-  `local/chain-of-command-non-specialist-20261101/` using pinned
-  Army/PDF/source checks and retained rollback. All 17 deployed
-  objects unchanged. Focused source-26 owner regression **1 passed**,
-  rules-database exact map **1 passed**, Specialist filter
-  independent-qualifier test **1 passed**, deployed-publication
-  determinism test **1 passed**. Publication `--check`, rules
-  stage and targeted Ruff **PASS**. Staged SHA-256: rules
-  `eb6b83fe9554a0b9aaad52caa7012bc57e4e3f59aa40e45baedc9fb29d8ea3cf`;
-  publication
-  `f18996a7034ac5d84844912d53c38f80bc688e3ba18162058407f5cc339ee606`.
-  Design: VD-0003 designed (4 passed); VD-0002 designed
-  (8 passed after correcting the `excluded` boolean guard and removing
-  the strict xfail). Deferred: cumulative `tools/run_checks.py --stage test`
-  and mandatory CI/release gates. Outcome: **verified** by the shared
-  2026-11-01 cumulative run; release gates remain separate.
-
-- [x] **VR-0005** (2026-11-01; verified): Publish the
-  exact source-59 Forward Observer `308/TEXT:+1SD` effect as one
-  Special Die for the WIP-based attack, with N5.3 pp. 75/92
-  citations; preserve the published 17 deployed-object records.
-  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree based on `0b7fe7a5`.
-  Risk: elevated for synchronized source/rules/publication
-  provenance, moderate for Special Die/Burst distinction.
-  Immediate: guarded stage/promote under ignored
-  `local/forward-observer-special-die-20261101/` with input
-  SHA-256 verification, recovered rollback copy and 17 unchanged
-  deployed objects; rules sha256
-  `50fa91f15be7da8449bdd179c94ceeadcf258f0edfedf12eb86ee344ab6d6a83`;
-  publication sha256
-  `f220f9e067fbd92779c90d4057c9bca767d1e05baf618bce4070a256a182276b`.
-  Direct source-59, rules-database and publication tests
-  **1 passed each**; rules build, publication `--check`,
-  targeted Ruff **PASS**. Design: VD-0005 designed (1 passed);
-  VD-0004 designed (9 passed after correcting the `count` integer guard
-  and removing the strict xfail). Deferred: one shared cumulative
-  `tools/run_checks.py --stage test` with other VR entries
-  and mandatory CI/release acceptance. Outcome: **verified** by the
-  shared 2026-11-01 cumulative run; release gates remain separate.
+Increment the relevant next-unused ID when adding a task, even if that
+task is later removed. Previous completed records remain in Git history.
+The 2026-11-01 cumulative local suite evidence is summarized in
+[testing.md](testing.md#chromium-concurrency-under-pytest-xdist);
+mandatory CI and final release acceptance remain separate.
 
 ## Recording template
 
-Copy a new item into the appropriate section above; use the next unused ID.
-Avoid creating an empty item for work fully verified during implementation.
+Copy only the applicable entry to the corresponding active section and
+replace the sample ID with the next unused ID shown above. Do not create
+entries for work fully verified during implementation.
 
 ```text
-- [ ] VD-0001 (YYYY-MM-DD; needs-design): <required assertion/edge case>.
+- [ ] VD-NNNN (YYYY-MM-DD; needs-design): <required assertion/edge case>.
   Work: <TODO anchor>; change: <revision/files>; risk: <level>.
-  Existing coverage: <selector or none>; linked execution: VR-0001.
-  Outcome: <new test selector and its design-sanity result, when available>.
+  Existing coverage: <selector or none>; linked execution: VR-NNNN.
+  Outcome: <selector and design-sanity result, when performed>.
 
-- [ ] VR-0001 (YYYY-MM-DD; awaiting-design): <one implementation change>.
+- [ ] VR-NNNN (YYYY-MM-DD; awaiting-design): <one implementation change>.
   Work: <TODO anchor>; revision: <commit/artifact>; risk: <level>.
-  Immediate: <essential created/existing test selector and result;
-    required validators and results; reason for any expanded run>.
-  Design: VD-0001 or none.
+  Immediate: <essential regression selector/result and required validators>.
+  Design: VD-NNNN or none.
   Deferred: <existing module/full-suite/integration/manual checks>.
   Outcome: <tested revision, command, counts and evidence, when run>.
 ```

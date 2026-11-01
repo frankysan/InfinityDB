@@ -105,8 +105,15 @@ evidence. A design-only pass writes queued tests and runs each new test
 directly to verify it; an execution-only pass batches the broader runs.
 Neither is a blanket exemption from essential tests. Never report deferred
 checks as passed or acceptance complete before verification. Failures
-remain open and link to the TODO fix. The queue does not replace the
-implementation backlog or weaken CI/release gates.
+remain open and link to the TODO fix. Retire completed VD/VR entries promptly
+after recording results; keep the queue active-only and advance next-unused
+IDs without reuse. Git history retains completed records. The queue does not
+replace the implementation backlog or weaken CI/release gates.
+
+While an asynchronous MCP test job runs, continue independent read-only
+review, analysis, planning and triage. Do not mutate inputs or artifacts
+visible to that test checkout; use an isolated worktree for concurrent edits
+and never apply a completed job's results to a later changed state.
 
 Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
 tools in isolation, and package installation still runs through the virtual-environment

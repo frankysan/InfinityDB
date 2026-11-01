@@ -834,7 +834,7 @@ rules/publication fingerprints with an ignored rollback backup.
 The source audit now reports **20 unresolved Skill source IDs**;
 the four reviewed option occurrences are not a Unit-usage index,
 automatic attack resolver, or permission to infer other variants.
-Broader project validation remains tracked in the validation queue.
+The deferred project suite passed on 2026-11-01; the queue entry was retired.
 
 **Reviewed Minelayer (2) deployment quantity (2026-11-01):**
 Skill source `56` has 546 direct occurrences in the pinned Army
@@ -855,7 +855,7 @@ and deployed-object publication refresh verified the unchanged
 17 deployed objects and retained ignored rollback copies.
 The source-variant audit now reports **19 unresolved Skill IDs**;
 the cross-Army variant usage index remains unimplemented.
-Broader tests and mutation coverage remain queued.
+Broader tests and mutation coverage passed on 2026-11-01.
 
 **Reviewed Chain of Command (Non Specialist) (2026-11-01):**
 The pinned Army source has 151 direct Chain of Command (source `26`)
@@ -876,8 +876,8 @@ migration matched the curated source, Army and PDF fingerprints,
 promoted the synchronized rules/publication artifacts, retained
 rollback copies, and verified that 17 published deployed objects
 remain unchanged. The source audit has **18 unresolved Skill IDs**,
-with cumulative tests and additional negative tests tracked in
-the validation queue. No cross-Army usage index is generated.
+with cumulative and additional negative tests passed on
+2026-11-01. No cross-Army usage index is generated.
 
 **Reviewed Forward Observer (+1SD) (2026-11-01):**
 Skill source `59` has 609 direct occurrences in the pinned
@@ -897,7 +897,7 @@ single-record change, verified exact Army/PDF inputs,
 promoted matched rules/publication outputs, retained rollback
 copies, and preserved all 17 deployed objects. The audit
 reports **17 unresolved Skill IDs**. Additional mutation
-and projection tests remain queued; no Unit-usage index
+and projection tests passed on 2026-11-01; no Unit-usage index
 or automatic Attack resolution is implied.
 
 **Partially reviewed Hacking Device program grants (2026-10-31):**

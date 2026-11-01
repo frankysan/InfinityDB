@@ -1750,8 +1750,8 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         objects, with ignored recovery copies. Focused source,
         database and publication checks pass; the unresolved
         Skill source count is now **19**. Broader validation and
-        additional mutation tests are tracked in the validation
-        queue. This does not generate Unit usage or calculate
+        additional mutation tests completed in the 2026-11-01
+        cumulative pass. This does not generate Unit usage or calculate
         the legality of specific placements.
       - [x] **Data processing — Chain of Command (Non Specialist), source 26:**
         Publish exact Army source extra `375/TEXT:Non Specialist`
@@ -1766,8 +1766,8 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         this variant without excluding independent Specialist Skills;
         focused source/database/filter/publication tests pass.
         The source audit now reports **18** unresolved Skill IDs.
-        Deferred edge-case tests and cumulative execution are in
-        the [validation queue](validation-queue.md).
+        Additional edge-case tests and cumulative execution passed
+        on 2026-11-01; the completed queue entries were retired.
       - [x] **Data processing — Forward Observer (+1SD), source 59:**
         Reconcile two `308/TEXT:+1SD` profile occurrences on
         TARKSHYA Operator in ALEPH and Operations Subsection, out
@@ -1782,8 +1782,8 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         publication, leaving 17 reviewed deployed objects unchanged
         with retained recovery artifacts. Focused source/database/
         publication checks pass; **17 Skill** source IDs remain
-        unresolved. Defer additional negative/derived-index tests
-        and the cumulative suite through the validation queue.
+        unresolved. Additional negative/derived-index tests and the cumulative
+        suite passed on 2026-11-01.
         This is source metadata, not gameplay attack resolution.
       - [x] **Data processing — correct reviewed-extra scalar type guards:**
         Source-specific curated validators now require
@@ -1793,8 +1793,8 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         The strict expected-failure markers were removed from
         `tests/test_curated.py`; their full focused mutation
         matrices now pass (**8/8** and **9/9** respectively).
-        Broader cumulative verification is tracked under
-        [VR-0004 and VR-0005](validation-queue.md).
+        The cumulative suite subsequently passed; completed
+        validation entries were retired from the active queue.
       - [x] **Data processing:** Audit the lone Journalist
         source-272 `1/TEXT:+3` on the Tohaa Diplomatic Delegate.
         N5.3 already defines Journalist's Guts Roll and campaign

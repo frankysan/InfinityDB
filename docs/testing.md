@@ -241,13 +241,17 @@ status; `docs/TODO.md` continues to own features, fixes, and milestone scope.
    check*, not a substitute for a later broader execution pass. Record
    exact selectors/results and unblock linked VR items; fix a defective
    test here, but send newly discovered product defects to `docs/TODO.md`.
+   Retire designed VD items after successful sanity checks, carrying any
+   needed selectors or dependencies into still-open VR items.
 3. **Test-execution pass:** batch **deferred verification** across ready VR
    changes: relevant existing module suites, integration/browser checks and
    cumulative full-suite/profile checks. Prefer a single shared run for
    overlapping requirements; do not re-run equivalent modules separately
    for each task. Record the exact tested revision, commands, pass/fail/skip
    counts and evidence. Close a VR item only when its required checks have
-   passed on the relevant state. Keep failed or blocked verification open.
+   passed on the relevant state. Retire verified VR entries from the active
+   queue after recording their outcome; Git history preserves the record.
+   Keep failed or blocked verification open.
 
 **Four kinds of test work:** essential *creation* (write the minimum
 regression needed to trust this change now); deferred *design* (queue
@@ -292,6 +296,17 @@ respects local validation requirements without requiring an unconditional
 full-module/full-suite run after every ordinary implementation. Keep check
 evidence and deferred obligations explicit in agent handoffs. The workflow
 does not change `tools/run_checks.py`, its profiles or hosted CI execution.
+
+**Parallel work while a test job runs:** An asynchronous test job does not
+require the agent to idle. Continue with read-only audits, source inspection,
+planning, issue triage and analysis, and poll the job as needed. Avoid any
+write to files, databases, staged publication artifacts or fixtures the
+running tests might read or modify; tests operate on the live checkout, not
+an automatically frozen snapshot. If parallel mutations are necessary,
+isolate the test run in a separate worktree/environment and verify which
+revision and artifacts it tested. Never treat a job result as acceptance
+for edits made after its tested state. Concurrent CPU/IO-intensive tasks
+can also affect test timing and Chromium stability, so limit contention.
 
 **Workspace MCP execution:** The connected MCP server requires test workloads
 to use its asynchronous job interface. Use `start_test_job` for ordinary
@@ -435,8 +450,11 @@ server `ERR_CONNECTION_REFUSED` and passed in isolation. A subsequent
 ran **133.47 s longer** than the unsuccessful loadgroup attempt; this is
 not a controlled performance comparison or proof of the failure cause.
 Continue to treat worksteal as the default and select browserlanes
-explicitly when validating contention. Full reports are indexed in
-[the validation queue](validation-queue.md).
+explicitly when validating contention. The passing asynchronous job
+(`e0806dee270e45638f1f348cea85d223`) wrote its detailed report to
+ignored `local/validation-queue-vr0001-vr0005-browserlanes-20261101.txt`.
+Completed VD/VR entries were retired from the active queue; the final
+release candidate still needs its own acceptance evidence.
 
 During an xdist run, `tests/conftest.py` admits **at most two Chromium
 slot holders concurrently** across workers using cross-process OS file locks
@@ -1005,8 +1023,8 @@ and retains rollback backups. The reviewed 17 deployed
 objects are identical before/after promotion and the
 audit now lists **17 unresolved Skill IDs**.
 Additional rejection/derived-index tests and cumulative
-full-suite verification are queued in
-`docs/validation-queue.md` for the next dedicated passes.
+full-suite verification were subsequently completed on 2026-11-01;
+the fulfilled VD/VR entries have been retired from the active queue.
 
 **Phased regression design pass (2026-11-01):**
 `tests/test_curated.py` now contains exact-source mutation matrices
@@ -1018,15 +1036,14 @@ non-inference. `tests/test_scenario_api.py` checks all 11 pinned
 Chain of Command option annotations against the Specialist candidate
 filter in all four reviewed contexts, preserving other Skill qualifiers.
 
-Direct design-sanity runs: **30 passed, 2 strict xfailed**.
-The two expected failures identify confirmed type-validator defects:
-`excluded: 1` is accepted for Chain of Command even though it is not
-a boolean, and `count: true` is accepted for Forward Observer
-even though it is not an integer. The test cases stay in place as
-strict xfails until the TODO fixes make them pass; then remove the
-markers. VD-0001/0003/0005 are designed, VD-0002/0004 remain blocked,
-and the shared full-suite execution is **not yet performed**.
-See `docs/validation-queue.md` for exact selectors and dependencies.
+Initial design-sanity runs yielded **30 passed, 2 strict xfailed**,
+exposing the boolean-as-integer validation defects (`excluded: 1`
+and `count: true`). Both guards were subsequently fixed, the strict
+xfail markers removed, and the affected negative-case matrices passed
+(**8/8** and **9/9**). All five deferred design requirements were
+completed, and the cumulative full-suite run on 2026-11-01 passed
+(**4,698 passed, 25 skipped**). These completed queue entries were
+retired; final hosted CI/release acceptance remains separate.
 
 ## Non-Skill Army source classification and Unit presentation
 
