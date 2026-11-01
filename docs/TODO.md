@@ -1690,10 +1690,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and 11 Equipment source IDs. The tracked
+      occurrence parameters and **10 Equipment** source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
-      Super-Jump, Jump, Climb and TinBot Firewall/Discover/ECM Guided
-      parameter mappings;
+      Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
+      and complete source-100 Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
       the release-matched source pair before final certification.
@@ -1863,6 +1863,31 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         unqualified SR and compound signatures;
         the **34 Skill / 11 Equipment** baseline and
         cross-Army Unit-use index remain unchanged.
+      - [x] **Data processing:** Promote the three *exact ordered*
+        Hacking Device source combinations as independent reviewed
+        signatures, not consequences of component-level approval.
+        Source Equipment 100: Cybermask + Trinity grants (one
+        occurrence, extras 25+12); Total Control PS=3 +
+        Trinity PS=5 (two occurrences, extras 373+343).
+        Device Plus 101: Trinity PS=5 + Zero Pain (two occurrences,
+        extras 343+287). Canonical program grants and PS
+        replacements remain separate effects of the complete
+        paired source. N5.3 pp. 54/57/58/123 establishes the
+        program/PS terminology but does not authorize
+        arbitrary further combinations. The typed
+        `occurrenceCombinations` contract preserves exact
+        source order, IDs, type, raw text and effect sequence;
+        the source audit never combines individually approved
+        values to approve a novel multi-extra signature.
+        The guarded v9 migration appends only these two
+        records' exact reviewed combinations and retains
+        prior matched rules/publication artifacts in ignored
+        `local/`. Source ID 100 is now **fully reviewed**,
+        reducing unresolved Equipment IDs from 11 to **10**.
+        Device Plus 101 still has two unqualified `UPGRADE:
+        SR-1` rows (source extra 344) with no program scope;
+        these deliberately remain unreviewed. No Unit-use
+        index or Hacking Program runtime calculation is added.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

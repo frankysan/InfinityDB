@@ -16673,6 +16673,28 @@
                             }
                         ]
                     }
+                ],
+                "occurrenceCombinations": [
+                    {
+                        "extras": [
+                            {"extraId": 25, "extraType": "TEXT", "rawValue": "UPGRADE: Cybermask"},
+                            {"extraId": 12, "extraType": "TEXT", "rawValue": "UPGRADE:\u00a0Trinity"}
+                        ],
+                        "effects": [
+                            {"kind": "hacking-program-grant", "program": "hacking-program:cybermask"},
+                            {"kind": "hacking-program-grant", "program": "hacking-program:trinity"}
+                        ]
+                    },
+                    {
+                        "extras": [
+                            {"extraId": 373, "extraType": "TEXT", "rawValue": "UPGRADE: Total Control (PS=3)"},
+                            {"extraId": 343, "extraType": "TEXT", "rawValue": "UPGRADE: Trinity (PS=5)"}
+                        ],
+                        "effects": [
+                            {"kind": "program-ps-replacement", "program": "hacking-program:total-control", "value": 3},
+                            {"kind": "program-ps-replacement", "program": "hacking-program:trinity", "value": 5}
+                        ]
+                    }
                 ]
             }
         },
@@ -16777,6 +16799,18 @@
                                     "modifier": -1
                                 }
                             }
+                        ]
+                    }
+                ],
+                "occurrenceCombinations": [
+                    {
+                        "extras": [
+                            {"extraId": 343, "extraType": "TEXT", "rawValue": "UPGRADE: Trinity (PS=5)"},
+                            {"extraId": 287, "extraType": "TEXT", "rawValue": "UPGRADE: Zero Pain"}
+                        ],
+                        "effects": [
+                            {"kind": "program-ps-replacement", "program": "hacking-program:trinity", "value": 5},
+                            {"kind": "hacking-program-grant", "program": "hacking-program:zero-pain"}
                         ]
                     }
                 ]

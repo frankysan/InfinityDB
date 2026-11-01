@@ -892,9 +892,10 @@ synchronizes the matched rules/publication pair with
 rollback copies in ignored `local/`. The unqualified
 source `101` extra `344` (`UPGRADE: SR-1`,
 two occurrences) remains unresolved because no program
-target is identified. Firewall and multi-extra
-signatures remain unresolved. The source-ID baseline
-remains **34 Skills / 11 Equipment**.
+target is identified. At this milestone Firewall and
+multi-extra signatures were also open, as was the
+source-ID baseline of **34 Skills / 11 Equipment**;
+both classes were reviewed in subsequent sections.
 
 **Reviewed Hacking Device Firewall extras (2026-10-31):**
 Source Equipment `100` has three exact standalone
@@ -923,9 +924,43 @@ to existing reviewed Device metadata, and synchronizes
 the matched rules/publication artifacts with ignored
 recovery copies. The 16 additional source occurrences
 are reviewed; the unqualified `UPGRADE: SR-1`
-(Device Plus `101`) and compound signatures remain
-unreviewed. The unresolved source-ID baseline
-remains **34 Skill / 11 Equipment**.
+(Device Plus `101`) remains unreviewed; at this
+Firewall milestone the compound signatures were
+also open. The source-ID baseline then stood at
+**34 Skill / 11 Equipment** before the exact
+combination review below.
+
+**Reviewed exact Hacking Device combinations (2026-11-01):**
+The maintained `variantSemantics.occurrenceCombinations` records
+complete, ordered two-extra source signatures, each with its own
+ordered `extras` (source extra ID, TEXT type, exact raw spelling)
+and `effects` (canonical Hacking Program grant or PS replacement).
+This is **not** a generic parser or a composition of independently
+reviewed extras. The pinned Army snapshot verifies three signatures:
+Hacking Device `100` Cybermask + Trinity grants (extras `25+12`,
+one direct occurrence); Hacking Device `100` Total Control
+`PS=3` + Trinity `PS=5` (extras `373+343`, two);
+and Hacking Device Plus `101` Trinity `PS=5` +
+Zero Pain (extras `343+287`, two). The two programs in
+each combination have independent typed effects; no merged
+Hacking Program, runtime roll arithmetic, or inferred
+Unit use is created. N5.3 pp. 54/57/58/123 supplies
+the program-access and PS semantics. The dedicated
+`RulesDatabase.equipment_reviewed_combination_semantics()`
+reader exposes only those exact reviewed pairs. The source audit
+accepts an ordered multi-extra signature **only** if it equals
+one published pair, never because its elements are individually
+reviewed; reordering, omitting or adding an extra fails closed.
+The guarded one-time v9 refresh appends only these two records'
+`occurrenceCombinations` fields, preserves all earlier variant
+metadata, verifies pinned raw occurrence counts and signatures,
+updates the matched `rules.db` / deployed-object publication
+and retains ignored rollback copies under `local/`.
+Source `100` is fully reconciled; `101` remains unresolved
+because extra `344` (`UPGRADE: SR-1`) occurs twice
+without naming an owning program. No effect or target has
+been invented for those two occurrences. The current
+unresolved baseline is **34 Skill / 10 Equipment source IDs**.
 
 **Remaining source-parameter inventory (pinned Army source and current
 generated rules database):** `tools/audit_source_variant_inputs.py` produces a
@@ -945,8 +980,8 @@ The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
 application/raw databases. The tracked artifact includes reviewed
 Mimetism, Berserk, Dodge, Surprise Attack, Super-Jump, Jump,
-Climb, TinBot variants, and the partial Hacking Device program-grant
-occurrence-parameter mappings.
+Climb, TinBot variants, Hacking Device single-extra semantics
+and exact reviewed multi-extra combinations.
 This baseline contains **96 Skill** source identities across
 **33,153 direct rows** and **34 Equipment** source identities across
 **5,427 direct rows**:
@@ -959,9 +994,10 @@ This baseline contains **96 Skill** source identities across
   (Dodge `40` and Super-Jump `74`); and **34** IDs with
   unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
-  19 family-only IDs; 3 reviewed extra-parameter sources
-  (TinBot Firewall `169`, Discover `244`, ECM Guided `247`);
-  and **11** IDs with unresolved occurrence parameters. Four
+  19 family-only IDs; 4 reviewed extra-parameter sources
+  (TinBot Firewall `169`, Discover `244`, ECM Guided `247`,
+  fully reconciled Hacking Device `100`);
+  and **10** IDs with unresolved occurrence parameters. Four
   currently published Equipment source IDs have reviewed exact-source
   named variants, of which Repeater `248` has no occurrence extras.
 - `TEXT` extras occur across 39 Skill source IDs and 14 Equipment
@@ -977,14 +1013,16 @@ A flagged source may also have valid, unparameterized occurrences,
 and reviewed family rules remain available. An exact reviewed
 source variant with an unreviewed occurrence extra is *not*
 a reviewed combined variant. The audit accepts a single reviewed extra
-(or a single typed distance for a Skill with reviewed distance semantics);
-multiple extras remain unresolved even if each has a reviewed individual
-meaning, until that exact combination has its own semantic review.
+(or a single typed distance for a Skill with reviewed distance semantics).
+Multiple extras remain unresolved even if each has a reviewed individual
+meaning **unless** the complete ordered signature is independently
+published in the exact reviewed combination registry.
 In particular, Booty/MetaChemistry `ReRoll`, Mimetism
 `-3/-6`, unreviewed TinBot variants outside the exact source
-IDs `169`/`244`/`247`, and unreviewed Hacking Device
-`UPGRADE` variants beyond the five exact program grants must
-not be promoted to typed variant keys on string parsing alone. The audit retains separate
+IDs `169`/`244`/`247`, and any Hacking Device
+`UPGRADE` variant outside the exact reviewed singles and
+three complete compound signatures must not be promoted
+on string parsing alone. The audit retains separate
 signatures for each extra combination and detects source
 drift via `tests/test_audit_source_variant_inputs.py` **when the
 paired, Git-ignored raw Army archive is available**. This source-only

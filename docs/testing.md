@@ -399,7 +399,7 @@ rows and the exact single-extra signatures 6/7 (`TEXT: -3/-6`, 762/5 rows).
 It checks both the tracked rules artifact and a fresh export, preserving the
 opponent-target Face to Face ARO scope separately from Mimetism and the
 distance-only display query. The current source inventory has 34 unresolved
-Skill IDs and 11 Equipment IDs; these are per-source review flags, not Unit counts.
+Skill IDs and 10 Equipment IDs; these are per-source review flags, not Unit counts.
 
 **Jump/Climb distance review:** Army source IDs 263/271 have 26/6
 exact single-extra `DISTANCE: 7.5` (extra ID 372) occurrences. The
@@ -468,8 +468,10 @@ program-upgrade and baseline-device distinction; individual
 program effects stay owned by their canonical `hacking-program:*`
 records. `tests/test_audit_source_variant_inputs.py` compares
 the local raw source against tracked and freshly exported
-rules metadata and asserts that multi-extra combinations
-remain unreviewed. The hermetic curated validator rejects
+rules metadata and, at that review milestone, asserted that
+multi-extra combinations remained unreviewed. The later
+explicit exact-combination review supersedes that
+classification for precisely three ordered signatures. The hermetic curated validator rejects
 wrong device, type, source value and program target; the
 guarded v9 source preflight rejects drift before promotion.
 The one-time local refresh was
@@ -511,7 +513,9 @@ extras totaling 55 occurrences. The curated
 Hacking Program. The source gate requires the pinned
 TEXT extra ID, raw spelling, count and previous
 reviewed grant/B/PS/SD ordering, and excludes
-unqualified `SR-1`, Firewall and multi-extra combinations.
+unqualified `SR-1`, Firewall and multi-extra combinations
+at that milestone. The later independent reviews
+addressed the exact Firewall and three compound signatures.
 The hermetic v9 migration delta tests reject modified
 program effects, absent older entries, unrelated table
 changes and schema drift; the full raw-source inventory
@@ -546,8 +550,39 @@ The one-time guarded local promotion is
 matched deployed-object publication and retains
 recovery copies under ignored `local/`.
 Do not rerun after the pair is promoted.
-Unqualified SR and multiple-extra combinations
-remain unreviewed.
+At this Firewall milestone, unqualified SR and
+multiple-extra combinations were unreviewed; the
+later exact-combination review below supersedes that
+for precisely three source signatures.
+
+**Exact Hacking Device compound source reviews (2026-11-01):**
+The curated `occurrenceCombinations` field lists only three
+complete, ordered two-extra Army signatures. Device `100`
+has Cybermask + Trinity grants (one direct occurrence) and
+Total Control `PS=3` + Trinity `PS=5` (two). Device Plus
+`101` has Trinity `PS=5` + Zero Pain (two).
+`tests/test_curated.py` rejects changed extra IDs,
+spellings, order, program identity, effects and additional
+unlisted pairs. `tests/test_audit_source_variant_inputs.py`
+checks the exact ordered signatures, including comparing
+the tracked rules artifact and a fresh curated export
+against pinned raw Army occurrences. It also proves that
+individual reviewed extras and different permutations
+cannot certify an unlisted combination. The dedicated
+`RulesDatabase.equipment_reviewed_combination_semantics()`
+reader returns the exact reviewed pairs, without adding
+their effects to ordinary single-extra semantics.
+The bounded `tests/test_restriction_storage_candidate.py`
+migration suite rejects unreviewed or missing source
+signatures, changed prior reviewed rules, schema changes
+and unrelated database edits. The one-time guarded command
+is `python -m tools.build_deployed_object_publication
+--refresh-hacking-combinations-v9`; the matching previous
+rules/publication pair is preserved under ignored `local/`.
+Do not rerun on the promoted pair. The source-level
+baseline is now **34 unresolved Skill / 10 Equipment IDs**;
+Device Plus extra `344` (`UPGRADE: SR-1`, two occurrences)
+remains open because it lacks a program target.
 
 ## Non-Skill Army source classification and Unit presentation
 

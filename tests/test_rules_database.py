@@ -1806,6 +1806,55 @@ def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
     assert "hacking-device-plus" not in rules.skill_numeric_mod_semantics()
 
 
+def test_exact_hacking_device_compounds_retain_order_and_program_effects(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    reviewed = rules.equipment_reviewed_combination_semantics()
+    assert set(reviewed) == {"hacking-device", "hacking-device-plus"}
+    expected = {
+        "hacking-device": [
+            ([(25, "UPGRADE: Cybermask"), (12, "UPGRADE:\u00a0Trinity")],
+             [("hacking-program-grant", "hacking-program:cybermask", None),
+              ("hacking-program-grant", "hacking-program:trinity", None)]),
+            ([(373, "UPGRADE: Total Control (PS=3)"),
+              (343, "UPGRADE: Trinity (PS=5)")],
+             [("program-ps-replacement", "hacking-program:total-control", 3),
+              ("program-ps-replacement", "hacking-program:trinity", 5)]),
+        ],
+        "hacking-device-plus": [
+            ([(343, "UPGRADE: Trinity (PS=5)"), (287, "UPGRADE: Zero Pain")],
+             [("program-ps-replacement", "hacking-program:trinity", 5),
+              ("hacking-program-grant", "hacking-program:zero-pain", None)]),
+        ],
+    }
+    for slug, cases in expected.items():
+        combos = reviewed[slug]
+        assert len(combos) == len(cases)
+        for combination, (source_extras, effects) in zip(combos, cases, strict=True):
+            assert [
+                (e["extra_id"], e["raw_value"]) for e in combination["extras"]
+            ] == source_extras
+            assert all(e["extra_type"] == "TEXT" for e in combination["extras"])
+            assert [
+                (effect["kind"], effect["program"], effect.get("value"))
+                for effect in combination["effects"]
+            ] == effects
+            assert all(
+                rules.composed_record(effect["program"]) is not None
+                for effect in combination["effects"]
+            )
+        record = rules.composed_record(f"equipment:{slug}")
+        assert record is not None
+        assert record["variant_semantics"]["occurrence_combinations"] == combos
+    assert all(
+        entry["extra_id"] != 344
+        for entry in rules.equipment_reviewed_extra_semantics()[
+            "hacking-device-plus"
+        ]["extra_values"]
+    )
+
+
 def test_rules_database_returns_reviewed_source_variant_semantics(
     current_rules_database: RulesDatabase,
 ) -> None:

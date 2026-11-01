@@ -55,6 +55,51 @@ SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
 
 
+# Full, ordered Army occurrence combinations; component review never implies approval.
+# A missing PS value means a program grant, while PS=N is an exact replacement.
+HACKING_COMBINATION_SPECS = {
+    "hacking-device": (
+        (
+            (25, "UPGRADE: Cybermask", "cybermask", None),
+            (12, "UPGRADE:\u00a0Trinity", "trinity", None),
+        ),
+        (
+            (373, "UPGRADE: Total Control (PS=3)", "total-control", 3),
+            (343, "UPGRADE: Trinity (PS=5)", "trinity", 5),
+        ),
+    ),
+    "hacking-device-plus": (
+        (
+            (343, "UPGRADE: Trinity (PS=5)", "trinity", 5),
+            (287, "UPGRADE: Zero Pain", "zero-pain", None),
+        ),
+    ),
+}
+
+
+def reviewed_hacking_combinations(device: str) -> list[dict[str, Any]]:
+    """Only approved full ordered source signatures, with separate effects."""
+    return [
+        {
+            "extras": [
+                {"extraId": extra_id, "extraType": "TEXT", "rawValue": raw}
+                for extra_id, raw, _program, _ps in signature
+            ],
+            "effects": [
+                (
+                    {"kind": "hacking-program-grant",
+                     "program": f"hacking-program:{program}"}
+                    if ps is None else
+                    {"kind": "program-ps-replacement",
+                     "program": f"hacking-program:{program}", "value": ps}
+                )
+                for _extra_id, _raw, program, ps in signature
+            ],
+        }
+        for signature in HACKING_COMBINATION_SPECS[device]
+    ]
+
+
 def _validate_reviewed_extra_parameter(
     parameter: dict[str, Any],
     context: str,
@@ -367,7 +412,10 @@ def _validate_variant_semantics(
 ) -> str:
     if not isinstance(value, dict):
         raise ValueError(f"{context}: must be an object")
-    allowed = {"inheritance", "occurrenceParameters", "sourceVariant", "sourceMode"}
+    allowed = {
+        "inheritance", "occurrenceParameters", "occurrenceCombinations",
+        "sourceVariant", "sourceMode",
+    }
     unknown = set(value) - allowed
     if unknown:
         raise ValueError(f"{context}: unsupported fields {sorted(unknown)}")
@@ -509,6 +557,21 @@ def _validate_variant_semantics(
             raise ValueError(f"{parameter_context}: duplicate parameter {key!r}")
         seen_parameters.add(key)
 
+    if "occurrenceCombinations" in value:
+        combinations = value["occurrenceCombinations"]
+        expected_device = (
+            army_links[0].get("id")
+            if len(army_links) == 1 and isinstance(army_links[0], dict)
+            and army_links[0].get("entity") == "equipment"
+            else None
+        )
+        if (
+            inheritance != "family"
+            or expected_device not in HACKING_COMBINATION_SPECS
+            or not isinstance(combinations, list)
+            or combinations != reviewed_hacking_combinations(expected_device)
+        ):
+            raise ValueError(f"{context}: invalid exact Hacking Device combinations")
     source_variant = value.get("sourceVariant")
     source_mode = value.get("sourceMode")
     if source_mode is not None:

@@ -82,8 +82,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
         "statuses": {
             "family-only": 19,
             "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 3,
-            "unresolved-occurrence-parameter": 11,
+            "reviewed-extra-parameter": 4,
+            "unresolved-occurrence-parameter": 10,
         },
         "extraTypes": {"TEXT": 14},
     }
@@ -122,11 +122,11 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     assert skills[74]["status"] == "reviewed-extra-parameter"
     for source_id in (24, 28, 40, 74):
         assert all(part["reviewed"] for part in skills[source_id]["extraSignatures"])
-    for source_id in (100, 101):
-        item = equipment[source_id]
-        assert item["status"] == "unresolved-occurrence-parameter"
-        assert item["extraTypes"] == ["TEXT"]
-        assert item["extraSignatures"]
+    assert equipment[100]["status"] == "reviewed-extra-parameter"
+    assert all(part["reviewed"] for part in equipment[100]["extraSignatures"])
+    assert equipment[101]["status"] == "unresolved-occurrence-parameter"
+    assert equipment[101]["extraTypes"] == ["TEXT"]
+    assert equipment[101]["extraSignatures"]
     for source_id in (169, 244, 247):
         assert equipment[source_id]["status"] == "reviewed-extra-parameter"
         assert all(part["reviewed"] for part in equipment[source_id]["extraSignatures"])
@@ -176,6 +176,26 @@ def test_reviewed_extra_signatures_require_explicit_combination_review(
         reviewed_values={(6, "TEXT", "-3"), (7, "TEXT", "-6")},
         distance_allowed=distance_allowed,
     ) is expected
+
+
+def test_exact_compound_review_never_approves_components_or_permutations() -> None:
+    allowed = {((25, "TEXT", "UPGRADE: Cybermask"),
+                (12, "TEXT", "UPGRADE:\u00a0Trinity"))}
+    exact = [(0, 25, "TEXT", "UPGRADE: Cybermask"),
+             (1, 12, "TEXT", "UPGRADE:\u00a0Trinity")]
+    for items, accepted in (
+        (exact, True),
+        (list(reversed(exact)), False),
+        (exact[:1], False),
+        (exact[1:], False),
+        (exact + [(2, 287, "TEXT", "UPGRADE: Zero Pain")], False),
+        ([(0, 25, "TEXT", "UPGRADE: Cybermask"),
+          (1, 12, "TEXT", "UPGRADE: Trinity")], False),
+    ):
+        assert reviewed_extra_signature(
+            items, reviewed_values=set(), distance_allowed=False,
+            reviewed_combinations=allowed,
+        ) is accepted
 
 
 def _single_extra_counts(item: dict) -> dict[tuple[int, str, str], int]:
@@ -463,8 +483,12 @@ def test_tinbot_firewall_source_extras_match_fresh_export(tmp_path: Path) -> Non
             {"extras": [[6, "TEXT", "-3"]], "reviewed": True, "count": 92},
             {"extras": [[7, "TEXT", "-6"]], "reviewed": True, "count": 55},
         ]
-        assert all(row["status"] == "unresolved-occurrence-parameter"
-                   for row in rows if row["id"] in (100, 101))
+        assert next(row for row in rows if row["id"] == 100)["status"] == (
+            "reviewed-extra-parameter"
+        )
+        assert next(row for row in rows if row["id"] == 101)["status"] == (
+            "unresolved-occurrence-parameter"
+        )
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -496,7 +520,7 @@ def test_tinbot_discover_ecm_extras_match_tracked_and_fresh_rules(tmp_path: Path
             assert row["extraSignatures"] == signatures
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 3, "unresolved-occurrence-parameter": 11,
+            "reviewed-extra-parameter": 4, "unresolved-occurrence-parameter": 10,
         }
 
 
@@ -553,25 +577,33 @@ def test_hacking_device_program_grants_preserve_unreviewed_overrides(
             [item] = select_source_variants(report, "equipment", [source_id])["items"]
             slug = "hacking-device" if source_id == 100 else "hacking-device-plus"
             assert item["reviewedExtra"] == reviewed[slug]
-            assert item["status"] == "unresolved-occurrence-parameter"
+            assert item["status"] == (
+                "reviewed-extra-parameter" if source_id == 100
+                else "unresolved-occurrence-parameter"
+            )
             assert item["reviewedVariant"] is None
             checked = {
                 (sig["extras"][0][0], sig["extras"][0][2]): sig["count"]
                 for sig in item["extraSignatures"]
-                if sig["reviewed"]
+                if sig["reviewed"] and len(sig["extras"]) == 1
             }
             assert checked == grants
             assert all(
-                len(sig["extras"]) == 1 and sig["extras"][0][1] == "TEXT"
+                sig["extras"][0][1] == "TEXT"
                 for sig in item["extraSignatures"] if sig["reviewed"]
             )
-            assert any(
-                not sig["reviewed"] and len(sig["extras"]) > 1
-                for sig in item["extraSignatures"]
+            assert [
+                sig for sig in item["extraSignatures"] if not sig["reviewed"]
+            ] == ([] if source_id == 100 else [{
+                "extras": [[344, "TEXT", "UPGRADE: SR-1"]],
+                "reviewed": False, "count": 2,
+            }])
+            assert item["reviewedCombinations"] == (
+                RulesDatabase(path).equipment_reviewed_combination_semantics()[slug]
             )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 3, "unresolved-occurrence-parameter": 11,
+            "reviewed-extra-parameter": 4, "unresolved-occurrence-parameter": 10,
         }
 
 

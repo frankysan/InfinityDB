@@ -1100,6 +1100,157 @@ def test_hacking_firewall_source_gate_rejects_drift(
         assert not calls
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "missing-combination", "reordered-extras", "wrong-program",
+               "prior-grant", "other-record", "schema", "missing-record"),
+)
+def test_hacking_combination_delta_only_adds_exact_full_signatures(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import _check_variant_semantics_delta
+
+    source = json.loads(
+        (ROOT / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    ids = ("equipment:hacking-device", "equipment:hacking-device-plus")
+    records = {row["id"]: row for row in source["records"] if row["id"] in ids}
+    before_rows = []
+    variants: dict[tuple[str, str], str] = {}
+    for record_id in ids:
+        after = copy.deepcopy(records[record_id]["variantSemantics"])
+        previous = copy.deepcopy(after)
+        previous.pop("occurrenceCombinations")
+        key = ("n5-core-v5.3", record_id)
+        before_rows.append((*key, json.dumps(previous), "preserved"))
+        variants[key] = json.dumps(after)
+    key = ("n5-core-v5.3", ids[0])
+    if defect in {"missing-combination", "reordered-extras", "wrong-program", "prior-grant"}:
+        after = json.loads(variants[key])
+        if defect == "missing-combination":
+            after["occurrenceCombinations"].pop()
+        elif defect == "reordered-extras":
+            after["occurrenceCombinations"][0]["extras"].reverse()
+        elif defect == "wrong-program":
+            after["occurrenceCombinations"][1]["effects"][0]["program"] = (
+                "hacking-program:spotlight"
+            )
+        else:
+            after["occurrenceParameters"][0]["extraValues"].pop(0)
+        variants[key] = json.dumps(after)
+    before_db, next_db = tmp_path / "before.db", tmp_path / "next.db"
+    with sqlite3.connect(before_db) as old, sqlite3.connect(next_db) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", before_rows + [
+            ("n5-core-v5.3", "equipment:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        for key, value in variants.items():
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE collection_id=? AND id=?",
+                (value, *key),
+            )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX unwanted ON records(id)")
+        elif defect == "missing-record":
+            new.execute("DELETE FROM records WHERE id='equipment:hacking-device-plus'")
+    if defect is None:
+        _check_variant_semantics_delta(
+            before_db, next_db, variants, hacking_combinations=True,
+        )
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                before_db, next_db, variants, hacking_combinations=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(before_db, next_db, variants)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "count", "extra-id", "raw-value", "reviewed",
+               "unqualified", "missing", "previous-combinations"),
+)
+def test_hacking_combination_source_gate_checks_entire_signature(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    items = []
+    for source_id, specs in ((100, (
+        ((25, "UPGRADE: Cybermask"), (12, "UPGRADE:\u00a0Trinity"), 1),
+        ((373, "UPGRADE: Total Control (PS=3)"),
+         (343, "UPGRADE: Trinity (PS=5)"), 2),
+    )), (101, (
+        ((343, "UPGRADE: Trinity (PS=5)"), (287, "UPGRADE: Zero Pain"), 2),
+    ))):
+        source = release.HACKING_GRANT_SOURCES[source_id]
+        unreviewed = [
+            {
+                "extras": [[first[0], "TEXT", first[1]],
+                           [second[0], "TEXT", second[1]]],
+                "reviewed": False, "count": count,
+            }
+            for first, second, count in specs
+        ]
+        if source_id == 101:
+            unreviewed.append({
+                "extras": [[344, "TEXT", "UPGRADE: SR-1"]],
+                "reviewed": False, "count": 2,
+            })
+        items.append({
+            "id": source_id, "name": source["name"], "applicationId": source_id,
+            "occurrences": source["occurrences"],
+            "status": "unresolved-occurrence-parameter",
+            "reviewedCombinations": None, "reviewedExtra": {"kind": "reviewed-extra"},
+            "rawValues": [], "extraSignatures": unreviewed,
+        })
+    item = items[0]
+    if defect == "name":
+        item["name"] = "unexpected"
+    elif defect == "count":
+        item["extraSignatures"][0]["count"] += 1
+    elif defect == "extra-id":
+        item["extraSignatures"][0]["extras"][0][0] = 999
+    elif defect == "raw-value":
+        item["extraSignatures"][0]["extras"][0][2] = "unknown"
+    elif defect == "reviewed":
+        item["extraSignatures"][0]["reviewed"] = True
+    elif defect == "unqualified":
+        items[1]["extraSignatures"][-1]["reviewed"] = True
+    elif defect == "missing":
+        item["extraSignatures"].pop(0)
+    elif defect == "previous-combinations":
+        item["reviewedCombinations"] = []
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": items}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_hacking_combinations_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {
+                "equipment:hacking-device", "equipment:hacking-device-plus",
+            }, "hacking_combinations": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="drift|changed"):
+            release.refresh_hacking_combinations_v9_release(root=tmp_path)
+        assert not calls
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

@@ -1341,6 +1341,58 @@ def test_hacking_program_grants_require_exact_device_and_raw_signature(
 
 
 @pytest.mark.parametrize(
+    ("device", "defect"),
+    [
+        (device, defect)
+        for device in ("hacking-device", "hacking-device-plus")
+        for defect in ("reorder", "change-id", "change-raw", "wrong-effect",
+                       "wrong-program", "additional-combination")
+    ],
+)
+def test_hacking_compounds_require_exact_full_signatures(
+    tmp_path: Path, device: str, defect: str,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(
+        row for row in source["records"] if row["id"] == f"equipment:{device}"
+    )
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": f"equipment:{device}", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": device}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "compound.json"
+
+    def validate() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    validate()
+    combos = record["variantSemantics"]["occurrenceCombinations"]
+    if defect == "reorder":
+        combos[0]["extras"].reverse()
+    elif defect == "change-id":
+        combos[0]["extras"][0]["extraId"] = 999
+    elif defect == "change-raw":
+        combos[0]["extras"][0]["rawValue"] = "UPGRADE: wrong"
+    elif defect == "wrong-effect":
+        combos[0]["effects"][0]["kind"] = "hacking-program-grant" if (
+            combos[0]["effects"][0]["kind"] != "hacking-program-grant"
+        ) else "program-ps-replacement"
+    elif defect == "wrong-program":
+        combos[0]["effects"][0]["program"] = "hacking-program:oblivion"
+    else:
+        combos.append(deepcopy(combos[0]))
+    with pytest.raises(ValueError, match="invalid exact Hacking Device combinations"):
+        validate()
+
+
+@pytest.mark.parametrize(
     ("device", "extra_id", "mutation"),
     [
         ("hacking-device", 269, {"modifier": 2}),

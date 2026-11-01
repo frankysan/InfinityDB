@@ -24,10 +24,12 @@ def reviewed_extra_signature(
     *,
     reviewed_values: set[tuple[int, str, str]],
     distance_allowed: bool,
+    reviewed_combinations: set[tuple[tuple[int, str, str], ...]] | None = None,
 ) -> bool:
-    """Accept only single extras; reviewed values do not certify combinations."""
+    """Review exact ordered combinations independently of single extras."""
     if len(items) != 1:
-        return False
+        signature = tuple((extra_id, kind, raw) for _pos, extra_id, kind, raw in items)
+        return len(items) > 1 and signature in (reviewed_combinations or set())
     _position, extra_id, extra_type, extra_name = items[0]
     return (
         (extra_id, extra_type, extra_name) in reviewed_values
@@ -50,6 +52,7 @@ def inventory_source_variants(
         "skills": rules.skill_reviewed_extra_semantics(),
         "equipment": rules.equipment_reviewed_extra_semantics(),
     }
+    equipment_combinations = rules.equipment_reviewed_combination_semantics()
     report: dict[str, Any] = {"catalogs": {}}
 
     application_uri = application_path.resolve().as_uri() + "?mode=ro"
@@ -130,16 +133,31 @@ def inventory_source_variants(
                     for semantics in (numeric, typed) if semantics is not None
                     for item in semantics["extra_values"]
                 }
+                combinations = (
+                    equipment_combinations.get(source_id)
+                    or (equipment_combinations.get(slug) if slug else None)
+                ) if catalog == "equipment" else None
+                exact_combinations = {
+                    tuple(
+                        (entry["extra_id"], entry["extra_type"], entry["raw_value"])
+                        for entry in combination["extras"]
+                    )
+                    for combination in (combinations or [])
+                }
 
                 def reviewed_signature(
                     items: list[tuple[int, int, str, str]],
                     allowed_values: set[tuple[int, str, str]] = reviewed_values,
                     distance_allowed: bool = distance is not None,
+                    reviewed_combinations: set[tuple[tuple[int, str, str], ...]] = (
+                        exact_combinations
+                    ),
                 ) -> bool:
                     return reviewed_extra_signature(
                         items,
                         reviewed_values=allowed_values,
                         distance_allowed=distance_allowed,
+                        reviewed_combinations=reviewed_combinations,
                     )
 
                 unresolved = (
@@ -174,6 +192,7 @@ def inventory_source_variants(
                         "reviewedDistance": distance,
                         "reviewedNumericMod": numeric,
                         "reviewedExtra": typed,
+                        "reviewedCombinations": combinations,
                         "occurrences": len(extras),
                         "extraTypes": extra_types,
                         "extraSignatures": [

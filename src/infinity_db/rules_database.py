@@ -736,6 +736,21 @@ def _variant_semantics(value: str | None) -> dict[str, Any] | None:
     result: dict[str, Any] = {"inheritance": raw["inheritance"]}
     if parameters:
         result["occurrence_parameters"] = parameters
+    if raw.get("occurrenceCombinations"):
+        result["occurrence_combinations"] = [
+            {
+                "extras": [
+                    {
+                        "extra_id": entry["extraId"],
+                        "extra_type": entry["extraType"],
+                        "raw_value": entry["rawValue"],
+                    }
+                    for entry in combination["extras"]
+                ],
+                "effects": [dict(effect) for effect in combination["effects"]],
+            }
+            for combination in raw["occurrenceCombinations"]
+        ]
     source_variant = raw.get("sourceVariant")
     if isinstance(source_variant, dict):
         result["source_variant"] = dict(source_variant)
@@ -1635,6 +1650,35 @@ class RulesDatabase:
     def equipment_reviewed_extra_semantics(self) -> dict[ArmyLinkRef, dict[str, Any]]:
         """Return exact reviewed Equipment effects without inferring Fireteam sharing."""
         return self._reviewed_extra_semantics("equipment")
+
+    def equipment_reviewed_combination_semantics(
+        self,
+    ) -> dict[ArmyLinkRef, list[dict[str, Any]]]:
+        """Only exact, ordered reviewed compound Equipment signatures."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT l.external_id AS army_ref, r.variant_json "
+                "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+                "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+                "AND l.record_id = r.id "
+                "WHERE r.kind = 'equipment' AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND l.entity = 'equipment' "
+                "AND l.external_id IS NOT NULL "
+                "ORDER BY l.external_id, r.collection_id, r.id"
+            ).fetchall()
+            result: dict[ArmyLinkRef, list[dict[str, Any]]] = {}
+            for row in rows:
+                variant = _variant_semantics(row["variant_json"])
+                if not isinstance(variant, dict):
+                    continue
+                combinations = variant.get("occurrence_combinations")
+                if not combinations:
+                    continue
+                army_ref = _army_link_ref(row["army_ref"])
+                if army_ref in result and result[army_ref] != combinations:
+                    raise ValueError(f"Equipment {army_ref!r} has conflicting combinations")
+                result[army_ref] = combinations
+            return result
 
     def catalog_source_variant_semantics(self, entity: str) -> dict[ArmyLinkRef, dict[str, Any]]:
         """Return reviewed exact-source variant semantics for one catalog domain."""

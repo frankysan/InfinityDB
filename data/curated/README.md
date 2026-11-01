@@ -1041,9 +1041,11 @@ The exact approved grants are Trinity, White Noise, Cybermask,
 Zero Pain (Device `100`) and Fairy Dust (Device Plus `101`).
 These grant access to the named program; they do not clone
 program-specific mechanics or override a baseline program.
-The program-specific B/PS/SD and named SR forms were reviewed
-separately below. Firewall upgrades, unqualified SR and
-multiple co-occurring extras still require exact semantic review. Raw `UPGRADE:` spellings, including
+The program-specific B/PS/SD, named SR and Firewall
+forms were reviewed separately below. Three exact full
+multi-extra combinations were subsequently reviewed,
+but arbitrary combinations and the unqualified SR
+remain unresolved. Raw `UPGRADE:` spellings, including
 nonbreaking spaces, remain source evidence rather than a
 generic parser contract. See
 [the source-parameter audit](../../docs/data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
@@ -1058,9 +1060,12 @@ standalone rule record and does not overwrite the owning
 program's base facts. `+1B` and `+1SD` are distinct;
 a Special Die does not raise Burst. The validator requires
 the exact approved source ID, raw spelling, field, numeric
-value and program target. Compound signatures, unqualified `SR` and Firewall
-forms remain unresolved and must not be approved by
-generic substring parsing or reviewed component membership.
+value and program target. At that stage, compound signatures,
+unqualified `SR` and Firewall forms remained unreviewed;
+the exact three combinations and Firewall forms were
+subsequently reviewed separately. Generic substring
+parsing or reviewed component membership never
+certifies a compound signature.
 
 Named-program Saving Roll upgrades on Hacking Device
 source IDs `100`/`101` use `program-saving-roll-mod`
@@ -1073,9 +1078,9 @@ many Saving Rolls are made or modify the Program's
 base PS. The reviewed mapping is source-ID-specific
 and covers only the exact Carbonite, Trinity and
 Total Control `SR-1/SR-2` spellings. Unqualified
-`UPGRADE: SR-1`, Firewall variants and compound
-extras must remain unresolved without their own
-scope and source review.
+`UPGRADE: SR-1` remains unresolved. The Firewall
+variants and three compound signatures have
+separate exact reviewed contracts below.
 
 Hacking Device source Equipment `100` also supports
 only the exact standalone `Firewall -6`,
@@ -1094,6 +1099,26 @@ selection/nonstacking semantics. Device Plus
 `101` has no reviewed Firewall extras.
 Do not infer component usage from composite
 signatures or parse arbitrary text as Firewall.
+
+Exact Hacking Device `occurrenceCombinations` are reviewed
+separately from `occurrenceParameters.extraValues`. Each
+combination records an ordered two-extra source signature
+with exact `extraId`, `extraType`, `rawValue` and an
+ordered list of program-specific `effects`. Source `100`
+permits only Cybermask + Trinity program grants and
+Total Control `PS=3` + Trinity `PS=5` replacements;
+source `101` permits only a Trinity `PS=5` replacement
+and a Zero Pain grant. The whole combination is validated
+as an indivisible source identity. Recognition of one
+component does not authorize that component in another
+pair or order. Read the explicit combinations through
+`RulesDatabase.equipment_reviewed_combination_semantics()`;
+the source audit uses their full ordered signatures,
+not the single-extra approved set. The unqualified
+Device Plus `UPGRADE: SR-1` (source extra `344`)
+still lacks an owning program and remains deliberately
+unreviewed. No Unit-use inference, program arithmetic,
+or generic upgrade parser is introduced.
 
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
