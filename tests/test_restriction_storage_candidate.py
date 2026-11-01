@@ -1512,6 +1512,131 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "wrong-unit", "wrong-scope", "wrong-raw",
+               "wrong-extra-id", "other-record", "schema", "missing"),
+)
+def test_ft_master_v9_refresh_only_changes_exact_source_metadata(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        FT_MASTER,
+        FT_MASTER_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    before, after = tmp_path / "before.db", tmp_path / "after.db"
+    variant = copy.deepcopy(FT_MASTER_VARIANT)
+    extras = variant["occurrenceParameters"][0]["extraValues"]
+    if defect == "wrong-unit":
+        extras[3]["effect"]["unitNames"] = ["Morlocks"]
+    elif defect == "wrong-scope":
+        extras[0]["effect"]["appliesTo"] = "all-fireteams"
+    elif defect == "wrong-raw":
+        extras[1]["rawValue"] = "Shaolin Monks"
+    elif defect == "wrong-extra-id":
+        extras[1]["extraId"] = 330
+    with sqlite3.connect(before) as old, sqlite3.connect(after) as new:
+        old.execute(
+            "CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)"
+        )
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*FT_MASTER, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "skill:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), FT_MASTER[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:ft-master'")
+    changed: dict[tuple[str, str], str] = {FT_MASTER: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(before, after, changed, ft_master=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(before, after, changed, ft_master=True)
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(before, after, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "count", "name", "app-id", "extra-id",
+               "raw", "count-per-extra", "status", "previous", "additional"),
+)
+def test_ft_master_v9_refresh_checks_pinned_source_signatures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from infinity_db.curated import FT_MASTER_UNIT_SIGNATURES
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    raw_counts = (2, 47, 1, 2, 2, 2, 2, 1)
+    source = {
+        "id": 261, "name": "FT Master", "applicationId": 261,
+        "occurrences": 61, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None,
+        "reviewedNumericMod": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[extra_id, "TEXT", raw]], "reviewed": False,
+             "count": count}
+            for (extra_id, raw, _names), count in zip(
+                FT_MASTER_UNIT_SIGNATURES, raw_counts, strict=True,
+            )
+        ],
+    }
+    if defect == "count":
+        source["occurrences"] = 60
+    elif defect == "name":
+        source["name"] = "FT-Master"
+    elif defect == "app-id":
+        source["applicationId"] = 999
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 321
+    elif defect == "raw":
+        source["extraSignatures"][3]["extras"][0][2] = "Morlocks"
+    elif defect == "count-per-extra":
+        source["extraSignatures"][1]["count"] = 46
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "additional":
+        source["extraSignatures"].append({
+            "extras": [[999, "TEXT", "Unknown"]], "reviewed": False, "count": 1,
+        })
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_ft_master_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"skill:ft-master"},
+            "ft_master": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="FT Master source-261 signature drift"):
+            release.refresh_ft_master_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
     "defect", (None, "wrong-recipient", "wrong-condition", "wrong-dodge-scope",
                "wrong-gizmokit-scope", "changed-mod", "wrong-stacking",
                "incomplete", "reordered", "other-record", "schema", "missing"),

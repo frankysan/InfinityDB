@@ -113,6 +113,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote Skill-273 target PH replacements on canonical MediKit Equipment",
     )
     migration.add_argument(
+        "--refresh-ft-master-v9", action="store_true",
+        help="Promote exact FT Master source-261 listed-Unit cancellation triggers",
+    )
+    migration.add_argument(
         "--refresh-tagcom-v9", action="store_true",
         help="Promote exact ordered TAGCom Dodge/GizmoKit recipient modifiers",
     )
@@ -205,6 +209,7 @@ def main() -> int:
         or args.refresh_impersonation_v9
         or args.refresh_remdriver_v9
         or args.refresh_tagcom_v9
+        or args.refresh_ft_master_v9
         or args.refresh_evo_trinity_v9
         or args.refresh_ecm_source_variants_v9
         or args.refresh_tinbot_other_v9
@@ -225,6 +230,7 @@ def main() -> int:
             refresh_deactivator_v9_release,
             refresh_ecm_source_variants_v9_release,
             refresh_evo_trinity_v9_release,
+            refresh_ft_master_v9_release,
             refresh_gizmokit_target_ph_v9_release,
             refresh_gizmokit_v9_release,
             refresh_hacking_combinations_v9_release,
@@ -266,6 +272,11 @@ def main() -> int:
         if args.refresh_medikit_v9:
             backup = refresh_medikit_v9_release()
             print("Refreshed exact ranged MediKit Burst upgrade in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_ft_master_v9:
+            backup = refresh_ft_master_v9_release()
+            print("Refreshed exact FT Master Skill-261 source variants in matched v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_tagcom_v9:

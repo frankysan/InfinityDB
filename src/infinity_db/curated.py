@@ -259,6 +259,39 @@ KILLER_HACKING_VARIANT: dict[str, Any] = {
 }
 
 
+# Bracketed FT Master Unit names are the source-listed cancellation triggers,
+# not inferred unit slugs. One Army TEXT extra can name multiple Units.
+FT_MASTER_UNIT_SIGNATURES: tuple[tuple[int, str, tuple[str, ...]], ...] = (
+    (325, "Kuang Shi", ("Kuang Shi",)),
+    (329, "Shaolin", ("Shaolin",)),
+    (336, "Diablos", ("Diablos",)),
+    (338, "Morlocks, Zellenkriegers, Connolly",
+     ("Morlocks", "Zellenkriegers", "Connolly")),
+    (347, "Hungries", ("Hungries",)),
+    (364, "Helots", ("Helots",)),
+    (365, "Jackals", ("Jackals",)),
+    (377, "Stingers", ("Stingers",)),
+)
+FT_MASTER_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "fireteam-cancellation-dependency",
+                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                    "unitNames": list(names),
+                },
+            }
+            for extra_id, raw, names in FT_MASTER_UNIT_SIGNATURES
+        ],
+    }],
+}
+
+
 # Army additionally lists Bangbomb (+4) as Skill 266 on RacerBots,
 # although the reviewed rules owner is canonical Equipment source 246.
 # Preserve exactly the same Dodge eligibility restriction, not a generic +4.
@@ -739,6 +772,25 @@ def _validate_reviewed_extra_parameter(
             or values != expected
         ):
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "ft-master"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = FT_MASTER_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or not all(
+                isinstance(entry, dict)
+                and type(entry.get("extraId")) is int
+                and isinstance(entry.get("effect"), dict)
+                and isinstance(entry["effect"].get("unitNames"), list)
+                for entry in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid FT Master listed-unit extras")
         return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "impersonation"}

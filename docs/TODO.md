@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **28 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **27 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1699,6 +1699,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Skill-listed GizmoKit source-254 and MediKit source-273 target PH replacements,
       Bangbomb Skill source-266 restricted Dodge +4,
       TAGCom source-270 recipient-side Dodge/GizmoKit PH modifiers,
+      FT Master source-261 named Unit dependency,
       RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
@@ -2230,7 +2231,19 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         validators and fresh/tracked export tests
         prevent silent broadening. No dynamic
         roster/group resolver or Unit-use index.
-        Current baseline: **28 Skill / 1 Equipment**.
+        Baseline at that point: **28 Skill / 1 Equipment**.
+      - [x] **Data processing:** Reconcile FT Master Skill source 261:
+        61 direct occurrences, including 59 with one of eight exact
+        bracketed Unit-name extras and two without extras. The current
+        N5.3 official Wiki revision 4114 specifies that a Fireteam
+        containing a listed Unit is canceled when its FT Master leaves.
+        Preserve the original Unit-name strings, with the multi-name
+        source extra treated as one three-name condition. Do not infer
+        Unit IDs, Fireteam membership, or eligibility from these names.
+        Exact-source guards, typed validation, tracked/fresh rules
+        export tests, and metadata-only v9 promotion retain the
+        existing family and unrelated records. Current baseline:
+        **27 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

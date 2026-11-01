@@ -1143,6 +1143,43 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**FT Master listed-Unit source dependencies (2026-11-01):**
+Current official N5.3 Wiki revision 4114 specifies that when
+an FT Master profile names one or more Units in brackets,
+a Fireteam containing one of those Units is automatically
+canceled if the FT Master leaves the Fireteam. This is a
+conditional exception to the normal Fireteam integrity
+rule, not general Fireteam eligibility or an action resolver.
+
+The pinned Army Skill source `261` has **61** direct
+occurrences. Exactly **59** have one of eight standalone
+`TEXT` extras, with source IDs `325` (Kuang Shi; 2),
+`329` (Shaolin; 47), `336` (Diablos; 1),
+`338` (Morlocks, Zellenkriegers, Connolly; 2),
+`347` (Hungries; 2), `364` (Helots; 2),
+`365` (Jackals; 2) and `377` (Stingers; 1).
+Two occurrences have no modifier and retain family-only
+semantics. The comma-separated triple is one upstream
+extra representing three listed Unit names, not three
+independent Army extras or inferred Unit identities.
+
+The canonical `skill:ft-master` family retains its
+existing requirements and Fireteam effects, adding an
+exact `reviewed-extra` source contract. Each extra
+is typed as `fireteam-cancellation-dependency`, scoped
+to `ft-master-leaves-fireteam-with-listed-unit-member`,
+with its exact `unitNames` list. No matching to Army
+Unit IDs/slugs is claimed until the separately planned
+Unit-use index reconciles names in army context.
+Curated validation rejects unexpected IDs, raw text,
+scope or listed names. The guarded v9 promotion pins
+all eight source counts, preserves prior family-only
+metadata and unrelated rows/schema, and retains
+the previous matched pair in ignored `local/`.
+Tracked and fresh rules exports are tested against
+the pinned raw source. Remaining source audit baseline:
+**27 Skill / 1 Equipment**.
+
 **TAGCom reviewed recipient modifiers (2026-11-01):**
 Official TAGCom N5.3 Wiki revision `3144` establishes
 that, while the TAGCom user is deployed on the table

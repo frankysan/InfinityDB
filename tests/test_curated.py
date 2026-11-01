@@ -1434,6 +1434,56 @@ def test_khd_requires_exact_pinned_upgrade_semantics(
 
 
 @pytest.mark.parametrize(
+    ("index", "field", "wrong"), [
+        (0, "extraId", 326),
+        (0, "extraId", 325.0),
+        (0, "extraType", "DISTANCE"),
+        (0, "rawValue", "Kuang"),
+        (1, "effect", {
+            "kind": "fireteam-cancellation-dependency",
+            "appliesTo": "fireteam-cancel-if-master-unconscious",
+            "unitNames": ["Shaolin"],
+        }),
+        (3, "effect", {
+            "kind": "fireteam-cancellation-dependency",
+            "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+            "unitNames": ["Morlocks"],
+        }),
+        (3, "effect", {
+            "kind": "fireteam-cancellation-dependency",
+            "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+            "unitNames": ["Morlocks", "Zellenkriegers", "Connolly", "Other"],
+        }),
+    ],
+)
+def test_ft_master_listed_unit_source_signatures_are_exact(
+    tmp_path: Path, index: int, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"] if row["id"] == "skill:ft-master")
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "automatic"
+    record = document["records"][0]
+    record.update({
+        "id": "skill:ft-master", "kind": "skill",
+        "facts": {"typeIds": ["automatic"]},
+        "armyLinks": [{"entity": "skill", "id": "ft-master"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "ft-master.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    entries = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"]
+    entries[index][field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid FT Master listed-unit extras"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("group", "section", "index", "field", "wrong"), [
         (0, "extras", 0, "extraId", 313),
         (0, "extras", 0, "extraId", 312.0),

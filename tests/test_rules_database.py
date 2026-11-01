@@ -1521,7 +1521,7 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     current_rules_database: RulesDatabase,
 ) -> None:
     mappings = current_rules_database.skill_reviewed_extra_semantics()
-    assert set(mappings) == {"dodge", "super-jump", "impersonation"}
+    assert set(mappings) == {"dodge", "super-jump", "impersonation", "ft-master"}
     param = mappings["dodge"]
     assert param["kind"] == "reviewed-extra"
     assert param["source"] == "army-extra"
@@ -1578,6 +1578,41 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
         {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
     ]
+
+
+def test_ft_master_source_unit_names_are_not_inferred_as_army_unit_ids(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.curated import FT_MASTER_UNIT_SIGNATURES
+
+    rules = current_rules_database
+    parameters = rules.skill_reviewed_extra_semantics()["ft-master"]
+    assert (parameters["source"], parameters["kind"]) == (
+        "army-extra", "reviewed-extra",
+    )
+    assert [
+        (entry["extra_id"], entry["raw_value"], entry["effect"]["unitNames"])
+        for entry in parameters["extra_values"]
+    ] == [
+        (extra_id, raw, list(names))
+        for extra_id, raw, names in FT_MASTER_UNIT_SIGNATURES
+    ]
+    assert all(
+        entry["extra_type"] == "TEXT"
+        and entry["effect"]["kind"] == "fireteam-cancellation-dependency"
+        and entry["effect"]["applies_to"]
+            == "ft-master-leaves-fireteam-with-listed-unit-member"
+        for entry in parameters["extra_values"]
+    )
+    record = rules.composed_record("skill:ft-master")
+    assert record is not None
+    assert record["variant_semantics"]["occurrence_parameters"][0][
+        "extra_values"
+    ] == parameters["extra_values"]
+    assert any(
+        c["source_id"] == "wiki-ft-master-oldid-4114"
+        for c in record["citations"]
+    )
 
 
 def test_tagcom_exact_combat_group_ph_modifiers_preserve_source_signatures(

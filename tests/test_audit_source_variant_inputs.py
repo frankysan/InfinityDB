@@ -130,9 +130,9 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 6,
+            "reviewed-extra-parameter": 7,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 28,
+            "unresolved-occurrence-parameter": 27,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -410,9 +410,9 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 6,
+        "reviewed-extra-parameter": 7,
         "reviewed-combination-parameter": 2,
-        "unresolved-occurrence-parameter": 28,
+        "unresolved-occurrence-parameter": 27,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -428,6 +428,49 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         263: {"kind": "distance", "positive_sign": "omit"},
         271: {"kind": "distance", "positive_sign": "omit"},
     }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_ft_master_261_lists_exact_cancellation_trigger_units_in_both_exports(
+    tmp_path: Path,
+) -> None:
+    from infinity_db.curated import FT_MASTER_UNIT_SIGNATURES
+
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = [
+        {"extras": [[extra_id, "TEXT", raw]], "reviewed": True, "count": count}
+        for (extra_id, raw, _names), count in zip(
+            FT_MASTER_UNIT_SIGNATURES, (2, 47, 1, 2, 2, 2, 2, 1),
+            strict=True,
+        )
+    ]
+    assert sum(item["count"] for item in expected) == 59
+    for path in (ROOT / "data/generated/rules.db", fresh):
+        db = RulesDatabase(path)
+        parameters = db.skill_reviewed_extra_semantics()["ft-master"]
+        assert len(parameters["extra_values"]) == 8
+        assert parameters["extra_values"][3]["effect"]["unitNames"] == [
+            "Morlocks", "Zellenkriegers", "Connolly",
+        ]
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", path,
+        )
+        [row] = select_source_variants(report, "skills", [261])["items"]
+        assert (row["name"], row["applicationId"], row["occurrences"]) == (
+            "FT Master", 261, 61,
+        )
+        assert row["status"] == "reviewed-extra-parameter"
+        assert row["reviewedExtra"] == parameters
+        assert row["extraSignatures"] == expected
+        assert row["rawValues"] == []
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
+            "family-only": 44, "reviewed-distance-parameter": 3,
+            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
+            "reviewed-extra-parameter": 7, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 27,
+        }
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -482,8 +525,8 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 6, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 28,
+            "reviewed-extra-parameter": 7, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 27,
         }
 
 
@@ -536,8 +579,8 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 6, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 28,
+            "reviewed-extra-parameter": 7, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 27,
         }
 
 
@@ -580,8 +623,8 @@ def test_bangbomb_skill_266_reuses_equipment_scope_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 6, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 28,
+            "reviewed-extra-parameter": 7, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 27,
         }
 
 
@@ -626,8 +669,8 @@ def test_medikit_target_ph_skill_273_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 6, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 28,
+            "reviewed-extra-parameter": 7, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 27,
         }
 
 
@@ -671,8 +714,8 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 6, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 28,
+            "reviewed-extra-parameter": 7, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 27,
         }
 
 
@@ -717,9 +760,9 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 6,
+            "reviewed-extra-parameter": 7,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 28,
+            "unresolved-occurrence-parameter": 27,
         }
 
 

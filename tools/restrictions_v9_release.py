@@ -18,6 +18,8 @@ from typing import Any
 
 from infinity_db.curated import (
     BANGBOMB_SKILL_PARAMETERS,
+    FT_MASTER_UNIT_SIGNATURES,
+    FT_MASTER_VARIANT,
     GIZMOKIT_TARGET_PH_PARAMETERS,
     KILLER_HACKING_VARIANT,
     MEDIKIT_TARGET_PH_PARAMETERS,
@@ -111,6 +113,7 @@ GIZMOKIT_TARGET_PH_VARIANT = {
     **GIZMOKIT_VARIANT,
     "sourceCatalogParameters": GIZMOKIT_TARGET_PH_PARAMETERS,
 }
+FT_MASTER = ("n5-core-v5.3", "skill:ft-master")
 TAGCOM = ("n5-core-v5.3", "skill:tagcom")
 TAGCOM_VARIANT = {
     "inheritance": "family",
@@ -1012,10 +1015,19 @@ def _check_variant_semantics_delta(
     killer_hacking: bool = False, impersonation: bool = False,
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
     remdriver: bool = False, bangbomb_skill: bool = False,
-    tagcom: bool = False,
+    tagcom: bool = False, ft_master: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if ft_master and (
+        initial or bangbomb or bangbomb_skill or medikit or gizmokit
+        or deactivator or gizmokit_target_ph or medikit_target_ph or remdriver
+        or evo_trinity or killer_hacking or impersonation or tagcom
+        or tinbot_firewall or tinbot_other or hacking_mods or hacking_srs
+        or hacking_firewall or hacking_combinations or hacking_trinity_access
+        or set(variants) != {FT_MASTER}
+    ):
+        raise ValueError("FT Master refresh requires exactly Skill source 261")
     if tagcom and (
         initial or bangbomb or bangbomb_skill or medikit or gizmokit
         or deactivator or gizmokit_target_ph or medikit_target_ph or remdriver
@@ -1171,6 +1183,15 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == FT_MASTER:
+                        if not ft_master:
+                            raise ValueError("FT Master requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != FT_MASTER_VARIANT
+                        ):
+                            raise ValueError("FT Master refresh changed source-only semantics")
                     elif key == TAGCOM:
                         if not tagcom:
                             raise ValueError("TAGCom requires source-verified refresh")
@@ -1587,6 +1608,43 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_ft_master_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote exact FT Master listed-Unit cancellation triggers only."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [row for row in report["catalogs"]["skills"]["items"]
+            if row["id"] == 261]
+    signatures = [
+        {
+            "extras": [[extra_id, "TEXT", raw]], "reviewed": False,
+            "count": count,
+        }
+        for (extra_id, raw, _names), count in zip(
+            FT_MASTER_UNIT_SIGNATURES, (2, 47, 1, 2, 2, 2, 2, 1),
+            strict=True,
+        )
+    ]
+    if (
+        len(rows) != 1 or rows[0]["name"] != "FT Master"
+        or rows[0]["applicationId"] != 261
+        or rows[0]["occurrences"] != 61
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"] or rows[0]["extraSignatures"] != signatures
+    ):
+        raise ValueError("FT Master source-261 signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={FT_MASTER[1]}, ft_master=True,
     )
 
 
@@ -2346,7 +2404,7 @@ def _refresh_metadata_v9_release(
     killer_hacking: bool = False, impersonation: bool = False,
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
     remdriver: bool = False, bangbomb_skill: bool = False,
-    tagcom: bool = False,
+    tagcom: bool = False, ft_master: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2447,6 +2505,7 @@ def _refresh_metadata_v9_release(
                 remdriver=remdriver,
                 bangbomb_skill=bangbomb_skill,
                 tagcom=tagcom,
+                ft_master=ft_master,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,

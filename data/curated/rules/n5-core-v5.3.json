@@ -21490,7 +21490,113 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 325,
+                                "extraType": "TEXT",
+                                "rawValue": "Kuang Shi",
+                                "effect": {
+                                    "kind": "fireteam-cancellation-dependency",
+                                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                                    "unitNames": [
+                                        "Kuang Shi"
+                                    ]
+                                }
+                            },
+                            {
+                                "extraId": 329,
+                                "extraType": "TEXT",
+                                "rawValue": "Shaolin",
+                                "effect": {
+                                    "kind": "fireteam-cancellation-dependency",
+                                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                                    "unitNames": [
+                                        "Shaolin"
+                                    ]
+                                }
+                            },
+                            {
+                                "extraId": 336,
+                                "extraType": "TEXT",
+                                "rawValue": "Diablos",
+                                "effect": {
+                                    "kind": "fireteam-cancellation-dependency",
+                                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                                    "unitNames": [
+                                        "Diablos"
+                                    ]
+                                }
+                            },
+                            {
+                                "extraId": 338,
+                                "extraType": "TEXT",
+                                "rawValue": "Morlocks, Zellenkriegers, Connolly",
+                                "effect": {
+                                    "kind": "fireteam-cancellation-dependency",
+                                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                                    "unitNames": [
+                                        "Morlocks",
+                                        "Zellenkriegers",
+                                        "Connolly"
+                                    ]
+                                }
+                            },
+                            {
+                                "extraId": 347,
+                                "extraType": "TEXT",
+                                "rawValue": "Hungries",
+                                "effect": {
+                                    "kind": "fireteam-cancellation-dependency",
+                                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                                    "unitNames": [
+                                        "Hungries"
+                                    ]
+                                }
+                            },
+                            {
+                                "extraId": 364,
+                                "extraType": "TEXT",
+                                "rawValue": "Helots",
+                                "effect": {
+                                    "kind": "fireteam-cancellation-dependency",
+                                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                                    "unitNames": [
+                                        "Helots"
+                                    ]
+                                }
+                            },
+                            {
+                                "extraId": 365,
+                                "extraType": "TEXT",
+                                "rawValue": "Jackals",
+                                "effect": {
+                                    "kind": "fireteam-cancellation-dependency",
+                                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                                    "unitNames": [
+                                        "Jackals"
+                                    ]
+                                }
+                            },
+                            {
+                                "extraId": 377,
+                                "extraType": "TEXT",
+                                "rawValue": "Stingers",
+                                "effect": {
+                                    "kind": "fireteam-cancellation-dependency",
+                                    "appliesTo": "ft-master-leaves-fireteam-with-listed-unit-member",
+                                    "unitNames": [
+                                        "Stingers"
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {
