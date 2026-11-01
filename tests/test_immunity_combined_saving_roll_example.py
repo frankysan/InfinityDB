@@ -31,7 +31,8 @@ def reviewed_case() -> dict:
     return immunity["facts"]["immunityInteraction"]["reviewedSavingRollCases"][0]
 
 
-def test_printed_plasma_immunity_example_has_independent_n53_evidence() -> None:
+def test_printed_plasma_immunity_example_has_independent_n53_evidence(require_source_files) -> None:
+    require_source_files(PDF)
     fitz = pytest.importorskip("fitz")
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with fitz.open(PDF) as source:

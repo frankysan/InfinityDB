@@ -44,7 +44,8 @@ EXPECTED = {
 }
 
 
-def test_n53_ap_shock_bts_and_silent_evidence() -> None:
+def test_n53_ap_shock_bts_and_silent_evidence(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as pdf:
         pages = {}
@@ -62,6 +63,9 @@ def test_n53_ap_shock_bts_and_silent_evidence() -> None:
         182: ("silenced pistol", "ap+shock", "bts/2", "silent (-6)"),
     }.items():
         assert all(token in pages[number] for token in fragments), number
+
+
+def test_curated_n53_ap_shock_bts_and_silent_evidence() -> None:
     records = {row["id"]: row for row in load_curated_document(
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )["records"]}

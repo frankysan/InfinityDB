@@ -47,7 +47,8 @@ EXPECTED = {
 }
 
 
-def test_monofilament_is_printed_n53_immunity_example_not_inferred() -> None:
+def test_monofilament_is_printed_n53_immunity_example_not_inferred(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as document:
         pages: dict[int, str] = {}
@@ -62,6 +63,9 @@ def test_monofilament_is_printed_n53_immunity_example_not_inferred() -> None:
         177: ("monofilament", "arm=0", "state: dead", "cc weapon"),
     }.items():
         assert all(fragment in pages[page] for fragment in fragments), page
+
+
+def test_curated_monofilament_is_printed_n53_immunity_example_not_inferred() -> None:
     source = load_curated_document(
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )

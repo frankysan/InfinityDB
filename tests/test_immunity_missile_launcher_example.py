@@ -46,7 +46,8 @@ EXPECTED = {
 }
 
 
-def test_printed_missile_launcher_immunity_example_matches_pinned_pdf() -> None:
+def test_printed_missile_launcher_immunity_example_matches_pinned_pdf(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as pdf:
         text_by_page = {}
@@ -63,6 +64,9 @@ def test_printed_missile_launcher_immunity_example_matches_pinned_pdf() -> None:
         "ap+exp", "arm/2", "impact", "anti-materiel",
     ))
     assert "immunity" in text_by_page[95] and "comms attacks" in text_by_page[95]
+
+
+def test_curated_printed_missile_launcher_immunity_example_matches_pinned_pdf() -> None:
     records = load_curated_document(ROOT / "data/curated/rules/n5-core-v5.3.json")[
         "records"
     ]

@@ -42,7 +42,8 @@ EXPECTED = {
 }
 
 
-def test_pinned_n53_rules_support_exact_non_comms_em_cc_case() -> None:
+def test_pinned_n53_rules_support_exact_non_comms_em_cc_case(require_source_files) -> None:
+    require_source_files(PDF)
     fitz = pytest.importorskip("pymupdf")
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PDF_SHA256
     with fitz.open(PDF) as source:

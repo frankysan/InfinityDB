@@ -83,9 +83,12 @@ PROFILES = [
 
 
 @pytest.mark.parametrize("index", range(3))
-def test_remaining_critical_case_matches_pinned_rules_and_exact_weapon(index: int) -> None:
+def test_remaining_critical_case_matches_pinned_rules_and_exact_weapon(
+    index: int, require_source_files,
+) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
-    weapon_id, ammunition_name, page, row = PROFILES[index]
+    _weapon_id, _ammunition_name, page, row = PROFILES[index]
     with pymupdf.open(PDF) as pdf:
         pages = {n: " ".join(str(pdf[n - 1].get_text("text")).casefold().split())
                  for n in (63, 64, 65, 67, 95, page)}
@@ -103,6 +106,11 @@ def test_remaining_critical_case_matches_pinned_rules_and_exact_weapon(index: in
         assert "any failed saving roll causes the target to enter isolated state" in combined
         assert "heavy infantry (hi), a tag, a remote (rem), or a vehicle" in combined
         assert "two due to the e/m ammunition and one due to the critical" in combined
+
+
+@pytest.mark.parametrize("index", range(3))
+def test_curated_remaining_critical_case_matches_pinned_rules_and_exact_weapon(index: int) -> None:
+    weapon_id, ammunition_name, _page, _row = PROFILES[index]
     case = EXPECTED[index]
     source_id = case["when"]["sourceAmmunitionId"]
     source = load_ammunition_reference_map()[source_id]

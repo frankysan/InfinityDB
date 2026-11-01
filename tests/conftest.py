@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import pytest
@@ -77,6 +77,17 @@ def chromium_test_slot(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Non
         return
     with browser_slot(_browser_slot_directory(tmp_path_factory), slots=2):
         yield
+
+
+@pytest.fixture(scope="module")
+def require_source_files() -> Callable[..., None]:
+    """Skip only absent local evidence; present bytes must still pass their audit."""
+    def require(*paths: Path) -> None:
+        missing = [path.name for path in paths if not path.exists()]
+        if missing:
+            pytest.skip(f"Ignored local source files unavailable: {', '.join(missing)}")
+
+    return require
 
 
 @pytest.fixture(scope="module")

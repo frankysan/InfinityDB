@@ -49,7 +49,8 @@ EXPECTED = {
 }
 
 
-def test_pinned_comms_exclusion_oblivion_and_saving_attribute() -> None:
+def test_pinned_comms_exclusion_oblivion_and_saving_attribute(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as source:
         pages = {}
@@ -67,6 +68,9 @@ def test_pinned_comms_exclusion_oblivion_and_saving_attribute() -> None:
     assert all(fragment in pages[95] for fragment in (
         "immunity (state)", "comms", "exception of immunity (state)",
     ))
+
+
+def test_curated_pinned_comms_exclusion_oblivion_and_saving_attribute() -> None:
     records = load_curated_document(
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )["records"]

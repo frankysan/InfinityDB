@@ -65,7 +65,10 @@ EXPECTED = [
 
 
 @pytest.mark.parametrize("index", (0, 1))
-def test_partial_bts_immunity_is_grounded_in_pinned_source_and_weapon(index: int) -> None:
+def test_partial_bts_immunity_is_grounded_in_pinned_source_and_weapon(
+    index: int, require_source_files,
+) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as pdf:
         pages = {n: " ".join(str(pdf[n - 1].get_text("text")).casefold().split())
@@ -87,6 +90,10 @@ def test_partial_bts_immunity_is_grounded_in_pinned_source_and_weapon(index: int
             "due to the normal ammunition, each failed saving roll inflicts one wound" in pages[67]
         )
         assert "half his bts value (bts/2 x 2)" in pages[64]
+
+
+@pytest.mark.parametrize("index", (0, 1))
+def test_curated_partial_bts_immunity_is_grounded_in_pinned_source_and_weapon(index: int) -> None:
     expected = EXPECTED[index]
     assert load_ammunition_reference_map()[expected["sourceAmmunitionId"]]["components"] == (
         expected["components"]

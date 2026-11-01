@@ -46,7 +46,8 @@ EXPECTED = {
 }
 
 
-def test_pinned_n53_t2_critical_is_separate_from_hit_wounds() -> None:
+def test_pinned_n53_t2_critical_is_separate_from_hit_wounds(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as pdf:
         pages = {}
@@ -65,6 +66,9 @@ def test_pinned_n53_t2_critical_is_separate_from_hit_wounds() -> None:
         177: ("ap+t2 cc", "arm/2", "anti-materiel", "cc."),
     }.items():
         assert all(clause in pages[number] for clause in clauses), number
+
+
+def test_curated_pinned_n53_t2_critical_is_separate_from_hit_wounds() -> None:
     document = load_curated_document(
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )

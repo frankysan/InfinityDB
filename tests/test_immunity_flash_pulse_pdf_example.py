@@ -40,7 +40,8 @@ EXPECTED = {
 }
 
 
-def test_flash_pulse_example_is_printed_in_pinned_english_n53() -> None:
+def test_flash_pulse_example_is_printed_in_pinned_english_n53(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as source:
         pages: dict[int, str] = {}
@@ -64,6 +65,9 @@ def test_flash_pulse_example_is_printed_in_pinned_english_n53() -> None:
     assert all(phrase in pages[186] for phrase in (
         "flash pulse", "stun", "bts", "non-lethal", "state: stunned",
     ))
+
+
+def test_curated_flash_pulse_example_is_printed_in_pinned_english_n53() -> None:
     records = {row["id"]: row for row in load_curated_document(
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )["records"]}

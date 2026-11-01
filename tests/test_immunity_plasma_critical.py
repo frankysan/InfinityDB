@@ -45,7 +45,8 @@ EXPECTED = {
 }
 
 
-def test_pinned_critical_sources_support_plasma_attribute_distinction() -> None:
+def test_pinned_critical_sources_support_plasma_attribute_distinction(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as pdf:
         pages: dict[int, str] = {}
@@ -66,6 +67,9 @@ def test_pinned_critical_sources_support_plasma_attribute_distinction() -> None:
         "example 3", "plasma rifle", "immunity (enhanced)",
         "saving roll against arm", "saving roll against bts",
     ))
+
+
+def test_curated_pinned_critical_sources_support_plasma_attribute_distinction() -> None:
     records = {r["id"]: r for r in load_curated_document(
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )["records"]}

@@ -100,14 +100,33 @@ Use `.venv/bin/python` on Linux/macOS. The preflight:
    merges or unsupported Git index modes fail rather than being silently flattened.
    Symlink export on Windows requires the permissions needed to create links.
 3. Runs pytest inside that index export, using the invoking environment's Python
-   and dependencies. Arguments following `--` are forwarded to pytest.
+   and dependencies. Before pytest it generates and checks the ignored deployed-object
+   publication, matching the source CI setup. Arguments following `--` are forwarded to pytest.
 4. Builds one wheel from the same export and checks that every indexed file under
    `src/` is present, including standalone modules and implicit namespace packages,
    except the explicit `src/infinity_db/web/static/logo/` design-source exemption.
    It also checks every source named by `[tool.setuptools.data-files]` in
    `pyproject.toml` is in the index and has a corresponding `.data/data/` wheel member.
 
-For a quick packaging/untracked check without repeating pytest:
+To catch undeclared dependencies and reliance on ignored local evidence before
+committing, use the isolated mode after staging the intended candidate:
+
+```powershell
+.\.venv\Scripts\python.exe tools/ci_preflight.py --isolated -- -n auto
+```
+
+This exports the same index, creates a fresh virtual environment without system-site
+packages, installs only `.[dev,symbols]` from that export, prepares the publication,
+then runs pytest (including tracked full-asset tests) and Pyright using that environment.
+It does not inherit `PYTHONPATH`,
+`PYTHONHOME`, a disposable Git-index override, or `PYTEST_ADDOPTS` that could mask tests.
+Package installation is explicit in this mode and may download dependencies; it
+does not acquire game sources. `--isolated` cannot be combined with `--skip-pytest`.
+It uses the invoking Python version and local OS, so hosted portability checks remain
+necessary. Ordinary preflight reuses installed packages and cannot detect a missing
+declaration when a developer already has that package installed.
+
+For a quick packaging/untracked check without repeating pytest or installing dependencies:
 
 ```powershell
 .\.venv\Scripts\python.exe tools/ci_preflight.py --skip-pytest
@@ -127,6 +146,14 @@ Infinity Army or wiki sources. Run the preflight again after staging intended
 changes; a pass against the index does **not** validate unstaged code. The
 dedicated regression cases are maintained in `tests/test_run_checks.py`;
 see [the hosted CI contract](ci.md).
+
+`.[dev]` includes PyMuPDF for PDF research tools and source-test collection.
+Ignored official PDFs remain optional local evidence: only tests that actually read
+unavailable source files skip. Curated-data, API and synthetic evidence-gate tests
+still run in clean CI. A present PDF must pass its original hash and clause checks;
+changed or malformed bytes are failures, not skips. Reinforcements authority/identity
+mutation tests use synthetic PDFs in CI and never authorize historical N4 procedures
+as current N5 rules.
 
 ## Targeted checks
 

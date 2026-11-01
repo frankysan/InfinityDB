@@ -8,6 +8,9 @@ Local working trees contain Git-ignored and untracked files that CI never sees. 
 3. builds a wheel from that export and checks all tracked src/ files (except
    explicit design-source exemptions) plus configured setuptools shared data-files.
 
+Use --isolated to install only declared CI dependencies in a fresh virtual environment
+and run both pytest and Pyright. This explicit mode may download Python packages.
+
 It does not replace the installed-wheel smoke workflow; see docs/ci.md.
 """
 
@@ -121,6 +124,63 @@ def audit_wheel(export: Path, wheel_dir: Path) -> list[str]:
     return missing
 
 
+def check_export(export: Path, environment: Path | None, pytest_args: list[str]) -> list[str]:
+    """Run clean-source checks, optionally without developer-installed packages."""
+    python = Path(sys.executable)
+    env = os.environ.copy()
+    # Do not let editable imports or a caller's disposable index leak into tests
+    # (which create their own temporary Git repositories).
+    for name in ("PYTHONPATH", "PYTHONHOME", "GIT_INDEX_FILE", "GIT_DIR", "GIT_WORK_TREE"):
+        env.pop(name, None)
+    if environment is not None:
+        for name in ("PYTEST_ADDOPTS", "PIP_TARGET", "PIP_PREFIX", "PIP_USER"):
+            env.pop(name, None)
+        result = subprocess.run(
+            [sys.executable, "-m", "venv", str(environment)], cwd=export, env=env,
+        )
+        if result.returncode:
+            return ["isolated virtual environment creation failed"]
+        scripts = environment / ("Scripts" if os.name == "nt" else "bin")
+        python = scripts / ("python.exe" if os.name == "nt" else "python")
+        env["VIRTUAL_ENV"] = str(environment)
+        env["PATH"] = str(scripts) + os.pathsep + env.get("PATH", "")
+        result = subprocess.run(
+            [str(python), "-m", "pip", "install", "-e", ".[dev,symbols]"],
+            cwd=export, env=env,
+        )
+        if result.returncode:
+            return ["isolated CI dependency installation failed"]
+
+    for arguments in (
+        ["-m", "tools.build_deployed_object_publication"],
+        ["-m", "tools.build_deployed_object_publication", "--check"],
+    ):
+        # The ordinary mode may have an editable install of the working tree.
+        # Publication preparation must import the indexed application instead.
+        result = subprocess.run(
+            [str(python), *arguments], cwd=export,
+            env={**env, "PYTHONPATH": str(export / "src")},
+        )
+        if result.returncode:
+            return ["clean-export deployed-object publication preparation failed"]
+
+    problems = []
+    asset_args = ["-m", "full_assets or not full_assets"] if environment is not None else []
+    result = subprocess.run(
+        [str(python), "-m", "pytest", "-q", *asset_args, *pytest_args], cwd=export, env=env,
+    )
+    if result.returncode:
+        problems.append(f"pytest failed in clean export (exit {result.returncode})")
+    if environment is not None:
+        result = subprocess.run(
+            [str(python), "-m", "pyright", "--pythonpath", str(python)],
+            cwd=export, env=env,
+        )
+        if result.returncode:
+            problems.append(f"Pyright failed in isolated export (exit {result.returncode})")
+    return problems
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=(__doc__ or "CI preflight").splitlines()[0])
     parser.add_argument("--skip-wheel", action="store_true", help="skip the wheel-content audit")
@@ -129,9 +189,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--allow-untracked", action="store_true", help="warn instead of fail")
     parser.add_argument(
+        "--isolated", action="store_true",
+        help="install declared CI dependencies in a fresh venv; run pytest/Pyright; may download",
+    )
+    parser.add_argument(
         "pytest_args", nargs="*", help="arguments passed to pytest (prefix with --)"
     )
     args = parser.parse_args(argv)
+    if args.isolated and args.skip_pytest:
+        parser.error("--isolated requires the clean-export pytest run; omit --skip-pytest")
 
     problems: list[str] = []
     untracked = untracked_files()
@@ -146,17 +212,16 @@ def main(argv: list[str] | None = None) -> int:
     with tempfile.TemporaryDirectory(prefix="infinitydb-preflight-") as tmp:
         export = Path(tmp) / "checkout"
         export.mkdir()
-        print(f"Exported {export_tracked(export)} tracked files to {export}")
+        print("Exporting Git index...", flush=True)
+        print(f"Exported {export_tracked(export)} tracked files to {export}", flush=True)
 
         if not args.skip_wheel:
             problems += audit_wheel(export, Path(tmp) / "wheel")
 
         if not args.skip_pytest:
-            pytest = subprocess.run(
-                [sys.executable, "-m", "pytest", "-q", *args.pytest_args], cwd=export
+            problems += check_export(
+                export, Path(tmp) / "venv" if args.isolated else None, args.pytest_args,
             )
-            if pytest.returncode != 0:
-                problems.append(f"pytest failed in clean export (exit {pytest.returncode})")
 
     if problems:
         print("\nCI preflight FAILED:")

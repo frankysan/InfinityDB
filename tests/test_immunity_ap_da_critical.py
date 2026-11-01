@@ -46,7 +46,8 @@ EXPECTED = {
 }
 
 
-def test_ap_da_cc_critical_is_independently_supported_by_n53() -> None:
+def test_ap_da_cc_critical_is_independently_supported_by_n53(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as pdf:
         sections = {}
@@ -68,6 +69,9 @@ def test_ap_da_cc_critical_is_independently_supported_by_n53() -> None:
     }
     assert all(term in sections[page] for page, terms in checks.items()
                for term in terms)
+
+
+def test_curated_ap_da_cc_critical_is_independently_supported_by_n53() -> None:
     records = load_curated_document(
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )["records"]

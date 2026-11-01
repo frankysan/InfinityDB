@@ -51,7 +51,10 @@ EXPECTED = {
 }
 
 
-def test_t2_critical_extra_roll_and_arm_halving_are_separately_sourced() -> None:
+def test_t2_critical_extra_roll_and_arm_halving_are_separately_sourced(
+    require_source_files,
+) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as pdf:
         pages: dict[int, str] = {}
@@ -69,6 +72,9 @@ def test_t2_critical_extra_roll_and_arm_halving_are_separately_sourced() -> None
         177: ("ap+t2 cc", "arm/2", "anti-materiel", "cc."),
     }
     assert all(phrase in pages[n] for n, terms in phrases.items() for phrase in terms)
+
+
+def test_curated_t2_critical_extra_roll_and_arm_halving_are_separately_sourced() -> None:
     records = {record["id"]: record for record in load_curated_document(
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )["records"]}

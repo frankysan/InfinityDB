@@ -39,8 +39,11 @@ BASE = frozenset({
 })
 
 
-def test_pinned_combination_source_evidence_is_independent_of_army_map() -> None:
+def test_pinned_combination_source_evidence_is_independent_of_army_map(
+    require_source_files,
+) -> None:
     """Page 67 describes three combined examples; two are Army metadata only."""
+    require_source_files(PDF)
     fitz = pytest.importorskip("fitz")
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PDF_SHA256
     with fitz.open(PDF) as document:
@@ -52,6 +55,8 @@ def test_pinned_combination_source_evidence_is_independent_of_army_map() -> None
         assert "combined saving roll" in page
         assert "plasma carbine" in page
 
+
+def test_reviewed_ammunition_map_preserves_base_and_combined_identities() -> None:
     reviewed = load_ammunition_reference_map()
     assert len(reviewed) == len(BASE) + len(COMBINED)
     assert {

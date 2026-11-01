@@ -30,7 +30,10 @@ PINS = {
 }
 
 
-def test_pinned_clauses_separate_timings_and_preserve_bilingual_wording() -> None:
+def test_pinned_clauses_separate_timings_and_preserve_bilingual_wording(
+    require_source_files,
+) -> None:
+    require_source_files(*(ROOT / relative for relative in PINS))
     texts: list[dict[int, str]] = []
     for (relative, pin), pages in zip(PINS.items(), ((14, 95, 175), (14, 99, 182)), strict=True):
         path = ROOT / relative
@@ -64,8 +67,11 @@ def test_pinned_clauses_separate_timings_and_preserve_bilingual_wording() -> Non
     ("esp-faqs-n5-v0-1.pdf",
      "7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a"),
 ])
-def test_supplied_faq_identity_and_selected_term_inventory(name: str, pin: str) -> None:
+def test_supplied_faq_identity_and_selected_term_inventory(
+    name: str, pin: str, require_source_files,
+) -> None:
     path = ROOT / "data/pdf/faq" / name
+    require_source_files(path)
     assert hashlib.sha256(path.read_bytes()).hexdigest() == pin
     with pymupdf.open(path) as pdf:
         text = " ".join(str(page.get_text("text")) for page in pdf).casefold()

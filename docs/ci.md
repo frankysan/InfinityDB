@@ -44,6 +44,12 @@ For the `--all` leg, CI sets up Node.js 24 and explicitly runs
 check runner starts. The `docs` stage uses this local installation without acquiring dependencies
 at execution time; other matrix legs do not require npm.
 
+The development dependencies include PyMuPDF so PDF-aware test modules collect and
+research tools type-check in a clean environment. Official PDFs under `data/pdf/`
+remain ignored local evidence. Only tests requiring absent PDF bytes skip; data/API
+checks and synthetic evidence-gate regressions still run. Present PDFs retain their
+hash/text validation and must fail on changed or malformed evidence.
+
 ### Git-index preflight and wheel-content audit
 
 The primary Ubuntu 3.11 `--all` leg includes the `preflight` stage
@@ -68,6 +74,11 @@ resolution after installation.
 
 Local Git-index preflight, including an optional clean-export pytest run,
 is documented in [development checks](testing.md#ci-preflight-clean-checkout-and-wheel-contents).
+Its explicit `--isolated` mode installs only the indexed development/symbol dependencies
+in a fresh virtual environment, prepares the same publication as source CI, and runs
+pytest plus Pyright. Use it before committing to expose dependencies hidden by a richer
+developer environment and tests that assume ignored inputs are present. The normal
+packaging-only `preflight` stage does not perform this isolation or repeat tests.
 It cannot validate unstaged tracked edits; stage a proposed change or
 review the index before relying on a green preflight. Pip's isolated wheel
 build may obtain its setuptools backend if not already cached; no upstream

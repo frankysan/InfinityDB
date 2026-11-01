@@ -868,13 +868,94 @@ def test_ci_preflight_main_propagates_clean_export_pytest_failure(
     monkeypatch.setattr(ci_preflight, "untracked_files", lambda: [])
     monkeypatch.setattr(ci_preflight, "export_tracked", lambda _path: 2)
     calls = []
-    def fake_run(command, **_kwargs):
-        calls.append(command)
-        return SimpleNamespace(returncode=2)
+    def fake_check(export, environment, pytest_args):
+        calls.append((export, environment, pytest_args))
+        return ["pytest failed in clean export (exit 2)"]
 
-    monkeypatch.setattr(ci_preflight.subprocess, "run", fake_run)
+    monkeypatch.setattr(ci_preflight, "check_export", fake_check)
     assert ci_preflight.main(["--skip-wheel", "--", "-k", "smoke"]) == 1
-    assert calls[0][-2:] == ["-k", "smoke"]
+    assert calls[0][1:] == (None, ["-k", "smoke"])
+
+
+def test_isolated_preflight_rejects_skipping_its_tests() -> None:
+    with pytest.raises(SystemExit) as exc:
+        ci_preflight.main(["--isolated", "--skip-pytest"])
+    assert exc.value.code == 2
+
+
+def test_isolated_preflight_checks_only_declared_environment_and_preserves_failures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("PYTHONPATH", "developer-packages")
+    monkeypatch.setenv("PYTHONHOME", "developer-python")
+    monkeypatch.setenv("GIT_INDEX_FILE", "developer-index")
+    monkeypatch.setenv("PYTEST_ADDOPTS", "--ignore=tests")
+    calls = []
+
+    def run(command, *, cwd, env):
+        assert cwd == tmp_path / "checkout"
+        assert not {"PYTHONHOME", "GIT_INDEX_FILE", "PYTEST_ADDOPTS"} & env.keys()
+        if command[2] == "tools.build_deployed_object_publication":
+            assert env["PYTHONPATH"] == str(tmp_path / "checkout/src")
+        else:
+            assert "PYTHONPATH" not in env
+        calls.append(command)
+        return SimpleNamespace(returncode=1 if command[2] in {"pytest", "pyright"} else 0)
+
+    monkeypatch.setattr(ci_preflight.subprocess, "run", run)
+    assert ci_preflight.check_export(tmp_path / "checkout", tmp_path / "venv", ["-n", "2"]) == [
+        "pytest failed in clean export (exit 1)",
+        "Pyright failed in isolated export (exit 1)",
+    ]
+    assert calls[1][1:] == ["-m", "pip", "install", "-e", ".[dev,symbols]"]
+    assert calls[1][0] != sys.executable
+    assert calls[2][1:] == ["-m", "tools.build_deployed_object_publication"]
+    assert calls[3][-1] == "--check"
+    assert calls[4][1:] == [
+        "-m", "pytest", "-q", "-m", "full_assets or not full_assets", "-n", "2",
+    ]
+    assert calls[5][1:] == ["-m", "pyright", "--pythonpath", calls[1][0]]
+
+
+@pytest.mark.parametrize("failed_step", ["venv", "pip", "tools.build_deployed_object_publication"])
+def test_isolated_preflight_stops_when_environment_or_publication_is_unusable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failed_step: str,
+) -> None:
+    calls = []
+
+    def run(command, **_kwargs):
+        calls.append(command)
+        return SimpleNamespace(returncode=1 if command[2] == failed_step else 0)
+
+    monkeypatch.setattr(ci_preflight.subprocess, "run", run)
+    problems = ci_preflight.check_export(tmp_path / "checkout", tmp_path / "venv", [])
+    assert len(problems) == 1
+    assert all(command[2] not in {"pytest", "pyright"} for command in calls)
+
+
+def test_preflight_prepares_publication_before_using_current_environment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = []
+    monkeypatch.setattr(ci_preflight.subprocess, "run", lambda command, **_kwargs: (
+        calls.append(command) or SimpleNamespace(returncode=0)
+    ))
+    assert ci_preflight.check_export(tmp_path, None, ["--collect-only"]) == []
+    assert [command[2] for command in calls] == [
+        "tools.build_deployed_object_publication", "tools.build_deployed_object_publication",
+        "pytest",
+    ]
+    assert calls[-1][0] == sys.executable
+
+
+def test_local_source_guard_skips_missing_but_not_present_invalid_bytes(
+    tmp_path: Path, require_source_files,
+) -> None:
+    source = tmp_path / "local-source.pdf"
+    with pytest.raises(pytest.skip.Exception, match="Ignored local source files unavailable"):
+        require_source_files(source)
+    source.write_bytes(b"malformed source still requires validation")
+    require_source_files(source)
 
 
 def test_fixture_build_stage_never_replaces_runtime_database(

@@ -41,7 +41,8 @@ EXPECTED = {
 }
 
 
-def test_pinned_n53_emitter_trait_and_immunity_clauses() -> None:
+def test_pinned_n53_emitter_trait_and_immunity_clauses(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as pdf:
         pages = {}
@@ -61,6 +62,9 @@ def test_pinned_n53_emitter_trait_and_immunity_clauses() -> None:
     assert all(token in pages[186] for token in (
         "e/mitter", "non-lethal", "bts/2", "e/m",
     ))
+
+
+def test_curated_pinned_n53_emitter_trait_and_immunity_clauses() -> None:
     curated = load_curated_document(
         ROOT / "data/curated/rules/n5-core-v5.3.json"
     )

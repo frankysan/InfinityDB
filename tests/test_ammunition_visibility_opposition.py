@@ -32,7 +32,10 @@ def expected(slug: str) -> dict[str, Any]:
     }
 
 
-def test_pinned_rules_require_rolled_crossing_lof_and_separate_visor_scope() -> None:
+def test_pinned_rules_require_rolled_crossing_lof_and_separate_visor_scope(
+    require_source_files,
+) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as pdf:
         smoke = " ".join(str(pdf[65].get_text("text")).casefold().split())

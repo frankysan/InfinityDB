@@ -44,7 +44,8 @@ EXPECTED = {
 }
 
 
-def test_grenade_em_immunity_derived_from_exact_pinned_rule_and_chart() -> None:
+def test_grenade_em_immunity_derived_from_exact_pinned_rule_and_chart(require_source_files) -> None:
+    require_source_files(PDF)
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == PIN
     with pymupdf.open(PDF) as document:
         pages: dict[int, str] = {}
@@ -62,6 +63,9 @@ def test_grenade_em_immunity_derived_from_exact_pinned_rule_and_chart() -> None:
               "impact template", "bts/2"),
     }.items():
         assert all(fragment in pages[number] for fragment in fragments), number
+
+
+def test_curated_grenade_em_immunity_derived_from_exact_pinned_rule_and_chart() -> None:
     source = load_curated_document(ROOT / "data/curated/rules/n5-core-v5.3.json")
     records = {record["id"]: record for record in source["records"]}
     assert records["skill:immunity"]["facts"]["immunityInteraction"][
