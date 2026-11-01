@@ -584,6 +584,27 @@ baseline is now **34 unresolved Skill / 10 Equipment IDs**;
 Device Plus extra `344` (`UPGRADE: SR-1`, two occurrences)
 remains open because it lacks a program target.
 
+**Read-only exact source-owner provenance (2026-11-01):**
+`tools.audit_source_variant_inputs` accepts
+`--catalog equipment --source-id 101 --owner-extra-id 344`
+to inspect only direct raw Army relationship owners. The
+`occurrenceOwners` result includes original owner type,
+Unit, army/source file, profile or loadout option, raw
+occurrence ID, source position, and exact extra ID/type/text.
+The pinned Charontid regression in
+`tests/test_audit_source_variant_inputs.py` verifies
+exactly two `option` owners: Combined Army source
+`601`, Unit `498`, option IDs `4`/`9`,
+occurrences `51441`/`51461`. Neither has
+a source-level program target or additional raw payload.
+Invalid catalog/source/extra arguments are rejected
+without opening a database. This test requires the
+ignored pinned raw Army database. These diagnostic
+details are not a published Unit-use index. The
+hypothesis that unqualified `SR-1` applies to every
+Hacking Program on the Device Plus is plausible but
+**not verified**; the two occurrences remain unresolved.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

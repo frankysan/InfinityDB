@@ -962,6 +962,43 @@ without naming an owning program. No effect or target has
 been invented for those two occurrences. The current
 unresolved baseline is **34 Skill / 10 Equipment source IDs**.
 
+**Unqualified Hacking Device Plus SR-1 source-owner investigation
+(2026-11-01):** Source Equipment `101`, exact extra `344`
+(`TEXT: UPGRADE: SR-1`), occurs twice in the pinned
+`601-combined-army.json` Army: THE CHARONTIDS, source Unit
+`498`, group `1`, loadout options `4` and `9`
+(raw occurrence IDs `51441` and `51461`). These are
+**option-owned**, not shared profile or unit-option
+relationships. Both options retain the unqualified
+`UPGRADE: SR-1` source string; the stored occurrence
+`raw` field is null, so it provides no supplementary
+program scope. N5.3 p. 54 describes Upgrade Programs
+but does not define an implicit target for an unnamed
+SR modifier. A plausible working hypothesis is that the
+unqualified `SR-1` applies across **all Hacking
+Programs used through the Device Plus**, rather than
+one named Upgrade Program. However, the Army extra
+does not explicitly state this global scope, and
+N5.3's general rules do not establish it for this
+particular source variant. A narrower intended effect
+remains possible; **neither interpretation is
+source-confirmed**.
+The two occurrences therefore remain unreviewed
+without an `appliesTo`, a fabricated program ID,
+or a modified published rules artifact.
+
+The read-only, exact-owner diagnostic
+`python -m tools.audit_source_variant_inputs --catalog equipment
+--source-id 101 --owner-extra-id 344` reports this
+`occurrenceOwners` evidence alongside the ordinary
+source-signature audit. It reads the ignored pinned raw
+Army database, joins to the source Unit/Army and
+profile/loadout ownership, and never aggregates or
+publishes a cross-Army usage index. Other ambiguity
+reviews can reuse the CLI with explicit source and
+extra IDs. The current unresolved baseline stays
+**34 Skill / 10 Equipment source IDs**.
+
 **Remaining source-parameter inventory (pinned Army source and current
 generated rules database):** `tools/audit_source_variant_inputs.py` produces a
 deterministic, read-only JSON inventory from `infinity.db`,

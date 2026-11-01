@@ -228,6 +228,65 @@ def inventory_source_variants(
     return report
 
 
+def source_extra_owner_context(
+    raw_path: Path, *, catalog: str, source_id: int, extra_id: int
+) -> list[dict[str, Any]]:
+    """Find exact direct source owners; do not infer logical or cross-Army Unit use."""
+    if catalog not in CATEGORIES or source_id <= 0 or extra_id <= 0:
+        raise ValueError("Owner lookup requires a valid source catalog and positive IDs")
+    suffix = "skill" if catalog == "skills" else "equipment"
+    results: list[dict[str, Any]] = []
+    uri = raw_path.resolve().as_uri() + "?mode=ro"
+    with sqlite3.connect(uri, uri=True) as raw:
+        raw.row_factory = sqlite3.Row
+        for owner in OWNERS:
+            parent_table = {
+                "profile": "profiles",
+                "option": "loadout_options",
+                "unit_option": "unit_options",
+            }[owner]
+            parent_keys = (
+                ("unit_id", "option_id") if owner == "unit_option"
+                else ("army_id", "unit_id", "group_id",
+                      "profile_id" if owner == "profile" else "option_id")
+            )
+            join = " AND ".join(f"p.{key} = o.{key}" for key in parent_keys)
+            army_join = (
+                "LEFT JOIN army_lists AS a ON a.id = o.army_id"
+                if owner != "unit_option" else ""
+            )
+            army_columns = (
+                "o.army_id AS army_id, a.name AS army_name, "
+                "a.source_file AS army_source_file, o.group_id AS group_id, "
+                if owner != "unit_option"
+                else "NULL AS army_id, NULL AS army_name, "
+                     "NULL AS army_source_file, NULL AS group_id, "
+            )
+            key = "profile_id" if owner == "profile" else "option_id"
+            query = (
+                f"SELECT o.occurrence_id, o.unit_id, u.name AS unit_name, "
+                f"u.slug AS unit_slug, {army_columns} "
+                f"o.{key} AS parent_id, p.name AS parent_name, "
+                f"o.position AS source_position, o.raw AS source_raw, "
+                f"e.position AS extra_position, x.id AS extra_id, "
+                f"x.type AS extra_type, x.name AS extra_raw "
+                f"FROM {owner}_{catalog} AS o "
+                f"JOIN {owner}_{suffix}_extras AS e "
+                "ON e.occurrence_id = o.occurrence_id "
+                "JOIN extras AS x ON x.id = e.extra_id "
+                "JOIN units AS u ON u.id = o.unit_id "
+                f"JOIN {parent_table} AS p ON {join} "
+                f"{army_join} "
+                "WHERE o.item_id = ? AND e.extra_id = ? "
+                "ORDER BY o.unit_id, o.occurrence_id, e.position"
+            )
+            for row in raw.execute(query, (source_id, extra_id)):
+                results.append({"owner": owner, **dict(row)})
+    return sorted(results, key=lambda r: (
+        r["owner"], r["unit_id"], r["occurrence_id"], r["extra_position"]
+    ))
+
+
 def select_source_variants(
     report: dict[str, Any], catalog: str, source_ids: list[int] | None = None
 ) -> dict[str, Any]:
@@ -261,15 +320,28 @@ def main() -> None:
         "--source-id", type=int, action="append", default=[],
         help="select an exact source ID (repeatable; requires --catalog)",
     )
+    parser.add_argument(
+        "--owner-extra-id", type=int,
+        help="show direct source owners of an exact extra; requires one source ID and catalog",
+    )
     args = parser.parse_args()
     if args.source_id and not args.catalog:
         parser.error("--source-id requires --catalog")
+    if args.owner_extra_id is not None and (
+        not args.catalog or len(args.source_id) != 1 or args.owner_extra_id <= 0
+    ):
+        parser.error("--owner-extra-id requires one --source-id, --catalog and positive ID")
     report = inventory_source_variants(args.application, args.raw, args.rules)
     if args.catalog:
         try:
             report = select_source_variants(report, args.catalog, args.source_id)
         except ValueError as exc:
             parser.error(str(exc))
+    if args.owner_extra_id is not None:
+        report["occurrenceOwners"] = source_extra_owner_context(
+            args.raw, catalog=args.catalog,
+            source_id=args.source_id[0], extra_id=args.owner_extra_id,
+        )
     print(json.dumps(report, indent=2))
 
 

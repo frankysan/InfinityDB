@@ -1888,6 +1888,31 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         SR-1` rows (source extra 344) with no program scope;
         these deliberately remain unreviewed. No Unit-use
         index or Hacking Program runtime calculation is added.
+      - [x] **Data processing:** Trace unqualified Hacking Device Plus
+        `UPGRADE: SR-1` to the exact source owners without assigning
+        unverified program scope. Equipment source `101`, extra `344`
+        occurs on two option-level Charontid Hacker loadouts in
+        Combined Army `601-combined-army.json`, Unit `498`,
+        group `1`, options `4`/`9` and raw occurrence IDs
+        `51441`/`51461`. Both preserve the identical
+        `TEXT: UPGRADE: SR-1` value without a program name;
+        the stored source `raw` field has no supplementary
+        scope. Added a bounded, read-only `--owner-extra-id`
+        option to the pinned source-variant audit with
+        source-owner regressions. This is diagnostic provenance,
+        not a generated Unit-use index.
+      - [ ] **Data processing:** Seek authoritative N5.3 FAQ,
+        erratum, or source clarification for what unqualified
+        Charontid Hacking Device Plus `UPGRADE: SR-1` changes.
+        The leading working hypothesis is that it modifies
+        Saving Rolls against **all Hacking Programs** used
+        through the Device Plus, but that scope is not
+        source-confirmed. Do not infer that it applies
+        to all Comms Attacks, or assign any particular
+        program automatically. Until scope is confirmed,
+        preserve both raw
+        occurrences as unresolved; leave source `101`
+        and the **34 Skill / 10 Equipment** baseline unchanged.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

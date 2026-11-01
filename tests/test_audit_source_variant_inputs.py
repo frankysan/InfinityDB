@@ -13,6 +13,7 @@ from tools.audit_source_variant_inputs import (
     inventory_source_variants,
     reviewed_extra_signature,
     select_source_variants,
+    source_extra_owner_context,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -52,6 +53,66 @@ def _inventory() -> dict:
         ROOT / "data/generated/infinity.raw.db",
         ROOT / "data/generated/rules.db",
     )
+
+
+@pytest.mark.parametrize(
+    ("catalog", "source_id", "extra_id"),
+    [("weapons", 101, 344), ("equipment", 0, 344),
+     ("equipment", 101, 0)],
+)
+def test_extra_owner_lookup_rejects_invalid_scope(
+    tmp_path: Path, catalog: str, source_id: int, extra_id: int,
+) -> None:
+    with pytest.raises(ValueError, match="valid source catalog and positive IDs"):
+        source_extra_owner_context(
+            tmp_path / "absent.db", catalog=catalog,
+            source_id=source_id, extra_id=extra_id,
+        )
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_charontid_unqualified_sr_owners_are_exact_source_loadouts() -> None:
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="equipment", source_id=101, extra_id=344,
+    )
+    assert len(owners) == 2
+    assert source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="equipment", source_id=100, extra_id=344,
+    ) == []
+    assert source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="equipment", source_id=101, extra_id=9999,
+    ) == []
+    assert [(row["owner"], row["occurrence_id"], row["parent_id"])
+            for row in owners] == [
+        ("option", 51441, 4), ("option", 51461, 9),
+    ]
+    for row in owners:
+        assert row["unit_id"] == 498
+        assert row["unit_name"] == "THE CHARONTIDS"
+        assert row["unit_slug"] == "the-charontids"
+        assert row["army_id"] == 601
+        assert row["army_name"] == "Combined Army"
+        assert row["army_source_file"] == "601-combined-army.json"
+        assert row["group_id"] == 1
+        assert row["parent_name"] == "CHARONTID"
+        assert row["source_raw"] is None
+        assert row["extra_id"] == 344
+        assert row["extra_type"] == "TEXT"
+        assert row["extra_raw"] == "UPGRADE: SR-1"
+    [device] = select_source_variants(
+        _inventory(), "equipment", [101],
+    )["items"]
+    assert device["status"] == "unresolved-occurrence-parameter"
+    assert [
+        signature for signature in device["extraSignatures"]
+        if not signature["reviewed"]
+    ] == [{
+        "extras": [[344, "TEXT", "UPGRADE: SR-1"]],
+        "reviewed": False, "count": 2,
+    }]
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
