@@ -17262,7 +17262,119 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 13,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Carbonite",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:carbonite"
+                                }
+                            },
+                            {
+                                "extraId": 14,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Spotlight",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:spotlight"
+                                }
+                            },
+                            {
+                                "extraId": 20,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: White Noise",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:white-noise"
+                                }
+                            },
+                            {
+                                "extraId": 21,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Oblivion",
+                                "effect": {
+                                    "kind": "hacking-program-grant",
+                                    "program": "hacking-program:oblivion"
+                                }
+                            },
+                            {
+                                "extraId": 270,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (AP)",
+                                "effect": {
+                                    "kind": "program-ammunition-upgrade",
+                                    "program": "hacking-program:trinity",
+                                    "ammunition": "ammunition:ap"
+                                }
+                            },
+                            {
+                                "extraId": 286,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (-3)",
+                                "effect": {
+                                    "kind": "program-opponent-roll-mod",
+                                    "program": "hacking-program:trinity",
+                                    "appliesTo": "enemy-face-to-face-roll-against-program",
+                                    "modifier": -3
+                                }
+                            },
+                            {
+                                "extraId": 334,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Firewall (-3)",
+                                "effect": {
+                                    "kind": "firewall-comms-defense",
+                                    "rule": "equipment:firewall",
+                                    "appliesTo": "comms-attack-targeting-device-owner",
+                                    "attackerWipMod": -3,
+                                    "defenderSavingRollMod": 3
+                                }
+                            },
+                            {
+                                "extraId": 335,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADES: Carbonite, Firewall (-3)",
+                                "effect": {
+                                    "kind": "hacking-program-grant-and-firewall",
+                                    "program": "hacking-program:carbonite",
+                                    "grantsProgram": true,
+                                    "rule": "equipment:firewall",
+                                    "appliesTo": "comms-attack-targeting-device-owner",
+                                    "attackerWipMod": -3,
+                                    "defenderSavingRollMod": 3
+                                }
+                            },
+                            {
+                                "extraId": 339,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (SR-1)",
+                                "effect": {
+                                    "kind": "program-saving-roll-mod",
+                                    "program": "hacking-program:trinity",
+                                    "appliesTo": "target-saving-roll-against-program",
+                                    "modifier": -1
+                                }
+                            },
+                            {
+                                "extraId": 343,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (PS=5)",
+                                "effect": {
+                                    "kind": "program-ps-replacement",
+                                    "program": "hacking-program:trinity",
+                                    "value": 5
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

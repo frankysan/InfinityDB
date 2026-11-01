@@ -1177,6 +1177,64 @@ checked against both tracked and fresh rules exports.
 The remaining unresolved source baseline is
 **34 Skill / 2 Equipment**; no Unit-use index is published.
 
+**Reviewed Killer Hacking Device source-145 Upgrades (2026-11-01):**
+The pinned Army has **229 direct Killer Hacking Device**
+Equipment occurrences; exactly **45** carry one of ten
+distinct, single-source-`TEXT` extra signatures. N5.3
+p. 58 lists **Trinity** and **Cybermask** as baseline KHD
+programs. The Spanish N5.3 p. 54 Upgrade explanation
+allows a program outside the baseline device matrix to
+be granted explicitly. The unmodified extras for
+Carbonite (10 occurrences), Spotlight (6), White Noise
+(1, containing a source-native nonbreaking space) and
+Oblivion (2) are therefore reviewed
+`hacking-program-grant` effects. They add access without
+replacing Trinity or Cybermask.
+
+Other exact KHD source signatures modify existing
+Trinity or protect the device owner:
+
+- `Trinity (AP)` (2): `program-ammunition-upgrade`
+  referencing `ammunition:ap`; do not treat AP as a
+  program grant or a saving-roll count modifier.
+- `Trinity (-3)` (4): `program-opponent-roll-mod`
+  targeting the opponent's Face to Face Roll, never
+  the user's attack WIP or a target Saving Roll
+  (N5.3 p. 75).
+- `Firewall (-3)` (14): `firewall-comms-defense`,
+  inflicting attacker WIP -3 and granting the
+  beneficiary +3 on Comms Attack Saving Rolls
+  (N5.3 p. 55); this is not a Hacking Program.
+- `Trinity (SR-1)` (1): `program-saving-roll-mod`
+  penalizing the target's Saving Roll against Trinity.
+- `Trinity (PS=5)` (1): `program-ps-replacement`
+  with value 5, not a PS modifier or extra program.
+
+The remaining source value (4 occurrences), exactly
+`UPGRADES: Carbonite, Firewall (-3)` (Army extra `335`),
+is one *raw* source extra on Leila Sharif's common
+profile, reused across four Armies. Its exact
+`hacking-program-grant-and-firewall` effect stores both
+Carbonite access and Firewall (-3/+3) defense without
+inventing two Army extras. The existing reviewed
+individual Firewall entry is separately retained.
+All ten extra IDs, source values, ordering and counts
+are validated against pinned raw Army data; the
+tracked and freshly exported rules DB must agree.
+
+The guarded v9 refresh promotes only the existing KHD
+family record's reviewed occurrence parameter, requires
+the previous family-only variant and exact input signatures,
+rejects schema/unrelated-row changes, and synchronizes
+`rules.db` with its deployed-object publication while
+retaining a recovery copy under ignored `local/`.
+This does **not** introduce a runtime program resolver,
+source-variant usage index or inferred loadout relations.
+The remaining unresolved baseline is **34 Skill / 1
+Equipment** (the latter includes the separately registered
+unqualified Hacking Device Plus SR-1 in
+[official source clarifications](official-source-clarifications.md#src-001--charontid-hacking-device-plus-unqualified-sr-1)).
+
 **Reviewed EVO Trinity Upgrade (2026-11-01):**
 The pinned Equipment source `182` has 40
 direct occurrences, exactly two carrying

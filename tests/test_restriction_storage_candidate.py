@@ -1512,6 +1512,138 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "missing-grant", "ap", "opponent-scope", "firewall",
+               "compound", "other-record", "schema", "missing"),
+)
+def test_khd_v9_refresh_only_changes_exact_reviewed_extras(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from infinity_db.curated import KILLER_HACKING_VARIANT
+    from tools.restrictions_v9_release import (
+        KILLER_HACKING_DEVICE,
+        _check_variant_semantics_delta,
+    )
+
+    previous, proposed = tmp_path / "previous.db", tmp_path / "proposed.db"
+    variant = copy.deepcopy(KILLER_HACKING_VARIANT)
+    entries = variant["occurrenceParameters"][0]["extraValues"]
+    if defect == "missing-grant":
+        entries.pop(0)
+    elif defect == "ap":
+        entries[4]["effect"]["ammunition"] = "ammunition:normal"
+    elif defect == "opponent-scope":
+        entries[5]["effect"]["appliesTo"] = "all-enemy-rolls"
+    elif defect == "firewall":
+        entries[6]["effect"]["defenderSavingRollMod"] = 0
+    elif defect == "compound":
+        entries[7]["effect"]["grantsProgram"] = False
+    with sqlite3.connect(previous) as old, sqlite3.connect(proposed) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*KILLER_HACKING_DEVICE, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "equipment:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), KILLER_HACKING_DEVICE[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='equipment:killer-hacking-device'")
+    changed: dict[tuple[str, str], str] = {
+        KILLER_HACKING_DEVICE: json.dumps(variant),
+    }
+    if defect is None:
+        _check_variant_semantics_delta(previous, proposed, changed, killer_hacking=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                previous, proposed, changed, killer_hacking=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(previous, proposed, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "extra-id", "extra-type",
+               "raw", "status", "previous", "compound"),
+)
+def test_khd_v9_refresh_requires_exact_pinned_signatures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 145, "name": "Killer Hacking Device", "applicationId": 145,
+        "occurrences": 229, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": count}
+            for extra_id, raw, count in (
+                (13, "UPGRADE: Carbonite", 10),
+                (14, "UPGRADE: Spotlight", 6),
+                (20, "UPGRADE:\u00a0White Noise", 1),
+                (21, "UPGRADE: Oblivion", 2),
+                (270, "UPGRADE: Trinity (AP)", 2),
+                (286, "UPGRADE: Trinity (-3)", 4),
+                (334, "UPGRADE: Firewall (-3)", 14),
+                (335, "UPGRADES: Carbonite, Firewall (-3)", 4),
+                (339, "UPGRADE: Trinity (SR-1)", 1),
+                (343, "UPGRADE: Trinity (PS=5)", 1),
+            )
+        ],
+    }
+    if defect == "name":
+        source["name"] = "other"
+    elif defect == "app-id":
+        source["applicationId"] = 144
+    elif defect == "count":
+        source["occurrences"] = 228
+    elif defect == "extra-id":
+        source["extraSignatures"][7]["extras"][0][0] = 99
+    elif defect == "extra-type":
+        source["extraSignatures"][0]["extras"][0][1] = "DISTANCE"
+    elif defect == "raw":
+        source["extraSignatures"][2]["extras"][0][2] = "UPGRADE: White Noise"
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "compound":
+        source["extraSignatures"][7]["extras"].append([334, "TEXT", "Firewall"])
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_killer_hacking_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"equipment:killer-hacking-device"},
+            "killer_hacking": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="Killer Hacking source signature drift"):
+            release.refresh_killer_hacking_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
     "defect", (None, "burst-scope", "burst-value", "reroll-scope",
                "reroll-kind", "raw", "other-record", "schema", "missing"),
 )

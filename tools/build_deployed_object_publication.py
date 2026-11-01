@@ -109,6 +109,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote source-verified MediKit ranged +1B in a matched v9 pair",
     )
     migration.add_argument(
+        "--refresh-khd-v9", action="store_true",
+        help="Promote exact KHD source variants in a matched v9 pair",
+    )
+    migration.add_argument(
         "--refresh-deactivator-v9", action="store_true",
         help="Promote exact Deactivator Burst and ReRoll source extras in a matched v9 pair",
     )
@@ -170,6 +174,7 @@ def main() -> int:
         or args.refresh_medikit_v9
         or args.refresh_gizmokit_v9
         or args.refresh_deactivator_v9
+        or args.refresh_khd_v9
         or args.refresh_evo_trinity_v9
         or args.refresh_ecm_source_variants_v9
         or args.refresh_tinbot_other_v9
@@ -197,6 +202,7 @@ def main() -> int:
             refresh_hacking_saving_rolls_v9_release,
             refresh_hacking_trinity_access_v9_release,
             refresh_isolated_context_v9_release,
+            refresh_killer_hacking_v9_release,
             refresh_medikit_v9_release,
             refresh_movement_distance_v9_release,
             refresh_pdf_source_pins_v9_release,
@@ -219,6 +225,11 @@ def main() -> int:
         if args.refresh_medikit_v9:
             backup = refresh_medikit_v9_release()
             print("Refreshed exact ranged MediKit Burst upgrade in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_khd_v9:
+            backup = refresh_killer_hacking_v9_release()
+            print("Refreshed exact KHD upgrades in matched v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_deactivator_v9:

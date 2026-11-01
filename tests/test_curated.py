@@ -1359,6 +1359,81 @@ def test_evo_trinity_requires_both_program_grant_and_sr_modifier(
 
 
 @pytest.mark.parametrize(
+    ("index", "field", "wrong"), [
+        (0, "extraId", 99),
+        (0, "extraId", 13.0),
+        (0, "rawValue", "UPGRADE: Spotlight"),
+        (2, "rawValue", "UPGRADE: White Noise"),
+        (4, "effect", {
+            "kind": "program-ammunition-upgrade",
+            "program": "hacking-program:trinity",
+            "ammunition": "ammunition:normal",
+        }),
+        (5, "effect", {
+            "kind": "program-opponent-roll-mod",
+            "program": "hacking-program:trinity",
+            "appliesTo": "all-enemy-rolls", "modifier": -3,
+        }),
+        (6, "effect", {
+            "kind": "firewall-comms-defense",
+            "rule": "equipment:firewall",
+            "appliesTo": "comms-attack-targeting-device-owner",
+            "attackerWipMod": -3, "defenderSavingRollMod": 0,
+        }),
+        (7, "effect", {
+            "kind": "hacking-program-grant-and-firewall",
+            "program": "hacking-program:carbonite",
+            "grantsProgram": False,
+            "rule": "equipment:firewall",
+            "appliesTo": "comms-attack-targeting-device-owner",
+            "attackerWipMod": -3, "defenderSavingRollMod": 3,
+        }),
+        (7, "effect", {
+            "kind": "hacking-program-grant-and-firewall",
+            "program": "hacking-program:carbonite",
+            "grantsProgram": 1,
+            "rule": "equipment:firewall",
+            "appliesTo": "comms-attack-targeting-device-owner",
+            "attackerWipMod": -3, "defenderSavingRollMod": 3,
+        }),
+        (8, "effect", {
+            "kind": "program-saving-roll-mod",
+            "program": "hacking-program:trinity",
+            "appliesTo": "target-saving-roll-against-program", "modifier": -2,
+        }),
+        (9, "effect", {
+            "kind": "program-ps-replacement",
+            "program": "hacking-program:trinity", "value": 4,
+        }),
+    ],
+)
+def test_khd_requires_exact_pinned_upgrade_semantics(
+    tmp_path: Path, index: int, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"]
+                   if row["id"] == "equipment:killer-hacking-device")
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": "equipment:killer-hacking-device", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": "killer-hacking-device"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "khd.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    entries = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"]
+    entries[index][field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Killer Hacking Device reviewed extras"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("field", "wrong"), [
         ("extraId", 9),
         ("extraId", 8.0),

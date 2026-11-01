@@ -101,6 +101,94 @@ def reviewed_hacking_combinations(device: str) -> list[dict[str, Any]]:
     ]
 
 
+# The exact KHD source-145 signatures, including one multi-upgrade *raw* value.
+# The compound source extra is one occurrence parameter, never two Army extras.
+KILLER_HACKING_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "hacking-program-grant",
+                    "program": f"hacking-program:{program}",
+                },
+            }
+            for extra_id, raw, program in (
+                (13, "UPGRADE: Carbonite", "carbonite"),
+                (14, "UPGRADE: Spotlight", "spotlight"),
+                (20, "UPGRADE:\u00a0White Noise", "white-noise"),
+                (21, "UPGRADE: Oblivion", "oblivion"),
+            )
+        ] + [
+            {
+                "extraId": 270, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Trinity (AP)",
+                "effect": {
+                    "kind": "program-ammunition-upgrade",
+                    "program": "hacking-program:trinity",
+                    "ammunition": "ammunition:ap",
+                },
+            },
+            {
+                "extraId": 286, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Trinity (-3)",
+                "effect": {
+                    "kind": "program-opponent-roll-mod",
+                    "program": "hacking-program:trinity",
+                    "appliesTo": "enemy-face-to-face-roll-against-program",
+                    "modifier": -3,
+                },
+            },
+            {
+                "extraId": 334, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Firewall (-3)",
+                "effect": {
+                    "kind": "firewall-comms-defense",
+                    "rule": "equipment:firewall",
+                    "appliesTo": "comms-attack-targeting-device-owner",
+                    "attackerWipMod": -3,
+                    "defenderSavingRollMod": 3,
+                },
+            },
+            {
+                "extraId": 335, "extraType": "TEXT",
+                "rawValue": "UPGRADES: Carbonite, Firewall (-3)",
+                "effect": {
+                    "kind": "hacking-program-grant-and-firewall",
+                    "program": "hacking-program:carbonite",
+                    "grantsProgram": True,
+                    "rule": "equipment:firewall",
+                    "appliesTo": "comms-attack-targeting-device-owner",
+                    "attackerWipMod": -3,
+                    "defenderSavingRollMod": 3,
+                },
+            },
+            {
+                "extraId": 339, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Trinity (SR-1)",
+                "effect": {
+                    "kind": "program-saving-roll-mod",
+                    "program": "hacking-program:trinity",
+                    "appliesTo": "target-saving-roll-against-program",
+                    "modifier": -1,
+                },
+            },
+            {
+                "extraId": 343, "extraType": "TEXT",
+                "rawValue": "UPGRADE: Trinity (PS=5)",
+                "effect": {
+                    "kind": "program-ps-replacement",
+                    "program": "hacking-program:trinity",
+                    "value": 5,
+                },
+            },
+        ],
+    }],
+}
+
+
 def _validate_reviewed_extra_parameter(
     parameter: dict[str, Any],
     context: str,
@@ -225,6 +313,27 @@ def _validate_reviewed_extra_parameter(
             )
         ):
             raise ValueError(f"{context}: invalid {device} reviewed hacking extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "killer-hacking-device"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = KILLER_HACKING_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != len(expected)
+            or any(
+                not isinstance(entry, dict) or type(entry.get("extraId")) is not int
+                for entry in values
+            )
+            or values != expected
+            or any(
+                type(entry["effect"]["grantsProgram"]) is not bool
+                for entry in values if "grantsProgram" in entry["effect"]
+            )
+        ):
+            raise ValueError(f"{context}: invalid Killer Hacking Device reviewed extras")
         return
     if inheritance == "family" and army_links == [
         {"entity": "equipment", "id": "evo-hacking-device"}

@@ -1690,11 +1690,12 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and **2 Equipment** source IDs. The tracked
+      occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
       standalone ECM Guided/Hacker, Albedo, Bangbomb, MediKit/GizmoKit ranged Burst,
-      Deactivator Burst/ReRoll, EVO Trinity grant/SR modifier, and complete source-100
+      Deactivator Burst/ReRoll, Killer Hacking Device source-145 upgrades,
+      EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
@@ -2106,6 +2107,21 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         source/tracked/fresh rules data. No Unit-use index or
         roll resolver is published. Current baseline:
         **34 Skill / 2 Equipment**.
+      - [x] **Data processing:** Reconcile all ten pinned Killer
+        Hacking Device source-145 extra signatures (45 upgraded
+        occurrences among 229 direct source rows). N5.3 pp. 54–55,
+        58, 64 and 75 distinguish four nonbaseline Hacking Program
+        grants, baseline Trinity AP/-3/SR-1/PS=5 overrides, Firewall
+        defense, and Leila Sharif's single raw
+        `UPGRADES: Carbonite, Firewall (-3)` value. Preserve the
+        full compound source spelling and provenance as *one* extra,
+        with the Carbonite grant and Firewall effects explicitly
+        coupled; do not split into fictitious Army source extras.
+        The closed reviewed-extra contract, exact source counts,
+        guarded matched-v9 metadata refresh, tracked/fresh export
+        regression and rollback checks certify these signatures.
+        No cross-Army Unit-use index or Hacking roll resolver is
+        published. Current baseline: **34 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

@@ -1635,6 +1635,7 @@ def test_tinbot_firewall_source_mods_are_equipment_only(
         169, 239, 241, 244, 247,
         "albedo", "bangbomb", "evo-hacking-device", "hacking-device",
         "hacking-device-plus", "medikit", "gizmokit", "deactivator",
+        "killer-hacking-device",
     }
     assert 169 not in rules.skill_reviewed_extra_semantics()
     assert 169 not in rules.skill_numeric_mod_semantics()
@@ -1880,6 +1881,68 @@ def test_bangbomb_reviewed_extra_excludes_template_weapons(
     assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 120
                for c in record["citations"])
     assert "bangbomb" not in rules.skill_reviewed_extra_semantics()
+
+
+def test_killer_hacking_device_exact_program_and_defense_upgrades(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    extras = rules.equipment_reviewed_extra_semantics()["killer-hacking-device"]
+    assert extras["source"] == "army-extra"
+    assert extras["kind"] == "reviewed-extra"
+    values = extras["extra_values"]
+    assert [entry["extra_id"] for entry in values] == [
+        13, 14, 20, 21, 270, 286, 334, 335, 339, 343,
+    ]
+    grants = {
+        row["extra_id"]: row["effect"]["program"]
+        for row in values if row["effect"]["kind"] == "hacking-program-grant"
+    }
+    assert grants == {
+        13: "hacking-program:carbonite",
+        14: "hacking-program:spotlight",
+        20: "hacking-program:white-noise",
+        21: "hacking-program:oblivion",
+    }
+    effects = {row["extra_id"]: row["effect"] for row in values}
+    assert effects[270] == {
+        "kind": "program-ammunition-upgrade",
+        "program": "hacking-program:trinity", "ammunition": "ammunition:ap",
+    }
+    assert effects[286] == {
+        "kind": "program-opponent-roll-mod",
+        "program": "hacking-program:trinity",
+        "applies_to": "enemy-face-to-face-roll-against-program", "modifier": -3,
+    }
+    firewall = {
+        "rule": "equipment:firewall",
+        "applies_to": "comms-attack-targeting-device-owner",
+        "attackerWipMod": -3, "defenderSavingRollMod": 3,
+    }
+    assert effects[334] == {"kind": "firewall-comms-defense", **firewall}
+    assert effects[335] == {
+        "kind": "hacking-program-grant-and-firewall",
+        "program": "hacking-program:carbonite",
+        "grantsProgram": True, **firewall,
+    }
+    assert effects[339] == {
+        "kind": "program-saving-roll-mod",
+        "program": "hacking-program:trinity",
+        "applies_to": "target-saving-roll-against-program", "modifier": -1,
+    }
+    assert effects[343] == {
+        "kind": "program-ps-replacement",
+        "program": "hacking-program:trinity", "value": 5,
+    }
+    assert not any(
+        effect.get("grantsProgram") for id_, effect in effects.items()
+        if id_ != 335
+    )
+    record = rules.composed_record("equipment:killer-hacking-device")
+    assert record is not None
+    assert extras in record["variant_semantics"]["occurrence_parameters"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 58
+               for c in record["citations"])
 
 
 def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(

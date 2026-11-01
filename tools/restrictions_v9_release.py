@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import (
+    KILLER_HACKING_VARIANT,
     discover_curated_documents,
     load_curated_directory,
     reviewed_hacking_combinations,
@@ -97,6 +98,7 @@ GIZMOKIT_VARIANT = {
         }],
     }],
 }
+KILLER_HACKING_DEVICE = ("n5-core-v5.3", "equipment:killer-hacking-device")
 DEACTIVATOR = ("n5-core-v5.3", "equipment:deactivator")
 DEACTIVATOR_VARIANT = {
     "inheritance": "family",
@@ -964,9 +966,17 @@ def _check_variant_semantics_delta(
     hacking_combinations: bool = False, bangbomb: bool = False,
     medikit: bool = False, gizmokit: bool = False, deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
+    killer_hacking: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if killer_hacking and (
+        initial or medikit or gizmokit or deactivator or bangbomb or evo_trinity
+        or tinbot_firewall or tinbot_other or hacking_mods or hacking_srs
+        or hacking_firewall or hacking_combinations or hacking_trinity_access
+        or set(variants) != {KILLER_HACKING_DEVICE}
+    ):
+        raise ValueError("Killer Hacking refresh requires exactly its Equipment record")
     if evo_trinity and (
         initial or medikit or gizmokit or bangbomb or deactivator
         or tinbot_firewall or tinbot_other
@@ -1066,6 +1076,15 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == KILLER_HACKING_DEVICE:
+                        if not killer_hacking:
+                            raise ValueError("Killer Hacking requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != KILLER_HACKING_VARIANT
+                        ):
+                            raise ValueError("Killer Hacking refresh changed source-only semantics")
                     elif key == EVO_HACKING_DEVICE:
                         if not evo_trinity:
                             raise ValueError("EVO Trinity requires source-verified refresh")
@@ -1425,6 +1444,50 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_killer_hacking_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only the ten exact standalone KHD Army source signatures."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["equipment"]["items"]
+        if row["id"] == 145
+    ]
+    signatures = (
+        (13, "UPGRADE: Carbonite", 10),
+        (14, "UPGRADE: Spotlight", 6),
+        (20, "UPGRADE:\u00a0White Noise", 1),
+        (21, "UPGRADE: Oblivion", 2),
+        (270, "UPGRADE: Trinity (AP)", 2),
+        (286, "UPGRADE: Trinity (-3)", 4),
+        (334, "UPGRADE: Firewall (-3)", 14),
+        (335, "UPGRADES: Carbonite, Firewall (-3)", 4),
+        (339, "UPGRADE: Trinity (SR-1)", 1),
+        (343, "UPGRADE: Trinity (PS=5)", 1),
+    )
+    if (
+        len(rows) != 1
+        or rows[0]["name"] != "Killer Hacking Device"
+        or rows[0]["applicationId"] != 145
+        or rows[0]["occurrences"] != 229
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"]
+        or rows[0]["extraSignatures"] != [
+            {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": count}
+            for extra_id, raw, count in signatures
+        ]
+    ):
+        raise ValueError("Killer Hacking source signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={KILLER_HACKING_DEVICE[1]}, killer_hacking=True,
     )
 
 
@@ -1913,6 +1976,7 @@ def _refresh_metadata_v9_release(
     ecm_sources: bool = False, medikit: bool = False, gizmokit: bool = False,
     deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
+    killer_hacking: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2008,6 +2072,7 @@ def _refresh_metadata_v9_release(
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,
+                killer_hacking=killer_hacking,
             )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)
