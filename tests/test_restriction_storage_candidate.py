@@ -1512,6 +1512,131 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "wrong-name", "ammunition-component", "wrong-immunity",
+               "wrong-extra", "float-id", "other-record", "schema", "missing"),
+)
+def test_vulnerability_viral_v9_delta_is_weapon_name_scoped(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        VULNERABILITY,
+        VULNERABILITY_VIRAL_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    before, after = tmp_path / "before.db", tmp_path / "after.db"
+    variant = copy.deepcopy(VULNERABILITY_VIRAL_VARIANT)
+    entry = variant["occurrenceParameters"][0]["extraValues"][0]
+    effect = entry["effect"]
+    if defect == "wrong-name":
+        effect["weaponNameContains"] = "Shock"
+    elif defect == "ammunition-component":
+        effect["appliesTo"] = "attack-with-ammunition-component-viral"
+    elif defect == "wrong-immunity":
+        effect["immunity"] = "skill:immunity-enhanced"
+    elif defect == "wrong-extra":
+        entry["extraId"] = 40
+    elif defect == "float-id":
+        entry["extraId"] = 39.0
+    with sqlite3.connect(before) as old, sqlite3.connect(after) as new:
+        old.execute(
+            "CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)"
+        )
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*VULNERABILITY, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "skill:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), VULNERABILITY[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:vulnerability'")
+    changed: dict[tuple[str, str], str] = {VULNERABILITY: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(
+            before, after, changed, vulnerability=True,
+        )
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                before, after, changed, vulnerability=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(before, after, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "extra-id", "raw",
+               "count-per-extra", "status", "previous", "compound"),
+)
+def test_vulnerability_viral_v9_source_gate_is_exact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 220, "name": "Vulnerability", "applicationId": 220,
+        "occurrences": 2, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None,
+        "reviewedNumericMod": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [{
+            "extras": [[39, "TEXT", "Viral"]],
+            "reviewed": False, "count": 2,
+        }],
+    }
+    if defect == "name":
+        source["name"] = "Viral Vulnerability"
+    elif defect == "app-id":
+        source["applicationId"] = 221
+    elif defect == "count":
+        source["occurrences"] = 3
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 40
+    elif defect == "raw":
+        source["extraSignatures"][0]["extras"][0][2] = "VIRAL"
+    elif defect == "count-per-extra":
+        source["extraSignatures"][0]["count"] = 3
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "compound":
+        source["extraSignatures"][0]["extras"].append([1, "TEXT", "+3"])
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_vulnerability_viral_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"skill:vulnerability"},
+            "vulnerability": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="Vulnerability source-220 signature drift"):
+            release.refresh_vulnerability_viral_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
     "defect", (None, "wrong-count", "wrong-scope", "wrong-extra-id",
                "float-count", "reordered", "other-record", "schema", "missing"),
 )

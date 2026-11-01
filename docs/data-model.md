@@ -1143,6 +1143,38 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**Vulnerability (Viral) source semantics (2026-11-01):**
+Pinned Army Skill source `220` contains exactly two
+profile-level `39/TEXT:Viral` extras, both for
+CHAKSA LONGARMS (Tohaa and White Company).
+N5.3 p. 118 and the pinned Vulnerability Wiki
+revision `3156` state that the listed vulnerability
+prevents use of the user's Immunity against the
+specified Attack, weapon or Ammunition. The
+**printed Viral example** specifically applies
+to weapons with `Viral` in their **name**,
+not weapons selected by a Viral Ammunition
+component. Current Viral-named weapons may
+themselves use Normal Ammunition.
+
+The exact reviewed Skill `occurrenceParameters`
+uses `immunity-use-restriction` with
+`immunity: skill:immunity`,
+`appliesTo: attack-with-weapon-name-containing-viral`
+and `weaponNameContains: Viral`. This remains
+source metadata; there is no substring-based
+weapon-name matcher, target roll resolver,
+Ammunition conversion, or new generalized
+Vulnerability interaction engine. The existing
+`skill:immunity.facts.immunityInteraction.reviewedVulnerabilityCases`
+Enhanced/Viral case remains unchanged. Curated
+validation and the guarded matched-v9 migration
+require the exact source extra, rule scope,
+pre-existing family-only variant and unchanged
+unrelated records/schema. Pinned source tests
+compare the tracked and fresh rules exports.
+Unresolved baseline: **25 Skill / 1 Equipment**.
+
 **Decoy replica-marker counts (2026-11-01):**
 The N5.3 Decoy State rules explicitly define
 `Decoy (1)` and `Decoy (2)` as permitting up to

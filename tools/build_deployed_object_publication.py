@@ -113,6 +113,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote Skill-273 target PH replacements on canonical MediKit Equipment",
     )
     migration.add_argument(
+        "--refresh-vulnerability-viral-v9", action="store_true",
+        help="Promote source-220 Viral weapon-name Immunity restriction",
+    )
+    migration.add_argument(
         "--refresh-decoy-v9", action="store_true",
         help="Promote exact Decoy source-215 additional replica counts",
     )
@@ -215,6 +219,7 @@ def main() -> int:
         or args.refresh_tagcom_v9
         or args.refresh_ft_master_v9
         or args.refresh_decoy_v9
+        or args.refresh_vulnerability_viral_v9
         or args.refresh_evo_trinity_v9
         or args.refresh_ecm_source_variants_v9
         or args.refresh_tinbot_other_v9
@@ -257,6 +262,7 @@ def main() -> int:
             refresh_tinbot_firewall_v9_release,
             refresh_tinbot_other_v9_release,
             refresh_variant_semantics_v9_release,
+            refresh_vulnerability_viral_v9_release,
             stage_restrictions_v9,
         )
 
@@ -278,6 +284,11 @@ def main() -> int:
         if args.refresh_medikit_v9:
             backup = refresh_medikit_v9_release()
             print("Refreshed exact ranged MediKit Burst upgrade in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_vulnerability_viral_v9:
+            backup = refresh_vulnerability_viral_v9_release()
+            print("Refreshed exact Viral Vulnerability source-220 variant in v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_decoy_v9:

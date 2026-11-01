@@ -22928,7 +22928,26 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 39,
+                                "extraType": "TEXT",
+                                "rawValue": "Viral",
+                                "effect": {
+                                    "kind": "immunity-use-restriction",
+                                    "immunity": "skill:immunity",
+                                    "appliesTo": "attack-with-weapon-name-containing-viral",
+                                    "weaponNameContains": "Viral"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

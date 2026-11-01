@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **26 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **25 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1701,6 +1701,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       TAGCom source-270 recipient-side Dodge/GizmoKit PH modifiers,
       FT Master source-261 named Unit dependency,
       Decoy source-215 exact additional replica Marker counts,
+      Vulnerability source-220 weapon-name-scoped Viral Immunity restriction,
       RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
@@ -2259,7 +2260,22 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         Fireteam restrictions. Exact raw source
         signatures, negative tests and guarded paired
         publication preserve all unrelated metadata.
-        Current baseline: **26 Skill / 1 Equipment**.
+        Baseline at that point: **26 Skill / 1 Equipment**.
+      - [x] **Data processing:** Reconcile the two exact
+        `39/TEXT:Viral` Vulnerability source-220
+        occurrences, both CHAKSA LONGARMS profiles
+        (Tohaa and White Company). N5.3 p. 118
+        explicitly prevents applying Immunity
+        against weapons with Viral in their **name**;
+        this is not a generic Viral ammunition
+        component match. Store the canonical Skill's
+        exact typed Immunity restriction and retain
+        the existing printed Enhanced/Viral example.
+        Fail closed on source drift, altered match
+        scope or unrelated v9 database changes.
+        No weapon-name parsing or attack engine
+        is published. Current baseline:
+        **25 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

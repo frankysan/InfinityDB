@@ -259,6 +259,25 @@ KILLER_HACKING_VARIANT: dict[str, Any] = {
 }
 
 
+# The pinned Viral Vulnerability example matches *weapon names*, not
+# Ammunition identities/components. This metadata is not a runtime matcher.
+VULNERABILITY_VIRAL_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [{
+            "extraId": 39, "extraType": "TEXT", "rawValue": "Viral",
+            "effect": {
+                "kind": "immunity-use-restriction",
+                "immunity": "skill:immunity",
+                "appliesTo": "attack-with-weapon-name-containing-viral",
+                "weaponNameContains": "Viral",
+            },
+        }],
+    }],
+}
+
+
 # Decoy (1)/(2) counts additional replica Markers on deployment, not
 # the total number of representations or an Attribute modifier.
 DECOY_VARIANT: dict[str, Any] = {
@@ -793,6 +812,26 @@ def _validate_reviewed_extra_parameter(
             or values != expected
         ):
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "vulnerability"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = VULNERABILITY_VIRAL_VARIANT[
+            "occurrenceParameters"
+        ][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                for entry in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid exact Viral Vulnerability extra")
         return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "decoy"}

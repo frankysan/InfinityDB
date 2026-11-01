@@ -1523,6 +1523,7 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     mappings = current_rules_database.skill_reviewed_extra_semantics()
     assert set(mappings) == {
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
+        "vulnerability",
     }
     param = mappings["dodge"]
     assert param["kind"] == "reviewed-extra"
@@ -1580,6 +1581,45 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
         {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
     ]
+
+
+def test_vulnerability_viral_uses_weapon_name_not_ammunition_component(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    params = rules.skill_reviewed_extra_semantics()["vulnerability"]
+    assert params["kind"] == "reviewed-extra"
+    assert params["source"] == "army-extra"
+    assert params["extra_values"] == [{
+        "extra_id": 39, "extra_type": "TEXT", "raw_value": "Viral",
+        "effect": {
+            "kind": "immunity-use-restriction",
+            "immunity": "skill:immunity",
+            "applies_to": "attack-with-weapon-name-containing-viral",
+            "weaponNameContains": "Viral",
+        },
+    }]
+    record = rules.composed_record("skill:vulnerability")
+    assert record is not None
+    assert record["variant_semantics"]["occurrence_parameters"][0][
+        "extra_values"
+    ] == params["extra_values"]
+    assert any(
+        c["source_id"] == "wiki-vulnerability-oldid-3156"
+        for c in record["citations"]
+    )
+    immunity = rules.composed_record("skill:immunity")
+    assert immunity is not None
+    cases = immunity["facts"]["immunityInteraction"]["reviewedVulnerabilityCases"]
+    assert cases == [{
+        "when": {
+            "immunity": "Enhanced",
+            "vulnerability": "Viral",
+            "weaponNameContains": "Viral",
+        },
+        "result": "cannot-apply-immunity",
+        "evidence": "explicit-pinned-wiki-example",
+    }]
 
 
 def test_decoy_source_counts_add_replicas_not_total_representations(

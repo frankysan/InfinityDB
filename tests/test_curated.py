@@ -1434,6 +1434,61 @@ def test_khd_requires_exact_pinned_upgrade_semantics(
 
 
 @pytest.mark.parametrize(
+    ("field", "wrong"), [
+        ("extraId", 40),
+        ("extraId", 39.0),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "Viral Ammunition"),
+        ("effect", {
+            "kind": "immunity-use-restriction",
+            "immunity": "skill:immunity",
+            "appliesTo": "attack-with-ammunition-component-viral",
+            "weaponNameContains": "Viral",
+        }),
+        ("effect", {
+            "kind": "immunity-use-restriction",
+            "immunity": "skill:immunity",
+            "appliesTo": "attack-with-weapon-name-containing-viral",
+            "weaponNameContains": "Shock",
+        }),
+        ("effect", {
+            "kind": "immunity-use-restriction",
+            "immunity": "skill:immunity-enhanced",
+            "appliesTo": "attack-with-weapon-name-containing-viral",
+            "weaponNameContains": "Viral",
+        }),
+    ],
+)
+def test_vulnerability_viral_rejects_broader_ammunition_or_immunity_inference(
+    tmp_path: Path, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(
+        row for row in source["records"] if row["id"] == "skill:vulnerability"
+    )
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "automatic"
+    record = document["records"][0]
+    record.update({
+        "id": "skill:vulnerability", "kind": "skill",
+        "facts": {"typeIds": ["automatic"]},
+        "armyLinks": [{"entity": "skill", "id": "vulnerability"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "vulnerability.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    entry = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"][0]
+    entry[field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid exact Viral Vulnerability extra"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("index", "field", "wrong"), [
         (0, "extraId", 45),
         (0, "extraId", 44.0),

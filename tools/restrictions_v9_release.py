@@ -26,6 +26,7 @@ from infinity_db.curated import (
     MEDIKIT_TARGET_PH_PARAMETERS,
     REMDRIVER_COMBINATIONS,
     TAGCOM_COMBINATIONS,
+    VULNERABILITY_VIRAL_VARIANT,
     discover_curated_documents,
     load_curated_directory,
     reviewed_hacking_combinations,
@@ -114,6 +115,7 @@ GIZMOKIT_TARGET_PH_VARIANT = {
     **GIZMOKIT_VARIANT,
     "sourceCatalogParameters": GIZMOKIT_TARGET_PH_PARAMETERS,
 }
+VULNERABILITY = ("n5-core-v5.3", "skill:vulnerability")
 DECOY = ("n5-core-v5.3", "skill:decoy")
 FT_MASTER = ("n5-core-v5.3", "skill:ft-master")
 TAGCOM = ("n5-core-v5.3", "skill:tagcom")
@@ -1018,10 +1020,20 @@ def _check_variant_semantics_delta(
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
     remdriver: bool = False, bangbomb_skill: bool = False,
     tagcom: bool = False, ft_master: bool = False,
-    decoy: bool = False,
+    decoy: bool = False, vulnerability: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if vulnerability and (
+        initial or bangbomb or bangbomb_skill or medikit or gizmokit
+        or deactivator or gizmokit_target_ph or medikit_target_ph or remdriver
+        or ft_master or tagcom or decoy or evo_trinity or killer_hacking
+        or impersonation or tinbot_firewall or tinbot_other
+        or hacking_mods or hacking_srs or hacking_firewall
+        or hacking_combinations or hacking_trinity_access
+        or set(variants) != {VULNERABILITY}
+    ):
+        raise ValueError("Vulnerability refresh requires only Skill source 220")
     if decoy and (
         initial or bangbomb or bangbomb_skill or medikit or gizmokit
         or deactivator or gizmokit_target_ph or medikit_target_ph
@@ -1196,6 +1208,19 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == VULNERABILITY:
+                        if not vulnerability:
+                            raise ValueError("Vulnerability requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != VULNERABILITY_VIRAL_VARIANT
+                            or any(
+                                type(item["extraId"]) is not int
+                                for item in after["occurrenceParameters"][0]["extraValues"]
+                            )
+                        ):
+                            raise ValueError("Vulnerability refresh changed source-only semantics")
                     elif key == DECOY:
                         if not decoy:
                             raise ValueError("Decoy requires source-verified refresh")
@@ -1635,6 +1660,37 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_vulnerability_viral_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only the name-scoped Viral Immunity restriction from source 220."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [item for item in report["catalogs"]["skills"]["items"]
+            if item["id"] == 220]
+    if (
+        len(rows) != 1 or rows[0]["name"] != "Vulnerability"
+        or rows[0]["applicationId"] != 220
+        or rows[0]["occurrences"] != 2
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"]
+        or rows[0]["extraSignatures"] != [{
+            "extras": [[39, "TEXT", "Viral"]],
+            "reviewed": False, "count": 2,
+        }]
+    ):
+        raise ValueError("Vulnerability source-220 signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={VULNERABILITY[1]}, vulnerability=True,
     )
 
 
@@ -2464,7 +2520,7 @@ def _refresh_metadata_v9_release(
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
     remdriver: bool = False, bangbomb_skill: bool = False,
     tagcom: bool = False, ft_master: bool = False,
-    decoy: bool = False,
+    decoy: bool = False, vulnerability: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2567,6 +2623,7 @@ def _refresh_metadata_v9_release(
                 tagcom=tagcom,
                 ft_master=ft_master,
                 decoy=decoy,
+                vulnerability=vulnerability,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,
