@@ -1079,6 +1079,40 @@ def test_weapon_glossary_uses_opt_in_army_links_for_routable_definitions(
     assert all(not entry["embedded"] for entry in entries)
 
 
+def test_numeric_army_skill_links_resolve_to_public_slugs(tmp_path: Path) -> None:
+    database = _reference_database(tmp_path)
+    record = {
+        "kind": "skill",
+        "id": "skill:hacker",
+        "army_links": [{"entity": "skill", "id": 1000}],
+    }
+    expected = {"catalog": "skills", "id": "hacker"}
+    assert rule_record_public_reference(database, record) == expected
+    assert rule_record_public_reference(None, record) is None
+    record["army_links"][0]["id"] = "1000"
+    assert rule_record_public_reference(database, record) == expected
+    record["army_links"][0]["id"] = "hacker"
+    assert rule_record_public_reference(database, record) == expected
+
+    # Common Skills remain accessible as curated definitions in minimal Army
+    # snapshots even when their numeric source ID is absent from the catalog.
+    missing = {
+        "kind": "skill",
+        "id": "skill:jump",
+        "facts": {"category": "common-skill"},
+        "variant_semantics": {"inheritance": "family"},
+        "army_links": [{"entity": "skill", "id": 263}],
+    }
+    assert rule_record_public_reference(database, missing) == {
+        "catalog": "skills", "id": "jump",
+    }
+    missing["variant_semantics"]["inheritance"] = "source"
+    assert rule_record_public_reference(database, missing) is None
+    missing["variant_semantics"]["inheritance"] = "family"
+    missing["facts"]["category"] = "unknown"
+    assert rule_record_public_reference(database, missing) is None
+
+
 def test_shared_weapon_family_reference_targets_its_card() -> None:
     family = {
         "kind": "weapon",

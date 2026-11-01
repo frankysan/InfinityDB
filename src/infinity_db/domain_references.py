@@ -92,23 +92,34 @@ def rule_record_public_reference(
         has_army_link = bool(army_links)
         for link in army_links:
             raw_ref = link.get("id")
-            if not isinstance(raw_ref, str) or not raw_ref:
-                continue
-            if raw_ref.isdigit():
+            if type(raw_ref) is int or (
+                isinstance(raw_ref, str) and raw_ref.isdigit()
+            ):
                 if database is None:
                     continue
                 slug = public_slug_for_reference(database, catalog, int(raw_ref))
                 if slug is None:
                     continue
-            else:
+            elif isinstance(raw_ref, str) and raw_ref:
                 slug = raw_ref
+            else:
+                continue
             if shared_weapon_family:
                 fragment = record["id"].replace(":", "-")
                 return {"href": f"/{catalog}/{quote(slug, safe='')}#rule-{fragment}"}
             return {"catalog": catalog, "id": slug}
 
         if has_army_link or kind not in {"skill", "equipment"}:
-            return None
+            # The Skill catalog also serves canonical Common/Special definitions
+            # by semantic slug when a given Army snapshot has no matching skill.
+            # Never infer such a route for source-specific or non-Skill records.
+            facts = record.get("facts") or {}
+            if not (
+                kind == "skill"
+                and facts.get("category") in {"common-skill", "special-skill"}
+                and (record.get("variant_semantics") or {}).get("inheritance") != "source"
+            ):
+                return None
         # Only explicitly source-independent Equipment has a standalone route.
         if kind == "equipment" and record.get("id") not in {
             f"equipment:{slug}" for slug in CURATED_ONLY_EQUIPMENT_SLUGS

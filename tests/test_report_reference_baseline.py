@@ -45,17 +45,17 @@ RULES_DB = ROOT / "data/generated/rules.db"
 def test_frozen_explanation_inventory_reconciles_current_source_identities() -> None:
     result = reconcile_explanation_inventory()
     assert result["status"] == "identity-bridge-only-pending-clause-and-browser-acceptance"
-    assert (result["frozenCount"], result["currentCount"]) == (367, 448)
+    assert (result["frozenCount"], result["currentCount"]) == (367, 450)
     assert (result["retainedCount"], result["addedCount"], result["removedCount"]) == (
-        350, 98, 17,
+        350, 100, 17,
     )
     assert result["frozenTiers"] == {"D": 304, "S": 63}
     assert len(result["retainedScreeningOnlyIds"]) == 46
     assert result["addedKinds"] == {
-        "declaration-category": 20, "equipment": 1, "rule": 17,
+        "declaration-category": 20, "equipment": 3, "rule": 17,
         "skill": 2, "term": 5, "weapon": 53,
     }
-    assert len(result["currentRecords"]) == 448
+    assert len(result["currentRecords"]) == 450
     assert all(row["id"].startswith("declaration-category:")
                and row["replacementVerified"] is False
                for row in result["retiredIdentityRows"])
@@ -266,7 +266,7 @@ def test_five_visibility_zone_cli_keeps_whole_corpus_gate_open(tmp_path: Path) -
     assert report["visibilityZones"]["reviewedTermCount"] == 5
     assert report["fullRecordApprovalsIssuedByThisAudit"] == 0
     assert report["frozenCount"] == 367
-    assert report["currentCount"] == 448
+    assert report["currentCount"] == 450
     assert "Five post-inventory Visibility Zone" in markdown.read_text(encoding="utf-8")
     assert all(
         row["sourceDisposition"] == "pending-full-material-clause-reconciliation"
@@ -490,7 +490,7 @@ def test_explanation_reconciliation_cli_writes_ignored_style_reports(
         "--markdown-output", str(markdown_path),
     ]) == 0
     result = json.loads(json_path.read_text(encoding="utf-8"))
-    assert (result["currentCount"], result["addedCount"]) == (448, 98)
+    assert (result["currentCount"], result["addedCount"]) == (450, 100)
     markdown = markdown_path.read_text(encoding="utf-8")
     assert "not a v1.0 release gate pass" in markdown
     assert "declaration-category:aro:p40" in markdown

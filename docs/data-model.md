@@ -1537,7 +1537,13 @@ Where a domain has a stable slug:
 - consumers must not derive slugs independently from labels.
 
 Rules/reference semantic IDs (`skill:...`, `equipment:...`, etc.) remain distinct from public route
-slugs even when they correspond one-to-one.
+slugs even when they correspond one-to-one. A numeric Army link is projected through the
+current application catalog rather than treated as an absent string slug. If that source
+identity is missing from the current Army snapshot, a reviewed Common/Special Skill
+definition can still use its canonical semantic slug: the Skill catalog supports these
+rules-only detail pages. This fallback does not apply to source-specific Skill variants
+or unresolvable Equipment/Weapon links; those remain non-routable rather than receiving
+invented source destinations.
 
 **Reviewed metadata-only Weapon publication:** The upstream `weapons` table
 describes usage-derived source catalog entries; `metadata_weapons` also contains

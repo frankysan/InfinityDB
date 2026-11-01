@@ -252,7 +252,7 @@ def test_pinned_source_inventory_keeps_separate_catalogs_and_review_boundaries()
     )
     assert len(result["reviewedDeliveryPaths"]) == 28
     assert len(result["reviewedCandidateDecisions"]) == 12
-    assert result["curatedWeaponEquipmentDefinitions"] == 104
+    assert result["curatedWeaponEquipmentDefinitions"] == 106
     leads = {row["recordId"]: row for row in result["additionalCuratedClauseLeads"]}
     assert set(leads) == {
         "weapon:sepsitor-plus", "weapon:flammenspeer", "weapon:chain-rifle",
