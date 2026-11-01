@@ -1689,13 +1689,14 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **33 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **32 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
       standalone ECM Guided/Hacker, Albedo, Bangbomb, MediKit/GizmoKit ranged Burst,
       Deactivator Burst/ReRoll, Killer Hacking Device source-145 upgrades,
       Impersonation source-249 IMP-2 deployment restriction,
+      Skill-listed GizmoKit source-254 target PH replacements,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
@@ -2134,7 +2135,25 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         an exact pinned-signature v9 metadata-only refresh, tracked
         versus fresh export and negative regression cases.
         No Unit-use index or gameplay resolver is introduced.
-        Current baseline: **33 Skill / 1 Equipment**.
+        Baseline at that point: **33 Skill / 1 Equipment**.
+      - [x] **Data processing:** Reconcile GizmoKit target PH values
+        from Army **Skill source 254**, without creating a
+        duplicate Skill rule. N5.3 p. 123 establishes that the
+        bracketed PH value applies to the **target receiving
+        GizmoKit**, not its user's BS Attack, contact action or
+        Burst. All 288 source occurrences carry one of six
+        standalone `TEXT:PH=N` extras (IDs 27, 32, 46,
+        52, 244 and 250). Canonical `equipment:gizmokit`
+        now owns their exact `sourceCatalogParameters`
+        mapping separately from Equipment source-237
+        ranged `+1B`. The source auditor and read-only
+        rules query resolve Skill 254 via the reviewed
+        cross-catalog mapping; an exact pinned v9
+        metadata-only migration and tracked/fresh tests
+        guard source counts, scope, schema and prior effects.
+        No duplicate Skill rule, roll resolver, or Unit-use
+        index is published. Current baseline:
+        **32 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

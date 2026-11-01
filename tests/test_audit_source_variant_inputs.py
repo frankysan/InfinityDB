@@ -130,8 +130,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 3,
-            "unresolved-occurrence-parameter": 33,
+            "reviewed-extra-parameter": 4,
+            "unresolved-occurrence-parameter": 32,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -386,8 +386,8 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 3,
-        "unresolved-occurrence-parameter": 33,
+        "reviewed-extra-parameter": 4,
+        "unresolved-occurrence-parameter": 32,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -403,6 +403,50 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         263: {"kind": "distance", "positive_sign": "omit"},
         271: {"kind": "distance", "positive_sign": "omit"},
     }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = [
+        {"extras": [[extra_id, "TEXT", f"PH={value}"]],
+         "reviewed": True, "count": count}
+        for extra_id, value, count in (
+            (27, 11, 131), (32, 10, 53), (46, 9, 57),
+            (52, 13, 33), (244, 14, 4), (250, 12, 10),
+        )
+    ]
+    assert sum(row["count"] for row in expected) == 288
+    for rules_path in (ROOT / "data/generated/rules.db", fresh):
+        db = RulesDatabase(rules_path)
+        assert 254 in db.skill_source_equipment_overrides()
+        assert "gizmokit" not in db.skill_reviewed_extra_semantics()
+        equipment = db.equipment_reviewed_extra_semantics()["gizmokit"]
+        assert equipment["extra_values"][0]["effect"] == {
+            "kind": "equipment-burst-mod",
+            "applies_to": "ranged-gizmokit-bs-attack", "modifier": 1,
+        }
+        result = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", rules_path,
+        )
+        [row] = select_source_variants(result, "skills", [254])["items"]
+        assert (row["name"], row["applicationId"], row["occurrences"]) == (
+            "Gizmokit", 254, 288,
+        )
+        assert row["status"] == "reviewed-extra-parameter"
+        assert row["extraSignatures"] == expected
+        assert row["reviewedCombinations"] is None
+        assert row["rawValues"] == []
+        assert row["reviewedExtra"] == db.skill_source_equipment_overrides()[254]
+        assert result["catalogs"]["skills"]["summary"]["statuses"] == {
+            "family-only": 44, "reviewed-distance-parameter": 3,
+            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
+            "reviewed-extra-parameter": 4, "unresolved-occurrence-parameter": 32,
+        }
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -446,8 +490,8 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 3,
-            "unresolved-occurrence-parameter": 33,
+            "reviewed-extra-parameter": 4,
+            "unresolved-occurrence-parameter": 32,
         }
 
 

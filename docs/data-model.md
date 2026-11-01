@@ -1143,6 +1143,45 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**Cross-catalog GizmoKit target PH replacements (2026-11-01):**
+Army classifies target-side `Gizmokit (PH=N)` as **Skill
+source 254**, while N5.3 p. 123 defines
+`[[equipment:gizmokit|GizmoKit]]` as Equipment.
+That source classification is preserved without inventing
+a separate canonical Skill: its bracketed PH number is
+the PH value the **target** uses when that Equipment
+is applied to them. It does not replace the GizmoKit
+operator's BS, add Burst, change Silhouette-contact
+delivery, or grant another recovery Roll.
+
+All **288** direct source-254 occurrences carry
+exactly one of six standalone `TEXT:PH=N` extras:
+`27/PH=11` (131), `32/PH=10` (53), `46/PH=9`
+(57), `52/PH=13` (33), `244/PH=14` (4), and
+`250/PH=12` (10). The curated Equipment record
+retains its original source-237 `+1B` ranged Attack
+modifier and adds a distinct, strictly validated
+`sourceCatalogParameters` entry for `skills/254`.
+Each exact extra maps to
+`gizmokit-target-ph-replacement` with `attribute: PH`
+and `appliesTo: target-gizmokit-recovery-ph-roll`.
+`RulesDatabase.skill_source_equipment_overrides()`
+exposes this cross-catalog source contract; the
+read-only Army variant auditor recognizes it without
+polluting `skill_reviewed_extra_semantics()` or
+creating a `skill:gizmokit` record.
+
+A source-254-count-pinned v9 refresh changes only the
+existing GizmoKit Equipment family metadata. Its delta
+guard requires the previous reviewed ranged-Burst
+semantics unchanged, forbids other row/schema changes
+and preserves a recovery pair under ignored `local/`.
+Tracked and freshly generated rules exports must
+match the six raw source signatures. This enables
+precise classification, not a live gameplay roll
+resolver or cross-Army Unit-use index.
+Unresolved baseline: **32 Skill / 1 Equipment**.
+
 **Reviewed Deactivator source extras (2026-11-01):**
 English N5.3 p. 121 defines `[[equipment:deactivator]]`
 as a Short Skill (Attack) using a Normal WIP Roll, and gives

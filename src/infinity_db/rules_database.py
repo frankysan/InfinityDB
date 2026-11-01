@@ -736,6 +736,30 @@ def _variant_semantics(value: str | None) -> dict[str, Any] | None:
     result: dict[str, Any] = {"inheritance": raw["inheritance"]}
     if parameters:
         result["occurrence_parameters"] = parameters
+    if raw.get("sourceCatalogParameters"):
+        result["source_catalog_parameters"] = [
+            {
+                "catalog": parameter["catalog"],
+                "source_id": parameter["sourceId"],
+                "source": parameter["source"],
+                "kind": parameter["kind"],
+                "extra_values": [
+                    {
+                        "extra_id": entry["extraId"],
+                        "extra_type": entry["extraType"],
+                        "raw_value": entry["rawValue"],
+                        "effect": {
+                            **{key: value for key, value in entry["effect"].items()
+                               if key != "appliesTo"},
+                            **({"applies_to": entry["effect"]["appliesTo"]}
+                               if "appliesTo" in entry["effect"] else {}),
+                        },
+                    }
+                    for entry in parameter["extraValues"]
+                ],
+            }
+            for parameter in raw["sourceCatalogParameters"]
+        ]
     if raw.get("occurrenceCombinations"):
         result["occurrence_combinations"] = [
             {
@@ -1641,6 +1665,35 @@ class RulesDatabase:
                             "reviewed-extra semantics"
                         )
                     result[army_ref] = dict(parameter)
+            return result
+
+    def skill_source_equipment_overrides(self) -> dict[int, dict[str, Any]]:
+        """Return Skill-listed source extras belonging to canonical Equipment rules."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT r.variant_json FROM records AS r "
+                "JOIN collections AS c ON c.id = r.collection_id "
+                "WHERE r.kind = 'equipment' AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND r.id = 'equipment:gizmokit' "
+                "ORDER BY r.collection_id"
+            ).fetchall()
+            result: dict[int, dict[str, Any]] = {}
+            for row in rows:
+                variant = _variant_semantics(row["variant_json"])
+                if variant is None:
+                    continue
+                for parameter in variant.get("source_catalog_parameters", []):
+                    if parameter["catalog"] != "skills":
+                        continue
+                    source_id = parameter["source_id"]
+                    value = {
+                        "source": parameter["source"],
+                        "kind": parameter["kind"],
+                        "extra_values": parameter["extra_values"],
+                    }
+                    if source_id in result:
+                        raise ValueError("Duplicate cross-catalog Skill source identity")
+                    result[source_id] = value
             return result
 
     def skill_reviewed_extra_semantics(self) -> dict[ArmyLinkRef, dict[str, Any]]:

@@ -189,6 +189,28 @@ KILLER_HACKING_VARIANT: dict[str, Any] = {
 }
 
 
+# Army publishes target PH overrides under Skill 254 even though GizmoKit is
+# canonical Equipment 237. Keep the source classification, not a duplicate rule.
+GIZMOKIT_TARGET_PH_PARAMETERS: list[dict[str, Any]] = [{
+    "catalog": "skills", "sourceId": 254,
+    "source": "army-extra", "kind": "reviewed-extra",
+    "extraValues": [
+        {
+            "extraId": extra_id, "extraType": "TEXT", "rawValue": f"PH={value}",
+            "effect": {
+                "kind": "gizmokit-target-ph-replacement",
+                "appliesTo": "target-gizmokit-recovery-ph-roll",
+                "attribute": "PH", "value": value,
+            },
+        }
+        for extra_id, value in (
+            (27, 11), (32, 10), (46, 9),
+            (52, 13), (244, 14), (250, 12),
+        )
+    ],
+}]
+
+
 def _validate_reviewed_extra_parameter(
     parameter: dict[str, Any],
     context: str,
@@ -753,7 +775,7 @@ def _validate_variant_semantics(
         raise ValueError(f"{context}: must be an object")
     allowed = {
         "inheritance", "occurrenceParameters", "occurrenceCombinations",
-        "sourceVariant", "sourceMode",
+        "sourceVariant", "sourceMode", "sourceCatalogParameters",
     }
     unknown = set(value) - allowed
     if unknown:
@@ -765,6 +787,27 @@ def _validate_variant_semantics(
             f"{sorted(VARIANT_INHERITANCE_MODES)}"
         )
 
+    # Cross-catalog source classification is distinct from canonical record kind.
+    # A Skill-listed target PH annotation belongs to GizmoKit Equipment, not
+    # to a fabricated Skill rule or the user's ranged BS Attack.
+    if "sourceCatalogParameters" in value:
+        extra = value["sourceCatalogParameters"]
+        if (
+            inheritance != "family"
+            or army_links != [{"entity": "equipment", "id": "gizmokit"}]
+            or not isinstance(extra, list)
+            or len(extra) != 1
+            or not isinstance(extra[0], dict)
+            or not isinstance(extra[0].get("extraValues"), list)
+            or any(
+                not isinstance(item, dict) or type(item.get("extraId")) is not int
+                or not isinstance(item.get("effect"), dict)
+                or type(item["effect"].get("value")) is not int
+                for item in extra[0]["extraValues"]
+            )
+            or extra != GIZMOKIT_TARGET_PH_PARAMETERS
+        ):
+            raise ValueError(f"{context}: invalid cross-catalog GizmoKit target PH")
     parameters = value.get("occurrenceParameters", [])
     if not isinstance(parameters, list):
         raise ValueError(f"{context}: 'occurrenceParameters' must be an array")

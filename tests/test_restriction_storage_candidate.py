@@ -1758,6 +1758,129 @@ def test_khd_v9_refresh_requires_exact_pinned_signatures(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "wrong-scope", "wrong-value", "wrong-source",
+               "burst-change", "other-record", "schema", "missing"),
+)
+def test_gizmokit_target_ph_cross_catalog_delta_is_exact(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        GIZMOKIT,
+        GIZMOKIT_TARGET_PH_VARIANT,
+        GIZMOKIT_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    previous, proposed = tmp_path / "previous.db", tmp_path / "proposed.db"
+    variant = copy.deepcopy(GIZMOKIT_TARGET_PH_VARIANT)
+    if defect == "wrong-scope":
+        variant["sourceCatalogParameters"][0]["extraValues"][0]["effect"][
+            "appliesTo"
+        ] = "gizmokit-user-bs-attack"
+    elif defect == "wrong-value":
+        variant["sourceCatalogParameters"][0]["extraValues"][0]["effect"]["value"] = 10
+    elif defect == "wrong-source":
+        variant["sourceCatalogParameters"][0]["sourceId"] = 237
+    elif defect == "burst-change":
+        variant["occurrenceParameters"][0]["extraValues"][0]["effect"]["modifier"] = 2
+    with sqlite3.connect(previous) as old, sqlite3.connect(proposed) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*GIZMOKIT, json.dumps(GIZMOKIT_VARIANT), "preserved"),
+            ("n5-core-v5.3", "equipment:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), GIZMOKIT[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='equipment:gizmokit'")
+    changed: dict[tuple[str, str], str] = {GIZMOKIT: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(
+            previous, proposed, changed, gizmokit_target_ph=True,
+        )
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                previous, proposed, changed, gizmokit_target_ph=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(previous, proposed, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "extra-id",
+               "raw", "status", "previous", "compound"),
+)
+def test_gizmokit_target_ph_source_gate_checks_exact_skill_254_signatures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 254, "name": "Gizmokit", "applicationId": 254,
+        "occurrences": 288, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None, "reviewedNumericMod": None,
+        "reviewedExtra": None, "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[extra_id, "TEXT", f"PH={value}"]],
+             "reviewed": False, "count": count}
+            for extra_id, value, count in (
+                (27, 11, 131), (32, 10, 53), (46, 9, 57),
+                (52, 13, 33), (244, 14, 4), (250, 12, 10),
+            )
+        ],
+    }
+    if defect == "name":
+        source["name"] = "GizmoKit"
+    elif defect == "app-id":
+        source["applicationId"] = 237
+    elif defect == "count":
+        source["occurrences"] = 287
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 8
+    elif defect == "raw":
+        source["extraSignatures"][1]["extras"][0][2] = "PH=11"
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "compound":
+        source["extraSignatures"][0]["extras"].append([32, "TEXT", "PH=10"])
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_gizmokit_target_ph_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"equipment:gizmokit"},
+            "gizmokit_target_ph": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="GizmoKit target PH source signature drift"):
+            release.refresh_gizmokit_target_ph_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
     "defect", (None, "burst-scope", "burst-value", "reroll-scope",
                "reroll-kind", "raw", "other-record", "schema", "missing"),
 )

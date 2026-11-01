@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import (
+    GIZMOKIT_TARGET_PH_PARAMETERS,
     KILLER_HACKING_VARIANT,
     discover_curated_documents,
     load_curated_directory,
@@ -97,6 +98,10 @@ GIZMOKIT_VARIANT = {
             },
         }],
     }],
+}
+GIZMOKIT_TARGET_PH_VARIANT = {
+    **GIZMOKIT_VARIANT,
+    "sourceCatalogParameters": GIZMOKIT_TARGET_PH_PARAMETERS,
 }
 IMPERSONATION = ("n5-core-v5.3", "skill:impersonation")
 IMPERSONATION_VARIANT = {
@@ -983,9 +988,18 @@ def _check_variant_semantics_delta(
     medikit: bool = False, gizmokit: bool = False, deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
     killer_hacking: bool = False, impersonation: bool = False,
+    gizmokit_target_ph: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if gizmokit_target_ph and (
+        initial or gizmokit or medikit or deactivator or bangbomb
+        or evo_trinity or killer_hacking or impersonation or tinbot_firewall
+        or tinbot_other or hacking_mods or hacking_srs or hacking_firewall
+        or hacking_combinations or hacking_trinity_access
+        or set(variants) != {GIZMOKIT}
+    ):
+        raise ValueError("GizmoKit target PH requires exactly its Equipment record")
     if impersonation and (
         initial or killer_hacking or medikit or gizmokit or deactivator or bangbomb
         or evo_trinity or tinbot_firewall or tinbot_other or hacking_mods
@@ -1135,6 +1149,13 @@ def _check_variant_semantics_delta(
                             or after != MEDIKIT_VARIANT
                         ):
                             raise ValueError("MediKit refresh changed source-only semantics")
+                    elif key == GIZMOKIT and gizmokit_target_ph:
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != GIZMOKIT_VARIANT
+                            or after != GIZMOKIT_TARGET_PH_VARIANT
+                        ):
+                            raise ValueError("GizmoKit target PH changed prior Equipment semantics")
                     elif key == GIZMOKIT:
                         if not gizmokit:
                             raise ValueError("GizmoKit requires source-verified refresh")
@@ -1476,6 +1497,47 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_gizmokit_target_ph_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote exact target-side PH replacements without inventing a Skill rule."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["skills"]["items"] if row["id"] == 254
+    ]
+    signatures = (
+        (27, "PH=11", 131),
+        (32, "PH=10", 53),
+        (46, "PH=9", 57),
+        (52, "PH=13", 33),
+        (244, "PH=14", 4),
+        (250, "PH=12", 10),
+    )
+    if (
+        len(rows) != 1
+        or rows[0]["name"] != "Gizmokit"
+        or rows[0]["applicationId"] != 254
+        or rows[0]["occurrences"] != 288
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"]
+        or rows[0]["extraSignatures"] != [
+            {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": count}
+            for extra_id, raw, count in signatures
+        ]
+    ):
+        raise ValueError("GizmoKit target PH source signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={GIZMOKIT[1]}, gizmokit_target_ph=True,
     )
 
 
@@ -2043,6 +2105,7 @@ def _refresh_metadata_v9_release(
     deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
     killer_hacking: bool = False, impersonation: bool = False,
+    gizmokit_target_ph: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2135,6 +2198,7 @@ def _refresh_metadata_v9_release(
                 bangbomb=bangbomb,
                 medikit=medikit,
                 gizmokit=gizmokit,
+                gizmokit_target_ph=gizmokit_target_ph,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,

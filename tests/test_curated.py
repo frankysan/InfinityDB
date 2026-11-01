@@ -1543,6 +1543,55 @@ def test_medikit_requires_exact_ranged_burst_extra(
 
 
 @pytest.mark.parametrize(
+    ("index", "field", "wrong"), [
+        (0, "extraId", 28),
+        (0, "extraId", 27.0),
+        (0, "extraType", "DISTANCE"),
+        (0, "rawValue", "PH=10"),
+        (2, "effect", {
+            "kind": "gizmokit-target-ph-replacement",
+            "appliesTo": "gizmokit-user-bs-attack",
+            "attribute": "PH", "value": 9,
+        }),
+        (4, "effect", {
+            "kind": "gizmokit-target-ph-replacement",
+            "appliesTo": "target-gizmokit-recovery-ph-roll",
+            "attribute": "PH", "value": 15,
+        }),
+        (4, "effect", {
+            "kind": "gizmokit-target-ph-replacement",
+            "appliesTo": "target-gizmokit-recovery-ph-roll",
+            "attribute": "PH", "value": 14.0,
+        }),
+    ],
+)
+def test_gizmokit_skill_listed_ph_extras_require_exact_equipment_ownership(
+    tmp_path: Path, index: int, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"]
+                   if row["id"] == "equipment:gizmokit")
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": "equipment:gizmokit", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": "gizmokit"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "gizmokit-target-ph.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    entries = record["variantSemantics"]["sourceCatalogParameters"][0]["extraValues"]
+    entries[index][field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid cross-catalog GizmoKit target PH"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("field", "wrong"), [
         ("extraId", 9),
         ("extraId", 8.0),

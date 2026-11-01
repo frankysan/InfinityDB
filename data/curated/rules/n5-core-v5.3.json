@@ -16730,6 +16730,82 @@
                             }
                         ]
                     }
+                ],
+                "sourceCatalogParameters": [
+                    {
+                        "catalog": "skills",
+                        "sourceId": 254,
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 27,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=11",
+                                "effect": {
+                                    "kind": "gizmokit-target-ph-replacement",
+                                    "appliesTo": "target-gizmokit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 11
+                                }
+                            },
+                            {
+                                "extraId": 32,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=10",
+                                "effect": {
+                                    "kind": "gizmokit-target-ph-replacement",
+                                    "appliesTo": "target-gizmokit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 10
+                                }
+                            },
+                            {
+                                "extraId": 46,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=9",
+                                "effect": {
+                                    "kind": "gizmokit-target-ph-replacement",
+                                    "appliesTo": "target-gizmokit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 9
+                                }
+                            },
+                            {
+                                "extraId": 52,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=13",
+                                "effect": {
+                                    "kind": "gizmokit-target-ph-replacement",
+                                    "appliesTo": "target-gizmokit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 13
+                                }
+                            },
+                            {
+                                "extraId": 244,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=14",
+                                "effect": {
+                                    "kind": "gizmokit-target-ph-replacement",
+                                    "appliesTo": "target-gizmokit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 14
+                                }
+                            },
+                            {
+                                "extraId": 250,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=12",
+                                "effect": {
+                                    "kind": "gizmokit-target-ph-replacement",
+                                    "appliesTo": "target-gizmokit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 12
+                                }
+                            }
+                        ]
+                    }
                 ]
             }
         },

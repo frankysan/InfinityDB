@@ -52,6 +52,13 @@ def inventory_source_variants(
         "skills": rules.skill_reviewed_extra_semantics(),
         "equipment": rules.equipment_reviewed_extra_semantics(),
     }
+    # Army Skill 254 represents a target-side PH override on Equipment GizmoKit.
+    # Retain its source catalog while keeping only one canonical game-rule owner.
+    cross_catalog = rules.skill_source_equipment_overrides()
+    for source_id, semantics in cross_catalog.items():
+        if source_id in reviewed_extras["skills"]:
+            raise ValueError(f"Conflicting Skill source override: {source_id}")
+        reviewed_extras["skills"][source_id] = semantics
     equipment_combinations = rules.equipment_reviewed_combination_semantics()
     report: dict[str, Any] = {"catalogs": {}}
 
