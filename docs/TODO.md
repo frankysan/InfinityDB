@@ -3178,6 +3178,24 @@ follow-up action. Retain source-native values until official resolution.
   player-facing meaning. Until then retain the source values without inferring either
   current availability or a miniature-count rule.
 
+### Unit Explorer discovery
+
+- [ ] **Web backend + Web frontend:** Add contextual usage counts to the
+  Skills, Equipment, and Weapons filter dropdowns. Count distinct logical
+  Units in the complete currently filtered population, retaining every active
+  filter, including the selection in the counted dropdown, Army context, and
+  optional availability. Preserve the existing
+  [profile/loadout matching semantics](data-model.md#context-coherent-filtering).
+  Counts describe usage within that population, not hypothetical totals obtained
+  by replacing or removing a filter, and are independent of pagination, sorting,
+  and extended view. Compute counts in batches, keep them synchronized with
+  displayed results, and validate accessible presentation, loading/cancellation
+  behavior, semantic correctness, and representative performance.
+  **Strictly post-1.0:** this accepted feature does not expand the 1.0 release
+  gate. Multi-selection and per-filter AND/OR/NOT remain separate proposed
+  extensions. Server-response/count caching is a measured implementation option,
+  not a prerequisite or an accepted infrastructure commitment.
+
 ### Routing and long-term compatibility
 
 - [ ] **Web frontend + Project infrastructure:** Design a **stateless, self-contained v2
