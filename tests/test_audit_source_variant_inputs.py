@@ -1795,6 +1795,40 @@ def test_minelayer_two_deployment_count_matches_pinned_source() -> None:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_minelayer_unparameterized_rows_do_not_inherit_two_items() -> None:
+    """Only 15 exact occurrences, not all 546 Minelayer rows, carry (2)."""
+    [row] = select_source_variants(_inventory(), "skills", [56])["items"]
+    assert row["occurrences"] == 546
+    assert row["extraSignatures"] == [
+        {"extras": [[267, "TEXT", "2"]], "reviewed": True, "count": 15},
+    ]
+    assert row["occurrences"] - sum(
+        signature["count"] for signature in row["extraSignatures"]
+    ) == 531
+    reviewed_values = {(267, "TEXT", "2")}
+    assert reviewed_extra_signature(
+        [(1, 267, "TEXT", "2")],
+        reviewed_values=reviewed_values, distance_allowed=False,
+    )
+    assert not reviewed_extra_signature(
+        [], reviewed_values=reviewed_values, distance_allowed=False,
+    )
+    assert not reviewed_extra_signature(
+        [(1, 267, "TEXT", "3")],
+        reviewed_values=reviewed_values, distance_allowed=False,
+    )
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=56, extra_id=267,
+    )
+    profile_owners = [owner for owner in owners if owner["owner"] == "profile"]
+    assert [(owner["army_id"], owner["unit_slug"]) for owner in profile_owners] == [
+        (1002, "saladin-naval-liaison-officer"),
+    ]
+    assert len(owners) == 15
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_chain_of_command_non_specialist_matches_exact_source_owners() -> None:
     """Non Specialist suppresses only CoC-derived scenario qualification."""
     [item] = select_source_variants(_inventory(), "skills", [26])["items"]
@@ -1896,6 +1930,57 @@ def test_forward_observer_special_die_exact_profile_owners() -> None:
     assert {(c["sourceId"], c.get("page")) for c in record["citations"]} >= {
         ("n5-core-v5.3-pdf", 75), ("n5-core-v5.3-pdf", 92),
     }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_forward_observer_special_die_fresh_export_preserves_exact_scope(
+    tmp_path: Path,
+) -> None:
+    """A family metadata entry never assigns +1SD to the other 607 rows."""
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    published = ROOT / "data/generated/rules.db"
+    expected = RulesDatabase(published).skill_reviewed_extra_semantics()[
+        "forward-observer"
+    ]
+    reviewed_values = {(308, "TEXT", "+1SD")}
+    assert reviewed_extra_signature(
+        [(1, 308, "TEXT", "+1SD")],
+        reviewed_values=reviewed_values, distance_allowed=False,
+    )
+    assert not reviewed_extra_signature(
+        [], reviewed_values=reviewed_values, distance_allowed=False,
+    )
+    assert not reviewed_extra_signature(
+        [(1, 308, "TEXT", "+1B")],
+        reviewed_values=reviewed_values, distance_allowed=False,
+    )
+    for rules_path in (published, fresh):
+        typed = RulesDatabase(rules_path).skill_reviewed_extra_semantics()
+        assert typed["forward-observer"] == expected
+        assert typed["forward-observer"]["extra_values"][0]["effect"] == {
+            "kind": "special-die",
+            "applies_to": "forward-observer-wip-attack-roll",
+            "count": 1,
+        }
+        [row] = select_source_variants(
+            inventory_source_variants(
+                ROOT / "data/generated/infinity.db",
+                ROOT / "data/generated/infinity.raw.db", rules_path,
+            ),
+            "skills", [59],
+        )["items"]
+        assert row["status"] == "reviewed-extra-parameter"
+        assert row["reviewedExtra"] == expected
+        assert row["extraSignatures"] == [
+            {"extras": [[308, "TEXT", "+1SD"]], "reviewed": True, "count": 2},
+        ]
+        assert row["occurrences"] == 609
+        assert row["occurrences"] - sum(
+            signature["count"] for signature in row["extraSignatures"]
+        ) == 607
+        assert row["reviewedNumericMod"] is None
+        assert "modifier" not in typed["forward-observer"]["extra_values"][0]["effect"]
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

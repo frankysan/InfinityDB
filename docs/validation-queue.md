@@ -69,7 +69,7 @@ Each item records:
 - **Result:** new or modified test selectors, their individual design-sanity
   results, and date. Broader regression execution remains in VR.
 
-- [ ] **VD-0001** (2026-11-01; needs-design): Extend source-56
+- [x] **VD-0001** (2026-11-01; designed): Extend source-56
   Minelayer variant validation with negative cases that mutate the
   extra ID, raw type/value, `count` (including boolean), effect kind
   and action scope, asserting each malformed curated document is
@@ -82,9 +82,13 @@ Each item records:
   Existing coverage: essential exact-signature and 15-owner test in
   `tests/test_audit_source_variant_inputs.py`; current closed
   validator accepts only `267/TEXT:2`. Risk: moderate;
-  linked execution: VR-0003. Outcome: test design deferred.
+  linked execution: VR-0003. Outcome (2026-11-01):
+  `test_minelayer_deployment_count_rejects_unreviewed_extras` **9 passed**;
+  `test_minelayer_unparameterized_rows_do_not_inherit_two_items`
+  **1 passed**. All 531 unparameterized rows remain distinct from
+  the 15 source-specific occurrences; one profile owner retained.
 
-- [ ] **VD-0002** (2026-11-01; needs-design): Add negative
+- [ ] **VD-0002** (2026-11-01; blocked): Add negative
   curated-source validation cases for Chain of Command
   `375/TEXT:Non Specialist`: altered extra ID, raw value/type,
   effect kind/scope and `excluded` (including a non-boolean).
@@ -93,9 +97,13 @@ Each item records:
   change: `dev/v1.0.0` after `980fb6b3`; existing coverage:
   `test_chain_of_command_non_specialist_matches_exact_source_owners`
   and the closed curated validator. Risk: moderate; linked
-  execution: VR-0004. Outcome: design deferred.
+  execution: VR-0004. Outcome (2026-11-01):
+  `test_chain_of_command_non_specialist_rejects_unreviewed_extras`
+  **7 passed, 1 strict xfail** (`excluded: 1` is accepted). Tests are
+  written; TODO records the product defect. Unblock after the
+  guard rejects the value and the xfail marker is removed.
 
-- [ ] **VD-0003** (2026-11-01; needs-design): Add a pinned
+- [x] **VD-0003** (2026-11-01; designed): Add a pinned
   Army-to-filter parity check for Chain of Command (Non Specialist):
   the 11 exact options must never qualify through Chain of
   Command alone, while other qualifying Specialist Skills remain
@@ -105,9 +113,13 @@ Each item records:
   change: `dev/v1.0.0` after `980fb6b3`; existing coverage:
   `test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills`
   uses synthetic variants. Risk: moderate; linked execution:
-  VR-0004. Outcome: design deferred.
+  VR-0004. Outcome (2026-11-01):
+  `test_pinned_chain_of_command_non_specialist_owners_do_not_qualify_alone`
+  **4 passed** (standard, domination, supplies, firefight).
+  Eleven pinned source options map to three Unit identities, but
+  candidate status remains scenario- and Skill-dependent.
 
-- [ ] **VD-0004** (2026-11-01; needs-design): Add
+- [ ] **VD-0004** (2026-11-01; blocked): Add
   curated-source negative cases for Forward Observer source `59`
   `308/TEXT:+1SD`: altered extra ID, raw type/value,
   `special-die` kind, WIP attack scope and count (including
@@ -117,9 +129,13 @@ Each item records:
   change: `dev/v1.0.0` after `0b7fe7a5`; existing
   coverage: `test_forward_observer_special_die_exact_profile_owners`
   and the exact curated validator. Risk: moderate; linked
-  execution: VR-0005. Outcome: design deferred.
+  execution: VR-0005. Outcome (2026-11-01):
+  `test_forward_observer_special_die_rejects_unreviewed_extras`
+  **8 passed, 1 strict xfail** (`count: true` is accepted). Tests are
+  written; TODO records the product defect. Unblock after the
+  guard rejects the value and the xfail marker is removed.
 
-- [ ] **VD-0005** (2026-11-01; needs-design): Add
+- [x] **VD-0005** (2026-11-01; designed): Add
   tracked/fresh rules export parity for the exact
   Forward Observer (+1SD) profile occurrences, including
   confirmation that the two TARKSHYA profile rows do not
@@ -129,7 +145,10 @@ Each item records:
   change: `dev/v1.0.0` after `0b7fe7a5`; existing
   coverage: the pinned two-owner test and stage-time
   rules/publication fingerprints. Risk: moderate;
-  linked execution: VR-0005. Outcome: design deferred.
+  linked execution: VR-0005. Outcome (2026-11-01):
+  `test_forward_observer_special_die_fresh_export_preserves_exact_scope`
+  **1 passed**. Tracked and fresh exports agree; 607 ordinary
+  occurrences receive no inferred Burst or Special Die.
 
 ## Pending deferred execution
 
@@ -189,7 +208,7 @@ Each item records:
   against the cumulative state and the regular mandatory hosted CI/release
   acceptance. Outcome: awaiting broader verification.
 
-- [ ] **VR-0003** (2026-11-01; awaiting-design): Publish
+- [ ] **VR-0003** (2026-11-01; ready-to-run): Publish
   source-56 Minelayer (2) deployment item-count semantics using
   `267/TEXT:2`, without changing deployed-object identities.
   Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
@@ -207,13 +226,13 @@ Each item records:
   Ruff **PASS** (2026-11-01). The generic v9 refresh declined to run
   because its schema-version precondition was not met, before any
   artifact mutation; the guarded script was used instead.
-  Design: VD-0001, nonessential additional negative/edge coverage.
-  Deferred: targeted completed design tests and a cumulative
-  `tools/run_checks.py --stage test` / normal mandatory CI and
-  release gates on the final reviewed state. Outcome: awaiting design
-  and broader execution; immediate publication integrity verified.
+  Design: VD-0001 designed (9 mutation cases plus one no-inference
+  test passed at `0e7dc16b`). Deferred: cumulative
+  `tools/run_checks.py --stage test` and mandatory CI/release
+  gates. Outcome: awaiting broader execution; publication
+  integrity was already verified.
 
-- [ ] **VR-0004** (2026-11-01; awaiting-design): Publish
+- [ ] **VR-0004** (2026-11-01; blocked): Publish
   source-26 Chain of Command (Non Specialist) as a typed
   `specialist-qualification-exclusion` on the exact
   `375/TEXT:Non Specialist` source extra.
@@ -233,14 +252,15 @@ Each item records:
   `eb6b83fe9554a0b9aaad52caa7012bc57e4e3f59aa40e45baedc9fb29d8ea3cf`;
   publication
   `f18996a7034ac5d84844912d53c38f80bc688e3ba18162058407f5cc339ee606`.
-  Design: VD-0002 and VD-0003, both nonessential further coverage.
-  Deferred: their designed cases plus one cumulative
-  `tools/run_checks.py --stage test` and normal mandatory
-  CI/release gates against the reviewed state. Outcome: awaiting
-  design and broader verification; publication integrity
-  immediately validated.
+  Design: VD-0003 designed (4 passed); VD-0002 blocked
+  (7 passed, 1 strict xfail). Correct the Chain of Command
+  `excluded` type guard per TODO, remove xfail, then verify.
+  Deferred: cumulative `tools/run_checks.py --stage test`
+  and mandatory CI/release gates after repair.
+  Outcome: blocked by a confirmed validator type defect;
+  previous publication integrity checks remain valid.
 
-- [ ] **VR-0005** (2026-11-01; awaiting-design): Publish the
+- [ ] **VR-0005** (2026-11-01; blocked): Publish the
   exact source-59 Forward Observer `308/TEXT:+1SD` effect as one
   Special Die for the WIP-based attack, with N5.3 pp. 75/92
   citations; preserve the published 17 deployed-object records.
@@ -257,12 +277,14 @@ Each item records:
   `f220f9e067fbd92779c90d4057c9bca767d1e05baf618bce4070a256a182276b`.
   Direct source-59, rules-database and publication tests
   **1 passed each**; rules build, publication `--check`,
-  targeted Ruff **PASS**. Design: VD-0004 and VD-0005.
-  Deferred: completed design cases and one shared cumulative
-  `tools/run_checks.py --stage test` with the existing VR
-  entries, then ordinary mandatory CI/release acceptance.
-  Outcome: awaiting design and broad execution; immediate
-  publication integrity verified.
+  targeted Ruff **PASS**. Design: VD-0005 designed (1 passed);
+  VD-0004 blocked (8 passed, 1 strict xfail). Correct the
+  Forward Observer `count` type guard per TODO, remove xfail,
+  then verify. Deferred: one shared cumulative
+  `tools/run_checks.py --stage test` with other VR entries
+  and mandatory CI/release acceptance.
+  Outcome: blocked by a confirmed validator type defect;
+  previous publication integrity checks remain valid.
 
 ## Recording template
 

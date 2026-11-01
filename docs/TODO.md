@@ -1785,6 +1785,20 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         unresolved. Defer additional negative/derived-index tests
         and the cumulative suite through the validation queue.
         This is source metadata, not gameplay attack resolution.
+      - [ ] **Data processing — correct reviewed-extra boolean type guards:**
+        The batched test-design pass discovered that Python's
+        `True == 1` permits a non-boolean `excluded: 1` on
+        `skill:chain-of-command` (source 26) and a non-integer
+        `count: true` on `skill:forward-observer` (source 59).
+        Both must fail the closed curated validator: require
+        `type(excluded) is bool` and `type(count) is int` at
+        the exact source-specific boundaries, retaining all
+        other accepted fields and semantics. Two strict expected-
+        failure regression cases in `tests/test_curated.py`
+        identify the present defects; after the implementation
+        fix, remove their xfail markers and require those cases
+        to pass. This task blocks VD-0002 and VD-0004 and the
+        corresponding broader verification VR-0004/VR-0005.
       - [x] **Data processing:** Audit the lone Journalist
         source-272 `1/TEXT:+3` on the Tohaa Diplomatic Delegate.
         N5.3 already defines Journalist's Guts Roll and campaign

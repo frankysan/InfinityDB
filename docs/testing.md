@@ -980,6 +980,26 @@ Additional rejection/derived-index tests and cumulative
 full-suite verification are queued in
 `docs/validation-queue.md` for the next dedicated passes.
 
+**Phased regression design pass (2026-11-01):**
+`tests/test_curated.py` now contains exact-source mutation matrices
+for Minelayer (2), Chain of Command (Non Specialist), and Forward
+Observer (+1SD); `tests/test_audit_source_variant_inputs.py` checks
+unparameterized Minelayer rows (531), Forward Observer tracked/fresh
+rules parity (607 ordinary occurrences), and source-specific
+non-inference. `tests/test_scenario_api.py` checks all 11 pinned
+Chain of Command option annotations against the Specialist candidate
+filter in all four reviewed contexts, preserving other Skill qualifiers.
+
+Direct design-sanity runs: **30 passed, 2 strict xfailed**.
+The two expected failures identify confirmed type-validator defects:
+`excluded: 1` is accepted for Chain of Command even though it is not
+a boolean, and `count: true` is accepted for Forward Observer
+even though it is not an integer. The test cases stay in place as
+strict xfails until the TODO fixes make them pass; then remove the
+markers. VD-0001/0003/0005 are designed, VD-0002/0004 remain blocked,
+and the shared full-suite execution is **not yet performed**.
+See `docs/validation-queue.md` for exact selectors and dependencies.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

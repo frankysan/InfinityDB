@@ -4152,6 +4152,109 @@ def test_neurocinetics_burst_variant_rejects_broadened_source(
         load_curated_document(path)
 
 
+def _assert_rejects_reviewed_skill_extra_mutation(
+    tmp_path: Path, skill: str, field: str, value: object, error: str,
+) -> None:
+    """Load a real reviewed source with one changed exact Army modifier."""
+    root = Path(__file__).parents[1]
+    document = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    record = next(
+        row for row in document["records"] if row["id"] == f"skill:{skill}"
+    )
+    parameter = record["variantSemantics"]["occurrenceParameters"][0]
+    extra = parameter["extraValues"][0]
+    if field in {"kind", "appliesTo", "count", "excluded"}:
+        extra["effect"][field] = value
+    elif field == "extraValues":
+        parameter["extraValues"] = value
+    else:
+        extra[field] = value
+    destination = tmp_path / "mutated.json"
+    destination.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match=error):
+        load_curated_document(destination)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("extraId", 266),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "3"),
+        ("kind", "disposable-uses"),
+        ("appliesTo", "all-deployable-weapon-attacks"),
+        ("count", 1),
+        ("count", 0),
+        ("count", True),
+        ("extraValues", []),
+    ],
+)
+def test_minelayer_deployment_count_rejects_unreviewed_extras(
+    tmp_path: Path, field: str, value: object,
+) -> None:
+    _assert_rejects_reviewed_skill_extra_mutation(
+        tmp_path, "minelayer", field, value,
+        "invalid Minelayer deployment item count",
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("extraId", 374),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "Specialist"),
+        ("kind", "specialist-qualification-grant"),
+        ("appliesTo", "all-specialist-qualifications"),
+        ("excluded", False),
+        pytest.param(
+            "excluded", 1,
+            marks=pytest.mark.xfail(
+                strict=True, reason="TODO: exact bool validation of CoC exclusion",
+            ),
+        ),
+        ("excluded", None),
+    ],
+)
+def test_chain_of_command_non_specialist_rejects_unreviewed_extras(
+    tmp_path: Path, field: str, value: object,
+) -> None:
+    _assert_rejects_reviewed_skill_extra_mutation(
+        tmp_path, "chain-of-command", field, value,
+        "invalid Chain of Command Non Specialist extra",
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("extraId", 307),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "+1B"),
+        ("kind", "skill-burst-mod"),
+        ("appliesTo", "all-bs-attacks"),
+        ("count", 2),
+        ("count", 0),
+        pytest.param(
+            "count", True,
+            marks=pytest.mark.xfail(
+                strict=True, reason="TODO: exact int validation of Forward Observer SD",
+            ),
+        ),
+        ("extraValues", []),
+    ],
+)
+def test_forward_observer_special_die_rejects_unreviewed_extras(
+    tmp_path: Path, field: str, value: object,
+) -> None:
+    _assert_rejects_reviewed_skill_extra_mutation(
+        tmp_path, "forward-observer", field, value,
+        "invalid Forward Observer Special Die extra",
+    )
+
+
 def test_guard_neurocinetics_total_reaction_n53_citations() -> None:
     path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
     records = {r["id"]: r for r in load_curated_document(path)["records"]}

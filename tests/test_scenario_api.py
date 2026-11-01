@@ -98,6 +98,71 @@ def test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills
     assert candidates == frozenset({1, 2, 4})
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+@pytest.mark.parametrize("context", ["standard", "domination", "supplies", "firefight"])
+def test_pinned_chain_of_command_non_specialist_owners_do_not_qualify_alone(
+    scenario_app: Application, context: str,
+) -> None:
+    """Source-option exclusions are not a blanket permanent Unit classification."""
+    from tools.audit_source_variant_inputs import source_extra_owner_context
+
+    root = Path(__file__).parents[1]
+    owners = source_extra_owner_context(
+        root / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=26, extra_id=375,
+    )
+    assert len(owners) == 11
+    assert all(owner["owner"] == "option" and owner["extra_raw"] == "Non Specialist"
+               for owner in owners)
+    source_units = {int(owner["unit_id"]) for owner in owners}
+    assert source_units == {20, 42, 259}
+
+    actual = scenario_app.database.get_skill("chain-of-command")
+    assert actual is not None
+    excluded_variants = []
+    for variant in actual["variants"]:
+        if _non_specialist_chain_variant(variant):
+            units = [unit for unit in variant["units"] if int(unit["id"]) in source_units]
+            if units:
+                excluded_variants.append({**variant, "units": units})
+    assert excluded_variants
+    assert {
+        int(unit["id"])
+        for variant in excluded_variants for unit in variant["units"]
+    } == source_units
+
+    assert scenario_app.rules_database is not None
+    qualifiers = _qualifying_skills(scenario_app.rules_database, context)
+    assert "skill:chain-of-command" in qualifiers
+    assert "skill:doctor" in qualifiers
+    independent_unit = 20
+
+    class SourceBackedFilterDatabase:
+        def __init__(self, allow_other_skill: bool) -> None:
+            self.allow_other_skill = allow_other_skill
+
+        def get_skill(self, skill_id: str) -> dict:
+            if skill_id == "chain-of-command":
+                return {"variants": excluded_variants}
+            if skill_id == "doctor" and self.allow_other_skill:
+                return {"variants": [
+                    {"skill_name": "Doctor", "extras": [],
+                     "units": [{"id": independent_unit}]},
+                ]}
+            return {"variants": []}
+
+    only_chain = candidate_unit_ids(
+        cast(Any, SourceBackedFilterDatabase(False)),
+        scenario_app.rules_database, context,
+    )
+    assert only_chain == frozenset()
+    with_other = candidate_unit_ids(
+        cast(Any, SourceBackedFilterDatabase(True)),
+        scenario_app.rules_database, context,
+    )
+    assert with_other == frozenset({independent_unit})
+
+
 def test_specialist_candidate_variant_exclusion_is_per_skill() -> None:
     assert _non_specialist_chain_variant({
         "skill_name": "Chain of Command (Non Specialist)", "extras": [],
