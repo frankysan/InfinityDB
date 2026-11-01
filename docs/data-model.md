@@ -1118,6 +1118,31 @@ reducing unresolved Equipment IDs from **7 to
 No runtime roll resolution or cross-Army Unit-use
 index is introduced.
 
+**Reviewed GizmoKit ranged Burst variant (2026-11-01):**
+N5.3 English p. 123 defines remote `[[equipment:gizmokit]]` as
+a Burst-1 Non-Lethal BS Weapon requiring LoF. Its separate
+Silhouette-contact use is a Short Skill without an Attack Roll;
+each successful hit/use asks the target to perform a PH recovery
+Roll, not a Saving Roll. The pinned Army Equipment source `237`
+has 544 direct occurrences, including exactly 16
+`TEXT:+1B` extras with source extra ID `8`. These 16
+occurrences now have a typed `equipment-burst-mod`
+effect with `modifier: 1` and
+`appliesTo: "ranged-gizmokit-bs-attack"`. The
+extra affects the remote attack's Burst only, not contact
+use, target PH Rolls, the one-Wound-per-Order limit,
+or the Remote Presence exception.
+
+The guarded source-237 v9 refresh requires that exact raw
+signature and previous family-only metadata, rejects
+other record/schema changes, synchronizes the rules database
+and deployed-object publication, and preserves a matched
+backup under ignored `local/`. Tests compare tracked and
+fresh exports against the pinned raw Army source. The
+remaining unresolved source-level baseline is **34 Skill
+IDs and 3 Equipment IDs**; the cross-Army Unit-use index
+is still unimplemented.
+
 **Reviewed EVO Trinity Upgrade (2026-11-01):**
 The pinned Equipment source `182` has 40
 direct occurrences, exactly two carrying

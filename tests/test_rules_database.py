@@ -1634,7 +1634,7 @@ def test_tinbot_firewall_source_mods_are_equipment_only(
     assert set(rules.equipment_reviewed_extra_semantics()) == {
         169, 239, 241, 244, 247,
         "albedo", "bangbomb", "evo-hacking-device", "hacking-device",
-        "hacking-device-plus", "medikit",
+        "hacking-device-plus", "medikit", "gizmokit",
     }
     assert 169 not in rules.skill_reviewed_extra_semantics()
     assert 169 not in rules.skill_numeric_mod_semantics()
@@ -1795,6 +1795,31 @@ def test_medikit_reviewed_burst_is_ranged_only(
     facts = record["facts"]
     assert any("in Silhouette contact" in text for text in facts["effects"])
     assert any("only one Wound" in text for text in facts["effects"])
+
+
+def test_gizmokit_reviewed_burst_is_ranged_only(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    extra = rules.equipment_reviewed_extra_semantics()["gizmokit"]
+    assert extra == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 8, "extra_type": "TEXT", "raw_value": "+1B",
+            "effect": {
+                "kind": "equipment-burst-mod",
+                "applies_to": "ranged-gizmokit-bs-attack",
+                "modifier": 1,
+            },
+        }],
+    }
+    record = rules.composed_record("equipment:gizmokit")
+    assert record is not None
+    assert extra in record["variant_semantics"]["occurrence_parameters"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 123
+               for c in record["citations"])
+    assert any("in Silhouette contact" in text for text in record["facts"]["effects"])
+    assert any("one Wound" in text for text in record["facts"]["effects"])
 
 
 def test_bangbomb_reviewed_extra_excludes_template_weapons(

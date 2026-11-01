@@ -1690,10 +1690,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and **4 Equipment** source IDs. The tracked
+      occurrence parameters and **3 Equipment** source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
-      standalone ECM Guided/Hacker, Albedo, Bangbomb, MediKit ranged Burst,
+      standalone ECM Guided/Hacker, Albedo, Bangbomb, MediKit/GizmoKit ranged Burst,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
@@ -2077,7 +2077,19 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         deployed-object publication, retaining recovery copies under
         ignored `local/`. Raw-source and fresh/tracked export
         regressions preserve exact IDs and scope; no Unit-use index
-        is published. Remaining baseline: **34 Skill / 4 Equipment**.
+        is published. Remaining baseline at that point: **34 Skill / 4 Equipment**.
+      - [x] **Data processing:** Reconcile the 16 GizmoKit ranged +1B
+        variants (Equipment source 237, extra 8, TEXT:+1B) among 544
+        direct pinned Army occurrences. N5.3 p. 123 defines remote
+        GizmoKit as a Burst-1 BS Weapon; Silhouette-contact use makes
+        no Attack Roll. The exact `equipment-burst-mod` effect applies
+        only to `ranged-gizmokit-bs-attack`, not contact use or
+        the target's PH recovery Rolls. The guarded matched-v9 refresh
+        checks the source signature and changes only reviewed family
+        metadata, preserving unrelated database/publication content
+        and ignored recovery copies. Fresh/tracked export and negative
+        regression tests protect the scope; no Unit-use index is
+        published. Current baseline: **34 Skill / 3 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

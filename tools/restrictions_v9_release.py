@@ -82,6 +82,21 @@ MEDIKIT_VARIANT = {
         }],
     }],
 }
+GIZMOKIT = ("n5-core-v5.3", "equipment:gizmokit")
+GIZMOKIT_VARIANT = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [{
+            "extraId": 8, "extraType": "TEXT", "rawValue": "+1B",
+            "effect": {
+                "kind": "equipment-burst-mod",
+                "appliesTo": "ranged-gizmokit-bs-attack",
+                "modifier": 1,
+            },
+        }],
+    }],
+}
 BANGBOMB = ("n5-core-v5.3", "equipment:bangbomb")
 BANGBOMB_VARIANT = {
     "inheritance": "family",
@@ -923,23 +938,29 @@ def _check_variant_semantics_delta(
     tinbot_other: bool = False, hacking_mods: bool = False,
     hacking_srs: bool = False, hacking_firewall: bool = False,
     hacking_combinations: bool = False, bangbomb: bool = False,
-    medikit: bool = False, evo_trinity: bool = False,
+    medikit: bool = False, gizmokit: bool = False, evo_trinity: bool = False,
     hacking_trinity_access: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
     if evo_trinity and (
-        initial or medikit or bangbomb or tinbot_firewall or tinbot_other
+        initial or medikit or gizmokit or bangbomb or tinbot_firewall or tinbot_other
         or hacking_mods or hacking_srs or hacking_firewall or hacking_combinations
         or set(variants) != {EVO_HACKING_DEVICE}
     ):
         raise ValueError("EVO Trinity refresh requires exactly its Equipment record")
     if medikit and (
-        initial or bangbomb or tinbot_firewall or tinbot_other or hacking_mods
+        initial or gizmokit or bangbomb or tinbot_firewall or tinbot_other or hacking_mods
         or hacking_srs or hacking_firewall or hacking_combinations or evo_trinity
         or set(variants) != {MEDIKIT}
     ):
         raise ValueError("MediKit refresh requires exactly its Equipment record")
+    if gizmokit and (
+        initial or medikit or bangbomb or tinbot_firewall or tinbot_other or hacking_mods
+        or hacking_srs or hacking_firewall or hacking_combinations or evo_trinity
+        or hacking_trinity_access or set(variants) != {GIZMOKIT}
+    ):
+        raise ValueError("GizmoKit refresh requires exactly its Equipment record")
     if bangbomb and (
         initial or tinbot_firewall or tinbot_other or hacking_mods
         or hacking_srs or hacking_firewall or hacking_combinations or medikit
@@ -975,7 +996,8 @@ def _check_variant_semantics_delta(
         raise ValueError("Hacking combinations require exactly the two device records")
     if hacking_trinity_access and (
         initial or tinbot_other or tinbot_firewall or hacking_mods or hacking_srs
-        or hacking_firewall or hacking_combinations or evo_trinity or medikit or bangbomb
+        or hacking_firewall or hacking_combinations or evo_trinity
+        or medikit or gizmokit or bangbomb
         or set(variants) != set(hacking_keys)
     ):
         raise ValueError("Trinity access requires precisely two Hacking Device records")
@@ -1029,6 +1051,15 @@ def _check_variant_semantics_delta(
                             or after != MEDIKIT_VARIANT
                         ):
                             raise ValueError("MediKit refresh changed source-only semantics")
+                    elif key == GIZMOKIT:
+                        if not gizmokit:
+                            raise ValueError("GizmoKit requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != GIZMOKIT_VARIANT
+                        ):
+                            raise ValueError("GizmoKit refresh changed source-only semantics")
                     elif key == BANGBOMB:
                         if not bangbomb:
                             raise ValueError("Bangbomb requires source-verified refresh")
@@ -1321,6 +1352,37 @@ def refresh_medikit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("MediKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={MEDIKIT[1]}, medikit=True,
+    )
+
+
+def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only exact +1 Burst modifier for ranged GizmoKit use."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["equipment"]["items"]
+        if row["id"] == 237
+    ]
+    if (
+        len(rows) != 1
+        or rows[0]["name"] != "GizmoKit"
+        or rows[0]["applicationId"] != 237
+        or rows[0]["occurrences"] != 544
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"]
+        or rows[0]["extraSignatures"] != [{
+            "extras": [[8, "TEXT", "+1B"]], "reviewed": False, "count": 16,
+        }]
+    ):
+        raise ValueError("GizmoKit source signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
     )
 
 
@@ -1774,7 +1836,7 @@ def _refresh_metadata_v9_release(
     tinbot_other: bool = False, hacking_mods: bool = False,
     hacking_srs: bool = False, hacking_firewall: bool = False,
     hacking_combinations: bool = False, bangbomb: bool = False,
-    ecm_sources: bool = False, medikit: bool = False,
+    ecm_sources: bool = False, medikit: bool = False, gizmokit: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
 ) -> Path:
     root = root.resolve()
@@ -1867,6 +1929,7 @@ def _refresh_metadata_v9_release(
                 hacking_combinations=hacking_combinations,
                 bangbomb=bangbomb,
                 medikit=medikit,
+                gizmokit=gizmokit,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,
             )
