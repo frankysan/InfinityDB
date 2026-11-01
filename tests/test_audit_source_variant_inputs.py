@@ -71,6 +71,49 @@ def test_extra_owner_lookup_rejects_invalid_scope(
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_booty_metachemistry_exact_chart_rerolls_in_both_exports(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    for path in (ROOT / "data/generated/rules.db", fresh):
+        rules = RulesDatabase(path)
+        params = rules.skill_reviewed_extra_semantics()
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", path,
+        )
+        for source_id, skill, occurrence_count, signature_count in (
+            (25, "booty", 482, 108), (55, "metachemistry", 117, 60),
+        ):
+            [item] = select_source_variants(report, "skills", [source_id])["items"]
+            assert item["status"] == "reviewed-extra-parameter"
+            assert item["occurrences"] == occurrence_count
+            assert item["extraSignatures"] == [{
+                "extras": [[277, "TEXT", "ReRoll"]],
+                "reviewed": True, "count": signature_count,
+            }]
+            assert item["reviewedCombinations"] is None
+            assert item["reviewedExtra"] == params[skill]
+            assert params[skill] == {
+                "source": "army-extra", "kind": "reviewed-extra",
+                "extra_values": [{
+                    "extra_id": 277, "extra_type": "TEXT", "raw_value": "ReRoll",
+                    "effect": {
+                        "kind": "reroll-one-die",
+                        "applies_to": f"{skill}-deployment-chart-roll",
+                    },
+                }],
+            }
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
+            "family-only": 44, "reviewed-distance-parameter": 3,
+            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
+            "reviewed-extra-parameter": 12, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 22,
+        }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_hacker_skill_source_1000_exact_direct_programs_in_both_exports(
     tmp_path: Path,
 ) -> None:
@@ -108,8 +151,8 @@ def test_hacker_skill_source_1000_exact_direct_programs_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "reviewed-extra-parameter": 12, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 22,
         }
 
 
@@ -204,9 +247,9 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10,
+            "reviewed-extra-parameter": 12,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "unresolved-occurrence-parameter": 22,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -247,9 +290,9 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     equipment = {item["id"]: item for item in report["equipment"]["items"]}
 
     # A TEXT extra is not automatically a reviewed modifier.
-    # Hacker source 1000 now has independently certified exact signatures;
-    # these other source IDs remain unresolved.
-    for source_id in (25, 55):
+    # Booty/MetaChemistry and Hacker have exact source-specific review.
+    # Commlink and Journalist still have unresolved source annotations.
+    for source_id in (260, 272):
         item = skills[source_id]
         assert item["status"] == "unresolved-occurrence-parameter"
         assert "TEXT" in item["extraTypes"]
@@ -485,9 +528,9 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 10,
+        "reviewed-extra-parameter": 12,
         "reviewed-combination-parameter": 2,
-        "unresolved-occurrence-parameter": 24,
+        "unresolved-occurrence-parameter": 22,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -495,7 +538,8 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
     assert sources[24]["status"] == "reviewed-numeric-parameter"
     assert sources[40]["status"] == "reviewed-extra-parameter"
     assert all(s["reviewed"] for s in sources[40]["extraSignatures"])
-    assert sources[25]["status"] == "unresolved-occurrence-parameter"
+    assert sources[25]["status"] == "reviewed-extra-parameter"
+    assert sources[55]["status"] == "reviewed-extra-parameter"
     # Existing distance-only projection remains independent of numeric MODs.
     assert rules.skill_parameter_semantics() == {
         "super-jump": {"kind": "distance", "positive_sign": "omit"},
@@ -570,8 +614,8 @@ def test_decoy_215_exact_deployment_replica_counts_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "reviewed-extra-parameter": 12, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 22,
         }
 
 
@@ -613,8 +657,8 @@ def test_ft_master_261_lists_exact_cancellation_trigger_units_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "reviewed-extra-parameter": 12, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 22,
         }
 
 
@@ -670,8 +714,8 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "reviewed-extra-parameter": 12, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 22,
         }
 
 
@@ -724,8 +768,8 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "reviewed-extra-parameter": 12, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 22,
         }
 
 
@@ -768,8 +812,8 @@ def test_bangbomb_skill_266_reuses_equipment_scope_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "reviewed-extra-parameter": 12, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 22,
         }
 
 
@@ -814,8 +858,8 @@ def test_medikit_target_ph_skill_273_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "reviewed-extra-parameter": 12, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 22,
         }
 
 
@@ -859,8 +903,8 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "reviewed-extra-parameter": 12, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 22,
         }
 
 
@@ -905,9 +949,9 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 10,
+            "reviewed-extra-parameter": 12,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 24,
+            "unresolved-occurrence-parameter": 22,
         }
 
 

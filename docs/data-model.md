@@ -1143,6 +1143,39 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**Booty and MetaChemistry chart ReRolls (2026-11-01):**
+The N5.3 general modifier rule states that `ReRoll`
+in brackets lets a Trooper reroll one die when
+using the specified Skill. Booty (p. 86) and
+MetaChemistry (p. 101) each roll on a deployment
+chart after the Trooper is placed in Model form.
+The source extra does not reroll attacks or other
+rolls enabled by a chart reward.
+
+Pinned Army Skill source 25 (`Booty`) has
+482 direct occurrences, of which 108 have the
+single `277/TEXT:ReRoll` extra. Source 55
+(`MetaChemistry`) has 117, of which 60 have
+the same raw extra. These identical source
+IDs are interpreted **in each Skill's context**,
+never as a globally applicable ReRoll.
+The curated definitions retain family inheritance
+and expose one typed `reroll-one-die` effect
+applied to `booty-deployment-chart-roll` or
+`metachemistry-deployment-chart-roll`.
+Every other occurrence remains family-only.
+
+Exact extra ID/type/text, effect scopes, the
+two source frequencies, previous family-only
+semantics and unrelated database rows/schema are
+checked by curated validation, source audit,
+and a guarded paired v9 refresh. A previous
+matched pair is retained in ignored `local/`.
+Tracked/fresh rules export tests pin the result.
+No automatic roll resolution, reward selection
+or chart-roll UI is introduced. Remaining:
+**22 Skill / 1 Equipment** source IDs.
+
 **Hacker Skill source-1000 direct Hacking Programs (2026-11-01):**
 Pinned Army Skill source `1000` has **1094** direct occurrences;
 only **21** have extras, using four exact signatures:

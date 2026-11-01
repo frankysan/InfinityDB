@@ -1433,6 +1433,49 @@ def test_khd_requires_exact_pinned_upgrade_semantics(
         load_curated_document(path)
 
 
+@pytest.mark.parametrize("skill", ("booty", "metachemistry"))
+@pytest.mark.parametrize(
+    ("field", "wrong"), [
+        ("extraId", 278),
+        ("extraId", 277.0),
+        ("rawValue", "Reroll"),
+        ("extraType", "DISTANCE"),
+        ("effect", {
+            "kind": "reroll-one-die", "appliesTo": "all-rolls",
+        }),
+        ("effect", {
+            "kind": "reroll-one-die", "appliesTo": "booty-reward-attack-roll",
+        }),
+    ],
+)
+def test_deployment_chart_reroll_exact_scope(
+    tmp_path: Path, skill: str, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"] if row["id"] == f"skill:{skill}")
+    doc = valid_document()
+    doc["skillTypes"][0]["id"] = "deployment-skill"
+    record = doc["records"][0]
+    record.update({
+        "id": f"skill:{skill}", "kind": "skill",
+        "facts": {"typeIds": ["deployment-skill"]},
+        "armyLinks": [{"entity": "skill", "id": skill}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "chart.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    load_curated_document(path)
+    record["variantSemantics"]["occurrenceParameters"][0][
+        "extraValues"
+    ][0][field] = wrong
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match="chart ReRoll extra"):
+        load_curated_document(path)
+
+
 @pytest.mark.parametrize(
     "defect", ("partial", "reordered", "duplicate", "wrong-owner",
                "wrong-grant", "wrong-extra-id"),

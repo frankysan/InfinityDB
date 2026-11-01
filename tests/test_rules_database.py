@@ -1523,7 +1523,7 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     mappings = current_rules_database.skill_reviewed_extra_semantics()
     assert set(mappings) == {
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
-        "vulnerability", "hacker",
+        "vulnerability", "hacker", "booty", "metachemistry",
     }
     param = mappings["dodge"]
     assert param["kind"] == "reviewed-extra"
@@ -1581,6 +1581,30 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
         {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
     ]
+
+
+@pytest.mark.parametrize(
+    ("skill", "page"), (("booty", 86), ("metachemistry", 101)),
+)
+def test_booty_metachemistry_reroll_only_own_deployment_chart(
+    current_rules_database: RulesDatabase, skill: str, page: int,
+) -> None:
+    rules = current_rules_database
+    param = rules.skill_reviewed_extra_semantics()[skill]
+    assert param["extra_values"] == [{
+        "extra_id": 277, "extra_type": "TEXT", "raw_value": "ReRoll",
+        "effect": {
+            "kind": "reroll-one-die",
+            "applies_to": f"{skill}-deployment-chart-roll",
+        },
+    }]
+    record = rules.composed_record(f"skill:{skill}")
+    assert record is not None
+    assert record["variant_semantics"]["occurrence_parameters"][0][
+        "extra_values"
+    ] == param["extra_values"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == page
+               for c in record["citations"])
 
 
 def test_hacker_source_programs_and_upgrade_effects_are_skill_owned(

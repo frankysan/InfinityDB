@@ -1512,6 +1512,139 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "missing", "wrong-scope", "wrong-id",
+               "float-id", "other-record", "schema", "only-one"),
+)
+def test_chart_rerolls_v9_delta_is_exact_and_pairwise(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        CHART_REROLLS,
+        _check_variant_semantics_delta,
+    )
+
+    before, after = tmp_path / "before.db", tmp_path / "after.db"
+    versions = copy.deepcopy(CHART_REROLLS)
+    keys = list(versions)
+    if defect == "wrong-scope":
+        versions[keys[0]]["occurrenceParameters"][0][
+            "extraValues"
+        ][0]["effect"]["appliesTo"] = "all-rolls"
+    elif defect == "wrong-id":
+        versions[keys[0]]["occurrenceParameters"][0][
+            "extraValues"
+        ][0]["extraId"] = 278
+    elif defect == "float-id":
+        versions[keys[1]]["occurrenceParameters"][0][
+            "extraValues"
+        ][0]["extraId"] = 277.0
+    with sqlite3.connect(before) as old, sqlite3.connect(after) as new:
+        old.execute(
+            "CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)"
+        )
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*key, '{"inheritance":"family"}', "preserved") for key in keys
+        ] + [("n5-core-v5.3", "skill:other", None, "preserved")])
+        old.commit()
+        old.backup(new)
+        for key, variant in versions.items():
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE collection_id=? AND id=?",
+                (json.dumps(variant), *key),
+            )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:metachemistry'")
+    changes: dict[tuple[str, str], str] = {
+        key: json.dumps(value) for key, value in versions.items()
+    }
+    if defect == "only-one":
+        changes.pop(keys[0])
+    if defect is None:
+        _check_variant_semantics_delta(before, after, changes, chart_rerolls=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                before, after, changes, chart_rerolls=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(before, after, changes)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count",
+               "extra-id", "raw", "status", "previous", "count-per-extra"),
+)
+def test_chart_rerolls_v9_requires_both_exact_pinned_sources(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = [
+        {
+            "id": source_id, "name": name, "applicationId": source_id,
+            "occurrences": count, "status": "unresolved-occurrence-parameter",
+            "reviewedVariant": None, "reviewedDistance": None,
+            "reviewedNumericMod": None, "reviewedExtra": None,
+            "reviewedCombinations": None, "rawValues": [],
+            "extraSignatures": [{
+                "extras": [[277, "TEXT", "ReRoll"]],
+                "reviewed": False, "count": signatures,
+            }],
+        }
+        for source_id, name, count, signatures in (
+            (25, "Booty", 482, 108), (55, "MetaChemistry", 117, 60),
+        )
+    ]
+    if defect == "name":
+        source[0]["name"] = "Booties"
+    elif defect == "app-id":
+        source[1]["applicationId"] = 54
+    elif defect == "count":
+        source[0]["occurrences"] = 481
+    elif defect == "extra-id":
+        source[1]["extraSignatures"][0]["extras"][0][0] = 278
+    elif defect == "raw":
+        source[0]["extraSignatures"][0]["extras"][0][2] = "Reroll"
+    elif defect == "status":
+        source[1]["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source[0]["reviewedExtra"] = {"unexpected": True}
+    elif defect == "count-per-extra":
+        source[1]["extraSignatures"][0]["count"] = 59
+    elif defect == "missing":
+        source.pop()
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_a: {"catalogs": {"skills": {"items": source}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_chart_rerolls_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path,
+            "variant_records": {"skill:booty", "skill:metachemistry"},
+            "chart_rerolls": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="Chart ReRoll source"):
+            release.refresh_chart_rerolls_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
     "defect", (None, "name", "app-id", "count", "extra-id",
                "extra-type", "raw", "pair-order", "status", "previous",
                "extra-combination"),

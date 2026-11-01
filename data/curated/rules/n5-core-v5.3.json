@@ -21975,7 +21975,24 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 277,
+                                "extraType": "TEXT",
+                                "rawValue": "ReRoll",
+                                "effect": {
+                                    "kind": "reroll-one-die",
+                                    "appliesTo": "booty-deployment-chart-roll"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {
@@ -22031,7 +22048,24 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 277,
+                                "extraType": "TEXT",
+                                "rawValue": "ReRoll",
+                                "effect": {
+                                    "kind": "reroll-one-die",
+                                    "appliesTo": "metachemistry-deployment-chart-roll"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

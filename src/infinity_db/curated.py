@@ -259,6 +259,26 @@ KILLER_HACKING_VARIANT: dict[str, Any] = {
 }
 
 
+# The generic N5.3 ReRoll annotation applies to the Skill's own Roll.
+# Both are optional deployment chart Rolls, not rolls using chart rewards.
+CHART_REROLL_VARIANTS: dict[str, dict[str, Any]] = {
+    slug: {
+        "inheritance": "family",
+        "occurrenceParameters": [{
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extraValues": [{
+                "extraId": 277, "extraType": "TEXT", "rawValue": "ReRoll",
+                "effect": {
+                    "kind": "reroll-one-die",
+                    "appliesTo": f"{slug}-deployment-chart-roll",
+                },
+            }],
+        }],
+    }
+    for slug in ("booty", "metachemistry")
+}
+
+
 # Source Skill 1000 attaches directly assigned programs/Upgrades to the Hacker.
 # These are not automatically Hacking Device extras. One profile variant has
 # two ordered program grants: neither standalone component is certified.
@@ -871,6 +891,25 @@ def _validate_reviewed_extra_parameter(
             or values != expected
         ):
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
+        return
+    if inheritance == "family" and len(army_links) == 1 and isinstance(
+        army_links[0], dict
+    ) and army_links[0].get("entity") == "skill" and (
+        army_links[0].get("id") in CHART_REROLL_VARIANTS
+    ):
+        skill = army_links[0]["id"]
+        expected = CHART_REROLL_VARIANTS[skill][
+            "occurrenceParameters"
+        ][0]["extraValues"]
+        values = parameter.get("extraValues")
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(not isinstance(x, dict) or type(x.get("extraId")) is not int
+                   for x in values)
+        ):
+            raise ValueError(f"{context}: invalid {skill} chart ReRoll extra")
         return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "hacker"}

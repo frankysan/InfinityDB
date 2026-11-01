@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **24 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **22 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1703,6 +1703,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Decoy source-215 exact additional replica Marker counts,
       Vulnerability source-220 weapon-name-scoped Viral Immunity restriction,
       Hacker Skill source-1000 direct programs and exact Upgrades,
+      Booty/MetaChemistry source-25/55 chart ReRolls,
       RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
@@ -2303,7 +2304,20 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         and matched-v9 metadata-only promotion
         leave Equipment devices unaffected and
         reject unobserved signatures. Current
-        baseline: **24 Skill / 1 Equipment**.
+        baseline: **24 Skill / 1 Equipment** at that point.
+      - [x] **Data processing:** Certify the
+        `277/TEXT:ReRoll` variants on Booty source 25
+        (108/482 occurrences) and MetaChemistry
+        source 55 (60/117). N5.3 p. 86 and p. 101
+        each require a deployment-time chart roll;
+        the general N5.3 ReRoll modifier applies
+        to that Skill's roll, not rolls performed
+        with an obtained weapon, Skill or bonus.
+        Encode separate exact chart-roll scopes,
+        preserve unannotated family-only profiles,
+        and guard the two-record matched-v9 refresh
+        against raw-source drift and unrelated changes.
+        Current baseline: **22 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

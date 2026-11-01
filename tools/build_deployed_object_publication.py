@@ -113,6 +113,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote Skill-273 target PH replacements on canonical MediKit Equipment",
     )
     migration.add_argument(
+        "--refresh-chart-rerolls-v9", action="store_true",
+        help="Promote exact Booty and MetaChemistry chart ReRoll signatures",
+    )
+    migration.add_argument(
         "--refresh-hacker-skill-v9", action="store_true",
         help="Promote source-1000 direct Hacker programs and exact upgrades",
     )
@@ -225,6 +229,7 @@ def main() -> int:
         or args.refresh_decoy_v9
         or args.refresh_vulnerability_viral_v9
         or args.refresh_hacker_skill_v9
+        or args.refresh_chart_rerolls_v9
         or args.refresh_evo_trinity_v9
         or args.refresh_ecm_source_variants_v9
         or args.refresh_tinbot_other_v9
@@ -241,6 +246,7 @@ def main() -> int:
             promote_restrictions_v9,
             refresh_bangbomb_skill_v9_release,
             refresh_bangbomb_v9_release,
+            refresh_chart_rerolls_v9_release,
             refresh_core_pdf_pin_v9_release,
             refresh_deactivator_v9_release,
             refresh_decoy_v9_release,
@@ -290,6 +296,11 @@ def main() -> int:
         if args.refresh_medikit_v9:
             backup = refresh_medikit_v9_release()
             print("Refreshed exact ranged MediKit Burst upgrade in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_chart_rerolls_v9:
+            backup = refresh_chart_rerolls_v9_release()
+            print("Refreshed exact Booty/MetaChemistry ReRolls in matched v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_hacker_skill_v9:

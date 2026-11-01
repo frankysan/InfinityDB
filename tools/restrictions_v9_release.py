@@ -18,6 +18,7 @@ from typing import Any
 
 from infinity_db.curated import (
     BANGBOMB_SKILL_PARAMETERS,
+    CHART_REROLL_VARIANTS,
     DECOY_VARIANT,
     FT_MASTER_UNIT_SIGNATURES,
     FT_MASTER_VARIANT,
@@ -115,6 +116,10 @@ GIZMOKIT_VARIANT = {
 GIZMOKIT_TARGET_PH_VARIANT = {
     **GIZMOKIT_VARIANT,
     "sourceCatalogParameters": GIZMOKIT_TARGET_PH_PARAMETERS,
+}
+CHART_REROLLS = {
+    ("n5-core-v5.3", f"skill:{skill}"): variant
+    for skill, variant in CHART_REROLL_VARIANTS.items()
 }
 HACKER_SKILL = ("n5-core-v5.3", "skill:hacker")
 VULNERABILITY = ("n5-core-v5.3", "skill:vulnerability")
@@ -1023,10 +1028,20 @@ def _check_variant_semantics_delta(
     remdriver: bool = False, bangbomb_skill: bool = False,
     tagcom: bool = False, ft_master: bool = False,
     decoy: bool = False, vulnerability: bool = False,
-    hacker_skill: bool = False,
+    hacker_skill: bool = False, chart_rerolls: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if chart_rerolls and (
+        initial or bangbomb or bangbomb_skill or medikit or gizmokit
+        or deactivator or gizmokit_target_ph or medikit_target_ph
+        or remdriver or ft_master or tagcom or decoy or vulnerability
+        or hacker_skill or evo_trinity or killer_hacking or impersonation
+        or tinbot_firewall or tinbot_other or hacking_mods or hacking_srs
+        or hacking_firewall or hacking_combinations or hacking_trinity_access
+        or set(variants) != set(CHART_REROLLS)
+    ):
+        raise ValueError("Chart ReRoll refresh requires only both Skill records")
     if hacker_skill and (
         initial or bangbomb or bangbomb_skill or medikit or gizmokit
         or deactivator or gizmokit_target_ph or medikit_target_ph
@@ -1221,6 +1236,17 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key in CHART_REROLLS:
+                        if not chart_rerolls:
+                            raise ValueError("Chart ReRoll requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != CHART_REROLLS[key]
+                            or type(after["occurrenceParameters"][0][
+                                "extraValues"][0]["extraId"]) is not int
+                        ):
+                            raise ValueError("Chart ReRoll changed source-only semantics")
                     elif key == HACKER_SKILL:
                         if not hacker_skill:
                             raise ValueError("Hacker Skill requires source-verified refresh")
@@ -1699,6 +1725,46 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_chart_rerolls_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote exactly Booty and MetaChemistry deployment chart ReRolls."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    items = {
+        row["id"]: row for row in report["catalogs"]["skills"]["items"]
+        if row["id"] in (25, 55)
+    }
+    for source_id, name, occurrences, count in (
+        (25, "Booty", 482, 108),
+        (55, "MetaChemistry", 117, 60),
+    ):
+        row = items.get(source_id)
+        if (
+            row is None or row["name"] != name
+            or row["applicationId"] != source_id
+            or row["occurrences"] != occurrences
+            or row["status"] != "unresolved-occurrence-parameter"
+            or row["reviewedVariant"] is not None
+            or row["reviewedDistance"] is not None
+            or row["reviewedNumericMod"] is not None
+            or row["reviewedExtra"] is not None
+            or row["reviewedCombinations"] is not None
+            or row["rawValues"]
+            or row["extraSignatures"] != [{
+                "extras": [[277, "TEXT", "ReRoll"]],
+                "reviewed": False, "count": count,
+            }]
+        ):
+            raise ValueError(f"Chart ReRoll source-{source_id} signature drift")
+    return _refresh_metadata_v9_release(
+        root=root,
+        variant_records={key[1] for key in CHART_REROLLS},
+        chart_rerolls=True,
     )
 
 
@@ -2597,7 +2663,7 @@ def _refresh_metadata_v9_release(
     remdriver: bool = False, bangbomb_skill: bool = False,
     tagcom: bool = False, ft_master: bool = False,
     decoy: bool = False, vulnerability: bool = False,
-    hacker_skill: bool = False,
+    hacker_skill: bool = False, chart_rerolls: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2702,6 +2768,7 @@ def _refresh_metadata_v9_release(
                 decoy=decoy,
                 vulnerability=vulnerability,
                 hacker_skill=hacker_skill,
+                chart_rerolls=chart_rerolls,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,
