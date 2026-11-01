@@ -1524,6 +1524,19 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     assert set(mappings) == {
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
         "vulnerability", "hacker", "booty", "metachemistry", "regeneration",
+        "neurocinetics",
+    }
+    assert mappings["neurocinetics"] == {
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 8, "extra_type": "TEXT", "raw_value": "+1B",
+            "effect": {
+                "kind": "skill-burst-mod",
+                "applies_to": "neurocinetics-reactive-turn-bs-weapon-single-target",
+                "modifier": 1,
+            },
+        }],
     }
     param = mappings["dodge"]
     assert param["kind"] == "reviewed-extra"

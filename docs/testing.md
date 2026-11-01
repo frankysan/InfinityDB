@@ -887,6 +887,21 @@ passes `--check`. Current unresolved source
 counts are **34 Skill / 4 Equipment**; the
 cross-Army usage index remains unimplemented.
 
+**Neurocinetics reactive Burst source variant (2026-11-01):**
+`tests/test_audit_source_variant_inputs.py` now verifies the four
+option-specific source-109 `8/TEXT:+1B` signatures and their two
+Unit identities across four Army contexts, in both the tracked and
+fresh rules export. `tests/test_curated.py` rejects unsupported
+IDs, kind, source type, value and non-Reactive-Turn scopes.
+`tools.stage_neurocinetics_burst --output-dir local/<unique-stage>`
+creates an ignored staged v9 `rules.db` and matched deployed-object
+publication without mutating tracked artifacts;
+`--promote-staged` rechecks input hashes/HEAD and preserves rollback
+copies. The published pair retains all 17 reviewed objects, and
+the source inventory moves from 21 to **20 unresolved Skill IDs**.
+This is metadata publication and does not establish a Unit-usage
+index, attack resolution, full browser signoff or release acceptance.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

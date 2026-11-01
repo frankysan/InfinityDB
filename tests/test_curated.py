@@ -4119,6 +4119,39 @@ def test_esx02_jet_propulsion_wording_in_pinned_source_versions() -> None:
     assert "variar libremente su trayectoria por el aire" in example
 
 
+@pytest.mark.parametrize(
+    ("mutation", "value"),
+    [
+        ("modifier", 2),
+        ("modifier", True),
+        ("appliesTo", "active-turn-bs-weapon"),
+        ("kind", "equipment-burst-mod"),
+        ("extraId", 7),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "+2B"),
+    ],
+)
+def test_neurocinetics_burst_variant_rejects_broadened_source(
+    tmp_path: Path, mutation: str, value: object,
+) -> None:
+    root = Path(__file__).parents[1]
+    document = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    record = next(
+        item for item in document["records"] if item["id"] == "skill:neurocinetics"
+    )
+    extra = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"][0]
+    if mutation in {"modifier", "appliesTo", "kind"}:
+        extra["effect"][mutation] = value
+    else:
+        extra[mutation] = value
+    path = tmp_path / "mutated.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Neurocinetics reactive Burst extra"):
+        load_curated_document(path)
+
+
 def test_guard_neurocinetics_total_reaction_n53_citations() -> None:
     path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
     records = {r["id"]: r for r in load_curated_document(path)["records"]}

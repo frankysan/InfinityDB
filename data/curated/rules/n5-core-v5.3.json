@@ -18813,7 +18813,25 @@
                 }
             ],
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 8,
+                                "extraType": "TEXT",
+                                "rawValue": "+1B",
+                                "effect": {
+                                    "kind": "skill-burst-mod",
+                                    "appliesTo": "neurocinetics-reactive-turn-bs-weapon-single-target",
+                                    "modifier": 1
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

@@ -961,10 +961,11 @@ this metadata does not calculate stacking or an effective game-state MOD.
 
 The **`reviewed-extra`** kind adds explicit, per-source-ID typed effects
 without broadening numeric MODs or the distance-only browser projection.
-Its reviewed Skill families are `skill:dodge` and
-`skill:super-jump`; the exact source Equipment variants
+Reviewed Skill families include `skill:dodge`, `skill:super-jump`
+and `skill:neurocinetics`; exact source Equipment variants include
 `equipment:tinbot-firewall`, `equipment:tinbot-discover`
-and `equipment:tinbot-ecm-guided` are also supported.
+and `equipment:tinbot-ecm-guided`. Each owner has a closed,
+source-specific set of accepted extras and effect scopes.
 Each entry requires
 `extraId`, `extraType`, `rawValue`, and a discriminated `effect`:
 

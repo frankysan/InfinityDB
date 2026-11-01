@@ -914,6 +914,32 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "neurocinetics"}
+    ]:
+        expected = [{
+            "extraId": 8,
+            "extraType": "TEXT",
+            "rawValue": "+1B",
+            "effect": {
+                "kind": "skill-burst-mod",
+                "appliesTo": "neurocinetics-reactive-turn-bs-weapon-single-target",
+                "modifier": 1,
+            },
+        }]
+        values = parameter.get("extraValues")
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(not isinstance(entry, dict)
+                   or type(entry.get("extraId")) is not int
+                   or not isinstance(entry.get("effect"), dict)
+                   or type(entry["effect"].get("modifier")) is not int
+                   for entry in values)
+        ):
+            raise ValueError(f"{context}: invalid Neurocinetics reactive Burst extra")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "regeneration"}
     ]:
         values = parameter.get("extraValues")

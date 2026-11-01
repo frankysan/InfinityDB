@@ -1693,7 +1693,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **21 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **20 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1730,10 +1730,13 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         to the Reactive Turn while the Skill sets BS Weapon B=1
         in the Active Turn. A focused regression pins source
         ownership, signature, existing curated citation and prose.
-        **Still open:** typed source-variant publication and its
-        matched rules/database artifact validation. The audit
-        correctly retains source 109 among the 21 unresolved Skill
-        IDs; no Unit-usage index or gameplay engine was created.
+        The exact reactive-only `skill-burst-mod` parameter was
+        subsequently published through guarded v9 rules/database and
+        deployed-object artifact promotion, with 17 reviewed objects
+        unchanged and rollback copies retained. Mutated modifier,
+        source signature and scope tests fail closed; the pinned
+        source audit now reports **20** unresolved Skill IDs. The
+        cross-Army Unit-usage index and final release gates remain open.
       - [x] **Data processing:** Audit the lone Journalist
         source-272 `1/TEXT:+3` on the Tohaa Diplomatic Delegate.
         N5.3 already defines Journalist's Guts Roll and campaign

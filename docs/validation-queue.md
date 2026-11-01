@@ -91,8 +91,31 @@ Each item records:
   Deferred: one ordinary full project test run against the
   cumulative implementation state, before the next mandatory merge/release
   acceptance. Exact check: `tools/run_checks.py --stage test`.
-  Outcome: awaiting run; do not treat the targeted module as full-suite
-  evidence or claim source 109 has a typed variant.
+  Outcome: awaiting run; the later typed source-109 migration is tracked
+  separately as VR-0002. This entry records the earlier source-only review.
+
+- [ ] **VR-0002** (2026-11-01; ready-to-run): Publish typed source-109
+  Neurocinetics `+1B` in the curated rules, matched v9 `rules.db`,
+  and deployed-object publication, without changing the 17 objects.
+  Work: [Rule-variant usage index](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree based on `7cb11e9b`.
+  Risk: elevated for artifact synchronization (therefore guarded staging,
+  pinned-source verification, rollback, and immediate rules/publication checks).
+  Immediate: staged and promoted using `tools.stage_neurocinetics_burst`
+  from ignored `local/neurocinetics-burst-n53-20261101/`;
+  rules sha256 `9f8b482413d39fd7596da4aec63f0a9c2d14525e01c635965763fdec44e7fa08`,
+  objects sha256 `3d02fbda90f39b35e33cbaf74300309ecbc969867e1725d41570bb04f50eaa72`;
+  source-variant tests **51 passed**, curated negative mutations
+  **7 passed**, rules database **166 passed**, deployed-object publication
+  **12 passed**; rules stage **PASS**, targeted Ruff **PASS**, Pyright
+  **0 errors**, Markdownlint/docs links **PASS**, diff check **PASS**.
+  A stale exact-set expectation in the rules database suite was corrected
+  and all 166 tests then passed. The three promoted file hashes were
+  independently reverified. Design: none pending; tests implemented
+  in this pass.
+  Deferred: ordinary full project test run (`tools/run_checks.py --stage test`)
+  against the cumulative state and the regular mandatory hosted CI/release
+  acceptance. Outcome: awaiting broader verification.
 
 ## Recording template
 
