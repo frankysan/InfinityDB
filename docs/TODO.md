@@ -1901,18 +1901,31 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         option to the pinned source-variant audit with
         source-owner regressions. This is diagnostic provenance,
         not a generated Unit-use index.
-      - [ ] **Data processing:** Seek authoritative N5.3 FAQ,
-        erratum, or source clarification for what unqualified
-        Charontid Hacking Device Plus `UPGRADE: SR-1` changes.
-        The leading working hypothesis is that it modifies
-        Saving Rolls against **all Hacking Programs** used
-        through the Device Plus, but that scope is not
-        source-confirmed. Do not infer that it applies
-        to all Comms Attacks, or assign any particular
-        program automatically. Until scope is confirmed,
-        preserve both raw
-        occurrences as unresolved; leave source `101`
-        and the **34 Skill / 10 Equipment** baseline unchanged.
+      - [x] **Data processing:** Perform a bounded official-source
+        applicability review of the Charontid Hacking Device Plus
+        `UPGRADE: SR-1`. English N5.3 p. 54 and the current
+        official Hacking/Hacking Device Wiki pages describe
+        Upgrades but do not assign a program scope to this
+        unqualified string. The pinned English FAQ v0.1
+        (printed pp. 1–4) clarifies Firewall activation, not
+        this Upgrade. Human-Sphere and tournament rosters
+        reproduce the string without an authoritative
+        interpretation. Record the evidence and limits in
+        [data-model.md](data-model.md).
+        The leading hypothesis remains an SR-1 penalty
+        against Saving Rolls caused by any Hacking Program
+        used through the Device Plus, **not a reviewed fact**.
+      - [ ] **Data processing:** Obtain an authoritative publisher
+        clarification or erratum before promoting the two
+        Charontid `UPGRADE: SR-1` occurrences. The
+        outstanding question is whether the modifier
+        applies device-wide to all programs capable of
+        causing Saving Rolls, only to named programs,
+        or to some other scope. Do not infer an effect
+        on all Comms Attacks or program-specific effects
+        without evidence. Preserve both raw occurrences
+        as unresolved; retain source `101` and the
+        **34 Skill / 10 Equipment** baseline unchanged.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7
