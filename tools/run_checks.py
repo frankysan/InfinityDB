@@ -229,7 +229,8 @@ def stage_definitions(
         if name in {"test", "preflight"}:
             command = (
                 [python, "-m", "pytest"] if name == "test" else
-                [python, str(REPO_ROOT / "tools" / "ci_preflight.py"), "--isolated", "--"]
+                [python, str(REPO_ROOT / "tools" / "ci_preflight.py"), "--isolated",
+                 "--assets", "required" if include_full_assets else "off", "--"]
             )
             if test_workers != "0":
                 distribution = (

@@ -345,10 +345,9 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
 def test_installed_wheel_smoke_runs_database_health_check() -> None:
     workflow = _read(".github/workflows/installed-wheel.yml")
 
-    assert (
-        '"$RUNNER_TEMP/wheel-venv/bin/infinity-db" database-health '
-        "generated/infinity.db --require-raw"
-    ) in workflow
+    assert "python tools/installed_wheel_smoke.py" in workflow
+    smoke = _read("tools/installed_wheel_smoke.py")
+    assert '[main_cli, "database-health", "generated/infinity.db", "--require-raw"]' in smoke
 
 
 def test_full_asset_checks_can_run_against_candidate_branch() -> None:

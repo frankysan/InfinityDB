@@ -70,13 +70,26 @@ def verify_deployment_assets(
     )
     _require_complete_asset_set(validation)
 
+    verify_runtime_artifacts(database_path, rules_database_path, publication_manifest_path)
+    return validation
+
+
+def verify_runtime_artifacts(
+    database_path: Path,
+    rules_database_path: Path,
+    publication_manifest_path: Path,
+) -> None:
+    """Validate database schemas and source binding independently of SVG availability."""
     validate_database_symbol_provenance(database_path, publication_manifest_path)
     RulesDatabase(rules_database_path).validate()
-    return validation
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--skip-svg", action="store_true",
+        help="check database schemas and snapshot binding without requiring SVG files",
+    )
     parser.add_argument(
         "--static-root",
         type=Path,
@@ -104,6 +117,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.skip_svg:
+            verify_runtime_artifacts(
+                args.database, args.rules_database, args.publication_manifest,
+            )
+            print("Runtime databases valid and snapshot-matched; SVG validation skipped")
+            return 0
         validation = verify_deployment_assets(
             args.static_root,
             database_path=args.database,

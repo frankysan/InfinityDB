@@ -63,8 +63,10 @@ For `--stage docs` or `--all`, bootstrap the lockfile-pinned Node.js Markdownlin
 dependency with `npm ci --ignore-scripts --no-audit --no-fund` first (Node.js 22+).
 The docs check stage itself works offline and does not install packages.
 The `preflight` stage builds and audits a wheel, installs declared development/symbol
-dependencies in a fresh virtual environment, and runs the full indexed pytest suite
-plus Pyright. These pip operations may download packages. `--all` and `--profile all`
+dependencies in a fresh virtual environment, verifies real indexed deployment artifacts,
+and runs indexed Ruff, pytest and Pyright. It also smoke-tests the built wheel in a
+separate clean installation outside the checkout. These pip operations may download
+packages. `--all` and `--profile all`
 include this isolated validation; preflight is skipped if an earlier stage fails.
 It compares the Git **index**, not unstaged tracked edits; use it after staging the
 proposed commit. It checks

@@ -732,7 +732,8 @@ def test_ci_preflight_stage_runs_isolated_full_index_despite_local_targets(
     assert stage.command == (
         sys.executable,
         str(Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"),
-        "--isolated", "--", "-n", "auto", "--dist", "worksteal",
+        "--isolated", "--assets", "required" if include_assets else "off",
+        "--", "-n", "auto", "--dist", "worksteal",
         "-m", "full_assets or not full_assets" if include_assets else "not full_assets", "-q",
     )
 
@@ -754,7 +755,7 @@ def test_full_run_includes_isolated_preflight_after_successful_checks(
     ]) == 0
     assert [stage.name for stage in invoked] == list(run_checks.STAGE_ORDER)
     assert invoked[-1].command[2:] == (
-        "--isolated", "--", "-m", "not full_assets", "-q",
+        "--isolated", "--assets", "off", "--", "-m", "not full_assets", "-q",
     )
     assert "tests/test_web.py" in invoked[0].command
     assert "section_web" in invoked[0].command[-2]
@@ -820,7 +821,7 @@ def test_standalone_preflight_forwards_worker_and_distribution_choices(
         "--test-workers", workers, "--test-dist", distribution,
     ]) == 0
     [command] = invoked
-    assert command[2:4] == ("--isolated", "--")
+    assert command[2:6] == ("--isolated", "--assets", "off", "--")
     if workers == "0":
         assert "-n" not in command
     else:
@@ -968,7 +969,7 @@ def test_ci_preflight_main_propagates_clean_export_pytest_failure(
     monkeypatch.setattr(ci_preflight, "untracked_files", lambda: [])
     monkeypatch.setattr(ci_preflight, "export_tracked", lambda _path: 2)
     calls = []
-    def fake_check(export, environment, pytest_args):
+    def fake_check(export, environment, pytest_args, **_kwargs):
         calls.append((export, environment, pytest_args))
         return ["pytest failed in clean export (exit 2)"]
 
@@ -1011,10 +1012,62 @@ def test_isolated_preflight_checks_only_declared_environment_and_preserves_failu
     assert calls[1][0] != sys.executable
     assert calls[2][1:] == ["-m", "tools.build_deployed_object_publication"]
     assert calls[3][-1] == "--check"
-    assert calls[4][1:] == [
+    assert calls[4][1:] == ["-m", "tools.verify_deployment_assets"]
+    assert calls[5][1:] == ["-m", "tools.run_checks", "--stage", "lint"]
+    assert calls[6][1:] == [
         "-m", "pytest", "-q", "-m", "full_assets or not full_assets", "-n", "2",
     ]
-    assert calls[5][1:] == ["-m", "pyright", "--pythonpath", calls[1][0]]
+    assert calls[7][1:] == ["-m", "pyright", "--pythonpath", calls[1][0]]
+
+
+@pytest.mark.parametrize("module,message", [
+    ("tools.verify_deployment_assets", "indexed deployment-artifact verification failed"),
+    ("tools.run_checks", "Ruff failed in isolated export"),
+])
+def test_indexed_artifact_and_lint_failures_propagate_even_with_svg_checks_off(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, module: str, message: str,
+) -> None:
+    calls = []
+
+    def run(command, **_kwargs):
+        calls.append(command)
+        return SimpleNamespace(returncode=1 if command[2] == module else 0)
+
+    monkeypatch.setattr(ci_preflight.subprocess, "run", run)
+    assert ci_preflight.check_export(
+        tmp_path, tmp_path / "venv", [], include_full_assets=False,
+    ) == [message]
+    assert calls[4][-1] == "--skip-svg"
+    assert calls[6][-2:] == ["-m", "not full_assets"]
+
+
+@pytest.mark.parametrize("wheel_fails", [False, True])
+def test_isolated_preflight_runs_built_wheel_smoke_only_after_successful_wheel_audit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+    wheel_fails: bool,
+) -> None:
+    def audit(_export, wheels):
+        wheels.mkdir()
+        (wheels / "demo.whl").write_bytes(b"wheel fixture")
+        return ["wheel content missing"] if wheel_fails else []
+
+    monkeypatch.setattr(ci_preflight, "audit_wheel", audit)
+    monkeypatch.setattr(ci_preflight, "untracked_files", lambda: [])
+    monkeypatch.setattr(ci_preflight, "export_tracked", lambda _path: 1)
+    monkeypatch.setattr(ci_preflight, "check_export", lambda *_args, **_kwargs: [])
+    calls = []
+    monkeypatch.setattr(ci_preflight.subprocess, "run", lambda command, **_kwargs: (
+        calls.append(command) or SimpleNamespace(returncode=1)
+    ))
+    assert ci_preflight.main(["--isolated", "--assets", "off"]) == 1
+    output = capsys.readouterr().out
+    if wheel_fails:
+        assert not calls
+        assert "Installed-wheel smoke skipped" in output
+    else:
+        assert len(calls) == 1
+        assert calls[0][-2:] == ["--assets", "off"]
+        assert "installed-wheel CLI/runtime smoke failed" in output
 
 
 @pytest.mark.parametrize("failed_step", ["venv", "pip", "tools.build_deployed_object_publication"])

@@ -8,8 +8,9 @@ Local working trees contain Git-ignored and untracked files that CI never sees. 
 3. builds a wheel from that export and checks all tracked src/ files (except
    explicit design-source exemptions) plus configured setuptools shared data-files.
 
-Use --isolated to install only declared CI dependencies in a fresh virtual environment
-and run both pytest and Pyright. This explicit mode may download Python packages.
+Use --isolated to verify indexed release artifacts, run Ruff/pytest/Pyright with
+declared dependencies, and smoke-test the built wheel in a second fresh environment.
+This explicit mode may download Python packages.
 
 It does not replace the installed-wheel smoke workflow; see docs/ci.md.
 """
@@ -124,7 +125,10 @@ def audit_wheel(export: Path, wheel_dir: Path) -> list[str]:
     return missing
 
 
-def check_export(export: Path, environment: Path | None, pytest_args: list[str]) -> list[str]:
+def check_export(
+    export: Path, environment: Path | None, pytest_args: list[str], *,
+    include_full_assets: bool = True,
+) -> list[str]:
     """Run clean-source checks, optionally without developer-installed packages."""
     python = Path(sys.executable)
     env = os.environ.copy()
@@ -165,7 +169,21 @@ def check_export(export: Path, environment: Path | None, pytest_args: list[str])
             return ["clean-export deployed-object publication preparation failed"]
 
     problems = []
-    asset_args = ["-m", "full_assets or not full_assets"] if environment is not None else []
+    if environment is not None:
+        artifact_command = [str(python), "-m", "tools.verify_deployment_assets"]
+        if not include_full_assets:
+            artifact_command.append("--skip-svg")
+        result = subprocess.run(artifact_command, cwd=export, env=env)
+        if result.returncode:
+            problems.append("indexed deployment-artifact verification failed")
+        result = subprocess.run(
+            [str(python), "-m", "tools.run_checks", "--stage", "lint"], cwd=export, env=env,
+        )
+        if result.returncode:
+            problems.append("Ruff failed in isolated export")
+    asset_args = [
+        "-m", "full_assets or not full_assets" if include_full_assets else "not full_assets",
+    ] if environment is not None else []
     result = subprocess.run(
         [str(python), "-m", "pytest", "-q", *asset_args, *pytest_args], cwd=export, env=env,
     )
@@ -183,14 +201,21 @@ def check_export(export: Path, environment: Path | None, pytest_args: list[str])
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=(__doc__ or "CI preflight").splitlines()[0])
-    parser.add_argument("--skip-wheel", action="store_true", help="skip the wheel-content audit")
+    parser.add_argument(
+        "--skip-wheel", action="store_true",
+        help="skip wheel-content audit and installed-wheel smoke",
+    )
+    parser.add_argument(
+        "--assets", choices=("off", "required"), default="required",
+        help="off skips SVG files but still verifies indexed database provenance",
+    )
     parser.add_argument(
         "--skip-pytest", action="store_true", help="skip the clean-export pytest run"
     )
     parser.add_argument("--allow-untracked", action="store_true", help="warn instead of fail")
     parser.add_argument(
         "--isolated", action="store_true",
-        help="install declared CI dependencies in a fresh venv; run pytest/Pyright; may download",
+        help="run indexed lint, artifacts, pytest/type and installed-wheel checks; may download",
     )
     parser.add_argument(
         "pytest_args", nargs="*", help="arguments passed to pytest (prefix with --)"
@@ -215,13 +240,29 @@ def main(argv: list[str] | None = None) -> int:
         print("Exporting Git index...", flush=True)
         print(f"Exported {export_tracked(export)} tracked files to {export}", flush=True)
 
-        if not args.skip_wheel:
-            problems += audit_wheel(export, Path(tmp) / "wheel")
+        wheel_dir = Path(tmp) / "wheel"
+        wheel_problems = [] if args.skip_wheel else audit_wheel(export, wheel_dir)
+        problems += wheel_problems
 
         if not args.skip_pytest:
             problems += check_export(
                 export, Path(tmp) / "venv" if args.isolated else None, args.pytest_args,
+                include_full_assets=args.assets == "required",
             )
+        if args.isolated and not args.skip_wheel:
+            if wheel_problems:
+                print("Installed-wheel smoke skipped: wheel audit failed", flush=True)
+            else:
+                wheel = next(wheel_dir.glob("*.whl"))
+                result = subprocess.run([
+                    sys.executable, str(export / "tools/installed_wheel_smoke.py"),
+                    "--wheel", str(wheel), "--source-root", str(export),
+                    "--work-dir", str(Path(tmp) / "installed-wheel"), "--assets", args.assets,
+                ], cwd=export, env={key: value for key, value in os.environ.items() if key not in {
+                    "PYTHONPATH", "PYTHONHOME", "GIT_INDEX_FILE", "GIT_DIR", "GIT_WORK_TREE",
+                }})
+                if result.returncode:
+                    problems.append("installed-wheel CLI/runtime smoke failed")
 
     if problems:
         print("\nCI preflight FAILED:")

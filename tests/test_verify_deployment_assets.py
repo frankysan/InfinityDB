@@ -175,3 +175,30 @@ def test_deployment_rejects_publication_without_snapshot_provenance(tmp_path: Pa
 
     with pytest.raises(DeploymentProvenanceError, match="sourceSnapshot.armyArtifact.sha256"):
         publication_snapshot_sha256(publication_manifest)
+
+
+@pytest.mark.parametrize("mismatched", [False, True])
+def test_svg_skip_still_checks_real_database_publication_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mismatched: bool,
+) -> None:
+    database, digest = _build_fixture_database(tmp_path, "runtime")
+    manifest, _ = _write_publication(tmp_path, army_sha256="0" * 64 if mismatched else digest)
+    validated = []
+
+    class Rules:
+        def __init__(self, path: Path) -> None:
+            self.path = path
+
+        def validate(self) -> None:
+            validated.append(self.path)
+
+    monkeypatch.setattr(deployment_assets, "RulesDatabase", Rules)
+    monkeypatch.setattr(deployment_assets, "validate_asset_set", lambda *_args, **_kwargs: (
+        pytest.fail("SVG availability must not be checked in skip mode")
+    ))
+    rules = tmp_path / "rules.db"
+    assert deployment_assets.main([
+        "--skip-svg", "--database", str(database), "--rules-database", str(rules),
+        "--publication-manifest", str(manifest),
+    ]) == (1 if mismatched else 0)
+    assert validated == ([] if mismatched else [rules])

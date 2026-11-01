@@ -32,7 +32,8 @@ The runner exposes seven stages:
   curated rules validation/database build;
 - `preflight` — isolated CI-parity check: rejects untracked non-ignored files, audits wheel
   contents from the index, installs declared dependencies in a fresh environment, and runs
-  pytest plus Pyright there. It may download Python packages; see
+  indexed Ruff, pytest and Pyright, verifies the release-artifact source binding, and
+  smoke-tests the built wheel in another clean environment. It may download Python packages; see
   [CI preflight](#ci-preflight-clean-checkout-and-wheel-contents).
 
 Named profiles are:
@@ -89,7 +90,7 @@ A local working tree can contain files that a fresh CI checkout never sees. Befo
 pushing a candidate, run the full Git-index preflight using the project virtual environment:
 
 ```powershell
-.\.venv\Scripts\python.exe tools/ci_preflight.py -- -n auto
+.\.venv\Scripts\python.exe tools/run_checks.py --stage preflight
 ```
 
 Use `.venv/bin/python` on Linux/macOS. The preflight:
@@ -109,6 +110,11 @@ Use `.venv/bin/python` on Linux/macOS. The preflight:
    except the explicit `src/infinity_db/web/static/logo/` design-source exemption.
    It also checks every source named by `[tool.setuptools.data-files]` in
    `pyproject.toml` is in the index and has a corresponding `.data/data/` wheel member.
+5. In isolated mode, installs that wheel without dependencies or an editable source
+   link in a second fresh environment outside the checkout. The shared
+   `tools/installed_wheel_smoke.py` helper checks both CLI entry points, Army/rules
+   builds, database health, installed configuration lookup, application routes, and
+   operation after removing SVG directories from only that disposable installation.
 
 To catch undeclared dependencies and reliance on ignored local evidence before
 committing, use the isolated mode after staging the intended candidate:
@@ -125,14 +131,18 @@ automatically, after the working-tree checks. Run only that gate with:
 ```
 
 The runner forwards `--test-workers`, `--test-dist` and its resolved asset selection
-to isolated pytest. Preflight always checks the full indexed suite; positional targets
+to preflight and isolated pytest. `--assets off` omits SVG-file checks while retaining
+database schema and database/publication snapshot verification; `required` also checks
+the complete indexed SVG publication. Preflight always checks the full indexed suite; positional targets
 and `--test-section` narrow only the ordinary working-tree test stage. The ordinary
 test stage retains access to local evidence and optional browser tooling, while the
 isolated pass checks the environment and files available to a clean CI checkout.
 
 This exports the same index, creates a fresh virtual environment without system-site
 packages, installs only `.[dev,symbols]` from that export, prepares the publication,
-then runs pytest (including tracked full-asset tests) and Pyright using that environment.
+and invokes the existing deployment-artifact verifier on the actual indexed databases
+and publication manifest. It also runs the canonical Ruff stage against the index,
+pytest (including full-asset tests when selected), and Pyright in that environment.
 It does not inherit `PYTHONPATH`,
 `PYTHONHOME`, a disposable Git-index override, or `PYTEST_ADDOPTS` that could mask tests.
 Package installation is explicit in this mode and may download dependencies; it
@@ -147,13 +157,17 @@ For a quick packaging/untracked check without repeating pytest or installing dep
 .\.venv\Scripts\python.exe tools/ci_preflight.py --skip-pytest
 ```
 
-`--skip-wheel` omits the wheel audit; combining the skip switches exercises
+`--skip-wheel` omits the wheel audit and installed-wheel smoke; combining the skip switches exercises
 only index export and untracked-file checks. These are direct `ci_preflight.py`
 options; the standard runner's `preflight` stage always uses `--isolated`.
 
-**Limits:** Preflight audits wheel member *presence*, not byte-level equivalence,
-installed runtime behavior, or files that are not declared as package data.
-The installed-wheel smoke workflow tests installed behavior separately.
+**Limits:** Wheel member auditing checks presence, not byte-level equivalence. The
+isolated installed-wheel smoke additionally exercises runtime/resource lookup; it
+cannot prove every unexercised consumer's packaging requirements. Source tests, builds
+and installed-wheel smoke run on the invoking OS/Python, so multi-platform byte
+comparisons and production Docker startup still require their separate CI gates.
+Indexed Markdown lint/link checks are not part of preflight; the ordinary `docs`
+stage checks the working tree.
 The wheel command uses pip's PEP 517 build isolation; it may require network
 access for build requirements when those are not cached. It does not acquire
 Infinity Army or wiki sources. Run the preflight again after staging intended

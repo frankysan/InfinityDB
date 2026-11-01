@@ -55,7 +55,9 @@ hash/text validation and must fail on changed or malformed evidence.
 The primary Ubuntu 3.11 `--all` leg includes the isolated `preflight` stage
 after the ordinary test/build/rules stages. It invokes
 `tools/ci_preflight.py --isolated`, installs only indexed `.[dev,symbols]`
-dependencies in a fresh environment, and runs the indexed pytest suite plus Pyright.
+dependencies in a fresh environment, verifies indexed release-artifact provenance,
+and runs indexed Ruff, pytest and Pyright. It then exercises the built wheel in a
+second fresh environment using the same smoke helper as the installed-wheel workflow.
 This additional pass checks dependency declarations and clean-source assumptions
 independently of the working-tree checks. If any earlier stage fails or cannot start,
 preflight is reported as skipped; the remaining ordinary stages still run unless
@@ -71,10 +73,11 @@ intentional logo design-source directory), including standalone modules and
 implicit namespace packages, **and** all configured `[tool.setuptools.data-files]`
 sources at their expected wheel `.data/data/` destinations. Missing files,
 unsupported Git modes, unresolved index entries, build failures, or unexpected wheel counts fail
-the stage. The wheel audit does not install or execute the wheel and does
-not guarantee that unrelated undeclared external files were packaged.
-The independent installed-wheel workflow owns execution and resource
-resolution after installation.
+the stage. The structural wheel audit does not infer undeclared shared-resource
+requirements. Isolated preflight therefore also installs and executes the built
+wheel outside the checkout; application startup and CLI builds must resolve their
+resources from the installation. The independent installed-wheel workflow retains
+the same acceptance on hosted Ubuntu.
 
 Local Git-index preflight, including an optional clean-export pytest run,
 is documented in [development checks](testing.md#ci-preflight-clean-checkout-and-wheel-contents).
@@ -141,7 +144,11 @@ checksum-bound files from being rewritten by checkout line-ending conversion.
 
 `.github/workflows/installed-wheel.yml` builds a wheel, installs it in a fresh virtual environment,
 stages controlled Army/rules fixtures outside the repository checkout, and exercises the installed
-contract.
+contract. Both the workflow and isolated preflight call
+`tools/installed_wheel_smoke.py`, keeping CLI, configuration, runtime-route and
+asset-free acceptance in one implementation. The installed wheel has no developer
+dependencies or editable import path; runtime probes use Python's isolated mode
+and reject application imports outside that environment.
 
 The job verifies:
 

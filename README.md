@@ -412,7 +412,7 @@ python tools/run_checks.py --all
 # CI preflight: staged src/ files and configured wheel data, without rerunning pytest
 python tools/ci_preflight.py --skip-pytest
 
-# Before committing: clean index export, declared dependencies only, pytest + Pyright
+# Before committing: indexed lint/artifacts/tests/types and installed-wheel smoke
 # Creates a fresh virtual environment and may download Python packages
 python tools/run_checks.py --stage preflight
 
