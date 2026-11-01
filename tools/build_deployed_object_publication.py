@@ -137,6 +137,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote source-verified GizmoKit ranged +1B in a matched v9 pair",
     )
     migration.add_argument(
+        "--refresh-bangbomb-skill-v9", action="store_true",
+        help="Promote Skill-266 +4 via the existing restricted Bangbomb Equipment effect",
+    )
+    migration.add_argument(
         "--refresh-bangbomb-v9", action="store_true",
         help="Promote source-verified Bangbomb Dodge +4 extras in a matched v9 pair",
     )
@@ -187,6 +191,7 @@ def main() -> int:
         or args.refresh_movement_distance_v9
         or args.refresh_tinbot_firewall_v9
         or args.refresh_bangbomb_v9
+        or args.refresh_bangbomb_skill_v9
         or args.refresh_medikit_v9
         or args.refresh_medikit_target_ph_v9
         or args.refresh_gizmokit_v9
@@ -209,6 +214,7 @@ def main() -> int:
             raise ValueError("--check cannot be combined with v9 migration operations")
         from tools.restrictions_v9_release import (
             promote_restrictions_v9,
+            refresh_bangbomb_skill_v9_release,
             refresh_bangbomb_v9_release,
             refresh_core_pdf_pin_v9_release,
             refresh_deactivator_v9_release,
@@ -284,6 +290,11 @@ def main() -> int:
         if args.refresh_gizmokit_v9:
             backup = refresh_gizmokit_v9_release()
             print("Refreshed exact ranged GizmoKit Burst upgrade in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_bangbomb_skill_v9:
+            backup = refresh_bangbomb_skill_v9_release()
+            print("Refreshed exact Skill-266 Bangbomb on canonical Equipment in v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_bangbomb_v9:

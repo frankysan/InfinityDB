@@ -1143,6 +1143,44 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**Cross-catalog Bangbomb Skill source 266 (2026-11-01):**
+N5.3 English p. 120 defines Bangbomb as Equipment.
+Army additionally classifies `Bangbomb (+4)` under
+Skill source `266` for four direct profile occurrences
+of RacerBots (PanOceania, Yu Jing, Haqqislam,
+Nomads). Every occurrence has the exact standalone
+`310/TEXT:+4` extra. Equipment source `246`
+already publishes that same raw extra and reviewed
+`dodge-roll-mod` effect on 125 direct occurrences.
+
+The canonical `equipment:bangbomb` record keeps
+its existing source-246 `occurrenceParameters`.
+A separate `sourceCatalogParameters` mapping for
+`skills/266` uses the **same** extra, modifier 4,
+and `appliesTo:
+dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons`.
+Only eligible enemy attacks within LoF or ZoC receive
+this Dodge modifier; Template Weapon attacks never
+do. The extra is not a generic PH/Dodge bonus,
+Skill grant, or permission to ignore simultaneous
+Template Weapon attacks. The read-only auditor and
+`RulesDatabase.skill_source_equipment_overrides()`
+classify these four source occurrences under the
+canonical Equipment record, without inventing
+`skill:bangbomb`.
+
+A source-266 and original-Equipment-signature-guarded
+metadata-only v9 refresh changes only this Equipment
+family's added source mapping. It rejects broader
+Dodge scope, changed numeric effects, unrelated
+schema/records, or unrecognized raw source forms.
+It preserves the matched publication and ignored
+recovery copies; tracked and fresh rules exports are
+cross-checked against the pinned source audit.
+No live Unit-use index or gameplay resolver is added.
+Remaining unresolved baseline:
+**29 Skill / 1 Equipment**.
+
 **Cross-catalog MediKit target PH replacements (2026-11-01):**
 The pinned Army Skill source `273` lists `MediKit (PH=N)`,
 although N5.3 p. 124 defines `[[equipment:medikit|MediKit]]`
@@ -1163,10 +1201,10 @@ separate `sourceCatalogParameters` entry for
 `skills/273`. Each exact extra maps to
 `medikit-target-ph-replacement` scoped only to
 `target-medikit-recovery-ph-roll`.
-The cross-catalog validator now permits only the
-known source-273 MediKit and source-254 GizmoKit
-assignments; `RulesDatabase.skill_source_equipment_overrides()`
-and the pinned source auditor project both without
+The cross-catalog validator permits exact Skill
+source mappings for MediKit (273), GizmoKit (254)
+and Bangbomb (266); `RulesDatabase.skill_source_equipment_overrides()`
+and the pinned source auditor project all three without
 inventing duplicate Skill definitions.
 
 An exact source-273 guard and matched-v9 metadata-only

@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **30 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **29 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1697,6 +1697,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Deactivator Burst/ReRoll, Killer Hacking Device source-145 upgrades,
       Impersonation source-249 IMP-2 deployment restriction,
       Skill-listed GizmoKit source-254 and MediKit source-273 target PH replacements,
+      Bangbomb Skill source-266 restricted Dodge +4,
       RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
@@ -2187,7 +2188,26 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         signatures, tracked/fresh DB comparisons, negative
         regressions and guarded matched-v9 publication.
         No gameplay roll resolver or Unit-use index.
-        Current baseline: **30 Skill / 1 Equipment**.
+        Baseline at that point: **30 Skill / 1 Equipment**.
+      - [x] **Data processing:** Reconcile Bangbomb Skill
+        source `266` with canonical
+        `equipment:bangbomb`, retaining the exact
+        source `310/TEXT:+4` on all **4** direct
+        RacerBots profile occurrences (PanOceania,
+        Yu Jing, Haqqislam and Nomads). Equipment
+        source `246` already has the same reviewed
+        extra on **125** occurrences. N5.3 p. 120
+        restricts the modifier to Dodge against attacks
+        from enemies in LoF/ZoC, excluding Template
+        Weapons. Add a source-catalog mapping on the
+        existing Equipment rule, with the *identical*
+        typed Dodge scope and no duplicate Skill.
+        Pinned source signatures, explicit effect equality,
+        negative validator/delta tests, and a matched-v9
+        metadata-only refresh preserve other Equipment
+        semantics and publication. No live Unit-use index
+        or broader Dodge modifier is introduced.
+        Current baseline: **29 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

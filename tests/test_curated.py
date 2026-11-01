@@ -1617,6 +1617,55 @@ def test_medikit_requires_exact_ranged_burst_extra(
 
 
 @pytest.mark.parametrize(
+    ("field", "wrong"), [
+        ("extraId", 311),
+        ("extraId", 310.0),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "+3"),
+        ("effect", {
+            "kind": "dodge-roll-mod",
+            "appliesTo": "all-dodge-rolls",
+            "modifier": 4,
+        }),
+        ("effect", {
+            "kind": "dodge-roll-mod",
+            "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+            "modifier": 5,
+        }),
+        ("effect", {
+            "kind": "dodge-roll-mod",
+            "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+            "modifier": 4.0,
+        }),
+    ],
+)
+def test_bangbomb_skill_266_reuses_only_the_exact_equipment_dodge_scope(
+    tmp_path: Path, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"]
+                   if row["id"] == "equipment:bangbomb")
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": "equipment:bangbomb", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": "bangbomb"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "bangbomb-skill.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    entry = record["variantSemantics"]["sourceCatalogParameters"][0]["extraValues"][0]
+    entry[field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid cross-catalog Bangbomb Skill extra"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("index", "field", "wrong"), [
         (0, "extraId", 53),
         (0, "extraId", 52.0),

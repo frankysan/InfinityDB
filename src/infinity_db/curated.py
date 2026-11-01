@@ -222,6 +222,23 @@ KILLER_HACKING_VARIANT: dict[str, Any] = {
 }
 
 
+# Army additionally lists Bangbomb (+4) as Skill 266 on RacerBots,
+# although the reviewed rules owner is canonical Equipment source 246.
+# Preserve exactly the same Dodge eligibility restriction, not a generic +4.
+BANGBOMB_SKILL_PARAMETERS: list[dict[str, Any]] = [{
+    "catalog": "skills", "sourceId": 266,
+    "source": "army-extra", "kind": "reviewed-extra",
+    "extraValues": [{
+        "extraId": 310, "extraType": "TEXT", "rawValue": "+4",
+        "effect": {
+            "kind": "dodge-roll-mod",
+            "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+            "modifier": 4,
+        },
+    }],
+}]
+
+
 # Army lists target-side PH overrides as Skills 254/273, although both
 # canonical GizmoKit and MediKit definitions are Equipment. Keep those
 # provenance identities distinct from the single game-rule owner.
@@ -840,11 +857,12 @@ def _validate_variant_semantics(
             f"{sorted(VARIANT_INHERITANCE_MODES)}"
         )
 
-    # Source-native Skill catalog labels refer to target-side Equipment PH rolls.
-    # Each reviewed Skill source ID must match its exact Equipment rule owner.
+    # Army Skill catalog extras can refer to existing Equipment rule families.
+    # Permit only exact source IDs, effect scope, and canonical Equipment owners.
     if "sourceCatalogParameters" in value:
         extra = value["sourceCatalogParameters"]
         expected_cross_catalog = {
+            "bangbomb": BANGBOMB_SKILL_PARAMETERS,
             "gizmokit": GIZMOKIT_TARGET_PH_PARAMETERS,
             "medikit": MEDIKIT_TARGET_PH_PARAMETERS,
         }
@@ -864,17 +882,22 @@ def _validate_variant_semantics(
             or any(
                 not isinstance(item, dict) or type(item.get("extraId")) is not int
                 or not isinstance(item.get("effect"), dict)
-                or type(item["effect"].get("value")) is not int
+                or type(item["effect"].get(
+                    "modifier" if equipment_id == "bangbomb" else "value"
+                )) is not int
                 for item in extra[0]["extraValues"]
             )
             or extra != expected_cross_catalog[equipment_id]
         ):
             label = str(equipment_id)
-            if equipment_id == "gizmokit":
+            if equipment_id == "bangbomb":
+                label = "Bangbomb"
+            elif equipment_id == "gizmokit":
                 label = "GizmoKit"
             elif equipment_id == "medikit":
                 label = "MediKit"
-            raise ValueError(f"{context}: invalid cross-catalog {label} target PH")
+            detail = "Skill extra" if equipment_id == "bangbomb" else "target PH"
+            raise ValueError(f"{context}: invalid cross-catalog {label} {detail}")
     parameters = value.get("occurrenceParameters", [])
     if not isinstance(parameters, list):
         raise ValueError(f"{context}: 'occurrenceParameters' must be an array")

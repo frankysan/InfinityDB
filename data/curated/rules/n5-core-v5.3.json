@@ -16298,6 +16298,26 @@
                             }
                         ]
                     }
+                ],
+                "sourceCatalogParameters": [
+                    {
+                        "catalog": "skills",
+                        "sourceId": 266,
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 310,
+                                "extraType": "TEXT",
+                                "rawValue": "+4",
+                                "effect": {
+                                    "kind": "dodge-roll-mod",
+                                    "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+                                    "modifier": 4
+                                }
+                            }
+                        ]
+                    }
                 ]
             }
         },

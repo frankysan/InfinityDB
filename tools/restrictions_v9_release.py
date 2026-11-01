@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import (
+    BANGBOMB_SKILL_PARAMETERS,
     GIZMOKIT_TARGET_PH_PARAMETERS,
     KILLER_HACKING_VARIANT,
     MEDIKIT_TARGET_PH_PARAMETERS,
@@ -169,6 +170,10 @@ BANGBOMB_VARIANT = {
             },
         }],
     }],
+}
+BANGBOMB_SKILL_VARIANT = {
+    **BANGBOMB_VARIANT,
+    "sourceCatalogParameters": BANGBOMB_SKILL_PARAMETERS,
 }
 ECM_SOURCES = {
     ("n5-core-v5.3", "equipment:ecm-guided"): {
@@ -1000,10 +1005,19 @@ def _check_variant_semantics_delta(
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
     killer_hacking: bool = False, impersonation: bool = False,
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
-    remdriver: bool = False,
+    remdriver: bool = False, bangbomb_skill: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if bangbomb_skill and (
+        initial or bangbomb or medikit or gizmokit or deactivator
+        or gizmokit_target_ph or medikit_target_ph or remdriver
+        or evo_trinity or killer_hacking or impersonation
+        or tinbot_firewall or tinbot_other or hacking_mods or hacking_srs
+        or hacking_firewall or hacking_combinations or hacking_trinity_access
+        or set(variants) != {BANGBOMB}
+    ):
+        raise ValueError("Bangbomb Skill mapping requires exactly its Equipment record")
     if medikit_target_ph and (
         initial or medikit or gizmokit or gizmokit_target_ph or deactivator
         or bangbomb or evo_trinity or killer_hacking or impersonation
@@ -1218,6 +1232,13 @@ def _check_variant_semantics_delta(
                             or after != DEACTIVATOR_VARIANT
                         ):
                             raise ValueError("Deactivator refresh changed source-only semantics")
+                    elif key == BANGBOMB and bangbomb_skill:
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != BANGBOMB_VARIANT
+                            or after != BANGBOMB_SKILL_VARIANT
+                        ):
+                            raise ValueError("Bangbomb Skill mapping changed prior Equipment scope")
                     elif key == BANGBOMB:
                         if not bangbomb:
                             raise ValueError("Bangbomb requires source-verified refresh")
@@ -1579,6 +1600,38 @@ def refresh_remdriver_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("RemDriver source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={REMDRIVER[1]}, remdriver=True,
+    )
+
+
+def refresh_bangbomb_skill_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only the existing restricted Dodge scope for Skill-listed Bangbomb."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["skills"]["items"] if row["id"] == 266
+    ]
+    if (
+        len(rows) != 1
+        or rows[0]["name"] != "Bangbomb"
+        or rows[0]["applicationId"] != 266
+        or rows[0]["occurrences"] != 4
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"]
+        or rows[0]["extraSignatures"] != [{
+            "extras": [[310, "TEXT", "+4"]], "reviewed": False, "count": 4,
+        }]
+    ):
+        raise ValueError("Bangbomb Skill source-266 signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={BANGBOMB[1]}, bangbomb_skill=True,
     )
 
 
@@ -2229,7 +2282,7 @@ def _refresh_metadata_v9_release(
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
     killer_hacking: bool = False, impersonation: bool = False,
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
-    remdriver: bool = False,
+    remdriver: bool = False, bangbomb_skill: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2328,6 +2381,7 @@ def _refresh_metadata_v9_release(
                 gizmokit_target_ph=gizmokit_target_ph,
                 medikit_target_ph=medikit_target_ph,
                 remdriver=remdriver,
+                bangbomb_skill=bangbomb_skill,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,
