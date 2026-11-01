@@ -1917,17 +1917,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         The leading hypothesis remains an SR-1 penalty
         against Saving Rolls caused by any Hacking Program
         used through the Device Plus, **not a reviewed fact**.
-      - [ ] **Data processing:** Obtain an authoritative publisher
-        clarification or erratum before promoting the two
-        Charontid `UPGRADE: SR-1` occurrences. The
-        outstanding question is whether the modifier
-        applies device-wide to all programs capable of
-        causing Saving Rolls, only to named programs,
-        or to some other scope. Do not infer an effect
-        on all Comms Attacks or program-specific effects
-        without evidence. Preserve both raw occurrences
-        as unresolved; retain source `101` and the
-        **34 Skill / 10 Equipment** baseline unchanged.
+      - [x] **Data processing:** Register the unresolved Charontid
+        program scope as [SRC-001](official-source-clarifications.md#src-001--charontid-hacking-device-plus-unqualified-sr-1).
+        The publisher request is tracked under the post-1.0
+        External source clarifications task; do not promote
+        the unqualified extra before an authoritative answer.
       - [x] **Data processing:** Review all 125 direct Bangbomb
         Equipment occurrences (source ID `246`, extra `310`,
         `TEXT: +4`) against N5.3 English p. 120. The modifier
@@ -3105,113 +3099,19 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 **Project domain:** Data processing
 
-These external corrections and rulings do **not** block 1.0 when the sources
-and nature of each disagreement are clear to users. The 1.0 acceptance task
-owns disclosure and accurate scope; this section owns later authoritative
-resolution. Preserve reviewed source values and uncertainty while waiting.
-An external correction can be incorporated earlier when available without
-making its arrival a release prerequisite.
+These external corrections and rulings do **not** block 1.0 while
+the affected player references disclose the unresolved source scope.
+The canonical [official-source-clarifications.md](official-source-clarifications.md)
+register owns the evidence, question wording, stable SRC IDs and publisher
+response status. This TODO section tracks only the remaining request/
+follow-up action. Retain source-native values until official resolution.
 
-- [ ] Seek an applicable official **Silent / Attribute-Immunity** clarification:
-  whether the Saving-Roll-triggered Trait protection of Immunity (ARM)/(BTS)
-  negates Silent's earlier conditional Dodge MOD, and whether Spanish N5.3
-  p. 182's omitted Face to Face qualifier is intentional. The current reference
-  follows the explicit English Trait scope and discloses the application question
-  on Silent, Immunity and Silenced Pistol; no ruling or retroactive roll change is
-  inferred. This source follow-up is non-blocking while the disclosure is accurate;
-  final release-matched acceptance remains separate.
-
-- [ ] Seek source corrections or clarification for the pinned Fireteam chart
-  references disclosed under ARMY-01: 11 rows referencing eight exact slugs
-  without Unit definitions (including three Combined Army Spec-Ops placeholders), ARJUNA's global-only
-  match and KORSAN's FTO annotation without an FTO-named local loadout.
-  Preserve chart names/annotations and uncertainty; do not create aliases or
-  eligible options from similar names. The visible disclosure is locally
-  accepted; an external publisher response is not a 1.0 prerequisite.
-
-- [ ] Continue review of PARA Mine's intended Army footnote marker, Sepsitor
-  Plus's missing Army `[*]`, and WildParrot's printed `Non-Lethal` against
-  its E/M ammunition effect; Endgame's missing Army `Double Shot` is already
-  shown with provenance. Both Sepsitor variants now link to the p. 73 rules,
-  but the cause of the missing Army footnote remains unverified.
-
-- [ ] **REA-045 — Official Armed Turret E/Mitter ruling:** Seek an
-  applicable Corvus Belli erratum/FAQ or scoped confirmation of
-  whether the Turret profile's one Saving Roll is intentional or
-  the two-roll canonical E/Mitter applies. Do not infer a unique
-  turret E/M rule or overwrite Army source data in the meantime.
-
-- [ ] Seek authoritative publication corrections for AP Thunderbolt
-  (both Wiki languages), AP+EXP CC Weapon (Spanish Wiki) and Stun Pistol
-  (Spanish Wiki). Their current player-facing source notes retain
-  the discrepancies; closing source-coverage review does not imply
-  that Corvus Belli has resolved the underlying publication conflicts.
-
-- [ ] Establish official precedence or corrections for the six Mine
-  S0-versus-Army-S1 discrepancies and Dazer's cross-publication
-  S0/S1 conflict before modifying profiles or publishing a definitive
-  active-object geometry ruling. S0 itself remains a valid N5.3
-  template (25 mm base, 3 mm high; general rules p. 18), also
-  present in N5.1/N5.2.
-
-- [ ] **REA-027 — Spanish Flash Pulse chart correction:** Seek an authoritative
-  correction for Spanish Wiki Weapon Chart revisions 3987/3988, which list two
-  PB rolls without State: Stunned. Both N5.3 PDF languages, pinned Army Weapon 72
-  and the published reference retain one roll, Non-Lethal and Stunned.
-  Keep the source disagreement visible; revision chronology alone is not a ruling.
-
-- [ ] **REA-028 — Kobra Pistol CC Anti-materiel ruling:** Seek official
-  clarification on the bilingual printed chart versus Army/current Wiki.
-  Keep the disputed Trait separate from DA's supported two Saving Rolls
-  (three on a Critical). BS and CC share Army source ID 221, so preserve exact
-  mode scope. Wiki revisions 4021/4077/4082 retain historical evidence, not
-  automatic precedence; do not infer Anti-materiel from DA.
-
-- [ ] **REA-030 — Core versus ITS FAQ scope:** Seek clarification on whether
-  the ITS scenario-element Marker-State answer and undeployed Ancillary Killed
-  exception also apply to the four core N5.3 scenarios. Preserve the currently
-  reviewed applicability, including the bounded Annihilation ruling; do not
-  universalize ITS-only answers or change core missions while awaiting a ruling.
-  Remaining in-scope FAQ coverage stays under the 1.0 FAQ task.
-
-- [ ] **REA-034 — Official example correction:** Seek an official
-  correction for the Level 3 Morat example granting Level 4's +1
-  BS/CD in both printed languages. Do not infer that the example
-  overrides the Fireteam Level table in the meantime.
-
-- [ ] **REA-037 — Official Armed Turret Silhouette ruling:**
-  Seek a scoped Corvus Belli correction or approved precedence
-  decision for S2 detailed profiles versus S1 summary tables.
-  Do not change the existing S2 value solely from the summary or
-  treat its use as an authoritative resolution.
-
-- [ ] **REA-038 — Non-Allied direct-target ruling:** Obtain a scoped
-  current N5 ruling or explicit project decision on the *derived*
-  interpretation for non-Allied Unconscious/Immobilized, Neutral,
-  Hostile, and scenario-specific targets. Absence of an Allied gate
-  in direct Skill text alone is not a verified universal permission.
-  Do not change gameplay eligibility beyond confirmed clauses until
-  this source decision is made.
-
-- [ ] **REA-041 — Official Fireteam dice clarification:** Obtain an
-  authoritative erratum or scoped ruling for Spanish N5.3 p. 140
-  versus p. 75 and English pp. 75/136. Keep the contradiction
-  explicit meanwhile; this external dependency does not block the
-  locally reviewed 1.0 reference explanation.
-
-- [ ] **REA-042 — Official Dodge modifier clarification:** Seek an
-  authoritative correction for the PDF-versus-Wiki failed-PH
-  condition. The unresolved external source disagreement is visible
-  to players and is not a remaining 1.0 implementation blocker.
-
-- [ ] Seek authoritative clarification of **Domination's 350-point SWC cross-language source conflict**.
-  English N5.3 p. 151, English N5.2 p. 150
-  and pinned English Wiki revision 3264 print 6 SWC; official Spanish N5.3
-  p. 155 prints **7 CAP/SWC** for the same scenario and Army Points.
-  Retain the published English-source 6 with a visible `needs-verification`
-  issue until clarification; do not silently override one official edition.
-  This specific discrepancy does not itself require changing the scenario
-  model or reopening the completed 1.0 interaction-review ledger.
+- [ ] Prepare and submit a consolidated set of official source clarification
+  requests from the [canonical register](official-source-clarifications.md).
+  Record each publisher response against its stable SRC ID, then add only
+  implementation follow-ups that a verified ruling actually requires.
+  This external work is non-blocking for 1.0 while the published
+  reference accurately discloses uncertainty.
 
 ### Source notation and rule references
 

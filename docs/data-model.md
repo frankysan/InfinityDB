@@ -999,40 +999,13 @@ reviews can reuse the CLI with explicit source and
 extra IDs. The current unresolved baseline stays
 **34 Skill / 10 Equipment source IDs**.
 
-**Authoritative applicability follow-up (2026-11-01):**
-The pinned English N5.3 rules p. 54 explain that custom
-Upgrade Programs appear next to a Hacker or Device,
-but provide no default scope for `UPGRADE: SR-1`
-without a program name. The official N5.3
-[Hacking](https://infinitythewiki.com/Hacking)
-and [Hacking Device](https://infinitythewiki.com/Hacking_Device)
-Wiki pages describe the same program/device relationship
-without defining this exact unqualified modifier.
-The pinned English FAQ v0.1, printed pp. 1–4,
-has a Quantronic Combat clarification on **Firewall**
-availability, but no question specifying the target
-program(s) for a Charontid `SR-1` Upgrade.
-[Human-Sphere's Charontid roster](https://human-sphere.com/Charontid)
-repeats the exact loadout notation, which corroborates
-its display but **does not supply authoritative
-applicability**. No reviewed primary-source erratum,
-official clarification, or FAQ answer was identified
-establishing the intended scope. This is a bounded
-negative evidence review, not proof that a clarification
-does not exist elsewhere.
-
-The leading interpretation remains **-1 to the
-target's Saving Roll against each Hacking Program
-used through this Device Plus that causes Saving
-Rolls**. Programs that cause no Saving Rolls cannot
-receive a Saving Roll MOD. That interpretation remains
-**provisional**, not a published gameplay fact.
-A definitive ruling must state whether the effect is
-device-wide, applies only to particular programs,
-or has another intended scope. Until then, retain
-the original two Army extras, the unresolved audit
-classification, and the existing matched publication
-without adding a generic `program-saving-roll-mod`.
+**Official clarification still needed:** The unqualified
+Charontid `SR-1` does not identify the affected
+program(s). The provisional device-wide interpretation
+and the bounded negative FAQ/Wiki/source review are
+recorded as [SRC-001](official-source-clarifications.md#src-001--charontid-hacking-device-plus-unqualified-sr-1).
+Keep the two raw occurrences unresolved and do not add a
+generic Saving Roll effect without official confirmation.
 
 **Remaining source-parameter inventory (pinned Army source and current
 generated rules database):** `tools/audit_source_variant_inputs.py` produces a

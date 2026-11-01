@@ -38,6 +38,11 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
 
 - `rules-semantics.md` — audited rules meaning that already has a concrete InfinityDB consumer.
 - `rules-research.md` — verified source findings retained for possible future product/model work.
+- [official-source-clarifications.md](official-source-clarifications.md) — canonical,
+  stable-ID register of unresolved and locally reconciled rules, Army, Wiki, FAQ
+  and scenario discrepancies requiring possible official rulings or source
+  corrections. Owns question wording, evidence, and publisher-response status;
+  `TODO.md` tracks only the remaining follow-up work.
 - `n5-source-history.md` — N5 official update-post index, historical Army evidence, and
   cross-source reconciliation procedure; an index, not a verified completeness ledger.
 - [v1.0-source-coverage-audit.md](v1.0-source-coverage-audit.md) — dated 2026-10-31
