@@ -1690,6 +1690,31 @@ def test_tinbot_discover_and_ecm_guided_extras_are_source_specific(
         assert source_id not in rules.skill_reviewed_extra_semantics()
 
 
+def test_bangbomb_reviewed_extra_excludes_template_weapons(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    effect = rules.equipment_reviewed_extra_semantics()["bangbomb"]
+    assert effect == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 310, "extra_type": "TEXT", "raw_value": "+4",
+            "effect": {
+                "kind": "dodge-roll-mod",
+                "applies_to": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+                "modifier": 4,
+            },
+        }],
+    }
+    record = rules.composed_record("equipment:bangbomb")
+    assert record is not None
+    assert record["variant_semantics"]["inheritance"] == "family"
+    assert effect in record["variant_semantics"]["occurrence_parameters"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 120
+               for c in record["citations"])
+    assert "bangbomb" not in rules.skill_reviewed_extra_semantics()
+
+
 def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
     current_rules_database: RulesDatabase,
 ) -> None:

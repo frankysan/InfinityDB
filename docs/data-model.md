@@ -1048,12 +1048,36 @@ keeps `fullCatalogSummary` for the entire catalog and lists selected
 IDs separately, so global counts are never mistaken for subset counts.
 It does **not** calculate Unit usage.
 
+**Reviewed Bangbomb Dodge modifier (2026-11-01):**
+The pinned source Equipment `246` has exactly 125
+direct occurrences, each with a single extra `310`
+(`TEXT: +4`), all now reviewed. English N5.3 p. 120
+restricts that +4 to Dodge Rolls against attacks by
+enemy Troopers in the user's LoF or ZoC, explicitly
+**excluding Template Weapon attacks**. The
+`equipment:bangbomb` family record retains its
+original rules, with one exact `reviewed-extra`
+effect of kind `dodge-roll-mod`, `modifier: 4`
+and `appliesTo:
+"dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons"`.
+This is a source-variant description, not a runtime
+Dodge/ARO resolution engine. The guarded v9 promotion
+requires exactly this raw signature and old family
+variant, rejects generic migration bypass, and updates
+only the paired `rules.db`/deployed-object fingerprints
+with ignored rollback copies. Pinned-raw tests compare
+tracked and fresh rules exports. It reduces the
+unresolved Equipment baseline from **10 to 9**;
+the 34 unresolved Skill source IDs and the absent
+cross-Army usage index are unaffected.
+
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
 application/raw databases. The tracked artifact includes reviewed
 Mimetism, Berserk, Dodge, Surprise Attack, Super-Jump, Jump,
 Climb, TinBot variants, Hacking Device single-extra semantics
-and exact reviewed multi-extra combinations.
+and exact reviewed multi-extra combinations,
+plus the source-verified Bangbomb Dodge modifier.
 This baseline contains **96 Skill** source identities across
 **33,153 direct rows** and **34 Equipment** source identities across
 **5,427 direct rows**:
@@ -1066,10 +1090,10 @@ This baseline contains **96 Skill** source identities across
   (Dodge `40` and Super-Jump `74`); and **34** IDs with
   unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
-  19 family-only IDs; 4 reviewed extra-parameter sources
+  19 family-only IDs; 5 reviewed extra-parameter sources
   (TinBot Firewall `169`, Discover `244`, ECM Guided `247`,
-  fully reconciled Hacking Device `100`);
-  and **10** IDs with unresolved occurrence parameters. Four
+  Bangbomb `246`, fully reconciled Hacking Device `100`);
+  and **9** IDs with unresolved occurrence parameters. Four
   currently published Equipment source IDs have reviewed exact-source
   named variants, of which Repeater `248` has no occurrence extras.
 - `TEXT` extras occur across 39 Skill source IDs and 14 Equipment

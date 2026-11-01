@@ -605,6 +605,29 @@ hypothesis that unqualified `SR-1` applies to every
 Hacking Program on the Device Plus is plausible but
 **not verified**; the two occurrences remain unresolved.
 
+**Bangbomb source-verified Dodge +4 (2026-11-01):**
+The exact `equipment:bangbomb` variant is sourced to
+N5.3 p. 120, source Equipment ID `246`, extra `310`,
+`TEXT: +4`, with **125** standalone occurrences.
+The `dodge-roll-mod` modifier is only applicable
+against attacks from enemy Troopers in LoF/ZoC
+and excludes Template Weapons. The curated validator
+rejects wrong IDs, types, values, scopes, numeric
+modifiers, and source family changes.
+`tests/test_audit_source_variant_inputs.py` checks
+the 125 reviewed signatures against tracked and
+freshly exported rules databases when the ignored
+pinned raw Army archive exists. The one-time guarded
+command `python -m tools.build_deployed_object_publication
+--refresh-bangbomb-v9` verifies exact source input,
+compares the full before/after database to reject
+unrelated changes and generic append bypasses, and
+updates the matched rules/publication artifacts
+with ignored recovery copies in `local/`.
+Do not rerun after promotion. The source audit
+baseline becomes **34 unresolved Skill / 9 Equipment**
+IDs; this does not publish a Unit-use index.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

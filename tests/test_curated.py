@@ -1271,6 +1271,62 @@ def test_reviewed_dodge_extra_parameter_rejects_unscoped_or_mismatched_values(
 
 
 @pytest.mark.parametrize(
+    ("field", "wrong"), [
+        ("extraId", 311),
+        ("extraId", 310.0),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "+3"),
+        ("effect", {
+            "kind": "dodge-roll-mod",
+            "appliesTo": "all-dodge-rolls",
+            "modifier": 4,
+        }),
+        ("effect", {
+            "kind": "dodge-roll-mod",
+            "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+            "modifier": 3,
+        }),
+        ("effect", {
+            "kind": "bs-attack-roll-mod",
+            "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+            "modifier": 4,
+        }),
+    ],
+)
+def test_bangbomb_requires_exact_source_dodge_modifier(
+    tmp_path: Path, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"]
+                   if row["id"] == "equipment:bangbomb")
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": "equipment:bangbomb", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": "bangbomb"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "bangbomb.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    value = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"][0]
+    value[field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Bangbomb reviewed source extra"):
+        load_curated_document(path)
+    value[field] = deepcopy(
+        curated["variantSemantics"]["occurrenceParameters"][0]["extraValues"][0][field]
+    )
+    record["armyLinks"] = [{"entity": "equipment", "id": "ecm"}]
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("source_id", "grants"),
     [
         ("hacking-device", [

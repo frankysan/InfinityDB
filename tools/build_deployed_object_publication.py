@@ -97,6 +97,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Add verified Jump/Climb source links and distance metadata to a matched v9 pair",
     )
     migration.add_argument(
+        "--refresh-bangbomb-v9", action="store_true",
+        help="Promote source-verified Bangbomb Dodge +4 extras in a matched v9 pair",
+    )
+    migration.add_argument(
         "--refresh-tinbot-firewall-v9", action="store_true",
         help="Promote exact TinBot Firewall Comms modifiers in a matched v9 pair",
     )
@@ -138,6 +142,7 @@ def main() -> int:
         or args.refresh_variant_semantics_v9 is not None
         or args.refresh_movement_distance_v9
         or args.refresh_tinbot_firewall_v9
+        or args.refresh_bangbomb_v9
         or args.refresh_tinbot_other_v9
         or args.refresh_hacking_program_grants_v9
         or args.refresh_hacking_program_mods_v9
@@ -149,6 +154,7 @@ def main() -> int:
             raise ValueError("--check cannot be combined with v9 migration operations")
         from tools.restrictions_v9_release import (
             promote_restrictions_v9,
+            refresh_bangbomb_v9_release,
             refresh_core_pdf_pin_v9_release,
             refresh_hacking_combinations_v9_release,
             refresh_hacking_firewall_v9_release,
@@ -164,6 +170,11 @@ def main() -> int:
             stage_restrictions_v9,
         )
 
+        if args.refresh_bangbomb_v9:
+            backup = refresh_bangbomb_v9_release()
+            print("Refreshed exact Bangbomb Dodge +4 semantics in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
         if args.refresh_hacking_combinations_v9:
             backup = refresh_hacking_combinations_v9_release()
             print("Refreshed exact Hacking Device compound extras in v9 artifacts.")

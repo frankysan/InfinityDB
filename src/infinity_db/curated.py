@@ -217,6 +217,28 @@ def _validate_reviewed_extra_parameter(
         ):
             raise ValueError(f"{context}: invalid {device} reviewed hacking extras")
         return
+    if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "bangbomb"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 310, "extraType": "TEXT", "rawValue": "+4",
+            "effect": {
+                "kind": "dodge-roll-mod",
+                "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+                "modifier": 4,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid Bangbomb reviewed source extra")
+        return
     if inheritance == "source" and army_links == [
         {"entity": "equipment", "id": 244}
     ]:

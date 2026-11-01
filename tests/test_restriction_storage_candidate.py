@@ -1251,6 +1251,118 @@ def test_hacking_combination_source_gate_checks_entire_signature(
         assert not calls
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "modifier", "scope", "raw", "other-record", "schema", "missing"),
+)
+def test_bangbomb_v9_refresh_guards_exact_parameter_delta(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        BANGBOMB,
+        BANGBOMB_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    original, next_db = tmp_path / "original.db", tmp_path / "next.db"
+    variant = copy.deepcopy(BANGBOMB_VARIANT)
+    if defect in {"modifier", "scope", "raw"}:
+        extra = variant["occurrenceParameters"][0]["extraValues"][0]
+        if defect == "modifier":
+            extra["effect"]["modifier"] = 3
+        elif defect == "scope":
+            extra["effect"]["appliesTo"] = "all-dodge"
+        else:
+            extra["rawValue"] = "+3"
+    with sqlite3.connect(original) as old, sqlite3.connect(next_db) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*BANGBOMB, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "equipment:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), BANGBOMB[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='equipment:bangbomb'")
+    variants: dict[tuple[str, str], str] = {BANGBOMB: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(original, next_db, variants, bangbomb=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(original, next_db, variants, bangbomb=True)
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(original, next_db, variants)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "extra-id", "extra-type",
+               "raw", "status", "previous", "compound"),
+)
+def test_bangbomb_v9_refresh_checks_pinned_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 246, "name": "Bangbomb", "applicationId": 246,
+        "occurrences": 125, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [{
+            "extras": [[310, "TEXT", "+4"]], "reviewed": False, "count": 125,
+        }],
+    }
+    if defect == "name":
+        source["name"] = "different"
+    elif defect == "app-id":
+        source["applicationId"] = 245
+    elif defect == "count":
+        source["occurrences"] = 124
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 999
+    elif defect == "extra-type":
+        source["extraSignatures"][0]["extras"][0][1] = "DISTANCE"
+    elif defect == "raw":
+        source["extraSignatures"][0]["extras"][0][2] = "+3"
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "compound":
+        source["extraSignatures"][0]["extras"].append([310, "TEXT", "+4"])
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_bangbomb_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"equipment:bangbomb"},
+            "bangbomb": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="Bangbomb source signature drift"):
+            release.refresh_bangbomb_v9_release(root=tmp_path)
+        assert not calls
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

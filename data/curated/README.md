@@ -1120,6 +1120,19 @@ still lacks an owning program and remains deliberately
 unreviewed. No Unit-use inference, program arithmetic,
 or generic upgrade parser is introduced.
 
+Bangbomb Equipment source `246` accepts only
+extra `310` (`TEXT: +4`) as an exact
+`reviewed-extra` effect of kind `dodge-roll-mod`,
+with `modifier: 4` and the strict
+`dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons`
+applicability scope. N5.3 p. 120 explicitly excludes
+Template Weapon attacks and limits eligibility
+to enemy Troopers inside LoF or ZoC. Source ID,
+type, raw spelling and exact effect all validate
+fail-closed. The resulting reviewed mapping is
+source-specific; it never makes all Dodge or PH
+Rolls receive the bonus.
+
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
 forms remain opaque until their semantics are reviewed.

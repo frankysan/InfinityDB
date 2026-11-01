@@ -1690,10 +1690,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and **10 Equipment** source IDs. The tracked
+      occurrence parameters and **9 Equipment** source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
-      and complete source-100 Hacking Device parameters;
+      Bangbomb and complete source-100 Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
       the release-matched source pair before final certification.
@@ -1926,6 +1926,25 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         without evidence. Preserve both raw occurrences
         as unresolved; retain source `101` and the
         **34 Skill / 10 Equipment** baseline unchanged.
+      - [x] **Data processing:** Review all 125 direct Bangbomb
+        Equipment occurrences (source ID `246`, extra `310`,
+        `TEXT: +4`) against N5.3 English p. 120. The modifier
+        applies to a Dodge Roll against attacks by enemy
+        Troopers in LoF or ZoC, **excluding Template Weapons**;
+        it does not grant +4 to every Dodge, against Template
+        Weapons, or to other PH actions. The typed
+        `dodge-roll-mod` is bound to canonical
+        `equipment:bangbomb` with the exact source signature
+        and eligibility scope. The guarded, one-time v9
+        refresh rejects alternate raw values, changing the
+        eligibility scope, missing or compound source extras,
+        unrelated database changes, and a generic migration
+        bypass. It updates the matched rules/publication
+        pair with ignored rollback copies. The pinned raw
+        audit verifies all 125 rows against both tracked
+        and freshly exported rules databases. This reduces
+        unresolved Equipment source IDs from 10 to **9**
+        without creating a Unit-use index.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

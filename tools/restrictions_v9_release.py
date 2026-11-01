@@ -49,6 +49,21 @@ MOVEMENT_DISTANCE_VARIANT = {
         "source": "army-extra", "kind": "distance", "positiveSign": "omit",
     }],
 }
+BANGBOMB = ("n5-core-v5.3", "equipment:bangbomb")
+BANGBOMB_VARIANT = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [{
+            "extraId": 310, "extraType": "TEXT", "rawValue": "+4",
+            "effect": {
+                "kind": "dodge-roll-mod",
+                "appliesTo": "dodge-vs-enemy-in-lof-or-zoc-excluding-template-weapons",
+                "modifier": 4,
+            },
+        }],
+    }],
+}
 TINBOT_FIREWALL = ("n5-core-v5.3", "equipment:tinbot-firewall")
 TINBOT_FIREWALL_BASE = {
     "inheritance": "source", "sourceVariant": {"kind": "named", "label": "Firewall"},
@@ -679,10 +694,16 @@ def _check_variant_semantics_delta(
     *, initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
     tinbot_other: bool = False, hacking_mods: bool = False,
     hacking_srs: bool = False, hacking_firewall: bool = False,
-    hacking_combinations: bool = False,
+    hacking_combinations: bool = False, bangbomb: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if bangbomb and (
+        initial or tinbot_firewall or tinbot_other or hacking_mods
+        or hacking_srs or hacking_firewall or hacking_combinations
+        or set(variants) != {BANGBOMB}
+    ):
+        raise ValueError("Bangbomb refresh requires exactly its Equipment record")
     if initial and set(variants) != set(initial):
         raise ValueError("Movement distance refresh requires exactly Jump and Climb")
     if tinbot_firewall and (initial or tinbot_other or set(variants) != {TINBOT_FIREWALL}):
@@ -741,6 +762,15 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == BANGBOMB:
+                        if not bangbomb:
+                            raise ValueError("Bangbomb requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != BANGBOMB_VARIANT
+                        ):
+                            raise ValueError("Bangbomb refresh changed source-only semantics")
                     elif key == TINBOT_FIREWALL and tinbot_firewall:
                         if (
                             row[index] is None
@@ -914,6 +944,38 @@ def refresh_movement_distance_v9_release(*, root: Path = ROOT) -> Path:
     return _refresh_metadata_v9_release(
         root=root, variant_records={key[1] for key in INITIAL_MOVEMENT_DISTANCE},
         initialize_movement_distance=True,
+    )
+
+
+def refresh_bangbomb_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only the N5.3 Dodge-specific Bangbomb +4 Army extra."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["equipment"]["items"]
+        if row["id"] == 246
+    ]
+    if (
+        len(rows) != 1
+        or rows[0]["name"] != "Bangbomb"
+        or rows[0]["applicationId"] != 246
+        or rows[0]["occurrences"] != 125
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"]
+        or rows[0]["extraSignatures"] != [{
+            "extras": [[310, "TEXT", "+4"]],
+            "reviewed": False, "count": 125,
+        }]
+    ):
+        raise ValueError("Bangbomb source signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={BANGBOMB[1]}, bangbomb=True,
     )
 
 
@@ -1263,7 +1325,7 @@ def _refresh_metadata_v9_release(
     initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
     tinbot_other: bool = False, hacking_mods: bool = False,
     hacking_srs: bool = False, hacking_firewall: bool = False,
-    hacking_combinations: bool = False,
+    hacking_combinations: bool = False, bangbomb: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -1351,6 +1413,7 @@ def _refresh_metadata_v9_release(
                 hacking_srs=hacking_srs,
                 hacking_firewall=hacking_firewall,
                 hacking_combinations=hacking_combinations,
+                bangbomb=bangbomb,
             )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)
