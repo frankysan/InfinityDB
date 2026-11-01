@@ -1524,7 +1524,7 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     assert set(mappings) == {
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
         "vulnerability", "hacker", "booty", "metachemistry", "regeneration",
-        "neurocinetics",
+        "neurocinetics", "minelayer",
     }
     assert mappings["neurocinetics"] == {
         "source": "army-extra",

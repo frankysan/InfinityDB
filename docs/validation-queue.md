@@ -69,8 +69,20 @@ Each item records:
 - **Result:** new or modified test selectors, their individual design-sanity
   results, and date. Broader regression execution remains in VR.
 
-No prospective design items recorded yet. This does **not** certify that prior
-work has complete test coverage; existing release and TODO obligations remain.
+- [ ] **VD-0001** (2026-11-01; needs-design): Extend source-56
+  Minelayer variant validation with negative cases that mutate the
+  extra ID, raw type/value, `count` (including boolean), effect kind
+  and action scope, asserting each malformed curated document is
+  rejected. Separately check that an ordinary unparameterized
+  Minelayer occurrence does not receive an inferred numeric count
+  and that the source's one profile-level owner is retained.
+  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
+  change: `dev/v1.0.0` after `16653b16`, files
+  `src/infinity_db/curated.py` and `data/curated/rules/n5-core-v5.3.json`.
+  Existing coverage: essential exact-signature and 15-owner test in
+  `tests/test_audit_source_variant_inputs.py`; current closed
+  validator accepts only `267/TEXT:2`. Risk: moderate;
+  linked execution: VR-0003. Outcome: test design deferred.
 
 ## Pending deferred execution
 
@@ -129,6 +141,30 @@ Each item records:
   Deferred: ordinary full project test run (`tools/run_checks.py --stage test`)
   against the cumulative state and the regular mandatory hosted CI/release
   acceptance. Outcome: awaiting broader verification.
+
+- [ ] **VR-0003** (2026-11-01; awaiting-design): Publish
+  source-56 Minelayer (2) deployment item-count semantics using
+  `267/TEXT:2`, without changing deployed-object identities.
+  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree based on `16653b16`;
+  risk: elevated for coordinated generated publication.
+  Immediate: `tools.stage_minelayer_count` stage/promote with
+  exact curated/Army/PDF fingerprints and 17 unchanged objects;
+  stored pair SHA-256: rules
+  `4e9c3493338ec4bf3067ab3838f0ca5bda9879469f9f506c6749854175b6453f`,
+  objects `9db94143da110c3ff86703a2cf40c4f3f8e77100004b0da5094520488a9835d2`.
+  `test_minelayer_two_deployment_count_matches_pinned_source`
+  **1 passed**; `test_current_dodge_reviewed_extra_effects_keep_exact_source_types`
+  **1 passed**; `test_pinned_publication_is_deterministic_and_source_complete`
+  **1 passed**. Rules stage, publication `--check`, and targeted
+  Ruff **PASS** (2026-11-01). The generic v9 refresh declined to run
+  because its schema-version precondition was not met, before any
+  artifact mutation; the guarded script was used instead.
+  Design: VD-0001, nonessential additional negative/edge coverage.
+  Deferred: targeted completed design tests and a cumulative
+  `tools/run_checks.py --stage test` / normal mandatory CI and
+  release gates on the final reviewed state. Outcome: awaiting design
+  and broader execution; immediate publication integrity verified.
 
 ## Recording template
 

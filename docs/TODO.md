@@ -1693,7 +1693,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **20 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **19 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1737,6 +1737,22 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         source signature and scope tests fail closed; the pinned
         source audit now reports **20** unresolved Skill IDs. The
         cross-Army Unit-usage index and final release gates remain open.
+      - [x] **Data processing — Minelayer (2), source 56:**
+        Publish exact source extra `267/TEXT:2` as a reviewed
+        `minelayer-deployment-item-count` (two deployable Weapons
+        or Equipment items placed during Deployment), scoped to
+        N5.3 p. 102 rather than general Disposable ammunition or
+        another Skill. Pinned Army archive: **15** occurrence
+        contexts out of **546** direct Minelayer occurrences,
+        including one profile-level and 14 option-level rows.
+        The guarded staging/promotion synchronizes the curated
+        definition, rules database and 17 unchanged deployed
+        objects, with ignored recovery copies. Focused source,
+        database and publication checks pass; the unresolved
+        Skill source count is now **19**. Broader validation and
+        additional mutation tests are tracked in the validation
+        queue. This does not generate Unit usage or calculate
+        the legality of specific placements.
       - [x] **Data processing:** Audit the lone Journalist
         source-272 `1/TEXT:+3` on the Tohaa Diplomatic Delegate.
         N5.3 already defines Journalist's Guts Roll and campaign

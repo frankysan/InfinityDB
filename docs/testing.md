@@ -923,6 +923,26 @@ the source inventory moves from 21 to **20 unresolved Skill IDs**.
 This is metadata publication and does not establish a Unit-usage
 index, attack resolution, full browser signoff or release acceptance.
 
+**Minelayer (2) source-quantity promotion (2026-11-01):**
+The source audit verifies Skill source `56` has 546 direct
+occurrences, including exactly 15 `267/TEXT:2` extras (14
+option-level and one profile-level), with no other reviewed
+signatures. The `reviewed-extra` effect is strictly an item
+count scoped to deployment; it does not modify Disposable uses.
+The focused `test_minelayer_two_deployment_count_matches_pinned_source`
+pins all 15 Army contexts and the promoted rules database.
+The script `tools.stage_minelayer_count --output-dir local/<unique-name>`
+stages the matched rules/publication pair under ignored `local/`;
+`--promote-staged` revalidates hashes and retains rollback copies.
+All 17 published deployed objects remain unchanged, and the
+variant audit drops to **19 unresolved Skill IDs**. The older
+generic `--refresh-variant-semantics-v9` path requires schema
+`user_version=9` and rejects this newer checkout; use the
+dedicated guarded migration for this change. Focused regression,
+database, publication and rules-build validation were run
+immediately. Additional mutation cases and cumulative test-suite
+execution are deferred in `docs/validation-queue.md`.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

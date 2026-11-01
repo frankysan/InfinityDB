@@ -836,6 +836,27 @@ the four reviewed option occurrences are not a Unit-usage index,
 automatic attack resolver, or permission to infer other variants.
 Broader project validation remains tracked in the validation queue.
 
+**Reviewed Minelayer (2) deployment quantity (2026-11-01):**
+Skill source `56` has 546 direct occurrences in the pinned Army
+snapshot. Exactly 15 have occurrence extra `267` (`TEXT:2`):
+14 option-level rows and one profile-level row. English
+N5.3 p. 102 explicitly defines a bracketed Minelayer value
+greater than one as the number of deployable Weapons or Equipment
+items that may be placed in the user's Zone of Control when deployed.
+The exact `reviewed-extra` effect is
+`{"kind":"minelayer-deployment-item-count","appliesTo":"minelayer-items-placed-during-deployment","count":2}`.
+It does not grant additional Disposable uses, bypass the usual
+deployment/exclusion requirements, or imply that each Minelayer
+without an extra has a stored numeric occurrence value.
+The closed curated validator accepts only the matching source
+extra; a focused source test pins all 15 owners, including the
+profile-level Saladin occurrence. A guarded matched rules/export
+and deployed-object publication refresh verified the unchanged
+17 deployed objects and retained ignored rollback copies.
+The source-variant audit now reports **19 unresolved Skill IDs**;
+the cross-Army variant usage index remains unimplemented.
+Broader tests and mutation coverage remain queued.
+
 **Partially reviewed Hacking Device program grants (2026-10-31):**
 The pinned Army source has Hacking Device `100` with 653 direct
 occurrences and Hacking Device Plus `101` with 126. English

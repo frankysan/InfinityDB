@@ -940,6 +940,27 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid Neurocinetics reactive Burst extra")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "minelayer"}
+    ]:
+        # N5.3 p. 102: the bracketed quantity is the number of deployable
+        # items placed, never extra uses or an unrelated equipment count.
+        expected = [{
+            "extraId": 267,
+            "extraType": "TEXT",
+            "rawValue": "2",
+            "effect": {
+                "kind": "minelayer-deployment-item-count",
+                "appliesTo": "minelayer-items-placed-during-deployment",
+                "count": 2,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+        ):
+            raise ValueError(f"{context}: invalid Minelayer deployment item count")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "regeneration"}
     ]:
         values = parameter.get("extraValues")
