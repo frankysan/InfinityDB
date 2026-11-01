@@ -101,6 +101,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote exact Guided/Hacker ECM source variants in a matched v9 pair",
     )
     migration.add_argument(
+        "--refresh-medikit-v9", action="store_true",
+        help="Promote source-verified MediKit ranged +1B in a matched v9 pair",
+    )
+    migration.add_argument(
         "--refresh-bangbomb-v9", action="store_true",
         help="Promote source-verified Bangbomb Dodge +4 extras in a matched v9 pair",
     )
@@ -147,6 +151,7 @@ def main() -> int:
         or args.refresh_movement_distance_v9
         or args.refresh_tinbot_firewall_v9
         or args.refresh_bangbomb_v9
+        or args.refresh_medikit_v9
         or args.refresh_ecm_source_variants_v9
         or args.refresh_tinbot_other_v9
         or args.refresh_hacking_program_grants_v9
@@ -168,6 +173,7 @@ def main() -> int:
             refresh_hacking_program_mods_v9_release,
             refresh_hacking_saving_rolls_v9_release,
             refresh_isolated_context_v9_release,
+            refresh_medikit_v9_release,
             refresh_movement_distance_v9_release,
             refresh_pdf_source_pins_v9_release,
             refresh_tinbot_firewall_v9_release,
@@ -179,6 +185,11 @@ def main() -> int:
         if args.refresh_ecm_source_variants_v9:
             backup = refresh_ecm_source_variants_v9_release()
             print("Promoted two exact ECM source variants in matched v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_medikit_v9:
+            backup = refresh_medikit_v9_release()
+            print("Refreshed exact ranged MediKit Burst upgrade in v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_bangbomb_v9:

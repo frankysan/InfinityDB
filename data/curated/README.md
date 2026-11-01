@@ -1154,6 +1154,21 @@ A separate guarded v9 addition promotes only
 these exact two source definitions and their
 relational rows.
 
+MediKit Equipment source `106` accepts exactly
+extra `8` (`TEXT:+1B`) as a `reviewed-extra`
+effect of kind `equipment-burst-mod`, with
+`modifier: 1` and strict
+`appliesTo: "ranged-medikit-bs-attack"`.
+N5.3 p. 124 defines remote MediKit as a BS Weapon,
+whereas Silhouette-contact use does not require an
+Attack Roll. Burst does not alter the target's
+separate PH recovery Rolls or award additional
+recovered Wounds when multiple hits succeed in
+one Order. Do not interpret `+1B` as a Special Die,
+a contact-use effect, or a generic Equipment
+Burst modifier. The source signature and effect
+are validated fail-closed.
+
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
 forms remain opaque until their semantics are reviewed.

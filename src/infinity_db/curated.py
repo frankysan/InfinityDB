@@ -218,6 +218,28 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid {device} reviewed hacking extras")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "medikit"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 8, "extraType": "TEXT", "rawValue": "+1B",
+            "effect": {
+                "kind": "equipment-burst-mod",
+                "appliesTo": "ranged-medikit-bs-attack",
+                "modifier": 1,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid MediKit reviewed source extra")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "equipment", "id": "bangbomb"}
     ]:
         values = parameter.get("extraValues")

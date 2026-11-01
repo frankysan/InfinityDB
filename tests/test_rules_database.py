@@ -1734,6 +1734,33 @@ def test_ecm_guided_and_hacker_source_variants_are_separate(
     assert base["variant_semantics"] == {"inheritance": "family"}
 
 
+def test_medikit_reviewed_burst_is_ranged_only(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    effect = rules.equipment_reviewed_extra_semantics()["medikit"]
+    assert effect == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 8, "extra_type": "TEXT", "raw_value": "+1B",
+            "effect": {
+                "kind": "equipment-burst-mod",
+                "applies_to": "ranged-medikit-bs-attack",
+                "modifier": 1,
+            },
+        }],
+    }
+    record = rules.composed_record("equipment:medikit")
+    assert record is not None
+    assert record["variant_semantics"]["inheritance"] == "family"
+    assert effect in record["variant_semantics"]["occurrence_parameters"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 124
+               for c in record["citations"])
+    facts = record["facts"]
+    assert any("in Silhouette contact" in text for text in facts["effects"])
+    assert any("only one Wound" in text for text in facts["effects"])
+
+
 def test_bangbomb_reviewed_extra_excludes_template_weapons(
     current_rules_database: RulesDatabase,
 ) -> None:

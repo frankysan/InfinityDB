@@ -17239,7 +17239,25 @@
                 "reviewedOn": "2026-10-09"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 8,
+                                "extraType": "TEXT",
+                                "rawValue": "+1B",
+                                "effect": {
+                                    "kind": "equipment-burst-mod",
+                                    "appliesTo": "ranged-medikit-bs-attack",
+                                    "modifier": 1
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

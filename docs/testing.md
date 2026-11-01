@@ -659,6 +659,32 @@ audit baseline is now **34 Skill / 7 Equipment**
 unresolved IDs. These are not cross-Army Unit-use
 indices.
 
+**MediKit source-verified ranged Burst (2026-11-01):**
+Equipment source ID `106` has 573 direct Army
+occurrences; 38 have one extra `8` (`TEXT:+1B`).
+N5.3 p. 124 limits its typed
+`equipment-burst-mod` effect to the remote
+MediKit BS Attack, not its contact Short Skill
+or the recipient's PH recovery Rolls.
+`tests/test_curated.py` rejects changed source
+IDs, raw text, extra type, effect kind, modifier,
+or broad/incorrect scope.
+`tests/test_audit_source_variant_inputs.py`
+verifies all source signatures against both the
+tracked and freshly exported rules databases.
+Hermetic tests in
+`tests/test_restriction_storage_candidate.py`
+reject source drift, unrelated database changes
+and a generic refresh bypass. The one-time
+guarded command
+`python -m tools.build_deployed_object_publication
+--refresh-medikit-v9` synchronizes the matched
+rules/publication pair while preserving ignored
+rollback copies under `local/`. Do not rerun
+the command after promotion. The unresolved
+baseline becomes **34 Skill / 6 Equipment**
+source IDs; this is not a Unit-use index.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

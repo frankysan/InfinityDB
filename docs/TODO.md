@@ -1690,11 +1690,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and **7 Equipment** source IDs. The tracked
+      occurrence parameters and **6 Equipment** source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
-      standalone ECM Guided/Hacker, Bangbomb, and complete
-      source-100 Hacking Device parameters;
+      standalone ECM Guided/Hacker, Bangbomb, MediKit ranged Burst,
+      and complete source-100 Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
       the release-matched source pair before final certification.
@@ -1972,6 +1972,26 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         This certifies **342 direct ECM occurrences** and
         reduces unresolved Equipment source IDs from 9
         to **7**, with **34 Skill IDs** unchanged.
+      - [x] **Data processing:** Reconcile all 38 standalone
+        MediKit `+1B` extras (Equipment source `106`,
+        extra `8`, `TEXT:+1B`, 573 direct source rows).
+        N5.3 English p. 124 defines remote MediKit use
+        as a BS Weapon (base B 1) and contact use as a
+        Short Skill without an Attack Roll. Record a
+        source-exact `equipment-burst-mod` with
+        `modifier: 1` applying only to
+        `ranged-medikit-bs-attack`, without changing
+        contact use, target PH Rolls or the rule that
+        multiple successes remove only one Wound in
+        the Order. The guarded matched-v9 migration
+        checks source identity, raw signature and
+        count, allows only the one metadata update,
+        rejects generic append bypass, and preserves
+        the previous artifact pair under ignored
+        `local/`. Pinned-raw tests compare the
+        tracked rules database with a fresh export.
+        This reduces unresolved Equipment source IDs
+        from 7 to **6** (34 Skill IDs unchanged).
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

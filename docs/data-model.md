@@ -1116,14 +1116,43 @@ identities. **342 direct occurrences** become reviewed;
 unresolved Equipment IDs fall from **9 to 7**
 while Skill IDs remain **34**.
 
+**Reviewed MediKit ranged Burst variant (2026-11-01):**
+Equipment source `106` has 573 direct Army
+occurrences, of which exactly 38 carry a single
+`TEXT:+1B` extra `8`. N5.3 p. 124 describes
+MediKit as a BS Weapon when used remotely (base
+Burst 1), but its Silhouette-contact use requires
+no Attack Roll. The canonical `equipment:medikit`
+family record now has an exact `reviewed-extra`
+effect `equipment-burst-mod` with `modifier: 1`
+and `appliesTo: "ranged-medikit-bs-attack"`.
+This raises the Burst of the ranged MediKit BS
+Attack only; it does not alter contact use,
+the target's separate PH recovery Rolls, or
+the one-Wound maximum recovered from multiple
+successful hits/uses in a single Order.
+The source gate requires the exact ID, raw value,
+type and occurrence count. The guarded v9
+metadata refresh rejects generic append-only
+promotion, schema/other-row changes and any
+unexpected variant semantics; it preserves the
+previous matched rules/publication pair under
+ignored `local/`. The pinned raw Army audit
+matches the tracked and freshly exported rules
+database. All 38 variants are now reviewed,
+reducing unresolved Equipment IDs from **7 to
+6**, with 34 unresolved Skill IDs unchanged.
+No runtime roll resolution or cross-Army Unit-use
+index is introduced.
+
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
 application/raw databases. The tracked artifact includes reviewed
 Mimetism, Berserk, Dodge, Surprise Attack, Super-Jump, Jump,
 Climb, TinBot variants, Hacking Device single-extra semantics
 and exact reviewed multi-extra combinations,
-plus source-verified Bangbomb Dodge and ECM Guided/Hacker
-modifiers. This baseline contains **96 Skill** source identities across
+plus source-verified Bangbomb Dodge, ECM Guided/Hacker,
+and MediKit ranged Burst modifiers. This baseline contains **96 Skill** source identities across
 **33,153 direct rows** and **34 Equipment** source identities across
 **5,427 direct rows**:
 
@@ -1135,10 +1164,10 @@ modifiers. This baseline contains **96 Skill** source identities across
   (Dodge `40` and Super-Jump `74`); and **34** IDs with
   unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
-  19 family-only IDs; 7 reviewed extra-parameter sources
+  19 family-only IDs; 8 reviewed extra-parameter sources
   (TinBot Firewall `169`, Discover `244`, ECM Guided `247`,
-  Bangbomb `246`, Hacking Device `100`, ECM Guided `239`
-  and ECM Hacker `241`); and **7** IDs with
+  Bangbomb `246`, Hacking Device `100`, ECM Guided `239`,
+  ECM Hacker `241`, and MediKit `106`); and **6** IDs with
   unresolved occurrence parameters. Six currently
   published Equipment source IDs have reviewed exact-source
   named variants, of which Repeater `248` has no occurrence extras.

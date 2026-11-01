@@ -143,8 +143,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
         "statuses": {
             "family-only": 19,
             "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 7,
-            "unresolved-occurrence-parameter": 7,
+            "reviewed-extra-parameter": 8,
+            "unresolved-occurrence-parameter": 6,
         },
         "extraTypes": {"TEXT": 14},
     }
@@ -188,7 +188,7 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     assert equipment[101]["status"] == "unresolved-occurrence-parameter"
     assert equipment[101]["extraTypes"] == ["TEXT"]
     assert equipment[101]["extraSignatures"]
-    for source_id in (169, 239, 241, 244, 246, 247):
+    for source_id in (106, 169, 239, 241, 244, 246, 247):
         assert equipment[source_id]["status"] == "reviewed-extra-parameter"
         assert all(part["reviewed"] for part in equipment[source_id]["extraSignatures"])
     assert equipment[169]["reviewedVariant"] == {"kind": "named", "label": "Firewall"}
@@ -523,6 +523,37 @@ def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_medikit_source_106_burst_matches_tracked_and_fresh_rules(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = [{
+        "extras": [[8, "TEXT", "+1B"]], "reviewed": True, "count": 38,
+    }]
+    for rules_path in (ROOT / "data/generated/rules.db", fresh):
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db",
+            rules_path,
+        )
+        [row] = select_source_variants(report, "equipment", [106])["items"]
+        assert row["name"] == "MediKit"
+        assert row["applicationId"] == 106
+        assert row["occurrences"] == 573
+        assert row["status"] == "reviewed-extra-parameter"
+        assert row["extraSignatures"] == expected
+        assert row["reviewedCombinations"] is None
+        assert row["reviewedExtra"] == (
+            RulesDatabase(rules_path).equipment_reviewed_extra_semantics()["medikit"]
+        )
+        assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
+            "family-only": 19, "reviewed-exact-source": 1,
+            "reviewed-extra-parameter": 8, "unresolved-occurrence-parameter": 6,
+        }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_bangbomb_source_246_matches_tracked_and_fresh_rules(tmp_path: Path) -> None:
     fresh = tmp_path / "rules.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
@@ -547,7 +578,7 @@ def test_bangbomb_source_246_matches_tracked_and_fresh_rules(tmp_path: Path) -> 
         )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 7, "unresolved-occurrence-parameter": 7,
+            "reviewed-extra-parameter": 8, "unresolved-occurrence-parameter": 6,
         }
 
 
@@ -655,7 +686,7 @@ def test_tinbot_discover_ecm_extras_match_tracked_and_fresh_rules(tmp_path: Path
             assert row["extraSignatures"] == signatures
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 7, "unresolved-occurrence-parameter": 7,
+            "reviewed-extra-parameter": 8, "unresolved-occurrence-parameter": 6,
         }
 
 
@@ -738,7 +769,7 @@ def test_hacking_device_program_grants_preserve_unreviewed_overrides(
             )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 7, "unresolved-occurrence-parameter": 7,
+            "reviewed-extra-parameter": 8, "unresolved-occurrence-parameter": 6,
         }
 
 

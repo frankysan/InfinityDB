@@ -49,6 +49,21 @@ MOVEMENT_DISTANCE_VARIANT = {
         "source": "army-extra", "kind": "distance", "positiveSign": "omit",
     }],
 }
+MEDIKIT = ("n5-core-v5.3", "equipment:medikit")
+MEDIKIT_VARIANT = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [{
+            "extraId": 8, "extraType": "TEXT", "rawValue": "+1B",
+            "effect": {
+                "kind": "equipment-burst-mod",
+                "appliesTo": "ranged-medikit-bs-attack",
+                "modifier": 1,
+            },
+        }],
+    }],
+}
 BANGBOMB = ("n5-core-v5.3", "equipment:bangbomb")
 BANGBOMB_VARIANT = {
     "inheritance": "family",
@@ -826,12 +841,19 @@ def _check_variant_semantics_delta(
     tinbot_other: bool = False, hacking_mods: bool = False,
     hacking_srs: bool = False, hacking_firewall: bool = False,
     hacking_combinations: bool = False, bangbomb: bool = False,
+    medikit: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if medikit and (
+        initial or bangbomb or tinbot_firewall or tinbot_other or hacking_mods
+        or hacking_srs or hacking_firewall or hacking_combinations
+        or set(variants) != {MEDIKIT}
+    ):
+        raise ValueError("MediKit refresh requires exactly its Equipment record")
     if bangbomb and (
         initial or tinbot_firewall or tinbot_other or hacking_mods
-        or hacking_srs or hacking_firewall or hacking_combinations
+        or hacking_srs or hacking_firewall or hacking_combinations or medikit
         or set(variants) != {BANGBOMB}
     ):
         raise ValueError("Bangbomb refresh requires exactly its Equipment record")
@@ -893,6 +915,15 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == MEDIKIT:
+                        if not medikit:
+                            raise ValueError("MediKit requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != MEDIKIT_VARIANT
+                        ):
+                            raise ValueError("MediKit refresh changed source-only semantics")
                     elif key == BANGBOMB:
                         if not bangbomb:
                             raise ValueError("Bangbomb requires source-verified refresh")
@@ -1110,6 +1141,38 @@ def refresh_ecm_source_variants_v9_release(*, root: Path = ROOT) -> Path:
         root=root,
         variant_records={key[1] for key in ECM_SOURCES},
         ecm_sources=True,
+    )
+
+
+def refresh_medikit_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only the exact +1 Burst modifier for ranged MediKit use."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    matches = [
+        row for row in report["catalogs"]["equipment"]["items"]
+        if row["id"] == 106
+    ]
+    if (
+        len(matches) != 1
+        or matches[0]["name"] != "MediKit"
+        or matches[0]["applicationId"] != 106
+        or matches[0]["occurrences"] != 573
+        or matches[0]["status"] != "unresolved-occurrence-parameter"
+        or matches[0]["reviewedVariant"] is not None
+        or matches[0]["reviewedExtra"] is not None
+        or matches[0]["reviewedCombinations"] is not None
+        or matches[0]["rawValues"]
+        or matches[0]["extraSignatures"] != [{
+            "extras": [[8, "TEXT", "+1B"]],
+            "reviewed": False, "count": 38,
+        }]
+    ):
+        raise ValueError("MediKit source signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={MEDIKIT[1]}, medikit=True,
     )
 
 
@@ -1492,7 +1555,7 @@ def _refresh_metadata_v9_release(
     tinbot_other: bool = False, hacking_mods: bool = False,
     hacking_srs: bool = False, hacking_firewall: bool = False,
     hacking_combinations: bool = False, bangbomb: bool = False,
-    ecm_sources: bool = False,
+    ecm_sources: bool = False, medikit: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -1583,6 +1646,7 @@ def _refresh_metadata_v9_release(
                 hacking_firewall=hacking_firewall,
                 hacking_combinations=hacking_combinations,
                 bangbomb=bangbomb,
+                medikit=medikit,
             )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)
