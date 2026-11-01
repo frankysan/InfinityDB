@@ -959,12 +959,15 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           audit with a pinned historical-inventory hash, exact current Core/Hacking
           identities, source locators, curated review metadata, known selected
           browser-test pointers, and explicitly pending full-record acceptance.
-          The current corpus has **448 records**, **350 retained**, **98 added**
-          (20 declaration categories, 53 Weapons, 17 Rules, five terms, two
-          Skills, one Equipment), and **17 retired declaration identities**;
-          46 historical S identities remain current. All 740 distinct cited
-          source locations are listed for further clause review. The original
-          **367 / 304 D / 63 S** stays frozen; this is not 448 approvals.
+          The 2026-11-02 current-source rerun has **450 records**,
+          **350 retained**, **100 added** (20 declaration categories,
+          53 Weapons, 17 Rules, five terms, two Skills and three Equipment),
+          and **17 retired declaration identities**. The 46 historical
+          S identities remain current; **743** distinct cited source
+          locations still require clause review. The original
+          **367 / 304 D / 63 S** stays frozen; these are not 450 approvals.
+          The earlier 448-record/740-locator inventory is dated evidence
+          retained in the changelog.
           Ignored JSON/Markdown reports are under `local/audits/`.
         - [x] **Metadata identity and source-heading migration:** The pinned
           historical curated source at `c5400ab1` confirms each of the **17**
@@ -981,10 +984,25 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           and pinned PDF). This closes **identity/source heading**, not the
           separately open conditional permissions, variant effects, or final
           normal-browser explanation acceptance.
+        - [x] **V1-A08 added Equipment route distinction (2026-11-02):**
+          The two source-specific ECM definitions (Guided source 239 and
+          Hacker source 241) do not create independent curated-only
+          Equipment destinations. Preserve their distinct source-owned
+          attack scopes under the ECM family and Army occurrence context;
+          do not infer separate routes from the curated IDs. Firewall
+          is an independent public Equipment card. The existing N5.3 English source pin
+          and printed pp. 75, 122 and 55 clauses pass a focused
+          regression. Firewall normal catalog navigation and card
+          citations/conditions pass Chromium at 1440/390/320 px.
+          The inventory reporter records source-specific variant
+          browser work separately from normal page acceptance.
+          This is selected source/route evidence, not full-record
+          approval for any of the three or their owner.
         - [ ] **Clause and browser dispositions:** Reconcile each current source
           section and record with later documented source/FAQ decisions,
           reviewed conditional effects, and normal-player browser evidence.
-          Prior A01–04 browser tests cover selected routes, not all 448 records.
+          Prior A01–04 and the selected Equipment browser tests cover
+          specific routes, not all 450 records.
           Prioritize added Skills, the five Visibility Zone terms, source-scoped
           Rules, and Weapon family/mode cases; retain unresolved source conflicts.
         - [ ] **Final completeness gate:** Sign off all relevant current

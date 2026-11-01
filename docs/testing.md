@@ -1656,6 +1656,27 @@ source/page references may cover distinct procedures; source locations
 need their own clause-level dispositions. Metadata page/type peers are
 candidate discoveries, not approved identity renames.
 
+A fresh **2026-11-02** run reports **450 current records** (350 retained,
+100 added, 17 retired declaration identities) and **743** source
+locators; the earlier 448/740 baseline remains dated evidence.
+Three post-inventory Equipment identities are explicitly distinguished:
+`equipment:ecm-guided` and `equipment:ecm-hacker` have
+`inheritance: source` and require owner-context presentation review, whereas
+`equipment:firewall` has a normal public route. The reconciliation
+reports the ECM variants as awaiting owner-context presentation review
+rather than misreporting missing pages. The pinned English N5.3 PDF
+checks exact selected ECM pp. 122/75 and Firewall p. 55 clauses.
+Firewall's normal catalog-to-detail navigation, conditions, citation
+and horizontal fit pass Chromium at 1440/390/320 px; no program or
+attack calculation was introduced. These are **selected source and
+browser checks**, not whole-record acceptance or an expansion of the
+historical D/S tiers. The bounded 2026-11-02 batch passed **48 focused
+tests** (including three real Chromium widths) using two test workers,
+plus Ruff, Pyright, documentation and diff checks. The ignored
+`local/audits/v1-explanation-current-20261102.{json,md}`
+contains the current 450/743 reconciliation; the final cumulative
+suite is deferred under VR-0007, and whole-corpus signoff remains open.
+
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill
 owners from historical Git commit `c5400ab1`. This explicitly requires

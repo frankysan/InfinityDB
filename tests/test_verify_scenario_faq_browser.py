@@ -56,6 +56,36 @@ def chrome() -> Iterator[Any]:
             browser.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_added_equipment_firewall_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1-A08: Firewall is public; ECM source variants remain non-standalone."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/equipment", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator('#catalog-list a[href="/equipment/firewall"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.click()
+        page.wait_for_url(f"{ORIGIN}/equipment/firewall", timeout=30000)
+        card = page.locator("#rule-equipment-firewall")
+        card.wait_for(state="visible", timeout=30000)
+        visible = card.inner_text()
+        for phrase in ("Comms Attack", "+3", "-3", "-6", "only one", "Isolated"):
+            assert phrase in visible, (width, phrase)
+        assert "p. 55" in card.locator(".rules-source-citations").inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390, 320])
 def test_visibility_zone_terms_normal_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,

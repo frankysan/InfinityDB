@@ -1370,6 +1370,7 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:army-retreat": "test_army_retreat_standard_game_normal_reference_navigation",
     "rule:standard-game": "test_army_retreat_standard_game_normal_reference_navigation",
     "rule:game-modes": "test_game_modes_source_table_normal_reference_navigation",
+    "equipment:firewall": "test_added_equipment_firewall_normal_browser",
     "rule:order-expenditure-sequence": (
         "test_conditional_reaction_source_slices_visible_in_normal_browser"
     ),
@@ -1513,8 +1514,13 @@ def reconcile_explanation_inventory(
             "curatedReviewedOn": review.get("reviewedOn"),
             "citations": locations,
             "sourceDisposition": "pending-full-material-clause-reconciliation",
+            "sourceSpecificVariant": (
+                (record.get("variantSemantics") or {}).get("inheritance") == "source"
+            ),
             "browserDisposition": (
-                "selected-route-smoke-evidence-not-full-acceptance"
+                "source-variant-pending-owner-context-presentation-review"
+                if (record.get("variantSemantics") or {}).get("inheritance") == "source"
+                else "selected-route-smoke-evidence-not-full-acceptance"
                 if identifier in SELECTED_EXPLANATION_BROWSER_TESTS
                 else "pending-full-normal-mode-acceptance"
             ),

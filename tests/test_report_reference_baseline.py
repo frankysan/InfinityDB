@@ -73,7 +73,7 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
     }
     assert set(selected) == {
         "rule:initiative-roll", "rule:combat-group", "rule:army-retreat",
-        "rule:standard-game", "rule:game-modes",
+        "rule:standard-game", "rule:game-modes", "equipment:firewall",
         "rule:order-expenditure-sequence", "skill:look-out",
         "term:visibility-zone", "term:low-visibility-zone",
         "term:poor-visibility-zone", "term:zero-visibility-zone",
@@ -84,7 +84,71 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
         assert row["browserDisposition"] in {
             "pending-full-normal-mode-acceptance",
             "selected-route-smoke-evidence-not-full-acceptance",
+            "source-variant-pending-owner-context-presentation-review",
         }
+
+
+def test_post_inventory_equipment_distinguishes_source_variants_from_public_firewall() -> None:
+    """ECM curated variants require owner context, not whole-record approval."""
+    report = reconcile_explanation_inventory()
+    current = {row["id"]: row for row in report["currentRecords"]}
+    added_equipment = {
+        item for item in report["addedIds"] if item.startswith("equipment:")
+    }
+    assert added_equipment == {
+        "equipment:ecm-guided", "equipment:ecm-hacker", "equipment:firewall",
+    }
+    for identifier in ("equipment:ecm-guided", "equipment:ecm-hacker"):
+        item = current[identifier]
+        assert item["sourceSpecificVariant"] is True
+        assert item["browserDisposition"] == (
+            "source-variant-pending-owner-context-presentation-review"
+        )
+        assert item["selectedBrowserTest"] is None
+        assert any(citation["sourceId"] == "n5-core-v5.3-pdf"
+                   and citation["page"] == 122
+                   for citation in item["citations"])
+    firewall = current["equipment:firewall"]
+    assert firewall["sourceSpecificVariant"] is False
+    assert firewall["selectedBrowserTest"] == "test_added_equipment_firewall_normal_browser"
+    assert firewall["browserDisposition"] == (
+        "selected-route-smoke-evidence-not-full-acceptance"
+    )
+    assert any(citation["sourceId"] == "n5-core-v5.3-pdf"
+               and citation["page"] == 55
+               for citation in firewall["citations"])
+    assert all(current[item]["fullRecordAcceptance"] == "not-assessed-in-this-audit"
+               for item in added_equipment)
+
+
+def test_post_inventory_ecm_and_firewall_clauses_match_pinned_n5_3_pdf() -> None:
+    """Selected source clauses only, not full Equipment review or gameplay resolution."""
+    pdf = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not pdf.is_file():
+        pytest.skip("Pinned N5.3 English PDF unavailable")
+    pymupdf = pytest.importorskip("pymupdf")
+    pins = json.loads((
+        ROOT / "config/validation/restrictions-source-chart.json"
+    ).read_text(encoding="utf-8"))
+    assert hashlib.sha256(pdf.read_bytes()).hexdigest() == pins["sourcePdfSha256"]
+    expected = {
+        75: ("ECM (Hacking -3)", "Hacking Program against the user"),
+        122: (
+            "Electronic Countermeasures",
+            "owner must be the target of the Attack type",
+            "Both the affected Attack type and the MOD",
+        ),
+        55: (
+            "Any enemy that declares a Comms Attack",
+            "MOD of +3 to their Saving Rolls",
+            "only benefit from one Firewall at a time",
+        ),
+    }
+    with pymupdf.open(pdf) as document:
+        for page, phrases in expected.items():
+            source = " ".join(document[page - 1].get_text("text").split()).casefold()
+            for phrase in phrases:
+                assert " ".join(phrase.split()).casefold() in source, (page, phrase)
 
 
 def test_declaration_migration_review_matches_historical_owners_and_current_pdf() -> None:
