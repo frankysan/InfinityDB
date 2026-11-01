@@ -26,10 +26,12 @@ def reviewed_extra_signature(
     distance_allowed: bool,
     reviewed_combinations: set[tuple[tuple[int, str, str], ...]] | None = None,
 ) -> bool:
-    """Review exact ordered combinations independently of single extras."""
+    """Review whole ordered signatures, including singleton compound TEXT extras."""
+    signature = tuple((extra_id, kind, raw) for _pos, extra_id, kind, raw in items)
+    if signature in (reviewed_combinations or set()):
+        return True
     if len(items) != 1:
-        signature = tuple((extra_id, kind, raw) for _pos, extra_id, kind, raw in items)
-        return len(items) > 1 and signature in (reviewed_combinations or set())
+        return False
     _position, extra_id, extra_type, extra_name = items[0]
     return (
         (extra_id, extra_type, extra_name) in reviewed_values

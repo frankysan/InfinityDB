@@ -1512,6 +1512,141 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "wrong-recipient", "wrong-condition", "wrong-dodge-scope",
+               "wrong-gizmokit-scope", "changed-mod", "wrong-stacking",
+               "incomplete", "reordered", "other-record", "schema", "missing"),
+)
+def test_tagcom_v9_refresh_only_promotes_exact_combat_group_modifiers(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        TAGCOM,
+        TAGCOM_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    previous, proposed = tmp_path / "previous.db", tmp_path / "proposed.db"
+    variant = copy.deepcopy(TAGCOM_VARIANT)
+    combos = variant["occurrenceCombinations"]
+    if defect == "wrong-recipient":
+        combos[0]["effects"][0]["recipient"] = "tagcom-user"
+    elif defect == "wrong-condition":
+        combos[0]["effects"][1]["sourceCondition"] = "tagcom-user-null"
+    elif defect == "wrong-dodge-scope":
+        combos[1]["effects"][0]["appliesTo"] = "all-dodge-rolls"
+    elif defect == "wrong-gizmokit-scope":
+        combos[1]["effects"][1]["appliesTo"] = "gizmokit-user-bs-attack"
+    elif defect == "changed-mod":
+        combos[2]["effects"][0]["modifier"] = 3
+    elif defect == "wrong-stacking":
+        combos[0]["effects"][0]["stacking"] = "cumulative"
+    elif defect == "incomplete":
+        combos[0]["extras"].pop()
+    elif defect == "reordered":
+        combos[0]["extras"].reverse()
+    with sqlite3.connect(previous) as old, sqlite3.connect(proposed) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*TAGCOM, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "skill:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), TAGCOM[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:tagcom'")
+    changed: dict[tuple[str, str], str] = {TAGCOM: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(previous, proposed, changed, tagcom=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(previous, proposed, changed, tagcom=True)
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(previous, proposed, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "extra-id", "extra-type",
+               "raw", "order", "status", "previous", "compound"),
+)
+def test_tagcom_v9_refresh_requires_exact_pinned_signatures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 270, "name": "TAGCom", "applicationId": 270,
+        "occurrences": 28, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None,
+        "reviewedNumericMod": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[312, "TEXT", "Dodge (PH+3)"],
+                        [313, "TEXT", "GizmoKit (PH+1)"]],
+             "reviewed": False, "count": 2},
+            {"extras": [[369, "TEXT", "Dodge (PH+3), GizmoKit (PH+1)"]],
+             "reviewed": False, "count": 24},
+            {"extras": [[370, "TEXT", "Dodge (PH+1), GizmoKit (PH+1)"]],
+             "reviewed": False, "count": 2},
+        ],
+    }
+    if defect == "name":
+        source["name"] = "TagCom"
+    elif defect == "app-id":
+        source["applicationId"] = 999
+    elif defect == "count":
+        source["occurrences"] = 27
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 313
+    elif defect == "extra-type":
+        source["extraSignatures"][0]["extras"][0][1] = "DISTANCE"
+    elif defect == "raw":
+        source["extraSignatures"][1]["extras"][0][2] = "Dodge (PH+1)"
+    elif defect == "order":
+        source["extraSignatures"][0]["extras"].reverse()
+    elif defect == "status":
+        source["status"] = "reviewed-combination-parameter"
+    elif defect == "previous":
+        source["reviewedCombinations"] = [{"unexpected": True}]
+    elif defect == "compound":
+        source["extraSignatures"].append(
+            {"extras": [[312, "TEXT", "Dodge (PH+3)"]],
+             "reviewed": False, "count": 1}
+        )
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_tagcom_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"skill:tagcom"},
+            "tagcom": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="TAGCom source-270 signature drift"):
+            release.refresh_tagcom_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
     "defect", (None, "wrong-recipient", "wrong-attribute", "changed-mod",
                "incomplete", "reordered", "other-record", "schema", "missing"),
 )

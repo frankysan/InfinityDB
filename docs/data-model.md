@@ -1143,6 +1143,53 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**TAGCom reviewed recipient modifiers (2026-11-01):**
+Official TAGCom N5.3 Wiki revision `3144` establishes
+that, while the TAGCom user is deployed on the table
+in a non-Null State, **TAGs in the user's Combat Group**
+gain the profile-listed modifiers. Identical TAGCom
+MODs are not cumulative; only different MODs may
+apply together. This is not a self-bonus for the
+TAGCom user and does not target all friendly TAGs
+regardless of Combat Group.
+
+Pinned Army Skill source `270` has exactly **28**
+direct occurrences, with three ordered `TEXT`
+signature encodings: two extras `312/Dodge (PH+3)`
+and `313/GizmoKit (PH+1)` (2 occurrences), one
+extra `369/Dodge (PH+3), GizmoKit (PH+1)` (24),
+and one extra `370/Dodge (PH+1), GizmoKit (PH+1)`
+(2). The first two are different raw encodings of the
+same pair of effects; neither permits inferring any
+other raw pair or partial approval of extra 312/313.
+
+The curated `skill:tagcom` definition retains its
+source-native identity, adding **three complete
+ordered** `occurrenceCombinations`. Each signature
+contains two typed `tagcom-recipient-ph-mod` effects,
+scoped independently to `tag-dodge-ph-roll`
+(`modifier: 3` or `1`) and
+`tag-target-gizmokit-recovery-ph-roll`
+(`modifier: 1`). The effects explicitly retain
+`recipient: tag-in-user-combat-group`,
+`sourceCondition: tagcom-user-deployed-non-null`,
+and `stacking: distinct-tagcom-mods-only`.
+Unlike an Equipment's standalone target PH replacement,
+these are recipient-side **positive modifiers**.
+The curated validator rejects altered raw IDs, order,
+recipient/scope, amount, condition or stacking.
+The source auditor matches only exact ordered signatures,
+and `RulesDatabase.skill_reviewed_combination_semantics()`
+exposes the complete variants. A guarded matched-v9
+metadata-only refresh pins all three source signatures,
+preserves unaffected database rows and schema, and
+retains the previous matched artifact pair under
+ignored `local/`. Tracked/fresh rules exports are
+tested against the raw Army snapshot. No roster/group
+assignment engine, cumulative-modifier solver,
+or cross-army Unit-use index is published.
+Remaining unresolved: **28 Skill / 1 Equipment**.
+
 **Cross-catalog Bangbomb Skill source 266 (2026-11-01):**
 N5.3 English p. 120 defines Bangbomb as Equipment.
 Army additionally classifies `Bangbomb (+4)` under

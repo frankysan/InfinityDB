@@ -55,6 +55,43 @@ SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
 
 
+# TAGCom's source strings contain two distinct PH-roll bonuses, but Army
+# encodes the same pair both as two extras and as one compound TEXT extra.
+# Each complete, ordered source signature is independently certified.
+TAGCOM_SOURCE_SPECS = (
+    (((312, "Dodge (PH+3)"), (313, "GizmoKit (PH+1)")), 3),
+    (((369, "Dodge (PH+3), GizmoKit (PH+1)"),), 3),
+    (((370, "Dodge (PH+1), GizmoKit (PH+1)"),), 1),
+)
+TAGCOM_COMBINATIONS: list[dict[str, Any]] = [
+    {
+        "extras": [
+            {"extraId": extra_id, "extraType": "TEXT", "rawValue": raw}
+            for extra_id, raw in signature
+        ],
+        "effects": [
+            {
+                "kind": "tagcom-recipient-ph-mod",
+                "recipient": "tag-in-user-combat-group",
+                "sourceCondition": "tagcom-user-deployed-non-null",
+                "appliesTo": "tag-dodge-ph-roll",
+                "modifier": dodge_mod,
+                "stacking": "distinct-tagcom-mods-only",
+            },
+            {
+                "kind": "tagcom-recipient-ph-mod",
+                "recipient": "tag-in-user-combat-group",
+                "sourceCondition": "tagcom-user-deployed-non-null",
+                "appliesTo": "tag-target-gizmokit-recovery-ph-roll",
+                "modifier": 1,
+                "stacking": "distinct-tagcom-mods-only",
+            },
+        ],
+    }
+    for signature, dodge_mod in TAGCOM_SOURCE_SPECS
+]
+
+
 # RemDriver's compound profile values belong to the assigned Remote, not the
 # Skill holder. Each complete, source-native ordered signature is certified.
 REMDRIVER_COMBINATION_SPECS = (
@@ -1037,7 +1074,26 @@ def _validate_variant_semantics(
             and army_links[0].get("entity") == "equipment"
             else None
         )
-        if army_links == [{"entity": "skill", "id": "remdriver"}]:
+        if army_links == [{"entity": "skill", "id": "tagcom"}]:
+            if (
+                inheritance != "family"
+                or not isinstance(combinations, list)
+                or combinations != TAGCOM_COMBINATIONS
+                or any(
+                    not isinstance(entry, dict)
+                    or type(entry.get("extraId")) is not int
+                    for combination in combinations
+                    for entry in combination["extras"]
+                )
+                or any(
+                    not isinstance(effect, dict)
+                    or type(effect.get("modifier")) is not int
+                    for combination in combinations
+                    for effect in combination["effects"]
+                )
+            ):
+                raise ValueError(f"{context}: invalid exact TAGCom combinations")
+        elif army_links == [{"entity": "skill", "id": "remdriver"}]:
             if (
                 inheritance != "family"
                 or not isinstance(combinations, list)

@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **29 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **28 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1698,6 +1698,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Impersonation source-249 IMP-2 deployment restriction,
       Skill-listed GizmoKit source-254 and MediKit source-273 target PH replacements,
       Bangbomb Skill source-266 restricted Dodge +4,
+      TAGCom source-270 recipient-side Dodge/GizmoKit PH modifiers,
       RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
@@ -2207,7 +2208,29 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         metadata-only refresh preserve other Equipment
         semantics and publication. No live Unit-use index
         or broader Dodge modifier is introduced.
-        Current baseline: **29 Skill / 1 Equipment**.
+        Baseline at that point: **29 Skill / 1 Equipment**.
+      - [x] **Data processing:** Certify the three exact Army
+        TAGCom Skill source-270 modifier signatures (28 direct
+        occurrences): paired extras `312/Dodge (PH+3)` and
+        `313/GizmoKit (PH+1)` (2), compound
+        `369/Dodge (PH+3), GizmoKit (PH+1)` (24),
+        and compound `370/Dodge (PH+1), GizmoKit (PH+1)`
+        (2). The pinned N5.3 official TAGCom Wiki
+        revision 3144 scopes these to TAGs in the
+        **user's Combat Group**, while the user is
+        deployed and non-Null; identical TAGCom MODs
+        do not stack. Encode each whole, ordered raw
+        signature as two recipient-side typed PH Roll
+        modifiers, one for Dodge and one for
+        receiving GizmoKit, never as independent
+        universally applicable extras. Keep the
+        three source encodings distinct even where
+        their effects match. A guarded matched-v9
+        migration, pinned source audit, negative
+        validators and fresh/tracked export tests
+        prevent silent broadening. No dynamic
+        roster/group resolver or Unit-use index.
+        Current baseline: **28 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

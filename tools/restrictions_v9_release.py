@@ -22,6 +22,7 @@ from infinity_db.curated import (
     KILLER_HACKING_VARIANT,
     MEDIKIT_TARGET_PH_PARAMETERS,
     REMDRIVER_COMBINATIONS,
+    TAGCOM_COMBINATIONS,
     discover_curated_documents,
     load_curated_directory,
     reviewed_hacking_combinations,
@@ -109,6 +110,11 @@ GIZMOKIT_VARIANT = {
 GIZMOKIT_TARGET_PH_VARIANT = {
     **GIZMOKIT_VARIANT,
     "sourceCatalogParameters": GIZMOKIT_TARGET_PH_PARAMETERS,
+}
+TAGCOM = ("n5-core-v5.3", "skill:tagcom")
+TAGCOM_VARIANT = {
+    "inheritance": "family",
+    "occurrenceCombinations": TAGCOM_COMBINATIONS,
 }
 REMDRIVER = ("n5-core-v5.3", "skill:remdriver")
 REMDRIVER_VARIANT = {
@@ -1006,9 +1012,19 @@ def _check_variant_semantics_delta(
     killer_hacking: bool = False, impersonation: bool = False,
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
     remdriver: bool = False, bangbomb_skill: bool = False,
+    tagcom: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if tagcom and (
+        initial or bangbomb or bangbomb_skill or medikit or gizmokit
+        or deactivator or gizmokit_target_ph or medikit_target_ph or remdriver
+        or evo_trinity or killer_hacking or impersonation
+        or tinbot_firewall or tinbot_other or hacking_mods or hacking_srs
+        or hacking_firewall or hacking_combinations or hacking_trinity_access
+        or set(variants) != {TAGCOM}
+    ):
+        raise ValueError("TAGCom refresh requires exactly Skill source 270")
     if bangbomb_skill and (
         initial or bangbomb or medikit or gizmokit or deactivator
         or gizmokit_target_ph or medikit_target_ph or remdriver
@@ -1155,6 +1171,15 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == TAGCOM:
+                        if not tagcom:
+                            raise ValueError("TAGCom requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != TAGCOM_VARIANT
+                        ):
+                            raise ValueError("TAGCom refresh changed source-only semantics")
                     elif key == REMDRIVER:
                         if not remdriver:
                             raise ValueError("RemDriver requires source-verified refresh")
@@ -1562,6 +1587,44 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_tagcom_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only three complete TAGCom profile-signature encodings."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["skills"]["items"] if row["id"] == 270
+    ]
+    expected = [
+        {"extras": [[312, "TEXT", "Dodge (PH+3)"],
+                    [313, "TEXT", "GizmoKit (PH+1)"]],
+         "reviewed": False, "count": 2},
+        {"extras": [[369, "TEXT", "Dodge (PH+3), GizmoKit (PH+1)"]],
+         "reviewed": False, "count": 24},
+        {"extras": [[370, "TEXT", "Dodge (PH+1), GizmoKit (PH+1)"]],
+         "reviewed": False, "count": 2},
+    ]
+    if (
+        len(rows) != 1 or rows[0]["name"] != "TAGCom"
+        or rows[0]["applicationId"] != 270
+        or rows[0]["occurrences"] != 28
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"]
+        or rows[0]["extraSignatures"] != expected
+    ):
+        raise ValueError("TAGCom source-270 signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={TAGCOM[1]}, tagcom=True,
     )
 
 
@@ -2283,6 +2346,7 @@ def _refresh_metadata_v9_release(
     killer_hacking: bool = False, impersonation: bool = False,
     gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
     remdriver: bool = False, bangbomb_skill: bool = False,
+    tagcom: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2382,6 +2446,7 @@ def _refresh_metadata_v9_release(
                 medikit_target_ph=medikit_target_ph,
                 remdriver=remdriver,
                 bangbomb_skill=bangbomb_skill,
+                tagcom=tagcom,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,

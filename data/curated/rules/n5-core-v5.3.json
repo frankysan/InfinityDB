@@ -21697,8 +21697,96 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
-            }
+                    "inheritance": "family",
+                    "occurrenceCombinations": [
+                        {
+                            "extras": [
+                                {
+                                    "extraId": 312,
+                                    "extraType": "TEXT",
+                                    "rawValue": "Dodge (PH+3)"
+                                },
+                                {
+                                    "extraId": 313,
+                                    "extraType": "TEXT",
+                                    "rawValue": "GizmoKit (PH+1)"
+                                }
+                            ],
+                            "effects": [
+                                {
+                                    "kind": "tagcom-recipient-ph-mod",
+                                    "recipient": "tag-in-user-combat-group",
+                                    "sourceCondition": "tagcom-user-deployed-non-null",
+                                    "appliesTo": "tag-dodge-ph-roll",
+                                    "modifier": 3,
+                                    "stacking": "distinct-tagcom-mods-only"
+                                },
+                                {
+                                    "kind": "tagcom-recipient-ph-mod",
+                                    "recipient": "tag-in-user-combat-group",
+                                    "sourceCondition": "tagcom-user-deployed-non-null",
+                                    "appliesTo": "tag-target-gizmokit-recovery-ph-roll",
+                                    "modifier": 1,
+                                    "stacking": "distinct-tagcom-mods-only"
+                                }
+                            ]
+                        },
+                        {
+                            "extras": [
+                                {
+                                    "extraId": 369,
+                                    "extraType": "TEXT",
+                                    "rawValue": "Dodge (PH+3), GizmoKit (PH+1)"
+                                }
+                            ],
+                            "effects": [
+                                {
+                                    "kind": "tagcom-recipient-ph-mod",
+                                    "recipient": "tag-in-user-combat-group",
+                                    "sourceCondition": "tagcom-user-deployed-non-null",
+                                    "appliesTo": "tag-dodge-ph-roll",
+                                    "modifier": 3,
+                                    "stacking": "distinct-tagcom-mods-only"
+                                },
+                                {
+                                    "kind": "tagcom-recipient-ph-mod",
+                                    "recipient": "tag-in-user-combat-group",
+                                    "sourceCondition": "tagcom-user-deployed-non-null",
+                                    "appliesTo": "tag-target-gizmokit-recovery-ph-roll",
+                                    "modifier": 1,
+                                    "stacking": "distinct-tagcom-mods-only"
+                                }
+                            ]
+                        },
+                        {
+                            "extras": [
+                                {
+                                    "extraId": 370,
+                                    "extraType": "TEXT",
+                                    "rawValue": "Dodge (PH+1), GizmoKit (PH+1)"
+                                }
+                            ],
+                            "effects": [
+                                {
+                                    "kind": "tagcom-recipient-ph-mod",
+                                    "recipient": "tag-in-user-combat-group",
+                                    "sourceCondition": "tagcom-user-deployed-non-null",
+                                    "appliesTo": "tag-dodge-ph-roll",
+                                    "modifier": 1,
+                                    "stacking": "distinct-tagcom-mods-only"
+                                },
+                                {
+                                    "kind": "tagcom-recipient-ph-mod",
+                                    "recipient": "tag-in-user-combat-group",
+                                    "sourceCondition": "tagcom-user-deployed-non-null",
+                                    "appliesTo": "tag-target-gizmokit-recovery-ph-roll",
+                                    "modifier": 1,
+                                    "stacking": "distinct-tagcom-mods-only"
+                                }
+                            ]
+                        }
+                    ]
+                }
         },
         {
             "id": "skill:booty",

@@ -1435,6 +1435,83 @@ def test_khd_requires_exact_pinned_upgrade_semantics(
 
 @pytest.mark.parametrize(
     ("group", "section", "index", "field", "wrong"), [
+        (0, "extras", 0, "extraId", 313),
+        (0, "extras", 0, "extraId", 312.0),
+        (1, "extras", 0, "rawValue", "Dodge (PH+3)"),
+        (2, "extras", 0, "extraType", "DISTANCE"),
+        (0, "effects", 0, "recipient", "tagcom-user"),
+        (1, "effects", 0, "sourceCondition", "tagcom-user-null"),
+        (1, "effects", 0, "appliesTo", "all-dodge-rolls"),
+        (1, "effects", 1, "appliesTo", "gizmokit-user-bs-attack"),
+        (2, "effects", 0, "modifier", 3),
+        (2, "effects", 1, "modifier", 1.0),
+        (0, "effects", 0, "stacking", "cumulative"),
+    ],
+)
+def test_tagcom_exact_source_combinations_require_recipient_scoped_effects(
+    tmp_path: Path, group: int, section: str, index: int,
+    field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"] if row["id"] == "skill:tagcom")
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "automatic"
+    record = document["records"][0]
+    record.update({
+        "id": "skill:tagcom", "kind": "skill",
+        "facts": {"typeIds": ["automatic"]},
+        "armyLinks": [{"entity": "skill", "id": "tagcom"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "tagcom.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    record["variantSemantics"]["occurrenceCombinations"][group][section][index][
+        field
+    ] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid exact TAGCom combinations"):
+        load_curated_document(path)
+
+
+def test_tagcom_partial_reordered_or_duplicate_signature_rejected(
+    tmp_path: Path,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"] if row["id"] == "skill:tagcom")
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "automatic"
+    record = document["records"][0]
+    record.update({
+        "id": "skill:tagcom", "kind": "skill",
+        "facts": {"typeIds": ["automatic"]},
+        "armyLinks": [{"entity": "skill", "id": "tagcom"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    baseline = deepcopy(record["variantSemantics"]["occurrenceCombinations"])
+    path = tmp_path / "tagcom.json"
+    for mode in ("partial", "reordered", "duplicate"):
+        combinations = deepcopy(baseline)
+        if mode == "partial":
+            combinations[0]["extras"].pop()
+        elif mode == "reordered":
+            combinations[0]["extras"].reverse()
+        else:
+            combinations.append(deepcopy(combinations[1]))
+        record["variantSemantics"]["occurrenceCombinations"] = combinations
+        path.write_text(json.dumps(document), encoding="utf-8")
+        with pytest.raises(ValueError, match="invalid exact TAGCom combinations"):
+            load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    ("group", "section", "index", "field", "wrong"), [
         (0, "extras", 0, "extraId", 272),
         (0, "extras", 0, "extraId", 271.0),
         (0, "extras", 0, "rawValue", "+2 BS"),

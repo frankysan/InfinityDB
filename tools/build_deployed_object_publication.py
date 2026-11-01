@@ -113,6 +113,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote Skill-273 target PH replacements on canonical MediKit Equipment",
     )
     migration.add_argument(
+        "--refresh-tagcom-v9", action="store_true",
+        help="Promote exact ordered TAGCom Dodge/GizmoKit recipient modifiers",
+    )
+    migration.add_argument(
         "--refresh-remdriver-v9", action="store_true",
         help="Promote exact RemDriver source-255 compound Attribute signatures",
     )
@@ -200,6 +204,7 @@ def main() -> int:
         or args.refresh_khd_v9
         or args.refresh_impersonation_v9
         or args.refresh_remdriver_v9
+        or args.refresh_tagcom_v9
         or args.refresh_evo_trinity_v9
         or args.refresh_ecm_source_variants_v9
         or args.refresh_tinbot_other_v9
@@ -236,6 +241,7 @@ def main() -> int:
             refresh_movement_distance_v9_release,
             refresh_pdf_source_pins_v9_release,
             refresh_remdriver_v9_release,
+            refresh_tagcom_v9_release,
             refresh_tinbot_firewall_v9_release,
             refresh_tinbot_other_v9_release,
             refresh_variant_semantics_v9_release,
@@ -260,6 +266,11 @@ def main() -> int:
         if args.refresh_medikit_v9:
             backup = refresh_medikit_v9_release()
             print("Refreshed exact ranged MediKit Burst upgrade in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_tagcom_v9:
+            backup = refresh_tagcom_v9_release()
+            print("Refreshed exact TAGCom Skill-270 signatures in matched v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_remdriver_v9:

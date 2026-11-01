@@ -1580,6 +1580,49 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     ]
 
 
+def test_tagcom_exact_combat_group_ph_modifiers_preserve_source_signatures(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.curated import TAGCOM_COMBINATIONS
+
+    rules = current_rules_database
+    reviewed = rules.skill_reviewed_combination_semantics()
+    assert set(reviewed) == {"remdriver", "tagcom"}
+    assert reviewed["tagcom"] == [
+        {
+            "extras": [
+                {"extra_id": entry["extraId"], "extra_type": entry["extraType"],
+                 "raw_value": entry["rawValue"]}
+                for entry in combination["extras"]
+            ],
+            "effects": combination["effects"],
+        }
+        for combination in TAGCOM_COMBINATIONS
+    ]
+    assert "tagcom" not in rules.skill_reviewed_extra_semantics()
+    record = rules.composed_record("skill:tagcom")
+    assert record is not None
+    assert record["variant_semantics"]["occurrence_combinations"] == reviewed["tagcom"]
+    assert any(
+        c["source_id"] == "wiki-tagcom-oldid-3144"
+        for c in record["citations"]
+    )
+    assert [tuple(effect["modifier"] for effect in combo["effects"])
+            for combo in TAGCOM_COMBINATIONS] == [(3, 1), (3, 1), (1, 1)]
+    assert all(
+        effect["kind"] == "tagcom-recipient-ph-mod"
+        and effect["recipient"] == "tag-in-user-combat-group"
+        and effect["sourceCondition"] == "tagcom-user-deployed-non-null"
+        and effect["stacking"] == "distinct-tagcom-mods-only"
+        for combo in TAGCOM_COMBINATIONS for effect in combo["effects"]
+    )
+    assert all(
+        [e["appliesTo"] for e in combo["effects"]] ==
+        ["tag-dodge-ph-roll", "tag-target-gizmokit-recovery-ph-roll"]
+        for combo in TAGCOM_COMBINATIONS
+    )
+
+
 def test_remdriver_exact_ordered_remote_attribute_assignments(
     current_rules_database: RulesDatabase,
 ) -> None:
