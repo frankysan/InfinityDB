@@ -5,7 +5,7 @@
   "python.testing.pytestArgs": [
     "tests"
   ],
-  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.diagnosticMode": "openFilesOnly",
   "editor.formatOnSave": true,
   "files.exclude": {
     "**/__pycache__": true,
