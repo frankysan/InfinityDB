@@ -137,6 +137,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote exact Hacking Device Firewall Comms-defense extras in a matched v9 pair",
     )
     migration.add_argument(
+        "--refresh-hacking-trinity-access-v9", action="store_true",
+        help="Add exact reviewed Trinity grants in a matched v9 pair",
+    )
+    migration.add_argument(
         "--refresh-hacking-combinations-v9", action="store_true",
         help="Promote only exact multi-extra Hacking Device signatures in a matched v9 pair",
     )
@@ -164,6 +168,7 @@ def main() -> int:
         or args.refresh_hacking_saving_rolls_v9
         or args.refresh_hacking_firewall_v9
         or args.refresh_hacking_combinations_v9
+        or args.refresh_hacking_trinity_access_v9
     ):
         if args.check:
             raise ValueError("--check cannot be combined with v9 migration operations")
@@ -178,6 +183,7 @@ def main() -> int:
             refresh_hacking_program_grants_v9_release,
             refresh_hacking_program_mods_v9_release,
             refresh_hacking_saving_rolls_v9_release,
+            refresh_hacking_trinity_access_v9_release,
             refresh_isolated_context_v9_release,
             refresh_medikit_v9_release,
             refresh_movement_distance_v9_release,
@@ -206,6 +212,11 @@ def main() -> int:
         if args.refresh_bangbomb_v9:
             backup = refresh_bangbomb_v9_release()
             print("Refreshed exact Bangbomb Dodge +4 semantics in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_hacking_trinity_access_v9:
+            backup = refresh_hacking_trinity_access_v9_release()
+            print("Added exact Trinity program access to reviewed device variants.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_hacking_combinations_v9:

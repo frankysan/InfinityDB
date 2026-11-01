@@ -1192,6 +1192,31 @@ this EVO-specific contract to all
 program-modifier extras on other
 devices without their own review.
 
+The reviewed Hacking Device `100` and Device Plus
+`101` Trinity Upgrade variants have a second,
+**source-specific program-access component**.
+Each modifier-bearing Trinity extra retains its
+previous `kind` (`program-burst-mod`,
+`program-special-die`, or
+`program-saving-roll-mod`) and numeric effect,
+with `grantsProgram: true` on that same effect.
+The two independently approved compound signatures
+with Trinity `PS=5` retain their full source order
+and append the same boolean to the Trinity
+`program-ps-replacement` effect only.
+This applies to exactly six standalone signatures
+and two complete combinations (19 direct Army
+occurrences), not to baseline Carbonite/Oblivion/
+Total Control modifiers or unrelated `UPGRADE:`
+texts. The validator rejects absent, false and
+non-boolean grants, including integer `1`; it
+does not infer a grant from string prefixes.
+An exact one-time v9 migration and pinned-raw
+audit enforce unchanged previous effects.
+The unqualified Charontid `SR-1` remains
+unreviewed under
+[SRC-001](../../docs/official-source-clarifications.md#src-001--charontid-hacking-device-plus-unqualified-sr-1).
+
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
 forms remain opaque until their semantics are reviewed.

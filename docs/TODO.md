@@ -2032,36 +2032,29 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         modifier; do not infer that unrelated
         `UPGRADE: Firewall` or unnamed `SR-1`
         is a named program grant.
-      - [ ] **Data processing:** Correct the **eight
-        exact reviewed Trinity Upgrade signatures
-        (19 direct Army occurrences)** on ordinary
-        Hacking Device (`100`) and Device Plus
-        (`101`) to represent **Trinity access**
-        as well as existing Burst/SR/Special Die
-        or PS=5 semantics. Six standalone source/
-        extra signatures: `100` extras
-        `290/339/352/378`, `101`
-        extras `339/378`; two exact ordered
-        combinations: `100` extras
-        `373+343`, `101` extras
-        `343+287`. Retain unchanged effects
-        for baseline Carbonite, Oblivion and Total
-        Control, existing bare program grants and
-        EVO `182` (already grant + SR typed).
-        Determine a consistent typed contract
-        for a grant plus modified program in
-        single extras and independently reviewed
-        combinations. Add fail-closed curated
-        mutation, source-signature, decoder and
-        guarded v9 DB-delta tests before promotion.
-        Preserve exact input IDs/text/compound
-        order, matched deployed-object publication,
-        and previous artifact recovery copies.
-        Do **not** infer scope for the two unqualified
-        Charontid `UPGRADE: SR-1` rows. The
-        unresolved source-ID baseline remains
-        **34 Skill / 5 Equipment** until a
-        separate source review changes it.
+      - [x] **Data processing:** Add the missing Trinity
+        program grant to eight reviewed Hacking Device
+        and Device Plus Upgrade signatures (19 direct
+        occurrences). Six standalone entries and two
+        exact ordered compound signatures now carry
+        `grantsProgram: true` **on the Trinity modifier
+        effect itself**, preserving the previously
+        reviewed Burst, Special Die, SR and PS=5 values.
+        Baseline Carbonite/Oblivion/Total Control and
+        bare program grants, Firewall and EVO semantics
+        are unchanged. The guarded matched-v9 migration
+        verifies source occurrence counts, rejects extra
+        effects or unrelated database changes, and
+        preserves a previous matched release pair under
+        ignored `local/`. Curated, database and
+        pinned-raw tests enforce exact signatures and
+        boolean grant types. See
+        [the data-model contract](data-model.md).
+        The Charontid unqualified `SR-1` remains
+        unresolved under
+        [SRC-001](official-source-clarifications.md#src-001--charontid-hacking-device-plus-unqualified-sr-1).
+        Unresolved source-ID counts remain **34 Skill /
+        5 Equipment**.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

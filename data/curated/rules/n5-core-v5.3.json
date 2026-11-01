@@ -16783,6 +16783,7 @@
                                 "effect": {
                                     "kind": "program-burst-mod",
                                     "program": "hacking-program:trinity",
+                                    "grantsProgram": true,
                                     "modifier": 1
                                 }
                             },
@@ -16803,6 +16804,7 @@
                                 "effect": {
                                     "kind": "program-special-die",
                                     "program": "hacking-program:trinity",
+                                    "grantsProgram": true,
                                     "count": 1
                                 }
                             },
@@ -16834,6 +16836,7 @@
                                 "effect": {
                                     "kind": "program-saving-roll-mod",
                                     "program": "hacking-program:trinity",
+                                    "grantsProgram": true,
                                     "appliesTo": "target-saving-roll-against-program",
                                     "modifier": -1
                                 }
@@ -16845,6 +16848,7 @@
                                 "effect": {
                                     "kind": "program-saving-roll-mod",
                                     "program": "hacking-program:trinity",
+                                    "grantsProgram": true,
                                     "appliesTo": "target-saving-roll-against-program",
                                     "modifier": -2
                                 }
@@ -16906,7 +16910,7 @@
                         ],
                         "effects": [
                             {"kind": "program-ps-replacement", "program": "hacking-program:total-control", "value": 3},
-                            {"kind": "program-ps-replacement", "program": "hacking-program:trinity", "value": 5}
+                            {"kind": "program-ps-replacement", "program": "hacking-program:trinity", "value": 5, "grantsProgram": true}
                         ]
                     }
                 ]
@@ -16988,6 +16992,7 @@
                                 "effect": {
                                     "kind": "program-special-die",
                                     "program": "hacking-program:trinity",
+                                    "grantsProgram": true,
                                     "count": 1
                                 }
                             },
@@ -17009,6 +17014,7 @@
                                 "effect": {
                                     "kind": "program-saving-roll-mod",
                                     "program": "hacking-program:trinity",
+                                    "grantsProgram": true,
                                     "appliesTo": "target-saving-roll-against-program",
                                     "modifier": -1
                                 }
@@ -17023,7 +17029,7 @@
                             {"extraId": 287, "extraType": "TEXT", "rawValue": "UPGRADE: Zero Pain"}
                         ],
                         "effects": [
-                            {"kind": "program-ps-replacement", "program": "hacking-program:trinity", "value": 5},
+                            {"kind": "program-ps-replacement", "program": "hacking-program:trinity", "value": 5, "grantsProgram": true},
                             {"kind": "hacking-program-grant", "program": "hacking-program:zero-pain"}
                         ]
                     }

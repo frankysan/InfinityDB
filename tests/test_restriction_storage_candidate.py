@@ -1741,6 +1741,180 @@ def test_evo_trinity_v9_refresh_checks_pinned_source(
         assert not calls
 
 
+@pytest.mark.parametrize(
+    "defect", (
+        None, "missing-grant", "false-grant", "baseline-grant",
+        "wrong-program", "wrong-modifier", "wrong-combo",
+        "other-record", "schema", "missing-device",
+    ),
+)
+def test_hacking_trinity_access_v9_delta_is_additive_and_exact(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        _check_variant_semantics_delta,
+        _with_exact_trinity_access,
+    )
+
+    curated = json.loads(
+        (ROOT / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    keys = [(100, "hacking-device"), (101, "hacking-device-plus")]
+    before: dict[tuple[str, str], dict] = {}
+    after: dict[tuple[str, str], dict] = {}
+    for source_id, name in keys:
+        key = ("n5-core-v5.3", f"equipment:{name}")
+        variant = copy.deepcopy(next(
+            r["variantSemantics"] for r in curated["records"] if r["id"] == key[1]
+        ))
+        previous = copy.deepcopy(variant)
+        for entry in previous["occurrenceParameters"][0]["extraValues"]:
+            if entry["effect"].get("grantsProgram") is True:
+                entry["effect"].pop("grantsProgram")
+        for pair in previous["occurrenceCombinations"]:
+            for effect in pair["effects"]:
+                effect.pop("grantsProgram", None)
+        assert _with_exact_trinity_access(previous, source_id) == variant
+        before[key], after[key] = previous, variant
+    first = next(iter(after))
+    if defect in {"missing-grant", "false-grant", "baseline-grant",
+                  "wrong-program", "wrong-modifier", "wrong-combo"}:
+        changed = after[first]
+        entries = changed["occurrenceParameters"][0]["extraValues"]
+        trinity = next(entry["effect"] for entry in entries if entry["extraId"] == 290)
+        if defect == "missing-grant":
+            del trinity["grantsProgram"]
+        elif defect == "false-grant":
+            trinity["grantsProgram"] = False
+        elif defect == "baseline-grant":
+            next(entry for entry in entries if entry["extraId"] == 269
+                 )["effect"]["grantsProgram"] = True
+        elif defect == "wrong-program":
+            trinity["program"] = "hacking-program:carbonite"
+        elif defect == "wrong-modifier":
+            trinity["modifier"] = 2
+        else:
+            changed["occurrenceCombinations"][1]["effects"][1]["grantsProgram"] = False
+    prior_db, next_db = tmp_path / "prior.db", tmp_path / "next.db"
+    with sqlite3.connect(prior_db) as old, sqlite3.connect(next_db) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*key, json.dumps(variant), "unchanged") for key, variant in before.items()
+        ] + [("n5-core-v5.3", "equipment:other", None, "unchanged")])
+        old.commit()
+        old.backup(new)
+        for key, value in after.items():
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE collection_id=? AND id=?",
+                (json.dumps(value), *key),
+            )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX unwanted ON records(id)")
+        elif defect == "missing-device":
+            new.execute("DELETE FROM records WHERE id='equipment:hacking-device-plus'")
+    variants = {key: json.dumps(value) for key, value in after.items()}
+    if defect is None:
+        _check_variant_semantics_delta(
+            prior_db, next_db, variants, hacking_trinity_access=True,
+        )
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                prior_db, next_db, variants, hacking_trinity_access=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(prior_db, next_db, variants)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "count", "extra-id", "raw", "type", "compound",
+               "status", "bare-sr", "name", "missing"),
+)
+def test_hacking_trinity_access_v9_source_gate_pins_signatures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    raw_names = {
+        290: "UPGRADE: Trinity (+1B)", 378: "UPGRADE: Trinity (+1SD)",
+        339: "UPGRADE: Trinity (SR-1)", 352: "UPGRADE: Trinity (SR-2)",
+    }
+    items = []
+    for source_id, source in release.HACKING_GRANT_SOURCES.items():
+        combination = (
+            [[373, "TEXT", "UPGRADE: Total Control (PS=3)"],
+             [343, "TEXT", "UPGRADE: Trinity (PS=5)"]]
+            if source_id == 100 else
+            [[343, "TEXT", "UPGRADE: Trinity (PS=5)"],
+             [287, "TEXT", "UPGRADE: Zero Pain"]]
+        )
+        signatures = [
+            {"extras": [[extra_id, "TEXT", raw_names[extra_id]]],
+             "reviewed": True, "count": count}
+            for extra_id, count in release.TRINITY_ACCESS_SIGNATURES[source_id]
+        ] + [{"extras": combination, "reviewed": True, "count": 2}]
+        if source_id == 101:
+            signatures.append({
+                "extras": [[344, "TEXT", "UPGRADE: SR-1"]],
+                "reviewed": False, "count": 2,
+            })
+        items.append({
+            "id": source_id, "name": source["name"],
+            "applicationId": source_id, "occurrences": source["occurrences"],
+            "status": ("reviewed-extra-parameter" if source_id == 100
+                       else "unresolved-occurrence-parameter"),
+            "reviewedVariant": None, "reviewedExtra": {"source": "army-extra"},
+            "reviewedCombinations": [{"extras": combination}],
+            "rawValues": [], "extraSignatures": signatures,
+        })
+    target = items[0]
+    if defect == "count":
+        target["extraSignatures"][0]["count"] += 1
+    elif defect == "extra-id":
+        target["extraSignatures"][0]["extras"][0][0] = 999
+    elif defect == "raw":
+        target["extraSignatures"][0]["extras"][0][2] = "UPGRADE: Trinity (+2B)"
+    elif defect == "type":
+        target["extraSignatures"][0]["extras"][0][1] = "DISTANCE"
+    elif defect == "compound":
+        target["extraSignatures"][-1]["extras"].reverse()
+    elif defect == "status":
+        target["status"] = "unresolved-occurrence-parameter"
+    elif defect == "bare-sr":
+        items[1]["extraSignatures"][-1]["reviewed"] = True
+    elif defect == "name":
+        target["name"] = "wrong device"
+    elif defect == "missing":
+        items.pop()
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": items}}},
+    )
+    calls: list[dict] = []
+
+    def promote(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", promote)
+    if defect is None:
+        assert release.refresh_hacking_trinity_access_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path,
+            "variant_records": {"equipment:hacking-device", "equipment:hacking-device-plus"},
+            "hacking_trinity_access": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="Trinity|Charontid"):
+            release.refresh_hacking_trinity_access_v9_release(root=tmp_path)
+        assert not calls
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

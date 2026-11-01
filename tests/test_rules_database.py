@@ -609,7 +609,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 4
         # Special Terrain, Access Width Initiative Roll and Combat Group are General Rules,
         # not deployed-object identities.
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 478
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 480
         assert connection.execute(
             "SELECT id FROM records WHERE id IN (?, ?) ORDER BY id",
             ("rule:access-width", "rule:special-terrain"),
@@ -1632,7 +1632,9 @@ def test_tinbot_firewall_source_mods_are_equipment_only(
         ],
     }
     assert set(rules.equipment_reviewed_extra_semantics()) == {
-        169, 244, 247, "hacking-device", "hacking-device-plus",
+        169, 239, 241, 244, 247,
+        "bangbomb", "evo-hacking-device", "hacking-device",
+        "hacking-device-plus", "medikit",
     }
     assert 169 not in rules.skill_reviewed_extra_semantics()
     assert 169 not in rules.skill_numeric_mod_semantics()
@@ -1885,6 +1887,7 @@ def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
                     "effect": {
                         "kind": kind, "program": f"hacking-program:{program}",
                         field: value,
+                        **({"grantsProgram": True} if program == "trinity" else {}),
                     },
                 }
                 for extra_id, raw, program, kind, field, value in expected_mods[slug]
@@ -1896,6 +1899,7 @@ def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
                         "program": f"hacking-program:{program}",
                         "modifier": modifier,
                         "applies_to": "target-saving-roll-against-program",
+                        **({"grantsProgram": True} if program == "trinity" else {}),
                     },
                 }
                 for extra_id, raw, program, modifier in expected_srs[slug]
@@ -1974,6 +1978,13 @@ def test_exact_hacking_device_compounds_retain_order_and_program_effects(
                 rules.composed_record(effect["program"]) is not None
                 for effect in combination["effects"]
             )
+            for effect in combination["effects"]:
+                if effect["program"] == "hacking-program:trinity" and (
+                    effect["kind"] == "program-ps-replacement"
+                ):
+                    assert effect["grantsProgram"] is True
+                else:
+                    assert "grantsProgram" not in effect
         record = rules.composed_record(f"equipment:{slug}")
         assert record is not None
         assert record["variant_semantics"]["occurrence_combinations"] == combos

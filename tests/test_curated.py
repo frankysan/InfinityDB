@@ -938,7 +938,20 @@ def test_checked_in_n5_collection_is_valid() -> None:
                 "source": "army-extra",
                 "kind": "distance",
                 "positiveSign": "omit",
-            }
+            },
+            {
+                "source": "army-extra",
+                "kind": "reviewed-extra",
+                "extraValues": [{
+                    "extraId": 304,
+                    "extraType": "TEXT",
+                    "rawValue": "Jet Propulsion",
+                    "effect": {
+                        "kind": "trajectory-control",
+                        "appliesTo": "super-jump-jet-propulsion",
+                    },
+                }],
+            },
         ],
     }
     assert records["skill:discover"]["facts"]["typeIds"] == ["basic-short-skill", "aro"]
@@ -1285,6 +1298,13 @@ def test_reviewed_dodge_extra_parameter_rejects_unscoped_or_mismatched_values(
         }),
         ("effect", {
             "kind": "hacking-program-upgrade",
+            "program": "hacking-program:trinity",
+            "grantsProgram": 1,
+            "appliesTo": "target-saving-roll-against-program",
+            "modifier": -2,
+        }),
+        ("effect", {
+            "kind": "hacking-program-upgrade",
             "program": "hacking-program:oblivion",
             "grantsProgram": True,
             "appliesTo": "target-saving-roll-against-program",
@@ -1440,6 +1460,67 @@ def test_bangbomb_requires_exact_source_dodge_modifier(
     record["armyLinks"] = [{"entity": "equipment", "id": "ecm"}]
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    ("device", "extra_id"), [
+        ("hacking-device", 290), ("hacking-device", 378),
+        ("hacking-device", 339), ("hacking-device", 352),
+        ("hacking-device-plus", 378), ("hacking-device-plus", 339),
+        ("hacking-device", 343), ("hacking-device-plus", 343),
+    ],
+)
+@pytest.mark.parametrize("defect", ("removed", "false", "nonboolean"))
+def test_trinity_nonbaseline_upgrade_requires_explicit_program_access(
+    tmp_path: Path, device: str, extra_id: int, defect: str,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(
+        row for row in source["records"] if row["id"] == f"equipment:{device}"
+    )
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": f"equipment:{device}", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": device}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    variant = record["variantSemantics"]
+    if extra_id == 343:
+        combination = next(
+            pair for pair in variant["occurrenceCombinations"]
+            if any(e["extraId"] == 343 for e in pair["extras"])
+        )
+        index = next(
+            i for i, entry in enumerate(combination["extras"])
+            if entry["extraId"] == 343
+        )
+        effect = combination["effects"][index]
+        baseline_effects = [
+            e for i, e in enumerate(combination["effects"]) if i != index
+        ]
+        assert all("grantsProgram" not in e for e in baseline_effects)
+    else:
+        item = next(
+            value for value in variant["occurrenceParameters"][0]["extraValues"]
+            if value["extraId"] == extra_id
+        )
+        effect = item["effect"]
+    assert effect["grantsProgram"] is True
+    assert effect["program"] == "hacking-program:trinity"
+    path = tmp_path / "trinity.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    if defect == "removed":
+        del effect["grantsProgram"]
+    else:
+        effect["grantsProgram"] = False if defect == "false" else 1
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="reviewed hacking extras|Hacking Device combinations"):
         load_curated_document(path)
 
 

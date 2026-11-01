@@ -806,6 +806,42 @@ def test_hacking_device_program_grants_preserve_unreviewed_overrides(
             assert item["reviewedCombinations"] == (
                 RulesDatabase(path).equipment_reviewed_combination_semantics()[slug]
             )
+            trinity_ids = (
+                {290: 3, 378: 1, 339: 2, 352: 4}
+                if source_id == 100 else {378: 3, 339: 2}
+            )
+            trinity = [
+                entry for entry in reviewed[slug]["extra_values"]
+                if entry["extra_id"] in trinity_ids
+            ]
+            assert {entry["extra_id"] for entry in trinity} == set(trinity_ids)
+            assert all(
+                entry["effect"]["program"] == "hacking-program:trinity"
+                and entry["effect"]["grantsProgram"] is True
+                for entry in trinity
+            )
+            compound = next(
+                pair for pair in item["reviewedCombinations"]
+                if any(entry["extra_id"] == 343 for entry in pair["extras"])
+            )
+            trinity_index = next(
+                i for i, entry in enumerate(compound["extras"])
+                if entry["extra_id"] == 343
+            )
+            assert compound["effects"][trinity_index] == {
+                "kind": "program-ps-replacement",
+                "program": "hacking-program:trinity",
+                "value": 5,
+                "grantsProgram": True,
+            }
+            assert sum(trinity_ids.values()) + 2 == (
+                12 if source_id == 100 else 7
+            )
+            assert all(
+                "grantsProgram" not in effect
+                for i, effect in enumerate(compound["effects"])
+                if i != trinity_index
+            )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
             "reviewed-extra-parameter": 9, "unresolved-occurrence-parameter": 5,

@@ -2314,24 +2314,26 @@ also moves Nourkias to a standard Hacking Device with a
 Trinity (PS=5) Upgrade despite Trinity being absent from
 the standard device's baseline chart.
 
-**Known remaining mapping gap:** Ordinary Hacking Device source
-`100` lacks baseline Trinity, but its reviewed single extras
-`290` (Trinity +1B), `378` (Trinity +1SD), `339`
-(Trinity SR-1), and `352` (Trinity SR-2) currently
-carry only program-specific modifiers. Hacking Device Plus
-source `101` likewise lacks Trinity, but extra `378`
-(+1SD) and `339` (SR-1) currently carry only modifiers.
-The two exact reviewed compound signatures using Trinity
-`PS=5` (extra `343`, on both device families) also
-represent the PS replacement without an explicit grant.
-Their source identities and modifier arithmetic are already
-reviewed; **access is under-modeled**, not source-invented.
-Review the actual owning occurrences and full signatures
-before a guarded, append-only correction. The unqualified
-Charontid `UPGRADE: SR-1` has no named program and remains
-unresolved. Likewise, `UPGRADE: Firewall` names defensive
-equipment semantics, not a Hacking Program, so generic
-`UPGRADE:` prefix parsing must never imply a program grant.
+**Implemented Trinity mapping correction (2026-11-01):**
+The six standalone modifier signatures on Hacking
+Device `100` (Trinity extras `290/378/339/352`)
+and Device Plus `101` (`378/339`), plus both
+exact compound signatures containing Trinity
+`PS=5` (extra `343`), now explicitly
+include `grantsProgram: true` on their existing
+Trinity modifier/replacement effect. This covers
+**19 source occurrences**. The modifier types,
+numeric effects, baseline programs, other
+compound effects, and bare program grants
+remain unchanged. See [data-model.md](data-model.md)
+for the exact one-time guarded migration and
+validation contract. The unqualified Charontid
+`UPGRADE: SR-1` still names no program and
+remains unresolved under
+[SRC-001](official-source-clarifications.md#src-001--charontid-hacking-device-plus-unqualified-sr-1).
+`UPGRADE: Firewall` names defensive equipment
+semantics, not a Hacking Program; no generic
+prefix-based grant interpretation was added.
 
 **Sources:** N5.3 English pp. 54, 58; N5 English v5.1/v5.2
 p. 54; N3 English pp. 159-161 (historical);

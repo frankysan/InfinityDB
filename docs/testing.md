@@ -710,6 +710,35 @@ ignored rollback files in `local/`. Do not
 rerun it after promotion. The source baseline
 is **34 unresolved Skill / 5 Equipment IDs**.
 
+**Hacking Device/Plus Trinity access correction (2026-11-01):**
+Eight previously reviewed, exact Upgrade signatures
+on Equipment sources `100` and `101` (19 direct
+Army occurrences) now retain their B/SD/SR/PS=5
+semantics **and** grant Trinity. Standalone extras
+`290/378/339/352` on source `100`, extras
+`378/339` on `101`, and the two approved
+`343` compound signatures are the complete
+scope. `tests/test_curated.py` checks that all
+eight require `grantsProgram` as an actual
+boolean `true`, including rejection of integer
+`1`; hermetic
+`tests/test_restriction_storage_candidate.py`
+tests reject altered prior modifiers, missing
+grants, changed compound components, unrelated
+rows and generic refresh bypass. The pinned
+Army audit in `tests/test_audit_source_variant_inputs.py`
+compares tracked and freshly exported Rules DBs
+against exact source IDs, counts and full
+compound order; the unqualified Charontid extra
+remains open. The matched v9 update used
+`python -m tools.build_deployed_object_publication
+--refresh-hacking-trinity-access-v9`; do not
+rerun after promotion. Prior artifacts are
+retained under ignored `local/`, with
+`--check` verifying publication parity.
+Source audit counts remain **34 unresolved
+Skill / 5 Equipment**.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

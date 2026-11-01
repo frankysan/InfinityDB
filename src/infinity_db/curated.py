@@ -91,7 +91,8 @@ def reviewed_hacking_combinations(device: str) -> list[dict[str, Any]]:
                      "program": f"hacking-program:{program}"}
                     if ps is None else
                     {"kind": "program-ps-replacement",
-                     "program": f"hacking-program:{program}", "value": ps}
+                     "program": f"hacking-program:{program}", "value": ps,
+                     **({"grantsProgram": True} if program == "trinity" else {})}
                 )
                 for _extra_id, _raw, program, ps in signature
             ],
@@ -175,6 +176,7 @@ def _validate_reviewed_extra_parameter(
                 "effect": {
                     "kind": kind, "program": f"hacking-program:{program}",
                     field: value,
+                    **({"grantsProgram": True} if program == "trinity" else {}),
                 },
             }
             for extra_id, raw, program, kind, field, value in hacking_mods[device]
@@ -187,6 +189,7 @@ def _validate_reviewed_extra_parameter(
                     "program": f"hacking-program:{program}",
                     "appliesTo": "target-saving-roll-against-program",
                     "modifier": modifier,
+                    **({"grantsProgram": True} if program == "trinity" else {}),
                 },
             }
             for extra_id, raw, program, modifier in hacking_srs[device]
@@ -214,6 +217,12 @@ def _validate_reviewed_extra_parameter(
                 for entry in values
             )
             or values != expected
+            or any(
+                isinstance(entry.get("effect"), dict)
+                and "grantsProgram" in entry["effect"]
+                and type(entry["effect"]["grantsProgram"]) is not bool
+                for entry in values
+            )
         ):
             raise ValueError(f"{context}: invalid {device} reviewed hacking extras")
         return
@@ -239,6 +248,10 @@ def _validate_reviewed_extra_parameter(
             or not isinstance(values[0], dict)
             or type(values[0].get("extraId")) is not int
             or values != expected
+            or (
+                isinstance(values[0].get("effect"), dict)
+                and type(values[0]["effect"].get("grantsProgram")) is not bool
+            )
         ):
             raise ValueError(f"{context}: invalid EVO Hacking Device Trinity upgrade")
         return
@@ -678,6 +691,12 @@ def _validate_variant_semantics(
             or expected_device not in HACKING_COMBINATION_SPECS
             or not isinstance(combinations, list)
             or combinations != reviewed_hacking_combinations(expected_device)
+            or any(
+                type(effect.get("grantsProgram")) is not bool
+                for combination in combinations
+                for effect in combination["effects"]
+                if "grantsProgram" in effect
+            )
         ):
             raise ValueError(f"{context}: invalid exact Hacking Device combinations")
     source_variant = value.get("sourceVariant")

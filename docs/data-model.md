@@ -1204,11 +1204,13 @@ This interpretation is supported by authoritative
 rules plus Army changes, not by treating every
 `UPGRADE:` string as a generic program grant.
 
-**Confirmed gap in existing typed data, not yet migrated:**
-the previously reviewed Hacking Device (`100`)
-and Device Plus (`101`) modifier-only entries
-preserve Trinity's target program and numeric changes
-but omit an explicit access-grant semantic.
+**Source-verified Trinity program access (2026-11-01):**
+The reviewed Hacking Device (`100`) and Device Plus
+(`101`) Trinity modifier entries now also record
+program access explicitly. All eight exact signatures
+retain their existing target program and numeric
+modifier, while the Trinity effect adds
+`grantsProgram: true`.
 The exact pinned signatures are:
 
 - Source `100`: Trinity `+1B` (extra `290`, 3
@@ -1223,9 +1225,8 @@ The exact pinned signatures are:
   (extras `343+287`, 2 occurrences).
 
 These are **eight exact signature shapes and 19
-direct occurrences** requiring explicit Trinity
-access representation in addition to the existing
-modifiers. Existing bare Trinity and Cybermask
+direct occurrences** with explicit Trinity access
+in addition to the existing modifiers. Existing bare Trinity and Cybermask
 program grants, baseline-program modifiers and
 the reviewed EVO `182` combined grant/SR effect
 remain correct. The standalone `UPGRADE: SR-1`
@@ -1237,19 +1238,26 @@ Similarly `UPGRADE: Firewall` is not a named
 Hacking Program and must not be automatically
 converted into a program grant.
 
-**Migration boundary:** update only the eight
-pinned reviewed signatures, preserving original
-source ID/type/raw spelling, order of compound
-extras, prior numeric program effects and earlier
-published metadata. A guarded matched-v9 refresh
-must reject unrelated rows, unrelated program
-grants, or inferred effects on unqualified extras,
-synchronize the rules/publication pair and verify
-the tracked-vs-fresh source audit. Until that
-promotion the source-ID audit baseline is still
-**34 Skill / 5 Equipment**: an already-reviewed
-signature can lack an important *semantic component*
-without becoming a new unresolved source ID.
+**Completed migration boundary:** The dedicated
+`--refresh-hacking-trinity-access-v9` operation
+accepts only these eight pre-reviewed source
+signatures, checking their pinned raw IDs, spellings,
+counts and full compound order. It adds a strict
+boolean `grantsProgram: true` to each applicable
+`program-burst-mod`, `program-special-die`,
+`program-saving-roll-mod` or
+`program-ps-replacement` **without changing the
+existing kind, program or numeric fields**.
+Earlier reviewed extra and compound mappings, all
+other records and schema are unchanged. The one-time
+guarded refresh synchronized the tracked
+`rules.db`/deployed-object pair and retained the
+previous pair under ignored `local/`. Both the
+tracked and freshly generated rules databases are
+audited against the raw Army snapshot. The source-ID
+baseline remains **34 Skill / 5 Equipment**:
+the correction adds semantics to already-reviewed
+source signatures, not new source coverage.
 
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army

@@ -853,6 +853,70 @@ def _check_ecm_source_additions(
             raise ValueError("ECM refresh changed source citations or family relations")
 
 
+TRINITY_ACCESS_SINGLE_IDS = {
+    100: (290, 378, 339, 352),
+    101: (378, 339),
+}
+TRINITY_ACCESS_SIGNATURES = {
+    100: ((290, 3), (378, 1), (339, 2), (352, 4)),
+    101: ((378, 3), (339, 2)),
+}
+
+
+def _with_exact_trinity_access(
+    previous: dict[str, Any], source_id: int,
+) -> dict[str, Any]:
+    """Add one access flag per reviewed Trinity variant; retain all other data."""
+    if (
+        set(previous) != {"inheritance", "occurrenceParameters", "occurrenceCombinations"}
+        or previous["inheritance"] != "family"
+        or len(previous["occurrenceParameters"]) != 1
+    ):
+        raise ValueError("Trinity access requires existing reviewed device metadata")
+    result = json.loads(json.dumps(previous))
+    entries = result["occurrenceParameters"][0]["extraValues"]
+    selected = [
+        entry for entry in entries if entry.get("extraId") in TRINITY_ACCESS_SINGLE_IDS[source_id]
+    ]
+    if (
+        len(selected) != len(TRINITY_ACCESS_SINGLE_IDS[source_id])
+        or {entry["extraId"] for entry in selected}
+        != set(TRINITY_ACCESS_SINGLE_IDS[source_id])
+    ):
+        raise ValueError("Trinity access requires exact single extra identities")
+    for entry in selected:
+        effect = entry["effect"]
+        if effect.get("program") != "hacking-program:trinity" or "grantsProgram" in effect:
+            raise ValueError("Trinity access requires previously ungranted Trinity modifiers")
+        effect["grantsProgram"] = True
+    combinations = result["occurrenceCombinations"]
+    selected_combinations = [
+        combination for combination in combinations
+        if any(entry["extraId"] == 343 for entry in combination["extras"])
+    ]
+    if len(selected_combinations) != 1:
+        raise ValueError("Trinity access requires one approved exact compound signature")
+    combination = selected_combinations[0]
+    if (
+        sum(entry["extraId"] == 343 for entry in combination["extras"]) != 1
+        or len(combination["extras"]) != len(combination["effects"])
+    ):
+        raise ValueError("Trinity access compound identity changed")
+    index = next(
+        i for i, entry in enumerate(combination["extras"]) if entry["extraId"] == 343
+    )
+    effect = combination["effects"][index]
+    if (
+        effect != {
+            "kind": "program-ps-replacement",
+            "program": "hacking-program:trinity", "value": 5,
+        }
+    ):
+        raise ValueError("Trinity access requires unmodified reviewed PS replacement")
+    effect["grantsProgram"] = True
+    return result
+
+
 def _check_variant_semantics_delta(
     previous: Path, proposed: Path, variants: dict[tuple[str, str], str],
     *, initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
@@ -860,6 +924,7 @@ def _check_variant_semantics_delta(
     hacking_srs: bool = False, hacking_firewall: bool = False,
     hacking_combinations: bool = False, bangbomb: bool = False,
     medikit: bool = False, evo_trinity: bool = False,
+    hacking_trinity_access: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
@@ -904,9 +969,16 @@ def _check_variant_semantics_delta(
         raise ValueError("Hacking Firewall refresh requires its exact source record")
     if hacking_combinations and (
         initial or tinbot_other or tinbot_firewall or hacking_mods or hacking_srs
-        or hacking_firewall or set(variants) != set(hacking_keys)
+        or hacking_firewall or hacking_trinity_access
+        or set(variants) != set(hacking_keys)
     ):
         raise ValueError("Hacking combinations require exactly the two device records")
+    if hacking_trinity_access and (
+        initial or tinbot_other or tinbot_firewall or hacking_mods or hacking_srs
+        or hacking_firewall or hacking_combinations or evo_trinity or medikit or bangbomb
+        or set(variants) != set(hacking_keys)
+    ):
+        raise ValueError("Trinity access requires precisely two Hacking Device records")
     with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
         for pragma in ("user_version", "application_id"):
             if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
@@ -986,6 +1058,17 @@ def _check_variant_semantics_delta(
                             or after != TINBOT_OTHER_VARIANTS[key]
                         ):
                             raise ValueError("TinBot refresh changed additional named source")
+                    elif hacking_trinity_access and key in hacking_keys:
+                        if row[index] is None:
+                            raise ValueError("Trinity access requires existing metadata")
+                        previous_variant = json.loads(row[index])
+                        expected = _with_exact_trinity_access(
+                            previous_variant, hacking_keys[key],
+                        )
+                        if after != expected:
+                            raise ValueError(
+                                "Trinity access must preserve all prior reviewed effects"
+                            )
                     elif hacking_combinations and key in hacking_keys:
                         if row[index] is None:
                             raise ValueError("Hacking combinations require existing variants")
@@ -1560,6 +1643,77 @@ def refresh_hacking_firewall_v9_release(*, root: Path = ROOT) -> Path:
     )
 
 
+def refresh_hacking_trinity_access_v9_release(*, root: Path = ROOT) -> Path:
+    """Add Trinity access only to eight existing exact reviewed Upgrade signatures."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    items = {row["id"]: row for row in report["catalogs"]["equipment"]["items"]}
+    raw_names = {
+        290: "UPGRADE: Trinity (+1B)",
+        378: "UPGRADE: Trinity (+1SD)",
+        339: "UPGRADE: Trinity (SR-1)",
+        352: "UPGRADE: Trinity (SR-2)",
+    }
+    compound_ids = {
+        100: [[373, "TEXT", "UPGRADE: Total Control (PS=3)"],
+              [343, "TEXT", "UPGRADE: Trinity (PS=5)"]],
+        101: [[343, "TEXT", "UPGRADE: Trinity (PS=5)"],
+              [287, "TEXT", "UPGRADE: Zero Pain"]],
+    }
+    total_occurrences = 0
+    for source_id, source in HACKING_GRANT_SOURCES.items():
+        item = items.get(source_id)
+        if (
+            item is None or item["name"] != source["name"]
+            or item["applicationId"] != source_id
+            or item["occurrences"] != source["occurrences"]
+            or item["status"] != (
+                "reviewed-extra-parameter" if source_id == 100
+                else "unresolved-occurrence-parameter"
+            )
+            or item["reviewedVariant"] is not None
+            or item["reviewedExtra"] is None
+            or item["reviewedCombinations"] is None
+            or item["rawValues"]
+        ):
+            raise ValueError(f"Trinity source family drift: {source_id}")
+        selected_ids = {extra_id for extra_id, _ in TRINITY_ACCESS_SIGNATURES[source_id]}
+        signatures = [
+            sig for sig in item["extraSignatures"]
+            if any(part[0] in selected_ids | {343} for part in sig["extras"])
+        ]
+        expected = [
+            {
+                "extras": [[extra_id, "TEXT", raw_names[extra_id]]],
+                "reviewed": True, "count": count,
+            }
+            for extra_id, count in TRINITY_ACCESS_SIGNATURES[source_id]
+        ] + [{
+            "extras": compound_ids[source_id], "reviewed": True, "count": 2,
+        }]
+        if sorted(signatures, key=str) != sorted(expected, key=str):
+            raise ValueError(f"Trinity exact source signatures changed: {source_id}")
+        total_occurrences += sum(count for _id, count in TRINITY_ACCESS_SIGNATURES[source_id])
+        total_occurrences += 2
+        if source_id == 101 and [
+            sig for sig in item["extraSignatures"] if not sig["reviewed"]
+        ] != [{
+            "extras": [[344, "TEXT", "UPGRADE: SR-1"]],
+            "reviewed": False, "count": 2,
+        }]:
+            raise ValueError("Unqualified Charontid SR source drift")
+    if total_occurrences != 19:
+        raise ValueError("Trinity grant audit expected 19 direct occurrences")
+    return _refresh_metadata_v9_release(
+        root=root,
+        variant_records={source["record"] for source in HACKING_GRANT_SOURCES.values()},
+        hacking_trinity_access=True,
+    )
+
+
 def refresh_hacking_combinations_v9_release(*, root: Path = ROOT) -> Path:
     """Promote only complete pinned compound signatures; leave bare SR-1 unresolved."""
     from tools.audit_source_variant_inputs import inventory_source_variants
@@ -1621,7 +1775,7 @@ def _refresh_metadata_v9_release(
     hacking_srs: bool = False, hacking_firewall: bool = False,
     hacking_combinations: bool = False, bangbomb: bool = False,
     ecm_sources: bool = False, medikit: bool = False,
-    evo_trinity: bool = False,
+    evo_trinity: bool = False, hacking_trinity_access: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -1714,6 +1868,7 @@ def _refresh_metadata_v9_release(
                 bangbomb=bangbomb,
                 medikit=medikit,
                 evo_trinity=evo_trinity,
+                hacking_trinity_access=hacking_trinity_access,
             )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)
