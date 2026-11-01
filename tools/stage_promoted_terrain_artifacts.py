@@ -13,13 +13,13 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory, load_curated_document
-from infinity_db.rules_database import export_rules_database
 from tools.audit_terrain_scenery_source_gaps import (
     CURATED,
     PUBLICATION,
     audit_terrain_scenery_boundary,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
+from tools.release_rules_export import export_release_rules
 from tools.stage_terrain_scenery_references import (
     ARMY,
     CANDIDATES,
@@ -77,7 +77,7 @@ def stage_promoted_terrain_artifacts(
     generated = output / "data/generated"
     generated.mkdir(parents=True, exist_ok=False)
     rules_db = generated / "rules.db"
-    export_rules_database(load_curated_directory(curated_path.parent), rules_db)
+    export_release_rules(load_curated_directory(curated_path.parent), rules_db)
     published = build_publication(
         army_path, rules_db, curated_path, DELIVERY, CANDIDATES,
     )

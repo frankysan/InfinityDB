@@ -11,14 +11,12 @@ import hashlib
 import json
 import os
 import shutil
-import sqlite3
 import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory, load_curated_document
-from infinity_db.rules_database import RulesDatabase, export_rules_database
 from tools.audit_hacking_device_program_source_chart import (
     CURATED,
     MANIFEST,
@@ -28,6 +26,7 @@ from tools.audit_hacking_device_program_source_chart import (
     verify_pinned_pdf,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
+from tools.release_rules_export import export_release_rules
 from tools.stage_deployed_object_citation_migration import (
     insert_citations_without_reformatting,
 )
@@ -43,35 +42,6 @@ STAGED_PATHS = (
     "data/generated/rules.db",
     "data/generated/deployed-objects.json",
 )
-
-
-def export_release_rules(
-    documents: list, destination: Path, *, baseline: Path | None = None,
-) -> None:
-    """Preserve the active v8/v9 schema and reviewed Restrictions when staging."""
-    source = baseline or ROOT / STAGED_PATHS[1]
-    existing = RulesDatabase(source)
-    existing.validate()
-    with sqlite3.connect(source) as connection:
-        version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if version not in (8, 9):
-        raise ValueError("Cannot stage an unsupported release rules schema")
-    manifest = (
-        json.loads((ROOT / "config/validation/restrictions-source-chart.json").read_text(
-            encoding="utf-8"
-        ))
-        if version == 9 else None
-    )
-    export_rules_database(documents, destination, restrictions_manifest=manifest)
-    staged = RulesDatabase(destination)
-    staged.validate()
-    with sqlite3.connect(destination) as connection:
-        staged_version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if (
-        staged_version != version
-        or staged.restrictions_payload() != existing.restrictions_payload()
-    ):
-        raise ValueError("Staging changed release schema or reviewed Restrictions")
 
 
 def prepare_chart_citations(

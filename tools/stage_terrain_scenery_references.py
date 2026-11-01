@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory, load_curated_document
-from infinity_db.rules_database import export_rules_database
 from tools.audit_terrain_scenery_source_gaps import (
     CURATED,
     PUBLICATION,
@@ -21,6 +20,7 @@ from tools.audit_terrain_scenery_source_gaps import (
     verify_pinned_pdf,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
+from tools.release_rules_export import export_release_rules
 
 ROOT = CURATED.parents[3]
 ADDITIONS = ROOT / "config/validation/terrain-scenery-reference-additions.json"
@@ -132,7 +132,7 @@ def stage_terrain_references(
     generated = output / "data/generated"
     generated.mkdir(parents=True, exist_ok=True)
     rules_db = generated / "rules.db"
-    export_rules_database(load_curated_directory(rules_dir), rules_db)
+    export_release_rules(load_curated_directory(rules_dir), rules_db)
     pub = build_publication(
         army_path, rules_db, modified, DELIVERY, CANDIDATES,
     )

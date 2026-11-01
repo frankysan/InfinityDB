@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sqlite3
 from pathlib import Path
 
 import pytest
 
+from infinity_db.rules_database import RulesDatabase
 from tools.audit_terrain_scenery_source_gaps import CURATED, PUBLICATION
 from tools.stage_promoted_terrain_artifacts import stage_promoted_terrain_artifacts
 
@@ -31,6 +33,13 @@ def test_promoted_terrain_rebuild_is_source_pinned_and_nonmutating(
     assert report["stagedPaths"] == [
         "data/generated/rules.db", "data/generated/deployed-objects.json",
     ]
+    staged_rules = output / "data/generated/rules.db"
+    with sqlite3.connect(rules) as source, sqlite3.connect(staged_rules) as staged:
+        assert source.execute("PRAGMA user_version").fetchone()[0] == 9
+        assert staged.execute("PRAGMA user_version").fetchone()[0] == 9
+    assert RulesDatabase(staged_rules).restrictions_payload() == (
+        RulesDatabase(rules).restrictions_payload()
+    )
     for name, relative in (
         ("rulesDatabase", "data/generated/rules.db"),
         ("deployedObjects", "data/generated/deployed-objects.json"),

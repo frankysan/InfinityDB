@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory
-from infinity_db.rules_database import export_rules_database
 from tools.audit_deployed_object_citation_migrations import (
     CURATED,
     MANIFEST_PATHS,
@@ -25,6 +24,7 @@ from tools.audit_deployed_object_citation_migrations import (
     build_citation_migration_plan,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
+from tools.release_rules_export import export_release_rules
 
 RULES_DIR = CURATED.parent
 ARMY_DB = ROOT / "data/generated/infinity.db"
@@ -203,7 +203,7 @@ def stage_citation_migration(
     generated = output / "data/generated"
     generated.mkdir(parents=True, exist_ok=True)
     rules_db = generated / "rules.db"
-    export_rules_database(load_curated_directory(staged_rules), rules_db)
+    export_release_rules(load_curated_directory(staged_rules), rules_db)
     published = build_publication(
         army_db, rules_db, staged_curated, DELIVERY, CANDIDATES,
     )

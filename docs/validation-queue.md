@@ -63,7 +63,19 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-Only open VD requirements belong here. **No pending entries.**
+Only open VD requirements belong here.
+
+- [ ] **VD-0006** (2026-11-02; needs-design): Add disposable
+  pre-promotion fixtures for the citation and terrain/scenery staging
+  commands, verifying that each creates a v9 rules database with all 14
+  reviewed Restrictions and a matching publication fingerprint while
+  leaving the active checkout untouched. Their historical staging tests
+  now skip after source promotion.
+  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
+  change: `dev/v1.0.0` after `dec42367`, shared
+  `tools/release_rules_export.py` and three legacy staging callers.
+  Existing coverage: shared v9 exporter/promotion guards and live
+  promoted-terrain rebuild; risk: moderate; linked execution: VR-0006.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -73,7 +85,20 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+Only open VR obligations belong here.
+
+- [ ] **VR-0006** (2026-11-02; awaiting-design): Complete deferred
+  verification of schema-preserving release staging across the
+  citation, terrain/scenery and promoted-terrain tools.
+  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree after `dec42367`;
+  files: `tools/release_rules_export.py`, four staging scripts and
+  `tests/test_promoted_terrain_artifacts.py`; risk: moderate.
+  Immediate: focused async pytest **18 passed, 5 historical
+  pre-promotion skips**; Ruff, Pyright, docs and diff checks **PASS**.
+  Design: VD-0006. Deferred: execute the new disposable staging
+  regressions, affected module tests and cumulative suite against
+  the finalized change; hosted CI/release gates remain separate.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -84,8 +109,8 @@ is recorded. Failed or incomplete verification remains open.
 
 ## Next unused IDs
 
-- Design: `VD-0006` (through `VD-0005` retired).
-- Execution: `VR-0006` (through `VR-0005` retired).
+- Design: `VD-0007` (`VD-0006` open; earlier entries retired).
+- Execution: `VR-0007` (`VR-0006` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
