@@ -4209,12 +4209,7 @@ def test_minelayer_deployment_count_rejects_unreviewed_extras(
         ("kind", "specialist-qualification-grant"),
         ("appliesTo", "all-specialist-qualifications"),
         ("excluded", False),
-        pytest.param(
-            "excluded", 1,
-            marks=pytest.mark.xfail(
-                strict=True, reason="TODO: exact bool validation of CoC exclusion",
-            ),
-        ),
+        ("excluded", 1),
         ("excluded", None),
     ],
 )
@@ -4237,12 +4232,7 @@ def test_chain_of_command_non_specialist_rejects_unreviewed_extras(
         ("appliesTo", "all-bs-attacks"),
         ("count", 2),
         ("count", 0),
-        pytest.param(
-            "count", True,
-            marks=pytest.mark.xfail(
-                strict=True, reason="TODO: exact int validation of Forward Observer SD",
-            ),
-        ),
+        ("count", True),
         ("extraValues", []),
     ],
 )

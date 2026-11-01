@@ -15,10 +15,14 @@ from typing import Any
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
-from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.rules_database import RulesDatabase
 from infinity_db.weapon_combined_saving_rolls import WeaponCombinedSavingRolls
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.stage_hacking_device_chart_citations import STAGED_PATHS, _replace_staged_batch
+from tools.stage_hacking_device_chart_citations import (
+    STAGED_PATHS,
+    _replace_staged_batch,
+    export_release_rules,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CURATED, RULES, PUBLICATION = (ROOT / name for name in STAGED_PATHS)
@@ -122,7 +126,7 @@ def stage(relative: Path) -> dict[str, Any]:
         raise ValueError("Existing rules/publication pair is not synchronized")
     path.mkdir(parents=True)
     staged_rules = path / "rules.db"
-    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), staged_rules)
+    export_release_rules(load_curated_directory(ROOT / "data/curated/rules"), staged_rules)
     check_rules(staged_rules)
     updated_bytes = build(staged_rules)
     updated = json.loads(updated_bytes)

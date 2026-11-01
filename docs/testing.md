@@ -293,6 +293,21 @@ full-module/full-suite run after every ordinary implementation. Keep check
 evidence and deferred obligations explicit in agent handoffs. The workflow
 does not change `tools/run_checks.py`, its profiles or hosted CI execution.
 
+**Workspace MCP execution:** The connected MCP server requires test workloads
+to use its asynchronous job interface. Use `start_test_job` for ordinary
+pytest or unittest selectors and `start_script_job` for a tracked custom
+runner such as `tools.run_checks` (including complete validation profiles).
+Recover job IDs with `list_script_jobs`; poll incremental output through
+`poll_script_job` using its returned byte offset; cancel explicitly through
+`cancel_script_job` when necessary. Synchronous `run_checks` test/code/all,
+`run_tool` unittest, and recognized test-launching `run_script` modules
+refuse test execution with `tests_require_job`. This restriction applies to
+the MCP tools, not to the local PowerShell CLI. A dropped MCP request or
+client stream does **not** establish a pytest result: require the job's
+terminal status, subprocess exit code, and final report. For the recent
+Windows suite (~8–10 minutes), allow **1,800 s** for full pytest and
+**3,600 s** for a full validation profile (server job maximum: **7,200 s**).
+
 ## Source-test tail profiling and browser isolation
 
 The default pytest configuration reports the 20 slowest setup/call/teardown
@@ -409,6 +424,19 @@ mode without both a passing full run and reproducible speedup. The Fireteam
 browser test now records browser request, HTTP and JavaScript diagnostics on
 visibility timeout without weakening its assertions. No new report snapshot
 is needed unless recording a release milestone.
+
+The **2026-11-01 v1.0 cumulative verification** adds a passing browser-lane
+data point, but does not establish a faster default. With eight workers,
+ordinary `loadgroup` completed **4,697 passed, 25 skipped, 1 failed**
+in **462.38 s**; the failed Chromium cohort reported a transient local
+server `ERR_CONNECTION_REFUSED` and passed in isolation. A subsequent
+`browserlanes` full run completed **4,698 passed, 25 skipped** in
+**595.85 s**. Its two Chromium lanes avoided this particular failure but
+ran **133.47 s longer** than the unsuccessful loadgroup attempt; this is
+not a controlled performance comparison or proof of the failure cause.
+Continue to treat worksteal as the default and select browserlanes
+explicitly when validating contention. Full reports are indexed in
+[the validation queue](validation-queue.md).
 
 During an xdist run, `tests/conftest.py` admits **at most two Chromium
 slot holders concurrently** across workers using cross-process OS file locks

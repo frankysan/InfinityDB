@@ -11,13 +11,14 @@ import hashlib
 import json
 import os
 import shutil
+import sqlite3
 import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory, load_curated_document
-from infinity_db.rules_database import export_rules_database
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from tools.audit_hacking_device_program_source_chart import (
     CURATED,
     MANIFEST,
@@ -42,6 +43,35 @@ STAGED_PATHS = (
     "data/generated/rules.db",
     "data/generated/deployed-objects.json",
 )
+
+
+def export_release_rules(
+    documents: list, destination: Path, *, baseline: Path | None = None,
+) -> None:
+    """Preserve the active v8/v9 schema and reviewed Restrictions when staging."""
+    source = baseline or ROOT / STAGED_PATHS[1]
+    existing = RulesDatabase(source)
+    existing.validate()
+    with sqlite3.connect(source) as connection:
+        version = connection.execute("PRAGMA user_version").fetchone()[0]
+    if version not in (8, 9):
+        raise ValueError("Cannot stage an unsupported release rules schema")
+    manifest = (
+        json.loads((ROOT / "config/validation/restrictions-source-chart.json").read_text(
+            encoding="utf-8"
+        ))
+        if version == 9 else None
+    )
+    export_rules_database(documents, destination, restrictions_manifest=manifest)
+    staged = RulesDatabase(destination)
+    staged.validate()
+    with sqlite3.connect(destination) as connection:
+        staged_version = connection.execute("PRAGMA user_version").fetchone()[0]
+    if (
+        staged_version != version
+        or staged.restrictions_payload() != existing.restrictions_payload()
+    ):
+        raise ValueError("Staging changed release schema or reviewed Restrictions")
 
 
 def prepare_chart_citations(
@@ -126,7 +156,7 @@ def stage_hacking_device_chart_citations(
     generated = output / "data/generated"
     generated.mkdir(parents=True, exist_ok=True)
     staged_rules_db = generated / "rules.db"
-    export_rules_database(load_curated_directory(rules_dir), staged_rules_db)
+    export_release_rules(load_curated_directory(rules_dir), staged_rules_db)
     published = build_publication(
         army_path, staged_rules_db, staged_source, DELIVERY, CANDIDATES,
     )
@@ -194,6 +224,15 @@ def _replace_staged_batch(
     """
     targets = {relative: root / relative for relative in STAGED_PATHS}
     originals = {relative: path.read_bytes() for relative, path in targets.items()}
+    rules_key = STAGED_PATHS[1]
+    old_rules = originals[rules_key]
+    new_rules = payloads[rules_key]
+    if (
+        old_rules.startswith(b"SQLite format 3\x00")
+        and new_rules.startswith(b"SQLite format 3\x00")
+        and old_rules[60:64] != new_rules[60:64]
+    ):
+        raise ValueError("Staged rules schema differs from active rules.db; use migration")
     backup = Path(tempfile.mkdtemp(prefix="hacking-device-citation-backup-", dir=root / "local"))
     for relative, raw in originals.items():
         destination = backup / relative

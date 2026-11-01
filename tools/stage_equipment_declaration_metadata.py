@@ -16,12 +16,13 @@ from typing import Any
 from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.declaration_matrix import core_declaration_matrix
-from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.rules_database import RulesDatabase
 from tools.audit_orders_aro_object_adjacent_chart import audit as source_chart_audit
 from tools.build_deployed_object_publication import build_publication, publication_bytes
 from tools.stage_hacking_device_chart_citations import (
     STAGED_PATHS,
     _replace_staged_batch,
+    export_release_rules,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -115,7 +116,7 @@ def stage(output: Path) -> dict[str, Any]:
         raise ValueError("Existing deployed publication is out of sync")
     stage_dir.mkdir(parents=True)
     staged_rules = stage_dir / "rules.db"
-    export_rules_database(
+    export_release_rules(
         load_curated_directory(ROOT / "data/curated/rules"), staged_rules
     )
     validate_matrix(staged_rules)

@@ -6,6 +6,7 @@ post-publication checks. It does not commit, deploy or change legacy relations.
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -2868,3 +2869,20 @@ def _refresh_metadata_v9_release(
                 else "pdf-source-pin-v9-recovery-"
             ),
         )
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stage-dir", type=Path, required=True)
+    parser.add_argument("--promote-staged", action="store_true")
+    args = parser.parse_args()
+    if args.promote_staged:
+        print(f"Promoted v9 release pair; recovery: {promote_restrictions_v9(args.stage_dir)}")
+    else:
+        print(json.dumps(stage_restrictions_v9(args.stage_dir), indent=2))
+        print("Staged only; release artifacts unchanged.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

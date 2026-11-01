@@ -13,10 +13,14 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.curated import load_curated_directory, load_curated_document
-from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.rules_database import RulesDatabase
 from tools.audit_source_variant_inputs import inventory_source_variants, select_source_variants
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.stage_hacking_device_chart_citations import STAGED_PATHS, _replace_staged_batch
+from tools.stage_hacking_device_chart_citations import (
+    STAGED_PATHS,
+    _replace_staged_batch,
+    export_release_rules,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CURATED = ROOT / STAGED_PATHS[0]
@@ -137,7 +141,7 @@ def stage(relative: Path) -> dict[str, Any]:
         raise ValueError("Current deployed-object publication is out of sync")
     output.mkdir(parents=True)
     staged = output / "rules.db"
-    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), staged)
+    export_release_rules(load_curated_directory(ROOT / "data/curated/rules"), staged)
     check_source_occurrences(staged)
     if RulesDatabase(staged).skill_reviewed_extra_semantics().get("minelayer") != EXPECTED:
         raise ValueError("Missing typed Minelayer parameter in staged export")

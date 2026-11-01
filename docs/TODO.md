@@ -1785,20 +1785,16 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         unresolved. Defer additional negative/derived-index tests
         and the cumulative suite through the validation queue.
         This is source metadata, not gameplay attack resolution.
-      - [ ] **Data processing — correct reviewed-extra boolean type guards:**
-        The batched test-design pass discovered that Python's
-        `True == 1` permits a non-boolean `excluded: 1` on
-        `skill:chain-of-command` (source 26) and a non-integer
-        `count: true` on `skill:forward-observer` (source 59).
-        Both must fail the closed curated validator: require
-        `type(excluded) is bool` and `type(count) is int` at
-        the exact source-specific boundaries, retaining all
-        other accepted fields and semantics. Two strict expected-
-        failure regression cases in `tests/test_curated.py`
-        identify the present defects; after the implementation
-        fix, remove their xfail markers and require those cases
-        to pass. This task blocks VD-0002 and VD-0004 and the
-        corresponding broader verification VR-0004/VR-0005.
+      - [x] **Data processing — correct reviewed-extra scalar type guards:**
+        Source-specific curated validators now require
+        `type(excluded) is bool` for Chain of Command source 26
+        and `type(count) is int` for Forward Observer source 59,
+        closing Python's `True == 1` comparison loophole.
+        The strict expected-failure markers were removed from
+        `tests/test_curated.py`; their full focused mutation
+        matrices now pass (**8/8** and **9/9** respectively).
+        Broader cumulative verification is tracked under
+        [VR-0004 and VR-0005](validation-queue.md).
       - [x] **Data processing:** Audit the lone Journalist
         source-272 `1/TEXT:+3` on the Tohaa Diplomatic Delegate.
         N5.3 already defines Journalist's Guts Roll and campaign
@@ -2504,6 +2500,31 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         application startup. The legacy generic relation graph
         is unchanged. See `docs/data-model.md` for fingerprints
         and recovery location.
+      - [x] **Recover v9 after an inadvertent v8 staging downgrade
+        and guard future synchronized promotions.** On 2026-11-01
+        the tracked release pair was found valid but downgraded to
+        v8/compatibility-10 by staging tools that called the default
+        exporter without the Restrictions manifest; the rollback
+        contract test correctly detected all 14 typed Restrictions
+        missing. Restored v9 with `tools.restrictions_v9_release`
+        guarded stage/promote (retained v8 backup under
+        `local/restrictions-v8-recovery-7550vzut/`). Seven active
+        staged migration tools now preserve the current v8/v9 schema,
+        verify identical reviewed Restrictions payloads and reject
+        an unintended schema downgrade before replacing artifacts.
+        New staging/promotion regression tests pass; the complete
+        2026-11-01 browser-lane suite passed **4,698 tests,
+        25 skipped**. [Validation evidence](validation-queue.md).
+      - [ ] **Audit older staging-only release exporters for v9
+        preservation** before applying any of their generated
+        binaries: `tools.stage_deployed_object_citation_migration`,
+        `tools.stage_promoted_terrain_artifacts`, and
+        `tools.stage_terrain_scenery_references` still use the
+        default (v8) rules export. They currently stage into
+        ignored output without automatic promotion; replace the
+        exporter with the schema-preserving helper, add focused
+        tests, and reject stale pre-v9 staged binaries explicitly
+        before any promotion.
       - [x] **Validate and package the promoted v9 release pair** in
         the GitHub Actions Source checks, Installed wheel smoke and
         Deployment smoke test workflows (all green at `b7230761`,

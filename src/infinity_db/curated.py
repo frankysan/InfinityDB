@@ -931,6 +931,7 @@ def _validate_reviewed_extra_parameter(
         if (
             set(parameter) != {"source", "kind", "extraValues"}
             or parameter.get("extraValues") != expected
+            or type(parameter["extraValues"][0]["effect"]["count"]) is not int
         ):
             raise ValueError(f"{context}: invalid Forward Observer Special Die extra")
         return
@@ -978,6 +979,7 @@ def _validate_reviewed_extra_parameter(
         if (
             set(parameter) != {"source", "kind", "extraValues"}
             or parameter.get("extraValues") != expected
+            or type(parameter["extraValues"][0]["effect"]["excluded"]) is not bool
         ):
             raise ValueError(f"{context}: invalid Chain of Command Non Specialist extra")
         return

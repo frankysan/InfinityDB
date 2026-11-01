@@ -3826,6 +3826,40 @@ def candidate(
         connection.close()
 
 
+def test_shared_staging_preserves_active_v9_restrictions(tmp_path: Path) -> None:
+    from tools.stage_hacking_device_chart_citations import export_release_rules
+
+    current = RulesDatabase(DB)
+    current.validate()
+    assert len(current.restrictions_payload()["items"]) == 14
+    staged = tmp_path / "staged-rules.db"
+    export_release_rules(load_curated_directory(ROOT / "data/curated/rules"), staged)
+    copied = RulesDatabase(staged)
+    copied.validate()
+    assert copied.restrictions_payload() == current.restrictions_payload()
+    with sqlite3.connect(staged) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone()[0] == 9
+
+
+def test_shared_promotion_refuses_v9_to_v8_downgrade(
+    tmp_path: Path, legacy_v8_db: Path,
+) -> None:
+    from tools.stage_hacking_device_chart_citations import STAGED_PATHS, _replace_staged_batch
+
+    root = tmp_path / "workspace"
+    (root / "local").mkdir(parents=True)
+    originals = {path: (ROOT / path).read_bytes() for path in STAGED_PATHS}
+    for path, data in originals.items():
+        destination = root / path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(data)
+    proposed = dict(originals)
+    proposed[STAGED_PATHS[1]] = legacy_v8_db.read_bytes()
+    with pytest.raises(ValueError, match="schema differs"):
+        _replace_staged_batch(root, proposed, lambda: None)
+    assert all((root / path).read_bytes() == original for path, original in originals.items())
+
+
 def test_disposable_v8_rollback_pair_preserves_v9_reviewed_objects(
     legacy_v8_db: Path, tmp_path: Path,
 ) -> None:
