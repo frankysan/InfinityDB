@@ -11,9 +11,17 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Queue rules
 
-- Record every deferred test requirement before ending an implementation pass,
-  including changes that need only a later full-suite or browser run. Record
-  the observed immediate checks separately; never call an unrun check passed.
+- Separate the four activities: **essential test creation** and
+  **essential targeted execution** happen within the implementation pass;
+  **additional test design** is deferred as VD; **broader test execution**
+  is deferred as VR. A design pass may run newly written tests for sanity
+  without turning into a general execution pass. See
+  [testing.md](testing.md#phased-development-and-validation).
+- Before ending an implementation pass, record every concrete missing
+  regression **design** as VD and each change's deferred broader **execution**
+  as VR, including changes needing only an existing full-suite or browser run.
+  Record exact immediate test selectors and results separately. Never call an
+  unrun check passed or defer a required safety, migration or publication gate.
 - Design items are `VD-0001`, `VD-0002`, etc. Each ID is one independently
   actionable test requirement, not one test function or a speculative idea.
   Count open `needs-design` IDs toward the **5-requirement design threshold**.
@@ -53,10 +61,13 @@ Each item records:
 - **ID / recorded date / status:** `needs-design`, `blocked`, or `designed`.
 - **Owning work and change:** link to `docs/TODO.md` section and relevant
   commit, branch, or tracked files.
-- **Required behavior:** observable setup, action, expected result, and
-  source/edge cases; identify existing tests to extend before adding new ones.
+- **Required behavior:** a concrete *additional* observable setup, action,
+  expected result and edge/negative case; identify existing tests to extend.
+  Essential direct coverage belongs in the implementation pass, not the VD
+  queue. Do not create a VD item just to rerun an existing test.
 - **Priority/dependency:** risk and linked VR item.
-- **Result:** test paths, targeted execution result, and date when designed.
+- **Result:** new or modified test selectors, their individual design-sanity
+  results, and date. Broader regression execution remains in VR.
 
 No prospective design items recorded yet. This does **not** certify that prior
 work has complete test coverage; existing release and TODO obligations remain.
@@ -69,10 +80,12 @@ Each item records:
   `blocked`, or `verified`.
 - **Owning work and change:** one distinct implementation change, linked
   TODO section and precise revision/artifact identity.
-- **Immediate evidence:** targeted test/lint/data checks already run, with
-  pass/fail/skip and date.
-- **Deferred checks:** executable test selector(s), sections, browser/manual
-  review or broader profile, plus any blocking VD IDs.
+- **Immediate evidence:** direct existing or newly created regression
+  selector(s), required risk-critical lint/data/schema/publication checks,
+  pass/fail/skip and date; note why any full module was immediately necessary.
+- **Deferred checks:** existing module suite selectors, integration/browser
+  acceptance or full profiles, plus any blocking VD IDs. Defer only checks
+  that do not undermine the correctness/safety of the current implementation.
 - **Result:** executed commands, revision, pass/fail/skip and report location;
   close only after the required checks pass.
 
@@ -125,12 +138,14 @@ Avoid creating an empty item for work fully verified during implementation.
 ```text
 - [ ] VD-0001 (YYYY-MM-DD; needs-design): <required assertion/edge case>.
   Work: <TODO anchor>; change: <revision/files>; risk: <level>.
-  Existing coverage: <test selector or none>; linked execution: VR-0001.
-  Outcome: <test path and targeted run, when available>.
+  Existing coverage: <selector or none>; linked execution: VR-0001.
+  Outcome: <new test selector and its design-sanity result, when available>.
 
 - [ ] VR-0001 (YYYY-MM-DD; awaiting-design): <one implementation change>.
   Work: <TODO anchor>; revision: <commit/artifact>; risk: <level>.
-  Immediate: <command and pass/fail/skip>; design: VD-0001.
-  Deferred: <exact checks/section/manual acceptance>.
-  Outcome: <revision, command, counts and evidence, when run>.
+  Immediate: <essential created/existing test selector and result;
+    required validators and results; reason for any expanded run>.
+  Design: VD-0001 or none.
+  Deferred: <existing module/full-suite/integration/manual checks>.
+  Outcome: <tested revision, command, counts and evidence, when run>.
 ```

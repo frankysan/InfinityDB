@@ -86,15 +86,27 @@ force an execution-only pass, after any blocking design. An item older than
 **7 calendar days** is due even below threshold. Critical checks, CI, and
 release/merge/deployment gates override batching.
 
-On each implementation change, run the required immediate targeted tests and
-appropriate validators. Record missing test designs and deferred checks under
-stable VD/VR IDs, linked to the owning TODO work, exact revision, and observed
-checks. Never report a deferred test as passed or mark acceptance complete
-before its requirements are verified. A dedicated design pass adds or fixes
-tests and runs their targeted cases; an execution pass runs and records batched
-checks. Failures remain open and create/link a TODO fix. This queue is not
-a replacement implementation backlog, and it never weakens the mandatory
-CI or release gates.
+Distinguish **essential test creation**, **deferred test design**,
+**essential test execution**, and **deferred broader test execution**.
+During implementation, create a direct regression only where needed to
+establish the changed contract; run that specific test and applicable
+risk-critical validators immediately. Prefer individual pytest selectors,
+not entire neighboring modules by default. Only expand immediate execution
+when narrower tests cannot establish safety (especially for rules, migrations,
+security, database schema or synchronized artifacts), or a mandatory gate
+requires it. Explain any such expansion. Do **not** routinely write a full
+negative/edge-case matrix or run every adjacent test module during an
+implementation pass.
+
+Record further concrete regression requirements as VD items; record existing
+tests, broader modules and integrated/full-suite checks deferred for each
+distinct change as VR items, with exact selectors, revision and immediate
+evidence. A design-only pass writes queued tests and runs each new test
+directly to verify it; an execution-only pass batches the broader runs.
+Neither is a blanket exemption from essential tests. Never report deferred
+checks as passed or acceptance complete before verification. Failures
+remain open and link to the TODO fix. The queue does not replace the
+implementation backlog or weaken CI/release gates.
 
 Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
 tools in isolation, and package installation still runs through the virtual-environment

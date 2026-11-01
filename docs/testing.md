@@ -219,29 +219,45 @@ weakening targeted checks, required CI, or [release acceptance](releasing.md).
 The [validation queue](validation-queue.md) owns pending obligations and their
 status; `docs/TODO.md` continues to own features, fixes, and milestone scope.
 
-1. **Implementation pass:** define the expected contract and acceptance checks
-   before changing behavior. Implement a bounded change, inspect its diff, and
-   immediately run the smallest relevant existing or new regression tests and
-   applicable lint/type/data/docs checks. For material behavior changes, include
-   a direct focused regression test now when it is necessary to establish
-   correctness; the new workflow is not permission to ship untested behavior.
-   Record any additional missing test designs as VD items and any deferred
-   broader verification as one VR item per distinct implementation change,
-   including exact checks, revision, risk, and immediate results. Report
-   `implemented; broader validation pending` rather than `fully verified`
-   until the required checks pass.
-2. **Test-design pass:** implement several queued assertions/fixtures without
-   unrelated feature changes. Reuse existing test modules and fixtures, run
-   each new or modified test directly, and record the results. Link product
-   defects back to a TODO fix rather than silently fixing them in this pass.
-   Mark a VD entry `designed` only once its tests are in place and targeted
-   checks pass; unblock its linked VR entry.
-3. **Test-execution pass:** batch compatible pending checks across changes.
-   Prefer one shared full-suite/profile run to one run per VR entry; include
-   the affected browser/manual checks and artifact validations as required.
-   Record the exact tested revision, commands, pass/fail/skip counts, and
-   evidence. Close a VR entry only when all of its requirements pass on the
-   relevant state. Failures or source changes reopen the affected obligations.
+1. **Implementation pass:** define expected behavior and a minimum acceptance
+   check before editing. Implement a bounded change and inspect its diff.
+   **Create an essential focused regression now** if existing tests cannot
+   demonstrate the changed contract or safely catch its immediate failure.
+   **Execute only essential checks now**: selected test node IDs (or the
+   smallest suitable module if targeting is impractical), required local
+   lint/type/docs/data checks, and any migration, provenance or publication
+   integrity guards. A change is not safe merely because its broader tests
+   are queued. Avoid automatically running whole neighboring test modules,
+   full profiles, or the complete suite just because they are available.
+   Record additional desired regression assertions as VD items, and deferred
+   execution against this distinct change as a VR item. Include the exact
+   immediate test names/results and the checks still missing. Report
+   `implemented; broader validation pending` until required verification
+   is complete.
+2. **Test-design pass:** batch **nonessential additional test design** from
+   open VD requirements: add assertions, edge cases, negative cases and
+   fixtures without unrelated production changes. Reuse existing tests.
+   Execute each newly added or edited test directly as a *design sanity
+   check*, not a substitute for a later broader execution pass. Record
+   exact selectors/results and unblock linked VR items; fix a defective
+   test here, but send newly discovered product defects to `docs/TODO.md`.
+3. **Test-execution pass:** batch **deferred verification** across ready VR
+   changes: relevant existing module suites, integration/browser checks and
+   cumulative full-suite/profile checks. Prefer a single shared run for
+   overlapping requirements; do not re-run equivalent modules separately
+   for each task. Record the exact tested revision, commands, pass/fail/skip
+   counts and evidence. Close a VR item only when its required checks have
+   passed on the relevant state. Keep failed or blocked verification open.
+
+**Four kinds of test work:** essential *creation* (write the minimum
+regression needed to trust this change now); deferred *design* (queue
+additional tests as VD); essential *execution* (run the direct regression
+and risk-critical checks now); deferred *execution* (queue broader runs
+as VR). Creating a test and running that specific test is permitted during
+implementation or test design; it does **not** authorize automatically
+running the entire surrounding module. Existing tests to rerun require
+VR work, not a VD entry. Avoid speculative VD entries when no concrete
+missing behavior or assertion can be described.
 
 **Scheduling:** At **5 open VD requirements**, the next pass must be test
 design. At **5 distinct implementation changes with open VR verification**,
@@ -252,25 +268,30 @@ before and after each pass and do not start unrelated ordinary implementation
 while a mandatory pass is due. The thresholds are batching triggers, not
 limits on how many checks a pass may execute.
 
-**Never defer essential checks:** run fast targeted regressions and appropriate
-static/structure validators for every changed contract. Migration, schema,
-artifact/publication integrity, source provenance, security, compatibility
-boundaries, and correctness-critical player-facing rules changes require
-immediate risk-appropriate regression coverage and validation; run broader
-checks immediately when a targeted test cannot provide confidence. Do not
-defer checks needed to diagnose a failure or verify a bug fix. Existing
-push/pull-request CI runs on its configured triggers; its checks are not
-disabled, postponed, or replaced by this local queue. Before merge, deploy,
-tagging, or a release-candidate acceptance decision, clear all relevant VD
-and VR obligations and run all required gates in `docs/ci.md` and
-`docs/releasing.md`; unrelated explicitly post-release work must remain
-classified in TODO rather than be silently ignored.
+**Never defer essential checks:** validate the changed contract with a
+direct existing or newly written regression and appropriate static/structure
+checks. Migrations, schemas, artifact/publication integrity, provenance,
+security, compatibility boundaries and correctness-critical player-facing
+rules require immediate risk-appropriate coverage and verification.
+Run a larger module or suite **immediately only when** narrow checks cannot
+reliably establish safety, when diagnosing/fixing a failure, or when a
+required integration/acceptance gate is due. Such an exception is explicit:
+state what risk requires it and what was run. Conversely, deferring a
+broader suite is not a waiver of any relevant immediate regression.
+Existing push/pull-request CI runs on its configured triggers; its checks
+are not disabled, postponed, or replaced by this local queue. Before merge,
+deploy, tagging, or release-candidate acceptance, clear all relevant VD/VR
+obligations and run the gates in `docs/ci.md` and `docs/releasing.md`.
+Unrelated post-release work must remain classified in TODO.
 
-An implementation can be reviewable before broad validation, but **do not
-mark its acceptance complete or report all tests passed** while required VD/VR
-items remain. Keep executed check evidence and pending checks explicit in
-agent handoffs. This workflow does not change `tools/run_checks.py`, its
-profiles, or hosted CI execution.
+A bounded implementation with successful **relevant immediate checks** may
+be reported as implemented, but not as fully validated if VD/VR obligations
+remain. Distinguish precisely between `implemented`, `targeted checks passed`
+and `acceptance validated`; never report an unrun test as passed. This
+respects local validation requirements without requiring an unconditional
+full-module/full-suite run after every ordinary implementation. Keep check
+evidence and deferred obligations explicit in agent handoffs. The workflow
+does not change `tools/run_checks.py`, its profiles or hosted CI execution.
 
 ## Source-test tail profiling and browser isolation
 
