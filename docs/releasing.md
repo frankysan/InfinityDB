@@ -95,6 +95,9 @@ player-relevant information required by this definition.
 
 - [ ] Confirm the target version and the intended release scope.
 - [ ] Complete the release-specific requirements recorded in `docs/TODO.md`.
+- [ ] Resolve all design/execution obligations in the
+  [validation queue](validation-queue.md) for this release's changes. Deferred
+  local testing never replaces the required CI and final candidate checks.
 - [ ] For releases with a maintained rules-interaction review target, run the interaction
   audit with both `--check-output docs/rules-interaction-checklist.md` and
   `--require-release <version>`, then resolve every pending entity for that release. Deferred

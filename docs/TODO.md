@@ -13,7 +13,11 @@ belong in `docs/releasing.md`.
 Keep completed prerequisites only when they clarify an open dependency. Summarize
 implemented foundations with links to their canonical owners; remove completed run
 diaries after their durable outcomes are recorded. Git history retains implementation
-detail. New or materially revised work items use the canonical project-domain labels
+detail. Deferred test design and execution belong in the
+[validation queue](validation-queue.md), not as duplicate TODO implementation
+items. A task with required validation outstanding is implemented but not
+fully accepted; retain its open acceptance status until those checks pass.
+New or materially revised work items use the canonical project-domain labels
 defined in `docs/project-domains.md`; section-level domain declarations may be used
 when all contained work shares the same owner.
 

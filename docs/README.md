@@ -22,8 +22,10 @@ Use these documents when deciding how the project works now:
 - `data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
   lifecycle.
 - `data/curated/README.md` — authored/curated data schemas and review contracts.
-- `testing.md` — local validation entry points, test slices, asset modes, reports, and benchmark
-  tooling.
+- `testing.md` — local validation entry points, phased validation policy, test slices,
+  asset modes, reports, and benchmark tooling.
+- `validation-queue.md` — the active VD/VR register for deferred test design and
+  execution, with batching thresholds and evidence; not an implementation backlog.
 - `ci.md` — hosted CI workflows and repository-level validation policy.
 - `deployment.md` — production install/update/rollback/operations contract.
 - `server-migration.md` — moving released or development environments between hosts.

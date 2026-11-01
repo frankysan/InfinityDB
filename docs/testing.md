@@ -211,6 +211,67 @@ python -m pyright
 
 Do not report Ruff/Pyright as run when those tools are unavailable in the active environment.
 
+## Phased development and validation
+
+For ordinary v1.0 development, split work into **implementation**, **test design**,
+and **test execution** passes. This minimizes redundant full-suite runs without
+weakening targeted checks, required CI, or [release acceptance](releasing.md).
+The [validation queue](validation-queue.md) owns pending obligations and their
+status; `docs/TODO.md` continues to own features, fixes, and milestone scope.
+
+1. **Implementation pass:** define the expected contract and acceptance checks
+   before changing behavior. Implement a bounded change, inspect its diff, and
+   immediately run the smallest relevant existing or new regression tests and
+   applicable lint/type/data/docs checks. For material behavior changes, include
+   a direct focused regression test now when it is necessary to establish
+   correctness; the new workflow is not permission to ship untested behavior.
+   Record any additional missing test designs as VD items and any deferred
+   broader verification as one VR item per distinct implementation change,
+   including exact checks, revision, risk, and immediate results. Report
+   `implemented; broader validation pending` rather than `fully verified`
+   until the required checks pass.
+2. **Test-design pass:** implement several queued assertions/fixtures without
+   unrelated feature changes. Reuse existing test modules and fixtures, run
+   each new or modified test directly, and record the results. Link product
+   defects back to a TODO fix rather than silently fixing them in this pass.
+   Mark a VD entry `designed` only once its tests are in place and targeted
+   checks pass; unblock its linked VR entry.
+3. **Test-execution pass:** batch compatible pending checks across changes.
+   Prefer one shared full-suite/profile run to one run per VR entry; include
+   the affected browser/manual checks and artifact validations as required.
+   Record the exact tested revision, commands, pass/fail/skip counts, and
+   evidence. Close a VR entry only when all of its requirements pass on the
+   relevant state. Failures or source changes reopen the affected obligations.
+
+**Scheduling:** At **5 open VD requirements**, the next pass must be test
+design. At **5 distinct implementation changes with open VR verification**,
+the next pass must be test execution (after any blocking design). If both are
+due, first design what execution needs. Each open item also becomes due
+**7 calendar days after recording**, irrespective of count. Check the queue
+before and after each pass and do not start unrelated ordinary implementation
+while a mandatory pass is due. The thresholds are batching triggers, not
+limits on how many checks a pass may execute.
+
+**Never defer essential checks:** run fast targeted regressions and appropriate
+static/structure validators for every changed contract. Migration, schema,
+artifact/publication integrity, source provenance, security, compatibility
+boundaries, and correctness-critical player-facing rules changes require
+immediate risk-appropriate regression coverage and validation; run broader
+checks immediately when a targeted test cannot provide confidence. Do not
+defer checks needed to diagnose a failure or verify a bug fix. Existing
+push/pull-request CI runs on its configured triggers; its checks are not
+disabled, postponed, or replaced by this local queue. Before merge, deploy,
+tagging, or a release-candidate acceptance decision, clear all relevant VD
+and VR obligations and run all required gates in `docs/ci.md` and
+`docs/releasing.md`; unrelated explicitly post-release work must remain
+classified in TODO rather than be silently ignored.
+
+An implementation can be reviewable before broad validation, but **do not
+mark its acceptance complete or report all tests passed** while required VD/VR
+items remain. Keep executed check evidence and pending checks explicit in
+agent handoffs. This workflow does not change `tools/run_checks.py`, its
+profiles, or hosted CI execution.
+
 ## Source-test tail profiling and browser isolation
 
 The default pytest configuration reports the 20 slowest setup/call/teardown

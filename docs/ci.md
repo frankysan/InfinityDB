@@ -10,6 +10,12 @@ Required CI is intentionally hermetic with respect to Corvus Belli services and 
 inputs. A clean checkout must be able to validate source behavior, deterministic generated output,
 installed-package behavior, tracked release assets, and the production container.
 
+The local [phased validation workflow](testing.md#phased-development-and-validation)
+may batch discretionary broad checks between implementation passes, but it
+does not change required hosted CI triggers, jobs, matrices, or acceptance
+criteria. Outstanding validation for the relevant change must be resolved
+before merge or release acceptance; a local deferral is not a CI exemption.
+
 ## Principles
 
 1. **No routine network acquisition.** Required push/pull-request jobs consume repository-owned

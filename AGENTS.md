@@ -75,6 +75,27 @@ shared data-files, without substituting for installed-wheel CI. The `code`
 profile remains Python-only.
 See `docs/testing.md` for the complete contract.
 
+### Phased validation workflow
+
+Follow [phased development and validation](docs/testing.md#phased-development-and-validation)
+for ordinary implementation, test design, and test execution. At the start
+and end of each task, inspect `docs/validation-queue.md` and its age/threshold
+triggers: **5 pending test-design requirements** force a design-only pass;
+**5 distinct implementation changes awaiting deferred test execution**
+force an execution-only pass, after any blocking design. An item older than
+**7 calendar days** is due even below threshold. Critical checks, CI, and
+release/merge/deployment gates override batching.
+
+On each implementation change, run the required immediate targeted tests and
+appropriate validators. Record missing test designs and deferred checks under
+stable VD/VR IDs, linked to the owning TODO work, exact revision, and observed
+checks. Never report a deferred test as passed or mark acceptance complete
+before its requirements are verified. A dedicated design pass adds or fixes
+tests and runs their targeted cases; an execution pass runs and records batched
+checks. Failures remain open and create/link a TODO fix. This queue is not
+a replacement implementation backlog, and it never weakens the mandatory
+CI or release gates.
+
 Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
 tools in isolation, and package installation still runs through the virtual-environment
 Python, for example:
