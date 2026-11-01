@@ -961,6 +961,25 @@ rules-build tests passed; source audit count is **18 unresolved
 Skill IDs**. Mutation/edge-case tests and cumulative suite
 execution are deferred in `docs/validation-queue.md`.
 
+**Forward Observer (+1SD) source promotion (2026-11-01):**
+The pinned raw Army audit confirms two profile-level
+`308/TEXT:+1SD` occurrences of source `59` on TARKSHYA
+Operator in ALEPH and Operations Subsection, among 609 direct
+Forward Observer occurrences. The curated exact effect is one
+`special-die` scoped to `forward-observer-wip-attack-roll`,
+not additional Burst or Disposable uses; newly added N5.3
+citations on pp. 75 and 92 establish its rule scope.
+The source-variant regression and rules-database mapping
+test pass. `tools.stage_forward_observer_special_die`
+stages a fingerprint-verified matched rules/publication
+pair beneath ignored `local/`; `--promote-staged` verifies
+and retains rollback backups. The reviewed 17 deployed
+objects are identical before/after promotion and the
+audit now lists **17 unresolved Skill IDs**.
+Additional rejection/derived-index tests and cumulative
+full-suite verification are queued in
+`docs/validation-queue.md` for the next dedicated passes.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

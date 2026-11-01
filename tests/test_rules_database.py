@@ -1524,7 +1524,18 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     assert set(mappings) == {
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
         "vulnerability", "hacker", "booty", "metachemistry", "regeneration",
-        "neurocinetics", "minelayer", "chain-of-command",
+        "neurocinetics", "minelayer", "chain-of-command", "forward-observer",
+    }
+    assert mappings["forward-observer"] == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 308, "extra_type": "TEXT", "raw_value": "+1SD",
+            "effect": {
+                "kind": "special-die",
+                "applies_to": "forward-observer-wip-attack-roll",
+                "count": 1,
+            },
+        }],
     }
     assert mappings["chain-of-command"] == {
         "source": "army-extra", "kind": "reviewed-extra",

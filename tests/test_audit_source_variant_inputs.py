@@ -156,8 +156,8 @@ def test_regeneration_62_exact_states_phase_ph_values_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -199,8 +199,8 @@ def test_booty_metachemistry_exact_chart_rerolls_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -242,8 +242,8 @@ def test_hacker_skill_source_1000_exact_direct_programs_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -338,9 +338,9 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16,
+            "reviewed-extra-parameter": 17,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "unresolved-occurrence-parameter": 17,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -619,9 +619,9 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 16,
+        "reviewed-extra-parameter": 17,
         "reviewed-combination-parameter": 2,
-        "unresolved-occurrence-parameter": 18,
+        "unresolved-occurrence-parameter": 17,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -705,8 +705,8 @@ def test_decoy_215_exact_deployment_replica_counts_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -748,8 +748,8 @@ def test_ft_master_261_lists_exact_cancellation_trigger_units_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -805,8 +805,8 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -859,8 +859,8 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -903,8 +903,8 @@ def test_bangbomb_skill_266_reuses_equipment_scope_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -949,8 +949,8 @@ def test_medikit_target_ph_skill_273_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -994,8 +994,8 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "reviewed-extra-parameter": 17, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -1040,9 +1040,9 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 16,
+            "reviewed-extra-parameter": 17,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 18,
+            "unresolved-occurrence-parameter": 17,
         }
 
 
@@ -1845,6 +1845,57 @@ def test_chain_of_command_non_specialist_matches_exact_source_owners() -> None:
     assert {o["owner"] for o in owners} == {"option"}
     assert all(o["extra_type"] == "TEXT" and o["extra_raw"] == "Non Specialist"
                for o in owners)
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_forward_observer_special_die_exact_profile_owners() -> None:
+    """+1SD applies to Forward Observer rolls; it is not +1 Burst."""
+    [item] = select_source_variants(_inventory(), "skills", [59])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Forward Observer", 59, 609,
+    )
+    assert item["status"] == "reviewed-extra-parameter"
+    assert item["extraSignatures"] == [{
+        "extras": [[308, "TEXT", "+1SD"]], "reviewed": True, "count": 2,
+    }]
+    assert item["rawValues"] == []
+    assert item["reviewedCombinations"] is None
+    expected = {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 308, "extra_type": "TEXT", "raw_value": "+1SD",
+            "effect": {
+                "kind": "special-die",
+                "applies_to": "forward-observer-wip-attack-roll",
+                "count": 1,
+            },
+        }],
+    }
+    assert item["reviewedExtra"] == expected
+    assert RulesDatabase(ROOT / "data/generated/rules.db").skill_reviewed_extra_semantics()[
+        "forward-observer"
+    ] == expected
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=59, extra_id=308,
+    )
+    assert sorted((o["army_id"], o["unit_slug"], o["owner"]) for o in owners) == [
+        (701, "tarkshya-interception-wing", "profile"),
+        (703, "tarkshya-interception-wing", "profile"),
+    ]
+    assert all(o["extra_type"] == "TEXT" and o["extra_raw"] == "+1SD"
+               for o in owners)
+
+    document = json.loads(
+        (ROOT / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    record = next(
+        value for value in document["records"]
+        if value["id"] == "skill:forward-observer"
+    )
+    assert {(c["sourceId"], c.get("page")) for c in record["citations"]} >= {
+        ("n5-core-v5.3-pdf", 75), ("n5-core-v5.3-pdf", 92),
+    }
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

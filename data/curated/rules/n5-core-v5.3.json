@@ -13811,6 +13811,16 @@
                 {
                     "sourceId": "wiki-forward-observer-oldid-3878",
                     "heading": "Forward Observer"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 92,
+                    "section": "Forward Observer"
                 }
             ],
             "review": {
@@ -13818,7 +13828,25 @@
                 "reviewedOn": "2026-09-23"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 308,
+                                "extraType": "TEXT",
+                                "rawValue": "+1SD",
+                                "effect": {
+                                    "kind": "special-die",
+                                    "appliesTo": "forward-observer-wip-attack-roll",
+                                    "count": 1
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

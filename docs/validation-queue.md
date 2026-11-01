@@ -107,6 +107,30 @@ Each item records:
   uses synthetic variants. Risk: moderate; linked execution:
   VR-0004. Outcome: design deferred.
 
+- [ ] **VD-0004** (2026-11-01; needs-design): Add
+  curated-source negative cases for Forward Observer source `59`
+  `308/TEXT:+1SD`: altered extra ID, raw type/value,
+  `special-die` kind, WIP attack scope and count (including
+  boolean and zero). Each must fail closed rather than become
+  a Burst MOD or an unscoped additional die.
+  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
+  change: `dev/v1.0.0` after `0b7fe7a5`; existing
+  coverage: `test_forward_observer_special_die_exact_profile_owners`
+  and the exact curated validator. Risk: moderate; linked
+  execution: VR-0005. Outcome: design deferred.
+
+- [ ] **VD-0005** (2026-11-01; needs-design): Add
+  tracked/fresh rules export parity for the exact
+  Forward Observer (+1SD) profile occurrences, including
+  confirmation that the two TARKSHYA profile rows do not
+  imply `+1SD` on ordinary unparameterized Forward
+  Observer occurrences or a generic BS Attack Burst bonus.
+  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
+  change: `dev/v1.0.0` after `0b7fe7a5`; existing
+  coverage: the pinned two-owner test and stage-time
+  rules/publication fingerprints. Risk: moderate;
+  linked execution: VR-0005. Outcome: design deferred.
+
 ## Pending deferred execution
 
 Each item records:
@@ -215,6 +239,30 @@ Each item records:
   CI/release gates against the reviewed state. Outcome: awaiting
   design and broader verification; publication integrity
   immediately validated.
+
+- [ ] **VR-0005** (2026-11-01; awaiting-design): Publish the
+  exact source-59 Forward Observer `308/TEXT:+1SD` effect as one
+  Special Die for the WIP-based attack, with N5.3 pp. 75/92
+  citations; preserve the published 17 deployed-object records.
+  Work: [Rules variant source reconciliation](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree based on `0b7fe7a5`.
+  Risk: elevated for synchronized source/rules/publication
+  provenance, moderate for Special Die/Burst distinction.
+  Immediate: guarded stage/promote under ignored
+  `local/forward-observer-special-die-20261101/` with input
+  SHA-256 verification, recovered rollback copy and 17 unchanged
+  deployed objects; rules sha256
+  `50fa91f15be7da8449bdd179c94ceeadcf258f0edfedf12eb86ee344ab6d6a83`;
+  publication sha256
+  `f220f9e067fbd92779c90d4057c9bca767d1e05baf618bce4070a256a182276b`.
+  Direct source-59, rules-database and publication tests
+  **1 passed each**; rules build, publication `--check`,
+  targeted Ruff **PASS**. Design: VD-0004 and VD-0005.
+  Deferred: completed design cases and one shared cumulative
+  `tools/run_checks.py --stage test` with the existing VR
+  entries, then ordinary mandatory CI/release acceptance.
+  Outcome: awaiting design and broad execution; immediate
+  publication integrity verified.
 
 ## Recording template
 

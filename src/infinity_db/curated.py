@@ -914,6 +914,27 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "forward-observer"}
+    ]:
+        # N5.3 pp. 75, 92: +1SD adds a selectable/discarded die to
+        # this WIP-based BS Attack; it is not +1 Burst or ammunition.
+        expected = [{
+            "extraId": 308,
+            "extraType": "TEXT",
+            "rawValue": "+1SD",
+            "effect": {
+                "kind": "special-die",
+                "appliesTo": "forward-observer-wip-attack-roll",
+                "count": 1,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+        ):
+            raise ValueError(f"{context}: invalid Forward Observer Special Die extra")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "neurocinetics"}
     ]:
         expected = [{

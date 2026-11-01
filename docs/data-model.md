@@ -879,6 +879,27 @@ remain unchanged. The source audit has **18 unresolved Skill IDs**,
 with cumulative tests and additional negative tests tracked in
 the validation queue. No cross-Army usage index is generated.
 
+**Reviewed Forward Observer (+1SD) (2026-11-01):**
+Skill source `59` has 609 direct occurrences in the pinned
+Army snapshot; exactly two profile-level occurrences contain
+`308/TEXT:+1SD`, both on TARKSHYA Operator in ALEPH and
+Operations Subsection. N5.3 p. 75 defines a Special Die as an
+extra die that is selected and discarded, separate from Burst
+and additional Disposable uses, and permits it in both Active
+and Reactive Turns. N5.3 p. 92 defines Forward Observer as a
+WIP-based BS Attack. The single `reviewed-extra` effect is
+`special-die`, `appliesTo: forward-observer-wip-attack-roll`
+and `count: 1`. It is not an increase to the source chart's
+B or a general BS Attack modifier. The previously Wiki-only
+curated record now additionally cites both N5.3 pages.
+`tools.stage_forward_observer_special_die` guarded the
+single-record change, verified exact Army/PDF inputs,
+promoted matched rules/publication outputs, retained rollback
+copies, and preserved all 17 deployed objects. The audit
+reports **17 unresolved Skill IDs**. Additional mutation
+and projection tests remain queued; no Unit-usage index
+or automatic Attack resolution is implied.
+
 **Partially reviewed Hacking Device program grants (2026-10-31):**
 The pinned Army source has Hacking Device `100` with 653 direct
 occurrences and Hacking Device Plus `101` with 126. English

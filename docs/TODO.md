@@ -1693,7 +1693,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **18 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **17 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1768,6 +1768,23 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         The source audit now reports **18** unresolved Skill IDs.
         Deferred edge-case tests and cumulative execution are in
         the [validation queue](validation-queue.md).
+      - [x] **Data processing — Forward Observer (+1SD), source 59:**
+        Reconcile two `308/TEXT:+1SD` profile occurrences on
+        TARKSHYA Operator in ALEPH and Operations Subsection, out
+        of 609 direct Forward Observer occurrences. N5.3 p. 75
+        defines an additional Special Die, selected and discarded
+        without increasing Burst or consuming Disposable uses;
+        p. 92 identifies the Forward Observer WIP-based BS Attack.
+        Publish the exact `special-die` count-one effect, scoped
+        to `forward-observer-wip-attack-roll`, plus these official
+        citations. The guarded source/Army/PDF-backed migration
+        synchronizes the curated source, rules database and
+        publication, leaving 17 reviewed deployed objects unchanged
+        with retained recovery artifacts. Focused source/database/
+        publication checks pass; **17 Skill** source IDs remain
+        unresolved. Defer additional negative/derived-index tests
+        and the cumulative suite through the validation queue.
+        This is source metadata, not gameplay attack resolution.
       - [x] **Data processing:** Audit the lone Journalist
         source-272 `1/TEXT:+3` on the Tohaa Diplomatic Delegate.
         N5.3 already defines Journalist's Guts Roll and campaign
