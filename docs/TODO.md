@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **22 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **21 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1704,6 +1704,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Vulnerability source-220 weapon-name-scoped Viral Immunity restriction,
       Hacker Skill source-1000 direct programs and exact Upgrades,
       Booty/MetaChemistry source-25/55 chart ReRolls,
+      Regeneration source-62 States Phase PH replacements,
       RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
@@ -2317,7 +2318,21 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         preserve unannotated family-only profiles,
         and guard the two-record matched-v9 refresh
         against raw-source drift and unrelated changes.
-        Current baseline: **22 Skill / 1 Equipment**.
+        Baseline at that point: **22 Skill / 1 Equipment**.
+      - [x] **Data processing:** Certify Regeneration source-62
+        exact `PH=13` (3), `PH=14` (3), `PH=12` (2),
+        `PH=15` (8) signatures, across 82 occurrences.
+        N5.3 pp. 75 and 109 specify that a bracketed
+        `PH=N` replaces the Attribute used by the Skill;
+        this applies only to Regeneration's States Phase
+        Normal PH Roll, not the Trooper's global PH.
+        Validate exact source IDs, values, types and counts;
+        use matched-v9 metadata-only promotion preserving
+        unrelated records and the paired publication.
+        The source audit now supports `--unresolved-only
+        --brief` to avoid truncation while preserving
+        full-catalog denominators. Current baseline:
+        **21 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

@@ -448,7 +448,18 @@ python -m tools.audit_source_variant_inputs --catalog equipment --source-id 169
 The first command selects Super-Jump, Jump and Climb; the second selects
 TinBot: Firewall. Output preserves the original full-catalog summary
 and every selected raw extra ID/type/value; unknown source IDs fail
-explicitly. Selection/combination guard tests work in CI without the
+explicitly. To inspect only the remaining unresolved source IDs without
+truncating the console response, use:
+
+```powershell
+python -m tools.audit_source_variant_inputs --catalog skills --unresolved-only --brief
+```
+
+`--unresolved-only` filters the displayed items without changing the
+`fullCatalogSummary` counts. `--brief` retains source IDs, names,
+occurrence totals and the number of signatures while omitting verbose
+per-signature data; rerun with `--source-id N` to inspect exact raw
+values. Selection/combination guard tests work in CI without the
 raw database, while pinned occurrence-count regressions require the
 local archive.
 

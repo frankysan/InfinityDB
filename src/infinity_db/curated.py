@@ -259,6 +259,27 @@ KILLER_HACKING_VARIANT: dict[str, Any] = {
 }
 
 
+# Regeneration PH=N replaces only the Normal PH Roll used in States Phase.
+# It does not alter the Trooper's PH Attribute or other PH Rolls.
+REGENERATION_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": f"PH={value}",
+                "effect": {
+                    "kind": "regeneration-ph-replacement",
+                    "appliesTo": "regeneration-states-phase-ph-roll",
+                    "attribute": "PH", "value": value,
+                },
+            }
+            for extra_id, value in ((52, 13), (244, 14), (250, 12), (353, 15))
+        ],
+    }],
+}
+
+
 # The generic N5.3 ReRoll annotation applies to the Skill's own Roll.
 # Both are optional deployment chart Rolls, not rolls using chart rewards.
 CHART_REROLL_VARIANTS: dict[str, dict[str, Any]] = {
@@ -891,6 +912,25 @@ def _validate_reviewed_extra_parameter(
             or values != expected
         ):
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "regeneration"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = REGENERATION_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(item, dict)
+                or type(item.get("extraId")) is not int
+                or not isinstance(item.get("effect"), dict)
+                or type(item["effect"].get("value")) is not int
+                for item in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid exact Regeneration PH replacements")
         return
     if inheritance == "family" and len(army_links) == 1 and isinstance(
         army_links[0], dict

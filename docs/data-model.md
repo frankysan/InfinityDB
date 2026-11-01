@@ -1143,6 +1143,36 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**Regeneration exact PH replacements (2026-11-01):**
+The pinned N5.3 Skill/Equipment modifier rule (p. 75)
+explains `PH=N` as replacing the PH value for
+that Skill's Roll, not the owner's PH Attribute
+everywhere. Regeneration (p. 109) makes exactly
+one Normal PH Roll when activated during the
+States Phase, with different consequences for
+success and failure.
+
+Pinned Army Skill source `62` has 82 direct
+occurrences, 16 with reviewed `TEXT` extras:
+`52/PH=13` (3), `244/PH=14` (3),
+`250/PH=12` (2), `353/PH=15` (8).
+The other 66 occurrences retain family-only
+semantics. Canonical `skill:regeneration`
+records a `regeneration-ph-replacement` effect
+with `attribute: PH`, exact integer `value`,
+and `appliesTo: regeneration-states-phase-ph-roll`.
+No change to normal PH, healing consequences,
+States Phase activation or Null State rules.
+
+Curated validation rejects altered IDs, raw
+values, order, type or roll scope. The guarded
+matched-v9 refresh checks pinned source counts,
+requires prior family-only metadata, and preserves
+unrelated records/schema and the paired
+deployed-object publication. Pinned source tests
+compare tracked and fresh rules exports.
+Unresolved baseline: **21 Skill / 1 Equipment**.
+
 **Booty and MetaChemistry chart ReRolls (2026-11-01):**
 The N5.3 general modifier rule states that `ReRoll`
 in brackets lets a Trooper reroll one die when

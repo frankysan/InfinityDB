@@ -332,6 +332,14 @@ def main() -> None:
     parser.add_argument("--rules", type=Path, default=Path("data/generated/rules.db"))
     parser.add_argument("--catalog", choices=CATEGORIES, help="limit output to one source catalog")
     parser.add_argument(
+        "--unresolved-only", action="store_true",
+        help="list only unresolved source items; preserve full-catalog summary",
+    )
+    parser.add_argument(
+        "--brief", action="store_true",
+        help="list source ID, name, occurrence count and signature counts only",
+    )
+    parser.add_argument(
         "--source-id", type=int, action="append", default=[],
         help="select an exact source ID (repeatable; requires --catalog)",
     )
@@ -346,12 +354,27 @@ def main() -> None:
         not args.catalog or len(args.source_id) != 1 or args.owner_extra_id <= 0
     ):
         parser.error("--owner-extra-id requires one --source-id, --catalog and positive ID")
+    if args.unresolved_only and not args.catalog:
+        parser.error("--unresolved-only requires --catalog")
     report = inventory_source_variants(args.application, args.raw, args.rules)
     if args.catalog:
         try:
             report = select_source_variants(report, args.catalog, args.source_id)
         except ValueError as exc:
             parser.error(str(exc))
+    if args.unresolved_only:
+        report["items"] = [
+            item for item in report["items"]
+            if item["status"] == "unresolved-occurrence-parameter"
+        ]
+        report["selectedSourceIds"] = [item["id"] for item in report["items"]]
+    if args.brief:
+        report["items"] = [{
+            "id": item["id"], "name": item["name"],
+            "status": item["status"], "occurrences": item["occurrences"],
+            "extraSignatures": len(item["extraSignatures"]),
+            "rawValueDistinctCount": item["rawValueDistinctCount"],
+        } for item in report["items"]]
     if args.owner_extra_id is not None:
         report["occurrenceOwners"] = source_extra_owner_context(
             args.raw, catalog=args.catalog,

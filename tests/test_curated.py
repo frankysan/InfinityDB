@@ -1433,6 +1433,48 @@ def test_khd_requires_exact_pinned_upgrade_semantics(
         load_curated_document(path)
 
 
+@pytest.mark.parametrize(
+    ("index", "field", "wrong"), [
+        (0, "extraId", 53),
+        (0, "extraId", 52.0),
+        (1, "rawValue", "PH=13"),
+        (2, "extraType", "DISTANCE"),
+        (3, "effect", {
+            "kind": "regeneration-ph-replacement",
+            "appliesTo": "all-ph-rolls", "attribute": "PH", "value": 15,
+        }),
+        (3, "effect", {
+            "kind": "regeneration-ph-replacement",
+            "appliesTo": "regeneration-states-phase-ph-roll",
+            "attribute": "PH", "value": 15.0,
+        }),
+    ],
+)
+def test_regeneration_exact_ph_replacements_are_states_phase_only(
+    tmp_path: Path, index: int, field: str, wrong: object,
+) -> None:
+    from infinity_db.curated import REGENERATION_VARIANT
+
+    doc = valid_document()
+    doc["skillTypes"][0]["id"] = "automatic"
+    record = doc["records"][0]
+    record.update({
+        "id": "skill:regeneration", "kind": "skill",
+        "facts": {"typeIds": ["automatic"]},
+        "armyLinks": [{"entity": "skill", "id": "regeneration"}],
+        "variantSemantics": deepcopy(REGENERATION_VARIANT),
+    })
+    path = tmp_path / "regeneration.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    load_curated_document(path)
+    record["variantSemantics"]["occurrenceParameters"][0][
+        "extraValues"
+    ][index][field] = wrong
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid exact Regeneration PH replacements"):
+        load_curated_document(path)
+
+
 @pytest.mark.parametrize("skill", ("booty", "metachemistry"))
 @pytest.mark.parametrize(
     ("field", "wrong"), [

@@ -26,6 +26,7 @@ from infinity_db.curated import (
     HACKER_SOURCE_VARIANT,
     KILLER_HACKING_VARIANT,
     MEDIKIT_TARGET_PH_PARAMETERS,
+    REGENERATION_VARIANT,
     REMDRIVER_COMBINATIONS,
     TAGCOM_COMBINATIONS,
     VULNERABILITY_VIRAL_VARIANT,
@@ -117,6 +118,7 @@ GIZMOKIT_TARGET_PH_VARIANT = {
     **GIZMOKIT_VARIANT,
     "sourceCatalogParameters": GIZMOKIT_TARGET_PH_PARAMETERS,
 }
+REGENERATION = ("n5-core-v5.3", "skill:regeneration")
 CHART_REROLLS = {
     ("n5-core-v5.3", f"skill:{skill}"): variant
     for skill, variant in CHART_REROLL_VARIANTS.items()
@@ -1029,9 +1031,21 @@ def _check_variant_semantics_delta(
     tagcom: bool = False, ft_master: bool = False,
     decoy: bool = False, vulnerability: bool = False,
     hacker_skill: bool = False, chart_rerolls: bool = False,
+    regeneration: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if regeneration and (
+        initial or bangbomb or bangbomb_skill or medikit or gizmokit
+        or deactivator or gizmokit_target_ph or medikit_target_ph
+        or remdriver or ft_master or tagcom or decoy or vulnerability
+        or hacker_skill or chart_rerolls or evo_trinity or killer_hacking
+        or impersonation or tinbot_firewall or tinbot_other
+        or hacking_mods or hacking_srs or hacking_firewall
+        or hacking_combinations or hacking_trinity_access
+        or set(variants) != {REGENERATION}
+    ):
+        raise ValueError("Regeneration refresh requires exactly Skill source 62")
     if chart_rerolls and (
         initial or bangbomb or bangbomb_skill or medikit or gizmokit
         or deactivator or gizmokit_target_ph or medikit_target_ph
@@ -1236,6 +1250,20 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == REGENERATION:
+                        if not regeneration:
+                            raise ValueError("Regeneration requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != REGENERATION_VARIANT
+                            or any(
+                                type(item["extraId"]) is not int
+                                or type(item["effect"]["value"]) is not int
+                                for item in after["occurrenceParameters"][0]["extraValues"]
+                            )
+                        ):
+                            raise ValueError("Regeneration changed source-only semantics")
                     elif key in CHART_REROLLS:
                         if not chart_rerolls:
                             raise ValueError("Chart ReRoll requires source-verified refresh")
@@ -1725,6 +1753,38 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_regeneration_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote exact Regeneration States Phase PH replacements from source 62."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [item for item in report["catalogs"]["skills"]["items"]
+            if item["id"] == 62]
+    signatures = [
+        {"extras": [[extra_id, "TEXT", f"PH={value}"]],
+         "reviewed": False, "count": count}
+        for extra_id, value, count in ((52, 13, 3), (244, 14, 3),
+                                       (250, 12, 2), (353, 15, 8))
+    ]
+    if (
+        len(rows) != 1 or rows[0]["name"] != "Regeneration"
+        or rows[0]["applicationId"] != 62 or rows[0]["occurrences"] != 82
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"] or rows[0]["extraSignatures"] != signatures
+    ):
+        raise ValueError("Regeneration source-62 signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={REGENERATION[1]}, regeneration=True,
     )
 
 
@@ -2664,6 +2724,7 @@ def _refresh_metadata_v9_release(
     tagcom: bool = False, ft_master: bool = False,
     decoy: bool = False, vulnerability: bool = False,
     hacker_skill: bool = False, chart_rerolls: bool = False,
+    regeneration: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2769,6 +2830,7 @@ def _refresh_metadata_v9_release(
                 vulnerability=vulnerability,
                 hacker_skill=hacker_skill,
                 chart_rerolls=chart_rerolls,
+                regeneration=regeneration,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,

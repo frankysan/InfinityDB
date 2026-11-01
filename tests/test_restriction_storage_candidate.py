@@ -1512,6 +1512,132 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "count", "name", "app-id", "extra-id",
+               "raw", "frequency", "status", "previous", "new-extra"),
+)
+def test_regeneration_v9_source_gate_pins_four_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 62, "name": "Regeneration", "applicationId": 62,
+        "occurrences": 82, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None,
+        "reviewedNumericMod": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[eid, "TEXT", f"PH={value}"]],
+             "reviewed": False, "count": count}
+            for eid, value, count in (
+                (52, 13, 3), (244, 14, 3), (250, 12, 2), (353, 15, 8)
+            )
+        ],
+    }
+    if defect == "count":
+        source["occurrences"] = 81
+    elif defect == "name":
+        source["name"] = "Regenerations"
+    elif defect == "app-id":
+        source["applicationId"] = 99
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 53
+    elif defect == "raw":
+        source["extraSignatures"][1]["extras"][0][2] = "PH=15"
+    elif defect == "frequency":
+        source["extraSignatures"][3]["count"] = 9
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "new-extra":
+        source["extraSignatures"].append({
+            "extras": [[400, "TEXT", "PH=16"]],
+            "reviewed": False, "count": 1,
+        })
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "backup"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_regeneration_v9_release(root=tmp_path) == (
+            tmp_path / "backup"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"skill:regeneration"},
+            "regeneration": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="Regeneration source-62 signature drift"):
+            release.refresh_regeneration_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "wrong-scope", "wrong-value", "float-value",
+               "wrong-id", "reordered", "other-record", "schema", "missing"),
+)
+def test_regeneration_v9_delta_only_adds_exact_ph_roll_values(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        REGENERATION,
+        REGENERATION_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    before, after = tmp_path / "before.db", tmp_path / "after.db"
+    variant = copy.deepcopy(REGENERATION_VARIANT)
+    values = variant["occurrenceParameters"][0]["extraValues"]
+    if defect == "wrong-scope":
+        values[0]["effect"]["appliesTo"] = "all-ph-rolls"
+    elif defect == "wrong-value":
+        values[1]["effect"]["value"] = 15
+    elif defect == "float-value":
+        values[2]["effect"]["value"] = 12.0
+    elif defect == "wrong-id":
+        values[0]["extraId"] = 53
+    elif defect == "reordered":
+        values.reverse()
+    with sqlite3.connect(before) as old, sqlite3.connect(after) as new:
+        old.execute(
+            "CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)"
+        )
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*REGENERATION, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "skill:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), REGENERATION[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX altered ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:regeneration'")
+    changed: dict[tuple[str, str], str] = {REGENERATION: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(before, after, changed, regeneration=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(before, after, changed, regeneration=True)
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(before, after, changed)
+
+
+@pytest.mark.parametrize(
     "defect", (None, "missing", "wrong-scope", "wrong-id",
                "float-id", "other-record", "schema", "only-one"),
 )

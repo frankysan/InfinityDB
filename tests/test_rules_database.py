@@ -1523,7 +1523,7 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     mappings = current_rules_database.skill_reviewed_extra_semantics()
     assert set(mappings) == {
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
-        "vulnerability", "hacker", "booty", "metachemistry",
+        "vulnerability", "hacker", "booty", "metachemistry", "regeneration",
     }
     param = mappings["dodge"]
     assert param["kind"] == "reviewed-extra"
@@ -1581,6 +1581,33 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
         {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
     ]
+
+
+def test_regeneration_ph_values_replace_only_states_phase_roll(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    param = rules.skill_reviewed_extra_semantics()["regeneration"]
+    assert param["kind"] == "reviewed-extra"
+    assert param["source"] == "army-extra"
+    assert [(entry["extra_id"], entry["raw_value"], entry["effect"]["value"])
+            for entry in param["extra_values"]] == [
+        (52, "PH=13", 13), (244, "PH=14", 14),
+        (250, "PH=12", 12), (353, "PH=15", 15),
+    ]
+    assert all(
+        entry["effect"]["kind"] == "regeneration-ph-replacement"
+        and entry["effect"]["applies_to"] == "regeneration-states-phase-ph-roll"
+        and entry["effect"]["attribute"] == "PH"
+        for entry in param["extra_values"]
+    )
+    record = rules.composed_record("skill:regeneration")
+    assert record is not None
+    assert record["variant_semantics"]["occurrence_parameters"][0][
+        "extra_values"
+    ] == param["extra_values"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 109
+               for c in record["citations"])
 
 
 @pytest.mark.parametrize(
