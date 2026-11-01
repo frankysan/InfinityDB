@@ -1690,11 +1690,12 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and **6 Equipment** source IDs. The tracked
+      occurrence parameters and **5 Equipment** source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
       standalone ECM Guided/Hacker, Bangbomb, MediKit ranged Burst,
-      and complete source-100 Hacking Device parameters;
+      EVO Trinity grant/SR modifier, and complete source-100
+      Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
       the release-matched source pair before final certification.
@@ -1992,6 +1993,39 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         tracked rules database with a fresh export.
         This reduces unresolved Equipment source IDs
         from 7 to **6** (34 Skill IDs unchanged).
+      - [x] **Data processing:** Reconcile both EVO Hacking
+        Device `UPGRADE: Trinity (SR-2)` occurrences
+        (source Equipment `182`, extra `352`,
+        `TEXT: UPGRADE: Trinity (SR-2)`; 40 direct
+        occurrences, two upgraded). N5.3 p. 58
+        grants EVO its four baseline support programs,
+        **not** Trinity. Confirmed gameplay
+        interpretation: this named Upgrade additionally
+        **grants Trinity access** and reduces the
+        target's Saving Roll against Trinity by `2`.
+        The exact `hacking-program-upgrade` effect
+        includes the canonical program reference,
+        `grantsProgram: true`,
+        `appliesTo: target-saving-roll-against-program`,
+        and `modifier: -2`; it does not change
+        the baseline device chart or apply to other
+        programs. A guarded one-record matched-v9
+        migration requires the exact source signature,
+        prior family metadata, and unchanged unrelated
+        rows, retaining rollback copies under ignored
+        `local/`. Pinned raw-source tests compare
+        tracked and fresh rules exports. Equipment
+        unresolved source IDs fall from 6 to **5**
+        (34 Skill IDs unchanged).
+      - [ ] **Data processing:** Independently review whether
+        previously typed program-specific modifiers
+        (particularly Trinity on Hacking Device/Plus)
+        also need an explicit program-access grant when
+        the modified program is absent from that
+        Device's N5.3 p. 58 baseline. Do not alter
+        existing device grants/modifiers by extrapolating
+        the EVO source-182 decision; audit exact
+        source signatures and owner contexts first.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

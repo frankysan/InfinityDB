@@ -16565,7 +16565,27 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 352,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Trinity (SR-2)",
+                                "effect": {
+                                    "kind": "hacking-program-upgrade",
+                                    "program": "hacking-program:trinity",
+                                    "grantsProgram": true,
+                                    "appliesTo": "target-saving-roll-against-program",
+                                    "modifier": -2
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

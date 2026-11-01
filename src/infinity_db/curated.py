@@ -218,6 +218,31 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid {device} reviewed hacking extras")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "evo-hacking-device"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 352, "extraType": "TEXT",
+            "rawValue": "UPGRADE: Trinity (SR-2)",
+            "effect": {
+                "kind": "hacking-program-upgrade",
+                "program": "hacking-program:trinity",
+                "grantsProgram": True,
+                "appliesTo": "target-saving-roll-against-program",
+                "modifier": -2,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid EVO Hacking Device Trinity upgrade")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "equipment", "id": "medikit"}
     ]:
         values = parameter.get("extraValues")

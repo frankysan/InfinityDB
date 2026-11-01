@@ -1623,6 +1623,124 @@ def test_medikit_v9_refresh_checks_pinned_source(
         assert not calls
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "grant", "modifier", "scope", "program", "raw",
+               "other-record", "schema", "missing"),
+)
+def test_evo_trinity_v9_refresh_requires_coupled_exact_metadata(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        EVO_HACKING_DEVICE,
+        EVO_TRINITY_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    previous, proposed = tmp_path / "previous.db", tmp_path / "proposed.db"
+    variant = copy.deepcopy(EVO_TRINITY_VARIANT)
+    if defect in {"grant", "modifier", "scope", "program", "raw"}:
+        extra = variant["occurrenceParameters"][0]["extraValues"][0]
+        if defect == "grant":
+            extra["effect"]["grantsProgram"] = False
+        elif defect == "modifier":
+            extra["effect"]["modifier"] = -1
+        elif defect == "scope":
+            extra["effect"]["appliesTo"] = "all-programs"
+        elif defect == "program":
+            extra["effect"]["program"] = "hacking-program:carbonite"
+        else:
+            extra["rawValue"] = "UPGRADE: Trinity (SR-1)"
+    with sqlite3.connect(previous) as old, sqlite3.connect(proposed) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*EVO_HACKING_DEVICE, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "equipment:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), EVO_HACKING_DEVICE[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='equipment:evo-hacking-device'")
+    changed: dict[tuple[str, str], str] = {EVO_HACKING_DEVICE: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(previous, proposed, changed, evo_trinity=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(previous, proposed, changed, evo_trinity=True)
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(previous, proposed, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "extra-id", "extra-type",
+               "raw", "status", "previous", "compound"),
+)
+def test_evo_trinity_v9_refresh_checks_pinned_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 182, "name": "EVO Hacking Device", "applicationId": 182,
+        "occurrences": 40, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [{
+            "extras": [[352, "TEXT", "UPGRADE: Trinity (SR-2)"]],
+            "reviewed": False, "count": 2,
+        }],
+    }
+    if defect == "name":
+        source["name"] = "different"
+    elif defect == "app-id":
+        source["applicationId"] = 101
+    elif defect == "count":
+        source["occurrences"] = 39
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 339
+    elif defect == "extra-type":
+        source["extraSignatures"][0]["extras"][0][1] = "DISTANCE"
+    elif defect == "raw":
+        source["extraSignatures"][0]["extras"][0][2] = "UPGRADE: Trinity (SR-1)"
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "compound":
+        source["extraSignatures"][0]["extras"].append([352, "TEXT", "UPGRADE: Trinity (SR-2)"])
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_evo_trinity_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"equipment:evo-hacking-device"},
+            "evo_trinity": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="EVO Trinity source signature drift"):
+            release.refresh_evo_trinity_v9_release(root=tmp_path)
+        assert not calls
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

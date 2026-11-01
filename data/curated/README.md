@@ -1169,6 +1169,29 @@ a contact-use effect, or a generic Equipment
 Burst modifier. The source signature and effect
 are validated fail-closed.
 
+EVO Hacking Device source `182` accepts only
+extra `352` (`TEXT: UPGRADE: Trinity (SR-2)`)
+as a single exact `reviewed-extra` effect
+of kind `hacking-program-upgrade`. The
+effect explicitly holds
+`program: "hacking-program:trinity"`,
+`grantsProgram: true`,
+`appliesTo: "target-saving-roll-against-program"`,
+and `modifier: -2`. This means the
+Upgrade both **adds Trinity to the EVO
+Device's four baseline Hacking Programs**
+and modifies Saving Rolls against Trinity
+only. The source chart (N5.3 p. 58)
+does not grant EVO baseline Trinity;
+this upgrade does. The full object is
+validated against the source ID, raw
+extra identity and exact semantic
+fields: a modifier without a program
+grant is invalid. Do not generalize
+this EVO-specific contract to all
+program-modifier extras on other
+devices without their own review.
+
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
 forms remain opaque until their semantics are reviewed.

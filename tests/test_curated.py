@@ -1272,6 +1272,74 @@ def test_reviewed_dodge_extra_parameter_rejects_unscoped_or_mismatched_values(
 
 @pytest.mark.parametrize(
     ("field", "wrong"), [
+        ("extraId", 353),
+        ("extraId", 352.0),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "UPGRADE: Trinity (SR-1)"),
+        ("effect", {
+            "kind": "hacking-program-upgrade",
+            "program": "hacking-program:trinity",
+            "grantsProgram": False,
+            "appliesTo": "target-saving-roll-against-program",
+            "modifier": -2,
+        }),
+        ("effect", {
+            "kind": "hacking-program-upgrade",
+            "program": "hacking-program:oblivion",
+            "grantsProgram": True,
+            "appliesTo": "target-saving-roll-against-program",
+            "modifier": -2,
+        }),
+        ("effect", {
+            "kind": "hacking-program-upgrade",
+            "program": "hacking-program:trinity",
+            "grantsProgram": True,
+            "appliesTo": "target-saving-roll-against-program",
+            "modifier": -1,
+        }),
+        ("effect", {
+            "kind": "program-saving-roll-mod",
+            "program": "hacking-program:trinity",
+            "appliesTo": "target-saving-roll-against-program",
+            "modifier": -2,
+        }),
+        ("effect", {
+            "kind": "hacking-program-upgrade",
+            "program": "hacking-program:trinity",
+            "grantsProgram": True,
+            "appliesTo": "all-hacking-programs",
+            "modifier": -2,
+        }),
+    ],
+)
+def test_evo_trinity_requires_both_program_grant_and_sr_modifier(
+    tmp_path: Path, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"]
+                   if row["id"] == "equipment:evo-hacking-device")
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": "equipment:evo-hacking-device", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": "evo-hacking-device"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "evo.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    entry = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"][0]
+    entry[field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid EVO Hacking Device Trinity upgrade"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    ("field", "wrong"), [
         ("extraId", 9),
         ("extraId", 8.0),
         ("extraType", "DISTANCE"),

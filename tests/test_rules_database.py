@@ -1734,6 +1734,40 @@ def test_ecm_guided_and_hacker_source_variants_are_separate(
     assert base["variant_semantics"] == {"inheritance": "family"}
 
 
+def test_evo_trinity_upgrade_grants_program_and_modifies_sr(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    reviewed = rules.equipment_reviewed_extra_semantics()["evo-hacking-device"]
+    assert reviewed == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 352, "extra_type": "TEXT",
+            "raw_value": "UPGRADE: Trinity (SR-2)",
+            "effect": {
+                "kind": "hacking-program-upgrade",
+                "program": "hacking-program:trinity",
+                "grantsProgram": True,
+                "applies_to": "target-saving-roll-against-program",
+                "modifier": -2,
+            },
+        }],
+    }
+    record = rules.composed_record("equipment:evo-hacking-device")
+    assert record is not None
+    assert record["variant_semantics"]["inheritance"] == "family"
+    assert reviewed in record["variant_semantics"]["occurrence_parameters"]
+    assert rules.composed_record("hacking-program:trinity") is not None
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 58
+               for c in record["citations"])
+    effects = record["facts"]["effects"]
+    for program in (
+        "assisted-fire", "controlled-jump", "enhanced-reaction", "fairy-dust",
+    ):
+        assert any(f"[[hacking-program:{program}]]" in text for text in effects)
+    assert all("trinity" not in text.lower() for text in effects)
+
+
 def test_medikit_reviewed_burst_is_ranged_only(
     current_rules_database: RulesDatabase,
 ) -> None:

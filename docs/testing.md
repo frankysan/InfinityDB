@@ -685,6 +685,31 @@ the command after promotion. The unresolved
 baseline becomes **34 Skill / 6 Equipment**
 source IDs; this is not a Unit-use index.
 
+**EVO Trinity grant plus Saving Roll modifier (2026-11-01):**
+Equipment source `182` has 40 direct
+Army occurrences; two use exact extra `352`,
+`TEXT: UPGRADE: Trinity (SR-2)`. The
+`hacking-program-upgrade` mapping preserves
+both **Trinity access** and its `-2` target
+Saving Roll modifier, alongside EVO's four
+unchanged baseline programs (N5.3 p. 58).
+Curated mutation tests reject removal of
+`grantsProgram: true`, incorrect program,
+SR modifier, scope, source ID, or spelling.
+The hermetic guarded migration tests reject
+generic append bypass, changed earlier
+family semantics, missing or modified source
+rows, schema changes and unrelated metadata.
+The pinned raw-source audit compares tracked
+and freshly exported rules databases.
+The one-time guarded command
+`python -m tools.build_deployed_object_publication
+--refresh-evo-trinity-v9` synchronizes
+the previous matched release pair and retains
+ignored rollback files in `local/`. Do not
+rerun it after promotion. The source baseline
+is **34 unresolved Skill / 5 Equipment IDs**.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

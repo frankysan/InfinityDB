@@ -1145,6 +1145,50 @@ reducing unresolved Equipment IDs from **7 to
 No runtime roll resolution or cross-Army Unit-use
 index is introduced.
 
+**Reviewed EVO Trinity Upgrade (2026-11-01):**
+The pinned Equipment source `182` has 40
+direct occurrences, exactly two carrying
+`TEXT: UPGRADE: Trinity (SR-2)` (extra
+`352`). N5.3 p. 58 lists the four baseline
+EVO Hacking Device programs: Assisted Fire,
+Enhanced Reaction, Fairy Dust, and Controlled
+Jump; **Trinity is not baseline**. The confirmed
+upgrade interpretation is therefore
+**two simultaneous semantics**: this
+source-specific Upgrade grants the user access
+to `hacking-program:trinity` and imposes a
+`-2` modifier to the target's Saving Roll
+against Trinity. The exact `reviewed-extra`
+effect is `hacking-program-upgrade`, with
+`program: "hacking-program:trinity"`,
+`grantsProgram: true`,
+`appliesTo: "target-saving-roll-against-program"`,
+and `modifier: -2`. This combined object keeps
+the grant and modifier explicit within the
+existing one-effect-per-extra contract; it
+does not override the EVO device's four baseline
+programs or imply a device-wide SR modifier.
+This is curated, user-confirmed rules
+interpretation associated with the pinned
+N5.3 chart and Army extra; the chart itself
+does not list EVO Trinity as a base Program.
+
+A guarded one-time v9 metadata refresh promotes
+only the exact source-182 signature from a
+previously family-only record, preserves all
+other rows and schema, synchronizes the matched
+`rules.db` and deployed-object publication,
+and retains recovery artifacts in ignored
+`local/`. Pinned raw-source tests compare
+tracked and freshly exported rules metadata.
+The two direct upgraded EVO occurrences become
+reviewed; unresolved Equipment source IDs
+decrease from **6 to 5**, while Skill source
+IDs remain **34**. Program-access implications
+of other previously reviewed nonbaseline
+program modifiers need a separate audit;
+no changes to those meanings were made here.
+
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
 application/raw databases. The tracked artifact includes reviewed
@@ -1152,7 +1196,8 @@ Mimetism, Berserk, Dodge, Surprise Attack, Super-Jump, Jump,
 Climb, TinBot variants, Hacking Device single-extra semantics
 and exact reviewed multi-extra combinations,
 plus source-verified Bangbomb Dodge, ECM Guided/Hacker,
-and MediKit ranged Burst modifiers. This baseline contains **96 Skill** source identities across
+MediKit ranged Burst, and EVO Trinity access/SR semantics.
+This baseline contains **96 Skill** source identities across
 **33,153 direct rows** and **34 Equipment** source identities across
 **5,427 direct rows**:
 
@@ -1164,10 +1209,11 @@ and MediKit ranged Burst modifiers. This baseline contains **96 Skill** source i
   (Dodge `40` and Super-Jump `74`); and **34** IDs with
   unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
-  19 family-only IDs; 8 reviewed extra-parameter sources
+  19 family-only IDs; 9 reviewed extra-parameter sources
   (TinBot Firewall `169`, Discover `244`, ECM Guided `247`,
   Bangbomb `246`, Hacking Device `100`, ECM Guided `239`,
-  ECM Hacker `241`, and MediKit `106`); and **6** IDs with
+  ECM Hacker `241`, MediKit `106`, and EVO Hacking
+  Device `182`); and **5** IDs with
   unresolved occurrence parameters. Six currently
   published Equipment source IDs have reviewed exact-source
   named variants, of which Repeater `248` has no occurrence extras.
