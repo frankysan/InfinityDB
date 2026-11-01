@@ -1654,6 +1654,57 @@ def test_hacking_device_program_grants_preserve_unreviewed_overrides(
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_neurocinetics_reactive_burst_extra_has_exact_source_owners() -> None:
+    """Source-only review: +1B is not a generic Active Turn BS Attack bonus."""
+    [item] = select_source_variants(_inventory(), "skills", [109])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Neurocinetics", 109, 27,
+    )
+    assert item["extraSignatures"] == [{
+        "extras": [[8, "TEXT", "+1B"]],
+        "reviewed": False,
+        "count": 4,
+    }]
+    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["reviewedExtra"] is None
+    assert item["rawValues"] == []
+
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=109, extra_id=8,
+    )
+    assert sorted((owner["army_id"], owner["unit_slug"]) for owner in owners) == [
+        (201, "yan-hu-invincibles"),
+        (204, "yan-hu-invincibles"),
+        (401, "sunduqbut-covert-heavy-support-unit"),
+        (402, "sunduqbut-covert-heavy-support-unit"),
+    ]
+    assert {owner["owner"] for owner in owners} == {"option"}
+    assert all(
+        owner["extra_position"] == 1
+        and owner["extra_type"] == "TEXT"
+        and owner["extra_raw"] == "+1B"
+        for owner in owners
+    )
+
+    document = json.loads(
+        (ROOT / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    record = next(
+        entry for entry in document["records"]
+        if entry["id"] == "skill:neurocinetics"
+    )
+    assert any(
+        citation["sourceId"] == "n5-core-v5.3-pdf" and citation["page"] == 104
+        for citation in record["citations"]
+    )
+    assert any(
+        "Reactive Turn" in effect and "MOD" in effect
+        for effect in record["facts"]["effects"]
+    )
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_source_inventory_is_deterministic() -> None:
     first = _inventory()
     assert json.dumps(first, sort_keys=True) == json.dumps(_inventory(), sort_keys=True)

@@ -1721,6 +1721,19 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       variants with extra MODs; preserve raw signatures and exclude
       unreviewed specific combinations from index counts. Fail closed
       rather than parsing numeric-looking display strings.
+      - [x] **Data processing — Neurocinetics source-109 evidence:**
+        Reconcile all four occurrence-level `8/TEXT:+1B` signatures
+        against the pinned Army raw database: two YĀN HUǑ option
+        contexts (Yu Jing/Invincible Army) and two SUNDUQBUT option
+        contexts (Haqqislam/Hassassin Bahram), out of 27 direct
+        Neurocinetics occurrences. N5.3 p. 104 restricts B MODs
+        to the Reactive Turn while the Skill sets BS Weapon B=1
+        in the Active Turn. A focused regression pins source
+        ownership, signature, existing curated citation and prose.
+        **Still open:** typed source-variant publication and its
+        matched rules/database artifact validation. The audit
+        correctly retains source 109 among the 21 unresolved Skill
+        IDs; no Unit-usage index or gameplay engine was created.
       - [x] **Data processing:** Audit the lone Journalist
         source-272 `1/TEXT:+3` on the Tohaa Diplomatic Delegate.
         N5.3 already defines Journalist's Guts Roll and campaign

@@ -76,8 +76,23 @@ Each item records:
 - **Result:** executed commands, revision, pass/fail/skip and report location;
   close only after the required checks pass.
 
-No prospective execution items recorded yet. Do not infer that earlier changes
-have already passed broader validation.
+- [ ] **VR-0001** (2026-11-01; ready-to-run): Source-only
+  Neurocinetics `+1B` occurrence review and pinned regression.
+  Work: [Rule-variant usage index](TODO.md#rules-and-reference-completeness)
+  (source-ID 109 under the unresolved-parameter inventory);
+  revision: `dev/v1.0.0`, working tree based on `75a618bc`,
+  `tests/test_audit_source_variant_inputs.py`,
+  `docs/TODO.md`, `docs/data-model.md`. Risk: low
+  (test and docs only; no schema, runtime, curated record or generated artifact
+  change). Immediate: focused test **1 passed**; full affected
+  `tests/test_audit_source_variant_inputs.py` **50 passed**;
+  Ruff targeted **PASS**, docs **PASS**, `git diff --check HEAD`
+  **PASS** (2026-11-01). Design: none pending.
+  Deferred: one ordinary full project test run against the
+  cumulative implementation state, before the next mandatory merge/release
+  acceptance. Exact check: `tools/run_checks.py --stage test`.
+  Outcome: awaiting run; do not treat the targeted module as full-suite
+  evidence or claim source 109 has a typed variant.
 
 ## Recording template
 

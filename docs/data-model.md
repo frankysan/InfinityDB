@@ -812,6 +812,24 @@ the matched rules database/publication, and retains ignored
 recovery copies. The Equipment unresolved count is now **11**,
 with no Unit-usage index yet produced.
 
+**Neurocinetics (+1B) source review (2026-11-01; not yet typed):**
+Skill source `109` has 27 direct occurrences in the pinned Army
+snapshot. Four exact option-level occurrences carry source extra
+`8` (`TEXT:+1B`): YĀN HUǑ in Yu Jing and Invincible Army, and
+SUNDUQBUT in Haqqislam and Hassassin Bahram. English N5.3 p. 104
+restricts Burst MODs on Neurocinetics to the **Reactive Turn**:
+all BS Weapons have B 1 in the Active Turn; the Reactive Turn
+uses their normal full Burst against one target with applicable
+Burst modifiers. The existing curated Skill correctly describes
+this baseline. A source/raw-occurrence regression checks all
+four contexts and verifies the published p. 104 reference,
+without treating an occurrence's `+1B` as a general BS modifier
+or manufacturing an additional Unit use. This is **source
+evidence only**: source `109` deliberately remains unresolved
+in the variant inventory until a reviewed typed effect, guarded
+export and matching rules/publication refresh are delivered.
+The planned Unit-usage index remains unimplemented.
+
 **Partially reviewed Hacking Device program grants (2026-10-31):**
 The pinned Army source has Hacking Device `100` with 653 direct
 occurrences and Hacking Device Plus `101` with 126. English
