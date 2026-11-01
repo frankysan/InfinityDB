@@ -1389,6 +1389,57 @@ def test_hacking_program_modifiers_reject_wrong_effects(
 
 
 @pytest.mark.parametrize(
+    ("field", "wrong"), [
+        ("extraId", 327),
+        ("extraId", 326.0),
+        ("rawValue", "Firewall (-6)"),
+        ("extraType", "DISTANCE"),
+        ("effect", {
+            "kind": "firewall-comms-defense", "rule": "equipment:firewall",
+            "appliesTo": "comms-attack-targeting-device-owner",
+            "attackerWipMod": -6, "defenderSavingRollMod": 6,
+        }),
+        ("effect", {
+            "kind": "firewall-comms-defense", "rule": "equipment:firewall",
+            "appliesTo": "all-enemy-rolls",
+            "attackerWipMod": -6, "defenderSavingRollMod": 3,
+        }),
+        ("effect", {
+            "kind": "firewall-comms-defense", "rule": "equipment:tinbot-firewall",
+            "appliesTo": "comms-attack-targeting-device-owner",
+            "attackerWipMod": -6, "defenderSavingRollMod": 3,
+        }),
+    ],
+)
+def test_hacking_device_firewall_rejects_unreviewed_effect(
+    tmp_path: Path, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(
+        row for row in source["records"] if row["id"] == "equipment:hacking-device"
+    )
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": "equipment:hacking-device", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": "hacking-device"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "firewall.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    values = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"]
+    first = next(row for row in values if row["extraId"] == 326)
+    first[field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid hacking-device reviewed hacking extras"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("source_id", "label", "extras"),
     [
         (244, "Discover", [{

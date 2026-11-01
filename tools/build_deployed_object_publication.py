@@ -116,6 +116,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--refresh-hacking-saving-rolls-v9", action="store_true",
         help="Promote exact named-program Hacking Device SR modifiers in a matched v9 pair",
     )
+    migration.add_argument(
+        "--refresh-hacking-firewall-v9", action="store_true",
+        help="Promote exact Hacking Device Firewall Comms-defense extras in a matched v9 pair",
+    )
     return parser
 
 
@@ -134,12 +138,14 @@ def main() -> int:
         or args.refresh_hacking_program_grants_v9
         or args.refresh_hacking_program_mods_v9
         or args.refresh_hacking_saving_rolls_v9
+        or args.refresh_hacking_firewall_v9
     ):
         if args.check:
             raise ValueError("--check cannot be combined with v9 migration operations")
         from tools.restrictions_v9_release import (
             promote_restrictions_v9,
             refresh_core_pdf_pin_v9_release,
+            refresh_hacking_firewall_v9_release,
             refresh_hacking_program_grants_v9_release,
             refresh_hacking_program_mods_v9_release,
             refresh_hacking_saving_rolls_v9_release,
@@ -152,6 +158,11 @@ def main() -> int:
             stage_restrictions_v9,
         )
 
+        if args.refresh_hacking_firewall_v9:
+            backup = refresh_hacking_firewall_v9_release()
+            print("Refreshed reviewed Hacking Device Firewall extras in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
         if args.refresh_hacking_saving_rolls_v9:
             backup = refresh_hacking_saving_rolls_v9_release()
             print("Refreshed exact Hacking Device named-program SR modifiers in v9 artifacts.")

@@ -207,6 +207,33 @@ def _hacking_sr_values(source_id: int) -> list[dict[str, Any]]:
     ]
 
 
+# Standalone Hacking Device Firewall effects are distinct from TinBot
+# and from the target-program SR upgrades. Both forms impose +3 SR.
+HACKING_FIREWALL_SOURCES = {
+    100: [
+        (326, "Firewall -6", -6, 2),
+        (334, "UPGRADE: Firewall (-3)", -3, 13),
+        (376, "UPGRADE: Firewall (-6)", -6, 1),
+    ],
+}
+
+
+def _hacking_firewall_values(source_id: int) -> list[dict[str, Any]]:
+    return [
+        {
+            "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+            "effect": {
+                "kind": "firewall-comms-defense",
+                "rule": "equipment:firewall",
+                "appliesTo": "comms-attack-targeting-device-owner",
+                "attackerWipMod": modifier,
+                "defenderSavingRollMod": 3,
+            },
+        }
+        for extra_id, raw, modifier, _count in HACKING_FIREWALL_SOURCES[source_id]
+    ]
+
+
 def _sha(path: Path) -> str:
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -647,7 +674,7 @@ def _check_variant_semantics_delta(
     previous: Path, proposed: Path, variants: dict[tuple[str, str], str],
     *, initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
     tinbot_other: bool = False, hacking_mods: bool = False,
-    hacking_srs: bool = False,
+    hacking_srs: bool = False, hacking_firewall: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
@@ -662,10 +689,16 @@ def _check_variant_semantics_delta(
         for source_id, source in HACKING_GRANT_SOURCES.items()
     }
     if (hacking_mods or hacking_srs) and (
-        initial or tinbot_other or tinbot_firewall or hacking_mods == hacking_srs
-        or set(variants) != set(hacking_keys)
+        initial or tinbot_other or tinbot_firewall or hacking_firewall
+        or hacking_mods == hacking_srs or set(variants) != set(hacking_keys)
     ):
         raise ValueError("Hacking modifiers require precisely the two device records")
+    firewall_key = ("n5-core-v5.3", "equipment:hacking-device")
+    if hacking_firewall and (
+        initial or tinbot_other or tinbot_firewall or hacking_mods or hacking_srs
+        or set(variants) != {firewall_key}
+    ):
+        raise ValueError("Hacking Firewall refresh requires its exact source record")
     with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
         for pragma in ("user_version", "application_id"):
             if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
@@ -718,7 +751,9 @@ def _check_variant_semantics_delta(
                             or after != TINBOT_OTHER_VARIANTS[key]
                         ):
                             raise ValueError("TinBot refresh changed additional named source")
-                    elif (hacking_mods or hacking_srs) and key in hacking_keys:
+                    elif (hacking_mods or hacking_srs or hacking_firewall) and (
+                        key in hacking_keys if not hacking_firewall else key == firewall_key
+                    ):
                         if row[index] is None:
                             raise ValueError("Hacking modifier refresh requires existing grants")
                         before = json.loads(row[index])
@@ -735,8 +770,9 @@ def _check_variant_semantics_delta(
                         prior = before["occurrenceParameters"][0]
                         proposed_param = after["occurrenceParameters"][0]
                         expected = (
-                            _hacking_mod_values(source_id)
-                            if hacking_mods else _hacking_sr_values(source_id)
+                            _hacking_mod_values(source_id) if hacking_mods
+                            else _hacking_sr_values(source_id) if hacking_srs
+                            else _hacking_firewall_values(source_id)
                         )
                         if hacking_srs and (
                             prior.get("extraValues", [])[
@@ -746,6 +782,12 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Saving Roll refresh changed previous program modifiers"
                             )
+                        if hacking_firewall and (
+                            prior.get("extraValues", [])[
+                                -len(HACKING_SR_SOURCES[source_id]):
+                            ] != _hacking_sr_values(source_id)
+                        ):
+                            raise ValueError("Firewall refresh changed previous SR modifiers")
                         if (
                             prior.get("kind") != "reviewed-extra"
                             or prior.get("source") != "army-extra"
@@ -1068,12 +1110,77 @@ def refresh_hacking_saving_rolls_v9_release(*, root: Path = ROOT) -> Path:
     )
 
 
+def refresh_hacking_firewall_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote exact device Firewall profiles, never TinBot or combined extras."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    items = {row["id"]: row for row in report["catalogs"]["equipment"]["items"]}
+    source_id = 100
+    item = items.get(source_id)
+    source = HACKING_GRANT_SOURCES[source_id]
+    if (
+        item is None
+        or item["name"] != source["name"]
+        or item["applicationId"] != source_id
+        or item["occurrences"] != source["occurrences"]
+        or item["status"] != "unresolved-occurrence-parameter"
+        or item["reviewedVariant"] is not None
+        or item["rawValues"]
+    ):
+        raise ValueError("Hacking Firewall source drift")
+    reviewed = item["reviewedExtra"]
+    previous = [
+        (extra_id, raw)
+        for extra_id, (raw, _count) in source["singles"].items()
+    ] + [
+        (extra_id, raw)
+        for extra_id, raw, _program, _kind, _field, _value, _count
+        in HACKING_MOD_SOURCES[source_id]
+    ] + [
+        (extra_id, raw)
+        for extra_id, raw, _program, _modifier, _count
+        in HACKING_SR_SOURCES[source_id]
+    ]
+    if (
+        not isinstance(reviewed, dict)
+        or not isinstance(reviewed.get("extra_values"), list)
+        or [
+            (entry.get("extra_id"), entry.get("raw_value"))
+            for entry in reviewed["extra_values"]
+        ] != previous
+    ):
+        raise ValueError("Previous reviewed Hacking extras changed")
+    specs = HACKING_FIREWALL_SOURCES[source_id]
+    ids = {extra_id for extra_id, _raw, _mod, _count in specs}
+    signatures = item["extraSignatures"]
+    selected = [
+        sig for sig in signatures if len(sig["extras"]) == 1
+        and sig["extras"][0][0] in ids
+    ]
+    desired = [
+        {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": count}
+        for extra_id, raw, _modifier, count in specs
+    ]
+    combined = [
+        sig for sig in signatures if len(sig["extras"]) > 1
+        and any(part[0] in ids for part in sig["extras"])
+    ]
+    if sorted(selected, key=str) != sorted(desired, key=str) or combined:
+        raise ValueError("Hacking Firewall signatures changed")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={source["record"]}, hacking_firewall=True,
+    )
+
+
 def _refresh_metadata_v9_release(
     *, root: Path, source_ids: set[str] | None = None, expected_count: int | None = None,
     variant_records: set[str] | None = None,
     initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
     tinbot_other: bool = False, hacking_mods: bool = False,
-    hacking_srs: bool = False,
+    hacking_srs: bool = False, hacking_firewall: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -1159,6 +1266,7 @@ def _refresh_metadata_v9_release(
                 tinbot_other=tinbot_other,
                 hacking_mods=hacking_mods,
                 hacking_srs=hacking_srs,
+                hacking_firewall=hacking_firewall,
             )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)

@@ -523,6 +523,32 @@ The one-time guarded promotion was
 earlier matched release pair under ignored `local/`.
 Do not rerun on the already promoted pair.
 
+**Hacking Device Firewall review:** Source Equipment
+`100` has 16 direct single-extra occurrences:
+`326`/`Firewall -6` (2),
+`334`/`UPGRADE: Firewall (-3)` (13) and
+`376`/`UPGRADE: Firewall (-6)` (1).
+Each reviewed effect contains a canonical Firewall
+reference, the negative attacker WIP MOD and
+a **fixed +3 defender Saving Roll MOD** against
+Comms Attacks, per N5.3 pp. 55-56.
+The pinned-source audit compares the raw Army
+snapshot, tracked `rules.db`, and a freshly
+exported rules database. Curated mutation tests
+reject wrong extra IDs/types, scope, modifier
+values, or TinBot substitution. The v9 hermetic
+migration suite rejects changes to previous
+reviewed grants/B/PS/SD/SR entries, schema,
+unrelated rows, and source signatures.
+The one-time guarded local promotion is
+`python -m tools.build_deployed_object_publication
+--refresh-hacking-firewall-v9`; it updates the
+matched deployed-object publication and retains
+recovery copies under ignored `local/`.
+Do not rerun after the pair is promoted.
+Unqualified SR and multiple-extra combinations
+remain unreviewed.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

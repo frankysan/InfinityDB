@@ -16634,6 +16634,42 @@
                                     "appliesTo": "target-saving-roll-against-program",
                                     "modifier": -2
                                 }
+                            },
+                            {
+                                "extraId": 326,
+                                "extraType": "TEXT",
+                                "rawValue": "Firewall -6",
+                                "effect": {
+                                    "kind": "firewall-comms-defense",
+                                    "rule": "equipment:firewall",
+                                    "appliesTo": "comms-attack-targeting-device-owner",
+                                    "attackerWipMod": -6,
+                                    "defenderSavingRollMod": 3
+                                }
+                            },
+                            {
+                                "extraId": 334,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Firewall (-3)",
+                                "effect": {
+                                    "kind": "firewall-comms-defense",
+                                    "rule": "equipment:firewall",
+                                    "appliesTo": "comms-attack-targeting-device-owner",
+                                    "attackerWipMod": -3,
+                                    "defenderSavingRollMod": 3
+                                }
+                            },
+                            {
+                                "extraId": 376,
+                                "extraType": "TEXT",
+                                "rawValue": "UPGRADE: Firewall (-6)",
+                                "effect": {
+                                    "kind": "firewall-comms-defense",
+                                    "rule": "equipment:firewall",
+                                    "appliesTo": "comms-attack-targeting-device-owner",
+                                    "attackerWipMod": -6,
+                                    "defenderSavingRollMod": 3
+                                }
                             }
                         ]
                     }

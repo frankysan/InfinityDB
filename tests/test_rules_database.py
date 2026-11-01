@@ -1731,6 +1731,11 @@ def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
             (339, "UPGRADE: Trinity (SR-1)", "trinity", -1),
         ],
     }
+    expected_firewall = [
+        (326, "Firewall -6", -6),
+        (334, "UPGRADE: Firewall (-3)", -3),
+        (376, "UPGRADE: Firewall (-6)", -6),
+    ]
     for slug, grants in expected.items():
         parameter = mapping[slug]
         assert parameter == {
@@ -1764,7 +1769,19 @@ def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
                     },
                 }
                 for extra_id, raw, program, modifier in expected_srs[slug]
-            ],
+            ] + ([
+                {
+                    "extra_id": extra_id, "extra_type": "TEXT", "raw_value": raw,
+                    "effect": {
+                        "kind": "firewall-comms-defense",
+                        "rule": "equipment:firewall",
+                        "attackerWipMod": modifier,
+                        "defenderSavingRollMod": 3,
+                        "applies_to": "comms-attack-targeting-device-owner",
+                    },
+                }
+                for extra_id, raw, modifier in expected_firewall
+            ] if slug == "hacking-device" else []),
         }
         record = rules.composed_record(f"equipment:{slug}")
         assert record is not None
@@ -1772,14 +1789,19 @@ def test_hacking_upgrade_grants_are_program_links_not_roll_modifiers(
         assert record["variant_semantics"]["inheritance"] == "family"
         assert any(c["source_id"] == "n5-core-v5.3-pdf" for c in record["citations"])
         for entry in parameter["extra_values"]:
-            if entry["effect"]["kind"] == "program-saving-roll-mod":
-                assert entry["effect"]["applies_to"] == (
-                    "target-saving-roll-against-program"
-                )
+            effect = entry["effect"]
+            if effect["kind"] == "firewall-comms-defense":
+                assert effect["applies_to"] == "comms-attack-targeting-device-owner"
+                assert effect["defenderSavingRollMod"] == 3
+                assert effect["attackerWipMod"] in (-3, -6)
+                assert rules.composed_record(effect["rule"]) is not None
+                assert "program" not in effect
+                continue
+            if effect["kind"] == "program-saving-roll-mod":
+                assert effect["applies_to"] == "target-saving-roll-against-program"
             else:
-                assert "applies_to" not in entry["effect"]
-            program_id = entry["effect"]["program"]
-            assert rules.composed_record(program_id) is not None
+                assert "applies_to" not in effect
+            assert rules.composed_record(effect["program"]) is not None
     assert "hacking-device" not in rules.skill_reviewed_extra_semantics()
     assert "hacking-device-plus" not in rules.skill_numeric_mod_semantics()
 

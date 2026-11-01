@@ -100,6 +100,14 @@ def _validate_reviewed_extra_parameter(
             (339, "UPGRADE: Trinity (SR-1)", "trinity", -1),
         ],
     }
+    hacking_firewalls = {
+        "hacking-device": [
+            (326, "Firewall -6", -6),
+            (334, "UPGRADE: Firewall (-3)", -3),
+            (376, "UPGRADE: Firewall (-6)", -6),
+        ],
+        "hacking-device-plus": [],
+    }
     for device, grants in hacking_grants.items():
         if inheritance != "family" or army_links != [
             {"entity": "equipment", "id": device}
@@ -137,6 +145,19 @@ def _validate_reviewed_extra_parameter(
                 },
             }
             for extra_id, raw, program, modifier in hacking_srs[device]
+        ]
+        expected += [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "firewall-comms-defense",
+                    "rule": "equipment:firewall",
+                    "appliesTo": "comms-attack-targeting-device-owner",
+                    "attackerWipMod": modifier,
+                    "defenderSavingRollMod": 3,
+                },
+            }
+            for extra_id, raw, modifier in hacking_firewalls[device]
         ]
         if (
             set(parameter) != {"source", "kind", "extraValues"}

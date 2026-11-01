@@ -896,6 +896,37 @@ target is identified. Firewall and multi-extra
 signatures remain unresolved. The source-ID baseline
 remains **34 Skills / 11 Equipment**.
 
+**Reviewed Hacking Device Firewall extras (2026-10-31):**
+Source Equipment `100` has three exact standalone
+Firewall signatures: extra `326` (`Firewall -6`, two
+occurrences), `334` (`UPGRADE: Firewall (-3)`, 13)
+and `376` (`UPGRADE: Firewall (-6)`, one).
+English N5.3 pp. 55-56 defines a Firewall as coupled
+protection against a Comms Attack: the enemy applies
+the listed negative WIP MOD, while the protected
+Trooper receives a fixed **+3 Saving Roll MOD**
+regardless of Firewall strength. Only one Firewall
+can apply to a Trooper at a time. The typed
+`firewall-comms-defense` effect preserves
+`rule: "equipment:firewall"`,
+`appliesTo: "comms-attack-targeting-device-owner"`,
+`attackerWipMod: -3/-6` and
+`defenderSavingRollMod: 3`. It does not overwrite
+the canonical Firewall rule, decide which available
+Firewall to use, infer Fireteam benefits, or bypass
+the existing restrictions on a disabled Hacking Device.
+This source-only mapping is separate from TinBot
+Firewall and from named-program `SR-1/SR-2` upgrades.
+The guarded v9 migration pins the three Army source
+IDs/types/values/counts, appends only these effects
+to existing reviewed Device metadata, and synchronizes
+the matched rules/publication artifacts with ignored
+recovery copies. The 16 additional source occurrences
+are reviewed; the unqualified `UPGRADE: SR-1`
+(Device Plus `101`) and compound signatures remain
+unreviewed. The unresolved source-ID baseline
+remains **34 Skill / 11 Equipment**.
+
 **Remaining source-parameter inventory (pinned Army source and current
 generated rules database):** `tools/audit_source_variant_inputs.py` produces a
 deterministic, read-only JSON inventory from `infinity.db`,

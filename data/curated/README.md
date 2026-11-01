@@ -1077,6 +1077,24 @@ Total Control `SR-1/SR-2` spellings. Unqualified
 extras must remain unresolved without their own
 scope and source review.
 
+Hacking Device source Equipment `100` also supports
+only the exact standalone `Firewall -6`,
+`UPGRADE: Firewall (-3)`, and
+`UPGRADE: Firewall (-6)` extras (IDs 326,
+334 and 376). Their `firewall-comms-defense`
+effect references `equipment:firewall` and
+specifies `appliesTo: "comms-attack-targeting-device-owner"`,
+the numeric negative `attackerWipMod`, and
+`defenderSavingRollMod: 3`. These are a
+single coupled Firewall benefit, not generic
+program SR penalties or TinBot modifiers.
+The existing Firewall record owns activation,
+disabled Device eligibility, and one-at-a-time
+selection/nonstacking semantics. Device Plus
+`101` has no reviewed Firewall extras.
+Do not infer component usage from composite
+signatures or parse arbitrary text as Firewall.
+
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
 forms remain opaque until their semantics are reviewed.

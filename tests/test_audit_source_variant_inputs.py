@@ -537,6 +537,11 @@ def test_hacking_device_program_grants_preserve_unreviewed_overrides(
         (314, "UPGRADE: Total Control (SR-2)"): 46,
         (339, "UPGRADE: Trinity (SR-1)"): 2,
     })
+    expected[100].update({
+        (326, "Firewall -6"): 2,
+        (334, "UPGRADE: Firewall (-3)"): 13,
+        (376, "UPGRADE: Firewall (-6)"): 1,
+    })
     for path in (ROOT / "data/generated/rules.db", fresh):
         report = inventory_source_variants(
             ROOT / "data/generated/infinity.db",

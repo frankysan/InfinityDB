@@ -1839,6 +1839,30 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         program. Firewall and compound extras remain open,
         as does the cross-Army usage index. The unresolved
         baseline stays **34 Skill / 11 Equipment source IDs**.
+      - [x] **Data processing:** Review three exact standalone
+        Hacking Device Firewall source extras, distinct from
+        TinBot Firewall and program-specific SR modifiers.
+        Source Equipment 100 contains extra 326
+        (`TEXT: Firewall -6`, two occurrences), 334
+        (`TEXT: UPGRADE: Firewall (-3)`, 13), and 376
+        (`TEXT: UPGRADE: Firewall (-6)`, one).
+        N5.3 pp. 55-56 specifies both the variable enemy
+        WIP penalty and fixed defender +3 Saving Roll
+        bonus against Comms Attacks, with only one
+        Firewall benefiting a Trooper. The exact typed
+        `firewall-comms-defense` effect refers to
+        `equipment:firewall` and does not duplicate
+        activation, device-disabled, or nonstacking rules.
+        A guarded v9 refresh appends only these 16
+        standalone occurrences, preserving earlier
+        program grants/B/PS/SD/SR mappings and matched
+        publication fingerprints; ignored recovery
+        copies are retained. Hacking Device Plus is not
+        assigned new Firewall source extras. Both
+        device source IDs remain unresolved due to
+        unqualified SR and compound signatures;
+        the **34 Skill / 11 Equipment** baseline and
+        cross-Army Unit-use index remain unchanged.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7
