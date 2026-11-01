@@ -239,6 +239,45 @@ def _validate_reviewed_extra_parameter(
         ):
             raise ValueError(f"{context}: invalid Bangbomb reviewed source extra")
         return
+    ecm_sources = {
+        239: (
+            "Guided", "guided-attack-targeting-ecm-owner",
+            ((6, -3), (7, -6), (51, -8), (251, -8)),
+        ),
+        241: (
+            "Hacker", "hacking-program-targeting-ecm-owner",
+            ((6, -3), (7, -6)),
+        ),
+    }
+    if inheritance == "source" and len(army_links) == 1:
+        link = army_links[0]
+        source_id = link.get("id") if isinstance(link, dict) else None
+        if isinstance(link, dict) and link.get("entity") == "equipment" and (
+            source_id in ecm_sources
+        ):
+            label, scope, modifiers = ecm_sources[source_id]
+            expected = [
+                {
+                    "extraId": extra_id, "extraType": "TEXT",
+                    "rawValue": str(modifier),
+                    "effect": {
+                        "kind": "enemy-ecm-attack-mod", "appliesTo": scope,
+                        "modifier": modifier,
+                    },
+                }
+                for extra_id, modifier in modifiers
+            ]
+            values = parameter.get("extraValues")
+            if (
+                set(parameter) != {"source", "kind", "extraValues"}
+                or not isinstance(values, list)
+                or len(values) != len(expected)
+                or any(not isinstance(entry, dict)
+                       or type(entry.get("extraId")) is not int for entry in values)
+                or values != expected
+            ):
+                raise ValueError(f"{context}: invalid ECM {label} source extras")
+            return
     if inheritance == "source" and army_links == [
         {"entity": "equipment", "id": 244}
     ]:
@@ -647,6 +686,13 @@ def _validate_variant_semantics(
             _require_string(
                 source_variant.get("label"), "label", f"{context}.sourceVariant"
             )
+            ecm_labels = {239: "Guided", 241: "Hacker"}
+            if (
+                link.get("entity") == "equipment"
+                and link.get("id") in ecm_labels
+                and source_variant["label"] != ecm_labels[link["id"]]
+            ):
+                raise ValueError(f"{context}: invalid exact ECM source label")
         else:
             if set(source_variant) != {"kind", "attribute", "value"}:
                 raise ValueError(

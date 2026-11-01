@@ -1133,6 +1133,27 @@ fail-closed. The resulting reviewed mapping is
 source-specific; it never makes all Dodge or PH
 Rolls receive the bonus.
 
+Standalone ECM source variants have separate exact
+numeric Army source links, despite sharing application
+Equipment `239`. `equipment:ecm-guided` represents
+source `239`: extra `6` (`TEXT:-3`),
+`7` (`TEXT:-6`), and both distinct
+`TEXT:-8` extra identities `51` and `251`.
+`equipment:ecm-hacker` represents source `241`:
+extra `6` (`TEXT:-3`) and `7`
+(`TEXT:-6`). Their typed
+`enemy-ecm-attack-mod` effects preserve the
+individual modifier and use either
+`guided-attack-targeting-ecm-owner` or
+`hacking-program-targeting-ecm-owner`
+applicability. Do not collapse raw extra IDs with
+equal text, merge the source variant labels, assign
+these modifiers to TinBot or general Comms Attacks,
+or alter the generic `equipment:ecm` family rule.
+A separate guarded v9 addition promotes only
+these exact two source definitions and their
+relational rows.
+
 Reviewed exact-source Attribute replacements are kept on
 `sourceVariant`, not as generic occurrence parameters. Other MOD/value
 forms remain opaque until their semantics are reviewed.

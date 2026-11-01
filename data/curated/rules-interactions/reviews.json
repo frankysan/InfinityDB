@@ -1408,6 +1408,20 @@
       "reviewedOn": "2026-09-24"
     },
     {
+      "recordId": "equipment:ecm-guided",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-01",
+      "note": "Exact Army source 239 retains both distinct -8 extra IDs; only Guided attacks against the owner are affected."
+    },
+    {
+      "recordId": "equipment:ecm-hacker",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-01",
+      "note": "Exact Army source 241 affects Hacking Program Rolls against the owner, not every Comms Attack."
+    },
+    {
       "recordId": "equipment:escape-system",
       "targetRelease": "0.7.0",
       "status": "reviewed",

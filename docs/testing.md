@@ -628,6 +628,37 @@ Do not rerun after promotion. The source audit
 baseline becomes **34 unresolved Skill / 9 Equipment**
 IDs; this does not publish a Unit-use index.
 
+**Source-specific ECM Guided/Hacker (2026-11-01):**
+ECM source `239` uses exact `TEXT` extras `6/-3`
+(2), `7/-6` (176), `51/-8` (1), `251/-8`
+(2); ECM source `241` uses `6/-3` (158) and
+`7/-6` (3). Both belong to application Equipment
+`239`, so distinct `inheritance: source`
+definitions carry exact numeric source links rather
+than borrowing a shared generic parameter. The
+curated validator rejects altered source IDs, named
+variant labels, effect targets, numeric values and
+extra identities. The pinned Army-source audit
+compares the tracked `rules.db` and a freshly
+exported rules database, including raw owner
+checks for `-8`: Next Wave Juggernauts (extra
+`51`) and ZETA UNIT in O-12 and Starmada
+(extra `251`). The dedicated additive v9
+migration guard permits only the two exact
+source-specific definitions/links/citations/relations;
+pre-existing database rows, schema, source snapshot
+and publication objects are preserved. Negative
+tests reject unrelated additions, changed legacy
+rows, source-link drift and missing or malformed
+extras. The one-time guarded command
+`python -m tools.build_deployed_object_publication
+--refresh-ecm-source-variants-v9` synchronizes
+the release pair and retains ignored rollback
+files; do not rerun after promotion. The source
+audit baseline is now **34 Skill / 7 Equipment**
+unresolved IDs. These are not cross-Army Unit-use
+indices.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

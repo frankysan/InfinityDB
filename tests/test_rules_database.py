@@ -1690,6 +1690,50 @@ def test_tinbot_discover_and_ecm_guided_extras_are_source_specific(
         assert source_id not in rules.skill_reviewed_extra_semantics()
 
 
+def test_ecm_guided_and_hacker_source_variants_are_separate(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    extras = rules.equipment_reviewed_extra_semantics()
+    source_variants = rules.catalog_source_variant_semantics("equipment")
+    expected = {
+        239: ("equipment:ecm-guided", "Guided",
+              "guided-attack-targeting-ecm-owner", [
+                  (6, -3), (7, -6), (51, -8), (251, -8),
+              ]),
+        241: ("equipment:ecm-hacker", "Hacker",
+              "hacking-program-targeting-ecm-owner", [
+                  (6, -3), (7, -6),
+              ]),
+    }
+    for source_id, (record_id, label, scope, modifiers) in expected.items():
+        assert source_variants[source_id] == {"kind": "named", "label": label}
+        assert extras[source_id] == {
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extra_values": [
+                {
+                    "extra_id": extra_id, "extra_type": "TEXT",
+                    "raw_value": str(modifier),
+                    "effect": {
+                        "kind": "enemy-ecm-attack-mod",
+                        "applies_to": scope, "modifier": modifier,
+                    },
+                }
+                for extra_id, modifier in modifiers
+            ],
+        }
+        record = rules.composed_record(record_id)
+        assert record is not None
+        assert record["variant_semantics"]["inheritance"] == "source"
+        assert extras[source_id] in record["variant_semantics"]["occurrence_parameters"]
+        assert any(r["record_id"] == "equipment:ecm"
+                   for r in rules.relations_for_record(record_id)
+                   if r["direction"] == "outbound")
+    base = rules.composed_record("equipment:ecm")
+    assert base is not None
+    assert base["variant_semantics"] == {"inheritance": "family"}
+
+
 def test_bangbomb_reviewed_extra_excludes_template_weapons(
     current_rules_database: RulesDatabase,
 ) -> None:

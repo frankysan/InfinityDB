@@ -139,12 +139,12 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
         "publishedSourceIds": 34,
         "sourceIdsWithDirectRows": 34,
         "directSourceRows": 5427,
-        "reviewedExactSourceIds": 4,
+        "reviewedExactSourceIds": 6,
         "statuses": {
             "family-only": 19,
             "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 5,
-            "unresolved-occurrence-parameter": 9,
+            "reviewed-extra-parameter": 7,
+            "unresolved-occurrence-parameter": 7,
         },
         "extraTypes": {"TEXT": 14},
     }
@@ -188,7 +188,7 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     assert equipment[101]["status"] == "unresolved-occurrence-parameter"
     assert equipment[101]["extraTypes"] == ["TEXT"]
     assert equipment[101]["extraSignatures"]
-    for source_id in (169, 244, 246, 247):
+    for source_id in (169, 239, 241, 244, 246, 247):
         assert equipment[source_id]["status"] == "reviewed-extra-parameter"
         assert all(part["reviewed"] for part in equipment[source_id]["extraSignatures"])
     assert equipment[169]["reviewedVariant"] == {"kind": "named", "label": "Firewall"}
@@ -547,8 +547,53 @@ def test_bangbomb_source_246_matches_tracked_and_fresh_rules(tmp_path: Path) -> 
         )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 5, "unresolved-occurrence-parameter": 9,
+            "reviewed-extra-parameter": 7, "unresolved-occurrence-parameter": 7,
         }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_ecm_source_variants_match_tracked_and_fresh_rules(tmp_path: Path) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = {
+        239: ("Guided", 181, [
+            (6, "-3", 2), (7, "-6", 176), (51, "-8", 1), (251, "-8", 2),
+        ]),
+        241: ("Hacker", 161, [(6, "-3", 158), (7, "-6", 3)]),
+    }
+    for rules_path in (ROOT / "data/generated/rules.db", fresh):
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db",
+            rules_path,
+        )
+        reviewed = RulesDatabase(rules_path).equipment_reviewed_extra_semantics()
+        for source_id, (label, count, signatures) in expected.items():
+            [item] = select_source_variants(report, "equipment", [source_id])["items"]
+            assert item["applicationId"] == 239
+            assert item["status"] == "reviewed-extra-parameter"
+            assert item["reviewedVariant"] == {"kind": "named", "label": label}
+            assert item["reviewedExtra"] == reviewed[source_id]
+            assert item["occurrences"] == count
+            assert item["extraSignatures"] == [
+                {"extras": [[extra_id, "TEXT", raw]],
+                 "reviewed": True, "count": number}
+                for extra_id, raw, number in signatures
+            ]
+    raw = ROOT / "data/generated/infinity.raw.db"
+    juggernauts = source_extra_owner_context(
+        raw, catalog="equipment", source_id=239, extra_id=51,
+    )
+    zetas = source_extra_owner_context(
+        raw, catalog="equipment", source_id=239, extra_id=251,
+    )
+    assert [(row["unit_id"], row["army_id"], row["extra_raw"])
+            for row in juggernauts] == [(1882, 605, "-8")]
+    assert {(row["unit_id"], row["army_id"], row["extra_raw"])
+            for row in zetas} == {(1458, 1001, "-8"), (1458, 1002, "-8")}
+    assert source_extra_owner_context(
+        raw, catalog="equipment", source_id=241, extra_id=251,
+    ) == []
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -610,7 +655,7 @@ def test_tinbot_discover_ecm_extras_match_tracked_and_fresh_rules(tmp_path: Path
             assert row["extraSignatures"] == signatures
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 5, "unresolved-occurrence-parameter": 9,
+            "reviewed-extra-parameter": 7, "unresolved-occurrence-parameter": 7,
         }
 
 
@@ -693,7 +738,7 @@ def test_hacking_device_program_grants_preserve_unreviewed_overrides(
             )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 5, "unresolved-occurrence-parameter": 9,
+            "reviewed-extra-parameter": 7, "unresolved-occurrence-parameter": 7,
         }
 
 

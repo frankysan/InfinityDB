@@ -1363,6 +1363,154 @@ def test_bangbomb_v9_refresh_checks_pinned_source(
         assert not calls
 
 
+@pytest.mark.parametrize(
+    "defect", (None, "variant", "name", "existing", "extra-row",
+               "source-link", "relation", "schema"),
+)
+def test_ecm_v9_additions_preserve_all_existing_database_rows(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        ECM_SOURCES,
+        _check_ecm_source_additions,
+        _ecm_variant,
+    )
+
+    before_path, after_path = tmp_path / "before.db", tmp_path / "after.db"
+    statements = (
+        "CREATE TABLE records("
+        "collection_id TEXT,id TEXT,name TEXT,kind TEXT,"
+        "composition_role TEXT,variant_json TEXT)",
+        "CREATE TABLE record_army_links("
+        "collection_id TEXT,record_id TEXT,entity TEXT,external_id TEXT)",
+        "CREATE TABLE record_citations("
+        "collection_id TEXT,record_id TEXT,source_id TEXT)",
+        "CREATE TABLE record_relations("
+        "collection_id TEXT,record_id TEXT,relation_type TEXT,related_record_id TEXT)",
+    )
+    with sqlite3.connect(before_path) as old, sqlite3.connect(after_path) as new:
+        for statement in statements:
+            old.execute(statement)
+        old.execute("INSERT INTO records VALUES (?,?,?,?,?,?)", (
+            "n5-core-v5.3", "equipment:ecm", "ECM", "equipment",
+            "definition", '{"inheritance":"family"}',
+        ))
+        old.commit()
+        old.backup(new)
+        variants: dict[tuple[str, str], str] = {}
+        for key, spec in ECM_SOURCES.items():
+            value = _ecm_variant(key)
+            variants[key] = json.dumps(value)
+            new.execute("INSERT INTO records VALUES (?,?,?,?,?,?)", (
+                *key, spec["recordName"], "equipment", "definition",
+                json.dumps(value),
+            ))
+            new.execute("INSERT INTO record_army_links VALUES (?,?,?,?)", (
+                *key, "equipment", str(spec["sourceId"]),
+            ))
+            new.execute("INSERT INTO record_citations VALUES (?,?,?)", (
+                *key, "n5-core-v5.3-pdf",
+            ))
+            new.execute("INSERT INTO record_relations VALUES (?,?,?,?)", (
+                *key, "variant-of", "equipment:ecm",
+            ))
+        first = next(iter(ECM_SOURCES))
+        if defect == "variant":
+            value = json.loads(variants[first])
+            value["sourceVariant"]["label"] = "Hacker"
+            variants[first] = json.dumps(value)
+            new.execute("UPDATE records SET variant_json=? WHERE id=?", (
+                variants[first], first[1],
+            ))
+        elif defect == "name":
+            new.execute("UPDATE records SET name='wrong' WHERE id=?", (first[1],))
+        elif defect == "existing":
+            new.execute("UPDATE records SET name='wrong' WHERE id='equipment:ecm'")
+        elif defect == "extra-row":
+            new.execute("INSERT INTO record_citations VALUES (?,?,?)", (
+                "n5-core-v5.3", "equipment:ecm", "bad",
+            ))
+        elif defect == "source-link":
+            new.execute("UPDATE record_army_links SET external_id='999' WHERE record_id=?",
+                        (first[1],))
+        elif defect == "relation":
+            new.execute("UPDATE record_relations SET related_record_id='equipment:firewall'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX unexpected ON records(id)")
+    if defect is None:
+        _check_ecm_source_additions(before_path, after_path, variants)
+    else:
+        with pytest.raises(ValueError):
+            _check_ecm_source_additions(before_path, after_path, variants)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "id", "name", "count", "extra-id", "raw",
+               "type", "reviewed", "compound"),
+)
+def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    items = []
+    for spec in release.ECM_SOURCES.values():
+        items.append({
+            "id": spec["sourceId"], "name": spec["name"],
+            "applicationId": 239, "occurrences": spec["count"],
+            "status": "unresolved-occurrence-parameter",
+            "reviewedExtra": None, "reviewedVariant": None,
+            "reviewedCombinations": None, "rawValues": [],
+            "extraSignatures": [
+                {"extras": [[extra_id, "TEXT", str(modifier)]],
+                 "reviewed": False, "count": count}
+                for extra_id, modifier, count in spec["signatures"]
+            ],
+        })
+    item = items[0]
+    if defect == "id":
+        item["applicationId"] = 241
+    elif defect == "name":
+        item["name"] = "wrong"
+    elif defect == "count":
+        item["extraSignatures"][-1]["count"] += 1
+    elif defect == "extra-id":
+        item["extraSignatures"][-1]["extras"][0][0] = 51
+    elif defect == "raw":
+        item["extraSignatures"][-1]["extras"][0][2] = "-6"
+    elif defect == "type":
+        item["extraSignatures"][-1]["extras"][0][1] = "DISTANCE"
+    elif defect == "reviewed":
+        item["status"] = "reviewed-extra-parameter"
+    elif defect == "compound":
+        item["extraSignatures"][-1]["extras"].append([7, "TEXT", "-6"])
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"equipment": {"items": items}}},
+    )
+    calls: list[dict] = []
+
+    def promote(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", promote)
+    if defect is None:
+        assert release.refresh_ecm_source_variants_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path,
+            "variant_records": {"equipment:ecm-guided", "equipment:ecm-hacker"},
+            "ecm_sources": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="ECM source signature drift"):
+            release.refresh_ecm_source_variants_v9_release(root=tmp_path)
+        assert not calls
+
+
 def source_data() -> tuple[dict, dict]:
     chart = json.loads(CHART.read_text(encoding="utf-8"))
     curated = json.loads(CURATED.read_text(encoding="utf-8"))

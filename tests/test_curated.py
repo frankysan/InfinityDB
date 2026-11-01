@@ -1548,6 +1548,59 @@ def test_hacking_device_firewall_rejects_unreviewed_effect(
 
 
 @pytest.mark.parametrize(
+    ("source_id", "defect"), [
+        (source_id, defect)
+        for source_id in (239, 241)
+        for defect in (
+            "extra-id", "raw-value", "scope", "modifier",
+            "variant-label", "source-link", "duplicate-extra",
+        )
+    ],
+)
+def test_ecm_variants_require_exact_source_scope_and_extras(
+    tmp_path: Path, source_id: int, defect: str,
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    source = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    id_ = "equipment:ecm-guided" if source_id == 239 else "equipment:ecm-hacker"
+    reviewed = next(row for row in source["records"] if row["id"] == id_)
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": id_, "kind": "equipment", "facts": {},
+        "armyLinks": deepcopy(reviewed["armyLinks"]),
+        "variantSemantics": deepcopy(reviewed["variantSemantics"]),
+    })
+    path = tmp_path / "ecm.json"
+
+    def validate() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    validate()
+    variant = record["variantSemantics"]
+    first = variant["occurrenceParameters"][0]["extraValues"][0]
+    if defect == "extra-id":
+        first["extraId"] = 999
+    elif defect == "raw-value":
+        first["rawValue"] = "-5"
+    elif defect == "scope":
+        first["effect"]["appliesTo"] = "all-attacks"
+    elif defect == "modifier":
+        first["effect"]["modifier"] = -9
+    elif defect == "variant-label":
+        variant["sourceVariant"]["label"] = "Hacker" if source_id == 239 else "Guided"
+    elif defect == "source-link":
+        record["armyLinks"][0]["id"] = 241 if source_id == 239 else 239
+    else:
+        variant["occurrenceParameters"][0]["extraValues"].append(deepcopy(first))
+    with pytest.raises(ValueError, match="invalid ECM|invalid exact ECM"):
+        validate()
+
+
+@pytest.mark.parametrize(
     ("source_id", "label", "extras"),
     [
         (244, "Discover", [{

@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **205/205** complete, **0** pending.
-- Current authored outgoing relations: **514**.
+- Supporting semantic identities: **207/207** complete, **0** pending.
+- Current authored outgoing relations: **516**.
 - Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
@@ -902,8 +902,12 @@ review. `declaration-category` projection records are excluded.
 - [x] **T2 Ammunition** (`ammunition:t2`) — reviewed: English N5.3 p. 67, Spanish p. 67 and pinned Wiki T2 revision 2999 confirm two Wounds on a failed hit Saving Roll and only one on failure of the additional Critical roll; players must identify dice before rolling. Cross-source wording differs: English PDF specifies ARM Roll, Spanish PDF and English Wiki say Saving Roll without an Attribute. Retain the weapon's authoritative printed Saving Roll Attribute and expose the discrepancy in sourceNotes. Applicable Immunity (T2) reduces covered failed-hit effects to Normal, without automatically removing a Critical roll; this is derived, not printed specifically for T2. No unconditional outgoing relation is justified.
   - outgoing: none
 
-#### Equipment (1/1)
+#### Equipment (3/3)
 
+- [x] **ECM: Guided** (`equipment:ecm-guided`) — reviewed: Exact Army source 239 retains both distinct -8 extra IDs; only Guided attacks against the owner are affected.
+  - `variant-of` → ECM (`equipment:ecm`)
+- [x] **ECM: Hacker** (`equipment:ecm-hacker`) — reviewed: Exact Army source 241 affects Hacking Program Rolls against the owner, not every Comms Attack.
+  - `variant-of` → ECM (`equipment:ecm`)
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 

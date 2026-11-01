@@ -16291,6 +16291,182 @@
             }
         },
         {
+            "id": "equipment:ecm-guided",
+            "kind": "equipment",
+            "name": "ECM: Guided",
+            "summary": "A source-specific [[equipment:ecm]] variant imposing the listed negative MOD on enemy Guided Attacks targeting its owner.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": 239
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 122,
+                    "heading": "ECM"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "ECM",
+                    "heading": "ECM"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-01"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "named",
+                    "label": "Guided"
+                },
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 6,
+                                "extraType": "TEXT",
+                                "rawValue": "-3",
+                                "effect": {
+                                    "kind": "enemy-ecm-attack-mod",
+                                    "appliesTo": "guided-attack-targeting-ecm-owner",
+                                    "modifier": -3
+                                }
+                            },
+                            {
+                                "extraId": 7,
+                                "extraType": "TEXT",
+                                "rawValue": "-6",
+                                "effect": {
+                                    "kind": "enemy-ecm-attack-mod",
+                                    "appliesTo": "guided-attack-targeting-ecm-owner",
+                                    "modifier": -6
+                                }
+                            },
+                            {
+                                "extraId": 51,
+                                "extraType": "TEXT",
+                                "rawValue": "-8",
+                                "effect": {
+                                    "kind": "enemy-ecm-attack-mod",
+                                    "appliesTo": "guided-attack-targeting-ecm-owner",
+                                    "modifier": -8
+                                }
+                            },
+                            {
+                                "extraId": 251,
+                                "extraType": "TEXT",
+                                "rawValue": "-8",
+                                "effect": {
+                                    "kind": "enemy-ecm-attack-mod",
+                                    "appliesTo": "guided-attack-targeting-ecm-owner",
+                                    "modifier": -8
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "equipment:ecm"
+                }
+            ]
+        },
+        {
+            "id": "equipment:ecm-hacker",
+            "kind": "equipment",
+            "name": "ECM: Hacker",
+            "summary": "A source-specific [[equipment:ecm]] variant imposing the listed negative MOD on enemies declaring Hacking Programs against its owner.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "equipment",
+                    "id": 241
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 122,
+                    "heading": "ECM"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "ECM",
+                    "heading": "ECM"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-01"
+            },
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "named",
+                    "label": "Hacker"
+                },
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 6,
+                                "extraType": "TEXT",
+                                "rawValue": "-3",
+                                "effect": {
+                                    "kind": "enemy-ecm-attack-mod",
+                                    "appliesTo": "hacking-program-targeting-ecm-owner",
+                                    "modifier": -3
+                                }
+                            },
+                            {
+                                "extraId": 7,
+                                "extraType": "TEXT",
+                                "rawValue": "-6",
+                                "effect": {
+                                    "kind": "enemy-ecm-attack-mod",
+                                    "appliesTo": "hacking-program-targeting-ecm-owner",
+                                    "modifier": -6
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "equipment:ecm"
+                }
+            ]
+        },
+        {
             "id": "equipment:escape-system",
             "kind": "equipment",
             "name": "Escape System",

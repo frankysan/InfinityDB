@@ -1690,10 +1690,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and **9 Equipment** source IDs. The tracked
+      occurrence parameters and **7 Equipment** source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
-      Bangbomb and complete source-100 Hacking Device parameters;
+      standalone ECM Guided/Hacker, Bangbomb, and complete
+      source-100 Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
       the release-matched source pair before final certification.
@@ -1945,6 +1946,32 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         and freshly exported rules databases. This reduces
         unresolved Equipment source IDs from 10 to **9**
         without creating a Unit-use index.
+      - [x] **Data processing:** Review exact ECM: Guided and ECM:
+        Hacker source variants independently from the family ECM
+        definition and TinBot. Source Equipment `239` (Guided;
+        181 occurrences) has extra `6/TEXT:-3` (2),
+        `7/TEXT:-6` (176), and two distinct `TEXT:-8`
+        IDs: `51` (1, Next Wave Juggernauts) and
+        `251` (2, O-12/Starmada ZETA UNIT). Source `241`
+        (Hacker; 161 occurrences, application ID `239`)
+        has `6/TEXT:-3` (158), `7/TEXT:-6` (3).
+        N5.3 p. 122 defines negative attacker MODs
+        against the ECM owner's designated attack type,
+        while the N5.3 modifier example explicitly scopes
+        ECM (Hacking) to Hacking Program declarations.
+        Add separate exact numeric source-linked Equipment
+        variants `equipment:ecm-guided` and
+        `equipment:ecm-hacker`; retain canonical
+        `equipment:ecm` unchanged and do not generalize
+        Hacker to all Comms Attacks. The guarded v9
+        addition verifies source IDs, raw signatures/counts
+        and exact two-record DB additions, preserving all
+        existing rows and the matched publication; ignored
+        rollback artifacts retained. CI and pinned-raw
+        regressions cover semantic scope and source owners.
+        This certifies **342 direct ECM occurrences** and
+        reduces unresolved Equipment source IDs from 9
+        to **7**, with **34 Skill IDs** unchanged.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

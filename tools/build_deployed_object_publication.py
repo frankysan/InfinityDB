@@ -97,6 +97,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Add verified Jump/Climb source links and distance metadata to a matched v9 pair",
     )
     migration.add_argument(
+        "--refresh-ecm-source-variants-v9", action="store_true",
+        help="Promote exact Guided/Hacker ECM source variants in a matched v9 pair",
+    )
+    migration.add_argument(
         "--refresh-bangbomb-v9", action="store_true",
         help="Promote source-verified Bangbomb Dodge +4 extras in a matched v9 pair",
     )
@@ -143,6 +147,7 @@ def main() -> int:
         or args.refresh_movement_distance_v9
         or args.refresh_tinbot_firewall_v9
         or args.refresh_bangbomb_v9
+        or args.refresh_ecm_source_variants_v9
         or args.refresh_tinbot_other_v9
         or args.refresh_hacking_program_grants_v9
         or args.refresh_hacking_program_mods_v9
@@ -156,6 +161,7 @@ def main() -> int:
             promote_restrictions_v9,
             refresh_bangbomb_v9_release,
             refresh_core_pdf_pin_v9_release,
+            refresh_ecm_source_variants_v9_release,
             refresh_hacking_combinations_v9_release,
             refresh_hacking_firewall_v9_release,
             refresh_hacking_program_grants_v9_release,
@@ -170,6 +176,11 @@ def main() -> int:
             stage_restrictions_v9,
         )
 
+        if args.refresh_ecm_source_variants_v9:
+            backup = refresh_ecm_source_variants_v9_release()
+            print("Promoted two exact ECM source variants in matched v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
         if args.refresh_bangbomb_v9:
             backup = refresh_bangbomb_v9_release()
             print("Refreshed exact Bangbomb Dodge +4 semantics in v9 artifacts.")

@@ -1071,14 +1071,59 @@ unresolved Equipment baseline from **10 to 9**;
 the 34 unresolved Skill source IDs and the absent
 cross-Army usage index are unaffected.
 
+**Source-specific ECM Guided and Hacker review (2026-11-01):**
+The N5.3 p. 122 `[[equipment:ecm]]` family rule
+requires the owner to be targeted by the attack type
+in the profile, and applies the listed negative MOD
+to the enemy attacker. The official N5.3 general
+modifier example clarifies that ECM against Hacking
+affects **Hacking Program Rolls**, not every Comms
+Attack. Source `239` (`ECM: Guided`, 181 direct
+occurrences) now has `equipment:ecm-guided` and
+source `241` (`ECM: Hacker`, 161 direct
+occurrences, application Equipment ID `239`)
+has `equipment:ecm-hacker`, each an independent
+`inheritance: source` variant of the canonical
+`equipment:ecm` family. The named source variants
+use exact numeric source links to avoid collapsing
+different attack scopes into the same application ID.
+
+Guided signatures are `TEXT:-3` (extra `6`, 2),
+`TEXT:-6` (extra `7`, 176), and `TEXT:-8`
+(extra `51`, 1; extra `251`, 2).
+The `-8` identities remain distinct: extra `51`
+belongs to the Next Wave Juggernauts source profile,
+while extra `251` belongs to the ZETA UNIT in
+O-12 and Starmada. Hacker signatures are `TEXT:-3`
+(extra `6`, 158) and `TEXT:-6` (extra `7`, 3).
+Typed effects use `enemy-ecm-attack-mod`, with
+`appliesTo: "guided-attack-targeting-ecm-owner"`
+or `"hacking-program-targeting-ecm-owner"` and
+exact negative `modifier`. These effects do not
+derive TinBot sharing, immunity, or runtime attack
+resolution. Existing generic ECM and TinBot semantics
+remain unchanged.
+
+The guarded one-time v9 refresh adds only the two
+new reviewed definitions and their exact source links,
+citations and `variant-of` relations. It checks every
+pre-existing database row, schema, input fingerprint
+and matched deployed-object publication and retains
+the previous pair under ignored `local/`. Pinned
+raw-source tests compare the tracked rules database
+to a fresh export, including both source `-8`
+identities. **342 direct occurrences** become reviewed;
+unresolved Equipment IDs fall from **9 to 7**
+while Skill IDs remain **34**.
+
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
 application/raw databases. The tracked artifact includes reviewed
 Mimetism, Berserk, Dodge, Surprise Attack, Super-Jump, Jump,
 Climb, TinBot variants, Hacking Device single-extra semantics
 and exact reviewed multi-extra combinations,
-plus the source-verified Bangbomb Dodge modifier.
-This baseline contains **96 Skill** source identities across
+plus source-verified Bangbomb Dodge and ECM Guided/Hacker
+modifiers. This baseline contains **96 Skill** source identities across
 **33,153 direct rows** and **34 Equipment** source identities across
 **5,427 direct rows**:
 
@@ -1090,11 +1135,12 @@ This baseline contains **96 Skill** source identities across
   (Dodge `40` and Super-Jump `74`); and **34** IDs with
   unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
-  19 family-only IDs; 5 reviewed extra-parameter sources
+  19 family-only IDs; 7 reviewed extra-parameter sources
   (TinBot Firewall `169`, Discover `244`, ECM Guided `247`,
-  Bangbomb `246`, fully reconciled Hacking Device `100`);
-  and **9** IDs with unresolved occurrence parameters. Four
-  currently published Equipment source IDs have reviewed exact-source
+  Bangbomb `246`, Hacking Device `100`, ECM Guided `239`
+  and ECM Hacker `241`); and **7** IDs with
+  unresolved occurrence parameters. Six currently
+  published Equipment source IDs have reviewed exact-source
   named variants, of which Repeater `248` has no occurrence extras.
 - `TEXT` extras occur across 39 Skill source IDs and 14 Equipment
   source IDs. `DISTANCE` occurs across 5 Skill source IDs;

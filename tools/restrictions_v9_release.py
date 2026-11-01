@@ -64,6 +64,46 @@ BANGBOMB_VARIANT = {
         }],
     }],
 }
+ECM_SOURCES = {
+    ("n5-core-v5.3", "equipment:ecm-guided"): {
+        "sourceId": 239, "name": "ECM:\u00a0Guided",
+        "recordName": "ECM: Guided", "count": 181,
+        "label": "Guided", "scope": "guided-attack-targeting-ecm-owner",
+        "signatures": ((6, -3, 2), (7, -6, 176),
+                       (51, -8, 1), (251, -8, 2)),
+    },
+    ("n5-core-v5.3", "equipment:ecm-hacker"): {
+        "sourceId": 241, "name": "ECM: Hacker",
+        "recordName": "ECM: Hacker", "count": 161,
+        "label": "Hacker", "scope": "hacking-program-targeting-ecm-owner",
+        "signatures": ((6, -3, 158), (7, -6, 3)),
+    },
+}
+
+
+def _ecm_variant(key: tuple[str, str]) -> dict[str, Any]:
+    spec = ECM_SOURCES[key]
+    return {
+        "inheritance": "source",
+        "sourceVariant": {"kind": "named", "label": spec["label"]},
+        "occurrenceParameters": [{
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extraValues": [
+                {
+                    "extraId": extra_id, "extraType": "TEXT",
+                    "rawValue": str(modifier),
+                    "effect": {
+                        "kind": "enemy-ecm-attack-mod",
+                        "appliesTo": spec["scope"],
+                        "modifier": modifier,
+                    },
+                }
+                for extra_id, modifier, _count in spec["signatures"]
+            ],
+        }],
+    }
+
+
 TINBOT_FIREWALL = ("n5-core-v5.3", "equipment:tinbot-firewall")
 TINBOT_FIREWALL_BASE = {
     "inheritance": "source", "sourceVariant": {"kind": "named", "label": "Firewall"},
@@ -689,6 +729,97 @@ def refresh_pdf_source_pins_v9_release(*, root: Path = ROOT) -> Path:
     return _refresh_metadata_v9_release(root=root)
 
 
+def _check_ecm_source_additions(
+    previous: Path, proposed: Path, variants: dict[tuple[str, str], str],
+) -> None:
+    """Allow only two exact source records and their owned relational rows."""
+    from collections import Counter
+
+    if set(variants) != set(ECM_SOURCES):
+        raise ValueError("ECM source refresh requires precisely Guided and Hacker")
+    for key, payload in variants.items():
+        if json.loads(payload) != _ecm_variant(key):
+            raise ValueError(f"ECM source variant drift: {key[1]}")
+    with closing(sqlite3.connect(previous)) as old, closing(sqlite3.connect(proposed)) as new:
+        for pragma in ("user_version", "application_id"):
+            if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
+                f"PRAGMA {pragma}"
+            ).fetchone():
+                raise ValueError("ECM refresh changed database identity")
+        schema_sql = "SELECT type, name, sql FROM sqlite_master ORDER BY type, name"
+        schema = old.execute(schema_sql).fetchall()
+        if schema != new.execute(schema_sql).fetchall():
+            raise ValueError("ECM refresh changed database schema")
+        additions: dict[str, list[dict[str, Any]]] = {}
+        for kind, name, _ in schema:
+            if kind != "table":
+                continue
+            quoted = '"' + name.replace('"', '""') + '"'
+            columns = [row[1] for row in old.execute(f"PRAGMA table_info({quoted})")]
+            order = ",".join(str(index + 1) for index in range(len(columns)))
+            query = f"SELECT * FROM {quoted} ORDER BY {order}"
+            before = old.execute(query).fetchall()
+            after = new.execute(query).fetchall()
+            if name == "sqlite_stat1":
+                # New definitions legitimately change optimizer estimates.
+                index = columns.index("tbl")
+                touched = {"records", "record_army_links", "record_citations",
+                           "record_relations"}
+                before = [row for row in before if row[index] not in touched]
+                after = [row for row in after if row[index] not in touched]
+            missing = Counter(before) - Counter(after)
+            if missing:
+                raise ValueError(f"ECM refresh changed existing rows: {name}")
+            extra = Counter(after) - Counter(before)
+            additions[name] = []
+            for values, multiplicity in extra.items():
+                entry = dict(zip(columns, values, strict=True))
+                key = (entry.get("collection_id"),
+                       entry.get("id") if name == "records" else entry.get("record_id"))
+                if key not in ECM_SOURCES or name not in {
+                    "records", "record_army_links", "record_citations",
+                    "record_relations",
+                }:
+                    raise ValueError(f"ECM refresh added unrelated rows: {name}")
+                additions[name].extend([entry] * multiplicity)
+        added_records = additions["records"]
+        if {(row["collection_id"], row["id"]) for row in added_records} != set(
+            ECM_SOURCES
+        ) or len(added_records) != 2:
+            raise ValueError("ECM refresh must add exactly two definition records")
+        for row in added_records:
+            key = (row["collection_id"], row["id"])
+            if (
+                row["kind"] != "equipment"
+                or row["name"] != ECM_SOURCES[key]["recordName"]
+                or row["composition_role"] != "definition"
+                or json.loads(row["variant_json"]) != _ecm_variant(key)
+            ):
+                raise ValueError("ECM refresh changed new definition identity")
+        links = additions["record_army_links"]
+        if len(links) != 2 or {
+            (row["collection_id"], row["record_id"], row["entity"],
+             row["external_id"])
+            for row in links
+        } != {
+            (*key, "equipment", str(spec["sourceId"]))
+            for key, spec in ECM_SOURCES.items()
+        }:
+            raise ValueError("ECM refresh changed exact source links")
+        citations = additions["record_citations"]
+        relations = additions["record_relations"]
+        if (
+            { (row["collection_id"], row["record_id"]) for row in citations }
+            != set(ECM_SOURCES)
+            or {(row["collection_id"], row["record_id"]) for row in relations}
+            != set(ECM_SOURCES)
+            or any(row["related_record_id"] != "equipment:ecm"
+                   or row["relation_type"] != "variant-of" for row in relations)
+            or len(relations) != 2
+        ):
+            raise ValueError("ECM refresh changed source citations or family relations")
+
+
 def _check_variant_semantics_delta(
     previous: Path, proposed: Path, variants: dict[tuple[str, str], str],
     *, initialize_movement_distance: bool = False, tinbot_firewall: bool = False,
@@ -944,6 +1075,41 @@ def refresh_movement_distance_v9_release(*, root: Path = ROOT) -> Path:
     return _refresh_metadata_v9_release(
         root=root, variant_records={key[1] for key in INITIAL_MOVEMENT_DISTANCE},
         initialize_movement_distance=True,
+    )
+
+
+def refresh_ecm_source_variants_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote the two exact source-specific ECM definitions as a matched pair."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    items = {row["id"]: row for row in report["catalogs"]["equipment"]["items"]}
+    for spec in ECM_SOURCES.values():
+        source_id = spec["sourceId"]
+        row = items.get(source_id)
+        if (
+            row is None or row["name"] != spec["name"]
+            or row["applicationId"] != 239 or row["occurrences"] != spec["count"]
+            or row["status"] != "unresolved-occurrence-parameter"
+            or row["reviewedExtra"] is not None
+            or row["reviewedVariant"] is not None
+            or row["reviewedCombinations"] is not None
+            or row["rawValues"]
+            or row["extraSignatures"] != [
+                {
+                    "extras": [[extra_id, "TEXT", str(modifier)]],
+                    "reviewed": False, "count": count,
+                }
+                for extra_id, modifier, count in spec["signatures"]
+            ]
+        ):
+            raise ValueError(f"ECM source signature drift: {source_id}")
+    return _refresh_metadata_v9_release(
+        root=root,
+        variant_records={key[1] for key in ECM_SOURCES},
+        ecm_sources=True,
     )
 
 
@@ -1326,6 +1492,7 @@ def _refresh_metadata_v9_release(
     tinbot_other: bool = False, hacking_mods: bool = False,
     hacking_srs: bool = False, hacking_firewall: bool = False,
     hacking_combinations: bool = False, bangbomb: bool = False,
+    ecm_sources: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -1403,7 +1570,9 @@ def _refresh_metadata_v9_release(
             raise ValueError("Source pin export is not byte deterministic")
         generated = RulesDatabase(next_rules)
         generated.validate()
-        if variant_records is not None:
+        if ecm_sources:
+            _check_ecm_source_additions(current_rules, next_rules, variants)
+        elif variant_records is not None:
             _check_variant_semantics_delta(
                 current_rules, next_rules, variants,
                 initialize_movement_distance=initialize_movement_distance,
