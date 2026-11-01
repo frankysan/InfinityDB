@@ -62,9 +62,12 @@ stages continue after failures by default; use `--fail-fast` when appropriate.
 For `--stage docs` or `--all`, bootstrap the lockfile-pinned Node.js Markdownlint
 dependency with `npm ci --ignore-scripts --no-audit --no-fund` first (Node.js 22+).
 The docs check stage itself works offline and does not install packages.
-The `preflight` stage instead builds a wheel using pip, which may acquire
-uncached build-backend dependencies. It compares the Git **index**, not
-unstaged tracked edits; use it after staging the proposed commit. It checks
+The `preflight` stage builds and audits a wheel, installs declared development/symbol
+dependencies in a fresh virtual environment, and runs the full indexed pytest suite
+plus Pyright. These pip operations may download packages. `--all` and `--profile all`
+include this isolated validation; preflight is skipped if an earlier stage fails.
+It compares the Git **index**, not unstaged tracked edits; use it after staging the
+proposed commit. It checks
 all tracked `src/` files except explicit design-source exemptions, plus configured
 shared data-files, without substituting for installed-wheel CI. The `code`
 profile remains Python-only.

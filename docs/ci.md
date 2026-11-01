@@ -52,11 +52,15 @@ hash/text validation and must fail on changed or malformed evidence.
 
 ### Git-index preflight and wheel-content audit
 
-The primary Ubuntu 3.11 `--all` leg includes the `preflight` stage
-(after the ordinary test/build/rules stages). It invokes
-`tools/ci_preflight.py --skip-pytest`: pytest is already executed by the
-matrix test stage, so CI does not run the full suite twice. The other
-`Source checks` legs do not run this packaging stage; the separate
+The primary Ubuntu 3.11 `--all` leg includes the isolated `preflight` stage
+after the ordinary test/build/rules stages. It invokes
+`tools/ci_preflight.py --isolated`, installs only indexed `.[dev,symbols]`
+dependencies in a fresh environment, and runs the indexed pytest suite plus Pyright.
+This additional pass checks dependency declarations and clean-source assumptions
+independently of the working-tree checks. If any earlier stage fails or cannot start,
+preflight is reported as skipped; the remaining ordinary stages still run unless
+`--fail-fast` was requested. The other
+`Source checks` legs do not run this isolated stage; the separate
 `Installed wheel smoke` job builds and tests an installed wheel on Ubuntu.
 
 The preflight detects non-ignored untracked files and exports exactly the
@@ -74,11 +78,11 @@ resolution after installation.
 
 Local Git-index preflight, including an optional clean-export pytest run,
 is documented in [development checks](testing.md#ci-preflight-clean-checkout-and-wheel-contents).
-Its explicit `--isolated` mode installs only the indexed development/symbol dependencies
-in a fresh virtual environment, prepares the same publication as source CI, and runs
-pytest plus Pyright. Use it before committing to expose dependencies hidden by a richer
-developer environment and tests that assume ignored inputs are present. The normal
-packaging-only `preflight` stage does not perform this isolation or repeat tests.
+The standard runner uses isolated mode for `--all`, `--profile all` and
+`--stage preflight`; it prepares the same publication as source CI before pytest.
+Use it before committing to expose dependencies hidden by a richer developer
+environment and tests that assume ignored inputs are present. The direct
+`ci_preflight.py --skip-pytest` command remains available for a packaging-only check.
 It cannot validate unstaged tracked edits; stage a proposed change or
 review the index before relying on a green preflight. Pip's isolated wheel
 build may obtain its setuptools backend if not already cached; no upstream

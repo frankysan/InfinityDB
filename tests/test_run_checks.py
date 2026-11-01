@@ -209,12 +209,12 @@ def test_test_stage_can_schedule_two_browser_lanes() -> None:
     assert stage.command[8:] == ("-m", "not full_assets", "-q")
 
 
-def test_test_distribution_requires_test_stage(
+def test_test_distribution_requires_test_or_preflight_stage(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     result = run_checks.main(["--stage", "lint", "--test-dist", "loadgroup"])
     assert result == run_checks.EXIT_RUNNER_ERROR
-    assert "--test-dist requires the test stage" in capsys.readouterr().err
+    assert "--test-dist requires the test or preflight stage" in capsys.readouterr().err
 
 
 def test_test_stage_can_force_serial_execution() -> None:
@@ -274,11 +274,11 @@ def test_test_stage_can_combine_maintained_sections_and_assets() -> None:
     )
 
 
-def test_test_workers_require_test_stage(capsys: pytest.CaptureFixture[str]) -> None:
+def test_test_workers_require_test_or_preflight_stage(capsys: pytest.CaptureFixture[str]) -> None:
     result = run_checks.main(["--stage", "lint", "--test-workers", "2"])
 
     assert result == run_checks.EXIT_RUNNER_ERROR
-    assert "--test-workers requires the test stage" in capsys.readouterr().err
+    assert "--test-workers requires the test or preflight stage" in capsys.readouterr().err
 
 
 def test_test_sections_require_test_stage(capsys: pytest.CaptureFixture[str]) -> None:
@@ -720,16 +720,116 @@ def _fake_preflight_wheel(
     return export, wheel_dir
 
 
-def test_ci_preflight_stage_is_wheel_only_because_test_stage_runs_pytest() -> None:
+@pytest.mark.parametrize("include_assets", [False, True])
+def test_ci_preflight_stage_runs_isolated_full_index_despite_local_targets(
+    include_assets: bool,
+) -> None:
     [stage] = run_checks.stage_definitions(
         ("preflight",), ["tests/test_run_checks.py"], build_source=None,
+        include_full_assets=include_assets,
     )
     assert stage.name == "preflight"
     assert stage.command == (
         sys.executable,
         str(Path(__file__).resolve().parents[1] / "tools" / "ci_preflight.py"),
-        "--skip-pytest",
+        "--isolated", "--", "-n", "auto", "--dist", "worksteal",
+        "-m", "full_assets or not full_assets" if include_assets else "not full_assets", "-q",
     )
+
+
+@pytest.mark.parametrize("selection", [["--all"], ["--profile", "all"]])
+def test_full_run_includes_isolated_preflight_after_successful_checks(
+    monkeypatch: pytest.MonkeyPatch, selection: list[str],
+) -> None:
+    invoked = []
+
+    def run(stage, _reporter, **_kwargs):
+        invoked.append(stage)
+        return run_checks.StageResult(stage.name, "PASS", 0, 0.0)
+
+    monkeypatch.setattr(run_checks, "run_stage", run)
+    assert run_checks.main([
+        *selection, "--assets", "off", "--test-workers", "0",
+        "--test-section", "web", "tests/test_web.py",
+    ]) == 0
+    assert [stage.name for stage in invoked] == list(run_checks.STAGE_ORDER)
+    assert invoked[-1].command[2:] == (
+        "--isolated", "--", "-m", "not full_assets", "-q",
+    )
+    assert "tests/test_web.py" in invoked[0].command
+    assert "section_web" in invoked[0].command[-2]
+
+
+@pytest.mark.parametrize("failed_stage", run_checks.STAGE_ORDER[:-1])
+@pytest.mark.parametrize("status", ["FAIL", "ERROR"])
+def test_full_run_skips_preflight_after_any_previous_failure_but_finishes_other_checks(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+    failed_stage: str, status: str,
+) -> None:
+    invoked = []
+
+    def run(stage, _reporter, **_kwargs):
+        invoked.append(stage.name)
+        if stage.name == failed_stage:
+            return run_checks.StageResult(stage.name, status, 1, 0.0)
+        return run_checks.StageResult(stage.name, "PASS", 0, 0.0)
+
+    monkeypatch.setattr(run_checks, "run_stage", run)
+    expected = run_checks.EXIT_STAGE_FAILURE if status == "FAIL" else run_checks.EXIT_RUNNER_ERROR
+    assert run_checks.main(["--all", "--assets", "off", "--test-workers", "0"]) == expected
+    assert invoked == list(run_checks.STAGE_ORDER[:-1])
+    output = capsys.readouterr().out
+    assert f"Skipped: earlier stages failed: {failed_stage}" in output
+    assert "preflight SKIP" in output
+    assert "Overall: FAIL" in output
+
+
+def test_full_run_fail_fast_still_stops_before_remaining_checks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    invoked = []
+
+    def run(stage, _reporter, **_kwargs):
+        invoked.append(stage.name)
+        return run_checks.StageResult(stage.name, "FAIL", 1, 0.0)
+
+    monkeypatch.setattr(run_checks, "run_stage", run)
+    assert run_checks.main([
+        "--all", "--assets", "off", "--test-workers", "0", "--fail-fast",
+    ]) == run_checks.EXIT_STAGE_FAILURE
+    assert invoked == ["test"]
+
+
+@pytest.mark.parametrize("workers,distribution", [
+    ("0", "worksteal"), ("2", "loadgroup"), ("auto", "browserlanes"),
+])
+def test_standalone_preflight_forwards_worker_and_distribution_choices(
+    monkeypatch: pytest.MonkeyPatch, workers: str, distribution: str,
+) -> None:
+    invoked = []
+
+    def run(stage, _reporter, **_kwargs):
+        invoked.append(stage.command)
+        return run_checks.StageResult(stage.name, "PASS", 0, 0.0)
+
+    monkeypatch.setattr(run_checks, "run_stage", run)
+    # The fresh environment supplies xdist; a host installation is unnecessary.
+    monkeypatch.setattr(run_checks.importlib.util, "find_spec", lambda _name: None)
+    assert run_checks.main([
+        "--stage", "preflight", "--assets", "off",
+        "--test-workers", workers, "--test-dist", distribution,
+    ]) == 0
+    [command] = invoked
+    assert command[2:4] == ("--isolated", "--")
+    if workers == "0":
+        assert "-n" not in command
+    else:
+        assert command[command.index("-n") + 1] == workers
+        assert command[command.index("--dist") + 1] == (
+            "loadgroup" if distribution == "browserlanes" else distribution
+        )
+    assert ("--browser-lanes" in command) is (distribution == "browserlanes")
+    assert command[-3:] == ("-m", "not full_assets", "-q")
 
 
 def test_ci_preflight_rejects_unresolved_index_and_gitlink_modes(

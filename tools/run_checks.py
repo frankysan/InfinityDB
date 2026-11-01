@@ -124,7 +124,7 @@ def build_parser() -> argparse.ArgumentParser:
     selection.add_argument(
         "--all",
         action="store_true",
-        help="Run all stages (equivalent to --profile all).",
+        help="Run all stages, including isolated preflight (may download Python packages).",
     )
     parser.add_argument(
         "targets",
@@ -144,7 +144,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=ASSET_MODES,
         default="auto",
         help=(
-            "Third-party graphical asset policy for the test stage: off runs hermetic "
+            "Graphical asset policy for test/preflight stages: off runs hermetic "
             "tests only; auto uses a complete validated local set when available; "
             "required fails unless that complete set is available."
         ),
@@ -155,7 +155,7 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="N|auto",
         help=(
             "Run pytest through pytest-xdist with N workers or automatic CPU-based "
-            "worker selection. Test stages default to auto; use 0 for serial execution."
+            "worker selection. Test/preflight stages default to auto; use 0 for serial execution."
         ),
     )
     parser.add_argument(
@@ -226,8 +226,11 @@ def stage_definitions(
     python = sys.executable
     stages: list[Stage] = []
     for name in stage_names:
-        if name == "test":
-            command = [python, "-m", "pytest"]
+        if name in {"test", "preflight"}:
+            command = (
+                [python, "-m", "pytest"] if name == "test" else
+                [python, str(REPO_ROOT / "tools" / "ci_preflight.py"), "--isolated", "--"]
+            )
             if test_workers != "0":
                 distribution = (
                     "loadgroup" if test_distribution == "browserlanes" else test_distribution
@@ -235,12 +238,12 @@ def stage_definitions(
                 command.extend(("-n", test_workers, "--dist", distribution))
                 if test_distribution == "browserlanes":
                     command.append("--browser-lanes")
-            if targets:
+            if targets and name == "test":
                 command.extend(targets)
             asset_marker = (
                 "full_assets or not full_assets" if include_full_assets else "not full_assets"
             )
-            if test_sections:
+            if test_sections and name == "test":
                 section_marker = " or ".join(
                     TEST_SECTIONS[section].marker for section in test_sections
                 )
@@ -273,8 +276,6 @@ def stage_definitions(
                 "--output",
                 str(Path(tempfile.mkdtemp(prefix="infinitydb-check-rules-")) / "rules.db"),
             ]
-        elif name == "preflight":
-            command = [python, str(REPO_ROOT / "tools" / "ci_preflight.py"), "--skip-pytest"]
         else:  # pragma: no cover - guarded by argparse/selected_stage_names
             raise ValueError(f"Unknown stage: {name}")
         stages.append(Stage(name=name, command=tuple(command)))
@@ -419,12 +420,13 @@ def main(argv: list[str] | None = None) -> int:
     try:
         args = build_parser().parse_args(argv)
         stage_names = selected_stage_names(args)
+        runs_pytest = bool({"test", "preflight"} & set(stage_names))
         if args.build_source is not None and "build" not in stage_names:
             build_parser().error("--build-source requires the build stage")
-        if args.test_workers is not None and "test" not in stage_names:
-            build_parser().error("--test-workers requires the test stage")
-        if args.test_dist is not None and "test" not in stage_names:
-            build_parser().error("--test-dist requires the test stage")
+        if args.test_workers is not None and not runs_pytest:
+            build_parser().error("--test-workers requires the test or preflight stage")
+        if args.test_dist is not None and not runs_pytest:
+            build_parser().error("--test-dist requires the test or preflight stage")
         if args.test_section and "test" not in stage_names:
             build_parser().error("--test-section requires the test stage")
         if args.source_occupancy_gate and "rules" not in stage_names:
@@ -432,7 +434,7 @@ def main(argv: list[str] | None = None) -> int:
         test_workers = (
             args.test_workers
             if args.test_workers is not None
-            else (DEFAULT_TEST_WORKERS if "test" in stage_names else "0")
+            else (DEFAULT_TEST_WORKERS if runs_pytest else "0")
         )
         if test_workers != "auto":
             try:
@@ -442,7 +444,8 @@ def main(argv: list[str] | None = None) -> int:
             if worker_count < 0:
                 build_parser().error("--test-workers must be 0, auto, or a positive integer")
             test_workers = str(worker_count)
-        if test_workers != "0" and importlib.util.find_spec("xdist") is None:
+        if ("test" in stage_names and test_workers != "0"
+                and importlib.util.find_spec("xdist") is None):
             raise ValueError(
                 "pytest-xdist is required for parallel test execution; "
                 "install the project dev dependencies"
@@ -453,7 +456,7 @@ def main(argv: list[str] | None = None) -> int:
                 STATIC_ROOT,
                 publication_manifest=PUBLICATION_MANIFEST,
             )
-            if "test" in stage_names
+            if runs_pytest
             else None
         )
         test_sections = tuple(dict.fromkeys(args.test_section or ()))
@@ -480,18 +483,28 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with Reporter(report_path) as reporter:
             write_header(reporter, stages, args.targets, started_at, asset_selection)
-            if args.targets and ({"docs", "type", "build", "rules"} & set(stage_names)):
+            if args.targets and (
+                {"docs", "type", "build", "rules", "preflight"} & set(stage_names)
+            ):
                 reporter.write(
                     "Note: positional targets apply to pytest/Ruff only; "
                     "docs checks repository Markdown, type uses Pyright, "
-                    "build uses --build-source, and rules uses curated defaults."
+                    "build uses --build-source, rules uses curated defaults, "
+                    "and preflight tests the full indexed suite."
                 )
             results: list[StageResult] = []
             for stage in stages:
-                result = run_stage(
-                    stage, reporter,
-                    source_occupancy_gate=args.source_occupancy_gate and stage.name == "rules",
-                )
+                failed = [result.name for result in results if result.status in {"FAIL", "ERROR"}]
+                if stage.name == "preflight" and failed:
+                    reporter.write()
+                    reporter.write("[PREFLIGHT]")
+                    reporter.write(f"Skipped: earlier stages failed: {', '.join(failed)}")
+                    result = StageResult(stage.name, "SKIP", None, 0.0)
+                else:
+                    result = run_stage(
+                        stage, reporter,
+                        source_occupancy_gate=args.source_occupancy_gate and stage.name == "rules",
+                    )
                 results.append(result)
                 if args.fail_fast and result.status != "PASS":
                     break

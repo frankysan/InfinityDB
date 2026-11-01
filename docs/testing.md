@@ -30,10 +30,10 @@ The runner exposes seven stages:
 - `build` — Army data/database build validation;
 - `rules` - interaction-review coverage and generated-checklist validation, followed by
   curated rules validation/database build;
-- `preflight` — CI-parity check: fails on untracked non-ignored files and verifies tracked package
-  files are shipped in a wheel built from the tracked export (see
-  [CI preflight](#ci-preflight-clean-checkout-and-wheel-contents); the clean-export pytest run is
-  not part of this stage).
+- `preflight` — isolated CI-parity check: rejects untracked non-ignored files, audits wheel
+  contents from the index, installs declared dependencies in a fresh environment, and runs
+  pytest plus Pyright there. It may download Python packages; see
+  [CI preflight](#ci-preflight-clean-checkout-and-wheel-contents).
 
 Named profiles are:
 
@@ -80,6 +80,8 @@ build step is part of the application's runtime or packaging.
 
 Requested stages continue after a failure by default so one run can report the complete failure set.
 Use `--fail-fast` when the first failure is sufficient.
+The final `preflight` stage is skipped if any earlier stage failed or could not start;
+the summary reports `preflight SKIP` and retains the original failure status.
 
 ## CI preflight (clean checkout and wheel contents)
 
@@ -115,6 +117,19 @@ committing, use the isolated mode after staging the intended candidate:
 .\.venv\Scripts\python.exe tools/ci_preflight.py --isolated -- -n auto
 ```
 
+`tools/run_checks.py --all` and `--profile all` include this isolated validation
+automatically, after the working-tree checks. Run only that gate with:
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage preflight
+```
+
+The runner forwards `--test-workers`, `--test-dist` and its resolved asset selection
+to isolated pytest. Preflight always checks the full indexed suite; positional targets
+and `--test-section` narrow only the ordinary working-tree test stage. The ordinary
+test stage retains access to local evidence and optional browser tooling, while the
+isolated pass checks the environment and files available to a clean CI checkout.
+
 This exports the same index, creates a fresh virtual environment without system-site
 packages, installs only `.[dev,symbols]` from that export, prepares the publication,
 then runs pytest (including tracked full-asset tests) and Pyright using that environment.
@@ -133,9 +148,8 @@ For a quick packaging/untracked check without repeating pytest or installing dep
 ```
 
 `--skip-wheel` omits the wheel audit; combining the skip switches exercises
-only index export and untracked-file checks. The standard `preflight` stage
-in `tools/run_checks.py --stage preflight` uses `--skip-pytest` because the
-normal `test` stage already runs pytest. The `--all` profile includes both.
+only index export and untracked-file checks. These are direct `ci_preflight.py`
+options; the standard runner's `preflight` stage always uses `--isolated`.
 
 **Limits:** Preflight audits wheel member *presence*, not byte-level equivalence,
 installed runtime behavior, or files that are not declared as package data.
