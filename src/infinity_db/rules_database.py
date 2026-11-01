@@ -1704,20 +1704,32 @@ class RulesDatabase:
         """Return exact reviewed Equipment effects without inferring Fireteam sharing."""
         return self._reviewed_extra_semantics("equipment")
 
+    def skill_reviewed_combination_semantics(
+        self,
+    ) -> dict[ArmyLinkRef, list[dict[str, Any]]]:
+        """Only exact, ordered reviewed compound Skill signatures."""
+        return self._reviewed_combination_semantics("skill")
+
     def equipment_reviewed_combination_semantics(
         self,
     ) -> dict[ArmyLinkRef, list[dict[str, Any]]]:
         """Only exact, ordered reviewed compound Equipment signatures."""
+        return self._reviewed_combination_semantics("equipment")
+
+    def _reviewed_combination_semantics(
+        self, entity: str,
+    ) -> dict[ArmyLinkRef, list[dict[str, Any]]]:
         with self._connect() as connection:
             rows = connection.execute(
                 "SELECT l.external_id AS army_ref, r.variant_json "
                 "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
                 "JOIN record_army_links AS l ON l.collection_id = r.collection_id "
                 "AND l.record_id = r.id "
-                "WHERE r.kind = 'equipment' AND r.composition_role = 'definition' "
-                "AND c.status = 'current' AND l.entity = 'equipment' "
+                "WHERE r.kind = ? AND r.composition_role = 'definition' "
+                "AND c.status = 'current' AND l.entity = ? "
                 "AND l.external_id IS NOT NULL "
-                "ORDER BY l.external_id, r.collection_id, r.id"
+                "ORDER BY l.external_id, r.collection_id, r.id",
+                (entity, entity),
             ).fetchall()
             result: dict[ArmyLinkRef, list[dict[str, Any]]] = {}
             for row in rows:
@@ -1729,7 +1741,7 @@ class RulesDatabase:
                     continue
                 army_ref = _army_link_ref(row["army_ref"])
                 if army_ref in result and result[army_ref] != combinations:
-                    raise ValueError(f"Equipment {army_ref!r} has conflicting combinations")
+                    raise ValueError(f"{entity.title()} {army_ref!r} has conflicting combinations")
                 result[army_ref] = combinations
             return result
 

@@ -1512,6 +1512,132 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "wrong-recipient", "wrong-attribute", "changed-mod",
+               "incomplete", "reordered", "other-record", "schema", "missing"),
+)
+def test_remdriver_v9_refresh_only_promotes_exact_compound_metadata(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        REMDRIVER,
+        REMDRIVER_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    previous, proposed = tmp_path / "previous.db", tmp_path / "proposed.db"
+    variant = copy.deepcopy(REMDRIVER_VARIANT)
+    combos = variant["occurrenceCombinations"]
+    if defect == "wrong-recipient":
+        combos[0]["effects"][0]["recipient"] = "remdriver-user"
+    elif defect == "wrong-attribute":
+        combos[1]["effects"][1]["attribute"] = "WIP"
+    elif defect == "changed-mod":
+        combos[0]["effects"][0]["modifier"] = 2
+    elif defect == "incomplete":
+        combos[2]["extras"].pop()
+    elif defect == "reordered":
+        combos[1]["extras"].reverse()
+    with sqlite3.connect(previous) as old, sqlite3.connect(proposed) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*REMDRIVER, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "skill:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), REMDRIVER[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:remdriver'")
+    changed: dict[tuple[str, str], str] = {REMDRIVER: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(previous, proposed, changed, remdriver=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(previous, proposed, changed, remdriver=True)
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(previous, proposed, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "signature-id", "raw",
+               "order", "status", "previous", "extra-combo"),
+)
+def test_remdriver_v9_refresh_requires_exact_pinned_signatures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 255, "name": "RemDriver", "applicationId": 255,
+        "occurrences": 12, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None,
+        "reviewedNumericMod": None, "reviewedExtra": None,
+        "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[271, "TEXT", "+1 BS"], [300, "TEXT", "+5 CC"]],
+             "reviewed": False, "count": 3},
+            {"extras": [[280, "TEXT", "CC=15"], [281, "TEXT", "BS=13"],
+                        [282, "TEXT", "WIP=14"]],
+             "reviewed": False, "count": 5},
+            {"extras": [[281, "TEXT", "BS=13"], [52, "TEXT", "PH=13"],
+                        [384, "TEXT", "BTS=6"]],
+             "reviewed": False, "count": 4},
+        ],
+    }
+    if defect == "name":
+        source["name"] = "Other"
+    elif defect == "app-id":
+        source["applicationId"] = 250
+    elif defect == "count":
+        source["occurrences"] = 11
+    elif defect == "signature-id":
+        source["extraSignatures"][0]["extras"][0][0] = 280
+    elif defect == "raw":
+        source["extraSignatures"][1]["extras"][1][2] = "BS=14"
+    elif defect == "order":
+        source["extraSignatures"][2]["extras"].reverse()
+    elif defect == "status":
+        source["status"] = "reviewed-combination-parameter"
+    elif defect == "previous":
+        source["reviewedCombinations"] = [{"unexpected": True}]
+    elif defect == "extra-combo":
+        source["extraSignatures"].append(
+            {"extras": [[271, "TEXT", "+1 BS"]], "reviewed": False, "count": 1}
+        )
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_remdriver_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"skill:remdriver"},
+            "remdriver": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="RemDriver source signature drift"):
+            release.refresh_remdriver_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
     "defect", (None, "wrong-state", "wrong-scope", "not-only", "raw",
                "other-record", "schema", "missing"),
 )

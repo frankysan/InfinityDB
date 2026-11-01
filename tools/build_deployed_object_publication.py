@@ -109,6 +109,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote source-verified MediKit ranged +1B in a matched v9 pair",
     )
     migration.add_argument(
+        "--refresh-remdriver-v9", action="store_true",
+        help="Promote exact RemDriver source-255 compound Attribute signatures",
+    )
+    migration.add_argument(
         "--refresh-impersonation-v9", action="store_true",
         help="Promote exact Impersonation IMP-2 Skill variant in matched v9 artifacts",
     )
@@ -185,6 +189,7 @@ def main() -> int:
         or args.refresh_deactivator_v9
         or args.refresh_khd_v9
         or args.refresh_impersonation_v9
+        or args.refresh_remdriver_v9
         or args.refresh_evo_trinity_v9
         or args.refresh_ecm_source_variants_v9
         or args.refresh_tinbot_other_v9
@@ -218,6 +223,7 @@ def main() -> int:
             refresh_medikit_v9_release,
             refresh_movement_distance_v9_release,
             refresh_pdf_source_pins_v9_release,
+            refresh_remdriver_v9_release,
             refresh_tinbot_firewall_v9_release,
             refresh_tinbot_other_v9_release,
             refresh_variant_semantics_v9_release,
@@ -237,6 +243,11 @@ def main() -> int:
         if args.refresh_medikit_v9:
             backup = refresh_medikit_v9_release()
             print("Refreshed exact ranged MediKit Burst upgrade in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_remdriver_v9:
+            backup = refresh_remdriver_v9_release()
+            print("Refreshed exact RemDriver compound signatures in matched v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_impersonation_v9:

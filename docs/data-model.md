@@ -1274,6 +1274,49 @@ Equipment** (the latter includes the separately registered
 unqualified Hacking Device Plus SR-1 in
 [official source clarifications](official-source-clarifications.md#src-001--charontid-hacking-device-plus-unqualified-sr-1)).
 
+**RemDriver full compound recipient attributes (2026-11-01):**
+Pinned Army Skill source `255` contains exactly **12 direct
+RemDriver occurrences** across three **ordered compound**
+`TEXT` extra signatures: `(+1 BS, +5 CC)` (3),
+`(CC=15, BS=13, WIP=14)` (5), and
+`(BS=13, PH=13, BTS=6)` (4). The specific source
+extra IDs and order are retained in the curated Skill
+record's `occurrenceCombinations`, not decomposed
+into separately approved source extras.
+
+N5.3 English p. 110 says the deployed RemDriver
+owner places a Token beside one already deployed Remote
+in the same Army List. The Token-bearing **Remote**
+receives the bracketed MODs or values from the
+RemDriver owner's profile. Thus `+1 BS` and
+`+5 CC` are additive recipient Attribute modifiers;
+`CC=15`, `BS=13`, `WIP=14`, `PH=13`
+and `BTS=6` are fixed recipient Attribute
+replacements. These typed effects use
+`recipient: token-assigned-remote` and cannot be
+mistaken for MODs on the RemDriver owner.
+The Token is removed at the end of the Order in which
+the owner enters any Null State, and one Remote may not
+carry more than one RemDriver Token. No specific
+Remote assignment is derivable from the profile alone.
+
+The curated validator enforces the exact **three**
+source signatures, typed effects and primitive types.
+`RulesDatabase.skill_reviewed_combination_semantics()`
+exposes only complete combinations. The source audit
+reports the distinct `reviewed-combination-parameter`
+status for the Skill without changing Equipment
+combination semantics. The guarded matched-v9
+metadata-only refresh permits only the RemDriver
+family's exact additional `occurrenceCombinations`,
+requires the old family-only value, and rejects unrelated
+rows/schema changes. Pinned raw-source tests compare the
+tracked rules export and fresh curated export, including
+ordered signatures and counts. This does not publish
+a Unit-use index, a token assignment resolver, or a
+general live-game attribute-calculation engine.
+Remaining baseline: **31 Skill / 1 Equipment**.
+
 **Reviewed Impersonation IMP-2 source restriction (2026-11-01):**
 Pinned Army Skill source `249` has 14 direct occurrences,
 nine carrying exactly one `TEXT:IMP-2` extra (`268`).

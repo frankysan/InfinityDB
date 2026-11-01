@@ -131,7 +131,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
             "reviewed-extra-parameter": 4,
-            "unresolved-occurrence-parameter": 32,
+            "reviewed-combination-parameter": 1,
+            "unresolved-occurrence-parameter": 31,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -160,6 +161,7 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-exact-source",
             "reviewed-numeric-parameter",
             "reviewed-extra-parameter",
+            "reviewed-combination-parameter",
             "unresolved-occurrence-parameter",
         }
 
@@ -387,7 +389,8 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
         "reviewed-extra-parameter": 4,
-        "unresolved-occurrence-parameter": 32,
+        "reviewed-combination-parameter": 1,
+        "unresolved-occurrence-parameter": 31,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -403,6 +406,60 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         263: {"kind": "distance", "positive_sign": "omit"},
         271: {"kind": "distance", "positive_sign": "omit"},
     }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_remdriver_255_only_exact_full_compounds_are_reviewed(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = [
+        {"extras": [[271, "TEXT", "+1 BS"], [300, "TEXT", "+5 CC"]],
+         "reviewed": True, "count": 3},
+        {"extras": [[280, "TEXT", "CC=15"], [281, "TEXT", "BS=13"],
+                    [282, "TEXT", "WIP=14"]],
+         "reviewed": True, "count": 5},
+        {"extras": [[281, "TEXT", "BS=13"], [52, "TEXT", "PH=13"],
+                    [384, "TEXT", "BTS=6"]],
+         "reviewed": True, "count": 4},
+    ]
+    from tools.audit_source_variant_inputs import reviewed_extra_signature
+    assert not reviewed_extra_signature(
+        [(1, 281, "TEXT", "BS=13")],
+        reviewed_values=set(), distance_allowed=False,
+    )
+    assert not reviewed_extra_signature(
+        [(1, 281, "TEXT", "BS=13"), (2, 280, "TEXT", "CC=15"),
+         (3, 282, "TEXT", "WIP=14")],
+        reviewed_values=set(), distance_allowed=False,
+        reviewed_combinations={
+            tuple(tuple(x) for x in signature["extras"]) for signature in expected
+        },
+    )
+    for path in (ROOT / "data/generated/rules.db", fresh):
+        rules = RulesDatabase(path)
+        combos = rules.skill_reviewed_combination_semantics()
+        assert set(combos) == {"remdriver"}
+        result = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", path,
+        )
+        [row] = select_source_variants(result, "skills", [255])["items"]
+        assert (row["name"], row["applicationId"], row["occurrences"]) == (
+            "RemDriver", 255, 12,
+        )
+        assert row["status"] == "reviewed-combination-parameter"
+        assert row["extraSignatures"] == expected
+        assert row["reviewedExtra"] is None
+        assert row["reviewedCombinations"] == combos["remdriver"]
+        assert row["rawValues"] == []
+        assert result["catalogs"]["skills"]["summary"]["statuses"] == {
+            "family-only": 44, "reviewed-distance-parameter": 3,
+            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
+            "reviewed-extra-parameter": 4, "reviewed-combination-parameter": 1,
+            "unresolved-occurrence-parameter": 31,
+        }
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -445,7 +502,8 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 4, "unresolved-occurrence-parameter": 32,
+            "reviewed-extra-parameter": 4, "reviewed-combination-parameter": 1,
+            "unresolved-occurrence-parameter": 31,
         }
 
 
@@ -491,7 +549,8 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
             "reviewed-extra-parameter": 4,
-            "unresolved-occurrence-parameter": 32,
+            "reviewed-combination-parameter": 1,
+            "unresolved-occurrence-parameter": 31,
         }
 
 

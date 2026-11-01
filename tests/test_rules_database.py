@@ -1580,6 +1580,48 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     ]
 
 
+def test_remdriver_exact_ordered_remote_attribute_assignments(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.curated import REMDRIVER_COMBINATIONS
+
+    rules = current_rules_database
+    assert rules.skill_reviewed_combination_semantics()["remdriver"] == [
+        {
+            "extras": [
+                {"extra_id": entry["extraId"], "extra_type": entry["extraType"],
+                 "raw_value": entry["rawValue"]}
+                for entry in combination["extras"]
+            ],
+            "effects": combination["effects"],
+        }
+        for combination in REMDRIVER_COMBINATIONS
+    ]
+    assert "remdriver" not in rules.skill_reviewed_extra_semantics()
+    assert "remdriver" not in rules.skill_numeric_mod_semantics()
+    record = rules.composed_record("skill:remdriver")
+    assert record is not None
+    assert record["variant_semantics"]["occurrence_combinations"] == (
+        rules.skill_reviewed_combination_semantics()["remdriver"]
+    )
+    assert any(
+        item["source_id"] == "n5-core-v5.3-pdf" and item["page"] == 110
+        for item in record["citations"]
+    )
+    first, second, third = REMDRIVER_COMBINATIONS
+    assert [(e["attribute"], e["modifier"]) for e in first["effects"]] == [
+        ("BS", 1), ("CC", 5),
+    ]
+    assert [(e["attribute"], e["value"]) for e in second["effects"]] == [
+        ("CC", 15), ("BS", 13), ("WIP", 14),
+    ]
+    assert [(e["attribute"], e["value"]) for e in third["effects"]] == [
+        ("BS", 13), ("PH", 13), ("BTS", 6),
+    ]
+    assert all(e["recipient"] == "token-assigned-remote"
+               for c in REMDRIVER_COMBINATIONS for e in c["effects"])
+
+
 def test_gizmokit_source_skill_254_target_ph_is_owned_by_equipment(
     current_rules_database: RulesDatabase,
 ) -> None:

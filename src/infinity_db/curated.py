@@ -55,6 +55,39 @@ SOURCE_VARIANT_KINDS = frozenset({"attribute-replacement", "level", "named"})
 TRAINING_ORDER_TYPES = frozenset({"regular", "irregular"})
 
 
+# RemDriver's compound profile values belong to the assigned Remote, not the
+# Skill holder. Each complete, source-native ordered signature is certified.
+REMDRIVER_COMBINATION_SPECS = (
+    ((271, "+1 BS", "BS", 1, "mod"), (300, "+5 CC", "CC", 5, "mod")),
+    ((280, "CC=15", "CC", 15, "replace"),
+     (281, "BS=13", "BS", 13, "replace"),
+     (282, "WIP=14", "WIP", 14, "replace")),
+    ((281, "BS=13", "BS", 13, "replace"),
+     (52, "PH=13", "PH", 13, "replace"),
+     (384, "BTS=6", "BTS", 6, "replace")),
+)
+REMDRIVER_COMBINATIONS: list[dict[str, Any]] = [
+    {
+        "extras": [
+            {"extraId": extra_id, "extraType": "TEXT", "rawValue": raw}
+            for extra_id, raw, _attribute, _value, _operation in signature
+        ],
+        "effects": [
+            {
+                "kind": ("remdriver-recipient-attribute-mod"
+                         if operation == "mod"
+                         else "remdriver-recipient-attribute-replacement"),
+                "recipient": "token-assigned-remote",
+                "attribute": attribute,
+                ("modifier" if operation == "mod" else "value"): value,
+            }
+            for _extra_id, _raw, attribute, value, operation in signature
+        ],
+    }
+    for signature in REMDRIVER_COMBINATION_SPECS
+]
+
+
 # Full, ordered Army occurrence combinations; component review never implies approval.
 # A missing PS value means a program grant, while PS=N is an exact replacement.
 HACKING_COMBINATION_SPECS = {
@@ -947,7 +980,29 @@ def _validate_variant_semantics(
             and army_links[0].get("entity") == "equipment"
             else None
         )
-        if (
+        if army_links == [{"entity": "skill", "id": "remdriver"}]:
+            if (
+                inheritance != "family"
+                or not isinstance(combinations, list)
+                or combinations != REMDRIVER_COMBINATIONS
+                or any(
+                    not isinstance(entry, dict)
+                    or type(entry.get("extraId")) is not int
+                    for combination in combinations
+                    for entry in combination["extras"]
+                )
+                or any(
+                    not isinstance(effect, dict)
+                    or type(effect.get(
+                        "modifier" if effect.get("kind")
+                        == "remdriver-recipient-attribute-mod" else "value"
+                    )) is not int
+                    for combination in combinations
+                    for effect in combination["effects"]
+                )
+            ):
+                raise ValueError(f"{context}: invalid exact RemDriver combinations")
+        elif (
             inheritance != "family"
             or expected_device not in HACKING_COMBINATION_SPECS
             or not isinstance(combinations, list)

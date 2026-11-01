@@ -1434,6 +1434,80 @@ def test_khd_requires_exact_pinned_upgrade_semantics(
 
 
 @pytest.mark.parametrize(
+    ("group", "section", "index", "field", "wrong"), [
+        (0, "extras", 0, "extraId", 272),
+        (0, "extras", 0, "extraId", 271.0),
+        (0, "extras", 0, "rawValue", "+2 BS"),
+        (0, "extras", 0, "extraType", "DISTANCE"),
+        (1, "effects", 0, "recipient", "remdriver-user"),
+        (1, "effects", 0, "attribute", "BS"),
+        (1, "effects", 0, "value", 15.0),
+        (2, "effects", 2, "value", 7),
+    ],
+)
+def test_remdriver_exact_compound_contract_rejects_source_or_effect_drift(
+    tmp_path: Path, group: int, section: str, index: int,
+    field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"]
+                   if row["id"] == "skill:remdriver")
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "deployment-skill"
+    record = document["records"][0]
+    record.update({
+        "id": "skill:remdriver", "kind": "skill",
+        "facts": {"typeIds": ["deployment-skill"]},
+        "armyLinks": [{"entity": "skill", "id": "remdriver"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "remdriver.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    combos = record["variantSemantics"]["occurrenceCombinations"]
+    combos[group][section][index][field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid exact RemDriver combinations"):
+        load_curated_document(path)
+
+
+def test_remdriver_rejects_partial_or_reordered_compound(
+    tmp_path: Path,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"] if row["id"] == "skill:remdriver")
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "deployment-skill"
+    record = document["records"][0]
+    record.update({
+        "id": "skill:remdriver", "kind": "skill",
+        "facts": {"typeIds": ["deployment-skill"]},
+        "armyLinks": [{"entity": "skill", "id": "remdriver"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "remdriver.json"
+    baseline = deepcopy(record["variantSemantics"]["occurrenceCombinations"])
+    for mode in ("missing", "reorder", "extra"):
+        record["variantSemantics"]["occurrenceCombinations"] = deepcopy(baseline)
+        combos = record["variantSemantics"]["occurrenceCombinations"]
+        if mode == "missing":
+            combos[0]["extras"].pop()
+        elif mode == "reorder":
+            combos[1]["extras"].reverse()
+        else:
+            combos.append(deepcopy(combos[0]))
+        path.write_text(json.dumps(document), encoding="utf-8")
+        with pytest.raises(ValueError, match="invalid exact RemDriver combinations"):
+            load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("field", "wrong"), [
         ("extraId", 267),
         ("extraId", 268.0),

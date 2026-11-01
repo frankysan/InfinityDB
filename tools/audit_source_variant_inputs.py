@@ -59,7 +59,10 @@ def inventory_source_variants(
         if source_id in reviewed_extras["skills"]:
             raise ValueError(f"Conflicting Skill source override: {source_id}")
         reviewed_extras["skills"][source_id] = semantics
-    equipment_combinations = rules.equipment_reviewed_combination_semantics()
+    reviewed_combinations = {
+        "skills": rules.skill_reviewed_combination_semantics(),
+        "equipment": rules.equipment_reviewed_combination_semantics(),
+    }
     report: dict[str, Any] = {"catalogs": {}}
 
     application_uri = application_path.resolve().as_uri() + "?mode=ro"
@@ -140,10 +143,11 @@ def inventory_source_variants(
                     for semantics in (numeric, typed) if semantics is not None
                     for item in semantics["extra_values"]
                 }
+                combination_registry = reviewed_combinations[catalog]
                 combinations = (
-                    equipment_combinations.get(source_id)
-                    or (equipment_combinations.get(slug) if slug else None)
-                ) if catalog == "equipment" else None
+                    combination_registry.get(source_id)
+                    or (combination_registry.get(slug) if slug else None)
+                )
                 exact_combinations = {
                     tuple(
                         (entry["extra_id"], entry["extra_type"], entry["raw_value"])
@@ -178,6 +182,8 @@ def inventory_source_variants(
                 elif extra_types or raw_values:
                     if not unresolved and typed is not None:
                         status = "reviewed-extra-parameter"
+                    elif not unresolved and combinations is not None:
+                        status = "reviewed-combination-parameter"
                     elif not unresolved and numeric is not None:
                         status = "reviewed-numeric-parameter"
                     elif not unresolved and distance is not None:

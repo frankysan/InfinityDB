@@ -19,6 +19,7 @@ from typing import Any
 from infinity_db.curated import (
     GIZMOKIT_TARGET_PH_PARAMETERS,
     KILLER_HACKING_VARIANT,
+    REMDRIVER_COMBINATIONS,
     discover_curated_documents,
     load_curated_directory,
     reviewed_hacking_combinations,
@@ -102,6 +103,11 @@ GIZMOKIT_VARIANT = {
 GIZMOKIT_TARGET_PH_VARIANT = {
     **GIZMOKIT_VARIANT,
     "sourceCatalogParameters": GIZMOKIT_TARGET_PH_PARAMETERS,
+}
+REMDRIVER = ("n5-core-v5.3", "skill:remdriver")
+REMDRIVER_VARIANT = {
+    "inheritance": "family",
+    "occurrenceCombinations": REMDRIVER_COMBINATIONS,
 }
 IMPERSONATION = ("n5-core-v5.3", "skill:impersonation")
 IMPERSONATION_VARIANT = {
@@ -988,10 +994,18 @@ def _check_variant_semantics_delta(
     medikit: bool = False, gizmokit: bool = False, deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
     killer_hacking: bool = False, impersonation: bool = False,
-    gizmokit_target_ph: bool = False,
+    gizmokit_target_ph: bool = False, remdriver: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if remdriver and (
+        initial or medikit or gizmokit or gizmokit_target_ph or deactivator
+        or bangbomb or evo_trinity or killer_hacking or impersonation
+        or tinbot_firewall or tinbot_other or hacking_mods or hacking_srs
+        or hacking_firewall or hacking_combinations or hacking_trinity_access
+        or set(variants) != {REMDRIVER}
+    ):
+        raise ValueError("RemDriver refresh requires exactly Skill source 255")
     if gizmokit_target_ph and (
         initial or gizmokit or medikit or deactivator or bangbomb
         or evo_trinity or killer_hacking or impersonation or tinbot_firewall
@@ -1113,6 +1127,15 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == REMDRIVER:
+                        if not remdriver:
+                            raise ValueError("RemDriver requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != REMDRIVER_VARIANT
+                        ):
+                            raise ValueError("RemDriver refresh changed source-only semantics")
                     elif key == IMPERSONATION:
                         if not impersonation:
                             raise ValueError("Impersonation requires source-verified refresh")
@@ -1497,6 +1520,44 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_remdriver_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote three complete ordered RemDriver recipient attribute signatures."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["skills"]["items"] if row["id"] == 255
+    ]
+    expected = [
+        {"extras": [[271, "TEXT", "+1 BS"], [300, "TEXT", "+5 CC"]],
+         "reviewed": False, "count": 3},
+        {"extras": [[280, "TEXT", "CC=15"], [281, "TEXT", "BS=13"],
+                    [282, "TEXT", "WIP=14"]],
+         "reviewed": False, "count": 5},
+        {"extras": [[281, "TEXT", "BS=13"], [52, "TEXT", "PH=13"],
+                    [384, "TEXT", "BTS=6"]],
+         "reviewed": False, "count": 4},
+    ]
+    if (
+        len(rows) != 1 or rows[0]["name"] != "RemDriver"
+        or rows[0]["applicationId"] != 255
+        or rows[0]["occurrences"] != 12
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"] or rows[0]["extraSignatures"] != expected
+    ):
+        raise ValueError("RemDriver source signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={REMDRIVER[1]}, remdriver=True,
     )
 
 
@@ -2105,7 +2166,7 @@ def _refresh_metadata_v9_release(
     deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
     killer_hacking: bool = False, impersonation: bool = False,
-    gizmokit_target_ph: bool = False,
+    gizmokit_target_ph: bool = False, remdriver: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2145,7 +2206,10 @@ def _refresh_metadata_v9_release(
         for _, document in documents for row in document["records"]
         if variant_records is not None and row["id"] in variant_records
         and row.get("review", {}).get("status") == "reviewed"
-        and row.get("variantSemantics", {}).get("occurrenceParameters")
+        and (
+            row.get("variantSemantics", {}).get("occurrenceParameters")
+            or row.get("variantSemantics", {}).get("occurrenceCombinations")
+        )
     }
     for _, document in documents:
         for source in document["sources"]:
@@ -2199,6 +2263,7 @@ def _refresh_metadata_v9_release(
                 medikit=medikit,
                 gizmokit=gizmokit,
                 gizmokit_target_ph=gizmokit_target_ph,
+                remdriver=remdriver,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,

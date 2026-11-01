@@ -22960,7 +22960,115 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceCombinations": [
+                    {
+                        "extras": [
+                            {
+                                "extraId": 271,
+                                "extraType": "TEXT",
+                                "rawValue": "+1 BS"
+                            },
+                            {
+                                "extraId": 300,
+                                "extraType": "TEXT",
+                                "rawValue": "+5 CC"
+                            }
+                        ],
+                        "effects": [
+                            {
+                                "kind": "remdriver-recipient-attribute-mod",
+                                "recipient": "token-assigned-remote",
+                                "attribute": "BS",
+                                "modifier": 1
+                            },
+                            {
+                                "kind": "remdriver-recipient-attribute-mod",
+                                "recipient": "token-assigned-remote",
+                                "attribute": "CC",
+                                "modifier": 5
+                            }
+                        ]
+                    },
+                    {
+                        "extras": [
+                            {
+                                "extraId": 280,
+                                "extraType": "TEXT",
+                                "rawValue": "CC=15"
+                            },
+                            {
+                                "extraId": 281,
+                                "extraType": "TEXT",
+                                "rawValue": "BS=13"
+                            },
+                            {
+                                "extraId": 282,
+                                "extraType": "TEXT",
+                                "rawValue": "WIP=14"
+                            }
+                        ],
+                        "effects": [
+                            {
+                                "kind": "remdriver-recipient-attribute-replacement",
+                                "recipient": "token-assigned-remote",
+                                "attribute": "CC",
+                                "value": 15
+                            },
+                            {
+                                "kind": "remdriver-recipient-attribute-replacement",
+                                "recipient": "token-assigned-remote",
+                                "attribute": "BS",
+                                "value": 13
+                            },
+                            {
+                                "kind": "remdriver-recipient-attribute-replacement",
+                                "recipient": "token-assigned-remote",
+                                "attribute": "WIP",
+                                "value": 14
+                            }
+                        ]
+                    },
+                    {
+                        "extras": [
+                            {
+                                "extraId": 281,
+                                "extraType": "TEXT",
+                                "rawValue": "BS=13"
+                            },
+                            {
+                                "extraId": 52,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=13"
+                            },
+                            {
+                                "extraId": 384,
+                                "extraType": "TEXT",
+                                "rawValue": "BTS=6"
+                            }
+                        ],
+                        "effects": [
+                            {
+                                "kind": "remdriver-recipient-attribute-replacement",
+                                "recipient": "token-assigned-remote",
+                                "attribute": "BS",
+                                "value": 13
+                            },
+                            {
+                                "kind": "remdriver-recipient-attribute-replacement",
+                                "recipient": "token-assigned-remote",
+                                "attribute": "PH",
+                                "value": 13
+                            },
+                            {
+                                "kind": "remdriver-recipient-attribute-replacement",
+                                "recipient": "token-assigned-remote",
+                                "attribute": "BTS",
+                                "value": 6
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

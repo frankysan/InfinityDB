@@ -1689,7 +1689,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **32 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **31 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1697,6 +1697,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Deactivator Burst/ReRoll, Killer Hacking Device source-145 upgrades,
       Impersonation source-249 IMP-2 deployment restriction,
       Skill-listed GizmoKit source-254 target PH replacements,
+      RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
@@ -2153,7 +2154,23 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         guard source counts, scope, schema and prior effects.
         No duplicate Skill rule, roll resolver, or Unit-use
         index is published. Current baseline:
-        **32 Skill / 1 Equipment**.
+        Baseline at that point: **32 Skill / 1 Equipment**.
+      - [x] **Data processing:** Certify all three ordered,
+        multi-extra RemDriver Skill source-255 signatures
+        (12 direct occurrences: 3, 5 and 4). N5.3 p. 110
+        assigns the owner's bracketed MODs/values to the
+        Remote carrying the RemDriver Token, not to the
+        owner. The source bundles are `(+1 BS, +5 CC)`,
+        `(CC=15, BS=13, WIP=14)`, and
+        `(BS=13, PH=13, BTS=6)`. Encode scoped recipient
+        Attribute modifiers/replacements only as **whole,
+        ordered** reviewed Skill combinations, never as
+        independent extras; reject partial/reordered or
+        unobserved bundles. Pinned raw source counts and
+        tracked/fresh rules export comparisons, a guarded
+        matched-v9 metadata refresh, and regression tests
+        prevent inferred Unit usage or token assignment.
+        Current baseline: **31 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.
