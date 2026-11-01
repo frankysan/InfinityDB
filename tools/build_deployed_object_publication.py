@@ -109,6 +109,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote source-verified MediKit ranged +1B in a matched v9 pair",
     )
     migration.add_argument(
+        "--refresh-deactivator-v9", action="store_true",
+        help="Promote exact Deactivator Burst and ReRoll source extras in a matched v9 pair",
+    )
+    migration.add_argument(
         "--refresh-gizmokit-v9", action="store_true",
         help="Promote source-verified GizmoKit ranged +1B in a matched v9 pair",
     )
@@ -165,6 +169,7 @@ def main() -> int:
         or args.refresh_bangbomb_v9
         or args.refresh_medikit_v9
         or args.refresh_gizmokit_v9
+        or args.refresh_deactivator_v9
         or args.refresh_evo_trinity_v9
         or args.refresh_ecm_source_variants_v9
         or args.refresh_tinbot_other_v9
@@ -181,6 +186,7 @@ def main() -> int:
             promote_restrictions_v9,
             refresh_bangbomb_v9_release,
             refresh_core_pdf_pin_v9_release,
+            refresh_deactivator_v9_release,
             refresh_ecm_source_variants_v9_release,
             refresh_evo_trinity_v9_release,
             refresh_gizmokit_v9_release,
@@ -213,6 +219,11 @@ def main() -> int:
         if args.refresh_medikit_v9:
             backup = refresh_medikit_v9_release()
             print("Refreshed exact ranged MediKit Burst upgrade in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_deactivator_v9:
+            backup = refresh_deactivator_v9_release()
+            print("Refreshed exact Deactivator Burst and ReRoll extras in matched v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_gizmokit_v9:

@@ -300,6 +300,39 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid GizmoKit reviewed source extra")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "deactivator"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": 8, "extraType": "TEXT", "rawValue": "+1B",
+                "effect": {
+                    "kind": "equipment-burst-mod",
+                    "appliesTo": "deactivator-wip-attack",
+                    "modifier": 1,
+                },
+            },
+            {
+                "extraId": 277, "extraType": "TEXT", "rawValue": "ReRoll",
+                "effect": {
+                    "kind": "reroll-one-die",
+                    "appliesTo": "deactivator-wip-roll",
+                },
+            },
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != len(expected)
+            or any(
+                not isinstance(value, dict) or type(value.get("extraId")) is not int
+                for value in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid Deactivator reviewed source extras")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "equipment", "id": "albedo"}
     ]:
         values = parameter.get("extraValues")

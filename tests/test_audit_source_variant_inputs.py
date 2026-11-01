@@ -143,8 +143,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
         "statuses": {
             "family-only": 19,
             "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 11,
-            "unresolved-occurrence-parameter": 3,
+            "reviewed-extra-parameter": 12,
+            "unresolved-occurrence-parameter": 2,
         },
         "extraTypes": {"TEXT": 14},
     }
@@ -557,7 +557,7 @@ def test_evo_trinity_grant_and_sr_modifier_match_tracked_and_fresh_rules(
         }
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 11, "unresolved-occurrence-parameter": 3,
+            "reviewed-extra-parameter": 12, "unresolved-occurrence-parameter": 2,
         }
 
 
@@ -609,7 +609,7 @@ def test_albedo_183_modifiers_match_pinned_source_and_both_rules_exports(
         }
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 11, "unresolved-occurrence-parameter": 3,
+            "reviewed-extra-parameter": 12, "unresolved-occurrence-parameter": 2,
         }
 
 
@@ -640,7 +640,7 @@ def test_medikit_source_106_burst_matches_tracked_and_fresh_rules(
         )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 11, "unresolved-occurrence-parameter": 3,
+            "reviewed-extra-parameter": 12, "unresolved-occurrence-parameter": 2,
         }
 
 
@@ -671,7 +671,40 @@ def test_gizmokit_source_237_burst_matches_tracked_and_fresh_rules(
         )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 11, "unresolved-occurrence-parameter": 3,
+            "reviewed-extra-parameter": 12, "unresolved-occurrence-parameter": 2,
+        }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_deactivator_source_238_variants_match_tracked_and_fresh_rules(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = [
+        {"extras": [[8, "TEXT", "+1B"]], "reviewed": True, "count": 1},
+        {"extras": [[277, "TEXT", "ReRoll"]], "reviewed": True, "count": 9},
+    ]
+    for rules_path in (ROOT / "data/generated/rules.db", fresh):
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db",
+            rules_path,
+        )
+        [row] = select_source_variants(report, "equipment", [238])["items"]
+        assert (row["name"], row["applicationId"], row["occurrences"]) == (
+            "Deactivator", 238, 416,
+        )
+        assert row["status"] == "reviewed-extra-parameter"
+        assert row["extraSignatures"] == expected
+        assert row["reviewedCombinations"] is None
+        assert row["rawValues"] == []
+        assert row["reviewedExtra"] == (
+            RulesDatabase(rules_path).equipment_reviewed_extra_semantics()["deactivator"]
+        )
+        assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
+            "family-only": 19, "reviewed-exact-source": 1,
+            "reviewed-extra-parameter": 12, "unresolved-occurrence-parameter": 2,
         }
 
 
@@ -700,7 +733,7 @@ def test_bangbomb_source_246_matches_tracked_and_fresh_rules(tmp_path: Path) -> 
         )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 11, "unresolved-occurrence-parameter": 3,
+            "reviewed-extra-parameter": 12, "unresolved-occurrence-parameter": 2,
         }
 
 
@@ -808,7 +841,7 @@ def test_tinbot_discover_ecm_extras_match_tracked_and_fresh_rules(tmp_path: Path
             assert row["extraSignatures"] == signatures
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 11, "unresolved-occurrence-parameter": 3,
+            "reviewed-extra-parameter": 12, "unresolved-occurrence-parameter": 2,
         }
 
 
@@ -927,7 +960,7 @@ def test_hacking_device_program_grants_preserve_unreviewed_overrides(
             )
         assert report["catalogs"]["equipment"]["summary"]["statuses"] == {
             "family-only": 19, "reviewed-exact-source": 1,
-            "reviewed-extra-parameter": 11, "unresolved-occurrence-parameter": 3,
+            "reviewed-extra-parameter": 12, "unresolved-occurrence-parameter": 2,
         }
 
 

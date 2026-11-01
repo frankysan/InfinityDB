@@ -1143,6 +1143,40 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**Reviewed Deactivator source extras (2026-11-01):**
+English N5.3 p. 121 defines `[[equipment:deactivator]]`
+as a Short Skill (Attack) using a Normal WIP Roll, and gives
+the WIP-based BS Weapon profile **Burst 1**. Targets must
+be deployed enemy Weapons/Equipment with the Deployable
+Trait inside LoF or ZoC, never CAMO Markers. Only
+Range MODs apply; a success removes the deployed item
+but cannot prevent its trigger in the same Order.
+The N5.3 p. 68 general Weaponry rule defines a
+parenthesized `ReRoll` as a reroll of **one die**
+only when using the named Skill, Weapon or Equipment.
+
+Pinned Army Equipment source `238` has 416 direct occurrences:
+exactly one standalone extra `8/TEXT:+1B` and nine
+standalone extra `277/TEXT:ReRoll`. The family
+record stores two independent, exact source parameters:
+`equipment-burst-mod` with `modifier: 1` and
+`appliesTo: "deactivator-wip-attack"`; and
+`reroll-one-die` with
+`appliesTo: "deactivator-wip-roll"`.
+These do not grant generic rerolls, alter target
+eligibility or Range-only MODs, guarantee deactivation,
+combine into unobserved signatures, or reinterpret
+the separate `[[skill:activate-disco-ball]]` action.
+
+The guarded, source-count-pinned v9 migration permits
+only this existing record's family metadata addition
+and its matched rules/publication fingerprints; it
+rejects unrelated row/schema changes and retains
+ignored recovery artifacts. Exact raw signatures are
+checked against both tracked and fresh rules exports.
+The remaining unresolved source baseline is
+**34 Skill / 2 Equipment**; no Unit-use index is published.
+
 **Reviewed EVO Trinity Upgrade (2026-11-01):**
 The pinned Equipment source `182` has 40
 direct occurrences, exactly two carrying

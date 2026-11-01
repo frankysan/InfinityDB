@@ -1634,7 +1634,7 @@ def test_tinbot_firewall_source_mods_are_equipment_only(
     assert set(rules.equipment_reviewed_extra_semantics()) == {
         169, 239, 241, 244, 247,
         "albedo", "bangbomb", "evo-hacking-device", "hacking-device",
-        "hacking-device-plus", "medikit", "gizmokit",
+        "hacking-device-plus", "medikit", "gizmokit", "deactivator",
     }
     assert 169 not in rules.skill_reviewed_extra_semantics()
     assert 169 not in rules.skill_numeric_mod_semantics()
@@ -1820,6 +1820,41 @@ def test_gizmokit_reviewed_burst_is_ranged_only(
                for c in record["citations"])
     assert any("in Silhouette contact" in text for text in record["facts"]["effects"])
     assert any("one Wound" in text for text in record["facts"]["effects"])
+
+
+def test_deactivator_source_burst_and_reroll_are_independent(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    extra = rules.equipment_reviewed_extra_semantics()["deactivator"]
+    assert extra == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [
+            {
+                "extra_id": 8, "extra_type": "TEXT", "raw_value": "+1B",
+                "effect": {
+                    "kind": "equipment-burst-mod",
+                    "applies_to": "deactivator-wip-attack",
+                    "modifier": 1,
+                },
+            },
+            {
+                "extra_id": 277, "extra_type": "TEXT", "raw_value": "ReRoll",
+                "effect": {
+                    "kind": "reroll-one-die",
+                    "applies_to": "deactivator-wip-roll",
+                },
+            },
+        ],
+    }
+    record = rules.composed_record("equipment:deactivator")
+    assert record is not None
+    assert record["variant_semantics"]["inheritance"] == "family"
+    assert extra in record["variant_semantics"]["occurrence_parameters"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 121
+               for c in record["citations"])
+    assert any("current Order" in text for text in record["facts"]["restrictions"])
+    assert any("Range MODs only" in text for text in record["facts"]["restrictions"])
 
 
 def test_bangbomb_reviewed_extra_excludes_template_weapons(

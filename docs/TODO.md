@@ -1690,11 +1690,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and **3 Equipment** source IDs. The tracked
+      occurrence parameters and **2 Equipment** source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
       standalone ECM Guided/Hacker, Albedo, Bangbomb, MediKit/GizmoKit ranged Burst,
-      EVO Trinity grant/SR modifier, and complete source-100
+      Deactivator Burst/ReRoll, EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
       and independently checks a fresh curated rules export. Revalidate
@@ -2089,7 +2089,23 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         metadata, preserving unrelated database/publication content
         and ignored recovery copies. Fresh/tracked export and negative
         regression tests protect the scope; no Unit-use index is
-        published. Current baseline: **34 Skill / 3 Equipment**.
+        published. Baseline at that point: **34 Skill / 3 Equipment**.
+      - [x] **Data processing:** Verify all 416 direct pinned Deactivator
+        Equipment-238 source occurrences. One standalone extra 8
+        (`TEXT:+1B`) increases Burst of its WIP-based Deactivator
+        Attack, and nine standalone extra 277 (`TEXT:ReRoll`)
+        permit rerolling one die of the Deactivator WIP Roll.
+        N5.3 pp. 68 and 121 establish the parenthesized ReRoll
+        scope, Attack profile (B 1), Range-only MODs, eligible
+        enemy Deployable targets, and current-Order trigger
+        restriction. Do not infer combination signatures or
+        modify Activate Disco Ball's separate action.
+        The exact two effects are source-validated, guarded by a
+        matched-v9 metadata-only refresh, synchronized with the
+        deployed-object publication, and tested against pinned
+        source/tracked/fresh rules data. No Unit-use index or
+        roll resolver is published. Current baseline:
+        **34 Skill / 2 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

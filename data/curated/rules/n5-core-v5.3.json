@@ -15859,7 +15859,34 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 8,
+                                "extraType": "TEXT",
+                                "rawValue": "+1B",
+                                "effect": {
+                                    "kind": "equipment-burst-mod",
+                                    "appliesTo": "deactivator-wip-attack",
+                                    "modifier": 1
+                                }
+                            },
+                            {
+                                "extraId": 277,
+                                "extraType": "TEXT",
+                                "rawValue": "ReRoll",
+                                "effect": {
+                                    "kind": "reroll-one-die",
+                                    "appliesTo": "deactivator-wip-roll"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

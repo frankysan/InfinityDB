@@ -1457,6 +1457,58 @@ def test_gizmokit_requires_exact_ranged_burst_extra(
 
 
 @pytest.mark.parametrize(
+    ("index", "field", "wrong"), [
+        (0, "extraId", 9),
+        (0, "extraId", 8.0),
+        (0, "extraType", "DISTANCE"),
+        (0, "rawValue", "+1SD"),
+        (0, "effect", {
+            "kind": "equipment-burst-mod", "appliesTo": "all-wip-rolls",
+            "modifier": 1,
+        }),
+        (0, "effect", {
+            "kind": "equipment-burst-mod", "appliesTo": "deactivator-wip-attack",
+            "modifier": 2,
+        }),
+        (1, "extraId", 8),
+        (1, "extraId", 277.0),
+        (1, "extraType", "DISTANCE"),
+        (1, "rawValue", "ReRoll WIP"),
+        (1, "effect", {
+            "kind": "reroll-one-die", "appliesTo": "any-equipment-roll",
+        }),
+        (1, "effect", {
+            "kind": "equipment-burst-mod", "appliesTo": "deactivator-wip-roll",
+        }),
+    ],
+)
+def test_deactivator_requires_two_distinct_reviewed_extras(
+    tmp_path: Path, index: int, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"]
+                   if row["id"] == "equipment:deactivator")
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": "equipment:deactivator", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": "deactivator"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "deactivator.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    values = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"]
+    values[index][field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Deactivator reviewed source extras"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("field", "wrong"), [
         ("extraId", 311),
         ("extraId", 310.0),
