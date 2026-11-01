@@ -323,6 +323,21 @@ terminal status, subprocess exit code, and final report. For the recent
 Windows suite (~8–10 minutes), allow **1,800 s** for full pytest and
 **3,600 s** for a full validation profile (server job maximum: **7,200 s**).
 
+**2026-11-02 schema-preserving staging regression (VD/VR-0006):**
+`tests/test_legacy_staging_schema_guards.py` reconstructs pending
+deployed-object citation, terrain/scenery, and Hacking Device citation
+inputs under disposable pytest directories. All three staging paths
+pass: each preserves schema-v9 and the 14 reviewed Restrictions,
+produces a matching 17-object publication fingerprint, and leaves
+the active checkout unchanged. Focused tests: **3 passed**.
+The eight-worker `worksteal` cumulative suite on `dev/v1.0.0`
+based on `6cc2f1e`, including the new working-tree tests, passed
+**4,701 tests, 25 skipped, 0 failed** in **552.19 s** (async job
+`c21786aaa9504047bf74437904e21d5e`; ignored report
+`local/validation-vr0006-full-20261102.txt`). Ruff, Pyright,
+docs and diff checks also passed. This retires the local VD/VR-0006
+obligations, not hosted CI or release-candidate acceptance.
+
 ## Source-test tail profiling and browser isolation
 
 The default pytest configuration reports the 20 slowest setup/call/teardown

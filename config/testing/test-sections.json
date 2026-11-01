@@ -81,6 +81,7 @@
         "test_identities",
         "test_identity_database",
         "test_interim_reference_consistency",
+        "test_legacy_staging_schema_guards",
         "test_logical_unit_identity",
         "test_maintained_text",
         "test_martial_arts_variant_provenance",
