@@ -1690,10 +1690,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
     - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
-      occurrence parameters and **5 Equipment** source IDs. The tracked
+      occurrence parameters and **4 Equipment** source IDs. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
-      standalone ECM Guided/Hacker, Bangbomb, MediKit ranged Burst,
+      standalone ECM Guided/Hacker, Albedo, Bangbomb, MediKit ranged Burst,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
@@ -2066,6 +2066,18 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         regressions cover both tracked and fresh rules exports; this is
         parameter reconciliation, not a published Unit-use index. See
         [source review](n5-source-history.md#reviewed-surprise-attack-occurrence-modifiers).
+      - [x] **Data processing:** Reconcile Albedo source Equipment `183`
+        against N5.3 p. 119 and 142 exact pinned Army occurrences.
+        Its sole extras are `TEXT: -3` (55 rows) and `TEXT: -6`
+        (87 rows). The closed `enemy-albedo-attribute-mod` effect
+        applies only to enemy MSV/Marksmanship users declaring a
+        LoF-requiring BS Attack or Discover against the bearer,
+        not CC Attacks. The guarded v9 metadata refresh changed only
+        the reviewed family variant and synchronized the
+        deployed-object publication, retaining recovery copies under
+        ignored `local/`. Raw-source and fresh/tracked export
+        regressions preserve exact IDs and scope; no Unit-use index
+        is published. Remaining baseline: **34 Skill / 4 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

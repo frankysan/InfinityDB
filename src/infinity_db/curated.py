@@ -278,6 +278,36 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid MediKit reviewed source extra")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "equipment", "id": "albedo"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [
+            {
+                "extraId": extra_id,
+                "extraType": "TEXT",
+                "rawValue": str(modifier),
+                "effect": {
+                    "kind": "enemy-albedo-attribute-mod",
+                    "appliesTo": (
+                        "msv-or-marksmanship-lof-bs-attack-or-discover-against-bearer"
+                    ),
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((6, -3), (7, -6))
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict) or type(entry.get("extraId")) is not int
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid Albedo reviewed source extras")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "equipment", "id": "bangbomb"}
     ]:
         values = parameter.get("extraValues")

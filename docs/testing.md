@@ -797,6 +797,24 @@ retained under ignored `local/`, with
 Source audit counts remain **34 unresolved
 Skill / 5 Equipment**.
 
+**Albedo source occurrence reconciliation (2026-11-01):**
+`tests/test_curated.py` rejects changed source
+IDs, extra types, spellings, effect targets or
+modifier signs for Albedo Equipment `183`.
+`tests/test_audit_source_variant_inputs.py`
+asserts 142 pinned direct rows: `TEXT:-3`
+(extra 6, 55 occurrences) and `TEXT:-6`
+(extra 7, 87 occurrences). It compares the
+tracked v9 rules database with a fresh export
+and rejects unreviewed combinations. The
+existing append-only v9 metadata refresh
+`--refresh-variant-semantics-v9 equipment:albedo`
+was run once, with a retained matched pair
+under ignored `local/`. The paired publication
+passes `--check`. Current unresolved source
+counts are **34 Skill / 4 Equipment**; the
+cross-Army usage index remains unimplemented.
+
 ## Non-Skill Army source classification and Unit presentation
 
 `tests/test_non_skill_army_presentation.py` is a maintained, hermetic

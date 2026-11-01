@@ -1133,6 +1133,22 @@ fail-closed. The resulting reviewed mapping is
 source-specific; it never makes all Dodge or PH
 Rolls receive the bonus.
 
+Albedo Equipment source `183` accepts only
+extra `6` (`TEXT:-3`) and extra `7`
+(`TEXT:-6`) as exact `reviewed-extra`
+values. Their `enemy-albedo-attribute-mod`
+effects use the single closed applicability
+`msv-or-marksmanship-lof-bs-attack-or-discover-against-bearer`.
+N5.3 p. 119 limits the negative Attribute
+MOD to enemy Multispectral Visor or
+Marksmanship users declaring a LoF-requiring
+BS Attack or Discover against the bearer;
+it excludes CC Attacks. The canonical Albedo
+family facts and counter-interaction links
+remain unchanged. Do not apply the MOD to
+every attacker, generic rolls, or attacks
+without the source conditions.
+
 Standalone ECM source variants have separate exact
 numeric Army source links, despite sharing application
 Equipment `239`. `equipment:ecm-guided` represents

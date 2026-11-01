@@ -1259,6 +1259,29 @@ baseline remains **34 Skill / 5 Equipment**:
 the correction adds semantics to already-reviewed
 source signatures, not new source coverage.
 
+**Reviewed Albedo occurrence modifiers (2026-11-01):** The
+pinned Army source Equipment `183` has 142 direct
+occurrences: 55 with exact extra `6` (`TEXT: -3`) and
+87 with extra `7` (`TEXT: -6`); there are no multi-extra
+signatures. English N5.3 p. 119 restricts the printed
+negative Attribute MOD to enemies using Multispectral
+Visor or Marksmanship who declare LoF-requiring BS Attacks
+or Discover against the Albedo bearer;
+it does not apply to CC Attacks. The family record
+`equipment:albedo` now retains both values as exact
+`reviewed-extra` entries of kind
+`enemy-albedo-attribute-mod`, with
+`appliesTo:
+"msv-or-marksmanship-lof-bs-attack-or-discover-against-bearer"`.
+The closed curated validator refuses different scopes, types,
+signs, IDs or values; pinned-raw tests compare both
+the tracked and freshly exported rules databases. A guarded
+append-only v9 metadata refresh synchronized the rules database
+and deployed-object publication, retaining a previous matched
+pair under ignored `local/`. No Unit usage index or
+attack legality evaluation is inferred. This reduces unresolved
+source IDs to **34 Skill / 4 Equipment**.
+
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
 application/raw databases. The tracked artifact includes reviewed
@@ -1266,7 +1289,8 @@ Mimetism, Berserk, Dodge, Surprise Attack, Super-Jump, Jump,
 Climb, TinBot variants, Hacking Device single-extra semantics
 and exact reviewed multi-extra combinations,
 plus source-verified Bangbomb Dodge, ECM Guided/Hacker,
-MediKit ranged Burst, and EVO Trinity access/SR semantics.
+MediKit ranged Burst, EVO Trinity access/SR, and reviewed
+Albedo Attribute modifiers.
 This baseline contains **96 Skill** source identities across
 **33,153 direct rows** and **34 Equipment** source identities across
 **5,427 direct rows**:
@@ -1279,11 +1303,11 @@ This baseline contains **96 Skill** source identities across
   (Dodge `40` and Super-Jump `74`); and **34** IDs with
   unresolved occurrence parameters.
 - Equipment: 1 reviewed exact-source ID without occurrence extras;
-  19 family-only IDs; 9 reviewed extra-parameter sources
+  19 family-only IDs; 10 reviewed extra-parameter sources
   (TinBot Firewall `169`, Discover `244`, ECM Guided `247`,
-  Bangbomb `246`, Hacking Device `100`, ECM Guided `239`,
-  ECM Hacker `241`, MediKit `106`, and EVO Hacking
-  Device `182`); and **5** IDs with
+  Albedo `183`, Bangbomb `246`, Hacking Device `100`,
+  ECM Guided `239`, ECM Hacker `241`, MediKit `106`, and
+  EVO Hacking Device `182`); and **4** IDs with
   unresolved occurrence parameters. Six currently
   published Equipment source IDs have reviewed exact-source
   named variants, of which Repeater `248` has no occurrence extras.

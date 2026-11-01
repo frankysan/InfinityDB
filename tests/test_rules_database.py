@@ -1633,7 +1633,7 @@ def test_tinbot_firewall_source_mods_are_equipment_only(
     }
     assert set(rules.equipment_reviewed_extra_semantics()) == {
         169, 239, 241, 244, 247,
-        "bangbomb", "evo-hacking-device", "hacking-device",
+        "albedo", "bangbomb", "evo-hacking-device", "hacking-device",
         "hacking-device-plus", "medikit",
     }
     assert 169 not in rules.skill_reviewed_extra_semantics()

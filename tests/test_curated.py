@@ -1865,6 +1865,50 @@ def test_tinbot_other_extras_require_exact_source_and_scope(
         validate()
 
 
+@pytest.mark.parametrize(
+    ("index", "mutation"),
+    [
+        (0, {"extraId": 7}),
+        (0, {"extraId": 6.0}),
+        (0, {"extraType": "DISTANCE"}),
+        (0, {"rawValue": "+3"}),
+        (1, {"effect": {
+            "kind": "enemy-albedo-attribute-mod",
+            "appliesTo": "all-enemy-rolls", "modifier": -6,
+        }}),
+        (1, {"effect": {
+            "kind": "enemy-albedo-attribute-mod",
+            "appliesTo": "msv-or-marksmanship-lof-bs-attack-or-discover-against-bearer",
+            "modifier": 3,
+        }}),
+    ],
+)
+def test_albedo_requires_exact_enemy_attribute_mods(
+    tmp_path: Path, index: int, mutation: dict,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    albedo = next(row for row in source["records"] if row["id"] == "equipment:albedo")
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": "equipment:albedo", "kind": "equipment",
+        "facts": {}, "armyLinks": [{"entity": "equipment", "id": "albedo"}],
+        "variantSemantics": deepcopy(albedo["variantSemantics"]),
+    })
+    path = tmp_path / "albedo.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    record["variantSemantics"]["occurrenceParameters"][0]["extraValues"][index].update(
+        mutation
+    )
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Albedo reviewed source extras"):
+        load_curated_document(path)
+
+
 def test_tinbot_firewall_requires_exact_enemy_comms_mods(tmp_path: Path) -> None:
     document = valid_document()
     record = document["records"][0]
