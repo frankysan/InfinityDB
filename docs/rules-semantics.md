@@ -2259,6 +2259,95 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Hacking_Device>
 - PDF: Infinity N5 V5.3, printed pages 54 and 58-62
 
+### RS-CM-HACK-001A — Upgrade Program access and modifiers are separate questions
+
+**Classification:** cross-edition primary-source review; named program
+access is supported by Spanish N5.3 text and Army examples,
+while each exact source signature still requires guarded curation.
+
+**Source comparison (2026-11-01):**
+
+- **English N5 v1, v1.1, v5.1, v5.2, v5.3, and English wiki:** the
+  Hacker rule distinguishes the Hacking Device's granted program set from
+  Upgrade Programs that may be assigned to a Hacker. The Upgrade heading
+  describes customized software and its location on the Unit Profile,
+  but never explicitly states how a modifier-bearing named Upgrade
+  interacts with baseline program access. N5.3 p. 58 is authoritative
+  for the **baseline** programs; an Upgrade is not added to that chart.
+- **N4 (original official English rulebook pp. 59-60 and N4 2.1):**
+  substantially the same wording. The 2024 N4 wiki archive has the
+  same conceptual split. N4 FAQ v1.1.1 has no answer defining Upgrade
+  Program access or a modifier-bearing Upgrade.
+- **Spanish N4 and N5.3 official wording:** substantially clearer
+  than the English versions. Both describe Upgrade Programs as
+  programs **unavailable through standard Hacking Devices**
+  **or complementing those devices in some way**. This appears
+  in the pinned Spanish N5.3 PDF, p. 54, the current
+  Spanish official wiki, and Spanish N4 p. 59.
+  It is current-edition textual evidence for both adding
+  program access and enhancing an existing program.
+- **N3 (official English rulebook pp. 159-161):** named Upgrade
+  Hacking Programs are presented as their own program category
+  (Cybermask, Sucker Punch, White Noise, etc.), and the Hacking
+  Device Plus equipment explicitly **allows use** of named Upgrade
+  Programs. This is stronger historical evidence that a named
+  Upgrade can provide a *new executable Program*, rather than only
+  modifying an existing one. N3's Device families and program set
+  differ from N5: do not import N3 program lists or values.
+- **N5 FAQ v0.0/v0.1 and the current official wiki:** no specific
+  clarification was found describing whether each named
+  `UPGRADE: Program (B/PS/SD/SR)` both grants access and applies
+  the indicated program-specific modifier.
+
+**Accepted semantic distinction:** A named program Upgrade can
+supply access to a program absent from a Device's baseline *and*
+change that program's characteristics. EVO source `182`,
+`UPGRADE: Trinity (SR-2)`, has been reviewed and explicitly
+contains both `grantsProgram: true` and its target Saving Roll
+modifier. A program already in the Device's baseline instead
+needs its modifier represented without duplicating access.
+This distinction is **explicit in the Spanish N5.3 text**,
+though neither language specifies a universal machine-readable
+grammar for each `UPGRADE: Program (modifier)` source string.
+The [publisher's March 2025 Army update](https://infinityuniverse.com/en/news/army-update-march-2025)
+also moves Nourkias to a standard Hacking Device with a
+Trinity (PS=5) Upgrade despite Trinity being absent from
+the standard device's baseline chart.
+
+**Known remaining mapping gap:** Ordinary Hacking Device source
+`100` lacks baseline Trinity, but its reviewed single extras
+`290` (Trinity +1B), `378` (Trinity +1SD), `339`
+(Trinity SR-1), and `352` (Trinity SR-2) currently
+carry only program-specific modifiers. Hacking Device Plus
+source `101` likewise lacks Trinity, but extra `378`
+(+1SD) and `339` (SR-1) currently carry only modifiers.
+The two exact reviewed compound signatures using Trinity
+`PS=5` (extra `343`, on both device families) also
+represent the PS replacement without an explicit grant.
+Their source identities and modifier arithmetic are already
+reviewed; **access is under-modeled**, not source-invented.
+Review the actual owning occurrences and full signatures
+before a guarded, append-only correction. The unqualified
+Charontid `UPGRADE: SR-1` has no named program and remains
+unresolved. Likewise, `UPGRADE: Firewall` names defensive
+equipment semantics, not a Hacking Program, so generic
+`UPGRADE:` prefix parsing must never imply a program grant.
+
+**Sources:** N5.3 English pp. 54, 58; N5 English v5.1/v5.2
+p. 54; N3 English pp. 159-161 (historical);
+[N4 original rules](https://downloads.corvusbelli.com/infinity/rules/infinity-rules-en.pdf),
+pp. 59-60;
+[Spanish N4 rules](https://downloads.corvusbelli.com/infinity/rules/infinity-rules-es.pdf),
+p. 59;
+[Spanish N5.3 wiki](https://infinitythewiki.com/es/Combate_Cuantr%C3%B3nico_(Hackeo)),
+and pinned `data/pdf/rules/esp-n5-update-5-3.pdf`, p. 54;
+[N4 FAQ v1.1.1](https://downloads.corvusbelli.com/infinity/faq/n4-faq-en-v1-1-1.pdf);
+[Hacker](https://infinitythewiki.com/Hacker);
+[Quantronic Combat](https://infinitythewiki.com/Quantronic_Combat_(Hacking));
+[Hacking Device](https://infinitythewiki.com/Hacking_Device).
+See `docs/data-model.md` for the current exact-source variant
+representation and `docs/TODO.md` for the bounded correction.
+
 ### RS-CM-HACK-002 — Hacking Area is a derived runtime relationship graph
 
 **Classification:** source-native relationship semantics.

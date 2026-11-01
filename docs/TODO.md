@@ -2017,15 +2017,57 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         tracked and fresh rules exports. Equipment
         unresolved source IDs fall from 6 to **5**
         (34 Skill IDs unchanged).
-      - [ ] **Data processing:** Independently review whether
-        previously typed program-specific modifiers
-        (particularly Trinity on Hacking Device/Plus)
-        also need an explicit program-access grant when
-        the modified program is absent from that
-        Device's N5.3 p. 58 baseline. Do not alter
-        existing device grants/modifiers by extrapolating
-        the EVO source-182 decision; audit exact
-        source signatures and owner contexts first.
+      - [x] **Data processing:** Cross-check named Hacking
+        Upgrade access in English and Spanish N5.3,
+        N5.1/N5.2, N4 and historical N3 sources,
+        the pinned N5 FAQs and Corvus Belli's
+        March/October 2025 Army change logs.
+        Official **Spanish N5.3** p. 54 explicitly
+        defines Upgrades as programs unavailable to
+        standard devices **or** complementing them;
+        the official Spanish N4 text agrees.
+        The March 2025 publisher update specifically
+        assigns Trinity (PS=5) to a standard
+        Hacking Device on Nourkias, despite Trinity
+        not belonging to its baseline chart.
+        Record the source comparison, boundaries
+        and affected signatures in
+        [data-model.md](data-model.md). Research
+        confirms that a named nonbaseline Program
+        Upgrade can grant access and also carry a
+        modifier; do not infer that unrelated
+        `UPGRADE: Firewall` or unnamed `SR-1`
+        is a named program grant.
+      - [ ] **Data processing:** Correct the **eight
+        exact reviewed Trinity Upgrade signatures
+        (19 direct Army occurrences)** on ordinary
+        Hacking Device (`100`) and Device Plus
+        (`101`) to represent **Trinity access**
+        as well as existing Burst/SR/Special Die
+        or PS=5 semantics. Six standalone source/
+        extra signatures: `100` extras
+        `290/339/352/378`, `101`
+        extras `339/378`; two exact ordered
+        combinations: `100` extras
+        `373+343`, `101` extras
+        `343+287`. Retain unchanged effects
+        for baseline Carbonite, Oblivion and Total
+        Control, existing bare program grants and
+        EVO `182` (already grant + SR typed).
+        Determine a consistent typed contract
+        for a grant plus modified program in
+        single extras and independently reviewed
+        combinations. Add fail-closed curated
+        mutation, source-signature, decoder and
+        guarded v9 DB-delta tests before promotion.
+        Preserve exact input IDs/text/compound
+        order, matched deployed-object publication,
+        and previous artifact recovery copies.
+        Do **not** infer scope for the two unqualified
+        Charontid `UPGRADE: SR-1` rows. The
+        unresolved source-ID baseline remains
+        **34 Skill / 5 Equipment** until a
+        separate source review changes it.
       - [x] **Data processing:** Reconcile Surprise Attack source Skill 191
         against English N5.3 p. 114, Spanish p. 88 and archived Wiki
         revision 3943. Its 767 direct rows have only exact extras 6/7

@@ -1189,6 +1189,95 @@ of other previously reviewed nonbaseline
 program modifiers need a separate audit;
 no changes to those meanings were made here.
 
+**Cross-edition Upgrade Program applicability review (2026-11-01):**
+The English [N5.3 Hacking page](https://infinitythewiki.com/Quantronic_Combat_(Hacking))
+and locally pinned English N5 PDFs (5.1, 5.2, 5.3, p. 54)
+describe Upgrades only as custom software listed with
+the Hacker or Device. However, the official
+[Spanish N5.3 Hacking page](https://infinitythewiki.com/es/Combate_Cuantr%C3%B3nico_(Hackeo))
+and the pinned Spanish N5.3 PDF
+(`data/pdf/rules/esp-n5-update-5-3.pdf`, p. 54) are
+**more explicit**: an Upgrade is a specific program
+*unavailable to standard Hacking Devices* **or** one
+that *complements them*. The same distinction appears
+in the official
+[Spanish N4 rules](https://downloads.corvusbelli.com/infinity/rules/infinity-rules-es.pdf)
+(p. 59), whereas the English N4 wording is as terse
+as English N5. N3 Human Sphere v3.1, pp. 89-92,
+historically classified additional programs as
+UPGRADE and explicitly granted Cybermask/Maestro
+by special device entitlement; this is corroborating
+history, **not** an N5 rules override. Neither pinned
+N5 FAQ v0.0 nor v0.1 defines a different grant rule
+for named program modifiers.
+
+The publisher's
+[March 2025 Army update](https://infinityuniverse.com/en/news/army-update-march-2025)
+provides direct current-edition evidence: Nourkias
+changed from Killer Hacking Device to a standard
+Hacking Device with Total Control (PS=3) **and**
+Trinity (PS=5) Upgrades. Trinity is *not* baseline
+on the standard Hacking Device (N5.3 p. 58).
+The [October 2025 Army update](https://infinityuniverse.com/en/news/army-update-october-2025-part2)
+also names Gabriele De Fersen's Hacking Device
+Upgrade as Trinity (+1 SD). These examples reinforce
+the Spanish N5.3 distinction: a named program Upgrade
+can **add access** when its program is not supplied
+by the baseline device; modifier or replacement
+notation does **not** make that program inaccessible.
+If the named program is already baseline, its
+Upgrade may simply modify the existing program.
+This interpretation is supported by authoritative
+rules plus Army changes, not by treating every
+`UPGRADE:` string as a generic program grant.
+
+**Confirmed gap in existing typed data, not yet migrated:**
+the previously reviewed Hacking Device (`100`)
+and Device Plus (`101`) modifier-only entries
+preserve Trinity's target program and numeric changes
+but omit an explicit access-grant semantic.
+The exact pinned signatures are:
+
+- Source `100`: Trinity `+1B` (extra `290`, 3
+  occurrences), `SR-1` (`339`, 2), `SR-2`
+  (`352`, 4), `+1SD` (`378`, 1).
+- Source `101`: Trinity `SR-1` (`339`, 2)
+  and `+1SD` (`378`, 3).
+- Reviewed complete combinations: source `100`
+  Total Control `PS=3` + Trinity `PS=5`
+  (extras `373+343`, 2 occurrences), and
+  source `101` Trinity `PS=5` + Zero Pain
+  (extras `343+287`, 2 occurrences).
+
+These are **eight exact signature shapes and 19
+direct occurrences** requiring explicit Trinity
+access representation in addition to the existing
+modifiers. Existing bare Trinity and Cybermask
+program grants, baseline-program modifiers and
+the reviewed EVO `182` combined grant/SR effect
+remain correct. The standalone `UPGRADE: SR-1`
+on Charontid Device Plus (`101`, extra `344`,
+two occurrences) remains **unresolved**:
+the Spanish definition explains program availability
+but does not identify its unnamed modifier target.
+Similarly `UPGRADE: Firewall` is not a named
+Hacking Program and must not be automatically
+converted into a program grant.
+
+**Migration boundary:** update only the eight
+pinned reviewed signatures, preserving original
+source ID/type/raw spelling, order of compound
+extras, prior numeric program effects and earlier
+published metadata. A guarded matched-v9 refresh
+must reject unrelated rows, unrelated program
+grants, or inferred effects on unqualified extras,
+synchronize the rules/publication pair and verify
+the tracked-vs-fresh source audit. Until that
+promotion the source-ID audit baseline is still
+**34 Skill / 5 Equipment**: an already-reviewed
+signature can lack an important *semantic component*
+without becoming a new unresolved source ID.
+
 The following baseline uses the current **tracked**
 `data/generated/rules.db` alongside the paired pinned Army
 application/raw databases. The tracked artifact includes reviewed
