@@ -206,6 +206,13 @@ This register collects questions that may eventually be sent to Corvus Belli for
 - **Question:** Is the vertical-position restriction intended for both a Deployable weapon fired into position and a Deployable object placed by a Skill, or only the context literally described by each language?
 - **InfinityDB:** Preserves the selected English citation and the actual common answer; does not promote differing question wording into contradictory gameplay answers.
 
+### SRC-027 — Journalist (+3) on Tohaa Diplomatic Delegate option
+
+- **Status:** open — source intent unknown. **Alias:** Army Skill source `272`, extra `1/TEXT:+3`.
+- **Evidence:** Pinned N5 Army `801-tohaa.json`, TOHAA DIPLOMATIC DELEGATES, unit 658, DIPLOMATIC option 3, occurrence 68471, includes the sole `Journalist (+3)` annotation among **93** direct Journalist occurrences. The N5.3 English rules p. 99 (reviewed Wiki Journalist `oldid=4086`) already assign **+3 allied / -3 enemy Guts Roll MODs** within Zone of Control and separate campaign-only **+3 CUBEVAC / Promotion** bonuses, with non-stacking restrictions; they do not define a profile-specific `Journalist (+3)` variant or extra skill use. A [February 2025 community discussion](https://forum.corvusbelli.com/threads/does-the-journalist-l1-3-apply-to-objective-rolls-in-its-16.43426/) identified the same Tohaa annotation and rejected an inferred ITS objective-roll bonus, but contains **no official ruling**. Historic profile sources still display `Journalist L1 (+3)`; this suggests possible legacy labeling, not established publisher intent.
+- **Question:** Is the Tohaa Diplomatic Delegate's `Journalist (+3)` notation a legacy display artifact to be removed, or does it grant a rule effect beyond Journalist's printed N5.3 Guts/CUBEVAC/Promotion MODs? If it grants another effect, specify its roll, targets, condition, and stacking behavior; does any of it apply to ITS objective interactions?
+- **InfinityDB:** Keeps the literal extra on the Army option but leaves source 272's `+3` **unreviewed**. Publishes the existing N5.3 Journalist family effects exactly once, without adding another Guts/campaign bonus, objective modifier, or general Attribute MOD. Await official source correction or clarification.
+
 ## Intake / future publisher correspondence
 
 When a new candidate is found, add a new numbered section using this compact checklist. Keep the record **even if locally resolved** until official source status is documented.

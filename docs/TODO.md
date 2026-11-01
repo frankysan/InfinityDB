@@ -1714,6 +1714,13 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       variants with extra MODs; preserve raw signatures and exclude
       unreviewed specific combinations from index counts. Fail closed
       rather than parsing numeric-looking display strings.
+      - [x] **Data processing:** Audit the lone Journalist
+        source-272 `1/TEXT:+3` on the Tohaa Diplomatic Delegate.
+        N5.3 already defines Journalist's Guts Roll and campaign
+        MODs, without an independent use for this annotation.
+        Keep it unresolved, pin the source signature, and refer to
+        [SRC-027](official-source-clarifications.md#src-027--journalist-3-on-tohaa-diplomatic-delegate-option)
+        for the clarification question.
       - [x] **Data processing:** Harden the source-variant inventory against
         unreviewed combinations of individually recognized extras. Only a
         single reviewed extra or typed distance can currently certify an

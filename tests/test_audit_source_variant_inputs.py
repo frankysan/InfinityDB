@@ -71,6 +71,37 @@ def test_extra_owner_lookup_rejects_invalid_scope(
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_journalist_plus_three_stays_unreviewed_pending_src_027() -> None:
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=272, extra_id=1,
+    )
+    assert len(owners) == 1
+    [owner] = owners
+    assert (
+        owner["owner"], owner["occurrence_id"], owner["unit_id"],
+        owner["unit_slug"], owner["army_id"], owner["parent_id"],
+        owner["extra_type"], owner["extra_raw"],
+    ) == (
+        "option", 68471, 658, "tohaa-diplomatic-delegates",
+        801, 3, "TEXT", "+3",
+    )
+    row = select_source_variants(_inventory(), "skills", [272])["items"][0]
+    assert (row["name"], row["occurrences"], row["status"]) == (
+        "Journalist", 93, "unresolved-occurrence-parameter",
+    )
+    assert row["extraSignatures"] == [{
+        "extras": [[1, "TEXT", "+3"]], "reviewed": False, "count": 1,
+    }]
+    assert row["reviewedExtra"] is None
+    record = RulesDatabase(ROOT / "data/generated/rules.db").composed_record(
+        "skill:journalist",
+    )
+    assert record is not None
+    assert record["variant_semantics"] == {"inheritance": "family"}
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_charontid_unqualified_sr_owners_are_exact_source_loadouts() -> None:
     owners = source_extra_owner_context(
         ROOT / "data/generated/infinity.raw.db",
