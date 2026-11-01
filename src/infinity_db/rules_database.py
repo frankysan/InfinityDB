@@ -1674,8 +1674,9 @@ class RulesDatabase:
                 "SELECT r.variant_json FROM records AS r "
                 "JOIN collections AS c ON c.id = r.collection_id "
                 "WHERE r.kind = 'equipment' AND r.composition_role = 'definition' "
-                "AND c.status = 'current' AND r.id = 'equipment:gizmokit' "
-                "ORDER BY r.collection_id"
+                "AND c.status = 'current' AND r.id IN "
+                "('equipment:gizmokit', 'equipment:medikit') "
+                "ORDER BY r.collection_id, r.id"
             ).fetchall()
             result: dict[int, dict[str, Any]] = {}
             for row in rows:

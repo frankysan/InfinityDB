@@ -109,6 +109,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Promote source-verified MediKit ranged +1B in a matched v9 pair",
     )
     migration.add_argument(
+        "--refresh-medikit-target-ph-v9", action="store_true",
+        help="Promote Skill-273 target PH replacements on canonical MediKit Equipment",
+    )
+    migration.add_argument(
         "--refresh-remdriver-v9", action="store_true",
         help="Promote exact RemDriver source-255 compound Attribute signatures",
     )
@@ -184,6 +188,7 @@ def main() -> int:
         or args.refresh_tinbot_firewall_v9
         or args.refresh_bangbomb_v9
         or args.refresh_medikit_v9
+        or args.refresh_medikit_target_ph_v9
         or args.refresh_gizmokit_v9
         or args.refresh_gizmokit_target_ph_v9
         or args.refresh_deactivator_v9
@@ -220,6 +225,7 @@ def main() -> int:
             refresh_impersonation_v9_release,
             refresh_isolated_context_v9_release,
             refresh_killer_hacking_v9_release,
+            refresh_medikit_target_ph_v9_release,
             refresh_medikit_v9_release,
             refresh_movement_distance_v9_release,
             refresh_pdf_source_pins_v9_release,
@@ -238,6 +244,11 @@ def main() -> int:
         if args.refresh_evo_trinity_v9:
             backup = refresh_evo_trinity_v9_release()
             print("Refreshed exact EVO Trinity grant and SR-2 in v9 artifacts.")
+            print(f"Original matched v9 release pair retained: {backup}")
+            return 0
+        if args.refresh_medikit_target_ph_v9:
+            backup = refresh_medikit_target_ph_v9_release()
+            print("Refreshed Skill-273 target PH extras on MediKit Equipment in v9 artifacts.")
             print(f"Original matched v9 release pair retained: {backup}")
             return 0
         if args.refresh_medikit_v9:

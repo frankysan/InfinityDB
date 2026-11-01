@@ -130,9 +130,9 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 4,
+            "reviewed-extra-parameter": 5,
             "reviewed-combination-parameter": 1,
-            "unresolved-occurrence-parameter": 31,
+            "unresolved-occurrence-parameter": 30,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -388,9 +388,9 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 4,
+        "reviewed-extra-parameter": 5,
         "reviewed-combination-parameter": 1,
-        "unresolved-occurrence-parameter": 31,
+        "unresolved-occurrence-parameter": 30,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -457,8 +457,54 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 4, "reviewed-combination-parameter": 1,
-            "unresolved-occurrence-parameter": 31,
+            "reviewed-extra-parameter": 5, "reviewed-combination-parameter": 1,
+            "unresolved-occurrence-parameter": 30,
+        }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_medikit_target_ph_skill_273_is_equipment_owned_in_both_exports(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = [
+        {"extras": [[extra_id, "TEXT", f"PH={value}"]],
+         "reviewed": True, "count": count}
+        for extra_id, value, count in (
+            (52, 13, 2), (244, 14, 12), (250, 12, 1),
+            (340, 16, 4), (353, 15, 6), (382, 17, 6),
+        )
+    ]
+    assert sum(row["count"] for row in expected) == 31
+    for rules_path in (ROOT / "data/generated/rules.db", fresh):
+        db = RulesDatabase(rules_path)
+        assert set(db.skill_source_equipment_overrides()) == {254, 273}
+        assert "medikit" not in db.skill_reviewed_extra_semantics()
+        assert db.equipment_reviewed_extra_semantics()["medikit"]["extra_values"][0][
+            "effect"
+        ] == {
+            "kind": "equipment-burst-mod",
+            "applies_to": "ranged-medikit-bs-attack", "modifier": 1,
+        }
+        result = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", rules_path,
+        )
+        [row] = select_source_variants(result, "skills", [273])["items"]
+        assert (row["name"], row["applicationId"], row["occurrences"]) == (
+            "MediKit", 273, 31,
+        )
+        assert row["status"] == "reviewed-extra-parameter"
+        assert row["extraSignatures"] == expected
+        assert row["reviewedCombinations"] is None
+        assert row["rawValues"] == []
+        assert row["reviewedExtra"] == db.skill_source_equipment_overrides()[273]
+        assert result["catalogs"]["skills"]["summary"]["statuses"] == {
+            "family-only": 44, "reviewed-distance-parameter": 3,
+            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
+            "reviewed-extra-parameter": 5, "reviewed-combination-parameter": 1,
+            "unresolved-occurrence-parameter": 30,
         }
 
 
@@ -479,7 +525,7 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
     assert sum(row["count"] for row in expected) == 288
     for rules_path in (ROOT / "data/generated/rules.db", fresh):
         db = RulesDatabase(rules_path)
-        assert 254 in db.skill_source_equipment_overrides()
+        assert set(db.skill_source_equipment_overrides()) == {254, 273}
         assert "gizmokit" not in db.skill_reviewed_extra_semantics()
         equipment = db.equipment_reviewed_extra_semantics()["gizmokit"]
         assert equipment["extra_values"][0]["effect"] == {
@@ -502,8 +548,8 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 4, "reviewed-combination-parameter": 1,
-            "unresolved-occurrence-parameter": 31,
+            "reviewed-extra-parameter": 5, "reviewed-combination-parameter": 1,
+            "unresolved-occurrence-parameter": 30,
         }
 
 
@@ -548,9 +594,9 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 4,
+            "reviewed-extra-parameter": 5,
             "reviewed-combination-parameter": 1,
-            "unresolved-occurrence-parameter": 31,
+            "unresolved-occurrence-parameter": 30,
         }
 
 

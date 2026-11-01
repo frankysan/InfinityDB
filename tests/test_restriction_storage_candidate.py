@@ -1887,6 +1887,129 @@ def test_khd_v9_refresh_requires_exact_pinned_signatures(
     "defect", (None, "wrong-scope", "wrong-value", "wrong-source",
                "burst-change", "other-record", "schema", "missing"),
 )
+def test_medikit_target_ph_cross_catalog_delta_is_exact(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        MEDIKIT,
+        MEDIKIT_TARGET_PH_VARIANT,
+        MEDIKIT_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    previous, proposed = tmp_path / "previous.db", tmp_path / "proposed.db"
+    variant = copy.deepcopy(MEDIKIT_TARGET_PH_VARIANT)
+    if defect == "wrong-scope":
+        variant["sourceCatalogParameters"][0]["extraValues"][0]["effect"][
+            "appliesTo"
+        ] = "medikit-user-bs-attack"
+    elif defect == "wrong-value":
+        variant["sourceCatalogParameters"][0]["extraValues"][0]["effect"]["value"] = 14
+    elif defect == "wrong-source":
+        variant["sourceCatalogParameters"][0]["sourceId"] = 106
+    elif defect == "burst-change":
+        variant["occurrenceParameters"][0]["extraValues"][0]["effect"]["modifier"] = 2
+    with sqlite3.connect(previous) as old, sqlite3.connect(proposed) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*MEDIKIT, json.dumps(MEDIKIT_VARIANT), "preserved"),
+            ("n5-core-v5.3", "equipment:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), MEDIKIT[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='equipment:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='equipment:medikit'")
+    changed: dict[tuple[str, str], str] = {MEDIKIT: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(
+            previous, proposed, changed, medikit_target_ph=True,
+        )
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(
+                previous, proposed, changed, medikit_target_ph=True,
+            )
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(previous, proposed, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "extra-id",
+               "raw", "status", "previous", "compound"),
+)
+def test_medikit_target_ph_source_gate_checks_exact_skill_273_signatures(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 273, "name": "MediKit", "applicationId": 273,
+        "occurrences": 31, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None, "reviewedNumericMod": None,
+        "reviewedExtra": None, "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [
+            {"extras": [[extra_id, "TEXT", f"PH={value}"]],
+             "reviewed": False, "count": count}
+            for extra_id, value, count in (
+                (52, 13, 2), (244, 14, 12), (250, 12, 1),
+                (340, 16, 4), (353, 15, 6), (382, 17, 6),
+            )
+        ],
+    }
+    if defect == "name":
+        source["name"] = "Medikit"
+    elif defect == "app-id":
+        source["applicationId"] = 106
+    elif defect == "count":
+        source["occurrences"] = 30
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 8
+    elif defect == "raw":
+        source["extraSignatures"][1]["extras"][0][2] = "PH=13"
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "compound":
+        source["extraSignatures"][0]["extras"].append([244, "TEXT", "PH=14"])
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_medikit_target_ph_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"equipment:medikit"},
+            "medikit_target_ph": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="MediKit target PH source signature drift"):
+            release.refresh_medikit_target_ph_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "wrong-scope", "wrong-value", "wrong-source",
+               "burst-change", "other-record", "schema", "missing"),
+)
 def test_gizmokit_target_ph_cross_catalog_delta_is_exact(
     tmp_path: Path, defect: str | None,
 ) -> None:

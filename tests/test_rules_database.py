@@ -1622,6 +1622,41 @@ def test_remdriver_exact_ordered_remote_attribute_assignments(
                for c in REMDRIVER_COMBINATIONS for e in c["effects"])
 
 
+def test_medikit_source_skill_273_target_ph_is_owned_by_equipment(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    assert "medikit" not in rules.skill_reviewed_extra_semantics()
+    assert rules.equipment_reviewed_extra_semantics()["medikit"]["extra_values"][0][
+        "effect"
+    ] == {
+        "kind": "equipment-burst-mod",
+        "applies_to": "ranged-medikit-bs-attack", "modifier": 1,
+    }
+    source = rules.skill_source_equipment_overrides()
+    assert set(source) == {254, 273}
+    parameter = source[273]
+    assert (parameter["source"], parameter["kind"]) == ("army-extra", "reviewed-extra")
+    assert [
+        (entry["extra_id"], entry["raw_value"], entry["effect"]["value"])
+        for entry in parameter["extra_values"]
+    ] == [
+        (52, "PH=13", 13), (244, "PH=14", 14), (250, "PH=12", 12),
+        (340, "PH=16", 16), (353, "PH=15", 15), (382, "PH=17", 17),
+    ]
+    assert all(entry["effect"]["applies_to"] == "target-medikit-recovery-ph-roll"
+               and entry["effect"]["kind"] == "medikit-target-ph-replacement"
+               and entry["effect"]["attribute"] == "PH"
+               for entry in parameter["extra_values"])
+    record = rules.composed_record("equipment:medikit")
+    assert record is not None
+    assert record["variant_semantics"]["source_catalog_parameters"][0][
+        "source_id"
+    ] == 273
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 124
+               for c in record["citations"])
+
+
 def test_gizmokit_source_skill_254_target_ph_is_owned_by_equipment(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -1634,7 +1669,7 @@ def test_gizmokit_source_skill_254_target_ph_is_owned_by_equipment(
         "applies_to": "ranged-gizmokit-bs-attack", "modifier": 1,
     }
     source = rules.skill_source_equipment_overrides()
-    assert set(source) == {254}
+    assert set(source) == {254, 273}
     parameter = source[254]
     assert (parameter["source"], parameter["kind"]) == ("army-extra", "reviewed-extra")
     assert [

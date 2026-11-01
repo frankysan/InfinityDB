@@ -17544,6 +17544,82 @@
                             }
                         ]
                     }
+                ],
+                "sourceCatalogParameters": [
+                    {
+                        "catalog": "skills",
+                        "sourceId": 273,
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 52,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=13",
+                                "effect": {
+                                    "kind": "medikit-target-ph-replacement",
+                                    "appliesTo": "target-medikit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 13
+                                }
+                            },
+                            {
+                                "extraId": 244,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=14",
+                                "effect": {
+                                    "kind": "medikit-target-ph-replacement",
+                                    "appliesTo": "target-medikit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 14
+                                }
+                            },
+                            {
+                                "extraId": 250,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=12",
+                                "effect": {
+                                    "kind": "medikit-target-ph-replacement",
+                                    "appliesTo": "target-medikit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 12
+                                }
+                            },
+                            {
+                                "extraId": 340,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=16",
+                                "effect": {
+                                    "kind": "medikit-target-ph-replacement",
+                                    "appliesTo": "target-medikit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 16
+                                }
+                            },
+                            {
+                                "extraId": 353,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=15",
+                                "effect": {
+                                    "kind": "medikit-target-ph-replacement",
+                                    "appliesTo": "target-medikit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 15
+                                }
+                            },
+                            {
+                                "extraId": 382,
+                                "extraType": "TEXT",
+                                "rawValue": "PH=17",
+                                "effect": {
+                                    "kind": "medikit-target-ph-replacement",
+                                    "appliesTo": "target-medikit-recovery-ph-roll",
+                                    "attribute": "PH",
+                                    "value": 17
+                                }
+                            }
+                        ]
+                    }
                 ]
             }
         },

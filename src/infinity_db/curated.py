@@ -222,8 +222,28 @@ KILLER_HACKING_VARIANT: dict[str, Any] = {
 }
 
 
-# Army publishes target PH overrides under Skill 254 even though GizmoKit is
-# canonical Equipment 237. Keep the source classification, not a duplicate rule.
+# Army lists target-side PH overrides as Skills 254/273, although both
+# canonical GizmoKit and MediKit definitions are Equipment. Keep those
+# provenance identities distinct from the single game-rule owner.
+MEDIKIT_TARGET_PH_PARAMETERS: list[dict[str, Any]] = [{
+    "catalog": "skills", "sourceId": 273,
+    "source": "army-extra", "kind": "reviewed-extra",
+    "extraValues": [
+        {
+            "extraId": extra_id, "extraType": "TEXT", "rawValue": f"PH={value}",
+            "effect": {
+                "kind": "medikit-target-ph-replacement",
+                "appliesTo": "target-medikit-recovery-ph-roll",
+                "attribute": "PH", "value": value,
+            },
+        }
+        for extra_id, value in (
+            (52, 13), (244, 14), (250, 12),
+            (340, 16), (353, 15), (382, 17),
+        )
+    ],
+}]
+
 GIZMOKIT_TARGET_PH_PARAMETERS: list[dict[str, Any]] = [{
     "catalog": "skills", "sourceId": 254,
     "source": "army-extra", "kind": "reviewed-extra",
@@ -820,14 +840,23 @@ def _validate_variant_semantics(
             f"{sorted(VARIANT_INHERITANCE_MODES)}"
         )
 
-    # Cross-catalog source classification is distinct from canonical record kind.
-    # A Skill-listed target PH annotation belongs to GizmoKit Equipment, not
-    # to a fabricated Skill rule or the user's ranged BS Attack.
+    # Source-native Skill catalog labels refer to target-side Equipment PH rolls.
+    # Each reviewed Skill source ID must match its exact Equipment rule owner.
     if "sourceCatalogParameters" in value:
         extra = value["sourceCatalogParameters"]
+        expected_cross_catalog = {
+            "gizmokit": GIZMOKIT_TARGET_PH_PARAMETERS,
+            "medikit": MEDIKIT_TARGET_PH_PARAMETERS,
+        }
+        equipment_id = (
+            army_links[0].get("id")
+            if len(army_links) == 1 and isinstance(army_links[0], dict)
+            and army_links[0].get("entity") == "equipment"
+            else None
+        )
         if (
             inheritance != "family"
-            or army_links != [{"entity": "equipment", "id": "gizmokit"}]
+            or equipment_id not in expected_cross_catalog
             or not isinstance(extra, list)
             or len(extra) != 1
             or not isinstance(extra[0], dict)
@@ -838,9 +867,14 @@ def _validate_variant_semantics(
                 or type(item["effect"].get("value")) is not int
                 for item in extra[0]["extraValues"]
             )
-            or extra != GIZMOKIT_TARGET_PH_PARAMETERS
+            or extra != expected_cross_catalog[equipment_id]
         ):
-            raise ValueError(f"{context}: invalid cross-catalog GizmoKit target PH")
+            label = str(equipment_id)
+            if equipment_id == "gizmokit":
+                label = "GizmoKit"
+            elif equipment_id == "medikit":
+                label = "MediKit"
+            raise ValueError(f"{context}: invalid cross-catalog {label} target PH")
     parameters = value.get("occurrenceParameters", [])
     if not isinstance(parameters, list):
         raise ValueError(f"{context}: 'occurrenceParameters' must be an array")

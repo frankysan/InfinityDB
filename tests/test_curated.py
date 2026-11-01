@@ -1618,6 +1618,55 @@ def test_medikit_requires_exact_ranged_burst_extra(
 
 @pytest.mark.parametrize(
     ("index", "field", "wrong"), [
+        (0, "extraId", 53),
+        (0, "extraId", 52.0),
+        (0, "extraType", "DISTANCE"),
+        (0, "rawValue", "PH=14"),
+        (2, "effect", {
+            "kind": "medikit-target-ph-replacement",
+            "appliesTo": "medikit-user-bs-attack",
+            "attribute": "PH", "value": 12,
+        }),
+        (3, "effect", {
+            "kind": "medikit-target-ph-replacement",
+            "appliesTo": "target-medikit-recovery-ph-roll",
+            "attribute": "PH", "value": 17,
+        }),
+        (5, "effect", {
+            "kind": "medikit-target-ph-replacement",
+            "appliesTo": "target-medikit-recovery-ph-roll",
+            "attribute": "PH", "value": 17.0,
+        }),
+    ],
+)
+def test_medikit_skill_listed_ph_extras_require_exact_equipment_ownership(
+    tmp_path: Path, index: int, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"]
+                   if row["id"] == "equipment:medikit")
+    document = valid_document()
+    record = document["records"][0]
+    record.update({
+        "id": "equipment:medikit", "kind": "equipment", "facts": {},
+        "armyLinks": [{"entity": "equipment", "id": "medikit"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "medikit-target-ph.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    entries = record["variantSemantics"]["sourceCatalogParameters"][0]["extraValues"]
+    entries[index][field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid cross-catalog MediKit target PH"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    ("index", "field", "wrong"), [
         (0, "extraId", 28),
         (0, "extraId", 27.0),
         (0, "extraType", "DISTANCE"),

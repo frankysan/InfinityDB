@@ -19,6 +19,7 @@ from typing import Any
 from infinity_db.curated import (
     GIZMOKIT_TARGET_PH_PARAMETERS,
     KILLER_HACKING_VARIANT,
+    MEDIKIT_TARGET_PH_PARAMETERS,
     REMDRIVER_COMBINATIONS,
     discover_curated_documents,
     load_curated_directory,
@@ -84,6 +85,10 @@ MEDIKIT_VARIANT = {
             },
         }],
     }],
+}
+MEDIKIT_TARGET_PH_VARIANT = {
+    **MEDIKIT_VARIANT,
+    "sourceCatalogParameters": MEDIKIT_TARGET_PH_PARAMETERS,
 }
 GIZMOKIT = ("n5-core-v5.3", "equipment:gizmokit")
 GIZMOKIT_VARIANT = {
@@ -994,10 +999,19 @@ def _check_variant_semantics_delta(
     medikit: bool = False, gizmokit: bool = False, deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
     killer_hacking: bool = False, impersonation: bool = False,
-    gizmokit_target_ph: bool = False, remdriver: bool = False,
+    gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
+    remdriver: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if medikit_target_ph and (
+        initial or medikit or gizmokit or gizmokit_target_ph or deactivator
+        or bangbomb or evo_trinity or killer_hacking or impersonation
+        or remdriver or tinbot_firewall or tinbot_other or hacking_mods
+        or hacking_srs or hacking_firewall or hacking_combinations
+        or hacking_trinity_access or set(variants) != {MEDIKIT}
+    ):
+        raise ValueError("MediKit target PH requires exactly its Equipment record")
     if remdriver and (
         initial or medikit or gizmokit or gizmokit_target_ph or deactivator
         or bangbomb or evo_trinity or killer_hacking or impersonation
@@ -1163,6 +1177,13 @@ def _check_variant_semantics_delta(
                             or after != EVO_TRINITY_VARIANT
                         ):
                             raise ValueError("EVO Trinity refresh changed source-only semantics")
+                    elif key == MEDIKIT and medikit_target_ph:
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != MEDIKIT_VARIANT
+                            or after != MEDIKIT_TARGET_PH_VARIANT
+                        ):
+                            raise ValueError("MediKit target PH changed prior Equipment semantics")
                     elif key == MEDIKIT:
                         if not medikit:
                             raise ValueError("MediKit requires source-verified refresh")
@@ -1558,6 +1579,47 @@ def refresh_remdriver_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("RemDriver source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={REMDRIVER[1]}, remdriver=True,
+    )
+
+
+def refresh_medikit_target_ph_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote exact target-side MediKit PH replacements from Skill source 273."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["skills"]["items"] if row["id"] == 273
+    ]
+    signatures = (
+        (52, "PH=13", 2),
+        (244, "PH=14", 12),
+        (250, "PH=12", 1),
+        (340, "PH=16", 4),
+        (353, "PH=15", 6),
+        (382, "PH=17", 6),
+    )
+    if (
+        len(rows) != 1
+        or rows[0]["name"] != "MediKit"
+        or rows[0]["applicationId"] != 273
+        or rows[0]["occurrences"] != 31
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"]
+        or rows[0]["extraSignatures"] != [
+            {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": count}
+            for extra_id, raw, count in signatures
+        ]
+    ):
+        raise ValueError("MediKit target PH source signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={MEDIKIT[1]}, medikit_target_ph=True,
     )
 
 
@@ -2166,7 +2228,8 @@ def _refresh_metadata_v9_release(
     deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
     killer_hacking: bool = False, impersonation: bool = False,
-    gizmokit_target_ph: bool = False, remdriver: bool = False,
+    gizmokit_target_ph: bool = False, medikit_target_ph: bool = False,
+    remdriver: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2263,6 +2326,7 @@ def _refresh_metadata_v9_release(
                 medikit=medikit,
                 gizmokit=gizmokit,
                 gizmokit_target_ph=gizmokit_target_ph,
+                medikit_target_ph=medikit_target_ph,
                 remdriver=remdriver,
                 deactivator=deactivator,
                 evo_trinity=evo_trinity,

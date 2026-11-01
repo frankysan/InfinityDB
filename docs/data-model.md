@@ -1143,6 +1143,42 @@ remaining unresolved source-level baseline is **34 Skill
 IDs and 3 Equipment IDs**; the cross-Army Unit-use index
 is still unimplemented.
 
+**Cross-catalog MediKit target PH replacements (2026-11-01):**
+The pinned Army Skill source `273` lists `MediKit (PH=N)`,
+although N5.3 p. 124 defines `[[equipment:medikit|MediKit]]`
+as Equipment and explicitly requires the **target** to
+use the printed PH value for its own recovery Roll.
+These annotations do not affect the operator's BS
+Attack, contact action, Burst, or the result of an
+additional successful recovery Roll.
+
+All 31 direct Skill-273 occurrences carry exactly
+one standalone `TEXT` extra: `52/PH=13` (2),
+`244/PH=14` (12), `250/PH=12` (1),
+`340/PH=16` (4), `353/PH=15` (6),
+`382/PH=17` (6). The existing canonical
+`equipment:medikit` retains its source-106
+`+1B` ranged-attack modifier and now owns a
+separate `sourceCatalogParameters` entry for
+`skills/273`. Each exact extra maps to
+`medikit-target-ph-replacement` scoped only to
+`target-medikit-recovery-ph-roll`.
+The cross-catalog validator now permits only the
+known source-273 MediKit and source-254 GizmoKit
+assignments; `RulesDatabase.skill_source_equipment_overrides()`
+and the pinned source auditor project both without
+inventing duplicate Skill definitions.
+
+An exact source-273 guard and matched-v9 metadata-only
+refresh preserve all previous MediKit Equipment
+semantics, unrelated rows, schema, and deployed-object
+publication; a paired recovery copy remains in
+ignored `local/`. Tracked and fresh rules exports
+are compared against the pinned raw Army source.
+This is source classification, not a gameplay engine
+or Unit-use index. Unresolved baseline:
+**30 Skill / 1 Equipment**.
+
 **Cross-catalog GizmoKit target PH replacements (2026-11-01):**
 Army classifies target-side `Gizmokit (PH=N)` as **Skill
 source 254**, while N5.3 p. 123 defines

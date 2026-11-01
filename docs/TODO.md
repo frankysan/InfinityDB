@@ -1689,14 +1689,14 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **31 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **30 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
       standalone ECM Guided/Hacker, Albedo, Bangbomb, MediKit/GizmoKit ranged Burst,
       Deactivator Burst/ReRoll, Killer Hacking Device source-145 upgrades,
       Impersonation source-249 IMP-2 deployment restriction,
-      Skill-listed GizmoKit source-254 target PH replacements,
+      Skill-listed GizmoKit source-254 and MediKit source-273 target PH replacements,
       RemDriver source-255 complete recipient-Attribute bundles,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
@@ -2170,7 +2170,24 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         tracked/fresh rules export comparisons, a guarded
         matched-v9 metadata refresh, and regression tests
         prevent inferred Unit usage or token assignment.
-        Current baseline: **31 Skill / 1 Equipment**.
+        Baseline at that point: **31 Skill / 1 Equipment**.
+      - [x] **Data processing:** Reconcile the six exact
+        target-side `PH=N` signatures from Army Skill
+        source `273`, which N5.3 English p. 124 identifies
+        as a recipient-side PH recovery value of MediKit
+        Equipment. All 31 source-273 occurrences carry
+        one standalone `TEXT` extra:
+        `52/PH=13` (2), `244/PH=14` (12),
+        `250/PH=12` (1), `340/PH=16` (4),
+        `353/PH=15` (6), `382/PH=17` (6).
+        Extend the canonical `equipment:medikit`
+        cross-catalog mapping without creating a duplicate
+        Skill or touching the Equipment source-106
+        ranged `+1B` effect. Add strict source IDs, raw
+        signatures, tracked/fresh DB comparisons, negative
+        regressions and guarded matched-v9 publication.
+        No gameplay roll resolver or Unit-use index.
+        Current baseline: **30 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.
