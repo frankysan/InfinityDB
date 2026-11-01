@@ -1512,6 +1512,120 @@ def test_ecm_v9_preflight_pins_distinct_guided_extra_ids(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "wrong-state", "wrong-scope", "not-only", "raw",
+               "other-record", "schema", "missing"),
+)
+def test_impersonation_v9_refresh_only_changes_exact_imp2_semantics(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    from tools.restrictions_v9_release import (
+        IMPERSONATION,
+        IMPERSONATION_VARIANT,
+        _check_variant_semantics_delta,
+    )
+
+    previous, proposed = tmp_path / "previous.db", tmp_path / "proposed.db"
+    variant = copy.deepcopy(IMPERSONATION_VARIANT)
+    extra = variant["occurrenceParameters"][0]["extraValues"][0]
+    if defect == "wrong-state":
+        extra["effect"]["state"] = "state:impersonation-1"
+    elif defect == "wrong-scope":
+        extra["effect"]["appliesTo"] = "deployment-only"
+    elif defect == "not-only":
+        extra["effect"]["only"] = False
+    elif defect == "raw":
+        extra["rawValue"] = "IMP-1"
+    with sqlite3.connect(previous) as old, sqlite3.connect(proposed) as new:
+        old.execute("CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)")
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*IMPERSONATION, '{"inheritance":"family"}', "preserved"),
+            ("n5-core-v5.3", "skill:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        new.execute(
+            "UPDATE records SET variant_json=? WHERE id=?",
+            (json.dumps(variant), IMPERSONATION[1]),
+        )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='altered' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:impersonation'")
+    changed: dict[tuple[str, str], str] = {IMPERSONATION: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(previous, proposed, changed, impersonation=True)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(previous, proposed, changed, impersonation=True)
+    with pytest.raises(ValueError):
+        _check_variant_semantics_delta(previous, proposed, changed)
+
+
+@pytest.mark.parametrize(
+    "defect", (None, "name", "app-id", "count", "extra-id", "extra-type",
+               "raw", "status", "previous", "compound"),
+)
+def test_impersonation_v9_refresh_checks_pinned_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, defect: str | None,
+) -> None:
+    from tools import audit_source_variant_inputs as audit
+    from tools import restrictions_v9_release as release
+
+    source = {
+        "id": 249, "name": "Impersonation", "applicationId": 249,
+        "occurrences": 14, "status": "unresolved-occurrence-parameter",
+        "reviewedVariant": None, "reviewedDistance": None, "reviewedNumericMod": None,
+        "reviewedExtra": None, "reviewedCombinations": None, "rawValues": [],
+        "extraSignatures": [{
+            "extras": [[268, "TEXT", "IMP-2"]], "reviewed": False, "count": 9,
+        }],
+    }
+    if defect == "name":
+        source["name"] = "other"
+    elif defect == "app-id":
+        source["applicationId"] = 248
+    elif defect == "count":
+        source["occurrences"] = 13
+    elif defect == "extra-id":
+        source["extraSignatures"][0]["extras"][0][0] = 99
+    elif defect == "extra-type":
+        source["extraSignatures"][0]["extras"][0][1] = "DISTANCE"
+    elif defect == "raw":
+        source["extraSignatures"][0]["extras"][0][2] = "IMP-1"
+    elif defect == "status":
+        source["status"] = "reviewed-extra-parameter"
+    elif defect == "previous":
+        source["reviewedExtra"] = {"unexpected": True}
+    elif defect == "compound":
+        source["extraSignatures"][0]["extras"].append([268, "TEXT", "IMP-2"])
+    monkeypatch.setattr(
+        audit, "inventory_source_variants",
+        lambda *_args: {"catalogs": {"skills": {"items": [source]}}},
+    )
+    calls: list[dict] = []
+
+    def migrate(**kwargs: object) -> Path:
+        calls.append(kwargs)
+        return tmp_path / "recovery"
+
+    monkeypatch.setattr(release, "_refresh_metadata_v9_release", migrate)
+    if defect is None:
+        assert release.refresh_impersonation_v9_release(root=tmp_path) == (
+            tmp_path / "recovery"
+        )
+        assert calls == [{
+            "root": tmp_path, "variant_records": {"skill:impersonation"},
+            "impersonation": True,
+        }]
+    else:
+        with pytest.raises(ValueError, match="Impersonation source signature drift"):
+            release.refresh_impersonation_v9_release(root=tmp_path)
+        assert not calls
+
+
+@pytest.mark.parametrize(
     "defect", (None, "missing-grant", "ap", "opponent-scope", "firewall",
                "compound", "other-record", "schema", "missing"),
 )

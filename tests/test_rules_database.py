@@ -1521,7 +1521,7 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
     current_rules_database: RulesDatabase,
 ) -> None:
     mappings = current_rules_database.skill_reviewed_extra_semantics()
-    assert set(mappings) == {"dodge", "super-jump"}
+    assert set(mappings) == {"dodge", "super-jump", "impersonation"}
     param = mappings["dodge"]
     assert param["kind"] == "reviewed-extra"
     assert param["source"] == "army-extra"
@@ -1578,6 +1578,37 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         {"extra_id": 1, "extra_type": "TEXT", "raw_value": "+3", "modifier": 3},
         {"extra_id": 2, "extra_type": "TEXT", "raw_value": "+6", "modifier": 6},
     ]
+
+
+def test_impersonation_imp2_restricts_deployment_and_activation_only(
+    current_rules_database: RulesDatabase,
+) -> None:
+    rules = current_rules_database
+    extra = rules.skill_reviewed_extra_semantics()["impersonation"]
+    assert extra == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 268, "extra_type": "TEXT", "raw_value": "IMP-2",
+            "effect": {
+                "kind": "impersonation-state-restriction",
+                "state": "state:impersonation-2",
+                "applies_to": "deployment-and-activation",
+                "only": True,
+            },
+        }],
+    }
+    record = rules.composed_record("skill:impersonation")
+    assert record is not None
+    assert extra in record["variant_semantics"]["occurrence_parameters"]
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == 96
+        for citation in record["citations"]
+    )
+    assert any(
+        "only [[state:impersonation-2]]" in line
+        for line in record["facts"]["effects"]
+    )
+    assert "impersonation" not in rules.skill_numeric_mod_semantics()
 
 
 def test_super_jump_jet_propulsion_is_typed_separately_from_distance(

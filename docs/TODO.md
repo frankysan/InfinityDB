@@ -1689,12 +1689,13 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **34 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **33 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
       standalone ECM Guided/Hacker, Albedo, Bangbomb, MediKit/GizmoKit ranged Burst,
       Deactivator Burst/ReRoll, Killer Hacking Device source-145 upgrades,
+      Impersonation source-249 IMP-2 deployment restriction,
       EVO Trinity grant/SR modifier, and complete source-100
       Hacking Device parameters;
       `tests/test_audit_source_variant_inputs.py` pins this baseline
@@ -2121,7 +2122,19 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         guarded matched-v9 metadata refresh, tracked/fresh export
         regression and rollback checks certify these signatures.
         No cross-Army Unit-use index or Hacking roll resolver is
-        published. Current baseline: **34 Skill / 1 Equipment**.
+        published. Baseline at that point: **34 Skill / 1 Equipment**.
+      - [x] **Data processing:** Reconcile Impersonation Skill source
+        `249`, 14 direct occurrences, of which nine have the exact
+        standalone `TEXT:IMP-2` (extra `268`). N5.3 p. 96
+        explicitly restricts Impersonation (IMP-2) to deploying and
+        activating only `[[state:impersonation-2|IMP-2]]`; it
+        does not redefine the generic Impersonation-1 rule or the
+        State's Discover/reveal mechanics. Publish one typed
+        `impersonation-state-restriction` source extra, guarded by
+        an exact pinned-signature v9 metadata-only refresh, tracked
+        versus fresh export and negative regression cases.
+        No Unit-use index or gameplay resolver is introduced.
+        Current baseline: **33 Skill / 1 Equipment**.
     - [ ] Materialize the read-only index and public context links, then test
       duplicate-source, reused-payload, cross-Army, profile/loadout-specific,
       included/Peripheral, and ambiguous-variant cases before publication.

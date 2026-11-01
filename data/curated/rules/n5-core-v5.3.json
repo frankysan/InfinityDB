@@ -17775,7 +17775,26 @@
                 }
             ],
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 268,
+                                "extraType": "TEXT",
+                                "rawValue": "IMP-2",
+                                "effect": {
+                                    "kind": "impersonation-state-restriction",
+                                    "state": "state:impersonation-2",
+                                    "appliesTo": "deployment-and-activation",
+                                    "only": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

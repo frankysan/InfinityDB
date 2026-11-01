@@ -612,6 +612,30 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "impersonation"}
+    ]:
+        values = parameter.get("extraValues")
+        expected = [{
+            "extraId": 268, "extraType": "TEXT", "rawValue": "IMP-2",
+            "effect": {
+                "kind": "impersonation-state-restriction",
+                "state": "state:impersonation-2",
+                "appliesTo": "deployment-and-activation",
+                "only": True,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 1
+            or not isinstance(values[0], dict)
+            or type(values[0].get("extraId")) is not int
+            or values != expected
+            or type(values[0]["effect"].get("only")) is not bool
+        ):
+            raise ValueError(f"{context}: invalid Impersonation IMP-2 source extra")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "super-jump"}
     ]:
         values = parameter.get("extraValues")

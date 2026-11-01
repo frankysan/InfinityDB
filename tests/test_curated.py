@@ -1435,6 +1435,66 @@ def test_khd_requires_exact_pinned_upgrade_semantics(
 
 @pytest.mark.parametrize(
     ("field", "wrong"), [
+        ("extraId", 267),
+        ("extraId", 268.0),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "IMP-1"),
+        ("effect", {
+            "kind": "impersonation-state-restriction",
+            "state": "state:impersonation-1",
+            "appliesTo": "deployment-and-activation",
+            "only": True,
+        }),
+        ("effect", {
+            "kind": "impersonation-state-restriction",
+            "state": "state:impersonation-2",
+            "appliesTo": "deployment-only",
+            "only": True,
+        }),
+        ("effect", {
+            "kind": "impersonation-state-restriction",
+            "state": "state:impersonation-2",
+            "appliesTo": "deployment-and-activation",
+            "only": False,
+        }),
+        ("effect", {
+            "kind": "impersonation-state-restriction",
+            "state": "state:impersonation-2",
+            "appliesTo": "deployment-and-activation",
+            "only": 1,
+        }),
+    ],
+)
+def test_impersonation_requires_exact_imp2_restriction(
+    tmp_path: Path, field: str, wrong: object,
+) -> None:
+    source = json.loads(
+        (Path(__file__).resolve().parents[1] /
+         "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    curated = next(row for row in source["records"]
+                   if row["id"] == "skill:impersonation")
+    document = valid_document()
+    document["skillTypes"][0]["id"] = "deployment-skill"
+    record = document["records"][0]
+    record.update({
+        "id": "skill:impersonation", "kind": "skill",
+        "facts": {"typeIds": ["deployment-skill"]},
+        "armyLinks": [{"entity": "skill", "id": "impersonation"}],
+        "variantSemantics": deepcopy(curated["variantSemantics"]),
+    })
+    path = tmp_path / "impersonation.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    entry = record["variantSemantics"]["occurrenceParameters"][0]["extraValues"][0]
+    entry[field] = wrong
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Impersonation IMP-2 source extra"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    ("field", "wrong"), [
         ("extraId", 9),
         ("extraId", 8.0),
         ("extraType", "DISTANCE"),

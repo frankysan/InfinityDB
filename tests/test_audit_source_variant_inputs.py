@@ -130,8 +130,8 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 2,
-            "unresolved-occurrence-parameter": 34,
+            "reviewed-extra-parameter": 3,
+            "unresolved-occurrence-parameter": 33,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -386,8 +386,8 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 2,
-        "unresolved-occurrence-parameter": 34,
+        "reviewed-extra-parameter": 3,
+        "unresolved-occurrence-parameter": 33,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -403,6 +403,52 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         263: {"kind": "distance", "positive_sign": "omit"},
         271: {"kind": "distance", "positive_sign": "omit"},
     }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_impersonation_imp2_matches_pinned_source_and_both_exports(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    for rules_path in (ROOT / "data/generated/rules.db", fresh):
+        report = inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db",
+            rules_path,
+        )
+        [item] = select_source_variants(report, "skills", [249])["items"]
+        assert (item["name"], item["applicationId"], item["occurrences"]) == (
+            "Impersonation", 249, 14,
+        )
+        assert item["status"] == "reviewed-extra-parameter"
+        assert item["rawValues"] == []
+        assert item["reviewedCombinations"] is None
+        assert item["extraSignatures"] == [{
+            "extras": [[268, "TEXT", "IMP-2"]], "reviewed": True, "count": 9,
+        }]
+        reviewed = RulesDatabase(rules_path).skill_reviewed_extra_semantics()
+        assert item["reviewedExtra"] == reviewed["impersonation"]
+        assert reviewed["impersonation"] == {
+            "source": "army-extra", "kind": "reviewed-extra",
+            "extra_values": [{
+                "extra_id": 268, "extra_type": "TEXT", "raw_value": "IMP-2",
+                "effect": {
+                    "kind": "impersonation-state-restriction",
+                    "state": "state:impersonation-2",
+                    "applies_to": "deployment-and-activation",
+                    "only": True,
+                },
+            }],
+        }
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
+            "family-only": 44,
+            "reviewed-distance-parameter": 3,
+            "reviewed-exact-source": 10,
+            "reviewed-numeric-parameter": 3,
+            "reviewed-extra-parameter": 3,
+            "unresolved-occurrence-parameter": 33,
+        }
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

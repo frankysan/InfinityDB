@@ -98,6 +98,22 @@ GIZMOKIT_VARIANT = {
         }],
     }],
 }
+IMPERSONATION = ("n5-core-v5.3", "skill:impersonation")
+IMPERSONATION_VARIANT = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [{
+            "extraId": 268, "extraType": "TEXT", "rawValue": "IMP-2",
+            "effect": {
+                "kind": "impersonation-state-restriction",
+                "state": "state:impersonation-2",
+                "appliesTo": "deployment-and-activation",
+                "only": True,
+            },
+        }],
+    }],
+}
 KILLER_HACKING_DEVICE = ("n5-core-v5.3", "equipment:killer-hacking-device")
 DEACTIVATOR = ("n5-core-v5.3", "equipment:deactivator")
 DEACTIVATOR_VARIANT = {
@@ -966,10 +982,17 @@ def _check_variant_semantics_delta(
     hacking_combinations: bool = False, bangbomb: bool = False,
     medikit: bool = False, gizmokit: bool = False, deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
-    killer_hacking: bool = False,
+    killer_hacking: bool = False, impersonation: bool = False,
 ) -> None:
     """Guard exact parameter additions; preserve other records and source identity."""
     initial = INITIAL_MOVEMENT_DISTANCE if initialize_movement_distance else {}
+    if impersonation and (
+        initial or killer_hacking or medikit or gizmokit or deactivator or bangbomb
+        or evo_trinity or tinbot_firewall or tinbot_other or hacking_mods
+        or hacking_srs or hacking_firewall or hacking_combinations
+        or hacking_trinity_access or set(variants) != {IMPERSONATION}
+    ):
+        raise ValueError("Impersonation refresh requires exactly Skill source 249")
     if killer_hacking and (
         initial or medikit or gizmokit or deactivator or bangbomb or evo_trinity
         or tinbot_firewall or tinbot_other or hacking_mods or hacking_srs
@@ -1076,6 +1099,15 @@ def _check_variant_semantics_delta(
                             raise ValueError(
                                 "Initial movement distance requires exact new metadata"
                             )
+                    elif key == IMPERSONATION:
+                        if not impersonation:
+                            raise ValueError("Impersonation requires source-verified refresh")
+                        if (
+                            row[index] is None
+                            or json.loads(row[index]) != {"inheritance": "family"}
+                            or after != IMPERSONATION_VARIANT
+                        ):
+                            raise ValueError("Impersonation refresh changed source-only semantics")
                     elif key == KILLER_HACKING_DEVICE:
                         if not killer_hacking:
                             raise ValueError("Killer Hacking requires source-verified refresh")
@@ -1444,6 +1476,40 @@ def refresh_gizmokit_v9_release(*, root: Path = ROOT) -> Path:
         raise ValueError("GizmoKit source signature drift")
     return _refresh_metadata_v9_release(
         root=root, variant_records={GIZMOKIT[1]}, gizmokit=True,
+    )
+
+
+def refresh_impersonation_v9_release(*, root: Path = ROOT) -> Path:
+    """Promote only the exact Impersonation IMP-2 deployment/activation variant."""
+    from tools.audit_source_variant_inputs import inventory_source_variants
+
+    report = inventory_source_variants(
+        root / ARMY, root / "data/generated/infinity.raw.db", root / RULES,
+    )
+    rows = [
+        row for row in report["catalogs"]["skills"]["items"]
+        if row["id"] == 249
+    ]
+    if (
+        len(rows) != 1
+        or rows[0]["name"] != "Impersonation"
+        or rows[0]["applicationId"] != 249
+        or rows[0]["occurrences"] != 14
+        or rows[0]["status"] != "unresolved-occurrence-parameter"
+        or rows[0]["reviewedVariant"] is not None
+        or rows[0]["reviewedDistance"] is not None
+        or rows[0]["reviewedNumericMod"] is not None
+        or rows[0]["reviewedExtra"] is not None
+        or rows[0]["reviewedCombinations"] is not None
+        or rows[0]["rawValues"]
+        or rows[0]["extraSignatures"] != [{
+            "extras": [[268, "TEXT", "IMP-2"]],
+            "reviewed": False, "count": 9,
+        }]
+    ):
+        raise ValueError("Impersonation source signature drift")
+    return _refresh_metadata_v9_release(
+        root=root, variant_records={IMPERSONATION[1]}, impersonation=True,
     )
 
 
@@ -1976,7 +2042,7 @@ def _refresh_metadata_v9_release(
     ecm_sources: bool = False, medikit: bool = False, gizmokit: bool = False,
     deactivator: bool = False,
     evo_trinity: bool = False, hacking_trinity_access: bool = False,
-    killer_hacking: bool = False,
+    killer_hacking: bool = False, impersonation: bool = False,
 ) -> Path:
     root = root.resolve()
     current_rules, current_publication, army = (root / path for path in (RULES, PUBLICATION, ARMY))
@@ -2073,6 +2139,7 @@ def _refresh_metadata_v9_release(
                 evo_trinity=evo_trinity,
                 hacking_trinity_access=hacking_trinity_access,
                 killer_hacking=killer_hacking,
+                impersonation=impersonation,
             )
         else:
             _check_source_pins_delta(current_rules, next_rules, pins)

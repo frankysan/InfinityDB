@@ -1235,6 +1235,33 @@ Equipment** (the latter includes the separately registered
 unqualified Hacking Device Plus SR-1 in
 [official source clarifications](official-source-clarifications.md#src-001--charontid-hacking-device-plus-unqualified-sr-1)).
 
+**Reviewed Impersonation IMP-2 source restriction (2026-11-01):**
+Pinned Army Skill source `249` has 14 direct occurrences,
+nine carrying exactly one `TEXT:IMP-2` extra (`268`).
+English N5.3 p. 96 expressly restricts a Trooper whose
+profile lists Impersonation (IMP-2) to deploying and
+activating only in Impersonation-2 State. The existing
+canonical `skill:impersonation` record cites that page
+and links both Impersonation States, without declaring
+them interchangeable. Its exact `reviewed-extra`
+effect uses `impersonation-state-restriction`, with
+`state: "state:impersonation-2"`,
+`appliesTo: "deployment-and-activation"` and
+`only: true`. The five occurrences without this
+extra retain ordinary family semantics. This variant
+does **not** redefine Discover, reveal, deployment
+eligibility or other State mechanics.
+
+A guarded source-signature v9 refresh promotes only
+the Impersonation family's additional metadata,
+preserves existing row/schema and publication data,
+and retains the previous matched release pair under
+ignored `local/`. Pinned raw-source tests compare
+the tracked and fresh rules exports. This is a
+descriptive source classification, not a runtime
+action resolver or cross-Army Unit-use index.
+Current unresolved baseline: **33 Skill / 1 Equipment**.
+
 **Reviewed EVO Trinity Upgrade (2026-11-01):**
 The pinned Equipment source `182` has 40
 direct occurrences, exactly two carrying
