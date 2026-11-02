@@ -3803,9 +3803,14 @@ follow-up action. Retain source-native values until official resolution.
   `c39fb659`, with lanes B/D on one worker each. The follow-up at
   `413a2185` passed 250 tests (16 skipped), verified all four lanes on
   distinct single workers and the Scenario FAQ A/D split. Lane D remained
-  the long tail (+254 s versus ~15 s for B/C); next benchmark two and
-  four slots with unchanged four-lane grouping and FAQ split, recording
-  CPU/RAM and slot occupancy. Keep defaults and test isolation unchanged.
+  the long tail (+254 s versus ~15 s for B/C). Controlled full Linux
+  2/4-slot runs at `413a2185` then passed the same 4,520 tests
+  (330 skipped) in 503.49/380.97 s; four slots reduced measured
+  cumulative slot waiting from 750.74 to 93.27 worker-s, with correct
+  lane assignments in both runs. This is a single pair, not yet
+  adoption evidence. Next: repeat in alternating order, analyze the
+  timestamped occupancy, gather CPU/RAM and resolve cross-host skip
+  coverage. Keep defaults and test isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

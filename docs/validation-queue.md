@@ -89,8 +89,12 @@ Only open VR obligations belong here.
   four slots **420.25 s**, with measured cumulative Chromium waiting
   **2,777.73 s** and **1,072.94 s**, respectively. Grouped skip reasons
   reconcile all 330 cases. See `docs/testing.md` for methodology.
-  Deferred: aligned Windows skip-reason comparison, selective missing-source
-  reconciliation, repeated alternating Linux 2/4-slot trials and CPU/RAM
+  Correctly grouped Linux full-suite pair at `413a2185`: both slot
+  counts passed **4,520 / 330 skipped**; two slots took **503.49 s**
+  with **750.74 worker-s** of measured slot waiting; four took
+  **380.97 s** with **93.27 worker-s** waiting (24.3% faster in one
+  pair). Deferred: aligned Windows skip-reason comparison, selective
+  missing-source reconciliation, alternating Linux repeats and CPU/RAM
   monitoring, with no new flaky browser failures. Retire only after
   the remaining evidence is recorded.
 
@@ -124,9 +128,14 @@ Only open VR obligations belong here.
   Linux at `413a2185` with pytest 9.1.1: **250 passed, 16 skipped**
   in **257.41 s**; lanes A/B/C/D each stayed on one worker, with Scenario
   FAQ split across A/D and the assignment guard passing. D remained the
-  long tail (+254 s). Deferred: repeat full 2/4-slot grouped comparisons
-  with resource sampling and verify Windows/Linux coverage parity. Retire
-  only after the remaining acceptance evidence is recorded.
+  long tail (+254 s). At `413a2185`, the grouped full Linux
+  2/4-slot pair passed **4,520 / 330 skipped** in **503.49/380.97 s**,
+  with each of A/B/C/D assigned to one worker in both runs; the
+  four-slot D lane still finished last (+377.62 s). Timestamped
+  metrics are on `devbox` under `local/benchmarks/` (details in
+  `testing.md`). Deferred: analyze occupancy, repeat alternating
+  comparisons with CPU/RAM sampling and verify Windows/Linux coverage
+  parity. Retire only after the remaining acceptance evidence.
 
 - [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
   safety across Linux and Windows for `tools.run_checks`.

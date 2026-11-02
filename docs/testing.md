@@ -1031,6 +1031,36 @@ run verifies scheduler correctness, **not** full-suite performance or
 cross-host skip parity; repeat equal-revision full-suite two-/four-slot
 runs with the same four lanes and FAQ split before changing defaults.
 
+**Controlled Linux grouped full-suite pair, 2026-11-02:** On the
+same `devbox` revision `413a2185` with eight xdist workers, four
+browser lanes, Scenario FAQ A/D splitting and required/full assets,
+both runs passed **4,520 tests, 330 skipped, zero failed** (two
+Python multiprocessing `fork()` deprecation warnings each). Each lane
+remained on exactly one worker in both runs: A `gw2` (122 setup
+events), B `gw3` (121), C `gw1` (137), and D `gw0` (217).
+
+- **Two Chromium slots:** pytest **503.49 s**, runner **504.11 s**;
+  measured cumulative slot waiting **750.74 worker-s** across nine
+  setup events. Lane final teardowns A/B/C/D at
+  +385.43/+182.36/+501.79/+449.84 s. Metrics:
+  `local/benchmarks/chromium-20261102-151402-286243/` on `devbox`.
+- **Four Chromium slots:** pytest **380.97 s**, runner **381.49 s**;
+  measured cumulative slot waiting **93.27 worker-s** in one non-lane
+  Chromium setup. Lane final teardowns A/B/C/D at
+  +248.01/+182.98/+243.47/+377.62 s. Metrics:
+  `local/benchmarks/chromium-20261102-152232-319639/` on `devbox`.
+
+Four slots shortened this paired test stage by **122.52 s (24.3%)**
+and reduced summed Chromium waiting by **657.47 worker-s (87.6%)**.
+Both runs passed the group-to-worker scheduling guard. With four slots,
+lane D remains the long tail, while the ungrouped game-mode Chromium
+test still waited 93.27 s for admission. These are sequential
+**single-pair observations**, not an alternating/repeated performance
+result. No CPU/RAM sampling or cross-host source/skip reconciliation
+was supplied. Keep existing defaults; repeat the same pinned
+configuration in alternating order, analyze the timestamped slot
+metrics and capture CPU/RAM before making an adoption decision.
+
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version
