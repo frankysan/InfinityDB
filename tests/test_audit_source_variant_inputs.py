@@ -100,6 +100,121 @@ def _inventory() -> dict:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_commlink_source_260_exact_optional_reinforcements_variants() -> None:
+    """Pin the two N4-origin Commlink (+X) limits without adopting an N5 rewrite."""
+    from collections import Counter
+
+    expected = {
+        298: (
+            "+1",
+            {999, 1230, 2592, 4442, 6300, 8806, 10713, 11734, 14909,
+             17154, 18497, 20208, 24963, 26446, 41919, 42461, 43008,
+             44128, 46578, 47107, 48719, 49107, 53242, 55244, 56920,
+             58965, 67570, 80003, 83095, 84652, 86515, 86749, 88318,
+             90408},
+        ),
+        299: ("+2", {22387, 27808, 29914, 31132, 34375, 36408, 37637, 39877}),
+    }
+    [item] = select_source_variants(_inventory(), "skills", [260])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Commlink", 260, 51,
+    )
+    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["reviewedExtra"] is None
+    assert item["rawValues"] == []
+    assert item["extraSignatures"] == [
+        {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": len(ids)}
+        for extra_id, (raw, ids) in expected.items()
+    ]
+    assert sum(len(ids) for _raw, ids in expected.values()) == 42
+    for extra_id, (raw, ids) in expected.items():
+        owners = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=260, extra_id=extra_id,
+        )
+        assert {owner["occurrence_id"] for owner in owners} == ids
+        assert Counter(owner["owner"] for owner in owners) == {"option": len(ids)}
+        assert all(
+            owner["extra_position"] == 1
+            and owner["extra_id"] == extra_id
+            and owner["extra_type"] == "TEXT"
+            and owner["extra_raw"] == raw
+            and owner["source_raw"] is None
+            for owner in owners
+        )
+
+    commlink = next(
+        record
+        for _, document in load_curated_directory(ROOT / "data/curated/rules")
+        for record in document["records"]
+        if record["id"] == "skill:commlink"
+    )
+    assert commlink["variantSemantics"] == {"inheritance": "family"}
+    assert "N4-origin annex" in commlink["summary"]
+    effects = " ".join(commlink["facts"]["effects"])
+    assert "maximum Trooper count" in effects
+    assert "it does not modify an Attribute" in effects
+    assert "not verified as a revised N5 edition" in commlink["facts"]["restrictions"][0]
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_lieutenant_source_119_exact_command_token_and_order_qualifiers() -> None:
+    """Pin extra Lieutenant resources without conflating the two source variants."""
+    from collections import Counter
+
+    expected = {
+        245: (
+            "+1 Command Token",
+            {463, 1483, 2680, 4543, 4719, 14297, 14303, 16268, 16274,
+             22764, 23254, 26531, 28275, 28279, 29339, 29348, 34370,
+             34579, 36403, 37632, 39872, 50549, 50562, 50999, 52824,
+             68502, 68526, 76721, 80658, 82587},
+            30,
+        ),
+        246: ("+1 Order", None, 53),
+    }
+    [item] = select_source_variants(_inventory(), "skills", [119])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Lieutenant", 119, 438,
+    )
+    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["reviewedExtra"] is None
+    assert item["rawValues"] == []
+    assert item["extraSignatures"] == [
+        {"extras": [[extra_id, "TEXT", name]], "reviewed": False, "count": count}
+        for extra_id, (name, _ids, count) in expected.items()
+    ]
+    for extra_id, (raw, ids, count) in expected.items():
+        rows = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=119, extra_id=extra_id,
+        )
+        assert len(rows) == count
+        if ids is not None:
+            assert {row["occurrence_id"] for row in rows} == ids
+        assert Counter(row["owner"] for row in rows) == {"option": count}
+        assert all(
+            row["extra_position"] == 1
+            and row["extra_id"] == extra_id
+            and row["extra_type"] == "TEXT"
+            and row["extra_raw"] == raw
+            and row["source_raw"] is None
+            and row["army_source_file"] is not None
+            for row in rows
+        )
+
+    lieutenant = next(
+        record
+        for _, document in load_curated_directory(ROOT / "data/curated/rules")
+        for record in document["records"]
+        if record["id"] == "skill:lieutenant"
+    )
+    assert lieutenant["variantSemantics"] == {"inheritance": "family"}
+    assert "Special Lieutenant Order" in lieutenant["facts"]["effects"][0]
+    assert lieutenant["citations"][0]["page"] == 99
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_doctor_source_53_exact_qualifiers_preserve_2w_and_reroll_boundary() -> None:
     """Pin Doctor extra signatures without treating source labels as reviewed effects."""
     from collections import Counter

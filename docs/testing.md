@@ -526,6 +526,29 @@ and Infiltration source regressions were **not** in the tested
 Per-reason skip parity and full-load Chromium performance acceptance
 remain independently queued under VR-0023/24.
 
+**2026-11-02 Camouflage/Infiltration cumulative Linux acceptance
+(VR-0031/32):** The agent pushed the already committed
+`eec7f940d435e74bd918367298abb8e2356b8302` Windows
+revision, safely fetched/fast-forwarded the dedicated
+`linux-dev` checkout and rebuilt/verified the ignored
+deployed-object publication. Pinned full-suite job
+`linux-dev:086caa465f334f6a9cc3a30ba85ec578`
+passed **4,874 tests, 28 skipped, zero failed** in
+542.38 s pytest time (543.00 s runner duration); all **808/808**
+SVG assets present. Warnings were limited to the two known
+multithreaded `fork()` deprecations. The runner measured
+**5,714.64 summed worker-seconds** of setup resource waiting
+across 31 events, with Chromium slot waits as long as
+472.30 s, confirming the separate contention benchmark
+remains open under VR-0023/24. The 28 skips match the
+historical Windows count, but skip-reason parity still needs
+independent reconciliation. The pinned source-variant module independently passed
+**63/63**, `linux-dev:03429aa6ae764130967fc05c5a9261cc`,
+using the raw Army archive with no skips; VR-0031/32
+are therefore retired. Engineer and Doctor source
+regressions committed after `eec7f940` are not
+covered by this run.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at

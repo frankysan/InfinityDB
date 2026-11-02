@@ -1623,6 +1623,17 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Archive/pin the approved edition/date and reconcile any differences
       before labelling the published N4-origin procedures as N5-native.
       This **does not block** the clearly disclosed optional legacy reference.
+    - [x] **Data processing — exact Commlink (+X) Army source pin:**
+      The pinned September 29 source includes **51** direct
+      Commlink source-260 occurrences: **34** exact
+      `298/TEXT:+1` and **8** exact `299/TEXT:+2`
+      on loadout options; nine are unqualified. The source-only
+      regression pins all **42** qualified occurrence IDs and
+      owner kinds, and requires the scoped N4-origin Commlink
+      reference to retain the maximum-Trooper-count meaning
+      without misrepresenting a revised N5 procedure. No typed
+      effect, Army roster legality inference, or publication
+      migration is performed by this source audit.
     - [ ] Encode `Commlink (+X)` as a typed maximum-Trooper-count parameter, not a
       Skill Level or Attribute MOD.
     - [x] Classify `Request Reinforcements` as a separate
@@ -1968,6 +1979,20 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         neither the `-3` nor `+3` source text is promoted to
         a general WIP modifier. Raw Army and generated databases
         remain unchanged; the Unit-usage index stays deferred.
+      - [x] **Data processing — Lieutenant source-119 resource annotations:**
+        Pinned September 29 Army Skill source 119 has **438** direct
+        occurrences, including **30** exact `245/TEXT:+1 Command Token`
+        and **53** exact `246/TEXT:+1 Order` qualifiers. Both are
+        singleton extras attached only to loadout options; the
+        exact 30 Command Token source IDs and all 83 raw owner/signature
+        properties are regression-pinned. N5.3 p. 99 explicitly
+        distinguishes an extra Command Token *for the match* from
+        **two** Special Lieutenant Orders per Turn instead of one.
+        These are not regular Orders, a universal +1 Order for all
+        army members, or the separate Strategos/Inspiring Leadership
+        effects. Preserve the unreviewed occurrence parameters until
+        separate typed semantics, publication guards and Unit-usage
+        projection are reviewed; no raw Army or rules database changes.
       - [x] **Data processing — Discover source-131 modifiers:**
         N5.3 pp. 68, 77 define bracketed Skill modifiers as usable
         only with that Skill, Discover as a WIP Roll, and ReRoll

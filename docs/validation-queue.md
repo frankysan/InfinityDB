@@ -96,43 +96,69 @@ retain required dependencies in any still-open VR item.
 ## Pending deferred execution
 
 Only open VR obligations belong here. **Current count: 6 distinct
-changes** (VR-0023/0024/0031/0032/0033/0034); no deferred design
-requirement is open. Oldest recorded date: 2026-11-02.
-The previously due execution batch is already running on the
-pinned Linux revision `eec7f940`; new Windows Doctor changes
-are not included. Its completion must be reconciled before
-retirement, and the Doctor change requires a subsequent
-committed revision and separate Linux handoff.
-The five-item execution threshold was reached, and the agent
-safely pushed existing committed Windows HEAD
-`eec7f940d435e74bd918367298abb8e2356b8302`, fetched
-and fast-forwarded the dedicated `linux-dev` worker, and
-rebuilt/checked the ignored deployed-object publication.
-The pinned full Linux test suite was dispatched as
-`linux-dev:086caa465f334f6a9cc3a30ba85ec578` with all
-808/808 SVGs present; terminal outcome and skip parity remain
-pending. **The new uncommitted Engineer regression is not
-part of this Linux revision.** Independent Windows development
-continued after dispatch.
-The `d16338ed7676615431d260f766c261f7236428fc`
-Linux full suite passed **4,872 / 28 skipped / zero failed**,
-with 808/808 published SVGs. The exact Confessor source
-regression also passed independently on the Linux raw
-Army archive (**1/1**), so VR-0030 is retired. The prior
-`16f0d4cf` cumulative suite passed **4,871 / 28 skipped**.
-Evidence is retained in [testing.md](testing.md#parallel-windows-development-and-linux-validation).
-The 28 skips still require per-reason cross-host reconciliation
-under VR-0023. Camouflage and Infiltration edits newer than
-`d16338ed` were not tested by that Linux run; the next
-compatible handoff requires the committed intended revision
-and verified Linux source inputs.
+changes** (VR-0023/0024/0033/0034/0035/0036); no deferred
+design requirement is open. Oldest recorded date: 2026-11-02.
+The due Linux batch is already dispatched; the new Windows
+Commlink test remains uncommitted and cannot be covered by
+that in-flight `60511fec` suite.
+Linux revision `eec7f940d435e74bd918367298abb8e2356b8302`
+completed its pinned full suite with **4,874 passed, 28 skipped,
+zero failed**, all **808/808** published SVGs available. The
+independent source-variant module passed **63/63** against the
+pinned raw Army archive. Therefore VR-0031 (Camouflage) and
+VR-0032 (Infiltration) are retired; detailed evidence is in
+[testing.md](testing.md#parallel-windows-development-and-linux-validation).
+The two browser-concurrency acceptance items remain open, including
+per-reason comparison of the 28 Linux/Windows skips. The
+five-item execution threshold triggered a second safe Git handoff:
+the agent published the existing committed Windows revision
+`60511fec335ac370f6664bb0b22edd0ee6681764`,
+fast-forwarded `linux-dev`, rebuilt and verified the ignored
+deployed-object publication, and started the new pinned full
+suite `linux-dev:5ab409f05073456bb1e550134cd23030`.
+Engineer and Doctor source regressions are included in that
+revision; the new uncommitted Lieutenant Windows test is not.
+Completion, source/archive coverage and skip parity remain
+pending; Windows development continues independently.
 
-- [ ] **VR-0034** (2026-11-02; pending new Windows commit):
+- [ ] **VR-0036** (2026-11-02; pending new Windows commit):
+  Cross-platform source-only validation of the optional N4-origin
+  Reinforcements Commlink `+1`/`+2` Trooper-count qualifiers.
+  Work: [Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
+  Windows base `60511fec335ac370f6664bb0b22edd0ee6681764`
+  plus uncommitted regression and TODO notes. Immediate:
+  `tests/test_audit_source_variant_inputs.py::test_commlink_source_260_exact_optional_reinforcements_variants`
+  **1 passed** with pinned raw Army source. Confirms **51**
+  direct rows, 34 `298/TEXT:+1`, eight `299/TEXT:+2`,
+  all 42 exact occurrence IDs and loadout-only owner kinds;
+  keeps typed semantics unresolved and N4-origin scope visible.
+  Design: none. Deferred: independent Linux raw Army validation
+  and next compatible cumulative suite on committed revision;
+  current `60511fec` Linux job predates this Windows change.
+
+- [ ] **VR-0035** (2026-11-02; pending new Windows commit):
+  Independently validate Lieutenant source-119 resource annotations,
+  retaining the distinction between extra Command Tokens and Special
+  Lieutenant Orders. Work: [source reconciliation](TODO.md#100--current-reference-completeness-gate);
+  baseline Windows `60511fec335ac370f6664bb0b22edd0ee6681764`
+  plus uncommitted source regression/documentation. Immediate:
+  `tests/test_audit_source_variant_inputs.py::test_lieutenant_source_119_exact_command_token_and_order_qualifiers`
+  **1 passed** with the pinned raw Army snapshot, checking all
+  **83** qualified rows, the 30 exact Command Token occurrence
+  IDs, separate `245`/`246` signatures, and loadout-only owners.
+  N5.3 p. 99 supports distinct resource scopes. Design: none.
+  Deferred: pinned source verification on the Linux worker and
+  a subsequent cumulative run of the committed Windows revision.
+  Neither the completed `eec7f940` suite nor the new
+  `60511fec` Linux suite covers the uncommitted change.
+
+- [ ] **VR-0034** (2026-11-02; shared Linux cumulative job
+  dispatched at `60511fec`, result pending):
   Cross-platform source-only acceptance of Doctor source-53
   `+3`, `2W` and `ReRoll -3` source signatures.
   Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
-  Windows base `2efa2689ce30f315cdfe85998f17d4a14a4d9fa2`
-  plus uncommitted source regression and documentation.
+  Windows work is committed by
+  `60511fec335ac370f6664bb0b22edd0ee6681764`.
   Immediate:
   `tests/test_audit_source_variant_inputs.py::test_doctor_source_53_exact_qualifiers_preserve_2w_and_reroll_boundary`
   **1 passed** with pinned raw Army data. Checks all three singleton
@@ -142,14 +168,17 @@ and verified Linux source inputs.
   [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope).
   Design: none. Deferred: exact raw-source coverage on Linux at
   the committed target revision and the next compatible cumulative
-  suite. The current `eec7f940` Linux run predates this change.
+  suite. Pinned `linux-dev` cumulative job
+  `linux-dev:5ab409f05073456bb1e550134cd23030`
+  is underway; dispatch alone is not acceptance.
 
-- [ ] **VR-0033** (2026-11-02; pending new Windows commit):
+- [ ] **VR-0033** (2026-11-02; shared Linux cumulative job
+  dispatched at `60511fec`, result pending):
   Cross-platform source-only acceptance of Engineer source-49
   singleton annotations, including the unresolved `ReRoll -3`.
   Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
-  baseline Windows `eec7f940d435e74bd918367298abb8e2356b8302`
-  plus uncommitted source regression/documentation.
+  Windows work is committed by
+  `60511fec335ac370f6664bb0b22edd0ee6681764`.
   Immediate: `tests/test_audit_source_variant_inputs.py::test_engineer_source_49_qualifiers_remain_unreviewed_and_owner_exact`
   **1 passed** with the pinned raw Army snapshot; all 15 exact
   occurrence IDs and four complete extra signatures are pinned.
@@ -158,41 +187,9 @@ and verified Linux source inputs.
   Design: none. Deferred: verify the source-only regression
   on Linux with the pinned raw archive after a subsequent
   committed Git handoff, plus the next compatible cumulative
-  run; the current committed revision does not include this test.
-
-- [ ] **VR-0032** (2026-11-02; shared Linux cumulative
-  job dispatched, result pending): Cross-platform and cumulative source-only acceptance
-  of Infiltration source-47 PH replacements and ReRoll qualifiers.
-  Work: [source variant reconciliation](TODO.md#100--current-reference-completeness-gate);
-  Windows base `3b796152cabeddcd853e685880b012912211b4da`
-  with an uncommitted exact-signature/owner regression and
-  semantic-source notes. Immediate:
-  `tests/test_audit_source_variant_inputs.py::test_infiltration_source_47_exact_ph_and_reroll_owners`
-  **1 passed** on Windows with the pinned raw Army archive,
-  checking all six singleton signatures, 22 occurrence IDs and
-  21 profile/1 option ownership; the complete
-  `tests/test_audit_source_variant_inputs.py` module passed
-  **63/63** on the same working tree. Ruff, docs, and diff
-  checks passed. Design: none.
-  Deferred: independent pinned Linux raw-archive acceptance
-  and shared cumulative job
-  `linux-dev:086caa465f334f6a9cc3a30ba85ec578`
-  at `eec7f940`; do not treat dispatch as acceptance.
-
-- [ ] **VR-0031** (2026-11-02; shared Linux cumulative
-  job dispatched, result pending): Cross-platform and cumulative source-only verification
-  of Camouflage source-29 `43/TEXT:1 Use` and its N5 FAQ scope.
-  Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
-  committed on Windows by
-  `3b796152cabeddcd853e685880b012912211b4da`.
-  Immediate: `tests/test_audit_source_variant_inputs.py::test_camouflage_one_use_source_29_signature_and_faq_scope`
-  **1 passed** with the pinned raw Army snapshot (597 direct source
-  occurrences; 223 exactly qualified). The FAQ retains the distinction
-  between deploying as a Model and failed attempted Marker deployment.
-  Design: none. Deferred: confirm pinned raw-source coverage and
-  reconcile the completed shared Linux suite
-  `linux-dev:086caa465f334f6a9cc3a30ba85ec578`
-  at `eec7f940` before retirement.
+  run. Linux job
+  `linux-dev:5ab409f05073456bb1e550134cd23030`
+  includes this test, but is not yet accepted.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -296,9 +293,9 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0035` (`VR-0023`, `VR-0024`,
-  `VR-0031`, `VR-0032`, `VR-0033`, `VR-0034`
-  open; earlier entries retired).
+- Execution: `VR-0037` (`VR-0023`, `VR-0024`,
+  `VR-0033`, `VR-0034`, `VR-0035`,
+  `VR-0036` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

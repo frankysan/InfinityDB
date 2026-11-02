@@ -3605,6 +3605,18 @@ InfinityDB should preserve the source Skill/profile facts and may curate these
 relationships for explanation or search. It should not materialize their
 resulting match resource as an unconditional property of the logical Unit.
 
+The September 29 pinned Army snapshot assigns source-119 Lieutenant
+`245/TEXT:+1 Command Token` to **30** loadout options. N5.3 p. 99
+defines this as one additional Command Token for the **match when
+that Trooper is chosen as Lieutenant**. It is conditional on Army List
+selection and must not be projected to all options for the parent Unit.
+A separate `246/TEXT:+1 Order` annotation appears on **53**
+Lieutenant loadout options; N5.3 p. 99 states that it creates
+**two Special Lieutenant Orders per Turn** rather than one, not
+a new Regular Order. Both exact Army signatures are pinned by
+a source-only regression, and neither has yet been promoted
+to a typed per-occurrence usage index.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Command_Tokens>
@@ -3620,6 +3632,9 @@ Command Tokens can be spent together with or act upon Orders, but they are not
 Order types. A normal Coordinated Order spends one Command Token plus one Regular
 Order. Separately, NCO operates on Special Lieutenant Orders by replacing them
 with Tactical Orders; it does not turn them into Command Tokens.
+Lieutenant `+1 Order` refers to a second *Special Lieutenant Order*
+each Turn, whereas Lieutenant `+1 Command Token` affects the
+player's separate Command Token pool for the match (N5.3 p. 99).
 
 InfinityDB should therefore keep Command-resource semantics separate from
 Training and generated Order semantics. Cross-links may describe interactions,
