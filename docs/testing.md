@@ -509,6 +509,23 @@ their per-reason cross-host comparison remains separate under
 VR-0023. A new Windows-only Religious Troop source regression
 written *after* dispatch is not covered by this run (VR-0030).
 
+**2026-11-02 Confessor source anomaly Linux acceptance (VR-0030 retired):**
+With Linux and Windows committed at
+`d16338ed7676615431d260f766c261f7236428fc`, the
+`linux-dev:70e28c0dc41d460b9cde79fff596f684` cumulative
+suite passed **4,872 tests, 28 skipped, zero failed** in
+555.30 s (808/808 SVGs available; two known multiprocessing
+`fork()` warnings). The separate exact Army raw-snapshot
+`tests/test_audit_source_variant_inputs.py::test_religious_troop_total_source_83_is_unresolved_and_owner_pinned`
+regression passed **1/1**, job
+`linux-dev:4cee49adbe684ae797afeb8bf5c7daa6`.
+This retires VR-0030 without changing the upstream Confessor
+Religious Troop/Terrain qualifier. The later Windows Camouflage
+and Infiltration source regressions were **not** in the tested
+`d16338ed` snapshot and remain deferred under VR-0031/32.
+Per-reason skip parity and full-load Chromium performance acceptance
+remain independently queued under VR-0023/24.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at

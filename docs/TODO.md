@@ -1918,6 +1918,20 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         typed one-use semantics are explicitly modeled and guarded
         for publication. This does not authorize an inferred Unit-usage
         index or a state-transition evaluator.
+      - [x] **Data processing — Infiltration PH/ReRoll source audit:**
+        The September 29 pinned Army snapshot contains **216** direct
+        Infiltration source-47 rows; **17** carry exactly one `PH=X`
+        replacement (4 PH=12, 4 PH=15, 2 PH=16, 2 PH=18,
+        5 PH=19), and **five** carry `277/TEXT:ReRoll`.
+        All **22** exact occurrence IDs, owner kinds (21 profile,
+        one option) and complete singleton signatures are pinned by
+        a source regression. N5.3 p. 97 defines PH-3 using the
+        bracketed PH value and the specific `ReRoll PH=X` rule;
+        bare Army `ReRoll` does not itself specify a PH replacement
+        (generic ReRoll applies only to the annotated Skill).
+        No typed occurrence mapping or Unit-usage index is published
+        by this audit; future semantic promotion needs explicit
+        schema/publication guards.
       - [x] **Data processing — Discover source-131 modifiers:**
         N5.3 pp. 68, 77 define bracketed Skill modifiers as usable
         only with that Skill, Discover as a WIP Roll, and ReRoll

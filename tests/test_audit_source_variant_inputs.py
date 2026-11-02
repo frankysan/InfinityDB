@@ -100,6 +100,65 @@ def _inventory() -> dict:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_infiltration_source_47_exact_ph_and_reroll_owners() -> None:
+    """Preserve exact Army qualifiers before introducing typed Infiltration variants."""
+    from collections import Counter
+
+    # N5.3 p. 97 scopes bracketed PH replacements to the PH-3
+    # Infiltration Roll; bare ReRoll is a distinct source signature.
+    expected = {
+        250: ("PH=12", {51187, 51194, 58587, 58594}, {"profile": 4}),
+        277: ("ReRoll", {44546, 74177, 61511, 65105, 67248}, {"profile": 5}),
+        317: ("PH=18", {86311, 90562}, {"profile": 2}),
+        318: ("PH=19", {86574, 90140, 22696, 25017, 31744},
+              {"profile": 5}),
+        340: ("PH=16", {46149, 58240}, {"profile": 2}),
+        353: ("PH=15", {82925, 63815, 65316, 82466},
+              {"option": 1, "profile": 3}),
+    }
+    [item] = select_source_variants(_inventory(), "skills", [47])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Infiltration", 47, 216,
+    )
+    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["reviewedExtra"] is None
+    assert item["rawValues"] == []
+    assert item["extraSignatures"] == [
+        {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": len(ids)}
+        for extra_id, (raw, ids, _owners) in expected.items()
+    ]
+    assert sum(len(ids) for _raw, ids, _owners in expected.values()) == 22
+
+    for extra_id, (raw, ids, owners) in expected.items():
+        rows = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=47, extra_id=extra_id,
+        )
+        assert {row["occurrence_id"] for row in rows} == ids
+        assert Counter(row["owner"] for row in rows) == owners
+        assert all(
+            row["extra_position"] == 1
+            and row["extra_id"] == extra_id
+            and row["extra_type"] == "TEXT"
+            and row["extra_raw"] == raw
+            and row["source_raw"] is None
+            and row["army_source_file"] is not None
+            for row in rows
+        )
+
+    infiltration = next(
+        record
+        for _, document in load_curated_directory(ROOT / "data/curated/rules")
+        for record in document["records"]
+        if record["id"] == "skill:infiltration"
+    )
+    effects = " ".join(infiltration["facts"]["effects"])
+    assert "normally PH-3" in effects
+    assert "profile-specific PH replacement" in effects
+    assert infiltration["variantSemantics"] == {"inheritance": "family"}
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_camouflage_one_use_source_29_signature_and_faq_scope() -> None:
     """Pin exact Army one-use qualifiers without treating them as a reviewed effect."""
     [item] = select_source_variants(_inventory(), "skills", [29])["items"]

@@ -4903,6 +4903,26 @@ graph cannot state precisely remain in the maintained future ledger: failed Infi
 Marker/Hidden Deployment options, temporary loss of Partial Cover during airborne arrival,
 Foxhole's Partial Cover semantics, and Minelayer's item-dependent Disposable consumption.
 
+**Infiltration source-specific PH and ReRoll annotations (N5.3 p. 97):**
+The Infiltration Roll normally uses PH-3. When the Unit Profile lists an explicit
+`PH=X`, the rule applies **X-3** to this Roll, not the Trooper's ordinary PH and
+not a general Attribute replacement. The specific `ReRoll PH=X` rule allows
+a failed Infiltration Roll to be rerolled using the indicated PH value, with
+the second result binding. The general N5 ReRoll rule separately provides
+one die rerolled when using the annotated Skill; the five Army
+`ReRoll`-only profiles **do not supply an explicit PH=X value**, so no
+additional PH replacement is inferred.
+
+The pinned September 29 Army snapshot has **216 direct source-47
+Infiltration occurrences**. Exactly **17** have one of five `PH=X`
+extras (12, 15, 16, 18 or 19), and **five** have
+`277/TEXT:ReRoll`; **21** of the qualified occurrences belong to
+profiles and **one** to an option. A source-only regression pins all
+22 exact occurrence IDs and owner kinds. They remain unreviewed
+occurrence parameters for the variant index until typed semantics and
+publication guards are implemented; this source reconciliation changes
+neither a Skill definition nor the paired published rules database.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Combat_Jump&oldid=3456>
