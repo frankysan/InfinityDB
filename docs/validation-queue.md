@@ -89,6 +89,22 @@ Only open VR obligations belong here.
   Design: none. Deferred: cumulative full test suite after this
   change; hosted CI and release-candidate acceptance remain separate.
 
+- [ ] **VR-0010** (2026-11-02; ready-to-run): Run cumulative tests
+  after registering selected N5.3 MULTI Rifle and MULTI Heavy
+  Machine Gun mode/source and Chromium evidence in the current
+  Core/Hacking inventory.
+  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree after `ddb6c39f`;
+  files: `tests/test_verify_weapon_source_cards_browser.py`,
+  `tools/report_reference_baseline.py`,
+  `tests/test_report_reference_baseline.py` and supporting docs;
+  risk: low. Immediate: six real Chromium mode/navigation cases,
+  source/API checks, inventory reconciliation and missing-test
+  fail-closed guard **13 passed**; Ruff, Pyright, docs and diff
+  checks **PASS**.
+  Design: none. Deferred: cumulative full project suite;
+  hosted CI and release acceptance remain separate.
+
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -99,7 +115,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0010` (`VR-0009` open; earlier entries retired).
+- Execution: `VR-0011` (`VR-0009` and `VR-0010` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

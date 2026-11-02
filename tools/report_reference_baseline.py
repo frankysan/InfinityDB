@@ -1371,6 +1371,8 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:standard-game": "test_army_retreat_standard_game_normal_reference_navigation",
     "rule:game-modes": "test_game_modes_source_table_normal_reference_navigation",
     "rule:modifiers-explained": "test_modifiers_explained_normal_reference_navigation",
+    "weapon:multi-rifle": "test_multi_weapon_modes_stay_separate_in_normal_browser",
+    "weapon:multi-heavy-machine-gun": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "equipment:firewall": "test_added_equipment_firewall_normal_browser",
     "rule:order-expenditure-sequence": (
         "test_conditional_reaction_source_slices_visible_in_normal_browser"
@@ -1434,11 +1436,15 @@ def reconcile_explanation_inventory(
     frozen = parse_frozen_explanation_inventory(
         inventory_path.read_text(encoding="utf-8")
     )
-    browser_test_source = (
-        PROJECT_ROOT / "tests/test_verify_scenario_faq_browser.py"
-    ).read_text(encoding="utf-8")
+    browser_test_sources = [
+        (PROJECT_ROOT / path).read_text(encoding="utf-8")
+        for path in (
+            "tests/test_verify_scenario_faq_browser.py",
+            "tests/test_verify_weapon_source_cards_browser.py",
+        )
+    ]
     for identifier, test in SELECTED_EXPLANATION_BROWSER_TESTS.items():
-        if f"def {test}(" not in browser_test_source:
+        if not any(f"def {test}(" in source for source in browser_test_sources):
             raise ReferenceBaselineError(
                 f"Selected browser evidence no longer exists: {identifier}"
             )

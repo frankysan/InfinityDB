@@ -1719,6 +1719,25 @@ Weapon and whole-record acceptance remain open. Six focused tests
 passed including the inventory crosswalk; cumulative regression on
 the final change is queued as VR-0009.
 
+**MULTI Rifle and MULTI Heavy Machine Gun selected modes (2026-11-02):**
+`test_multi_weapon_modes_stay_separate_in_normal_browser` in
+`tests/test_verify_weapon_source_cards_browser.py` checks normal
+catalog-to-detail navigation at 1440/390/320 px, all three source
+profiles per Weapon, mode-local Ammunition, Burst, PS, Saving
+Rolls and Anti-materiel/Suppressive Fire Traits. It verifies the
+reviewed N5.3 pp. 183/179 citations, a keyboard-operated link to
+AP Ammunition, JS errors and horizontal fit. Existing API tests
+preserve source-mode facts independently. The six Chromium cases and two API cases passed initially (8/8).
+The inventory initially failed because selected browser test names
+were looked up only in the scenario/FAQ browser module. The auditor
+now checks that module and the existing Weapon browser module;
+a negative regression confirms missing test names still fail closed.
+The expanded focused run **passed 13/13**. The current
+reconciliation records only selected browser evidence
+for `weapon:multi-rifle` and `weapon:multi-heavy-machine-gun`;
+neither the frozen inventory nor whole-Weapon acceptance changes.
+Cumulative regression is deferred as VR-0010.
+
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill
 owners from historical Git commit `c5400ab1`. This explicitly requires

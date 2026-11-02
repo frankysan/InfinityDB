@@ -152,6 +152,80 @@ def test_pinned_weapon_modes_rules_links_and_citations(
     finally:
         page.close()
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "source_page", "modes"),
+    (
+        (
+            "multi-rifle", 183,
+            (
+                ("Anti-Materiel Mode", "DA", "1", "7", "ARM × 2",
+                 "Anti-materiel", "Suppressive Fire"),
+                ("AP Mode", "AP", "3", "7", "ARM/2 × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+                ("Shock Mode", "Shock", "3", "7", "ARM × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+            ),
+        ),
+        (
+            "multi-heavy-machine-gun", 179,
+            (
+                ("Anti-materiel Mode", "Exp", "1", "5", "ARM × 3",
+                 "Anti-materiel", "Suppressive Fire"),
+                ("AP Mode", "AP", "4", "5", "ARM/2 × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+                ("Shock Mode", "Shock", "4", "5", "ARM × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+            ),
+        ),
+    ),
+)
+def test_multi_weapon_modes_stay_separate_in_normal_browser(
+    origin: str, chrome: Any, width: int, slug: str, source_page: int,
+    modes: tuple[tuple[str, str, str, str, str, str, str], ...],
+) -> None:
+    """V1-A08: source-scoped MULTI modes must not transfer Burst or Traits."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{origin}/weapons", wait_until="domcontentloaded")
+        entry = page.locator(f'#catalog-list a[href="/weapons/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{origin}/weapons/{slug}", timeout=30000)
+        cards = page.locator(".weapon-variant .weapon-profile")
+        cards.first.wait_for(state="visible", timeout=30000)
+        assert cards.count() == len(modes), (slug, width)
+        for card, (name, ammo, burst, ps, saving, required, forbidden) in zip(
+            cards.all(), modes, strict=True,
+        ):
+            assert card.locator("h4").first.inner_text() == name
+            cells = card.locator(".weapon-statline tbody tr td")
+            assert [
+                cell.inner_text() for cell in cells.all()
+            ] == [ammo, burst, ps, saving], (slug, width, name)
+            text = card.inner_text()
+            assert required in text, (slug, width, name, required)
+            assert forbidden not in text, (slug, width, name, forbidden)
+        rule = page.locator(f'#rule-weapon-{slug}')
+        rule.wait_for(state="visible", timeout=30000)
+        assert f"p. {source_page}" in rule.locator(
+            ".rules-source-citations"
+        ).inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        ap_link = cards.nth(1).locator('a[href="/ammunition/ap"]').first
+        ap_link.wait_for(state="visible", timeout=10000)
+        ap_link.focus()
+        ap_link.press("Enter")
+        page.wait_for_url(f"{origin}/ammunition/ap", timeout=30000)
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
 @pytest.fixture(scope="module")
 def published_weapons(origin: str) -> list[dict[str, Any]]:
     """Read every published Weapon detail once for storage/API/browser checks."""

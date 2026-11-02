@@ -1016,11 +1016,22 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           citations, keyboard navigation and layout. No authored rule or
           published artifact changed; this is one selected clause/browser
           disposition, not whole-record or whole-Weapon acceptance.
+        - [x] **MULTI Rifle/HMG source-mode player presentation
+          (2026-11-02):** Source-reviewed N5.3 pp. 183/179 and
+          existing API tests distinguish three mutually exclusive
+          Anti-materiel, AP and Shock modes for each Weapon. Added
+          repeatable normal Chromium checks at 1440/390/320 px
+          for catalog discovery, per-mode Ammunition/Burst/PS/Saving,
+          strictly local Anti-materiel versus Suppressive Fire Traits,
+          source-page citations, keyboard navigation to AP Ammunition,
+          JavaScript errors and horizontal fit. No weapon profile,
+          curated rule or generated artifact changed; this is selected
+          source/route evidence, not acceptance of all Weapon modes.
         - [ ] **Clause and browser dispositions:** Reconcile each current source
           section and record with later documented source/FAQ decisions,
           reviewed conditional effects, and normal-player browser evidence.
-          Prior A01–04 and the selected Equipment/MOD browser tests cover
-          specific routes, not all 450 records.
+          Prior A01–04 and the selected Equipment/MOD/MULTI Weapon
+          browser tests cover specific routes, not all 450 records.
           Prioritize added Skills, the five Visibility Zone terms, source-scoped
           Rules, and Weapon family/mode cases; retain unresolved source conflicts.
         - [ ] **Final completeness gate:** Sign off all relevant current

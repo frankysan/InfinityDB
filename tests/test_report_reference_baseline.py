@@ -75,6 +75,7 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
         "rule:initiative-roll", "rule:combat-group", "rule:army-retreat",
         "rule:standard-game", "rule:game-modes", "equipment:firewall",
         "rule:modifiers-explained",
+        "weapon:multi-rifle", "weapon:multi-heavy-machine-gun",
         "rule:order-expenditure-sequence", "skill:look-out",
         "term:visibility-zone", "term:low-visibility-zone",
         "term:poor-visibility-zone", "term:zero-visibility-zone",
@@ -87,6 +88,20 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
             "selected-route-smoke-evidence-not-full-acceptance",
             "source-variant-pending-owner-context-presentation-review",
         }
+
+
+def test_selected_weapon_browser_evidence_fails_closed_on_missing_test() -> None:
+    """Selected browser markers must resolve to an actual maintained test."""
+    with patch.dict(
+        "tools.report_reference_baseline.SELECTED_EXPLANATION_BROWSER_TESTS",
+        {"weapon:multi-rifle": "test_nonexistent_multi_weapon_browser_case"},
+        clear=True,
+    ):
+        with pytest.raises(
+            ReferenceBaselineError,
+            match="Selected browser evidence no longer exists: weapon:multi-rifle",
+        ):
+            reconcile_explanation_inventory()
 
 
 def test_post_inventory_equipment_distinguishes_source_variants_from_public_firewall() -> None:
