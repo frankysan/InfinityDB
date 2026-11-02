@@ -607,6 +607,11 @@ omission, reordering and invented `+3`. Windows
 against the actual release revision), rules-database module
 **166/166**, temporary rules/data builds, Ruff and Pyright
 passed.
+A separate v9 migration-delta regression passed **7/7**
+on Windows (and the full release-storage candidate module
+passed **530/530**), verifying a single Commlink variant
+append and refusing changes to unrelated records, schema, missing
+records, unchanged variants and mismatched baselines.
 The active tracked v9 rules/publication pair is
 **not yet updated**; its guarded migration and matched
 deployed-object publication must be accepted independently

@@ -2161,6 +2161,65 @@ def test_decoy_v9_refresh_checks_pinned_source_signatures(
 
 
 @pytest.mark.parametrize(
+    "defect", (None, "other-record", "schema", "missing", "no-op",
+               "wrong-base", "other-variant"),
+)
+def test_commlink_v9_guard_preserves_other_records_and_schema(
+    tmp_path: Path, defect: str | None,
+) -> None:
+    """The optional annex variant may be appended, not broadly republished."""
+    from tools.restrictions_v9_release import _check_variant_semantics_delta
+
+    source = Path(__file__).resolve().parents[1] / (
+        "data/curated/rules/reinforcements-extra-n4-reference.json"
+    )
+    document = json.loads(source.read_text(encoding="utf-8"))
+    record = next(row for row in document["records"] if row["id"] == "skill:commlink")
+    variant = copy.deepcopy(record["variantSemantics"])
+    key = ("reinforcements-extra-n4-reference", "skill:commlink")
+    before, after = tmp_path / "before.db", tmp_path / "after.db"
+    baseline = '{"inheritance":"family"}'
+    with sqlite3.connect(before) as old, sqlite3.connect(after) as new:
+        old.execute(
+            "CREATE TABLE records(collection_id TEXT,id TEXT,variant_json TEXT,facts TEXT)"
+        )
+        old.executemany("INSERT INTO records VALUES (?,?,?,?)", [
+            (*key, baseline, "preserved"),
+            ("reinforcements-extra-n4-reference", "skill:other", None, "preserved"),
+        ])
+        old.commit()
+        old.backup(new)
+        if defect == "wrong-base":
+            old.execute(
+                "UPDATE records SET variant_json=? WHERE id='skill:commlink'",
+                ('{"inheritance":"source"}',),
+            )
+            old.commit()
+        if defect != "no-op":
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE id='skill:commlink'",
+                (json.dumps(variant),),
+            )
+        if defect == "other-record":
+            new.execute("UPDATE records SET facts='changed' WHERE id='skill:other'")
+        elif defect == "schema":
+            new.execute("CREATE INDEX changed ON records(id)")
+        elif defect == "missing":
+            new.execute("DELETE FROM records WHERE id='skill:commlink'")
+        elif defect == "other-variant":
+            new.execute(
+                "UPDATE records SET variant_json=? WHERE id='skill:other'",
+                ('{"inheritance":"family"}',),
+            )
+    changed = {key: json.dumps(variant)}
+    if defect is None:
+        _check_variant_semantics_delta(before, after, changed)
+    else:
+        with pytest.raises(ValueError):
+            _check_variant_semantics_delta(before, after, changed)
+
+
+@pytest.mark.parametrize(
     "defect", (None, "wrong-unit", "wrong-scope", "wrong-raw",
                "wrong-extra-id", "other-record", "schema", "missing"),
 )

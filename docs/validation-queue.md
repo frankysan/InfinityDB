@@ -142,7 +142,13 @@ validation are explicit agent actions, not background Git mirroring.
   publication have **not** been changed. Required: pinned Linux
   source/regression and compatible cumulative suite after commit;
   separately stage the v9 rules/publication pair using the
-  established guarded delta/rollback path, assert only the
+  established guarded delta/rollback path. The isolated delta
+  regression `test_commlink_v9_guard_preserves_other_records_and_schema`
+  passed **7/7**; the full release-storage candidate module
+  passed **530/530**: an exact Commlink family-to-parameter
+  append is allowed, while unrelated record/schema changes,
+  missing/no-op targets and incorrect baseline are rejected.
+  Still verify the complete matched pair, assert only the
   `skill:commlink` variant semantics differ, preserve
   Restrictions, all deployed objects, source pins and schema;
   run release-pair parity and normal UI acceptance before
