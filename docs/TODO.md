@@ -3776,8 +3776,10 @@ follow-up action. Retain source-native values until official resolution.
   opt-in Scenario FAQ split passed its first full browser-section run and
   cumulative-suite validation passed. A capacity-owned pooled Chrome pilot
   across three lane-B modules also passed (121 tests in each mode), but
-  saved only 1.5% in one comparison. Next: repeated measurements, process
-  resource sampling and Chrome lifecycle profiling across more modules.
+  saved only 1.5% in one comparison. The pooled four-lane browser section
+  and cumulative default full test suite passed, retiring local VR-0022.
+  Next: repeated measurements, process resource sampling and Chrome
+  lifecycle profiling across more modules.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

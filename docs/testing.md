@@ -778,6 +778,20 @@ More complete host CPU/RAM sampling and repeated, alternated runs are
 still required before adopting the pool; measured startup cost is too
 small to explain the full-suite long-tail delays.
 
+**Cumulative local validation of the reuse pilot, 2026-11-02:** The
+default test command (`python -m pytest -n auto --dist worksteal` through
+`tools.run_checks`, without reuse or Scenario FAQ split enabled) passed
+**4,805 tests, 25 skipped, 0 failed** in **533.47 s** (runner duration
+534.09 s, exit 0). Evidence: asynchronous job
+`055606fc719249308264da6fbd75565f`, on `dev/v1.0.0` at
+`16560d03` with the reuse-pilot working-tree edits. This fulfills the
+local cumulative-test obligation `VR-0022`; hosted CI and final
+release-candidate verification remain independent. Fixture setup
+durations still reached **284.93 s**, reflecting the unresolved
+default-scheduler long tail. At documentation closeout the repository
+HEAD had advanced to `709ccc7f`; this test result is **not** claimed
+as validation of changes introduced after `16560d03`.
+
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version
