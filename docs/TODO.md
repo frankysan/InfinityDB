@@ -3793,15 +3793,16 @@ follow-up action. Retain source-native values until official resolution.
   The next opt-in benchmark records request/acquire/release timestamps
   and xdist worker identity, with an offline timeline analyzer.
   The Linux follow-up found Scenario FAQ fixtures spread across seven
-  workers and no visible xdist lane assignments; this invalidates the
-  previous assumption of effective four-lane scheduling. Mark browser
-  groups before xdist's collection-modify hook and verify actual
-  group-to-worker assignments on Linux before benchmarking any new
-  lane balance. A subsequent attempted Linux run was invalidated
-  when bare `--report` consumed a trailing test target and overwrote
-  its tracked source; restore Scenario FAQ on devbox and verify the
-  runner's report-destination guard before repeating the narrow test.
-  Keep admission limits and test isolation unchanged.
+  workers and no effective lane grouping. Early marker assignment
+  alone was not sufficient: after restoring a test module corrupted
+  by an ambiguous `--report` argument, a targeted Linux run passed
+  **232 / 16 skipped** but the guard rejected both lanes being
+  dispersed across workers. This matches the upstream pytest 9.2 /
+  pytest-xdist 3.8.0 node-ID regression. Constrain pytest to <9.2
+  until xdist is fixed, check `devbox` package versions, install a
+  compatible pytest in its venv and rerun narrow lane acceptance
+  before renewed concurrency benchmarking. Keep admission limits
+  and test isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

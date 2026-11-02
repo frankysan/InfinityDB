@@ -1,11 +1,49 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
+from typing import cast
 
 import pytest
 
-from tools.pytest_startup_profile import XdistStartupProfile, _runner_launch_timestamp
+from tools import pytest_startup_profile
+from tools.pytest_startup_profile import (
+    XdistStartupProfile,
+    _runner_launch_timestamp,
+    incompatible_loadgroup_versions,
+)
 from tools.test_sections import load_test_sections, section_for_module
+
+
+@pytest.mark.parametrize(
+    ("pytest_version", "xdist_version", "incompatible"),
+    [
+        ("9.1.1", "3.8.0", False),
+        ("9.2.0", "3.8.0", True),
+        ("9.2.1", "3.7.0", True),
+        ("9.2.0", "3.8.1", False),
+        ("9.2.0", "4.0.0", False),
+        ("8.4.2", "3.8.0", False),
+    ],
+)
+def test_loadgroup_dependency_compatibility(
+    pytest_version: str, xdist_version: str, incompatible: bool,
+) -> None:
+    assert incompatible_loadgroup_versions(pytest_version, xdist_version) is incompatible
+
+
+def test_incompatible_loadgroup_fails_before_running_tests(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    versions = {"pytest": "9.2.0", "pytest-xdist": "3.8.0"}
+    monkeypatch.setattr(pytest_startup_profile, "version", versions.__getitem__)
+    session = cast(pytest.Session, SimpleNamespace(
+        config=SimpleNamespace(getoption=lambda *a, **kw: "loadgroup"),
+    ))
+    with pytest.raises(pytest.UsageError, match="silently ignores --dist loadgroup"):
+        pytest_startup_profile.pytest_sessionstart(session)
+    session.config.getoption = lambda *a, **kw: "worksteal"
+    pytest_startup_profile.pytest_sessionstart(session)
 
 
 def test_test_section_config_covers_every_test_module_exactly_once() -> None:

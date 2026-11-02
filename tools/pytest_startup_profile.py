@@ -8,10 +8,12 @@ without creating persistent report artifacts or changing test distribution.
 from __future__ import annotations
 
 import os
+import re
 import time
 from collections import Counter
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
+from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
 import pytest
@@ -22,6 +24,40 @@ _SETUP_WAITS: pytest.StashKey[list[tuple[str, float]]] = pytest.StashKey()
 _WAIT_PROPERTY_PREFIX = "infinitydb_wait_"
 _LANE_PROPERTY = "infinitydb_browser_lane"
 _WORKER_PROPERTY = "infinitydb_browser_worker"
+
+
+def incompatible_loadgroup_versions(pytest_version: str, xdist_version: str) -> bool:
+    """pytest 9.2 node IDs break pytest-xdist 3.8.0 loadgroup scheduling."""
+    def release(value: str) -> tuple[int, int, int] | None:
+        match = re.match(r"^(\d+)\.(\d+)\.(\d+)", value)
+        if match is None:
+            return None
+        return int(match[1]), int(match[2]), int(match[3])
+
+    pytest_release = release(pytest_version)
+    xdist_release = release(xdist_version)
+    return bool(
+        pytest_release is not None and xdist_release is not None
+        and pytest_release >= (9, 2, 0) and xdist_release <= (3, 8, 0)
+    )
+
+
+def pytest_sessionstart(session: pytest.Session) -> None:
+    """Reject a known silently broken loadgroup combination before collection."""
+    if session.config.getoption("dist", default="no") != "loadgroup":
+        return
+    try:
+        pytest_version = version("pytest")
+        xdist_version = version("pytest-xdist")
+    except PackageNotFoundError:
+        return
+    if incompatible_loadgroup_versions(pytest_version, xdist_version):
+        raise pytest.UsageError(
+            f"pytest {pytest_version} with pytest-xdist {xdist_version} "
+            "silently ignores --dist loadgroup (pytest 9.2 node IDs). "
+            "Install the compatible dev dependencies: "
+            "python -m pip install 'pytest>=8.0,<9.2'."
+        )
 
 
 def summarized_skip_reasons(reports: Sequence[pytest.TestReport]) -> tuple[str, ...]:

@@ -567,19 +567,26 @@ the `@chromium-*` test grouping suffix and browser-lane timing output,
 unlike Windows. This invalidates interpreting the run as effective
 four-lane scheduling; the 4-slot capacity result remains valid.
 
-The suspected cause is that the dynamic `xdist_group` marker was
-assigned in `pytest_collection_modifyitems`, while pytest-xdist
-collects group names in its own implementation of that hook. Hook
-ordering and/or installed xdist versions may differ across platforms.
-The marker is now assigned earlier in `pytest_itemcollected`, with the
-existing section assignment and validation left unchanged. An
-additional controller-side report prints each `chromium-*` lane's
-**actual** worker and setup count, and makes an explicitly requested
-browser-lane run fail if a lane executes on multiple workers.
-This guard is **opt-in** with `--browser-lanes`, not used by default
-`worksteal` runs. A focused Windows eight-worker loadgroup check
-passed **12/12** with lane B on `gw1` and lane D on `gw0`.
-It does **not** yet establish the Linux behavior after this change.
+An initial hypothesis was hook ordering: the dynamic `xdist_group`
+marker was moved from `pytest_collection_modifyitems` to
+`pytest_itemcollected`, before the pytest-xdist collection hook.
+This was insufficient on Linux. The likely underlying cause is
+a known dependency incompatibility: **pytest 9.2.0** introduced
+structured internal node IDs; **pytest-xdist 3.8.0** still rewrites
+the old internal `_nodeid` field for loadgroup. Group markers remain
+visible, but loadgroup silently distributes those tests as ungrouped.
+The Linux environment's exact installed versions must still be checked.
+Until upstream releases a compatible xdist version, InfinityDB's
+`.[dev]` dependencies constrain pytest to **`>=8.0,<9.2`**.
+The startup profiler rejects the known-incompatible
+pytest/xdist combination on `--dist loadgroup` with an actionable
+message, before test collection. This is a safeguard, not a monkeypatch
+of pytest internals or a change to normal worksteal scheduling.
+
+The controller-side report prints each `chromium-*` lane's **actual**
+worker and setup count; an explicitly grouped run fails if a lane
+executes on multiple workers. A focused Windows eight-worker loadgroup
+check passed **12/12** with lane B on `gw1` and lane D on `gw0`.
 
 The attempted Linux verification on 2026-11-02 at
 `d848609d` **does not constitute a scheduling acceptance run**.
@@ -588,20 +595,28 @@ argparse consumed that path as the report destination and overwrote
 `tests/test_verify_scenario_faq_browser.py`. Pytest consequently
 collected the entire suite, could not import the corrupted module,
 and produced nine dependent reference-baseline failures plus a
-collection error (**4,268 passed, 314 skipped**). The instrumented
-report also showed lanes spread over multiple workers, so a separate
-Linux grouping problem remains possible, but the damaged-source run
-must not be used as a speed/stability baseline. The runner now
-normalizes this ambiguous `--report`/test-target combination and
-refuses to overwrite source or tracked files; the checkout's damaged
-module still requires an explicit Git restore.
+collection error (**4,268 passed, 314 skipped**). This run
+is invalid benchmark evidence. The runner now normalizes the ambiguous
+`--report`/test-target combination and refuses to overwrite source
+or tracked files.
 
-Before comparing scheduling performance, restore the Linux test file,
-synchronize the runner safeguard, and rerun a short Linux
-`browserlanes` check at an aligned revision **without a report-path
-ambiguity**. Confirm that the `chromium lane worker assignment` report
-shows one worker per lane, and only then perform repeatable full-suite
-timings. Continue to collect CPU/RAM samples separately.
+The restored Linux checkout at `9f9e7eaa` then ran the intended
+Scenario FAQ selection: **232 passed, 16 skipped in 135.17 s**, but the
+runner correctly reported **FAIL** because lane A's 112 setup events
+were distributed over **five workers**, and lane D's 136 events over
+**seven workers**. Measured Chromium waiting was **506.61 summed
+worker-seconds** across four setup events; this is not proof of
+correct lane scheduling. No test assertions failed. The attempted
+early-marker fix is therefore not sufficient on that Linux install.
+
+**Recovery and cross-host validation:** On `devbox`, verify installed
+versions with `./.venv/bin/python -m pip show pytest pytest-xdist`.
+After pulling the compatibility constraint, install
+`./.venv/bin/python -m pip install 'pytest>=8,<9.2'`, then run a
+small targeted `browserlanes` check **with test targets before
+`--report`**. Require each observed lane to appear on one worker
+and the targeted suite to pass before repeating full benchmarks.
+Collect CPU/RAM samples separately.
 
 ### Measured waiting versus pytest setup
 

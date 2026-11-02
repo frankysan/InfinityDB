@@ -112,11 +112,15 @@ Only open VR obligations belong here.
   The marker is now placed at item-collection time and opt-in lane runs
   report actual worker assignments, failing if any lane spans workers.
   Focused Windows eight-worker loadgroup: **12 passed**, two lanes
-  confined to one worker each. Deferred: repeat focused Linux
-  grouped test on the updated revision; verify expected lane/worker
-  mapping before a controlled full-suite 2/4-slot comparison.
-  Retire when Linux cross-platform behavior and full metrics are
-  confirmed in `docs/testing.md`.
+  confined to one worker each. Linux at `9f9e7eaa`: restored Scenario
+  FAQ **232 passed, 16 skipped**, but lanes A/D still spanned five/seven
+  workers, so the test stage failed its safety guard. This matches
+  the pytest 9.2 / pytest-xdist 3.8.0 incompatibility: constrain
+  pytest <9.2 and fail fast for known-broken loadgroup versions.
+  Deferred: confirm installed Linux versions, install a compatible
+  pytest, rerun focused Linux grouping and only then repeat the
+  controlled full-suite 2/4-slot comparison.
+  Retire when cross-platform behavior and metrics are confirmed.
 
 - [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
   safety across Linux and Windows for `tools.run_checks`.
@@ -125,11 +129,12 @@ Only open VR obligations belong here.
   (prior accidental truncation of a tracked test source).
   Immediate: focused runner tests **98 passed, 1 expected skip**;
   Ruff passed. Design: none.
-  Deferred: restore the corrupted Scenario FAQ module on devbox,
-  synchronize the checked runner, verify test target selection with
-  bare `--report`, and run the Linux targeted browser test plus
-  release-relevant CI. Do not retire while the damaged checkout or
-  the Linux lane-assignment failure remains unverified.
+  Linux restored the corrupted Scenario FAQ file and successfully
+  collected the intended selector at `9f9e7eaa` (**232 passed,
+  16 skipped**); the run failed only its separate lane-assignment
+  guard. Deferred: run the focused report-safety tests on Linux
+  and verify the specific bare-`--report` selector regression before
+  retiring this report-path safety obligation.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
