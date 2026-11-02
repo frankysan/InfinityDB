@@ -95,9 +95,20 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 4 distinct
-changes** (VR-0023/0024/0031/0032); no deferred design
+Only open VR obligations belong here. **Current count: 5 distinct
+changes** (VR-0023/0024/0031/0032/0033); no deferred design
 requirement is open. Oldest recorded date: 2026-11-02.
+The five-item execution threshold was reached, and the agent
+safely pushed existing committed Windows HEAD
+`eec7f940d435e74bd918367298abb8e2356b8302`, fetched
+and fast-forwarded the dedicated `linux-dev` worker, and
+rebuilt/checked the ignored deployed-object publication.
+The pinned full Linux test suite was dispatched as
+`linux-dev:086caa465f334f6a9cc3a30ba85ec578` with all
+808/808 SVGs present; terminal outcome and skip parity remain
+pending. **The new uncommitted Engineer regression is not
+part of this Linux revision.** Independent Windows development
+continued after dispatch.
 The `d16338ed7676615431d260f766c261f7236428fc`
 Linux full suite passed **4,872 / 28 skipped / zero failed**,
 with 808/808 published SVGs. The exact Confessor source
@@ -111,8 +122,24 @@ under VR-0023. Camouflage and Infiltration edits newer than
 compatible handoff requires the committed intended revision
 and verified Linux source inputs.
 
-- [ ] **VR-0032** (2026-11-02; ready after Windows revision
-  is committed): Cross-platform and cumulative source-only acceptance
+- [ ] **VR-0033** (2026-11-02; pending new Windows commit):
+  Cross-platform source-only acceptance of Engineer source-49
+  singleton annotations, including the unresolved `ReRoll -3`.
+  Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
+  baseline Windows `eec7f940d435e74bd918367298abb8e2356b8302`
+  plus uncommitted source regression/documentation.
+  Immediate: `tests/test_audit_source_variant_inputs.py::test_engineer_source_49_qualifiers_remain_unreviewed_and_owner_exact`
+  **1 passed** with the pinned raw Army snapshot; all 15 exact
+  occurrence IDs and four complete extra signatures are pinned.
+  Unresolved `ReRoll -3` interpretation is documented in
+  [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope).
+  Design: none. Deferred: verify the source-only regression
+  on Linux with the pinned raw archive after a subsequent
+  committed Git handoff, plus the next compatible cumulative
+  run; the current committed revision does not include this test.
+
+- [ ] **VR-0032** (2026-11-02; shared Linux cumulative
+  job dispatched, result pending): Cross-platform and cumulative source-only acceptance
   of Infiltration source-47 PH replacements and ReRoll qualifiers.
   Work: [source variant reconciliation](TODO.md#100--current-reference-completeness-gate);
   Windows base `3b796152cabeddcd853e685880b012912211b4da`
@@ -126,11 +153,12 @@ and verified Linux source inputs.
   **63/63** on the same working tree. Ruff, docs, and diff
   checks passed. Design: none.
   Deferred: independent pinned Linux raw-archive acceptance
-  and the next compatible cumulative suite. Do not treat the
-  earlier `d16338ed` Linux suite as covering this addition.
+  and shared cumulative job
+  `linux-dev:086caa465f334f6a9cc3a30ba85ec578`
+  at `eec7f940`; do not treat dispatch as acceptance.
 
-- [ ] **VR-0031** (2026-11-02; ready after safe Linux
-  Git handoff): Cross-platform and cumulative source-only verification
+- [ ] **VR-0031** (2026-11-02; shared Linux cumulative
+  job dispatched, result pending): Cross-platform and cumulative source-only verification
   of Camouflage source-29 `43/TEXT:1 Use` and its N5 FAQ scope.
   Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
   committed on Windows by
@@ -139,10 +167,10 @@ and verified Linux source inputs.
   **1 passed** with the pinned raw Army snapshot (597 direct source
   occurrences; 223 exactly qualified). The FAQ retains the distinction
   between deploying as a Model and failed attempted Marker deployment.
-  Design: none. Deferred: repeat exact source audit with Linux pinned
-  raw-archive coverage and the next compatible cumulative suite after
-  safe Git handoff; the completed `d16338ed` suite did not include
-  this new regression.
+  Design: none. Deferred: confirm pinned raw-source coverage and
+  reconcile the completed shared Linux suite
+  `linux-dev:086caa465f334f6a9cc3a30ba85ec578`
+  at `eec7f940` before retirement.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -246,8 +274,9 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0033` (`VR-0023`, `VR-0024`,
-  `VR-0031`, `VR-0032` open; earlier entries retired).
+- Execution: `VR-0034` (`VR-0023`, `VR-0024`,
+  `VR-0031`, `VR-0032`, `VR-0033` open;
+  earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

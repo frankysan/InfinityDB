@@ -1932,6 +1932,26 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         No typed occurrence mapping or Unit-usage index is published
         by this audit; future semantic promotion needs explicit
         schema/publication guards.
+      - [x] **Data processing — Engineer source-49 qualifier audit:**
+        The pinned September 29 Army snapshot has **389** direct
+        Engineer source-49 occurrences; **15** are qualified by
+        one of four singleton extras: `1/TEXT:+3` (three Parvati
+        profiles), `277/TEXT:ReRoll` (five Johnny Kao profiles),
+        `282/TEXT:WIP=14` (one Shénjī Yíng profile), and
+        `366/TEXT:ReRoll -3` (six Sophotect/Chung-Hee profiles,
+        including Reinforcements). All 15 occurrence IDs,
+        source signatures, and profile owners are pinned.
+        N5.3 p. 91 defines Engineer (ReRoll WIP=X) on its
+        own Skill Roll, and excludes that replacement WIP from
+        a later Command Token reroll. The Army's bare `ReRoll`
+        and `ReRoll -3` strings remain unreviewed; the
+        negative numeric suffix is **not** automatically
+        interpreted as a WIP replacement or generic MOD.
+        The same qualifier appears on three Doctor profiles,
+        so [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope)
+        records the exact rule-scope question without treating the
+        Army notation as a confirmed erratum. No curated variant,
+        imported source, or Unit-usage index is changed.
       - [x] **Data processing — Discover source-131 modifiers:**
         N5.3 pp. 68, 77 define bracketed Skill modifiers as usable
         only with that Skill, Discover as a WIP Roll, and ReRoll

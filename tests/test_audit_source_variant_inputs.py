@@ -100,6 +100,59 @@ def _inventory() -> dict:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_engineer_source_49_qualifiers_remain_unreviewed_and_owner_exact() -> None:
+    """Pin Engineer's four source-native annotations without inferring their effects."""
+    from collections import Counter
+
+    expected = {
+        1: ("+3", {61556, 79846, 82776}, {"profile": 3}),
+        277: ("ReRoll", {14386, 19104, 20688, 61587, 65741}, {"profile": 5}),
+        282: ("WIP=14", {17019}, {"profile": 1}),
+        366: ("ReRoll -3", {61698, 66205, 18992, 20658, 22194, 67282},
+              {"profile": 6}),
+    }
+    [item] = select_source_variants(_inventory(), "skills", [49])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Engineer", 49, 389,
+    )
+    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["reviewedExtra"] is None
+    assert item["rawValues"] == []
+    assert item["extraSignatures"] == [
+        {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": len(ids)}
+        for extra_id, (raw, ids, _owners) in expected.items()
+    ]
+    assert sum(len(ids) for _raw, ids, _owners in expected.values()) == 15
+
+    for extra_id, (raw, ids, owners) in expected.items():
+        rows = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=49, extra_id=extra_id,
+        )
+        assert {row["occurrence_id"] for row in rows} == ids
+        assert Counter(row["owner"] for row in rows) == owners
+        assert all(
+            row["extra_position"] == 1
+            and row["extra_id"] == extra_id
+            and row["extra_type"] == "TEXT"
+            and row["extra_raw"] == raw
+            and row["source_raw"] is None
+            and row["army_source_file"] is not None
+            for row in rows
+        )
+
+    engineer = next(
+        record
+        for _, document in load_curated_directory(ROOT / "data/curated/rules")
+        for record in document["records"]
+        if record["id"] == "skill:engineer"
+    )
+    assert engineer["variantSemantics"] == {"inheritance": "family"}
+    assert "Engineer (ReRoll WIP=X)" in " ".join(engineer["facts"]["effects"])
+    assert "later Command Token reroll" in " ".join(engineer["facts"]["effects"])
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_infiltration_source_47_exact_ph_and_reroll_owners() -> None:
     """Preserve exact Army qualifiers before introducing typed Infiltration variants."""
     from collections import Counter

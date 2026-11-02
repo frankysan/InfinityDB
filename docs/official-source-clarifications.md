@@ -220,6 +220,13 @@ This register collects questions that may eventually be sent to Corvus Belli for
 - **Question:** Was extra 33 (`Total`) mistakenly assigned to the Religious Troop entry rather than the preceding Terrain entry on CONFESSOR HEAVY SPEC-OPS, and should that profile be corrected to `Terrain (Total)` plus ordinary `Religious Troop`?
 - **InfinityDB:** Preserve the literal Army profile and its exact source extra as unreviewed provenance, without creating a Religious Troop variant, transferring the extra in stored imported data, or granting additional Religious Troop effects. Treat the Terrain assignment as a strongly supported **proposed source correction**, not a publisher-confirmed erratum. A pinned source regression checks the anomalous heavy profile against its light/bot and separate Spec-Ops comparators.
 
+### SRC-029 — Doctor/Engineer (ReRoll -3) lacks explicit N5 WIP scope
+
+- **Status:** open — source intent unknown; **not** an established rules contradiction. **Alias:** Army Skill sources `49` (Engineer) and `53` (Doctor), extra `366/TEXT:ReRoll -3`.
+- **Evidence:** Pinned September 29 Army source has **six** Engineer `ReRoll -3` profile occurrences (Sophotects and Chief Mech-Engineer Chung-Hee Jeong, including Reinforcement profiles), alongside **three** Doctor `ReRoll -3` profile occurrences (Bipandra). The N5.3 English rules, pp. **90–91**, describe `Doctor (ReRoll WIP=X)` and `Engineer (ReRoll WIP=X)` as failed Skill Roll rerolls using an *explicit bracketed WIP value*, with the later Command Token reroll excluded from the Skill-specific replacement. The Army `ReRoll -3` string instead supplies a signed `-3`, not an explicit `WIP=X` value. The 2026-09-29 Army Engineer inventory has 389 direct occurrences and 15 qualified ones; the sole `ReRoll -3` signature is source extra 366. This wording difference alone does **not** establish how the signed modifier should apply.
+- **Question:** Does the Army `ReRoll -3` notation mean the Engineer/Doctor reroll is made at the Trooper's ordinary WIP with a -3 MOD, an alternative fixed WIP value, or another defined effect? Does it apply only to the Skill-granted reroll, and does the N5.3 Command Token exception continue to exclude it?
+- **InfinityDB:** Preserve the literal `366/TEXT:ReRoll -3` source qualifier, retain the separately reviewed base Doctor/Engineer mechanics, and leave the specific occurrence parameter unreviewed. Do not transform `-3` into a fixed replacement WIP, a blanket WIP MOD, or an additional reroll until its exact scope is supported.
+
 ## Intake / future publisher correspondence
 
 When a new candidate is found, add a new numbered section using this compact checklist. Keep the record **even if locally resolved** until official source status is documented.
