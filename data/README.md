@@ -64,7 +64,9 @@ provenance/state, and build outputs.
   Intermediate JSON/raw archives and other generated build products remain ignored.
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
-source control so machine-local snapshot state does not obscure code changes. The two
+source control so machine-local snapshot state does not obscure code changes.
+For the private Linux worker, [Syncthing-staged development assets](../docs/syncthing-assets.md)
+defines the separate source staging and explicit, verified checkout activation procedure. The two
 runtime SQLite databases are the deliberate exception: their deterministic bytes are
 reviewed/tracked with each release so a tagged checkout contains the exact runtime data that
 production will serve. Generated snapshot manifests remain local provenance records rather

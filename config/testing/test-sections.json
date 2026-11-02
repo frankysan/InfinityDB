@@ -178,6 +178,7 @@
     "ops": {
       "description": "Development checks, deployment, archive/report tooling, and operational helpers.",
       "modules": [
+        "test_activate_synced_assets",
         "test_benchmark_test_workers",
         "test_browser_test_capacity",
         "test_browser_test_metrics",

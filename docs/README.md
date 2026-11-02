@@ -29,6 +29,8 @@ Use these documents when deciding how the project works now:
 - `ci.md` — hosted CI workflows and repository-level validation policy.
 - `deployment.md` — production install/update/rollback/operations contract.
 - `server-migration.md` — moving released or development environments between hosts.
+- [syncthing-assets.md](syncthing-assets.md) — private Windows-to-Linux ignored-source staging,
+  verification, and explicit checkout activation.
 - `releasing.md` — mandatory release gate and the 1.0 completeness definition.
 
 When two documents appear to overlap, prefer the owner above. Correct the owner first, then reduce
