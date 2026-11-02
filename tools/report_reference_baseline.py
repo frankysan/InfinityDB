@@ -1375,6 +1375,8 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     "weapon:multi-heavy-machine-gun": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "weapon:multi-marksman-rifle": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "weapon:multi-pistol": "test_multi_weapon_modes_stay_separate_in_normal_browser",
+    "weapon:boarding-pistol": "test_blast_and_hit_weapon_modes_keep_effects_separate_in_browser",
+    "weapon:missile-launcher": "test_blast_and_hit_weapon_modes_keep_effects_separate_in_browser",
     "equipment:firewall": "test_added_equipment_firewall_normal_browser",
     "rule:order-expenditure-sequence": (
         "test_conditional_reaction_source_slices_visible_in_normal_browser"

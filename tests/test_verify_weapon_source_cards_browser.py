@@ -253,6 +253,85 @@ def test_multi_weapon_modes_stay_separate_in_normal_browser(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "page_number", "profiles"),
+    (
+        (
+            "boarding-pistol", 182,
+            (
+                ("Blast Mode", "N", "1", "ARM × 1",
+                 ("Intuitive Attack", "Direct Template (Small Teardrop)")),
+                ("Hit Mode", "N", "2", "ARM × 1", ()),
+            ),
+        ),
+        (
+            "missile-launcher", 187,
+            (
+                ("Blast Mode", "Exp", None, "ARM × 3",
+                 ("Impact Template (Circular)", "Anti-materiel")),
+                ("Hit Mode", "AP+Exp", None, "ARM/2 × 3",
+                 ("Anti-materiel",)),
+            ),
+        ),
+    ),
+)
+def test_blast_and_hit_weapon_modes_keep_effects_separate_in_browser(
+    origin: str, chrome: Any, width: int, slug: str, page_number: int,
+    profiles: tuple[tuple[str, str, str | None, str, tuple[str, ...]], ...],
+) -> None:
+    """V1-A08: template, ammunition and attack-mode effects must not leak."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{origin}/weapons", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(f'#catalog-list a[href="/weapons/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{origin}/weapons/{slug}", timeout=30000)
+        cards = page.locator(".weapon-variant .weapon-profile")
+        cards.first.wait_for(state="visible", timeout=30000)
+        assert cards.count() == 2, (slug, width)
+        for card, (mode, ammo, burst, saving, traits) in zip(
+            cards.all(), profiles, strict=True,
+        ):
+            assert card.locator("h4").inner_text() == mode
+            statline = card.locator(".weapon-statline tbody tr").first
+            assert statline.locator('td[data-label="Ammunition"]').inner_text() == ammo
+            assert statline.locator('td[data-label="Saving"]').inner_text() == saving
+            if burst is not None:
+                assert statline.locator('td[data-label="B"]').inner_text() == burst
+            text = card.inner_text()
+            for trait in traits:
+                assert trait in text, (slug, mode, trait)
+            if mode == "Hit Mode":
+                for template in ("Direct Template", "Impact Template", "Intuitive Attack"):
+                    assert template not in text, (slug, mode, template)
+            if slug == "boarding-pistol":
+                assert card.locator(".weapon-ranges").count() == (
+                    0 if mode == "Blast Mode" else 1
+                ), (slug, mode)
+        rule = page.locator(f"#rule-weapon-{slug}")
+        rule.wait_for(state="visible", timeout=30000)
+        assert f"p. {page_number}" in rule.locator(
+            ".rules-source-citations"
+        ).inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        ammo_href = "/ammunition/normal" if slug == "boarding-pistol" else "/ammunition/exp"
+        first_link = cards.first.locator(f'a[href="{ammo_href}"]').first
+        first_link.wait_for(state="visible", timeout=10000)
+        first_link.focus()
+        first_link.press("Enter")
+        page.wait_for_url(f"{origin}{ammo_href}", timeout=30000)
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
 @pytest.fixture(scope="module")
 def published_weapons(origin: str) -> list[dict[str, Any]]:
     """Read every published Weapon detail once for storage/API/browser checks."""

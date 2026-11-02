@@ -1039,10 +1039,24 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           keyboard AP link, errors and horizontal fit. This adds
           selected browser evidence only; published and curated data
           and whole-Weapon acceptance remain unchanged.
+        - [x] **Boarding Pistol/Missile Launcher mode separation
+          (2026-11-02):** Extend selected V1-A08 Chromium acceptance
+          to the N5.3 pp. 182/187 Blast/Hit definitions at
+          1440/390/320 px. Boarding Pistol Blast retains the Small
+          Teardrop Direct Template, Intuitive Attack, B1 and no
+          range modifiers; Hit instead has ranged B2 with no
+          template/Intuitive Attack. Missile Launcher Blast retains
+          EXP, Circular Impact Template and three ARM saves; Hit
+          retains AP+EXP, no Circular Template and three ARM/2
+          saves. Both missile modes retain Anti-materiel.
+          Check catalog, per-mode card, citations, keyboard ammunition
+          links, JS errors and layout without changing Army or rules
+          data. This certifies selected presentation only, not
+          attack resolution or whole-record acceptance.
         - [ ] **Clause and browser dispositions:** Reconcile each current source
           section and record with later documented source/FAQ decisions,
           reviewed conditional effects, and normal-player browser evidence.
-          Prior A01–04 and the selected Equipment/MOD/MULTI Weapon
+          Prior A01–04 and the selected Equipment/MOD/Weapon mode
           browser tests cover specific routes, not all 450 records.
           Prioritize added Skills, the five Visibility Zone terms, source-scoped
           Rules, and Weapon family/mode cases; retain unresolved source conflicts.

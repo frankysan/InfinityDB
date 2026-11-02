@@ -1755,6 +1755,24 @@ The two new inventory identities receive selected browser
 evidence only, without whole-record approval. Broader regression
 is deferred under VR-0011.
 
+**Boarding Pistol / Missile Launcher selected mode separation
+(2026-11-02):** `test_blast_and_hit_weapon_modes_keep_effects_separate_in_browser`
+adds 1440/390/320 px Chromium checks for normal catalog navigation,
+mode-specific Ammunition/Burst/Saving Rolls, template and
+Intuitive Attack exclusion from Hit Mode, the Boarding Pistol
+ranged-versus-template range-table distinction, reviewed N5.3
+p. 182/187 citations, keyboard ammunition links, JS errors
+and horizontal fit. Missile Launcher Blast preserves three ARM
+saves with Circular Impact Template, while Hit preserves three
+ARM/2 saves with AP+EXP and no Template; both keep Anti-materiel.
+Nine focused browser/API/source-mode tests passed before inventory
+registration. The expanded set with inventory reconciliation and its
+fail-closed guard passed **11/11**; Ruff, Pyright, Markdownlint,
+documentation links and diff checks passed. The current 450-record
+inventory records these two Weapons as **selected browser evidence only**;
+it does not certify automatic attack resolution or the complete record.
+Cumulative project regression remains VR-0012.
+
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill
 owners from historical Git commit `c5400ab1`. This explicitly requires
