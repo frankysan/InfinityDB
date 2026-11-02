@@ -459,6 +459,51 @@ thousand worker-seconds of admission waiting; do not promote four slots
 as the default until repeated A/B/A trials, CPU/RAM observations and
 cross-platform release stability checks pass.
 
+**Per-worker JSONL analysis (the two archived `chromium-*/` directories):**
+The slot files record completed acquisitions and holds, not a continuous
+occupancy timeline. The two-slot run recorded **60 admission records**,
+**1,004.96 aggregate slot-held worker-seconds**, and **2,777.73
+worker-seconds waiting**. Its two operating slots were occupied for
+**509.90/608.34 s (83.8%)** and **495.05/608.34 s (81.4%)**. Extra
+near-zero records for slots 2/3 belong to admission tests and do not
+signify ordinary Chromium capacity beyond the configured two slots.
+
+The four-slot run recorded **74 admission records**, **1,173.90
+aggregate held seconds**, and **1,072.95 waiting seconds**. Its slots
+held **309.08/420.25 s (73.5%)**, **292.84 s (69.7%)**, **290.17 s
+(69.0%)**, and **281.81 s (67.1%)**. These percentages approximate
+individual-slot utilization relative to total pytest duration; they do
+not establish CPU utilization or the exact overlap pattern. The
+aggregate held duration *increased* by about **16.8%** with four slots,
+so gains in elapsed time are not proportional to reduced total work.
+
+Scenario FAQ was the largest admission holder in both configurations:
+**464.09 held seconds** (46.2% of all held time) over four records
+with two slots, versus **529.37 held seconds** (45.1%) over six records
+with four. Its longest individual holds were **228.73/224.86 s**
+with two slots and **132.39/130.26/129.00/126.17 s** with four.
+Other notable four-slot holders were Weapon source cards (**163.63 s**),
+Unit Skill presentation (**125.85 s**) and Fireteam context
+(**106.00 s**); the latter incurred **526.56 s** of cumulative slot
+waiting despite only 106 seconds held. Ammunition publication's
+cumulative wait fell from **997.18 s** to **51.33 s**.
+
+The instrumented Chromium lifecycle files contain only **15 launches
+totaling 2.29 s** (two-slot run) versus **18 launches totaling 2.81 s**
+(four-slot run). Both recorded **120 `new_page` operations** (15.50
+versus 17.14 s total). Only explicitly timed browser fixtures are
+included; do not mistake these for every browser/context operation
+in the suite. Chrome startup cost is negligible compared with admission
+waiting.
+
+**Next profiling improvement:** add additive monotonic timestamps for
+slot request, acquisition and release, preserving the existing JSONL
+duration fields. This would enable an actual concurrent-slot timeline
+and distinguish synchronized blocking from idle capacity. Continue to
+prioritize Scenario FAQ balance and avoid allocating browser slots to
+idle workers. The current ZIP contains no CPU/RAM samples, so a higher
+slot limit cannot yet be justified on resource-saturation evidence.
+
 ### Measured waiting versus pytest setup
 
 Pytest's native `setup` duration includes time blocked acquiring a Chromium

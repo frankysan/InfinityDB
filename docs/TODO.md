@@ -3787,7 +3787,12 @@ follow-up action. Retain source-native values until official resolution.
   **61.4% less summed Chromium-slot waiting** using four slots.
   Next: selectively transfer pinned source evidence, compare Windows
   skip reasons, and repeat alternating 2/4-slot Linux runs with CPU/RAM
-  observations before changing the default.
+  observations before changing the default. Per-worker Linux slot
+  metrics show Scenario FAQ consumed 45–46% of total held time; profile
+  and rebalance this module before simply increasing slots further.
+  Current JSONL files lack request/acquire/release timestamps, so add
+  additive timing fields for real occupancy timelines in the next
+  measurement pass.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.
