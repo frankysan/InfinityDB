@@ -1868,7 +1868,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **16 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **15 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1896,6 +1896,20 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       variants with extra MODs; preserve raw signatures and exclude
       unreviewed specific combinations from index counts. Fail closed
       rather than parsing numeric-looking display strings.
+      - [x] **Data processing — Discover source-131 modifiers:**
+        N5.3 pp. 68, 77 define bracketed Skill modifiers as usable
+        only with that Skill, Discover as a WIP Roll, and ReRoll
+        as rerolling one die. The pinned Army snapshot has 43
+        direct Discover occurrences: 24 `1/TEXT:+3`, 13
+        `2/TEXT:+6`, and six `277/TEXT:ReRoll`. All exact
+        source owner IDs and types are pinned in regression tests.
+        Promoted exact `discover-wip-roll-mod` (+3/+6) and
+        `reroll-one-die` effects for the Discover WIP Roll only,
+        without modifying general WIP, other Skills, or the base
+        Discover procedure. The guarded v9 rules/publication
+        migration preserved all 17 reviewed deployed objects and
+        retained rollback artifacts. **15** Skill source IDs remain
+        unresolved. This is not a Unit-usage index or roll engine.
       - [x] **Data processing — Parachutist Deployment Zone source review:**
         The pinned N5.3 English p. 105 explicitly permits enemy Deployment
         Zone entry only for this variant. Army Skill source `33` has 305

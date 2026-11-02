@@ -984,6 +984,47 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid Chain of Command Non Specialist extra")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "discover"}
+    ]:
+        # N5.3 pp. 68, 77: brackets apply only to this Skill's WIP Roll.
+        # ReRoll permits one die to be rerolled; it is not an Attribute MOD.
+        expected = [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": f"+{modifier}",
+                "effect": {
+                    "kind": "discover-wip-roll-mod",
+                    "appliesTo": "discover-wip-roll",
+                    "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((1, 3), (2, 6))
+        ] + [{
+            "extraId": 277, "extraType": "TEXT", "rawValue": "ReRoll",
+            "effect": {
+                "kind": "reroll-one-die",
+                "appliesTo": "discover-wip-roll",
+            },
+        }]
+        values = parameter.get("extraValues")
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or len(values) != 3
+            or any(
+                not isinstance(item, dict)
+                or type(item.get("extraId")) is not int
+                or not isinstance(item.get("effect"), dict)
+                or (
+                    item["extraId"] in (1, 2)
+                    and type(item["effect"].get("modifier")) is not int
+                )
+                for item in values
+            )
+            or values != expected
+        ):
+            raise ValueError(f"{context}: invalid Discover reviewed source extras")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "parachutist"}
     ]:
         # N5.3 p. 105: only the exact Army Dep. Zone variant permits entry

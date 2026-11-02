@@ -180,6 +180,94 @@ def test_parachutist_deployment_zone_export_is_source_scoped(tmp_path: Path) -> 
         )
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_discover_131_exact_source_extras_and_owners() -> None:
+    """All 43 Discover source occurrences have one independently reviewed extra."""
+    from collections import Counter
+
+    [item] = select_source_variants(_inventory(), "skills", [131])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Discover", 131, 43,
+    )
+    assert item["status"] == "reviewed-extra-parameter"
+    assert item["rawValues"] == []
+    assert item["extraSignatures"] == [
+        {"extras": [[1, "TEXT", "+3"]], "reviewed": True, "count": 24},
+        {"extras": [[2, "TEXT", "+6"]], "reviewed": True, "count": 13},
+        {"extras": [[277, "TEXT", "ReRoll"]], "reviewed": True, "count": 6},
+    ]
+    assert item["reviewedExtra"]["kind"] == "reviewed-extra"
+    expected = {
+        1: (
+            {4278, 6423, 16516, 41502, 41515, 48170, 48183, 50841,
+             50920, 53448, 54720, 56674, 56893, 58393, 58426, 58524,
+             60806, 66106, 68389, 69537, 80498, 80650, 82705, 84912},
+            {"option": 9, "profile": 15}, "+3",
+        ),
+        2: (
+            {25171, 26785, 31511, 34673, 38006, 41626, 46537, 49175,
+             58340, 71102, 76097, 80980, 82136},
+            {"profile": 13}, "+6",
+        ),
+        277: (
+            {1309, 6622, 16348, 16879, 54571, 78075},
+            {"option": 1, "profile": 5}, "ReRoll",
+        ),
+    }
+    for extra_id, (ids, owners, raw) in expected.items():
+        rows = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=131, extra_id=extra_id,
+        )
+        assert {row["occurrence_id"] for row in rows} == ids
+        assert Counter(row["owner"] for row in rows) == owners
+        assert all(
+            row["extra_position"] == 1 and row["source_raw"] is None
+            and row["extra_id"] == extra_id
+            and row["extra_type"] == "TEXT" and row["extra_raw"] == raw
+            and row["army_id"] is not None
+            for row in rows
+        )
+
+
+def test_discover_131_exact_semantics_in_tracked_and_fresh_exports(
+    tmp_path: Path,
+) -> None:
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    expected = {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [
+            {
+                "extra_id": extra_id, "extra_type": "TEXT",
+                "raw_value": f"+{mod}",
+                "effect": {
+                    "kind": "discover-wip-roll-mod",
+                    "applies_to": "discover-wip-roll", "modifier": mod,
+                },
+            }
+            for extra_id, mod in ((1, 3), (2, 6))
+        ] + [{
+            "extra_id": 277, "extra_type": "TEXT", "raw_value": "ReRoll",
+            "effect": {
+                "kind": "reroll-one-die",
+                "applies_to": "discover-wip-roll",
+            },
+        }],
+    }
+    for path in (fresh, ROOT / "data/generated/rules.db"):
+        rules = RulesDatabase(path)
+        assert rules.skill_reviewed_extra_semantics()["discover"] == expected
+        record = rules.composed_record("skill:discover")
+        assert record is not None
+        assert record["variant_semantics"]["occurrence_parameters"] == [expected]
+        assert "WIP Roll" in " ".join(record["facts"]["effects"])
+        assert any(
+            cite["source_id"] == "n5-core-v5.3-pdf" and cite["page"] == 77
+            for cite in record["citations"]
+        )
+
+
 @pytest.mark.parametrize(
     ("catalog", "source_id", "extra_id"),
     [("weapons", 101, 344), ("equipment", 0, 344),
@@ -237,8 +325,8 @@ def test_regeneration_62_exact_states_phase_ph_values_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -280,8 +368,8 @@ def test_booty_metachemistry_exact_chart_rerolls_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -323,8 +411,8 @@ def test_hacker_skill_source_1000_exact_direct_programs_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -419,9 +507,9 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18,
+            "reviewed-extra-parameter": 19,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "unresolved-occurrence-parameter": 15,
         },
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
@@ -700,9 +788,9 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 18,
+        "reviewed-extra-parameter": 19,
         "reviewed-combination-parameter": 2,
-        "unresolved-occurrence-parameter": 16,
+        "unresolved-occurrence-parameter": 15,
     }
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
@@ -786,8 +874,8 @@ def test_decoy_215_exact_deployment_replica_counts_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -829,8 +917,8 @@ def test_ft_master_261_lists_exact_cancellation_trigger_units_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -886,8 +974,8 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -940,8 +1028,8 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -984,8 +1072,8 @@ def test_bangbomb_skill_266_reuses_equipment_scope_in_both_exports(
         assert report["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -1030,8 +1118,8 @@ def test_medikit_target_ph_skill_273_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -1075,8 +1163,8 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
         assert result["catalogs"]["skills"]["summary"]["statuses"] == {
             "family-only": 44, "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
+            "unresolved-occurrence-parameter": 15,
         }
 
 
@@ -1121,9 +1209,9 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
             "reviewed-distance-parameter": 3,
             "reviewed-exact-source": 10,
             "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 18,
+            "reviewed-extra-parameter": 19,
             "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 16,
+            "unresolved-occurrence-parameter": 15,
         }
 
 

@@ -744,6 +744,24 @@ source-bound; distinct modifiers such as `+1 SD` and `+1B` cannot be merged.
 A shared family does not imply that all of its variants are equivalent. Retain
 the source catalog ID, raw variant/extras and rule citations as provenance.
 
+**Reviewed Discover (+3/+6/ReRoll), promoted (2026-11-02):**
+Pinned Army Skill source `131` has 43 direct occurrences, all with
+one of three exact extras: `1/TEXT:+3` (24), `2/TEXT:+6` (13)
+or `277/TEXT:ReRoll` (six). The N5.3 p. 68 bracket rule applies
+positive MODs and ReRoll only when using the owning Skill; p. 77
+defines the Discover WIP Roll. The published `reviewed-extra`
+parameter therefore uses `discover-wip-roll-mod` with `modifier`
+3 or 6, or `reroll-one-die`, all scoped to
+`discover-wip-roll`. Closed schema validation rejects altered IDs,
+types, signatures, effect kinds and scopes, including Boolean numeric
+MODs and unreviewed combinations. Exact source-owner ID sets and
+tracked/fresh rules exports are covered by regression tests.
+`tools.stage_discover_extras` promoted the paired rules database and
+deployed-object publication after verifying hashes and all 17 unchanged
+reviewed objects, retaining ignored rollback copies. This does not
+apply to other Skills or grant an independent Fireteam bonus, and
+does not implement a runtime roll engine or Unit-usage index.
+
 **Parachutist (Deployment Zone), promoted (2026-11-02):**
 English N5.3 p. 105 explicitly allows this variant to enter the **enemy**
 Deployment Zone; the normal Parachutist restriction still applies without

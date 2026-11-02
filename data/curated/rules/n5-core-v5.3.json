@@ -2707,7 +2707,44 @@
                 "reviewedOn": "2026-10-16"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 1,
+                                "extraType": "TEXT",
+                                "rawValue": "+3",
+                                "effect": {
+                                    "kind": "discover-wip-roll-mod",
+                                    "appliesTo": "discover-wip-roll",
+                                    "modifier": 3
+                                }
+                            },
+                            {
+                                "extraId": 2,
+                                "extraType": "TEXT",
+                                "rawValue": "+6",
+                                "effect": {
+                                    "kind": "discover-wip-roll-mod",
+                                    "appliesTo": "discover-wip-roll",
+                                    "modifier": 6
+                                }
+                            },
+                            {
+                                "extraId": 277,
+                                "extraType": "TEXT",
+                                "rawValue": "ReRoll",
+                                "effect": {
+                                    "kind": "reroll-one-die",
+                                    "appliesTo": "discover-wip-roll"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

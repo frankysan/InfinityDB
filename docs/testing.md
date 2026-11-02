@@ -1723,6 +1723,21 @@ the source inventory moves from 21 to **20 unresolved Skill IDs**.
 This is metadata publication and does not establish a Unit-usage
 index, attack resolution, full browser signoff or release acceptance.
 
+**Discover (+3/+6/ReRoll) source promotion (2026-11-02):**
+Pinned source `131` has 43 direct occurrences, exclusively
+`1/TEXT:+3` (24), `2/TEXT:+6` (13), or `277/TEXT:ReRoll` (six).
+N5.3 pp. 68, 77 supplies scope and terminology. The source
+regression pins every owner occurrence ID, owner class, signature
+and exact raw string. Database tests compare both the tracked and
+fresh rules export; 13 mutation cases reject unknown signatures,
+wrong WIP scope, unreviewed ReRoll behavior and numeric type drift.
+`tools.stage_discover_extras --output-dir local/<unique-name>`
+stages the guarded v9 rules/deployed-object pair, and the
+`--promote-staged` flag verifies pinned SHA-256 inputs, unchanged
+reviewed-object content and retained rollback copies. The audit now
+reports **15** unresolved Skill source IDs. Full release-candidate
+browser acceptance and the Unit-usage projection are still open.
+
 **Parachutist (Dep. Zone) source promotion (2026-11-02):**
 Pinned Army Skill source `33` has 305 direct occurrences and exactly
 17 matching `48/TEXT:Dep. Zone` extras (12 profile, five option).

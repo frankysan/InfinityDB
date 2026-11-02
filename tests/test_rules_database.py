@@ -1525,7 +1525,26 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
         "vulnerability", "hacker", "booty", "metachemistry", "regeneration",
         "neurocinetics", "minelayer", "chain-of-command", "forward-observer",
-        "parachutist",
+        "parachutist", "discover",
+    }
+    assert mappings["discover"] == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [
+            {
+                "extra_id": extra_id, "extra_type": "TEXT",
+                "raw_value": f"+{modifier}",
+                "effect": {
+                    "kind": "discover-wip-roll-mod",
+                    "applies_to": "discover-wip-roll", "modifier": modifier,
+                },
+            }
+            for extra_id, modifier in ((1, 3), (2, 6))
+        ] + [{
+            "extra_id": 277, "extra_type": "TEXT", "raw_value": "ReRoll",
+            "effect": {
+                "kind": "reroll-one-die", "applies_to": "discover-wip-roll",
+            },
+        }],
     }
     assert mappings["parachutist"] == {
         "source": "army-extra", "kind": "reviewed-extra",

@@ -4178,6 +4178,47 @@ def _assert_rejects_reviewed_skill_extra_mutation(
 
 
 @pytest.mark.parametrize(
+    ("index", "part", "value"),
+    [
+        (0, "extraId", 10),
+        (0, "extraType", "DISTANCE"),
+        (0, "rawValue", "-3"),
+        (0, "kind", "enemy-discover-roll-mod"),
+        (0, "appliesTo", "all-wip-rolls"),
+        (0, "modifier", 4),
+        (0, "modifier", True),
+        (1, "modifier", 3),
+        (2, "rawValue", "Reroll"),
+        (2, "kind", "reroll-all-dice"),
+        (2, "appliesTo", "any-roll"),
+        (2, "modifier", 1),
+        (0, "extraValues", []),
+    ],
+)
+def test_discover_reviewed_extra_rejects_unapproved_signature(
+    tmp_path: Path, index: int, part: str, value: object,
+) -> None:
+    root = Path(__file__).parents[1]
+    document = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    record = next(row for row in document["records"] if row["id"] == "skill:discover")
+    parameter = record["variantSemantics"]["occurrenceParameters"][0]
+    if part == "extraValues":
+        parameter[part] = value
+    else:
+        entry = parameter["extraValues"][index]
+        if part in {"kind", "appliesTo", "modifier"}:
+            entry["effect"][part] = value
+        else:
+            entry[part] = value
+    path = tmp_path / "invalid-discover.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Discover reviewed source extras"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("part", "value"),
     [
         ("extraId", 49),

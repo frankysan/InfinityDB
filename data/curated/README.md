@@ -990,6 +990,17 @@ Each entry requires
 }
 ```
 
+Discover (N5.3 pp. 68, 77, Army Skill source 131) recognizes
+only exact `1/TEXT:+3` and `2/TEXT:+6` as
+`discover-wip-roll-mod` (+3/+6) and `277/TEXT:ReRoll` as
+`reroll-one-die`. All use `appliesTo: discover-wip-roll`.
+A base Discover action remains governed by its ordinary WIP Roll
+and modifier conditions; a source extra does not grant an
+unconditional general WIP bonus. Each isolated Army signature is
+reviewed independently; unrecognized extras and combinations fail
+closed. These semantics support later occurrence indexing without
+calculating Discover results.
+
 Parachutist (N5.3 p. 105, Army Skill source 33) recognizes only
 `48/TEXT:Dep. Zone` as `parachutist-entry-zone-permission` for
 `parachutist-table-edge-entry` in the `enemy-deployment-zone`
