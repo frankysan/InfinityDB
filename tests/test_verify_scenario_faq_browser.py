@@ -57,6 +57,58 @@ def chrome() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_modifiers_explained_normal_reference_navigation(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1-A08: reviewed MOD boundaries are readable via normal rule/weapon routes."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        rule_link = page.locator(
+            '#catalog-list a[href="/rules/modifiers-explained"]'
+        )
+        rule_link.wait_for(state="visible", timeout=30000)
+        rule_link.click()
+        page.wait_for_url(f"{ORIGIN}/rules/modifiers-explained", timeout=30000)
+        card = page.locator("#rule-rule-modifiers-explained")
+        card.wait_for(state="visible", timeout=30000)
+        visible = card.inner_text()
+        for phrase in (
+            "round brackets", "only while using that entry",
+            "Positive MODs benefit the user", "Negative MODs apply to enemies",
+            "Automatic Skills", "Face to Face Rolls",
+            "reroll one die", "Active Turn", "B6",
+            "PARA CC Weapon", "Saving Roll",
+        ):
+            assert phrase in visible, (width, phrase)
+        citations = card.locator(".rules-source-citations").inner_text()
+        assert "p. 68" in citations and "p. 75" in citations
+        for href in ("/rules/special-dice", "/weapons/para-cc-weapon"):
+            link = card.locator(f'a[href="{href}"]').first
+            link.wait_for(state="visible", timeout=10000)
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+
+        page.goto(f"{ORIGIN}/weapons/trench-hammer", wait_until="domcontentloaded")
+        inbound = page.locator('a[href="/rules/modifiers-explained"]').first
+        inbound.wait_for(state="visible", timeout=30000)
+        inbound.focus()
+        inbound.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/modifiers-explained", timeout=30000)
+        page.locator("#rule-rule-modifiers-explained").wait_for(
+            state="visible", timeout=30000,
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_source_ecm_variant_summaries_normal_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

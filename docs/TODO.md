@@ -1006,10 +1006,20 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           1440/390/320 px; no curated database or source fact changes.
           Only this owner-context presentation slice is covered; full
           record and occurrence-level acceptance remains open.
+        - [x] **Modifiers Explained (MODs) selected browser evidence
+          (2026-11-02):** The existing N5.3 pp. 68/75-pinned
+          `rule:modifiers-explained` card now has normal Chromium
+          Rules-catalog and Trench Hammer inbound navigation checks at
+          1440/390/320 px. Verify bracketed entry-only MODs, recipient
+          polarity, Automatic versus Face to Face scope, one-die ReRoll,
+          Active-Turn Burst and B6, Special Dice/PARA links, source
+          citations, keyboard navigation and layout. No authored rule or
+          published artifact changed; this is one selected clause/browser
+          disposition, not whole-record or whole-Weapon acceptance.
         - [ ] **Clause and browser dispositions:** Reconcile each current source
           section and record with later documented source/FAQ decisions,
           reviewed conditional effects, and normal-player browser evidence.
-          Prior A01–04 and the selected Equipment browser tests cover
+          Prior A01–04 and the selected Equipment/MOD browser tests cover
           specific routes, not all 450 records.
           Prioritize added Skills, the five Visibility Zone terms, source-scoped
           Rules, and Weapon family/mode cases; retain unresolved source conflicts.

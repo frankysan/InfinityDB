@@ -73,7 +73,21 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+Only open VR obligations belong here.
+
+- [ ] **VR-0009** (2026-11-02; ready-to-run): Run cumulative tests after
+  registering Modifiers Explained (MODs) selected Chromium navigation,
+  text and citation evidence in the current Core/Hacking inventory.
+  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree after `4e7ee6e`;
+  files: `tests/test_verify_scenario_faq_browser.py`,
+  `tools/report_reference_baseline.py`,
+  `tests/test_report_reference_baseline.py` and supporting docs;
+  risk: low. Immediate: Chromium 1440/390/320 px, source/API
+  focused tests **6 passed**, including inventory reconciliation;
+  Ruff, Pyright, docs and diff checks **PASS**.
+  Design: none. Deferred: cumulative full test suite after this
+  change; hosted CI and release-candidate acceptance remain separate.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -85,7 +99,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0009` (through `VR-0008` retired).
+- Execution: `VR-0010` (`VR-0009` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

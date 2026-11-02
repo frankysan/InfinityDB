@@ -1370,6 +1370,7 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:army-retreat": "test_army_retreat_standard_game_normal_reference_navigation",
     "rule:standard-game": "test_army_retreat_standard_game_normal_reference_navigation",
     "rule:game-modes": "test_game_modes_source_table_normal_reference_navigation",
+    "rule:modifiers-explained": "test_modifiers_explained_normal_reference_navigation",
     "equipment:firewall": "test_added_equipment_firewall_normal_browser",
     "rule:order-expenditure-sequence": (
         "test_conditional_reaction_source_slices_visible_in_normal_browser"

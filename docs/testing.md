@@ -1705,6 +1705,20 @@ five focused test cases passed. The corrected cumulative run on
 VR-0008 was retired. Hosted CI and release-candidate acceptance
 remain independent.
 
+**Modifiers Explained (MODs), selected source/browser review (2026-11-02):**
+`test_modifiers_explained_normal_reference_navigation` in
+`tests/test_verify_scenario_faq_browser.py` checks the tracked
+release-pair Rules catalog and inbound Trench Hammer link in Chromium
+at 1440/390/320 px, including keyboard activation, maintained rule
+text (bracketed, Automatic/non-Automatic, ReRoll, Burst/Special Dice,
+and PARA separation), N5.3 pp. 68/75 citations, outbound destinations,
+horizontal fit and JS errors. Existing API and pinned English
+N5.3 p. 75 tests remain unchanged. The current-inventory report
+registers this as **selected-route evidence only**; full clause,
+Weapon and whole-record acceptance remain open. Six focused tests
+passed including the inventory crosswalk; cumulative regression on
+the final change is queued as VR-0009.
+
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill
 owners from historical Git commit `c5400ab1`. This explicitly requires

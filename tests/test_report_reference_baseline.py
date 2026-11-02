@@ -74,6 +74,7 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
     assert set(selected) == {
         "rule:initiative-roll", "rule:combat-group", "rule:army-retreat",
         "rule:standard-game", "rule:game-modes", "equipment:firewall",
+        "rule:modifiers-explained",
         "rule:order-expenditure-sequence", "skill:look-out",
         "term:visibility-zone", "term:low-visibility-zone",
         "term:poor-visibility-zone", "term:zero-visibility-zone",
