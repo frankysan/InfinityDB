@@ -410,8 +410,16 @@ required preflight, and release acceptance remain independent requirements.
    the VR entry; request/perform Git fetch/checkout/fast-forward only
    through an **explicitly authorized separate Git operation**. Neither
    `start_test_job` nor file transfer is Git synchronization. Staged
-   Syncthing assets must be activated separately when needed. Do not
-   dispatch a run against an unmatched checkout and call it equivalent.
+   Syncthing assets must be activated separately when needed. **Before
+   the full suite, generate the Git-ignored paired deployed-object
+   publication on the selected worker using
+   `tools.build_deployed_object_publication`, then run its `--check`
+   verification against the tracked Army/rules databases.** A matching
+   Git HEAD does not include `data/generated/deployed-objects.json`;
+   omitting it makes publication, migration and scenario tests fail.
+   Verify browser dependencies and the expected source-evidence coverage
+   separately. Do not dispatch an unmatched or incomplete checkout and
+   call it equivalent.
 4. Start asynchronous MCP pytest jobs via `start_test_job` using
    `worker="linux-dev"` and `expected_commit=<full 40-character SHA>`.
    For runner profiles containing tests, use `start_script_job` with
@@ -444,6 +452,33 @@ client stream does **not** establish a pytest result: require the job's
 terminal status, subprocess exit code, and final report. For the recent
 Windows suite (~8–10 minutes), allow **1,800 s** for full pytest and
 **3,600 s** for a full validation profile (server job maximum: **7,200 s**).
+
+**2026-11-02 pinned Linux queue execution and prerequisite recovery:**
+The async `linux-dev` full-suite job
+`linux-dev:9360ac9d03034bff9a7a9384e54cf917` used
+`a2769e110d17dc415c715e05f154b941c81204e9` and all 808
+published SVG assets, completing in 537.31 s with **4,850 passed,
+22 failed, 27 skipped**. Sixteen failed tests required the Git-ignored
+`data/generated/deployed-objects.json` that a matching checkout
+does not supply. Running the tracked
+`tools.build_deployed_object_publication` on `linux-dev` and its
+`--check` verified the publication without touching tracked files;
+three affected modules then passed 3/3, 4/4 and 3/3 on Linux.
+The six remaining failures are stale rule-category/count and PDF
+source-count expectations plus two missing report newline arguments;
+see the 1.0 TODO fix and open VR-0027/0028. This cumulative run is
+**not accepted** despite all targeted source-variant checks passing.
+
+**2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
+After the `mcpworker` staging ACL/environment and explicit tracked
+checkout preparation, Linux asynchronous jobs at
+`a2769e110d17dc415c715e05f154b941c81204e9` listed
+the expected `JSON`, `WIKI`, `HUMAN-SPHERE` and `SYMBOLS`
+staging directories, verified three pinned snapshot SHA-256 values
+and successfully planned a read-only N5.3 PDF activation without
+writing it. Staging access was sufficient for subsequent explicit
+activation; no automatic Git operation or staging write was needed.
+The completed execution entry is retired, with historical detail in Git.
 
 **2026-11-02 schema-preserving staging regression (VD/VR-0006):**
 `tests/test_legacy_staging_schema_guards.py` reconstructs pending

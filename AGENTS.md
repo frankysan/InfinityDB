@@ -120,7 +120,10 @@ replace the implementation backlog or weaken CI/release gates.
 
 Prefer asynchronous Linux (`worker="linux-dev"`) jobs for broader tests
 when the dedicated Linux checkout has the intended code, dependencies and
-source evidence. Windows implementation may continue concurrently because
+source evidence. Verify the generated ignored deployed-object publication
+is present and reproducible **before** a cumulative Linux suite; matching
+Git HEADs alone cannot supply ignored artifacts. Windows implementation
+may continue concurrently because
 its checkout is separate. The interactive Linux checkout is also separate
 from the MCP worker checkout. Require/record the Linux `expected_commit`
 for a specific revision; associate every result with its actual revision,

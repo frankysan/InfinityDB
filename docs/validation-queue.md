@@ -85,16 +85,28 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 5 distinct
-changes** (VR-0023/0024/0026/0027/0028); the execution threshold is
-reached. The next validation pass must address runnable work and its
-prerequisites before another ordinary implementation pass. The oldest
-recorded date is 2026-11-02. Windows and Linux checkouts are independent;
-**no Linux Git update has been requested or performed** for the new
-Discover/Parachutist changes.
+Only open VR obligations belong here. **Current count: 4 distinct
+changes** (VR-0023/0024/0027/0028); no new design requirement is open.
+The oldest recorded date is 2026-11-02. The Windows and Linux MCP
+checkouts independently matched
+`a2769e110d17dc415c715e05f154b941c81204e9`; no Git
+operation was needed for this execution pass. The pinned asynchronous
+Linux full-suite job `linux-dev:9360ac9d03034bff9a7a9384e54cf917`
+completed after **537.31 s: 4,850 passed, 22 failed, 27 skipped**.
+Of the 22 failures, **16** required the ignored
+`data/generated/deployed-objects.json` publication absent on the worker;
+the artifact was subsequently built and verified with the tracked
+publication script, and 10 affected focused tests passed across
+core-scenario, terrain-source and legacy-staging modules. The remaining
+**six test-contract failures** (rules category/count drift, PDF source
+count, and newline policy for two staging scripts) are tracked in
+[1.0 TODO](TODO.md#100--current-reference-completeness-gate). Full-suite
+acceptance remains failed; do not count the targeted recovery runs as
+a replacement for a passing cumulative job. VR-0026's independent
+read-only Syncthing staging checks were verified and retired.
 
-- [ ] **VR-0027** (2026-11-02; ready-to-run; Linux checkout preparation
-  pending): Cumulative/cross-platform verification of the reviewed
+- [ ] **VR-0027** (2026-11-02; blocked — cumulative Linux failures
+  pending correction and rerun): Cumulative/cross-platform verification of the reviewed
   Parachutist (Dep. Zone) source-33 parameter and guarded publication.
   Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
   implementation included in Windows `dev/v1.0.0` baseline
@@ -110,14 +122,17 @@ Discover/Parachutist changes.
   selected exact revision**, with verified browser dependencies and
   source/asset skip explanations; compare any platform-specific findings
   with Windows and execute any remaining release-required Windows check.
-  Linux `worker="linux-dev"` requires a separately authorized Git
-  checkout selection/sync and exact `expected_commit`. The pinned raw
-  Army archive was checked on Windows; absent raw inputs on Linux must
-  remain disclosed, not counted as independently source-verified.
-  Retire after terminal results and evidence are recorded.
+  Linux `worker="linux-dev"` was tested at exact
+  `a2769e110d17dc415c715e05f154b941c81204e9` without additional
+  Git synchronization. Source-only audits passed **60/60** on Linux,
+  but the shared full suite failed **22 tests** (see queue overview).
+  The pinned raw Army archive was checked on Windows; skipped or absent
+  raw inputs on another host must be disclosed. Re-run cumulative
+  acceptance after the six test-contract corrections and publication
+  preflight. Retire only on passing revision-matched results.
 
-- [ ] **VR-0028** (2026-11-02; ready-to-run; Linux checkout preparation
-  pending): Cumulative/cross-platform verification of the three exact
+- [ ] **VR-0028** (2026-11-02; blocked — shared cumulative Linux
+  failures pending correction and rerun): Cumulative/cross-platform verification of the three exact
   Discover source-131 extras and guarded publication.
   Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
   Windows `dev/v1.0.0` combined baseline
@@ -131,9 +146,13 @@ Discover/Parachutist changes.
   Ruff, docs and diff checks passed. Design: none currently identified.
   Deferred: the **same compatible pinned Linux full-suite job** as
   VR-0027 (do not duplicate the run), with explicit skip/source
-  coverage and Windows-only checks where needed. Linux Git preparation
-  is a separate explicitly authorized operation, not a side effect
-  of test dispatch. Retire only for verified terminal acceptance.
+  coverage and Windows-only checks where needed. The pinned Linux
+  cumulative attempt failed **22 tests**, although the direct
+  source-variant module passed **60/60**. The ignored publication
+  prerequisite is now prepared and verified. Correct the remaining
+  six repository-test expectations in a separate implementation pass,
+  then repeat one shared cumulative job. Retire only for terminal
+  acceptance on the intended revision.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -227,20 +246,6 @@ Discover/Parachutist changes.
   passing comparisons with CPU/RAM sampling, and reconcile cross-host
   source coverage. Retire only after the remaining acceptance evidence.
 
-- [ ] **VR-0026** (2026-11-02; ready-to-run): Verify read-only
-  Syncthing staging access through the separate `mcpworker` account.
-  Work: [Syncthing staging](syncthing-assets.md#mcp-worker-policy);
-  change: `tools/activate_synced_assets.py`, its focused tests and
-  worker-specific environment configuration; risk: medium (host permissions
-  and pinned private source data). Immediate: Windows activation tests
-  **13 passed, 3 platform skips**; Ruff, docs and diff checks passed.
-  Design: none. Deferred: apply `mcpworker` read-only ACLs and systemd
-  staging-root environment on `devbox`; synchronize the updated tracked
-  activation module to the worker checkout deliberately; verify `list`,
-  one pinned snapshot hash and a dry-run activation through an asynchronous
-  `linux-dev` job with zero unexpected filesystem changes. Do not grant
-  staging writes or trigger activation automatically.
-
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -251,7 +256,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0029` (`VR-0023`, `VR-0024`, `VR-0026`,
+- Execution: `VR-0029` (`VR-0023`, `VR-0024`,
   `VR-0027` and `VR-0028` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
