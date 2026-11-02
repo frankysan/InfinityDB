@@ -1906,6 +1906,18 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       variants with extra MODs; preserve raw signatures and exclude
       unreviewed specific combinations from index counts. Fail closed
       rather than parsing numeric-looking display strings.
+      - [x] **Data processing — Camouflage (1 Use) source review:**
+        The pinned September 29 Army snapshot has **597** direct
+        Camouflage source-29 occurrences and **223** exact
+        `43/TEXT:1 Use` qualifiers, with no other extra signatures.
+        A source-only regression pins the raw signature and owner count,
+        and confirms the existing N5 FAQ v0.1 p. 2 ruling:
+        deployment as a Model preserves the use; an attempted Marker
+        deployment followed by failed Infiltration consumes it.
+        Keep the parameter unreviewed in the source inventory until
+        typed one-use semantics are explicitly modeled and guarded
+        for publication. This does not authorize an inferred Unit-usage
+        index or a state-transition evaluator.
       - [x] **Data processing — Discover source-131 modifiers:**
         N5.3 pp. 68, 77 define bracketed Skill modifiers as usable
         only with that Skill, Discover as a WIP Roll, and ReRoll

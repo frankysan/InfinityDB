@@ -100,6 +100,44 @@ def _inventory() -> dict:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_camouflage_one_use_source_29_signature_and_faq_scope() -> None:
+    """Pin exact Army one-use qualifiers without treating them as a reviewed effect."""
+    [item] = select_source_variants(_inventory(), "skills", [29])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Camouflage", 29, 597,
+    )
+    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["rawValues"] == []
+    assert item["reviewedExtra"] is None
+    assert item["extraSignatures"] == [{
+        "extras": [[43, "TEXT", "1 Use"]], "reviewed": False, "count": 223,
+    }]
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=29, extra_id=43,
+    )
+    assert len(owners) == 223
+    assert all(
+        row["extra_id"] == 43
+        and row["extra_type"] == "TEXT"
+        and row["extra_raw"] == "1 Use"
+        and row["extra_position"] == 1
+        and row["source_raw"] is None
+        for row in owners
+    )
+
+    faq = next(
+        record
+        for _, document in load_curated_directory(ROOT / "data/curated/rules")
+        for record in document["records"]
+        if record["id"] == "faq-ruling:camouflage-one-use-infiltration-failure"
+    )
+    answer = faq["facts"]["answer"]
+    assert "Deploying as a Model preserves" in answer
+    assert "failing an Infiltration Roll uses up the one use" in answer
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_religious_troop_total_source_83_is_unresolved_and_owner_pinned() -> None:
     """Pin the likely Army Terrain/Religious modifier swap without correcting input."""
     [item] = select_source_variants(_inventory(), "skills", [83])["items"]

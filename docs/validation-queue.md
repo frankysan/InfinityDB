@@ -95,9 +95,13 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 3 distinct
-changes** (VR-0023/0024/0030); no deferred design requirement is
-open. Oldest recorded date: 2026-11-02. The agent safely
+Only open VR obligations belong here. **Current count: 4 distinct
+changes** (VR-0023/0024/0030/0031); no deferred design
+requirement is open. Oldest recorded date: 2026-11-02.
+A shared Linux full suite at
+`d16338ed7676615431d260f766c261f7236428fc`
+is running as `linux-dev:70e28c0dc41d460b9cde79fff596f684`;
+new Windows changes after dispatch are not covered by it. The agent safely
 fetched/fast-forwarded the dedicated `linux-dev` MCP checkout to
 Windows `16f0d4cf5299ae29d0d3b308a4200ca39d6aa4db`,
 rebuilt and verified the ignored deployed-object publication,
@@ -110,6 +114,21 @@ with detailed evidence in [testing.md](testing.md#parallel-windows-development-a
 The 28 cumulative skips match the known Windows count;
 per-reason comparison remains part of VR-0023. Windows source
 work after dispatch is not covered by that revision (VR-0030).
+
+- [ ] **VR-0031** (2026-11-02; awaiting subsequent committed
+  revision): Cross-platform and cumulative source-only verification of
+  Camouflage source-29 `43/TEXT:1 Use` and its N5 FAQ scope.
+  Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
+  Windows baseline `d16338ed7676615431d260f766c261f7236428fc`
+  plus new uncommitted source regression/documentation.
+  Immediate: `tests/test_audit_source_variant_inputs.py::test_camouflage_one_use_source_29_signature_and_faq_scope`
+  **1 passed** with the pinned raw Army snapshot (597 direct source
+  occurrences; 223 exactly qualified). The FAQ retains the distinction
+  between deploying as a Model and failed attempted Marker deployment.
+  Design: none. Deferred: repeat exact source audit with Linux pinned
+  raw-archive coverage and the next compatible cumulative suite after
+  the Windows revision has been committed; the in-flight `d16338ed`
+  suite does not include this new regression.
 
 - [ ] **VR-0030** (2026-11-02; ready after new Windows revision
   is committed): Validate the single unreviewed Religious Troop
@@ -232,8 +251,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0031` (`VR-0023`, `VR-0024`, `VR-0030`
-  open; earlier entries retired).
+- Execution: `VR-0032` (`VR-0023`, `VR-0024`,
+  `VR-0030`, `VR-0031` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
