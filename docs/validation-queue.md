@@ -150,23 +150,27 @@ Only open VR obligations belong here.
   admissions (peak **2/4** slots), negligible waiting and **no**
   same-slot-overlap warning; summed unlock uncertainty was **0.0001 s**.
   Targeted Linux namespace/overlap diagnostics are verified.
+  Separate MCP `linux-dev` worker at `413a2185` initially skipped all
+  12 selected B/D browser tests because its virtual environment lacks
+  Playwright (despite full SVG assets); see `testing.md`. Restore
+  actual browser execution there before using its benchmarks.
   Deferred: repeated alternating full-suite slot comparisons with
   CPU/RAM sampling and Windows/Linux coverage parity. Retire only after
   the remaining acceptance evidence.
 
-- [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
-  safety across Linux and Windows for `tools.run_checks`.
-  Work: [targeted checks](testing.md#targeted-checks); revision:
-  runner/report regression tests based on `d848609d`; risk: high
-  (prior accidental truncation of a tracked test source).
-  Immediate: focused runner tests **98 passed, 1 expected skip**;
-  Ruff passed. Design: none.
-  Linux restored the corrupted Scenario FAQ file and successfully
-  collected the intended selector at `9f9e7eaa` (**232 passed,
-  16 skipped**); the run failed only its separate lane-assignment
-  guard. Deferred: run the focused report-safety tests on Linux
-  and verify the specific bare-`--report` selector regression before
-  retiring this report-path safety obligation.
+- [ ] **VR-0026** (2026-11-02; ready-to-run): Verify read-only
+  Syncthing staging access through the separate `mcpworker` account.
+  Work: [Syncthing staging](syncthing-assets.md#mcp-worker-policy);
+  change: `tools/activate_synced_assets.py`, its focused tests and
+  worker-specific environment configuration; risk: medium (host permissions
+  and pinned private source data). Immediate: Windows activation tests
+  **13 passed, 3 platform skips**; Ruff, docs and diff checks passed.
+  Design: none. Deferred: apply `mcpworker` read-only ACLs and systemd
+  staging-root environment on `devbox`; synchronize the updated tracked
+  activation module to the worker checkout deliberately; verify `list`,
+  one pinned snapshot hash and a dry-run activation through an asynchronous
+  `linux-dev` job with zero unexpected filesystem changes. Do not grant
+  staging writes or trigger activation automatically.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -178,7 +182,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0026` (`VR-0023` through `VR-0025` open; earlier entries retired).
+- Execution: `VR-0027` (`VR-0023`, `VR-0024` and `VR-0026` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

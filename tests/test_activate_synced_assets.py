@@ -46,6 +46,33 @@ def _run(args: list[str], staged: Path, checkout: Path) -> int:
     return main(args, staging_root=staged, repo_root=checkout)
 
 
+def test_worker_staging_root_environment_override(
+    staging: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    staged, checkout = staging
+    name, archive = _snapshot(staged)
+    monkeypatch.setenv("INFINITYDB_SYNC_STAGING_ROOT", str(staged))
+    assert main(["verify", "--snapshot", name], repo_root=checkout) == 0
+    assert main(["activate", "--snapshot", name], repo_root=checkout) == 0
+    assert archive.is_file()
+    assert list(checkout.iterdir()) == []
+
+
+def test_worker_staging_root_override_refuses_symlink(
+    staging: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    staged, checkout = staging
+    name, _ = _snapshot(staged)
+    alias = staged.parent / "linked-staging"
+    try:
+        alias.symlink_to(staged, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"Symlinks not available: {exc}")
+    monkeypatch.setenv("INFINITYDB_SYNC_STAGING_ROOT", str(alias))
+    assert main(["verify", "--snapshot", name], repo_root=checkout) == 1
+    assert list(checkout.iterdir()) == []
+
+
 def test_verify_snapshot_and_dry_run_do_not_modify_checkout(
     staging: tuple[Path, Path],
 ) -> None:

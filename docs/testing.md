@@ -214,6 +214,17 @@ test suite. Restore the original test module with
 `git restore --source=HEAD -- tests/test_verify_scenario_faq_browser.py`
 on the affected checkout after verifying no intended local edits remain.
 
+**2026-11-02 cross-host report-path regression (VR-0025):** At Linux commit
+`413a2185`, `tests/test_run_checks.py` passed **99/99**. At Windows commit
+`f90514f3`, it passed **98 with 1 platform skip**. The actual formerly
+ambiguous invocation, `--stage test --report tests/test_domain_slugs.py
+--assets off`, selected the intended test module and passed **8/8** on each
+host, rather than interpreting its path as a report destination. Both
+asynchronous jobs reported exit code zero and overall `PASS`. The focused
+suite also verifies that source/data and Git-tracked report destinations are
+rejected without overwriting files. This retires VR-0025; release and hosted
+CI gates remain independent.
+
 Direct tool commands remain appropriate when debugging the tool itself:
 
 ```powershell
@@ -1141,6 +1152,20 @@ negligible integrated waiting, not evidence of sustained contention.
 This confirms the namespace filtering and overlap classification on a
 real Linux mixed workload. It is not a full-suite capacity benchmark;
 repeat alternating runs with CPU/RAM sampling before changing defaults.
+
+**Separate MCP Linux worker environment, 2026-11-02:** The registered
+`linux-dev` worker executes from `/srv/mcp-worker/workspaces/InfinityDB`,
+not the earlier interactive `devbox` checkout. At `413a2185`, a focused
+four-slot/eight-worker B/D browser-lane invocation selected 12 tests but
+**skipped all 12** because `playwright.sync_api` was unavailable (`No module
+named 'playwright'`). Published graphical assets were present (808/808),
+and both lanes remained pinned to individual workers. Thus a successful
+runner exit from this worker is **not** evidence of Chromium execution,
+and its current results cannot extend the earlier `devbox` benchmarks.
+Install Playwright and its Chromium browser in the *worker's own* virtual
+environment, rerun a focused browser smoke with `--skip-summary` and require
+actual passed browser tests before attempting full-suite comparisons.
+Keep the two checkout identities and their test results separate.
 
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and

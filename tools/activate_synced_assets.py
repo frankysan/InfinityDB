@@ -204,10 +204,13 @@ def _parser() -> argparse.ArgumentParser:
 def main(
     argv: list[str] | None = None,
     *,
-    staging_root: Path = STAGING_ROOT,
+    staging_root: Path | None = None,
     repo_root: Path = REPO_ROOT,
 ) -> int:
     args = _parser().parse_args(argv)
+    if staging_root is None:
+        configured_root = os.environ.get("INFINITYDB_SYNC_STAGING_ROOT")
+        staging_root = Path(configured_root) if configured_root else STAGING_ROOT
     try:
         if args.action == "list":
             folder = staging_root / "snapshots"

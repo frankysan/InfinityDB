@@ -76,13 +76,44 @@ Existing tracked files are outside its permitted destination paths.
 
 ## MCP worker policy
 
-The `linux-dev` MCP worker can execute the tracked module using an
-asynchronous script job once its Git checkout contains that module. Run
-`list`, `verify` or a dry-run activation first; execute `--apply`
-only as a specifically requested worker task. The default staging directory
-is based on the worker account's Linux home. No Git fetch, checkout,
-commit, push or pull is performed by this utility; Git synchronization is
-separately invoked and must never be an implicit side effect of activation.
+The `linux-dev` MCP worker runs as `mcpworker`, whereas Syncthing runs as
+`infinitydb` and stores the synchronized files under
+`/home/infinitydb/syncthing/infinitydb/`. Keep the five Syncthing folders
+owned by `infinitydb`, and grant `mcpworker` **read-only** POSIX ACL access
+instead of moving files into its home or making either Git checkout shared.
+On `devbox` (install the `acl` package first if `setfacl` is unavailable):
+
+```bash
+sudo setfacl -m u:mcpworker:--x /home/infinitydb /home/infinitydb/syncthing
+sudo setfacl -R -m u:mcpworker:r-X /home/infinitydb/syncthing/infinitydb
+sudo find /home/infinitydb/syncthing/infinitydb -type d -exec setfacl -m d:u:mcpworker:r-x {} +
+sudo -u mcpworker test -r /home/infinitydb/syncthing/infinitydb/snapshots && echo 'MCP staging: readable'
+```
+
+The parent ACLs permit traversal, not browsing the `infinitydb` home.
+Recursive access covers existing files; default ACLs on the staging folders
+and descendants cover files added by Syncthing later. If Syncthing applies
+restrictive source permission bits to new files, recheck effective ACL masks
+with `getfacl` and repeat the access test after synchronization. Do not give
+the worker write permission to the receive-only staging source.
+
+The activation tool uses `~/syncthing/infinitydb` by default. Configure the
+worker's **actual** staging root via a systemd drop-in, avoiding changes to
+`HOME` and avoiding symlinks (which the activation safety check rejects):
+
+```bash
+sudo install -d -m 755 /etc/systemd/system/mcp-worker.service.d
+printf '%s\n' '[Service]' 'Environment=INFINITYDB_SYNC_STAGING_ROOT=/home/infinitydb/syncthing/infinitydb' | sudo tee /etc/systemd/system/mcp-worker.service.d/syncthing-staging.conf >/dev/null
+sudo systemctl daemon-reload && sudo systemctl restart mcp-worker.service
+```
+
+Restart only when no MCP job is running. After the worker checkout contains
+the updated activation tool, run its asynchronous `list` action first, then
+`verify` or dry-run `activate` for explicitly selected inputs. The utility
+never performs Git operations and never applies activation writes without
+`--apply`; any such write requires a specifically requested worker task.
+Git synchronization is separately invoked and must never be an implicit side
+effect of asset activation.
 
 A verified source archive alone does not prove the checkout is ready for a
 particular test. The test's expected source revisions, curated records, and
