@@ -9,6 +9,10 @@ from pathlib import Path
 
 import pytest
 
+from tools.analyze_chromium_timeline import load_slot_records, summarize_timeline
+from tools.analyze_chromium_timeline import (
+    main as timeline_main,
+)
 from tools.browser_test_capacity import (
     CHROMIUM_SCHEDULING_LANES,
     browser_lane_groups,
@@ -153,6 +157,7 @@ def test_browser_metrics_capture_wait_and_hold_without_changing_admission(
 ) -> None:
     metrics = tmp_path / "metrics"
     monkeypatch.setenv("INFINITYDB_BROWSER_METRICS_DIRECTORY", str(metrics))
+    monkeypatch.setenv("PYTEST_XDIST_WORKER", "gw-test")
     with browser_slot(tmp_path / "locks", slots=2, label="example-node") as index:
         assert index == 0
     files = list(metrics.glob("slot-*.jsonl"))
@@ -162,6 +167,81 @@ def test_browser_metrics_capture_wait_and_hold_without_changing_admission(
     assert record["slot"] == 0
     assert record["wait_seconds"] >= 0
     assert record["hold_seconds"] >= 0
+    assert (
+        record["request_monotonic_seconds"]
+        <= record["acquired_monotonic_seconds"]
+        <= record["released_monotonic_seconds"]
+    )
+    assert record["wait_seconds"] == pytest.approx(
+        record["acquired_monotonic_seconds"] - record["request_monotonic_seconds"]
+    )
+    assert record["hold_seconds"] == pytest.approx(
+        record["released_monotonic_seconds"] - record["acquired_monotonic_seconds"]
+    )
+    assert record["worker"] == "gw-test"
+
+
+def test_chromium_timeline_reconstructs_waiting_and_slot_occupancy(tmp_path: Path) -> None:
+    samples = (
+        (0, "tests/test_a.py::one", 0.0, 1.0, 4.0),
+        (1, "tests/test_b.py::two", 0.0, 2.0, 5.0),
+        (0, "tests/test_a.py::three", 2.0, 4.0, 6.0),
+        (2, "outside-capacity", 0.0, 0.0, 0.01),
+    )
+    rows = [
+        {"slot": slot, "label": label, "worker": f"gw{slot}", "pid": 100 + slot,
+         "request_monotonic_seconds": start, "acquired_monotonic_seconds": acquired,
+         "released_monotonic_seconds": released,
+         "wait_seconds": acquired - start, "hold_seconds": released - acquired}
+        for slot, label, start, acquired, released in samples
+    ]
+    (tmp_path / "slot-123.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8",
+    )
+    records, excluded = load_slot_records(tmp_path, slots=2)
+    assert len(records) == 3
+    assert excluded == 1
+    data = summarize_timeline(records, slots=2)
+    assert data["observed_seconds"] == pytest.approx(6.0)
+    assert data["wait_seconds"] == pytest.approx(5.0)
+    assert data["held_seconds"] == pytest.approx(8.0)
+    assert data["occupied_slot_seconds"] == pytest.approx(8.0)
+    assert data["full_capacity_seconds"] == pytest.approx(3.0)
+    assert data["idle_with_waiters_seconds"] == pytest.approx(2.0)
+    assert data["max_occupied"] == 2
+    assert data["max_waiters"] == 2
+    assert not data["same_slot_overlap"]
+    assert data["module_totals"][0] == ("test_a.py", 3.0, 5.0)
+    assert data["module_workers"]["test_a.py"] == ["gw0"]
+    assert data["module_pids"]["test_a.py"] == 1
+
+
+def test_chromium_timeline_cli_reports_reconstructed_intervals(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    (tmp_path / "slot-1.jsonl").write_text(
+        json.dumps({
+            "slot": 0, "label": "tests/test_example.py",
+            "request_monotonic_seconds": 1.0,
+            "acquired_monotonic_seconds": 2.0,
+            "released_monotonic_seconds": 4.0,
+        }) + "\n",
+        encoding="utf-8",
+    )
+    assert timeline_main([str(tmp_path), "--slots", "1"]) == 0
+    output = capsys.readouterr().out
+    assert "Waiting: 1.00 worker-seconds" in output
+    assert "Held: 2.00 worker-seconds" in output
+    assert "Peak occupied slots: 1/1" in output
+
+
+def test_chromium_timeline_refuses_legacy_duration_only_metrics(tmp_path: Path) -> None:
+    (tmp_path / "slot-1.jsonl").write_text(
+        json.dumps({"slot": 0, "wait_seconds": 3, "hold_seconds": 2}) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="legacy slot metrics"):
+        load_slot_records(tmp_path, slots=2)
 
 
 @pytest.mark.parametrize("capacity", (2, 3, 4))

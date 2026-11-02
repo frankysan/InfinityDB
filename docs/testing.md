@@ -496,13 +496,58 @@ included; do not mistake these for every browser/context operation
 in the suite. Chrome startup cost is negligible compared with admission
 waiting.
 
-**Next profiling improvement:** add additive monotonic timestamps for
-slot request, acquisition and release, preserving the existing JSONL
-duration fields. This would enable an actual concurrent-slot timeline
-and distinguish synchronized blocking from idle capacity. Continue to
-prioritize Scenario FAQ balance and avoid allocating browser slots to
-idle workers. The current ZIP contains no CPU/RAM samples, so a higher
-slot limit cannot yet be justified on resource-saturation evidence.
+**Timestamped slot instrumentation (opt-in, after the November 2 archive):**
+The Chromium admission JSONL retains `wait_seconds`, `hold_seconds`,
+`pid`, `label` and `slot`; it additionally records `worker` (xdist
+worker ID or `main`) and monotonic `request_monotonic_seconds`,
+`acquired_monotonic_seconds` and `released_monotonic_seconds`.
+Acquisition is timed after securing the OS lock; release is measured
+after unlocking. Monotonic timestamps are comparable **between processes
+on the same host within the same run**, not across hosts or reboots.
+This instrumentation does not change slot admission, test isolation or
+scheduling and does not require running a permanent monitor.
+
+The tracked offline analyzer `tools.analyze_chromium_timeline` reconstructs
+concurrent admission requests and held slots from completed, timestamped
+JSONL records. Run it after an instrumented benchmark, e.g. from the
+repository root on `devbox`:
+
+```bash
+./.venv/bin/python -m tools.analyze_chromium_timeline local/benchmarks/chromium-RUN --slots 4
+```
+
+Use the actual `local/benchmarks/chromium-*/` path printed by the runner.
+The analyzer prints observation span, aggregate waiting and held time,
+peak queued admissions, peak occupied slots, full-capacity time,
+time with queued requests despite a nominal free slot, and the
+heaviest module holders, with observed worker IDs and distinct PID
+counts for each. It excludes records above the configured
+slot count, because capacity-fixture self-tests can independently
+acquire additional test-only slots. It **refuses older duration-only
+JSONL** rather than inventing a concurrency timeline. Completed
+admissions are not a lossless event log: interrupted holders or
+timeouts may be absent, and similarly numbered slots from test-only
+lock directories are not necessarily the same resource. Apparent
+free capacity while waiting therefore merits further examination,
+not an immediate scheduler conclusion.
+
+A focused Windows real-Chromium xdist smoke run at `ce07106e`
+passed **12 tests** in **13.78 s** with four pytest workers and two
+slots (`--browser-metrics` directory
+`local/benchmarks/chromium-20261102-140301-32228`).
+The analyzer reconstructed **12.40 s** of observed admission activity,
+**11.04 s** with both slots held, **16.27 worker-seconds** waiting,
+and just **0.06 s** with a queued request and nominally free capacity.
+Peak admission queue length was three. These numbers describe the
+recorded Chromium locks, not whole-suite utilization.
+
+In the earlier four-slot ZIP, four separate worker PIDs held
+Scenario FAQ's module-scoped browser fixture, whereas the configured
+`--split-scenario-faq` grouping names only lanes A and D. The
+effective xdist group-to-worker mapping requires verification before
+changing scheduling or claiming exactly two workers served Scenario FAQ.
+Continue to prioritize a source-backed lane-balance comparison, while
+collecting CPU/RAM samples separately: the existing ZIP lacks them.
 
 ### Measured waiting versus pytest setup
 
@@ -747,12 +792,14 @@ For a controlled Windows browser-section comparison (run **sequentially**):
 ```
 
 Each run prints its ignored `local/benchmarks/chromium-*/` path. The
-per-worker `slot-<pid>.jsonl` files contain module/test label, slot index,
-wait seconds, and hold seconds. They do **not** yet capture the actual
-browser-process launch time or process-tree resource usage, so a recorded
-fixture wait must not be described as Chromium startup. Those counters,
-isolated browser reuse, and Windows/Docker performance sampling remain
-separate implementation steps.
+per-worker `slot-<pid>.jsonl` files contain module/test label, worker,
+slot index, wait/hold durations and (in newly recorded runs) monotonic
+request/acquisition/release timestamps. The separate optional browser
+lifecycle files time only explicitly instrumented Chrome launches and
+page creations; they do **not** cover every browser process or include
+CPU/RAM usage. A recorded fixture wait is not Chromium startup. See the
+[timestamped metrics analysis](#chromium-concurrency-under-pytest-xdist)
+and keep Windows/Docker performance sampling as separate work.
 
 **Exploratory Windows results, 2026-11-02:** All four runs used eight xdist
 workers, the same `dev/v1.0.0` source state based on `f82bf93d`,

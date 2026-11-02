@@ -3790,9 +3790,12 @@ follow-up action. Retain source-native values until official resolution.
   observations before changing the default. Per-worker Linux slot
   metrics show Scenario FAQ consumed 45–46% of total held time; profile
   and rebalance this module before simply increasing slots further.
-  Current JSONL files lack request/acquire/release timestamps, so add
-  additive timing fields for real occupancy timelines in the next
-  measurement pass.
+  The next opt-in benchmark records request/acquire/release timestamps
+  and xdist worker identity, with an offline timeline analyzer.
+  Verify why the prior four-slot Scenario FAQ fixture appeared on four
+  worker PIDs despite an A/D split before revising its lane assignments.
+  Analyze newly captured slot occupancy, then benchmark balanced splits
+  without weakening browser isolation or changing defaults.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

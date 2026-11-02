@@ -94,6 +94,23 @@ Only open VR obligations belong here.
   monitoring, with no new flaky browser failures. Retire only after
   the remaining evidence is recorded.
 
+- [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
+  timestamped Chromium slot metrics and the timeline analyzer under
+  real parallel Linux/Windows browser loads. Work:
+  [Chromium concurrency benchmark](TODO.md#performance-storage-and-build-tooling);
+  change: `tools/browser_test_capacity.py`,
+  `tools/analyze_chromium_timeline.py`, focused regression tests;
+  risk: low (metrics only; default admission unchanged).
+  Immediate: **18/18** capacity/timeline tests passed in serial and
+  two-worker xdist; twelve real Chromium browser tests passed with
+  timestamped metrics (two-slot occupancy **11.04/12.40 s** observed).
+  Ruff, Pyright, docs, and whitespace checks passed. Design: none.
+  Deferred: run both slot limits with `--browser-metrics` on the
+  same commit, analyze completed JSONL, investigate the observed
+  four-PID Scenario FAQ fixture placement, and confirm metrics on
+  Linux and Windows with no change in pass/skip/failure rates.
+  Retire when results and caveats are recorded in `docs/testing.md`.
+
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -104,7 +121,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0024` (`VR-0023` open; earlier entries retired).
+- Execution: `VR-0025` (`VR-0023` and `VR-0024` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
