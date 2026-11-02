@@ -1868,7 +1868,7 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
-    - [ ] Reconcile the remaining **17 Skill** source IDs with unresolved
+    - [ ] Reconcile the remaining **16 Skill** source IDs with unresolved
       occurrence parameters and **1 Equipment** source ID. The tracked
       rules.db includes reviewed Mimetism/Berserk/Dodge/Surprise Attack,
       Super-Jump, Jump, Climb, TinBot Firewall/Discover/ECM Guided,
@@ -1902,15 +1902,20 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         direct occurrences; exactly 17 carry extra `48/TEXT:Dep. Zone`
         (12 profile, five option). The source-only regression pins every
         occurrence ID and rejects alternate signatures. The published
-        Parachutist summary already explains the restriction and exception;
-        no new rule, database or Unit-usage index has been generated.
-      - [ ] **Data processing — promote exact Parachutist variant:**
-        Encode the reviewed `Dep. Zone` source extra as a typed,
-        source-exact enemy-Deployment-Zone entry permission, with closed
-        schema validation, pinned-source regression, paired rules database/
-        publication refresh and rollback. Do not make the permission a
-        family default or infer legal positions from a roster; preserve
-        the existing N5.3 p. 105 player-facing explanation.
+        Parachutist summary already explains the restriction and exception.
+        This source review alone did not add semantics or a Unit-usage index;
+        the subsequent typed database promotion is recorded below.
+      - [x] **Data processing — promote exact Parachutist variant:**
+        Encoded source-33 extra `48/TEXT:Dep. Zone` as a closed
+        `parachutist-entry-zone-permission`, scoped to the enemy
+        Deployment Zone during table-edge entry, not the entire Skill
+        family. All 17 pinned source occurrences are now reviewed,
+        preserving the N5.3 p. 105 base restriction. A guarded
+        rules.db/deployed-object publication promotion retained the
+        17 unchanged reviewed objects and rollback artifacts. The
+        source inventory has **16** unresolved Skill IDs. This does
+        not compute legal entry positions or generate a Unit-usage
+        index; final browser/release acceptance remains open.
       - [x] **Data processing — Neurocinetics source-109 evidence:**
         Reconcile all four occurrence-level `8/TEXT:+1B` signatures
         against the pinned Army raw database: two YĀN HUǑ option

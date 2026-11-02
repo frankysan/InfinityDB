@@ -744,21 +744,23 @@ source-bound; distinct modifiers such as `+1 SD` and `+1B` cannot be merged.
 A shared family does not imply that all of its variants are equivalent. Retain
 the source catalog ID, raw variant/extras and rule citations as provenance.
 
-**Parachutist (Deployment Zone), source-only review (2026-11-02):**
+**Parachutist (Deployment Zone), promoted (2026-11-02):**
 English N5.3 p. 105 explicitly allows this variant to enter the **enemy**
 Deployment Zone; the normal Parachutist restriction still applies without
 it. Pinned Skill source ID `33` contains 305 direct occurrences, of which
 exactly 17 carry one extra: ID `48`, `TEXT`, raw `Dep. Zone`. Twelve occur
 on source profiles and five on options, with no direct Unit-option matches.
 The source-owner IDs and exact signature are pinned by
-`tests/test_audit_source_variant_inputs.py`. This establishes a reviewed
-**source/procedure correspondence**, not a promoted typed parameter in
-`rules.db`: the current source-variant inventory correctly still marks
-Parachutist unresolved. A future migration should represent this as a
-source-exact entry-area permission, without assigning it to every member of
-the Skill family, altering the normal restriction, or inferring actual
-legal entry positions from the Army roster. This is not the cross-Army
-Unit-usage index.
+`tests/test_audit_source_variant_inputs.py`. The matching `rules.db`
+family-linked `reviewed-extra` parameter is strictly
+`parachutist-entry-zone-permission`, with
+`applies_to: parachutist-table-edge-entry`, `zone: enemy-deployment-zone`,
+and `permitted: true`. It is present only when extra 48 exactly matches;
+the base family gains no unconditional permission. The guarded paired
+rules/publication refresh preserved all reviewed deployed objects.
+This does not infer actual legal entry positions from the Army roster,
+implement the cross-Army Unit-usage index, or replace player-facing
+N5.3 p. 105 procedure text.
 
 **First verified exact-source pilot (Martial Arts L1-L5):** Army Skill source
 IDs `19`, `20`, `21`, `22`, `23` share one published application Skill

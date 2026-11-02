@@ -1723,6 +1723,23 @@ the source inventory moves from 21 to **20 unresolved Skill IDs**.
 This is metadata publication and does not establish a Unit-usage
 index, attack resolution, full browser signoff or release acceptance.
 
+**Parachutist (Dep. Zone) source promotion (2026-11-02):**
+Pinned Army Skill source `33` has 305 direct occurrences and exactly
+17 matching `48/TEXT:Dep. Zone` extras (12 profile, five option).
+The `reviewed-extra` effect strictly permits entry from the table
+edge inside the **enemy** Deployment Zone for the matching occurrence,
+while the base restriction and N5.3 p. 105 explanation remain intact.
+`tests/test_audit_source_variant_inputs.py` verifies source-owner IDs,
+full signatures, the published and fresh rules exports; the curated
+mutation tests reject incorrect IDs, raw strings, effect scope and
+non-Boolean permissions. Run
+`tools.stage_parachutist_deployment_zone --output-dir local/<unique-name>`
+to stage the paired v9 rules/publication output and
+`--promote-staged` to verify hashes, preserve the 17 reviewed objects
+and retain rollback copies. The audit now reports **16** unresolved
+Skill IDs. Browser verification, cross-Army usage projection and final
+release candidate acceptance remain separate.
+
 **Minelayer (2) source-quantity promotion (2026-11-01):**
 The source audit verifies Skill source `56` has 546 direct
 occurrences, including exactly 15 `267/TEXT:2` extras (14

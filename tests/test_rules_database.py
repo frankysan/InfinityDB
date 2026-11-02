@@ -1525,6 +1525,19 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         "dodge", "super-jump", "impersonation", "ft-master", "decoy",
         "vulnerability", "hacker", "booty", "metachemistry", "regeneration",
         "neurocinetics", "minelayer", "chain-of-command", "forward-observer",
+        "parachutist",
+    }
+    assert mappings["parachutist"] == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 48, "extra_type": "TEXT", "raw_value": "Dep. Zone",
+            "effect": {
+                "kind": "parachutist-entry-zone-permission",
+                "applies_to": "parachutist-table-edge-entry",
+                "zone": "enemy-deployment-zone",
+                "permitted": True,
+            },
+        }],
     }
     assert mappings["forward-observer"] == {
         "source": "army-extra", "kind": "reviewed-extra",

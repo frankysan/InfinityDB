@@ -4178,6 +4178,42 @@ def _assert_rejects_reviewed_skill_extra_mutation(
 
 
 @pytest.mark.parametrize(
+    ("part", "value"),
+    [
+        ("extraId", 49),
+        ("extraType", "DISTANCE"),
+        ("rawValue", "Deployment Zone"),
+        ("kind", "all-table-edge-entry"),
+        ("appliesTo", "combat-jump-entry"),
+        ("zone", "own-deployment-zone"),
+        ("permitted", False),
+        ("permitted", 1),
+        ("extraValues", []),
+    ],
+)
+def test_parachutist_deployment_zone_rejects_unreviewed_extras(
+    tmp_path: Path, part: str, value: object,
+) -> None:
+    root = Path(__file__).parents[1]
+    document = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    record = next(row for row in document["records"] if row["id"] == "skill:parachutist")
+    parameter = record["variantSemantics"]["occurrenceParameters"][0]
+    entry = parameter["extraValues"][0]
+    if part == "extraValues":
+        parameter[part] = value
+    elif part in {"kind", "appliesTo", "zone", "permitted"}:
+        entry["effect"][part] = value
+    else:
+        entry[part] = value
+    path = tmp_path / "mutated.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid Parachutist Deployment Zone extra"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     ("field", "value"),
     [
         ("extraId", 266),

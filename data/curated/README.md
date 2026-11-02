@@ -990,6 +990,14 @@ Each entry requires
 }
 ```
 
+Parachutist (N5.3 p. 105, Army Skill source 33) recognizes only
+`48/TEXT:Dep. Zone` as `parachutist-entry-zone-permission` for
+`parachutist-table-edge-entry` in the `enemy-deployment-zone`
+(`permitted: true`). The base Parachutist rule still forbids entry into
+the enemy Deployment Zone without the variant. Neither this exact
+source annotation nor its 17 reviewed occurrences decides the legality
+of specific table-edge positions or creates a Unit usage index.
+
 The Super-Jump family has one separate, exact `reviewed-extra`:
 source extra ID 304, `TEXT: Jet Propulsion`, with
 `effect: {"kind":"trajectory-control","appliesTo":"super-jump-jet-propulsion"}`.

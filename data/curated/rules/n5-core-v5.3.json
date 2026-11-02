@@ -18219,7 +18219,26 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 48,
+                                "extraType": "TEXT",
+                                "rawValue": "Dep. Zone",
+                                "effect": {
+                                    "kind": "parachutist-entry-zone-permission",
+                                    "appliesTo": "parachutist-table-edge-entry",
+                                    "zone": "enemy-deployment-zone",
+                                    "permitted": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

@@ -984,6 +984,29 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid Chain of Command Non Specialist extra")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "parachutist"}
+    ]:
+        # N5.3 p. 105: only the exact Army Dep. Zone variant permits entry
+        # inside the enemy Deployment Zone; the base family retains its ban.
+        expected = [{
+            "extraId": 48,
+            "extraType": "TEXT",
+            "rawValue": "Dep. Zone",
+            "effect": {
+                "kind": "parachutist-entry-zone-permission",
+                "appliesTo": "parachutist-table-edge-entry",
+                "zone": "enemy-deployment-zone",
+                "permitted": True,
+            },
+        }]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+            or type(parameter["extraValues"][0]["effect"]["permitted"]) is not bool
+        ):
+            raise ValueError(f"{context}: invalid Parachutist Deployment Zone extra")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "minelayer"}
     ]:
         # N5.3 p. 102: the bracketed quantity is the number of deployable
