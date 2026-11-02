@@ -9,11 +9,16 @@ from __future__ import annotations
 
 import os
 import time
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
 import pytest
+
+from tools.resource_waits import capture_resource_waits
+
+_SETUP_WAITS: pytest.StashKey[list[tuple[str, float]]] = pytest.StashKey()
+_WAIT_PROPERTY_PREFIX = "infinitydb_wait_"
 
 
 @dataclass
@@ -29,6 +34,7 @@ class XdistStartupProfile:
     first_ordinary_test_at: float | None = None
     browser_lane_started_at: dict[str, float] = field(default_factory=dict)
     browser_lane_finished_at: dict[str, float] = field(default_factory=dict)
+    setup_waits: list[tuple[str, str, float, float]] = field(default_factory=list)
 
     def start(self, workers: int, now: float, *, launch_at: float | None = None) -> None:
         self.started_at = now
@@ -40,6 +46,7 @@ class XdistStartupProfile:
         self.first_ordinary_test_at = None
         self.browser_lane_started_at.clear()
         self.browser_lane_finished_at.clear()
+        self.setup_waits.clear()
 
     def ready(self, worker: str, now: float) -> None:
         if self.started_at is not None:
@@ -74,6 +81,38 @@ class XdistStartupProfile:
         lane = self._browser_lane(nodeid)
         if lane is not None:
             self.browser_lane_finished_at[lane] = now
+
+    def record_setup_wait(self, report: pytest.TestReport) -> None:
+        """Retain measured resource waiting transported by pytest/xdist."""
+        for key, value in report.user_properties:
+            if (key.startswith(_WAIT_PROPERTY_PREFIX)
+                    and isinstance(value, (int, float)) and value >= 0.05):
+                self.setup_waits.append((
+                    report.nodeid, key[len(_WAIT_PROPERTY_PREFIX):],
+                    float(value), report.duration,
+                ))
+
+    def wait_summary_lines(self) -> tuple[str, ...]:
+        if not self.setup_waits:
+            return ()
+        total = sum(wait for _, _, wait, _ in self.setup_waits)
+        lines = [
+            f"Measured resource waiting during setup: {total:.2f}s across "
+            f"{len(self.setup_waits)} test setup events (summed worker time; not wall time).",
+            "Largest setup waits (waiting / remaining setup / original pytest setup):",
+        ]
+        for nodeid, resource, wait, duration in sorted(
+            self.setup_waits, key=lambda record: record[2], reverse=True,
+        )[:10]:
+            lines.append(
+                f"  {resource}: {wait:.2f}s / {max(0.0, duration - wait):.2f}s / "
+                f"{duration:.2f}s  {nodeid}"
+            )
+        lines.append(
+            "Remaining setup can include other unmeasured waits; waiting is already "
+            "included in pytest setup (do not add the two)."
+        )
+        return tuple(lines)
 
     def summary_lines(self) -> tuple[str, ...]:
         start = self.started_at
@@ -171,6 +210,28 @@ def pytest_xdist_node_collection_finished(node: Any, ids: Sequence[str]) -> None
     _PROFILE.collected(str(node.gateway.id), time.perf_counter())
 
 
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_runtest_setup(item: pytest.Item) -> Iterator[None]:
+    """Observe resource blocking without changing pytest's native setup phase."""
+    with capture_resource_waits() as waits:
+        yield
+    item.stash[_SETUP_WAITS] = waits
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo) -> Iterator[None]:
+    """Attach setup waits to the report for transmission to the xdist controller."""
+    outcome = yield
+    report = outcome.get_result()
+    if report.when != "setup":
+        return
+    by_resource: dict[str, float] = {}
+    for resource, seconds in item.stash.get(_SETUP_WAITS, []):
+        by_resource[resource] = by_resource.get(resource, 0.0) + seconds
+    for resource, seconds in sorted(by_resource.items()):
+        report.user_properties.append((_WAIT_PROPERTY_PREFIX + resource, seconds))
+
+
 def pytest_runtest_logstart(nodeid: str, location: tuple[str, int, str]) -> None:
     """Track when Chromium lanes and ordinary tests first start."""
     _PROFILE.test_started(nodeid, time.perf_counter())
@@ -180,12 +241,18 @@ def pytest_runtest_logreport(report: pytest.TestReport) -> None:
     """Track the last teardown observed per Chromium scheduling lane."""
     if report.when == "teardown":
         _PROFILE.test_finished(report.nodeid, time.perf_counter())
+    elif report.when == "setup":
+        _PROFILE.record_setup_wait(report)
 
 
 def pytest_terminal_summary(terminalreporter: Any) -> None:
     lines = _PROFILE.summary_lines()
-    if not lines:
-        return
-    terminalreporter.write_sep("=", "xdist startup and collection timings")
-    for line in lines:
-        terminalreporter.write_line(line)
+    if lines:
+        terminalreporter.write_sep("=", "xdist startup and collection timings")
+        for line in lines:
+            terminalreporter.write_line(line)
+    waits = _PROFILE.wait_summary_lines()
+    if waits:
+        terminalreporter.write_sep("=", "resource waiting versus pytest setup")
+        for line in waits:
+            terminalreporter.write_line(line)

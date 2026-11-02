@@ -19,6 +19,7 @@ import pytest
 from infinity_db.database.repository import Database
 from infinity_db.weapon_ammunition_references import load_ammunition_reference_map
 from infinity_db.web import create_app
+from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,11 +42,14 @@ def app() -> Any:
 
 
 @pytest.fixture(scope="module")
-def browser() -> Iterator[Any]:
+def browser(pooled_chromium_browser: Any) -> Iterator[Any]:
+    if pooled_chromium_browser is not None:
+        yield pooled_chromium_browser
+        return
     api = pytest.importorskip("playwright.sync_api")
     with api.sync_playwright() as driver:
         try:
-            chrome = driver.chromium.launch(channel="chrome")
+            chrome = launch_timed_chromium(driver, "ammunition")
         except Exception as exc:
             if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
                 pytest.skip(f"Chrome unavailable: {exc}")

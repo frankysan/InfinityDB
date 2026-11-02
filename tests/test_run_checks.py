@@ -221,6 +221,38 @@ def test_test_stage_can_select_three_or_four_chromium_slots_and_lanes() -> None:
     )
 
 
+def test_browser_reuse_opt_in_only_adds_flag_for_four_lane_benchmark() -> None:
+    [pooled] = run_checks.stage_definitions(
+        ("test",), [], build_source=None,
+        test_workers="8", test_distribution="browserlanes",
+        browser_slot_count=4, browser_lane_count=4, reuse_browser=True,
+    )
+    assert "--reuse-browser" in pooled.command
+    [regular] = run_checks.stage_definitions(
+        ("test",), [], build_source=None,
+        test_workers="8", test_distribution="browserlanes",
+        browser_slot_count=4, browser_lane_count=4,
+    )
+    assert "--reuse-browser" not in regular.command
+
+
+@pytest.mark.parametrize("args", [
+    ["--stage", "test", "--reuse-browser"],
+    ["--stage", "test", "--test-dist", "browserlanes",
+     "--browser-slot-count", "4", "--reuse-browser"],
+    ["--stage", "test", "--test-dist", "browserlanes",
+     "--browser-lane-count", "4", "--reuse-browser"],
+    ["--stage", "test", "--test-dist", "browserlanes",
+     "--browser-lane-count", "4", "--browser-slot-count", "4",
+     "--test-workers", "0", "--reuse-browser"],
+])
+def test_browser_reuse_rejects_unsafe_modes(
+    args: list[str], capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert run_checks.main(args) == run_checks.EXIT_RUNNER_ERROR
+    assert "--reuse-browser requires" in capsys.readouterr().err
+
+
 def test_four_lane_scenario_split_is_explicit_opt_in() -> None:
     [stage] = run_checks.stage_definitions(
         ("test",), [], build_source=None,

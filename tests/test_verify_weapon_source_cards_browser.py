@@ -16,6 +16,7 @@ from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 import pytest
 
 from infinity_db.web import create_app
+from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page
 
 
@@ -54,23 +55,30 @@ def origin(weapon_app: Any) -> Iterator[str]:
 
 
 @pytest.fixture(scope="module")
-def chrome(weapon_app: Any, origin: str) -> Iterator[Any]:
+def chrome(weapon_app: Any, origin: str, pooled_chromium_browser: Any) -> Iterator[Any]:
+    class RoutedBrowser:
+        def __init__(self, browser: Any):
+            self.browser = browser
+
+        def new_page(self, **kwargs: Any) -> Any:
+            page = self.browser.new_page(**kwargs)
+            route_browser_page(page, weapon_app, origin)
+            return page
+
+    if pooled_chromium_browser is not None:
+        yield RoutedBrowser(pooled_chromium_browser)
+        return
+
     sync_api = pytest.importorskip("playwright.sync_api")
     with sync_api.sync_playwright() as driver:
         try:
-            browser = driver.chromium.launch(channel="chrome")
+            browser = launch_timed_chromium(driver, "weapon-cards")
         except Exception as exc:
             if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
                 pytest.skip(f"Chromium unavailable: {exc}")
             raise
-        class RoutedBrowser:
-            def new_page(self, **kwargs: Any) -> Any:
-                page = browser.new_page(**kwargs)
-                route_browser_page(page, weapon_app, origin)
-                return page
-
         try:
-            yield RoutedBrowser()
+            yield RoutedBrowser(browser)
         finally:
             browser.close()
 

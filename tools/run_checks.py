@@ -173,6 +173,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Split Scenario FAQ across two groups in four-lane browserlanes mode.",
     )
     parser.add_argument(
+        "--reuse-browser", action="store_true",
+        help="Reuse one capacity-owned Chrome across group B in four-lane browserlanes mode.",
+    )
+    parser.add_argument(
         "--browser-metrics", action="store_true",
         help="Write per-worker Chromium slot wait/hold JSONL to ignored local/benchmarks.",
     )
@@ -241,6 +245,7 @@ def stage_definitions(
     browser_slot_count: int = 2,
     browser_lane_count: int = 2,
     split_scenario_faq: bool = False,
+    reuse_browser: bool = False,
 ) -> list[Stage]:
     python = sys.executable
     stages: list[Stage] = []
@@ -260,6 +265,8 @@ def stage_definitions(
                     command.append("--browser-lanes")
                     if split_scenario_faq:
                         command.append("--split-scenario-faq")
+                    if reuse_browser:
+                        command.append("--reuse-browser")
             if name == "test":
                 if browser_slot_count != 2:
                     command.extend(("--browser-slot-count", str(browser_slot_count)))
@@ -470,6 +477,15 @@ def main(argv: list[str] | None = None) -> int:
                 "--split-scenario-faq requires --stage test, --test-dist browserlanes, "
                 "--browser-lane-count 4 and parallel workers"
             )
+        if args.reuse_browser and (
+            "test" not in stage_names or args.test_dist != "browserlanes"
+            or args.browser_lane_count != 4 or args.browser_slot_count != 4
+            or args.test_workers == "0"
+        ):
+            build_parser().error(
+                "--reuse-browser requires --stage test, --test-dist browserlanes, "
+                "--browser-lane-count 4, --browser-slot-count 4 and parallel workers"
+            )
         if args.browser_metrics and "test" not in stage_names:
             build_parser().error("--browser-metrics requires the test stage")
         if (
@@ -528,6 +544,7 @@ def main(argv: list[str] | None = None) -> int:
             browser_slot_count=args.browser_slot_count,
             browser_lane_count=args.browser_lane_count,
             split_scenario_faq=args.split_scenario_faq,
+            reuse_browser=args.reuse_browser,
         )
     except SystemExit as exc:
         exit_code = exc.code

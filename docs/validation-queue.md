@@ -73,7 +73,24 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+Only open VR obligations belong here.
+
+- [ ] **VR-0022** (2026-11-02; ready-to-run): Run cumulative full
+  pytest after adding the opt-in Chromium lane-B process reuse pilot
+  and per-page/browser launch timing metrics.
+  Work: [Chromium benchmark](TODO.md#performance-storage-and-build-tooling);
+  revision: `dev/v1.0.0` working tree after `7c0a7adb`;
+  files: `tools/browser_test_metrics.py`, `tools/run_checks.py`,
+  `tests/conftest.py`, `tests/test_browser_test_metrics.py`,
+  `tests/test_run_checks.py`, the three lane-B browser fixtures,
+  and `config/testing/test-sections.json`. Risk: medium.
+  Immediate: pool and runner tests **102 passed, 1 skipped**;
+  lane-B baseline **121 passed in 128.34 s**, pooled **121 passed
+  in 126.42 s**; complete four-lane browser section with pooling
+  **592 passed, 16 skipped in 399.68 s**. Design: no additional
+  required regression known.
+  Deferred: cumulative full pytest and mandatory hosted CI.
+  Repeated performance trials and Docker comparison remain in TODO.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -85,7 +102,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0022` (`VR-0019`–`VR-0021` retired after cumulative tests).
+- Execution: `VR-0023` (`VR-0022` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

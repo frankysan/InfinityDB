@@ -389,6 +389,32 @@ remain stable under the workstation's normal worker count.
 
 ## Chromium concurrency under pytest-xdist
 
+### Measured waiting versus pytest setup
+
+Pytest's native `setup` duration includes time blocked acquiring a Chromium
+slot. This is **waiting**, not active fixture initialization; the two numbers
+must not be added. InfinityDB's `tools.pytest_startup_profile` plugin now
+records Chromium-slot acquisition waits during setup and transfers their
+durations through pytest's `user_properties` to the xdist controller. For
+significant waits (at least 50 ms), the final console report displays:
+
+- **Measured resource waiting**: time blocked before acquiring a Chromium
+  slot, summed across worker processes (not wall-clock elapsed time).
+- **Remaining setup**: the original pytest setup duration minus the measured
+  wait. This is *not* guaranteed active CPU work: other waits remain
+  uninstrumented.
+- **Original pytest setup**: unchanged, for comparison with historical results.
+
+The displayed largest-wait examples are individual test setup events; a
+module-scoped fixture's slot wait is charged to the first test executing that
+fixture on each worker, not distributed across all cases in the module. Tests
+blocked in a slot admission timeout also report their measured waiting.
+The existing `--browser-metrics` JSONL slot records remain optional and
+independent of this console report. This profiling change does not increase
+Chromium concurrency or alter test assertions, fixture scope, scheduling,
+or timeouts. A separate future improvement can expose live queued/waiting/
+setup/running/teardown states to the MCP job monitor.
+
 Full local checks retain `-n auto --dist worksteal` by default; the worker
 count is not reduced for browser acceptance. The 2026-10-29 full suite varied
 from 246.85 s to 305.64 s despite both runs passing. The latter showed
@@ -678,13 +704,63 @@ the main constraint was **uneven lane workload**. The Scenario FAQ module held
 one slot for about **373 / 449 / 430 s** in the 2/3/4-lane runs, respectively.
 Its execution slowed as more heavy browser modules ran concurrently, which
 is consistent with, but does not independently prove, resource contention.
-These are **single measurements**, not an A/B/A benchmark; browser reuse,
-Chrome launch counts, CPU/RAM sampling, Docker runtime verification, and
-the cumulative full test suite remain outstanding. Keep the existing
-`worksteal` / two-slot defaults until repeatability and release reliability
-are demonstrated. The next useful experiment is splitting the oversized
-Scenario FAQ workload or otherwise improving scheduler balance while
-preserving isolation and stable local transport.
+The original 2/3/4-lane results are **single measurements**, not an
+A/B/A benchmark. Keep the existing `worksteal` / two-slot default until
+repeatability and release reliability are demonstrated. The Scenario FAQ
+split and the first cumulative full-suite pass are now documented above.
+
+**Cross-module Chromium reuse pilot, 2026-11-02:** A second opt-in option,
+`--reuse-browser`, applies only to the three modules assigned to lane B
+in four-lane `browserlanes` mode: Ammunition publication, Sidebar density,
+and Weapon source cards. The same worker holds one OS Chromium slot for
+the entire pooled browser lifetime, skipping the redundant per-module
+slot lease. Its single Playwright process is closed after the last eligible
+module (or on worker teardown), and every test still calls
+`browser.new_page()` for a fresh, isolated page/context. This is not
+enabled by the default pytest command.
+
+The two comparable Windows runs selected the same three modules, eight
+workers, four slots, four lanes, and the same tracked and generated data:
+
+- Ordinary per-module Chrome lifecycle: **121 passed in 128.34 s**;
+  three launches took **0.919 s total**.
+- One pooled Chrome across the three modules: **121 passed in 126.42 s**;
+  one launch took **0.216 s**.
+- Both modes created **120 independent pages/contexts**, taking
+  **13.25 s** and **13.19 s** respectively. Slot waiting was negligible.
+  Thus, the 1.92-second (1.5%) total difference is a **single-run
+  observation**, not an established speedup.
+
+Reproduce the limited pilot (run sequentially, with no competing tests):
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-workers 8 --test-dist browserlanes --browser-slot-count 4 --browser-lane-count 4 --browser-metrics tests/test_verify_ammunition_publication_browser.py tests/test_verify_sidebar_density_browser.py tests/test_verify_weapon_source_cards_browser.py
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-workers 8 --test-dist browserlanes --browser-slot-count 4 --browser-lane-count 4 --reuse-browser --browser-metrics tests/test_verify_ammunition_publication_browser.py tests/test_verify_sidebar_density_browser.py tests/test_verify_weapon_source_cards_browser.py
+```
+
+The opt-in `browser-<pid>.jsonl` files beside slot records capture launch,
+close, and new-page durations. Reuse requires `browserlanes` and exactly
+four slots/four lanes, so the pool cannot exceed the configured resource
+cap. In a further **complete browser-section** four-lane run combining
+`--split-scenario-faq --reuse-browser`, **592 passed, 16 skipped** in
+**399.68 s** (lanes A/B/C/D finished at +296.05/+241.52/+285.30/+398.97 s).
+For comparison, the earlier four-lane split without the pool finished in
+**413.60 s**: a 3.4% single-run difference. The pool showed one launch,
+120 independent new-page calls, one close, and released its slot before
+other lanes finished. This validates coexistence but does not establish
+a repeatable improvement.
+
+More complete host CPU/RAM sampling and repeated, alternated runs are
+still required before adopting the pool; measured startup cost is too
+small to explain the full-suite long-tail delays.
+
+**Docker host readiness:** the fixed, read-only
+`python -m tools.probe_docker_test_host` probe found the Docker CLI and
+Compose **5.6.1** on the Windows MCP host, but both the daemon version
+and engine-info queries failed (exit 1, unclassified by the probe).
+The Linux container engine is **not yet verified as usable** from the
+MCP process. The existing Dockerfile and Compose configuration remain
+production-specific and unchanged. No Docker tests have been performed.
 
 Store raw measurements in ignored `local/benchmarks/`; publish only the
 selected configuration, methodology and concise outcome here. Do not

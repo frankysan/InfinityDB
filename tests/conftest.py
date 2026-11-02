@@ -15,6 +15,7 @@ from tools.browser_test_capacity import (
     browser_slot,
     scenario_faq_split_lane,
 )
+from tools.browser_test_metrics import POOLED_BROWSER_MODULES, ChromiumLanePool
 from tools.test_sections import load_test_sections, section_for_module
 
 pytest_plugins = ("tools.pytest_startup_profile",)
@@ -26,6 +27,10 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         action="store_true",
         default=False,
         help="Group Chromium tests into dedicated workers with --dist loadgroup.",
+    )
+    parser.addoption(
+        "--reuse-browser", action="store_true", default=False,
+        help="Experimentally reuse one capacity-owned Chrome across four-lane group B.",
     )
     parser.addoption(
         "--split-scenario-faq", action="store_true", default=False,
@@ -77,6 +82,8 @@ def limit_concurrent_browser_tests(
     if (
         not _uses_chromium(path)
         or path.name in _PER_TEST_CHROMIUM_MODULES
+        or (request.config.getoption("--reuse-browser")
+            and path.stem in POOLED_BROWSER_MODULES)
         or not _needs_chromium_slot()
     ):
         yield
@@ -103,6 +110,41 @@ def chromium_test_slot(
         label=str(request.node.nodeid),
     ):
         yield
+
+
+@pytest.fixture(scope="session")
+def _pooled_chromium_lane(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Iterator[ChromiumLanePool]:
+    pool = ChromiumLanePool(_browser_slot_directory(tmp_path_factory), slots=4)
+    try:
+        yield pool
+    finally:
+        pool.close()
+
+
+@pytest.fixture(scope="module")
+def pooled_chromium_browser(
+    request: pytest.FixtureRequest, _pooled_chromium_lane: ChromiumLanePool,
+) -> Iterator[object | None]:
+    """Optional shared browser for the three four-lane B modules only."""
+    if not request.config.getoption("--reuse-browser"):
+        yield None
+        return
+    module = Path(str(request.node.path)).stem
+    if module not in POOLED_BROWSER_MODULES:
+        raise pytest.UsageError(f"Module is not eligible for Chromium reuse: {module}")
+    pytest.importorskip("playwright.sync_api")
+    try:
+        browser = _pooled_chromium_lane.get()
+    except Exception as exc:
+        if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+            pytest.skip(f"Chrome unavailable: {exc}")
+        raise
+    try:
+        yield browser
+    finally:
+        _pooled_chromium_lane.finished_module(module)
 
 
 @pytest.fixture(scope="module")
@@ -150,9 +192,17 @@ def pytest_collection_modifyitems(
     """Assign every repository test module to exactly one maintained local section."""
     browser_lanes = bool(config.getoption("--browser-lanes"))
     split_scenario = bool(config.getoption("--split-scenario-faq"))
+    reuse_browser = bool(config.getoption("--reuse-browser"))
     lane_count = int(config.getoption("--browser-lane-count") or 2)
     if split_scenario and (not browser_lanes or lane_count != 4):
         raise pytest.UsageError("--split-scenario-faq requires --browser-lanes and four lanes")
+    if reuse_browser and (
+        not browser_lanes or lane_count != 4
+        or int(config.getoption("--browser-slot-count") or 2) != 4
+    ):
+        raise pytest.UsageError(
+            "--reuse-browser requires --browser-lanes, four lanes and four slots"
+        )
     groups = (
         browser_lane_groups(lane_count)
         if browser_lanes else {}

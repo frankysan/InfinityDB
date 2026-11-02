@@ -18,6 +18,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import BinaryIO
 
+from tools.resource_waits import record_resource_wait
+
 CHROMIUM_SCHEDULING_LANES = {
     # Stable, opt-in xdist groups prevent workers waiting on the two-slot lock.
     "test_verify_unit_skill_presentation_browser": "chromium-a",
@@ -144,6 +146,7 @@ def browser_slot(
                 handle.close()
                 continue
             acquired_at = time.monotonic()
+            record_resource_wait("chromium", acquired_at - start)
             try:
                 yield index
             finally:
@@ -166,6 +169,7 @@ def browser_slot(
                         output.write(json.dumps(record, sort_keys=True) + "\n")
             return
         if time.monotonic() - start >= timeout_seconds:
+            record_resource_wait("chromium", time.monotonic() - start)
             raise TimeoutError(
                 f"No Chromium acceptance slot available within {timeout_seconds}s"
             )

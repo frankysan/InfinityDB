@@ -9,6 +9,7 @@ from typing import Any
 import pytest
 
 from infinity_db.web import create_app
+from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,11 +31,14 @@ def app() -> Any:
 
 
 @pytest.fixture(scope="module")
-def chrome() -> Iterator[Any]:
+def chrome(pooled_chromium_browser: Any) -> Iterator[Any]:
+    if pooled_chromium_browser is not None:
+        yield pooled_chromium_browser
+        return
     sync_api = pytest.importorskip("playwright.sync_api")
     with sync_api.sync_playwright() as driver:
         try:
-            browser = driver.chromium.launch(channel="chrome")
+            browser = launch_timed_chromium(driver, "sidebar")
         except Exception as exc:
             if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
                 pytest.skip(f"Chrome unavailable: {exc}")
