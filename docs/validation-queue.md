@@ -73,41 +73,7 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here.
-
-- [ ] **VR-0019** (2026-11-02; ready-to-run): Run cumulative
-  tests after documenting the TinBot: Neurocinetics source-only
-  publication boundary and adding release-pair browser/API checks
-  proving the unavailable source ID 188 is not advertised as
-  a standalone Equipment route.
-  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree after `6d4b93fd`;
-  files: `tests/test_verify_scenario_faq_browser.py`,
-  `tests/test_web.py`, `docs/TODO.md`, `docs/testing.md`;
-  risk: low. Immediate: three Chromium width checks, one
-  API and one exact source-provenance test **5 passed**;
-  Ruff, Pyright, Markdownlint, docs links and diff **PASS**.
-  Design: none. Deferred: cumulative full suite under the
-  five-change/seven-day phased gate; hosted CI and final
-  release acceptance remain separate.
-
-- [ ] **VR-0020** (2026-11-02; ready-to-run): Run cumulative full
-  pytest after adding configurable Chromium slot/lane counts and opt-in
-  per-worker slot-wait/hold metrics.
-  Work: [Chromium benchmark](TODO.md#performance-storage-and-build-tooling);
-  revision: `dev/v1.0.0` working tree after `f82bf93d`;
-  files: `tests/conftest.py`, `tests/test_browser_test_capacity.py`,
-  `tests/test_run_checks.py`, `tests/test_test_sections.py`,
-  `tools/browser_test_capacity.py`, `tools/pytest_startup_profile.py`,
-  `tools/run_checks.py`; risk: medium. Immediate:
-  infrastructure regression tests **102 passed, 1 skipped**;
-  canonical Pyright **PASS**; complete grouped Chromium browser section
-  **592 passed, 16 skipped** at each of 2/3/4 lanes. Separate four-slot
-  `worksteal` experiment **590 passed, 16 skipped, 2 failed**
-  (local `ERR_CONNECTION_REFUSED`; not an accepted configuration).
-  Design: none for the current configuration change.
-  Deferred: full integrated pytest, mandatory hosted CI; experimental
-  browser reuse and repeated benchmark trials remain in the TODO.
+Only open VR obligations belong here. **No pending entries.**
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -119,12 +85,12 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0021` (`VR-0019` and `VR-0020` open; earlier entries retired).
+- Execution: `VR-0022` (`VR-0019`–`VR-0021` retired after cumulative tests).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
-The 2026-11-01 cumulative local suite evidence is summarized in
-[testing.md](testing.md#chromium-concurrency-under-pytest-xdist);
+The 2026-11-02 cumulative local suite evidence is summarized in
+[testing.md](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark);
 mandatory CI and final release acceptance remain separate.
 
 ## Recording template

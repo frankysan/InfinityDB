@@ -3772,7 +3772,9 @@ follow-up action. Retain source-native values until official resolution.
   isolation/stability/resource checks; keep raw evidence ignored under `local/`.
   Initial 2/3/4 grouped-lane runs passed, but the four-slot `worksteal`
   run exposed two local `ERR_CONNECTION_REFUSED` Chromium failures; investigate
-  transport/scheduling reliability before considering a new default.
+  transport/scheduling reliability before considering a new default. The
+  opt-in Scenario FAQ split passed its first full browser-section run, but
+  still needs repeatability and cumulative-suite evidence.
 
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a

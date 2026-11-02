@@ -8,6 +8,7 @@ This limits browser tests, not ordinary test parallelism or CI capability.
 from __future__ import annotations
 
 import errno
+import hashlib
 import importlib
 import json
 import os
@@ -74,6 +75,16 @@ def browser_lane_groups(count: int = 2) -> dict[str, str]:
     if set(groups) != set(CHROMIUM_SCHEDULING_LANES):
         raise ValueError("Experimental Chromium lane registry is incomplete")
     return groups
+
+
+def scenario_faq_split_lane(nodeid: str) -> str:
+    """Divide Scenario FAQ cases deterministically across lanes A and D.
+
+    This is only used by the opt-in four-lane benchmark. Each worker
+    retains its own module-scoped Chromium and WSGI fixtures.
+    """
+    partition = hashlib.sha256(nodeid.encode("utf-8")).digest()[0] & 1
+    return ("chromium-a", "chromium-d")[partition]
 
 
 def _lock(handle: BinaryIO) -> bool:

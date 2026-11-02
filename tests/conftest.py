@@ -10,7 +10,11 @@ from pathlib import Path
 
 import pytest
 
-from tools.browser_test_capacity import browser_lane_groups, browser_slot
+from tools.browser_test_capacity import (
+    browser_lane_groups,
+    browser_slot,
+    scenario_faq_split_lane,
+)
 from tools.test_sections import load_test_sections, section_for_module
 
 pytest_plugins = ("tools.pytest_startup_profile",)
@@ -22,6 +26,10 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         action="store_true",
         default=False,
         help="Group Chromium tests into dedicated workers with --dist loadgroup.",
+    )
+    parser.addoption(
+        "--split-scenario-faq", action="store_true", default=False,
+        help="Experimentally split Scenario FAQ cases across lanes A and D (four lanes only).",
     )
     parser.addoption(
         "--browser-slot-count", type=int, choices=(2, 3, 4), default=2,
@@ -141,8 +149,12 @@ def pytest_collection_modifyitems(
 ) -> None:
     """Assign every repository test module to exactly one maintained local section."""
     browser_lanes = bool(config.getoption("--browser-lanes"))
+    split_scenario = bool(config.getoption("--split-scenario-faq"))
+    lane_count = int(config.getoption("--browser-lane-count") or 2)
+    if split_scenario and (not browser_lanes or lane_count != 4):
+        raise pytest.UsageError("--split-scenario-faq requires --browser-lanes and four lanes")
     groups = (
-        browser_lane_groups(int(config.getoption("--browser-lane-count") or 2))
+        browser_lane_groups(lane_count)
         if browser_lanes else {}
     )
 
@@ -159,4 +171,6 @@ def pytest_collection_modifyitems(
         if _uses_chromium(path):
             # Dedicated groups keep Chromium work on bounded xdist workers.
             group = groups[path.stem] if browser_lanes else path.stem
+            if split_scenario and path.stem == "test_verify_scenario_faq_browser":
+                group = scenario_faq_split_lane(item.nodeid)
             item.add_marker(pytest.mark.xdist_group(name=group))

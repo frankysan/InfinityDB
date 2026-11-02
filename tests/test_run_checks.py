@@ -221,6 +221,37 @@ def test_test_stage_can_select_three_or_four_chromium_slots_and_lanes() -> None:
     )
 
 
+def test_four_lane_scenario_split_is_explicit_opt_in() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",), [], build_source=None,
+        test_workers="8", test_distribution="browserlanes",
+        browser_slot_count=4, browser_lane_count=4,
+        split_scenario_faq=True,
+    )
+    assert stage.command[3:13] == (
+        "-n", "8", "--dist", "loadgroup", "--browser-lanes",
+        "--split-scenario-faq", "--browser-slot-count", "4",
+        "--browser-lane-count", "4",
+    )
+    [ordinary] = run_checks.stage_definitions(
+        ("test",), [], build_source=None, test_distribution="browserlanes",
+        browser_slot_count=4, browser_lane_count=4,
+    )
+    assert "--split-scenario-faq" not in ordinary.command
+
+
+@pytest.mark.parametrize("args", [
+    ["--stage", "test", "--split-scenario-faq"],
+    ["--stage", "test", "--test-dist", "browserlanes", "--split-scenario-faq"],
+    ["--stage", "lint", "--split-scenario-faq"],
+])
+def test_scenario_split_rejects_invalid_modes(
+    args: list[str], capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert run_checks.main(args) == run_checks.EXIT_RUNNER_ERROR
+    assert "--split-scenario-faq requires" in capsys.readouterr().err
+
+
 def test_nondefault_browser_lanes_require_browserlane_scheduler(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

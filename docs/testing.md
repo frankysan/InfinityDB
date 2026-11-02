@@ -632,6 +632,47 @@ run sequentially, with independent per-worker slot metrics:
   Fixture setup waits reached **305.73 s**; do not promote or report this
   configuration as a successful speedup.
 
+**Scenario FAQ split experiment, 2026-11-02:** On the clean
+`dev/v1.0.0` base `d4c39fe` plus only the benchmark/test-fixture edits,
+an opt-in `--split-scenario-faq` mode partitions Scenario FAQ test
+node IDs deterministically between lanes A and D in four-lane mode.
+Each worker owns an independent module-scoped Chrome/WSGI fixture and
+retains the same cross-process Chromium slot limit. The normal grouping,
+pytest defaults, and release transport gate are unchanged. Run with:
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-section browser --test-workers 8 --test-dist browserlanes --browser-slot-count 4 --browser-lane-count 4 --split-scenario-faq --browser-metrics
+```
+
+The first complete Windows run passed **592, skipped 16, failed 0**
+in **413.60 s**, versus the earlier unsplit four-lane **445.63 s**
+(7.2% improvement across single runs). Lanes A/B/C/D finished at
++301.77/+246.20/+292.33/+412.79 s; lock waits remained
+about 1 ms or less. The duplicated Scenario FAQ module fixture held
+slots on two workers for approximately **287 and 272 s**. Thus, the
+split shortens the critical path without reducing total browser
+occupancy, and lane D remains the tail. Also, the independently
+HTTP-verified Reinforcement parentage test now routes Chromium page
+requests through the existing direct WSGI adapter to avoid local
+static-asset socket refusal; the hosted release-candidate test still
+uses real HTTP, and passed this run. The source of its earlier
+`ERR_CONNECTION_REFUSED` failures remains **unconfirmed**.
+
+A subsequent cumulative test run on the same working tree under
+the **unchanged default** (`-n auto --dist worksteal`, two Chromium
+slots) passed **4,797 tests, 25 skipped, 0 failed** in **564.13 s**
+(async job `453e2eba4f534fd5aea5dd9f5494598e`; 2026-11-02).
+It fulfills the deferred local VR-0019/0020/0021 cumulative execution
+obligations; mandatory hosted CI and final release acceptance remain
+independent. The slowest fixture setup took **299.97 s** (an
+Immunity/Plasma Chromium case), showing significant contention remains
+in the ordinary scheduling path. Ruff, canonical Pyright,
+Markdownlint, documentation links and diff checks all passed.
+
+These results remain exploratory, not adoption evidence: repeat the
+benchmark, capture CPU/memory and Chrome launch counts, and verify
+a final release candidate before changing the recommended default.
+
 The grouped runs' measured Chromium slot waits were generally sub-millisecond;
 the main constraint was **uneven lane workload**. The Scenario FAQ module held
 one slot for about **373 / 449 / 430 s** in the 2/3/4-lane runs, respectively.

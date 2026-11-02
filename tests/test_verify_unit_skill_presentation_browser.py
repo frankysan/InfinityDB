@@ -16,6 +16,7 @@ from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 import pytest
 
 from infinity_db.web import create_app
+from tools.browser_wsgi_transport import route_browser_page
 from tools.verify_non_skill_army_browser import CASES, WIDTHS
 from tools.verify_unit_skill_presentation_browser import (
     DEFAULT_SLUGS,
@@ -300,6 +301,7 @@ def test_reinforcement_parentage_is_visible_without_developer_mode() -> None:
             try:
                 for width in (1440, 390):
                     page = browser.new_page(viewport={"width": width, "height": 900})
+                    route_browser_page(page, app, base)
                     page_errors: list[str] = []
                     failed_requests: list[str] = []
                     page.on(

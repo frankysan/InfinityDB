@@ -9,7 +9,12 @@ from pathlib import Path
 
 import pytest
 
-from tools.browser_test_capacity import CHROMIUM_SCHEDULING_LANES, browser_lane_groups, browser_slot
+from tools.browser_test_capacity import (
+    CHROMIUM_SCHEDULING_LANES,
+    browser_lane_groups,
+    browser_slot,
+    scenario_faq_split_lane,
+)
 from tools.test_sections import load_test_sections
 
 
@@ -38,6 +43,17 @@ def test_experimental_browser_lanes_cover_all_modules_once(lanes: int) -> None:
 def test_browser_lane_count_rejects_unsupported_values() -> None:
     with pytest.raises(ValueError, match="lane count"):
         browser_lane_groups(5)
+
+
+def test_scenario_faq_split_is_stable_and_uses_only_existing_lanes() -> None:
+    ids = [
+        f"tests/test_verify_scenario_faq_browser.py::test_matrix[case-{i}]"
+        for i in range(400)
+    ]
+    first = [scenario_faq_split_lane(nodeid) for nodeid in ids]
+    assert first == [scenario_faq_split_lane(nodeid) for nodeid in ids]
+    assert set(first) == {"chromium-a", "chromium-d"}
+    assert 150 < first.count("chromium-a") < 250
 
 
 def test_browser_slots_reject_invalid_configuration(tmp_path: Path) -> None:

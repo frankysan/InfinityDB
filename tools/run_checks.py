@@ -169,6 +169,10 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--split-scenario-faq", action="store_true",
+        help="Split Scenario FAQ across two groups in four-lane browserlanes mode.",
+    )
+    parser.add_argument(
         "--browser-metrics", action="store_true",
         help="Write per-worker Chromium slot wait/hold JSONL to ignored local/benchmarks.",
     )
@@ -236,6 +240,7 @@ def stage_definitions(
     test_sections: tuple[str, ...] = (),
     browser_slot_count: int = 2,
     browser_lane_count: int = 2,
+    split_scenario_faq: bool = False,
 ) -> list[Stage]:
     python = sys.executable
     stages: list[Stage] = []
@@ -253,6 +258,8 @@ def stage_definitions(
                 command.extend(("-n", test_workers, "--dist", distribution))
                 if test_distribution == "browserlanes":
                     command.append("--browser-lanes")
+                    if split_scenario_faq:
+                        command.append("--split-scenario-faq")
             if name == "test":
                 if browser_slot_count != 2:
                     command.extend(("--browser-slot-count", str(browser_slot_count)))
@@ -455,6 +462,14 @@ def main(argv: list[str] | None = None) -> int:
             build_parser().error("--test-dist requires the test or preflight stage")
         if args.test_section and "test" not in stage_names:
             build_parser().error("--test-section requires the test stage")
+        if args.split_scenario_faq and (
+            "test" not in stage_names or args.test_dist != "browserlanes"
+            or args.browser_lane_count != 4 or args.test_workers == "0"
+        ):
+            build_parser().error(
+                "--split-scenario-faq requires --stage test, --test-dist browserlanes, "
+                "--browser-lane-count 4 and parallel workers"
+            )
         if args.browser_metrics and "test" not in stage_names:
             build_parser().error("--browser-metrics requires the test stage")
         if (
@@ -512,6 +527,7 @@ def main(argv: list[str] | None = None) -> int:
             test_sections=test_sections,
             browser_slot_count=args.browser_slot_count,
             browser_lane_count=args.browser_lane_count,
+            split_scenario_faq=args.split_scenario_faq,
         )
     except SystemExit as exc:
         exit_code = exc.code
