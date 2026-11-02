@@ -45,7 +45,22 @@ def test_annex_current_optional_reference_discloses_n4_source_boundary() -> None
     assert records["skill:commlink"]["armyLinks"] == [
         {"entity": "skill", "id": "commlink"},
     ]
-    assert records["skill:commlink"]["variantSemantics"] == {"inheritance": "family"}
+    variant = records["skill:commlink"]["variantSemantics"]
+    assert variant["inheritance"] == "family"
+    assert variant["occurrenceParameters"] == [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": f"+{count}",
+                "effect": {
+                    "kind": "max-trooper-count-increase",
+                    "appliesTo": "optional-reinforcements-extra-army-list",
+                    "count": count,
+                },
+            }
+            for extra_id, count in ((298, 1), (299, 2))
+        ],
+    }]
     assert records["skill:request-reinforcements"]["facts"]["typeIds"] == [
         "tactical-phase-step",
     ]
