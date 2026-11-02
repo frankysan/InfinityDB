@@ -1825,7 +1825,7 @@ passed **10/10**. Ruff, Pyright, documentation links, Markdownlint
 and diff checks passed. Both records are registered as
 **selected-route evidence only**. Whole-record and broader
 declaration eligibility signoff remain open.
-Cumulative regression is deferred as VR-0014.
+Cumulative regression completed in the VR-0014–VR-0018 batch below.
 
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill
@@ -1917,7 +1917,8 @@ and twelve Chromium cases passed (**16/16**); including inventory
 reconciliation and the fail-closed missing-test guard, **18/18**
 passed. The closed-source crosswalk audit passed against the pinned
 N5.3 PDF; Ruff, Pyright, documentation links, Markdownlint and
-diff checks passed. Cumulative execution is deferred under VR-0016.
+diff checks passed. Cumulative execution completed in the
+VR-0014–VR-0018 batch below.
 All **ten selected crosswalk cases** now have repeatable
 normal-browser evidence. This is neither all possible ARO triggers
 nor a complete matrix of Skill-specific permissions.
@@ -1941,9 +1942,52 @@ and missing-test guard, passed **10/10**. Ruff, Pyright,
 Markdownlint, documentation links and diff checks passed.
 These two new selected-browser pointers do not extend the closed
 ten-entry conditional-declaration manifest or grant full-record
-approval. Cumulative regression is deferred as VR-0017. Every record
+approval. Cumulative regression completed in the VR-0014–VR-0018
+batch below. Every record
 and source section retains pending whole-record acceptance, including
 where reviewed curation or selected browser evidence exists.
+
+**Reactive Burst permissions, Neurocinetics versus Total Reaction
+(2026-11-02):** The tracked release-pair Chromium regression
+`test_reactive_burst_skill_permissions_normal_browser` checks the
+N5.3 pp. 104/116 source-clause distinctions at 1440/390/320 px.
+Neurocinetics reduces Active Turn BS Weapon Burst to 1 and applies
+full Reactive Turn Burst against a single target; Total Reaction
+permits full Burst for a BS Attack ARO against an activated Trooper,
+without transferring Neurocinetics' Active Turn restriction. The
+test verifies Skills catalog discovery, source citations, keyboard
+navigation from the Skills catalog or Armed Turret, JavaScript
+errors and horizontal fit. The raw September Army archive and
+fresh-versus-published rules database audits confirm the separate
+Neurocinetics `+1B` modifier for four exact option occurrences,
+not all users or Total Reaction. A tentative TinBot (Neurocinetics)
+inbound link was not visible, so that unsupported inbound
+assumption was excluded rather than claiming a passing link.
+Six browser, two curated/PDF and two Army provenance cases
+passed (10/10) before inventory registration. The expanded
+focused set, including inventory reconciliation and the
+missing-test fail-closed guard, passed **12/12**. Ruff,
+Pyright, Markdownlint, documentation links and diff passed.
+Selected-route evidence and source-variant review are not
+general reaction eligibility, whole-Unit or whole-record signoff.
+Cumulative suite validation completed at the five-item
+VR-0014–VR-0018 gate.
+
+**Cumulative test execution, VR-0014 through VR-0018
+(2026-11-02):** On `dev/v1.0.0`, based on
+`c7d7b4fa2f1d33515c19f12183c84013b85ed51b`, the eight-worker
+`worksteal` full project suite passed: **4,779 passed,
+25 skipped, 0 failed**, **615.25 seconds** (runner stage 615.97 s).
+Managed job `bf6f5db144404b28b65699bc19a299bd` exited 0;
+ignored report `local/validation-vr0014-vr0018-full-20261102.txt`.
+This cumulative run covers added Skills, all ten selected
+conditional-declaration crosswalk browser cases, Combat Instinct
+and Sixth Sense, and the Neurocinetics/Total Reaction scope.
+VR-0014 through VR-0018 were retired. Browser-selected clauses
+and reviewed Army extras remain narrower than whole-record
+acceptance. Hosted CI and final release-candidate gates are
+independent. The slowest reported test fixture setups reached
+294.70 s; no local full-suite timeout or test failure occurred.
 
 The JSON contains the complete current identity crosswalk, D/S provenance
 where applicable, source pages/headings, curated review flags and

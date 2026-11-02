@@ -1148,16 +1148,29 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           keyboard navigation and responsive rendering, without
           changing the closed ten-case manifest or approving either
           entire Skill.
-        - [ ] **Neurocinetics versus Total Reaction (next distinct
-          conditional-Burst candidate):** Reconcile the N5.3
-          pp. 104/116 source-reviewed automatic Skills and Army
-          occurrence-level Neurocinetics +1B separately. Neurocinetics
-          changes Active/Reactive Burst and applies full Reactive
-          Burst against a single target; Total Reaction only permits
-          full Burst for a BS Attack ARO against a Trooper activated
-          by that Order. Add source-specific normal-browser checks;
-          do not treat either Skill as a universal ARO grant or
-          collapse their mode/occurrence boundaries.
+        - [x] **Neurocinetics versus Total Reaction (2026-11-02):**
+          Chromium at 1440/390/320 px confirms the source-scoped
+          N5.3 pp. 104/116 Skill text, citations, catalog navigation,
+          keyboard access, and separate Burst conditions. Obligatory
+          Neurocinetics sets Active Turn BS Weapon Burst to 1 and
+          allows full Reactive Turn Burst against one target; optional
+          Total Reaction permits full Burst only when declaring a
+          BS Attack ARO against an activated Trooper. The pinned
+          September Army source audit confirms Neurocinetics +1B
+          on four option occurrences of two Unit identities and
+          its reviewed reactive-only modifier; the generated rules
+          database matches a fresh export. The Army extra is not
+          a global modifier, nor a Total Reaction bonus. These are
+          selected routes/source occurrences, not universal ARO
+          eligibility or whole-record signoff.
+        - [ ] **TinBot (Neurocinetics) inbound navigation check:**
+          The equipment detail did not expose a visible direct
+          `/skills/neurocinetics` link during the first normal-browser
+          attempt at 1440/390/320 px. Determine whether the maintained
+          `uses-effects-of` relation should produce a player-facing
+          link on that surface. The accepted Neurocinetics regression
+          instead uses keyboard navigation from the Skills catalog;
+          do not claim TinBot-to-Skill navigation until verified.
         - [x] **Numerical Army source Skill variants (V1-A08):** Exact
           pinned September 29 Army ZIP, Skill dictionaries, all **17**
           faction-file option occurrences and parent-profile attributes

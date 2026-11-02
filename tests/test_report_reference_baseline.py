@@ -77,6 +77,7 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
         "rule:modifiers-explained",
         "skill:activate-disco-ball", "skill:request-specball",
         "skill:combat-instinct", "skill:sixth-sense",
+        "skill:neurocinetics", "skill:total-reaction",
         "weapon:multi-rifle", "weapon:multi-heavy-machine-gun",
         "weapon:multi-marksman-rifle", "weapon:multi-pistol",
         "weapon:boarding-pistol", "weapon:missile-launcher",

@@ -73,73 +73,7 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here.
-
-- [ ] **VR-0014** (2026-11-02; ready-to-run): Run the cumulative
-  suite after registering the two added Skills, Activate Disco Ball
-  and Request SpecBall, as selected release-pair browser evidence.
-  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree after `f2eb83bd`;
-  files: `tests/test_verify_scenario_faq_browser.py`,
-  `tools/report_reference_baseline.py`,
-  `tests/test_report_reference_baseline.py`, and supporting docs;
-  risk: low. Immediate: six Chromium cases, two source/API tests,
-  inventory reconciliation and missing-test guard **10 passed**;
-  Ruff, Pyright, docs and diff checks **PASS**.
-  Design: none. Deferred: cumulative full suite under the
-  five-change or seven-day phased gate; hosted CI and release
-  acceptance remain separate.
-
-- [ ] **VR-0015** (2026-11-02; ready-to-run): Run cumulative tests
-  after registering selected Discover, Place Deployable, Reload and
-  Alert! normal-browser evidence from the ten-case conditional
-  declaration source crosswalk.
-  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree after `685bd603`;
-  files: `tests/test_verify_scenario_faq_browser.py`,
-  `tools/report_reference_baseline.py`,
-  `tests/test_report_reference_baseline.py` and supporting docs;
-  risk: low. Immediate: 12 Chromium cases, 3 pinned-PDF
-  checks, inventory reconciliation and missing-test guard
-  **17 passed**; pinned conditional source audit, Ruff,
-  Pyright, docs and diff checks **PASS**.
-  Design: none. Deferred: cumulative full project suite under the
-  five-change or seven-day phased gate; hosted CI and release
-  acceptance remain separate.
-
-- [ ] **VR-0016** (2026-11-02; ready-to-run): Run cumulative tests
-  after registering the final four selected conditional-declaration
-  browser crosswalk cases (Guard/Aerial, Hacking Area, Cyberplug,
-  Stealth) for current Core/Hacking reference records.
-  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree after `dcb1f026`;
-  files: `tests/test_verify_scenario_faq_browser.py`,
-  `tools/report_reference_baseline.py`,
-  `tests/test_report_reference_baseline.py` and supporting docs;
-  risk: low. Immediate: 12 Chromium viewport cases, 4 pinned-PDF
-  source checks, inventory and missing-test guard **18 passed**;
-  pinned conditional-source audit, Ruff, Pyright, docs and diff
-  checks **PASS**.
-  Design: none. Deferred: cumulative full project suite under
-  the five-change/seven-day phased gate; hosted CI and release
-  acceptance remain separate.
-
-- [ ] **VR-0017** (2026-11-02; ready-to-run): Run cumulative tests
-  after registering Combat Instinct and Sixth Sense as two newly
-  identified conditional-reaction browser slices beyond the closed
-  ten-case crosswalk.
-  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree after `408d71c7`;
-  files: `tests/test_verify_scenario_faq_browser.py`,
-  `tools/report_reference_baseline.py`,
-  `tests/test_report_reference_baseline.py` and supporting docs;
-  risk: low. Immediate: 6 Chromium viewport cases,
-  two reviewed/PDF-source tests, inventory reconciliation
-  and missing-test guard **10 passed**;
-  Ruff, Pyright, docs and diff checks **PASS**.
-  Design: none. Deferred: cumulative full project test suite
-  under the five-change/seven-day phased gate; hosted CI and
-  release-candidate acceptance separate.
+Only open VR obligations belong here. **No pending entries.**
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -151,7 +85,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0018` (`VR-0014` through `VR-0017` open; earlier entries retired).
+- Execution: `VR-0019` (through `VR-0018` retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -58,6 +58,80 @@ def chrome() -> Iterator[Any]:
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
+    ("slug", "page_number", "required", "excluded", "inbound_path"),
+    (
+        (
+            "neurocinetics", 104,
+            (
+                "During the Active Turn",
+                "reduced to 1",
+                "During the Reactive Turn",
+                "full Burst against a single target",
+                "Burst MODs apply in the Reactive Turn",
+            ),
+            "The ARO must target one of the Troopers activated by the Order",
+            "/skills",
+        ),
+        (
+            "total-reaction", 116,
+            (
+                "When declaring a BS Attack ARO",
+                "full Burst of the selected weapon",
+                "including Burst MODs",
+                "target one of the Troopers activated by the Order",
+            ),
+            "During the Active Turn, the Burst of all",
+            "/weapons/armed-turret",
+        ),
+    ),
+)
+def test_reactive_burst_skill_permissions_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    slug: str, page_number: int, required: tuple[str, ...],
+    excluded: str, inbound_path: str,
+) -> None:
+    """V1-A08: Neurocinetics and Total Reaction retain distinct Burst scope."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/skills", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(f'#catalog-list a[href="/skills/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{ORIGIN}/skills/{slug}", timeout=30000)
+        card = page.locator(f"#rule-skill-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        visible = card.inner_text()
+        for phrase in required:
+            assert phrase in visible, (slug, width, phrase)
+        assert excluded not in visible, (slug, width, excluded)
+        assert f"p. {page_number}" in card.locator(
+            ".rules-source-citations"
+        ).inner_text()
+        link = card.locator('a[href="/skills/bs-attack"]').first
+        link.wait_for(state="visible", timeout=10000)
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        page.goto(f"{ORIGIN}{inbound_path}", wait_until="domcontentloaded")
+        selector = f'a[href="/skills/{slug}"]'
+        if inbound_path == "/skills":
+            selector = f"#catalog-list {selector}"
+        inbound = page.locator(selector).first
+        inbound.wait_for(state="visible", timeout=30000)
+        inbound.focus()
+        inbound.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/skills/{slug}", timeout=30000)
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
     ("slug", "pages", "clauses", "related"),
     (
         (
