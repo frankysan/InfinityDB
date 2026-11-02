@@ -99,6 +99,42 @@ def _inventory() -> dict:
     )
 
 
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_parachutist_deployment_zone_source_33_exact_owners() -> None:
+    """Pin source-only deployment-zone occurrences without implying a usage index."""
+    from collections import Counter
+
+    [item] = select_source_variants(_inventory(), "skills", [33])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Parachutist", 33, 305,
+    )
+    assert item["rawValues"] == []
+    assert item["extraSignatures"] == [{
+        "extras": [[48, "TEXT", "Dep. Zone"]], "reviewed": False, "count": 17,
+    }]
+
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=33, extra_id=48,
+    )
+    assert len(owners) == 17
+    assert Counter(row["owner"] for row in owners) == {"option": 5, "profile": 12}
+    assert {row["occurrence_id"] for row in owners} == {
+        54851, 34224, 38292, 1450, 12013,
+        22725, 27821, 22524, 22541, 26352, 26369,
+        31334, 31351, 45157, 45177, 50392, 52988,
+    }
+    assert all(
+        row["extra_position"] == 1
+        and row["extra_id"] == 48
+        and row["extra_type"] == "TEXT"
+        and row["extra_raw"] == "Dep. Zone"
+        and row["source_raw"] is None
+        and row["army_id"] is not None
+        for row in owners
+    )
+
+
 @pytest.mark.parametrize(
     ("catalog", "source_id", "extra_id"),
     [("weapons", 101, 344), ("equipment", 0, 344),

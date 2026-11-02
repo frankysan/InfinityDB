@@ -1892,6 +1892,21 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       variants with extra MODs; preserve raw signatures and exclude
       unreviewed specific combinations from index counts. Fail closed
       rather than parsing numeric-looking display strings.
+      - [x] **Data processing — Parachutist Deployment Zone source review:**
+        The pinned N5.3 English p. 105 explicitly permits enemy Deployment
+        Zone entry only for this variant. Army Skill source `33` has 305
+        direct occurrences; exactly 17 carry extra `48/TEXT:Dep. Zone`
+        (12 profile, five option). The source-only regression pins every
+        occurrence ID and rejects alternate signatures. The published
+        Parachutist summary already explains the restriction and exception;
+        no new rule, database or Unit-usage index has been generated.
+      - [ ] **Data processing — promote exact Parachutist variant:**
+        Encode the reviewed `Dep. Zone` source extra as a typed,
+        source-exact enemy-Deployment-Zone entry permission, with closed
+        schema validation, pinned-source regression, paired rules database/
+        publication refresh and rollback. Do not make the permission a
+        family default or infer legal positions from a roster; preserve
+        the existing N5.3 p. 105 player-facing explanation.
       - [x] **Data processing — Neurocinetics source-109 evidence:**
         Reconcile all four occurrence-level `8/TEXT:+1B` signatures
         against the pinned Army raw database: two YĀN HUǑ option
