@@ -333,6 +333,56 @@ revision and artifacts it tested. Never treat a job result as acceptance
 for edits made after its tested state. Concurrent CPU/IO-intensive tasks
 can also affect test timing and Chromium stability, so limit contention.
 
+### Parallel Windows development and Linux validation
+
+**Preferred when feasible:** continue implementation on the Windows development
+checkout while the separate `linux-dev` MCP checkout executes a previously
+selected revision's broader tests asynchronously. This applies to ordinary
+regression, integration, browser and full-suite validation; retain fast,
+essential focused regressions on the development checkout before handing off.
+Linux-only checks may naturally execute on Linux. Avoid scheduling duplicate
+full suites on Windows just because development has advanced during a Linux
+run; respect the active validation queue and mandatory release gates.
+
+The Windows MCP `local` checkout, the interactive `devbox` checkout, and the
+`mcpworker` checkout at `/srv/mcp-worker/workspaces/InfinityDB` are **three
+separate working trees**. `worker="linux-dev"` selects only the last one.
+Reading/editing through ordinary MCP workspace tools still targets Windows;
+remote test/script jobs do not provide a remote file editor. Check the chosen
+worker's actual Git HEAD and test inputs before dispatch, preferably with
+`expected_commit` for Linux. Record the commit, host, command, asset policy,
+source snapshot/database identity where relevant, and final pass/fail/skip
+counts. A Linux result validates only the state it tested, never newer
+Windows changes or a different Linux checkout.
+
+A practical handoff is **finish an implementation batch and its immediate
+checks -> commit or otherwise identify the exact intended test state ->
+explicitly prepare/select that revision on the Linux worker if needed ->
+start the asynchronous Linux test job -> continue the next independent Windows
+implementation batch -> poll and triage results by their recorded revision**.
+Do not require the agent to idle or prohibit unrelated Windows edits merely
+because a Linux job is running. The no-mutation rule above still applies to
+*the Linux test checkout and any shared inputs its jobs actually consume*;
+never edit that checkout or swap tracked databases during its test run.
+
+**Git is never synchronized as a side effect of testing, task handoff,
+validation, or source-data staging.** Different branches and commits on the
+three checkouts are intentional and permissible. Fetch, fast-forward,
+checkout, commit or push only through a separately requested Git action;
+`expected_commit` must **refuse** a mismatched Linux revision rather than
+try to repair it. Syncthing transfers only the designated ignored source
+folders, not Git or curated/generated databases; these staged inputs can
+change independently and must be explicitly activated and pinned before any
+test that needs them. Missing Linux-only dependencies or source material
+must be identified as coverage gaps/skips, never silently accepted as green.
+
+Prefer the idle Linux worker for longer validation workloads while Windows
+continues coding; reserve Windows execution for Windows-specific behavior,
+small immediate regressions, or independent confirmation when required.
+Do not compare concurrent multi-host run times as controlled performance
+benchmarks without accounting for contention and host differences. Hosted CI,
+required preflight, and release acceptance remain independent requirements.
+
 **Workspace MCP execution:** The connected MCP server requires test workloads
 to use its asynchronous job interface. Use `start_test_job` for ordinary
 pytest or unittest selectors and `start_script_job` for a tracked custom
