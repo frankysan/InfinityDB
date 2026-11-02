@@ -522,10 +522,11 @@ This split participates in the normal full-suite checks.
 
 ### Controlled Chromium concurrency and browser-reuse benchmark
 
-**Status: planned, not executed.** This is a Project infrastructure
-experiment, not a change to the current `worksteal` default or the 1.0
-release gate. Test cases currently share browsers within some modules,
-but Chromium admission is still capped at two active slot holders.
+**Status: single-run comparison complete; repeatability and browser-reuse work pending.**
+This is a Project infrastructure experiment, not a change to the current
+`worksteal` default or the 1.0 release gate. Test cases currently share
+browsers within some modules. The default remains two active Chromium
+slot holders; three and four are experimental settings.
 
 1. **Freeze the comparison inputs.** Pin Git HEAD and the complete working
    tree/DB/publication state, Python/pytest/xdist/Playwright versions,
@@ -587,6 +588,62 @@ but Chromium admission is still capped at two active slot holders.
    on the full test stage without material p95/peak-RAM regression.
    Otherwise keep the current defaults. Re-run the candidate with
    canonical checks, CI and release acceptance as applicable.
+
+Initial implementation exposes `--browser-slot-count` and
+`--browser-lane-count` (2, 3 or 4), plus opt-in `--browser-metrics`
+on `tools/run_checks.py --stage test`. Defaults and regular test
+command lines are unchanged. `--browser-lane-count` other than 2
+requires `--test-dist browserlanes`. The experimental three/four-lane
+assignments are provisional until profiled, and the separate real-Chromium
+cases outside the browser section still acquire slots independently.
+
+For a controlled Windows browser-section comparison (run **sequentially**):
+
+```powershell
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-section browser --test-workers 8 --test-dist browserlanes --browser-slot-count 2 --browser-lane-count 2 --browser-metrics
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-section browser --test-workers 8 --test-dist browserlanes --browser-slot-count 3 --browser-lane-count 3 --browser-metrics
+.\.venv\Scripts\python.exe tools/run_checks.py --stage test --test-section browser --test-workers 8 --test-dist browserlanes --browser-slot-count 4 --browser-lane-count 4 --browser-metrics
+```
+
+Each run prints its ignored `local/benchmarks/chromium-*/` path. The
+per-worker `slot-<pid>.jsonl` files contain module/test label, slot index,
+wait seconds, and hold seconds. They do **not** yet capture the actual
+browser-process launch time or process-tree resource usage, so a recorded
+fixture wait must not be described as Chromium startup. Those counters,
+isolated browser reuse, and Windows/Docker performance sampling remain
+separate implementation steps.
+
+**Exploratory Windows results, 2026-11-02:** All four runs used eight xdist
+workers, the same `dev/v1.0.0` source state based on `f82bf93d`,
+the same local generated DBs and full asset selection, and the complete
+maintained browser section (608 cases including expected skips). Each was
+run sequentially, with independent per-worker slot metrics:
+
+- 2 slots / 2 grouped lanes: **592 passed, 16 skipped** in **555.67 s**;
+  lane A completed at +554.76 s, lane B at +235.47 s.
+- 3 slots / 3 grouped lanes: **592 passed, 16 skipped** in **479.18 s**
+  (13.8% below the two-lane time); last lane at +478.35 s.
+- 4 slots / 4 grouped lanes: **592 passed, 16 skipped** in **445.63 s**
+  (19.8% below the two-lane time); last lane at +444.82 s.
+- 4 slots / ordinary `worksteal`: **590 passed, 16 skipped, 2 failed**
+  in **360.57 s**. Both failures were the real Chromium
+  Reinforcement-parentage and release-candidate tests: local static-module
+  requests returned `ERR_CONNECTION_REFUSED`, leaving Unit content hidden.
+  Fixture setup waits reached **305.73 s**; do not promote or report this
+  configuration as a successful speedup.
+
+The grouped runs' measured Chromium slot waits were generally sub-millisecond;
+the main constraint was **uneven lane workload**. The Scenario FAQ module held
+one slot for about **373 / 449 / 430 s** in the 2/3/4-lane runs, respectively.
+Its execution slowed as more heavy browser modules ran concurrently, which
+is consistent with, but does not independently prove, resource contention.
+These are **single measurements**, not an A/B/A benchmark; browser reuse,
+Chrome launch counts, CPU/RAM sampling, Docker runtime verification, and
+the cumulative full test suite remain outstanding. Keep the existing
+`worksteal` / two-slot defaults until repeatability and release reliability
+are demonstrated. The next useful experiment is splitting the oversized
+Scenario FAQ workload or otherwise improving scheduler balance while
+preserving isolation and stable local transport.
 
 Store raw measurements in ignored `local/benchmarks/`; publish only the
 selected configuration, methodology and concise outcome here. Do not

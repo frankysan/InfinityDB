@@ -3770,6 +3770,9 @@ follow-up action. Retain source-native values until official resolution.
   Playwright test environment without changing production Compose.
   Adopt a faster default only after repeatable improvements and passing
   isolation/stability/resource checks; keep raw evidence ignored under `local/`.
+  Initial 2/3/4 grouped-lane runs passed, but the four-slot `worksteal`
+  run exposed two local `ERR_CONNECTION_REFUSED` Chromium failures; investigate
+  transport/scheduling reliability before considering a new default.
 
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a

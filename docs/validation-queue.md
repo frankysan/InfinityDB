@@ -91,6 +91,24 @@ Only open VR obligations belong here.
   five-change/seven-day phased gate; hosted CI and final
   release acceptance remain separate.
 
+- [ ] **VR-0020** (2026-11-02; ready-to-run): Run cumulative full
+  pytest after adding configurable Chromium slot/lane counts and opt-in
+  per-worker slot-wait/hold metrics.
+  Work: [Chromium benchmark](TODO.md#performance-storage-and-build-tooling);
+  revision: `dev/v1.0.0` working tree after `f82bf93d`;
+  files: `tests/conftest.py`, `tests/test_browser_test_capacity.py`,
+  `tests/test_run_checks.py`, `tests/test_test_sections.py`,
+  `tools/browser_test_capacity.py`, `tools/pytest_startup_profile.py`,
+  `tools/run_checks.py`; risk: medium. Immediate:
+  infrastructure regression tests **102 passed, 1 skipped**;
+  canonical Pyright **PASS**; complete grouped Chromium browser section
+  **592 passed, 16 skipped** at each of 2/3/4 lanes. Separate four-slot
+  `worksteal` experiment **590 passed, 16 skipped, 2 failed**
+  (local `ERR_CONNECTION_REFUSED`; not an accepted configuration).
+  Design: none for the current configuration change.
+  Deferred: full integrated pytest, mandatory hosted CI; experimental
+  browser reuse and repeated benchmark trials remain in the TODO.
+
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -101,7 +119,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0020` (`VR-0019` open; earlier entries retired).
+- Execution: `VR-0021` (`VR-0019` and `VR-0020` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

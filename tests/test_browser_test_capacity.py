@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
-from tools.browser_test_capacity import CHROMIUM_SCHEDULING_LANES, browser_slot
+from tools.browser_test_capacity import CHROMIUM_SCHEDULING_LANES, browser_lane_groups, browser_slot
 from tools.test_sections import load_test_sections
 
 
@@ -21,6 +22,22 @@ def test_two_browser_lanes_cover_all_real_chromium_modules() -> None:
     assert CHROMIUM_SCHEDULING_LANES["test_verify_unit_skill_presentation_browser"] != (
         CHROMIUM_SCHEDULING_LANES["test_verify_weapon_source_cards_browser"]
     )
+
+
+@pytest.mark.parametrize("lanes", (2, 3, 4))
+def test_experimental_browser_lanes_cover_all_modules_once(lanes: int) -> None:
+    groups = browser_lane_groups(lanes)
+    assert set(groups) == set(CHROMIUM_SCHEDULING_LANES)
+    assert set(groups.values()) == {
+        f"chromium-{chr(ord('a') + i)}" for i in range(lanes)
+    }
+    if lanes == 2:
+        assert groups == CHROMIUM_SCHEDULING_LANES
+
+
+def test_browser_lane_count_rejects_unsupported_values() -> None:
+    with pytest.raises(ValueError, match="lane count"):
+        browser_lane_groups(5)
 
 
 def test_browser_slots_reject_invalid_configuration(tmp_path: Path) -> None:
@@ -53,7 +70,32 @@ def test_browser_slot_is_exclusive_across_processes_and_reusable(tmp_path: Path)
     assert released.returncode == 0, released.stderr
 
 
-def test_browser_slots_admit_distinct_slots(tmp_path: Path) -> None:
-    with browser_slot(tmp_path, slots=2) as first:
-        with browser_slot(tmp_path, slots=2) as second:
-            assert {first, second} == {0, 1}
+def test_browser_metrics_capture_wait_and_hold_without_changing_admission(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    metrics = tmp_path / "metrics"
+    monkeypatch.setenv("INFINITYDB_BROWSER_METRICS_DIRECTORY", str(metrics))
+    with browser_slot(tmp_path / "locks", slots=2, label="example-node") as index:
+        assert index == 0
+    files = list(metrics.glob("slot-*.jsonl"))
+    assert len(files) == 1
+    record = json.loads(files[0].read_text(encoding="utf-8").strip())
+    assert record["label"] == "example-node"
+    assert record["slot"] == 0
+    assert record["wait_seconds"] >= 0
+    assert record["hold_seconds"] >= 0
+
+
+@pytest.mark.parametrize("capacity", (2, 3, 4))
+def test_browser_slots_admit_distinct_slots(tmp_path: Path, capacity: int) -> None:
+    from contextlib import ExitStack
+
+    with ExitStack() as stack:
+        acquired = {
+            stack.enter_context(browser_slot(tmp_path, slots=capacity, timeout_seconds=0.1))
+            for _ in range(capacity)
+        }
+        assert acquired == set(range(capacity))
+        with pytest.raises(TimeoutError):
+            with browser_slot(tmp_path, slots=capacity, timeout_seconds=0):
+                pass

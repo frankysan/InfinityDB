@@ -84,6 +84,16 @@ def test_xdist_browser_lanes_report_start_and_last_teardown() -> None:
     assert not any("Browser lane" in line for line in profile.summary_lines())
 
 
+def test_additional_browser_lanes_are_profiled() -> None:
+    profile = XdistStartupProfile()
+    profile.start(4, 100.0)
+    profile.test_started("tests/test.py::test_case@chromium-c", 105.0)
+    profile.test_finished("tests/test.py::test_case@chromium-c", 110.0)
+    assert "Browser lane chromium-c: first +5.00s, last teardown +10.00s" in (
+        profile.summary_lines()
+    )
+
+
 def test_xdist_launch_includes_python_and_pytest_initialization() -> None:
     profile = XdistStartupProfile()
     profile.start(2, 100.0, launch_at=97.5)

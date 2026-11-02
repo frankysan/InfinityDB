@@ -56,7 +56,7 @@ class XdistStartupProfile:
     @staticmethod
     def _browser_lane(nodeid: str) -> str | None:
         lane = nodeid.rpartition("@")[2]
-        return lane if lane in ("chromium-a", "chromium-b") else None
+        return lane if lane in ("chromium-a", "chromium-b", "chromium-c", "chromium-d") else None
 
     def test_started(self, nodeid: str, now: float) -> None:
         if self.started_at is None:
@@ -124,10 +124,8 @@ class XdistStartupProfile:
                 lines.append(
                     f"First non-lane test started: +{elapsed(self.first_ordinary_test_at)}"
                 )
-            for lane in ("chromium-a", "chromium-b"):
-                started = self.browser_lane_started_at.get(lane)
-                if started is None:
-                    continue
+            for lane in sorted(self.browser_lane_started_at):
+                started = self.browser_lane_started_at[lane]
                 finished = self.browser_lane_finished_at.get(lane)
                 lines.append(
                     f"Browser lane {lane}: first +{elapsed(started)}"

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.browser_test_capacity import CHROMIUM_SCHEDULING_LANES, browser_slot
+from tools.browser_test_capacity import browser_lane_groups, browser_slot
 from tools.test_sections import load_test_sections, section_for_module
 
 pytest_plugins = ("tools.pytest_startup_profile",)
@@ -21,7 +21,15 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         "--browser-lanes",
         action="store_true",
         default=False,
-        help="Use two exclusive Chromium scheduling groups with --dist loadgroup.",
+        help="Group Chromium tests into dedicated workers with --dist loadgroup.",
+    )
+    parser.addoption(
+        "--browser-slot-count", type=int, choices=(2, 3, 4), default=2,
+        help="Maximum simultaneous Chromium acceptance tests (default: 2).",
+    )
+    parser.addoption(
+        "--browser-lane-count", type=int, choices=(2, 3, 4), default=2,
+        help="Number of grouped Chromium workers when --browser-lanes is enabled.",
     )
 
 
@@ -65,17 +73,27 @@ def limit_concurrent_browser_tests(
     ):
         yield
         return
-    with browser_slot(_browser_slot_directory(tmp_path_factory), slots=2):
+    with browser_slot(
+        _browser_slot_directory(tmp_path_factory),
+        slots=int(request.config.getoption("--browser-slot-count") or 2),
+        label=str(request.node.nodeid),
+    ):
         yield
 
 
 @pytest.fixture
-def chromium_test_slot(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+def chromium_test_slot(
+    request: pytest.FixtureRequest, tmp_path_factory: pytest.TempPathFactory,
+) -> Iterator[None]:
     """Reserve capacity only while a mixed module executes a real browser test."""
     if not _needs_chromium_slot():
         yield
         return
-    with browser_slot(_browser_slot_directory(tmp_path_factory), slots=2):
+    with browser_slot(
+        _browser_slot_directory(tmp_path_factory),
+        slots=int(request.config.getoption("--browser-slot-count") or 2),
+        label=str(request.node.nodeid),
+    ):
         yield
 
 
@@ -123,6 +141,10 @@ def pytest_collection_modifyitems(
 ) -> None:
     """Assign every repository test module to exactly one maintained local section."""
     browser_lanes = bool(config.getoption("--browser-lanes"))
+    groups = (
+        browser_lane_groups(int(config.getoption("--browser-lane-count") or 2))
+        if browser_lanes else {}
+    )
 
     for item in items:
         path = Path(str(item.path))
@@ -135,9 +157,6 @@ def pytest_collection_modifyitems(
             )
         item.add_marker(section.marker)
         if _uses_chromium(path):
-            # In opt-in browser-lane mode, limit browser work to two xdist
-            # workers instead of having others block on Chromium-slot locks.
-            group = (
-                CHROMIUM_SCHEDULING_LANES[path.stem] if browser_lanes else path.stem
-            )
+            # Dedicated groups keep Chromium work on bounded xdist workers.
+            group = groups[path.stem] if browser_lanes else path.stem
             item.add_marker(pytest.mark.xdist_group(name=group))

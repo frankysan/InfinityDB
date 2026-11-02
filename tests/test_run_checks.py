@@ -209,6 +209,27 @@ def test_test_stage_can_schedule_two_browser_lanes() -> None:
     assert stage.command[8:] == ("-m", "not full_assets", "-q")
 
 
+def test_test_stage_can_select_three_or_four_chromium_slots_and_lanes() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",), [], build_source=None,
+        test_workers="8", test_distribution="browserlanes",
+        browser_slot_count=4, browser_lane_count=3,
+    )
+    assert stage.command[3:12] == (
+        "-n", "8", "--dist", "loadgroup", "--browser-lanes",
+        "--browser-slot-count", "4", "--browser-lane-count", "3",
+    )
+
+
+def test_nondefault_browser_lanes_require_browserlane_scheduler(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert run_checks.main([
+        "--stage", "test", "--browser-lane-count", "3",
+    ]) == run_checks.EXIT_RUNNER_ERROR
+    assert "--test-dist browserlanes" in capsys.readouterr().err
+
+
 def test_test_distribution_requires_test_or_preflight_stage(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

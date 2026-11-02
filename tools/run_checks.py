@@ -169,6 +169,18 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--browser-metrics", action="store_true",
+        help="Write per-worker Chromium slot wait/hold JSONL to ignored local/benchmarks.",
+    )
+    parser.add_argument(
+        "--browser-slot-count", type=int, choices=(2, 3, 4), default=2,
+        help="Experimental maximum concurrent Chromium tests (default: 2).",
+    )
+    parser.add_argument(
+        "--browser-lane-count", type=int, choices=(2, 3, 4), default=2,
+        help="Experimental number of grouped Chromium workers (default: 2).",
+    )
+    parser.add_argument(
         "--test-section",
         action="append",
         choices=TEST_SECTION_NAMES,
@@ -222,6 +234,8 @@ def stage_definitions(
     test_workers: str = DEFAULT_TEST_WORKERS,
     test_distribution: str = DEFAULT_TEST_DISTRIBUTION,
     test_sections: tuple[str, ...] = (),
+    browser_slot_count: int = 2,
+    browser_lane_count: int = 2,
 ) -> list[Stage]:
     python = sys.executable
     stages: list[Stage] = []
@@ -239,6 +253,11 @@ def stage_definitions(
                 command.extend(("-n", test_workers, "--dist", distribution))
                 if test_distribution == "browserlanes":
                     command.append("--browser-lanes")
+            if name == "test":
+                if browser_slot_count != 2:
+                    command.extend(("--browser-slot-count", str(browser_slot_count)))
+                if browser_lane_count != 2:
+                    command.extend(("--browser-lane-count", str(browser_lane_count)))
             if targets and name == "test":
                 command.extend(targets)
             asset_marker = (
@@ -316,7 +335,8 @@ def git_value(*args: str) -> str:
 
 
 def run_stage(
-    stage: Stage, reporter: Reporter, *, source_occupancy_gate: bool = False
+    stage: Stage, reporter: Reporter, *, source_occupancy_gate: bool = False,
+    browser_metrics_directory: Path | None = None,
 ) -> StageResult:
     reporter.write()
     reporter.write(f"[{stage.name.upper()}]")
@@ -354,6 +374,11 @@ def run_stage(
         command_env = dict(env)
         if stage.name == "test":
             command_env["INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER"] = repr(time.perf_counter())
+            if browser_metrics_directory is not None:
+                command_env["INFINITYDB_BROWSER_METRICS_DIRECTORY"] = str(browser_metrics_directory)
+                reporter.write(
+                    f"Chromium metrics: {browser_metrics_directory.relative_to(REPO_ROOT)}"
+                )
         else:
             command_env.pop("INFINITYDB_PYTEST_LAUNCH_PERF_COUNTER", None)
         try:
@@ -430,6 +455,20 @@ def main(argv: list[str] | None = None) -> int:
             build_parser().error("--test-dist requires the test or preflight stage")
         if args.test_section and "test" not in stage_names:
             build_parser().error("--test-section requires the test stage")
+        if args.browser_metrics and "test" not in stage_names:
+            build_parser().error("--browser-metrics requires the test stage")
+        if (
+            (args.browser_slot_count != 2 or args.browser_lane_count != 2)
+            and "test" not in stage_names
+        ):
+            build_parser().error("browser slot/lane counts require the test stage")
+        if (
+            args.browser_lane_count != 2
+            and (args.test_dist or DEFAULT_TEST_DISTRIBUTION) != "browserlanes"
+        ):
+            build_parser().error("--browser-lane-count requires --test-dist browserlanes")
+        if args.browser_lane_count > 2 and args.test_workers == "0":
+            build_parser().error("multiple browser lanes require pytest-xdist workers")
         if args.source_occupancy_gate and "rules" not in stage_names:
             build_parser().error("--source-occupancy-gate requires the rules stage")
         test_workers = (
@@ -471,6 +510,8 @@ def main(argv: list[str] | None = None) -> int:
             test_workers=test_workers,
             test_distribution=args.test_dist or DEFAULT_TEST_DISTRIBUTION,
             test_sections=test_sections,
+            browser_slot_count=args.browser_slot_count,
+            browser_lane_count=args.browser_lane_count,
         )
     except SystemExit as exc:
         exit_code = exc.code
@@ -502,10 +543,21 @@ def main(argv: list[str] | None = None) -> int:
                     reporter.write(f"Skipped: earlier stages failed: {', '.join(failed)}")
                     result = StageResult(stage.name, "SKIP", None, 0.0)
                 else:
-                    result = run_stage(
-                        stage, reporter,
-                        source_occupancy_gate=args.source_occupancy_gate and stage.name == "rules",
-                    )
+                    if args.browser_metrics and stage.name == "test":
+                        metrics_dir = (
+                            REPO_ROOT / "local" / "benchmarks"
+                            / f"chromium-{started_at:%Y%m%d-%H%M%S}-{os.getpid()}"
+                        )
+                        result = run_stage(
+                            stage, reporter, browser_metrics_directory=metrics_dir,
+                        )
+                    else:
+                        result = run_stage(
+                            stage, reporter,
+                            source_occupancy_gate=(
+                                args.source_occupancy_gate and stage.name == "rules"
+                            ),
+                        )
                 results.append(result)
                 if args.fail_fast and result.status != "PASS":
                     break
