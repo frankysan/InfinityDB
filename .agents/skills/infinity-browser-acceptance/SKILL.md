@@ -45,7 +45,10 @@ make frontend acceptance a substitute for backend or data validation.
    [pinned asynchronous Linux worker](../../../docs/testing.md#parallel-windows-development-and-linux-validation)
    for broader real-Chromium runs when installed browser dependencies and
    source inputs are verified; unexpected skips do not satisfy acceptance.
-   Continue independent Windows work while queued Linux tests run.
+   For a due VR batch, safely fetch/fast-forward the intended committed
+   revision on the MCP worker using the authorized explicit Git tools,
+   dispatch the pinned test job, then immediately resume independent
+   Windows implementation. Do not wait or repeatedly poll.
 7. Report actual viewports, interactions, check stages, immediate results,
    and outstanding VR acceptance. Do not conflate focused UI tests with the
    final release browser gate.

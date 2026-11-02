@@ -145,9 +145,16 @@ Linux job validates its pinned snapshot, not later Windows edits.
 Read-only review, analysis, planning and triage remain appropriate
 when the next implementation cannot safely proceed. Do not mutate
 inputs or artifacts visible to the running **Linux** tests; use a
-separate worktree for concurrent edits on the same host. Git
-synchronization is *never* automatic: changing any checkout's branch
-or revision requires an explicit separate Git operation. Syncthing
+separate worktree for concurrent edits on the same host. **For a due
+validation batch, the approved handoff includes agent-initiated, safe
+Git synchronization:** verify a committed Windows test revision, then
+fetch and fast-forward the matching `dev/v1.0.0` branch on `linux-dev`
+using distinct bounded Git tool calls, without requiring another user
+prompt. An already-published Windows revision needs no push. Refuse
+divergence, dirty checkouts, unexpected branches, and non-fast-forward
+updates; never reset, force-push, rebase or change the interactive
+Linux checkout. This authorization does not permit unsolicited staging,
+commits, deployment or unrelated Git synchronization. Syncthing
 staging is not checkout synchronization. See
 [parallel Windows/Linux validation](docs/testing.md#parallel-windows-development-and-linux-validation).
 

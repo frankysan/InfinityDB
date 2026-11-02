@@ -51,7 +51,10 @@ hand those parts to the appropriate workflow after the source semantics are clea
    exact source evidence, test selectors and target commit. A pure read-only
    investigation without pending test work needs no artificial queue entry.
    Use the [phased Linux execution workflow](../../../docs/testing.md#parallel-windows-development-and-linux-validation)
-   for eligible broader checks; never silently synchronize checkouts.
+   for eligible broader checks. When execution is due, use the
+   authorized, separately invoked safe Git fetch/fast-forward handoff
+   to prepare the Linux worker, then dispatch and continue Windows
+   development; never force or implicitly synchronize a checkout.
 
 ## References
 

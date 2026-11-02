@@ -52,9 +52,12 @@ For source meaning or rules conflicts, first establish the evidence with
    cross-platform, or cumulative tests, with source snapshot/asset requirements
    and exact selectors. Prefer pinned asynchronous
    [Linux execution](../../../docs/testing.md#parallel-windows-development-and-linux-validation)
-   after separately authorized Git checkout preparation, leaving Windows
-   development independent. Do not retire an item based on unrelated or
-   skipped-asset test coverage.
+   after safe, validation-triggered Git fetch/fast-forward of the
+   committed Windows revision onto the dedicated MCP worker checkout.
+   This handoff is already authorized when tests are due; do not ask
+   again for ordinary safe synchronization, force a divergent checkout,
+   or interrupt independent Windows development. Do not retire an
+   item based on unrelated or skipped-asset test coverage.
 9. Summarize changed inputs/contracts, generated consequences, immediate
    results, queued obligations, and any unresolved data. Do not update pinned
    source artifacts or publish acquisition output unless explicitly required.

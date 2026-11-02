@@ -100,6 +100,51 @@ def _inventory() -> dict:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_religious_troop_total_source_83_is_unresolved_and_owner_pinned() -> None:
+    """Keep the lone source-qualified Total occurrence distinct from family rules."""
+    [item] = select_source_variants(_inventory(), "skills", [83])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Religious Troop", 83, 498,
+    )
+    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["rawValues"] == []
+    assert item["reviewedExtra"] is None
+    assert item["extraSignatures"] == [{
+        "extras": [[33, "TEXT", "Total"]], "reviewed": False, "count": 1,
+    }]
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=83, extra_id=33,
+    )
+    assert len(owners) == 1
+    owner = owners[0]
+    assert {
+        key: owner[key]
+        for key in (
+            "owner", "occurrence_id", "unit_id", "unit_slug",
+            "army_id", "army_name", "army_source_file", "parent_id",
+            "parent_name", "extra_position", "extra_id", "extra_type",
+            "extra_raw", "source_raw",
+        )
+    } == {
+        "owner": "profile",
+        "occurrence_id": 5240,
+        "unit_id": 1927,
+        "unit_slug": "confessor-team-ops",
+        "army_id": 103,
+        "army_name": "Military Orders",
+        "army_source_file": "103-military-orders.json",
+        "parent_id": 1,
+        "parent_name": "CONFESSOR HEAVY SPEC-OPS",
+        "extra_position": 1,
+        "extra_id": 33,
+        "extra_type": "TEXT",
+        "extra_raw": "Total",
+        "source_raw": None,
+    }
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_parachutist_deployment_zone_source_33_exact_owners() -> None:
     """Pin source-only deployment-zone occurrences without implying a usage index."""
     from collections import Counter

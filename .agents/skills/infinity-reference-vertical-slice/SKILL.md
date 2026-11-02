@@ -55,7 +55,10 @@ change, use [Army data pipeline](../infinity-army-data-pipeline/SKILL.md).
    Do not treat targeted green tests as completion of broader verification.
    Batch due VR items on the pinned asynchronous Linux worker when prepared,
    following the [Windows/Linux handoff](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
-   Never synchronize Git as a testing side effect; retire only verified entries.
+   When due, perform the separately invoked safe Git handoff steps
+   agentically, pin the worker revision, dispatch the job and **return
+   immediately to independent Windows implementation**. Do not force
+   Git changes or hide skipped coverage; retire only verified entries.
 
 ## References
 

@@ -56,15 +56,18 @@ IDs here and link the owning task instead of duplicating its description.
   Store bulky reports under ignored `local/`; retain concise durable acceptance
   evidence in its canonical document when required.
 - **Linux is the preferred deferred-execution worker**, not an automatic
-  mirror of Windows. When ready, batch compatible VR selectors into a
-  pinned asynchronous `linux-dev` job with `expected_commit`; **after
-  dispatch, resume independent Windows development immediately**, not a
-  polling/waiting loop. Check status at meaningful Windows task boundaries
-  and respond to actionable failures. A Linux run cannot verify later
-  Windows edits. A mismatch in the
-  worker's Git revision, dependencies or source assets is an explicit
-  dispatch blocker, not permission to sync Git or count skips as passing.
-  Only a separate requested Git operation changes the Linux checkout.
+  mirror of Windows. When execution is due, the agent prepares the
+  *committed* target revision using separately invoked safe Git
+  fetch/fast-forward operations on `linux-dev`, as already authorized
+  for the validation handoff. Never force, reset, rebase or disturb a
+  divergent/dirty checkout; report an unsafe or unavailable revision
+  as a blocker. Batch compatible selectors into one pinned asynchronous
+  `linux-dev` job with `expected_commit`; **after dispatch, resume
+  independent Windows development immediately**, not a polling/waiting
+  loop. Check status at meaningful Windows task boundaries and respond
+  to actionable failures. A Linux run cannot verify later Windows
+  edits. Git synchronization remains explicit, bounded and
+  validation-triggered, never a background mirror.
   Follow the [dispatch/retirement protocol](testing.md#parallel-windows-development-and-linux-validation).
   A successful job applies only to its verified revision and coverage.
   At each pass boundary, report queue counts, due/blocked items and what
@@ -92,95 +95,35 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 5 distinct
-changes** (VR-0023/0024/0027/0028/0029); no new design requirement is open.
-The execution threshold is due; dispatch a compatible pinned Linux
-batch once the corrected Windows state is committed and selected by an
-explicit Git operation, then **continue Windows development immediately**
-while the Linux job runs.
-The oldest recorded date is 2026-11-02. The Windows and Linux MCP
-checkouts independently matched
-`a2769e110d17dc415c715e05f154b941c81204e9`; no Git
-operation was needed for this execution pass. The pinned asynchronous
-Linux full-suite job `linux-dev:9360ac9d03034bff9a7a9384e54cf917`
-completed after **537.31 s: 4,850 passed, 22 failed, 27 skipped**.
-Of the 22 failures, **16** required the ignored
-`data/generated/deployed-objects.json` publication absent on the worker;
-the artifact was subsequently built and verified with the tracked
-publication script, and 10 affected focused tests passed across
-core-scenario, terrain-source and legacy-staging modules. The remaining
-**six test-contract failures** (rules category/count drift, PDF source
-count, and newline policy for two staging scripts) are tracked in
-[1.0 TODO](TODO.md#100--current-reference-completeness-gate). Full-suite
-acceptance remains failed; do not count the targeted recovery runs as
-a replacement for a passing cumulative job. VR-0026's independent
-read-only Syncthing staging checks were verified and retired.
+Only open VR obligations belong here. **Current count: 3 distinct
+changes** (VR-0023/0024/0030); no deferred design requirement is
+open. Oldest recorded date: 2026-11-02. The agent safely
+fetched/fast-forwarded the dedicated `linux-dev` MCP checkout to
+Windows `16f0d4cf5299ae29d0d3b308a4200ca39d6aa4db`,
+rebuilt and verified the ignored deployed-object publication,
+and completed shared Linux job
+`linux-dev:77cabfbc8f944158aad8c2cc8ca8d683`:
+**4,871 passed, 28 skipped, zero failed**, all 808 published
+SVGs present. A separate pinned Linux source-variant run passed
+**60/60** with the raw Army archive. VR-0027/28/29 are retired,
+with detailed evidence in [testing.md](testing.md#parallel-windows-development-and-linux-validation).
+The 28 cumulative skips match the known Windows count;
+per-reason comparison remains part of VR-0023. Windows source
+work after dispatch is not covered by that revision (VR-0030).
 
-- [ ] **VR-0029** (2026-11-02; ready after explicit Git revision
-  preparation): Cumulative regression of the Windows corrections to
-  six non-environment Linux failures. Work: [completed regression
-  corrections](TODO.md#source-inventory-and-gap-batches); working base
-  `60df18fd1560531c01c18c87ef374c810709ad33` plus uncommitted
-  updates to General Rules tests/verifier, PDF source pins/count and
-  newline-deterministic staging. Immediate Windows: application-rule
-  references **17 passed**, the affected Web API **1 passed**,
-  PDF source inventory **1 passed**, newline policy **1 passed**;
-  Ruff and docs checks passed. Design: no outstanding requirement.
-  Deferred: one **shared** revision-pinned Linux cumulative run with
-  VR-0027/0028, including ignored deployed-object publication
-  build/check preflight; verify all corrected regressions, unexpected
-  skips and browser coverage. Linux may remain on its prior revision
-  until an explicitly authorized Git operation. Do not interpret
-  passing Windows checks as cross-platform/full-suite acceptance.
-
-- [ ] **VR-0027** (2026-11-02; blocked — cumulative Linux failures
-  pending correction and rerun): Cumulative/cross-platform verification of the reviewed
-  Parachutist (Dep. Zone) source-33 parameter and guarded publication.
+- [ ] **VR-0030** (2026-11-02; ready after new Windows revision
+  is committed): Validate the single unreviewed Religious Troop
+  `Total` source occurrence without inventing typed effects.
   Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
-  implementation included in Windows `dev/v1.0.0` baseline
-  `11c6562ed4a3c7960ae3e6e81838799ce9ba0230`.
-  Immediate Windows: all 17 source signatures and owners verified in
-  `tests/test_audit_source_variant_inputs.py` (**58 passed** at promotion);
-  `tests/test_curated.py` (**651 passed**);
-  `tests/test_rules_database.py` (**166 passed**), guarded
-  staged/promoted v9 rules/deployed-object publication, 17 unchanged
-  objects, data/rules build, Ruff, docs and diff checks passed.
-  Design: none currently identified.
-  Deferred: one cumulative Linux full-suite run on the **explicitly
-  selected exact revision**, with verified browser dependencies and
-  source/asset skip explanations; compare any platform-specific findings
-  with Windows and execute any remaining release-required Windows check.
-  Linux `worker="linux-dev"` was tested at exact
-  `a2769e110d17dc415c715e05f154b941c81204e9` without additional
-  Git synchronization. Source-only audits passed **60/60** on Linux,
-  but the shared full suite failed **22 tests** (see queue overview).
-  The pinned raw Army archive was checked on Windows; skipped or absent
-  raw inputs on another host must be disclosed. Re-run cumulative
-  acceptance after the six test-contract corrections and publication
-  preflight. Retire only on passing revision-matched results.
-
-- [ ] **VR-0028** (2026-11-02; blocked — shared cumulative Linux
-  failures pending correction and rerun): Cumulative/cross-platform verification of the three exact
-  Discover source-131 extras and guarded publication.
-  Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
-  Windows `dev/v1.0.0` combined baseline
-  `11c6562ed4a3c7960ae3e6e81838799ce9ba0230`.
-  Immediate Windows: source owners and fresh/published export
-  `tests/test_audit_source_variant_inputs.py` (**60 passed**);
-  `tests/test_curated.py` (**664 passed**);
-  `tests/test_rules_database.py` (**166 passed**);
-  13 Discover mutation cases, exact SHA-256 guarded rules/publication
-  promotion with 17 deployed objects unchanged, data/rules builds,
-  Ruff, docs and diff checks passed. Design: none currently identified.
-  Deferred: the **same compatible pinned Linux full-suite job** as
-  VR-0027 (do not duplicate the run), with explicit skip/source
-  coverage and Windows-only checks where needed. The pinned Linux
-  cumulative attempt failed **22 tests**, although the direct
-  source-variant module passed **60/60**. The ignored publication
-  prerequisite is now prepared and verified. Correct the remaining
-  six repository-test expectations in a separate implementation pass,
-  then repeat one shared cumulative job. Retire only for terminal
-  acceptance on the intended revision.
+  development started from Windows `16f0d4cf`, after Linux test dispatch.
+  Immediate: exact source-83 extra-33 owner/signature regression
+  `tests/test_audit_source_variant_inputs.py::test_religious_troop_total_source_83_is_unresolved_and_owner_pinned`
+  **1 passed** with the pinned Army raw snapshot. Design: none.
+  Deferred: repeat the source audit on Linux with pinned raw Army
+  coverage (a skip without that archive is not independent verification)
+  and run the next compatible cumulative suite on the committed
+  updated revision. The successful `16f0d4cf` Linux cumulative
+  job predates and does not cover this Windows test addition.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -284,8 +227,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0030` (`VR-0023`, `VR-0024`,
-  `VR-0027`, `VR-0028` and `VR-0029` open; earlier entries retired).
+- Execution: `VR-0031` (`VR-0023`, `VR-0024`, `VR-0030`
+  open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

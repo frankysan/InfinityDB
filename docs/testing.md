@@ -373,16 +373,24 @@ because a Linux job is running. The no-mutation rule above still applies to
 *the Linux test checkout and any shared inputs its jobs actually consume*;
 never edit that checkout or swap tracked databases during its test run.
 
-**Git is never synchronized as a side effect of testing, task handoff,
-validation, or source-data staging.** Different branches and commits on the
-three checkouts are intentional and permissible. Fetch, fast-forward,
-checkout, commit or push only through a separately requested Git action;
-`expected_commit` must **refuse** a mismatched Linux revision rather than
-try to repair it. Syncthing transfers only the designated ignored source
-folders, not Git or curated/generated databases; these staged inputs can
-change independently and must be explicitly activated and pinned before any
-test that needs them. Missing Linux-only dependencies or source material
-must be identified as coverage gaps/skips, never silently accepted as green.
+**Git handoff for due validation is agent-initiated, not automatic
+background mirroring.** Once the queue triggers execution, inspect the
+committed Windows revision and the dedicated MCP worker checkout; use
+separate, bounded Git operations to fetch and fast-forward the worker's
+matching branch to the intended revision. The user has authorized this
+specific test-handoff synchronization without a new confirmation at
+each threshold. Never silently fetch/checkout a different task's
+revision, change the interactive `devbox` checkout, force, reset,
+rebase or discard local changes. If a Windows commit is not yet
+published or a remote differs, verify the configured origin/ancestry
+before any safe, separately executed Git push; never stage or commit
+uncommitted implementation edits merely to satisfy dispatch.
+`expected_commit` must still **refuse** a mismatched revision rather
+than silently repair it inside the test launcher. Syncthing transfers
+only designated ignored source folders, not Git or curated/generated
+databases; these inputs must be activated and pinned before use.
+Missing Linux-only dependencies or source material remain coverage
+gaps/skips, not passing results.
 
 Prefer the idle Linux worker for longer validation workloads while Windows
 continues coding; reserve Windows execution for Windows-specific behavior,
@@ -409,14 +417,17 @@ required preflight, and release acceptance remain independent requirements.
    it, group ready items by compatible test state and run overlapping
    modules/full-suite checks **once per compatible revision**, not once
    per entry. Prioritize due verification over starting another ordinary
-   implementation pass. A blocked prerequisite stays in the queue with its
-   specific blocker; it never authorizes a silent Git operation.
+   implementation pass. The approved due-test workflow includes safe,
+   explicit Git operations initiated by the agent; an unsafe or unresolved
+   Git prerequisite remains blocked, never forcibly bypassed.
 3. Select the intended committed/frozen revision and verify that the
    **MCP Linux worker checkout** (not the interactive `devbox` checkout)
    has exactly that HEAD and required dependencies/source inputs. If it
-   does not, record `Linux checkout not prepared` with the target SHA in
-   the VR entry; request/perform Git fetch/checkout/fast-forward only
-   through an **explicitly authorized separate Git operation**. Neither
+   does not, run separate safe Git fetch and fast-forward operations
+   against the worker's matching branch **as part of the authorized
+   due-validation handoff**, verifying the target SHA. If this refuses,
+   record `Linux checkout not prepared` and the exact blocker in the
+   VR entry; do not force or reset the checkout. Neither
    `start_test_job` nor file transfer is Git synchronization. Staged
    Syncthing assets must be activated separately when needed. **Before
    the full suite, generate the Git-ignored paired deployed-object
@@ -479,6 +490,24 @@ The six remaining failures are stale rule-category/count and PDF
 source-count expectations plus two missing report newline arguments;
 see the 1.0 TODO fix and open VR-0027/0028. This cumulative run is
 **not accepted** despite all targeted source-variant checks passing.
+
+**2026-11-02 corrected Linux cumulative acceptance (VR-0027/28/29):**
+After the worker's `origin` was corrected to official GitHub,
+the agent safely fetched/fast-forwarded `dev/v1.0.0` from
+`a2769e11` to `16f0d4cf5299ae29d0d3b308a4200ca39d6aa4db`,
+rebuilt and checked the ignored deployed-object publication, then
+dispatched `linux-dev:77cabfbc8f944158aad8c2cc8ca8d683`.
+With all **808/808** published SVGs, the 16-worker Linux full suite
+finished **4,871 passed, 28 skipped, zero failed** in 552.06 s;
+two warnings concern `fork()` in multithreaded web-metrics tests.
+The pinned Linux source-variant module independently passed
+**60/60**, job `linux-dev:41ca2800f4284c738ad647771c218658`,
+with no raw-source skips. This resolves the prior missing-publication
+and six stale-test regressions and accepts VR-0027/28/29. The 28
+full-suite skips match the known Windows skip-count baseline;
+their per-reason cross-host comparison remains separate under
+VR-0023. A new Windows-only Religious Troop source regression
+written *after* dispatch is not covered by this run (VR-0030).
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked

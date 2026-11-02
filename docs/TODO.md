@@ -129,9 +129,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
   General Rules catalog expectations for the reviewed optional
   Reinforcements Extra, verified 14 PDF source declarations/8 distinct
   IDs, and made both source-variant staging reports newline-deterministic.
-  Essential Windows tests, Ruff and documentation checks passed. Deferred
-  cumulative Linux verification remains open under VR-0027/0028/0029;
-  no automatic Git synchronization.
+  Essential Windows tests, Ruff and documentation checks passed.
+  The corrected pinned Linux full suite passed **4,871 tests / 28
+  skips**, and its independent source-variant module passed **60/60**;
+  VR-0027/0028/0029 are retired. Subsequent Windows-only changes
+  remain independently queued until their own revision is tested.
 
 - [ ] **Data processing + Project infrastructure:** Repair the current-input
   coverage audit path before using it as 1.0 acceptance evidence
@@ -2019,6 +2021,16 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         Keep it unresolved, pin the source signature, and refer to
         [SRC-027](official-source-clarifications.md#src-027--journalist-3-on-tohaa-diplomatic-delegate-option)
         for the clarification question.
+      - [x] **Data processing — Religious Troop (Total) source pin:**
+        The pinned Army raw DB has exactly one `33/TEXT:Total`
+        qualification among 498 direct source-83 Religious Troop
+        occurrences: Military Orders / CONFESSOR HEAVY SPEC-OPS,
+        profile occurrence 5240 on CONFESSOR TEAM OPS (unit 1927).
+        A direct owner/signature regression passes without assigning
+        mechanics to `Total`; the source audit still reports this Skill
+        as unresolved. The N5-reviewed generic Religious Troop facts
+        are unchanged. The qualifier's intended effect needs separate
+        source review before typed publication or a Unit-usage index.
       - [x] **Data processing:** Harden the source-variant inventory against
         unreviewed combinations of individually recognized extras. Only a
         single reviewed extra or typed distance can currently certify an
