@@ -95,38 +95,31 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 6 distinct
-changes** (VR-0023/0024/0033/0034/0035/0036); no deferred
-design requirement is open. Oldest recorded date: 2026-11-02.
-The due Linux batch is already dispatched; the new Windows
-Commlink test remains uncommitted and cannot be covered by
-that in-flight `60511fec` suite.
-Linux revision `eec7f940d435e74bd918367298abb8e2356b8302`
-completed its pinned full suite with **4,874 passed, 28 skipped,
-zero failed**, all **808/808** published SVGs available. The
-independent source-variant module passed **63/63** against the
-pinned raw Army archive. Therefore VR-0031 (Camouflage) and
-VR-0032 (Infiltration) are retired; detailed evidence is in
-[testing.md](testing.md#parallel-windows-development-and-linux-validation).
-The two browser-concurrency acceptance items remain open, including
-per-reason comparison of the 28 Linux/Windows skips. The
-five-item execution threshold triggered a second safe Git handoff:
-the agent published the existing committed Windows revision
-`60511fec335ac370f6664bb0b22edd0ee6681764`,
-fast-forwarded `linux-dev`, rebuilt and verified the ignored
-deployed-object publication, and started the new pinned full
-suite `linux-dev:5ab409f05073456bb1e550134cd23030`.
-Engineer and Doctor source regressions are included in that
-revision; the new uncommitted Lieutenant Windows test is not.
-Completion, source/archive coverage and skip parity remain
-pending; Windows development continues independently.
+Only open VR obligations belong here. **Current count: 4 distinct
+changes** (VR-0023/0024/0035/0036); no deferred design
+requirement is open. Oldest recorded date: 2026-11-02.
+At `60511fec335ac370f6664bb0b22edd0ee6681764`,
+the dedicated Linux worker passed the full suite:
+**4,876 passed, 28 skipped, 0 failed** with **808/808**
+published SVGs, plus **65/65** separate source-variant tests
+with pinned raw Army input. VR-0033 (Engineer) and VR-0034
+(Doctor) are retired. Earlier `eec7f940` source validation
+also retired VR-0031/32 (Camouflage/Infiltration). Evidence
+is in [testing.md](testing.md#parallel-windows-development-and-linux-validation).
+The independent Chromium contention and skip-reason
+investigations remain VR-0023/24. Newly committed Windows
+Lieutenant/Commlink regression changes belong to
+`5776779da247c12b186d028cc9328450963be1c7`;
+they require a separate pinned Linux handoff before acceptance.
+Commit/push and validation are explicit agent actions, not
+background Git synchronization.
 
-- [ ] **VR-0036** (2026-11-02; pending new Windows commit):
+- [ ] **VR-0036** (2026-11-02; committed, Linux validation pending):
   Cross-platform source-only validation of the optional N4-origin
   Reinforcements Commlink `+1`/`+2` Trooper-count qualifiers.
   Work: [Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
-  Windows base `60511fec335ac370f6664bb0b22edd0ee6681764`
-  plus uncommitted regression and TODO notes. Immediate:
+  Committed on Windows as
+  `5776779da247c12b186d028cc9328450963be1c7`. Immediate:
   `tests/test_audit_source_variant_inputs.py::test_commlink_source_260_exact_optional_reinforcements_variants`
   **1 passed** with pinned raw Army source. Confirms **51**
   direct rows, 34 `298/TEXT:+1`, eight `299/TEXT:+2`,
@@ -136,12 +129,12 @@ pending; Windows development continues independently.
   and next compatible cumulative suite on committed revision;
   current `60511fec` Linux job predates this Windows change.
 
-- [ ] **VR-0035** (2026-11-02; pending new Windows commit):
+- [ ] **VR-0035** (2026-11-02; committed, Linux validation pending):
   Independently validate Lieutenant source-119 resource annotations,
   retaining the distinction between extra Command Tokens and Special
   Lieutenant Orders. Work: [source reconciliation](TODO.md#100--current-reference-completeness-gate);
-  baseline Windows `60511fec335ac370f6664bb0b22edd0ee6681764`
-  plus uncommitted source regression/documentation. Immediate:
+  Committed on Windows as
+  `5776779da247c12b186d028cc9328450963be1c7`. Immediate:
   `tests/test_audit_source_variant_inputs.py::test_lieutenant_source_119_exact_command_token_and_order_qualifiers`
   **1 passed** with the pinned raw Army snapshot, checking all
   **83** qualified rows, the 30 exact Command Token occurrence
@@ -149,47 +142,8 @@ pending; Windows development continues independently.
   N5.3 p. 99 supports distinct resource scopes. Design: none.
   Deferred: pinned source verification on the Linux worker and
   a subsequent cumulative run of the committed Windows revision.
-  Neither the completed `eec7f940` suite nor the new
-  `60511fec` Linux suite covers the uncommitted change.
-
-- [ ] **VR-0034** (2026-11-02; shared Linux cumulative job
-  dispatched at `60511fec`, result pending):
-  Cross-platform source-only acceptance of Doctor source-53
-  `+3`, `2W` and `ReRoll -3` source signatures.
-  Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
-  Windows work is committed by
-  `60511fec335ac370f6664bb0b22edd0ee6681764`.
-  Immediate:
-  `tests/test_audit_source_variant_inputs.py::test_doctor_source_53_exact_qualifiers_preserve_2w_and_reroll_boundary`
-  **1 passed** with pinned raw Army data. Checks all three singleton
-  signatures, all 103 qualified source rows, exact 15 `2W`
-  IDs/owner kinds and exact three `ReRoll -3` IDs.
-  The ambiguity in `ReRoll -3` remains open under
-  [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope).
-  Design: none. Deferred: exact raw-source coverage on Linux at
-  the committed target revision and the next compatible cumulative
-  suite. Pinned `linux-dev` cumulative job
-  `linux-dev:5ab409f05073456bb1e550134cd23030`
-  is underway; dispatch alone is not acceptance.
-
-- [ ] **VR-0033** (2026-11-02; shared Linux cumulative job
-  dispatched at `60511fec`, result pending):
-  Cross-platform source-only acceptance of Engineer source-49
-  singleton annotations, including the unresolved `ReRoll -3`.
-  Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
-  Windows work is committed by
-  `60511fec335ac370f6664bb0b22edd0ee6681764`.
-  Immediate: `tests/test_audit_source_variant_inputs.py::test_engineer_source_49_qualifiers_remain_unreviewed_and_owner_exact`
-  **1 passed** with the pinned raw Army snapshot; all 15 exact
-  occurrence IDs and four complete extra signatures are pinned.
-  Unresolved `ReRoll -3` interpretation is documented in
-  [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope).
-  Design: none. Deferred: verify the source-only regression
-  on Linux with the pinned raw archive after a subsequent
-  committed Git handoff, plus the next compatible cumulative
-  run. Linux job
-  `linux-dev:5ab409f05073456bb1e550134cd23030`
-  includes this test, but is not yet accepted.
+  Neither the completed `eec7f940` suite nor the
+  `60511fec` Linux suite covers the `5776779d` change.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -294,8 +248,7 @@ is recorded. Failed or incomplete verification remains open.
 
 - Design: `VD-0007` (through `VD-0006` retired).
 - Execution: `VR-0037` (`VR-0023`, `VR-0024`,
-  `VR-0033`, `VR-0034`, `VR-0035`,
-  `VR-0036` open; earlier entries retired).
+  `VR-0035`, `VR-0036` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

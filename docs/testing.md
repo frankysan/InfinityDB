@@ -373,18 +373,28 @@ because a Linux job is running. The no-mutation rule above still applies to
 *the Linux test checkout and any shared inputs its jobs actually consume*;
 never edit that checkout or swap tracked databases during its test run.
 
-**Git handoff for due validation is agent-initiated, not automatic
-background mirroring.** Once the queue triggers execution, inspect the
-committed Windows revision and the dedicated MCP worker checkout; use
-separate, bounded Git operations to fetch and fast-forward the worker's
-matching branch to the intended revision. The user has authorized this
-specific test-handoff synchronization without a new confirmation at
-each threshold. Never silently fetch/checkout a different task's
-revision, change the interactive `devbox` checkout, force, reset,
-rebase or discard local changes. If a Windows commit is not yet
-published or a remote differs, verify the configured origin/ancestry
-before any safe, separately executed Git push; never stage or commit
-uncommitted implementation edits merely to satisfy dispatch.
+**Autonomous commits and due-validation Git handoff are agent-initiated,
+not automatic background mirroring.** After the essential focused
+checks pass, inspect the scope of the working diff, stage only
+task-related files, create a coherent conventional Git commit, and
+fast-forward push the intended development branch through separate
+bounded operations. Record the resulting SHA. Continue immediately
+with the next clearly identifiable open task; avoid manufacturing new
+tasks just to keep the process running. These actions are authorized
+by the user's standing InfinityDB development workflow, but they do
+not authorize force/reset/rebase, destructive checkout changes,
+releases, deployment, or publication of new acquired content.
+
+Once the queue triggers execution, inspect the committed Windows
+revision and dedicated MCP worker checkout; use separate, bounded
+Git operations to fetch and fast-forward the worker's matching branch
+to the intended revision. Never silently fetch/checkout a different
+task's revision, change the interactive `devbox` checkout, force,
+reset, rebase or discard local changes. If a Windows commit is not
+yet published or a remote differs, verify the configured origin and
+ancestry before a safe separately executed push. Do not move a Linux
+worker checkout while its pinned jobs are running. Earlier Linux
+results never validate subsequent Windows commits.
 `expected_commit` must still **refuse** a mismatched revision rather
 than silently repair it inside the test launcher. Syncthing transfers
 only designated ignored source folders, not Git or curated/generated
@@ -548,6 +558,28 @@ using the raw Army archive with no skips; VR-0031/32
 are therefore retired. Engineer and Doctor source
 regressions committed after `eec7f940` are not
 covered by this run.
+
+**2026-11-02 Engineer/Doctor pinned Linux acceptance
+(VR-0033/34 retired):** The agent
+safely published the committed Windows revision
+`60511fec335ac370f6664bb0b22edd0ee6681764`,
+fast-forwarded the dedicated `linux-dev` checkout, and rebuilt
+and verified the ignored deployed-object publication before
+starting `linux-dev:5ab409f05073456bb1e550134cd23030`.
+With **808/808** published SVGs, the full suite passed
+**4,876 tests, 28 skipped, 0 failed** in **556.60 s** pytest
+time. The two known multiprocessing `fork()` warnings remain.
+Measured Chromium resource waits totaled **5,730.67 summed
+worker-seconds** in 34 setup events; the browser-concurrency
+investigations remain open (VR-0023/24). Independent `tests/test_audit_source_variant_inputs.py`
+validation passed **65/65** with the pinned raw Army archive
+and zero skips, job
+`linux-dev:c452dd4d53bb4e7dbfa69a0d9096202f`.
+This retires VR-0033/34 without implying a ruling on
+Doctor/Engineer `ReRoll -3` (SRC-029).
+The subsequent Windows Lieutenant and Commlink regression
+commit `5776779da247c12b186d028cc9328450963be1c7`
+is not covered by these earlier tests.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked

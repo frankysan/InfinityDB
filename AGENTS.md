@@ -153,9 +153,13 @@ using distinct bounded Git tool calls, without requiring another user
 prompt. An already-published Windows revision needs no push. Refuse
 divergence, dirty checkouts, unexpected branches, and non-fast-forward
 updates; never reset, force-push, rebase or change the interactive
-Linux checkout. This authorization does not permit unsolicited staging,
-commits, deployment or unrelated Git synchronization. Syncthing
-staging is not checkout synchronization. See
+Linux checkout. Under the user's standing authorization, the agent
+may also stage only validated, task-related files, create conventional
+commits, and fast-forward push the intended development branch; these
+are distinct, inspected Git operations, not background mirroring.
+Do not deploy, publish a release, change branches, or use destructive
+Git operations without separate authorization. Syncthing staging is
+not checkout synchronization. See
 [parallel Windows/Linux validation](docs/testing.md#parallel-windows-development-and-linux-validation).
 
 Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
@@ -191,9 +195,17 @@ instructions must not depend on a particular user's machine configuration.
   or use an authorized remote-read workflow; validate any proposed patch against
   its actual base before claiming applicability. Do not infer current local
   state from a stale archive or a remote branch alone.
-- After local edits, inspect the actual diff and status, run relevant checks, and
-  report exact validation outcomes and whether the changes are already in the
-  checkout. Do not stage, commit, push, deploy, or publish without authorization.
+- After local edits, inspect the actual diff and status and run relevant
+  focused checks. For InfinityDB's authorized autonomous workflow, stage
+  only reviewed task-related files, commit a coherent validated batch with
+  a lowercase conventional message and push it with ordinary fast-forward
+  Git after checking the branch and remote ancestry. Report each SHA and
+  exact validation outcomes, and proceed to the next clearly identifiable
+  open task rather than stopping solely for approval. Do not commit failed
+  or uncertain changes as accepted, fold unrelated user edits into the
+  commit, force-push, reset, rebase, deploy, or publish a release without
+  separate authorization. A pushed revision is not automatically a
+  validated Linux or CI revision.
 - Keep machine-specific configuration, operational diagnostics, and private
   evidence out of tracked files. The Git-ignored `local/` workspace is the
   preferred location for private notes; ignore rules alone are not access
