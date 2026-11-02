@@ -4721,8 +4721,9 @@ Still unresolved: identify an authoritative N5 annex revision or adoption
 statement, pin its effective date and edition, and reconcile any differences
 before representing those procedures as N5-native. The following RS-RF
 sections describe the retained **N4 annex semantics and source/Army modeling
-implications**; the fully typed `Commlink (+X)` occurrence parameter and
-Army-list legality modeling remain separate work.
+implications**; exact typed `Commlink (+X)` parameters are now defined
+in curated source but pending guarded release-pair publication.
+Army-list legality modeling remains separate work.
 
 Sources:
 
@@ -4802,10 +4803,13 @@ Troopers permitted in the Army List beyond the normal limit of 15. The source
 also allows this bonus to combine with other effects that modify that maximum.
 
 The parenthetical value is therefore neither a Skill Level nor a generic MOD to
-an Attribute. A future annex-scoped Commlink record should encode the parameter
-as a typed `maximum Trooper count bonus` in `variantSemantics.occurrenceParameters`
-while preserving
-the exact Army/source representation for provenance.
+an Attribute. The optional annex now encodes the pinned Army
+`298/TEXT:+1` and `299/TEXT:+2` signatures as
+`max-trooper-count-increase` in curated
+`variantSemantics.occurrenceParameters`, scoped solely to
+`optional-reinforcements-extra-army-list`. The source is reviewed
+without inferring list legality or N5-native procedural authority.
+The tracked v9 rules/publication pair still needs guarded promotion.
 
 Source:
 

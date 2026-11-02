@@ -1016,6 +1016,18 @@ It denotes repeated direction/heading changes along a predeclared
 trajectory (N5.3 p. 113), never a distance bonus. The existing distance
 parameter remains independently owned, and no combination is inferred.
 
+The separately scoped **Commlink** source variant (optional
+Reinforcements Extra, N4-origin) recognizes only Army Skill 260
+`298/TEXT:+1` and `299/TEXT:+2`. Each exact
+`reviewed-extra` maps to `max-trooper-count-increase`
+with `appliesTo: "optional-reinforcements-extra-army-list"`
+and a positive integer `count` of one or two. This describes
+the annex's maximum Trooper-count allowance, not an
+Attribute modifier, Skill Level, list-legality decision or
+independently reissued N5 procedure. Only freshly built rules
+databases expose these newly curated source semantics until
+the tracked v9 release pair is guardedly refreshed.
+
 The bounded Dodge effects are `opponent-roll-mod` (negative opponent
 Face to Face MOD), `roll-attribute-replacement` (PH value for Dodge),
 `movement-bonus` (positive centimeters, measured using 2.5 cm per

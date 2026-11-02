@@ -914,6 +914,36 @@ def _validate_reviewed_extra_parameter(
             raise ValueError(f"{context}: invalid TinBot Firewall source extras")
         return
     if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "commlink"}
+    ]:
+        # Optional N4-origin Reinforcements Extra: +X modifies only
+        # the maximum Trooper count, not a stat or roster legality.
+        # Keep the source signatures closed rather than accepting any +N.
+        expected = [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": f"+{count}",
+                "effect": {
+                    "kind": "max-trooper-count-increase",
+                    "appliesTo": "optional-reinforcements-extra-army-list",
+                    "count": count,
+                },
+            }
+            for extra_id, count in ((298, 1), (299, 2))
+        ]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or parameter.get("extraValues") != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or type(entry["effect"].get("count")) is not int
+                for entry in parameter.get("extraValues", [])
+            )
+        ):
+            raise ValueError(f"{context}: invalid optional Commlink count extras")
+        return
+    if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "forward-observer"}
     ]:
         # N5.3 pp. 75, 92: +1SD adds a selectable/discarded die to

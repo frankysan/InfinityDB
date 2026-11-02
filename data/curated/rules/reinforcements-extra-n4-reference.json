@@ -190,7 +190,35 @@
         }
       ],
       "variantSemantics": {
-        "inheritance": "family"
+        "inheritance": "family",
+        "occurrenceParameters": [
+          {
+            "source": "army-extra",
+            "kind": "reviewed-extra",
+            "extraValues": [
+              {
+                "extraId": 298,
+                "extraType": "TEXT",
+                "rawValue": "+1",
+                "effect": {
+                  "kind": "max-trooper-count-increase",
+                  "appliesTo": "optional-reinforcements-extra-army-list",
+                  "count": 1
+                }
+              },
+              {
+                "extraId": 299,
+                "extraType": "TEXT",
+                "rawValue": "+2",
+                "effect": {
+                  "kind": "max-trooper-count-increase",
+                  "appliesTo": "optional-reinforcements-extra-army-list",
+                  "count": 2
+                }
+              }
+            ]
+          }
+        ]
       },
       "relations": [
         {

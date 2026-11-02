@@ -47,11 +47,18 @@ N5-era mode through N4-origin procedures**, with explicit source-edition
 notices. They do not assert that the N4 annex has been reissued or adopted
 unchanged for N5. Commlink retains the official Army Skill family link;
 Request Reinforcements is a rules-only `tactical-phase-step`, with no Army
-carrier and no core Orders/AROs declaration type. `Commlink (+X)` remains
-player-explained but **not yet a typed exact-source occurrence parameter**;
-reinforcement list legality is not calculated. The guarded v9 publication
-refresh adds precisely these three records to the matched `rules.db` and
-re-pins `deployed-objects.json`, leaving all 17 object records unchanged.
+carrier and no core Orders/AROs declaration type. `Commlink (+X)` is
+now mapped in the **curated source** to two exact `reviewed-extra`
+entries: Army Skill 260 extras `298/TEXT:+1` and `299/TEXT:+2`,
+respectively `max-trooper-count-increase` by one or two, scoped
+solely to `optional-reinforcements-extra-army-list`. The
+validator rejects any other source signature or effect scope, and
+fresh exports expose the typed effects. The active tracked v9
+`rules.db` and its matched `deployed-objects.json` still require a
+guarded paired refresh; source-only validation is not deployment.
+Reinforcement list legality is not calculated. The earlier guarded
+v9 publication refresh added precisely the three annex records and
+re-pinned `deployed-objects.json`, leaving all 17 object records unchanged.
 Separate N5-native procedural authority verification remains open.
 
 For weapon families such as Mines, a shared curated rule describes only the common

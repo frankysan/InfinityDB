@@ -1616,7 +1616,8 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       its appearance in the unchanged 57-row N5 Orders/AROs matrix. The
       guarded release-pair refresh preserved 17 deployed objects and a
       rollback backup. Source/API/regression and maintained-text checks pass;
-      full manual browser acceptance and exact typed Commlink (+X) remain open.
+      full manual browser acceptance and publication of typed
+      Commlink (+X) remain open.
     - [ ] **N5-native source clarification:** Identify an authoritative
       N5-specific Reinforcements Annex revision or explicit official adoption
       ruling establishing which N4 procedures remain applicable unchanged.
@@ -1634,8 +1635,15 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       without misrepresenting a revised N5 procedure. No typed
       effect, Army roster legality inference, or publication
       migration is performed by this source audit.
-    - [ ] Encode `Commlink (+X)` as a typed maximum-Trooper-count parameter, not a
-      Skill Level or Attribute MOD.
+    - [x] Encode `Commlink (+X)` in the **curated source** as
+      two closed, exact Army extras: `298/TEXT:+1` and
+      `299/TEXT:+2`, each with `max-trooper-count-increase`,
+      scoped only to `optional-reinforcements-extra-army-list`.
+      This is not a Skill Level, Attribute MOD, generic N5 roster rule,
+      or list-legality calculator. Fresh rules exports and negative
+      validator tests prove source semantics; promotion into the
+      tracked v9 `rules.db`/deployed-object publication pair and
+      full browser acceptance remain deferred under VR-0037.
     - [x] Classify `Request Reinforcements` as a separate
       `tactical-phase-step` in the optional annex. It is discoverable as a
       Skill without entering Basic Short/Short/Long/ARO declarations or

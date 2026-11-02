@@ -593,6 +593,26 @@ source-data skips. The prior `60511fec` cumulative Linux suite
 did not contain the Lieutenant and Commlink regressions.
 VR-0035/36 remain open until a compatible full-suite run.
 
+**2026-11-02 Commlink typed source-only implementation (VR-0037):**
+The scoped N4-origin annex now has a closed, exact typed mapping
+for the **34** `298/TEXT:+1` and **8** `299/TEXT:+2`
+Commlink occurrences. Fresh in-memory/exported rules include
+`max-trooper-count-increase`, restricted to the optional
+Reinforcements Extra's Army List maximum, not a core N5
+Attribute bonus or legality calculation. Six fail-closed
+mutations rejected incorrect IDs, effect scope, count type,
+omission, reordering and invented `+3`. Windows
+`tests/test_curated.py` **670/670**, source-variant module **68/68**
+(after updating 12 aggregate status assertions to compare
+against the actual release revision), rules-database module
+**166/166**, temporary rules/data builds, Ruff and Pyright
+passed.
+The active tracked v9 rules/publication pair is
+**not yet updated**; its guarded migration and matched
+deployed-object publication must be accepted independently
+before marking the runtime mapping published. Pending
+Linux cross-platform/cumulative verification is VR-0037.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at

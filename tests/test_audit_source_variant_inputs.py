@@ -99,6 +99,22 @@ def _inventory() -> dict:
     )
 
 
+def _expected_skill_statuses(rules_path: Path) -> dict[str, int]:
+    """Tie global source counts to the actual curated release revision."""
+    commlink_reviewed = (
+        "commlink" in RulesDatabase(rules_path).skill_reviewed_extra_semantics()
+    )
+    return {
+        "family-only": 44,
+        "reviewed-distance-parameter": 3,
+        "reviewed-exact-source": 10,
+        "reviewed-numeric-parameter": 3,
+        "reviewed-extra-parameter": 20 if commlink_reviewed else 19,
+        "reviewed-combination-parameter": 2,
+        "unresolved-occurrence-parameter": 14 if commlink_reviewed else 15,
+    }
+
+
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_commlink_source_260_exact_optional_reinforcements_variants() -> None:
     """Pin the two N4-origin Commlink (+X) limits without adopting an N5 rewrite."""
@@ -149,12 +165,52 @@ def test_commlink_source_260_exact_optional_reinforcements_variants() -> None:
         for record in document["records"]
         if record["id"] == "skill:commlink"
     )
-    assert commlink["variantSemantics"] == {"inheritance": "family"}
+    assert commlink["variantSemantics"]["inheritance"] == "family"
     assert "N4-origin annex" in commlink["summary"]
     effects = " ".join(commlink["facts"]["effects"])
     assert "maximum Trooper count" in effects
     assert "it does not modify an Attribute" in effects
     assert "not verified as a revised N5 edition" in commlink["facts"]["restrictions"][0]
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_commlink_typed_legacy_variant_in_fresh_publication(
+    tmp_path: Path,
+) -> None:
+    """Typed +1/+2 are roster-count annotations only for the optional annex."""
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    rules = RulesDatabase(fresh)
+    [parameter] = [rules.skill_reviewed_extra_semantics()["commlink"]]
+    assert parameter == {
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extra_values": [
+            {
+                "extra_id": extra_id, "extra_type": "TEXT",
+                "raw_value": f"+{count}",
+                "effect": {
+                    "kind": "max-trooper-count-increase",
+                    "applies_to": "optional-reinforcements-extra-army-list",
+                    "count": count,
+                },
+            }
+            for extra_id, count in ((298, 1), (299, 2))
+        ],
+    }
+    report = inventory_source_variants(
+        ROOT / "data/generated/infinity.db",
+        ROOT / "data/generated/infinity.raw.db", fresh,
+    )
+    [item] = select_source_variants(report, "skills", [260])["items"]
+    assert item["status"] == "reviewed-extra-parameter"
+    assert item["reviewedExtra"] == parameter
+    assert item["occurrences"] == 51
+    assert item["extraSignatures"] == [
+        {"extras": [[298, "TEXT", "+1"]], "reviewed": True, "count": 34},
+        {"extras": [[299, "TEXT", "+2"]], "reviewed": True, "count": 8},
+    ]
+    assert item["rawValues"] == []
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -709,12 +765,7 @@ def test_regeneration_62_exact_states_phase_ph_values_in_both_exports(
         assert item["reviewedExtra"] == params
         assert item["reviewedCombinations"] is None
         assert item["rawValues"] == []
-        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == _expected_skill_statuses(path)
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -752,12 +803,7 @@ def test_booty_metachemistry_exact_chart_rerolls_in_both_exports(
                     },
                 }],
             }
-        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == _expected_skill_statuses(path)
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -795,12 +841,7 @@ def test_hacker_skill_source_1000_exact_direct_programs_in_both_exports(
         assert item["reviewedCombinations"] == combos
         assert item["extraSignatures"] == signatures
         assert item["rawValues"] == []
-        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == _expected_skill_statuses(path)
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -1170,15 +1211,7 @@ def test_current_reviewed_numeric_mods_certify_only_exact_army_extras(
         ROOT / "data/generated/infinity.raw.db", output,
     )["catalogs"]["skills"]
     sources = {item["id"]: item for item in report["items"]}
-    assert report["summary"]["statuses"] == {
-        "family-only": 44,
-        "reviewed-distance-parameter": 3,
-        "reviewed-exact-source": 10,
-        "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 19,
-        "reviewed-combination-parameter": 2,
-        "unresolved-occurrence-parameter": 15,
-    }
+    assert report["summary"]["statuses"] == _expected_skill_statuses(output)
     assert sources[28]["status"] == "reviewed-numeric-parameter"
     assert all(s["reviewed"] for s in sources[28]["extraSignatures"])
     assert sources[24]["reviewedNumericMod"] is not None
@@ -1258,12 +1291,7 @@ def test_decoy_215_exact_deployment_replica_counts_in_both_exports(
         assert row["extraSignatures"] == expected
         assert row["reviewedExtra"] == params
         assert row["rawValues"] == []
-        assert result["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert result["catalogs"]["skills"]["summary"]["statuses"] == _expected_skill_statuses(path)
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -1301,12 +1329,7 @@ def test_ft_master_261_lists_exact_cancellation_trigger_units_in_both_exports(
         assert row["reviewedExtra"] == parameters
         assert row["extraSignatures"] == expected
         assert row["rawValues"] == []
-        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == _expected_skill_statuses(path)
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -1358,12 +1381,7 @@ def test_tagcom_270_complete_recipient_mod_signatures_in_both_exports(
         assert row["reviewedExtra"] is None
         assert row["reviewedCombinations"] == combos["tagcom"]
         assert row["rawValues"] == []
-        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == _expected_skill_statuses(path)
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -1412,12 +1430,7 @@ def test_remdriver_255_only_exact_full_compounds_are_reviewed(
         assert row["reviewedExtra"] is None
         assert row["reviewedCombinations"] == combos["remdriver"]
         assert row["rawValues"] == []
-        assert result["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert result["catalogs"]["skills"]["summary"]["statuses"] == _expected_skill_statuses(path)
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -1456,12 +1469,9 @@ def test_bangbomb_skill_266_reuses_equipment_scope_in_both_exports(
         assert row["reviewedCombinations"] is None
         assert row["rawValues"] == []
         assert row["reviewedExtra"] == rules.skill_source_equipment_overrides()[266]
-        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == (
+            _expected_skill_statuses(rules_path)
+        )
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -1502,12 +1512,9 @@ def test_medikit_target_ph_skill_273_is_equipment_owned_in_both_exports(
         assert row["reviewedCombinations"] is None
         assert row["rawValues"] == []
         assert row["reviewedExtra"] == db.skill_source_equipment_overrides()[273]
-        assert result["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert result["catalogs"]["skills"]["summary"]["statuses"] == (
+            _expected_skill_statuses(rules_path)
+        )
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -1547,12 +1554,9 @@ def test_gizmokit_target_ph_skill_254_is_equipment_owned_in_both_exports(
         assert row["reviewedCombinations"] is None
         assert row["rawValues"] == []
         assert row["reviewedExtra"] == db.skill_source_equipment_overrides()[254]
-        assert result["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44, "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10, "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19, "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert result["catalogs"]["skills"]["summary"]["statuses"] == (
+            _expected_skill_statuses(rules_path)
+        )
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -1591,15 +1595,9 @@ def test_impersonation_imp2_matches_pinned_source_and_both_exports(
                 },
             }],
         }
-        assert report["catalogs"]["skills"]["summary"]["statuses"] == {
-            "family-only": 44,
-            "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10,
-            "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19,
-            "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        }
+        assert report["catalogs"]["skills"]["summary"]["statuses"] == (
+            _expected_skill_statuses(rules_path)
+        )
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

@@ -95,9 +95,14 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 4 distinct
-changes** (VR-0023/0024/0035/0036); no deferred design
+Only open VR obligations belong here. **Current count: 5 distinct
+changes** (VR-0023/0024/0035/0036/0037); no deferred design
 requirement is open. Oldest recorded date: 2026-11-02.
+The new VR-0037 records a typed Commlink source change:
+Linux must validate the exact committed source and fresh-export
+behavior. The tracked v9 rules/publication pair remains unchanged;
+its guarded refresh requires a separate publication acceptance pass,
+not merely a green temporary rules build.
 At `60511fec335ac370f6664bb0b22edd0ee6681764`,
 the dedicated Linux worker passed the full suite:
 **4,876 passed, 28 skipped, 0 failed** with **808/808**
@@ -117,6 +122,32 @@ they passed independent pinned Linux raw-source verification:
 The compatible cumulative suite has not yet been executed on
 this revision, so VR-0035/36 remain open. Commit/push and
 validation are explicit agent actions, not background Git mirroring.
+
+- [ ] **VR-0037** (2026-11-02; source implemented, publication pending):
+  Cross-platform verification and guarded publication for the
+  annex-scoped typed Commlink (+X) occurrence parameter.
+  Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
+  Windows baseline `eb051e105f7eb6d64cd32dd245c59849a218da4f`.
+  The curated annex now maps only Army Skill 260
+  `298/TEXT:+1` and `299/TEXT:+2` as typed
+  `max-trooper-count-increase` effects, scoped to
+  `optional-reinforcements-extra-army-list`, preserving
+  the N4-origin warning. Immediate Windows: fresh-export
+  source inventory **1 passed**; six invalid signature/scope/type
+  variants rejected; full curated module **670 passed**,
+  source-variant module **68 passed**, full rules-database
+  module **166 passed**. Ruff, Pyright, docs, rules and data
+  stages passed. The old published
+  `data/generated/rules.db` and its paired deployed-object
+  publication have **not** been changed. Required: pinned Linux
+  source/regression and compatible cumulative suite after commit;
+  separately stage the v9 rules/publication pair using the
+  established guarded delta/rollback path, assert only the
+  `skill:commlink` variant semantics differ, preserve
+  Restrictions, all deployed objects, source pins and schema;
+  run release-pair parity and normal UI acceptance before
+  promoting. Do not classify the source-only pass as a completed
+  publication or as general N5 roster-legality support.
 
 - [ ] **VR-0036** (2026-11-02; Linux source PASS, cumulative pending):
   Cross-platform source-only validation of the optional N4-origin
@@ -254,8 +285,9 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0037` (`VR-0023`, `VR-0024`,
-  `VR-0035`, `VR-0036` open; earlier entries retired).
+- Execution: `VR-0038` (`VR-0023`, `VR-0024`,
+  `VR-0035`, `VR-0036`, `VR-0037`
+  open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

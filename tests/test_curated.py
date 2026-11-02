@@ -1717,6 +1717,45 @@ def test_decoy_replica_count_extras_are_exact(
 
 
 @pytest.mark.parametrize(
+    "mutation",
+    ("wrong-id", "wrong-scope", "bool-count", "extra-third", "missing", "reversed"),
+)
+def test_commlink_legacy_count_extras_fail_closed(
+    tmp_path: Path, mutation: str,
+) -> None:
+    """Only the exact optional N4-origin +1/+2 Army annotations are legal."""
+    source = Path(__file__).resolve().parents[1] / (
+        "data/curated/rules/reinforcements-extra-n4-reference.json"
+    )
+    document = json.loads(source.read_text(encoding="utf-8"))
+    commlink = next(
+        record for record in document["records"] if record["id"] == "skill:commlink"
+    )
+    values = commlink["variantSemantics"]["occurrenceParameters"][0]["extraValues"]
+    path = tmp_path / "commlink.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    load_curated_document(path)
+    if mutation == "wrong-id":
+        values[0]["extraId"] = 299
+    elif mutation == "wrong-scope":
+        values[1]["effect"]["appliesTo"] = "all-n5-army-lists"
+    elif mutation == "bool-count":
+        values[0]["effect"]["count"] = True
+    elif mutation == "extra-third":
+        values.append(deepcopy(values[0]))
+        values[-1]["extraId"] = 300
+        values[-1]["rawValue"] = "+3"
+        values[-1]["effect"]["count"] = 3
+    elif mutation == "missing":
+        values.pop()
+    else:
+        values.reverse()
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="invalid optional Commlink count extras"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     "mode", ("missing", "reversed", "duplicate"),
 )
 def test_decoy_rejects_incomplete_or_reordered_extra_set(
