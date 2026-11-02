@@ -3797,7 +3797,11 @@ follow-up action. Retain source-native values until official resolution.
   previous assumption of effective four-lane scheduling. Mark browser
   groups before xdist's collection-modify hook and verify actual
   group-to-worker assignments on Linux before benchmarking any new
-  lane balance. Keep admission limits and test isolation unchanged.
+  lane balance. A subsequent attempted Linux run was invalidated
+  when bare `--report` consumed a trailing test target and overwrote
+  its tracked source; restore Scenario FAQ on devbox and verify the
+  runner's report-destination guard before repeating the narrow test.
+  Keep admission limits and test isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

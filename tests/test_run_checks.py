@@ -459,6 +459,37 @@ def test_explicit_report_path_is_preserved() -> None:
     )
 
 
+def test_bare_report_before_pytest_target_preserves_target() -> None:
+    argv = ["--stage", "test", "--report", "tests/test_verify_scenario_faq_browser.py"]
+    parsed = run_checks.build_parser().parse_args(
+        run_checks.normalize_report_target_args(argv)
+    )
+    assert parsed.report is True
+    assert parsed.targets == ["tests/test_verify_scenario_faq_browser.py"]
+
+
+def test_explicit_report_filename_still_parses_as_destination() -> None:
+    argv = ["--stage", "test", "--report", "reports/my-check.txt"]
+    parsed = run_checks.build_parser().parse_args(
+        run_checks.normalize_report_target_args(argv)
+    )
+    assert parsed.report == "reports/my-check.txt"
+    assert parsed.targets == []
+
+
+def test_source_file_cannot_be_used_as_report_destination(tmp_path: Path) -> None:
+    source = tmp_path / "test_example.py"
+    source.write_text("original", encoding="utf-8")
+    with pytest.raises(ValueError, match="source/data file"):
+        run_checks.Reporter(source)
+    assert source.read_text(encoding="utf-8") == "original"
+
+
+def test_git_tracked_file_cannot_be_used_as_report_destination() -> None:
+    with pytest.raises(ValueError, match="Git-tracked"):
+        run_checks.validate_report_destination(run_checks.REPO_ROOT / "LICENSE")
+
+
 def test_reporter_tees_output_to_console_and_file(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],

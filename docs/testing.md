@@ -200,6 +200,20 @@ always checks the configured Markdown set; `docs`, `type`, `build`, `rules`, and
 targets. The runner accepts its documented options and test paths/node IDs, not arbitrary
 pytest flags. For keyword selection or other pytest-specific options, invoke pytest directly.
 
+**Check-report safety:** `--report` without a filename writes a timestamped
+transcript under `reports/`. Prefer placing test selectors **before**
+`--report`, or use `--report=reports/filename.txt` for an explicit
+output file. The runner also recognizes a Python test target immediately
+following a bare `--report`, preserving it as a test selector instead of
+opening it as the destination. Reports cannot overwrite Python/source
+files or any Git-tracked file. This protection addresses a 2026-11-02
+Linux incident where `--report tests/test_verify_scenario_faq_browser.py`
+caused argparse to interpret the test selector as a report filename,
+truncating the tracked source and inadvertently selecting the entire
+test suite. Restore the original test module with
+`git restore --source=HEAD -- tests/test_verify_scenario_faq_browser.py`
+on the affected checkout after verifying no intended local edits remain.
+
 Direct tool commands remain appropriate when debugging the tool itself:
 
 ```powershell
@@ -567,11 +581,27 @@ This guard is **opt-in** with `--browser-lanes`, not used by default
 passed **12/12** with lane B on `gw1` and lane D on `gw0`.
 It does **not** yet establish the Linux behavior after this change.
 
-Before comparing scheduling performance, rerun a short Linux
-`browserlanes` check at an aligned revision, confirm that the
-`chromium lane worker assignment` report shows one worker per lane,
-and only then perform repeatable full-suite timings. Continue to
-collect CPU/RAM samples separately: the earlier archive lacks them.
+The attempted Linux verification on 2026-11-02 at
+`d848609d` **does not constitute a scheduling acceptance run**.
+The command placed the test path directly after bare `--report`;
+argparse consumed that path as the report destination and overwrote
+`tests/test_verify_scenario_faq_browser.py`. Pytest consequently
+collected the entire suite, could not import the corrupted module,
+and produced nine dependent reference-baseline failures plus a
+collection error (**4,268 passed, 314 skipped**). The instrumented
+report also showed lanes spread over multiple workers, so a separate
+Linux grouping problem remains possible, but the damaged-source run
+must not be used as a speed/stability baseline. The runner now
+normalizes this ambiguous `--report`/test-target combination and
+refuses to overwrite source or tracked files; the checkout's damaged
+module still requires an explicit Git restore.
+
+Before comparing scheduling performance, restore the Linux test file,
+synchronize the runner safeguard, and rerun a short Linux
+`browserlanes` check at an aligned revision **without a report-path
+ambiguity**. Confirm that the `chromium lane worker assignment` report
+shows one worker per lane, and only then perform repeatable full-suite
+timings. Continue to collect CPU/RAM samples separately.
 
 ### Measured waiting versus pytest setup
 

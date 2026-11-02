@@ -79,6 +79,7 @@ class Reporter:
     def __init__(self, report_path: Path | None = None) -> None:
         self._file: TextIO | None = None
         if report_path is not None:
+            validate_report_destination(report_path)
             report_path.parent.mkdir(parents=True, exist_ok=True)
             self._file = report_path.open("w", encoding="utf-8", newline="")
 
@@ -226,6 +227,54 @@ def build_parser() -> argparse.ArgumentParser:
         help="Stop after the first failed or errored stage.",
     )
     return parser
+
+
+def normalize_report_target_args(argv: list[str]) -> list[str]:
+    """Keep a pytest target after bare --report from becoming an output path.
+
+    --report PATH remains supported for explicit report destinations such as
+    reports/checks.txt; --report=PATH is unambiguous for other filenames.
+    """
+    tokens = list(argv)
+    for i, token in enumerate(tokens[:-1]):
+        if token != "--report":
+            continue
+        following = tokens[i + 1]
+        if following.startswith("-"):
+            continue
+        candidate = following.replace("\\", "/")
+        if (candidate.endswith(".py") or "::" in candidate
+                or candidate == "tests" or candidate.startswith("tests/")):
+            tokens.pop(i)
+            tokens.append("--report")
+            break
+    return tokens
+
+
+def validate_report_destination(path: Path) -> None:
+    """Never truncate a source file or any Git-tracked file as a check log."""
+    if path.suffix.lower() in {
+        ".py", ".pyi", ".md", ".json", ".toml", ".yaml", ".yml",
+        ".js", ".ts", ".css", ".html", ".svg", ".db", ".sqlite",
+    }:
+        raise ValueError(f"Refusing to write a check report into a source/data file: {path}")
+    resolved = path.resolve()
+    try:
+        relative = resolved.relative_to(REPO_ROOT.resolve())
+    except ValueError:
+        return
+    try:
+        tracked = subprocess.run(
+            ("git", "ls-files", "--error-unmatch", "--", relative.as_posix()),
+            cwd=REPO_ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            check=False,
+        )
+    except OSError as exc:
+        raise ValueError(f"Cannot verify whether report destination is tracked: {path}") from exc
+    if tracked.returncode == 0:
+        raise ValueError(f"Refusing to overwrite Git-tracked file with report: {path}")
+    if tracked.returncode != 1:
+        raise ValueError(f"Cannot verify whether report destination is tracked: {path}")
 
 
 def selected_stage_names(args: argparse.Namespace) -> tuple[str, ...]:
@@ -465,7 +514,9 @@ def write_summary(reporter: Reporter, results: list[StageResult]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     try:
-        args = build_parser().parse_args(argv)
+        args = build_parser().parse_args(normalize_report_target_args(
+            sys.argv[1:] if argv is None else argv
+        ))
         stage_names = selected_stage_names(args)
         runs_pytest = bool({"test", "preflight"} & set(stage_names))
         if args.build_source is not None and "build" not in stage_names:
@@ -605,7 +656,7 @@ def main(argv: list[str] | None = None) -> int:
                 if args.fail_fast and result.status != "PASS":
                     break
             write_summary(reporter, results)
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return EXIT_RUNNER_ERROR
 

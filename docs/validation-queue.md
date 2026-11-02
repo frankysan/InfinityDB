@@ -118,6 +118,19 @@ Only open VR obligations belong here.
   Retire when Linux cross-platform behavior and full metrics are
   confirmed in `docs/testing.md`.
 
+- [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
+  safety across Linux and Windows for `tools.run_checks`.
+  Work: [targeted checks](testing.md#targeted-checks); revision:
+  runner/report regression tests based on `d848609d`; risk: high
+  (prior accidental truncation of a tracked test source).
+  Immediate: focused runner tests **98 passed, 1 expected skip**;
+  Ruff passed. Design: none.
+  Deferred: restore the corrupted Scenario FAQ module on devbox,
+  synchronize the checked runner, verify test target selection with
+  bare `--report`, and run the Linux targeted browser test plus
+  release-relevant CI. Do not retire while the damaged checkout or
+  the Linux lane-assignment failure remains unverified.
+
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -128,7 +141,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0025` (`VR-0023` and `VR-0024` open; earlier entries retired).
+- Execution: `VR-0026` (`VR-0023` through `VR-0025` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
