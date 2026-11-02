@@ -6538,7 +6538,8 @@ def test_catalog_detail_frontend_renders_typed_source_variant_labels(
     assert b"function sourceVariantLabel(variant)" in body
     assert b'if (semantics.kind === "named") return semantics.label;' in body
     assert b'const summaryParts = [semanticLabel, unitCount].filter(Boolean);' in body
-    assert b"gameplayVariantRules(item.variants)" in body
+    assert b"gameplayVariantRules(item.variants, {" in body
+    assert b'includeSourceSummaries: catalog === "equipment"' in body
     assert b"levelEffectsSection(item.rules)" in body
     assert b'rulesReferenceSection(variantRules, "Variant rules")' in body
     assert b"section.append(rulesReferenceSection(variant.rules" not in body

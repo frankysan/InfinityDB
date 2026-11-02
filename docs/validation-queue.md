@@ -73,23 +73,7 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here.
-
-- [ ] **VR-0008** (2026-11-02; ready-to-run): Run cumulative
-  regression after rendering reviewed summary-only Equipment source
-  variants in their parent catalog details (ECM Guided/Hacker).
-  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree after `8481d52b`;
-  files: `src/infinity_db/web/static/rules-reference.js`,
-  `src/infinity_db/web/static/catalog-detail.js`,
-  `tests/test_verify_scenario_faq_browser.py` and supporting docs;
-  risk: low. Immediate: red-before-green Chromium
-  **3 failures → 3 passed** at 1440/390/320 px, with both source
-  summaries, citations, links and layout checked.
-  Design: none. Deferred: cumulative project suite after this
-  presentation change; local full-suite evidence before the edit
-  (VR-0007: **4,706 passed, 25 skipped** at `8481d52b`)
-  does not verify the new renderer. Hosted CI/release gates separate.
+Only open VR obligations belong here. **No pending entries.**
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -101,7 +85,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0009` (`VR-0008` open; earlier entries retired).
+- Execution: `VR-0009` (through `VR-0008` retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

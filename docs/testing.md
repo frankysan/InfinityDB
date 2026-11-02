@@ -1691,8 +1691,19 @@ only for Equipment. Both `equipment:ecm-guided` and
 Hacking Program scopes, N5.3 p. 122 citations and maintained ECM
 links; the existing Skill/Weapon variant selection is unchanged.
 This adds no curated inference and does not constitute whole-record
-acceptance. The post-change cumulative suite remains VR-0008,
-while hosted CI and the release gates remain separate.
+acceptance. The first cumulative run after this change found one
+stale static JavaScript assertion in
+`test_catalog_detail_frontend_renders_typed_source_variant_labels`
+(**4,708 passed, 25 skipped, 1 failed**); the assertion was
+updated to require the Equipment-only variant option, and the
+five focused test cases passed. The corrected cumulative run on
+`dev/v1.0.0` at `8d24a47` plus the test correction passed
+**4,709 tests, 25 skipped, 0 failed** in **594.65 s** with eight
+`worksteal` workers (async job
+`7c58317028da401fa04054fba22c02c6`, report
+`local/validation-vr0008-full-rerun-20261102.txt`).
+VR-0008 was retired. Hosted CI and release-candidate acceptance
+remain independent.
 
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill
