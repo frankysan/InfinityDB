@@ -3820,10 +3820,13 @@ follow-up action. Retain source-native values until official resolution.
   from capacity self-tests and reports uncertain unlock-gap overlaps
   separately. Windows focused regression tests passed. Linux at
   `25c0da5b` passed 36 targeted tests with single-worker B/D lane
-  assignments in 13.86 s; the new mixed-workload metrics still require
-  offline analyzer inspection before declaring namespace isolation
-  verified. Then repeat resource-sampled comparisons. Keep defaults
-  and test isolation unchanged.
+  assignments in 13.86 s. The new Linux trace was analyzed: **13
+  independent lock records excluded**, two shared browser admissions,
+  peak occupancy **2/4**, negligible waiting, and no overlap warning.
+  Namespace and unlock diagnostics are verified for the targeted mixed
+  workload. Next: alternate full-suite slot comparisons with CPU/RAM
+  sampling and check cross-host coverage. Keep defaults and test
+  isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

@@ -145,10 +145,14 @@ Only open VR obligations belong here.
   capacity, Page Footer and Sidebar Density tests (13.86 s); B/D lanes
   remained on individual workers and fresh metrics were written under
   `local/benchmarks/chromium-20261102-160356-356643/` on `devbox`.
-  Deferred: inspect this trace with the updated analyzer to confirm
-  namespace exclusion and overlap classification, repeat alternating
-  comparisons with CPU/RAM sampling, and verify Windows/Linux coverage
-  parity. Retire only after the remaining acceptance evidence.
+  The updated analyzer selected the shared pytest lock namespace,
+  excluded **13** independent capacity self-test records, found two
+  admissions (peak **2/4** slots), negligible waiting and **no**
+  same-slot-overlap warning; summed unlock uncertainty was **0.0001 s**.
+  Targeted Linux namespace/overlap diagnostics are verified.
+  Deferred: repeated alternating full-suite slot comparisons with
+  CPU/RAM sampling and Windows/Linux coverage parity. Retire only after
+  the remaining acceptance evidence.
 
 - [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
   safety across Linux and Windows for `tools.run_checks`.

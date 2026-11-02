@@ -1126,10 +1126,21 @@ passed **36/36** in **13.86 s** (runner **14.23 s**, no skips or failures).
 Lane B remained on `gw1` and D on `gw0` (six setup events each); the
 assignment guard passed. Metrics on `devbox`:
 `local/benchmarks/chromium-20261102-160356-356643/`. This validates real
-Linux test execution and lane assignment with the new instrumentation,
-but **not** namespace filtering or overlap diagnostics: the timeline
-analyzer still needs to be run against this new trace. Keep the existing
-defaults.
+Linux test execution and lane assignment with the new instrumentation.
+The subsequent offline timeline analysis selected the shared lock
+namespace `/tmp/pytest-of-infinitydb/pytest-17/infinitydb-chromium-slots`
+and **excluded 13 independent self-test records**. It reconstructed
+**2 admissions**, **12.36 s** observation, **20.03 worker-s** held,
+**20.03 unique occupied slot-seconds**, **0.00 s** measurable waiting,
+**0.00 s** at full capacity, and **2/4** peak occupied slots. No
+same-slot-overlap warning remained; summed unlock timestamp uncertainty
+was **0.0001 s**. The selected holds were Sidebar Density (`gw1`,
+12.36 worker-s) and Page Footer (`gw0`, 7.66 worker-s). The reported
+peak queue of two requests is an instantaneous event count, despite
+negligible integrated waiting, not evidence of sustained contention.
+This confirms the namespace filtering and overlap classification on a
+real Linux mixed workload. It is not a full-suite capacity benchmark;
+repeat alternating runs with CPU/RAM sampling before changing defaults.
 
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
