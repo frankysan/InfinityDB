@@ -35,12 +35,13 @@
   ],
   "reviewDecision": {
     "n5ExtraCurrentlyReferenced": true,
+    "n4OriginOptionalReferenceAllowed": true,
     "specificN5AnnexTextVerified": false,
     "explicitUnchangedN4AdoptionVerified": false,
     "currentN5ProceduresAuthorized": false,
     "commlinkN5DefinitionAuthorized": false,
     "requestReinforcementsN5PhaseActionAuthorized": false,
-    "reason": "The current N5 and ITS references do not identify an N5-adapted annex revision or explicitly confirm the N4 annex procedures are unchanged."
+    "reason": "N5 and ITS establish an optional Reinforcements mode; the separately cited N4-origin annex may be shown as an explicitly labelled optional reference, but neither a revised N5 annex nor unchanged N4 adoption has been verified."
   },
   "legacyActionEvidence": [
     {

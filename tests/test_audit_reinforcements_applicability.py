@@ -163,11 +163,14 @@ def test_source_gate_fails_closed_on_missing_or_changed_evidence(
         audit_applicability(manifest_path, root)
 
 
-def test_unverified_annex_actions_do_not_leak_into_current_n5_rules() -> None:
+def test_optional_n4_annex_remains_separate_from_current_core_declarations() -> None:
     rules = RulesDatabase(ROOT / "data/generated/rules.db")
     army = Database(ROOT / "data/generated/infinity.db")
     for identity in ("skill:commlink", "skill:request-reinforcements"):
-        assert rules.composed_record(identity) is None
+        record = rules.composed_record(identity)
+        assert record is not None
+        assert record["collection"]["id"] == "reinforcements-extra-n4-reference"
+        assert "N4" in record["summary"]
     payload = core_declaration_matrix(army, rules)
     assert sum(len(section["items"]) for section in payload["sections"]) == 57
     assert not any(

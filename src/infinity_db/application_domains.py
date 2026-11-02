@@ -219,6 +219,7 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
             "command-token-use",
             "order-type",
             "peripheral-type",
+            "optional-extra",
         ),
         navigation=True,
         search=True,

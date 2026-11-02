@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **207/207** complete, **0** pending.
-- Current authored outgoing relations: **516**.
+- Supporting semantic identities: **209/209** complete, **0** pending.
+- Current authored outgoing relations: **518**.
 - Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
@@ -911,7 +911,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (26/26)
+#### Rule (27/27)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
@@ -951,6 +951,8 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Reinforced Tactical Link** (`rule:scenario:reinforced-tactical-link`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
+- [x] **Reinforcements Extra** (`rule:reinforcements-extra`) — reviewed: Optional N5-era Extra with explicitly N4-origin annex procedures. The one outbound Request Reinforcements relation is scoped to optional play; it is not N5 proof of unchanged historical procedures. No ordinary core declaration or scenario rule is granted.
+  - `enables-use-of` → Request Reinforcements (`skill:request-reinforcements`)
 - [x] **Saving Rolls** (`rule:saving-rolls`) — reviewed: N5.3 p.37 baseline for PS, defense and Critical Saving Rolls; Profile-specific Ammunition exceptions remain separate reviewed facts.
   - outgoing: none
 - [x] **Special Dice (+1 SD)** (`rule:special-dice`) — reviewed: Shared N5.3 SD resolution, Fireteam/CC applicability and Berserk exception are source-cited prose; no universal Burst or Disposable relation is inferred.
@@ -979,7 +981,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Supplies** (`scenario:supplies`) — reviewed: English N5.3 pp. 153-154, N5.2 p. 152 and pinned English Wiki Supplies revision 3266 agree on the three additive end-game objectives: 2 OP per controlled box (maximum 6), 2 for controlling strictly more than the opponent, and 2 extra for controlling all three. Placement is three 25 mm Supply Box Markers on the center line, the outer two 8 inches measured from table edge to marker edge; the diagram's 12-inch label is not a competing box-placement rule. Deployment in Silhouette contact is forbidden. The scenario-only Pick Up Supply Boxes Attack Short Skill is restricted to Specialists in contact with an uncarried Token, any Null Model carrying one, or an allied Normal Model carrying one; it costs a Short Skill without a Roll. Only Models can carry boxes (one per Specialist), and Tokens persist when their carriers become Null. At game end control requires a non-Null Model carrier not in Silhouette contact with an enemy Model; merely picking up, carrying while Null, or representing the carrier by a Marker does not score. The seven Specialist qualifiers, Non Specialist Chain of Command exception and Doctor/Engineer Peripheral restriction are shared. Three-round expiration and the game-size minimum-VP Tactical Phase/end-of-Player-Turn early ending are distinct. All six Army Points, SWC and minimum-VP rows are supported. Interactions are scoped through typed mission components and do not require unconditional graph relations or game-state persistence.
   - outgoing: none
 
-#### Skill (4/4)
+#### Skill (5/5)
 
 - [x] **Activate Disco Ball** (`skill:activate-disco-ball`) — reviewed: N5.3 p. 71 and matching archived Wiki page: source-only Short Skill, Deactivator and allied-ball requirements, LoF/ZoC, WIP+3 Normal Roll with range MODs, Eclipse placement/removal. No Army Skill identity synthesized.
   - `uses-effects-of` → Deactivator (`equipment:deactivator`)
@@ -987,6 +989,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Hack Consoles** (`skill:hack-consoles`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
+  - outgoing: none
+- [x] **Request Reinforcements** (`skill:request-reinforcements`) — reviewed: Source-bound N4-origin Tactical Phase step with no outbound interactions. Not an Order declaration, ARO, or new core N5 rule. Verifying an updated N5 annex is separate from reviewing this published optional reference.
   - outgoing: none
 - [x] **Request SpecBall** (`skill:request-specball`) — reviewed: Standalone core N5.3 Request SpecBall procedure published with Combat Jump relation and reviewed bilingual PDF/ITS scope.
   - `uses-effects-of` → Combat Jump (`skill:combat-jump`)

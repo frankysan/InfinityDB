@@ -2494,6 +2494,27 @@
       "status": "reviewed",
       "reviewedOn": "2026-10-16",
       "note": "N5.3 English p. 182, Spanish p. 191 and Army 92 specify one BTS/PB Saving Roll with Non-Lethal and State: Stunned. Archived Spanish Wiki charts list two rolls and omit the State Trait; documented as unresolved publication conflict without changing canonical Stun mechanics."
+    },
+    {
+      "recordId": "rule:reinforcements-extra",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-02",
+      "note": "Optional N5-era Extra with explicitly N4-origin annex procedures. The one outbound Request Reinforcements relation is scoped to optional play; it is not N5 proof of unchanged historical procedures. No ordinary core declaration or scenario rule is granted."
+    },
+    {
+      "recordId": "skill:commlink",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-02",
+      "note": "The N4-origin optional Extra's Commlink Skill enables the separately phase-scoped Request Reinforcements step. This reviews only the disclosed legacy reference and outgoing link; exact Commlink (+X) typed parameters and official N5 procedure adoption remain unresolved."
+    },
+    {
+      "recordId": "skill:request-reinforcements",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-02",
+      "note": "Source-bound N4-origin Tactical Phase step with no outbound interactions. Not an Order declaration, ARO, or new core N5 rule. Verifying an updated N5 annex is separate from reviewing this published optional reference."
     }
   ],
   "futureInteractions": [

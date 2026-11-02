@@ -50,14 +50,6 @@
   "overrides": [
     {
       "scope": "catalog",
-      "catalog": "skills",
-      "itemId": 260,
-      "gapCode": "missing_rule_definition",
-      "classification": "later-product-work",
-      "reason": "Commlink is owned by the separately versioned Reinforcements Extra planned for the 1.0 completeness gate, so its missing definition is intentionally deferred from 0.10."
-    },
-    {
-      "scope": "catalog",
       "catalog": "weapons",
       "itemId": 72,
       "gapCode": "stale_citation_source",

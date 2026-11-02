@@ -41,6 +41,7 @@ EXPECTED_LEGACY = {
 }
 EXPECTED_GATE = {
     "n5ExtraCurrentlyReferenced": True,
+    "n4OriginOptionalReferenceAllowed": True,
     "specificN5AnnexTextVerified": False,
     "explicitUnchangedN4AdoptionVerified": False,
     "currentN5ProceduresAuthorized": False,

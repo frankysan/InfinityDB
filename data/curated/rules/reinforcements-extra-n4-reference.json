@@ -1,0 +1,267 @@
+{
+  "format": "InfinityDB curated reference",
+  "formatVersion": 23,
+  "collection": {
+    "id": "reinforcements-extra-n4-reference",
+    "title": "Reinforcements Extra — N4-origin reference for optional N5 play",
+    "domain": "annex",
+    "status": "current",
+    "effectiveFrom": "2026-09-01",
+    "authority": "secondary"
+  },
+  "vocabularySources": {
+    "skillTypes": [],
+    "labels": []
+  },
+  "skillTypes": [
+    {
+      "id": "automatic",
+      "name": "Automatic Skills",
+      "labels": [
+        "Automatic Skill",
+        "Automatic Skills"
+      ],
+      "descriptions": {
+        "singular": "An Automatic Skill does not consume an Order or [[trait:aro|ARO]].",
+        "plural": "Automatic Skills do not consume Orders or [[trait:aro|AROs]]."
+      }
+    },
+    {
+      "id": "tactical-phase-step",
+      "name": "Tactical Phase step",
+      "labels": [
+        "Tactical Phase step",
+        "Tactical Phase steps"
+      ],
+      "descriptions": {
+        "singular": "An optional-mode action performed during its specified Tactical Phase step, not an Order declaration or [[trait:aro|ARO]].",
+        "plural": "Optional-mode actions performed during specified Tactical Phase steps, not Order declarations or [[trait:aro|AROs]]."
+      }
+    }
+  ],
+  "labels": [],
+  "sources": [
+    {
+      "id": "reinforcements-annex-wiki-n4",
+      "kind": "wiki",
+      "title": "Infinity Wiki — Reinforcements Annex (N4-origin)",
+      "version": "N4 Annex / oldid 3614",
+      "url": "https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614",
+      "authority": "secondary",
+      "retrievedDate": "2026-11-02"
+    },
+    {
+      "id": "reinforcements-wiki-current-navigation",
+      "kind": "wiki",
+      "title": "Infinity Wiki — Special Skills navigation",
+      "version": "N5.3-era live index",
+      "url": "https://infinitythewiki.com/Special_Skills",
+      "authority": "secondary",
+      "retrievedDate": "2026-11-02"
+    },
+    {
+      "id": "reinforcements-its-season-18",
+      "kind": "pdf",
+      "title": "ITS Season 18: Overheat (English)",
+      "version": "2026.09.01",
+      "publishedDate": "2026-09-01",
+      "localPath": "data/pdf/its/Its-rules-season-18-en.pdf",
+      "pageCount": 132,
+      "sha256": "9e16874924112e62d51acf78d622f5c0cf6196064cc36f003b515de9dc448baf",
+      "url": "https://experience.corvusbelli.com/en/infinity/its-rules",
+      "authority": "primary"
+    },
+    {
+      "id": "reinforcements-n5-core",
+      "kind": "pdf",
+      "title": "N5 Core Rules v5.3 (English)",
+      "version": "5.3",
+      "publishedDate": "2026-08-10",
+      "localPath": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+      "pageCount": 196,
+      "sha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+      "url": "https://experience.corvusbelli.com/en/infinity/resources",
+      "authority": "primary"
+    }
+  ],
+  "records": [
+    {
+      "id": "rule:reinforcements-extra",
+      "kind": "rule",
+      "name": "Reinforcements Extra",
+      "aliases": [
+        "Reinforcements",
+        "Reinforcements Annex"
+      ],
+      "summary": "**Optional mode; N4-origin procedures.** N5.3 names games with Reinforcements and ITS Season 18 explicitly offers the Extra, while the linked official Wiki still identifies its detailed procedures as an N4 annex. This reference explains those published annex procedures for players choosing the Extra; **an N5-specific rewrite or explicit confirmation that every N4 clause remains unchanged has not been verified**. Agree on the annex edition and scenario conditions before play.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "effects": [
+          "With this Extra, an Army List is divided into a Main Section and a separate Reinforcement Section; a Main Section Trooper must have [[skill:commlink]].",
+          "The N4-origin annex describes a 100 Army Point and 2 SWC Reinforcement Section; its example recommends 350 total Army Points and 7 SWC, divided 250/5 for the Main Section and 100/2 for Reinforcements.",
+          "The Reinforcement Section uses separate Combat Groups and may enter during the [[skill:request-reinforcements|Request Reinforcements]] step of the Tactical Phase. Source Reinforcement profiles and parent-Army restrictions remain relevant.",
+          "Reinforcement profiles are marked for their Section and cannot simply be assigned to the Main Section. Shared faction Reinforcement pools are selection context, not independent army-list legality."
+        ],
+        "restrictions": [
+          "This is an **optional Extra**, not a rule for ordinary N5 games or every scenario. It does not change the core Orders/[[trait:aro|AROs]] declaration categories.",
+          "Detailed procedures and numerical allowances here come from the **official N4-era annex as still published on the Wiki**. N5.3/ITS18 reference the Extra but do not supply an independently verified N5 procedure revision; check agreed event/scenario rules."
+        ],
+        "sourceNotes": [
+          "Current-mode evidence: N5.3 Game Modes p. 6 and ITS Season 18 p. 27. Detailed procedures: officially maintained Wiki page explicitly marked N4 Annex. The source status is disclosed; InfinityDB does not certify unchanged N4 mechanics as a separately published N5 revision."
+        ]
+      },
+      "relations": [
+        {
+          "type": "enables-use-of",
+          "recordId": "skill:request-reinforcements"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "reinforcements-its-season-18",
+          "page": 27,
+          "section": "Reinforcements"
+        },
+        {
+          "sourceId": "reinforcements-n5-core",
+          "page": 6,
+          "section": "Game Modes"
+        },
+        {
+          "sourceId": "reinforcements-annex-wiki-n4",
+          "heading": "Infinity Reinforcements"
+        },
+        {
+          "sourceId": "reinforcements-wiki-current-navigation",
+          "heading": "Special Skills"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-02"
+      }
+    },
+    {
+      "id": "skill:commlink",
+      "kind": "skill",
+      "name": "Commlink",
+      "summary": "**Optional Reinforcements Extra (N4-origin annex).** Obligatory Automatic Skill on the Main Section's designated Trooper. It enables the Tactical Phase [[skill:request-reinforcements|Request Reinforcements]] step; the governing detailed text is still labelled N4 on the official Wiki and has not been independently reissued as N5.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "labelIds": [],
+      "facts": {
+        "category": "special-skill",
+        "typeIds": [
+          "automatic"
+        ],
+        "effects": [
+          "In the N4-origin annex, the Main Section must include one Commlink Trooper and an Army List may contain at most one Trooper with Commlink.",
+          "Commlink enables [[skill:request-reinforcements|Request Reinforcements]] during the Tactical Phase even if its bearer is in a Null [[trait:state|State]] or has been removed from the table.",
+          "The variant Commlink (+X) increases the **maximum Trooper count** by X above the usual 15; it does not modify an Attribute or represent a Skill Level.",
+          "The N4-origin annex permits the Commlink Trooper to transfer to a Reinforcement Combat Group when that Section is deployed without using a Command Token."
+        ],
+        "restrictions": [
+          "Only relevant when playing the optional [[rule:reinforcements-extra|Reinforcements Extra]]; these N4-origin procedures are not verified as a revised N5 edition."
+        ],
+        "sourceNotes": [
+          "N5.3 and ITS Season 18 reference the optional mode, while the official Wiki still labels the Commlink procedure N4. This record reflects that continuing published reference, not a claim of an N5-specific Commlink revision."
+        ]
+      },
+      "armyLinks": [
+        {
+          "entity": "skill",
+          "id": "commlink"
+        }
+      ],
+      "variantSemantics": {
+        "inheritance": "family"
+      },
+      "relations": [
+        {
+          "type": "enables-use-of",
+          "recordId": "skill:request-reinforcements"
+        }
+      ],
+      "citations": [
+        {
+          "sourceId": "reinforcements-annex-wiki-n4",
+          "heading": "Commlink"
+        },
+        {
+          "sourceId": "reinforcements-its-season-18",
+          "page": 27,
+          "section": "Reinforcements"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-02"
+      }
+    },
+    {
+      "id": "skill:request-reinforcements",
+      "kind": "skill",
+      "name": "Request Reinforcements",
+      "summary": "**Optional Reinforcements Extra (N4-origin annex).** A separately classified Tactical Phase step, not a Short Skill, Long Skill, or [[trait:aro|ARO]]. See the source-edition warning in [[rule:reinforcements-extra|Reinforcements Extra]].",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "labelIds": [],
+      "facts": {
+        "category": "special-skill",
+        "typeIds": [
+          "tactical-phase-step"
+        ],
+        "effects": [
+          "In the N4-origin annex the Active Player may request Reinforcements in this Tactical Phase step when their total Victory Points are at or below the annex's threshold, or during their third Game Round.",
+          "The annex's Request Reinforcements chart lists thresholds of 200, 225, 250 and 275 Victory Points for games of 250, 300, 350 and 400 Army Points respectively.",
+          "On activation the annex requires a DropPod in the Active Player's half of the table, with Reinforcement Troopers, [[skill:peripheral|Peripherals]] and their [[trait:deployable|Deployables]] deployed inside its [[trait:zone-of-control-zc|Zone of Control]] subject to the printed location and exclusion restrictions."
+        ],
+        "restrictions": [
+          "This is **not** an ordinary Order declaration or [[trait:aro|ARO]] and must not be added to the unscoped N5 Orders/[[trait:aro|AROs]] matrix.",
+          "Detailed DropPod placement and thresholds are N4-era annex procedures, not independently verified N5 changes. Agree the applicable annex/scenario rules before using this optional Extra."
+        ],
+        "sourceNotes": [
+          "[[skill:commlink|Commlink]] and the [[rule:reinforcements-extra|Reinforcements Extra]] provide the applicable context. The source status remains N4 Annex on the official Wiki; the current N5/ITS references do not explicitly verify every procedural clause."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "reinforcements-annex-wiki-n4",
+          "heading": "Request Reinforcements"
+        },
+        {
+          "sourceId": "reinforcements-its-season-18",
+          "page": 27,
+          "section": "Reinforcements"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-02"
+      }
+    }
+  ]
+}

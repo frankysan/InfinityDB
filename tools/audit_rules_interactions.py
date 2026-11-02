@@ -523,12 +523,40 @@ def audit_rules_interactions(
                         "futureInteractions": future_by_source.get(record_id, []),
                     }
             else:
-                if release_exception is not None:
-                    raise RulesInteractionAuditError(
-                        f"{record_id}: release exception is stale because a curated rules "
-                        "definition now exists"
-                    )
                 review = policy[record_id]
+                if release_exception is not None:
+                    # A historical scope exception remains true when the item is
+                    # first defined in a *later* release. The later review must
+                    # not be retroactively credited to the older catalog gate.
+                    def version(value: str) -> tuple[int, int, int] | None:
+                        parts = value.split(".")
+                        if len(parts) != 3 or not all(part.isdigit() for part in parts):
+                            return None
+                        return int(parts[0]), int(parts[1]), int(parts[2])
+
+                    later = version(review["targetRelease"])
+                    earlier = version(target_release)
+                    if (
+                        later is None or earlier is None or later <= earlier
+                        or review["status"] not in COMPLETE_STATUSES
+                    ):
+                        raise RulesInteractionAuditError(
+                            f"{record_id}: release exception is stale because a curated rules "
+                            "definition now exists"
+                        )
+                    item = {
+                        **record, **review,
+                        "catalog": catalog, "catalogId": scoped["id"],
+                        "name": scoped["name"], "recordDefined": False,
+                        "targetRelease": release_exception["targetRelease"],
+                        "status": "deferred", "reviewedOn": None,
+                        "note": release_exception["reason"],
+                        "scopeException": True,
+                        "futureInteractions": future_by_source.get(record_id, []),
+                    }
+                    catalog_items.append(item)
+                    primary_items.append(item)
+                    continue
                 # The primary release is a coverage target, not a rewrite of
                 # historical reviewedOn/targetRelease provenance. Existing
                 # completed reviews may carry forward from an earlier release.

@@ -4382,12 +4382,11 @@ an Automatic Skill or ARO. Other ordinary Skill and
 Equipment links remain unchanged.
 
 Conversely, rules-native Skills do not need an Army occurrence to be catalog identities. The
-current core catalog therefore includes the canonical Special Skill `Non-Hackable` with zero
-Army uses, just as Common Skills can exist without profile rows. The Reinforcements-only
-`Request Reinforcements` Skill remains outside the current core Skills catalog until the
-separately scoped Reinforcements annex is curated and published into that surface. Unknown
-future Army
-skill-like values remain visible provisionally rather than being silently dropped.
+current core catalog includes canonical Special Skill `Non-Hackable` with zero
+Army uses, just as Common Skills can exist without profile rows. The optional
+N4-origin annex now publishes `Request Reinforcements` in the wider Skills
+catalog without making it a **core N5** or Army-carried Skill. Unknown future
+Army skill-like values remain visible provisionally rather than being dropped.
 
 The cross-domain source classifications are maintained in
 `config/catalogs/skill-source-classifications.json`; they are presentation/catalog policy, not
@@ -4451,11 +4450,11 @@ unscoped Army Skill page. The core 57-row response and core category counts
 are unchanged even with a scenario selected. Unsupported and ITS-only
 scenario selections are rejected rather than treated as default Core.
 
-The Reinforcements Extra is not yet authored as a separately versioned annex,
-so Request Reinforcements remains unclassified here. Its Tactical Phase
-activation cannot be represented as a normal Short/Long/ARO declaration.
-Phase-scoped annex actions and ITS season/revision actions remain explicit
-follow-ups and must never leak into the Core matrix.
+The Reinforcements Extra is separately published as an **N4-origin optional
+annex reference**. Request Reinforcements is classified as a
+`tactical-phase-step`, **outside** the N5 Core Short/Long/ARO chart.
+ITS season/revision actions remain independent follow-ups and must not leak
+into the Core declaration matrix.
 
 Sources:
 
@@ -4682,25 +4681,33 @@ Reinforcements as an optional tournament Extra and directs players to the
 Reinforcements Annex. This establishes current optional-mode applicability,
 **not** an edition-verified text of the annex or an unchanged N4 procedure.
 
-InfinityDB must preserve that source identity instead of silently folding
-`Commlink` and `Request Reinforcements` into the `n5-core-rules` collection.
-Keep the 1.0 Commlink review pending until an authoritative N5-applicable annex
-or explicit adoption ruling is identified; do not infer the Extra is obsolete.
-The maintained source-only audit
-`config/validation/reinforcements-n5-applicability-review.json` pins
-and verifies N5.3 p. 6 plus ITS18 v2026.09.01 p. 27 **independently**
-of the existing two pinned N4-language PDFs. It identifies Commlink's
-Automatic Skill classification and Request Reinforcements' Tactical Phase
-activation as **historical N4 evidence** and explicitly rejects their
-promotion into current N5 data. Its passing status means the four
-sources match their reviews, **not** that an N5 procedure has been adopted.
+InfinityDB publishes a **separate, N4-origin optional Extra reference** in
+`reinforcements-extra-n4-reference`, not a silent addition to core N5 rules.
+The normal `/rules/reinforcements-extra`, `/skills/commlink` and
+`/skills/request-reinforcements` routes explain the available annex text,
+clearly disclose its N4 source edition and link the N5/ITS optional-mode
+references. The Extra remains usable by player or event agreement; this is
+**not** proof that an official N5-specific rewrite or unchanged N4 adoption
+exists. The distinction between an optional mode's continued availability
+and the edition of its procedures is deliberate.
 
-Before implementation, obtain an authoritative N5-applicable annex text
-or explicit adoption of the historical procedures and capture its exact
-edition, revision, effective date and source hash. This is a current
-source-verification blocker, not an inferred removal of the Extra.
-The following RS-RF sections describe **N4 annex semantics and source/Army
-modeling implications**, not approved N5 gameplay rules.
+The maintained audit `config/validation/reinforcements-n5-applicability-review.json`
+checks N5.3 p. 6, ITS18 v2026.09.01 p. 27 and both byte-pinned N4 annex PDFs.
+It now explicitly permits **labelled historical-source publication** while
+retaining `currentN5ProceduresAuthorized: false`. Commlink remains an
+Automatic Skill; Request Reinforcements is a **Tactical Phase step**, not an
+Order declaration or ARO, and cannot enter the unscoped 57-row core matrix.
+The separate `rules.db` collection and generated deployed-object publication
+are synchronized, preserving all 17 existing deployed-object definitions.
+The reviewed interaction status refers to the **disclosed N4-origin reference
+and authored links**, not official certification of N5 gameplay procedures.
+
+Still unresolved: identify an authoritative N5 annex revision or adoption
+statement, pin its effective date and edition, and reconcile any differences
+before representing those procedures as N5-native. The following RS-RF
+sections describe the retained **N4 annex semantics and source/Army modeling
+implications**; the fully typed `Commlink (+X)` occurrence parameter and
+Army-list legality modeling remain separate work.
 
 Sources:
 

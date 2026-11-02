@@ -171,9 +171,11 @@ Reinforcements task in [TODO](TODO.md#rules-and-reference-completeness).
 | `data/pdf/rules/reinforcement-rules-es.pdf` | `ef2d6c67486e37336900a9e54fcc357bfdef4a185dc559c6ba1279274e6f41bf` | Spanish N4 Reglas de Refuerzos – Extra; cover, file page 1 |
 
 No printed publication/version date was established by this availability check.
-PDF creation metadata is not a publication date. Preserve these as historical
-comparison inputs; verify the intended N5 source and applicability before curation.
-Do not infer current Commlink or Request Reinforcements mechanics from a filename.
+PDF creation metadata is not a publication date. Preserve the N4 edition as
+verified **source provenance**; the optional N5-era Extra is now documented
+through a separately labelled N4-origin reference, without claiming those
+procedures were officially revised or adopted unchanged for N5. Do not infer
+an N5-specific Commlink or Request Reinforcements rule from a filename.
 
 **Offline identity verification, 2026-10-30:** Both files still match the
 reviewed hashes above. The audit-only
@@ -214,14 +216,18 @@ data continued to include Reinforcements; they do **not** supply an
 annex version, Commlink's precise N5 effects, or legal roster composition
 semantics. The 2026-10-28 Wiki check found an N4 Annex label.
 
-**Unresolved source boundary:** ITS 18 calls for an Annex without supplying a
-version identifier in its p. 27 cross-reference. The N5-era official Army updates
-confirm maintained source variants but do not identify the governing procedures.
-We have not established an official N5-applicable revision of that Annex, nor
-an official adoption statement for the N4 text. Do not mark `skill:commlink` reviewed in the 1.0 candidate,
-treat the old exception as a current N5 decision, or claim Reinforcements is
-obsolete. Verify the annex revision or obtain an explicit ruling before
-curating its procedural Skill effects as N5.
+**Unresolved source boundary, with usable optional reference:** ITS 18 calls
+for an Annex without identifying its edition; N5-era Army updates support
+Reinforcement profiles without establishing a new procedural text. The separate
+`reinforcements-extra-n4-reference` collection publishes an explicitly
+**N4-origin** account at `/rules/reinforcements-extra`, `/skills/commlink`
+and `/skills/request-reinforcements` for players choosing the optional mode.
+Its reviewed source/interaction coverage does **not** claim that Corvus Belli
+reissued or adopted every N4 procedure unchanged for N5. The historical
+0.7.0 exception remains part of the historical interaction scope; the distinct
+1.0 candidate now includes the optional references. Seek an edition-verified
+Annex or official adoption ruling and recheck any differences before promoting
+legacy procedures to N5-native authority. Do not call the Extra obsolete.
 
 ## Reviewed 1.0 structured Skill chart provenance
 

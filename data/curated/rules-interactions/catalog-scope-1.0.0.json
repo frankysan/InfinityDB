@@ -293,6 +293,10 @@
         "name": "Remote Presence"
       },
       {
+        "id": "request-reinforcements",
+        "name": "Request Reinforcements"
+      },
+      {
         "id": "request-specball",
         "name": "Request SpecBall"
       },

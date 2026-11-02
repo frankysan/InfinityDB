@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Explore the optional Reinforcements Extra, Commlink and Request Reinforcements
+  through linked references. The procedures are clearly marked **N4-origin**;
+  N5/ITS references confirm the Extra is still offered, not that all historic
+  annex text was officially reissued unchanged for N5.
 - Find more linked N5.3 explanations for Weapons, deployed objects, Peripherals,
   Hacking, Orders, Fireteams and Saving Rolls, with clearer conditions and exceptions.
 - Browse reviewed deployed-object profiles and their source links independently of the
@@ -49,6 +53,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Publish a separately scoped
+  optional Reinforcements Extra reference with Commlink and the Tactical Phase
+  Request Reinforcements action. Disclose N4 source origin, preserve the
+  current N5/ITS optional-mode reference and keep N5-native adoption
+  unverified. Do not change the 57-row core Orders/AROs chart or the 17
+  deployed-object profiles; refresh the matched rules/publication pair.
 - **Data processing + Project infrastructure + Web frontend:** Reconcile
   the five post-inventory Visibility Zone terms with pinned bilingual
   N5.3 source clauses and repeatable Glossary navigation/browser tests.

@@ -214,8 +214,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         classification_path=_fixture_classification_policy(tmp_path),
     )
 
-    assert report["summary"]["exposedCount"] == 159
-    assert report["summary"]["completeCount"] == 158
+    assert report["summary"]["exposedCount"] == 161
+    assert report["summary"]["completeCount"] == 160
     assert report["summary"]["gapCount"] == 1
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,

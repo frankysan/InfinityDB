@@ -141,11 +141,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     1.0 source-triage assessment, without changing the default historical policy.
     The pinned October 31 evidence distinguishes 62 reviewed shared-effect Weapon
     omissions, two historical approvals with current definitions, one accepted
-    historical Flash Pulse citation, and **Commlink as the sole pending 1.0
-    enrichment gap**. `--require-release 1.0.0` fails on Commlink even though the
-    historical classifier reports zero blockers. This establishes neither N5
-    Reinforcements authority nor broader 1.0 source/browser completeness; the
-    strict primary-interaction candidate and the annex source blocker remain open.
+    historical Flash Pulse citation and, **at that October 31 baseline**,
+    Commlink as the sole pending 1.0 enrichment gap. The subsequent labelled
+    N4-origin optional Reinforcements reference resolves missing Commlink
+    *definition* coverage, while N5-native annex authority, typed (+X)
+    parameters and final release/browser acceptance remain separate.
 
 - [ ] **Data processing + Project infrastructure:** Establish the 1.0 completeness baseline
   against the final intended input set; existing bounded reviews are prerequisites.
@@ -843,10 +843,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     ITS Season 18 (version 2026.09.01, p. 27) explicitly permits the Reinforcements
     Extra in tournaments and refers players to the Reinforcements Annex. This confirms
     current optional-mode applicability, but does not identify an N5 edition of the Annex
-    or certify unchanged N4 procedures. Keep Commlink unresolved for 1.0 rather than
-    importing N4 rules or treating the old exception as a current scope decision.
-    Reconcile the 1.0 primary review baseline and Commlink against pinned inputs,
-    preserving historical review dates and labels as provenance.
+    or certify unchanged N4 procedures. The v1.0 optional reference now exposes
+    explicitly N4-origin Commlink and Request Reinforcements, separate from N5 core.
+    Historical review dates/scope exceptions are preserved without attributing
+    N5-native authority to the old annex.
     - [x] Add a distinct `--require-primary-release` audit guard. The existing
       `--require-release 1.0.0` validates the 1.0 supporting slice while the
       primary denominator still targets 0.7.0. The new strict guard fails
@@ -856,11 +856,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       maintained primary catalog and Commlink scope are reconciled.
     - [x] Add non-mutating `--report-catalog-scope-drift` to the existing
       rules-interaction auditor, using the paired Army/rules databases.
-      A pinned regression finds only `skill:activate-disco-ball`,
-      `skill:request-specball`, and `equipment:firewall` added versus
-      the 0.7.0 primary scope; there are no removed or renamed entries.
-      All three have reviewed N5.3 definitions and 1.0 review records
-      dated October 13–14. The report preserves the old Commlink exception
+      The current drift has three later core reference additions
+      (`skill:activate-disco-ball`, `skill:request-specball`, and
+      `equipment:firewall`) plus the optional N4-origin
+      `skill:request-reinforcements`; no removals or renames. The three
+      core additions retain their October 13–14 source review. The report preserves the old Commlink exception
       without endorsing it as a current N5 scope decision. Inspect with:
       `python -m tools.audit_rules_interactions --report-catalog-scope-drift --database data/generated/infinity.db --rules-database data/generated/rules.db`.
       This identifies the bounded delta; it does not close the 1.0
@@ -868,20 +868,18 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     - [x] Establish a **separate, non-release-ready 1.0 primary catalog
       candidate** in `data/curated/rules-interactions/catalog-scope-1.0.0.json`.
       The candidate matches the pinned public Skill/Equipment/Trait/State
-      catalogs (97/31/33/24 entries), includes the three reviewed new
-      identities, and retains existing historical review dates and target
-      labels rather than rewriting them as 1.0 reviews. It does not carry
-      forward the old Commlink release exception. The bounded candidate
-      audit reports **184/185 primary identities complete, Commlink pending**,
-      and **195 supporting identities**. The strict candidate gate
-      `python -m tools.audit_rules_interactions --catalog-scope data/curated/rules-interactions/catalog-scope-1.0.0.json --require-primary-release 1.0.0`
-      fails and names Commlink as intended. The unchanged 0.7.0 scope and
-      generated historical checklist remain the default CI baseline.
+      catalogs (**98/31/33/24** entries), including the optional
+      `Request Reinforcements` Skill, and retains original historical
+      reviewedOn/targetRelease metadata. The candidate has no Commlink
+      exception and now passes **186/186 primary** plus **205 supporting**
+      interaction reviews, where Commlink's review explicitly covers only
+      the published N4-origin reference. The independent N5-native source
+      clarification remains open. The historical 0.7.0 scope remains the
+      default CI baseline; the candidate is not final release acceptance.
       This candidate is review-tracking evidence, **not** proof that earlier
       curated meanings remain accurate for the final 1.0 source set.
-      Verify an N5-applicable Reinforcements annex or explicitly decide the
-      1.0 applicability boundary before making this candidate the active
-      release gate.
+      Reconcile the final source/browser evidence and the remaining v1.0
+      release obligations before promoting this candidate to the active gate.
     - [x] Verify **current Reinforcements Extra applicability** without
       inferring N5 mechanics. The local official ITS Season 18 PDF
       (`data/pdf/its/Its-rules-season-18-en.pdf`, version 2026.09.01,
@@ -891,17 +889,18 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       (March 18, October 2 and October 15, 2025) confirm maintained
       Reinforcement profiles, **not** their annex procedure or Commlink
       effects. See `docs/n5-source-history.md` and `docs/rules-semantics.md`.
-      **Still open:** identify an official
-      N5-applicable Annex revision or explicit adoption ruling before
-      curating Commlink/Request Reinforcements as N5 and activating the
-      strict 1.0 primary release gate.
+      **Still open:** identify a verified N5 Annex revision or an explicit
+      unchanged-adoption ruling. The separately labelled N4-origin optional
+      reference is usable without misrepresenting that uncertainty.
     - [x] **Data processing + Project infrastructure:** Correct historical
       Reinforcements source availability in the existing evidence auditor.
       A maintained inventory verifies the two reviewed N4 PDF fingerprints;
       missing files stay unverified and changed bytes fail closed. The
       version-3 JSON/Markdown report separates historical availability from
-      unresolved N5 authority. Both local hashes match; this does not close
-      Commlink, Request Reinforcements or the strict 1.0 primary gate.
+      unresolved N5-native authority. Both local hashes match; the subsequent
+      labelled N4-origin reference closes the published Skill/Rule coverage
+      gap and the separate 1.0 interaction candidate gate, without proving
+      official unchanged N5 adoption.
   - [ ] Turn confirmed gaps into bounded batches under the owning tasks below. Each batch names
     the concepts/source sections, dependency, missing contract or content, and completion evidence;
     material source conflicts need reviewed applicability and clear user-visible disclosure
@@ -1294,11 +1293,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       scenario's real Skill reference, with URL persistence, browser acceptance
       and error recovery; the unscoped **57/57** matrix stays identical.
       Unsupported and ITS-only scenario selections fail closed.
-    - [ ] Add explicitly **phase-scoped** annex actions (not normal
-      Short/Long/ARO categories), notably Request Reinforcements, when the
-      separately versioned Reinforcements source and typed annex records
-      exist. ITS/season-only actions remain outside the 1.0 core selection
-      and should require explicit season/revision context in later work.
+    - [x] Publish `Request Reinforcements` as a separate
+      `tactical-phase-step` in the N4-origin optional annex, not a normal
+      Short/Long/ARO category; retain the unchanged 57/57 core matrix.
+      Further ITS/season actions require explicit season/revision context.
   - [ ] Deepen the existing first-class Ammunition model with explicit typed
     relationships. Preserve the eleven published base Ammunition identities, distinguish
     source-defined combined forms, preserve component relationships for Combined
@@ -1588,37 +1586,43 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Prove that scope is visible and unrelated scenario/season overlays do not leak into core help.
       - [ ] Review remaining shared scenario concepts, collection-specific
         supplements and normal browser presentation for the complete 1.0 scope.
-  - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
-    annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
-    and `Request Reinforcements`, link the capability they create to the annex
-    scope, and retain the ordinary-Army -> Reinforcement Section/pool context.
-    - [x] Independently verify current **source references** without promoting
-      historical procedures: N5.3 p. 6 mentions Reinforcements as a game mode;
-      ITS Season 18 v2026.09.01 p. 27 identifies a current optional Extra
-      and points to an unversioned Reinforcements Annex. Both official
-      current PDFs and the English/Spanish **N4 annex** PDFs are byte-pinned,
-      with Commlink (Automatic Skill) and Request Reinforcements (Tactical
-      Phase step) checked as **N4-only** evidence. The source gate in
-      `config/validation/reinforcements-n5-applicability-review.json`
-      rejects changes that turn historical text into current N5 authority.
-      Current `rules.db` and the 57-row N5 Orders/AROs matrix retain
-      neither unverified annex action.
-    - [ ] **Source blocker:** Identify an authoritative N5-specific
-      Reinforcements Annex revision or an explicit official adoption
-      ruling establishing which historical N4 procedures remain applicable.
-      Archive/pin the exact approved source, effective version/date and
-      publication scope before authoring current N5 Commlink or Request
-      Reinforcements. A reference to an unversioned Annex alone does not
-      authorize silently reusing N4 rules.
+  - [ ] Complete the optional **Reinforcements Extra** under its separately
+    versioned/scoped annex reference, not `n5-core-rules`. The N4-origin
+    procedural reference and links are published for optional N5-era play;
+    exact Commlink variants, full Army Section context and any N5-native
+    source reconciliation remain open.
+    - [x] Establish source boundaries: N5.3 p. 6 and ITS Season 18
+      v2026.09.01 p. 27 reference the current optional Extra, while the
+      archived English/Spanish annex and the detailed Wiki procedure are
+      explicitly **N4-origin**. All four local PDFs are byte-pinned.
+      `config/validation/reinforcements-n5-applicability-review.json` now
+      permits a separately labelled optional reference but still rejects
+      unsupported N5-native procedural authority.
+    - [x] **Publish the optional N4-origin reference:** A separate reviewed
+      collection exposes `/rules/reinforcements-extra`, `/skills/commlink`
+      and `/skills/request-reinforcements` in ordinary browsing and search.
+      Every record discloses N4 origins and unverified N5 adoption. Commlink
+      links to the Tactical Phase action; a custom phase category prevents
+      its appearance in the unchanged 57-row N5 Orders/AROs matrix. The
+      guarded release-pair refresh preserved 17 deployed objects and a
+      rollback backup. Source/API/regression and maintained-text checks pass;
+      full manual browser acceptance and exact typed Commlink (+X) remain open.
+    - [ ] **N5-native source clarification:** Identify an authoritative
+      N5-specific Reinforcements Annex revision or explicit official adoption
+      ruling establishing which N4 procedures remain applicable unchanged.
+      Archive/pin the approved edition/date and reconcile any differences
+      before labelling the published N4-origin procedures as N5-native.
+      This **does not block** the clearly disclosed optional legacy reference.
     - [ ] Encode `Commlink (+X)` as a typed maximum-Trooper-count parameter, not a
       Skill Level or Attribute MOD.
-    - [ ] Extend declaration-category validation so phase-scoped actions such as
-      `Request Reinforcements` can be explicitly classified outside Basic Short/
-      Short/Long/ARO instead of being treated as incomplete or assigned a false
-      category.
-    - [ ] Deliver the annex as a bounded slice: validated collection/citations, typed parameter
-      and declaration support, generated rules facts, and linked annex/Skill help from the existing
-      Reinforcement Army context. Reuse reviewed Army parent/pool relationships.
+    - [x] Classify `Request Reinforcements` as a separate
+      `tactical-phase-step` in the optional annex. It is discoverable as a
+      Skill without entering Basic Short/Short/Long/ARO declarations or
+      changing the core 57-row matrix.
+    - [ ] Complete the remaining annex slice: typed Commlink (+X), verified
+      profile/section context and linked Army parent/pool navigation. The
+      collection, source/citations, phase category and general Skill/Rule
+      navigation are already published; do not claim list legality.
     - [ ] Test ordinary versus Reinforcement context, exact `Commlink (+X)` variants, and explicit
       phase classification; do not infer roster legality or mutate the core declaration chart.
   - **Completion:** each covered batch builds into `rules.db`, passes maintained-text and

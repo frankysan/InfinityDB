@@ -20,9 +20,9 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 388
+    assert report["summary"]["recordCount"] == 391
     assert not any(item["id"].startswith("faq-ruling:") for item in report["items"])
-    assert report["summary"]["authoredOutgoingRelationCount"] == 516
+    assert report["summary"]["authoredOutgoingRelationCount"] == 518
     assert report["summary"]["futureInteractionCount"] == 111
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,
@@ -65,10 +65,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "percentComplete": 100.0,
     }
     assert report["summary"]["releases"]["1.0.0"] == {
-        "total": 120,
-        "complete": 120,
+        "total": 123,
+        "complete": 123,
         "pending": 0,
-        "reviewed": 120,
+        "reviewed": 123,
         "inherited": 0,
         "percentComplete": 100.0,
     }
@@ -117,8 +117,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 207
-    assert report["summary"]["supporting"]["complete"] == 207
+    assert report["summary"]["supporting"]["total"] == 209
+    assert report["summary"]["supporting"]["complete"] == 209
     assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -575,7 +575,7 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 207/207 complete, 0 pending" in output
+    assert "Supporting identities: 209/209 complete, 0 pending" in output
 
 
 def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> None:
@@ -584,7 +584,7 @@ def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> 
         "--require-release", "1.0.0",
     ]) == 0
     output = capsys.readouterr().out
-    assert "Supporting identities: 207/207 complete, 0 pending" in output
+    assert "Supporting identities: 209/209 complete, 0 pending" in output
     assert "Pending identities:" not in output
 
 
@@ -711,7 +711,7 @@ def test_pinned_catalog_scope_drift_identifies_three_reviewed_primary_omissions(
         category: [item["id"] for item in row["added"]]
         for category, row in drift["catalogs"].items()
     } == {
-        "skills": ["activate-disco-ball", "request-specball"],
+        "skills": ["activate-disco-ball", "request-reinforcements", "request-specball"],
         "equipment": ["firewall"],
         "traits": [],
         "states": [],
@@ -743,7 +743,7 @@ def test_pinned_catalog_scope_drift_identifies_three_reviewed_primary_omissions(
     assert DEFAULT_CATALOG_SCOPE_PATH.read_bytes() == original
 
 
-def test_1_0_primary_candidate_preserves_historical_reviews_and_pending_commlink(
+def test_1_0_primary_candidate_preserves_historical_reviews_and_discloses_optional_annex(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     candidate = DEFAULT_CATALOG_SCOPE_PATH.with_name("catalog-scope-1.0.0.json")
@@ -751,7 +751,7 @@ def test_1_0_primary_candidate_preserves_historical_reviews_and_pending_commlink
     assert document["targetRelease"] == "1.0.0"
     assert document["releaseExceptions"] == []
     assert {kind: len(items) for kind, items in document["catalogs"].items()} == {
-        "skills": 97, "equipment": 31, "traits": 33, "states": 24,
+        "skills": 98, "equipment": 31, "traits": 33, "states": 24,
     }
 
     report = audit_rules_interactions(
@@ -759,9 +759,9 @@ def test_1_0_primary_candidate_preserves_historical_reviews_and_pending_commlink
     )
     primary = report["summary"]["primaryCatalog"]
     assert (primary["total"], primary["complete"], primary["pending"]) == (
-        185, 184, 1,
+        186, 186, 0,
     )
-    assert report["summary"]["supporting"]["total"] == 204
+    assert report["summary"]["supporting"]["total"] == 205
     primary_items = {item["id"]: item for item in report["primaryCatalogItems"]}
     for record_id, release in {
         "skill:activate-disco-ball": "1.0.0",
@@ -772,20 +772,21 @@ def test_1_0_primary_candidate_preserves_historical_reviews_and_pending_commlink
         assert primary_items[record_id]["status"] == "reviewed"
         assert primary_items[record_id]["targetRelease"] == release
         assert primary_items[record_id]["reviewedOn"]
-    commlink = primary_items["skill:commlink"]
-    assert commlink["status"] == "pending"
-    assert not commlink["recordDefined"]
-    assert not commlink["scopeException"]
+    for identity in ("skill:commlink", "skill:request-reinforcements"):
+        item = primary_items[identity]
+        assert item["status"] == "reviewed"
+        assert item["recordDefined"]
+        assert not item["scopeException"]
+        assert "N4" in item["note"]
     assert main([
         "--catalog-scope", str(candidate),
         "--require-primary-release", "1.0.0",
-    ]) == 1
-    assert "Pending primary identities: skill:commlink" in capsys.readouterr().out
+    ]) == 0
+    assert "186/186 complete" in capsys.readouterr().out
     assert main([
         "--catalog-scope", str(candidate),
         "--require-release", "1.0.0",
-    ]) == 1
-    assert "Pending identities: skill:commlink" in capsys.readouterr().out
+    ]) == 0
 
 
 def test_1_0_primary_candidate_matches_pinned_public_database_pair(
@@ -802,7 +803,7 @@ def test_1_0_primary_candidate_matches_pinned_public_database_pair(
         "--database", str(database),
         "--rules-database", str(rules_database),
     ]) == 0
-    assert "1.0.0 primary catalog: 184/185 complete" in capsys.readouterr().out
+    assert "1.0.0 primary catalog: 186/186 complete" in capsys.readouterr().out
 
 
 def test_1_0_primary_candidate_rejects_reviews_from_future_releases(
