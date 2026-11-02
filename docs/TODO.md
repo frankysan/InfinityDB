@@ -1136,6 +1136,28 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           fit pass. All ten source-crosswalk cases now have selected
           browser evidence; general reaction permissions, source
           sections and whole-record signoff remain open.
+        - [x] **Combat Instinct versus Sixth Sense (outside the original
+          ten-case crosswalk; 2026-11-02):** Dedicated release-pair
+          Chromium tests at 1440/390/320 px distinguish ordinary ZoC
+          reactions regained when Stealth is ineffective from Sixth
+          Sense's separate permission to react to incoming Attacks
+          outside LoF. Combat Instinct does not create LoF, an
+          outside-LoF Attack response or a 360-degree LoF arc; Sixth
+          Sense does not waive conditions for arbitrary movement
+          reactions. Verify N5.3 pp. 20/88/111/112, related links,
+          keyboard navigation and responsive rendering, without
+          changing the closed ten-case manifest or approving either
+          entire Skill.
+        - [ ] **Neurocinetics versus Total Reaction (next distinct
+          conditional-Burst candidate):** Reconcile the N5.3
+          pp. 104/116 source-reviewed automatic Skills and Army
+          occurrence-level Neurocinetics +1B separately. Neurocinetics
+          changes Active/Reactive Burst and applies full Reactive
+          Burst against a single target; Total Reaction only permits
+          full Burst for a BS Attack ARO against a Trooper activated
+          by that Order. Add source-specific normal-browser checks;
+          do not treat either Skill as a universal ARO grant or
+          collapse their mode/occurrence boundaries.
         - [x] **Numerical Army source Skill variants (V1-A08):** Exact
           pinned September 29 Army ZIP, Skill dictionaries, all **17**
           faction-file option occurrences and parent-profile attributes

@@ -1920,7 +1920,28 @@ N5.3 PDF; Ruff, Pyright, documentation links, Markdownlint and
 diff checks passed. Cumulative execution is deferred under VR-0016.
 All **ten selected crosswalk cases** now have repeatable
 normal-browser evidence. This is neither all possible ARO triggers
-nor a complete matrix of Skill-specific permissions. Every record
+nor a complete matrix of Skill-specific permissions.
+
+**Beyond the original ten-case crosswalk — Stealth counters
+(2026-11-02):** The separately source-reviewed `skill:combat-instinct`
+and `skill:sixth-sense` records differ in reactive eligibility:
+Combat Instinct removes the Stealth limitation for otherwise eligible
+ZoC reactions but does not create LoF or a response to outside-LoF
+Attacks; Sixth Sense permits an outside-LoF response only to Attacks
+directed at its user, not arbitrary movement. The
+`test_stealth_counter_reaction_permissions_normal_browser`
+regression checks the actual tracked release-pair Skills catalog
+and both detail routes at 1440/390/320 px, the distinct clauses,
+N5.3 pp. 20/88/111/112 citations, keyboard navigation to
+related Skills, JS errors and horizontal fit. Six browser cases
+plus the existing curated source-contract and pinned-English-PDF
+tests passed (8/8) before inventory reconciliation.
+The expanded focused run, including the inventory crosswalk
+and missing-test guard, passed **10/10**. Ruff, Pyright,
+Markdownlint, documentation links and diff checks passed.
+These two new selected-browser pointers do not extend the closed
+ten-entry conditional-declaration manifest or grant full-record
+approval. Cumulative regression is deferred as VR-0017. Every record
 and source section retains pending whole-record acceptance, including
 where reviewed curation or selected browser evidence exists.
 

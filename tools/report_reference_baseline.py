@@ -1373,6 +1373,8 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:modifiers-explained": "test_modifiers_explained_normal_reference_navigation",
     "skill:activate-disco-ball": "test_added_source_skills_normal_browser",
     "skill:request-specball": "test_added_source_skills_normal_browser",
+    "skill:combat-instinct": "test_stealth_counter_reaction_permissions_normal_browser",
+    "skill:sixth-sense": "test_stealth_counter_reaction_permissions_normal_browser",
     "weapon:multi-rifle": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "weapon:multi-heavy-machine-gun": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "weapon:multi-marksman-rifle": "test_multi_weapon_modes_stay_separate_in_normal_browser",

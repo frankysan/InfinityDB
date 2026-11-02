@@ -124,6 +124,23 @@ Only open VR obligations belong here.
   the five-change/seven-day phased gate; hosted CI and release
   acceptance remain separate.
 
+- [ ] **VR-0017** (2026-11-02; ready-to-run): Run cumulative tests
+  after registering Combat Instinct and Sixth Sense as two newly
+  identified conditional-reaction browser slices beyond the closed
+  ten-case crosswalk.
+  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree after `408d71c7`;
+  files: `tests/test_verify_scenario_faq_browser.py`,
+  `tools/report_reference_baseline.py`,
+  `tests/test_report_reference_baseline.py` and supporting docs;
+  risk: low. Immediate: 6 Chromium viewport cases,
+  two reviewed/PDF-source tests, inventory reconciliation
+  and missing-test guard **10 passed**;
+  Ruff, Pyright, docs and diff checks **PASS**.
+  Design: none. Deferred: cumulative full project test suite
+  under the five-change/seven-day phased gate; hosted CI and
+  release-candidate acceptance separate.
+
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -134,7 +151,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0017` (`VR-0014` through `VR-0016` open; earlier entries retired).
+- Execution: `VR-0018` (`VR-0014` through `VR-0017` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

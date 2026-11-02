@@ -58,6 +58,75 @@ def chrome() -> Iterator[Any]:
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
+    ("slug", "pages", "clauses", "related"),
+    (
+        (
+            "combat-instinct", (88, 112, 20),
+            (
+                "other MODs and ARO conditions still apply",
+                "ordinary Zone of Control eligibility",
+                "does not create LoF",
+                "does not grant an outside-LoF response",
+                "ignores the MODs imposed by Surprise Attack",
+            ),
+            "/skills/surprise-attack",
+        ),
+        (
+            "sixth-sense", (111, 112, 20),
+            (
+                "Attacks directed at them from outside LoF",
+                "not arbitrary movement outside LoF",
+                "only to Attacks directed at the user",
+                "without granting unrestricted LoF",
+                "MSV1 by itself still has its printed -6",
+            ),
+            "/skills/stealth",
+        ),
+    ),
+)
+def test_stealth_counter_reaction_permissions_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    slug: str, pages: tuple[int, ...], clauses: tuple[str, ...], related: str,
+) -> None:
+    """V1-A08: Combat Instinct and Sixth Sense do not grant equivalent AROs."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/skills", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(f'#catalog-list a[href="/skills/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{ORIGIN}/skills/{slug}", timeout=30000)
+        card = page.locator(f"#rule-skill-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        visible = card.inner_text()
+        for fragment in clauses:
+            assert fragment in visible, (slug, width, fragment)
+        if slug == "combat-instinct":
+            assert "The user can respond to Attacks directed at them" not in visible
+        else:
+            assert "ignores Surprise Attack MODs" not in visible
+        citations = card.locator(".rules-source-citations").inner_text()
+        for number in pages:
+            assert f"p. {number}" in citations, (slug, width, number)
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        link = card.locator(f'a[href="{related}"]').first
+        link.wait_for(state="visible", timeout=10000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}{related}", timeout=30000)
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
     ("slug", "source_page", "expected", "inbound_path", "outbound_path"),
     (
         (
