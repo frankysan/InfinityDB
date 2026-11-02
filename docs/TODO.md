@@ -3779,7 +3779,12 @@ follow-up action. Retain source-native values until official resolution.
   saved only 1.5% in one comparison. The pooled four-lane browser section
   and cumulative default full test suite passed, retiring local VR-0022.
   Next: repeated measurements, process resource sampling and Chrome
-  lifecycle profiling across more modules.
+  lifecycle profiling across more modules. The Ubuntu `devbox`
+  completed all seven check stages at commit `16560d0`, but skipped 330
+  cases versus 25 in the Windows baseline. Reconcile grouped skip reasons
+  at the same Git revision, transfer only required pinned ignored inputs,
+  then compare Linux 2- versus 4-slot browser runs using explicit
+  waiting/remaining-setup measurements before choosing a new default.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

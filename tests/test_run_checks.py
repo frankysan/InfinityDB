@@ -190,6 +190,27 @@ def test_test_stage_can_enable_xdist_workers() -> None:
     )
 
 
+def test_skip_summary_is_opt_in_for_test_and_isolated_preflight() -> None:
+    stages = run_checks.stage_definitions(
+        ("test", "preflight"), [], build_source=None, test_workers="2",
+        skip_summary=True,
+    )
+    assert all("--infinitydb-skip-summary" in stage.command for stage in stages)
+    defaults = run_checks.stage_definitions(
+        ("test", "preflight"), [], build_source=None, test_workers="2",
+    )
+    assert all("--infinitydb-skip-summary" not in stage.command for stage in defaults)
+
+
+def test_skip_summary_rejects_non_pytest_stage(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert run_checks.main(["--stage", "lint", "--skip-summary"]) == (
+        run_checks.EXIT_RUNNER_ERROR
+    )
+    assert "--skip-summary requires the test or preflight stage" in capsys.readouterr().err
+
+
 def test_test_stage_can_group_browser_modules_without_changing_default() -> None:
     [stage] = run_checks.stage_definitions(
         ("test",), [], build_source=None,

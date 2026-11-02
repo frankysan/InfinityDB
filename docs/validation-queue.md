@@ -73,7 +73,21 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+Only open VR obligations belong here.
+
+- [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
+  reporting and explicit resource-wait measurements under full Linux and
+  Windows xdist runs. Work: [browser concurrency benchmarking](TODO.md#performance-storage-and-build-tooling);
+  change: `tools/run_checks.py`, `tools/pytest_startup_profile.py`,
+  related focused tests, based on `841acbe0`; risk: low (diagnostic-only).
+  Immediate: capacity/profile **15 passed**, runner **94 passed / 1 expected
+  skip**, real Windows xdist skip-summary **94 passed / 1 expected skip**,
+  12 browser tests passed with measured slot contention; Ruff, Pyright,
+  docs and diff checks passed. Design: none.
+  Deferred: compare full Linux/Windows grouped skip reasons on aligned
+  commits; rerun full 2- and 4-slot Linux browser benchmarks with wait/hold
+  metrics, unchanged expected pass/skip counts and no new errors. Retire
+  once evidence is recorded in `docs/testing.md`.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -85,7 +99,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0023` (`VR-0022` retired after cumulative local pytest; earlier entries retired).
+- Execution: `VR-0024` (`VR-0023` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

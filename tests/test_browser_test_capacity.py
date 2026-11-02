@@ -15,7 +15,7 @@ from tools.browser_test_capacity import (
     browser_slot,
     scenario_faq_split_lane,
 )
-from tools.pytest_startup_profile import XdistStartupProfile
+from tools.pytest_startup_profile import XdistStartupProfile, summarized_skip_reasons
 from tools.resource_waits import capture_resource_waits, record_resource_wait
 from tools.test_sections import load_test_sections
 
@@ -101,6 +101,30 @@ def test_wait_summary_keeps_original_setup_and_labels_remainder() -> None:
     assert "12.00s" in lines
     assert "summed worker time" in lines
     assert "do not add the two" in lines
+
+
+def test_skip_reasons_group_actual_skip_reports_without_duplicate_counts() -> None:
+    def report(reason: str) -> pytest.TestReport:
+        return pytest.TestReport(
+            nodeid="tests/test_example.py::test_case",
+            location=("tests/test_example.py", 1, "test_case"),
+            keywords={}, outcome="skipped",
+            longrepr=("tests/test_example.py", 1, "Skipped: " + reason),
+            when="setup", sections=[], duration=0.0,
+        )
+
+    lines = summarized_skip_reasons([
+        report("Pinned Army ZIP unavailable"),
+        report("Pinned N5.3 PDF unavailable"),
+        report("Pinned Army ZIP unavailable"),
+    ])
+    assert lines[0] == "Skipped: 3 tests; 2 distinct reasons."
+    assert lines[1].strip() == "2  Pinned Army ZIP unavailable"
+    assert lines[2].strip() == "1  Pinned N5.3 PDF unavailable"
+    assert summarized_skip_reasons([]) == ()
+    assert summarized_skip_reasons([report("Only reason")])[0] == (
+        "Skipped: 1 test; 1 distinct reason."
+    )
 
 
 def test_browser_slot_is_exclusive_across_processes_and_reusable(tmp_path: Path) -> None:

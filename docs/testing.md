@@ -413,6 +413,14 @@ Linux run predated the separate resource-wait reporting implementation,
 so its multi-minute pytest setup durations are not decomposed into
 waiting versus other setup.
 
+For a concise source-coverage audit, the runner now accepts optional
+`--skip-summary` on test/preflight stages. It groups **actual pytest
+skip reports** by reason and count, rather than printing hundreds of
+individual `-rs` entries; the total must reconcile with pytest's
+skipped count. This is opt-in and does not alter collection or execution.
+Record the reasons from Linux and Windows at the same commit, then
+synchronize only the pinned source files needed for parity.
+
 ### Measured waiting versus pytest setup
 
 Pytest's native `setup` duration includes time blocked acquiring a Chromium

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import time
+from collections import Counter
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import Any
@@ -19,6 +20,36 @@ from tools.resource_waits import capture_resource_waits
 
 _SETUP_WAITS: pytest.StashKey[list[tuple[str, float]]] = pytest.StashKey()
 _WAIT_PROPERTY_PREFIX = "infinitydb_wait_"
+
+
+def summarized_skip_reasons(reports: Sequence[pytest.TestReport]) -> tuple[str, ...]:
+    """Group actual pytest skip reports by reason without losing their counts."""
+    reasons: Counter[str] = Counter()
+    for report in reports:
+        detail = report.longrepr
+        if isinstance(detail, tuple) and len(detail) >= 3:
+            reason = str(detail[2])
+        else:
+            reason = str(detail or "Unspecified skip reason")
+        reasons[reason.removeprefix("Skipped: ").strip()] += 1
+    if not reasons:
+        return ()
+    total = sum(reasons.values())
+    test_word = "test" if total == 1 else "tests"
+    reason_word = "reason" if len(reasons) == 1 else "reasons"
+    lines = [f"Skipped: {total} {test_word}; {len(reasons)} distinct {reason_word}."]
+    lines.extend(
+        f"  {count:>4}  {reason}"
+        for reason, count in sorted(reasons.items(), key=lambda entry: (-entry[1], entry[0]))
+    )
+    return tuple(lines)
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--infinitydb-skip-summary", action="store_true", default=False,
+        help="Print grouped pytest skip reasons in the final validation report.",
+    )
 
 
 @dataclass
@@ -256,3 +287,9 @@ def pytest_terminal_summary(terminalreporter: Any) -> None:
         terminalreporter.write_sep("=", "resource waiting versus pytest setup")
         for line in waits:
             terminalreporter.write_line(line)
+    if terminalreporter.config.getoption("--infinitydb-skip-summary"):
+        skipped = summarized_skip_reasons(terminalreporter.stats.get("skipped", []))
+        if skipped:
+            terminalreporter.write_sep("=", "grouped skip reasons")
+            for line in skipped:
+                terminalreporter.write_line(line)
