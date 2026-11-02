@@ -191,11 +191,13 @@ def test_browser_metrics_capture_wait_and_hold_without_changing_admission(
     record = json.loads(files[0].read_text(encoding="utf-8").strip())
     assert record["label"] == "example-node"
     assert record["slot"] == 0
+    assert record["lock_directory"] == str((tmp_path / "locks").resolve())
     assert record["wait_seconds"] >= 0
     assert record["hold_seconds"] >= 0
     assert (
         record["request_monotonic_seconds"]
         <= record["acquired_monotonic_seconds"]
+        <= record["release_started_monotonic_seconds"]
         <= record["released_monotonic_seconds"]
     )
     assert record["wait_seconds"] == pytest.approx(
@@ -224,9 +226,10 @@ def test_chromium_timeline_reconstructs_waiting_and_slot_occupancy(tmp_path: Pat
     (tmp_path / "slot-123.jsonl").write_text(
         "\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8",
     )
-    records, excluded = load_slot_records(tmp_path, slots=2)
+    records, excluded, other = load_slot_records(tmp_path, slots=2)
     assert len(records) == 3
     assert excluded == 1
+    assert other == 0
     data = summarize_timeline(records, slots=2)
     assert data["observed_seconds"] == pytest.approx(6.0)
     assert data["wait_seconds"] == pytest.approx(5.0)
@@ -268,6 +271,127 @@ def test_chromium_timeline_refuses_legacy_duration_only_metrics(tmp_path: Path) 
     )
     with pytest.raises(ValueError, match="legacy slot metrics"):
         load_slot_records(tmp_path, slots=2)
+
+
+def test_chromium_timeline_selects_one_lock_namespace_before_capacity_filter(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    def record(namespace: str, slot: int, index: int) -> dict[str, object]:
+        return {
+            "lock_directory": namespace, "slot": slot, "label": f"tests/test_{index}.py",
+            "request_monotonic_seconds": float(index),
+            "acquired_monotonic_seconds": float(index),
+            "release_started_monotonic_seconds": float(index) + 0.5,
+            "released_monotonic_seconds": float(index) + 0.6,
+        }
+
+    rows = [
+        record("/main/locks", 0, 0), record("/main/locks", 1, 1),
+        record("/main/locks", 0, 2),
+        record("/self-test/locks", 0, 0), record("/self-test/locks", 3, 1),
+    ]
+    (tmp_path / "slot-1.jsonl").write_text(
+        "\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8",
+    )
+    selected, outside, other = load_slot_records(tmp_path, slots=2)
+    assert len(selected) == 3
+    assert outside == 0
+    assert other == 2
+    assert {row["lock_directory"] for row in selected} == {"/main/locks"}
+    other_selected, outside, other = load_slot_records(
+        tmp_path, slots=2, lock_directory="/self-test/locks",
+    )
+    assert len(other_selected) == 1
+    assert outside == 1
+    assert other == 3
+    assert timeline_main([str(tmp_path), "--slots", "2"]) == 0
+    output = capsys.readouterr().out
+    assert "Other lock namespaces excluded: 2 records" in output
+    assert "WARNING: same-slot" not in output
+
+
+@pytest.mark.parametrize(
+    "primary",
+    ("/tmp/infinitydb-chromium-slots", r"C:\Temp\infinitydb-chromium-slots"),
+)
+def test_chromium_timeline_prefers_real_browser_lock_when_self_tests_dominate(
+    tmp_path: Path, primary: str,
+) -> None:
+    def record(namespace: str, index: int) -> dict[str, object]:
+        return {
+            "lock_directory": namespace, "slot": 0,
+            "request_monotonic_seconds": float(index),
+            "acquired_monotonic_seconds": float(index),
+            "release_started_monotonic_seconds": float(index) + 0.1,
+            "released_monotonic_seconds": float(index) + 0.2,
+        }
+
+    rows = [record(primary, 0)] + [
+        record(str(tmp_path / "other-locks"), index) for index in range(1, 5)
+    ]
+    (tmp_path / "slot-1.jsonl").write_text(
+        "\n".join(json.dumps(value) for value in rows) + "\n", encoding="utf-8",
+    )
+    records, outside, other = load_slot_records(tmp_path, slots=2)
+    assert len(records) == 1
+    assert records[0]["lock_directory"] == primary
+    assert (outside, other) == (0, 4)
+
+
+def test_chromium_timeline_rejects_ambiguous_or_mixed_provenance(
+    tmp_path: Path,
+) -> None:
+    def row(namespace: str | None, index: int) -> dict[str, object]:
+        result: dict[str, object] = {
+            "slot": 0, "request_monotonic_seconds": float(index),
+            "acquired_monotonic_seconds": float(index),
+            "released_monotonic_seconds": float(index) + 0.5,
+        }
+        if namespace is not None:
+            result["lock_directory"] = namespace
+        return result
+
+    output = tmp_path / "slot-1.jsonl"
+    output.write_text(
+        "\n".join(json.dumps(value) for value in [
+            row("/a", 0), row("/b", 1),
+        ]) + "\n", encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Ambiguous lock directories"):
+        load_slot_records(tmp_path, slots=2)
+    output.write_text(
+        "\n".join(json.dumps(value) for value in [
+            row("/a", 0), row(None, 1),
+        ]) + "\n", encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Mixed namespace-aware"):
+        load_slot_records(tmp_path, slots=2)
+
+
+def test_chromium_timeline_distinguishes_unlock_skew_from_definite_overlap() -> None:
+    first = {
+        "slot": 0, "label": "tests/test_a.py", "lock_directory": "/shared",
+        "request_monotonic_seconds": 0.0,
+        "acquired_monotonic_seconds": 1.0,
+        "release_started_monotonic_seconds": 3.0,
+        "released_monotonic_seconds": 4.0,
+    }
+    second = {
+        "slot": 0, "label": "tests/test_b.py", "lock_directory": "/shared",
+        "request_monotonic_seconds": 2.0,
+        "acquired_monotonic_seconds": 3.5,
+        "release_started_monotonic_seconds": 5.0,
+        "released_monotonic_seconds": 5.1,
+    }
+    uncertain = summarize_timeline([first, second], slots=1)
+    assert not uncertain["same_slot_overlap"]
+    assert uncertain["possible_unlock_overlaps"] == 1
+    assert uncertain["unlock_gap_seconds"] == pytest.approx(1.1)
+    assert uncertain["occupied_slot_seconds"] == pytest.approx(3.5)
+
+    overlapping = dict(second, acquired_monotonic_seconds=2.5)
+    definite = summarize_timeline([first, overlapping], slots=1)
+    assert definite["same_slot_overlap"]
 
 
 @pytest.mark.parametrize("capacity", (2, 3, 4))

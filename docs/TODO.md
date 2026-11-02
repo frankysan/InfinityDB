@@ -3815,9 +3815,12 @@ follow-up action. Retain source-native values until official resolution.
   capacity while requests waited. The overlap warnings are not yet
   trustworthy: self-tests use separate lock directories in the same
   metrics output, and lock releases are timestamped after unlocking.
-  Record the lock namespace and bound timestamp skew before treating
-  timeline overlaps as resource-gate failures. Keep defaults and test
-  isolation unchanged.
+  Instrumentation now records the lock namespace and pre-/post-unlock
+  timestamp bounds; the analyzer isolates the shared browser namespace
+  from capacity self-tests and reports uncertain unlock-gap overlaps
+  separately. Windows focused regression tests passed; validate fresh
+  Linux traces, then repeat resource-sampled comparisons. Keep defaults
+  and test isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

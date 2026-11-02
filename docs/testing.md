@@ -1094,6 +1094,33 @@ lock namespaces and bound unlock-to-timestamp skew, with focused
 analyzer regressions. Keep the raw metrics and do not change resource
 limits based on this warning alone.
 
+**Chromium metric namespace/unlock instrumentation follow-up, 2026-11-02:**
+New runs record `lock_directory` and
+`release_started_monotonic_seconds`, sampled just before attempting to
+unlock, alongside the existing post-unlock `released_monotonic_seconds`.
+The timeline analyzer prefers the shared xdist
+`infinitydb-chromium-slots` namespace when present, excludes other
+self-test namespaces before filtering slots, and reports their count.
+If automatic selection is ambiguous, specify the exact
+`--lock-directory`; mixed legacy and namespace-aware records fail
+explicitly. Occupancy now uses the conservative pre-unlock bound while
+reported held time retains the post-unlock timestamp. Overlaps limited
+to the unlock interval are **indeterminate** rather than proven lock
+violations; the summed unlock uncertainty is reported. Existing traces
+without namespace/timing fields remain readable but cannot reliably
+resolve overlap warnings, so the prior Linux pair remains historical
+evidence rather than a corrected occupancy reconstruction.
+
+Focused Windows validation passed: **24/24** capacity/timeline tests
+(including Linux- and Windows-style lock-directory identities), **3/3**
+browser-metrics tests, and **98 passed / 1 expected skip** in the runner
+regressions. Ruff, canonical Pyright (zero errors), Markdownlint, links,
+and Git whitespace checks passed. The improvement affects
+instrumentation and offline analysis only; it does not change slot
+admission, grouping, or Chromium lifecycle. Repeat a fresh Linux run to verify that the warning is
+resolved with namespace-aware records, then continue alternating
+benchmarks with CPU/RAM sampling. Keep the existing defaults.
+
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version

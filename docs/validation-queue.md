@@ -137,10 +137,14 @@ Only open VR obligations belong here.
   at full capacity (two/four slots), with **0.22/0.09 s** waiting despite
   a free slot. Overlap warnings may include separate lock namespaces
   from capacity self-tests and post-unlock timestamp skew; they do not
-  establish a resource-cap breach. Deferred: disambiguate lock
-  namespaces/timestamp skew in diagnostics, repeat alternating
-  comparisons with CPU/RAM sampling, and verify Windows/Linux coverage
-  parity. Retire only after the remaining acceptance evidence.
+  establish a resource-cap breach. New instrumentation records
+  lock-directory provenance and pre-/post-unlock bounds, and the
+  analyzer isolates the shared xdist lock namespace, distinguishing
+  confirmed interval overlap from unlock-window ambiguity. Focused
+  Windows tests passed; deferred: verify fresh namespace-aware Linux
+  metrics, repeat alternating comparisons with CPU/RAM sampling, and
+  verify Windows/Linux coverage parity. Retire only after the
+  remaining acceptance evidence.
 
 - [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
   safety across Linux and Windows for `tools.run_checks`.

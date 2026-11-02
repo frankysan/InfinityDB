@@ -150,11 +150,12 @@ def browser_slot(
             try:
                 yield index
             finally:
+                release_started_at = time.monotonic()
                 try:
                     _unlock(handle)
+                    released_at = time.monotonic()
                 finally:
                     handle.close()
-                released_at = time.monotonic()
                 metrics_path = os.environ.get("INFINITYDB_BROWSER_METRICS_DIRECTORY")
                 if metrics_path:
                     metrics_dir = Path(metrics_path)
@@ -162,10 +163,12 @@ def browser_slot(
                     record = {
                         "pid": os.getpid(), "label": label, "slot": index,
                         "worker": os.environ.get("PYTEST_XDIST_WORKER", "main"),
+                        "lock_directory": str(directory.resolve()),
                         "wait_seconds": acquired_at - start,
                         "hold_seconds": released_at - acquired_at,
                         "request_monotonic_seconds": start,
                         "acquired_monotonic_seconds": acquired_at,
+                        "release_started_monotonic_seconds": release_started_at,
                         "released_monotonic_seconds": released_at,
                     }
                     with (metrics_dir / f"slot-{os.getpid()}.jsonl").open(
