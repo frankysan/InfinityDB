@@ -1391,6 +1391,13 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     ),
     "skill:look-out": "test_conditional_reaction_source_slices_visible_in_normal_browser",
     **{
+        identifier: "test_selected_conditional_skills_normal_browser"
+        for identifier in (
+            "skill:discover", "skill:place-deployable",
+            "skill:reload", "skill:alert",
+        )
+    },
+    **{
         identifier: "test_visibility_zone_terms_normal_browser"
         for identifier in (
             "term:visibility-zone", "term:low-visibility-zone",

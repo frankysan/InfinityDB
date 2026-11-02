@@ -1106,7 +1106,23 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           Look Out! pass Chromium at 1440/390/320 px (6/6). **This is
           selected-clause provenance and rendering only**, not a signoff
           for all reactions, linked scenarios, conditional permissions
-          or the 448-record whole-corpus gate.
+          or the 450-record whole-corpus gate.
+        - [x] **Discover, Place Deployable, Reload and Alert!
+          source-to-browser reconciliation (2026-11-02):**
+          The four corresponding entries in the ten-case conditional
+          declaration crosswalk now have normal release-pair Chromium
+          catalog-to-detail and keyboard-link checks at 1440/390/320 px.
+          Discover preserves same-Marker retry/ARO reveal exceptions;
+          Place Deployable preserves Reactive LoF despite Perimeter
+          placement; Reload retains Baggage/non-Null and separate ARO
+          eligibility; Alert! remains an optional automatic Conclusion
+          effect, not a newly declared ARO. Check N5.3 pp. 77/82/83,
+          related links, JavaScript errors and viewport fit.
+          Source hash/pinned-clause audit passes; this expands
+          selected browser evidence to six of ten crosswalk cases,
+          **not** all reactions or whole-record acceptance.
+          Guard/Aerial, Hacking Area, Cyberplug and Stealth still
+          need repeatable browser dispositions.
         - [x] **Numerical Army source Skill variants (V1-A08):** Exact
           pinned September 29 Army ZIP, Skill dictionaries, all **17**
           faction-file option occurrences and parent-profile attributes

@@ -90,6 +90,23 @@ Only open VR obligations belong here.
   five-change or seven-day phased gate; hosted CI and release
   acceptance remain separate.
 
+- [ ] **VR-0015** (2026-11-02; ready-to-run): Run cumulative tests
+  after registering selected Discover, Place Deployable, Reload and
+  Alert! normal-browser evidence from the ten-case conditional
+  declaration source crosswalk.
+  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree after `685bd603`;
+  files: `tests/test_verify_scenario_faq_browser.py`,
+  `tools/report_reference_baseline.py`,
+  `tests/test_report_reference_baseline.py` and supporting docs;
+  risk: low. Immediate: 12 Chromium cases, 3 pinned-PDF
+  checks, inventory reconciliation and missing-test guard
+  **17 passed**; pinned conditional source audit, Ruff,
+  Pyright, docs and diff checks **PASS**.
+  Design: none. Deferred: cumulative full project suite under the
+  five-change or seven-day phased gate; hosted CI and release
+  acceptance remain separate.
+
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -100,7 +117,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0015` (`VR-0014` open; earlier entries retired).
+- Execution: `VR-0016` (`VR-0014` and `VR-0015` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

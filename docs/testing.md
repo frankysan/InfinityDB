@@ -1892,10 +1892,23 @@ The ten entries cover Order declaration/Resolution timing, Look Out!,
 Discover, Place Deployable, Reload, Alert!, Guard versus Aerial,
 Hacking Area, Cyberplug Controller and Stealth mixed activations.
 The normal `/rules/order-expenditure-sequence` and
-`/skills/look-out` pages additionally passed six Chromium cases at
-1440/390/320px; existing source tests provide bounded evidence for
-the other cases. This is neither all possible ARO triggers nor a
-complete matrix of Skill-specific conditional permissions. Each
+`/skills/look-out` pages passed six Chromium cases at
+1440/390/320 px. The additional
+`test_selected_conditional_skills_normal_browser` regression
+checks `/skills/discover`, `/skills/place-deployable`,
+`/skills/reload`, and `/skills/alert` at those widths (12 cases).
+It verifies selected source-conditional requirements, restrictions,
+timing and exceptions, citations, normal catalog navigation, keyboard
+links, JavaScript errors and horizontal fit. The three existing pinned
+English N5.3 source tests passed alongside these checks (**15/15**).
+With inventory reconciliation and the missing-test fail-closed guard,
+the expanded focused run passed **17/17**. Ruff, Pyright,
+documentation and diff checks passed. The source crosswalk audit
+with the exact PDF fingerprint passed.
+Consequently six of ten crosswalk cases have selected browser
+coverage; Guard/Aerial, Hacking Area, Cyberplug and Stealth still
+require repeatable player-facing checks. This is neither all possible
+ARO triggers nor a complete matrix of Skill-specific permissions. Each
 record and its source sections retain pending whole-record acceptance,
 including where previously reviewed curation facts or selected
 browser tests are available.

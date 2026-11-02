@@ -288,6 +288,94 @@ def test_visibility_zone_terms_normal_browser(
 
 @pytest.mark.parametrize("width", [1440, 390, 320])
 @pytest.mark.parametrize(
+    ("slug", "page_number", "clauses", "related"),
+    (
+        (
+            "discover", 77,
+            (
+                "same Marker again until the next Player Turn",
+                "different Marker",
+                "re-enters",
+                "If the Camouflaged target declares an ARO",
+                "Discover Roll is not needed",
+            ),
+            "/skills/bs-attack",
+        ),
+        (
+            "place-deployable", 82,
+            (
+                "In the Reactive Turn",
+                "LoF to the Active Trooper",
+                "Perimeter",
+                "does not remove this reactive LoF requirement",
+                "only the placing Trooper",
+                "subsequent Orders",
+            ),
+            "/traits/perimeter",
+        ),
+        (
+            "reload", 83,
+            (
+                "both be in non-Null States",
+                "Only one Allied Trooper",
+                "does not bypass ordinary",
+                "automatic recovery",
+                "Non-Reloadable",
+            ),
+            "/equipment/baggage",
+        ),
+        (
+            "alert", 77,
+            (
+                "has not activated in the same Order",
+                "not a declared ARO",
+                "Conclusion Step",
+                "after Saving Rolls",
+                "does not grant a new ARO",
+            ),
+            "/rules/order-expenditure-sequence",
+        ),
+    ),
+)
+def test_selected_conditional_skills_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    slug: str, page_number: int, clauses: tuple[str, ...], related: str,
+) -> None:
+    """V1-A08: selected source-backed reaction restrictions reach normal players."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/skills", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(f'#catalog-list a[href="/skills/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{ORIGIN}/skills/{slug}", timeout=30000)
+        card = page.locator(f"#rule-skill-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        visible = card.inner_text()
+        for fragment in clauses:
+            assert fragment in visible, (slug, width, fragment)
+        assert f"p. {page_number}" in card.locator(
+            ".rules-source-citations"
+        ).inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        link = card.locator(f'a[href="{related}"]').first
+        link.wait_for(state="visible", timeout=10000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}{related}", timeout=30000)
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390, 320])
+@pytest.mark.parametrize(
     ("path", "card_id", "expected"),
     [
         (
