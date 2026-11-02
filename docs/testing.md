@@ -1155,17 +1155,47 @@ repeat alternating runs with CPU/RAM sampling before changing defaults.
 
 **Separate MCP Linux worker environment, 2026-11-02:** The registered
 `linux-dev` worker executes from `/srv/mcp-worker/workspaces/InfinityDB`,
-not the earlier interactive `devbox` checkout. At `413a2185`, a focused
-four-slot/eight-worker B/D browser-lane invocation selected 12 tests but
-**skipped all 12** because `playwright.sync_api` was unavailable (`No module
-named 'playwright'`). Published graphical assets were present (808/808),
-and both lanes remained pinned to individual workers. Thus a successful
-runner exit from this worker is **not** evidence of Chromium execution,
-and its current results cannot extend the earlier `devbox` benchmarks.
-Install Playwright and its Chromium browser in the *worker's own* virtual
-environment, rerun a focused browser smoke with `--skip-summary` and require
-actual passed browser tests before attempting full-suite comparisons.
-Keep the two checkout identities and their test results separate.
+not the earlier interactive `devbox` checkout. At `413a2185`, its initial
+four-slot/eight-worker B/D browser-lane run skipped all 12 tests because
+Playwright was absent. After restoring that environment dependency, the same
+12 real-Chromium tests passed in **14.06 s**, with B on `gw1` and D on `gw0`.
+A larger four-lane Scenario FAQ/Sidebar/Orders run passed **250 tests,
+16 expected skips in 255.05 s**; each lane used one worker (A/B/C/D:
+`gw1`/`gw3`/`gw2`/`gw0`). Final teardowns were +201.12/+15.26/+14.39/
++252.44 s, confirming the D long tail. The associated timestamped trace
+(`local/benchmarks/chromium-20261102-172648-362351/` on the worker)
+recorded **0.00 worker-s** of slot waiting, **476.29 worker-s** held, and
+only **12.66 s** with all four slots occupied. For this selected workload,
+Scenario FAQ case execution and uneven distribution, not Chromium admission,
+dominate elapsed time. These checks do not verify Syncthing staging access;
+that remains a separate obligation. Neither checkout was synchronized.
+
+**Controlled Windows full-suite slot pair, 2026-11-02:** At clean commit
+`4bda6efb`, sequential runs used eight xdist workers, four grouped lanes,
+Scenario FAQ A/D split, required assets, browser metrics, and grouped skip
+reporting, changing only Chromium slots. The two-slot run **passed 4,843,
+skipped 28, failed 0 in 672.40 s**, with **682.70 worker-s** of admission
+waiting, **445.59 s** at full slot capacity and lane D ending +671.53 s.
+The four-slot run took **509.91 s**, passed **4,842**, skipped the same **28**,
+but **failed one** Scenario FAQ browser assertion; measured waiting was
+**114.74 worker-s**, full-capacity occupancy **315.10 s**, and lane D ended
++509.15 s. Both lane-assignment guards passed. Observed duration fell
+**24.2%** and summed waiting **83.2%**, but the faster run is **not an
+acceptable configuration result** because of the failure. The failed case,
+`test_visibility_zone_terms_normal_browser[390]`, received HTTP 200 for
+`/glossary#term-visibility-zone` but timed out at 15 s waiting for the term
+to become visible. An isolated rerun on the same revision, eight workers and
+four slots **passed in 9.59 s**; the cause under full-suite load remains
+unconfirmed. A second focused four-lane run combining all three Glossary
+widths, Sidebar Density and Orders/AROs passed **21/21 in 24.22 s**;
+its 390px Glossary case took **12.02 s** in the call phase. Both targeted
+runs therefore pass, but neither reproduces full-suite load or establishes
+the reason for the original timeout. Metrics:
+`local/benchmarks/chromium-20261102-172549-31072/` (two slots) and
+`local/benchmarks/chromium-20261102-173728-15540/` (four slots), on Windows. No CPU/RAM sampling or aligned cross-host source-parity
+check was performed. Keep scheduling defaults unchanged, investigate the
+load-sensitive failure, and require repeated fully passing comparisons before
+promotion.
 
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and

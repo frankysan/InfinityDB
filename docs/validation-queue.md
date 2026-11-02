@@ -93,9 +93,13 @@ Only open VR obligations belong here.
   counts passed **4,520 / 330 skipped**; two slots took **503.49 s**
   with **750.74 worker-s** of measured slot waiting; four took
   **380.97 s** with **93.27 worker-s** waiting (24.3% faster in one
-  pair). Deferred: aligned Windows skip-reason comparison, selective
-  missing-source reconciliation, alternating Linux repeats and CPU/RAM
-  monitoring, with no new flaky browser failures. Retire only after
+  pair). Windows full-suite 2/4-slot pair at `4bda6efb`: both reported
+  **28 skips**, but only two slots passed (**4,843/28 in 672.40 s**);
+  four slots had **4,842/28 with one Glossary browser visibility timeout**
+  in **509.91 s**, despite 83.2% less measured slot waiting. The exact
+  failure passed in isolation; see `testing.md`. Deferred: resolve this
+  full-load failure, aligned Windows/Linux skip-source parity, alternating
+  repeated clean comparisons and CPU/RAM monitoring. Retire only after
   the remaining evidence is recorded.
 
 - [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
@@ -151,12 +155,17 @@ Only open VR obligations belong here.
   same-slot-overlap warning; summed unlock uncertainty was **0.0001 s**.
   Targeted Linux namespace/overlap diagnostics are verified.
   Separate MCP `linux-dev` worker at `413a2185` initially skipped all
-  12 selected B/D browser tests because its virtual environment lacks
-  Playwright (despite full SVG assets); see `testing.md`. Restore
-  actual browser execution there before using its benchmarks.
-  Deferred: repeated alternating full-suite slot comparisons with
-  CPU/RAM sampling and Windows/Linux coverage parity. Retire only after
-  the remaining acceptance evidence.
+  12 B/D browser tests for missing Playwright, but after environment
+  repair **12/12 real Chromium tests passed**. Its four-lane Scenario FAQ
+  acceptance passed **250/16 skipped in 255.05 s** and showed **0.00
+  worker-s** slot waiting with a +252.44 s lane-D tail. Windows full-suite
+  2/4-slot timelines at `4bda6efb` measured **682.70/114.74 worker-s**
+  of slot waiting; both lock namespaces were isolated correctly. The
+  four-slot run failed one browser visibility timeout, independently
+  reproduced as passing in isolation; see `testing.md`.
+  Deferred: investigate this full-load failure, repeat alternating fully
+  passing comparisons with CPU/RAM sampling, and reconcile cross-host
+  source coverage. Retire only after the remaining acceptance evidence.
 
 - [ ] **VR-0026** (2026-11-02; ready-to-run): Verify read-only
   Syncthing staging access through the separate `mcpworker` account.
