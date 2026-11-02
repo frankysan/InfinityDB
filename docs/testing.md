@@ -575,9 +575,10 @@ a known dependency incompatibility: **pytest 9.2.0** introduced
 structured internal node IDs; **pytest-xdist 3.8.0** still rewrites
 the old internal `_nodeid` field for loadgroup. Group markers remain
 visible, but loadgroup silently distributes those tests as ungrouped.
-The Linux environment's exact installed versions must still be checked.
-Until upstream releases a compatible xdist version, InfinityDB's
-`.[dev]` dependencies constrain pytest to **`>=8.0,<9.2`**.
+The Linux environment was confirmed to have pytest **9.2.0** and
+pytest-xdist **3.8.0**. Until upstream releases a compatible xdist
+version, InfinityDB's `.[dev]` dependencies constrain pytest to
+**`>=8.0,<9.2`**.
 The startup profiler rejects the known-incompatible
 pytest/xdist combination on `--dist loadgroup` with an actionable
 message, before test collection. This is a safeguard, not a monkeypatch
@@ -609,14 +610,26 @@ worker-seconds** across four setup events; this is not proof of
 correct lane scheduling. No test assertions failed. The attempted
 early-marker fix is therefore not sufficient on that Linux install.
 
-**Recovery and cross-host validation:** On `devbox`, verify installed
-versions with `./.venv/bin/python -m pip show pytest pytest-xdist`.
-After pulling the compatibility constraint, install
-`./.venv/bin/python -m pip install 'pytest>=8,<9.2'`, then run a
-small targeted `browserlanes` check **with test targets before
-`--report`**. Require each observed lane to appear on one worker
-and the targeted suite to pass before repeating full benchmarks.
-Collect CPU/RAM samples separately.
+**Confirmed Linux recovery:** At commit `c39fb659`, devbox
+downgraded pytest from **9.2.0 to 9.1.1**, retaining pytest-xdist
+**3.8.0**. A focused `browserlanes` acceptance run with eight xdist
+workers, four configured lanes and four Chromium slots selected only
+`test_verify_page_footer_browser.py` and
+`test_verify_sidebar_density_browser.py`. All **12 tests passed**
+in **13.58 s**, runner duration **14.03 s**. Browser lane B ran six
+tests solely on `gw1`, and lane D ran six tests solely on `gw0`;
+the lane assignment guard passed. This confirms the incompatibility
+resolution for the observed two lanes, but does not yet validate the
+Scenario FAQ A/D split or all four lanes together.
+
+**Next Linux acceptance:** At the same compatible dependency
+versions, run the Scenario FAQ module with `--split-scenario-faq`
+and confirm A/D each stay on one worker. Then execute the full
+browser section (or full suite) with all four lane groups and repeat
+two-/four-slot benchmarks under the **working** scheduler.
+Do not compare the older dispersed-worker full-suite measurements
+as if they were grouped-lane baselines. Collect CPU/RAM samples
+separately.
 
 ### Measured waiting versus pytest setup
 

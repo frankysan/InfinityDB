@@ -3798,11 +3798,12 @@ follow-up action. Retain source-native values until official resolution.
   by an ambiguous `--report` argument, a targeted Linux run passed
   **232 / 16 skipped** but the guard rejected both lanes being
   dispersed across workers. This matches the upstream pytest 9.2 /
-  pytest-xdist 3.8.0 node-ID regression. Constrain pytest to <9.2
-  until xdist is fixed, check `devbox` package versions, install a
-  compatible pytest in its venv and rerun narrow lane acceptance
-  before renewed concurrency benchmarking. Keep admission limits
-  and test isolation unchanged.
+  pytest-xdist 3.8.0 node-ID regression. Downgrading `devbox` to
+  pytest 9.1.1 confirmed the fix: 12 focused Linux tests passed at
+  `c39fb659`, with lanes B/D on one worker each. Next verify the
+  Scenario FAQ A/D split and all four browser lanes on Linux, then
+  benchmark two and four slots under correct grouping, with CPU/RAM
+  observations. Keep admission limits and test isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

@@ -117,10 +117,13 @@ Only open VR obligations belong here.
   workers, so the test stage failed its safety guard. This matches
   the pytest 9.2 / pytest-xdist 3.8.0 incompatibility: constrain
   pytest <9.2 and fail fast for known-broken loadgroup versions.
-  Deferred: confirm installed Linux versions, install a compatible
-  pytest, rerun focused Linux grouping and only then repeat the
-  controlled full-suite 2/4-slot comparison.
-  Retire when cross-platform behavior and metrics are confirmed.
+  Confirmed Linux recovery at `c39fb659`: `devbox` used pytest
+  9.2.0 and pytest-xdist 3.8.0 before downgrading pytest to **9.1.1**.
+  The targeted B/D browser-lane run passed **12/12 in 13.58 s**:
+  B's six setup events stayed on `gw1`; D's six stayed on `gw0`.
+  Deferred: validate Scenario FAQ's A/D split, verify all four lanes
+  together, then repeat full 2/4-slot comparisons with resource
+  sampling. Retire once these acceptance results are recorded.
 
 - [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
   safety across Linux and Windows for `tools.run_checks`.
