@@ -75,20 +75,21 @@ retain required dependencies in any still-open VR item.
 
 Only open VR obligations belong here.
 
-- [ ] **VR-0007** (2026-11-02; ready-to-run): Run cumulative
-  regression on the V1-A08 450-record reconciliation and selected
-  ECM/Firewall source/browser evidence changes.
+- [ ] **VR-0008** (2026-11-02; ready-to-run): Run cumulative
+  regression after rendering reviewed summary-only Equipment source
+  variants in their parent catalog details (ECM Guided/Hacker).
   Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
-  revision: `dev/v1.0.0` working tree after `9f6c7e41`;
-  files: `tools/report_reference_baseline.py`,
-  `tests/test_report_reference_baseline.py`,
-  `tests/test_verify_scenario_faq_browser.py`, and supporting docs;
-  risk: low. Immediate: focused audit/browser **48 passed**
-  (2 workers; source-pinned ECM/Firewall clauses and Chromium
-  1440/390/320 px); Ruff, Pyright, docs and diff **PASS**.
-  Design: none. Deferred: cumulative project test suite on the final
-  change state; independent hosted CI and release acceptance remain
-  separate.
+  revision: `dev/v1.0.0` working tree after `8481d52b`;
+  files: `src/infinity_db/web/static/rules-reference.js`,
+  `src/infinity_db/web/static/catalog-detail.js`,
+  `tests/test_verify_scenario_faq_browser.py` and supporting docs;
+  risk: low. Immediate: red-before-green Chromium
+  **3 failures → 3 passed** at 1440/390/320 px, with both source
+  summaries, citations, links and layout checked.
+  Design: none. Deferred: cumulative project suite after this
+  presentation change; local full-suite evidence before the edit
+  (VR-0007: **4,706 passed, 25 skipped** at `8481d52b`)
+  does not verify the new renderer. Hosted CI/release gates separate.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -100,7 +101,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0008` (`VR-0007` open; earlier entries retired).
+- Execution: `VR-0009` (`VR-0008` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

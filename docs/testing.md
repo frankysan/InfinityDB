@@ -1674,8 +1674,25 @@ historical D/S tiers. The bounded 2026-11-02 batch passed **48 focused
 tests** (including three real Chromium widths) using two test workers,
 plus Ruff, Pyright, documentation and diff checks. The ignored
 `local/audits/v1-explanation-current-20261102.{json,md}`
-contains the current 450/743 reconciliation; the final cumulative
-suite is deferred under VR-0007, and whole-corpus signoff remains open.
+contains the current 450/743 reconciliation. The cumulative
+suite subsequently **passed** on `8481d52b`: **4,706 passed,
+25 skipped, 0 failed** in **614.25 s** with eight `worksteal`
+workers (async job `dea98a36d6994302a5ec2f06123b7b32`,
+report `local/validation-vr0007-full-20261102.txt`). VR-0007
+was retired; whole-corpus signoff remains open.
+
+**ECM source-only summary presentation (2026-11-02):**
+The parent Equipment detail originally rendered source-variant labels
+but excluded summary-only variant records from the "Variant rules"
+cards. The new Chromium regression first failed at 1440/390/320 px,
+then passed at all three widths after enabling source-summary cards
+only for Equipment. Both `equipment:ecm-guided` and
+`equipment:ecm-hacker` now show their distinct Guided Attack versus
+Hacking Program scopes, N5.3 p. 122 citations and maintained ECM
+links; the existing Skill/Weapon variant selection is unchanged.
+This adds no curated inference and does not constitute whole-record
+acceptance. The post-change cumulative suite remains VR-0008,
+while hosted CI and the release gates remain separate.
 
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill

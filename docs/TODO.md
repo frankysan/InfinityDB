@@ -998,6 +998,14 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           browser work separately from normal page acceptance.
           This is selected source/route evidence, not full-record
           approval for any of the three or their owner.
+        - [x] **Source-owned ECM explanations in normal Equipment detail:**
+          The existing parent ECM page now renders reviewed summary-only
+          source variants, making Guided Attacks and Hacking Programs
+          distinct with p. 122 citations and maintained family links.
+          A red-before-green Chromium regression passes at
+          1440/390/320 px; no curated database or source fact changes.
+          Only this owner-context presentation slice is covered; full
+          record and occurrence-level acceptance remains open.
         - [ ] **Clause and browser dispositions:** Reconcile each current source
           section and record with later documented source/FAQ decisions,
           reviewed conditional effects, and normal-player browser evidence.

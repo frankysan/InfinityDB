@@ -436,12 +436,15 @@ export function hasGameplayRuleFacts(rule) {
   });
 }
 
-export function gameplayVariantRules(variants) {
+export function gameplayVariantRules(variants, { includeSourceSummaries = false } = {}) {
   const result = [];
   const seen = new Set();
   for (const variant of variants || []) {
     for (const rule of variant.rules || []) {
-      if (!hasGameplayRuleFacts(rule)) continue;
+      const reviewedSourceSummary = includeSourceSummaries
+        && rule.variant_semantics?.inheritance === "source"
+        && typeof rule.summary === "string" && rule.summary.trim();
+      if (!hasGameplayRuleFacts(rule) && !reviewedSourceSummary) continue;
       const key = rule.id || rule;
       if (seen.has(key)) continue;
       seen.add(key);

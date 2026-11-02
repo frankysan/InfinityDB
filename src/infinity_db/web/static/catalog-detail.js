@@ -620,7 +620,9 @@ function render(item) {
   const context = restrictionsData && ["equipment", "states"].includes(catalog)
     ? restrictionsContextSection(restrictionsData, (item.rules || []).map((rule) => rule.id))
     : null;
-  const variantRules = gameplayVariantRules(item.variants);
+  const variantRules = gameplayVariantRules(item.variants, {
+    includeSourceSummaries: catalog === "equipment",
+  });
   const levelEffects = levelEffectsSection(item.rules);
   const profiles = catalog === "weapons" && item.weapon_variants?.length
     ? weaponVariants(item.weapon_variants) : null;

@@ -162,6 +162,10 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Show reviewed, summary-only source-variant explanations
+  on Equipment detail pages. ECM: Guided and ECM: Hacker now have distinct
+  attack-scope cards with their original citations, without creating
+  standalone source-variant routes or changing Army profiles.
 - **Data processing + Web backend + Web frontend:** Improve Martial Arts, Booty and
   MetaChemistry charts without changing their source results. Hide inapplicable Martial Arts
   modifiers, separate Booty's TAG/other-Troop-Type branches and MetaChemistry's compound

@@ -57,6 +57,35 @@ def chrome() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_source_ecm_variant_summaries_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """Source-specific ECM attack types remain clear on the parent Equipment page."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/equipment/ecm", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        for slug, phrase in (
+            ("guided", "Guided Attacks targeting its owner"),
+            ("hacker", "Hacking Programs against its owner"),
+        ):
+            card = page.locator(f"#rule-equipment-ecm-{slug}")
+            card.wait_for(state="visible", timeout=30000)
+            assert phrase in card.inner_text(), (width, slug)
+            assert "p. 122" in card.locator(".rules-source-citations").inner_text()
+            assert card.locator('a[href="/equipment/ecm"]').count() >= 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_added_equipment_firewall_normal_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:
