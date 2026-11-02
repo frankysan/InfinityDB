@@ -3818,8 +3818,11 @@ follow-up action. Retain source-native values until official resolution.
   Instrumentation now records the lock namespace and pre-/post-unlock
   timestamp bounds; the analyzer isolates the shared browser namespace
   from capacity self-tests and reports uncertain unlock-gap overlaps
-  separately. Windows focused regression tests passed; validate fresh
-  Linux traces, then repeat resource-sampled comparisons. Keep defaults
+  separately. Windows focused regression tests passed. Linux at
+  `25c0da5b` passed 36 targeted tests with single-worker B/D lane
+  assignments in 13.86 s; the new mixed-workload metrics still require
+  offline analyzer inspection before declaring namespace isolation
+  verified. Then repeat resource-sampled comparisons. Keep defaults
   and test isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before

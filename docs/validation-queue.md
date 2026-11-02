@@ -141,10 +141,14 @@ Only open VR obligations belong here.
   lock-directory provenance and pre-/post-unlock bounds, and the
   analyzer isolates the shared xdist lock namespace, distinguishing
   confirmed interval overlap from unlock-window ambiguity. Focused
-  Windows tests passed; deferred: verify fresh namespace-aware Linux
-  metrics, repeat alternating comparisons with CPU/RAM sampling, and
-  verify Windows/Linux coverage parity. Retire only after the
-  remaining acceptance evidence.
+  Windows tests passed. Linux at `25c0da5b` passed **36/36** targeted
+  capacity, Page Footer and Sidebar Density tests (13.86 s); B/D lanes
+  remained on individual workers and fresh metrics were written under
+  `local/benchmarks/chromium-20261102-160356-356643/` on `devbox`.
+  Deferred: inspect this trace with the updated analyzer to confirm
+  namespace exclusion and overlap classification, repeat alternating
+  comparisons with CPU/RAM sampling, and verify Windows/Linux coverage
+  parity. Retire only after the remaining acceptance evidence.
 
 - [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
   safety across Linux and Windows for `tools.run_checks`.

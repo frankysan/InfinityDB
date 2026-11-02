@@ -1119,7 +1119,17 @@ and Git whitespace checks passed. The improvement affects
 instrumentation and offline analysis only; it does not change slot
 admission, grouping, or Chromium lifecycle. Repeat a fresh Linux run to verify that the warning is
 resolved with namespace-aware records, then continue alternating
-benchmarks with CPU/RAM sampling. Keep the existing defaults.
+benchmarks with CPU/RAM sampling. On Linux `devbox` at `25c0da5b`
+(2026-11-02 16:03 CET), a four-slot/eight-worker targeted run of
+`test_browser_test_capacity.py`, Page Footer, and Sidebar Density
+passed **36/36** in **13.86 s** (runner **14.23 s**, no skips or failures).
+Lane B remained on `gw1` and D on `gw0` (six setup events each); the
+assignment guard passed. Metrics on `devbox`:
+`local/benchmarks/chromium-20261102-160356-356643/`. This validates real
+Linux test execution and lane assignment with the new instrumentation,
+but **not** namespace filtering or overlap diagnostics: the timeline
+analyzer still needs to be run against this new trace. Keep the existing
+defaults.
 
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
