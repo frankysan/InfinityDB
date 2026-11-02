@@ -12,7 +12,9 @@ architecture mirror, release diary, or backlog. Before substantial work, use the
 - curated schemas/review policy: `data/curated/README.md`;
 - data/provenance lifecycle: `data/README.md`;
 - checks/CI: `docs/testing.md`, `docs/ci.md`;
-- unfinished work: `docs/TODO.md`;
+- deferred test design/execution and asynchronous Linux dispatch:
+  `docs/validation-queue.md` (active VD/VR obligations; check every pass);
+- unfinished implementation work: `docs/TODO.md`;
 - upstream rules/Army/Wiki/FAQ inconsistencies and publisher ruling questions:
   `docs/official-source-clarifications.md` (stable SRC IDs);
 - release history: `docs/CHANGELOG.md`.

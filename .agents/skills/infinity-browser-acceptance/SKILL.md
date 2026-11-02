@@ -28,17 +28,27 @@ make frontend acceptance a substitute for backend or data validation.
 3. Find and extend the existing test harness or verifier. Reuse the project fixtures and browser
    transport; keep API/DOM assertions and real page/module behavior. Avoid a parallel custom test
    framework or a browser-only implementation of backend-owned semantics.
-4. Run targeted automated tests first using the command and test selectors in
-   [development checks](../../../docs/testing.md). When diagnosing failure, preserve the first
-   useful HTTP, JavaScript, console, page-status, or screenshot evidence. Do not silently retry a
-   failed page or weaken an assertion to hide nondeterminism.
-5. Verify the exact requirement in the browser where visual or interaction evidence matters.
-   Exercise the affected paths at the planned viewports and themes; compare rendered content with
-   API/data assertions when the page presents backend data. Add manual acceptance only for concerns
-   automation cannot establish.
-6. Run the relevant broader browser/check slice if the shared harness or concurrency behavior
-   changed. Report which viewports, interactions, and check stages were actually verified, and
-   distinguish automation from manual review.
+4. Run essential targeted tests first under the
+   [phased validation workflow](../../../docs/testing.md#phased-development-and-validation).
+   When diagnosing failure, preserve the first useful HTTP, JavaScript, console,
+   page-status, or screenshot evidence. Do not silently retry a failed page or
+   weaken assertions to hide nondeterminism.
+5. Verify the exact requirement in the browser where risk-critical visual
+   or interaction evidence cannot safely be deferred. Exercise the affected
+   paths at the necessary viewports and themes and compare rendered content
+   with API/data assertions. Additional viewport/theme/cross-browser matrices
+   should be specified as VD/VR obligations rather than run indiscriminately.
+6. Check [the validation queue](../../../docs/validation-queue.md) at start
+   and closeout. Queue additional assertions as VD and deferred broader
+   browser/module/full-suite execution for the change as VR. Record
+   browser prerequisites, exact selectors and intended commit. Prefer a
+   [pinned asynchronous Linux worker](../../../docs/testing.md#parallel-windows-development-and-linux-validation)
+   for broader real-Chromium runs when installed browser dependencies and
+   source inputs are verified; unexpected skips do not satisfy acceptance.
+   Continue independent Windows work while queued Linux tests run.
+7. Report actual viewports, interactions, check stages, immediate results,
+   and outstanding VR acceptance. Do not conflate focused UI tests with the
+   final release browser gate.
 
 ## References
 

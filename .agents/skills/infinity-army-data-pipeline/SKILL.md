@@ -40,13 +40,24 @@ For source meaning or rules conflicts, first establish the evidence with
 6. Add or extend tests at the changed boundary. Check exact source-to-output parity and failure
    cases, including stale/mismatched inputs where applicable. Persistent generated artifacts must
    remain deterministic across supported platforms for the same pinned inputs and toolchain.
-7. Run the narrowest relevant stage of
-   [the standard checks](../../../docs/testing.md), then broaden only when the changed contract
-   requires it. Use `tools/run_checks.py --profile data` for the combined Army/rules data profile;
-   do not claim an unavailable stage passed.
-8. Summarize changed inputs/contracts, generated consequences, validation results, and any
-   remaining unresolved data. Do not update pinned source artifacts or publish acquisition output
-   unless explicitly required by the task.
+7. Run essential focused checks from the
+   [phased testing workflow](../../../docs/testing.md#phased-development-and-validation).
+   Use `tools/run_checks.py --profile data` when the combined Army/rules data
+   gate is immediately required, not as an automatic full-profile step for
+   every implementation. Never defer required artifact/provenance integrity
+   verification or claim an unavailable stage passed.
+8. Inspect [the validation queue](../../../docs/validation-queue.md) before
+   and after the pass. Add VD items for concrete additional regressions and a
+   VR item for each distinct change needing deferred modules, integration,
+   cross-platform, or cumulative tests, with source snapshot/asset requirements
+   and exact selectors. Prefer pinned asynchronous
+   [Linux execution](../../../docs/testing.md#parallel-windows-development-and-linux-validation)
+   after separately authorized Git checkout preparation, leaving Windows
+   development independent. Do not retire an item based on unrelated or
+   skipped-asset test coverage.
+9. Summarize changed inputs/contracts, generated consequences, immediate
+   results, queued obligations, and any unresolved data. Do not update pinned
+   source artifacts or publish acquisition output unless explicitly required.
 
 ## References
 

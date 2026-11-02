@@ -383,6 +383,53 @@ Do not compare concurrent multi-host run times as controlled performance
 benchmarks without accounting for contention and host differences. Hosted CI,
 required preflight, and release acceptance remain independent requirements.
 
+**Queued Linux dispatch protocol (VD/VR):**
+
+1. At **implementation start**, read [the active queue](validation-queue.md)
+   and check due thresholds and age. At **implementation closeout**, after
+   essential focused tests, register every additional concrete test-design
+   requirement as VD and every distinct change awaiting broader checks as
+   VR. Include the exact selectors, intended validation revision, initial
+   results, input/asset requirements, and outstanding gates. Do this even
+   when neighboring modules passed locally: a deferred full suite or
+   cross-platform check is still a VR obligation. If none remains, say so
+   explicitly. Update the next-unused-ID counters; do not maintain a second
+   pending-test list in TODO, skills or reports.
+2. When the VD threshold/age requires it, design the needed tests on
+   Windows, run only their direct sanity checks, retire completed VD items
+   and update dependent VR selectors. When the VR threshold/age requires
+   it, group ready items by compatible test state and run overlapping
+   modules/full-suite checks **once per compatible revision**, not once
+   per entry. Prioritize due verification over starting another ordinary
+   implementation pass. A blocked prerequisite stays in the queue with its
+   specific blocker; it never authorizes a silent Git operation.
+3. Select the intended committed/frozen revision and verify that the
+   **MCP Linux worker checkout** (not the interactive `devbox` checkout)
+   has exactly that HEAD and required dependencies/source inputs. If it
+   does not, record `Linux checkout not prepared` with the target SHA in
+   the VR entry; request/perform Git fetch/checkout/fast-forward only
+   through an **explicitly authorized separate Git operation**. Neither
+   `start_test_job` nor file transfer is Git synchronization. Staged
+   Syncthing assets must be activated separately when needed. Do not
+   dispatch a run against an unmatched checkout and call it equivalent.
+4. Start asynchronous MCP pytest jobs via `start_test_job` using
+   `worker="linux-dev"` and `expected_commit=<full 40-character SHA>`.
+   For runner profiles containing tests, use `start_script_job` with
+   the tracked `tools.run_checks` module, the same worker/commit pin,
+   and appropriate timeout. Record job ID and intended selectors in each
+   affected VR item or ignored evidence. Continue **independent Windows
+   development** while Linux runs; do not mutate the Linux test checkout
+   or shared inputs. Inspect `list_script_jobs` after a client reconnect
+   and poll each job to terminal status with `poll_script_job`.
+5. Before retiring a VR, verify the **actual** worker revision, exit code,
+   report, pass/fail/skip counts, and required source/asset coverage.
+   Unexpected browser or source-data skips are gaps, not a green
+   acceptance. A failure stays open and links the implementation fix in
+   TODO. Record concise durable outcome in `docs/testing.md` or the
+   release evidence owner, retire successful VD/VR entries immediately,
+   and advance queue counters without reusing IDs. Windows-only checks,
+   hosted CI and final release acceptance remain distinct.
+
 **Workspace MCP execution:** The connected MCP server requires test workloads
 to use its asynchronous job interface. Use `start_test_job` for ordinary
 pytest or unittest selectors and `start_script_job` for a tracked custom

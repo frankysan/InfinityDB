@@ -41,9 +41,17 @@ hand those parts to the appropriate workflow after the source semantics are clea
    [rules semantics](../../../docs/rules-semantics.md). Explain conditions, the baseline mechanic,
    modifying rule, exceptions, outcome, and source certainty. Use an explicit review-needed marker
    when identity or meaning is genuinely ambiguous.
-7. Report the supported conclusion, unresolved conflicts, source citations, and the smallest
-   relevant validation. Do not turn a reviewed descriptive fact into an executable game mechanic
+7. Report the supported conclusion, unresolved conflicts, source citations, and essential
+   focused validation. Do not turn a reviewed descriptive fact into an executable game mechanic
    or infer legality from a source relationship.
+8. Check the [validation queue](../../../docs/validation-queue.md) at entry
+   and closeout. If this pass changed maintained sources or associated regression
+   contracts, create VD items for concrete missing assertions and VR items for
+   deferred source-audit, cross-platform or cumulative execution, naming the
+   exact source evidence, test selectors and target commit. A pure read-only
+   investigation without pending test work needs no artificial queue entry.
+   Use the [phased Linux execution workflow](../../../docs/testing.md#parallel-windows-development-and-linux-validation)
+   for eligible broader checks; never silently synchronize checkouts.
 
 ## References
 

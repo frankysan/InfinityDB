@@ -101,7 +101,15 @@ implementation pass.
 Record further concrete regression requirements as VD items; record existing
 tests, broader modules and integrated/full-suite checks deferred for each
 distinct change as VR items, with exact selectors, revision and immediate
-evidence. A design-only pass writes queued tests and runs each new test
+evidence. **This is a mandatory closeout checkpoint for every implementation
+pass, including a data-only or source-curation change:** examine
+`docs/validation-queue.md`, add or update outstanding VD/VR obligations
+*before* reporting the task complete, and state the current queue counts,
+oldest due item and intended execution host. Passing focused local tests
+does not implicitly discharge deferred full-suite, browser, integration
+or cross-platform validation. If nothing remains deferred, explicitly
+record that decision in the handoff rather than adding an empty item.
+A design-only pass writes queued tests and runs each new test
 directly to verify it; an execution-only pass batches the broader runs.
 Neither is a blanket exemption from essential tests. Never report deferred
 checks as passed or acceptance complete before verification. Failures

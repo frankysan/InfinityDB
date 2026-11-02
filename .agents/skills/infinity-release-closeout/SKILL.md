@@ -35,14 +35,24 @@ closeout and release readiness, not the feature itself.
 5. Update `README.md` for user-visible behavior, setup, or major capabilities. Update architecture,
    data-model, AI context, or TODO only when the change affects the responsibilities those documents
    own. Check current schema/compatibility values and rebuild guidance together when either changes.
-6. For every closeout, run the smallest relevant documentation and code checks from
-   [development checks](../../../docs/testing.md) against the final changes, and record precise
-   results. Reuse applicable validation from the feature workflow when it covers the final state.
-7. For an actual release, complete every applicable gate in `docs/releasing.md`, including its
-   project-wide maintained-documentation audit; a recent diff review alone is not sufficient.
-8. Inspect the final diff and Git status. Preserve unrelated changes; do not stage, commit, push,
-   deploy, tag, or publish without explicit authorization. Report any release gate or validation
-   that remains incomplete.
+6. Inspect [the active validation queue](../../../docs/validation-queue.md)
+   before and after closeout. Confirm each implementation change has its
+   essential checks recorded and concrete missing test designs (VD) or
+   deferred broader executions (VR) registered, with selectors, evidence
+   requirements and exact commit. A green focused suite is not a reason to
+   omit a full-suite or cross-platform obligation still due. Check the
+   five-item/seven-day triggers and [pinned asynchronous Linux dispatch](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
+   Retire only entries with terminal passing evidence for the intended state;
+   allow independent Windows implementation while Linux jobs execute.
+7. Run the smallest necessary documentation and immediate code checks from
+   [phased development checks](../../../docs/testing.md#phased-development-and-validation).
+   Reuse verified focused results rather than repeating entire modules.
+8. For an actual release, resolve applicable queued obligations and every
+   gate in `docs/releasing.md`, including its project-wide maintained-
+   documentation audit. Queue retirement never substitutes for CI.
+9. Inspect the final diff and Git status. Preserve unrelated changes; do
+   not stage, commit, push, deploy, tag, or publish without authorization.
+   Report the queue counts, deferred gates and precise validation status.
 
 ## References
 

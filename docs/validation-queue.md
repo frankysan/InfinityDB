@@ -51,6 +51,18 @@ IDs here and link the owning task instead of duplicating its description.
   reproducible. A green result from an older state cannot verify a later edit.
   Store bulky reports under ignored `local/`; retain concise durable acceptance
   evidence in its canonical document when required.
+- **Linux is the preferred deferred-execution worker**, not an automatic
+  mirror of Windows. When ready, batch compatible VR selectors into a
+  pinned asynchronous `linux-dev` job with `expected_commit`; while it runs,
+  Windows implementation may continue independently. A mismatch in the
+  worker's Git revision, dependencies or source assets is an explicit
+  dispatch blocker, not permission to sync Git or count skips as passing.
+  Only a separate requested Git operation changes the Linux checkout.
+  Follow the [dispatch/retirement protocol](testing.md#parallel-windows-development-and-linux-validation).
+  A successful job applies only to its verified revision and coverage.
+  At each pass boundary, report queue counts, due/blocked items and what
+  was actually dispatched; do not equate green immediate tests with an
+  empty deferred-execution queue.
 - **Retire completed entries immediately after processing:** remove a VD item
   once its tests are designed and the direct sanity checks pass; carry any
   relevant selector/dependency into its open VR item. Remove a VR item when
@@ -73,7 +85,55 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here.
+Only open VR obligations belong here. **Current count: 5 distinct
+changes** (VR-0023/0024/0026/0027/0028); the execution threshold is
+reached. The next validation pass must address runnable work and its
+prerequisites before another ordinary implementation pass. The oldest
+recorded date is 2026-11-02. Windows and Linux checkouts are independent;
+**no Linux Git update has been requested or performed** for the new
+Discover/Parachutist changes.
+
+- [ ] **VR-0027** (2026-11-02; ready-to-run; Linux checkout preparation
+  pending): Cumulative/cross-platform verification of the reviewed
+  Parachutist (Dep. Zone) source-33 parameter and guarded publication.
+  Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
+  implementation included in Windows `dev/v1.0.0` baseline
+  `11c6562ed4a3c7960ae3e6e81838799ce9ba0230`.
+  Immediate Windows: all 17 source signatures and owners verified in
+  `tests/test_audit_source_variant_inputs.py` (**58 passed** at promotion);
+  `tests/test_curated.py` (**651 passed**);
+  `tests/test_rules_database.py` (**166 passed**), guarded
+  staged/promoted v9 rules/deployed-object publication, 17 unchanged
+  objects, data/rules build, Ruff, docs and diff checks passed.
+  Design: none currently identified.
+  Deferred: one cumulative Linux full-suite run on the **explicitly
+  selected exact revision**, with verified browser dependencies and
+  source/asset skip explanations; compare any platform-specific findings
+  with Windows and execute any remaining release-required Windows check.
+  Linux `worker="linux-dev"` requires a separately authorized Git
+  checkout selection/sync and exact `expected_commit`. The pinned raw
+  Army archive was checked on Windows; absent raw inputs on Linux must
+  remain disclosed, not counted as independently source-verified.
+  Retire after terminal results and evidence are recorded.
+
+- [ ] **VR-0028** (2026-11-02; ready-to-run; Linux checkout preparation
+  pending): Cumulative/cross-platform verification of the three exact
+  Discover source-131 extras and guarded publication.
+  Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
+  Windows `dev/v1.0.0` combined baseline
+  `11c6562ed4a3c7960ae3e6e81838799ce9ba0230`.
+  Immediate Windows: source owners and fresh/published export
+  `tests/test_audit_source_variant_inputs.py` (**60 passed**);
+  `tests/test_curated.py` (**664 passed**);
+  `tests/test_rules_database.py` (**166 passed**);
+  13 Discover mutation cases, exact SHA-256 guarded rules/publication
+  promotion with 17 deployed objects unchanged, data/rules builds,
+  Ruff, docs and diff checks passed. Design: none currently identified.
+  Deferred: the **same compatible pinned Linux full-suite job** as
+  VR-0027 (do not duplicate the run), with explicit skip/source
+  coverage and Windows-only checks where needed. Linux Git preparation
+  is a separate explicitly authorized operation, not a side effect
+  of test dispatch. Retire only for verified terminal acceptance.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -191,7 +251,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0027` (`VR-0023`, `VR-0024` and `VR-0026` open; earlier entries retired).
+- Execution: `VR-0029` (`VR-0023`, `VR-0024`, `VR-0026`,
+  `VR-0027` and `VR-0028` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -45,8 +45,17 @@ change, use [Army data pipeline](../infinity-army-data-pipeline/SKILL.md).
    so published API/browser output is checked against the generated contract, not raw-source
    assumptions.
 7. For browser-facing changes, follow [browser acceptance](../infinity-browser-acceptance/SKILL.md).
-   Run the smallest relevant checks from [testing](../../../docs/testing.md), then inspect the full
-   diff for missing documentation owners or changed behavior.
+   Run the essential focused tests and risk-critical checks from
+   [phased validation](../../../docs/testing.md#phased-development-and-validation), then inspect
+   the full diff for missing documentation owners or changed behavior.
+8. **Before implementation and at closeout**, inspect the
+   [active validation queue](../../../docs/validation-queue.md). Register missing
+   additional test design as VD and deferred integration/browser/module/full-suite
+   execution for this change as VR, with exact selectors and target revision.
+   Do not treat targeted green tests as completion of broader verification.
+   Batch due VR items on the pinned asynchronous Linux worker when prepared,
+   following the [Windows/Linux handoff](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
+   Never synchronize Git as a testing side effect; retire only verified entries.
 
 ## References
 
