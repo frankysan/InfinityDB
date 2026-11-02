@@ -1716,8 +1716,8 @@ horizontal fit and JS errors. Existing API and pinned English
 N5.3 p. 75 tests remain unchanged. The current-inventory report
 registers this as **selected-route evidence only**; full clause,
 Weapon and whole-record acceptance remain open. Six focused tests
-passed including the inventory crosswalk; cumulative regression on
-the final change is queued as VR-0009.
+passed including the inventory crosswalk; the cumulative regression
+completed in the VR-0009–VR-0013 batch described below.
 
 **MULTI Rifle and MULTI Heavy Machine Gun selected modes (2026-11-02):**
 `test_multi_weapon_modes_stay_separate_in_normal_browser` in
@@ -1736,7 +1736,7 @@ The expanded focused run **passed 13/13**. The current
 reconciliation records only selected browser evidence
 for `weapon:multi-rifle` and `weapon:multi-heavy-machine-gun`;
 neither the frozen inventory nor whole-Weapon acceptance changes.
-Cumulative regression is deferred as VR-0010.
+Cumulative regression completed in the VR-0009–VR-0013 batch below.
 
 **MULTI Marksman Rifle/Pistol mode extension (2026-11-02):**
 The same browser regression now also verifies N5.3 p. 180 MULTI
@@ -1753,7 +1753,7 @@ and its missing-test fail-closed guard, the final focused set
 passed **16/16**. Ruff, Pyright, docs and diff checks passed.
 The two new inventory identities receive selected browser
 evidence only, without whole-record approval. Broader regression
-is deferred under VR-0011.
+completed in the VR-0009–VR-0013 batch below.
 
 **Boarding Pistol / Missile Launcher selected mode separation
 (2026-11-02):** `test_blast_and_hit_weapon_modes_keep_effects_separate_in_browser`
@@ -1771,7 +1771,39 @@ fail-closed guard passed **11/11**; Ruff, Pyright, Markdownlint,
 documentation links and diff checks passed. The current 450-record
 inventory records these two Weapons as **selected browser evidence only**;
 it does not certify automatic attack resolution or the complete record.
-Cumulative project regression remains VR-0012.
+Cumulative regression completed in the VR-0009–VR-0013 batch below.
+
+**K1 Combi Rifle / K1 Sniper Rifle selected browser evidence
+(2026-11-02):** `test_k1_weapon_profiles_keep_normal_ammunition_and_arm_zero_in_browser`
+verifies normal catalog-to-detail Chromium navigation at 1440/390/320 px,
+single-mode source profiles, N Ammunition, PS 7, ARM=0 with one
+Saving Roll, and the Combi B3/Suppressive Fire versus Sniper
+B2/no Suppressive Fire distinction. Both retain Anti-materiel;
+the reviewed N5.3 chart citations are pp. 183/185. The
+browser test checks the source-backed distinction from AP's
+ARM/2, keyboard navigation to Normal Ammunition, horizontal
+fit and JavaScript errors. Six browser cases and two existing
+API/source checks passed (8/8); the expanded set including
+inventory reconciliation and missing-test guard passed **10/10**.
+Ruff, Pyright, documentation and diff checks passed. This is
+selected-route evidence, not a derived K1 ammunition mechanic, Immunity
+adjudication or whole-record approval. The five-item cumulative
+batch VR-0009–VR-0013 completed successfully.
+
+**Cumulative test execution, VR-0009 through VR-0013 (2026-11-02):**
+The final change state on `dev/v1.0.0`, based on
+`80d1df0dc21418d6ff90c2bc89ebe63636095315`, passed the full
+8-worker `worksteal` test suite: **4,737 passed, 25 skipped,
+0 failed** in **522.00 s** (overall test stage 522.64 s).
+Async job `a220d046688a464db4ebe2f41638be98` exited 0;
+ignored report `local/validation-vr0009-vr0013-full-20261102.txt`.
+The run covers the selected MODs, MULTI Rifle/HMG,
+MULTI Marksman/Pistol, Boarding Pistol/Missile Launcher, and
+K1 Combi/Sniper work, satisfying all five deferred obligations.
+The queue entries were retired; the historical 367-record review,
+current 450-record reconciliation, and selected browser checks do
+**not** imply whole-record signoff. Hosted CI and release-candidate
+acceptance remain separate.
 
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill

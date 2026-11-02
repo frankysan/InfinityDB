@@ -1053,6 +1053,18 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           links, JS errors and layout without changing Army or rules
           data. This certifies selected presentation only, not
           attack resolution or whole-record acceptance.
+        - [x] **K1 Combi/Sniper source-mode browser evidence
+          (2026-11-02):** Added normal Chromium navigation at
+          1440/390/320 px for N5.3 chart pp. 183/185. Both Weapons
+          retain N Ammunition, the printed ARM=0 single Saving
+          Roll, PS 7 and Anti-materiel rather than inventing a K1
+          Ammunition type or applying AP's ARM/2 modifier. The
+          Combi Rifle retains Burst 3 and Suppressive Fire; the
+          Sniper Rifle has Burst 2 without Suppressive Fire.
+          The selected route checks source citations, keyboard
+          navigation to Normal Ammunition, JS errors and layout,
+          without resolving Immunity interactions or approving
+          either complete Weapon record.
         - [ ] **Clause and browser dispositions:** Reconcile each current source
           section and record with later documented source/FAQ decisions,
           reviewed conditional effects, and normal-player browser evidence.

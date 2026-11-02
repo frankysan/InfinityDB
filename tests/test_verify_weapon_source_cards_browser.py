@@ -332,6 +332,70 @@ def test_blast_and_hit_weapon_modes_keep_effects_separate_in_browser(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "source_page", "burst", "suppressive"),
+    (
+        ("k1-combi-rifle", 183, "3", True),
+        ("k1-sniper-rifle", 185, "2", False),
+    ),
+)
+def test_k1_weapon_profiles_keep_normal_ammunition_and_arm_zero_in_browser(
+    origin: str, chrome: Any, width: int, slug: str,
+    source_page: int, burst: str, suppressive: bool,
+) -> None:
+    """V1-A08: K1 affects printed Saving, not ammunition or other K1 traits."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{origin}/weapons", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(f'#catalog-list a[href="/weapons/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{origin}/weapons/{slug}", timeout=30000)
+        profile = page.locator(".weapon-variant .weapon-profile")
+        profile.wait_for(state="visible", timeout=30000)
+        assert profile.count() == 1, (slug, width)
+        statline = profile.locator(".weapon-statline tbody tr").first
+        expected = {
+            "Ammunition": "N",
+            "B": burst,
+            "PS": "7",
+            "Saving": "ARM=0 × 1",
+        }
+        for label, value in expected.items():
+            assert statline.locator(
+                f'td[data-label="{label}"]'
+            ).inner_text() == value, (slug, width, label)
+        traits = profile.locator(".weapon-data-row").filter(
+            has=page.locator(".weapon-data-heading", has_text="Traits")
+        )
+        assert "Anti-materiel" in profile.inner_text()
+        assert ("Suppressive Fire" in traits.inner_text()
+                if traits.count() else False) is suppressive, (slug, width)
+        rule = page.locator(f"#rule-weapon-{slug}")
+        rule.wait_for(state="visible", timeout=30000)
+        summary = rule.inner_text()
+        assert "not a separate K1 Ammunition" in summary, (slug, width)
+        assert "ARM/2" in summary, (slug, width)
+        assert f"p. {source_page}" in rule.locator(
+            ".rules-source-citations"
+        ).inner_text()
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        link = statline.locator('a[href="/ammunition/normal"]').first
+        link.wait_for(state="visible", timeout=10000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{origin}/ammunition/normal", timeout=30000)
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
 @pytest.fixture(scope="module")
 def published_weapons(origin: str) -> list[dict[str, Any]]:
     """Read every published Weapon detail once for storage/API/browser checks."""

@@ -1377,6 +1377,12 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     "weapon:multi-pistol": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "weapon:boarding-pistol": "test_blast_and_hit_weapon_modes_keep_effects_separate_in_browser",
     "weapon:missile-launcher": "test_blast_and_hit_weapon_modes_keep_effects_separate_in_browser",
+    "weapon:k1-combi-rifle": (
+        "test_k1_weapon_profiles_keep_normal_ammunition_and_arm_zero_in_browser"
+    ),
+    "weapon:k1-sniper-rifle": (
+        "test_k1_weapon_profiles_keep_normal_ammunition_and_arm_zero_in_browser"
+    ),
     "equipment:firewall": "test_added_equipment_firewall_normal_browser",
     "rule:order-expenditure-sequence": (
         "test_conditional_reaction_source_slices_visible_in_normal_browser"
