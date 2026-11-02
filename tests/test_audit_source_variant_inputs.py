@@ -100,6 +100,66 @@ def _inventory() -> dict:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_doctor_source_53_exact_qualifiers_preserve_2w_and_reroll_boundary() -> None:
+    """Pin Doctor extra signatures without treating source labels as reviewed effects."""
+    from collections import Counter
+
+    expected = {
+        1: ("+3", 85, None, None),
+        253: (
+            "2W", 15,
+            {33478, 34014, 34181, 35960, 37682, 38372, 39421,
+             39890, 40147, 46484, 61555, 61573, 66315, 79845, 82775},
+            {"option": 11, "profile": 4},
+        ),
+        366: ("ReRoll -3", 3, {767, 8714, 12414}, {"profile": 3}),
+    }
+    [item] = select_source_variants(_inventory(), "skills", [53])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Doctor", 53, 235,
+    )
+    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["reviewedExtra"] is None
+    assert item["rawValues"] == []
+    assert item["extraSignatures"] == [
+        {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": count}
+        for extra_id, (raw, count, _ids, _owners) in expected.items()
+    ]
+    assert sum(count for _raw, count, _ids, _owners in expected.values()) == 103
+    for extra_id, (raw, count, ids, owners) in expected.items():
+        rows = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=53, extra_id=extra_id,
+        )
+        assert len(rows) == count
+        if ids is not None:
+            assert {row["occurrence_id"] for row in rows} == ids
+        if owners is not None:
+            assert Counter(row["owner"] for row in rows) == owners
+        assert all(
+            row["extra_position"] == 1
+            and row["extra_id"] == extra_id
+            and row["extra_type"] == "TEXT"
+            and row["extra_raw"] == raw
+            and row["source_raw"] is None
+            and row["army_source_file"] is not None
+            for row in rows
+        )
+
+    doctor = next(
+        record
+        for _, document in load_curated_directory(ROOT / "data/curated/rules")
+        for record in document["records"]
+        if record["id"] == "skill:doctor"
+    )
+    effects = " ".join(doctor["facts"]["effects"])
+    assert "Doctor (2W) removes two Wounds" in effects
+    assert "Doctor (ReRoll WIP=X)" in effects
+    assert "subsequent Command Token reroll" in effects
+    assert doctor["variantSemantics"] == {"inheritance": "family"}
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_engineer_source_49_qualifiers_remain_unreviewed_and_owner_exact() -> None:
     """Pin Engineer's four source-native annotations without inferring their effects."""
     from collections import Counter

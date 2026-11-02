@@ -1952,6 +1952,22 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         records the exact rule-scope question without treating the
         Army notation as a confirmed erratum. No curated variant,
         imported source, or Unit-usage index is changed.
+      - [x] **Data processing — Doctor source-53 qualifier audit:**
+        The pinned September 29 Army source contains **235** direct
+        Doctor occurrences, of which **103** carry exactly one
+        source extra: `1/TEXT:+3` (85), `253/TEXT:2W` (15),
+        and `366/TEXT:ReRoll -3` (three Bipandra profiles).
+        The source regression checks all three complete signatures,
+        all 15 `2W` occurrence IDs (11 options, four profiles)
+        and all three `ReRoll -3` IDs, plus the full 85-row
+        `+3` count and raw owner provenance. N5.3 p. 90
+        expressly defines the `2W` recovery effect, but no
+        typed occurrence-specific publication is made by this audit.
+        The `ReRoll -3` interpretation remains open as
+        [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope);
+        neither the `-3` nor `+3` source text is promoted to
+        a general WIP modifier. Raw Army and generated databases
+        remain unchanged; the Unit-usage index stays deferred.
       - [x] **Data processing — Discover source-131 modifiers:**
         N5.3 pp. 68, 77 define bracketed Skill modifiers as usable
         only with that Skill, Discover as a WIP Roll, and ReRoll

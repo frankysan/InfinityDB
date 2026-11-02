@@ -95,9 +95,14 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 5 distinct
-changes** (VR-0023/0024/0031/0032/0033); no deferred design
+Only open VR obligations belong here. **Current count: 6 distinct
+changes** (VR-0023/0024/0031/0032/0033/0034); no deferred design
 requirement is open. Oldest recorded date: 2026-11-02.
+The previously due execution batch is already running on the
+pinned Linux revision `eec7f940`; new Windows Doctor changes
+are not included. Its completion must be reconciled before
+retirement, and the Doctor change requires a subsequent
+committed revision and separate Linux handoff.
 The five-item execution threshold was reached, and the agent
 safely pushed existing committed Windows HEAD
 `eec7f940d435e74bd918367298abb8e2356b8302`, fetched
@@ -121,6 +126,23 @@ under VR-0023. Camouflage and Infiltration edits newer than
 `d16338ed` were not tested by that Linux run; the next
 compatible handoff requires the committed intended revision
 and verified Linux source inputs.
+
+- [ ] **VR-0034** (2026-11-02; pending new Windows commit):
+  Cross-platform source-only acceptance of Doctor source-53
+  `+3`, `2W` and `ReRoll -3` source signatures.
+  Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
+  Windows base `2efa2689ce30f315cdfe85998f17d4a14a4d9fa2`
+  plus uncommitted source regression and documentation.
+  Immediate:
+  `tests/test_audit_source_variant_inputs.py::test_doctor_source_53_exact_qualifiers_preserve_2w_and_reroll_boundary`
+  **1 passed** with pinned raw Army data. Checks all three singleton
+  signatures, all 103 qualified source rows, exact 15 `2W`
+  IDs/owner kinds and exact three `ReRoll -3` IDs.
+  The ambiguity in `ReRoll -3` remains open under
+  [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope).
+  Design: none. Deferred: exact raw-source coverage on Linux at
+  the committed target revision and the next compatible cumulative
+  suite. The current `eec7f940` Linux run predates this change.
 
 - [ ] **VR-0033** (2026-11-02; pending new Windows commit):
   Cross-platform source-only acceptance of Engineer source-49
@@ -274,9 +296,9 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0034` (`VR-0023`, `VR-0024`,
-  `VR-0031`, `VR-0032`, `VR-0033` open;
-  earlier entries retired).
+- Execution: `VR-0035` (`VR-0023`, `VR-0024`,
+  `VR-0031`, `VR-0032`, `VR-0033`, `VR-0034`
+  open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
