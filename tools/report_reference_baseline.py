@@ -1373,6 +1373,8 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:modifiers-explained": "test_modifiers_explained_normal_reference_navigation",
     "weapon:multi-rifle": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "weapon:multi-heavy-machine-gun": "test_multi_weapon_modes_stay_separate_in_normal_browser",
+    "weapon:multi-marksman-rifle": "test_multi_weapon_modes_stay_separate_in_normal_browser",
+    "weapon:multi-pistol": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "equipment:firewall": "test_added_equipment_firewall_normal_browser",
     "rule:order-expenditure-sequence": (
         "test_conditional_reaction_source_slices_visible_in_normal_browser"

@@ -1738,6 +1738,23 @@ for `weapon:multi-rifle` and `weapon:multi-heavy-machine-gun`;
 neither the frozen inventory nor whole-Weapon acceptance changes.
 Cumulative regression is deferred as VR-0010.
 
+**MULTI Marksman Rifle/Pistol mode extension (2026-11-02):**
+The same browser regression now also verifies N5.3 p. 180 MULTI
+Marksman Rifle and p. 182 MULTI Pistol at 1440/390/320 px. Army's
+first-mode label `Anti-Material Mode` stays unchanged despite
+the source-reviewed Anti-materiel spelling. Mode-specific
+Ammunition/Burst/PS/Saving and Traits remain independent; the
+Pistol AP/Shock alternatives do not acquire Anti-materiel or
+Suppressive Fire. All routes, citations, keyboard AP links,
+JavaScript and horizontal-fit checks passed. Initial focused
+regression: **14 passed** across four MULTI Weapons and two
+existing source/API cases. Including inventory reconciliation
+and its missing-test fail-closed guard, the final focused set
+passed **16/16**. Ruff, Pyright, docs and diff checks passed.
+The two new inventory identities receive selected browser
+evidence only, without whole-record approval. Broader regression
+is deferred under VR-0011.
+
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill
 owners from historical Git commit `c5400ab1`. This explicitly requires

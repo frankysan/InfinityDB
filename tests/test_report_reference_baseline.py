@@ -76,6 +76,7 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
         "rule:standard-game", "rule:game-modes", "equipment:firewall",
         "rule:modifiers-explained",
         "weapon:multi-rifle", "weapon:multi-heavy-machine-gun",
+        "weapon:multi-marksman-rifle", "weapon:multi-pistol",
         "rule:order-expenditure-sequence", "skill:look-out",
         "term:visibility-zone", "term:low-visibility-zone",
         "term:poor-visibility-zone", "term:zero-visibility-zone",

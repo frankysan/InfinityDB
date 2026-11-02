@@ -1027,6 +1027,18 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           JavaScript errors and horizontal fit. No weapon profile,
           curated rule or generated artifact changed; this is selected
           source/route evidence, not acceptance of all Weapon modes.
+        - [x] **MULTI Marksman Rifle/Pistol source-mode browser extension
+          (2026-11-02):** Extend the existing normal Chromium mode
+          regression at 1440/390/320 px to the printed N5.3 pp. 180/182
+          profiles. Verify three separate Anti-Material/AP/Shock modes,
+          ammunition, Burst, PS, Saving Rolls and strictly mode-local
+          Traits; preserve Army's `Anti-Material` label versus the
+          reviewed `Anti-Materiel` source spelling. MULTI Pistol
+          AP/Shock modes have no inherited Anti-materiel or Suppressive
+          Fire Trait. Check catalog navigation, source citations,
+          keyboard AP link, errors and horizontal fit. This adds
+          selected browser evidence only; published and curated data
+          and whole-Weapon acceptance remain unchanged.
         - [ ] **Clause and browser dispositions:** Reconcile each current source
           section and record with later documented source/FAQ decisions,
           reviewed conditional effects, and normal-player browser evidence.

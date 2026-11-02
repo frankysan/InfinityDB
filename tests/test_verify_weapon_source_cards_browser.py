@@ -178,11 +178,33 @@ def test_pinned_weapon_modes_rules_links_and_citations(
                  "Suppressive Fire", "Anti-materiel"),
             ),
         ),
+        (
+            "multi-marksman-rifle", 180,
+            (
+                ("Anti-Material Mode", "DA", "1", "7", "ARM × 2",
+                 "Anti-materiel", "Suppressive Fire"),
+                ("AP Mode", "AP", "3", "7", "ARM/2 × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+                ("Shock Mode", "Shock", "3", "7", "ARM × 1",
+                 "Suppressive Fire", "Anti-materiel"),
+            ),
+        ),
+        (
+            "multi-pistol", 182,
+            (
+                ("Anti-Material Mode", "DA", "1", "7", "ARM × 2",
+                 "Anti-materiel", "Suppressive Fire"),
+                ("AP Mode", "AP", "2", "7", "ARM/2 × 1",
+                 None, "Anti-materiel"),
+                ("Shock Mode", "Shock", "2", "7", "ARM × 1",
+                 None, "Anti-materiel"),
+            ),
+        ),
     ),
 )
 def test_multi_weapon_modes_stay_separate_in_normal_browser(
     origin: str, chrome: Any, width: int, slug: str, source_page: int,
-    modes: tuple[tuple[str, str, str, str, str, str, str], ...],
+    modes: tuple[tuple[str, str, str, str, str, str | None, str], ...],
 ) -> None:
     """V1-A08: source-scoped MULTI modes must not transfer Burst or Traits."""
     page = chrome.new_page(viewport={"width": width, "height": 900})
@@ -206,7 +228,12 @@ def test_multi_weapon_modes_stay_separate_in_normal_browser(
                 cell.inner_text() for cell in cells.all()
             ] == [ammo, burst, ps, saving], (slug, width, name)
             text = card.inner_text()
-            assert required in text, (slug, width, name, required)
+            if required is not None:
+                assert required in text, (slug, width, name, required)
+            else:
+                assert not card.locator(".weapon-data-heading").filter(
+                    has_text="Traits"
+                ).count(), (slug, width, name)
             assert forbidden not in text, (slug, width, name, forbidden)
         rule = page.locator(f'#rule-weapon-{slug}')
         rule.wait_for(state="visible", timeout=30000)
