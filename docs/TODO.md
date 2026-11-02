@@ -3761,6 +3761,16 @@ follow-up action. Retain source-native values until official resolution.
 
 ### Performance, storage, and build tooling
 
+- [ ] **Project infrastructure:** Execute the controlled
+  [Chromium concurrency and browser-reuse benchmark](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark).
+  Instrument slot waits versus browser launches; compare 2/3/4 slot limits
+  and scheduling lanes independently, then measure process reuse with fresh
+  per-test contexts. Retain an eight-worker native Windows baseline, repeat
+  full-suite finalists, and optionally compare a version-pinned Docker
+  Playwright test environment without changing production Compose.
+  Adopt a faster default only after repeatable improvements and passing
+  isolation/stability/resource checks; keep raw evidence ignored under `local/`.
+
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
   representative snapshot before and after each performance change.

@@ -520,6 +520,78 @@ eight cases in **35.08 s serially** and **25.09 s with two workers**; the
 complete relation module passed 11 tests in **34.15 s** with two workers.
 This split participates in the normal full-suite checks.
 
+### Controlled Chromium concurrency and browser-reuse benchmark
+
+**Status: planned, not executed.** This is a Project infrastructure
+experiment, not a change to the current `worksteal` default or the 1.0
+release gate. Test cases currently share browsers within some modules,
+but Chromium admission is still capped at two active slot holders.
+
+1. **Freeze the comparison inputs.** Pin Git HEAD and the complete working
+   tree/DB/publication state, Python/pytest/xdist/Playwright versions,
+   Chrome/Chromium channel and version, host CPU/RAM, pytest worker count
+   (start with eight), asset policy, and background workload. Run on the
+   same Windows checkout and record whether Docker Desktop is active.
+   Do not edit test inputs while benchmark jobs are running.
+2. **Instrument before tuning.** Report elapsed wall time, xdist startup/
+   collection, per-slot lock wait and hold time, browser launch/close count
+   and duration, browser-context/page creation, per-module execution and
+   teardown, and lane start/finish. Collect CPU utilization, peak process-
+   tree RAM, and failures (including WSGI/HTTP/JS/request diagnostics).
+   Distinguish blocked fixture setup from expensive Chromium launch.
+3. **Make admission and grouping configurable (separately).** Add validated
+   runner/pytest settings for browser slots (2, 3, 4) and browser lane count
+   (2, 3, 4). Keep the existing two-slot/two-lane behavior as the default.
+   Derive balanced, deterministic xdist groups from maintained browser
+   modules using measured workload rather than case count alone. Include
+   the two real-Chromium tests outside the `_browser.py` modules. Preserve
+   mock-only and mixed-module exclusions and the cross-process slot lock.
+4. **Establish native baselines.** On the unchanged tests, record current
+   `worksteal` with two slots and grouped `browserlanes` with two slots/
+   two lanes. Then compare `worksteal` at 2/3/4 slots (without reuse) and
+   grouped runs at 2/3/4 lanes with matching slot limits (without reuse).
+   Keep all non-browser pytest workers enabled. Start with the maintained
+   browser section; test each promising configuration against the full
+   test stage to expose scheduler starvation and the long-tail effect.
+5. **Measure browser reuse independently.** Prototype one lazily started
+   Playwright/Chromium process per dedicated browser worker, spanning
+   modules but never shared across worker processes. Create a fresh
+   context/page per independent test and always close them; preserve
+   per-test routing, event capture, viewport/theme/storage isolation,
+   and the existing HTTP acceptance checks. Ensure the number of
+   *live* pooled browsers, including idle ones, never exceeds the
+   configured resource cap: a short-lived slot lease alone does not
+   enforce this. Handle crashes, skips and worker exit without leaks.
+   Compare reuse on/off at identical lane and slot counts.
+6. **Repeat and validate.** Run one unscored warm-up followed by at least
+   three scored runs per candidate, alternating their order. Record
+   median total and browser-section time, run-to-run variation, p95
+   fixture wait/test time, CPU/RAM peaks, pass/skip counts, and all
+   timeouts/retries (do not silently retry). Add focused regression tests
+   for slot configuration, xdist grouping, isolation, crash/teardown,
+   and fallback when Chrome or Playwright is absent.
+7. **Evaluate Docker as a second environment, not a shortcut.** Confirm
+   `docker version`, `docker info` and `docker compose version` work with
+   Linux containers on the Windows development host before use. The
+   existing Dockerfile/Compose files package the *application*, not a
+   Playwright test runner. If native benchmarks justify further study,
+   use a separate pinned Playwright-capable test image, matching Python/
+   Playwright/browser versions and the same pinned data. Keep browser
+   tests and app data isolated from production containers; set explicit
+   CPU/RAM limits, account for Docker Desktop/WSL2 overhead, and record
+   host versus container results independently. Do not compare Chrome
+   on Windows with a different bundled Chromium build as equivalent.
+8. **Decision gate.** Adopt a new default only when all assertions pass
+   with unchanged expected skips, no new flaky failures or resource
+   leaks, and repeatable median wall-time improvement of at least 10%
+   on the full test stage without material p95/peak-RAM regression.
+   Otherwise keep the current defaults. Re-run the candidate with
+   canonical checks, CI and release acceptance as applicable.
+
+Store raw measurements in ignored `local/benchmarks/`; publish only the
+selected configuration, methodology and concise outcome here. Do not
+turn the active validation queue into a completed benchmark log.
+
 ## Theme runtime regression coverage
 
 The web test suite executes the checked-in theme startup and preference modules in a minimal Node.js
