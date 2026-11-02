@@ -389,6 +389,30 @@ remain stable under the workstation's normal worker count.
 
 ## Chromium concurrency under pytest-xdist
 
+**Linux worker validation, 2026-11-02:** Ubuntu `devbox` (16 vCPUs,
+approximately 15 GiB RAM, Python 3.14) passed the complete seven-stage
+`tools/run_checks.py --all --build-source tests/fixtures/deployment-smoke
+--test-workers 6 --assets required --report` command at commit
+`16560d038a611d23128a60e7b29781f6f0077d0c`. The ordinary test stage
+reported **4,492 passed, 330 skipped, 2 warnings in 546.85 s**; the
+isolated Git-index CI preflight passed in **262.10 s**, including wheel
+and deployed-asset verification. Ruff, docs, Pyright, synthetic Army
+build and curated rules all passed. The two warnings concern Python 3.14
+forking a multithreaded process in web-metrics tests, not assertion
+failures. A prior `-n auto` (16-worker) run on the same commit passed
+the same **4,492/330** split in **549.94 s**; these single runs do not
+show a speedup from increased workers with two Chromium slots.
+
+This Linux checkout lacks some Git-ignored source evidence: its
+**330 skipped** tests contrast with a previous Windows full-suite run
+of **4,797 passed / 25 skipped** (both totals are 4,822 collected).
+Investigate actual skip reasons and reconcile input availability
+before treating the hosts as coverage-equivalent; the differing source
+states also prevent a controlled cross-host speed comparison. This
+Linux run predated the separate resource-wait reporting implementation,
+so its multi-minute pytest setup durations are not decomposed into
+waiting versus other setup.
+
 ### Measured waiting versus pytest setup
 
 Pytest's native `setup` duration includes time blocked acquiring a Chromium
