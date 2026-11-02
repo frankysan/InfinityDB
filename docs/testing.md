@@ -1061,6 +1061,39 @@ was supplied. Keep existing defaults; repeat the same pinned
 configuration in alternating order, analyze the timestamped slot
 metrics and capture CPU/RAM before making an adoption decision.
 
+**Linux Chromium timeline reconstruction, same `413a2185` pair:**
+The two-slot trace observed 35 admissions (three records with slot indices
+above two excluded), **489.86 s** of observation, **927.81 worker-s** of
+holds, **437.69 s** at full capacity, **750.75 worker-s** of waiting,
+**0.22 s** with a free slot and a pending request, and a peak queue of
+three requests. The four-slot trace observed 38 admissions,
+**374.73 s** of observation, **1,042.82 worker-s** of holds,
+**182.22 s** at full capacity, **93.27 worker-s** of waiting,
+**0.09 s** with a free slot and a pending request, and a peak queue of
+two requests. Full-capacity occupancy fell from **89.4%** to **48.6%**
+of each trace's observation span. Scenario FAQ held **459.55/507.13
+worker-s** (two/four slots); higher parallelism shortened elapsed time
+but did not reduce its total hold cost. These observations support
+capacity contention rather than excessive idle-slot admission latency.
+
+**Timeline diagnostic caveat:** Both analyzer runs printed
+`overlapping holders for the same slot`. The measurement code samples
+`released_monotonic_seconds` *after* the OS lock is released and its
+handle closed, so recorded hold boundaries can overlap subsequent
+owners. In addition, the full suite's capacity self-tests use independent
+temporary lock directories while sharing the process-wide metrics
+output directory; their 3-/4-slot tests can generate the three slot
+indices excluded by a two-slot analysis. The analyzer currently stores
+neither lock-directory identity nor a separate unlock timestamp; it
+cannot distinguish independent namespaces or identify genuine lock
+ownership overlap from these summaries. The approximately **0.26
+slot-second** difference between summed holds and uniquely occupied
+slots in each trace is small but **not a lock-correctness proof**.
+Before using overlap warnings as a validation gate, record/partition
+lock namespaces and bound unlock-to-timestamp skew, with focused
+analyzer regressions. Keep the raw metrics and do not change resource
+limits based on this warning alone.
+
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version

@@ -3810,7 +3810,14 @@ follow-up action. Retain source-native values until official resolution.
   lane assignments in both runs. This is a single pair, not yet
   adoption evidence. Next: repeat in alternating order, analyze the
   timestamped occupancy, gather CPU/RAM and resolve cross-host skip
-  coverage. Keep defaults and test isolation unchanged.
+  coverage. Timeline analysis shows two slots saturated for 437.69 s
+  versus 182.22 s with four slots, with just 0.22/0.09 s of free
+  capacity while requests waited. The overlap warnings are not yet
+  trustworthy: self-tests use separate lock directories in the same
+  metrics output, and lock releases are timestamped after unlocking.
+  Record the lock namespace and bound timestamp skew before treating
+  timeline overlaps as resource-gate failures. Keep defaults and test
+  isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

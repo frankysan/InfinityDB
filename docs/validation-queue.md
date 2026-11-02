@@ -133,8 +133,13 @@ Only open VR obligations belong here.
   with each of A/B/C/D assigned to one worker in both runs; the
   four-slot D lane still finished last (+377.62 s). Timestamped
   metrics are on `devbox` under `local/benchmarks/` (details in
-  `testing.md`). Deferred: analyze occupancy, repeat alternating
-  comparisons with CPU/RAM sampling and verify Windows/Linux coverage
+  `testing.md`). The timeline reconstruction showed **437.69/182.22 s**
+  at full capacity (two/four slots), with **0.22/0.09 s** waiting despite
+  a free slot. Overlap warnings may include separate lock namespaces
+  from capacity self-tests and post-unlock timestamp skew; they do not
+  establish a resource-cap breach. Deferred: disambiguate lock
+  namespaces/timestamp skew in diagnostics, repeat alternating
+  comparisons with CPU/RAM sampling, and verify Windows/Linux coverage
   parity. Retire only after the remaining acceptance evidence.
 
 - [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
