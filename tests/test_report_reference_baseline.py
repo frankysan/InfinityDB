@@ -82,6 +82,8 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
         "weapon:k1-combi-rifle", "weapon:k1-sniper-rifle",
         "rule:order-expenditure-sequence", "skill:look-out",
         "skill:discover", "skill:place-deployable", "skill:reload", "skill:alert",
+        "skill:guard", "rule:hacking-area", "rule:peripheral-type:cyberplug",
+        "skill:stealth",
         "term:visibility-zone", "term:low-visibility-zone",
         "term:poor-visibility-zone", "term:zero-visibility-zone",
         "term:white-noise-zone",

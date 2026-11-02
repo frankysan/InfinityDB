@@ -1905,17 +1905,28 @@ With inventory reconciliation and the missing-test fail-closed guard,
 the expanded focused run passed **17/17**. Ruff, Pyright,
 documentation and diff checks passed. The source crosswalk audit
 with the exact PDF fingerprint passed.
-Consequently six of ten crosswalk cases have selected browser
-coverage; Guard/Aerial, Hacking Area, Cyberplug and Stealth still
-require repeatable player-facing checks. This is neither all possible
-ARO triggers nor a complete matrix of Skill-specific permissions. Each
-record and its source sections retain pending whole-record acceptance,
-including where previously reviewed curation facts or selected
-browser tests are available.
+The first two browser slices covered six of ten crosswalk cases.
+The follow-on `test_remaining_conditional_crosswalk_cases_normal_browser`
+regression checks Guard/Aerial (N5.3 pp. 86/95), Hacking Area
+(pp. 55/57), Peripheral (Cyberplug) (pp. 107/108), and Stealth
+(p. 112) at 1440/390/320 px. It checks the distinct ARO window
+and conditional exceptions, actual Rules/Skills catalog navigation,
+pinned source citations, working keyboard links, JavaScript errors
+and horizontal fit. The four associated pinned-PDF source tests
+and twelve Chromium cases passed (**16/16**); including inventory
+reconciliation and the fail-closed missing-test guard, **18/18**
+passed. The closed-source crosswalk audit passed against the pinned
+N5.3 PDF; Ruff, Pyright, documentation links, Markdownlint and
+diff checks passed. Cumulative execution is deferred under VR-0016.
+All **ten selected crosswalk cases** now have repeatable
+normal-browser evidence. This is neither all possible ARO triggers
+nor a complete matrix of Skill-specific permissions. Every record
+and source section retains pending whole-record acceptance, including
+where reviewed curation or selected browser evidence exists.
 
 The JSON contains the complete current identity crosswalk, D/S provenance
-where applicable, source pages/headings, curated review flags and seven
-selected browser-test pointers for recently published general references.
+where applicable, source pages/headings, curated review flags and
+selected browser-test pointers for recently published references.
 Every current record retains an explicit *full acceptance not assessed*
 disposition, even when its curated source status is `reviewed` or a
 selected browser test exists. The Markdown is an ignored reviewer queue.

@@ -286,6 +286,90 @@ def test_visibility_zone_terms_normal_browser(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("route", "record_id", "page_numbers", "clauses", "related"),
+    (
+        (
+            "/skills/guard", "skill-guard", (86, 95),
+            (
+                "Aerial target", "not Unconscious",
+                "Silhouette contact", "does not independently grant an ARO",
+            ),
+            "/skills/aerial",
+        ),
+        (
+            "/rules/hacking-area", "rule-hacking-area", (55, 57),
+            (
+                "outside both LoF and ZoC cannot react",
+                "gains its own Reset",
+                "only if the Marker reveals itself",
+                "unrevealed Marker",
+            ),
+            "/skills/reset",
+        ),
+        (
+            "/rules/peripheral-type-cyberplug",
+            "rule-peripheral-type-cyberplug", (107, 108),
+            (
+                "Controller performs Idle", "Autonomous",
+                "both Cyberplugs become Autonomous",
+                "Neither Profile grants an ARO without ordinary reaction eligibility",
+            ),
+            "/skills/cyberplug",
+        ),
+        (
+            "/skills/stealth", "skill-stealth", (112,),
+            (
+                "Mixed-activation example",
+                "other activated Trooper",
+                "becomes Idle",
+                "different active Trooper is not by itself an exception to Stealth",
+                "Marker form",
+            ),
+            "/skills/cautious-movement",
+        ),
+    ),
+)
+def test_remaining_conditional_crosswalk_cases_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    route: str, record_id: str, page_numbers: tuple[int, ...],
+    clauses: tuple[str, ...], related: str,
+) -> None:
+    """V1-A08: conditional ARO explanations remain scoped in player routes."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        catalog = route.split("/")[1]
+        response = page.goto(f"{ORIGIN}/{catalog}", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(f'#catalog-list a[href="{route}"]')
+        entry.wait_for(state="visible", timeout=15000)
+        entry.click()
+        page.wait_for_url(f"{ORIGIN}{route}", timeout=15000)
+        card = page.locator(f"#rule-{record_id}")
+        card.wait_for(state="visible", timeout=15000)
+        visible = card.inner_text()
+        for fragment in clauses:
+            assert fragment in visible, (route, width, fragment)
+        citations = card.locator(".rules-source-citations").inner_text()
+        for number in page_numbers:
+            assert f"p. {number}" in citations, (route, width, number)
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (route, width)
+        link = card.locator(f'a[href="{related}"]').first
+        link.wait_for(state="visible", timeout=10000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}{related}", timeout=15000)
+        assert not errors, (route, width, errors)
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390, 320])
 @pytest.mark.parametrize(
     ("slug", "page_number", "clauses", "related"),

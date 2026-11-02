@@ -1121,8 +1121,21 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           Source hash/pinned-clause audit passes; this expands
           selected browser evidence to six of ten crosswalk cases,
           **not** all reactions or whole-record acceptance.
-          Guard/Aerial, Hacking Area, Cyberplug and Stealth still
-          need repeatable browser dispositions.
+          The remaining four cases are covered by the next slice.
+        - [x] **Guard/Aerial, Hacking Area, Cyberplug and Stealth
+          release-pair browser dispositions (2026-11-02):**
+          Repeated Chromium at 1440/390/320 px confirms the existing
+          source-reviewed clauses through ordinary Skill/Rule catalog
+          navigation. Guard's Aerial/Unconscious exception does not
+          grant a new ARO; the Hacking Area's initial Idle/Repeater
+          window differs from a later targeted Reset; a Cyberplug
+          Controller's Connected/Autonomous alternatives retain ordinary
+          ARO eligibility; and Stealth's mixed activation/Marker
+          exceptions remain tied to the Stealth user's declarations.
+          N5.3 pages, related keyboard links, JS errors and viewport
+          fit pass. All ten source-crosswalk cases now have selected
+          browser evidence; general reaction permissions, source
+          sections and whole-record signoff remain open.
         - [x] **Numerical Army source Skill variants (V1-A08):** Exact
           pinned September 29 Army ZIP, Skill dictionaries, all **17**
           faction-file option occurrences and parent-profile attributes

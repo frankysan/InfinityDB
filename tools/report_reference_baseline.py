@@ -1391,6 +1391,13 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     ),
     "skill:look-out": "test_conditional_reaction_source_slices_visible_in_normal_browser",
     **{
+        identifier: "test_remaining_conditional_crosswalk_cases_normal_browser"
+        for identifier in (
+            "skill:guard", "rule:hacking-area",
+            "rule:peripheral-type:cyberplug", "skill:stealth",
+        )
+    },
+    **{
         identifier: "test_selected_conditional_skills_normal_browser"
         for identifier in (
             "skill:discover", "skill:place-deployable",
