@@ -3781,10 +3781,13 @@ follow-up action. Retain source-native values until official resolution.
   Next: repeated measurements, process resource sampling and Chrome
   lifecycle profiling across more modules. The Ubuntu `devbox`
   completed all seven check stages at commit `16560d0`, but skipped 330
-  cases versus 25 in the Windows baseline. Reconcile grouped skip reasons
-  at the same Git revision, transfer only required pinned ignored inputs,
-  then compare Linux 2- versus 4-slot browser runs using explicit
-  waiting/remaining-setup measurements before choosing a new default.
+  cases versus 25 in the Windows baseline. The first equal-revision
+  Linux two-/four-slot comparison passed **4,505 tests / 330 skipped**
+  in both configurations, with a **30.9% shorter** test stage and
+  **61.4% less summed Chromium-slot waiting** using four slots.
+  Next: selectively transfer pinned source evidence, compare Windows
+  skip reasons, and repeat alternating 2/4-slot Linux runs with CPU/RAM
+  observations before changing the default.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

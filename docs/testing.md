@@ -421,6 +421,44 @@ skipped count. This is opt-in and does not alter collection or execution.
 Record the reasons from Linux and Windows at the same commit, then
 synchronize only the pinned source files needed for parity.
 
+**Linux paired slot-limit experiment, 2026-11-02:** On `devbox` commit
+`c7901f1abc8e9d0d128f30283e74cf817bc733f4`, two sequential full test
+runs used eight xdist workers, `browserlanes`, four grouped browser lanes,
+`--split-scenario-faq`, `--assets required`, `--browser-metrics`, and
+`--skip-summary`. Only the Chromium slot count changed:
+
+- **Two slots (default):** **4,505 passed, 330 skipped, 2 warnings** in
+  **608.34 s** (runner 608.99 s). Measured Chromium admission waiting
+  totaled **2,777.73 worker-seconds** across 17 setup events; the longest
+  individual wait was **485.80 s** within **489.59 s** of pytest setup.
+  Report: `CHECKS 20261102-131906.txt`.
+- **Four slots:** identical **4,505 passed, 330 skipped, 2 warnings** in
+  **420.25 s** (runner 420.87 s). Measured admission waiting totaled
+  **1,072.94 worker-seconds** across 17 setup events; the longest wait
+  was **263.01 s** within **265.28 s** of pytest setup.
+  Report: `CHECKS 20261102-132923.txt`.
+
+Increasing from two to four slots shortened the test stage by **188.09 s
+(30.9%)** and reduced *summed worker waiting* by **1,704.79 s (61.4%)**.
+Worker waiting is concurrent and must not be interpreted as elapsed wall
+time. The same two Python 3.14 multithreaded-`fork` deprecation warnings
+were reported in both runs. Neither run changed the existing test default.
+
+The grouped skip-reason report reconciled all **330 skips across 50 reason
+strings** in each run: **307 missing pinned/local source evidence** (Army
+archives/raw DBs and rules/FAQ/historical PDFs), **17 intentional opt-ins
+for release-matched rebuilt databases**, **5 pre-promotion checks now
+inapplicable because migrations/citations were promoted**, and **1 absent
+local migration staging report**. The missing-source grouping is based on
+the reported reasons, not a file-by-file inventory; selective source
+transfer and a matching Windows skip-reason comparison are still needed.
+
+These are **two single measurements in one order**, not an alternating
+repeated benchmark. Four slots substantially help but retain over a
+thousand worker-seconds of admission waiting; do not promote four slots
+as the default until repeated A/B/A trials, CPU/RAM observations and
+cross-platform release stability checks pass.
+
 ### Measured waiting versus pytest setup
 
 Pytest's native `setup` duration includes time blocked acquiring a Chromium

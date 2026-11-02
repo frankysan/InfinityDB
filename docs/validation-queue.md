@@ -84,10 +84,15 @@ Only open VR obligations belong here.
   skip**, real Windows xdist skip-summary **94 passed / 1 expected skip**,
   12 browser tests passed with measured slot contention; Ruff, Pyright,
   docs and diff checks passed. Design: none.
-  Deferred: compare full Linux/Windows grouped skip reasons on aligned
-  commits; rerun full 2- and 4-slot Linux browser benchmarks with wait/hold
-  metrics, unchanged expected pass/skip counts and no new errors. Retire
-  once evidence is recorded in `docs/testing.md`.
+  Linux first-pair evidence: at `c7901f1`, both eight-worker/four-lane
+  runs passed **4,505 / 330 skipped**; two slots took **608.34 s** and
+  four slots **420.25 s**, with measured cumulative Chromium waiting
+  **2,777.73 s** and **1,072.94 s**, respectively. Grouped skip reasons
+  reconcile all 330 cases. See `docs/testing.md` for methodology.
+  Deferred: aligned Windows skip-reason comparison, selective missing-source
+  reconciliation, repeated alternating Linux 2/4-slot trials and CPU/RAM
+  monitoring, with no new flaky browser failures. Retire only after
+  the remaining evidence is recorded.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
