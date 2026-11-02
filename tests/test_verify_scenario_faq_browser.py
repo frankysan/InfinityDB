@@ -57,6 +57,75 @@ def chrome() -> Iterator[Any]:
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "source_page", "expected", "inbound_path", "outbound_path"),
+    (
+        (
+            "activate-disco-ball", 71,
+            (
+                "Deactivator", "allied", "LoF", "Zone of Control",
+                "Enemy Disco Balls cannot be activated", "WIP +3",
+                "Conclusion Step", "States Phase",
+            ),
+            "/weapons/disco-baller", "/equipment/deactivator",
+        ),
+        (
+            "request-specball", 98,
+            (
+                "Game Round 2 or 3", "Active Turn", "55 mm",
+                "PH 15", "two different items", "once per game",
+                "at the end of that Order", "English printing discrepancy",
+                "TEAM-OPS", "Request Speedball",
+            ),
+            "/skills/infinity-spec-ops", "/skills/combat-jump",
+        ),
+    ),
+)
+def test_added_source_skills_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    slug: str, source_page: int, expected: tuple[str, ...],
+    inbound_path: str, outbound_path: str,
+) -> None:
+    """V1-A08: newly added source Skills remain readable on the release pair."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/skills", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(f'#catalog-list a[href="/skills/{slug}"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{ORIGIN}/skills/{slug}", timeout=30000)
+        rule = page.locator(f"#rule-skill-{slug}")
+        rule.wait_for(state="visible", timeout=30000)
+        visible = rule.inner_text()
+        for phrase in expected:
+            assert phrase in visible, (slug, width, phrase)
+        assert f"p. {source_page}" in rule.locator(
+            ".rules-source-citations"
+        ).inner_text()
+        outbound = rule.locator(f'a[href="{outbound_path}"]').first
+        outbound.wait_for(state="visible", timeout=10000)
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (slug, width)
+        page.goto(f"{ORIGIN}{inbound_path}", wait_until="domcontentloaded")
+        inbound = page.locator(f'a[href="/skills/{slug}"]').first
+        inbound.wait_for(state="visible", timeout=30000)
+        inbound.focus()
+        inbound.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/skills/{slug}", timeout=30000)
+        page.locator(f"#rule-skill-{slug}").wait_for(
+            state="visible", timeout=30000,
+        )
+        assert not errors, (slug, width, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_modifiers_explained_normal_reference_navigation(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

@@ -1065,6 +1065,19 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           navigation to Normal Ammunition, JS errors and layout,
           without resolving Immunity interactions or approving
           either complete Weapon record.
+        - [x] **Added Skills release-pair browser coverage (2026-11-02):**
+          The two post-inventory Skills, Activate Disco Ball and
+          Request SpecBall, now have repeatable Chromium catalog/detail,
+          inbound keyboard navigation and source-conditions tests at
+          1440/390/320 px. The first distinguishes allied-only
+          Deactivator/WIP +3 activation, Circular Eclipse timing and
+          N5.3 p. 71 from launcher charges. The second covers
+          Round 2/3, PH 15, once-per-game, Spec-Ops pickup/profile
+          timing, the English printing discrepancy and ITS scope,
+          with N5.3 p. 98 citations. Existing API/source checks and
+          historical REA-040 acceptance remain applicable. This is
+          selected route evidence for the two current identities,
+          not a whole-Skill or conditional-declaration signoff.
         - [ ] **Clause and browser dispositions:** Reconcile each current source
           section and record with later documented source/FAQ decisions,
           reviewed conditional effects, and normal-player browser evidence.

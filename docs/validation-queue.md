@@ -73,7 +73,22 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+Only open VR obligations belong here.
+
+- [ ] **VR-0014** (2026-11-02; ready-to-run): Run the cumulative
+  suite after registering the two added Skills, Activate Disco Ball
+  and Request SpecBall, as selected release-pair browser evidence.
+  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree after `f2eb83bd`;
+  files: `tests/test_verify_scenario_faq_browser.py`,
+  `tools/report_reference_baseline.py`,
+  `tests/test_report_reference_baseline.py`, and supporting docs;
+  risk: low. Immediate: six Chromium cases, two source/API tests,
+  inventory reconciliation and missing-test guard **10 passed**;
+  Ruff, Pyright, docs and diff checks **PASS**.
+  Design: none. Deferred: cumulative full suite under the
+  five-change or seven-day phased gate; hosted CI and release
+  acceptance remain separate.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -85,7 +100,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0014` (through `VR-0013` retired).
+- Execution: `VR-0015` (`VR-0014` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

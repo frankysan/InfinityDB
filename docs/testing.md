@@ -1805,6 +1805,28 @@ current 450-record reconciliation, and selected browser checks do
 **not** imply whole-record signoff. Hosted CI and release-candidate
 acceptance remain separate.
 
+**Post-inventory Skills, selected source/browser review (2026-11-02):**
+`test_added_source_skills_normal_browser` checks the tracked
+release-pair Skills catalog and normal detail route for
+`skill:activate-disco-ball` (N5.3 p. 71) and
+`skill:request-specball` (N5.3 p. 98). Across 1440/390/320 px
+it verifies reviewed conditional text, restrictions, citations,
+related links, inbound keyboard navigation from Disco Baller
+and Infinity Spec-Ops, no JS errors, and horizontal fit.
+The Disco Ball activation test checks allied Deactivator/LoF/ZoC,
+WIP +3, Conclusion/States timing and enemy restriction.
+The SpecBall test checks Round 2/3, one drop/PH 15, once-per-game,
+selection/collection timing, printing discrepancy and ITS
+TEAM-OPS boundary. Existing API tests cover both, with older
+REA-040 browser evidence retained as historic validation.
+Eight focused browser/API cases passed before inventory registration;
+the expanded set with reconciliation and its missing-test guard
+passed **10/10**. Ruff, Pyright, documentation links, Markdownlint
+and diff checks passed. Both records are registered as
+**selected-route evidence only**. Whole-record and broader
+declaration eligibility signoff remain open.
+Cumulative regression is deferred as VR-0014.
+
 For the reviewed **declaration-category metadata migration** (V1-A08), add
 `--reconcile-declarations` to join retired categories to their actual Skill
 owners from historical Git commit `c5400ab1`. This explicitly requires

@@ -1371,6 +1371,8 @@ SELECTED_EXPLANATION_BROWSER_TESTS = {
     "rule:standard-game": "test_army_retreat_standard_game_normal_reference_navigation",
     "rule:game-modes": "test_game_modes_source_table_normal_reference_navigation",
     "rule:modifiers-explained": "test_modifiers_explained_normal_reference_navigation",
+    "skill:activate-disco-ball": "test_added_source_skills_normal_browser",
+    "skill:request-specball": "test_added_source_skills_normal_browser",
     "weapon:multi-rifle": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "weapon:multi-heavy-machine-gun": "test_multi_weapon_modes_stay_separate_in_normal_browser",
     "weapon:multi-marksman-rifle": "test_multi_weapon_modes_stay_separate_in_normal_browser",
