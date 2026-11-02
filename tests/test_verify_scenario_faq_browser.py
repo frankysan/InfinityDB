@@ -379,6 +379,48 @@ def test_added_equipment_firewall_normal_browser(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_unpublished_tinbot_source_variant_is_not_a_fake_public_route(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """N5 source ID 188 is reviewed but absent from published TinBot usage."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/equipment", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        assert page.locator(
+            '#catalog-list a[href="/equipment/tinbot-neurocinetics"]'
+        ).count() == 0
+        entry = page.locator('#catalog-list a[href="/equipment/tinbot"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{ORIGIN}/equipment/tinbot", timeout=30000)
+        details = page.locator("#item-content")
+        details.wait_for(state="visible", timeout=30000)
+        assert "TinBot" in page.locator("#item-name").inner_text()
+        assert details.locator("#rule-equipment-tinbot-neurocinetics").count() == 0
+        assert details.locator('a[href="/skills/neurocinetics"]').count() == 0
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+
+        page.goto(f"{ORIGIN}/skills", wait_until="domcontentloaded")
+        skill = page.locator('#catalog-list a[href="/skills/neurocinetics"]')
+        skill.wait_for(state="visible", timeout=30000)
+        skill.focus()
+        skill.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/skills/neurocinetics", timeout=30000)
+        page.locator("#rule-skill-neurocinetics").wait_for(
+            state="visible", timeout=30000,
+        )
+        assert not errors, (width, errors)
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390, 320])
 def test_visibility_zone_terms_normal_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,

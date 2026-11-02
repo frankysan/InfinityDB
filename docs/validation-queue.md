@@ -73,7 +73,23 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+Only open VR obligations belong here.
+
+- [ ] **VR-0019** (2026-11-02; ready-to-run): Run cumulative
+  tests after documenting the TinBot: Neurocinetics source-only
+  publication boundary and adding release-pair browser/API checks
+  proving the unavailable source ID 188 is not advertised as
+  a standalone Equipment route.
+  Work: [Rules and reference completeness](TODO.md#rules-and-reference-completeness);
+  revision: `dev/v1.0.0` working tree after `6d4b93fd`;
+  files: `tests/test_verify_scenario_faq_browser.py`,
+  `tests/test_web.py`, `docs/TODO.md`, `docs/testing.md`;
+  risk: low. Immediate: three Chromium width checks, one
+  API and one exact source-provenance test **5 passed**;
+  Ruff, Pyright, Markdownlint, docs links and diff **PASS**.
+  Design: none. Deferred: cumulative full suite under the
+  five-change/seven-day phased gate; hosted CI and final
+  release acceptance remain separate.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -85,7 +101,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0019` (through `VR-0018` retired).
+- Execution: `VR-0020` (`VR-0019` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

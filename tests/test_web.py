@@ -4990,6 +4990,18 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert rule_record_public_reference(rules_app.database, tinbot_variant) is None
     assert rules_app.api.equipment_catalog.get_equipment("tinbot-firewall") is None
 
+    # Source 188 is reviewed, but absent from this Army snapshot: it is not
+    # a standalone Equipment page or a member of the published TinBot family.
+    neuro_variant = rules_database.composed_record("equipment:tinbot-neurocinetics")
+    assert neuro_variant is not None
+    assert neuro_variant["variant_semantics"]["inheritance"] == "source"
+    assert any(
+        relation["type"] == "uses-effects-of"
+        and relation["record_id"] == "skill:neurocinetics"
+        for relation in neuro_variant["relations"]
+    )
+    assert rule_record_public_reference(rules_app.database, neuro_variant) is None
+    assert rules_app.api.equipment_catalog.get_equipment("tinbot-neurocinetics") is None
     # Army-backed Equipment must not appear without its source catalog identity.
     assert "repeater" not in equipment_items
     assert rules_app.api.equipment_catalog.get_equipment("repeater") is None

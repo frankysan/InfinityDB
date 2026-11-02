@@ -1163,14 +1163,23 @@ missing explanations: the existing shared-effects approvals must be reconciled.
           a global modifier, nor a Total Reaction bonus. These are
           selected routes/source occurrences, not universal ARO
           eligibility or whole-record signoff.
-        - [ ] **TinBot (Neurocinetics) inbound navigation check:**
-          The equipment detail did not expose a visible direct
-          `/skills/neurocinetics` link during the first normal-browser
-          attempt at 1440/390/320 px. Determine whether the maintained
-          `uses-effects-of` relation should produce a player-facing
-          link on that surface. The accepted Neurocinetics regression
-          instead uses keyboard navigation from the Skills catalog;
-          do not claim TinBot-to-Skill navigation until verified.
+        - [x] **TinBot (Neurocinetics) source-only navigation
+          investigation (2026-11-02):** The reviewed
+          `equipment:tinbot-neurocinetics` source ID 188 has a
+          valid `uses-effects-of` relation to Neurocinetics but is
+          absent from the current published Army TinBot source IDs
+          (169, 244, 247, 248). It does not have its own Equipment
+          application identity or standalone route; the active family
+          route is `/equipment/tinbot`. The previous attempt to
+          follow a nonexistent variant detail link was a test
+          assumption, not a missing UI link. Normal Chromium at
+          1440/390/320 px now verifies parent navigation without
+          an invented Neurocinetics card/link, and that the
+          independent `/skills/neurocinetics` route is reachable
+          by keyboard. API/source tests preserve the non-routable
+          source record and the exact published TinBot variant
+          membership. Do not introduce the unavailable variant or
+          extrapolate its effects onto currently published TinBots.
         - [x] **Numerical Army source Skill variants (V1-A08):** Exact
           pinned September 29 Army ZIP, Skill dictionaries, all **17**
           faction-file option occurrences and parent-profile attributes
