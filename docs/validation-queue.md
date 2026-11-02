@@ -110,11 +110,15 @@ The independent Chromium contention and skip-reason
 investigations remain VR-0023/24. Newly committed Windows
 Lieutenant/Commlink regression changes belong to
 `5776779da247c12b186d028cc9328450963be1c7`;
-they require a separate pinned Linux handoff before acceptance.
-Commit/push and validation are explicit agent actions, not
-background Git synchronization.
+they passed independent pinned Linux raw-source verification:
+`tests/test_audit_source_variant_inputs.py` **67/67** on worker
+`linux-dev` at `f4e58294e52f6da0be19008135de16df374b4518`
+(job `linux-dev:a11eff7e5372408caf51b73ebfaba5c4`).
+The compatible cumulative suite has not yet been executed on
+this revision, so VR-0035/36 remain open. Commit/push and
+validation are explicit agent actions, not background Git mirroring.
 
-- [ ] **VR-0036** (2026-11-02; committed, Linux validation pending):
+- [ ] **VR-0036** (2026-11-02; Linux source PASS, cumulative pending):
   Cross-platform source-only validation of the optional N4-origin
   Reinforcements Commlink `+1`/`+2` Trooper-count qualifiers.
   Work: [Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
@@ -125,11 +129,12 @@ background Git synchronization.
   direct rows, 34 `298/TEXT:+1`, eight `299/TEXT:+2`,
   all 42 exact occurrence IDs and loadout-only owner kinds;
   keeps typed semantics unresolved and N4-origin scope visible.
-  Design: none. Deferred: independent Linux raw Army validation
-  and next compatible cumulative suite on committed revision;
-  current `60511fec` Linux job predates this Windows change.
+  Design: none. Pinned Linux raw Army source module passed
+  **67/67** at `f4e58294` (includes the exact Commlink regression).
+  Deferred: next compatible cumulative suite; the previous
+  `60511fec` full suite predates this change.
 
-- [ ] **VR-0035** (2026-11-02; committed, Linux validation pending):
+- [ ] **VR-0035** (2026-11-02; Linux source PASS, cumulative pending):
   Independently validate Lieutenant source-119 resource annotations,
   retaining the distinction between extra Command Tokens and Special
   Lieutenant Orders. Work: [source reconciliation](TODO.md#100--current-reference-completeness-gate);
@@ -140,10 +145,12 @@ background Git synchronization.
   **83** qualified rows, the 30 exact Command Token occurrence
   IDs, separate `245`/`246` signatures, and loadout-only owners.
   N5.3 p. 99 supports distinct resource scopes. Design: none.
-  Deferred: pinned source verification on the Linux worker and
-  a subsequent cumulative run of the committed Windows revision.
-  Neither the completed `eec7f940` suite nor the
-  `60511fec` Linux suite covers the `5776779d` change.
+  Pinned Linux raw Army source module passed **67/67**
+  at `f4e58294` (includes the exact Lieutenant regression).
+  Deferred: next compatible cumulative suite of the
+  committed Windows revision. Neither the completed
+  `eec7f940` nor `60511fec` full suite covers
+  the `5776779d` change.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and

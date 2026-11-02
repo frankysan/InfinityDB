@@ -581,6 +581,18 @@ The subsequent Windows Lieutenant and Commlink regression
 commit `5776779da247c12b186d028cc9328450963be1c7`
 is not covered by these earlier tests.
 
+**2026-11-02 Lieutenant/Commlink pinned Linux source verification
+(VR-0035/36 source gate):** After ordinary, validated Windows
+commits `5776779da247c12b186d028cc9328450963be1c7`
+and `f4e58294e52f6da0be19008135de16df374b4518`
+were pushed, the dedicated `linux-dev` worker fetched and
+fast-forwarded the same branch to `f4e58294`. Pinned source job
+`linux-dev:a11eff7e5372408caf51b73ebfaba5c4`
+passed **67/67** with the raw Army archive; there were no
+source-data skips. The prior `60511fec` cumulative Linux suite
+did not contain the Lieutenant and Commlink regressions.
+VR-0035/36 remain open until a compatible full-suite run.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at
