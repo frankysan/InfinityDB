@@ -101,7 +101,7 @@ def _inventory() -> dict:
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_religious_troop_total_source_83_is_unresolved_and_owner_pinned() -> None:
-    """Keep the lone source-qualified Total occurrence distinct from family rules."""
+    """Pin the likely Army Terrain/Religious modifier swap without correcting input."""
     [item] = select_source_variants(_inventory(), "skills", [83])["items"]
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
         "Religious Troop", 83, 498,
@@ -142,6 +142,23 @@ def test_religious_troop_total_source_83_is_unresolved_and_owner_pinned() -> Non
         "extra_raw": "Total",
         "source_raw": None,
     }
+
+    # The same Team-Ops unit qualifies Terrain on its light/bot profiles,
+    # but not on the Heavy profile where its sole Religious Troop extra occurs.
+    terrain_owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=58, extra_id=33,
+    )
+    assert {
+        row["parent_name"] for row in terrain_owners
+        if row["unit_id"] == 1927
+    } == {"CONFESSOR-1 SPEC-OPS", "BLUEBERRY SPECBOTS"}
+    # Both ordinary Confessor Spec-Ops profiles (and their SpecBot) also
+    # qualify Terrain as Total; neither has a Religious Troop variant.
+    assert {
+        row["parent_name"] for row in terrain_owners
+        if row["unit_id"] == 1913
+    } == {"INITIAL PROFILE", "ENHANCED PROFILE", "BLUEBERRY SPECBOTS"}
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

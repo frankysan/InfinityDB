@@ -113,12 +113,17 @@ work after dispatch is not covered by that revision (VR-0030).
 
 - [ ] **VR-0030** (2026-11-02; ready after new Windows revision
   is committed): Validate the single unreviewed Religious Troop
-  `Total` source occurrence without inventing typed effects.
+  `Total` source occurrence and the likely Terrain modifier
+  misassignment ([SRC-028](official-source-clarifications.md#src-028--confessor-heavy-spec-ops-terrain-total-apparently-attached-to-religious-troop))
+  without inventing typed effects or changing raw Army data.
   Work: [source-variant reconciliation](TODO.md#100--current-reference-completeness-gate);
   development started from Windows `16f0d4cf`, after Linux test dispatch.
   Immediate: exact source-83 extra-33 owner/signature regression
   `tests/test_audit_source_variant_inputs.py::test_religious_troop_total_source_83_is_unresolved_and_owner_pinned`
-  **1 passed** with the pinned Army raw snapshot. Design: none.
+  **1 passed** with the pinned Army raw snapshot, now also asserting
+  Terrain (Total) on the corresponding Confessor-1/SpecBot and
+  original Confessor profiles, with none on the Heavy profile.
+  Documentation, Ruff and diff checks passed. Design: none.
   Deferred: repeat the source audit on Linux with pinned raw Army
   coverage (a skip without that archive is not independent verification)
   and run the next compatible cumulative suite on the committed

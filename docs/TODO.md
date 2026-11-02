@@ -2029,8 +2029,13 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         A direct owner/signature regression passes without assigning
         mechanics to `Total`; the source audit still reports this Skill
         as unresolved. The N5-reviewed generic Religious Troop facts
-        are unchanged. The qualifier's intended effect needs separate
-        source review before typed publication or a Unit-usage index.
+        are unchanged. Comparison across three pinned September Army
+        snapshots shows the Heavy has unqualified Terrain and
+        `Religious Troop (Total)`, whereas Confessor-1 and the separate
+        Confessor Spec-Ops have `Terrain (Total)` and ordinary Religious
+        Troop. The likely mistaken assignment is tracked as
+        [SRC-028](official-source-clarifications.md#src-028--confessor-heavy-spec-ops-terrain-total-apparently-attached-to-religious-troop);
+        preserve the literal source until officially corrected.
       - [x] **Data processing:** Harden the source-variant inventory against
         unreviewed combinations of individually recognized extras. Only a
         single reviewed extra or typed distance can currently certify an
