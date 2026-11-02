@@ -121,9 +121,12 @@ Only open VR obligations belong here.
   9.2.0 and pytest-xdist 3.8.0 before downgrading pytest to **9.1.1**.
   The targeted B/D browser-lane run passed **12/12 in 13.58 s**:
   B's six setup events stayed on `gw1`; D's six stayed on `gw0`.
-  Deferred: validate Scenario FAQ's A/D split, verify all four lanes
-  together, then repeat full 2/4-slot comparisons with resource
-  sampling. Retire once these acceptance results are recorded.
+  Linux at `413a2185` with pytest 9.1.1: **250 passed, 16 skipped**
+  in **257.41 s**; lanes A/B/C/D each stayed on one worker, with Scenario
+  FAQ split across A/D and the assignment guard passing. D remained the
+  long tail (+254 s). Deferred: repeat full 2/4-slot grouped comparisons
+  with resource sampling and verify Windows/Linux coverage parity. Retire
+  only after the remaining acceptance evidence is recorded.
 
 - [ ] **VR-0025** (2026-11-02; ready-to-run): Verify report-path
   safety across Linux and Windows for `tools.run_checks`.

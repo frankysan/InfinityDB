@@ -1012,6 +1012,25 @@ default-scheduler long tail. At documentation closeout the repository
 HEAD had advanced to `709ccc7f`; this test result is **not** claimed
 as validation of changes introduced after `16560d03`.
 
+**Linux four-lane grouping verification, 2026-11-02:** On Ubuntu `devbox`,
+`dev/v1.0.0` at `413a2185dfdd20d7caca5781380d8c1041814d57`,
+pytest 9.1.1 and pytest-xdist 3.8.0, the targeted Scenario FAQ,
+Sidebar density and Orders/AROs browser modules ran with eight workers,
+four Chromium slots, four browser lanes, `--split-scenario-faq`,
+`--browser-metrics`, required assets and reporting. The stage passed
+**250 tests, 16 skipped, 0 failed in 257.41 s** (runner 257.78 s).
+All four observed lanes stayed on exactly one worker: A `gw1` (112 setup
+events), B `gw3` (6), C `gw2` (12) and D `gw0` (136); the assignment
+guard passed. Scenario FAQ test identifiers were split across A/D.
+All lanes began at +1.27 s relative to worker spawn, but final teardown
+was +199.08/+14.93/+14.22/+254.08 s for A/B/C/D respectively.
+The remaining long tail is workload imbalance, not xdist startup or
+cross-worker lane dispersion. Timestamped metrics are stored on `devbox`
+at `local/benchmarks/chromium-20261102-150545-273889/`. This targeted
+run verifies scheduler correctness, **not** full-suite performance or
+cross-host skip parity; repeat equal-revision full-suite two-/four-slot
+runs with the same four lanes and FAQ split before changing defaults.
+
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version

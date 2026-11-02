@@ -3800,10 +3800,12 @@ follow-up action. Retain source-native values until official resolution.
   dispersed across workers. This matches the upstream pytest 9.2 /
   pytest-xdist 3.8.0 node-ID regression. Downgrading `devbox` to
   pytest 9.1.1 confirmed the fix: 12 focused Linux tests passed at
-  `c39fb659`, with lanes B/D on one worker each. Next verify the
-  Scenario FAQ A/D split and all four browser lanes on Linux, then
-  benchmark two and four slots under correct grouping, with CPU/RAM
-  observations. Keep admission limits and test isolation unchanged.
+  `c39fb659`, with lanes B/D on one worker each. The follow-up at
+  `413a2185` passed 250 tests (16 skipped), verified all four lanes on
+  distinct single workers and the Scenario FAQ A/D split. Lane D remained
+  the long tail (+254 s versus ~15 s for B/C); next benchmark two and
+  four slots with unchanged four-lane grouping and FAQ split, recording
+  CPU/RAM and slot occupancy. Keep defaults and test isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.
