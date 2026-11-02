@@ -4838,7 +4838,8 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 29
+    assert len(general_rules) == 30
+    assert general_rules["reinforcements-extra"]["name"] == "Reinforcements Extra"
     assert general_rules["initiative-roll"]["name"] == "Initiative Roll"
     assert general_rules["combat-group"]["name"] == "Combat Group"
     assert general_rules["army-retreat"]["name"] == "Army Retreat!"

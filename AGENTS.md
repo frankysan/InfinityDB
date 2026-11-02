@@ -115,8 +115,12 @@ Neither is a blanket exemption from essential tests. Never report deferred
 checks as passed or acceptance complete before verification. Failures
 remain open and link to the TODO fix. Retire completed VD/VR entries promptly
 after recording results; keep the queue active-only and advance next-unused
-IDs without reuse. Git history retains completed records. The queue does not
-replace the implementation backlog or weaken CI/release gates.
+IDs without reuse. Git history retains completed records. Dispatching a
+due asynchronous Linux validation batch addresses its scheduling
+checkpoint; its completion is **not** a prerequisite for resuming
+independent Windows development. Failed executions remain in the queue
+until corrected and verified. The queue does not replace the
+implementation backlog or weaken CI/release gates.
 
 Prefer asynchronous Linux (`worker="linux-dev"`) jobs for broader tests
 when the dedicated Linux checkout has the intended code, dependencies and
@@ -130,12 +134,20 @@ for a specific revision; associate every result with its actual revision,
 asset state and skip reasons. Never infer that an earlier Linux run validates
 subsequent Windows edits or silently skip missing dependencies.
 
-While an asynchronous MCP test job runs, continue independent development
-on **another checkout**, or read-only review, analysis, planning and triage
-on the checkout being tested. Do not mutate inputs or artifacts visible to
-the running tests; use a separate worktree for concurrent edits on the same
-host. Git synchronization is *never* automatic: changing any checkout's
-branch or revision requires an explicit separate Git operation. Syncthing
+**Dispatch-and-continue is the normal workflow:** once an asynchronous
+`linux-dev` test job starts, immediately resume the next independent
+implementation or test-design task in the **Windows** working tree.
+Do not spend the run repeatedly polling, waiting for completion, or
+substituting status narration for development. Poll at natural task
+boundaries or when output identifies an actionable blocker; retrieve
+the terminal result and reconcile the queue when appropriate. The
+Linux job validates its pinned snapshot, not later Windows edits.
+Read-only review, analysis, planning and triage remain appropriate
+when the next implementation cannot safely proceed. Do not mutate
+inputs or artifacts visible to the running **Linux** tests; use a
+separate worktree for concurrent edits on the same host. Git
+synchronization is *never* automatic: changing any checkout's branch
+or revision requires an explicit separate Git operation. Syncthing
 staging is not checkout synchronization. See
 [parallel Windows/Linux validation](docs/testing.md#parallel-windows-development-and-linux-validation).
 

@@ -182,7 +182,7 @@ def stage(relative: Path) -> dict:
         "reviewedObjects": 17,
     }
     (destination / "report.json").write_text(
-        json.dumps(report, indent=2) + "\n", encoding="utf-8",
+        json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n",
     )
     return report
 

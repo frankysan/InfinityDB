@@ -294,8 +294,12 @@ the next pass must be test execution (after any blocking design). If both are
 due, first design what execution needs. Each open item also becomes due
 **7 calendar days after recording**, irrespective of count. Check the queue
 before and after each pass and do not start unrelated ordinary implementation
-while a mandatory pass is due. The thresholds are batching triggers, not
-limits on how many checks a pass may execute.
+while a mandatory pass is due. **For asynchronous Linux execution, the
+due pass is addressed by safely preparing and dispatching its compatible
+jobs; waiting for their terminal results is not a prerequisite for
+continuing independent Windows development.** Failures still require
+triage, fixes and eventual VR retirement. The thresholds are batching
+triggers, not limits on how many checks a pass may execute.
 
 **Never defer essential checks:** validate the changed contract with a
 direct existing or newly written regression and appropriate static/structure
@@ -335,11 +339,15 @@ can also affect test timing and Chromium stability, so limit contention.
 
 ### Parallel Windows development and Linux validation
 
-**Preferred when feasible:** continue implementation on the Windows development
-checkout while the separate `linux-dev` MCP checkout executes a previously
-selected revision's broader tests asynchronously. This applies to ordinary
-regression, integration, browser and full-suite validation; retain fast,
-essential focused regressions on the development checkout before handing off.
+**Preferred default: dispatch on Linux, develop on Windows.** When the
+separate `linux-dev` MCP checkout executes a previously selected revision's
+broader tests asynchronously, **immediately continue the next independent
+Windows development task** instead of waiting or repeatedly polling. This
+applies to ordinary regression, integration, browser and full-suite
+validation; retain fast essential focused regressions on Windows before
+handoff. Poll at meaningful development/checkpoint boundaries, promptly
+investigate actionable failures when noticed, and reconcile the queue
+against the completed run without blocking unrelated Windows progress.
 Linux-only checks may naturally execute on Linux. Avoid scheduling duplicate
 full suites on Windows just because development has advanced during a Linux
 run; respect the active validation queue and mandatory release gates.
@@ -425,10 +433,13 @@ required preflight, and release acceptance remain independent requirements.
    For runner profiles containing tests, use `start_script_job` with
    the tracked `tools.run_checks` module, the same worker/commit pin,
    and appropriate timeout. Record job ID and intended selectors in each
-   affected VR item or ignored evidence. Continue **independent Windows
-   development** while Linux runs; do not mutate the Linux test checkout
-   or shared inputs. Inspect `list_script_jobs` after a client reconnect
-   and poll each job to terminal status with `poll_script_job`.
+   affected VR item or ignored evidence. **Immediately switch back to
+   productive Windows implementation on the next independent task**;
+   periodic polling is secondary to development, not the main activity
+   during the Linux job. Do not mutate the Linux test checkout or shared
+   inputs. Inspect `list_script_jobs` after a client reconnect and
+   poll with `poll_script_job` at task boundaries, on actionable failure
+   signals, or when gathering final acceptance evidence.
 5. Before retiring a VR, verify the **actual** worker revision, exit code,
    report, pass/fail/skip counts, and required source/asset coverage.
    Unexpected browser or source-data skips are gaps, not a green

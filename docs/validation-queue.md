@@ -35,7 +35,11 @@ IDs here and link the owning task instead of duplicating its description.
   reaches 5, the next pass handles test execution only, after required test
   design is ready. If both thresholds are reached, design goes first wherever
   it blocks execution. Do not start another ordinary implementation pass until
-  the due pass is addressed. A critical gate or an overdue item takes priority.
+  the due pass is addressed. For asynchronous Linux validation, correctly
+  dispatching the due jobs addresses the scheduling checkpoint; return
+  immediately to independent Windows work while they run. Failed jobs
+  remain open and actionable, not silently accepted or ignored.
+  A critical gate or an overdue item takes priority.
 - **Maximum age:** process any open deferrable item within 7 calendar days of
   its recorded date, even below threshold. Also process it before the relevant
   release, merge, deployment, or other mandatory acceptance gate. Reassess the
@@ -53,8 +57,11 @@ IDs here and link the owning task instead of duplicating its description.
   evidence in its canonical document when required.
 - **Linux is the preferred deferred-execution worker**, not an automatic
   mirror of Windows. When ready, batch compatible VR selectors into a
-  pinned asynchronous `linux-dev` job with `expected_commit`; while it runs,
-  Windows implementation may continue independently. A mismatch in the
+  pinned asynchronous `linux-dev` job with `expected_commit`; **after
+  dispatch, resume independent Windows development immediately**, not a
+  polling/waiting loop. Check status at meaningful Windows task boundaries
+  and respond to actionable failures. A Linux run cannot verify later
+  Windows edits. A mismatch in the
   worker's Git revision, dependencies or source assets is an explicit
   dispatch blocker, not permission to sync Git or count skips as passing.
   Only a separate requested Git operation changes the Linux checkout.
@@ -85,8 +92,12 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 4 distinct
-changes** (VR-0023/0024/0027/0028); no new design requirement is open.
+Only open VR obligations belong here. **Current count: 5 distinct
+changes** (VR-0023/0024/0027/0028/0029); no new design requirement is open.
+The execution threshold is due; dispatch a compatible pinned Linux
+batch once the corrected Windows state is committed and selected by an
+explicit Git operation, then **continue Windows development immediately**
+while the Linux job runs.
 The oldest recorded date is 2026-11-02. The Windows and Linux MCP
 checkouts independently matched
 `a2769e110d17dc415c715e05f154b941c81204e9`; no Git
@@ -104,6 +115,23 @@ count, and newline policy for two staging scripts) are tracked in
 acceptance remains failed; do not count the targeted recovery runs as
 a replacement for a passing cumulative job. VR-0026's independent
 read-only Syncthing staging checks were verified and retired.
+
+- [ ] **VR-0029** (2026-11-02; ready after explicit Git revision
+  preparation): Cumulative regression of the Windows corrections to
+  six non-environment Linux failures. Work: [completed regression
+  corrections](TODO.md#source-inventory-and-gap-batches); working base
+  `60df18fd1560531c01c18c87ef374c810709ad33` plus uncommitted
+  updates to General Rules tests/verifier, PDF source pins/count and
+  newline-deterministic staging. Immediate Windows: application-rule
+  references **17 passed**, the affected Web API **1 passed**,
+  PDF source inventory **1 passed**, newline policy **1 passed**;
+  Ruff and docs checks passed. Design: no outstanding requirement.
+  Deferred: one **shared** revision-pinned Linux cumulative run with
+  VR-0027/0028, including ignored deployed-object publication
+  build/check preflight; verify all corrected regressions, unexpected
+  skips and browser coverage. Linux may remain on its prior revision
+  until an explicitly authorized Git operation. Do not interpret
+  passing Windows checks as cross-platform/full-suite acceptance.
 
 - [ ] **VR-0027** (2026-11-02; blocked — cumulative Linux failures
   pending correction and rerun): Cumulative/cross-platform verification of the reviewed
@@ -256,8 +284,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0029` (`VR-0023`, `VR-0024`,
-  `VR-0027` and `VR-0028` open; earlier entries retired).
+- Execution: `VR-0030` (`VR-0023`, `VR-0024`,
+  `VR-0027`, `VR-0028` and `VR-0029` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -125,25 +125,13 @@ are dated evidence; the unchecked tasks here own their resolution. In particular
 the enrichment report's missing standalone Weapon definitions are not 62 confirmed
 missing explanations: the existing shared-effects approvals must be reconciled.
 
-- [ ] **Project infrastructure — Linux full-suite regression corrections:**
-  Reconcile the six non-environment failures in the pinned 2026-11-02
-  `linux-dev` cumulative run at `a2769e11` (4,850 passed, 22 failed,
-  27 skipped). Verify the intended newly published optional-extra
-  general-rule category and 30-record count before updating three
-  `tests/test_application_rule_references.py` assertions and the
-  `tests/test_web.py` catalog count; audit the 14 PDF source entries
-  against the older 12-entry contract in
-  `tests/test_restriction_storage_candidate.py`; add explicit
-  `newline` policies to the two staged report `write_text` calls
-  in `tools/stage_parachutist_deployment_zone.py` and
-  `tools/stage_discover_extras.py` (caught by
-  `tests/test_deterministic_io.py`). The other 16 failures were caused
-  by an absent Git-ignored deployed-object publication on the Linux
-  worker; this prerequisite is now generated and hash-checked, with
-  10 representative previously failing tests passing on rerun.
-  Retain open VR-0027/0028 for a fresh shared Linux cumulative run
-  after code fixes and publication preflight, without automatically
-  modifying either Git checkout.
+- [x] **Project infrastructure — Linux regression corrections:** Updated
+  General Rules catalog expectations for the reviewed optional
+  Reinforcements Extra, verified 14 PDF source declarations/8 distinct
+  IDs, and made both source-variant staging reports newline-deterministic.
+  Essential Windows tests, Ruff and documentation checks passed. Deferred
+  cumulative Linux verification remains open under VR-0027/0028/0029;
+  no automatic Git synchronization.
 
 - [ ] **Data processing + Project infrastructure:** Repair the current-input
   coverage audit path before using it as 1.0 acceptance evidence

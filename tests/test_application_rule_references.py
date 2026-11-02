@@ -220,6 +220,7 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
         "command-token-use",
         "order-type",
         "peripheral-type",
+        "optional-extra",
     }
 
     assert public_rule_domain("ammunition") == ammunition
@@ -384,7 +385,7 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
 
     general_rules = RulesRecordCatalog(rules_database, "rules")
     general_rule_items = general_rules.list_items()
-    assert len(general_rule_items) == 29
+    assert len(general_rule_items) == 30
     assert {item["slug"] for item in general_rule_items} == {
         "access-width",
         "army-retreat",
@@ -407,6 +408,7 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
         "peripheral-type-servant",
         "peripheral-type-synchronized",
         "regular-order",
+        "reinforcements-extra",
         "saving-rolls",
         "standard-game",
         "special-lieutenant-order",
@@ -661,7 +663,8 @@ def test_all_current_general_rules_preserve_category_scoped_publication() -> Non
         for record in document["records"]
         if record_matches_domain(domain, record)
     }
-    assert len(sources) == 29
+    assert len(sources) == 30
+    assert sources["rule:reinforcements-extra"][1]["facts"]["category"] == "optional-extra"
     slugs = {
         route_slug_from_qualified_typed_domain_id(
             record_id, expected_domain="rule", context="General Rule source identity"

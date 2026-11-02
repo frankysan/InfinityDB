@@ -130,7 +130,15 @@ def test_all_selected_pdf_sources_have_consistent_pins_and_exports(tmp_path: Pat
     documents = load_curated_directory(ROOT / "data/curated/rules")
     pdfs = [(doc["collection"]["id"], source)
             for _, doc in documents for source in doc["sources"] if source["kind"] == "pdf"]
-    assert len(pdfs) == 12
+    assert len(pdfs) == 14
+    assert {
+        (collection, source["id"])
+        for collection, source in pdfs
+        if collection == "reinforcements-extra-n4-reference"
+    } == {
+        ("reinforcements-extra-n4-reference", "reinforcements-its-season-18"),
+        ("reinforcements-extra-n4-reference", "reinforcements-n5-core"),
+    }
     source_pins: dict[str, str] = {}
     for _, source in pdfs:
         assert len(source["sha256"]) == 64
@@ -138,7 +146,7 @@ def test_all_selected_pdf_sources_have_consistent_pins_and_exports(tmp_path: Pat
         path = ROOT / source["localPath"]
         if path.exists():
             assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"]
-    assert len(source_pins) == 6
+    assert len(source_pins) == 8
     output = tmp_path / "rules.db"
     export_rules_database(documents, output)
     with sqlite3.connect(output) as db:
