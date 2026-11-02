@@ -541,13 +541,37 @@ and just **0.06 s** with a queued request and nominally free capacity.
 Peak admission queue length was three. These numbers describe the
 recorded Chromium locks, not whole-suite utilization.
 
-In the earlier four-slot ZIP, four separate worker PIDs held
-Scenario FAQ's module-scoped browser fixture, whereas the configured
-`--split-scenario-faq` grouping names only lanes A and D. The
-effective xdist group-to-worker mapping requires verification before
-changing scheduling or claiming exactly two workers served Scenario FAQ.
-Continue to prioritize a source-backed lane-balance comparison, while
-collecting CPU/RAM samples separately: the existing ZIP lacks them.
+**Linux grouped-lane regression, 2026-11-02:** A subsequent full
+four-slot Linux run at `f81cfa4a` passed **4,508/330 skipped** in
+**418.90 s**, with **1,075.27 worker-seconds** of slot waiting.
+Timestamped metrics reconstructed **378.58 s** of browser-admission
+activity, **284.29 s** with all four slots occupied, and just
+**0.55 s** of queued admission with nominally free capacity.
+However, Scenario FAQ occupied slots on **seven xdist workers** and
+Ammunition publication on **eight**. The Linux pytest report lacked
+the `@chromium-*` test grouping suffix and browser-lane timing output,
+unlike Windows. This invalidates interpreting the run as effective
+four-lane scheduling; the 4-slot capacity result remains valid.
+
+The suspected cause is that the dynamic `xdist_group` marker was
+assigned in `pytest_collection_modifyitems`, while pytest-xdist
+collects group names in its own implementation of that hook. Hook
+ordering and/or installed xdist versions may differ across platforms.
+The marker is now assigned earlier in `pytest_itemcollected`, with the
+existing section assignment and validation left unchanged. An
+additional controller-side report prints each `chromium-*` lane's
+**actual** worker and setup count, and makes an explicitly requested
+browser-lane run fail if a lane executes on multiple workers.
+This guard is **opt-in** with `--browser-lanes`, not used by default
+`worksteal` runs. A focused Windows eight-worker loadgroup check
+passed **12/12** with lane B on `gw1` and lane D on `gw0`.
+It does **not** yet establish the Linux behavior after this change.
+
+Before comparing scheduling performance, rerun a short Linux
+`browserlanes` check at an aligned revision, confirm that the
+`chromium lane worker assignment` report shows one worker per lane,
+and only then perform repeatable full-suite timings. Continue to
+collect CPU/RAM samples separately: the earlier archive lacks them.
 
 ### Measured waiting versus pytest setup
 

@@ -185,6 +185,29 @@ def requires_pinned_raw_army_archive() -> None:
     assert not missing, f"Full Army raw archive has missing tables: {sorted(missing)}"
 
 
+def pytest_itemcollected(item: pytest.Item) -> None:
+    """Assign xdist groups before collection-modify hooks consume test markers.
+
+    pytest-xdist reads xdist_group during its own collection-modify hook;
+    assigning them in our modifyitems hook depends on plugin ordering.
+    """
+    path = Path(str(item.path))
+    if path.parent.name != "tests" or not path.stem.startswith("test_"):
+        return
+    if not _uses_chromium(path):
+        return
+    config = item.config
+    browser_lanes = bool(config.getoption("--browser-lanes"))
+    count = int(config.getoption("--browser-lane-count") or 2)
+    groups = browser_lane_groups(count) if browser_lanes else {}
+    group = groups[path.stem] if browser_lanes else path.stem
+    if config.getoption("--split-scenario-faq") and path.stem == (
+        "test_verify_scenario_faq_browser"
+    ):
+        group = scenario_faq_split_lane(item.nodeid)
+    item.add_marker(pytest.mark.xdist_group(name=group))
+
+
 @pytest.hookimpl(tryfirst=True)
 def pytest_collection_modifyitems(
     config: pytest.Config, items: list[pytest.Item],
@@ -203,11 +226,6 @@ def pytest_collection_modifyitems(
         raise pytest.UsageError(
             "--reuse-browser requires --browser-lanes, four lanes and four slots"
         )
-    groups = (
-        browser_lane_groups(lane_count)
-        if browser_lanes else {}
-    )
-
     for item in items:
         path = Path(str(item.path))
         if path.parent.name != "tests" or not path.stem.startswith("test_"):
@@ -218,9 +236,3 @@ def pytest_collection_modifyitems(
                 f"Test module {path.name} is not assigned in config/testing/test-sections.json"
             )
         item.add_marker(section.marker)
-        if _uses_chromium(path):
-            # Dedicated groups keep Chromium work on bounded xdist workers.
-            group = groups[path.stem] if browser_lanes else path.stem
-            if split_scenario and path.stem == "test_verify_scenario_faq_browser":
-                group = scenario_faq_split_lane(item.nodeid)
-            item.add_marker(pytest.mark.xdist_group(name=group))

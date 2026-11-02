@@ -3792,10 +3792,12 @@ follow-up action. Retain source-native values until official resolution.
   and rebalance this module before simply increasing slots further.
   The next opt-in benchmark records request/acquire/release timestamps
   and xdist worker identity, with an offline timeline analyzer.
-  Verify why the prior four-slot Scenario FAQ fixture appeared on four
-  worker PIDs despite an A/D split before revising its lane assignments.
-  Analyze newly captured slot occupancy, then benchmark balanced splits
-  without weakening browser isolation or changing defaults.
+  The Linux follow-up found Scenario FAQ fixtures spread across seven
+  workers and no visible xdist lane assignments; this invalidates the
+  previous assumption of effective four-lane scheduling. Mark browser
+  groups before xdist's collection-modify hook and verify actual
+  group-to-worker assignments on Linux before benchmarking any new
+  lane balance. Keep admission limits and test isolation unchanged.
   Docker CLI/Compose are present, but the engine is not yet reachable
   through the MCP process; verify the Linux container engine before
   preparing a separate Playwright test image.

@@ -107,6 +107,32 @@ def test_wait_summary_keeps_original_setup_and_labels_remainder() -> None:
     assert "do not add the two" in lines
 
 
+def test_browser_lane_worker_summary_detects_dispersed_group() -> None:
+    profile = XdistStartupProfile()
+    def report(lane: str, worker: str) -> pytest.TestReport:
+        return pytest.TestReport(
+            nodeid="tests/test_example.py::test_case",
+            location=("tests/test_example.py", 1, "test_case"),
+            keywords={}, outcome="passed", longrepr=None,
+            when="setup", sections=[], duration=0.0,
+            user_properties=[
+                ("infinitydb_browser_lane", lane),
+                ("infinitydb_browser_worker", worker),
+            ],
+        )
+
+    profile.record_lane_worker(report("chromium-a", "gw0"))
+    profile.record_lane_worker(report("chromium-a", "gw0"))
+    profile.record_lane_worker(report("chromium-b", "gw1"))
+    assert profile.lane_violations() == ()
+    assert "PASS:" in "\n".join(profile.lane_summary_lines())
+    profile.record_lane_worker(report("chromium-a", "gw2"))
+    assert profile.lane_violations() == ("chromium-a: gw0, gw2",)
+    assert "FAIL:" in "\n".join(profile.lane_summary_lines())
+    profile.start(4, 1.0)
+    assert not profile.lane_violations()
+
+
 def test_skip_reasons_group_actual_skip_reports_without_duplicate_counts() -> None:
     def report(reason: str) -> pytest.TestReport:
         return pytest.TestReport(

@@ -105,11 +105,18 @@ Only open VR obligations belong here.
   two-worker xdist; twelve real Chromium browser tests passed with
   timestamped metrics (two-slot occupancy **11.04/12.40 s** observed).
   Ruff, Pyright, docs, and whitespace checks passed. Design: none.
-  Deferred: run both slot limits with `--browser-metrics` on the
-  same commit, analyze completed JSONL, investigate the observed
-  four-PID Scenario FAQ fixture placement, and confirm metrics on
-  Linux and Windows with no change in pass/skip/failure rates.
-  Retire when results and caveats are recorded in `docs/testing.md`.
+  Linux evidence: at `f81cfa4a`, four slots passed **4,508 tests /
+  330 skipped** in **418.90 s**; timestamped timeline found **284.29 s**
+  at full capacity, but Scenario FAQ admissions spanned **seven workers**,
+  exposing ineffective xdist lane grouping on Linux.
+  The marker is now placed at item-collection time and opt-in lane runs
+  report actual worker assignments, failing if any lane spans workers.
+  Focused Windows eight-worker loadgroup: **12 passed**, two lanes
+  confined to one worker each. Deferred: repeat focused Linux
+  grouped test on the updated revision; verify expected lane/worker
+  mapping before a controlled full-suite 2/4-slot comparison.
+  Retire when Linux cross-platform behavior and full metrics are
+  confirmed in `docs/testing.md`.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,

@@ -20,6 +20,8 @@ from tools.resource_waits import capture_resource_waits
 
 _SETUP_WAITS: pytest.StashKey[list[tuple[str, float]]] = pytest.StashKey()
 _WAIT_PROPERTY_PREFIX = "infinitydb_wait_"
+_LANE_PROPERTY = "infinitydb_browser_lane"
+_WORKER_PROPERTY = "infinitydb_browser_worker"
 
 
 def summarized_skip_reasons(reports: Sequence[pytest.TestReport]) -> tuple[str, ...]:
@@ -66,6 +68,8 @@ class XdistStartupProfile:
     browser_lane_started_at: dict[str, float] = field(default_factory=dict)
     browser_lane_finished_at: dict[str, float] = field(default_factory=dict)
     setup_waits: list[tuple[str, str, float, float]] = field(default_factory=list)
+    lane_workers: dict[str, set[str]] = field(default_factory=dict)
+    lane_cases: dict[str, int] = field(default_factory=dict)
 
     def start(self, workers: int, now: float, *, launch_at: float | None = None) -> None:
         self.started_at = now
@@ -78,6 +82,8 @@ class XdistStartupProfile:
         self.browser_lane_started_at.clear()
         self.browser_lane_finished_at.clear()
         self.setup_waits.clear()
+        self.lane_workers.clear()
+        self.lane_cases.clear()
 
     def ready(self, worker: str, now: float) -> None:
         if self.started_at is not None:
@@ -122,6 +128,37 @@ class XdistStartupProfile:
                     report.nodeid, key[len(_WAIT_PROPERTY_PREFIX):],
                     float(value), report.duration,
                 ))
+
+    def record_lane_worker(self, report: pytest.TestReport) -> None:
+        """Track actual group-to-worker placements across xdist test reports."""
+        properties = dict(report.user_properties)
+        lane = properties.get(_LANE_PROPERTY)
+        worker = properties.get(_WORKER_PROPERTY)
+        if not isinstance(lane, str) or not isinstance(worker, str):
+            return
+        self.lane_workers.setdefault(lane, set()).add(worker)
+        self.lane_cases[lane] = self.lane_cases.get(lane, 0) + 1
+
+    def lane_violations(self) -> tuple[str, ...]:
+        return tuple(
+            f"{lane}: {', '.join(sorted(workers))}"
+            for lane, workers in sorted(self.lane_workers.items())
+            if len(workers) > 1
+        )
+
+    def lane_summary_lines(self) -> tuple[str, ...]:
+        if not self.lane_workers:
+            return ("No Chromium lane assignments observed.",)
+        lines = [
+            f"  {lane}: {', '.join(sorted(workers))} "
+            f"({self.lane_cases[lane]} setup events)"
+            for lane, workers in sorted(self.lane_workers.items())
+        ]
+        if self.lane_violations():
+            lines.append("FAIL: one or more grouped browser lanes ran on multiple workers.")
+        else:
+            lines.append("PASS: each observed browser lane used one worker.")
+        return tuple(lines)
 
     def wait_summary_lines(self) -> tuple[str, ...]:
         if not self.setup_waits:
@@ -261,6 +298,15 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo) -> Itera
         by_resource[resource] = by_resource.get(resource, 0.0) + seconds
     for resource, seconds in sorted(by_resource.items()):
         report.user_properties.append((_WAIT_PROPERTY_PREFIX + resource, seconds))
+    if item.config.getoption("--browser-lanes"):
+        for marker in item.iter_markers("xdist_group"):
+            lane = marker.kwargs.get("name", marker.args[0] if marker.args else None)
+            if isinstance(lane, str) and lane.startswith("chromium-"):
+                report.user_properties.append((_LANE_PROPERTY, lane))
+                report.user_properties.append((
+                    _WORKER_PROPERTY, os.environ.get("PYTEST_XDIST_WORKER", "main"),
+                ))
+                break
 
 
 def pytest_runtest_logstart(nodeid: str, location: tuple[str, int, str]) -> None:
@@ -274,6 +320,14 @@ def pytest_runtest_logreport(report: pytest.TestReport) -> None:
         _PROFILE.test_finished(report.nodeid, time.perf_counter())
     elif report.when == "setup":
         _PROFILE.record_setup_wait(report)
+        _PROFILE.record_lane_worker(report)
+
+
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
+    """Reject silently dispersed opt-in browser lanes on the xdist controller."""
+    config = session.config
+    if config.getoption("--browser-lanes") and _PROFILE.lane_violations():
+        session.exitstatus = pytest.ExitCode.TESTS_FAILED
 
 
 def pytest_terminal_summary(terminalreporter: Any) -> None:
@@ -281,6 +335,10 @@ def pytest_terminal_summary(terminalreporter: Any) -> None:
     if lines:
         terminalreporter.write_sep("=", "xdist startup and collection timings")
         for line in lines:
+            terminalreporter.write_line(line)
+    if terminalreporter.config.getoption("--browser-lanes"):
+        terminalreporter.write_sep("=", "chromium lane worker assignment")
+        for line in _PROFILE.lane_summary_lines():
             terminalreporter.write_line(line)
     waits = _PROFILE.wait_summary_lines()
     if waits:
