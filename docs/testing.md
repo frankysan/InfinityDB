@@ -810,6 +810,25 @@ docs and data/rules checks passed. After committing the lane correction
 at `8e2b2de7`, Linux focused Chromium **3/3**, capacity **24/24**
 and the full suite passed, retiring VR-0039.
 
+**2026-11-03 Reinforcements source-profile/variant navigation (VR-0040):**
+A pinned Army-database cohort selects one logical Unit with profiles in
+an ordinary parent Army and its explicit Reinforcement Section.
+`tests/test_verify_reinforcements_optional_browser.py` checks exact
+`profile_payload_occurrences` names against the API for both contexts,
+the `reinforcement=0` filter and explicitly requested Section override,
+and General-profile identity consistency. At 1440/390 px, real Chromium
+opens only the chosen Army's profile disclosure and retains its source
+profile names. A separate pinned query follows actual Army Skill 260
+loadout extras `298/TEXT:+1` and `299/TEXT:+2`: real Chromium at
+1440/390 px shows `Commlink (+1)` and `Commlink (+2)` in their
+source Army loadouts and links to the scoped N4-origin Skill card.
+Windows essential regressions passed **1/1 source/API, 2/2 context
+Chromium, 2/2 Commlink Chromium**; targeted Ruff passed. This checks a
+bounded real-source cohort rather than all profiles, event roster
+legality or N5-native rule authority. Deferred Linux module/integration
+acceptance is tracked as VR-0040; the earlier `8e2b2de7` cumulative
+suite did not contain these new tests.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at

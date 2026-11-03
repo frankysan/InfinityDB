@@ -1,20 +1,23 @@
 """Normal-mode Chromium acceptance for the optional N4-origin Reinforcements annex.
 
 This verifies published navigation and disclosures, not N5-native annex authority,
-army-list legality, or independent N5-native annex authority.
+army-list legality, or adoption of the N4 procedures as N5-native.
 """
 
 from __future__ import annotations
 
+import json
+import sqlite3
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote, urlencode
 
 import pytest
 
 from infinity_db.web import create_app
 from tools.browser_test_metrics import launch_timed_chromium
-from tools.browser_wsgi_transport import route_browser_page
+from tools.browser_wsgi_transport import route_browser_page, wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-reinforcements-browser.test"
@@ -169,5 +172,246 @@ def test_optional_annex_disclosures_and_links_stay_outside_core_matrix(
         ), width
         assert not errors, errors
         assert not responses, responses
+    finally:
+        page.close()
+
+
+def _published_unit(app: Any, slug: str, *, query: str = "") -> dict[str, Any]:
+    url = f"{ORIGIN}/api/units/{quote(slug, safe='')}"
+    if query:
+        url += f"?{query}"
+    status, _headers, body = wsgi_response(app, url)
+    assert status == 200, (slug, query, status, body[:200])
+    return json.loads(body)
+
+
+@pytest.fixture(scope="module")
+def shared_section_unit(app: Any) -> tuple[str, dict[str, Any], dict[str, Any]]:
+    """Pick one pinned logical Unit with actual profiles in both list contexts."""
+    with sqlite3.connect(ROOT / "data/generated/infinity.db") as database:
+        rows = database.execute(
+            "SELECT lu.slug FROM logical_units AS lu "
+            "JOIN logical_unit_sources AS lus ON lus.logical_unit_id = lu.id "
+            "JOIN army_units AS au ON au.unit_id = lus.source_unit_id "
+            "JOIN army_lists AS al ON al.id = au.army_id "
+            "JOIN profile_payload_occurrences AS ppo "
+            "ON ppo.unit_id = au.unit_id AND ppo.army_id = au.army_id "
+            "WHERE lu.slug IS NOT NULL GROUP BY lu.id, lu.slug "
+            "HAVING COUNT(DISTINCT CASE WHEN al.kind = 'reinforcement' "
+            "THEN al.id END) > 0 "
+            "AND COUNT(DISTINCT CASE WHEN al.kind != 'reinforcement' "
+            "THEN al.id END) > 0 ORDER BY lu.slug"
+        )
+        slugs = [str(row[0]) for row in rows]
+    assert slugs, "No pinned logical Unit with ordinary and Reinforcement source profiles"
+    for slug in slugs:
+        unit = _published_unit(app, slug)
+        ordinary = [
+            army for army in unit["armies"]
+            if army["role"] != "reinforcement" and army["profiles"]
+            and "reinforcement" not in army["availability_flags"]
+        ]
+        sections = [
+            army for army in unit["armies"]
+            if army["role"] == "reinforcement" and army["profiles"]
+            and "reinforcement" in army["availability_flags"]
+        ]
+        for section in sections:
+            parents = {parent["id"] for parent in section["parent_armies"]}
+            for main in ordinary:
+                if main["id"] in parents:
+                    return slug, main, section
+    raise AssertionError(
+        f"No source-backed Unit has both an ordinary parent and its Reinforcement "
+        f"Section's own profile occurrences among {len(slugs)} shared candidates"
+    )
+
+
+def test_real_shared_unit_keeps_profiles_in_their_source_sections(
+    app: Any, shared_section_unit: tuple[str, dict[str, Any], dict[str, Any]],
+) -> None:
+    """Source variants remain separate after logical identity reconciliation."""
+    slug, main, section = shared_section_unit
+    main_slug = main["public_slug"]
+    section_slug = section["public_slug"]
+    assert main["id"] != section["id"]
+    assert main["role"] != "reinforcement"
+    assert section["role"] == "reinforcement"
+    assert any(parent["id"] == main["id"] for parent in section["parent_armies"])
+
+    with sqlite3.connect(ROOT / "data/generated/infinity.db") as database:
+        source_ids = [
+            row[0] for row in database.execute(
+                "SELECT lus.source_unit_id FROM logical_unit_sources AS lus "
+                "JOIN logical_units AS lu ON lu.id = lus.logical_unit_id "
+                "WHERE lu.slug = ? ORDER BY lus.source_unit_id", (slug,),
+            )
+        ]
+        assert source_ids
+        placeholders = ", ".join("?" for _ in source_ids)
+        source_names: dict[int, set[str]] = {}
+        for army_id, name in database.execute(
+            "SELECT aas.application_army_id, pp.name "
+            "FROM profile_payload_occurrences AS ppo "
+            "JOIN application_army_sources AS aas "
+            "ON aas.source_army_id = ppo.army_id "
+            "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+            f"WHERE ppo.unit_id IN ({placeholders})",
+            source_ids,
+        ):
+            source_names.setdefault(army_id, set()).add(name)
+
+    for army in (main, section):
+        actual = {profile["name"] for profile in army["profiles"]}
+        assert actual == source_names[army["id"]], (slug, army["name"], actual)
+
+    ordinary_view = _published_unit(
+        app, slug, query=urlencode({"reinforcement": 0, "army_id": main_slug}),
+    )
+    ordinary_armies = {army["id"]: army for army in ordinary_view["armies"]}
+    assert ordinary_armies[main["id"]]["presentation_visible"]
+    assert ordinary_armies[main["id"]]["presentation_requested"]
+    assert not ordinary_armies[section["id"]]["presentation_visible"]
+    assert not ordinary_armies[section["id"]]["presentation_requested"]
+    assert not any(
+        profile["reinforcement_only"] for profile in ordinary_view["general_profiles"]
+    )
+
+    section_view = _published_unit(
+        app, slug, query=urlencode({"reinforcement": 0, "army_id": section_slug}),
+    )
+    selected = {army["id"]: army for army in section_view["armies"]}
+    assert selected[section["id"]]["presentation_requested"]
+    assert selected[section["id"]]["presentation_visible"]
+    assert "reinforcement" in selected[section["id"]]["availability_flags"]
+    assert {profile["name"] for profile in selected[section["id"]]["profiles"]} == (
+        source_names[section["id"]]
+    )
+    assert selected[main["id"]]["presentation_visible"]
+    expected_general = {
+        profile["profile_identity"]
+        for army in section_view["armies"] if army["presentation_visible"]
+        for profile in army["profiles"]
+    }
+    assert {profile["profile_identity"] for profile in section_view["general_profiles"]} == (
+        expected_general
+    )
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+def test_real_shared_unit_opens_only_the_explicit_army_context(
+    app: Any, browser: Any,
+    shared_section_unit: tuple[str, dict[str, Any], dict[str, Any]], width: int,
+) -> None:
+    """The browser's expanded profile must follow Army selection, not Unit identity."""
+    slug, main, section = shared_section_unit
+    page = browser.new_page(viewport={"width": width, "height": 850})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for target in (main, section):
+            chosen = target["public_slug"]
+            page.goto(f"{ORIGIN}/units/{slug}", wait_until="domcontentloaded")
+            url = page.evaluate(
+                """async ({slug, army}) => (await import('/static/share-state.js'))
+                    .shareStateHref('/units/' + encodeURIComponent(slug), 'unit',
+                    {army_id: army})""",
+                {"slug": slug, "army": chosen},
+            )
+            page.goto(f"{ORIGIN}{url}", wait_until="domcontentloaded")
+            page.locator("#unit-content").wait_for(state="visible", timeout=20000)
+            expanded = page.locator("details.army-profile[open]")
+            assert expanded.count() == 1, (slug, chosen, width)
+            assert target["name"] in expanded.locator("summary").inner_text()
+            profile_names = {profile["name"] for profile in target["profiles"]}
+            rendered_names = set(
+                expanded.locator(".profile-name-with-division").all_text_contents()
+            )
+            assert profile_names <= rendered_names, (
+                slug, chosen, width, profile_names - rendered_names,
+            )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.fixture(scope="module")
+def commlink_variant_units(app: Any) -> dict[int, tuple[str, dict[str, Any]]]:
+    """Locate one source-backed Unit/loadout for each exact Army Commlink extra."""
+    with sqlite3.connect(ROOT / "data/generated/infinity.db") as database:
+        candidates = database.execute(
+            "SELECT DISTINCT lu.slug, e.extra_id "
+            "FROM loadout_payload_skill_extras AS e "
+            "JOIN loadout_payload_skills AS s "
+            "ON s.loadout_payload_id = e.loadout_payload_id "
+            "AND s.position = e.occurrence_position "
+            "JOIN loadout_payloads AS lp ON lp.id = s.loadout_payload_id "
+            "JOIN logical_units AS lu ON lu.id = lp.logical_unit_id "
+            "WHERE s.item_id = 260 AND e.extra_id IN (298, 299) "
+            "AND lu.slug IS NOT NULL ORDER BY e.extra_id, lu.slug"
+        ).fetchall()
+    found: dict[int, tuple[str, dict[str, Any]]] = {}
+    for slug, extra_id in candidates:
+        if extra_id in found:
+            continue
+        unit = _published_unit(app, slug)
+        for army in unit["armies"]:
+            if not army.get("profiles") or not army.get("loadouts"):
+                continue
+            if any(
+                skill.get("id") == 260
+                and [(extra["id"], extra["name"]) for extra in skill.get("extras", [])]
+                == [(extra_id, "+1" if extra_id == 298 else "+2")]
+                for loadout in army["loadouts"]
+                for skill in loadout.get("skills", [])
+            ):
+                found[extra_id] = (slug, army)
+                break
+        if len(found) == 2:
+            break
+    assert set(found) == {298, 299}, (
+        "Both reviewed Commlink (+X) Army signatures need Unit detail consumers",
+        found,
+    )
+    return found
+
+
+@pytest.mark.parametrize(
+    ("extra_id", "width"), [(298, 1440), (299, 390)],
+)
+def test_published_commlink_extra_is_linked_from_exact_source_army_loadout(
+    app: Any, browser: Any,
+    commlink_variant_units: dict[int, tuple[str, dict[str, Any]]],
+    extra_id: int, width: int,
+) -> None:
+    """Commlink (+X) stays on its actual Army loadout and leads to scoped rules."""
+    slug, army = commlink_variant_units[extra_id]
+    page = browser.new_page(viewport={"width": width, "height": 850})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    expected = "Commlink (+1)" if extra_id == 298 else "Commlink (+2)"
+    try:
+        page.goto(f"{ORIGIN}/units/{slug}", wait_until="domcontentloaded")
+        href = page.evaluate(
+            """async ({slug, army}) => (await import('/static/share-state.js'))
+                .shareStateHref('/units/' + encodeURIComponent(slug), 'unit',
+                {army_id: army})""",
+            {"slug": slug, "army": army["public_slug"]},
+        )
+        page.goto(f"{ORIGIN}{href}", wait_until="domcontentloaded")
+        page.locator("#unit-content").wait_for(state="visible", timeout=20000)
+        selected = page.locator("details.army-profile[open]")
+        assert selected.count() == 1, (slug, army["name"], width)
+        link = selected.locator('a[href="/skills/commlink"]').filter(has_text=expected)
+        assert link.count() > 0, (slug, army["name"], expected, width)
+        link.first.click()
+        page.wait_for_url(f"{ORIGIN}/skills/commlink")
+        rule = page.locator("#rule-skill-commlink")
+        rule.wait_for(state="visible", timeout=20000)
+        assert "N4-origin" in rule.inner_text()
+        assert "maximum Trooper count" in rule.inner_text()
+        assert not errors, errors
     finally:
         page.close()

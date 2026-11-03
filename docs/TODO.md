@@ -1657,22 +1657,27 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       `tactical-phase-step` in the optional annex. It is discoverable as a
       Skill without entering Basic Short/Short/Long/ARO declarations or
       changing the core 57-row matrix.
-    - [ ] Complete the remaining annex slice: full profile/section
-      context and acceptance. The Rule detail page now links current
-      Reinforcement Section pools to parent Armies and Unit Explorer
-      through the existing Army API; source-specific Unit/profile uses
-      and correct Main versus Reinforcement selection still need
-      verification. Typed Commlink (+X), source/citations, phase category
-      and general Skill/Rule navigation are published; do not claim list legality.
-    - [ ] Test ordinary versus Reinforcement context, exact `Commlink (+X)` variants, and explicit
-      phase classification; do not infer roster legality or mutate the core declaration chart.
+    - [ ] Complete the remaining annex slice: comprehensive profile/Section
+      source parity and final acceptance. The Rule page already links current
+      Reinforcement Section pools, parent Armies and Unit Explorer. A pinned
+      logical Unit shared by an ordinary parent and its Reinforcement Section
+      now verifies exact source-profile ownership, optional visibility and
+      selected-Army presentation in API and real Chromium. Both exact
+      Commlink (+1)/(+2) loadout occurrences also link to their scoped
+      Skill reference. This bounded cohort is **not** a complete audit of
+      every Section/profile, a list-legality model or N5-native annex approval.
+    - [x] Test a source-backed ordinary/Reinforcement shared Unit, exact
+      Commlink (+1)/(+2) Army loadouts, and the separate Tactical Phase
+      category. Windows API **1/1**, context Chromium **2/2** and variant
+      Chromium **2/2** pass; all remain read-only reference checks. Linux
+      cross-platform acceptance is deferred under VR-0040.
       - [x] Added normal-mode Chromium coverage of the three published optional
         annex pages and their navigation at 1440/390/320 px; N4 provenance,
         source citations and non-leakage to the 57 core declarations pass 3/3.
         Typed (+X) publication is now separately verified; this browser
-        coverage has been extended to Section/parent-Army links and Section
-        pool navigation, but does not yet establish profile ownership,
-        N5-native authority or full manual browser acceptance.
+        coverage now also includes actual source-profile ownership and exact
+        (+1)/(+2) Army occurrences. It does not establish every-profile
+        parity, N5-native authority or full manual browser acceptance.
   - **Completion:** each covered batch builds into `rules.db`, passes maintained-text and
     interaction review, and is navigable with citations in normal mode. Use semantic maintained-text
     tokens; preserve genuine ambiguity with `review-needed` rather than weakening plain-text review.

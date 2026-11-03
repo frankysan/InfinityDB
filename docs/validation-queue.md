@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 2 distinct
-changes** (VR-0023/0024); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 3 distinct
+changes** (VR-0023/0024/0040); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `8e2b2de727afa9695dcd3bc48b7f8b62cf319426`,
@@ -109,6 +109,24 @@ Full execution evidence and the earlier corrected one-failure run are
 in [testing.md](testing.md#parallel-windows-development-and-linux-validation).
 The independent Chromium skip-reason and controlled capacity comparisons
 remain open as VR-0023/24. Git updates are explicit, not background mirroring.
+
+- [ ] **VR-0040** (2026-11-03; ready-to-run): Cross-platform
+  acceptance for source-profile/Section context and exact Commlink
+  (+1)/(+2) loadout navigation. Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
+  Windows base `3ebf7b44`; changed
+  `tests/test_verify_reinforcements_optional_browser.py`, TODO/testing.
+  Risk: low (source-backed acceptance tests only; no runtime changes).
+  Immediate: pinned Army source/API ownership **1/1**, ordinary versus
+  Reinforcement selection Chromium **2/2** at 1440/390 px, Commlink
+  exact-source extra/Skill navigation Chromium **2/2** at 1440/390 px,
+  targeted Ruff **PASS**. Design: none.
+  Deferred: Linux `tests/test_verify_reinforcements_optional_browser.py`
+  including the new cases, then cumulative Linux when the queue reaches
+  its next dispatch threshold or a release gate is due. Verify the exact
+  committed SHA and ignored deployed-object publication first; the
+  Linux full suite at `8e2b2de7` preceded these tests.
+  Does not establish all-profile parity, source-authoritative N5 adoption
+  or roster-list legality.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -283,8 +301,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0040` (`VR-0023` and `VR-0024` open; all
-  earlier entries, including `VR-0037`–`VR-0039`, retired).
+- Execution: `VR-0041` (`VR-0023`, `VR-0024`, and `VR-0040`
+  open; all other earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
