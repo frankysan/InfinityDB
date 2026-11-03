@@ -280,6 +280,39 @@ REGENERATION_VARIANT: dict[str, Any] = {
 }
 
 
+# Lieutenant's two N5.3 p. 99 additions affect different resources.
+# Source extra 245 changes match Command Tokens; 246 grants a second
+# Special Lieutenant Order per Turn, not a Regular Order Pool increase.
+LIEUTENANT_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": 245,
+                "extraType": "TEXT",
+                "rawValue": "+1 Command Token",
+                "effect": {
+                    "kind": "lieutenant-extra-command-token",
+                    "appliesTo": "army-match-command-token-total",
+                    "count": 1,
+                },
+            },
+            {
+                "extraId": 246,
+                "extraType": "TEXT",
+                "rawValue": "+1 Order",
+                "effect": {
+                    "kind": "lieutenant-extra-special-order",
+                    "appliesTo": "special-lieutenant-orders-per-turn",
+                    "count": 1,
+                },
+            },
+        ],
+    }],
+}
+
 # The generic N5.3 ReRoll annotation applies to the Skill's own Roll.
 # Both are optional deployment chart Rolls, not rolls using chart rewards.
 CHART_REROLL_VARIANTS: dict[str, dict[str, Any]] = {
@@ -942,6 +975,26 @@ def _validate_reviewed_extra_parameter(
             )
         ):
             raise ValueError(f"{context}: invalid optional Commlink count extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "lieutenant"}
+    ]:
+        # The two printed extras are discrete: tokens for the match,
+        # Special Lieutenant Orders per Turn. Neither is a generic MOD.
+        values = parameter.get("extraValues")
+        expected = LIEUTENANT_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(item, dict)
+                or type(item.get("extraId")) is not int
+                or type(item.get("effect", {}).get("count")) is not int
+                for item in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid N5.3 Lieutenant resource extras")
         return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "forward-observer"}

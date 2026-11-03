@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 2 distinct
-changes** (VR-0023/0024); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 3 distinct
+changes** (VR-0023/0024/0044); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -117,6 +117,22 @@ published SVG assets. It retires VR-0043 (legacy staging freshness guard);
 full evidence and the two existing `fork()` warnings are recorded in
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
 The independent Chromium diagnostics remain open as VR-0023/24.
+
+- [ ] **VR-0044** (2026-11-03; ready-to-run): Revalidate the
+  N5.3 Lieutenant source-119 resource-variant publication against
+  the pinned Linux source archive and cumulative suite. Work: source
+  variants and usage index in [TODO](TODO.md#rules-and-reference-completeness);
+  change: exact `+1 Command Token`/`+1 Order` typed effects, guarded
+  v9 rules/publication refresh and source tests; risk: moderate
+  (source metadata and tracked rules artifact, not roster legality).
+  Immediate Windows: source-variant module **74/74**,
+  schema-v9 promotion/check and raw 438/83/355 occurrence
+  reconciliation;
+  Ruff, Pyright, data/rules, documentation and diff checks passed.
+  Design: none. Deferred: Linux source-variant tests with pinned
+  raw archive, cumulative suite including browser publication checks,
+  and hosted CI after Git commit. Do not treat the typed metadata as
+  a published cross-Army usage index.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -291,7 +307,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0044` (`VR-0023` and `VR-0024` open;
+- Execution: `VR-0045` (`VR-0023`, `VR-0024` and `VR-0044` open;
   `VR-0040`–`VR-0043` and other earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that

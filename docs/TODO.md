@@ -406,6 +406,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       pair with the ignored raw Army archive. Preserve complete ordered source
       signatures, exclude unreviewed combinations, fail closed on unknowns,
       and promote metadata only through guarded matched-v9 publication.
+      The 2026-11-03 Lieutenant source-119 review adds typed, distinct
+      `+1 Command Token` (30 options) and `+1 Order` (53 options) effects
+      under N5.3 p. 99; it does not treat either as a generic MOD or
+      publish the cross-Army usage index. Other unresolved source families
+      remain in this task.
     - [ ] Materialize public context links and verify duplicate sources, reused
       payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
       ambiguous variants before publication. An audited source signature alone

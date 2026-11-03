@@ -21252,7 +21252,35 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 245,
+                                "extraType": "TEXT",
+                                "rawValue": "+1 Command Token",
+                                "effect": {
+                                    "kind": "lieutenant-extra-command-token",
+                                    "appliesTo": "army-match-command-token-total",
+                                    "count": 1
+                                }
+                            },
+                            {
+                                "extraId": 246,
+                                "extraType": "TEXT",
+                                "rawValue": "+1 Order",
+                                "effect": {
+                                    "kind": "lieutenant-extra-special-order",
+                                    "appliesTo": "special-lieutenant-orders-per-turn",
+                                    "count": 1
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

@@ -963,7 +963,7 @@ The **`reviewed-extra`** kind adds explicit, per-source-ID typed effects
 without broadening numeric MODs or the distance-only browser projection.
 Reviewed Skill families include `skill:dodge`, `skill:super-jump`,
 `skill:neurocinetics`, `skill:minelayer`,
-`skill:chain-of-command` and `skill:forward-observer`;
+`skill:chain-of-command`, `skill:lieutenant` and `skill:forward-observer`;
 exact source Equipment variants include
 `equipment:tinbot-firewall`, `equipment:tinbot-discover`
 and `equipment:tinbot-ecm-guided`. Each owner has a closed,
@@ -1000,6 +1000,19 @@ unconditional general WIP bonus. Each isolated Army signature is
 reviewed independently; unrecognized extras and combinations fail
 closed. These semantics support later occurrence indexing without
 calculating Discover results.
+
+Lieutenant (N5.3 p. 99, Army Skill source 119) has two independently
+reviewed resources: `245/TEXT:+1 Command Token` creates one additional
+match Command Token only when the Trooper is selected as the army's
+Lieutenant (`lieutenant-extra-command-token`,
+`appliesTo: army-match-command-token-total`, count 1);
+`246/TEXT:+1 Order` increases that Lieutenant's Special Lieutenant
+Orders from one to two per Turn (`lieutenant-extra-special-order`,
+`appliesTo: special-lieutenant-orders-per-turn`, count 1).
+These are not Attribute MODs, generic additional Regular Orders, or
+interchangeable counts. Each entry remains attached to its exact
+single-extra Army loadout occurrence; unrelated or combined signatures
+are not inferred.
 
 Parachutist (N5.3 p. 105, Army Skill source 33) recognizes only
 `48/TEXT:Dep. Zone` as `parachutist-entry-zone-permission` for

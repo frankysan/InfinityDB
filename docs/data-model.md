@@ -2254,6 +2254,26 @@ join semantics, not new public routes. Validate duplicate-source, reused
 payload, repeated-row, cross-Army, shared-family/different-Level,
 profile-versus-loadout and unresolved-variant fixtures before publishing.
 
+**Lieutenant occurrence-resource review (2026-11-03):** N5.3 English
+p. 99 explicitly distinguishes `+1 Command Token` (one additional
+match Command Token if this Trooper is selected as Lieutenant) from
+`+1 Order` (two Special Lieutenant Orders per Turn rather than one).
+Pinned Army Skill 119 has **438** direct occurrences, including **30**
+with extra 245 (`TEXT:+1 Command Token`), **53** with extra 246
+(`TEXT:+1 Order`), and **355** unqualified; all qualified rows are
+loadout-option-scoped and have single extras. The reviewed metadata
+uses `lieutenant-extra-command-token` scoped to
+`army-match-command-token-total` and `lieutenant-extra-special-order`
+scoped to `special-lieutenant-orders-per-turn`, each with count 1.
+Neither entry changes a Unit Attribute, grants a Regular Order to a
+Combat Group's Order Pool, assumes both extras co-occur or implements
+roster legality. Source counts and the closed validation grammar are
+guarded by `tests/test_audit_source_variant_inputs.py`; the published
+schema-v9 rules/publication pair was refreshed via
+`tools.review_lieutenant_variant`. The current source audit reports
+**21 reviewed-extra / 13 unresolved Skill source IDs**. This metadata
+is not a published cross-Army Unit usage index.
+
 ### Application catalog identities and slugs
 
 Skills, Equipment, Weapons, and other application domains may group multiple source IDs/labels into

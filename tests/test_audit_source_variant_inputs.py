@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 
 import pytest
 
-from infinity_db.curated import load_curated_directory
+from infinity_db.curated import (
+    LIEUTENANT_VARIANT,
+    _validate_variant_semantics,
+    load_curated_directory,
+)
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from tools.audit_source_variant_inputs import (
     inventory_source_variants,
@@ -15,6 +20,8 @@ from tools.audit_source_variant_inputs import (
     select_source_variants,
     source_extra_owner_context,
 )
+from tools.release_rules_export import export_release_rules
+from tools.restrictions_v9_release import _check_variant_semantics_delta
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -101,17 +108,21 @@ def _inventory() -> dict:
 
 def _expected_skill_statuses(rules_path: Path) -> dict[str, int]:
     """Tie global source counts to the actual curated release revision."""
-    commlink_reviewed = (
-        "commlink" in RulesDatabase(rules_path).skill_reviewed_extra_semantics()
-    )
+    reviewed = RulesDatabase(rules_path).skill_reviewed_extra_semantics()
+    commlink_reviewed = "commlink" in reviewed
+    lieutenant_reviewed = "lieutenant" in reviewed
     return {
         "family-only": 44,
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
-        "reviewed-extra-parameter": 20 if commlink_reviewed else 19,
+        "reviewed-extra-parameter": (
+            (20 if commlink_reviewed else 19) + int(lieutenant_reviewed)
+        ),
         "reviewed-combination-parameter": 2,
-        "unresolved-occurrence-parameter": 14 if commlink_reviewed else 15,
+        "unresolved-occurrence-parameter": (
+            (14 if commlink_reviewed else 15) - int(lieutenant_reviewed)
+        ),
     }
 
 
@@ -235,11 +246,13 @@ def test_lieutenant_source_119_exact_command_token_and_order_qualifiers() -> Non
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
         "Lieutenant", 119, 438,
     )
-    assert item["status"] == "unresolved-occurrence-parameter"
-    assert item["reviewedExtra"] is None
+    assert item["status"] == "reviewed-extra-parameter"
+    assert item["reviewedExtra"] == RulesDatabase(
+        ROOT / "data/generated/rules.db"
+    ).skill_reviewed_extra_semantics()["lieutenant"]
     assert item["rawValues"] == []
     assert item["extraSignatures"] == [
-        {"extras": [[extra_id, "TEXT", name]], "reviewed": False, "count": count}
+        {"extras": [[extra_id, "TEXT", name]], "reviewed": True, "count": count}
         for extra_id, (name, _ids, count) in expected.items()
     ]
     for extra_id, (raw, ids, count) in expected.items():
@@ -267,9 +280,109 @@ def test_lieutenant_source_119_exact_command_token_and_order_qualifiers() -> Non
         for record in document["records"]
         if record["id"] == "skill:lieutenant"
     )
-    assert lieutenant["variantSemantics"] == {"inheritance": "family"}
+    assert lieutenant["variantSemantics"] == LIEUTENANT_VARIANT
     assert "Special Lieutenant Order" in lieutenant["facts"]["effects"][0]
     assert lieutenant["citations"][0]["page"] == 99
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        lambda row: row["occurrenceParameters"][0]["extraValues"][0]["effect"].update(
+            {"count": 2}
+        ),
+        lambda row: row["occurrenceParameters"][0]["extraValues"][1]["effect"].update(
+            {"appliesTo": "regular-order-pool"}
+        ),
+        lambda row: row["occurrenceParameters"][0]["extraValues"][0].update(
+            {"rawValue": "+1 Order"}
+        ),
+        lambda row: row["occurrenceParameters"][0]["extraValues"].reverse(),
+    ),
+)
+def test_lieutenant_resource_extras_fail_closed_on_semantic_drift(mutation) -> None:
+    reviewed = copy.deepcopy(LIEUTENANT_VARIANT)
+    assert _validate_variant_semantics(
+        reviewed, "skill:lieutenant", [{"entity": "skill", "id": "lieutenant"}],
+    ) == "family"
+    mutation(reviewed)
+    with pytest.raises(ValueError, match="invalid N5.3 Lieutenant resource extras"):
+        _validate_variant_semantics(
+            reviewed, "skill:lieutenant", [{"entity": "skill", "id": "lieutenant"}],
+        )
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_lieutenant_reviewed_resource_extras_fresh_release_pair(tmp_path: Path) -> None:
+    """Review all source-119 signatures, including 355 unqualified occurrences."""
+    records = {
+        record["id"]: record
+        for _, document in load_curated_directory(ROOT / "data/curated/rules")
+        for record in document["records"]
+    }
+    assert records["skill:lieutenant"]["variantSemantics"] == LIEUTENANT_VARIANT
+    assert records["skill:lieutenant"]["citations"][0]["page"] == 99
+
+    current = ROOT / "data/generated/rules.db"
+    fresh = tmp_path / "lieutenant-v9.db"
+    export_release_rules(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    typed = RulesDatabase(fresh).skill_reviewed_extra_semantics()["lieutenant"]
+    assert typed == {
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extra_values": [
+            {
+                "extra_id": 245, "extra_type": "TEXT", "raw_value": "+1 Command Token",
+                "effect": {
+                    "kind": "lieutenant-extra-command-token",
+                    "applies_to": "army-match-command-token-total", "count": 1,
+                },
+            },
+            {
+                "extra_id": 246, "extra_type": "TEXT", "raw_value": "+1 Order",
+                "effect": {
+                    "kind": "lieutenant-extra-special-order",
+                    "applies_to": "special-lieutenant-orders-per-turn", "count": 1,
+                },
+            },
+        ],
+    }
+    [item] = select_source_variants(
+        inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", fresh,
+        ),
+        "skills", [119],
+    )["items"]
+    assert item["status"] == "reviewed-extra-parameter"
+    assert item["reviewedExtra"] == typed
+    assert item["occurrences"] == 438
+    assert item["rawValues"] == []
+    assert item["extraSignatures"] == [
+        {"extras": [[245, "TEXT", "+1 Command Token"]], "reviewed": True, "count": 30},
+        {"extras": [[246, "TEXT", "+1 Order"]], "reviewed": True, "count": 53},
+    ]
+    assert 438 - sum(row["count"] for row in item["extraSignatures"]) == 355
+    assert item["reviewedNumericMod"] is None
+    assert all("modifier" not in row["effect"] for row in typed["extra_values"])
+    if "lieutenant" not in RulesDatabase(current).skill_reviewed_extra_semantics():
+        _check_variant_semantics_delta(
+            current, fresh, {
+                ("n5-core-v5.3", "skill:lieutenant"):
+                    json.dumps(LIEUTENANT_VARIANT, ensure_ascii=False, separators=(",", ":")),
+            },
+        )
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_lieutenant_review_gate_verifies_published_matched_pair() -> None:
+    from tools.review_lieutenant_variant import check_candidate
+
+    report = check_candidate()
+    assert report["scope"] == "lieutenant-resource-v9-verified-published"
+    assert report["qualifiedOccurrences"] == 83
+    assert report["unqualifiedOccurrences"] == 355
+    assert report["previousRulesSha256"] == report["candidateRulesSha256"]
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

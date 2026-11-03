@@ -935,6 +935,30 @@ wall time. This retires VR-0043; VR-0023/24 remain open for controlled
 capacity and skip-reason comparisons. Hosted CI and release sign-off
 remain separate gates.
 
+**2026-11-03 Lieutenant source-119 resource review (VR-0044 open):**
+The pinned N5.3 English p. 99 describes two different Lieutenant
+loadout qualifiers: `245/TEXT:+1 Command Token` (30 option rows,
++1 Command Token for the match) and `246/TEXT:+1 Order` (53 option
+rows, a second Special Lieutenant Order per Turn). Of 438 direct
+source-119 rows, 355 carry neither qualifier. Neither typed effect
+is a generic Attribute modifier or a Regular Order Pool addition.
+`tools.review_lieutenant_variant` verified all exact source signatures,
+option ownership, the PDF fingerprint, a deterministic v9 candidate
+with unchanged Restrictions and unrelated deployed-object rows, then
+promoted the matched pair using the audited rollback-capable release
+path. The ignored paired deployed-object publication passed `--check`.
+The generated audit now reports 21 reviewed-extra and 13 unresolved
+Skill source IDs; no Unit usage index or roster validator is published.
+
+Immediate Windows checks: `tests/test_audit_source_variant_inputs.py`
+**74/74 passed** on the final promoted pair, including the published
+pair verifier and four malformed/changed-qualifier rejection cases.
+The candidate regression passed both before and after promotion. Ruff, Pyright (0 errors), data/build, rules, documentation
+lint/links and Git diff whitespace checks passed. The source/archive
+and browser/full-suite follow-up remains VR-0044 until tested on the
+committed revision with the required Git-ignored inputs. Hosted CI
+and final release sign-off remain separate gates.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at
