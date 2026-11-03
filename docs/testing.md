@@ -1732,12 +1732,17 @@ or malformed captures. For example on Windows:
 
 Windows test-window coverage was **100%** across 109 intervals;
 CPU mean/peak **86.05%/100%**, RAM mean/peak
-**70.45%/72.41%**. The analyzer's **11/11** tests
-and section inventory **15/15** passed on Windows, with
-Ruff, Pyright and Git diff checks green; Linux
-test-window-only values remain pending a pinned Linux
-run of the new analyzer. Host-wide CPU and RAM averages
-are diagnostic, not per-test process attribution.
+**70.45%/72.41%**. Linux `linux-dev:eeac1d98f593419a9b273be7247edcec`
+ran the same committed analyzer at `f9206e06` against the
+fixed-run capture with **100%** coverage across 115 intervals:
+CPU mean/peak **41.22%/100%**, RAM mean/peak
+**23.24%/25.66%**. Linux analyzer regression
+`linux-dev:e1710ae2f90b48958ec1c5a2b9aaafab`
+passed **11/11** at that revision. Windows analyzer tests
+**11/11** and test-section inventory **15/15** passed,
+with Ruff, Pyright and Git diff checks green.
+These are host-wide utilization measurements, not per-test
+process attribution or a fair equal-worker Chromium benchmark.
 The original four-slot Glossary timeout still needs
 repeat controlled-capacity validation before any default change.
 

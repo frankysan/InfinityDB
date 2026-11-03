@@ -319,9 +319,15 @@ Git updates are explicit agent actions, not background mirroring.
   sampler coverage, and its test-window-only CPU mean/peak
   was **86.05% / 100%** and memory mean/peak
   **70.45% / 72.41%**, not the lower all-window CPU mean.
-  Matching Linux window analysis is pending the
-  independent worker's committed analyzer revision.
-  Remaining: finish aligned analysis; investigate the
+  Matching Linux analysis is now verified: at `f9206e06`,
+  the independent worker's analyzer tests passed **11/11**
+  and its fixed-run capture has **100%** coverage across
+  115 intervals, CPU mean/peak **41.22% / 100%** and
+  memory mean/peak **23.24% / 25.66%** (job
+  `linux-dev:eeac1d98f593419a9b273be7247edcec`).
+  These unmatched worker-count runs do not establish a
+  controlled browser-capacity comparison.
+  Remaining: investigate the
   earlier four-slot Glossary failure; repeat alternating
   fully passing equal-worker/slot comparisons with
   concurrent CPU/RAM sampling and reconcile source
