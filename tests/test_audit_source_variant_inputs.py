@@ -10,6 +10,8 @@ import pytest
 
 from infinity_db.curated import (
     CAMOUFLAGE_ONE_USE_VARIANT,
+    COMBAT_JUMP_SOURCE_SPECS,
+    COMBAT_JUMP_VARIANT,
     LIEUTENANT_VARIANT,
     TERRAIN_SOURCE_SPECS,
     TERRAIN_VARIANT,
@@ -116,6 +118,7 @@ def _expected_skill_statuses(rules_path: Path) -> dict[str, int]:
     lieutenant_reviewed = "lieutenant" in reviewed
     terrain_reviewed = "terrain" in reviewed
     camouflage_reviewed = "camouflage" in reviewed
+    combat_jump_reviewed = "combat-jump" in reviewed
     return {
         "family-only": 44,
         "reviewed-distance-parameter": 3,
@@ -124,13 +127,13 @@ def _expected_skill_statuses(rules_path: Path) -> dict[str, int]:
         "reviewed-extra-parameter": (
             (20 if commlink_reviewed else 19)
             + int(lieutenant_reviewed) + int(terrain_reviewed)
-            + int(camouflage_reviewed)
+            + int(camouflage_reviewed) + int(combat_jump_reviewed)
         ),
         "reviewed-combination-parameter": 2,
         "unresolved-occurrence-parameter": (
             (14 if commlink_reviewed else 15)
             - int(lieutenant_reviewed) - int(terrain_reviewed)
-            - int(camouflage_reviewed)
+            - int(camouflage_reviewed) - int(combat_jump_reviewed)
         ),
     }
 
@@ -716,6 +719,119 @@ def test_infiltration_source_47_exact_ph_and_reroll_owners() -> None:
     assert "normally PH-3" in effects
     assert "profile-specific PH replacement" in effects
     assert infiltration["variantSemantics"] == {"inheritance": "family"}
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_combat_jump_exact_source_35_landings_and_explosion(tmp_path: Path) -> None:
+    """PH= is landing-roll-only; Explosion is a one-use self-exempt attack."""
+    docs = load_curated_directory(ROOT / "data/curated/rules")
+    record = next(row for _, doc in docs for row in doc["records"]
+                  if row["id"] == "skill:combat-jump")
+    assert record["variantSemantics"] == COMBAT_JUMP_VARIANT
+    assert record["review"]["status"] == "reviewed"
+    assert any(c.get("sourceId") == "n5-core-v5.3-pdf" and c.get("page") == 89
+               for c in record["citations"])
+    original = ROOT / "data/generated/rules.db"
+    candidate = tmp_path / "combat-jump-v9.db"
+    export_release_rules(docs, candidate, baseline=original)
+    typed = RulesDatabase(candidate).skill_reviewed_extra_semantics()["combat-jump"]
+    assert len(typed["extra_values"]) == 6
+    assert typed["extra_values"][0]["effect"] == {
+        "kind": "combat-jump-landing-ph-mod",
+        "applies_to": "combat-jump-landing-ph-roll", "modifier": 3,
+    }
+    for index, ph in enumerate((11, 13, 14, 12), start=1):
+        assert typed["extra_values"][index]["effect"] == {
+            "kind": "combat-jump-landing-ph-value",
+            "applies_to": "combat-jump-landing-ph-roll",
+            "attribute": "PH", "value": ph,
+        }
+    assert typed["extra_values"][5]["effect"] == {
+        "kind": "combat-jump-landing-explosion",
+        "applies_to": "after-combat-jump-final-landing-location",
+        "attack": "direct-circular-template", "power": 8,
+        "ammunition": "ammunition:normal", "savingAttribute": "ARM",
+        "singleUse": True, "affectsUser": False,
+    }
+    published = RulesDatabase(original).skill_reviewed_extra_semantics().get("combat-jump")
+    if published is None:
+        _check_variant_semantics_delta(
+            original, candidate, {
+                ("n5-core-v5.3", "skill:combat-jump"): json.dumps(
+                    COMBAT_JUMP_VARIANT, ensure_ascii=False, separators=(",", ":"),
+                ),
+            },
+        )
+    else:
+        assert published == typed
+    for rules in (original, candidate):
+        [source] = select_source_variants(inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", rules,
+        ), "skills", [35])["items"]
+        reviewed = rules == candidate or published is not None
+        assert (source["name"], source["applicationId"], source["occurrences"]) == (
+            "Combat Jump", 35, 211,
+        )
+        assert source["status"] == (
+            "reviewed-extra-parameter" if reviewed else "unresolved-occurrence-parameter"
+        )
+        assert source["extraSignatures"] == [
+            {"extras": [[extra_id, "TEXT", raw]], "reviewed": reviewed, "count": count}
+            for extra_id, raw, count in COMBAT_JUMP_SOURCE_SPECS
+        ]
+        assert source["rawValues"] == []
+        assert source["reviewedExtra"] == typed if reviewed else source["reviewedExtra"] is None
+        assert inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", rules,
+        )["catalogs"]["skills"]["summary"]["statuses"] == _expected_skill_statuses(rules)
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    (
+        lambda v: v["occurrenceParameters"][0]["extraValues"][0]["effect"].update(
+            {"modifier": 4}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][1]["effect"].update(
+            {"value": 15}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][5]["effect"].update(
+            {"singleUse": False}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][5]["effect"].update(
+            {"affectsUser": True}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][5]["effect"].update(
+            {"ammunition": "ammunition:exp"}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"].append(
+            {"extraId": 999, "extraType": "TEXT", "rawValue": "PH=15", "effect": {}}
+        ),
+    ),
+)
+def test_combat_jump_reviewed_extras_reject_semantic_drift(mutate) -> None:
+    variant = copy.deepcopy(COMBAT_JUMP_VARIANT)
+    owner: list[object] = [{"entity": "skill", "id": "combat-jump"}]
+    assert _validate_variant_semantics(variant, "combat-jump", owner) == "family"
+    mutate(variant)
+    with pytest.raises(ValueError, match="invalid N5.3 Combat Jump source extras"):
+        _validate_variant_semantics(variant, "combat-jump", owner)
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_combat_jump_review_gate_preserves_release_pair() -> None:
+    from tools.review_combat_jump_variant import check_candidate
+
+    report = check_candidate()
+    assert report["qualifiedOccurrences"] == 121
+    assert report["unqualifiedOccurrences"] == 90
+    assert report["sourceVariants"] == 6
+    assert report["scope"] in {
+        "combat-jump-v9-candidate-not-promoted",
+        "combat-jump-v9-verified-published",
+    }
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

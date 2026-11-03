@@ -1526,6 +1526,7 @@ def test_current_dodge_reviewed_extra_effects_keep_exact_source_types(
         "vulnerability", "hacker", "booty", "metachemistry", "regeneration",
         "neurocinetics", "minelayer", "chain-of-command", "forward-observer",
         "parachutist", "discover", "commlink", "lieutenant", "terrain", "camouflage",
+        "combat-jump",
     }
     assert mappings["discover"] == {
         "source": "army-extra", "kind": "reviewed-extra",

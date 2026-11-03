@@ -95,8 +95,23 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 0**;
-no deferred test-design or test-execution requirement is open.
+Only open VR obligations belong here. **Current count: 1 distinct
+change** (VR-0050); no deferred test-design requirement is open.
+
+- [ ] **VR-0050** (2026-11-03; ready-to-run): Accept the six exact N5.3
+  Combat Jump source-35 Army extras, guarded paired v9 rules refresh,
+  and no-change deployed-object projection. Work:
+  [source variant coverage](TODO.md#rules-and-reference-completeness);
+  risk: medium (curated metadata and tracked `rules.db`, not a
+  match-state engine). Immediate Windows: pinned p. 89 source,
+  211 direct occurrences/121 qualified owner contexts, six exact
+  effect shapes and negative semantic drift cases; rollback-capable
+  promotion and read-only matched-pair recheck succeeded. Source
+  module **97/97**, curated **670/670**, rules build passed.
+  Design: none. Deferred: final Windows rules database/data checks,
+  pinned Linux source module and full-asset cumulative suite,
+  and all GitHub workflows at the final committed release SHA.
+  Do not confuse Explosion's single-use attack with a landing PH MOD.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
 the full suite passed **4,946 tests / 28 expected skips / 0 failures**
@@ -244,7 +259,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0050` (`VR-0023`, `VR-0024`,
+- Execution: `VR-0051` (`VR-0050` open; `VR-0023`, `VR-0024`,
   `VR-0044`–`VR-0049` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that

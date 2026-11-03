@@ -17902,7 +17902,64 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [{
+                    "source": "army-extra",
+                    "kind": "reviewed-extra",
+                    "extraValues": [
+                        {
+                            "extraId": 1, "extraType": "TEXT", "rawValue": "+3",
+                            "effect": {
+                                "kind": "combat-jump-landing-ph-mod",
+                                "appliesTo": "combat-jump-landing-ph-roll",
+                                "modifier": 3
+                            }
+                        },
+                        {
+                            "extraId": 27, "extraType": "TEXT", "rawValue": "PH=11",
+                            "effect": {
+                                "kind": "combat-jump-landing-ph-value",
+                                "appliesTo": "combat-jump-landing-ph-roll",
+                                "attribute": "PH", "value": 11
+                            }
+                        },
+                        {
+                            "extraId": 52, "extraType": "TEXT", "rawValue": "PH=13",
+                            "effect": {
+                                "kind": "combat-jump-landing-ph-value",
+                                "appliesTo": "combat-jump-landing-ph-roll",
+                                "attribute": "PH", "value": 13
+                            }
+                        },
+                        {
+                            "extraId": 244, "extraType": "TEXT", "rawValue": "PH=14",
+                            "effect": {
+                                "kind": "combat-jump-landing-ph-value",
+                                "appliesTo": "combat-jump-landing-ph-roll",
+                                "attribute": "PH", "value": 14
+                            }
+                        },
+                        {
+                            "extraId": 250, "extraType": "TEXT", "rawValue": "PH=12",
+                            "effect": {
+                                "kind": "combat-jump-landing-ph-value",
+                                "appliesTo": "combat-jump-landing-ph-roll",
+                                "attribute": "PH", "value": 12
+                            }
+                        },
+                        {
+                            "extraId": 255, "extraType": "TEXT", "rawValue": "Explosion",
+                            "effect": {
+                                "kind": "combat-jump-landing-explosion",
+                                "appliesTo": "after-combat-jump-final-landing-location",
+                                "attack": "direct-circular-template",
+                                "power": 8, "ammunition": "ammunition:normal",
+                                "savingAttribute": "ARM", "singleUse": true,
+                                "affectsUser": false
+                            }
+                        }
+                    ]
+                }]
             }
         },
         {

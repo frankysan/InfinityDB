@@ -2945,6 +2945,17 @@ identical rules. When the authoritative rule is naturally level-based, a family 
 carry reviewed `facts.levels` entries so the browser can present the level differences as one
 comparison surface instead of duplicating near-identical rule cards.
 
+The N5.3 Combat Jump source-35 occurrence review keeps each of six
+exact Army TEXT qualifiers attached to the canonical `skill:combat-jump`
+family: `+3` modifies the landing PH Roll; four distinct `PH=X`
+annotations select that Roll's PH value without modifying the Trooper's
+printed PH Attribute; and `Explosion` triggers a **single-use**, user-
+exempt PS 8 Normal circular Direct Template Attack after the landing
+location is resolved (N5.3 printed p. 89). This is static, typed source
+metadata; it neither rolls dice nor places models or computes the
+attack during play. Only the six reviewed signatures may enter the
+future cross-Army usage index, with full source-owner context retained.
+
 ### Typed relations
 
 Rules relations are authored once in the semantic direction and validated against current semantic

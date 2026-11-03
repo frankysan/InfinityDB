@@ -368,6 +368,49 @@ CAMOUFLAGE_ONE_USE_VARIANT: dict[str, Any] = {
     }],
 }
 
+# N5.3 p. 89: printed Combat Jump landing uses a PH Roll.
+# Source PH=X selects the PH value for that Roll; +3 modifies only
+# that Roll. Explosion triggers a self-exempt, single-use template
+# attack *after* the final landing position, not a landing PH bonus.
+COMBAT_JUMP_SOURCE_SPECS = (
+    (1, "+3", 3),
+    (27, "PH=11", 102),
+    (52, "PH=13", 2),
+    (244, "PH=14", 4),
+    (250, "PH=12", 5),
+    (255, "Explosion", 5),
+)
+COMBAT_JUMP_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": (
+                    {
+                        "kind": "combat-jump-landing-ph-mod",
+                        "appliesTo": "combat-jump-landing-ph-roll",
+                        "modifier": 3,
+                    } if raw == "+3" else {
+                        "kind": "combat-jump-landing-ph-value",
+                        "appliesTo": "combat-jump-landing-ph-roll",
+                        "attribute": "PH", "value": int(raw.removeprefix("PH=")),
+                    } if raw.startswith("PH=") else {
+                        "kind": "combat-jump-landing-explosion",
+                        "appliesTo": "after-combat-jump-final-landing-location",
+                        "attack": "direct-circular-template",
+                        "power": 8, "ammunition": "ammunition:normal",
+                        "savingAttribute": "ARM", "singleUse": True,
+                        "affectsUser": False,
+                    }
+                ),
+            }
+            for extra_id, raw, _count in COMBAT_JUMP_SOURCE_SPECS
+        ],
+    }],
+}
+
 # The generic N5.3 ReRoll annotation applies to the Skill's own Roll.
 # Both are optional deployment chart Rolls, not rolls using chart rewards.
 CHART_REROLL_VARIANTS: dict[str, dict[str, Any]] = {
@@ -1050,6 +1093,34 @@ def _validate_reviewed_extra_parameter(
             )
         ):
             raise ValueError(f"{context}: invalid N5.3 Lieutenant resource extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "combat-jump"}
+    ]:
+        # Exact source-35 Army extras only; the fixed PH values are
+        # landing-Roll values, not permanent model Attribute replacements.
+        # Explosion is a single-use attack after the final placement.
+        values = parameter.get("extraValues")
+        expected = COMBAT_JUMP_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or (entry["effect"].get("kind") == "combat-jump-landing-ph-value"
+                    and type(entry["effect"].get("value")) is not int)
+                or (entry["effect"].get("kind") == "combat-jump-landing-ph-mod"
+                    and type(entry["effect"].get("modifier")) is not int)
+                or (entry["effect"].get("kind") == "combat-jump-landing-explosion"
+                    and (type(entry["effect"].get("singleUse")) is not bool
+                         or type(entry["effect"].get("affectsUser")) is not bool))
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid N5.3 Combat Jump source extras")
         return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "camouflage"}

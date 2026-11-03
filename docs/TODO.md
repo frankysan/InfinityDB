@@ -417,8 +417,12 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       SRC-028's Religious Troop anomaly remains unreviewed. The
       Camouflage source-29 `1 Use` review certifies 223 one-use Army
       qualifiers using N5 FAQ v0.0/v0.1, without inventing a match-state
-      tracker or changing the existing FAQ. Other unresolved source
-      families remain in this task.
+      tracker or changing the existing FAQ. The Combat Jump source-35
+      review adds six exact landing-roll/Explosion parameters across 121
+      direct qualified Army occurrences under N5.3 p. 89; the one-use
+      template attack remains separate from the PH landing Roll and is
+      not a general attack resolver. Other unresolved source families
+      remain in this task.
     - [ ] Materialize public context links and verify duplicate sources, reused
       payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
       ambiguous variants before publication. An audited source signature alone

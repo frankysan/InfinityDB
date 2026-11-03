@@ -1052,6 +1052,37 @@ the same SHA, after which all matrix jobs and the cross-platform
 deterministic-output check passed. VR-0048 is retired. This remains
 metadata, not a game-state usage-tracking engine.
 
+**2026-11-03 Combat Jump source-35 landing/Explosion candidate (VR-0050):**
+The pinned N5.3 English rules p. 89 and September Army archive
+support six exact `TEXT` qualifier signatures across 211 direct
+Combat Jump occurrences: `+3` (extra 1, 3 owners), `PH=11`
+(27, 102), `PH=13` (52, 2), `PH=14` (244, 4), `PH=12`
+(250, 5) and `Explosion` (255, 5). All 121 qualified occurrences
+retain exact Army source/owner positions; the other 90 have no
+qualifier. These are three different effect shapes: a modifier
+to the landing PH Roll, a fixed PH value **for that landing Roll
+only**, and a single-use, self-exempt PS 8 Normal circular Direct
+Template Attack **after final placement**. None changes the
+printed Unit PH or implements an in-game combat evaluator.
+The reviewed typed effect metadata is closed to exactly the six
+source signatures; six negative mutation tests reject invented
+modifiers, PH values, Explosion-use/attack changes and extras.
+
+The read-only `tools.review_combat_jump_variant` verifies the
+pinned source PDF, 211 direct occurrences, all qualified raw
+owners, exact single-record schema-v9 delta, and matched
+deployed-object publication invariance. The rollback-capable
+`--promote` path refreshed the tracked rules DB and ignored
+paired publication. Read-only recheck reports
+`combat-jump-v9-verified-published` with identical active/candidate
+rules SHA-256. Windows source-variant **97/97**, curated **670/670**
+and rules-stage checks passed; the rules-database inventory
+assertion was updated for the new reviewed family. Linux pinned
+source/full suites and hosted CI on the committed revision remain
+deferred under VR-0050. Inventory should be **24 reviewed-extra /
+10 unresolved** Skill source IDs once the exact release is checked.
+The cross-Army usage index remains unimplemented.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at
