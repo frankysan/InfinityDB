@@ -5056,41 +5056,29 @@ if the original local staging directory still exists:
 ```
 
 The original `local/terrain-scenery-refresh-n53/staging-report.json`
-matched the current curated-source SHA-256, and both promoted binary
-files matched the staged SHA-256 fingerprints byte-for-byte. For future
-rebuilds, verify the current source hash and both staged binary hashes
-before copying them together:
+and promoted binary hashes were verified during the historical refresh.
+An older ignored staging directory is **not** automatically a safe source
+for a new promotion: its source, active release baseline or schema may
+have changed. Rebuild into a fresh directory, then use the read-only
+freshness gate before reviewing any manual promotion:
 
 ```powershell
-$stage = "local/terrain-scenery-refresh-n53"
-$report = Get-Content (Join-Path $stage "staging-report.json") -Raw |
-    ConvertFrom-Json
-if ($report.scope -ne "post-promotion-binary-rebuild-not-applied" -or
-    $report.reviewedObjects -ne 17 -or $report.stagedPaths.Count -ne 2) {
-    throw "Unexpected terrain refresh report"
-}
-if ((Get-FileHash data/curated/rules/n5-core-v5.3.json -Algorithm SHA256).Hash -ne
-    $report.sourceSha256) {
-    throw "Curated source changed after staging"
-}
-$hashes = @(
-    $report.stagedSha256.rulesDatabase,
-    $report.stagedSha256.deployedObjects
-)
-for ($i = 0; $i -lt $report.stagedPaths.Count; $i++) {
-    $path = $report.stagedPaths[$i]
-    $candidate = Join-Path $stage $path
-    if (-not (Test-Path -LiteralPath $candidate -PathType Leaf) -or
-        (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash -ne $hashes[$i]) {
-        throw "Missing or changed staged binary: $path"
-    }
-}
-foreach ($path in $report.stagedPaths) {
-    Copy-Item -LiteralPath (Join-Path $stage $path) -Destination $path -Force
-}
-& .\.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check
-& .\.venv\Scripts\python.exe -m tools.run_checks --stage rules
+$stage = "local/terrain-scenery-refresh-n53-new"
+& .\.venv\Scripts\python.exe -m tools.stage_promoted_terrain_artifacts --output-dir $stage
+& .\.venv\Scripts\python.exe -m tools.verify_staged_release_pair --stage $stage
 ```
+
+The verifier also accepts new output from
+`tools.stage_deployed_object_citation_migration` and
+`tools.stage_terrain_scenery_references`. It requires the staging report
+to identify the original active `rules.db` and `deployed-objects.json`
+hashes, then checks that neither release baseline nor curated source
+changed. It verifies both staged hashes, schema version, reviewed
+Restrictions and deployed-object pair integrity. Reports created before
+the baseline-hash fields existed fail closed; retain them only as historical
+evidence. No staging tool or verifier applies the candidate automatically.
+After separately reviewed promotion, run the publication check and rules
+stage against the newly paired tracked binaries.
 
 The refreshed binary pair must be committed together with the curated
 source and corresponding review policy/checklist changes. No deployment

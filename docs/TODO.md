@@ -415,13 +415,13 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     reverse links and qualified legacy labels are published; see the
     [current contract](data-model.md#reviewed-restrictions-chart-projection).
     Negative conditions do not establish affirmative action legality.
-    - [ ] **Data processing + Project infrastructure:** Audit older staging-only
-      exporters for v9 preservation before promoting their binaries:
-      `tools.stage_deployed_object_citation_migration`,
-      `tools.stage_promoted_terrain_artifacts` and
-      `tools.stage_terrain_scenery_references`. Replace default-v8 exports with
-      the schema-preserving helper, add focused tests and reject stale staged
-      binaries. These tools currently stage ignored output without promotion.
+    - The three legacy staging-only exporters now preserve the active v8/v9
+      release schema and reviewed Restrictions. Their focused regressions and
+      `tools.verify_staged_release_pair` reject stale release baselines,
+      modified candidate binaries and source drift before reviewed manual
+      promotion. Historical ignored staging directories without baseline
+      fingerprints remain evidence only; they must be rebuilt before reuse.
+      These tools do not promote artifacts automatically.
     - [ ] **Deployment:** Validate real host rollback/forward with the retained
       original v8 database/publication pair. The passing CI image rehearsal is
       not a hosted deployment. Obtain explicit operational authorization and

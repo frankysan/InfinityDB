@@ -19,7 +19,7 @@ from tools.audit_terrain_scenery_source_gaps import (
     audit_terrain_scenery_boundary,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import RELEASE_RULES, export_release_rules
 from tools.stage_terrain_scenery_references import (
     ARMY,
     CANDIDATES,
@@ -92,6 +92,10 @@ def stage_promoted_terrain_artifacts(
 
     report = {
         "scope": "post-promotion-binary-rebuild-not-applied",
+        "releaseBaselineSha256": {
+            "rulesDatabase": hashlib.sha256(RELEASE_RULES.read_bytes()).hexdigest(),
+            "deployedObjects": hashlib.sha256(PUBLICATION.read_bytes()).hexdigest(),
+        },
         "sourceSha256": hashlib.sha256(curated_path.read_bytes()).hexdigest(),
         "reviewedRuleIds": list(EXPECTED_IDS),
         "reviewedObjects": len(published["objects"]),

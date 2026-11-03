@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 2 distinct
-changes** (VR-0023/0024); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 3 distinct
+changes** (VR-0023/0024/0043); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -110,6 +110,18 @@ See [testing.md](testing.md#parallel-windows-development-and-linux-validation)
 for the pinned jobs, warnings and residual scope. The independent
 Chromium skip-reason and controlled capacity comparisons remain open
 as VR-0023/24. Git updates are explicit, not background mirroring.
+
+- [ ] **VR-0043** (2026-11-03; ready-to-run): Verify the legacy
+  staged-release freshness gate on a pinned Linux checkout and in the
+  cumulative suite. Work: Restrictions staging safety in `TODO.md`;
+  change: the three staging reports, read-only pair verifier and tests;
+  risk: moderate (artifact review safety only, no runtime or promotion
+  changes). Immediate Windows: verifier **5/5**, legacy staging **3/3**,
+  promoted-terrain **3/3** before final report extension; Ruff, Pyright,
+  docs and whitespace passed. Design: none. Deferred: retest the
+  promoted-terrain report, Linux verifier/staging tests at the committed
+  revision, and next eligible cumulative Linux suite. Never promote an
+  ignored historical directory to satisfy this gate.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -284,7 +296,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0043` (`VR-0023` and `VR-0024` open;
+- Execution: `VR-0044` (`VR-0023`, `VR-0024` and `VR-0043` open;
   `VR-0040`–`VR-0042` and other earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that

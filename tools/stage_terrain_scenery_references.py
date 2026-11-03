@@ -20,7 +20,7 @@ from tools.audit_terrain_scenery_source_gaps import (
     verify_pinned_pdf,
 )
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import RELEASE_RULES, export_release_rules
 
 ROOT = CURATED.parents[3]
 ADDITIONS = ROOT / "config/validation/terrain-scenery-reference-additions.json"
@@ -147,6 +147,10 @@ def stage_terrain_references(
         raise ValueError("Staging publication fingerprint mismatch")
     report = {
         "scope": "staged-only-no-checkout-modification",
+        "releaseBaselineSha256": {
+            "rulesDatabase": hashlib.sha256(RELEASE_RULES.read_bytes()).hexdigest(),
+            "deployedObjects": hashlib.sha256(publication_path.read_bytes()).hexdigest(),
+        },
         "proposedIds": list(EXPECTED_IDS),
         "verifiedPdfSha256": pdf_digest,
         "sourceSha256": hashlib.sha256(curated_path.read_bytes()).hexdigest(),

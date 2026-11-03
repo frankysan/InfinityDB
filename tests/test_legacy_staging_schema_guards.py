@@ -25,6 +25,7 @@ from tools.stage_terrain_scenery_references import (
     EXPECTED_IDS,
     stage_terrain_references,
 )
+from tools.verify_staged_release_pair import verify_staged_release_pair
 
 ROOT = Path(__file__).resolve().parents[1]
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
@@ -142,5 +143,9 @@ def test_legacy_staging_preserves_v9_restrictions_and_checkout(
     assert hashlib.sha256(staged_publication.read_bytes()).hexdigest() == (
         report["stagedSha256"]["deployedObjects"]
     )
+    if stage_kind != "hacking-device":
+        assert verify_staged_release_pair(
+            output, curated_path=staged_source,
+        )["schemaVersion"] == 9
     assert all(hashlib.sha256(path.read_bytes()).digest() == digest
                for path, digest in originals.items())
