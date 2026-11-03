@@ -955,8 +955,9 @@ new source-confirmed data/API defect found within this
 bounded nine-ruling review. The Haris conflicting citation,
 FT Master omission and Deployable question-context
 difference stay disclosed rather than suppressed.
-V1S-020 and the general source/browser release gates
-still own final frozen-source/FAQ acceptance.
+V1S-020 now records [the pinned FAQ/annex source classification](v1.0-source-coverage-audit.md#faq-byte-provenance-and-optional-reinforcements-scope-v1s-020-2026-11-03);
+the later FAQ, whole-source and browser release gates still own
+final candidate acceptance.
 
 ### Remaining release gates (not counted as additional change items)
 

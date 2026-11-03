@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-020 (M, review):** Verify final FAQ v0.1 source hashes and applicability and classify optional
-  Reinforcements N4 PDFs correctly.
 - [ ] **V1S-021 (M, gate):** Reconcile interaction review and catalog scope with current release identities;
   run the strict 1.0 primary guard without rewriting history.
 - [ ] **V1S-022 (M, gate):** Produce ranked confirmed-gap batches with source/version, owner, normal browser
@@ -450,8 +448,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     [V1S-016–018 coverage dispositions](v1.0-source-coverage-audit.md#supplementary-category-level-coverage-dispositions-v1s-018-2026-11-03).
     The [V1S-019 Weaponry triage](v1.0-source-coverage-audit.md#weaponry-profile-prose-and-exception-triage-v1s-019-2026-11-03) classifies
     source conflicts separately from incomplete prose, mode and object review.
-    Remaining work: source-specific FAQ/annex and strict source guards under
-    V1S-020–022, plus whole-record/source-browser release acceptance.
+    [V1S-020](v1.0-source-coverage-audit.md#faq-byte-provenance-and-optional-reinforcements-scope-v1s-020-2026-11-03)
+    confirms the final pinned FAQ byte identities, current FAQ scope and separate
+    N4-origin optional Reinforcements reference. Remaining work: the strict
+    identity/interaction guard and ranked confirmed gaps under V1S-021–022,
+    plus whole-record/source-browser release acceptance.
     Distinguish missing facts, missing relationships, and missing presentation.
   - [ ] Reuse `audit_source_presentation.py`, `audit_enrichment_coverage.py`, and
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
