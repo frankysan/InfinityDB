@@ -33,6 +33,68 @@ and DA in CC Mode. It does **not** resolve the printed-versus-Army CC Saving Rol
 count discrepancy. The April 2025 update includes both a dated post and a later
 appendix: preserve that distinction when associating events with snapshots.
 
+## Unmatched N5 announcements and historical gaps (V1S-012; 2026-11-03)
+
+This is a **historical provenance/disposition register**, not a
+new source acquisition, an exhaustive line-by-line audit of all
+official posts, or a list of confirmed current defects. The links
+and announcement dates in the index above identify the reported
+events, but an official claim of a past change is **not** proof of
+the current value, the exact transition time or a missing
+InfinityDB record. Track announcements by independent rules,
+Army/profile, FAQ and ITS scope.
+
+| Announcement group | What can currently be used | Unmatched historical boundary / disposition |
+| --- | --- | --- |
+| **2025-01-09 N5 introduction** | Official overview of N4-to-N5 changes | No frozen, comparable N4 rule/Army corpus is selected; do not infer a per-profile N4-to-N5 change or a current N5 omission from a primer |
+| **2025-03-18 Army** | Dated Imperial Service and cross-faction additions, removals, costs, Fireteam and equipment changes | No pinned immediately preceding and following March Army API snapshots; the September 2026 Army source can show a current profile, not when the named March modification occurred |
+| **2025-04-03 rules and April 4 Army-fixes appendix** | Separate published rules changelog and Army change list; the appended April 4 corrections (including Jump/Super-Jump profiles) are a **second dated event** | The local v5.1/v5.2/v5.3 PDFs do not by themselves provide a complete version-specific before/after for every April claim; no matched pre-/post-April Army member pair was verified; do not absorb the April 4 appendix into April 3 chronology |
+| **2025-04-24 v5.1.1** | Official minor PDF correction list, including Climb geometry and Jet Propulsion examples; official explanation of N5 version numbering | No **byte-verified local v5.1.1 PDF** was selected for full exact-version comparison (the available files include v5.1, v5.2 and v5.3). A later text/example that agrees does not prove the complete v5.1.1 transition or graphic equivalence |
+| **2025-05-05 English Wiki announcement** | Dated announcement of Wiki availability and individual preserved English oldid histories | No complete May 5 Wiki capture; exact oldid timestamps substantiate *individual* pages, not same-day whole-Wiki coverage or retrospective equivalence |
+| **2025-07-28 and 2025-10-02 Army updates** | Official dated profile/sectorial change descriptions, including N5-era Reinforcement variants | No pinned pre-/post-update Army snapshot pairs or exhaustive item-to-current-Unit audit; absence of a named historical option in a current snapshot is not automatically a data-ingestion defect |
+| **2025-10-15 rules/FAQ and Army changes** | English N5 v5.2 and FAQ v0.0 can support **selected** later-v5.3 comparison; the original 28 FAQ Q&As are independently inventoried | PDF availability does not independently fix the FAQ upload date or provide contemporaneous October Army before/after data; distinct rule, FAQ, ITS and roster contexts must stay separate |
+| **2026-05-27 Mazebreaker/Corregidor Army changes** | Dated report of Corregidor division/availability changes and named Dodge (ARM+3)/AP Red Fury changes; current N5.3 and September Army inputs support selected present-state identities | No pinned before/after May Army export; a later repeated announcement is not evidence for a second new Weapon/Skill or a missing current profile; specific division/Fireteam/Unit relationships still require their own source and browser gate |
+| **2026-09-01 N5.3 rules, Army, FAQ and ITS** | The 26 English rule items, four additional Spanish-list subjects, 20 Army items and nine added FAQ Q&As have **bounded current-state** dispositions in the [reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md#current-reconciliation-inventory-2026-10-29) | No pre-notice Army snapshot, no earlier Spanish N5.2 PDF, and no authenticated original September 18 Wiki ZIP. Source-variant history, exact FAQ upload date, full source-wide/normal-browser coverage and frozen-release acceptance are **not** established by these selected-item reviews |
+
+**Known unresolved comparisons, not generic defect counts:**
+The September 18 Army captures are themselves after the
+September 1 notice; the selected September 25/29 Army bytes
+cannot create a pre-notice delta. The missing original
+September 18 English Wiki capture has an expected hash but
+no recovered bytes; the selected September 26 replacement
+and exact oldid histories prove only their own page provenance.
+The Spanish N5.2 rulebook is unavailable; the v5.3 Spanish
+PDF supports current bilingual comparisons, not every older
+Spanish wording transition. English v5.3 PDF creation
+metadata dated August 10, the September 1 update post,
+September ZIP acquisition dates and the selected FAQ
+date anchor are **different dates for different events**.
+
+**Keep genuine source disputes separate:** the bilingual
+N5.3-versus-Army/Wiki Kobra CC profile, Dodge (ARM+3)'s
+PDF-versus-Wiki condition, and the announcement's “Breaker
+Sniper” label versus the published Breaker Marksman are
+already explicitly reviewed/disclosed. The source conflicts
+can be real even without a historical transition archive;
+they do not justify inventing a missing Weapon/Unit or
+silently rewriting imported Army data. Earlier March/April/
+July/October/May announcements also contain unpaired
+historical profile claims; classify these as **insufficient
+historical evidence**, not individually confirmed catalog
+defects until a specific current source/publication mismatch
+is independently demonstrated.
+
+**Next handling:** keep the initial publication list
+non-exhaustive and use the [comparison procedure](#cross-source-reconciliation-procedure)
+for any newly discovered official post. An item can advance
+to a verified historical delta only with matched exact
+source/version identities on both sides; a current gameplay
+defect requires separate source-to-storage/API evidence.
+V1S-013–022 own broader current-source omissions and their
+publication disposition, while V1S-081–095 own the frozen
+release gates. No live article was imported into curated
+gameplay data by this review.
+
 ## Selected Army input for 1.0 (V1S-001; 2026-11-03)
 
 The intended Army input for the current 1.0 completeness review is the
