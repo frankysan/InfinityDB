@@ -444,9 +444,9 @@ def test_commlink_source_extras_remain_on_their_exact_army_loadouts() -> None:
         defaultdict(set)
     )
     signatures: Counter[tuple[tuple[int, str], ...]] = Counter()
-    for (*loadout, _position), extras in occurrences.items():
+    for (logical_id, army_id, group_id, option_id, _position), extras in occurrences.items():
         signature = tuple(extras)
-        expected[tuple(loadout)].add(signature)
+        expected[(logical_id, army_id, group_id, option_id)].add(signature)
         signatures[signature] += 1
     assert signatures[((298, "+1"),)] > 0
     assert signatures[((299, "+2"),)] > 0
