@@ -644,6 +644,22 @@ across 25 setup events, including 491.75 s on the longest
 single Chromium acquisition: evidence for outstanding
 VR-0023/24, not an additional suite failure.
 The separate guarded release-pair promotion remains VR-0037.
+A subsequent non-destructive Windows pair preflight
+`tests/test_reinforcements_optional_reference.py` passed
+**2/2**: temporary v9 rules export differs only in
+`skill:commlink` metadata (or not at all once promoted),
+while a freshly built proposed deployed-object publication
+preserves all **17** records, their Unit uses and all source
+provenance except the new rules-db SHA-256. The normal
+`load_deployed_object_publication` validator accepted
+the staged temporary pair. Existing deployed-object
+publication tests passed **12/12**; migration-guard cases
+passed **7/7**. Pyright now passes after explicitly typing
+the migration test's dictionary keys as
+`dict[tuple[str, str], str]`. Neither tracked release artifact
+was modified. This acceptance is deliberately compatible
+with a future already-promoted release; actual promotion,
+rollback verification and normal UI acceptance remain open.
 A subsequent **read-only v9 release-export preflight** in
 `test_annex_read_model_is_discoverable_and_separate_from_core_matrix`
 compared every staged `records` row against the active tracked

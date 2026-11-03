@@ -143,17 +143,23 @@ Git updates are explicit agent actions, not background mirroring.
   passed **530/530**: an exact Commlink family-to-parameter
   append is allowed, while unrelated record/schema changes,
   missing/no-op targets and incorrect baseline are rejected.
-  A separate **read-only temporary v9 release export** now
-  compares every `records` row with the tracked `rules.db`
-  and confirms **only `skill:commlink` differs**; the existing
-  full-database variant-delta checker accepts the exactly
-  serialized change and rejects unrelated records/schema.
-  Focused Annex acceptance passed **2/2** on Windows.
-  Still verify the complete matched rules/deployed-objects
-  publication pair, preserve Restrictions, all deployed
-  objects and source pins, and run normal UI acceptance
-  before promoting. Do not classify the source-only pass as a completed
-  publication or as general N5 roster-legality support.
+  A separate **read-only temporary v9 release export** compares
+  every `records` row with tracked `rules.db`: only
+  `skill:commlink` differs before promotion (none afterward).
+  The full-database variant-delta guard accepts that exact
+  serialized addition and rejects unrelated changes.
+  The new **matched-pair preflight** builds candidate deployed-object
+  JSON against the temporary rules database and checks all
+  **17** object records, Unit uses, provenance and unrelated
+  fingerprints remain identical, with only
+  `sourceSnapshot.rulesDatabaseSha256` re-pinned. The
+  normal publication loader accepts the staged pair. Windows
+  focused Annex acceptance **2/2**, deployed-object module
+  **12/12** and migration guard **7/7**; Ruff, Pyright
+  and docs checks pass. Remaining: guarded
+  promotion with recovery artifacts, followed by release-pair
+  integrity checks and normal UI acceptance. Do not represent
+  this preflight as publication or general N5 roster legality.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and

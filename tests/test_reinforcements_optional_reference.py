@@ -5,15 +5,18 @@ These assertions cover the source boundary, not verified N5 adoption of N4 proce
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from pathlib import Path
 
 from infinity_db.curated import load_curated_directory, load_curated_document
 from infinity_db.database.repository import Database
+from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.reference_catalog import RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
+from tools.build_deployed_object_publication import build_publication, publication_bytes
 from tools.release_rules_export import export_release_rules
 from tools.restrictions_v9_release import _check_variant_semantics_delta
 
@@ -116,7 +119,28 @@ def test_annex_read_model_is_discoverable_and_separate_from_core_matrix(tmp_path
             {key: json.dumps(commlink["variantSemantics"], ensure_ascii=False,
                              separators=(",", ":"))},
         )
-    army = Database(ROOT / "data/generated/infinity.db")
+
+    # A prospective publication may only re-pin the rules DB hash.
+    # All 17 object definitions, reviewed Unit uses and other source
+    # fingerprints must remain byte-equivalent in their JSON values.
+    army_path = ROOT / "data/generated/infinity.db"
+    sources = (
+        ROOT / "data/curated/rules/n5-core-v5.3.json",
+        ROOT / "config/validation/deployed-object-delivery-reviews.json",
+        ROOT / "config/validation/deployed-object-candidate-reviews.json",
+    )
+    previous = build_publication(army_path, baseline, *sources)
+    staged = build_publication(army_path, output, *sources)
+    expected = json.loads(json.dumps(previous))
+    expected["sourceSnapshot"]["rulesDatabaseSha256"] = hashlib.sha256(
+        output.read_bytes()
+    ).hexdigest()
+    assert len(staged["objects"]) == 17
+    assert staged == expected
+    proposed_path = tmp_path / "deployed-objects.json"
+    proposed_path.write_bytes(publication_bytes(staged))
+    assert load_deployed_object_publication(proposed_path, army_path, output) == staged
+    army = Database(army_path)
 
     general = RulesRecordCatalog(rules, "rules")
     assert any(item["slug"] == "reinforcements-extra" for item in general.list_items())

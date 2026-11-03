@@ -2211,7 +2211,7 @@ def test_commlink_v9_guard_preserves_other_records_and_schema(
                 "UPDATE records SET variant_json=? WHERE id='skill:other'",
                 ('{"inheritance":"family"}',),
             )
-    changed = {key: json.dumps(variant)}
+    changed: dict[tuple[str, str], str] = {key: json.dumps(variant)}
     if defect is None:
         _check_variant_semantics_delta(before, after, changed)
     else:
