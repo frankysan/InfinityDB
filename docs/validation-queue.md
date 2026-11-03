@@ -95,147 +95,20 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 5 distinct
-changes** (VR-0023/0024/0037/0038/0039); no deferred design
-requirement is open. Oldest recorded date: 2026-11-02.
-VR-0039 is a Windows development change made while a Linux suite at
-`561e1269` is running; that older suite cannot accept VR-0039.
-Dispatch its pinned Linux checks after the existing test checkout is idle.
-At `fd38485fc5867ba6abe7c945cbf5786221cc15cc`, the
-pinned Linux cumulative suite passed **4,892 tests,
-28 skipped, 0 failed**, with 808/808 published SVG assets
-(job `linux-dev:538f30517bf5477c8dc77881c7a985d7`).
-The earlier pinned Linux source module at `f4e58294`
-passed **67/67**, and the corrected optional-annex
-regression passed **2/2** on Linux at `fd38485f`.
-This retires VR-0035 (Lieutenant) and VR-0036 (Commlink
-source signatures); the completed history is in
-[testing.md](testing.md#parallel-windows-development-and-linux-validation).
-VR-0037 now awaits cumulative acceptance of the committed promotion,
-not new authorization. The independent Chromium
-skip-reason and wait-time investigations remain VR-0023/24.
-Git updates are explicit agent actions, not background mirroring.
+Only open VR obligations belong here. **Current count: 2 distinct
+changes** (VR-0023/0024); no deferred test-design requirement is open.
+Oldest recorded date: 2026-11-02.
 
-- [ ] **VR-0039** (2026-11-03; ready-to-run): Accept new normal-mode
-  optional Reinforcements Rule → Army Section/parent/pool navigation.
-  Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
-  Windows base `561e1269`; changed
-  `src/infinity_db/web/static/reference-detail.js`,
-  `tests/test_verify_reinforcements_optional_browser.py` and docs.
-  Risk: low to moderate (frontend routing and shared Section identities).
-  Immediate: real Windows Chromium **3/3** at 1440/390/320 px,
-  with `/api/armies` source relationships, all current playable Section
-  and parent links, encoded Unit Explorer filters, real overview-card
-  navigation, N4-origin caveat and original Orders/AROs isolation.
-  Targeted Ruff, Pyright, docs and diff checks passed. Commit
-  `30bea0b5` published the navigation; a subsequent direct pool link
-  adjustment explicitly pins `reinforcement=1` to keep the Section
-  visible when an optional-unit preference is disabled. Windows real
-  Chromium reaccepted **3/3** with the selected Army filter and URL
-  codec. Design: none. Deferred: pinned Linux Chromium and the next
-  cumulative suite after a clean commit/worker synchronization.
-  Do not infer Main Section legality, N5-native annex authority or
-  that the concurrent Linux run at the previous commit covers this change.
-
-- [ ] **VR-0038** (2026-11-03; ready-to-run): Cross-platform and
-  cumulative acceptance of the new normal-mode Chromium regression for
-  the published optional Reinforcements annex; no v9 publication is
-  changed. Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
-  change: `tests/test_verify_reinforcements_optional_browser.py` and
-  `config/testing/test-sections.json` on Windows base `bc6ce3e1`;
-  risk: low (test-only). Immediate: real Windows Chromium at
-  **1440/390/320 px passed 3/3**, test-section registry **15/15**,
-  targeted Ruff passed. The test follows the Rule → Commlink →
-  Request Reinforcements links, checks the N4-origin disclosures and
-  citations, and ensures neither optional Skill appears in the
-  unscoped 57-row Orders/AROs chart. Linux at pinned `f21ad5ac`
-  passed **3/3 real Chromium cases** in 7.59 s (job
-  `linux-dev:77099baf333c4e5a98372b9f5b31e0ef`), with no
-  missing-browser skip. The cumulative Linux suite at `561e1269`
-  showed **4,938 passed / 28 skipped / 1 failed**: the new browser
-  module was absent from `CHROMIUM_SCHEDULING_LANES`, though it was
-  registered in `test-sections.json`. The module was subsequently
-  assigned to the two-, three- and four-lane schedules.
-  Windows `tests/test_browser_test_capacity.py` passed **24/24**;
-  Ruff, Pyright and docs checks passed. Remaining: a green
-  corrected-revision cumulative Linux suite;
-  full Army Sections, N5-native authority and manual browser sign-off
-  are separate.
-
-- [ ] **VR-0037** (2026-11-02; guarded promotion completed, cumulative acceptance pending):
-  Cross-platform verification and guarded publication for the
-  annex-scoped typed Commlink (+X) occurrence parameter.
-  Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
-  Windows baseline `eb051e105f7eb6d64cd32dd245c59849a218da4f`,
-  source committed at `5fcd01b1`, delta regression
-  `80602f9d` and corrected Annex assertion `fd38485f`.
-  The curated annex now maps only Army Skill 260
-  `298/TEXT:+1` and `299/TEXT:+2` as typed
-  `max-trooper-count-increase` effects, scoped to
-  `optional-reinforcements-extra-army-list`, preserving
-  the N4-origin warning. Immediate Windows: fresh-export
-  source inventory **1 passed**; six invalid signature/scope/type
-  variants rejected; full curated module **670 passed**,
-  source-variant module **68 passed**, full rules-database
-  module **166 passed**. Ruff, Pyright, docs, rules and data
-  stages passed. At the initial source-only baseline, the tracked
-  `rules.db` and paired deployed-object publication were still
-  unchanged. Cross-platform regression was accepted: after a first Linux run with one
-  corrected stale Annex assertion, focused Annex tests
-  passed **2/2** at `fd38485f`; the replacement full suite
-  passed **4,892 tests, 28 skipped, zero failed** at that
-  revision. Separately stage the v9 rules/publication pair using the
-  established guarded delta/rollback path. The isolated delta
-  regression `test_commlink_v9_guard_preserves_other_records_and_schema`
-  passed **7/7**; the full release-storage candidate module
-  passed **530/530**: an exact Commlink family-to-parameter
-  append is allowed, while unrelated record/schema changes,
-  missing/no-op targets and incorrect baseline are rejected.
-  A separate **read-only temporary v9 release export** compares
-  every `records` row with tracked `rules.db`: only
-  `skill:commlink` differs before promotion (none afterward).
-  The full-database variant-delta guard accepts that exact
-  serialized addition and rejects unrelated changes.
-  The new **matched-pair preflight** builds candidate deployed-object
-  JSON against the temporary rules database and checks all
-  **17** object records, Unit uses, provenance and unrelated
-  fingerprints remain identical, with only
-  `sourceSnapshot.rulesDatabaseSha256` re-pinned. The
-  normal publication loader accepts the staged pair. Windows
-  focused Annex acceptance **2/2**, deployed-object module
-  **12/12** and migration guard **7/7**; Ruff, Pyright
-  and docs checks pass. A dedicated **non-promoting** CLI
-  `tools.stage_commlink_v9_candidate` has now staged and
-  verified an actual pair in ignored
-  `local/commlink-v9-candidate-20261103/`. Its manifest
-  pins old/new SHA-256 values, validates exactly one
-  Commlink metadata delta, the same v9 schema/Restrictions,
-  all 17 unchanged deployed objects and a matched publication
-  fingerprint. The staging module's focused acceptance
-  passed **3/3**; Ruff and Pyright passed. Under explicit
-  authorization the guarded promotion command verified the exact
-  manifest, rebuilt candidate and byte pins, then locally promoted
-  tracked `rules.db` and its Git-ignored matched publication on
-  2026-11-03. Current SHA-256: rules
-  `5a12887c255e8ccbd5dd2f880b4471e2c8dbd46b9fc4c2dc9469f2e740722f9d`;
-  publication
-  `bd7f2b49c6983012f34d195a1b4e77ad32e3f4ffcc9bca39a596cd7bb2851262`.
-  Original bytes were retained and hash-verified under ignored
-  `local/commlink-v9-recovery-tscycrly/`. The disposable promotion
-  and rollback regression passed **6/6**, release storage **530/530**,
-  post-promotion Annex **6/6**, deployed objects **12/12**,
-  publication `--check`, rules stage and normal-mode Windows
-  Chromium **3/3**. A Windows SQLite-handle failure discovered
-  before the real promotion was fixed and successfully retested.
-  The three old unresolved-Commlink source-variant expectations were
-  corrected; the complete source module passed **68/68** and the
-  restored synthetic pre-promotion/rollback test fixture **6/6**.
-  The tracked `rules.db` and companion source/tests were committed and
-  pushed as `561e1269`; the Windows working tree was clean. The
-  Linux cumulative run on that revision produced one Chromium lane
-  registration failure (VR-0038), not a Commlink-data failure.
-  Remaining: a green corrected-revision cumulative Linux suite and
-  Army-context/manual-browser scope. This is not general N5 roster legality.
+At pinned Linux commit `8e2b2de727afa9695dcd3bc48b7f8b62cf319426`,
+the full suite passed **4,939 tests / 28 expected skips / 0 failures**
+with 808/808 SVG assets, closing VR-0037 (Commlink v9 promotion),
+VR-0038 (optional Annex Chromium coverage) and VR-0039 (Section/parent
+navigation and browser lane registration). Focused Linux tests passed
+**24/24** lane-capacity and **3/3** Chromium cases.
+Full execution evidence and the earlier corrected one-failure run are
+in [testing.md](testing.md#parallel-windows-development-and-linux-validation).
+The independent Chromium skip-reason and controlled capacity comparisons
+remain open as VR-0023/24. Git updates are explicit, not background mirroring.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -410,8 +283,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0040` (`VR-0023`, `VR-0024`,
-  `VR-0037`, `VR-0038`, `VR-0039` open; earlier entries retired).
+- Execution: `VR-0040` (`VR-0023` and `VR-0024` open; all
+  earlier entries, including `VR-0037`–`VR-0039`, retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

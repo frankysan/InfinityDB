@@ -771,8 +771,27 @@ Chromium lane registries. Both code and source assertions otherwise
 passed, but **the cumulative suite was not accepted**. The module was
 added to each lane mapping; its direct Windows capacity regression
 passed **24/24** and the expanded optional Annex Chromium module
-passed **3/3**. Full-suite acceptance remains required at the corrected commit. The two
-existing Linux multiprocessing-fork warnings were unchanged.
+passed **3/3**. The two existing Linux multiprocessing-fork warnings were unchanged.
+
+**Accepted corrected cumulative Linux validation, 2026-11-03:** At
+`8e2b2de727afa9695dcd3bc48b7f8b62cf319426` (committed and pushed
+on `dev/v1.0.0`), worker `linux-dev` verified the matched
+deployed-object publication and 808/808 published SVGs, then ran
+`pytest -n auto --dist worksteal --infinitydb-skip-summary` across the
+full asset-enabled suite. Job
+`linux-dev:013c20ae82b247c29cc9793dab15d12e` finished
+**4,939 passed / 28 skipped / 0 failed**, in **574.46 s**
+(575.10 s runner duration). The 28 skips were grouped into 12
+known reasons: 16 explicit rebuild-only opt-ins and 12 promoted,
+local-migration/source-evidence or local-PDF cases. The two existing
+Python 3.14 `fork()` deprecation warnings remain. Chromium resource
+waiting totaled **6,008.59 worker-seconds** across 34 setup events;
+this is summed wait time, not additional wall-clock time.
+These results retire **VR-0037, VR-0038 and VR-0039**. They verify the
+promoted scoped Commlink (+X) pair, optional Annex browser behavior and
+parent/pool links; they do **not** establish N5-native annex authority,
+Army List legality, manual assistive-technology acceptance or controlled
+2-/4-slot performance equivalence (VR-0023/24).
 
 **2026-11-03 optional annex Section/parent navigation (VR-0039):**
 The normal-mode optional Rule detail now derives a current, playable
@@ -781,11 +800,15 @@ Army overview card and its own Unit Explorer pool, with explicit links to
 all available parent Armies. Source availability is not combined Army List
 legality or N5-native procedural adoption. The existing browser regression
 checks the exact API-derived Section/parent links and Unit Explorer
-share-state paths at **1440/390/320 px**, plus a live desktop navigation
-through the overview card. Windows real Chromium **3/3** passed at
-base `561e1269` plus local navigation changes; targeted Ruff passed.
-A revision-pinned Linux focused run and cumulative suite are deferred
-under VR-0039, separate from the already-running pre-change Linux suite.
+share-state paths at **1440/390/320 px**, plus live desktop navigation
+through both the overview card and the Section-filtered Unit Explorer.
+The explicit `reinforcement=1` share-state parameter preserves Section
+visibility when optional-unit preferences are disabled. Windows real
+Chromium **3/3**, Army overview Chromium **4/4**, and the source-derived
+Army-context API test **1/1** passed; targeted Ruff, full Pyright,
+docs and data/rules checks passed. After committing the lane correction
+at `8e2b2de7`, Linux focused Chromium **3/3**, capacity **24/24**
+and the full suite passed, retiring VR-0039.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked

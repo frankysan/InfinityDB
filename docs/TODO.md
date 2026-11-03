@@ -1649,8 +1649,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       changes only the rules-database fingerprint, retaining all 17
       reviewed objects. Verified old-byte recovery copies are retained
       under ignored `local/commlink-v9-recovery-tscycrly/`.
-      Whole-suite and remaining browser/Army-context acceptance are
-      separate; this is not a general roster-legality calculation.
+      The corrected, published revision `8e2b2de7` passed the pinned
+      Linux full suite (4,939 passed, 28 expected skips). Remaining
+      profile/Army-context and manual browser acceptance are separate;
+      this is not a general roster-legality calculation.
     - [x] Classify `Request Reinforcements` as a separate
       `tactical-phase-step` in the optional annex. It is discoverable as a
       Skill without entering Basic Short/Short/Long/ARO declarations or
