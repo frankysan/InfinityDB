@@ -1575,8 +1575,13 @@ responses. This will distinguish a pending API response from
 client rendering or a visible error state on a future
 full-suite failure without weakening the acceptance gate.
 Targeted Windows Chromium execution passed **3/3** in
-23.68 s (390px case 6.43 s), with Ruff and diff checks green.
-This isolated pass does **not** reproduce or explain the
+23.68 s (390px case 6.43 s), with Ruff, Pyright, docs
+and diff checks green. After safe Git handoff of the committed
+diagnostic revision `ce6d6d8b268438260e4831f372b34884c2c8ae09`,
+the separate `linux-dev` MCP worker passed the **same 3/3
+real-Chromium cases in 19.09 s** (390px case 5.15 s), job
+`linux-dev:c827d624021a438a87a72f1c5fdf9ba0`.
+This cross-platform isolated pass does **not** reproduce or explain the
 earlier full-load failure and does not justify promoting
 four Chromium slots as the default.
 

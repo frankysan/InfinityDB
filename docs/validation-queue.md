@@ -198,9 +198,13 @@ Git updates are explicit agent actions, not background mirroring.
   **failure-only Glossary diagnostic** captures the `/api/glossary`
   response and pending/loading/error/list/JS state on the original
   15-second timeout; three isolated normal Chromium widths passed
-  **3/3**, including 390px in 6.43 s. It changes no timeout,
-  lane scheduling or default capacity, and does not yet establish
-  the full-load cause. Retire only after remaining acceptance evidence.
+  **3/3**, including 390px in 6.43 s. Linux acceptance of
+  the same committed test (`ce6d6d8b`) passed **3/3** in
+  19.09 s (390px in 5.15 s), job
+  `linux-dev:c827d624021a438a87a72f1c5fdf9ba0`.
+  It changes no timeout, lane scheduling or default capacity,
+  and does not yet establish the full-load cause. Retire
+  only after remaining acceptance evidence.
 
 - [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
   timestamped Chromium slot metrics and the timeline analyzer under
