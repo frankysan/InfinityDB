@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 1 distinct
-change** (VR-0052; not yet due by the five-change threshold).
+Only open VR obligations belong here. **Current count: 2 distinct
+changes** (VR-0052/0053; not yet due by the five-change threshold).
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -111,6 +111,25 @@ change** (VR-0052; not yet due by the five-change threshold).
   cumulative full suite when the validation threshold is due,
   plus exact-SHA hosted CI. Retire only after checking those
   outcomes; final frozen-release acceptance remains separate.
+
+- [ ] **VR-0053** (2026-11-03; ready-to-run): Validate
+  the paired raw/application Army source-audit adapter and
+  explicit current-only historical-review boundary from V1S-014.
+  Work: [source inventory and gap batches](TODO.md#source-inventory-and-gap-batches);
+  risk: low/medium (read-only audit tooling, no runtime changes).
+  Immediate Windows: new `tests/test_paired_audit_connection.py`
+  **3/3**, existing relationship **7/7**, Peripheral **6/6**,
+  normalization **3/3**, published Unit relationship Chromium
+  **1/1**, Controller API **1/1**. Actual source audits all
+  pass in their applicable modes, and the five historical
+  endpoint IDs remain unresolved under `--current-only`.
+  Design: none; paired/mismatch/legacy tests added, with the
+  original snapshot-bound guard kept.
+  Deferred: pinned committed-revision Linux focused tests,
+  cumulative full suite when the threshold is due, and
+  exact-SHA hosted CI. A future separately approved
+  re-review may rebind historical endpoint evidence; do
+  not count this current-only mode as such approval.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
@@ -286,7 +305,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0053` (`VR-0052` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0054` (`VR-0052/0053` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

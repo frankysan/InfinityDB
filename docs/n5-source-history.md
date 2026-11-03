@@ -236,6 +236,101 @@ passed; no Army/rules database, API or browser files changed.
 Broader execution for this tooling fix is tracked as
 VR-0052 in the active [validation queue](validation-queue.md).
 
+### Army Includes and Peripheral relationships (V1S-014; 2026-11-03)
+
+A read-only comparison on the selected September 29 Army export
+at `adea76c1df0d6d370db7ce54093c122c548f4b59`
+confirmed the exact application/raw database pair. The legacy
+relationship, Peripheral and normalization auditors expected a
+single combined schema; current `infinity.db` intentionally omits
+source-only normalized tables, while `infinity.raw.db` omits
+application projections. Their initial direct attempts against
+either file therefore failed on missing tables, **not because
+source relationships were missing**. The bounded paired-audit
+helper `tools.paired_audit_connection` now opens the application
+database read-only, verifies the raw sibling's shared export
+metadata/fingerprint and exposes required raw tables through
+temporary SQLite views. It preserves the combined-schema
+fixture contract, denies an unmatched pair and writes to
+neither input. The source-variant and browser runtime models
+are unchanged.
+
+- **Includes:** all **949** source Loadout Include edges,
+  **2** Profile Includes and **35** shared Unit-option Include
+  edges resolve to their respective Army-specific canonical
+  targets. The selected source has **zero missing targets,
+  cross-logical targets or fallback raw-only values**. The
+  same-parent canonical payload comparison correctly preserves
+  **23** Loadout Include signature variants across Army
+  occurrences: those are contextual information, not
+  duplicates to collapse globally.
+- **Peripheral definitions and attachments:** **279**
+  army-local definitions represent **56 names** and exactly
+  **818** option/Loadout attachments; all resolve to a source
+  definition with no missing ID or raw fallback. The selected
+  source has no profile-level attachments or ambiguous global
+  Unit-option Peripheral warnings. **22** reused canonical
+  Loadout payloads have semantically differing Peripheral
+  attachment signatures; the Army/Loadout occurrence remains
+  the owner, not a single canonical payload-wide set. Names
+  and `mercs` are diagnostic identity candidates, **not**
+  global Peripheral IDs.
+- **Controller ownership:** the Army source supplies
+  source-local attachment/access information, but does
+  not by itself authorize a rules-derived Controller.
+  The published current pair has no reviewed
+  `application_peripheral_controller_access` rows,
+  which is explicitly checked by the normal Unit
+  browser acceptance. The API's bidirectional
+  Controller/Peripheral linking behavior is separately
+  covered using a reviewed synthetic relationship
+  fixture; the absence of an inferred live Controller
+  link is intentional, not proof of a missing source
+  attachment.
+- **Structural indirection:** the normalization audit
+  confirmed **eight** Army filter-link tables with
+  **15,072** rows and **52,554** source weapon-option
+  occurrences mapping to **490** templates, with
+  **zero dangling template references**. The seven
+  canonicalization/provenance link families are retained
+  as infrastructure, not extra gameplay relationships.
+
+**Separate historical relation boundary:** the broader source
+relation audit enumerates **126** constraints. Its maintained
+historical endpoint review for retired Unit IDs
+`165, 613, 749, 1503, 1509` is explicitly pinned to
+a different source archive
+(`858309ea44b6a07f0aadb7bf2856d6c0dfdcb75dbe587b85997ed46c4780e3a3`)
+from the selected current archive
+(`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`).
+Applying it directly **still fails closed**. The new
+opt-in `tools.audit_relationship_semantics
+data/generated/infinity.db --current-only` reports
+**eight unresolved constraints referencing those five
+source IDs**, without borrowing the prior historical
+review; the other **118** relation structures are
+canonically resolved. Those eight require source-exact
+historical review before being called verified stale,
+rather than an invented Unit link or an assumed current
+roster defect. This does **not** reopen the independently
+resolved Includes/Peripheral attachment identities.
+Further cross-source relation review remains in the
+1.0 source-gap and release acceptance gates (V1S-016–022).
+
+Focused Windows validation for this bounded implementation:
+paired-export adapter **3/3**, existing relationship
+semantics **7/7**, Peripheral semantics **6/6**,
+normalization semantics **3/3**, normal Unit browser
+relationship cohort **1/1** (four source-backed Unit
+routes at desktop/mobile widths), and bidirectional
+Controller API contract **1/1**: **21/21** passing.
+The actual read-only paired-source auditors all exit
+successfully in their applicable current-state modes.
+This is not a final frozen candidate, a complete Army
+List/roster builder, or proof of an N5 gameplay rule from
+Peripheral naming alone. Broader committed-state
+Linux/CI validation is queued under VR-0053.
+
 ### Selected rules, FAQ, Wiki and annex evidence (V1S-002; 2026-11-03)
 
 The 1.0 current-reference review selects these **existing local inputs**;
