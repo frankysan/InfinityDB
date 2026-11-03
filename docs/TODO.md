@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-007 (M, review):** Reconcile all four Spanish-only N5.3 update subjects and source conflicts
-  against their applicable versions.
 - [ ] **V1S-008 (M, review):** Settle ARMY-01 publication applicability and Reinforcements authority boundary
   without inferring roster legality.
 - [ ] **V1S-009 (M, review):** Review ARMY-02-10 source/profile/loadout change subjects against pinned current

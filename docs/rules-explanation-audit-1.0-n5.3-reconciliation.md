@@ -289,6 +289,79 @@ This evidence does not replace whole-corpus review, independent full-browser
 or frozen-candidate acceptance under V1S-016–022 and V1S-081–095;
 no VD/VR is required for a read-only reconciliation.
 
+### V1S-007: four additional Spanish-list subjects (2026-11-03)
+
+These are the four subjects added to the **Spanish N5.3 update notice**
+(S13) beyond the 26 shared English-list entries. Their presence on
+the Spanish list does **not** by itself mean all four are *Spanish-only
+gameplay changes*: ESX-02 explicitly identifies a change to the
+English Jet Propulsion wording. The primary current texts are the
+pinned English and Spanish N5.3 PDFs (S1/S17); selected Spanish Wiki
+capture/revisions (S14/S21), the older English v5.2 PDF (S3) and
+curated records supplement the comparison. The previous **Spanish**
+N5.2 PDF is not available. Therefore all four may receive a
+source-backed **current-rule** disposition, but **none** receives a
+verified historical Spanish before/after delta or a conjectured
+effective-publication date.
+
+- **ESX-01 / Spanish ordinal 17 — Stealth: current bilingual
+  agreement, no change.** English N5.3 p. 112 and Spanish p. 114
+  agree on LoF-dependent reactions to Cautious Movement, Idle and
+  Basic Short Movement, the Combat Instinct/Sixth Sense and
+  Deployable exceptions, and the CC Attack/Dodge/Reset choices
+  after Silhouette contact. `skill:stealth` displays those scoped
+  choices and links to `state:engaged`; its source and browser
+  regressions reject a blanket suppression of all reactions.
+  Spanish oldid 4004 is corroborating page evidence, not a
+  recovered Spanish previous-PDF baseline.
+- **ESX-02 / Spanish ordinal 19 — Jet Propulsion: English change
+  established, Spanish history unresolved.** English v5.2 p. 112
+  describes changing direction/heading before landing; English
+  N5.3 p. 113 explicitly permits repeatedly changing both in
+  mid-air. Spanish N5.3 p. 116 uses less explicit before-landing
+  wording while the p. 117 example permits freely varying a
+  trajectory in the air. `skill:super-jump` describes this only
+  for the Jet Propulsion variant, preserving advance trajectory
+  declaration, distance, and once-per-Order limits. The older
+  Spanish release's exact wording remains unknown.
+- **ESX-03 / Spanish ordinal 23 — Multispectral Visor L3:
+  current bilingual scope, no change.** English N5.3 p. 125 and
+  Spanish p. 131 place attack-without-Discover in the user's
+  **Active Turn**. Spanish adds that merely declaring this
+  attack does not reveal the target to the rest of the army.
+  `equipment:multispectral-visor` Level 3 preserves the
+  attacking user's exception while linking normal
+  `state:camouflaged` cancellation, including saving-roll
+  requirements (English p. 158; Spanish p. 163). It does not
+  authorize Reactive-Turn bypass or universal Marker immunity.
+  No historical Spanish revision equivalence is inferred.
+- **ESX-04 / Spanish ordinal 28 — AP+T2 CC: current chart/profile
+  agreement, no change.** English N5.3 p. 177 and Spanish
+  p. 184 match the public `ap-t2-cc-weapon` profile:
+  PS 8, Burst 1, AP+T2, one ARM/2 Saving Roll, Anti-materiel
+  and CC. The composed `weapon-property:ap-t2`, AP and T2
+  references are preserved. Neither the AP+T2 composition nor
+  the Spanish source implies an additional Saving Roll.
+  The separate Kobra Anti-materiel conflict remains open.
+
+**Outcome:** all four selected current rules already have local
+source, maintained-data, API, and ordinary-browser coverage; **zero
+new source-confirmed defects** and **no gameplay edit** resulted.
+Earlier source-backed acceptance is retained without rewriting
+the original four *Partially verified* historical classifications.
+At Windows `76f473d869ac690227cfa6c7846c0cd766ba29e6`,
+the four ordinary Chromium checks passed **12/12**
+(1440/390/320 px), and the bilingual AP+T2 printed-chart and
+public-profile regressions passed **2/2**, with no failed or skipped
+cases. Pinned bilingual Stealth, Jet Propulsion and MSV3 PDF tests,
+together with the respective curated assertions, also passed in
+`tests/test_curated.py` **670/670** on the identical rules/Army
+pair at `6e04d7128741edb29c9318848afcf3a2ba594944`;
+later commits only changed documentation. This is not hosted
+frozen-candidate acceptance, an exhaustive bilingual translation
+review, or proof of historical Spanish content equivalence.
+No new VD/VR obligation arises from this read-only review.
+
 ### Additional Spanish, Army and FAQ subjects
 
 - **ESX-01 to ESX-04 (four items):** retain the historical partially
