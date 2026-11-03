@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 3 distinct
-changes** (VR-0023/0024/0048); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 2 distinct
+changes** (VR-0023/0024); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -145,22 +145,17 @@ Chromium setup included **6,301.22 summed worker-seconds** of resource
 waiting across 31 events; this is included in pytest wall time.
 The unresolved `Religious Troop (Total)` source anomaly is unchanged.
 
-- [ ] **VR-0048** (2026-11-03; ready-to-run): Verify exact N5
-  Camouflage `1 Use` source-29 semantics against the pinned Linux
-  archive, cumulative browser/source suite and hosted CI. Work:
-  [variant usage projection](TODO.md#rules-and-reference-completeness);
-  change: one reviewed `43/TEXT:1 Use` parameter with the N5 FAQ
-  Model-deployment and failed-Infiltration distinctions; guarded matched-v9
-  release refresh and source regressions; risk: moderate (curated metadata
-  and tracked rules DB, not an executable game-state evaluator).
-  Immediate Windows: 223 qualified/374 unqualified occurrence owners,
-  N5 FAQ v0.0 English and v0.1 English/Spanish PDFs pin-verified,
-  exact candidate/release pair guard and five fail-closed semantic
-  mutation cases. Windows source-variant **89/89**, curated **670/670**,
-  rules DB **166/166**, build/data, rules, Ruff, Pyright,
-  documentation and whitespace checks passed. No change to FAQ
-  ruling text. Design: none. Deferred: Linux pinned-source and cumulative suite, hosted CI at the
-  committed release revision. Do not infer a general Limited state engine.
+Camouflage source-29 review **VR-0048** retired at pinned
+`5ac294165a8be49a13125ba9324281b17b406264`: the matched
+publication and Linux source-variant module passed **89/89**; the full
+Linux suite passed **4,984 / 29 skipped / 0 failed** in **596.40 s**
+(pytest; `linux-dev:ec597818137143ffa8cb26c741a8fd87`), with
+**808/808** published SVGs. Existing Python 3.14 `fork()` warnings
+persist. All GitHub workflows passed, including Source Checks after
+rerunning its initially cancelled macOS job and final deterministic-
+output comparison. No source-data or FAQ semantics changed during
+the retry; the reviewed annotation remains metadata, not a match-state
+tracker.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -214,9 +209,13 @@ The unresolved `Religious Troop (Total)` source anomaly is unchanged.
   **both** full suites at that revision passed: Windows
   **4,922/28 skipped in 537.68 s**, Linux **4,922/28
   skipped in 566.85 s**, with no failures or browser
-  regressions. Six host-specific skip reasons on each side
-  remain. Retire only after source coverage and other
-  acceptance evidence are reconciled.
+  regressions. Six host-specific skip reasons on each side remain.
+  New same-revision eight-worker/four-lane browser comparisons at
+  `5ac29416` passed **600 / 16 skipped / 0 failed** at both capacities
+  on each host (Windows **481.83/402.56 s**, Linux
+  **636.13/396.22 s**, two/four slots). The Glossary timeout did not
+  recur; see `testing.md`. Retire only after alternating repeatability
+  and the remaining host-specific source/skip differences are reconciled.
 
 - [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
   timestamped Chromium slot metrics and the timeline analyzer under
@@ -317,13 +316,19 @@ The unresolved `Religious Troop (Total)` source anomaly is unchanged.
   115 intervals, CPU mean/peak **41.22% / 100%** and
   memory mean/peak **23.24% / 25.66%** (job
   `linux-dev:eeac1d98f593419a9b273be7247edcec`).
-  These unmatched worker-count runs do not establish a
-  controlled browser-capacity comparison.
-  Remaining: investigate the
-  earlier four-slot Glossary failure; repeat alternating
-  fully passing equal-worker/slot comparisons with
-  concurrent CPU/RAM sampling and reconcile source
-  coverage. Do not alter defaults or retire yet.
+  Those unmatched worker-count runs did not establish a
+  controlled browser-capacity comparison. At `5ac29416`, both
+  controlled two-/four-slot browser pairs passed **600 / 16 skipped**
+  with consistent lane ownership. Admission waiting fell on Windows
+  from **328.55 to 0.01 worker-s**, on Linux from **442.24 to
+  0.00 worker-s**, with no lock-overlap warnings. CPU/RAM captures
+  covered **100%** of all four test windows. Windows CPU means
+  changed **66.87% → 79.48%**, Linux **22.89% → 38.09%**
+  (two/four slots), with complete RAM statistics, lane traces and
+  artifact identities in `testing.md`.
+  Remaining: alternating clean repeats, Glossary failure
+  investigation if it recurs, and source/skip parity reconciliation.
+  Do not change defaults or retire yet.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -335,8 +340,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0049` (`VR-0023`, `VR-0024` and `VR-0048`
-  open; `VR-0044`–`VR-0047` and earlier entries retired).
+- Execution: `VR-0049` (`VR-0023` and `VR-0024` open;
+  `VR-0044`–`VR-0048` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -1019,7 +1019,7 @@ two existing Python 3.14 multithreaded `fork()` warnings. This retires
 VR-0047; benchmarking VR-0023/24 and independent final release sign-off
 remain open.
 
-**2026-11-03 Camouflage source-29 FAQ one-use candidate (VR-0048 open):**
+**2026-11-03 Camouflage source-29 FAQ one-use review (VR-0048 retired):**
 The pinned Army archive reports 597 direct Camouflage occurrences,
 including **223** exact `43/TEXT:1 Use` source annotations and **374**
 without that extra. The published N5 FAQ v0.0 English and v0.1
@@ -1037,9 +1037,20 @@ consumption conditions and invented extras. Windows source-variant
 module **89/89**, curated collection module **670/670**, and rules
 DB module **166/166** passed. Build/data, rules, Ruff, Pyright, docs
 lint/links and whitespace checks passed. The inventory is now **23
-reviewed-extra / 11 unresolved** Skill source IDs. Linux pinned
-source/full suite and hosted CI remain VR-0048; this is metadata,
-not a game-state usage-tracking engine.
+reviewed-extra / 11 unresolved** Skill source IDs. At pinned
+`5ac294165a8be49a13125ba9324281b17b406264`, the Linux source
+module passed **89/89** and the cumulative suite passed **4,984 tests,
+29 expected skips, 0 failures** in **596.40 s pytest / 597.07 s
+runner** (`linux-dev:ec597818137143ffa8cb26c741a8fd87`). All
+**808/808** published SVGs were available. Two pre-existing Python
+3.14 multithreaded `fork()` warnings and 6,597.21 summed Chromium
+worker-seconds of resource waiting (already included in setup time)
+were recorded. GitHub Installed Wheel Smoke and Deployment Smoke
+passed. Source Checks initially reported failure because macOS was
+cancelled before any step; the unsuccessful jobs were retried on
+the same SHA, after which all matrix jobs and the cross-platform
+deterministic-output check passed. VR-0048 is retired. This remains
+metadata, not a game-state usage-tracking engine.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
@@ -2082,6 +2093,69 @@ These are host-wide utilization measurements, not per-test
 process attribution or a fair equal-worker Chromium benchmark.
 The original four-slot Glossary timeout still needs
 repeat controlled-capacity validation before any default change.
+
+**Controlled browser concurrency pair, 2026-11-03 (preliminary VR-0023/24
+evidence):** All runs use the same pinned commit
+`5ac294165a8be49a13125ba9324281b17b406264`, complete published
+assets (808/808), eight xdist workers, four isolated Chromium lanes,
+Scenario FAQ A/D split, and the same 616-case browser test selection
+(600 passed, 16 expected skips). Each host runs a serial two-slot then
+four-slot pair with an independently started native CPU/RAM sampler.
+No browser timeout or other failure occurred in either Windows run.
+The historical four-slot Glossary timeout has not been reproduced,
+which does **not** establish its cause.
+
+On **Windows**, two slots took **481.83 s pytest / 482.46 s runner**,
+and four slots took **402.56 s pytest / 403.26 s runner**: 79.27 s
+(**16.5%**) less pytest wall time. Lane A/B/C/D teardown changed from
++360.61/+171.29/+185.67/+480.86 s to
++274.92/+235.66/+260.22/+401.57 s. Both capacities passed the
+one-worker-per-lane guard. Namespace-aware timestamped traces measured
+**328.55 / 0.01 summed worker-seconds** waiting (two/four slots),
+**829.32 / 1,127.28 worker-seconds** of slot holding, and
+**354.34 / 208.47 s** at full slot occupancy; no same-slot overlap
+warning. Raw metrics:
+`local/benchmarks/chromium-20261103-161832-19556/` and
+`local/benchmarks/chromium-20261103-163030-34840/`.
+Both native test-window captures achieved **100% coverage**.
+CPU mean/peak increased from **66.87% / 94.80%** (two slots)
+to **79.48% / 100.00%** (four slots), and RAM mean/peak from
+**76.61% / 77.88%** to **78.89% / 85.27%**. Captures:
+`local/benchmarks/chromium-v1-5ac29416-2slots-cpu.jsonl` and
+`local/benchmarks/chromium-v1-5ac29416-4slots-cpu.jsonl`.
+The speedup trades for greater host CPU/RAM use and higher total
+Chromium slot-held worker time.
+
+On **Linux**, the two-slot run passed **600 / 16 skipped** in
+**636.13 s pytest / 636.57 s runner**, with A/B/C/D final teardowns
+at +306.32/+181.02/+301.02/+632.04 s; lane ownership was correct.
+The timeline measured **442.24 summed worker-seconds** of waiting
+and **909.10 worker-seconds** held, with **291.08 s** at full
+capacity and no same-slot overlap warning. Its native test-window
+capture covered **100% of 636.13 s**, with CPU mean/peak
+**22.89% / 51.07%** and RAM mean/peak **18.21% / 19.75%**.
+Raw artifacts: `local/benchmarks/chromium-20261103-162532-817731/`
+and `local/benchmarks/chromium-v1-5ac29416-linux-2slots-cpu.jsonl`.
+The **Linux four-slot** run also passed **600 / 16 skipped** in
+**396.22 s pytest / 396.69 s runner**, a **239.91 s (37.7%)**
+reduction from two slots. A/B/C/D finished at
++242.55/+183.92/+237.39/+392.49 s, with correct worker ownership.
+Its separate lock-namespace trace found **0.00 worker-seconds**
+of admission waiting, **987.47 worker-seconds** of holding,
+**156.03 s** at full capacity, and no same-slot overlap warning;
+raw metrics: `local/benchmarks/chromium-20261103-163737-856283/`.
+Its native four-slot test-window capture had **100% coverage**
+across **396.22 s**: CPU mean/peak **38.09% / 70.28%**, RAM
+mean/peak **16.40% / 19.72%**
+(`local/benchmarks/chromium-v1-5ac29416-linux-4slots-cpu.jsonl`).
+Compared with Linux's two-slot window, average CPU increased from
+**22.89%** while mean measured RAM decreased from **18.21%**;
+host-wide measurements do not isolate the benchmark's processes.
+All four host/capacity runs passed the 616-case selection; the
+prior isolated four-slot Glossary timeout did not recur.
+A single paired comparison per host does not establish
+repeatability; retain the two-slot default and VR-0023/24 pending
+alternating repetitions and final source/skip reconciliation.
 
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
