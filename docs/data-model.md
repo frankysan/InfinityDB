@@ -2162,6 +2162,21 @@ Skill source IDs, including Jump and Climb, retain their unresolved
 parameter status; TinBot Firewall remains an independently unresolved
 Equipment occurrence parameter. No Unit-use index has been published.
 
+**Reviewed Camouflage limited-use qualifier (2026-11-03):**
+Skill source `29` has 597 direct Army occurrences; 223 carry the sole
+`43/TEXT:1 Use` qualifier and 374 are unqualified. The N5 FAQ
+v0.0 English and v0.1 English/Spanish rulings (printed p. 2)
+explicitly preserve a use after deployment as a Model, but consume
+the use when attempted Camouflaged Marker deployment fails an
+Infiltration Roll. The reviewed `camouflaged-state-one-use`
+effect is scoped only to `camouflaged-state-entry`, with
+`maxUses: 1` and separately typed consumption booleans. It is
+**not** a generic Skill use count, does not rewrite the FAQ, and
+does not track in-match used/remaining states. The exact raw source
+signature and the matched schema-v9 rules/deployed-object pair are
+verified with fail-closed regressions. The Unit-use index remains
+unpublished.
+
 **Reviewed Terrain type qualifiers (2026-11-03):** Skill source `58`
 has 1,236 direct Army occurrences: 918 `Total` (extra 33), 164
 `Zero-G` (34), 65 `Aquatic` (35), 29 `Desert` (36), 30

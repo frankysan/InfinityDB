@@ -2621,7 +2621,27 @@
                 }
             ],
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 43,
+                                "extraType": "TEXT",
+                                "rawValue": "1 Use",
+                                "effect": {
+                                    "kind": "camouflaged-state-one-use",
+                                    "appliesTo": "camouflaged-state-entry",
+                                    "maxUses": 1,
+                                    "deploymentAsModelConsumesUse": false,
+                                    "failedInfiltrationMarkerDeploymentConsumesUse": true
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

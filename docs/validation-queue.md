@@ -96,7 +96,7 @@ retain required dependencies in any still-open VR item.
 ## Pending deferred execution
 
 Only open VR obligations belong here. **Current count: 3 distinct
-changes** (VR-0023/0024/0047); no deferred test-design requirement is open.
+changes** (VR-0023/0024/0048); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -134,21 +134,33 @@ Python 3.14 fork warnings and independent controlled Chromium
 benchmarking are not resolved by these results. See
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
 
-- [ ] **VR-0047** (2026-11-03; ready-to-run): Validate N5.3
-  Terrain source-58 profile-type metadata on pinned Linux and across the
-  release-matched browser/reference suite. Work: [variant usage projection](TODO.md#rules-and-reference-completeness);
-  change: seven exact Terrain `TEXT` extras (`Total`, five single
-  Types, `Aquatic/Jungle` choose-one), guarded matched-v9 refresh,
-  and pinned source regressions; risk: moderate (curated semantics and
-  tracked rules DB, no executable terrain evaluator).
-  Immediate Windows: source-variant module **82/82**; five malformed
-  type/selection regressions, 1,235 qualified/one unqualified source
-  occurrence and SRC-028 separation; read-only pre-promotion delta guard,
-  rollback-capable promotion and published pair recheck; data and rules
-  stages, Ruff, and diff checks passed. Design: none.
-  Deferred: Linux pinned-source module, cumulative browser/source suite,
-  hosted CI on the committed release pair. Independent official
-  clarification SRC-028 remains open.
+Terrain source-58 review **VR-0047** retired at pinned
+`333a091cb4336cb5cce0d9b0c2eae9b27c7abaa0`: source-variant
+module **82/82** on Linux (`linux-dev:e4b0c232a25c499b8ff18941da38edad`),
+and full Linux suite **4,977 passed / 29 skipped / 0 failed**
+in **593.76 s** (`linux-dev:bbfa0a7fd0f64ab79e67e19041c371f3`),
+with **808/808** published SVGs. Two existing Python 3.14
+`fork()` warnings remain. All three GitHub workflows passed.
+Chromium setup included **6,301.22 summed worker-seconds** of resource
+waiting across 31 events; this is included in pytest wall time.
+The unresolved `Religious Troop (Total)` source anomaly is unchanged.
+
+- [ ] **VR-0048** (2026-11-03; ready-to-run): Verify exact N5
+  Camouflage `1 Use` source-29 semantics against the pinned Linux
+  archive, cumulative browser/source suite and hosted CI. Work:
+  [variant usage projection](TODO.md#rules-and-reference-completeness);
+  change: one reviewed `43/TEXT:1 Use` parameter with the N5 FAQ
+  Model-deployment and failed-Infiltration distinctions; guarded matched-v9
+  release refresh and source regressions; risk: moderate (curated metadata
+  and tracked rules DB, not an executable game-state evaluator).
+  Immediate Windows: 223 qualified/374 unqualified occurrence owners,
+  N5 FAQ v0.0 English and v0.1 English/Spanish PDFs pin-verified,
+  exact candidate/release pair guard and five fail-closed semantic
+  mutation cases. Windows source-variant **89/89**, curated **670/670**,
+  rules DB **166/166**, build/data, rules, Ruff, Pyright,
+  documentation and whitespace checks passed. No change to FAQ
+  ruling text. Design: none. Deferred: Linux pinned-source and cumulative suite, hosted CI at the
+  committed release revision. Do not infer a general Limited state engine.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -323,8 +335,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0048` (`VR-0023`, `VR-0024` and `VR-0047`
-  open; `VR-0044`–`VR-0046` and earlier entries retired).
+- Execution: `VR-0049` (`VR-0023`, `VR-0024` and `VR-0048`
+  open; `VR-0044`–`VR-0047` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

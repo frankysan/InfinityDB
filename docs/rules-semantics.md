@@ -5345,13 +5345,16 @@ sources for one ruling, not independent mechanics or supersession events:
   failing Infiltration after attempting Marker deployment does.
   The pinned September 29 Army source uses Skill ID **29** with
   extra **43/TEXT:1 Use** on **223 of 597 direct Camouflage
-  occurrences**. An exact source-signature regression links this
-  otherwise unreviewed Army occurrence parameter to the existing
-  `faq-ruling:camouflage-one-use-infiltration-failure`; the FAQ
-  distinguishes *attempted Marker deployment* from deployment as a
-  Model, not a blanket consumption on deployment. No typed
-  occurrence-parameter semantics or Unit-usage projection is published
-  by this source-only evidence pass.
+  occurrences**. The reviewed exact `43/TEXT:1 Use` source
+  parameter maps to a `camouflaged-state-one-use` effect with one
+  permitted Camouflaged State entry. The existing
+  `faq-ruling:camouflage-one-use-infiltration-failure` supplies
+  two explicit boundaries: deploying as a Model preserves the use;
+  attempting Marker deployment and failing Infiltration consumes it.
+  This does not imply that simply deploying in Model form always
+  expends the use, nor introduce a general resource state machine.
+  The paired v9 rules and deployed-object publication contain only
+  this scoped source metadata; no Unit-usage projection is published.
 
 The original v0.0 source's `2025-10-15` date is a version-associated
 official update anchor from the source history; the PDF creation

@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.curated import (
+    CAMOUFLAGE_ONE_USE_VARIANT,
     CURATED_FORMAT_VERSION,
     discover_curated_documents,
     load_curated_directory,
@@ -930,7 +931,7 @@ def test_checked_in_n5_collection_is_valid() -> None:
         {"type": "enters-state", "recordId": "state:camouflaged"}
     ]
     assert records["skill:camouflage"]["armyLinks"] == [{"entity": "skill", "id": "camouflage"}]
-    assert records["skill:camouflage"]["variantSemantics"] == {"inheritance": "family"}
+    assert records["skill:camouflage"]["variantSemantics"] == CAMOUFLAGE_ONE_USE_VARIANT
     assert records["skill:super-jump"]["variantSemantics"] == {
         "inheritance": "family",
         "occurrenceParameters": [

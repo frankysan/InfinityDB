@@ -984,7 +984,7 @@ passed at this same commit. This retires VR-0044, VR-0045 and VR-0046;
 VR-0023/24 controlled performance comparisons and final release
 sign-off remain independent.
 
-**2026-11-03 Terrain source-58 type review (VR-0047 open):**
+**2026-11-03 Terrain source-58 type review (VR-0047 retired):**
 N5.3 English p. 116 and the pinned September 29 Army archive support
 seven exact type qualifiers: `Total` (extra 33, 918 direct rows),
 `Zero-G` (34, 164), `Aquatic` (35, 65), `Desert` (36, 29),
@@ -1006,8 +1006,40 @@ and malformed-variant tests passed, then the source-variant module
 passed **82/82** on the promoted pair. Both `rules` and `data`
 stages passed; Ruff and whitespace checks passed. The inventory is
 now **22 reviewed-extra / 12 unresolved** Skill source IDs, without
-a published cross-Army Unit-use index. Linux pinned acceptance,
-cumulative browser suite and hosted CI remain VR-0047.
+a published cross-Army Unit-use index. On the pinned Linux checkout
+`333a091cb4336cb5cce0d9b0c2eae9b27c7abaa0`, the source-variant
+module passed **82/82** (job
+`linux-dev:e4b0c232a25c499b8ff18941da38edad`); the cumulative suite
+passed **4,977/29 skipped/0 failed** in **593.76 s pytest / 594.37 s
+runner** (job `linux-dev:bbfa0a7fd0f64ab79e67e19041c371f3`),
+with **808/808** published SVGs. All three hosted workflows passed.
+The Linux suite recorded **6,301.22 summed worker-seconds** of Chromium
+setup resource waiting over 31 events, included in pytest setup, and
+two existing Python 3.14 multithreaded `fork()` warnings. This retires
+VR-0047; benchmarking VR-0023/24 and independent final release sign-off
+remain open.
+
+**2026-11-03 Camouflage source-29 FAQ one-use candidate (VR-0048 open):**
+The pinned Army archive reports 597 direct Camouflage occurrences,
+including **223** exact `43/TEXT:1 Use` source annotations and **374**
+without that extra. The published N5 FAQ v0.0 English and v0.1
+English/Spanish sources (printed p. 2) agree: deploying as a Model
+preserves the use; attempting Marker deployment with a failed
+Infiltration Roll consumes it. One reviewed `camouflaged-state-one-use`
+effect now encodes that boundary, without changing the base Skill or
+the published FAQ answer. Three pinned FAQ PDF hashes verified on Windows.
+The guarded read-only candidate checked the exact v9 single-record
+delta, all 223 raw owners and unchanged unrelated deployed-object data.
+The variant was promoted using the rollback-capable matched-v9 path;
+`tools.review_camouflage_variant` now verifies the published pair.
+Five negative mutation cases reject widened use counts, changed
+consumption conditions and invented extras. Windows source-variant
+module **89/89**, curated collection module **670/670**, and rules
+DB module **166/166** passed. Build/data, rules, Ruff, Pyright, docs
+lint/links and whitespace checks passed. The inventory is now **23
+reviewed-extra / 11 unresolved** Skill source IDs. Linux pinned
+source/full suite and hosted CI remain VR-0048; this is metadata,
+not a game-state usage-tracking engine.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked

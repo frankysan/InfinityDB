@@ -414,8 +414,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       review adds seven exact typed Terrain applicability selectors (1,235
       qualified direct rows, one unqualified), distinguishing Total/all
       Types, single fixed Types and Aquatic/Jungle/choose-one on placement.
-      SRC-028's Religious Troop anomaly remains unreviewed. Other
-      unresolved source families remain in this task.
+      SRC-028's Religious Troop anomaly remains unreviewed. The
+      Camouflage source-29 `1 Use` review certifies 223 one-use Army
+      qualifiers using N5 FAQ v0.0/v0.1, without inventing a match-state
+      tracker or changing the existing FAQ. Other unresolved source
+      families remain in this task.
     - [ ] Materialize public context links and verify duplicate sources, reused
       payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
       ambiguous variants before publication. An audited source signature alone

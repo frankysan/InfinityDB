@@ -345,6 +345,29 @@ TERRAIN_VARIANT: dict[str, Any] = {
 }
 
 
+# N5 FAQ v0.1 (carried from v0.0) p. 2: a one-use Camouflage
+# state entry remains available after Model deployment, but attempted
+# Marker deployment with failed Infiltration consumes it.
+CAMOUFLAGE_ONE_USE_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra",
+        "kind": "reviewed-extra",
+        "extraValues": [{
+            "extraId": 43,
+            "extraType": "TEXT",
+            "rawValue": "1 Use",
+            "effect": {
+                "kind": "camouflaged-state-one-use",
+                "appliesTo": "camouflaged-state-entry",
+                "maxUses": 1,
+                "deploymentAsModelConsumesUse": False,
+                "failedInfiltrationMarkerDeploymentConsumesUse": True,
+            },
+        }],
+    }],
+}
+
 # The generic N5.3 ReRoll annotation applies to the Skill's own Roll.
 # Both are optional deployment chart Rolls, not rolls using chart rewards.
 CHART_REROLL_VARIANTS: dict[str, dict[str, Any]] = {
@@ -1027,6 +1050,31 @@ def _validate_reviewed_extra_parameter(
             )
         ):
             raise ValueError(f"{context}: invalid N5.3 Lieutenant resource extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "camouflage"}
+    ]:
+        # The carried-forward FAQ requires an exact single use, not a
+        # generic limited-use counter or permission to retry failed infiltration.
+        values = parameter.get("extraValues")
+        expected = CAMOUFLAGE_ONE_USE_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or type(entry["effect"].get("maxUses")) is not int
+                or type(entry["effect"].get("deploymentAsModelConsumesUse")) is not bool
+                or type(entry["effect"].get(
+                    "failedInfiltrationMarkerDeploymentConsumesUse"
+                )) is not bool
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid FAQ Camouflage one-use extra")
         return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "terrain"}

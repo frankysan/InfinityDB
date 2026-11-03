@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.curated import (
+    CAMOUFLAGE_ONE_USE_VARIANT,
     LIEUTENANT_VARIANT,
     TERRAIN_SOURCE_SPECS,
     TERRAIN_VARIANT,
@@ -114,6 +115,7 @@ def _expected_skill_statuses(rules_path: Path) -> dict[str, int]:
     commlink_reviewed = "commlink" in reviewed
     lieutenant_reviewed = "lieutenant" in reviewed
     terrain_reviewed = "terrain" in reviewed
+    camouflage_reviewed = "camouflage" in reviewed
     return {
         "family-only": 44,
         "reviewed-distance-parameter": 3,
@@ -122,11 +124,13 @@ def _expected_skill_statuses(rules_path: Path) -> dict[str, int]:
         "reviewed-extra-parameter": (
             (20 if commlink_reviewed else 19)
             + int(lieutenant_reviewed) + int(terrain_reviewed)
+            + int(camouflage_reviewed)
         ),
         "reviewed-combination-parameter": 2,
         "unresolved-occurrence-parameter": (
             (14 if commlink_reviewed else 15)
             - int(lieutenant_reviewed) - int(terrain_reviewed)
+            - int(camouflage_reviewed)
         ),
     }
 
@@ -716,16 +720,21 @@ def test_infiltration_source_47_exact_ph_and_reroll_owners() -> None:
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_camouflage_one_use_source_29_signature_and_faq_scope() -> None:
-    """Pin exact Army one-use qualifiers without treating them as a reviewed effect."""
+    """Pin exact Army one-use qualifier to the reviewed FAQ boundary."""
+    reviewed = RulesDatabase(ROOT / "data/generated/rules.db").skill_reviewed_extra_semantics()
     [item] = select_source_variants(_inventory(), "skills", [29])["items"]
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
         "Camouflage", 29, 597,
     )
-    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["status"] == (
+        "reviewed-extra-parameter" if "camouflage" in reviewed
+        else "unresolved-occurrence-parameter"
+    )
     assert item["rawValues"] == []
-    assert item["reviewedExtra"] is None
+    assert item["reviewedExtra"] == reviewed.get("camouflage")
     assert item["extraSignatures"] == [{
-        "extras": [[43, "TEXT", "1 Use"]], "reviewed": False, "count": 223,
+        "extras": [[43, "TEXT", "1 Use"]],
+        "reviewed": "camouflage" in reviewed, "count": 223,
     }]
     owners = source_extra_owner_context(
         ROOT / "data/generated/infinity.raw.db",
@@ -750,6 +759,112 @@ def test_camouflage_one_use_source_29_signature_and_faq_scope() -> None:
     answer = faq["facts"]["answer"]
     assert "Deploying as a Model preserves" in answer
     assert "failing an Infiltration Roll uses up the one use" in answer
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_camouflage_one_use_fresh_v9_effect_and_source_29(tmp_path: Path) -> None:
+    """One Camouflaged State use, with the precise current FAQ exceptions."""
+    docs = load_curated_directory(ROOT / "data/curated/rules")
+    records = {row["id"]: row for _, doc in docs for row in doc["records"]}
+    assert records["skill:camouflage"]["variantSemantics"] == CAMOUFLAGE_ONE_USE_VARIANT
+    faq = records["faq-ruling:camouflage-one-use-infiltration-failure"]
+    assert faq["review"]["status"] == "reviewed"
+    assert "Deploying as a Model preserves" in faq["facts"]["answer"]
+    assert "failing an Infiltration Roll uses up the one use" in faq["facts"]["answer"]
+    assert {
+        (citation["sourceId"], citation["page"]) for citation in faq["citations"]
+    } == {
+        ("n5-faq-v0.0-en-pdf", 2),
+        ("n5-faq-v0.1-en-pdf", 2),
+        ("n5-faq-v0.1-es-pdf", 2),
+    }
+    base = ROOT / "data/generated/rules.db"
+    candidate = tmp_path / "camouflage-v9.db"
+    export_release_rules(docs, candidate, baseline=base)
+    typed = RulesDatabase(candidate).skill_reviewed_extra_semantics()["camouflage"]
+    assert typed == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [{
+            "extra_id": 43, "extra_type": "TEXT", "raw_value": "1 Use",
+            "effect": {
+                "kind": "camouflaged-state-one-use",
+                "applies_to": "camouflaged-state-entry",
+                "maxUses": 1,
+                "deploymentAsModelConsumesUse": False,
+                "failedInfiltrationMarkerDeploymentConsumesUse": True,
+            },
+        }],
+    }
+    [source] = select_source_variants(inventory_source_variants(
+        ROOT / "data/generated/infinity.db",
+        ROOT / "data/generated/infinity.raw.db", candidate,
+    ), "skills", [29])["items"]
+    assert source["status"] == "reviewed-extra-parameter"
+    assert source["reviewedExtra"] == typed
+    assert source["occurrences"] == 597
+    assert source["rawValues"] == []
+    assert source["extraSignatures"] == [{
+        "extras": [[43, "TEXT", "1 Use"]], "reviewed": True, "count": 223,
+    }]
+    if "camouflage" not in RulesDatabase(base).skill_reviewed_extra_semantics():
+        _check_variant_semantics_delta(
+            base, candidate, {
+                ("n5-core-v5.3", "skill:camouflage"):
+                    json.dumps(
+                        CAMOUFLAGE_ONE_USE_VARIANT,
+                        ensure_ascii=False, separators=(",", ":"),
+                    ),
+            },
+        )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        lambda v: v["occurrenceParameters"][0]["extraValues"][0]["effect"].update(
+            {"maxUses": True}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][0]["effect"].update(
+            {"deploymentAsModelConsumesUse": True}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][0]["effect"].update(
+            {"failedInfiltrationMarkerDeploymentConsumesUse": False}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][0].update(
+            {"rawValue": "Unlimited"}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"].append(
+            {"extraId": 999, "extraType": "TEXT", "rawValue": "2 Uses", "effect": {}}
+        ),
+    ),
+)
+def test_camouflage_one_use_metadata_rejects_unsafe_mutations(mutation) -> None:
+    variant = copy.deepcopy(CAMOUFLAGE_ONE_USE_VARIANT)
+    assert _validate_variant_semantics(
+        variant, "skill:camouflage", [{"entity": "skill", "id": "camouflage"}],
+    ) == "family"
+    mutation(variant)
+    with pytest.raises(ValueError, match="invalid FAQ Camouflage one-use extra"):
+        _validate_variant_semantics(
+            variant, "skill:camouflage", [{"entity": "skill", "id": "camouflage"}],
+        )
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_camouflage_review_gate_verifies_published_matched_pair() -> None:
+    """Read-only release check also works when Linux omits ignored FAQ PDFs."""
+    from tools.review_camouflage_variant import check_candidate
+
+    report = check_candidate()
+    assert report["scope"] == "camouflage-one-use-v9-verified-published"
+    assert report["qualifiedOccurrences"] == 223
+    assert report["unqualifiedOccurrences"] == 374
+    assert report["logicalContentVerified"] is True
+    assert set(report["verifiedFaqPdfs"]) <= {
+        "n5-faq-v0.0-en-pdf",
+        "n5-faq-v0.1-en-pdf",
+        "n5-faq-v0.1-es-pdf",
+    }
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
