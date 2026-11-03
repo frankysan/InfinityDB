@@ -121,6 +121,304 @@ browser acceptance for new visual/interaction surfaces. Promote durable contract
 canonical owners as implementation lands; keep remaining design extensions explicitly labelled
 as unimplemented and distinguish them from the published core-scenario foundation.
 
+### Pre-planned 1.0 execution slices
+
+**Planning baseline:** dev/v1.0.0 at dd071c4d (2026-11-03). This is the
+actionable slice register for the nine open 1.0 parent outcomes below, not a
+second release gate or a new interpretation of historical audit counts.
+Each numbered slice maps to the named parent section; the existing parent and
+nested acceptance conditions still govern closure. For a new implementation
+pass, select a ready slice here rather than inventing another ad hoc subdivision.
+Remove completed slices as part of the normal backlog retirement rule; Git
+history retains the original estimate and result.
+
+**Sizing:** S = one bounded source decision/check or focused change (1 unit);
+M = a small, independently reviewable multi-step source/data/browser slice
+(2 units); L = a larger bounded multi-family or end-to-end gate (4 units).
+Units are relative planning weights, **not days, hours or commitments**.
+A review may close as source-verified no-change; a conditional slice produces
+code only when the reviewed source confirms a gap. Source uncertainties,
+newer inputs and previously undiscovered 1.0 omissions can expand the plan.
+Labels: **review** = evaluate evidence, **design** = settle a contract,
+**build** = implement, **gate** = verify/accept, **decision** = settle
+a supported boundary, **conditional** = only for confirmed additions,
+**external** = independent authorization/dependency.
+
+**Shared completion rule:** Every implementation slice must specify its
+pinned source/variant, affected maintained model/export, API and ordinary
+browser entry point (or a justified no-change), essential regressions,
+deferred validation-queue obligations and documentation handoff. No slice
+alone replaces final source-wide or release-candidate acceptance. Work on
+independent slices can overlap Linux validation of an earlier committed
+revision, following the established dispatch-and-continue protocol.
+
+#### Source baseline, reconciliation, and gap discovery
+
+**Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
+**Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
+
+- [ ] **V1S-001 (S, review):** Select the final intended Army archive and record exact identity, date and
+  acquisition limits; do not fetch a newer source implicitly.
+- [ ] **V1S-002 (M, review):** Pin rules, annex, English/Spanish FAQ, Wiki revisions, and official update
+  posts with separate publication/acquisition dates.
+- [ ] **V1S-003 (S, review):** Record tracked Army/rules database and derived-publication identities and
+  prepare the matched-pair freeze recheck.
+- [ ] **V1S-004 (M, review):** Revisit interpretations whose September 26 Wiki capture cannot establish a
+  historical before/after claim; disclose uncertainty.
+- [ ] **V1S-005 (M, review):** Reconcile N5.3 English update subjects 01-13 to final PDF, Wiki and maintained
+  identities; record confirmed/no-change outcomes.
+- [ ] **V1S-006 (M, review):** Reconcile N5.3 English update subjects 14-26 independently, retaining original
+  reviewed-clause limitations.
+- [ ] **V1S-007 (M, review):** Reconcile all four Spanish-only N5.3 update subjects and source conflicts
+  against their applicable versions.
+- [ ] **V1S-008 (M, review):** Settle ARMY-01 publication applicability and Reinforcements authority boundary
+  without inferring roster legality.
+- [ ] **V1S-009 (M, review):** Review ARMY-02-10 source/profile/loadout change subjects against pinned current
+  Army and available historical evidence.
+- [ ] **V1S-010 (M, review):** Review ARMY-11-20 change subjects, exact annotations and remaining
+  source/version boundaries.
+- [ ] **V1S-011 (M, review):** Reconcile the nine N5.3-added FAQ subjects, cross-postings and ITS-only
+  applicability; do not publish ITS-only answers as core.
+- [ ] **V1S-012 (M, review):** Record unmatched N5 update announcements and unverifiable historical snapshot
+  boundaries separately from actual data defects.
+- [ ] **V1S-013 (M, review):** Inventory Army Unit/profile/loadout, availability, attributes and source-field
+  occupancy against generated and raw storage.
+- [ ] **V1S-014 (M, review):** Audit Unit option Includes, Peripheral/controller ownership and resolved
+  profile/loadout identities across the current Army input.
+- [ ] **V1S-015 (M, review):** Audit Fireteam availability, Reinforcement parent/pool context and ordinary
+  Unit/Army/Section browser reachability.
+- [ ] **V1S-016 (L, review):** Give Core/Hacking PDF sections and current curated families a
+  source-to-storage-to-browser disposition, not citation-only approval.
+- [ ] **V1S-017 (M, review):** Review Wiki-backed Skills, Equipment, Terms, Traits and special source wording
+  for missing facts, relationships and normal links.
+- [ ] **V1S-018 (M, review):** Account for four core scenarios, FAQ, symbols and other source categories in
+  the category-level coverage ledger.
+- [ ] **V1S-019 (M, review):** Triage further Weapon Properties, exceptions, non-four-attribute entries and
+  remaining Weaponry clauses; separate prose from missing facts.
+- [ ] **V1S-020 (M, review):** Verify final FAQ v0.1 source hashes and applicability and classify optional
+  Reinforcements N4 PDFs correctly.
+- [ ] **V1S-021 (M, gate):** Reconcile interaction review and catalog scope with current release identities;
+  run the strict 1.0 primary guard without rewriting history.
+- [ ] **V1S-022 (M, gate):** Produce ranked confirmed-gap batches with source/version, owner, normal browser
+  entry point and required checks; explicitly exclude conjecture.
+
+#### Rules and contextual reference completion
+
+**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
+**Project domains:** Data processing, Web backend, Web frontend
+
+- [ ] **V1S-023 (S, review):** Verify newly published Initiative, Combat Group, army Retreat, Standard Game
+  and general setup/threshold references end to end; patch only verified gaps.
+- [ ] **V1S-024 (M, review):** Review remaining Skills by semantic family for missing definitions, typed facts
+  and source-backed browser links.
+- [ ] **V1S-025 (M, review):** Review Equipment and exceptional Army gear wording, including nonstandard
+  attributes and source-scoped semantics.
+- [ ] **V1S-026 (M, review):** Review other canonical Rules, game terms, training, scenario terminology and
+  glossary coverage without duplicating Hacking Programs.
+- [ ] **V1S-027 (M, review):** Review remaining States, Traits, Attributes and reference links; keep in-game
+  States separate from static profiles.
+- [ ] **V1S-028 (M, review):** Reconcile player-facing cross-source conflicts, FAQ applicability and explicit
+  uncertainty before publishing dependent summaries.
+- [ ] **V1S-029 (L, review):** Join the 367 frozen explanation-audit records to the current Core/Hacking set
+  and later reviewed evidence; preserve original counts.
+- [ ] **V1S-030 (M, review):** Review conditional declaration, ARO and reactive eligibility clauses outside
+  the already accepted exception examples.
+- [ ] **V1S-031 (S, gate):** Give the five newer Visibility Zone terms independent whole-corpus and
+  source/browser dispositions.
+- [ ] **V1S-032 (M, review):** Review unaccepted Orders, game phases, command and activation rule clauses with
+  player-facing conditions and exceptions.
+- [ ] **V1S-033 (M, review):** Review movement, visibility, geometry, positioning and terrain clauses for
+  missing operative conditions.
+- [ ] **V1S-034 (M, review):** Review remaining attacks, Weaponry, mode, ammunition and state interaction
+  clauses against exact source text.
+- [ ] **V1S-035 (M, review):** Review unaccepted Hacking, firewall, Supportware and scoped interaction
+  clauses, without recreating existing program facts.
+- [ ] **V1S-036 (M, review):** Review remaining component Immunity and combined-effect precedence cases with
+  exact target, source and non-executable semantics.
+- [ ] **V1S-037 (M, review):** Review BTS/non-Comms Weapon exceptions, Criticals, affected attributes and
+  conditional State relationships separately.
+- [ ] **V1S-038 (M, gate):** Reconcile every published base and combined Ammunition fact against pinned Weapon
+  data and validate stored/API/browser semantics.
+- [ ] **V1S-039 (M, review):** Review shared core/scenario concepts and collection supplements for scoped
+  applicability, leakage and browser explanation.
+- [ ] **V1S-040 (M, decision):** Document N5-native Reinforcements authority if available, or preserve
+  disclosed optional legacy reference and SRC-030 follow-up.
+- [ ] **V1S-041 (M, gate):** Accept Reinforcement Section, profile and exact Commlink variants in ordinary
+  browser/release context, without asserting roster legality.
+
+#### Four core scenarios
+
+**Parent:** [Core-scenario reference completion](#rules-and-reference-completeness).
+**Project domains:** Data processing, Web backend, Web frontend
+
+- [ ] **V1S-042 (M, review):** Reconcile objective, setup, scoring and ending facts for the four core
+  scenarios against their pinned source sections.
+- [ ] **V1S-043 (M, gate):** Verify source geometry, markers, 24 points/distance configurations and
+  deterministic map publication.
+- [ ] **V1S-044 (M, gate):** Verify scoped Skills, Specialist roles, scenario overlays and FAQ links without
+  ITS-season or core-rule leakage.
+- [ ] **V1S-045 (M, gate):** Run normal browser accessibility/navigation, desktop/mobile/theme/rapid-selection
+  and empty/error acceptance on final inputs.
+
+#### FAQ and errata
+
+**Parent:** [Dated FAQ/errata acceptance](#rules-and-reference-completeness).
+**Project domains:** Data processing, Web backend, Web frontend
+
+- [ ] **V1S-046 (M, review):** Reconcile all 29 published rulings, original citations and 48 topic
+  associations to the final pinned FAQ/core sources.
+- [ ] **V1S-047 (M, review):** Review carried-forward versus newly added FAQ identities, supersession and
+  effective source/season boundaries.
+- [ ] **V1S-048 (M, gate):** Verify source precedence, disputed interpretations, excluded ITS-only answers and
+  explicit uncertainty in public API output.
+- [ ] **V1S-049 (M, gate):** Recheck discoverability, topic/scenario reverse links and base-rule versus
+  clarification presentation in ordinary browser.
+
+#### Rule-variant usage index and Restrictions
+
+**Parent:** [Generated rules-reference projections](#rules-and-reference-completeness).
+**Project domains:** Data processing, Web backend, Web frontend, Deployment
+
+- [ ] **V1S-050 (S, review):** Resolve Infiltration's five bare ReRoll occurrences only with explicit source
+  authority; preserve the five reviewed fixed-PH values.
+- [ ] **V1S-051 (S, review):** Review exact Engineer occurrence parameters and operational exceptions; no
+  unsupported generic modifiers.
+- [ ] **V1S-052 (S, review):** Review exact Doctor occurrence parameters independently of Engineer and
+  preserve source-defined differences.
+- [ ] **V1S-053 (S, review):** Investigate the Religious Troop/Total anomaly (SRC-028) against raw Terrain and
+  profile sources; do not invent a correction.
+- [ ] **V1S-054 (M, review):** Review Immunity source-162 occurrence signatures, especially combined/base
+  component boundaries.
+- [ ] **V1S-055 (M, review):** Review BS Attack source-201 variants and modifiers, preserving ordered raw
+  signatures.
+- [ ] **V1S-056 (M, review):** Review CC Attack source-240 variants and distinct attribute/attack conditions.
+- [ ] **V1S-057 (M, review):** Review Peripheral source-243 modifiers and separate controller/attached option
+  contexts.
+- [ ] **V1S-058 (M, review):** Review Transmutation source-246 exact profile transition and qualifier
+  semantics.
+- [ ] **V1S-059 (S, review):** Review Journalist source-272 qualifiers and establish whether a typed rule
+  variant is justified.
+- [ ] **V1S-060 (M, review):** Review Hacking Device Plus source-101 compound/Upgrade Programs signatures
+  without inferring extra Program access.
+- [ ] **V1S-061 (M, review):** Run cross-family TEXT/DISTANCE, named MOD and unusual variant consistency
+  sweep; classify remaining unknowns fail closed.
+- [ ] **V1S-062 (M, design):** Finalize occurrence identity, ordering, duplicate-handling and
+  Unit/profile/loadout/Army ownership contract for the usage index.
+- [ ] **V1S-063 (L, build):** Generate and validate exact-variant occurrence projections from matched
+  Army/rules data, including Includes and Peripherals.
+- [ ] **V1S-064 (M, build):** Expose source-scoped variant usage through a stable API/read model with negative
+  and duplicate-source cases.
+- [ ] **V1S-065 (M, build):** Add discoverable ordinary reference links from canonical Skill/Equipment
+  variants to Unit/profile/loadout occurrences.
+- [ ] **V1S-066 (M, gate):** Validate full cross-Army publication parity, unknown exclusion, browser coverage
+  and source-pair freshness for the new index.
+- [ ] **V1S-067 (M, external):** With separate authorization, rehearse Restrictions v8/v9 real-host
+  rollback/forward; CI simulation is not host acceptance.
+
+#### Game States context
+
+**Parent:** [Contextual Game States](#rules-and-reference-completeness).
+**Project domains:** Data processing, Web backend, Web frontend
+
+- [ ] **V1S-068 (M, review):** Inventory new state references from Fireteam, Hacking, ammunition, scenarios
+  and FAQ; classify entry/cancellation/override.
+- [ ] **V1S-069 (M, gate):** Curate only source-backed missing links and verify two-way Rule/State browser
+  navigation, conditions and scope.
+
+#### Weapons, Ammunition and deployed objects
+
+**Parent:** [Weapon, Ammunition and Deployable presentation](#rules-and-reference-completeness).
+**Project domains:** Data processing, Web backend, Web frontend
+
+- [ ] **V1S-070 (M, review):** Audit single/multimode, multi-ammunition and Combined Saving Roll
+  source/profile presentation in the existing catalog.
+- [ ] **V1S-071 (M, design):** Specify any missing structured mode/profile/conditional/sentinel fields before
+  frontend changes; do not parse display strings.
+- [ ] **V1S-072 (L, gate):** Reconcile the full published Weapon profile set through storage, API and browser,
+  including range, damage and Traits.
+- [ ] **V1S-073 (M, review):** Extend deployed-object discovery across independent N5 tables, unusual
+  Weapon/Equipment entries and alternate wording.
+- [ ] **V1S-074 (M, review):** Review scenery, Gate glossary terms, terrain combinations and scenario
+  elements; classify devices versus non-devices.
+- [ ] **V1S-075 (M, review):** Rerun source snapshot and full-depth Include audits; preserve exact Army,
+  Unit-option and profile ownership.
+- [ ] **V1S-076 (M, review):** Audit reverse-use delivery, carrier and source-position edges; avoid inferred
+  uses from prose.
+- [ ] **V1S-077 (L, conditional):** For each confirmed new object or edge, extend curated inventory,
+  deterministic publication and API with targeted regressions.
+- [ ] **V1S-078 (M, gate):** Accept deployed-object API/browser navigation, incomplete attributes, variants
+  and documented Mine/Dazer/Turret conflicts.
+
+#### Accessibility and navigation
+
+**Parent:** [Player-facing navigation and reference clarity](#player-facing-navigation-and-reference-clarity).
+**Project domains:** Web frontend, Project infrastructure
+
+- [ ] **V1S-079 (M, gate):** Perform assistive-technology review of floating accuracy notice and navigation:
+  roles, focus, announcement, keyboard.
+- [ ] **V1S-080 (M, gate):** Verify touch, theme, narrow viewport and notice collapse/expand behavior; fix
+  only reproducible 1.0 regressions.
+
+#### Final frozen-candidate acceptance and release
+
+**Parent:** [Final 1.0 acceptance](#final-10-acceptance).
+**Project domains:** Data processing, Web backend, Web frontend, Project infrastructure, Deployment
+
+- [ ] **V1S-081 (M, gate):** Freeze intended source inputs, tracked databases and derived asset identities;
+  rerun complete category/source disposition.
+- [ ] **V1S-082 (L, gate):** Close all confirmed source-to-storage-to-normal-browser gaps and review every
+  explicit exclusion against the 1.0 definition.
+- [ ] **V1S-083 (M, gate):** Reconcile cross-source uncertainty, empty/unavailable/not-applicable semantics
+  and player-facing source claims.
+- [ ] **V1S-084 (M, gate):** Rebuild/verify the release-matched Army/rules pair, FAQ parity, deployed-object
+  publication and processed symbols.
+- [ ] **V1S-085 (M, gate):** Run source occupancy, source/archive, strict primary interaction, reference
+  baseline and output reproducibility checks.
+- [ ] **V1S-086 (M, gate):** Run rule fragment and wider source-to-browser checks on the exact candidate;
+  document uncovered normal entry points.
+- [ ] **V1S-087 (L, gate):** Run the 81-page local Unit matrix and hosted exact-version representative checks
+  with pinned assets/databases.
+- [ ] **V1S-088 (M, gate):** Rerun scenario 24-configuration and FAQ browser/source gates against the
+  candidate; include applicable other surfaces.
+- [ ] **V1S-089 (M, gate):** Obtain manual Silhouette hover/keyboard/touch/theme/narrow-width sign-off plus
+  required human visual review.
+- [ ] **V1S-090 (L, gate):** Drain validation queue and run all relevant complete local/Linux full-asset,
+  docs, source and preflight suites.
+- [ ] **V1S-091 (L, gate):** Audit the entire tracked Markdown corpus, stale version/command references,
+  canonical contracts and browser copy.
+- [ ] **V1S-092 (M, gate):** Finalize coherent Unreleased notes, release metadata and version only after the
+  completeness review.
+- [ ] **V1S-093 (L, gate):** Merge the approved candidate and obtain exact-main-SHA hosted workflows, optional
+  full-assets, evidence and annotated tag.
+- [ ] **V1S-094 (L, external):** With explicit operational approval, validate retained rollback/forward
+  procedure and deploy the approved tagged artifact.
+- [ ] **V1S-095 (M, gate):** Verify deployed exact source/runtime pair, release version, static assets and
+  representative browser paths after deployment.
+
+**Initial sizing at this baseline:** 95 planned slices (9 S,
+75 M, 11 L), **203 relative work units**.
+This is an upper-level capacity indicator, not an elapsed-time forecast:
+review/no-change slices may be short; full-source discovery can add new work;
+separately authorized host/human checks may be schedule dependencies.
+The pre-existing validation queue is not counted as new implementation.
+Recalculate open counts from unchecked V1S entries as slices retire.
+The initial mix is 56 review, 30 gate, two design, three build,
+one boundary decision, one conditional implementation and two external
+operations. These are not 95 code changes.
+
+**Dependency order (not a serial schedule):** Source/version pinning
+V1S-001–003 and the bounded current-state audits can start alongside existing
+source-backed variant review V1S-050–061, published-reference verification
+V1S-023, and Weapon/deployed-object discovery V1S-070–076. Source review
+V1S-004–022 qualifies any new omissions; the relevant owning rules/reference
+slice then addresses confirmed gaps. The variant index V1S-062–066 follows
+reviewed occurrence semantics, not the other way around. V1S-081–095 are
+frozen-candidate/release gates and must not be marked complete from earlier
+development checks. V1S-040 can close by accurate legacy-annex disclosure
+without a publisher response; V1S-067 and V1S-094 need separate operational
+authorization. After a new source acquisition, revisit affected review and
+downstream acceptance rather than accepting a previous baseline silently.
+
 ### Source inventory and gap batches
 
 The [2026-10-31 source-coverage assessment](v1.0-source-coverage-audit.md)

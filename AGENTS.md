@@ -332,6 +332,14 @@ Before finalizing **any release**, follow the canonical checklist in `docs/relea
 - Update `docs/AI_CONTEXT.md` when introducing a durable, non-obvious project
   invariant or development constraint.
 - Add identified future work to `docs/TODO.md`.
+- For 1.0 work, select a ready, numbered item from the
+  [pre-planned execution slices](docs/TODO.md#pre-planned-10-execution-slices),
+  then check the owning parent and its acceptance conditions. Do not routinely
+  subdivide a parent during implementation when an existing slice covers the
+  work. Add another slice only for source-confirmed new scope or a demonstrated
+  dependency, preserving a bounded outcome and validation gate. Retire completed
+  slices using the same active-backlog rules as their parents. Planning units
+  are relative workload indicators, not elapsed-time or completion promises.
 - Follow [backlog completion and retirement](docs/README.md#backlog-completion-and-retirement)
   at every task closeout. A checkmark means the entire task subtree, required
   acceptance and documentation handoff are complete. Reopen affected tasks and
