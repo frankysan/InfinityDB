@@ -191,6 +191,10 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--skip-details", action="store_true",
+        help="Also print each skipped test ID and reason for cross-host comparisons.",
+    )
+    parser.add_argument(
         "--browser-slot-count", type=int, choices=(2, 3, 4), default=2,
         help="Experimental maximum concurrent Chromium tests (default: 2).",
     )
@@ -346,6 +350,7 @@ def stage_definitions(
     split_scenario_faq: bool = False,
     reuse_browser: bool = False,
     skip_summary: bool = False,
+    skip_details: bool = False,
 ) -> list[Stage]:
     python = sys.executable
     stages: list[Stage] = []
@@ -386,6 +391,8 @@ def stage_definitions(
                 marker = asset_marker
             if skip_summary:
                 command.append("--infinitydb-skip-summary")
+            if skip_details and name == "test":
+                command.append("--infinitydb-skip-details")
             command.extend(("-m", marker, "-q"))
         elif name == "lint":
             command = [python, "-m", "ruff", "check"]
@@ -600,6 +607,8 @@ def main(argv: list[str] | None = None) -> int:
             build_parser().error("--browser-metrics requires the test stage")
         if args.skip_summary is not None and not runs_pytest:
             build_parser().error("--skip-summary requires the test or preflight stage")
+        if args.skip_details and "test" not in stage_names:
+            build_parser().error("--skip-details requires the test stage")
         if (
             (args.browser_slot_count != 2 or args.browser_lane_count != 2)
             and "test" not in stage_names
@@ -660,6 +669,7 @@ def main(argv: list[str] | None = None) -> int:
             skip_summary=should_summarize_skips(
                 stage_names, args.targets, test_sections, args.skip_summary,
             ),
+            skip_details=args.skip_details,
         )
     except SystemExit as exc:
         exit_code = exc.code

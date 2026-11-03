@@ -60,16 +60,20 @@ def pytest_sessionstart(session: pytest.Session) -> None:
         )
 
 
+def _skip_reason(report: pytest.TestReport) -> str:
+    detail = report.longrepr
+    if isinstance(detail, tuple) and len(detail) >= 3:
+        reason = str(detail[2])
+    else:
+        reason = str(detail or "Unspecified skip reason")
+    return reason.removeprefix("Skipped: ").strip()
+
+
 def summarized_skip_reasons(reports: Sequence[pytest.TestReport]) -> tuple[str, ...]:
     """Group actual pytest skip reports by reason without losing their counts."""
     reasons: Counter[str] = Counter()
     for report in reports:
-        detail = report.longrepr
-        if isinstance(detail, tuple) and len(detail) >= 3:
-            reason = str(detail[2])
-        else:
-            reason = str(detail or "Unspecified skip reason")
-        reasons[reason.removeprefix("Skipped: ").strip()] += 1
+        reasons[_skip_reason(report)] += 1
     if not reasons:
         return ()
     total = sum(reasons.values())
@@ -83,10 +87,24 @@ def summarized_skip_reasons(reports: Sequence[pytest.TestReport]) -> tuple[str, 
     return tuple(lines)
 
 
+def summarized_skip_details(reports: Sequence[pytest.TestReport]) -> tuple[str, ...]:
+    """Expose exact skipped node IDs for optional cross-host coverage comparison."""
+    if not reports:
+        return ()
+    return tuple(
+        f"  {report.nodeid} :: {' '.join(_skip_reason(report).split())}"
+        for report in sorted(reports, key=lambda item: (item.nodeid, _skip_reason(item)))
+    )
+
+
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption(
         "--infinitydb-skip-summary", action="store_true", default=False,
         help="Print grouped pytest skip reasons in the final validation report.",
+    )
+    parser.addoption(
+        "--infinitydb-skip-details", action="store_true", default=False,
+        help="Print individual skipped test IDs and reasons for cross-host comparison.",
     )
 
 
@@ -386,4 +404,10 @@ def pytest_terminal_summary(terminalreporter: Any) -> None:
         if skipped:
             terminalreporter.write_sep("=", "grouped skip reasons")
             for line in skipped:
+                terminalreporter.write_line(line)
+    if terminalreporter.config.getoption("--infinitydb-skip-details"):
+        details = summarized_skip_details(terminalreporter.stats.get("skipped", []))
+        if details:
+            terminalreporter.write_sep("=", "skipped test identities")
+            for line in details:
                 terminalreporter.write_line(line)

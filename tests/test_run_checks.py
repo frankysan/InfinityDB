@@ -237,6 +237,27 @@ def test_skip_summary_rejects_non_pytest_stage(
     assert "--skip-summary requires the test or preflight stage" in capsys.readouterr().err
 
 
+def test_skip_details_are_opt_in_and_identify_each_skipped_test(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",), [], build_source=None, skip_details=True,
+    )
+    assert "--infinitydb-skip-details" in stage.command
+    [default_stage] = run_checks.stage_definitions(
+        ("test",), [], build_source=None,
+    )
+    assert "--infinitydb-skip-details" not in default_stage.command
+    [preflight] = run_checks.stage_definitions(
+        ("preflight",), [], build_source=None, skip_details=True,
+    )
+    assert "--infinitydb-skip-details" not in preflight.command
+    assert run_checks.main(["--stage", "docs", "--skip-details"]) == (
+        run_checks.EXIT_RUNNER_ERROR
+    )
+    assert "--skip-details requires the test stage" in capsys.readouterr().err
+
+
 def test_test_stage_can_group_browser_modules_without_changing_default() -> None:
     [stage] = run_checks.stage_definitions(
         ("test",), [], build_source=None,

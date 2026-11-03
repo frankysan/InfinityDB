@@ -19,7 +19,11 @@ from tools.browser_test_capacity import (
     browser_slot,
     scenario_faq_split_lane,
 )
-from tools.pytest_startup_profile import XdistStartupProfile, summarized_skip_reasons
+from tools.pytest_startup_profile import (
+    XdistStartupProfile,
+    summarized_skip_details,
+    summarized_skip_reasons,
+)
 from tools.resource_waits import capture_resource_waits, record_resource_wait
 from tools.test_sections import load_test_sections
 
@@ -155,6 +159,27 @@ def test_skip_reasons_group_actual_skip_reports_without_duplicate_counts() -> No
     assert summarized_skip_reasons([report("Only reason")])[0] == (
         "Skipped: 1 test; 1 distinct reason."
     )
+
+
+def test_skip_details_preserve_exact_sorted_test_ids_and_reasons() -> None:
+    def report(nodeid: str, reason: str) -> pytest.TestReport:
+        return pytest.TestReport(
+            nodeid=nodeid,
+            location=("tests/test_example.py", 1, "test_case"),
+            keywords={}, outcome="skipped",
+            longrepr=("tests/test_example.py", 1, "Skipped: " + reason),
+            when="setup", sections=[], duration=0.0,
+        )
+
+    lines = summarized_skip_details([
+        report("tests/test_b.py::test_two", "Requires pinned PDF"),
+        report("tests/test_a.py::test_one", "Host-specific  reason"),
+    ])
+    assert lines == (
+        "  tests/test_a.py::test_one :: Host-specific reason",
+        "  tests/test_b.py::test_two :: Requires pinned PDF",
+    )
+    assert summarized_skip_details([]) == ()
 
 
 def test_browser_slot_is_exclusive_across_processes_and_reusable(tmp_path: Path) -> None:
