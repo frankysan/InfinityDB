@@ -95,9 +95,12 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 4 distinct
-changes** (VR-0023/0024/0037/0038); no deferred design
+Only open VR obligations belong here. **Current count: 5 distinct
+changes** (VR-0023/0024/0037/0038/0039); no deferred design
 requirement is open. Oldest recorded date: 2026-11-02.
+VR-0039 is a Windows development change made while a Linux suite at
+`561e1269` is running; that older suite cannot accept VR-0039.
+Dispatch its pinned Linux checks after the existing test checkout is idle.
 At `fd38485fc5867ba6abe7c945cbf5786221cc15cc`, the
 pinned Linux cumulative suite passed **4,892 tests,
 28 skipped, 0 failed**, with 808/808 published SVG assets
@@ -112,6 +115,23 @@ VR-0037 remains open exclusively for guarded publication
 of typed Commlink semantics. The independent Chromium
 skip-reason and wait-time investigations remain VR-0023/24.
 Git updates are explicit agent actions, not background mirroring.
+
+- [ ] **VR-0039** (2026-11-03; ready-to-run): Accept new normal-mode
+  optional Reinforcements Rule → Army Section/parent/pool navigation.
+  Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
+  Windows base `561e1269`; changed
+  `src/infinity_db/web/static/reference-detail.js`,
+  `tests/test_verify_reinforcements_optional_browser.py` and docs.
+  Risk: low to moderate (frontend routing and shared Section identities).
+  Immediate: real Windows Chromium **3/3** at 1440/390/320 px,
+  with `/api/armies` source relationships, all current playable Section
+  and parent links, encoded Unit Explorer filters, real overview-card
+  navigation, N4-origin caveat and original Orders/AROs isolation.
+  Targeted Ruff passed; docs and diff checks follow.
+  Design: none. Deferred: pinned Linux Chromium selector and the next
+  cumulative suite after a clean commit/worker synchronization.
+  Do not infer Main Section legality, N5-native annex authority or
+  that the concurrent Linux run at the previous commit covers this change.
 
 - [ ] **VR-0038** (2026-11-03; ready-to-run): Cross-platform and
   cumulative acceptance of the new normal-mode Chromium regression for
@@ -379,8 +399,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0039` (`VR-0023`, `VR-0024`,
-  `VR-0037`, `VR-0038` open; earlier entries retired).
+- Execution: `VR-0040` (`VR-0023`, `VR-0024`,
+  `VR-0037`, `VR-0038`, `VR-0039` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -757,6 +757,19 @@ Cumulative validation, remaining Army context and manual browser
 acceptance are separate;
 this does not verify N5-native annex authority or promote typed (+X).
 
+**2026-11-03 optional annex Section/parent navigation (VR-0039):**
+The normal-mode optional Rule detail now derives a current, playable
+Reinforcement Section list from `/api/armies`, linking each Section to its
+Army overview card and its own Unit Explorer pool, with explicit links to
+all available parent Armies. Source availability is not combined Army List
+legality or N5-native procedural adoption. The existing browser regression
+checks the exact API-derived Section/parent links and Unit Explorer
+share-state paths at **1440/390/320 px**, plus a live desktop navigation
+through the overview card. Windows real Chromium **3/3** passed at
+base `561e1269` plus local navigation changes; targeted Ruff passed.
+A revision-pinned Linux focused run and cumulative suite are deferred
+under VR-0039, separate from the already-running pre-change Linux suite.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at

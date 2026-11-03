@@ -60,6 +60,11 @@ separately authorized guarded paired promotion. The matched
 reviewed objects and other source fingerprints remain unchanged.
 Reinforcement list legality is not calculated.
 Separate N5-native procedural authority verification remains open.
+The optional Rule detail page also exposes a browser-only list of currently
+playable Reinforcement Sections, their explicit `parent_armies` from
+`/api/armies`, and direct links to each Section's Unit Explorer pool and
+Army overview card. It does not infer legality, assign Section units to
+Main Sections, or create new persistent Army identities.
 
 For weapon families such as Mines, a shared curated rule describes only the common
 mechanics. The individual Army weapon profile identifies ammunition, PS, Saving Rolls,

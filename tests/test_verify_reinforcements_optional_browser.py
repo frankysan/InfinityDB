@@ -1,7 +1,7 @@
 """Normal-mode Chromium acceptance for the optional N4-origin Reinforcements annex.
 
 This verifies published navigation and disclosures, not N5-native annex authority,
-army-list legality, or the still-unpromoted typed Commlink (+X) v9 publication.
+army-list legality, or independent N5-native annex authority.
 """
 
 from __future__ import annotations
@@ -66,6 +66,47 @@ def test_optional_annex_disclosures_and_links_stay_outside_core_matrix(
         assert "not been verified" in rule.inner_text()
         assert rule.locator(".rules-source-citations a").count() == 4
         assert "N4" in rule.locator(".detail-source").all_inner_texts()[-1]
+
+        # The annex offers direct navigation to the current Section pools and
+        # their parent Armies using the published /api/armies relationships.
+        armies = page.evaluate("async () => (await fetch('/api/armies')).json()")
+        eligible = {
+            army["id"]: army
+            for army in armies["items"]
+            if army.get("playable") is not False and not army.get("legacy")
+        }
+        reinforcement_sections = sorted(
+            (army for army in eligible.values() if army["role"] == "reinforcement"),
+            key=lambda army: army["name"],
+        )
+        assert reinforcement_sections
+        navigation = page.locator("#reinforcement-section-navigation")
+        navigation.wait_for(state="visible", timeout=20000)
+        assert "do not validate a combined Army List" in navigation.inner_text()
+        rows = navigation.locator("li")
+        assert rows.count() == len(reinforcement_sections)
+        for section, row in zip(reinforcement_sections, rows.all(), strict=True):
+            section_slug = section.get("public_slug") or section.get("slug") or str(section["id"])
+            assert row.locator("a").first.get_attribute("href") == f"/armies#army-{section_slug}"
+            parent_links = row.locator('a[href^="/armies#army-"]')
+            parents = [
+                eligible[parent["id"]]
+                for parent in section.get("parent_armies", [])
+                if parent["id"] in eligible
+            ]
+            assert parent_links.count() == 1 + len(parents)
+            assert [link.text_content() for link in parent_links.all()][1:] == [
+                parent["name"] for parent in parents
+            ]
+            units_link = row.get_by_role("link", name="Browse section units")
+            assert units_link.get_attribute("href").startswith("/units?s=v1.u.")
+        if width == 1440:
+            destination = rows.first.locator("a").first.get_attribute("href")
+            rows.first.locator("a").first.click()
+            page.wait_for_url(f"{ORIGIN}{destination}")
+            page.locator(f'[id="{destination.split("#", 1)[1]}"]').wait_for(state="visible")
+            page.goto(f"{ORIGIN}/rules/reinforcements-extra", wait_until="domcontentloaded")
+            rule.wait_for(state="visible", timeout=20000)
 
         commlink = rule.locator('a[href="/skills/commlink"]').first
         assert commlink.is_visible()

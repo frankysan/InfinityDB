@@ -1655,18 +1655,22 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       `tactical-phase-step` in the optional annex. It is discoverable as a
       Skill without entering Basic Short/Short/Long/ARO declarations or
       changing the core 57-row matrix.
-    - [ ] Complete the remaining annex slice: verified profile/section
-      context and linked Army parent/pool navigation. Typed Commlink (+X),
-      collection, source/citations, phase category and general Skill/Rule
-      navigation are already published; do not claim list legality.
+    - [ ] Complete the remaining annex slice: full profile/section
+      context and acceptance. The Rule detail page now links current
+      Reinforcement Section pools to parent Armies and Unit Explorer
+      through the existing Army API; source-specific Unit/profile uses
+      and correct Main versus Reinforcement selection still need
+      verification. Typed Commlink (+X), source/citations, phase category
+      and general Skill/Rule navigation are published; do not claim list legality.
     - [ ] Test ordinary versus Reinforcement context, exact `Commlink (+X)` variants, and explicit
       phase classification; do not infer roster legality or mutate the core declaration chart.
       - [x] Added normal-mode Chromium coverage of the three published optional
         annex pages and their navigation at 1440/390/320 px; N4 provenance,
         source citations and non-leakage to the 57 core declarations pass 3/3.
         Typed (+X) publication is now separately verified; this browser
-        coverage does not yet verify unit/Army context, N5-native authority
-        or full manual browser acceptance.
+        coverage has been extended to Section/parent-Army links and Section
+        pool navigation, but does not yet establish profile ownership,
+        N5-native authority or full manual browser acceptance.
   - **Completion:** each covered batch builds into `rules.db`, passes maintained-text and
     interaction review, and is navigable with citations in normal mode. Use semantic maintained-text
     tokens; preserve genuine ambiguity with `review-needed` rather than weakening plain-text review.
