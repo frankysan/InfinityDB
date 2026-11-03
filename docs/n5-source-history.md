@@ -162,6 +162,80 @@ SQLite output is guaranteed across operating systems. A changed source,
 pair or projection reopens affected review; V1S-081/084 and final browser
 acceptance must use the final release candidate.
 
+### Army source occupancy and canonical payloads (V1S-013; 2026-11-03)
+
+The selected September 29 Army ZIP and the unchanged tracked
+`data/generated/infinity.db` were audited against the matched ignored
+`data/generated/infinity.raw.db` at development revision
+`b893f3fc76906beaf921b85f2ee6740d55d1203e`.
+The read-only source-presentation auditor's strict
+`--require-no-occupied-gaps` gate passed: **70 normalized source
+tables, 441 source fields, and zero occupied values in all 39 fields
+classified as potentially unrepresented**. Its maintained policy
+reported **zero confirmed schema-level gap families** and **two
+intentional semantic scope decisions**. The paired-raw evidence
+was available; this was not a skipped clean-checkout verification.
+Reports are stored under ignored `local/audits/v1s-013-*.json`.
+
+The independent current application/payload audits yielded:
+
+- **Unit identity and availability:** 920 source Unit rows resolve to
+  737 canonical logical Units, including 167 multi-source logical
+  identities. There are no invalid representative picks; 133
+  Reinforcement and 49 mercenary variants remain nonrepresentative
+  source contexts. All 167 repeated logical Units have alternate
+  general labels, four have additional nonrepresentative note deltas,
+  and the canonical model retains 473 alias occurrences, 30 note
+  occurrences and 30 Spec-Ops/TEAM-OPS chart occurrences. Eighteen
+  composite Unit-option rows occur across seven logical Units; two
+  repeated-Unit collections vary and must retain their Army context.
+  The separate Army/faction audit successfully distinguished
+  source-list availability from broader declared membership and
+  checked the derived application Army identity/mapping contract.
+- **Attributes and Profiles:** 5,020 source/profile occurrences
+  resolve to 1,108 canonical profile payloads, with 636 payloads
+  reused. The source-identity audit recorded 23 source-key semantic
+  variations, 297 AVA variations and three logo variations;
+  these remain represented per occurrence, not overwritten by the
+  representative Unit.
+- **Loadouts and costs:** 12,993 source/loadout occurrences resolve
+  to 3,448 canonical payloads, with 2,022 reused. The audit found
+  16 source-key semantic variations, two points variations and one
+  SWC variation. Ordered item/extra relationships and occurrence
+  costs remain separate from the shared payload identity.
+- **Explicit exclusions:** the 30 selection-chart payloads remain
+  visible as source-backed **read-only references**; configuring
+  a legal Army List/session is not part of the immutable Unit
+  reference model. Source-client `disabled`/`minis` fields
+  retain their original data but no speculative roster-builder
+  semantics are inferred.
+
+This verifies **schema field occupancy and the audited canonical
+projection contracts**, not the material correctness of every
+source clause, link or UI page. An unpopulated candidate field
+does not prove that all relationship types are complete. In
+particular, V1S-014 owns Included option targets and
+Peripheral/controller relations, V1S-015 owns Fireteam and
+Reinforcement reachability, and V1S-016–022 own cross-source and
+normal-browser dispositions. The independent reference-baseline
+report still enumerates **23 category rows and 126 source groups
+requiring review**; they were not accepted by this slice.
+Final frozen-candidate occupancy and data-pair checks remain
+V1S-081–095.
+
+The source-presentation, logical-Unit, profile, loadout and
+faction audits all exited successfully. Focused Windows tests:
+source-presentation **12/12**, Unit semantics **4/4**,
+profile semantics **5/5**, loadout semantics **5/5** and
+faction semantics **4/4** (**30/30** total). During inspection,
+the faction auditor's default JSON stdout was found to fail
+under Windows CP1252 when source names contain Ō; a small
+CLI-only fix now escapes non-ASCII on stdout, retaining
+UTF-8 in file reports. Its new limited-console regression
+passed; no Army/rules database, API or browser files changed.
+Broader execution for this tooling fix is tracked as
+VR-0052 in the active [validation queue](validation-queue.md).
+
 ### Selected rules, FAQ, Wiki and annex evidence (V1S-002; 2026-11-03)
 
 The 1.0 current-reference review selects these **existing local inputs**;

@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-013 (M, review):** Inventory Army Unit/profile/loadout, availability, attributes and source-field
-  occupancy against generated and raw storage.
 - [ ] **V1S-014 (M, review):** Audit Unit option Includes, Peripheral/controller ownership and resolved
   profile/loadout identities across the current Army input.
 - [ ] **V1S-015 (M, review):** Audit Fireteam availability, Reinforcement parent/pool context and ordinary

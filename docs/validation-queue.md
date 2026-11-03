@@ -95,7 +95,22 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+Only open VR obligations belong here. **Current count: 1 distinct
+change** (VR-0052; not yet due by the five-change threshold).
+
+- [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
+  Windows CP1252-safe JSON stdout change in
+  `tools/audit_army_faction_semantics.py` from V1S-013.
+  Work: [source inventory and gap batches](TODO.md#source-inventory-and-gap-batches);
+  risk: low (audit CLI only; source data and runtime unchanged).
+  Immediate Windows: `tests/test_audit_army_faction_semantics.py`
+  **4/4**, direct actual-database CLI exit 0 (previously
+  `UnicodeEncodeError`), Ruff on tool/test and full Pyright pass.
+  Design: none; limited-encoding regression already added.
+  Deferred: pinned committed-revision Linux focused module and
+  cumulative full suite when the validation threshold is due,
+  plus exact-SHA hosted CI. Retire only after checking those
+  outcomes; final frozen-release acceptance remains separate.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
@@ -271,7 +286,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0052` (`VR-0051` and earlier entries retired).
+- Execution: `VR-0053` (`VR-0052` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import hashlib
+import io
+import json
+import sys
 from pathlib import Path
 
 from infinity_army_data.normalize import normalize_master, validate_normalized
 from infinity_db.database import export_database, raw_database_path
+from tools import audit_army_faction_semantics as army_audit
 from tools.audit_army_faction_semantics import audit_database
 
 
@@ -137,3 +141,28 @@ def test_army_faction_audit_is_deterministic_and_read_only(tmp_path: Path) -> No
     assert audit_database(database) == audit_database(database)
     assert hashlib.sha256(database.read_bytes()).hexdigest() == before
     assert hashlib.sha256(raw.read_bytes()).hexdigest() == raw_before
+
+
+def test_army_faction_audit_cli_handles_limited_windows_stdout(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    """The console JSON must survive CP1252; saved reports remain UTF-8."""
+    database = _army_database(tmp_path)
+    report = audit_database(database)
+    report["sampleName"] = "Ōban"
+    monkeypatch.setattr(army_audit, "audit_database", lambda _: report)
+
+    class Cp1252Output(io.StringIO):
+        def write(self, value: str) -> int:
+            value.encode("cp1252")
+            return super().write(value)
+
+    output = Cp1252Output()
+    monkeypatch.setattr(sys, "stdout", output)
+    assert army_audit.main([str(database)]) == 0
+    assert json.loads(output.getvalue())["sampleName"] == "Ōban"
+    assert "\\u014cban" in output.getvalue()
+
+    report_path = tmp_path / "report.json"
+    assert army_audit.main([str(database), "--output", str(report_path)]) == 0
+    assert '"sampleName": "Ōban"' in report_path.read_text(encoding="utf-8")
