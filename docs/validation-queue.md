@@ -95,39 +95,31 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 5 distinct
-changes** (VR-0023/0024/0035/0036/0037); no deferred design
+Only open VR obligations belong here. **Current count: 3 distinct
+changes** (VR-0023/0024/0037); no deferred design
 requirement is open. Oldest recorded date: 2026-11-02.
-The new VR-0037 records a typed Commlink source change:
-Linux must validate the exact committed source and fresh-export
-behavior. The tracked v9 rules/publication pair remains unchanged;
-its guarded refresh requires a separate publication acceptance pass,
-not merely a green temporary rules build.
-At `60511fec335ac370f6664bb0b22edd0ee6681764`,
-the dedicated Linux worker passed the full suite:
-**4,876 passed, 28 skipped, 0 failed** with **808/808**
-published SVGs, plus **65/65** separate source-variant tests
-with pinned raw Army input. VR-0033 (Engineer) and VR-0034
-(Doctor) are retired. Earlier `eec7f940` source validation
-also retired VR-0031/32 (Camouflage/Infiltration). Evidence
-is in [testing.md](testing.md#parallel-windows-development-and-linux-validation).
-The independent Chromium contention and skip-reason
-investigations remain VR-0023/24. Newly committed Windows
-Lieutenant/Commlink regression changes belong to
-`5776779da247c12b186d028cc9328450963be1c7`;
-they passed independent pinned Linux raw-source verification:
-`tests/test_audit_source_variant_inputs.py` **67/67** on worker
-`linux-dev` at `f4e58294e52f6da0be19008135de16df374b4518`
-(job `linux-dev:a11eff7e5372408caf51b73ebfaba5c4`).
-The compatible cumulative suite has not yet been executed on
-this revision, so VR-0035/36 remain open. Commit/push and
-validation are explicit agent actions, not background Git mirroring.
+At `fd38485fc5867ba6abe7c945cbf5786221cc15cc`, the
+pinned Linux cumulative suite passed **4,892 tests,
+28 skipped, 0 failed**, with 808/808 published SVG assets
+(job `linux-dev:538f30517bf5477c8dc77881c7a985d7`).
+The earlier pinned Linux source module at `f4e58294`
+passed **67/67**, and the corrected optional-annex
+regression passed **2/2** on Linux at `fd38485f`.
+This retires VR-0035 (Lieutenant) and VR-0036 (Commlink
+source signatures); the completed history is in
+[testing.md](testing.md#parallel-windows-development-and-linux-validation).
+VR-0037 remains open exclusively for guarded publication
+of typed Commlink semantics. The independent Chromium
+skip-reason and wait-time investigations remain VR-0023/24.
+Git updates are explicit agent actions, not background mirroring.
 
 - [ ] **VR-0037** (2026-11-02; source implemented, publication pending):
   Cross-platform verification and guarded publication for the
   annex-scoped typed Commlink (+X) occurrence parameter.
   Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
-  Windows baseline `eb051e105f7eb6d64cd32dd245c59849a218da4f`.
+  Windows baseline `eb051e105f7eb6d64cd32dd245c59849a218da4f`,
+  source committed at `5fcd01b1`, delta regression
+  `80602f9d` and corrected Annex assertion `fd38485f`.
   The curated annex now maps only Army Skill 260
   `298/TEXT:+1` and `299/TEXT:+2` as typed
   `max-trooper-count-increase` effects, scoped to
@@ -139,55 +131,29 @@ validation are explicit agent actions, not background Git mirroring.
   module **166 passed**. Ruff, Pyright, docs, rules and data
   stages passed. The old published
   `data/generated/rules.db` and its paired deployed-object
-  publication have **not** been changed. Required: pinned Linux
-  source/regression and compatible cumulative suite after commit;
-  separately stage the v9 rules/publication pair using the
+  publication have **not** been changed. Cross-platform
+  regression was accepted: after a first Linux run with one
+  corrected stale Annex assertion, focused Annex tests
+  passed **2/2** at `fd38485f`; the replacement full suite
+  passed **4,892 tests, 28 skipped, zero failed** at that
+  revision. Separately stage the v9 rules/publication pair using the
   established guarded delta/rollback path. The isolated delta
   regression `test_commlink_v9_guard_preserves_other_records_and_schema`
   passed **7/7**; the full release-storage candidate module
   passed **530/530**: an exact Commlink family-to-parameter
   append is allowed, while unrelated record/schema changes,
   missing/no-op targets and incorrect baseline are rejected.
-  Still verify the complete matched pair, assert only the
-  `skill:commlink` variant semantics differ, preserve
-  Restrictions, all deployed objects, source pins and schema;
-  run release-pair parity and normal UI acceptance before
-  promoting. Do not classify the source-only pass as a completed
+  A separate **read-only temporary v9 release export** now
+  compares every `records` row with the tracked `rules.db`
+  and confirms **only `skill:commlink` differs**; the existing
+  full-database variant-delta checker accepts the exactly
+  serialized change and rejects unrelated records/schema.
+  Focused Annex acceptance passed **2/2** on Windows.
+  Still verify the complete matched rules/deployed-objects
+  publication pair, preserve Restrictions, all deployed
+  objects and source pins, and run normal UI acceptance
+  before promoting. Do not classify the source-only pass as a completed
   publication or as general N5 roster-legality support.
-
-- [ ] **VR-0036** (2026-11-02; Linux source PASS, cumulative pending):
-  Cross-platform source-only validation of the optional N4-origin
-  Reinforcements Commlink `+1`/`+2` Trooper-count qualifiers.
-  Work: [Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
-  Committed on Windows as
-  `5776779da247c12b186d028cc9328450963be1c7`. Immediate:
-  `tests/test_audit_source_variant_inputs.py::test_commlink_source_260_exact_optional_reinforcements_variants`
-  **1 passed** with pinned raw Army source. Confirms **51**
-  direct rows, 34 `298/TEXT:+1`, eight `299/TEXT:+2`,
-  all 42 exact occurrence IDs and loadout-only owner kinds;
-  keeps typed semantics unresolved and N4-origin scope visible.
-  Design: none. Pinned Linux raw Army source module passed
-  **67/67** at `f4e58294` (includes the exact Commlink regression).
-  Deferred: next compatible cumulative suite; the previous
-  `60511fec` full suite predates this change.
-
-- [ ] **VR-0035** (2026-11-02; Linux source PASS, cumulative pending):
-  Independently validate Lieutenant source-119 resource annotations,
-  retaining the distinction between extra Command Tokens and Special
-  Lieutenant Orders. Work: [source reconciliation](TODO.md#100--current-reference-completeness-gate);
-  Committed on Windows as
-  `5776779da247c12b186d028cc9328450963be1c7`. Immediate:
-  `tests/test_audit_source_variant_inputs.py::test_lieutenant_source_119_exact_command_token_and_order_qualifiers`
-  **1 passed** with the pinned raw Army snapshot, checking all
-  **83** qualified rows, the 30 exact Command Token occurrence
-  IDs, separate `245`/`246` signatures, and loadout-only owners.
-  N5.3 p. 99 supports distinct resource scopes. Design: none.
-  Pinned Linux raw Army source module passed **67/67**
-  at `f4e58294` (includes the exact Lieutenant regression).
-  Deferred: next compatible cumulative suite of the
-  committed Windows revision. Neither the completed
-  `eec7f940` nor `60511fec` full suite covers
-  the `5776779d` change.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -292,8 +258,7 @@ is recorded. Failed or incomplete verification remains open.
 
 - Design: `VD-0007` (through `VD-0006` retired).
 - Execution: `VR-0038` (`VR-0023`, `VR-0024`,
-  `VR-0035`, `VR-0036`, `VR-0037`
-  open; earlier entries retired).
+  `VR-0037` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

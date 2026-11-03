@@ -5,6 +5,8 @@ These assertions cover the source boundary, not verified N5 adoption of N4 proce
 
 from __future__ import annotations
 
+import json
+import sqlite3
 from pathlib import Path
 
 from infinity_db.curated import load_curated_directory, load_curated_document
@@ -13,6 +15,7 @@ from infinity_db.reference_catalog import RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from tools.release_rules_export import export_release_rules
+from tools.restrictions_v9_release import _check_variant_semantics_delta
 
 ROOT = Path(__file__).resolve().parents[1]
 ANNEX = ROOT / "data/curated/rules/reinforcements-extra-n4-reference.json"
@@ -80,6 +83,39 @@ def test_annex_read_model_is_discoverable_and_separate_from_core_matrix(tmp_path
     export_release_rules(documents, output)
     rules = RulesDatabase(output)
     rules.validate()
+    # Accept either the pre-promotion v9 pair or the future promoted one.
+    # The only permitted pending record delta is Commlink's exact metadata.
+    commlink = next(
+        record
+        for _, document in documents
+        for record in document["records"]
+        if record["id"] == "skill:commlink"
+    )
+    baseline = ROOT / "data/generated/rules.db"
+    with sqlite3.connect(baseline) as old, sqlite3.connect(output) as new:
+        old_rows = {
+            (row[0], row[1]): row
+            for row in old.execute("SELECT * FROM records ORDER BY collection_id, id")
+        }
+        new_rows = {
+            (row[0], row[1]): row
+            for row in new.execute("SELECT * FROM records ORDER BY collection_id, id")
+        }
+    differing = [
+        key for key in sorted(set(old_rows) | set(new_rows))
+        if old_rows.get(key) != new_rows.get(key)
+    ]
+    key = ("reinforcements-extra-n4-reference", "skill:commlink")
+    published = "commlink" in RulesDatabase(baseline).skill_reviewed_extra_semantics()
+    assert differing == ([] if published else [key]), (
+        f"Unexpected v9 rules-record drift: {differing[:25]}"
+    )
+    if not published:
+        _check_variant_semantics_delta(
+            baseline, output,
+            {key: json.dumps(commlink["variantSemantics"], ensure_ascii=False,
+                             separators=(",", ":"))},
+        )
     army = Database(ROOT / "data/generated/infinity.db")
 
     general = RulesRecordCatalog(rules, "rules")

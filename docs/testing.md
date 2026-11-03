@@ -591,7 +591,9 @@ fast-forwarded the same branch to `f4e58294`. Pinned source job
 passed **67/67** with the raw Army archive; there were no
 source-data skips. The prior `60511fec` cumulative Linux suite
 did not contain the Lieutenant and Commlink regressions.
-VR-0035/36 remain open until a compatible full-suite run.
+The later `fd38485f` full Linux suite passed, retiring
+VR-0035/36; typed Commlink publication is tracked
+separately under VR-0037.
 
 **2026-11-02 Commlink typed source-only implementation (VR-0037):**
 The scoped N4-origin annex now has a closed, exact typed mapping
@@ -615,8 +617,42 @@ records, unchanged variants and mismatched baselines.
 The active tracked v9 rules/publication pair is
 **not yet updated**; its guarded migration and matched
 deployed-object publication must be accepted independently
-before marking the runtime mapping published. Pending
-Linux cross-platform/cumulative verification is VR-0037.
+before marking the runtime mapping published.
+
+The committed source revision `5fcd01b102d5f7e580994c4891c79489bd5a088e`
+was validated on Linux via
+`linux-dev:ac67b012dd014a8f9bf2d4f76f66f3fb`:
+**4,884 passed, 28 skipped, one failed** in 542.46 s pytest.
+The sole failure was the old exact `Commlink` variant-dict
+assertion in
+`tests/test_reinforcements_optional_reference.py`,
+which did not allow the newly reviewed occurrence parameters.
+A corrected exact N4-origin assertion was committed as
+`fd38485fc5867ba6abe7c945cbf5786221cc15cc`;
+focused tests passed **2/2** on Windows and Linux
+(`linux-dev:a1993f8ea16347e6ac794f81694269ff`).
+After rebuilding and verifying 808/808 ignored SVG-dependent
+publication assets, replacement full Linux job
+`linux-dev:538f30517bf5477c8dc77881c7a985d7` at
+`fd38485fc5867ba6abe7c945cbf5786221cc15cc` passed
+**4,892 tests, 28 skipped, zero failed** in 560.68 s pytest
+(561.20 s runner), with two known multithreaded `fork()`
+deprecation warnings. This accepts source-only VR-0035/36,
+without publishing the new typed Commlink effects.
+Chromium resource wait was 6221.58 summed worker-seconds
+across 25 setup events, including 491.75 s on the longest
+single Chromium acquisition: evidence for outstanding
+VR-0023/24, not an additional suite failure.
+The separate guarded release-pair promotion remains VR-0037.
+A subsequent **read-only v9 release-export preflight** in
+`test_annex_read_model_is_discoverable_and_separate_from_core_matrix`
+compared every staged `records` row against the active tracked
+`rules.db`: **only `skill:commlink` differs**. The existing
+`_check_variant_semantics_delta` guard accepted the exact
+canonically serialized variant append across the full database;
+the Annex module passed **2/2** on Windows. This is not a
+release-pair promotion; matched deployed-object publication
+and normal-mode acceptance are still required.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
