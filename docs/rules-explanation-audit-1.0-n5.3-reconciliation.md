@@ -600,6 +600,78 @@ No new VD/VR obligation arises from this read-only review.
   do not publish that scope without scenario-specific evidence.
   The FAQ v0.1 publication date is also not established.
 
+### V1S-008: ARMY-01 and Reinforcements applicability (2026-11-03)
+
+**Decision: retain the optional current-reference mode with explicit
+N4-origin procedure warnings; do not certify an N5-native annex.**
+The September 1 N5.3 Army changelog's ARMY-01 chart subject has
+usable **post-notice current-state** evidence in the selected
+September 29 Army ZIP, but no pinned pre-notice Army version proves
+which chart rows actually changed. The official N5.3 Game Modes
+p. 6 names games with Reinforcements, and ITS Season 18 p. 27
+offers the Extra while referring to an **unversioned**
+Reinforcements Annex. Neither supplies an independently verified
+N5 procedural annex nor explicitly states that every old N4 clause
+is adopted unchanged.
+
+The two byte-pinned official Reinforcements PDFs (English/Spanish)
+identify **N4** on their covers; the official Wiki annex still
+describes N4-origin detailed procedures. The
+[applicability review](../config/validation/reinforcements-n5-applicability-review.json)
+and [historical PDF pins](../config/validation/reinforcements-source-inputs.json)
+preserve separate authority classes and fail closed on attempts to
+authorize unsupported N5 procedures. A fresh read-only
+`tools.audit_reinforcements_applicability --json` rechecked
+**2/2 current N5/ITS source references** and **2/2 historical N4
+PDFs**, with Commlink and Request Reinforcements classified only
+under that N4 annex. Its explicit decision is
+`n5ExtraCurrentlyReferenced=true` but
+`n5ProceduresAuthorized=false`; the next authority gate is
+verified N5-applicable annex text or explicit publisher adoption
+of the older procedures.
+
+The existing secondary curated
+`reinforcements-extra-n4-reference` is the supported **opt-in
+player reference**. Its Reinforcements Extra, Commlink and Request
+Reinforcements cards visibly distinguish optional N4-origin text
+from normal N5 rules, publish the correct source-edition citations
+and keep Request Reinforcements a **Tactical Phase step**, not an
+Order declaration or ARO. The Commlink (+1/+2) source parameters
+affect only the optional Extra's maximum Trooper count, not a
+generic N5 Attribute or Skill Level. Commlink and Request
+Reinforcements remain outside the **57-declaration** core
+Orders/AROs matrix. Normal browser routes and links to section
+Armies/Unit pages carry the same warnings; they are not a
+combined Army List validator.
+
+**ARMY-01 chart evidence:** all **58** selected raw Army contexts
+and **57** application Fireteam charts retain the matched source
+data (including the contracted Back-up duplicate), with **268**
+teams and **1,249** member rows. The read-only Fireteam audit
+reports **1,237** Army-local member rows and **12** non-local
+or unresolved rows, plus **195/197** FTO rows resolved to
+Army-local loadout options and **2** source anomalies.
+The existing reviewed 13 affected chart-row disclosures remain
+in force. Reinforcement sections keep their **46** parent
+relationships independent from Main-Section chart limits, with
+**9** parent/type contexts restricted by source limits; no
+cross-section eligibility or general roster legality is inferred.
+
+At `7f10386357826b54c6665cb062f231784ae7b5b1`, focused
+Windows checks passed: applicability gate **16/16**,
+optional reference **8/8**, raw chart-to-API parity **4/4**,
+and responsive Chromium optional-annex/Unit navigation
+**8/8** (**36 tests total**). The read-only applicability
+and Fireteam audits both exited successfully. The selected
+current mode and source disclosure need **no additional data,
+API, browser, or rules database change** from this bounded
+review. ARMY-01's historical before/after remains **unverified**,
+and V1S-014/015, source-wide acceptance and final
+release-candidate gates separately own unresolved source
+relationships, eligibility, browser coverage and future
+N5-annex evidence. A publisher clarification is not silently
+treated as a current 1.0 release prerequisite.
+
 ### Remaining release gates (not counted as additional change items)
 
 1. **Source and scope:** freeze the intended Army/rules/FAQ/Wiki
