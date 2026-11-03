@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 3 distinct
-changes** (VR-0023/0024/0037); no deferred design
+Only open VR obligations belong here. **Current count: 4 distinct
+changes** (VR-0023/0024/0037/0038); no deferred design
 requirement is open. Oldest recorded date: 2026-11-02.
 At `fd38485fc5867ba6abe7c945cbf5786221cc15cc`, the
 pinned Linux cumulative suite passed **4,892 tests,
@@ -112,6 +112,23 @@ VR-0037 remains open exclusively for guarded publication
 of typed Commlink semantics. The independent Chromium
 skip-reason and wait-time investigations remain VR-0023/24.
 Git updates are explicit agent actions, not background mirroring.
+
+- [ ] **VR-0038** (2026-11-03; ready-to-run): Cross-platform and
+  cumulative acceptance of the new normal-mode Chromium regression for
+  the published optional Reinforcements annex; no v9 publication is
+  changed. Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
+  change: `tests/test_verify_reinforcements_optional_browser.py` and
+  `config/testing/test-sections.json` on Windows base `bc6ce3e1`;
+  risk: low (test-only). Immediate: real Windows Chromium at
+  **1440/390/320 px passed 3/3**, test-section registry **15/15**,
+  targeted Ruff passed. The test follows the Rule → Commlink →
+  Request Reinforcements links, checks the N4-origin disclosures and
+  citations, and ensures neither optional Skill appears in the
+  unscoped 57-row Orders/AROs chart. Deferred: pin the committed
+  revision and run the same real-Chromium test on `linux-dev`;
+  include it in the next due cumulative full-suite pass. This does
+  not accept unpublished typed (+X) semantics, full Army Sections,
+  N5-native authority or manual browser sign-off.
 
 - [ ] **VR-0037** (2026-11-02; source implemented, publication pending):
   Cross-platform verification and guarded publication for the
@@ -343,8 +360,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0038` (`VR-0023`, `VR-0024`,
-  `VR-0037` open; earlier entries retired).
+- Execution: `VR-0039` (`VR-0023`, `VR-0024`,
+  `VR-0037`, `VR-0038` open; earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

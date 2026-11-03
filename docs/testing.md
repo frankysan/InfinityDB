@@ -704,6 +704,18 @@ authorized guarded promotion. The focused Annex module
 passed **3/3**, with Ruff and Pyright green.
 VR-0037 retains the promotion, rollback and browser acceptance gates.
 
+**2026-11-03 optional annex normal-mode Chromium navigation (VR-0038):**
+The separate `tests/test_verify_reinforcements_optional_browser.py`
+now covers the published Rule → Commlink → Request Reinforcements
+navigation in normal mode at 1440/390/320 px. Windows real Chromium
+passed **3/3**, including the N4-origin notices, source citations,
+keyboard link activation, and non-leakage of both optional Skills
+into the 57-row N5 Orders/AROs matrix. Test-section registration
+passed **15/15** and targeted Ruff passed. The active v9 publication
+pair was not modified. A pinned Linux run, cumulative validation,
+remaining Army context and manual browser acceptance are separate;
+this does not verify N5-native annex authority or promote typed (+X).
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at

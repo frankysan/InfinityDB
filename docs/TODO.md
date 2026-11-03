@@ -1657,6 +1657,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       navigation are already published; do not claim list legality.
     - [ ] Test ordinary versus Reinforcement context, exact `Commlink (+X)` variants, and explicit
       phase classification; do not infer roster legality or mutate the core declaration chart.
+      - [x] Added normal-mode Chromium coverage of the three published optional
+        annex pages and their navigation at 1440/390/320 px; N4 provenance,
+        source citations and non-leakage to the 57 core declarations pass 3/3.
+        This does not yet verify typed (+X) publication, unit/Army context,
+        N5-native authority or full manual browser acceptance.
   - **Completion:** each covered batch builds into `rules.db`, passes maintained-text and
     interaction review, and is navigable with citations in normal mode. Use semantic maintained-text
     tokens; preserve genuine ambiguity with `review-needed` rather than weakening plain-text review.

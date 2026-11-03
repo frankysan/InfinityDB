@@ -150,6 +150,7 @@
         "test_verify_immunity_plasma_browser",
         "test_verify_orders_aros_browser",
         "test_verify_page_footer_browser",
+        "test_verify_reinforcements_optional_browser",
         "test_verify_release_candidate_browser",
         "test_verify_rule_fragment_browser",
         "test_verify_scenario_faq_browser",
