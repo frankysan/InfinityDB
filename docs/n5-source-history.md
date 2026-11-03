@@ -100,6 +100,80 @@ SQLite output is guaranteed across operating systems. A changed source,
 pair or projection reopens affected review; V1S-081/084 and final browser
 acceptance must use the final release candidate.
 
+### Selected rules, FAQ, Wiki and annex evidence (V1S-002; 2026-11-03)
+
+The 1.0 current-reference review selects these **existing local inputs**;
+no source was downloaded or silently updated in this pass:
+
+- **Core rules (primary):** English `data/pdf/rules/n5-rules-v5-3-en.pdf`
+  and Spanish `data/pdf/rules/esp-n5-update-5-3.pdf`, both identified
+  by their covers as **N5 v5.3**. Exact byte pins and page counts are
+  recorded in the [English core identity](#reviewed-english-n53-core-pdf-identity)
+  and [remaining PDF identities](#remaining-reviewed-pdf-identities).
+  N5 v5.2 English remains comparison evidence, not current authority.
+- **FAQ (primary within applicability):** English
+  `data/pdf/faq/n5-faqs-v0-1-en.pdf` and Spanish
+  `data/pdf/faq/esp-faqs-n5-v0-1.pdf` (both cover v0.1).
+  English `data/pdf/faq/n5-faqs-v0-0-en.pdf` is pinned historical
+  comparison material, not a second current FAQ. All three byte pins
+  are in the PDF register and the
+  [question-level scope inventory](faq-v0.1-scope-inventory.md).
+  ITS-only questions remain separately scoped.
+- **Current-capture Wiki research:** English
+  `data/wiki/WIKI-en 20260926-200832.zip` (812 members; acquired
+  2026-09-26T20:08:32+02:00) and Spanish
+  `data/wiki/WIKI-es 20261009-211304.zip` (786 members; acquired
+  2026-10-09T21:13:04+02:00). Their generated snapshot manifests
+  pin respectively SHA-256
+  `c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987`
+  and `8e4d40f0ad60d9a42c276f90a07253d8bcdbb61ed7839506cf9f91b7c8270be4`.
+  Captures do **not** establish a single Wiki publication/effective date.
+- **Exact-revision Wiki research:** English
+  `data/wiki/WIKI-en-history 20260928-165727.zip` (3,592 members;
+  acquired 2026-09-28T16:57:27+02:00), and Spanish
+  `data/wiki/WIKI-es-history 20261009-215316.zip` (3,290 members;
+  acquired 2026-10-09T21:53:16+02:00). Their manifest SHA-256 values
+  are `d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`
+  and `ce588e4f7cb70b84ca115a63f66c3c227a0d7f91d89969caa9a1d46e94d9489b`.
+  Exact oldid/timestamp evidence remains per page, not per capture.
+- **Reinforcements annex (historical only):** The byte-pinned
+  `data/pdf/rules/reinforcement-rules-en.pdf` and
+  `data/pdf/rules/reinforcement-rules-es.pdf` both explicitly identify
+  **N4** on their covers. The
+  [annex inventory](../config/validation/reinforcements-source-inputs.json)
+  retains the hashes, unknown publication dates and historical-only
+  applicability; neither provides verified N5-native annex authority.
+  Optional legacy reference and SRC-030 remain separately governed.
+- **Supplementary current-season scope:** The existing
+  `data/pdf/its/Its-rules-season-18-en.pdf` has cover version
+  `2026.09.01` and a pinned hash in the PDF register. Its ITS-only
+  provisions do not broaden the 1.0 core-reference gate.
+
+Official publication-change evidence is the **2026-09-01** English
+[N5.3 update notice](https://infinityuniverse.com/en/news/infinity-rules-update-5-3)
+and same-date [Spanish notice](https://infinityuniverse.com/es/news/infinity-rules-update-5-3).
+The English notice has separate 26-rule and 20-Army subjects; Spanish
+contains four additional language-specific rule subjects. These are
+**dated URL-backed announcements**, not local byte-pinned PDFs or
+standalone gameplay authority. Earlier official N5 notices remain in
+the [publication index](#official-n5-publication-index) for historical
+change reconciliation. The v5.3 PDF creation metadata is dated
+2026-08-10, while FAQ v0.1 creation metadata is dated 2026-08-25;
+**neither is independently established publication time**. The
+September 1 announcement date and acquisition dates must not be
+substituted for a document's effective date.
+
+All selected local PDF/Wiki/annex hashes were remeasured against the
+existing maintained pins on 2026-11-03. The read-only
+`tools.audit_1_0_reference_inputs` completed successfully with the
+selected English/Spanish Wiki captures and histories, English core
+and FAQ files (results under ignored
+`local/audits/v1s-002-source-evidence.*`). These are source
+**identity and scope selections**, not exhaustive clause equivalence,
+Wiki historical completeness, Army-change reconciliation or browser
+acceptance. A later explicitly approved acquisition reopens affected
+review; V1S-081 performs final frozen-candidate input confirmation.
+
 ## Historical Army evidence
 
 The community-maintained
