@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 2 distinct
-changes** (VR-0023/0024); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 3 distinct
+changes** (VR-0023/0024/0049); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -157,6 +157,23 @@ output comparison. No source-data or FAQ semantics changed during
 the retry; the reviewed annotation remains metadata, not a match-state
 tracker.
 
+- [ ] **VR-0049** (2026-11-03; ready-to-run): Validate the
+  approved Linux-only four-slot runner profile without changing
+  Windows, clean CI or explicit test overrides. Work:
+  [Chromium host defaults](TODO.md#performance-storage-and-build-tooling);
+  change: `tools.browser_test_host_profile`, opt-in ignored
+  `local/browser-test-profile.json`, bounded `run_checks` resolution
+  and regression coverage; risk: medium (Linux development test
+  scheduling, no application or CI release-data changes).
+  Immediate Windows: profile regressions **16 passed / one
+  platform-specific symlink skip**, runner **107 passed / one
+  expected skip**, test-section inventory **15/15**, Ruff and
+  Pyright passed. Design: none. Deferred: Linux fast-forward,
+  `tools.browser_test_host_profile enable/status`, focused Linux
+  tests, inspect the maintained default runner command, and
+  confirm Windows stays at two slots. Do not retire VR-0023/24
+  based on these settings alone.
+
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
   Windows xdist runs. Work: [browser concurrency benchmarking](TODO.md#performance-storage-and-build-tooling);
@@ -216,6 +233,13 @@ tracker.
   **636.13/396.22 s**, two/four slots). The Glossary timeout did not
   recur; see `testing.md`. Retire only after alternating repeatability
   and the remaining host-specific source/skip differences are reconciled.
+  At documentation revision `48d0cd84`, Linux four-slot repetition
+  again passed **600 / 16 skipped** in **395.29 s**, while Windows
+  four-slot repetition had **599 / 16 skipped / one Spec-Ops chart
+  visibility timeout** in **434.84 s**. The user authorized a
+  Linux-only four-slot default while retaining two slots on Windows;
+  this is implemented as an ignored, opt-in host-local runner profile
+  (VR-0049), not a global or CI default change.
 
 - [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
   timestamped Chromium slot metrics and the timeline analyzer under
@@ -340,7 +364,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0049` (`VR-0023` and `VR-0024` open;
+- Execution: `VR-0050` (`VR-0023`, `VR-0024`, and `VR-0049` open;
   `VR-0044`–`VR-0048` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that

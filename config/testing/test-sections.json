@@ -186,6 +186,7 @@
         "test_analyze_test_host_resources",
         "test_benchmark_test_workers",
         "test_browser_test_capacity",
+        "test_browser_test_host_profile",
         "test_browser_test_metrics",
         "test_browser_wsgi_transport",
         "test_capacity_test",

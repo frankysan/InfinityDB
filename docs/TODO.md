@@ -706,6 +706,9 @@ follow-up action. Retain source-native values until official resolution.
   [Chromium concurrency and browser-reuse benchmark](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark).
   Existing slot/timeline diagnostics, host CPU/RAM sampling and pooled-browser
   pilots are implemented; their measurements and limitations belong in testing.
+  - [x] Adopt a reversible host-local four-slot/four-lane benchmarked test
+    profile on the dedicated Linux worker; retain the two-slot Windows and
+    clean-CI defaults. See [host-specific decision](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark).
   - [ ] Repeat alternating full-suite slot comparisons with aligned Windows/Linux
     source coverage, eight-worker Windows baseline, lane assignments, timestamped
     occupancy and CPU/RAM observations. Investigate full-load transport/Glossary

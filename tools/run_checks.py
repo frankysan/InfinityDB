@@ -23,6 +23,7 @@ try:
         AssetModeSelection,
         select_asset_mode,
     )
+    from tools.browser_test_host_profile import linux_four_slots_enabled
     from tools.test_sections import load_test_sections
 except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
     from asset_validation import (  # type: ignore[no-redef]
@@ -30,6 +31,7 @@ except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
         AssetModeSelection,
         select_asset_mode,
     )
+    from browser_test_host_profile import linux_four_slots_enabled  # type: ignore[no-redef]
     from test_sections import load_test_sections  # type: ignore[no-redef]
 
 STAGE_ORDER = ("test", "lint", "docs", "type", "build", "rules", "preflight")
@@ -230,6 +232,35 @@ def build_parser() -> argparse.ArgumentParser:
         help="Stop after the first failed or errored stage.",
     )
     return parser
+
+
+_BROWSER_PROFILE_OVERRIDES = frozenset({
+    "--test-workers", "--test-dist", "--browser-slot-count",
+    "--browser-lane-count", "--split-scenario-faq", "--reuse-browser",
+})
+
+
+def apply_host_browser_test_defaults(
+    args: argparse.Namespace,
+    argv: list[str],
+    *,
+    profile_enabled: bool,
+) -> bool:
+    """Use the tested Linux profile only with an otherwise unmodified test setup.
+
+    Explicit scheduling/capacity flags always retain their normal semantics.
+    """
+    if not profile_enabled or any(
+        token.split("=", 1)[0] in _BROWSER_PROFILE_OVERRIDES
+        for token in argv
+    ):
+        return False
+    args.test_workers = "8"
+    args.test_dist = "browserlanes"
+    args.browser_slot_count = 4
+    args.browser_lane_count = 4
+    args.split_scenario_faq = True
+    return True
 
 
 def normalize_report_target_args(argv: list[str]) -> list[str]:
@@ -529,10 +560,16 @@ def write_summary(reporter: Reporter, results: list[StageResult]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     try:
-        args = build_parser().parse_args(normalize_report_target_args(
+        effective_argv = normalize_report_target_args(
             sys.argv[1:] if argv is None else argv
-        ))
+        )
+        args = build_parser().parse_args(effective_argv)
         stage_names = selected_stage_names(args)
+        if "test" in stage_names and "preflight" not in stage_names:
+            apply_host_browser_test_defaults(
+                args, effective_argv,
+                profile_enabled=linux_four_slots_enabled(REPO_ROOT),
+            )
         runs_pytest = bool({"test", "preflight"} & set(stage_names))
         if args.build_source is not None and "build" not in stage_names:
             build_parser().error("--build-source requires the build stage")

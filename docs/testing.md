@@ -2153,9 +2153,39 @@ Compared with Linux's two-slot window, average CPU increased from
 host-wide measurements do not isolate the benchmark's processes.
 All four host/capacity runs passed the 616-case selection; the
 prior isolated four-slot Glossary timeout did not recur.
-A single paired comparison per host does not establish
-repeatability; retain the two-slot default and VR-0023/24 pending
-alternating repetitions and final source/skip reconciliation.
+The first pair alone did not establish repeatability. In a subsequent
+reverse-order **four-slot** repetition at `48d0cd84`, Linux again
+passed **600 / 16 skipped / 0 failures** in **395.29 s** (previously
+396.22 s), whereas Windows completed **599 / 16 skipped / one failure**
+in **434.84 s** (the Spec-Ops source-chart visibility wait timed out at
+12 s; no gameplay assertion changed). This is evidence of an unreliable
+four-slot Windows acceptance configuration under shared-host load,
+but it does not prove the application or Chromium is defective.
+The existing two-slot Windows limit remains appropriate.
+
+**Host-specific capacity decision (2026-11-03):** The dedicated Linux
+MCP worker may opt into the *validated* four-slot, four-lane, eight-worker
+Scenario FAQ A/D split profile, while Windows retains two slots.
+`tools.browser_test_host_profile` stores a strict, ignored
+`local/browser-test-profile.json` marker on the Linux worker only.
+The maintained `tools.run_checks --stage test` adopts that profile
+when no worker, distribution, slot, lane, split or browser-reuse
+override is explicitly supplied. Any explicit scheduling/capacity
+option retains the pre-existing manual selection behavior. The
+profile does **not** change clean CI, Windows, standalone direct
+`pytest`, or isolated preflight defaults; it is reversible without
+a Git change. Enable/check/disable on Linux with:
+
+```bash
+python -m tools.browser_test_host_profile enable
+python -m tools.browser_test_host_profile status
+python -m tools.browser_test_host_profile disable
+```
+
+The capacity increase is **not** permission to close VR-0023/24:
+full-suite source/skip parity, long-tail browser lifecycle analysis
+and the Windows four-slot failure are still open. No production
+browser configuration changes.
 
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
