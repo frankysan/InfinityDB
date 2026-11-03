@@ -95,8 +95,10 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 3 distinct
-changes** (VR-0023/0024/0044); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 5 distinct
+changes** (VR-0023/0024/0044/0045/0046); no deferred test-design
+requirement is open. The execution threshold is reached; dispatch one
+compatible Linux cumulative pass after synchronizing the latest commit.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -131,8 +133,34 @@ The independent Chromium diagnostics remain open as VR-0023/24.
   Ruff, Pyright, data/rules, documentation and diff checks passed.
   Design: none. Deferred: Linux source-variant tests with pinned
   raw archive, cumulative suite including browser publication checks,
-  and hosted CI after Git commit. Do not treat the typed metadata as
-  a published cross-Army usage index.
+  and hosted CI after Git commit. Initial pinned Linux suite at
+  `14590055`: **4,956 passed / 29 skipped / 2 failed** (cross-platform
+  SQLite byte-layout assertion and missing Lieutenant in an exact
+  reviewed-extra key set). Both regressions were corrected in
+  `bda102e6`; each Linux failing selector passed **1/1** at that
+  pinned commit, and the cumulative rerun was dispatched as
+  `linux-dev:54b236c499a54a6ab96c9b11d7b0df15`.
+  Do not treat typed metadata as a published cross-Army usage index.
+
+- [ ] **VR-0045** (2026-11-03; ready-to-run): Validate the read-only
+  paired raw-archive inspector on pinned Linux and in the cumulative
+  suite. Work: [raw database tooling](TODO.md#performance-storage-and-build-tooling);
+  change: `tools.inspect_raw_archive` and source-table/row tests, commit
+  `c6c1d341`; risk: low (development-only read tooling).
+  Immediate Windows: **11/11** inspector tests with real pinned paired
+  archive and synthetic mismatched/corrupt/empty source data, Ruff,
+  Pyright, docs and whitespace checks passed; real `verify` CLI
+  reported a verified export pair. Design: none. Deferred: Linux
+  focused module, cumulative suite and hosted CI. No runtime DB writes.
+
+- [ ] **VR-0046** (2026-11-03; ready-to-run): Validate generated
+  application/raw database size reporting in `infinity-db build`.
+  Work: [build tooling](TODO.md#performance-storage-and-build-tooling);
+  change: successful-build stdout and directory/ZIP fixture assertions,
+  commit `8ae5ee4e`; risk: low (display-only, no export format changes).
+  Immediate Windows: **2/2** build fixture cases; Ruff, Pyright,
+  documentation and whitespace checks passed. Design: none.
+  Deferred: Linux build fixture tests, cumulative suite and hosted CI.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -307,8 +335,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0045` (`VR-0023`, `VR-0024` and `VR-0044` open;
-  `VR-0040`–`VR-0043` and other earlier entries retired).
+- Execution: `VR-0047` (`VR-0023`, `VR-0024`, `VR-0044`,
+  `VR-0045` and `VR-0046` open; earlier completed entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
