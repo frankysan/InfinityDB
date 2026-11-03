@@ -331,6 +331,89 @@ List/roster builder, or proof of an N5 gameplay rule from
 Peripheral naming alone. Broader committed-state
 Linux/CI validation is queued under VR-0053.
 
+### Fireteam, Reinforcement and normal navigation (V1S-015; 2026-11-03)
+
+**Current-source disposition:** the selected Army snapshot's chart, Section
+and parent/Unit navigation data reaches the existing publication and ordinary
+browser without a newly confirmed missing relationship. The checked application
+Army DB is the tracked `data/generated/infinity.db` (SHA-256
+`8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`),
+paired with the September 29 source ZIP already pinned above. This is a
+read-only development-state review at `6810c6c30db51c79e091704567d08bdfe521ea84`,
+not final release or independent roster-legality acceptance.
+
+- **Chart occupancy/availability:** all **58** raw Army-list contexts map
+  through the application provenance graph to **57** published Fireteam
+  charts (one intentionally shared Back-up chart). All **268** teams
+  and **1,249** member rows agree with the raw archive through the
+  selected source SHA-256, original chart description, types,
+  `min`/`max`/`required`, Wildcard/observation/annotation and
+  source-name fields. There are **438** team-type memberships:
+  99 CORE, 157 HARIS and 182 DUO. These are descriptions of
+  available source composition, **not** complete Army-list legality.
+- **Unresolved chart identities remain visible:** **1,237** member
+  rows resolve Army-locally and **12** are non-local/unresolved:
+  11 exact-slug unresolved placeholders, and one ARJUNA
+  global-but-not-Army-local match. In total **13** chart rows
+  carry reviewed reference notices; the ARJUNA case has
+  overlapping source/context warnings. FTO membership resolves
+  **195/197** marked rows; KORSAN REINF. has no matching
+  Army-local FTO option and ARJUNA has a source-context mismatch.
+  Neither missing local identity nor FTO option is invented.
+  These remain publisher-side ambiguity `SRC-009`, not an
+  unannounced set of made-up playable units or loadouts.
+- **Section-to-parent graph and limits:** **11** application
+  Reinforcement Section charts have **46** parent relationships.
+  The public chart API marks **45** of those parent-chart
+  destinations selectable and retains one as unavailable.
+  In **10** parent relationships the source limit disallows
+  CORE; in **nine** of those the Section also advertises CORE
+  teams. The ordinary Fireteam reference shows the parent
+  restriction separately from the Section's team membership,
+  including zero/unavailable versus unlimited and absent-chart
+  states. No automatic cross-section roster choice follows.
+  Main-Section and Section eligibility are not merged.
+- **Normal navigation:** Army-overview cards expose their
+  applicable parent/child anchors in the regular page
+  (keyboard-operable); missing, nonplayable and legacy
+  targets do not acquire false links. The selected
+  Reinforcement Unit detail links its visible parent Army
+  contexts without Developer mode. Fireteam pages show
+  source member annotations, parent links, type-limit
+  badges and the full verified/not-verified row notices.
+  Nine affected charts retain warnings even after Wildcard
+  insertion. Original parentheses, type/Fireteam labels
+  and FTO markers remain source context rather than
+  inferred `Counts as` or guaranteed FTO eligibility.
+- **Source authority:** N5.3/ITS references to
+  Reinforcements do not independently adopt the N4-origin
+  procedural annex. The optional-mode disclosure decided
+  in V1S-008 remains unchanged. Static Army catalog and
+  Section associations are supported without asserting
+  optional Extra legality or interactive roster building.
+
+**Focused checks:** at `6810c6c3`, the pinned raw-chart/public
+API test module passed **4/4**, and the Fireteam semantic audit
+module **4/4**. Normal Chromium passed **90/90** cases:
+33 Section-to-parent links and keyboard navigations across
+11 Sections × three viewports; 27 chart-source uncertainty
+cases; 24 source-annotation/Wildcard cases; two Army overview
+source-link cases; two nonplayable/missing-target fail-closed
+cases; one normal Unit parentage case, and one absent-parent
+chart safeguard. Total **98 passed, zero skipped/failed**
+across these focused selectors. The read-only Fireteam
+semantic audit independently exited 0 and saved its
+ignored JSON report to `local/audits/v1s-015-fireteam.json`.
+
+**Decision:** no code, data, browser or schema repair is
+warranted for the checked current-source projection. The
+source ambiguity register `SRC-009` remains open for
+publisher clarification and is not reclassified as a
+proven InfinityDB bug. In-scope source-wide semantics and
+unverified publisher rules are separately owned by
+V1S-016–022; final frozen-release browser, accessibility,
+full-suite and CI gates are still outstanding.
+
 ### Selected rules, FAQ, Wiki and annex evidence (V1S-002; 2026-11-03)
 
 The 1.0 current-reference review selects these **existing local inputs**;

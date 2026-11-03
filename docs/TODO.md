@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-015 (M, review):** Audit Fireteam availability, Reinforcement parent/pool context and ordinary
-  Unit/Army/Section browser reachability.
 - [ ] **V1S-016 (L, review):** Give Core/Hacking PDF sections and current curated families a
   source-to-storage-to-browser disposition, not citation-only approval.
 - [ ] **V1S-017 (M, review):** Review Wiki-backed Skills, Equipment, Terms, Traits and special source wording
@@ -460,15 +458,16 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
     not establish PDF, FAQ, or scenario completeness or prove browser usability; add the missing
     source review and presentation checks explicitly.
-    - [ ] Cross-check the **derived Army relationships** that source-field occupancy alone
+    - [x] Cross-check the **derived Army relationships** that source-field occupancy alone
       cannot certify: canonical Unit/profile/loadout identities, shared Unit-option Includes,
       Peripheral/controller targets, Reinforcement parent/pool membership and Army-local
-      Fireteam availability. Distinguish an existing working projection from an uncovered
-      source relationship or inaccessible player-facing context; add only confirmed
-      deficiencies to the owning vertical slice.
-      - [ ] Reconcile normal Unit/Army/Fireteam browser reachability and applicability
-        for these relationships (including Reinforcement pool context); classify any
-        missing, misleading or deliberately deferred behavior with source evidence.
+      Fireteam availability. The bounded dispositions are in the
+      [V1S-013–015 source history](n5-source-history.md#fireteam-reinforcement-and-normal-navigation-v1s-015-2026-11-03):
+      source-boundary warnings remain open without inventing roster legality.
+      - [x] Verify normal Unit/Army/Fireteam browser reachability and applicability,
+        including Reinforcement pool parent context, notes and source-backed
+        uncertainty; **90/90** focused Chromium cases passed. Final release
+        acceptance and unrelated source-section review remain separate.
     - [ ] Obtain independent human visual acceptance if required for the 1.0
       release; agent-reviewed screenshots and automated browser assertions
       are evidence, not a human sign-off.
