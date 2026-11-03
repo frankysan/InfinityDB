@@ -1667,18 +1667,27 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       Skill reference. An additional pinned-source regression now covers
       **every published Reinforcement Section profile and loadout** against
       the source Army identity/group and original values (VR-0041).
+      Source-wide Commlink variant/loadout parity also passes locally,
+      including unqualified, (+1) and (+2) Skill signatures (VR-0042).
       Full manual browser acceptance and any publisher-specific N5
       procedural authority still remain; this is not list legality.
     - [x] Audit all published Reinforcement Section profiles and loadouts
       against their exact source Unit, Army, group, name and option/cost
       occurrences after logical-Unit reconciliation. The complete
       Section parity regression passes locally **1/1**; cross-platform
-      and cumulative acceptance are queued as VR-0041.
+      Linux pinned `b8b02491` focused **1/1 passed**; cumulative
+      acceptance remains under VR-0041.
+    - [x] Verify **all materialized Commlink (+X) Army loadouts** against
+      source Skill 260 occurrences, preserving the exact empty, +1 and
+      +2 extras on their Army/Unit/option identity without cross-list
+      leakage. Windows focused regression passes **1/1**; Linux and
+      cumulative acceptance queued under VR-0042.
     - [x] Test a source-backed ordinary/Reinforcement shared Unit, exact
       Commlink (+1)/(+2) Army loadouts, and the separate Tactical Phase
       category. Windows API **1/1**, context Chromium **2/2** and variant
       Chromium **2/2** pass; all remain read-only reference checks. Linux
-      cross-platform acceptance is deferred under VR-0040.
+      Linux pinned `b8b02491` full Chromium module **8/8 passed**;
+      cumulative acceptance remains deferred under VR-0040.
       - [x] Added normal-mode Chromium coverage of the three published optional
         annex pages and their navigation at 1440/390/320 px; N4 provenance,
         source citations and non-leakage to the 57 core declarations pass 3/3.

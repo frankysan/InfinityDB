@@ -825,9 +825,10 @@ source Army loadouts and links to the scoped N4-origin Skill card.
 Windows essential regressions passed **1/1 source/API, 2/2 context
 Chromium, 2/2 Commlink Chromium**; targeted Ruff passed. This checks a
 bounded real-source cohort rather than all profiles, event roster
-legality or N5-native rule authority. Deferred Linux module/integration
-acceptance is tracked as VR-0040; the earlier `8e2b2de7` cumulative
-suite did not contain these new tests.
+legality or N5-native rule authority. Linux at `b8b02491` passed
+the complete normal Chromium module **8/8**, including these cases,
+while the prior cumulative suite at `8e2b2de7` predates them.
+New-revision cumulative acceptance is tracked in VR-0040.
 
 **2026-11-03 complete Reinforcement Section source parity (VR-0041):**
 `tests/test_reinforcements_optional_reference.py::test_every_published_reinforcement_profile_and_loadout_keeps_source_army`
@@ -843,7 +844,27 @@ cross-Section entries. Windows focused regression **1/1 passed**
 (1.77 s pytest), targeted Ruff passed. This establishes **published
 source-identity parity**, not publisher rules adoption, every possible
 Army-list legality constraint or manual browser/AT acceptance.
-Cross-platform/cumulative acceptance is deferred as VR-0041.
+Linux pinned `b8b0249127e7782331c6b23e1be375d2a9d8ab51`
+focused **1/1** passed (job
+`linux-dev:66cfc3c91f6b402da58c48e6f90145dc`);
+the matching Annex normal Chromium module passed **8/8**
+(job `linux-dev:7b225640da724276bc271f2ccea40979`).
+The matched ignored deployed-object publication was verified before
+these runs. Cumulative acceptance remains queued (VR-0040/41).
+
+**2026-11-03 source-wide Commlink occurrence/loadout parity (VR-0042):**
+`tests/test_reinforcements_optional_reference.py::test_commlink_source_extras_remain_on_their_exact_army_loadouts`
+joins the published Army's Skill 260 loadout occurrences, exact extra
+occurrence positions, logical Unit provenance and source Army mapping.
+It independently compares each (logical Unit, Army, group, option)
+signature set to the runtime Unit API's underlying read-model,
+requiring the three observed states: no extra, `298/+1`, and
+`299/+2`. No source variant may disappear or leak to an
+unrelated Army loadout after Unit canonicalization. Windows targeted
+pytest **1/1 passed** and Ruff passed. This checks all materialized
+source identities and variant rendering inputs; it does **not** certify
+an N5-native procedural rewrite or calculate the actual roster limit.
+Linux focused and cumulative testing are queued in VR-0042.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked

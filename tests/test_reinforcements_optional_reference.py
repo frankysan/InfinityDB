@@ -404,3 +404,76 @@ def test_every_published_reinforcement_profile_and_loadout_keeps_source_army() -
         )
         compared_sections += len(set(expected_profiles) | set(expected_loadouts))
     assert compared_sections > 20
+
+
+def test_commlink_source_extras_remain_on_their_exact_army_loadouts() -> None:
+    """Source Commlink (+X) signatures must not leak across canonical Unit/Army rows."""
+    from collections import Counter, defaultdict
+
+    path = ROOT / "data/generated/infinity.db"
+    # Include unqualified Commlink and preserve all extras belonging to each
+    # source Skill occurrence. Source IDs are not inferred from display names.
+    occurrences: dict[tuple[int, int, int, int, int], list[tuple[int, str]]] = defaultdict(
+        list
+    )
+    with sqlite3.connect(path) as connection:
+        for logical_id, army_id, group_id, option_id, position, extra_id, extra_name in (
+            connection.execute(
+                "SELECT lus.logical_unit_id, aas.application_army_id, "
+                "lpo.group_id, lpo.option_id, s.position, e.extra_id, x.name "
+                "FROM loadout_payload_occurrences AS lpo "
+                "JOIN logical_unit_sources AS lus ON lus.source_unit_id = lpo.unit_id "
+                "JOIN application_army_sources AS aas ON aas.source_army_id = lpo.army_id "
+                "JOIN loadout_payload_skills AS s "
+                "ON s.loadout_payload_id = lpo.loadout_payload_id AND s.item_id = 260 "
+                "LEFT JOIN loadout_payload_skill_extras AS e "
+                "ON e.loadout_payload_id = s.loadout_payload_id "
+                "AND e.occurrence_position = s.position "
+                "LEFT JOIN extras AS x ON x.id = e.extra_id "
+                "ORDER BY lus.logical_unit_id, aas.application_army_id, "
+                "lpo.group_id, lpo.option_id, s.position, e.position"
+            )
+        ):
+            key = (logical_id, army_id, group_id, option_id, position)
+            occurrences.setdefault(key, [])
+            if extra_id is not None:
+                occurrences[key].append((extra_id, extra_name))
+
+    assert occurrences, "No source-backed Commlink occurrences"
+    expected: dict[tuple[int, int, int, int], set[tuple[tuple[int, str], ...]]] = (
+        defaultdict(set)
+    )
+    signatures: Counter[tuple[tuple[int, str], ...]] = Counter()
+    for (*loadout, _position), extras in occurrences.items():
+        signature = tuple(extras)
+        expected[tuple(loadout)].add(signature)
+        signatures[signature] += 1
+    assert signatures[((298, "+1"),)] > 0
+    assert signatures[((299, "+2"),)] > 0
+    assert signatures[()] > 0
+    assert set(signatures) == {(), ((298, "+1"),), ((299, "+2"),)}
+
+    actual: dict[tuple[int, int, int, int], set[tuple[tuple[int, str], ...]]] = (
+        defaultdict(set)
+    )
+    database = Database(path)
+    for logical_id in sorted({key[0] for key in expected}):
+        unit = database.get_unit(logical_id)
+        assert unit is not None
+        for army in unit["armies"]:
+            for loadout in army["loadouts"]:
+                key = (logical_id, army["id"], loadout["group_id"], loadout["option_id"])
+                for skill in loadout["skills"]:
+                    if skill["id"] != 260:
+                        continue
+                    actual[key].add(tuple(
+                        (extra["id"], extra["name"]) for extra in skill.get("extras", [])
+                    ))
+    assert dict(actual) == dict(expected), (
+        "Commlink source variant leak or missing exact loadout",
+        [
+            (key, actual.get(key), expected.get(key))
+            for key in sorted(set(actual) | set(expected))
+            if actual.get(key) != expected.get(key)
+        ][:20],
+    )
