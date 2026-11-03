@@ -107,6 +107,24 @@ def test_optional_annex_disclosures_and_links_stay_outside_core_matrix(
             page.locator(f'[id="{destination.split("#", 1)[1]}"]').wait_for(state="visible")
             page.goto(f"{ORIGIN}/rules/reinforcements-extra", wait_until="domcontentloaded")
             rule.wait_for(state="visible", timeout=20000)
+            navigation.wait_for(state="visible", timeout=20000)
+            section = reinforcement_sections[0]
+            expected_slug = section.get("public_slug") or section.get("slug") or str(section["id"])
+            navigation.locator("li").first.get_by_role(
+                "link", name="Browse section units",
+            ).click()
+            page.wait_for_url("**/units?s=*")
+            page.locator("#army-filter").wait_for(state="visible")
+            page.wait_for_function(
+                "() => document.querySelector('#army-filter')?.disabled === false"
+            )
+            assert page.locator("#army-filter").input_value() == expected_slug
+            assert page.evaluate(
+                "async () => (await import('/static/share-state.js'))"
+                ".readShareState('units').params.get('reinforcement')"
+            ) == "1"
+            page.goto(f"{ORIGIN}/rules/reinforcements-extra", wait_until="domcontentloaded")
+            rule.wait_for(state="visible", timeout=20000)
 
         commlink = rule.locator('a[href="/skills/commlink"]').first
         assert commlink.is_visible()

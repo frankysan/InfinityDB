@@ -111,8 +111,8 @@ regression passed **2/2** on Linux at `fd38485f`.
 This retires VR-0035 (Lieutenant) and VR-0036 (Commlink
 source signatures); the completed history is in
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
-VR-0037 remains open exclusively for guarded publication
-of typed Commlink semantics. The independent Chromium
+VR-0037 now awaits cumulative acceptance of the committed promotion,
+not new authorization. The independent Chromium
 skip-reason and wait-time investigations remain VR-0023/24.
 Git updates are explicit agent actions, not background mirroring.
 
@@ -127,8 +127,12 @@ Git updates are explicit agent actions, not background mirroring.
   with `/api/armies` source relationships, all current playable Section
   and parent links, encoded Unit Explorer filters, real overview-card
   navigation, N4-origin caveat and original Orders/AROs isolation.
-  Targeted Ruff passed; docs and diff checks follow.
-  Design: none. Deferred: pinned Linux Chromium selector and the next
+  Targeted Ruff, Pyright, docs and diff checks passed. Commit
+  `30bea0b5` published the navigation; a subsequent direct pool link
+  adjustment explicitly pins `reinforcement=1` to keep the Section
+  visible when an optional-unit preference is disabled. Windows real
+  Chromium reaccepted **3/3** with the selected Army filter and URL
+  codec. Design: none. Deferred: pinned Linux Chromium and the next
   cumulative suite after a clean commit/worker synchronization.
   Do not infer Main Section legality, N5-native annex authority or
   that the concurrent Linux run at the previous commit covers this change.
@@ -147,10 +151,16 @@ Git updates are explicit agent actions, not background mirroring.
   unscoped 57-row Orders/AROs chart. Linux at pinned `f21ad5ac`
   passed **3/3 real Chromium cases** in 7.59 s (job
   `linux-dev:77099baf333c4e5a98372b9f5b31e0ef`), with no
-  missing-browser skip. Remaining: include the committed test in
-  the next due cumulative full-suite pass. This does
-  not accept unpublished typed (+X) semantics, full Army Sections,
-  N5-native authority or manual browser sign-off.
+  missing-browser skip. The cumulative Linux suite at `561e1269`
+  showed **4,938 passed / 28 skipped / 1 failed**: the new browser
+  module was absent from `CHROMIUM_SCHEDULING_LANES`, though it was
+  registered in `test-sections.json`. The module was subsequently
+  assigned to the two-, three- and four-lane schedules.
+  Windows `tests/test_browser_test_capacity.py` passed **24/24**;
+  Ruff, Pyright and docs checks passed. Remaining: a green
+  corrected-revision cumulative Linux suite;
+  full Army Sections, N5-native authority and manual browser sign-off
+  are separate.
 
 - [ ] **VR-0037** (2026-11-02; guarded promotion completed, cumulative acceptance pending):
   Cross-platform verification and guarded publication for the
@@ -220,11 +230,12 @@ Git updates are explicit agent actions, not background mirroring.
   The three old unresolved-Commlink source-variant expectations were
   corrected; the complete source module passed **68/68** and the
   restored synthetic pre-promotion/rollback test fixture **6/6**.
-  The local tracked `rules.db` must still be committed and pushed;
-  the restricted MCP Git staging interface does not accept this binary
-  path. Remaining: a committed, revision-pinned Linux/full-suite
-  acceptance and uncompleted Army-context/manual-browser scope. This
-  is not general N5 roster legality.
+  The tracked `rules.db` and companion source/tests were committed and
+  pushed as `561e1269`; the Windows working tree was clean. The
+  Linux cumulative run on that revision produced one Chromium lane
+  registration failure (VR-0038), not a Commlink-data failure.
+  Remaining: a green corrected-revision cumulative Linux suite and
+  Army-context/manual-browser scope. This is not general N5 roster legality.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and

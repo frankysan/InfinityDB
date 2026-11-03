@@ -178,6 +178,7 @@ function reinforcementSectionsSection(armies) {
     const units = document.createElement("a");
     units.href = shareStateHref("/units", "units", {
       army_id: reinforcement.public_slug || reinforcement.slug || String(reinforcement.id),
+      reinforcement: "1",
     });
     units.textContent = "Browse section units";
     item.append(" · ", units);

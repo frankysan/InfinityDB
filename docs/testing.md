@@ -757,6 +757,23 @@ Cumulative validation, remaining Army context and manual browser
 acceptance are separate;
 this does not verify N5-native annex authority or promote typed (+X).
 
+**2026-11-03 Linux promoted-pair cumulative validation (VR-0037/38):**
+After explicit worker Git fetch/fast-forward to `561e1269`, the Linux
+worker built and verified its Git-ignored matched deployed-object
+publication. The 808/808 SVG assets were available. Pinned full-suite
+job `linux-dev:a4541b2a28fd4f1e8ea5222c455b60c0` finished
+**4,938 passed / 28 skipped / 1 failed** in 575.79 seconds. The
+only failure was `tests/test_browser_test_capacity.py::`\
+`test_two_browser_lanes_cover_all_real_chromium_modules`: the new
+`test_verify_reinforcements_optional_browser` module was present in
+the test-section registry but missing from both default/experimental
+Chromium lane registries. Both code and source assertions otherwise
+passed, but **the cumulative suite was not accepted**. The module was
+added to each lane mapping; its direct Windows capacity regression
+passed **24/24** and the expanded optional Annex Chromium module
+passed **3/3**. Full-suite acceptance remains required at the corrected commit. The two
+existing Linux multiprocessing-fork warnings were unchanged.
+
 **2026-11-03 optional annex Section/parent navigation (VR-0039):**
 The normal-mode optional Rule detail now derives a current, playable
 Reinforcement Section list from `/api/armies`, linking each Section to its
