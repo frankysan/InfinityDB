@@ -10,6 +10,8 @@ import pytest
 
 from infinity_db.curated import (
     LIEUTENANT_VARIANT,
+    TERRAIN_SOURCE_SPECS,
+    TERRAIN_VARIANT,
     _validate_variant_semantics,
     load_curated_directory,
 )
@@ -111,17 +113,20 @@ def _expected_skill_statuses(rules_path: Path) -> dict[str, int]:
     reviewed = RulesDatabase(rules_path).skill_reviewed_extra_semantics()
     commlink_reviewed = "commlink" in reviewed
     lieutenant_reviewed = "lieutenant" in reviewed
+    terrain_reviewed = "terrain" in reviewed
     return {
         "family-only": 44,
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
         "reviewed-extra-parameter": (
-            (20 if commlink_reviewed else 19) + int(lieutenant_reviewed)
+            (20 if commlink_reviewed else 19)
+            + int(lieutenant_reviewed) + int(terrain_reviewed)
         ),
         "reviewed-combination-parameter": 2,
         "unresolved-occurrence-parameter": (
-            (14 if commlink_reviewed else 15) - int(lieutenant_reviewed)
+            (14 if commlink_reviewed else 15)
+            - int(lieutenant_reviewed) - int(terrain_reviewed)
         ),
     }
 
@@ -411,6 +416,127 @@ def test_lieutenant_review_gate_verifies_published_matched_pair() -> None:
     assert report["scope"] == "lieutenant-resource-v9-verified-published"
     assert report["qualifiedOccurrences"] == 83
     assert report["unqualifiedOccurrences"] == 355
+    assert report["logicalContentVerified"] is True
+    assert len(report["previousRulesSha256"]) == 64
+    assert len(report["candidateRulesSha256"]) == 64
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_terrain_source_58_exact_types_and_reviewed_effects(tmp_path: Path) -> None:
+    """All seven signatures remain distinct; Total is not choose-one."""
+    counts = (918, 164, 65, 29, 30, 19, 10)
+    current = ROOT / "data/generated/rules.db"
+    docs = load_curated_directory(ROOT / "data/curated/rules")
+    terrain = next(
+        row for _, document in docs for row in document["records"]
+        if row["id"] == "skill:terrain"
+    )
+    assert terrain["variantSemantics"] == TERRAIN_VARIANT
+    assert any(
+        c["sourceId"] == "n5-core-v5.3-pdf" and c["page"] == 116
+        for c in terrain["citations"]
+    )
+    candidate = tmp_path / "terrain-v9.db"
+    export_release_rules(docs, candidate, baseline=current)
+    typed = RulesDatabase(candidate).skill_reviewed_extra_semantics()["terrain"]
+    assert typed == {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [
+            {
+                "extra_id": extra_id, "extra_type": "TEXT", "raw_value": raw,
+                "effect": {
+                    "kind": "terrain-type-applicability",
+                    "applies_to": "terrain-movement-skill-effects",
+                    "terrainTypes": list(types), "selection": selection,
+                },
+            }
+            for extra_id, raw, types, selection in TERRAIN_SOURCE_SPECS
+        ],
+    }
+    report = inventory_source_variants(
+        ROOT / "data/generated/infinity.db",
+        ROOT / "data/generated/infinity.raw.db", candidate,
+    )
+    [item] = select_source_variants(report, "skills", [58])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        "Terrain", 58, 1236,
+    )
+    assert item["status"] == "reviewed-extra-parameter"
+    assert item["reviewedExtra"] == typed and item["rawValues"] == []
+    assert item["extraSignatures"] == [
+        {"extras": [[extra_id, "TEXT", raw]], "reviewed": True, "count": count}
+        for (extra_id, raw, _types, _selection), count
+        in zip(TERRAIN_SOURCE_SPECS, counts, strict=True)
+    ]
+    assert sum(counts) == 1235 and item["occurrences"] - sum(counts) == 1
+    for (extra_id, raw, _types, _selection), count in zip(
+        TERRAIN_SOURCE_SPECS, counts, strict=True,
+    ):
+        owners = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=58, extra_id=extra_id,
+        )
+        assert len(owners) == count
+        assert all(
+            row["extra_id"] == extra_id and row["extra_type"] == "TEXT"
+            and row["extra_raw"] == raw and row["extra_position"] == 1
+            and row["source_raw"] is None
+            for row in owners
+        )
+    # SRC-028's Religious Troop assignment remains unreviewed.
+    [religious] = select_source_variants(report, "skills", [83])["items"]
+    assert religious["status"] == "unresolved-occurrence-parameter"
+    assert religious["extraSignatures"] == [{
+        "extras": [[33, "TEXT", "Total"]], "reviewed": False, "count": 1,
+    }]
+    if "terrain" not in RulesDatabase(current).skill_reviewed_extra_semantics():
+        _check_variant_semantics_delta(
+            current, candidate, {
+                ("n5-core-v5.3", "skill:terrain"):
+                    json.dumps(TERRAIN_VARIANT, ensure_ascii=False, separators=(",", ":")),
+            },
+        )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        lambda v: v["occurrenceParameters"][0]["extraValues"][0]["effect"].update(
+            {"selection": "choose-one-on-placement"}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][6]["effect"].update(
+            {"selection": "all"}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][2]["effect"].update(
+            {"terrainTypes": ["mountain"]}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"][1].update(
+            {"rawValue": "Aquatic"}
+        ),
+        lambda v: v["occurrenceParameters"][0]["extraValues"].reverse(),
+    ),
+)
+def test_terrain_type_semantics_fail_closed_on_drift(mutation) -> None:
+    reviewed = copy.deepcopy(TERRAIN_VARIANT)
+    assert _validate_variant_semantics(
+        reviewed, "skill:terrain", [{"entity": "skill", "id": "terrain"}],
+    ) == "family"
+    mutation(reviewed)
+    with pytest.raises(ValueError, match="invalid N5.3 Terrain type extras"):
+        _validate_variant_semantics(
+            reviewed, "skill:terrain", [{"entity": "skill", "id": "terrain"}],
+        )
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_terrain_review_gate_verifies_published_matched_pair() -> None:
+    from tools.review_terrain_variant import check_candidate
+
+    report = check_candidate()
+    assert report["scope"] == "terrain-v9-verified-published"
+    assert report["qualifiedOccurrences"] == 1235
+    assert report["unqualifiedOccurrences"] == 1
+    assert report["sourceVariants"] == 7
     assert report["logicalContentVerified"] is True
     assert len(report["previousRulesSha256"]) == 64
     assert len(report["candidateRulesSha256"]) == 64

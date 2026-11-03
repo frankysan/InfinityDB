@@ -3843,10 +3843,16 @@ The Terrain Special Skill uses those same identities as its profile parameter.
 When several Types are listed, one is chosen when the Trooper is placed on the
 table; `Terrain (Total)` covers all current Types.
 
-A Terrain parenthetical value should therefore be interpreted as a typed terrain
-scope/choice, not as a Level or generic text/numeric modifier. InfinityDB can
-retain the exact source extra while rules-reference data supplies the finite
-vocabulary and relationships.
+A Terrain parenthetical value is a typed terrain scope/choice, not a Level
+or generic text/numeric modifier. The N5.3 source-58 family now retains all
+seven exact Army qualifiers as reviewed `terrain-type-applicability` effects:
+five fixed single Types, `Aquatic/Jungle` as choose-one-when-placed, and
+`Total` as all five current Types. The base Skill still supplies the
+movement rules; a variant does not stack additional MOV bonuses. All 1,235
+qualified direct source occurrences are accounted for, plus one unqualified
+row. SRC-028's unrelated `Religious Troop (Total)` source anomaly remains
+unreviewed, without reassigning its annotation to Terrain. This is metadata
+for the future Unit-use index, not published roster/terrain resolution.
 
 Sources:
 

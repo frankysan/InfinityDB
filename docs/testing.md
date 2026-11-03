@@ -984,6 +984,31 @@ passed at this same commit. This retires VR-0044, VR-0045 and VR-0046;
 VR-0023/24 controlled performance comparisons and final release
 sign-off remain independent.
 
+**2026-11-03 Terrain source-58 type review (VR-0047 open):**
+N5.3 English p. 116 and the pinned September 29 Army archive support
+seven exact type qualifiers: `Total` (extra 33, 918 direct rows),
+`Zero-G` (34, 164), `Aquatic` (35, 65), `Desert` (36, 29),
+`Jungle` (37, 30), `Mountain` (38, 19), and `Aquatic/Jungle`
+(50, 10). One of 1,236 direct Terrain occurrences is unqualified.
+The reviewed typed effect scopes the **existing** Terrain Skill
+to a single fixed Type, a player-selected one of two Types when
+placed on the table, or all five Types with `Total`—not multiple
+stacking MOV bonuses or dynamic terrain resolution. The separate
+`Religious Troop (Total)` occurrence remains unreviewed under SRC-028.
+
+The read-only `tools.review_terrain_variant` guard verified source
+signatures and owners, pinned N5.3 PDF bytes, the exact
+schema-v9 Terrain-only candidate delta, and unrelated
+deployed-object invariance. The rollback-capable
+`--promote` path refreshed the tracked rules DB and matched ignored
+publication, whose independent `--check` passed. Windows direct
+and malformed-variant tests passed, then the source-variant module
+passed **82/82** on the promoted pair. Both `rules` and `data`
+stages passed; Ruff and whitespace checks passed. The inventory is
+now **22 reviewed-extra / 12 unresolved** Skill source IDs, without
+a published cross-Army Unit-use index. Linux pinned acceptance,
+cumulative browser suite and hosted CI remain VR-0047.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at

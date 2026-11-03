@@ -2162,6 +2162,24 @@ Skill source IDs, including Jump and Climb, retain their unresolved
 parameter status; TinBot Firewall remains an independently unresolved
 Equipment occurrence parameter. No Unit-use index has been published.
 
+**Reviewed Terrain type qualifiers (2026-11-03):** Skill source `58`
+has 1,236 direct Army occurrences: 918 `Total` (extra 33), 164
+`Zero-G` (34), 65 `Aquatic` (35), 29 `Desert` (36), 30
+`Jungle` (37), 19 `Mountain` (38), and ten
+`Aquatic/Jungle` (50), leaving one unqualified occurrence.
+N5.3 p. 116 establishes each single Type, the choose-one-on-placement
+condition for a multi-Type profile, and `Total` applicability to
+all five rulebook Types. The exact `reviewed-extra` effects are
+`terrain-type-applicability`, using `terrainTypes` and
+`selection: fixed / choose-one-on-placement / all`. They do **not**
+add a second MOV bonus, override area conditions, or rewrite any
+Army occurrence. A guarded schema-v9 refresh changed only this reviewed
+family parameter and regenerated the matched deployed-object pair;
+the separately reported `Religious Troop (Total)` misassignment
+(SRC-028) remains unreviewed. The source audit now reports 22 reviewed
+extra and 12 unresolved Skill source IDs. No cross-Army usage index
+or terrain effect evaluator was published.
+
 **Reviewed Surprise Attack occurrence MODs (2026-10-30):** Source Skill
 `191` has 767 direct relationships, all with one exact extra: `TEXT: -3`
 (ID 6, 762 rows) or `TEXT: -6` (ID 7, 5 rows). The family record now maps

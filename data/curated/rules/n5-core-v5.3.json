@@ -19283,7 +19283,111 @@
                 "reviewedOn": "2026-09-24"
             },
             "variantSemantics": {
-                "inheritance": "family"
+                "inheritance": "family",
+                "occurrenceParameters": [
+                    {
+                        "source": "army-extra",
+                        "kind": "reviewed-extra",
+                        "extraValues": [
+                            {
+                                "extraId": 33,
+                                "extraType": "TEXT",
+                                "rawValue": "Total",
+                                "effect": {
+                                    "kind": "terrain-type-applicability",
+                                    "appliesTo": "terrain-movement-skill-effects",
+                                    "terrainTypes": [
+                                        "aquatic",
+                                        "desert",
+                                        "mountain",
+                                        "jungle",
+                                        "zero-g"
+                                    ],
+                                    "selection": "all"
+                                }
+                            },
+                            {
+                                "extraId": 34,
+                                "extraType": "TEXT",
+                                "rawValue": "Zero-G",
+                                "effect": {
+                                    "kind": "terrain-type-applicability",
+                                    "appliesTo": "terrain-movement-skill-effects",
+                                    "terrainTypes": [
+                                        "zero-g"
+                                    ],
+                                    "selection": "fixed"
+                                }
+                            },
+                            {
+                                "extraId": 35,
+                                "extraType": "TEXT",
+                                "rawValue": "Aquatic",
+                                "effect": {
+                                    "kind": "terrain-type-applicability",
+                                    "appliesTo": "terrain-movement-skill-effects",
+                                    "terrainTypes": [
+                                        "aquatic"
+                                    ],
+                                    "selection": "fixed"
+                                }
+                            },
+                            {
+                                "extraId": 36,
+                                "extraType": "TEXT",
+                                "rawValue": "Desert",
+                                "effect": {
+                                    "kind": "terrain-type-applicability",
+                                    "appliesTo": "terrain-movement-skill-effects",
+                                    "terrainTypes": [
+                                        "desert"
+                                    ],
+                                    "selection": "fixed"
+                                }
+                            },
+                            {
+                                "extraId": 37,
+                                "extraType": "TEXT",
+                                "rawValue": "Jungle",
+                                "effect": {
+                                    "kind": "terrain-type-applicability",
+                                    "appliesTo": "terrain-movement-skill-effects",
+                                    "terrainTypes": [
+                                        "jungle"
+                                    ],
+                                    "selection": "fixed"
+                                }
+                            },
+                            {
+                                "extraId": 38,
+                                "extraType": "TEXT",
+                                "rawValue": "Mountain",
+                                "effect": {
+                                    "kind": "terrain-type-applicability",
+                                    "appliesTo": "terrain-movement-skill-effects",
+                                    "terrainTypes": [
+                                        "mountain"
+                                    ],
+                                    "selection": "fixed"
+                                }
+                            },
+                            {
+                                "extraId": 50,
+                                "extraType": "TEXT",
+                                "rawValue": "Aquatic/Jungle",
+                                "effect": {
+                                    "kind": "terrain-type-applicability",
+                                    "appliesTo": "terrain-movement-skill-effects",
+                                    "terrainTypes": [
+                                        "aquatic",
+                                        "jungle"
+                                    ],
+                                    "selection": "choose-one-on-placement"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {

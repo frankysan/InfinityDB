@@ -313,6 +313,38 @@ LIEUTENANT_VARIANT: dict[str, Any] = {
     }],
 }
 
+# N5.3 p. 116: one matching type, choose one on placement for a
+# multi-type profile, or all five current types with Terrain (Total).
+# These are applicability selectors, never extra MOV modifiers.
+TERRAIN_SOURCE_SPECS = (
+    (33, "Total", ("aquatic", "desert", "mountain", "jungle", "zero-g"), "all"),
+    (34, "Zero-G", ("zero-g",), "fixed"),
+    (35, "Aquatic", ("aquatic",), "fixed"),
+    (36, "Desert", ("desert",), "fixed"),
+    (37, "Jungle", ("jungle",), "fixed"),
+    (38, "Mountain", ("mountain",), "fixed"),
+    (50, "Aquatic/Jungle", ("aquatic", "jungle"), "choose-one-on-placement"),
+)
+TERRAIN_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": raw,
+                "effect": {
+                    "kind": "terrain-type-applicability",
+                    "appliesTo": "terrain-movement-skill-effects",
+                    "terrainTypes": list(types),
+                    "selection": selection,
+                },
+            }
+            for extra_id, raw, types, selection in TERRAIN_SOURCE_SPECS
+        ],
+    }],
+}
+
+
 # The generic N5.3 ReRoll annotation applies to the Skill's own Roll.
 # Both are optional deployment chart Rolls, not rolls using chart rewards.
 CHART_REROLL_VARIANTS: dict[str, dict[str, Any]] = {
@@ -995,6 +1027,27 @@ def _validate_reviewed_extra_parameter(
             )
         ):
             raise ValueError(f"{context}: invalid N5.3 Lieutenant resource extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "terrain"}
+    ]:
+        # N5.3 p. 116: multi-type means choose one when placed,
+        # except Total, which applies to all five types. No MOV stacking.
+        values = parameter.get("extraValues")
+        expected = TERRAIN_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or not isinstance(entry.get("effect"), dict)
+                or not isinstance(entry["effect"].get("terrainTypes"), list)
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid N5.3 Terrain type extras")
         return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "forward-observer"}

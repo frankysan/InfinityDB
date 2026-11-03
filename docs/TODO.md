@@ -401,7 +401,8 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     [accepted index design](data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
     - [ ] Reconcile remaining unresolved Skill/Equipment occurrence parameters,
       mixed TEXT/DISTANCE sources and named variants with extra MODs.
-      Reuse `tools.audit_source_variant_inputs --unresolved-only --brief` and
+      Reuse `python -m tools.audit_source_variant_inputs --catalog skills
+      --unresolved-only --brief` (or `--catalog equipment`) and
       `tests/test_audit_source_variant_inputs.py`; revalidate the release-matched
       pair with the ignored raw Army archive. Preserve complete ordered source
       signatures, exclude unreviewed combinations, fail closed on unknowns,
@@ -409,8 +410,12 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       The 2026-11-03 Lieutenant source-119 review adds typed, distinct
       `+1 Command Token` (30 options) and `+1 Order` (53 options) effects
       under N5.3 p. 99; it does not treat either as a generic MOD or
-      publish the cross-Army usage index. Other unresolved source families
-      remain in this task.
+      publish the cross-Army usage index. The same day's Terrain source-58
+      review adds seven exact typed Terrain applicability selectors (1,235
+      qualified direct rows, one unqualified), distinguishing Total/all
+      Types, single fixed Types and Aquatic/Jungle/choose-one on placement.
+      SRC-028's Religious Troop anomaly remains unreviewed. Other
+      unresolved source families remain in this task.
     - [ ] Materialize public context links and verify duplicate sources, reused
       payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
       ambiguous variants before publication. An audited source signature alone

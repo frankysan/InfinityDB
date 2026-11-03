@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 2 distinct
-changes** (VR-0023/0024); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 3 distinct
+changes** (VR-0023/0024/0047); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -133,6 +133,22 @@ published SVGs; all three GitHub workflows passed. The two existing
 Python 3.14 fork warnings and independent controlled Chromium
 benchmarking are not resolved by these results. See
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
+
+- [ ] **VR-0047** (2026-11-03; ready-to-run): Validate N5.3
+  Terrain source-58 profile-type metadata on pinned Linux and across the
+  release-matched browser/reference suite. Work: [variant usage projection](TODO.md#rules-and-reference-completeness);
+  change: seven exact Terrain `TEXT` extras (`Total`, five single
+  Types, `Aquatic/Jungle` choose-one), guarded matched-v9 refresh,
+  and pinned source regressions; risk: moderate (curated semantics and
+  tracked rules DB, no executable terrain evaluator).
+  Immediate Windows: source-variant module **82/82**; five malformed
+  type/selection regressions, 1,235 qualified/one unqualified source
+  occurrence and SRC-028 separation; read-only pre-promotion delta guard,
+  rollback-capable promotion and published pair recheck; data and rules
+  stages, Ruff, and diff checks passed. Design: none.
+  Deferred: Linux pinned-source module, cumulative browser/source suite,
+  hosted CI on the committed release pair. Independent official
+  clarification SRC-028 remains open.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -307,8 +323,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0047` (`VR-0023` and `VR-0024` open;
-  `VR-0044`–`VR-0046` and earlier completed entries retired).
+- Execution: `VR-0048` (`VR-0023`, `VR-0024` and `VR-0047`
+  open; `VR-0044`–`VR-0046` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
