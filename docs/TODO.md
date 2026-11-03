@@ -153,14 +153,6 @@ alone replaces final source-wide or release-candidate acceptance. Work on
 independent slices can overlap Linux validation of an earlier committed
 revision, following the established dispatch-and-continue protocol.
 
-#### Source baseline, reconciliation, and gap discovery
-
-**Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
-**Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
-
-- [ ] **V1S-022 (M, gate):** Produce ranked confirmed-gap batches with source/version, owner, normal browser
-  entry point and required checks; explicitly exclude conjecture.
-
 #### Rules and contextual reference completion
 
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
@@ -452,9 +444,13 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     N4-origin optional Reinforcements reference. The
     [V1S-021 strict 1.0 catalog gate](v1.0-source-coverage-audit.md#strict-10-interaction-identity-gate-v1s-021-2026-11-03)
     also passes without changing the historical 0.7 checklist.
-    Remaining work: ranked **confirmed** gaps under V1S-022, plus
-    whole-record/source-browser release acceptance.
-    Distinguish missing facts, missing relationships, and missing presentation.
+    The [V1S-022 ranked gap register](v1.0-source-coverage-audit.md#ranked-confirmed-gaps-and-evidence-batches-v1s-022-2026-11-03)
+    assigns exact variant review, unimplemented cross-Army usage projection,
+    whole-record acceptance and remaining source/browser gates to their
+    existing owners, separating proven omissions from unchecked evidence and
+    cross-source uncertainty. Remaining work is implementing/reviewing those
+    batches and final candidate acceptance; distinguish missing facts,
+    relationships and presentation.
   - [ ] Reuse `audit_source_presentation.py`, `audit_enrichment_coverage.py`, and
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
     not establish PDF, FAQ, or scenario completeness or prove browser usability; add the missing
@@ -506,14 +502,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     Account for later published identities, including Activate Disco Ball,
     Request SpecBall, Firewall and optional Commlink, without rewriting historical
     approvals or attributing N5-native authority to the N4-origin annex.
-  - [ ] Turn confirmed gaps into bounded batches under the owning tasks below. Each batch names
-    the concepts/source sections, dependency, missing contract or content, and completion evidence;
-    material source conflicts need reviewed applicability and clear user-visible disclosure
-    before dependent presentation is closed; a missing official ruling is not a release blocker.
-    Rank populated, player-relevant missing data or misleading rules ahead of optional
-    comparisons and presentation enhancements. For every batch, retain the explicit
-    blocker/dependency, source/version, expected browser entry point and validation gate;
-    do not turn unresolved source chronology into a presumed application defect.
+  - [x] Turn confirmed gaps into [ranked, owned batches](v1.0-source-coverage-audit.md#ranked-confirmed-gaps-and-evidence-batches-v1s-022-2026-11-03)
+    with pinned source/version, dependency, required normal browser surface and checks.
+    The register distinguishes unreviewed source parameters, missing usage-index
+    delivery, pending whole-record/source acceptance and external publisher disputes.
+    This is discovery/ownership closure, **not** implementation or release approval.
   - **Completion:** every supported source/category has an explicit coverage disposition and every
     material in-scope gap has an owning open task. This establishes the baseline, not final acceptance.
 
