@@ -9,7 +9,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sqlite3
 import tempfile
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +40,41 @@ SIGNATURES = [
 
 def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def verify_equivalent_rules_content(published: Path, rebuilt: Path) -> None:
+    """Check logical v9 content, not OS/SQLite-specific binary layout.
+
+    Internal SQLite ANALYZE statistics are not gameplay data. The schema,
+    version/identity and every row of all application-owned tables must match.
+    """
+    with (
+        closing(sqlite3.connect(published.resolve().as_uri() + "?mode=ro", uri=True)) as old,
+        closing(sqlite3.connect(rebuilt.resolve().as_uri() + "?mode=ro", uri=True)) as new,
+    ):
+        for pragma in ("application_id", "user_version"):
+            if old.execute(f"PRAGMA {pragma}").fetchone() != new.execute(
+                f"PRAGMA {pragma}"
+            ).fetchone():
+                raise ValueError(f"Lieutenant release database identity differs: {pragma}")
+        schema_sql = (
+            "SELECT type, name, tbl_name, sql FROM sqlite_master "
+            "WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name"
+        )
+        schema = old.execute(schema_sql).fetchall()
+        if not schema or schema != new.execute(schema_sql).fetchall():
+            raise ValueError("Lieutenant release database schema differs")
+        for kind, name, _owner, _ddl in schema:
+            if kind != "table":
+                continue
+            quoted = '"' + name.replace('"', '""') + '"'
+            columns = old.execute(f"PRAGMA table_info({quoted})").fetchall()
+            if not columns:
+                raise ValueError(f"Lieutenant release has no columns: {name}")
+            order = ", ".join(str(index + 1) for index in range(len(columns)))
+            rows = f"SELECT * FROM {quoted} ORDER BY {order}"
+            if old.execute(rows).fetchall() != new.execute(rows).fetchall():
+                raise ValueError(f"Lieutenant release rows differ: {name}")
 
 
 def check_candidate(root: Path = ROOT) -> dict[str, Any]:
@@ -113,8 +150,8 @@ def check_candidate(root: Path = ROOT) -> dict[str, Any]:
                     ),
                 },
             )
-        elif _sha(candidate) != _sha(active_rules):
-            raise ValueError("Published Lieutenant release differs from a fresh v9 export")
+        else:
+            verify_equivalent_rules_content(active_rules, candidate)
         staged = RulesDatabase(candidate)
         typed = staged.skill_reviewed_extra_semantics()["lieutenant"]
         expected = LIEUTENANT_VARIANT["occurrenceParameters"][0]["extraValues"]
@@ -149,6 +186,7 @@ def check_candidate(root: Path = ROOT) -> dict[str, Any]:
             "unqualifiedOccurrences": 355,
             "previousRulesSha256": _sha(active_rules),
             "candidateRulesSha256": _sha(candidate),
+            "logicalContentVerified": published is not None,
         }
 
 
