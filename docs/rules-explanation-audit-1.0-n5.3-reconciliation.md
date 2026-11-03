@@ -753,6 +753,102 @@ V1S-010 owns the subsequent ten Army update subjects,
 V1S-013–015 the broader source/relationship occupancy review,
 and V1S-081–095 the final candidate gates.
 
+### V1S-010: ARMY-11–20 source, annotations and version limits (2026-11-03)
+
+This is the **current-state publication reconciliation** of the ten
+remaining N5.3 Army changelog subjects against the pinned September 29
+Army ZIP and the tracked Army/rules database pair. The earlier
+[Army native-profile contract](testing.md#army-update-profile-acceptance)
+compares raw source members, source-version identity, original
+profiles/loadouts and public Unit data, while the independently
+reviewed choice-chart and Fireteam tests preserve the source-local
+annotations. No pre-September-1 Army archive has been verified;
+**historical changes, insertion dates, and preceding loadouts remain
+unknown** even where the selected present-day identity is correct.
+
+- **ARMY-11 — Blur (1921/1935):** paired Next Wave
+  Spec-Ops/TEAM-OPS source Units and their profiles, options and
+  source-choice charts remain separate at `7.26246.158`.
+- **ARMY-12 — Chandra (1922/1936):** both source Units occur
+  in ALEPH, Steel Phalanx and Operations Subsection at
+  `7.26246.159`. The three source-member profiles and chart
+  provenance must not collapse into the first Army encountered.
+- **ARMY-13 — Ŝtormo (1923/1937):** the source slugs
+  `tormo-spec-ops` / `o12-team-ops` retain the separate
+  O-12, Starmada and Torchlight Brigade contexts at
+  `7.26246.159`. The accented published name is not
+  itself a different Unit.
+- **ARMY-14 — Kaizoku (1924/1938):** preserve the JSA,
+  Shindenbutai and Ōban contexts at `7.26246.159`;
+  source-specific profiles, option values and choice charts do
+  not imply a universal shared list configuration.
+- **ARMY-15 — Hatail (1908/1909):** Tohaa Spec-Ops and
+  TEAM-OPS retain their independent `7.26246.159` profiles
+  and choice charts. Active/Inactive Symbiont Armor and Chaksa
+  profiles remain distinct; chart options are not automatic
+  profile transitions.
+- **ARMY-16 — Rumbler (1925/1939):** Rumbler Spec-Ops
+  appears in six NA2 sources, including the *non-playable*
+  umbrella grouping. NA2 TEAM-OPS appears only in the five
+  named sectorials, not the umbrella. These `7.26246.159`
+  source contexts are not merged into a fictitious legal roster.
+- **ARMY-17 — Ioann Bann (1940):** eight source Army
+  contexts preserve Dogface/Dog-Warrior profiles. The
+  O-12/Starmada source charts specifically admit a maximum
+  of one Ioann in the named Varangian DUO context; this
+  is source-backed chart annotation, not a blanket legality rule.
+- **ARMY-18 — Najjarun (314):** all five source Army
+  contexts retain their own AVA and three native loadouts.
+  Equipment **238** (Deactivator) belongs to the shared
+  profile and is not removed from its three options simply
+  because the source also lists an unrelated weapon option.
+- **ARMY-19 — Sāchā (1874):** five current contexts
+  span Army source versions `7.26246.158` and
+  `7.26246.159`; AVA 1 is an Army/profile value, not a
+  generic Unit Attribute. USAriadna has two loadouts and
+  the other four contexts one each. The earlier four-faction
+  selected comparison is not proof that only four exist.
+- **ARMY-20 — Racerbot (1905):** four current contexts
+  retain the original Bangbomb Equipment **246** plus legacy
+  Skill **266**, extra **310**, but publish the reviewed
+  deduplicated Equipment reference. The source's Skill bucket
+  is provenance, not permission to render a second canonical Skill.
+
+These **16 source Unit identities** occupy **55 Army/Unit
+contexts**: eight for ARMY-11–12, 25 for ARMY-13–16,
+and 22 for ARMY-17–20. The scoped original choice-chart
+data for ARMY-11–16 retains grouped options and four
+SpecBall choices without forming a configured Army List.
+The existing [profile acceptance](testing.md#army-update-profile-acceptance)
+is pinned-source-to-Unit-API parity, and its dated
+desktop/mobile/light/dark Chromium results are prior
+acceptance evidence—not new browser checks or current CI.
+
+The 2026-11-03 focused checks passed against unchanged
+Army/rules artifacts: at `ff56b7eb`,
+`tests/test_army_profile_publication.py` **34/34** and
+`tests/test_spec_ops_source_charts.py` **25/25**;
+at `67b1ffa3`, `tests/test_non_skill_army_presentation.py`
+**14/14** and `tests/test_army_fireteam_publication.py`
+**4/4**. These cover relevant current-source identity,
+AVA/Orders/loadouts, source-choice sets, marker classification,
+Fireteam notes and API links; **77/77** in those four
+modules, with no failures. The only changes between the
+two test revisions are the preceding source-review
+documentation.
+
+**Disposition:** no new verified native publication defect
+or required data/API edit for ARMY-11–20. Keep all ten
+historical update subjects *Partially verified* because the
+pre-update Army state is unavailable. Do not infer
+historical changes from raw source version strings,
+non-playable grouping membership, FTO annotations, or
+current profile transitions. Existing unresolved Fireteam
+member references, parent/Section restrictions, and
+roster legality remain under V1S-013–015 and their
+own acceptance contracts; frozen candidate source,
+browser and hosted CI gates remain under V1S-081–095.
+
 ### Remaining release gates (not counted as additional change items)
 
 1. **Source and scope:** freeze the intended Army/rules/FAQ/Wiki
