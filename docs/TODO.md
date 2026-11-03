@@ -80,10 +80,11 @@ These foundations are implemented; final source-to-browser acceptance remains se
   are published in the guarded v9 rules pair. N5-native annex authority and final
   release/browser acceptance remain separate:
   [scoped contract](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data).
-- The interaction-review ledger passes its current supporting-identity slice with
-  zero pending entries. Its default primary scope is historical; strict 1.0 primary
-  acceptance remains separate, as does full clause/source review:
-  [generated checklist](rules-interaction-checklist.md).
+- The historical interaction-review ledger and its frozen checklist remain
+  unchanged. The [V1S-021 strict 1.0 identity gate](v1.0-source-coverage-audit.md#strict-10-interaction-identity-gate-v1s-021-2026-11-03)
+  passes against the paired Army/rules databases (186/186 primary and
+  205/205 supporting). Full source-clause and browser acceptance remain
+  separate: [historical checklist](rules-interaction-checklist.md).
 - Source archive/storage/API parity checks, optional Chromium verifiers and an
   exact-runtime hosted candidate verifier exist:
   [validation procedures](testing.md#10-source-evidence-baseline).
@@ -157,8 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-021 (M, gate):** Reconcile interaction review and catalog scope with current release identities;
-  run the strict 1.0 primary guard without rewriting history.
 - [ ] **V1S-022 (M, gate):** Produce ranked confirmed-gap batches with source/version, owner, normal browser
   entry point and required checks; explicitly exclude conjecture.
 
@@ -450,9 +449,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     source conflicts separately from incomplete prose, mode and object review.
     [V1S-020](v1.0-source-coverage-audit.md#faq-byte-provenance-and-optional-reinforcements-scope-v1s-020-2026-11-03)
     confirms the final pinned FAQ byte identities, current FAQ scope and separate
-    N4-origin optional Reinforcements reference. Remaining work: the strict
-    identity/interaction guard and ranked confirmed gaps under V1S-021–022,
-    plus whole-record/source-browser release acceptance.
+    N4-origin optional Reinforcements reference. The
+    [V1S-021 strict 1.0 catalog gate](v1.0-source-coverage-audit.md#strict-10-interaction-identity-gate-v1s-021-2026-11-03)
+    also passes without changing the historical 0.7 checklist.
+    Remaining work: ranked **confirmed** gaps under V1S-022, plus
+    whole-record/source-browser release acceptance.
     Distinguish missing facts, missing relationships, and missing presentation.
   - [ ] Reuse `audit_source_presentation.py`, `audit_enrichment_coverage.py`, and
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
