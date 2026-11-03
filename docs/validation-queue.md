@@ -124,9 +124,11 @@ Git updates are explicit agent actions, not background mirroring.
   targeted Ruff passed. The test follows the Rule → Commlink →
   Request Reinforcements links, checks the N4-origin disclosures and
   citations, and ensures neither optional Skill appears in the
-  unscoped 57-row Orders/AROs chart. Deferred: pin the committed
-  revision and run the same real-Chromium test on `linux-dev`;
-  include it in the next due cumulative full-suite pass. This does
+  unscoped 57-row Orders/AROs chart. Linux at pinned `f21ad5ac`
+  passed **3/3 real Chromium cases** in 7.59 s (job
+  `linux-dev:77099baf333c4e5a98372b9f5b31e0ef`), with no
+  missing-browser skip. Remaining: include the committed test in
+  the next due cumulative full-suite pass. This does
   not accept unpublished typed (+X) semantics, full Army Sections,
   N5-native authority or manual browser sign-off.
 

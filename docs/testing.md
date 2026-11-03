@@ -710,10 +710,14 @@ now covers the published Rule → Commlink → Request Reinforcements
 navigation in normal mode at 1440/390/320 px. Windows real Chromium
 passed **3/3**, including the N4-origin notices, source citations,
 keyboard link activation, and non-leakage of both optional Skills
-into the 57-row N5 Orders/AROs matrix. Test-section registration
-passed **15/15** and targeted Ruff passed. The active v9 publication
-pair was not modified. A pinned Linux run, cumulative validation,
-remaining Army context and manual browser acceptance are separate;
+into the 57-row N5 Orders/AROs matrix. At `f21ad5ac`, the
+separately synchronized Linux worker passed the same **3/3 real
+Chromium cases** in 7.59 s (job
+`linux-dev:77099baf333c4e5a98372b9f5b31e0ef`), with no skip.
+Test-section registration passed **15/15** and targeted Ruff passed
+on Windows. The active v9 publication pair was not modified.
+Cumulative validation, remaining Army context and manual browser
+acceptance are separate;
 this does not verify N5-native annex authority or promote typed (+X).
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
