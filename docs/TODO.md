@@ -159,8 +159,6 @@ revision, following the established dispatch-and-continue protocol.
 
 - [ ] **V1S-002 (M, review):** Pin rules, annex, English/Spanish FAQ, Wiki revisions, and official update
   posts with separate publication/acquisition dates.
-- [ ] **V1S-003 (S, review):** Record tracked Army/rules database and derived-publication identities and
-  prepare the matched-pair freeze recheck.
 - [ ] **V1S-004 (M, review):** Revisit interpretations whose September 26 Wiki capture cannot establish a
   historical before/after claim; disclose uncertainty.
 - [ ] **V1S-005 (M, review):** Reconcile N5.3 English update subjects 01-13 to final PDF, Wiki and maintained

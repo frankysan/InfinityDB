@@ -64,8 +64,41 @@ This is the **selected review baseline**, not final frozen-release acceptance
 or proof that the source has not changed upstream since acquisition.
 Do not silently fetch or swap in a newer snapshot. A deliberately approved
 source change must reopen affected coverage and rebuild the matched Army/rules
-artifacts. Database/publication identity and freeze rechecks remain in
-V1S-003, V1S-081 and V1S-084; source-wide and browser acceptance remain open.
+artifacts. The current database/publication identity checkpoint is below;
+frozen-candidate rechecks remain in V1S-081 and V1S-084. Source-wide and
+browser acceptance remain open.
+
+### Current matched artifacts (V1S-003; 2026-11-03)
+
+At Windows development HEAD `e74b5cb148312e26acf0892d15502ecfd337459e`,
+the existing selected Army archive above is paired with these **current
+development** identities (SHA-256 of exact local bytes):
+
+- Tracked `data/generated/infinity.db`: `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
+  (8,392,704 bytes).
+- Tracked schema-v9 `data/generated/rules.db`: `c016006b7eae19e80969f432a590b802bf989b5831bd6cfd1c1f26765bb3800c`
+  (1,265,664 bytes).
+- Generated, ignored `data/generated/deployed-objects.json`: `f1885134b54633bde8fa2f3512ca16c2dc81d39e780ea0be26f9ca06a3617a9a`
+  (1,970,911 bytes).
+- Tracked `data/manifests/symbol-publication.json`: `92a27c349c6ac23d81de138ee7bff5d196f0f83caa5846417ebd1d89427a3eb5`
+  (478,720 bytes; its Army archive pin matches above).
+
+The ignored paired `infinity.raw.db` is a **development audit artifact**,
+not a deployed database; its local hash is not part of release identity.
+Read-only `tools.build_deployed_object_publication --check` passed for the
+current Army/rules/deployed-object triplet. The baseline reporter with
+`--army-archive "data/raw/JSON 20260929-114335.zip"` passed its source
+and publication checks and enumerated 23 category rows and 126 source
+groups; all still require review. No application model, API, or browser
+contract changed in this identity-recording slice.
+
+At the later frozen candidate, remeasure hashes **at that exact commit**
+and rerun both checks, source occupancy, matched database/export
+identities and release gates. Do not assume this development-state
+fingerprint survives subsequent rules/Army curation or that byte-equal
+SQLite output is guaranteed across operating systems. A changed source,
+pair or projection reopens affected review; V1S-081/084 and final browser
+acceptance must use the final release candidate.
 
 ## Historical Army evidence
 
