@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-018 (M, review):** Account for four core scenarios, FAQ, symbols and other source categories in
-  the category-level coverage ledger.
 - [ ] **V1S-019 (M, review):** Triage further Weapon Properties, exceptions, non-four-attribute entries and
   remaining Weaponry clauses; separate prose from missing facts.
 - [ ] **V1S-020 (M, review):** Verify final FAQ v0.1 source hashes and applicability and classify optional
@@ -449,8 +447,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. Core/Hacking module/family inventory and its bounded source-to-storage-to-browser
     dispositions are recorded in the [V1S-016 current review overlay](v1.0-source-coverage-audit.md#current-corehacking-section-disposition-overlay-v1s-016-2026-11-03).
-    Remaining work: Wiki/FAQ/annex, source-specific Weaponry, scenario and other category
-    dispositions under V1S-017–022, plus whole-record/source-browser release acceptance.
+    The Core/Hacking module overlay, Wiki-backed families and supplemental
+    scenario/FAQ/Army/symbol/annex category owners are recorded in the
+    [V1S-016–018 coverage dispositions](v1.0-source-coverage-audit.md#supplementary-category-level-coverage-dispositions-v1s-018-2026-11-03).
+    Remaining work: source-specific Weaponry/FAQ/annex decisions under
+    V1S-019–022, plus whole-record/source-browser release acceptance.
     Distinguish missing facts, missing relationships, and missing presentation.
   - [ ] Reuse `audit_source_presentation.py`, `audit_enrichment_coverage.py`, and
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
