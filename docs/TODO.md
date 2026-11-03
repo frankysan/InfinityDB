@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-017 (M, review):** Review Wiki-backed Skills, Equipment, Terms, Traits and special source wording
-  for missing facts, relationships and normal links.
 - [ ] **V1S-018 (M, review):** Account for four core scenarios, FAQ, symbols and other source categories in
   the category-level coverage ledger.
 - [ ] **V1S-019 (M, review):** Triage further Weapon Properties, exceptions, non-four-attribute entries and
