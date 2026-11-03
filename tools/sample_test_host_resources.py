@@ -19,6 +19,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_SAMPLES = 2000
@@ -80,20 +81,22 @@ def windows_host_counters() -> HostCounters:
             ("avail_extended", ctypes.c_ulonglong),
         ]
 
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    # These ctypes members exist only on Windows, not in Linux's ctypes stubs.
+    windows_ctypes = cast(Any, ctypes)
+    kernel32 = windows_ctypes.WinDLL("kernel32", use_last_error=True)
     get_times = kernel32.GetSystemTimes
     get_times.argtypes = [ctypes.POINTER(FileTime)] * 3
     get_times.restype = wintypes.BOOL
     idle, kernel, user = FileTime(), FileTime(), FileTime()
     if not get_times(ctypes.byref(idle), ctypes.byref(kernel), ctypes.byref(user)):
-        raise OSError(ctypes.get_last_error(), "GetSystemTimes failed")
+        raise OSError(windows_ctypes.get_last_error(), "GetSystemTimes failed")
     get_memory = kernel32.GlobalMemoryStatusEx
     get_memory.argtypes = [ctypes.POINTER(MemoryStatus)]
     get_memory.restype = wintypes.BOOL
     memory = MemoryStatus()
     memory.length = ctypes.sizeof(MemoryStatus)
     if not get_memory(ctypes.byref(memory)):
-        raise OSError(ctypes.get_last_error(), "GlobalMemoryStatusEx failed")
+        raise OSError(windows_ctypes.get_last_error(), "GlobalMemoryStatusEx failed")
     return HostCounters(
         cpu_total=kernel.ticks() + user.ticks(),
         cpu_idle=idle.ticks(),

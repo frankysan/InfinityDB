@@ -7,6 +7,7 @@ workers cannot launch an uncounted browser while the pooled one is idle.
 
 from __future__ import annotations
 
+import importlib
 import json
 import os
 import time
@@ -96,7 +97,8 @@ class ChromiumLanePool:
 
     def get(self) -> TimedBrowser:
         if self._browser is None:
-            from playwright.sync_api import sync_playwright
+            # Playwright is an optional test dependency, absent from clean CI.
+            sync_playwright = importlib.import_module("playwright.sync_api").sync_playwright
 
             try:
                 self._stack.enter_context(browser_slot(

@@ -148,7 +148,9 @@ def _activate_one(
 ) -> str:
     dest = _destination(repo_root, relative, apply=apply)
     if dest.is_symlink():
-        if mode == "symlink" and dest.readlink() == source.absolute():
+        # Windows may expose a stored absolute target with a different path spelling
+        # (for example, a device prefix). Compare canonical targets, not link text.
+        if mode == "symlink" and dest.resolve(strict=True) == source.resolve(strict=True):
             return "unchanged"
         raise ActivationError(f"Existing destination symlink differs: {relative}")
     if dest.exists():

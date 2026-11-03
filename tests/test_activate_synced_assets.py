@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -136,6 +137,11 @@ def test_symlink_mode_targets_staging_and_refuses_differing_link(
     assert _run(args, staged, checkout) == 0
     target = checkout / "data/raw" / archive.name
     assert target.is_symlink()
+    assert target.resolve() == archive.resolve()
+    assert _run(args, staged, checkout) == 0
+    # A relative symlink to the same canonical source is also idempotent.
+    target.unlink()
+    target.symlink_to(Path(os.path.relpath(archive, target.parent)))
     assert target.resolve() == archive.resolve()
     assert _run(args, staged, checkout) == 0
     target.unlink()

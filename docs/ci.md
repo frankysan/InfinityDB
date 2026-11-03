@@ -59,6 +59,17 @@ remain ignored local evidence. Only tests requiring absent PDF bytes skip; data/
 checks and synthetic evidence-gate regressions still run. Present PDFs retain their
 hash/text validation and must fail on changed or malformed evidence.
 
+Chromium browser pooling is an opt-in test feature. Its Playwright import
+must remain deferred until the pool is activated: `.[dev,symbols]`
+deliberately does not install Playwright, and the primary clean Ubuntu
+Pyright leg must still pass. Host-resource sampling also contains
+Windows-only `ctypes` entry points; Linux type checking must not depend
+on those symbols existing in Linux's `ctypes` stubs. The Windows matrix
+exercises the native sampler and Syncthing activation, including
+idempotent links whose resolved target is identical despite a different
+stored path spelling. A genuinely different symlink destination remains
+a conflict, not an overwrite.
+
 ### Git-index preflight and wheel-content audit
 
 The primary Ubuntu 3.11 `--all` leg includes the isolated `preflight` stage

@@ -223,6 +223,10 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Project infrastructure:** Restore clean-hosted CI portability for
+  optional Chromium pooling and Windows host sampling under Linux Pyright,
+  and make Syncthing symlink activation idempotent when Windows stores
+  an equivalent destination path differently. Conflicting links remain refused.
 - **Data processing + Web frontend:** Show Domination Console placement distances
   from marker centers to table edges, and list physical Console/Supply Box diameters
   beside scenario maps without confusing marker footprints with scoring areas.

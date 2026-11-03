@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -14,7 +15,15 @@ from tools.sample_test_host_resources import (
     linux_memory_bytes,
     resolve_output,
     sample_host,
+    validate_sample,
+    windows_host_counters,
 )
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows kernel APIs only")
+def test_windows_host_counters_use_native_ctypes_entry_points() -> None:
+    counters = windows_host_counters()
+    validate_sample(counters)
 
 
 def test_linux_cpu_counters_exclude_duplicate_guest_fields() -> None:
