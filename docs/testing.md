@@ -1585,6 +1585,39 @@ This cross-platform isolated pass does **not** reproduce or explain the
 earlier full-load failure and does not justify promoting
 four Chromium slots as the default.
 
+**2026-11-03 bounded CPU/RAM sampling for Chromium benchmarks (VR-0024):**
+A new `tools.sample_test_host_resources` module runs **alongside**,
+but never launches or modifies, independently scheduled test jobs.
+It records one JSONL metadata header, timestamped host CPU-busy
+and physical-memory-usage samples, and a final summary in a new
+ignored `local/benchmarks/*.jsonl` file. Linux reads aggregate
+`/proc/stat` and `/proc/meminfo`; Windows uses
+`GetSystemTimes` and `GlobalMemoryStatusEx` from the
+operating system. CPU busy is a delta of host-wide cumulative
+counters, not per-process utilization; the first sample has
+no CPU delta. This intentionally reports total host contention
+from other workloads as well as the test run. Use a unique filename
+and start the sampler just before a comparable test job:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.sample_test_host_resources --output local/benchmarks/host-load-windows-2slot.jsonl --duration-seconds 780 --interval-seconds 5
+```
+
+On Linux, use
+`./.venv/bin/python -m tools.sample_test_host_resources --output local/benchmarks/host-load-linux-2slot.jsonl --duration-seconds 780 --interval-seconds 5`.
+The module refuses absolute/escaping paths, overwrites and
+unbounded sampling configurations; the source/test schema is
+portable, while native measurements support Windows and Linux.
+The two files must be sampled on their respective hosts and
+aligned with separately pinned revision, start time, test flags
+and asset coverage. A missing or prematurely stopped sampler
+is incomplete evidence, **not** zero host load.
+The focused 21-test sampler suite and Windows native two-second
+smoke probe passed. That smoke recorded 3 samples, mean
+**9.84% host CPU busy** and **71.18% physical memory used**,
+but is not a controlled Chromium performance measurement.
+No browser slot defaults or scheduling were changed.
+
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version

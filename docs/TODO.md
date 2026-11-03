@@ -3948,7 +3948,9 @@ follow-up action. Retain source-native values until official resolution.
   **61.4% less summed Chromium-slot waiting** using four slots.
   Next: selectively transfer pinned source evidence, compare Windows
   skip reasons, and repeat alternating 2/4-slot Linux runs with CPU/RAM
-  observations before changing the default. Per-worker Linux slot
+  observations before changing the default. A bounded Windows/Linux
+  host CPU/RAM JSONL sampler is now available for the next paired run;
+  it does not start tests, alter slots, or justify changing defaults. Per-worker Linux slot
   metrics show Scenario FAQ consumed 45–46% of total held time; profile
   and rebalance this module before simply increasing slots further.
   The next opt-in benchmark records request/acquire/release timestamps

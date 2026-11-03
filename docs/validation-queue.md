@@ -267,8 +267,16 @@ Git updates are explicit agent actions, not background mirroring.
   of slot waiting; both lock namespaces were isolated correctly. The
   four-slot run failed one browser visibility timeout, independently
   reproduced as passing in isolation; see `testing.md`.
-  Deferred: investigate this full-load failure, repeat alternating fully
-  passing comparisons with CPU/RAM sampling, and reconcile cross-host
+  An independent bounded host CPU/RAM sampler is implemented,
+  recording host-wide CPU counter deltas and physical-memory
+  usage as ignored JSONL alongside separate test jobs.
+  Windows focused sampler tests **21/21** and a real native
+  smoke probe **3/3 samples** passed (9.84% mean host CPU,
+  71.18% mean RAM used); this is instrumentation evidence,
+  not a browser benchmark. Linux verification and aligned
+  full-load samples are pending. Deferred: investigate the
+  full-load failure, repeat alternating fully passing comparisons
+  with concurrent CPU/RAM sampling, and reconcile cross-host
   source coverage. Retire only after the remaining acceptance evidence.
 
 A VR entry records its ID/date/status (`awaiting-design`,
