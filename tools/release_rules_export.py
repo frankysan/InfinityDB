@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 from infinity_db.rules_database import RulesDatabase, export_rules_database
@@ -20,7 +21,7 @@ def export_release_rules(
     source = baseline or RELEASE_RULES
     existing = RulesDatabase(source)
     existing.validate()
-    with sqlite3.connect(source) as connection:
+    with closing(sqlite3.connect(source)) as connection:
         version = connection.execute("PRAGMA user_version").fetchone()[0]
     if version not in (8, 9):
         raise ValueError("Cannot stage an unsupported release rules schema")
@@ -31,7 +32,7 @@ def export_release_rules(
     export_rules_database(documents, destination, restrictions_manifest=manifest)
     staged = RulesDatabase(destination)
     staged.validate()
-    with sqlite3.connect(destination) as connection:
+    with closing(sqlite3.connect(destination)) as connection:
         staged_version = connection.execute("PRAGMA user_version").fetchone()[0]
     if (
         staged_version != version

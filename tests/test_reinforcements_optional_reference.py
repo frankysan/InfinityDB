@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import sqlite3
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -21,7 +23,10 @@ from infinity_db.skill_catalog import SkillCatalog
 from tools.build_deployed_object_publication import build_publication, publication_bytes
 from tools.release_rules_export import export_release_rules
 from tools.restrictions_v9_release import _check_variant_semantics_delta
-from tools.stage_commlink_v9_candidate import stage_commlink_candidate
+from tools.stage_commlink_v9_candidate import (
+    promote_commlink_candidate,
+    stage_commlink_candidate,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 ANNEX = ROOT / "data/curated/rules/reinforcements-extra-n4-reference.json"
@@ -33,6 +38,12 @@ def test_commlink_candidate_stages_matched_pair_without_promoting(tmp_path: Path
     publication = ROOT / "data/generated/deployed-objects.json"
     old_rules = hashlib.sha256(baseline.read_bytes()).hexdigest()
     old_publication = hashlib.sha256(publication.read_bytes()).hexdigest()
+    if "commlink" in RulesDatabase(baseline).skill_reviewed_extra_semantics():
+        # Once the candidate is promoted, check the published pair instead.
+        assert load_deployed_object_publication(
+            publication, ROOT / "data/generated/infinity.db", baseline,
+        ) is not None
+        return
     destination = tmp_path / "unpromoted"
     manifest = stage_commlink_candidate(destination)
     assert manifest["kind"] == "staged-commlink-v9-pair-not-promoted"
@@ -56,6 +67,115 @@ def test_commlink_candidate_stages_matched_pair_without_promoting(tmp_path: Path
     assert hashlib.sha256(publication.read_bytes()).hexdigest() == old_publication
     with pytest.raises(ValueError, match="already exists"):
         stage_commlink_candidate(destination)
+
+
+def _disposable_commlink_release(tmp_path: Path) -> Path:
+    """Copy only required release inputs into a disposable Git-backed checkout."""
+    root = tmp_path / "release"
+    (root / "local").mkdir(parents=True)
+    shutil.copytree(ROOT / "data/curated/rules", root / "data/curated/rules")
+    files = (
+        "data/generated/infinity.db",
+        "data/generated/rules.db",
+        "data/generated/deployed-objects.json",
+        "config/validation/deployed-object-delivery-reviews.json",
+        "config/validation/deployed-object-candidate-reviews.json",
+    )
+    for relative in files:
+        target = root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / relative, target)
+    subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+    subprocess.run(
+        ["git", "add", "data/generated/rules.db", "data/generated/deployed-objects.json"],
+        cwd=root, check=True,
+    )
+    subprocess.run(
+        ["git", "-c", "user.name=Local Test", "-c", "user.email=test@example.invalid",
+         "commit", "-qm", "baseline"], cwd=root, check=True,
+    )
+    return root
+
+
+def test_commlink_candidate_promotion_restores_recovery_and_matches_staging(
+    tmp_path: Path,
+) -> None:
+    """Promote both binaries in a disposable checkout, never the tracked project."""
+    if "commlink" in RulesDatabase(
+        ROOT / "data/generated/rules.db"
+    ).skill_reviewed_extra_semantics():
+        # The tracked pair is already promoted; the historical candidate cannot be
+        # re-staged against a new baseline, and is checked by other published tests.
+        return
+    root = _disposable_commlink_release(tmp_path)
+    destination = root / "local/staged"
+    manifest = stage_commlink_candidate(destination, root=root)
+    originals = {
+        name: (root / "data/generated" / name).read_bytes()
+        for name in ("rules.db", "deployed-objects.json")
+    }
+    recovery = promote_commlink_candidate(destination, root=root)
+    assert recovery.parent == root / "local"
+    for name, previous in originals.items():
+        assert (recovery / "data/generated" / name).read_bytes() == previous
+        assert hashlib.sha256((root / "data/generated" / name).read_bytes()).hexdigest() == (
+            manifest["candidateSha256"][name]
+        )
+    assert load_deployed_object_publication(
+        root / "data/generated/deployed-objects.json",
+        root / "data/generated/infinity.db",
+        root / "data/generated/rules.db",
+    ) is not None
+    assert destination.is_dir()
+
+
+def test_commlink_candidate_promotion_refuses_changed_stage(tmp_path: Path) -> None:
+    if "commlink" in RulesDatabase(
+        ROOT / "data/generated/rules.db"
+    ).skill_reviewed_extra_semantics():
+        return
+    root = _disposable_commlink_release(tmp_path)
+    destination = root / "local/staged"
+    stage_commlink_candidate(destination, root=root)
+    original = (root / "data/generated/rules.db").read_bytes()
+    (destination / "rules.db").write_bytes((destination / "rules.db").read_bytes() + b"x")
+    with pytest.raises(ValueError, match="Staged Commlink artifact changed"):
+        promote_commlink_candidate(destination, root=root)
+    assert (root / "data/generated/rules.db").read_bytes() == original
+
+
+def test_commlink_candidate_promotion_rolls_back_on_post_validation_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if "commlink" in RulesDatabase(
+        ROOT / "data/generated/rules.db"
+    ).skill_reviewed_extra_semantics():
+        return
+    root = _disposable_commlink_release(tmp_path)
+    destination = root / "local/staged"
+    stage_commlink_candidate(destination, root=root)
+    originals = {
+        name: (root / "data/generated" / name).read_bytes()
+        for name in ("rules.db", "deployed-objects.json")
+    }
+    import infinity_db.web
+
+    def fail_post_validation(*_args: object, **_kwargs: object) -> None:
+        raise ValueError("injected post-promotion failure")
+
+    monkeypatch.setattr(infinity_db.web, "create_app", fail_post_validation)
+    with pytest.raises(RuntimeError, match="promotion rolled back"):
+        promote_commlink_candidate(destination, root=root)
+    assert all(
+        (root / "data/generated" / name).read_bytes() == previous
+        for name, previous in originals.items()
+    )
+    recovery = list((root / "local").glob("commlink-v9-recovery-*"))
+    assert len(recovery) == 1
+    assert all(
+        (recovery[0] / "data/generated" / name).read_bytes() == previous
+        for name, previous in originals.items()
+    )
 
 
 def test_annex_current_optional_reference_discloses_n4_source_boundary() -> None:

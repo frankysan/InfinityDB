@@ -1,8 +1,8 @@
-"""Stage, but never promote, the reviewed Commlink v9 rules/publication pair.
+"""Stage and explicitly promote a reviewed Commlink v9 rules/publication pair.
 
 Only the exact optional Reinforcements Extra Commlink (+1)/(+2) source
-metadata may differ from the currently tracked release pair. Output
-stays under ignored local/ and needs a separate promotion decision.
+metadata may differ from the current tracked release pair. Promotion requires
+an unchanged candidate, a reproducible rebuild and rollback copies in local/.
 """
 
 from __future__ import annotations
@@ -21,7 +21,10 @@ from infinity_db.deployed_object_publication import load_deployed_object_publica
 from infinity_db.rules_database import RulesDatabase
 from tools.build_deployed_object_publication import build_publication, publication_bytes
 from tools.release_rules_export import export_release_rules
-from tools.restrictions_v9_release import _check_variant_semantics_delta
+from tools.restrictions_v9_release import (
+    _check_variant_semantics_delta,
+    _replace_with_rollback,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 COMMLINK = ("reinforcements-extra-n4-reference", "skill:commlink")
@@ -130,21 +133,126 @@ def stage_commlink_candidate(destination: Path, *, root: Path = ROOT) -> dict[st
         if working.exists():
             shutil.rmtree(working)
 
+def promote_commlink_candidate(destination: Path, *, root: Path = ROOT) -> Path:
+    """Promote the exact verified candidate pair with retained rollback copies."""
+    root = root.resolve()
+    local = root / "local"
+    if destination.is_symlink():
+        raise ValueError("Commlink candidate directory must not be a symlink")
+    stage = destination.resolve()
+    if not stage.is_relative_to(local) or not stage.is_dir():
+        raise ValueError("Commlink candidate must be a directory inside ignored local/")
+    if {path.name for path in stage.iterdir()} != {
+        "rules.db", "deployed-objects.json", "manifest.json",
+    }:
+        raise ValueError("Commlink candidate directory has unexpected contents")
+    manifest_path = stage / "manifest.json"
+    if manifest_path.is_symlink():
+        raise ValueError("Commlink manifest must not be a symlink")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if (
+        set(manifest) != {
+            "kind", "record", "sourceCollection", "previousSha256",
+            "candidateSha256", "deployedObjectCount",
+        }
+        or manifest["kind"] != "staged-commlink-v9-pair-not-promoted"
+        or manifest["record"] != COMMLINK[1]
+        or manifest["sourceCollection"] != COMMLINK[0]
+        or manifest["deployedObjectCount"] != 17
+        or set(manifest["previousSha256"]) != {"rules.db", "deployed-objects.json"}
+        or set(manifest["candidateSha256"]) != {"rules.db", "deployed-objects.json"}
+    ):
+        raise ValueError("Unexpected Commlink promotion manifest")
+    generated = root / "data/generated"
+    tracked = {
+        "rules.db": generated / "rules.db",
+        "deployed-objects.json": generated / "deployed-objects.json",
+    }
+    payloads: dict[Path, bytes] = {}
+    for name, target in tracked.items():
+        check = subprocess.run(
+            ["git", "diff", "--quiet", "HEAD", "--", target.relative_to(root).as_posix()],
+            cwd=root, capture_output=True, check=False,
+        )
+        if check.returncode != 0:
+            raise ValueError(f"Tracked Commlink release target differs from HEAD: {name}")
+        if _sha256(target) != manifest["previousSha256"][name]:
+            raise ValueError(f"Commlink baseline changed since staging: {name}")
+        source = stage / name
+        if not source.is_file() or source.is_symlink():
+            raise ValueError(f"Staged Commlink artifact missing or unsafe: {name}")
+        data = source.read_bytes()
+        if hashlib.sha256(data).hexdigest() != manifest["candidateSha256"][name]:
+            raise ValueError(f"Staged Commlink artifact changed: {name}")
+        payloads[target.relative_to(root)] = data
+
+    # Independently reconstruct the staged pair from CURRENT maintained inputs.
+    # A stale but internally consistent manifest must not authorize publication.
+    with tempfile.TemporaryDirectory(prefix="commlink-v9-verify-", dir=local) as temporary:
+        fresh = Path(temporary) / "candidate"
+        regenerated = stage_commlink_candidate(fresh, root=root)
+        if regenerated != manifest:
+            raise ValueError("Commlink curated source or release inputs changed since staging")
+        for name in tracked:
+            if (fresh / name).read_bytes() != payloads[tracked[name].relative_to(root)]:
+                raise ValueError(f"Staged Commlink pair is not reproducible: {name}")
+
+    army = generated / "infinity.db"
+    expected = load_deployed_object_publication(
+        stage / "deployed-objects.json", army, stage / "rules.db",
+    )
+    if expected is None or len(expected["objects"]) != 17:
+        raise ValueError("Staged Commlink release pair is not loadable")
+
+    def post_validate() -> None:
+        for name, target in tracked.items():
+            if _sha256(target) != manifest["candidateSha256"][name]:
+                raise ValueError(f"Promoted Commlink artifact fingerprint changed: {name}")
+        published = RulesDatabase(tracked["rules.db"])
+        published.validate()
+        semantics = published.skill_reviewed_extra_semantics().get("commlink")
+        if semantics is None or [
+            (entry["extra_id"], entry["effect"]["count"])
+            for entry in semantics["extra_values"]
+        ] != [(298, 1), (299, 2)]:
+            raise ValueError("Promoted Commlink typed parameters are unavailable")
+        if load_deployed_object_publication(
+            tracked["deployed-objects.json"], army, tracked["rules.db"],
+        ) != expected:
+            raise ValueError("Promoted Commlink deployed-object publication mismatches staging")
+        from infinity_db.web import create_app
+
+        app = create_app(army, rules_database_path=tracked["rules.db"])
+        if app.deployed_objects is None or len(app.deployed_objects["objects"]) != 17:
+            raise ValueError("Promoted Commlink application did not load the matched pair")
+
+    return _replace_with_rollback(
+        root, payloads, post_validate, backup_prefix="commlink-v9-recovery-",
+    )
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--destination", type=Path, required=True,
-        help="New ignored local/ directory for an unpromoted candidate pair",
+        help="Ignored local/ destination (new for staging, existing for promotion)",
+    )
+    parser.add_argument(
+        "--promote-staged", action="store_true",
+        help="Promote this exact verified candidate with retained rollback copies",
     )
     args = parser.parse_args()
-    destination = (ROOT / args.destination).resolve()
+    destination = ROOT / args.destination
     local = (ROOT / "local").resolve()
-    if not destination.is_relative_to(local) or destination == local:
+    if not destination.resolve().is_relative_to(local) or destination.resolve() == local:
         parser.error("--destination must be inside the ignored local/ directory")
-    manifest = stage_commlink_candidate(destination)
-    print(f"Staged Commlink v9 candidate: {destination}")
-    print(json.dumps(manifest, indent=2, sort_keys=True))
+    if args.promote_staged:
+        backup = promote_commlink_candidate(destination)
+        print(f"Promoted reviewed Commlink v9 pair; rollback copies: {backup}")
+    else:
+        manifest = stage_commlink_candidate(destination)
+        print(f"Staged Commlink v9 candidate: {destination}")
+        print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0
 
 
