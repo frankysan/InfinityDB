@@ -1105,10 +1105,13 @@ negative combination/type tests and exact new read-only reviewer
 `python -m tools.review_infiltration_ph_variant` protect those bounds.
 Its guarded `--promote` updated the tracked v9 rules database and
 matched ignored deployed-object publication with a local rollback;
-read-only regeneration exactly matches the promoted rules SHA-256
+Windows read-only regeneration exactly matches the promoted rules SHA-256
 `c016006b7eae19e80969f432a590b802bf989b5831bd6cfd1c1f26765bb3800c`.
-Windows source-variant **100/100**, rules, data/build, docs, Ruff and
-canonical Pyright passed. Linux final-revision/hosted acceptance is
+The Linux export can have a different binary SHA due to SQLite layout or
+ANALYZE statistics; the cross-platform review gate instead compares all
+application-owned tables, schema and database identity. Windows
+source-variant **100/100**, rules, data/build, docs, Ruff and canonical
+Pyright passed. Linux final-revision/hosted acceptance is
 tracked separately as VR-0051; no cross-Army usage index was added.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
