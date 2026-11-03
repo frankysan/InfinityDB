@@ -512,7 +512,22 @@ def test_source_file_cannot_be_used_as_report_destination(tmp_path: Path) -> Non
 
 
 def test_git_tracked_file_cannot_be_used_as_report_destination() -> None:
-    with pytest.raises(ValueError, match="Git-tracked"):
+    # The isolated CI preflight exports tracked files without .git metadata.
+    # Both a confirmed tracked path and an unverifiable path must fail closed.
+    with pytest.raises(
+        ValueError, match="Git-tracked|Cannot verify whether report destination is tracked",
+    ):
+        run_checks.validate_report_destination(run_checks.REPO_ROOT / "LICENSE")
+
+
+def test_report_destination_refuses_when_git_cannot_verify_tracking(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        run_checks.subprocess, "run",
+        lambda *_args, **_kwargs: SimpleNamespace(returncode=128),
+    )
+    with pytest.raises(ValueError, match="Cannot verify whether report destination is tracked"):
         run_checks.validate_report_destination(run_checks.REPO_ROOT / "LICENSE")
 
 

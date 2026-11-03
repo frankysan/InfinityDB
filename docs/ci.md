@@ -87,6 +87,11 @@ preflight is reported as skipped; the remaining ordinary stages still run unless
 
 The preflight detects non-ignored untracked files and exports exactly the
 Git-index snapshot, preserving executable modes and symlink entries.
+The exported tree intentionally has no `.git` directory. Report-path
+safety checks must therefore reject paths when Git tracking cannot be
+verified, rather than treating missing metadata as permission to overwrite.
+The corresponding regression accepts that fail-closed result as well as
+confirmed Git-tracked rejection in a normal checkout.
 In normal hosted CI this index corresponds to the checked-out commit.
 Its wheel audit checks presence of **every tracked `src/` file** (except the
 intentional logo design-source directory), including standalone modules and
