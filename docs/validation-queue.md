@@ -218,10 +218,13 @@ Git updates are explicit agent actions, not background mirroring.
   grouped reasons. Windows skipped two Gunicorn fork tests
   and four symlink-privilege tests; Linux skipped six tests
   needing local PDFs or migration staging evidence. The
-  newline-policy defect has been fixed and passes the
-  focused deterministic/Annex modules, but the full
-  fixed-revision suite and skip-source parity remain
-  outstanding. Retire only after remaining acceptance evidence.
+  newline-policy defect was fixed in `5e1cdbf6`, and
+  **both** full suites at that revision passed: Windows
+  **4,922/28 skipped in 537.68 s**, Linux **4,922/28
+  skipped in 566.85 s**, with no failures or browser
+  regressions. Six host-specific skip reasons on each side
+  remain. Retire only after source coverage and other
+  acceptance evidence are reconciled.
 
 - [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
   timestamped Chromium slot metrics and the timeline analyzer under
@@ -306,11 +309,23 @@ Git updates are explicit agent actions, not background mirroring.
   summed Chromium worker-seconds** of setup waiting vs
   **1,560.39** on Windows, but worker counts differ and
   the runs both failed one non-browser I/O guard.
-  Remaining: align actual test windows, investigate the
-  full-load browser failure, repeat alternating fully
-  passing equal-worker/slot comparisons with concurrent
-  CPU/RAM sampling, and reconcile source coverage.
-  Do not alter defaults or retire yet.
+  A new read-only overlap-weighted
+  `tools.analyze_test_host_resources` utility selects
+  exactly the recorded pytest start/duration from these
+  ignored captures and fails closed if the summary or
+  99% interval coverage is absent. **11/11** focused
+  analyzer tests and **15/15** test-section tests passed.
+  The fixed-revision Windows full suite has **100%**
+  sampler coverage, and its test-window-only CPU mean/peak
+  was **86.05% / 100%** and memory mean/peak
+  **70.45% / 72.41%**, not the lower all-window CPU mean.
+  Matching Linux window analysis is pending the
+  independent worker's committed analyzer revision.
+  Remaining: finish aligned analysis; investigate the
+  earlier four-slot Glossary failure; repeat alternating
+  fully passing equal-worker/slot comparisons with
+  concurrent CPU/RAM sampling and reconcile source
+  coverage. Do not alter defaults or retire yet.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,

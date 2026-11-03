@@ -1687,6 +1687,60 @@ are not an equal-worker, controlled slot-capacity benchmark;
 the observed differences do not prove Linux/browser slots
 are slower or that four-slot capacity is unsafe.
 
+**2026-11-03 corrected cross-host full-suite acceptance at
+`5e1cdbf6` (VR-0023/24):**
+After the explicit newline-policy correction was committed
+and pushed as `5e1cdbf6a91b15ad2c0f67596179b1108e9d7830`,
+the matched 808/808-asset, default `-n auto` full suites
+passed cleanly:
+
+- Windows `f8b502de14e84b5386d21d1f6c8a38af`:
+  **4,922 passed, 28 skipped, 0 failed** in **537.68 s**
+  pytest / **538.37 s** runner; **1,584.13 worker-s**
+  of measured Chromium admission waits across 16 events.
+- Linux `linux-dev:e60ec281afcd46daa893b8f8f1f55b88`:
+  **4,922 passed, 28 skipped, 0 failed** in **566.85 s**
+  pytest / **567.52 s** runner; **6,075.50 worker-s**
+  of measured Chromium waits across 32 events and two
+  existing multithreaded `fork()` warnings.
+
+The six unmatched skip reasons on either host persisted:
+Windows lacks symlink privileges and skips two Linux-specific
+Gunicorn cases; Linux lacks selected ignored FAQ/rules PDFs
+and historical migration staging evidence. Equal skip totals
+are **not** equal source coverage. The default worker count
+was eight on Windows, 16 on Linux; these runs verify
+functional stability, not fair 2/4 Chromium slot performance.
+
+Both new 660-second CPU/RAM captures finished successfully
+(133 samples per host):
+`local/benchmarks/host-load-full-windows-20261103-fixed.jsonl`
+and `local/benchmarks/host-load-full-linux-20261103-fixed.jsonl`.
+The complete capture's means/peaks were Windows
+CPU **73.59%/100%**, RAM **69.06%/72.41%**;
+Linux CPU **35.58%/100%**, RAM **21.07%/25.66%**.
+Whole-capture means still include post-test time.
+
+To align captures with the real test duration, the new read-only
+`tools.analyze_test_host_resources` calculates overlap-weighted
+CPU/RAM percentages using sample intervals and refuses incomplete
+or malformed captures. For example on Windows:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.analyze_test_host_resources --input local/benchmarks/host-load-full-windows-20261103-fixed.jsonl --test-start 2026-11-03T08:55:33+01:00 --duration-seconds 538.37
+```
+
+Windows test-window coverage was **100%** across 109 intervals;
+CPU mean/peak **86.05%/100%**, RAM mean/peak
+**70.45%/72.41%**. The analyzer's **11/11** tests
+and section inventory **15/15** passed on Windows, with
+Ruff, Pyright and Git diff checks green; Linux
+test-window-only values remain pending a pinned Linux
+run of the new analyzer. Host-wide CPU and RAM averages
+are diagnostic, not per-test process attribution.
+The original four-slot Glossary timeout still needs
+repeat controlled-capacity validation before any default change.
+
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version
