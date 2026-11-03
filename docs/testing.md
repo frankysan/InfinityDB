@@ -1094,6 +1094,25 @@ at that same SHA; VR-0050 is retired. The inventory at that commit was
 **24 reviewed-extra / 10 unresolved** Skill source IDs. The cross-Army
 usage index remains unimplemented.
 
+**2026-11-03 General rules and game-table source/browser review (V1S-023 retired):**
+At Windows `73ab29a3b9d5bbbabe682879e69cf2298020bc12`,
+the pinned English N5.3 PDF and
+`tools.audit_standard_game_reference_tables --pdf data/pdf/rules/n5-rules-v5-3-en.pdf`
+reverified the six exact Retreat! thresholds (150–400 Army Points),
+25% session-state basis and non-mandatory table sizes from printed
+pp. 146–147. Focused table/source tests passed **4/4**.
+Normal API/search/reverse-link tests for Initiative Roll, Combat Group,
+Army Retreat!, Standard Game and Game Modes passed **4/4**;
+ordinary Chromium navigation passed **14/14** across the applicable
+1440/390/320 px cases: Initiative **2**, Combat Group **3**,
+Retreat/Standard Game **6**, and Game Modes **3**. Checked printed
+source bindings include Initiative p. 15, Combat Group p. 10 and
+Game Modes pp. 6/146/147. No verified storage, API or browser gap
+required a change; the existing current curated/rules pair was
+preserved. This closes this bounded reference-review slice, not
+whole-source or frozen-release-candidate acceptance. No additional
+VD/VR obligation was created by the read-only review.
+
 **2026-11-03 Infiltration fixed-PH source review (VR-0051 retired):**
 N5.3 p. 97 permits bracketed PH=X to replace only the PH used for the
 normal PH-3 Infiltration Roll. The pinned Skill source-47 inventory has

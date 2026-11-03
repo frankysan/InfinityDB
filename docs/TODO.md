@@ -201,8 +201,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-023 (S, review):** Verify newly published Initiative, Combat Group, army Retreat, Standard Game
-  and general setup/threshold references end to end; patch only verified gaps.
 - [ ] **V1S-024 (M, review):** Review remaining Skills by semantic family for missing definitions, typed facts
   and source-backed browser links.
 - [ ] **V1S-025 (M, review):** Review Equipment and exceptional Army gear wording, including nonstandard
