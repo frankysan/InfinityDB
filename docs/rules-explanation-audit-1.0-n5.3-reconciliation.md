@@ -672,6 +672,87 @@ relationships, eligibility, browser coverage and future
 N5-annex evidence. A publisher clarification is not silently
 treated as a current 1.0 release prerequisite.
 
+### V1S-009: ARMY-02–10 current-state source/profile review (2026-11-03)
+
+This independently rechecks the first **nine** paired-unit Army update
+subjects after ARMY-01 against the chosen English September 29 Army
+archive, `data/raw/JSON 20260929-114335.zip` (SHA-256
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`).
+The exact imported Army member bytes/versions are checked against
+`data/generated/infinity.db`, the Unit API and the existing
+[profile acceptance contract](testing.md#army-update-profile-acceptance).
+These subjects use version `7.26246.158` in their reviewed Army
+contexts. This is a **current-state publication review**, not a claim
+that these profiles were added or changed between any two particular
+Army releases: no verified pre-September-1 Army archive is available.
+
+- **ARMY-02 — Indigo (1912/1926):** PanOceania Spec-Ops and TEAM-OPS
+  occupy six source Armies each. Preserve separate source Orders:
+  the PanOceania Hacker is Irregular, whereas the other five
+  relevant contexts are Regular.
+- **ARMY-03 — Confessor (1913/1927):** the Military Orders pair
+  preserves its single source-Army context per Unit and exact native
+  profiles, loadout option identities and costs.
+- **ARMY-04 — Gui Feng/Yu Jing (1914/1928):** preserve each paired
+  Unit's four Yu Jing/sectorial contexts and their own profile and
+  loadout selection, not a single faction-wide flattened option set.
+- **ARMY-05 — Intel (1915/1929):** the six Ariadna contexts per
+  Unit preserve distinct *Full Power* and *Battle Ravaged* profiles,
+  including source-specific Attributes, AVA and items. Do not
+  infer profile-transition legality from the reference.
+- **ARMY-06 — Husam (1916/1930):** four Haqqislam contexts per
+  Unit retain their exact profiles, Orders and optional equipment/
+  weapon/Skill Extras.
+- **ARMY-07 — Vortex (1917/1931):** four Nomads contexts per Unit
+  retain native loadouts and source-local profile identities.
+- **ARMY-08 — Nexus-7 (1918/1932):** Spec-Ops belongs to Combined
+  Army, Onyx and Next Wave; TEAM-OPS belongs to Combined Army and
+  Onyx **only**. Do not manufacture a Next Wave TEAM-OPS instance.
+- **ARMY-09 — Treitak (1919/1933):** Spec-Ops appears in Combined
+  Army and Morat; the TEAM-OPS Unit appears in Morat only.
+  Preserve the asymmetric source contexts rather than treating
+  the paired names as interchangeable.
+- **ARMY-10 — Corax (1920/1934):** preserve the two Shasvastii
+  source Units and their own profile/option data. Their current
+  presence does not prove the timing of their publication.
+
+Across these **18 distinct Unit source IDs**, the scoped source
+sets comprise **60 Unit/Army contexts**: 22 for ARMY-02–04,
+33 for ARMY-05–08 and 5 for ARMY-09–10.
+The existing source-parity test compares the exact Army sets and
+ordered profile/loadout groups, names, MOV, CC/BS/PH/WIP,
+ARM/BTS/VITA/STR/Silhouette, AVA, category, Characteristics,
+item IDs/quantities/Extras, Order Training, points/SWC,
+and disabled options. It asserts that the selected occurrences
+have no unmodelled non-empty Includes, Peripheral or profile
+notes; a future populated relationship would require new review.
+The distinct Spec-Ops and TEAM-OPS selection/SpecBall charts
+remain source references, **not configured roster choices**.
+
+At `ff56b7eb8ad9db2b62066efd927ad141f4c63221`, the
+source archive-to-current Unit API module
+`tests/test_army_profile_publication.py` passed **34/34**,
+including every Unit in this slice (the module additionally tests
+ARMY-11–20). The exact choice-chart/source-context module
+`tests/test_spec_ops_source_charts.py` passed **25/25** on the same
+commit, including the Treitak/Morat exception; **59/59** focused
+source/API tests passed altogether. Existing browser evidence for these families is
+documented in [testing](testing.md#army-update-profile-acceptance);
+that older desktop/mobile/light/dark acceptance is **not**
+re-labelled as a new browser run or frozen-release acceptance.
+
+**Disposition:** zero newly confirmed native publication defects
+in the nine reviewed subjects; no gameplay data/API change is
+warranted. Historical Army before/after and full roster legality,
+Fireteam eligibility, Spec-Ops/TEAM-OPS interactive choices,
+upgrade/transition semantics, and release-matched browser/CI
+remain independently open. Keep the original ARMY-02–10
+*Partially verified* historical classification, without treating
+the earlier audit's narrower baseline as current defects.
+V1S-010 owns the subsequent ten Army update subjects,
+V1S-013–015 the broader source/relationship occupancy review,
+and V1S-081–095 the final candidate gates.
+
 ### Remaining release gates (not counted as additional change items)
 
 1. **Source and scope:** freeze the intended Army/rules/FAQ/Wiki
