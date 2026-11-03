@@ -59,6 +59,12 @@ are not retroactively relabeled.
   current N5/ITS optional-mode reference and keep N5-native adoption
   unverified. Do not change the 57-row core Orders/AROs chart or the 17
   deployed-object profiles; refresh the matched rules/publication pair.
+- **Data processing + Project infrastructure:** Publish the reviewed Commlink
+  (+1)/(+2) Army extras as typed maximum-Trooper-count increases, scoped
+  only to the optional N4-origin Reinforcements Extra. Keep the normal
+  N5 roster limit and list-legality evaluation unchanged. Promote the
+  matched rules/deployed-object v9 pair with verified rollback copies;
+  all 17 deployed objects remain unchanged.
 - **Data processing + Project infrastructure + Web frontend:** Reconcile
   the five post-inventory Visibility Zone terms with pinned bilingual
   N5.3 source clauses and repeatable Glossary navigation/browser tests.

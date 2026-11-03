@@ -135,11 +135,13 @@ def test_commlink_source_260_exact_optional_reinforcements_variants() -> None:
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
         "Commlink", 260, 51,
     )
-    assert item["status"] == "unresolved-occurrence-parameter"
-    assert item["reviewedExtra"] is None
+    assert item["status"] == "reviewed-extra-parameter"
+    assert item["reviewedExtra"] == RulesDatabase(
+        ROOT / "data/generated/rules.db"
+    ).skill_reviewed_extra_semantics()["commlink"]
     assert item["rawValues"] == []
     assert item["extraSignatures"] == [
-        {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": len(ids)}
+        {"extras": [[extra_id, "TEXT", raw]], "reviewed": True, "count": len(ids)}
         for extra_id, (raw, ids) in expected.items()
     ]
     assert sum(len(ids) for _raw, ids in expected.values()) == 42
@@ -930,15 +932,7 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
         "sourceIdsWithDirectRows": 96,
         "directSourceRows": 33153,
         "reviewedExactSourceIds": 10,
-        "statuses": {
-            "family-only": 44,
-            "reviewed-distance-parameter": 3,
-            "reviewed-exact-source": 10,
-            "reviewed-numeric-parameter": 3,
-            "reviewed-extra-parameter": 19,
-            "reviewed-combination-parameter": 2,
-            "unresolved-occurrence-parameter": 15,
-        },
+        "statuses": _expected_skill_statuses(ROOT / "data/generated/rules.db"),
         "extraTypes": {"DISTANCE": 5, "TEXT": 39},
     }
     assert equipment["summary"] == {
@@ -978,13 +972,12 @@ def test_known_ambiguous_extras_do_not_become_reviewed_variants() -> None:
     equipment = {item["id"]: item for item in report["equipment"]["items"]}
 
     # A TEXT extra is not automatically a reviewed modifier.
-    # Booty/MetaChemistry and Hacker have exact source-specific review.
-    # Commlink and Journalist still have unresolved source annotations.
-    for source_id in (260, 272):
-        item = skills[source_id]
-        assert item["status"] == "unresolved-occurrence-parameter"
-        assert "TEXT" in item["extraTypes"]
-        assert item["extraSignatures"]
+    # Commlink is now exact and scoped; Journalist remains unresolved.
+    assert skills[260]["status"] == "reviewed-extra-parameter"
+    assert all(part["reviewed"] for part in skills[260]["extraSignatures"])
+    assert skills[272]["status"] == "unresolved-occurrence-parameter"
+    assert "TEXT" in skills[272]["extraTypes"]
+    assert skills[272]["extraSignatures"]
     assert skills[24]["status"] == "reviewed-numeric-parameter"
     assert skills[28]["status"] == "reviewed-numeric-parameter"
     assert skills[40]["status"] == "reviewed-extra-parameter"

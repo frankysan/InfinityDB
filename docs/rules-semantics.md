@@ -4809,7 +4809,9 @@ an Attribute. The optional annex now encodes the pinned Army
 `variantSemantics.occurrenceParameters`, scoped solely to
 `optional-reinforcements-extra-army-list`. The source is reviewed
 without inferring list legality or N5-native procedural authority.
-The tracked v9 rules/publication pair still needs guarded promotion.
+The exact reviewed +1/+2 effects are now included in the guardedly
+promoted tracked v9 rules/publication pair, without introducing roster-legality
+evaluation or claiming independent N5 annex authority.
 
 Source:
 

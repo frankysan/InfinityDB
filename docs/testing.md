@@ -670,10 +670,10 @@ the Annex module passed **2/2** on Windows. This is not a
 release-pair promotion; matched deployed-object publication
 and normal-mode acceptance are still required.
 
-**2026-11-03 Commlink v9 candidate staged, not promoted (VR-0037):**
-The new `tools.stage_commlink_v9_candidate` command accepts
-a **new** `--destination local/<candidate-directory>` and never
-writes the tracked release pair. From repository root on Windows:
+**2026-11-03 Commlink v9 staging and subsequent promotion (VR-0037):**
+By default, `tools.stage_commlink_v9_candidate` accepts a **new**
+`--destination local/<candidate-directory>` and does not modify the
+tracked release pair. From repository root on Windows:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.stage_commlink_v9_candidate --destination local/commlink-v9-candidate-NEXT
@@ -698,11 +698,48 @@ Candidate hashes: rules
 `5a12887c255e8ccbd5dd2f880b4471e2c8dbd46b9fc4c2dc9469f2e740722f9d`,
 publication
 `bd7f2b49c6983012f34d195a1b4e77ad32e3f4ffcc9bca39a596cd7bb2851262`.
-The ignored candidate is **not** a release or deployment, and
-its original input hashes must be rechecked before any separate,
-authorized guarded promotion. The focused Annex module
-passed **3/3**, with Ruff and Pyright green.
-VR-0037 retains the promotion, rollback and browser acceptance gates.
+The originally staged candidate was **not** a release or deployment;
+its input hashes were subsequently rechecked before authorized promotion.
+The pre-promotion Annex module passed **3/3**, with Ruff and Pyright green.
+
+**Guarded Commlink pair promotion, 2026-11-03:** The separate
+`--promote-staged` mode requires the original manifest and both candidate
+binaries to match their SHA-256 pins, matches the untouched HEAD baseline,
+rebuilds the same candidate from current curated inputs, and requires the
+reconstructed bytes to match exactly before writing. It reuses the
+paired rollback helper with atomic per-file writes and verifies the
+published v9 database, exact +1/+2 effects, matched 17-object
+publication and application loader after replacement. An earlier
+Windows regression exposed an SQLite handle held by the staging
+exporter; explicit connection closure fixed that before promotion.
+The disposable promotion, tamper-rejection and injected-failure
+rollback suite passed **6/6**; the separate release-storage module
+passed **530/530**. Under explicit authorization, the command
+
+```powershell
+.\\.venv\\Scripts\\python.exe -m tools.stage_commlink_v9_candidate --destination local/commlink-v9-candidate-20261103 --promote-staged
+```
+
+promoted tracked `data/generated/rules.db` and refreshed its matched,
+Git-ignored `data/generated/deployed-objects.json`. Verified recovery
+copies are retained under ignored `local/commlink-v9-recovery-tscycrly/`.
+Before SHA-256:
+`rules.db` `bc5df34bf752339c41156d5fe84ca35cc74feb0c890cb5407dd97f6d09f3a35d`,
+`deployed-objects.json` `88e5b42537f600a016aef62a48d47aa17ab38fdb871f75af9c604485ab34973f`.
+Promoted SHA-256:
+`rules.db` `5a12887c255e8ccbd5dd2f880b4471e2c8dbd46b9fc4c2dc9469f2e740722f9d`,
+`deployed-objects.json` `bd7f2b49c6983012f34d195a1b4e77ad32e3f4ffcc9bca39a596cd7bb2851262`.
+The before/after artifact hashes and both recovery copies matched;
+publication
+`--check`, Rules validation, post-promotion Annex **6/6**, deployed
+objects **12/12** and normal-mode Windows Chromium **3/3** passed.
+The optional N4-origin scope and uncalculated roster legality are
+unchanged. The source-variant audit's three obsolete pre-promotion assertions
+were reconciled against the reviewed published parameter; its
+**68/68** tests passed. A disposable synthetic prior-v9 fixture
+keeps the actual staged-pair, tamper and injected-rollback tests
+exercised after promotion (Annex **6/6**). Cumulative Linux/full-suite
+and manual Army-context acceptance remain separate.
 
 **2026-11-03 optional annex normal-mode Chromium navigation (VR-0038):**
 The separate `tests/test_verify_reinforcements_optional_browser.py`

@@ -1599,8 +1599,8 @@ missing explanations: the existing shared-effects approvals must be reconciled.
   - [ ] Complete the optional **Reinforcements Extra** under its separately
     versioned/scoped annex reference, not `n5-core-rules`. The N4-origin
     procedural reference and links are published for optional N5-era play;
-    exact Commlink variants, full Army Section context and any N5-native
-    source reconciliation remain open.
+    typed Commlink variants are now published; full Army Section context
+    and N5-native source reconciliation remain open.
     - [x] Establish source boundaries: N5.3 p. 6 and ITS Season 18
       v2026.09.01 p. 27 reference the current optional Extra, while the
       archived English/Spanish annex and the detailed Wiki procedure are
@@ -1616,8 +1616,8 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       its appearance in the unchanged 57-row N5 Orders/AROs matrix. The
       guarded release-pair refresh preserved 17 deployed objects and a
       rollback backup. Source/API/regression and maintained-text checks pass;
-      full manual browser acceptance and publication of typed
-      Commlink (+X) remain open.
+      typed Commlink (+X) is now published in the matched v9 pair;
+      full manual browser and Army-context acceptance remain open.
     - [ ] **N5-native source clarification:** Identify an authoritative
       N5-specific Reinforcements Annex revision or explicit official adoption
       ruling establishing which N4 procedures remain applicable unchanged.
@@ -1641,18 +1641,22 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       scoped only to `optional-reinforcements-extra-army-list`.
       This is not a Skill Level, Attribute MOD, generic N5 roster rule,
       or list-legality calculator. Fresh rules exports and negative
-      validator tests prove source semantics. A separate,
-      non-promoting candidate pair was staged under ignored
-      `local/commlink-v9-candidate-20261103/` using a dedicated
-      source-/schema-guarded command. This does **not** change the
-      tracked v9 `rules.db` or `deployed-objects.json`; guarded
-      promotion and full browser acceptance remain VR-0037.
+      validator tests prove source semantics. The separately staged
+      `local/commlink-v9-candidate-20261103/` pair was promoted on
+      2026-11-03 through exact manifest, baseline, fresh-export and
+      matched-publication guards. The tracked v9 `rules.db` now
+      contains the typed variants; its paired `deployed-objects.json`
+      changes only the rules-database fingerprint, retaining all 17
+      reviewed objects. Verified old-byte recovery copies are retained
+      under ignored `local/commlink-v9-recovery-tscycrly/`.
+      Whole-suite and remaining browser/Army-context acceptance are
+      separate; this is not a general roster-legality calculation.
     - [x] Classify `Request Reinforcements` as a separate
       `tactical-phase-step` in the optional annex. It is discoverable as a
       Skill without entering Basic Short/Short/Long/ARO declarations or
       changing the core 57-row matrix.
-    - [ ] Complete the remaining annex slice: typed Commlink (+X), verified
-      profile/section context and linked Army parent/pool navigation. The
+    - [ ] Complete the remaining annex slice: verified profile/section
+      context and linked Army parent/pool navigation. Typed Commlink (+X),
       collection, source/citations, phase category and general Skill/Rule
       navigation are already published; do not claim list legality.
     - [ ] Test ordinary versus Reinforcement context, exact `Commlink (+X)` variants, and explicit
@@ -1660,8 +1664,9 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       - [x] Added normal-mode Chromium coverage of the three published optional
         annex pages and their navigation at 1440/390/320 px; N4 provenance,
         source citations and non-leakage to the 57 core declarations pass 3/3.
-        This does not yet verify typed (+X) publication, unit/Army context,
-        N5-native authority or full manual browser acceptance.
+        Typed (+X) publication is now separately verified; this browser
+        coverage does not yet verify unit/Army context, N5-native authority
+        or full manual browser acceptance.
   - **Completion:** each covered batch builds into `rules.db`, passes maintained-text and
     interaction review, and is navigable with citations in normal mode. Use semantic maintained-text
     tokens; preserve genuine ambiguity with `review-needed` rather than weakening plain-text review.

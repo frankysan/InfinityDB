@@ -10,6 +10,7 @@ import json
 import shutil
 import sqlite3
 import subprocess
+from contextlib import closing
 from pathlib import Path
 
 import pytest
@@ -34,18 +35,13 @@ ANNEX = ROOT / "data/curated/rules/reinforcements-extra-n4-reference.json"
 
 def test_commlink_candidate_stages_matched_pair_without_promoting(tmp_path: Path) -> None:
     """Make an inspectable v9 candidate, leaving the active release byte-for-byte intact."""
-    baseline = ROOT / "data/generated/rules.db"
-    publication = ROOT / "data/generated/deployed-objects.json"
+    root = _disposable_commlink_release(tmp_path)
+    baseline = root / "data/generated/rules.db"
+    publication = root / "data/generated/deployed-objects.json"
     old_rules = hashlib.sha256(baseline.read_bytes()).hexdigest()
     old_publication = hashlib.sha256(publication.read_bytes()).hexdigest()
-    if "commlink" in RulesDatabase(baseline).skill_reviewed_extra_semantics():
-        # Once the candidate is promoted, check the published pair instead.
-        assert load_deployed_object_publication(
-            publication, ROOT / "data/generated/infinity.db", baseline,
-        ) is not None
-        return
-    destination = tmp_path / "unpromoted"
-    manifest = stage_commlink_candidate(destination)
+    destination = root / "local/unpromoted"
+    manifest = stage_commlink_candidate(destination, root=root)
     assert manifest["kind"] == "staged-commlink-v9-pair-not-promoted"
     assert manifest["record"] == "skill:commlink"
     assert manifest["deployedObjectCount"] == 17
@@ -60,13 +56,13 @@ def test_commlink_candidate_stages_matched_pair_without_promoting(tmp_path: Path
     ]["extra_values"][0]["effect"]["count"] == 1
     assert load_deployed_object_publication(
         destination / "deployed-objects.json",
-        ROOT / "data/generated/infinity.db",
+        root / "data/generated/infinity.db",
         destination / "rules.db",
     ) is not None
     assert hashlib.sha256(baseline.read_bytes()).hexdigest() == old_rules
     assert hashlib.sha256(publication.read_bytes()).hexdigest() == old_publication
     with pytest.raises(ValueError, match="already exists"):
-        stage_commlink_candidate(destination)
+        stage_commlink_candidate(destination, root=root)
 
 
 def _disposable_commlink_release(tmp_path: Path) -> Path:
@@ -85,6 +81,36 @@ def _disposable_commlink_release(tmp_path: Path) -> Path:
         target = root / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / relative, target)
+    # Exercise one-time promotion even after the real tracked release is promoted:
+    # reconstruct the exact prior family-only row in a disposable v9 database.
+    rules = root / "data/generated/rules.db"
+    if "commlink" in RulesDatabase(rules).skill_reviewed_extra_semantics():
+        with closing(sqlite3.connect(rules)) as database:
+            row = database.execute(
+                "SELECT variant_json FROM records "
+                "WHERE collection_id = ? AND id = ?",
+                ("reinforcements-extra-n4-reference", "skill:commlink"),
+            ).fetchone()
+            assert row is not None
+            variant = json.loads(row[0])
+            assert variant["inheritance"] == "family"
+            assert len(variant["occurrenceParameters"]) == 1
+            database.execute(
+                "UPDATE records SET variant_json = ? "
+                "WHERE collection_id = ? AND id = ?",
+                ('{"inheritance":"family"}',
+                 "reinforcements-extra-n4-reference", "skill:commlink"),
+            )
+            database.commit()
+        source_paths = (
+            root / "data/curated/rules/n5-core-v5.3.json",
+            root / "config/validation/deployed-object-delivery-reviews.json",
+            root / "config/validation/deployed-object-candidate-reviews.json",
+        )
+        previous = build_publication(root / "data/generated/infinity.db", rules, *source_paths)
+        (root / "data/generated/deployed-objects.json").write_bytes(
+            publication_bytes(previous)
+        )
     subprocess.run(["git", "init", "-q"], cwd=root, check=True)
     subprocess.run(
         ["git", "add", "data/generated/rules.db", "data/generated/deployed-objects.json"],
@@ -101,12 +127,6 @@ def test_commlink_candidate_promotion_restores_recovery_and_matches_staging(
     tmp_path: Path,
 ) -> None:
     """Promote both binaries in a disposable checkout, never the tracked project."""
-    if "commlink" in RulesDatabase(
-        ROOT / "data/generated/rules.db"
-    ).skill_reviewed_extra_semantics():
-        # The tracked pair is already promoted; the historical candidate cannot be
-        # re-staged against a new baseline, and is checked by other published tests.
-        return
     root = _disposable_commlink_release(tmp_path)
     destination = root / "local/staged"
     manifest = stage_commlink_candidate(destination, root=root)
@@ -130,10 +150,6 @@ def test_commlink_candidate_promotion_restores_recovery_and_matches_staging(
 
 
 def test_commlink_candidate_promotion_refuses_changed_stage(tmp_path: Path) -> None:
-    if "commlink" in RulesDatabase(
-        ROOT / "data/generated/rules.db"
-    ).skill_reviewed_extra_semantics():
-        return
     root = _disposable_commlink_release(tmp_path)
     destination = root / "local/staged"
     stage_commlink_candidate(destination, root=root)
@@ -147,10 +163,6 @@ def test_commlink_candidate_promotion_refuses_changed_stage(tmp_path: Path) -> N
 def test_commlink_candidate_promotion_rolls_back_on_post_validation_failure(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    if "commlink" in RulesDatabase(
-        ROOT / "data/generated/rules.db"
-    ).skill_reviewed_extra_semantics():
-        return
     root = _disposable_commlink_release(tmp_path)
     destination = root / "local/staged"
     stage_commlink_candidate(destination, root=root)

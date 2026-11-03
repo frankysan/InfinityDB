@@ -132,7 +132,7 @@ Git updates are explicit agent actions, not background mirroring.
   not accept unpublished typed (+X) semantics, full Army Sections,
   N5-native authority or manual browser sign-off.
 
-- [ ] **VR-0037** (2026-11-02; source implemented, publication pending):
+- [ ] **VR-0037** (2026-11-02; guarded promotion completed, cumulative acceptance pending):
   Cross-platform verification and guarded publication for the
   annex-scoped typed Commlink (+X) occurrence parameter.
   Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
@@ -148,10 +148,9 @@ Git updates are explicit agent actions, not background mirroring.
   variants rejected; full curated module **670 passed**,
   source-variant module **68 passed**, full rules-database
   module **166 passed**. Ruff, Pyright, docs, rules and data
-  stages passed. The old published
-  `data/generated/rules.db` and its paired deployed-object
-  publication have **not** been changed. Cross-platform
-  regression was accepted: after a first Linux run with one
+  stages passed. At the initial source-only baseline, the tracked
+  `rules.db` and paired deployed-object publication were still
+  unchanged. Cross-platform regression was accepted: after a first Linux run with one
   corrected stale Annex assertion, focused Annex tests
   passed **2/2** at `fd38485f`; the replacement full suite
   passed **4,892 tests, 28 skipped, zero failed** at that
@@ -183,11 +182,29 @@ Git updates are explicit agent actions, not background mirroring.
   Commlink metadata delta, the same v9 schema/Restrictions,
   all 17 unchanged deployed objects and a matched publication
   fingerprint. The staging module's focused acceptance
-  passed **3/3**; Ruff and Pyright passed. The candidate
-  remains local/ignored, not tracked or deployed.
-  Remaining: separately authorized guarded promotion with
-  recovery artifacts, followed by release-pair integrity
-  and normal UI acceptance. This is not general N5 roster legality.
+  passed **3/3**; Ruff and Pyright passed. Under explicit
+  authorization the guarded promotion command verified the exact
+  manifest, rebuilt candidate and byte pins, then locally promoted
+  tracked `rules.db` and its Git-ignored matched publication on
+  2026-11-03. Current SHA-256: rules
+  `5a12887c255e8ccbd5dd2f880b4471e2c8dbd46b9fc4c2dc9469f2e740722f9d`;
+  publication
+  `bd7f2b49c6983012f34d195a1b4e77ad32e3f4ffcc9bca39a596cd7bb2851262`.
+  Original bytes were retained and hash-verified under ignored
+  `local/commlink-v9-recovery-tscycrly/`. The disposable promotion
+  and rollback regression passed **6/6**, release storage **530/530**,
+  post-promotion Annex **6/6**, deployed objects **12/12**,
+  publication `--check`, rules stage and normal-mode Windows
+  Chromium **3/3**. A Windows SQLite-handle failure discovered
+  before the real promotion was fixed and successfully retested.
+  The three old unresolved-Commlink source-variant expectations were
+  corrected; the complete source module passed **68/68** and the
+  restored synthetic pre-promotion/rollback test fixture **6/6**.
+  The local tracked `rules.db` must still be committed and pushed;
+  the restricted MCP Git staging interface does not accept this binary
+  path. Remaining: a committed, revision-pinned Linux/full-suite
+  acceptance and uncompleted Army-context/manual-browser scope. This
+  is not general N5 roster legality.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
