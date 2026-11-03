@@ -2182,9 +2182,28 @@ python -m tools.browser_test_host_profile status
 python -m tools.browser_test_host_profile disable
 ```
 
+**Host-profile acceptance (VR-0049 retired):** At pinned
+`47122aa519b6d81c0b471797e9aa93ec77f4588a`, Linux's ignored
+profile was enabled explicitly and its runner command verified
+`-n 8 --dist loadgroup --browser-lanes --split-scenario-faq
+--browser-slot-count 4 --browser-lane-count 4`. Linux focused
+profile tests passed **17/17**, ops section **365/one skipped**,
+and the complete suite passed **5,001/29 skipped/zero failures**
+in **422.07 s pytest / 422.72 s runner** (async job
+`linux-dev:33798d90fffe42caa22b2b2c697994c6`). All four
+browser lanes remained on individual workers; Chromium setup
+waiting totaled **54.42 worker-seconds** across one event, with
+**808/808** published SVGs. Two pre-existing Python 3.14
+`fork()` deprecation warnings remain. On Windows the unchanged
+`-n auto --dist worksteal` command passed **361/five skipped** ops
+tests, and its standard two-slot configuration was confirmed.
+GitHub Source Checks (including cross-platform deterministic outputs),
+Installed Wheel Smoke and Deployment Smoke all passed at that SHA.
+The host-local change does not rewrite application data or CI defaults.
+
 The capacity increase is **not** permission to close VR-0023/24:
 full-suite source/skip parity, long-tail browser lifecycle analysis
-and the Windows four-slot failure are still open. No production
+and the Windows four-slot failure remain open. No production
 browser configuration changes.
 
 **Docker host readiness:** the fixed, read-only

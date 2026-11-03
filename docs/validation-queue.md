@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 3 distinct
-changes** (VR-0023/0024/0049); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 2 distinct
+changes** (VR-0023/0024); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -157,22 +157,22 @@ output comparison. No source-data or FAQ semantics changed during
 the retry; the reviewed annotation remains metadata, not a match-state
 tracker.
 
-- [ ] **VR-0049** (2026-11-03; ready-to-run): Validate the
-  approved Linux-only four-slot runner profile without changing
-  Windows, clean CI or explicit test overrides. Work:
-  [Chromium host defaults](TODO.md#performance-storage-and-build-tooling);
-  change: `tools.browser_test_host_profile`, opt-in ignored
-  `local/browser-test-profile.json`, bounded `run_checks` resolution
-  and regression coverage; risk: medium (Linux development test
-  scheduling, no application or CI release-data changes).
-  Immediate Windows: profile regressions **16 passed / one
-  platform-specific symlink skip**, runner **107 passed / one
-  expected skip**, test-section inventory **15/15**, Ruff and
-  Pyright passed. Design: none. Deferred: Linux fast-forward,
-  `tools.browser_test_host_profile enable/status`, focused Linux
-  tests, inspect the maintained default runner command, and
-  confirm Windows stays at two slots. Do not retire VR-0023/24
-  based on these settings alone.
+Linux host-only Chromium profile **VR-0049** retired at
+`47122aa519b6d81c0b471797e9aa93ec77f4588a`.
+On Linux the ignored `local/browser-test-profile.json` was enabled
+explicitly and the maintained runner's generated command verified
+**eight xdist workers, four slots, four lanes and Scenario FAQ A/D
+split**. Focused profile tests passed **17/17**, operational section
+**365/one skip**, and the pinned full suite
+`linux-dev:33798d90fffe42caa22b2b2c697994c6` passed
+**5,001/29 skipped/zero failures** in **422.07 s pytest / 422.72 s
+runner**, with **808/808** SVGs, correct one-worker-per-lane assignments,
+**54.42 summed worker-seconds** of Chromium admission waiting, and
+two existing Python 3.14 fork warnings. Windows retained standard
+`-n auto --dist worksteal` and the two-slot cap; its operational
+section passed **361/five skips**. All three GitHub workflows passed,
+including the cross-platform deterministic-output matrix. The
+profile is host-local and reversible; VR-0023/24 remain open.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -364,8 +364,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0050` (`VR-0023`, `VR-0024`, and `VR-0049` open;
-  `VR-0044`–`VR-0048` and earlier entries retired).
+- Execution: `VR-0050` (`VR-0023` and `VR-0024` open;
+  `VR-0044`–`VR-0049` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
