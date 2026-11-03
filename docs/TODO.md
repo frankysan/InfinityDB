@@ -427,12 +427,13 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     cannot establish a before/after content delta. The bounded dispositions
     are recorded in the [source evidence](rules-explanation-audit-1.0-sources.md#historical-wiki-comparison-boundary-v1s-004-2026-11-03);
     source-wide semantic and frozen-release gates remain open.
-  - [ ] Pin the intended Army snapshot, rules/FAQ/annex PDF versions, and supported wiki evidence.
-    Record archive/content hashes as appropriate, publication dates separately from acquisition
-    dates, and the generated database/publication identities. A later source refresh reopens the
-    affected coverage review; normal checks must not acquire newer inputs implicitly.
-    Include relevant dated official Corvus Belli rules-update posts as supplementary
-    release-change evidence (not replacements for the versioned primary sources).
+  - [x] Select and pin the intended Army, rules/FAQ/annex and Wiki review inputs,
+    including source/derived-publication identities in the
+    [N5 source history](n5-source-history.md#selected-army-input-for-10-v1s-001-2026-11-03).
+    Publication dates are separate from acquisition dates. A later source refresh reopens
+    affected coverage; normal checks must not acquire newer inputs implicitly.
+    Official update posts are supplementary change evidence, not replacements
+    for versioned primary sources. Final candidate freeze is still due below.
     - [ ] Refresh the release-candidate baseline and source occupancy gate once
       the Army/rules database pair is frozen for 1.0. Do not reuse the
       pre-Peripheral-projection publication SHA or paired runtime revision.
