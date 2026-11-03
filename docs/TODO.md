@@ -749,8 +749,10 @@ follow-up action. Retain source-native values until official resolution.
   individual or bounded paged lossless source rows. Unknown tables, unpaired
   siblings and invalid row selectors fail closed; see [data guidance](../data/README.md).
 
-- [ ] Add database-size reporting to `infinity-db build` so snapshot growth is
-  visible in build output and CI.
+- [x] Report the application `infinity.db` and paired `infinity.raw.db`
+  byte sizes after a successful `infinity-db build`, in ordinary build and
+  CI output. A focused regression checks the reported sizes against the
+  actual generated files.
 
 ### Army snapshot and symbol-pipeline maintenance
 

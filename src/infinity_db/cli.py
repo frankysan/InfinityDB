@@ -105,7 +105,10 @@ def cmd_build(args: argparse.Namespace) -> int:
     )
     normalized = args.output_dir / "normalized.json"
     _validate_source_anomaly_baseline(normalized)
-    _export(normalized, args.output_dir / "infinity.db")
+    database = args.output_dir / "infinity.db"
+    _export(normalized, database)
+    print(f"Application database size: {database.stat().st_size:,} bytes")
+    print(f"Raw archive size: {raw_database_path(database).stat().st_size:,} bytes")
     return 0
 
 
