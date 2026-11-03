@@ -849,6 +849,115 @@ roster legality remain under V1S-013–015 and their
 own acceptance contracts; frozen candidate source,
 browser and hosted CI gates remain under V1S-081–095.
 
+### V1S-011: nine FAQ v0.1 additions and scope (2026-11-03)
+
+The pinned English FAQ v0.0 (S15) has **28** substantive Q&A
+blocks; the pinned English v0.1 (S2) has **37**, including **nine
+new questions**. The [question-level inventory](faq-v0.1-scope-inventory.md)
+and its [audit-only manifest](../config/validation/n5-faq-v0.1-question-inventory.json)
+independently fix each old/current question, original-versus-selected
+source, English/Spanish printed page, answer-semantic anchors,
+and topic/scenario applicability. The **29** currently reviewed,
+published FAQ cards comprise 20 carried-forward v0.0 answers and
+nine new v0.1 answers. The eight additional ITS-only questions
+in the printed FAQ remain uncurated by deliberate scope decision.
+
+- **FAQ-01 — declaring a target position (p. 1):**
+  `faq-ruling:skill-declaration-target-position` preserves that the
+  target's position is set in Resolution before measuring Range
+  and that the active player determines first declaration order
+  where the FAQ permits. This does not rewrite all declaration rules.
+- **FAQ-02 — disabled Hacking Device (p. 1):**
+  `faq-ruling:hacking-device-firewall-disabled` retains the
+  device-enabled condition for Firewall. Isolated/Null disabling
+  exceptions are contextual, not universal exemption from Comms.
+- **FAQ-03 — a fired Deployable on a vertical surface (EN p. 1,
+  ES p. 2):** `faq-ruling:fired-deployable-vertical-surface`
+  retains the required fully supported Token and prohibition on
+  vertical placement. The English question specifically concerns
+  **firing** a Deployable while the Spanish question covers
+  **placing** Deployables more broadly. This question-scope
+  difference is not a contradictory answer or independent
+  authorization to generalize the English case.
+- **FAQ-04 — Controller cannot declare a Skill (p. 2):**
+  `faq-ruling:peripheral-controller-unable-to-declare`
+  preserves the shared declaration with a participant unable
+  to perform it declaring Idle. It is not permission for every
+  Peripheral subtype to ignore other Controller restrictions.
+- **FAQ-05 — Special Dice in Coordinated Orders (EN p. 2,
+  ES p. 3):** `faq-ruling:coordinated-order-special-dice`
+  distinguishes the extra Special Die from Burst; a Special
+  Dice MOD can apply without changing the Coordinated Order's
+  Burst limit.
+- **FAQ-06 — Camouflaged Marker and Total Cover (pp. 2–3):**
+  `faq-ruling:camouflaged-marker-total-cover` distinguishes a
+  required disclosure when the attack forces a Saving Roll from
+  whether the underlying item actually suffers a hit despite
+  Total Cover. The source question does not remove all Cover
+  or Marker rules.
+- **FAQ-07 — Fireteam Type after member loss (p. 3):**
+  `faq-ruling:fireteam-type-after-member-loss` retains
+  the Fireteam's type rather than automatically becoming a
+  DUO. **Real bilingual numerical discrepancy:** the English
+  Haris example goes from three to two members whereas the
+  Spanish example describes two remaining from two. Preserve
+  selected English and the Spanish `conflictingCitations`
+  disclosure; losing members may still trigger other Fireteam
+  cancellation conditions.
+- **FAQ-08 — required Fireteam members (p. 3):**
+  `faq-ruling:fireteam-required-member-lost` applies the
+  Fireteam Chart's minimum/required members at creation, with
+  the separate **FT Master** exception. Spanish omits the
+  explicit exception without contradicting it; this is
+  recorded as a language-specific omission, **not** a
+  second numerical conflict.
+- **FAQ-09 — undeployed Ancillary / Killed (p. 4, ITS
+  section):** `faq-ruling:undeployed-ancillary-not-killed`
+  states the Ancillary must first have deployed, then be
+  Dead or remain in a Null State at game end to meet the
+  stated scenario Killed condition. Current curated
+  applicability is specifically `scenario:annihilation`,
+  a **conservative reviewed Core-scenario overlap**,
+  not an explicit scenario assignment made by the FAQ.
+  Firefight has similar Killing text but is **not** selected;
+  neither it nor generic N5 recovery, roster scoring or
+  all ITS scenarios receive this answer automatically.
+
+These nine have **selected English FAQ v0.1 citations**,
+independent Spanish v0.1 corroborating pages, an original
+v0.1 publication identity, and the existing N5.3
+announcement-era `2026-09-01` **source-date anchor**. That
+anchor does not certify the PDFs' exact upload or effective
+publication day. Current FAQ-topic selection preserves
+all **48 authored associations across 42 topics**, and
+scenario/revision/date gates prevent an ITS-only answer
+leaking into unscoped or unrelated Core pages. The
+published Supplies carrier FAQ is an earlier v0.0 answer
+with its own narrowly reviewed Supplies applicability,
+**not a tenth v0.1 addition**. Eight remaining ITS-specific
+questions have no new core publication or new 1.0
+implementation obligation by this review.
+
+At `feeba7b64972153ae7b35c2c28a539277461ad57`,
+`tests/test_faq_ruling_references.py` passed **79** tests,
+with **one expected skip**: opt-in
+`test_tracked_faq_database_matches_current_curated_release_projection`
+is reserved for a rebuilt, release-matched `rules.db`.
+The ordinary Chromium FAQ entry-point selector passed **8/8**
+across desktop/mobile, covering all 29 published cards through
+normal topic/scenario pages. Thus **87 tests passed, one
+release-gated skip** in these two checked selectors. These verify
+current source/FAQ semantics and ordinary navigation; they do
+not provide historical runtime replay, full bilingual translation
+certification, new ITS applicability, independent human visual
+sign-off or frozen-candidate hosted acceptance. **Disposition:** no
+new source-confirmed data/API defect found within this
+bounded nine-ruling review. The Haris conflicting citation,
+FT Master omission and Deployable question-context
+difference stay disclosed rather than suppressed.
+V1S-020 and the general source/browser release gates
+still own final frozen-source/FAQ acceptance.
+
 ### Remaining release gates (not counted as additional change items)
 
 1. **Source and scope:** freeze the intended Army/rules/FAQ/Wiki
