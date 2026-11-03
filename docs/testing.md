@@ -1634,6 +1634,59 @@ full-load measurements remain pending. Ruff, Pyright, docs
 and diff checks passed before the commit, and no browser
 slot defaults or scheduling were changed.
 
+**2026-11-03 same-revision full-suite skip parity and host-load evidence
+(VR-0023/24, unsuccessful common source gate):**
+Windows and Linux both ran full, 808/808-asset suites at
+`ea438555d62fe441d7c428ed49ffb6704dc664f2`,
+with default `-n auto --dist worksteal` and newly automatic grouped
+skip-reason reporting. Windows job
+`4a9ab9d4bd284f7db2c6546e2567d71d` finished
+**4,921 passed, 28 skipped, one failed** in **517.04 s**
+(pytest; 517.69 s runner). Linux job
+`linux-dev:04d3dacf1efc42d1974cf1e2a3592d8a`
+finished the same **4,921/28/one failed** in **570.68 s**
+(pytest; 571.28 s runner), plus two established multithreaded
+`fork()` warnings. **Both failed the identical deterministic
+I/O assertion**, because
+`tools/stage_commlink_v9_candidate.py` wrote its manifest with
+`Path.write_text` without an explicit `newline` argument.
+There was no reported Chromium test failure. The newline
+policy was corrected to `newline="\\n"`; Windows focused
+`tests/test_deterministic_io.py` **4/4** and
+`tests/test_reinforcements_optional_reference.py` **3/3**
+passed, with Ruff and Pyright green. These failed full
+suites do not constitute cumulative acceptance of the fix.
+
+**Skip totals match but reasons do not.** Exactly **22**
+skips share their grouped reasons: 16 opted-out release-matched
+DB tests, two already-promoted citations and four singletons
+for earlier promoted/staging states. Windows has six
+additional host-specific skips (two Gunicorn fork checks and
+four symlink-privilege/host-policy checks). Linux has six
+source-evidence skips instead: four referencing missing local
+FAQ PDFs, one local migration staging report and one required
+N5.2/N5.3 PDF set. This is a genuine **coverage mismatch**
+despite both totals being 28; neither host's skipped checks
+have been silently counted as passing. Pinned input coverage
+and platform-dependent skip rationales require separate review.
+
+New host resource samplers ran simultaneously, each using
+5-second intervals for **780 seconds / 157 samples** in
+ignored `local/benchmarks/`:
+`host-load-full-windows-20261103-0831.jsonl` and
+`host-load-full-linux-20261103-0831.jsonl`.
+The **whole sampling-window** averages/peaks were Windows
+CPU **60.31%/100.00%**, RAM **78.16%/83.75%**;
+Linux CPU **30.07%/99.96%**, RAM **18.66%/25.86%**.
+The measurement windows extend well after the 517/571-second
+test stages, so these means are **not aligned test-only
+averages**. Windows measured 1,560.39 summed Chromium
+waiting worker-seconds across 15 setup events and Linux
+6,171.14 across 32 events. These `-n auto` workloads
+are not an equal-worker, controlled slot-capacity benchmark;
+the observed differences do not prove Linux/browser slots
+are slower or that four-slot capacity is unsafe.
+
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version

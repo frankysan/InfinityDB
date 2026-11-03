@@ -119,7 +119,8 @@ def stage_commlink_candidate(destination: Path, *, root: Path = ROOT) -> dict[st
             "deployedObjectCount": 17,
         }
         (working / "manifest.json").write_text(
-            json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8",
+            json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8", newline="\n",
         )
         if destination.exists():
             raise ValueError("Commlink staging destination was created concurrently")

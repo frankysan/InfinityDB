@@ -211,9 +211,17 @@ Git updates are explicit agent actions, not background mirroring.
   reporting remains opt-in, with an explicit
   `--no-skip-summary` override. Focused runner regression
   passed **106 tests, one expected skip**; Ruff and Pyright
-  passed. The grouped counts are **not** yet
-  cross-host-validated. Retire only after remaining
-  acceptance evidence.
+  passed. The grouped counts are now available from
+  both same-revision full suites at `ea438555`: both reported
+  **4,921 passed, 28 skipped, one shared non-browser
+  deterministic-I/O failure**. Only **22** skips share
+  grouped reasons. Windows skipped two Gunicorn fork tests
+  and four symlink-privilege tests; Linux skipped six tests
+  needing local PDFs or migration staging evidence. The
+  newline-policy defect has been fixed and passes the
+  focused deterministic/Annex modules, but the full
+  fixed-revision suite and skip-source parity remain
+  outstanding. Retire only after remaining acceptance evidence.
 
 - [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
   timestamped Chromium slot metrics and the timeline analyzer under
@@ -287,10 +295,22 @@ Git updates are explicit agent actions, not background mirroring.
   tests plus a native **3-sample** probe (mean 0.06%
   CPU busy and 9.32% RAM used); Windows and Linux
   instrumentation is now independently verified.
-  Aligned full-load samples remain pending. Deferred: investigate the
-  full-load failure, repeat alternating fully passing comparisons
-  with concurrent CPU/RAM sampling, and reconcile cross-host
-  source coverage. Retire only after the remaining acceptance evidence.
+  Same-revision Windows/Linux full-suite samplers completed
+  **157 samples each**, measuring 780 seconds while the tests
+  lasted 517/571 seconds. Entire-window CPU mean and peak:
+  Windows **60.31% / 100%**, Linux **30.07% / 99.96%**.
+  Entire-window RAM mean and peak: Windows **78.16% /
+  83.75%**, Linux **18.66% / 25.86%**. These durations
+  include post-test idle time, **not** test-window-only
+  averages. Default `-n auto` Linux observed **6,171.14
+  summed Chromium worker-seconds** of setup waiting vs
+  **1,560.39** on Windows, but worker counts differ and
+  the runs both failed one non-browser I/O guard.
+  Remaining: align actual test windows, investigate the
+  full-load browser failure, repeat alternating fully
+  passing equal-worker/slot comparisons with concurrent
+  CPU/RAM sampling, and reconcile source coverage.
+  Do not alter defaults or retire yet.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
