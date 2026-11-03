@@ -96,22 +96,42 @@ retain required dependencies in any still-open VR item.
 ## Pending deferred execution
 
 Only open VR obligations belong here. **Current count: 1 distinct
-change** (VR-0050); no deferred test-design requirement is open.
+change** (VR-0051); no deferred test-design requirement is open.
 
-- [ ] **VR-0050** (2026-11-03; ready-to-run): Accept the six exact N5.3
-  Combat Jump source-35 Army extras, guarded paired v9 rules refresh,
-  and no-change deployed-object projection. Work:
+- [ ] **VR-0051** (2026-11-03; ready-to-run): Accept the five exact
+  N5.3 Infiltration source-47 bracketed PH values, guarded paired
+  v9 rules refresh, and no-change deployed-object projection. Work:
   [source variant coverage](TODO.md#rules-and-reference-completeness);
-  risk: medium (curated metadata and tracked `rules.db`, not a
-  match-state engine). Immediate Windows: pinned p. 89 source,
-  211 direct occurrences/121 qualified owner contexts, six exact
-  effect shapes and negative semantic drift cases; rollback-capable
-  promotion and read-only matched-pair recheck succeeded. Source
-  module **97/97**, curated **670/670**, rules build passed.
-  Design: none. Deferred: final Windows rules database/data checks,
-  pinned Linux source module and full-asset cumulative suite,
-  and all GitHub workflows at the final committed release SHA.
-  Do not confuse Explosion's single-use attack with a landing PH MOD.
+  risk: medium (reviewed metadata and tracked rules database).
+  Immediate Windows: pinned N5.3 p. 97, 216 direct occurrences,
+  17 fixed-PH qualifiers and five explicitly unresolved bare ReRoll
+  qualifiers; guarded promotion and read-only matched-pair recheck,
+  exact owner/negative semantics and source-variant **100/100**,
+  rules/data/build/docs/Ruff/Pyright passed. Design: none.
+  Deferred: committed-revision Linux source-variant module and
+  cumulative full-asset suite, plus exact-SHA hosted CI workflows.
+  A fixed PH value substitutes only for the PH-3 Infiltration Roll;
+  do not treat it as a Unit Attribute change or infer missing ReRoll PH=X.
+
+Combat Jump source-35 occurrence semantics **VR-0050** retired at
+pinned `c1d8adc6cd547063ee5b8a85e831aa73cd4d4195`. The exact
+N5.3 p. 89 Army variants cover **121 qualified/90 unqualified**
+direct occurrences across six signatures, retaining landing-only
+PH modifications and the separate one-use Explosion attack. The
+guarded schema-v9 release refresh preserved unrelated records and
+the paired deployed-object projection. Windows source-variant
+**97/97**, curated **670/670**, rules DB **166/166**, data/build,
+rules, Ruff and Pyright passed. The explicitly rebuilt ignored Linux
+publication passed its matched-pair `--check`; Linux source-variant
+**97/97** passed, and its full suite passed **5,011 / 29 expected
+skips / zero failed** in **417.86 s pytest / 418.50 s runner** (job
+`linux-dev:858b769b73294503b857031c802abf74`), with
+**808/808** published SVGs, correct four-lane worker assignment,
+**56.00 summed worker-seconds** of Chromium admission waiting and
+two known Python 3.14 `fork()` warnings. GitHub Source Checks
+(all four matrix jobs plus cross-platform deterministic outputs),
+Installed Wheel Smoke and Deployment Smoke all passed. The
+cross-Army variant usage index remains separate and unimplemented.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
 the full suite passed **4,946 tests / 28 expected skips / 0 failures**
@@ -259,8 +279,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0051` (`VR-0050` open; `VR-0023`, `VR-0024`,
-  `VR-0044`–`VR-0049` and earlier entries retired).
+- Execution: `VR-0052` (`VR-0051` open; `VR-0050`, `VR-0023`,
+  `VR-0024`, `VR-0044`–`VR-0049` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

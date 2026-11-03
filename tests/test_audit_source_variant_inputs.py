@@ -12,6 +12,8 @@ from infinity_db.curated import (
     CAMOUFLAGE_ONE_USE_VARIANT,
     COMBAT_JUMP_SOURCE_SPECS,
     COMBAT_JUMP_VARIANT,
+    INFILTRATION_PH_SOURCE_SPECS,
+    INFILTRATION_PH_VARIANT,
     LIEUTENANT_VARIANT,
     TERRAIN_SOURCE_SPECS,
     TERRAIN_VARIANT,
@@ -664,7 +666,7 @@ def test_engineer_source_49_qualifiers_remain_unreviewed_and_owner_exact() -> No
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_infiltration_source_47_exact_ph_and_reroll_owners() -> None:
-    """Preserve exact Army qualifiers before introducing typed Infiltration variants."""
+    """Preserve exact Army owners and the unreviewed ReRoll boundary."""
     from collections import Counter
 
     # N5.3 p. 97 scopes bracketed PH replacements to the PH-3
@@ -684,10 +686,13 @@ def test_infiltration_source_47_exact_ph_and_reroll_owners() -> None:
         "Infiltration", 47, 216,
     )
     assert item["status"] == "unresolved-occurrence-parameter"
-    assert item["reviewedExtra"] is None
+    assert item["reviewedExtra"] == RulesDatabase(
+        ROOT / "data/generated/rules.db",
+    ).skill_reviewed_extra_semantics()["infiltration"]
     assert item["rawValues"] == []
     assert item["extraSignatures"] == [
-        {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": len(ids)}
+        {"extras": [[extra_id, "TEXT", raw]],
+         "reviewed": extra_id != 277, "count": len(ids)}
         for extra_id, (raw, ids, _owners) in expected.items()
     ]
     assert sum(len(ids) for _raw, ids, _owners in expected.values()) == 22
@@ -718,7 +723,7 @@ def test_infiltration_source_47_exact_ph_and_reroll_owners() -> None:
     effects = " ".join(infiltration["facts"]["effects"])
     assert "normally PH-3" in effects
     assert "profile-specific PH replacement" in effects
-    assert infiltration["variantSemantics"] == {"inheritance": "family"}
+    assert infiltration["variantSemantics"] == INFILTRATION_PH_VARIANT
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -3029,6 +3034,119 @@ def test_forward_observer_special_die_fresh_export_preserves_exact_scope(
         ) == 607
         assert row["reviewedNumericMod"] is None
         assert "modifier" not in typed["forward-observer"]["extra_values"][0]["effect"]
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_infiltration_ph_exact_source_47_and_unreviewed_reroll(tmp_path: Path) -> None:
+    """Five PH=X values replace only Infiltration Roll PH, not model PH."""
+    fresh = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
+    signatures = [
+        {"extras": [[extra_id, "TEXT", f"PH={value}"]],
+         "reviewed": True, "count": count}
+        for extra_id, value, count in INFILTRATION_PH_SOURCE_SPECS
+    ] + [{
+        "extras": [[277, "TEXT", "ReRoll"]],
+        "reviewed": False, "count": 5,
+    }]
+    signatures.sort(key=lambda item: item["extras"][0][0])
+    assert sum(count for _, _, count in INFILTRATION_PH_SOURCE_SPECS) == 17
+    assert {ph - 3 for _, ph, _ in INFILTRATION_PH_SOURCE_SPECS} == {
+        9, 12, 13, 15, 16,
+    }
+    expected = {
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extra_values": [
+            {
+                "extra_id": extra_id, "extra_type": "TEXT",
+                "raw_value": f"PH={value}",
+                "effect": {
+                    "kind": "infiltration-roll-ph-value",
+                    "applies_to": "infiltration-ph-minus-three-roll",
+                    "attribute": "PH", "value": value,
+                },
+            }
+            for extra_id, value, _count in INFILTRATION_PH_SOURCE_SPECS
+        ],
+    }
+    for path in (ROOT / "data/generated/rules.db", fresh):
+        typed = RulesDatabase(path).skill_reviewed_extra_semantics()["infiltration"]
+        assert typed == expected
+        [row] = select_source_variants(inventory_source_variants(
+            ROOT / "data/generated/infinity.db",
+            ROOT / "data/generated/infinity.raw.db", path,
+        ), "skills", [47])["items"]
+        assert (row["name"], row["applicationId"], row["occurrences"]) == (
+            "Infiltration", 47, 216,
+        )
+        # ReRoll PH=X from p.97 lacks X in the Army source: stay unresolved.
+        assert row["status"] == "unresolved-occurrence-parameter"
+        assert row["extraSignatures"] == signatures
+        assert row["rawValues"] == []
+        assert row["reviewedCombinations"] is None
+        assert row["occurrences"] - sum(sig["count"] for sig in signatures) == 194
+        assert row["reviewedExtra"] == typed
+    reviewed = {(extra_id, "TEXT", f"PH={ph}")
+                for extra_id, ph, _count in INFILTRATION_PH_SOURCE_SPECS}
+    assert reviewed_extra_signature(
+        [(1, 317, "TEXT", "PH=18")],
+        reviewed_values=reviewed, distance_allowed=False,
+    )
+    assert not reviewed_extra_signature(
+        [(1, 277, "TEXT", "ReRoll")],
+        reviewed_values=reviewed, distance_allowed=False,
+    )
+    assert not reviewed_extra_signature(
+        [(1, 317, "TEXT", "PH=18"), (2, 277, "TEXT", "ReRoll")],
+        reviewed_values=reviewed, distance_allowed=False,
+    )
+    assert not reviewed_extra_signature(
+        [(1, 317, "TEXT", "PH=19")],
+        reviewed_values=reviewed, distance_allowed=False,
+    )
+    for extra_id, _ph, count in INFILTRATION_PH_SOURCE_SPECS:
+        owners = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=47, extra_id=extra_id,
+        )
+        assert len(owners) == count
+        assert all(
+            owner["extra_position"] == 1
+            and owner["extra_type"] == "TEXT"
+            and owner["source_raw"] is None
+            for owner in owners
+        )
+
+
+def test_infiltration_ph_review_rejects_unapproved_values_and_type() -> None:
+    links: list[object] = [{"entity": "skill", "id": "infiltration"}]
+    assert _validate_variant_semantics(
+        INFILTRATION_PH_VARIANT, "infiltration", links,
+    ) == "family"
+    altered = copy.deepcopy(INFILTRATION_PH_VARIANT)
+    altered["occurrenceParameters"][0]["extraValues"][0]["effect"]["value"] = True
+    with pytest.raises(ValueError, match="invalid N5.3 Infiltration PH"):
+        _validate_variant_semantics(altered, "infiltration", links)
+    altered = copy.deepcopy(INFILTRATION_PH_VARIANT)
+    altered["occurrenceParameters"][0]["extraValues"].append({
+        "extraId": 277, "extraType": "TEXT", "rawValue": "ReRoll",
+        "effect": {"kind": "reroll-one-die",
+                   "appliesTo": "infiltration-ph-minus-three-roll"},
+    })
+    with pytest.raises(ValueError, match="invalid N5.3 Infiltration PH"):
+        _validate_variant_semantics(altered, "infiltration", links)
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_infiltration_ph_review_gate_preserves_matched_pair() -> None:
+    from tools.review_infiltration_ph_variant import check_candidate
+    result = check_candidate()
+    assert result["scope"] == "infiltration-ph-v9-verified-published"
+    assert result["qualifiedPHOccurrences"] == 17
+    assert result["unreviewedReRollOccurrences"] == 5
+    assert result["unqualifiedOccurrences"] == 194
+    assert result["previousRulesSha256"] == result["candidateRulesSha256"]
+    assert result["logicalContentVerified"] is True
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")

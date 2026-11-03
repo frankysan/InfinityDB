@@ -421,8 +421,12 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       review adds six exact landing-roll/Explosion parameters across 121
       direct qualified Army occurrences under N5.3 p. 89; the one-use
       template attack remains separate from the PH landing Roll and is
-      not a general attack resolver. Other unresolved source families
-      remain in this task.
+      not a general attack resolver. The Infiltration source-47 review
+      adds five exact bracketed PH values for 17 Army occurrences under
+      N5.3 p. 97, applying only to the PH-3 Infiltration Roll; five bare
+      `ReRoll` extras remain unresolved because the printed reroll
+      requires an explicit PH=X value. These do not yet publish the
+      cross-Army usage index. Other unresolved source families remain.
     - [ ] Materialize public context links and verify duplicate sources, reused
       payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
       ambiguous variants before publication. An audited source signature alone

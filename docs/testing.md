@@ -1075,13 +1075,41 @@ deployed-object publication invariance. The rollback-capable
 `--promote` path refreshed the tracked rules DB and ignored
 paired publication. Read-only recheck reports
 `combat-jump-v9-verified-published` with identical active/candidate
-rules SHA-256. Windows source-variant **97/97**, curated **670/670**
-and rules-stage checks passed; the rules-database inventory
-assertion was updated for the new reviewed family. Linux pinned
-source/full suites and hosted CI on the committed revision remain
-deferred under VR-0050. Inventory should be **24 reviewed-extra /
-10 unresolved** Skill source IDs once the exact release is checked.
-The cross-Army usage index remains unimplemented.
+rules SHA-256. Windows source-variant **97/97**, curated **670/670**,
+rules-database **166/166**, data/build, Ruff, Pyright, docs and
+rules stages passed. The rules-database inventory assertion was
+updated for the new reviewed family. At pinned commit
+`c1d8adc6cd547063ee5b8a85e831aa73cd4d4195`, Linux's
+source-variant module passed **97/97** after the ignored deployed-object
+publication was explicitly rebuilt to match the newly fetched tracked
+rules database; the separate `--check` then passed. The complete
+Linux suite passed **5,011 tests / 29 expected skips / zero failures**
+in **417.86 s pytest / 418.50 s runner**
+(`linux-dev:858b769b73294503b857031c802abf74`), with **808/808**
+SVGs, correct one-worker-per-lane assignment and **56.00 summed
+worker-seconds** of Chromium admission waiting. Two known Python 3.14
+multithreaded `fork()` warnings remained. All three hosted workflows,
+including Source Checks and deterministic outputs, subsequently passed
+at that same SHA; VR-0050 is retired. The inventory at that commit was
+**24 reviewed-extra / 10 unresolved** Skill source IDs. The cross-Army
+usage index remains unimplemented.
+
+**2026-11-03 Infiltration fixed-PH source review (VR-0051 pending):**
+N5.3 p. 97 permits bracketed PH=X to replace only the PH used for the
+normal PH-3 Infiltration Roll. The pinned Skill source-47 inventory has
+216 direct occurrences: 17 carry five exact fixed-PH signatures,
+five carry bare `ReRoll` without the explicit PH=X required by the
+printed reroll rule, and 194 carry neither. Only the five fixed-PH
+signatures are typed. The original source-47 owner/ID assertion,
+negative combination/type tests and exact new read-only reviewer
+`python -m tools.review_infiltration_ph_variant` protect those bounds.
+Its guarded `--promote` updated the tracked v9 rules database and
+matched ignored deployed-object publication with a local rollback;
+read-only regeneration exactly matches the promoted rules SHA-256
+`c016006b7eae19e80969f432a590b802bf989b5831bd6cfd1c1f26765bb3800c`.
+Windows source-variant **100/100**, rules, data/build, docs, Ruff and
+canonical Pyright passed. Linux final-revision/hosted acceptance is
+tracked separately as VR-0051; no cross-Army usage index was added.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked

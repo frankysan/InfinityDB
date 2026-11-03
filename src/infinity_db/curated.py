@@ -368,6 +368,33 @@ CAMOUFLAGE_ONE_USE_VARIANT: dict[str, Any] = {
     }],
 }
 
+# N5.3 p. 97: a bracketed Infiltration PH=X substitutes only the PH
+# used for the PH-3 Infiltration Roll; never change the Unit's PH stat.
+# Army source-47 ReRoll (extra 277) does not name the printed reroll PH=X
+# and remains deliberately unresolved until that source boundary is reviewed.
+INFILTRATION_PH_SOURCE_SPECS = (
+    (250, 12, 4), (353, 15, 4), (340, 16, 2),
+    (317, 18, 2), (318, 19, 5),
+)
+INFILTRATION_PH_VARIANT: dict[str, Any] = {
+    "inheritance": "family",
+    "occurrenceParameters": [{
+        "source": "army-extra", "kind": "reviewed-extra",
+        "extraValues": [
+            {
+                "extraId": extra_id, "extraType": "TEXT", "rawValue": f"PH={ph}",
+                "effect": {
+                    "kind": "infiltration-roll-ph-value",
+                    "appliesTo": "infiltration-ph-minus-three-roll",
+                    "attribute": "PH", "value": ph,
+                },
+            }
+            for extra_id, ph, _count in INFILTRATION_PH_SOURCE_SPECS
+        ],
+    }],
+}
+
+
 # N5.3 p. 89: printed Combat Jump landing uses a PH Roll.
 # Source PH=X selects the PH value for that Roll; +3 modifies only
 # that Roll. Explosion triggers a self-exempt, single-use template
@@ -1093,6 +1120,26 @@ def _validate_reviewed_extra_parameter(
             )
         ):
             raise ValueError(f"{context}: invalid N5.3 Lieutenant resource extras")
+        return
+    if inheritance == "family" and army_links == [
+        {"entity": "skill", "id": "infiltration"}
+    ]:
+        # Only the five pinned source-47 PH=X extras. ReRoll is not a
+        # typed value without the printed PH=X reroll parameter.
+        values = parameter.get("extraValues")
+        expected = INFILTRATION_PH_VARIANT["occurrenceParameters"][0]["extraValues"]
+        if (
+            set(parameter) != {"source", "kind", "extraValues"}
+            or not isinstance(values, list)
+            or values != expected
+            or any(
+                not isinstance(entry, dict)
+                or type(entry.get("extraId")) is not int
+                or type(entry.get("effect", {}).get("value")) is not int
+                for entry in values
+            )
+        ):
+            raise ValueError(f"{context}: invalid N5.3 Infiltration PH source extras")
         return
     if inheritance == "family" and army_links == [
         {"entity": "skill", "id": "combat-jump"}
