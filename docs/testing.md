@@ -935,7 +935,7 @@ wall time. This retires VR-0043; VR-0023/24 remain open for controlled
 capacity and skip-reason comparisons. Hosted CI and release sign-off
 remain separate gates.
 
-**2026-11-03 Lieutenant source-119 resource review (VR-0044 open):**
+**2026-11-03 Lieutenant source-119 resource review (VR-0044 retired):**
 The pinned N5.3 English p. 99 describes two different Lieutenant
 loadout qualifiers: `245/TEXT:+1 Command Token` (30 option rows,
 +1 Command Token for the match) and `246/TEXT:+1 Order` (53 option
@@ -953,11 +953,36 @@ Skill source IDs; no Unit usage index or roster validator is published.
 Immediate Windows checks: `tests/test_audit_source_variant_inputs.py`
 **74/74 passed** on the final promoted pair, including the published
 pair verifier and four malformed/changed-qualifier rejection cases.
-The candidate regression passed both before and after promotion. Ruff, Pyright (0 errors), data/build, rules, documentation
-lint/links and Git diff whitespace checks passed. The source/archive
-and browser/full-suite follow-up remains VR-0044 until tested on the
-committed revision with the required Git-ignored inputs. Hosted CI
-and final release sign-off remain separate gates.
+The candidate regression passed both before and after promotion.
+Ruff, Pyright (0 errors), data/build, rules, documentation lint/links
+and Git diff whitespace checks passed. The initial pinned Linux full
+suite at `14590055` found two regression-test defects: a Windows/Linux
+SQLite byte-layout assumption and an exact reviewed-extra set that
+omitted Lieutenant. Both were corrected by `bda102e6`. The two exact
+Linux failure selectors then passed **1/1** each; its full suite passed
+**4,959 / 29 expected skips / 0 failures** in **572.58 s**.
+No unrelated gameplay semantics or curated source facts changed.
+
+**2026-11-03 final paired source/tooling validation
+(VR-0044/45/46 retired):** The Linux worker was explicitly fast-forwarded
+to `60bd855932f663bf6bec0de5dc29f3439006e6ed`; the ignored
+`deployed-objects.json` matched the tracked release pair on
+`tools.build_deployed_object_publication --check`. The newly added
+read-only raw-inspection module passed **11/11** pinned Linux tests
+(including exact source rows, zero-row table reporting, and refusal of
+unpaired archives); directory and ZIP database-size build fixtures passed
+**2/2**. The pinned cumulative async job
+`linux-dev:0f5828bdc96a4172bb46c5fcce1e991e` passed **4,970 tests,
+29 expected skips, 0 failures** in **594.79 s pytest / 595.42 s
+runner**, with **808/808** published SVGs. The 29 skips were grouped
+into 13 expected reasons. Two existing Python 3.14 multithreaded
+`fork()` deprecation warnings remain; 6,589.71 worker-seconds of
+Chromium/resource waiting across 33 setup events are *included* in
+pytest setup timings, not additional wall time. All three GitHub
+workflows (Source Checks, Installed Wheel Smoke, Deployment Smoke)
+passed at this same commit. This retires VR-0044, VR-0045 and VR-0046;
+VR-0023/24 controlled performance comparisons and final release
+sign-off remain independent.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked

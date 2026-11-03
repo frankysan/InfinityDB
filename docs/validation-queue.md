@@ -95,10 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 5 distinct
-changes** (VR-0023/0024/0044/0045/0046); no deferred test-design
-requirement is open. The execution threshold is reached; dispatch one
-compatible Linux cumulative pass after synchronizing the latest commit.
+Only open VR obligations belong here. **Current count: 2 distinct
+changes** (VR-0023/0024); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -120,47 +118,21 @@ full evidence and the two existing `fork()` warnings are recorded in
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
 The independent Chromium diagnostics remain open as VR-0023/24.
 
-- [ ] **VR-0044** (2026-11-03; ready-to-run): Revalidate the
-  N5.3 Lieutenant source-119 resource-variant publication against
-  the pinned Linux source archive and cumulative suite. Work: source
-  variants and usage index in [TODO](TODO.md#rules-and-reference-completeness);
-  change: exact `+1 Command Token`/`+1 Order` typed effects, guarded
-  v9 rules/publication refresh and source tests; risk: moderate
-  (source metadata and tracked rules artifact, not roster legality).
-  Immediate Windows: source-variant module **74/74**,
-  schema-v9 promotion/check and raw 438/83/355 occurrence
-  reconciliation;
-  Ruff, Pyright, data/rules, documentation and diff checks passed.
-  Design: none. Deferred: Linux source-variant tests with pinned
-  raw archive, cumulative suite including browser publication checks,
-  and hosted CI after Git commit. Initial pinned Linux suite at
-  `14590055`: **4,956 passed / 29 skipped / 2 failed** (cross-platform
-  SQLite byte-layout assertion and missing Lieutenant in an exact
-  reviewed-extra key set). Both regressions were corrected in
-  `bda102e6`; each Linux failing selector passed **1/1** at that
-  pinned commit, and the cumulative rerun was dispatched as
-  `linux-dev:54b236c499a54a6ab96c9b11d7b0df15`.
-  Do not treat typed metadata as a published cross-Army usage index.
-
-- [ ] **VR-0045** (2026-11-03; ready-to-run): Validate the read-only
-  paired raw-archive inspector on pinned Linux and in the cumulative
-  suite. Work: [raw database tooling](TODO.md#performance-storage-and-build-tooling);
-  change: `tools.inspect_raw_archive` and source-table/row tests, commit
-  `c6c1d341`; risk: low (development-only read tooling).
-  Immediate Windows: **11/11** inspector tests with real pinned paired
-  archive and synthetic mismatched/corrupt/empty source data, Ruff,
-  Pyright, docs and whitespace checks passed; real `verify` CLI
-  reported a verified export pair. Design: none. Deferred: Linux
-  focused module, cumulative suite and hosted CI. No runtime DB writes.
-
-- [ ] **VR-0046** (2026-11-03; ready-to-run): Validate generated
-  application/raw database size reporting in `infinity-db build`.
-  Work: [build tooling](TODO.md#performance-storage-and-build-tooling);
-  change: successful-build stdout and directory/ZIP fixture assertions,
-  commit `8ae5ee4e`; risk: low (display-only, no export format changes).
-  Immediate Windows: **2/2** build fixture cases; Ruff, Pyright,
-  documentation and whitespace checks passed. Design: none.
-  Deferred: Linux build fixture tests, cumulative suite and hosted CI.
+The 2026-11-03 Lieutenant publication and development tooling batches
+retired **VR-0044/45/46** at pinned `60bd855932f663bf6bec0de5dc29f3439006e6ed`.
+The initial Lieutenant suite at `14590055` exposed two test defects,
+both corrected by `bda102e6`: cross-platform SQLite byte-layout
+comparison and an incomplete reviewed-extra identity assertion.
+The corrected `bda102e6` Linux suite passed **4,959 / 29 skipped /
+0 failed**; its two original failing selectors passed separately on
+Linux. On the final revision the raw-inspector module passed **11/11**
+and the directory/ZIP database-size fixtures passed **2/2** on Linux.
+The final full Linux job `linux-dev:0f5828bdc96a4172bb46c5fcce1e991e`
+passed **4,970 / 29 skipped / 0 failed** in **594.79 s**, with **808/808**
+published SVGs; all three GitHub workflows passed. The two existing
+Python 3.14 fork warnings and independent controlled Chromium
+benchmarking are not resolved by these results. See
+[testing.md](testing.md#parallel-windows-development-and-linux-validation).
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -335,8 +307,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0047` (`VR-0023`, `VR-0024`, `VR-0044`,
-  `VR-0045` and `VR-0046` open; earlier completed entries retired).
+- Execution: `VR-0047` (`VR-0023` and `VR-0024` open;
+  `VR-0044`–`VR-0046` and earlier completed entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
