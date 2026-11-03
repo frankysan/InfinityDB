@@ -670,6 +670,40 @@ the Annex module passed **2/2** on Windows. This is not a
 release-pair promotion; matched deployed-object publication
 and normal-mode acceptance are still required.
 
+**2026-11-03 Commlink v9 candidate staged, not promoted (VR-0037):**
+The new `tools.stage_commlink_v9_candidate` command accepts
+a **new** `--destination local/<candidate-directory>` and never
+writes the tracked release pair. From repository root on Windows:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.stage_commlink_v9_candidate --destination local/commlink-v9-candidate-NEXT
+```
+
+Use a previously unused directory name. The command refuses destinations outside the
+ignored `local/` directory, preexisting destinations, dirty
+tracked release artifacts, mismatched source/publication pairs,
+unreviewed source records, unexpected database changes or
+unrelated publication drift. It exports a fresh matched v9
+`rules.db` and `deployed-objects.json` plus `manifest.json`,
+verifies the exact `skill:commlink` variant append and retained
+Restrictions, checks 17 identical deployed-object records,
+and asserts the active pair remains byte-unchanged.
+A real candidate was staged at
+`local/commlink-v9-candidate-20261103/`.
+Manifest baseline hashes: rules
+`bc5df34bf752339c41156d5fe84ca35cc74feb0c890cb5407dd97f6d09f3a35d`,
+publication
+`88e5b42537f600a016aef62a48d47aa17ab38fdb871f75af9c604485ab34973f`.
+Candidate hashes: rules
+`5a12887c255e8ccbd5dd2f880b4471e2c8dbd46b9fc4c2dc9469f2e740722f9d`,
+publication
+`bd7f2b49c6983012f34d195a1b4e77ad32e3f4ffcc9bca39a596cd7bb2851262`.
+The ignored candidate is **not** a release or deployment, and
+its original input hashes must be rechecked before any separate,
+authorized guarded promotion. The focused Annex module
+passed **3/3**, with Ruff and Pyright green.
+VR-0037 retains the promotion, rollback and browser acceptance gates.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at

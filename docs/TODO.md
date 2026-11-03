@@ -1641,9 +1641,12 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       scoped only to `optional-reinforcements-extra-army-list`.
       This is not a Skill Level, Attribute MOD, generic N5 roster rule,
       or list-legality calculator. Fresh rules exports and negative
-      validator tests prove source semantics; promotion into the
-      tracked v9 `rules.db`/deployed-object publication pair and
-      full browser acceptance remain deferred under VR-0037.
+      validator tests prove source semantics. A separate,
+      non-promoting candidate pair was staged under ignored
+      `local/commlink-v9-candidate-20261103/` using a dedicated
+      source-/schema-guarded command. This does **not** change the
+      tracked v9 `rules.db` or `deployed-objects.json`; guarded
+      promotion and full browser acceptance remain VR-0037.
     - [x] Classify `Request Reinforcements` as a separate
       `tactical-phase-step` in the optional annex. It is discoverable as a
       Skill without entering Basic Short/Short/Long/ARO declarations or

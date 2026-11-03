@@ -156,10 +156,19 @@ Git updates are explicit agent actions, not background mirroring.
   normal publication loader accepts the staged pair. Windows
   focused Annex acceptance **2/2**, deployed-object module
   **12/12** and migration guard **7/7**; Ruff, Pyright
-  and docs checks pass. Remaining: guarded
-  promotion with recovery artifacts, followed by release-pair
-  integrity checks and normal UI acceptance. Do not represent
-  this preflight as publication or general N5 roster legality.
+  and docs checks pass. A dedicated **non-promoting** CLI
+  `tools.stage_commlink_v9_candidate` has now staged and
+  verified an actual pair in ignored
+  `local/commlink-v9-candidate-20261103/`. Its manifest
+  pins old/new SHA-256 values, validates exactly one
+  Commlink metadata delta, the same v9 schema/Restrictions,
+  all 17 unchanged deployed objects and a matched publication
+  fingerprint. The staging module's focused acceptance
+  passed **3/3**; Ruff and Pyright passed. The candidate
+  remains local/ignored, not tracked or deployed.
+  Remaining: separately authorized guarded promotion with
+  recovery artifacts, followed by release-pair integrity
+  and normal UI acceptance. This is not general N5 roster legality.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and

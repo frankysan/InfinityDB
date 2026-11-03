@@ -10,6 +10,8 @@ import json
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from infinity_db.curated import load_curated_directory, load_curated_document
 from infinity_db.database.repository import Database
 from infinity_db.deployed_object_publication import load_deployed_object_publication
@@ -19,9 +21,41 @@ from infinity_db.skill_catalog import SkillCatalog
 from tools.build_deployed_object_publication import build_publication, publication_bytes
 from tools.release_rules_export import export_release_rules
 from tools.restrictions_v9_release import _check_variant_semantics_delta
+from tools.stage_commlink_v9_candidate import stage_commlink_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
 ANNEX = ROOT / "data/curated/rules/reinforcements-extra-n4-reference.json"
+
+
+def test_commlink_candidate_stages_matched_pair_without_promoting(tmp_path: Path) -> None:
+    """Make an inspectable v9 candidate, leaving the active release byte-for-byte intact."""
+    baseline = ROOT / "data/generated/rules.db"
+    publication = ROOT / "data/generated/deployed-objects.json"
+    old_rules = hashlib.sha256(baseline.read_bytes()).hexdigest()
+    old_publication = hashlib.sha256(publication.read_bytes()).hexdigest()
+    destination = tmp_path / "unpromoted"
+    manifest = stage_commlink_candidate(destination)
+    assert manifest["kind"] == "staged-commlink-v9-pair-not-promoted"
+    assert manifest["record"] == "skill:commlink"
+    assert manifest["deployedObjectCount"] == 17
+    assert set(path.name for path in destination.iterdir()) == {
+        "rules.db", "deployed-objects.json", "manifest.json",
+    }
+    assert manifest["previousSha256"] == {
+        "rules.db": old_rules, "deployed-objects.json": old_publication,
+    }
+    assert RulesDatabase(destination / "rules.db").skill_reviewed_extra_semantics()[
+        "commlink"
+    ]["extra_values"][0]["effect"]["count"] == 1
+    assert load_deployed_object_publication(
+        destination / "deployed-objects.json",
+        ROOT / "data/generated/infinity.db",
+        destination / "rules.db",
+    ) is not None
+    assert hashlib.sha256(baseline.read_bytes()).hexdigest() == old_rules
+    assert hashlib.sha256(publication.read_bytes()).hexdigest() == old_publication
+    with pytest.raises(ValueError, match="already exists"):
+        stage_commlink_candidate(destination)
 
 
 def test_annex_current_optional_reference_discloses_n4_source_boundary() -> None:
