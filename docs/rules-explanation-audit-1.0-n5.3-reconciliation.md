@@ -98,6 +98,92 @@ The 12 + 9 + 2 + 2 + 1 grouping accounts for all **26 English items**;
 it is **not** a replacement for the historical 9/12/4/1 source-assessment
 counts above.
 
+### V1S-005: English N5.3 changes 01–13 (2026-11-03)
+
+This bounded pass reconciles the **first 13 numbered English Rules Update
+subjects** to the existing maintained current-reference projection. Primary
+evidence is the pinned English N5.3 v5.3 PDF (S1), earlier English
+v5.2 PDF (S3) where a previous clause is available, the separate FAQ
+v0.1 (S2), the exact Wiki oldids (S4) or selected September 26 capture
+(S5), the pinned September 29 Army source (S6) where relevant, and the
+2026-09-01 official update notice (S11). The exact sources, publication
+limits and unresolved September 18 Wiki history are retained in the
+[source manifest](rules-explanation-audit-1.0-sources.md#historical-wiki-comparison-boundary-v1s-004-2026-11-03).
+No source was newly acquired and no absent historical capture was inferred.
+All 13 subjects have an explicit **current selected-change disposition**
+below; these are not full-section/whole-record acceptances.
+
+- **N53-01 — editorial; no gameplay change.** Blue annotation on the
+  N5.3 cover distinguishes changes; no curated runtime identity is
+  warranted.
+- **N53-02 — current reference already published.** N5.3 p. 98's
+  `skill:infinity-spec-ops` and `skill:request-specball` retain the
+  reviewed core procedure and choice charts, separately from the ITS
+  TEAM-OPS restriction. No new delta; the broader source/browser and
+  release-candidate gates remain outstanding.
+- **N53-03 — reviewed change represented; source conflict retained.**
+  N5.3 p. 29 permits the Berserk exception to voluntary
+  `state:prone` transitions, and `skill:berserk`/Prone cross-links
+  cover it. The shortened Prone summary on p. 169 still omits that
+  exception; do not treat its omission as an independent prohibition.
+- **N53-04 — selected clause verified, no change.** N5.3 pp. 32–33
+  `skill:climb`/Cover denies Cover while Climbing or hanging, even
+  where the example finishes horizontally. Broader geometry review
+  belongs to V1S-033.
+- **N53-05 — current reference accepted locally, no change.**
+  `rule:guts-roll` uses the positions from which the attacks actually
+  occurred (p. 38), with the already-outside fallback to Prone.
+  Existing ordinary-browser acceptance is recorded above.
+- **N53-06 — reviewed current category, no change.**
+  `equipment:firewall` represents N5.3 p. 55's **Automatic
+  Equipment** protection, with FAQ-scoped disabled Hacking Device,
+  selected MOD and non-stacking conditions. This is not a free
+  permission to stack device effects.
+- **N53-07 — genuine published conflict, not silently corrected.**
+  `weapon:kobra-pistol-cc` follows DA's two-saving-roll rule,
+  while the bilingual N5.3 charts print one; Army 221 and pinned
+  Wiki revisions support two. The Anti-materiel discrepancy between
+  Army/Wiki and both PDFs remains unresolved; no Trait was invented
+  or discarded by this review.
+- **N53-08 — selected source/profile agreement; no change.**
+  `weapon:trench-hammer` does not retain the older v5.2
+  Disposable (3) limit absent from N5.3 p. 68 and Army 177.
+- **N53-09 — source disagreement disclosed, no change.**
+  `skill:dodge` applies its profile-specific ARM+3 to an ARM Saving
+  Roll following Dodge declaration under both N5.3 PDFs p. 75.
+  Both language Wiki sources instead condition it on failed PH;
+  an official correction has not been established.
+- **N53-10 — current modifier distinction represented; no change.**
+  `weapon:para-cc-weapon`, `ammunition:para` and
+  `rule:modifiers-explained` distinguish the opponent's negative
+  Face to Face Attribute MOD from PARA's separate PH-6 Saving
+  Roll (N5.3 p. 75); neither applies the other as a replacement.
+- **N53-11 — selected source/FAQ agreement; no change.**
+  `skill:request-speedball` uses PH 15 for landing (N5.3 p. 84),
+  with Controlled Jump disallowed by the scoped FAQ; it is not
+  conflated with the distinct SpecBall request.
+- **N53-12 — selected source exception represented; no change.**
+  `skill:aerial` and `trait:boost` retain the N5.3 p. 86
+  rule that the cited approach does not trigger Boost; this is
+  not a general exception for all reactive actions.
+- **N53-13 — reviewed current restriction, no change.**
+  `skill:impetuous` now separately states the movement/phase
+  restrictions and that the Trooper cannot end an Order
+  `state:prone` (N5.3 p. 97); no blanket all-Order Cover
+  ban or unrelated State interaction is inferred.
+
+**Outcome:** zero newly confirmed data/API defects in this bounded pass;
+N53-03's printed-summary omission and N53-07/09 publication
+disagreements remain explicit. The historical 26-subject assessment
+and per-record source gaps are **not** replaced by this newer
+current-state overlay. At `d5958a7a22b5dcf94cfe4ec3dfe7b5a7390c07a9`,
+focused Windows curated rules **670/670** and public catalog/API
+**45/45** passed on the unchanged tracked publications; no new
+test-design or deferred execution obligation arose from this
+read-only reconciliation. Normal browser routes retain their existing
+owners; final pinned-source-wide, browser and hosted release acceptance
+remain separate under V1S-016/021/022 and V1S-081–095.
+
 ### Additional Spanish, Army and FAQ subjects
 
 - **ESX-01 to ESX-04 (four items):** retain the historical partially
