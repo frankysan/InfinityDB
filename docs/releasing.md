@@ -137,9 +137,11 @@ During the audit:
   multi-domain labels only where responsibility genuinely crosses a boundary.
 - [ ] Review `docs/testing.md`, `docs/ci.md`, `docs/deployment.md`, and
   `docs/server-migration.md` against the actual validation and operational workflows.
-- [ ] Review `docs/TODO.md`: remove completed standalone work after recording its
-  durable outcome in the appropriate reference documentation or changelog, and make
-  remaining work accurately describe what is still unimplemented.
+- [ ] Review `docs/TODO.md` using the
+  [completion and retirement rules](README.md#backlog-completion-and-retirement):
+  no checked entry may retain unfinished descendants or required validation.
+  Confirm practical outcomes are documented, completed tasks/subtrees are removed,
+  completed child context is brief and linked, and open work describes only what remains.
 - [ ] Review `docs/AI_CONTEXT.md` for durable, non-obvious invariants that changed
   during the release, without duplicating ordinary reference documentation.
 - [ ] Audit normal player-visible browser copy against `docs/web-design-guidelines.md`: titles,

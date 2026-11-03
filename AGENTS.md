@@ -305,6 +305,12 @@ Before finalizing **any release**, follow the canonical checklist in `docs/relea
 - Update `docs/AI_CONTEXT.md` when introducing a durable, non-obvious project
   invariant or development constraint.
 - Add identified future work to `docs/TODO.md`.
+- Follow [backlog completion and retirement](docs/README.md#backlog-completion-and-retirement)
+  at every task closeout. A checkmark means the entire task subtree, required
+  acceptance and documentation handoff are complete. Reopen affected tasks and
+  checked ancestors before adding or correcting work; put genuinely new scope
+  in a separate open entry. Remove completed tasks after documenting outcomes,
+  or reduce a completed child of an open parent to brief linked context.
 - Record meaningful changes under `Unreleased` in `docs/CHANGELOG.md`.
   Do this as part of the work that delivers the outcome, not as a deferred
   release-preparation task. Before reporting a substantive task complete,

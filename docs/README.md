@@ -79,6 +79,44 @@ only when it contains unique rationale that still guides active work.
 - `AI_CONTEXT.md` — compact agent-oriented index of non-obvious current invariants and pointers to
   canonical documentation. It is not a second architecture or data-model specification.
 
+### Backlog completion and retirement
+
+**Project domain:** Project infrastructure
+
+`TODO.md` is an active backlog. A checked task means that its stated outcome and
+**every descendant task** are complete, required acceptance checks have passed,
+and the documentation handoff is done. A checked parent must never contain open
+or deferred work. Implementation alone does not complete a task whose required
+validation remains in the [validation queue](validation-queue.md). A bounded task
+can close while a separate, explicitly owned final release gate remains open;
+do not relabel unfinished descendants as separate gates merely to close a parent.
+
+When correcting or extending an existing task, reopen it and every checked
+ancestor **before** editing its scope or adding subtasks. If genuinely new scope
+arises after completion, create a separate open task referring to the delivered
+capability; do not append work beneath a checked entry. Checkmarks are never
+progress indicators for partially delivered tasks.
+
+Complete the handoff at the same time as the work:
+
+1. Record the practical outcome in the canonical behavior/design documentation.
+   Add or consolidate meaningful player/operator outcomes under `Unreleased` in
+   [the changelog](CHANGELOG.md); internal-only test, refactor or process work
+   needs no release-note entry, with that decision stated in the handoff.
+2. Remove a completed standalone task or completed parent and its whole subtree.
+   A completed subtask whose immediate parent is still open may instead become
+   a brief, plain context note under that parent, only when the remaining work
+   needs it. Keep one or two outcome sentences and a canonical documentation
+   link; remove the checked item and its implementation history.
+3. Rewrite the open parent's scope around what remains. Preserve dependencies,
+   unresolved source questions and required acceptance gates. Keep validation
+   obligations in the validation queue, source evidence in its maintained owner,
+   and run logs, hashes and intermediate counts out of TODO.
+
+Apply this to subtasks at every depth during each change's closeout, not only at
+release preparation. Git history retains retired details; do not create another
+completed-task archive or append new status reports to completed entries.
+
 ## Private local workspace
 
 `local/` is Git-ignored and excluded from Docker build contexts. Use it for private audit evidence,

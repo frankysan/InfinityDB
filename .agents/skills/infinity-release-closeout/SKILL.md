@@ -24,14 +24,17 @@ closeout and release readiness, not the feature itself.
    release, also follow the complete mandatory [release checklist](../../../docs/releasing.md).
 2. Inspect the actual diff and current state. Identify the canonical current-behavior/design owner
    for each durable outcome; update that owner rather than duplicating contracts across documents.
-3. Reconcile backlog status: remove or mark only work that the delivered change truly completes,
-   preserve real remaining dependencies, and keep future design explicitly distinguished from
-   implemented behavior. Apply exact project-domain labels to new or materially revised entries.
-   Preserve unrelated proposals unless the requested task includes them.
-4. Add an Unreleased changelog entry only for a meaningful user/operator-visible outcome. Write
+3. Add an Unreleased changelog entry only for a meaningful user/operator-visible outcome. Write
    from the user's or operator's perspective, consolidate related outcomes, and keep implementation
    details in code/tests/history. If the change is internal-only and warrants no entry, state that
    decision in the handoff rather than adding noise.
+4. Follow [backlog completion and retirement](../../../docs/README.md#backlog-completion-and-retirement):
+   check the entire subtree, required validation and documentation handoff before completion.
+   Reopen affected tasks and checked ancestors before corrections or added subtasks;
+   create a separate open task for genuinely new scope. After documenting the practical outcome,
+   remove completed tasks/subtrees or reduce a completed child of an open parent to brief linked
+   context. Rewrite the parent around remaining work; preserve dependencies and unrelated proposals.
+   Apply exact project-domain labels to new or materially revised entries.
 5. Update `README.md` for user-visible behavior, setup, or major capabilities. Update architecture,
    data-model, AI context, or TODO only when the change affects the responsibilities those documents
    own. Check current schema/compatibility values and rebuild guidance together when either changes.

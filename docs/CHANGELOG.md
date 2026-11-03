@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Find candidate Specialist Troops for a selected scenario, and browse Orders
+  and AROs with their declaration categories and source links.
 - Explore the optional Reinforcements Extra, Commlink and Request Reinforcements
   through linked references. The procedures are clearly marked **N4-origin**;
   N5/ITS references confirm the Extra is still offered, not that all historic
@@ -53,6 +55,13 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Add an Orders/AROs quick
+  reference linking current core declarations to their owning rules. Keep optional
+  scenario actions and the Reinforcements Tactical Phase action separately scoped.
+- **Data processing + Web backend + Web frontend:** Add a general Specialist Troops
+  reference and a contextual Unit Explorer filter. Select InfinityDB Standard,
+  Domination, Supplies or Firefight qualifiers; results identify candidate Units
+  without claiming every profile qualifies or creating a permanent Unit attribute.
 - **Data processing + Web backend + Web frontend:** Publish a separately scoped
   optional Reinforcements Extra reference with Commlink and the Tactical Phase
   Request Reinforcements action. Disclose N4 source origin, preserve the
@@ -166,9 +175,9 @@ are not retroactively relabeled.
   Special Dice, Hacking Area, Firewall, Supportware, Modifiers Explained and Mixed
   Weapons. Explain targeting, timing, exceptions and recovery without calculating
   game outcomes.
-- **Data processing + Web backend + Web frontend:** Publish 28 dated FAQ clarifications
+- **Data processing + Web backend + Web frontend:** Publish 29 dated FAQ clarifications
   beside their Equipment, Scenario, Skill, Trait, State, General Rule, Hacking Program
-  and Fireteam topics. Nineteen retain their original v0.0 provenance alongside current
+  and Fireteam topics. Twenty retain their original v0.0 provenance alongside current
   English/Spanish v0.1 citations. General Deployment repositioning has its own rule page;
   the Ancillary scoring clarification remains explicitly Annihilation-scoped.
 - **Data processing + Web backend + Web frontend:** Add exact scenario collection/revision
@@ -182,6 +191,12 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Make desktop navigation more compact and keep mobile menus
+  scrollable on short screens. Remove redundant rule-card subtitles and show a
+  collapsible accuracy/independence notice, expanded for each new browsing session.
+- **Data processing + Web frontend:** Distinguish InfinityDB rules summaries,
+  reviewed examples, dated FAQ clarifications and conflicting sources with explicit
+  text labels and citations in the shared rules and FAQ views.
 - **Web frontend:** Show reviewed, summary-only source-variant explanations
   on Equipment detail pages. ECM: Guided and ECM: Hacker now have distinct
   attack-scope cards with their original citations, without creating
@@ -208,6 +223,9 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing + Web frontend:** Show Domination Console placement distances
+  from marker centers to table edges, and list physical Console/Supply Box diameters
+  beside scenario maps without confusing marker footprints with scoring areas.
 - **Data processing + Web backend:** Restore the fourteen source-scoped
   Restrictions in the shipped rules database and `/api/restrictions`,
   preserving the reviewed deployed-object profiles and legacy relationships.
