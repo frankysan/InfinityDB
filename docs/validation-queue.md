@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 2 distinct
-changes** (VR-0023/0024); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 1 distinct
+change** (VR-0023); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
@@ -172,7 +172,30 @@ two existing Python 3.14 fork warnings. Windows retained standard
 `-n auto --dist worksteal` and the two-slot cap; its operational
 section passed **361/five skips**. All three GitHub workflows passed,
 including the cross-platform deterministic-output matrix. The
-profile is host-local and reversible; VR-0023/24 remain open.
+profile is host-local and reversible; the separate metrics gate
+VR-0024 is retired below, while VR-0023 remains open.
+
+Chromium metrics and timeline instrumentation **VR-0024** retired
+at pinned `6177a8dc0befd544971913db010168254bf431fb`.
+The maintained operations section passed **361 / 5 skipped** on
+Windows (`708666f4030c45549c0737c36c90c95b`) and
+**365 / 1 skipped** on Linux
+(`linux-dev:36888a30c0b545d5b0e1d21e552a68ec`).
+Independent two-/four-slot parallel browser runs at `5ac29416`
+passed **600/16 skipped/zero failed** on both platforms, with
+one-worker-per-lane guards passing; namespace-partitioned slot
+timelines found **no confirmed same-slot overlap**. Full-duration
+native CPU/RAM sampling covered **100% of each four host/capacity
+test windows**, and the analyzer's overlap-weighted summaries and
+per-worker slot wait/hold data were verified. Linux's repeated
+four-slot run at `48d0cd84` also passed **600/16 skipped**;
+its host-specific four-slot full suite at `47122aa5` passed
+**5,001/29 skipped/zero failed** in **422.07 s**. All hosted
+checks at `47122aa5` passed. This closes the metrics
+implementation/verification obligation, **not** the Windows four-slot
+timeout or cross-host source/skip parity, which remain with VR-0023.
+Linux keeps its opt-in four-slot profile; Windows and CI remain
+unchanged.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -245,119 +268,6 @@ profile is host-local and reversible; VR-0023/24 remain open.
   browser errors and DOM state for a possible next recurrence.
   No Windows four-slot default increase is planned.
 
-- [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
-  timestamped Chromium slot metrics and the timeline analyzer under
-  real parallel Linux/Windows browser loads. Work:
-  [Chromium concurrency benchmark](TODO.md#performance-storage-and-build-tooling);
-  change: `tools/browser_test_capacity.py`,
-  `tools/analyze_chromium_timeline.py`, focused regression tests;
-  risk: low (metrics only; default admission unchanged).
-  Immediate: **18/18** capacity/timeline tests passed in serial and
-  two-worker xdist; twelve real Chromium browser tests passed with
-  timestamped metrics (two-slot occupancy **11.04/12.40 s** observed).
-  Ruff, Pyright, docs, and whitespace checks passed. Design: none.
-  Linux evidence: at `f81cfa4a`, four slots passed **4,508 tests /
-  330 skipped** in **418.90 s**; timestamped timeline found **284.29 s**
-  at full capacity, but Scenario FAQ admissions spanned **seven workers**,
-  exposing ineffective xdist lane grouping on Linux.
-  The marker is now placed at item-collection time and opt-in lane runs
-  report actual worker assignments, failing if any lane spans workers.
-  Focused Windows eight-worker loadgroup: **12 passed**, two lanes
-  confined to one worker each. Linux at `9f9e7eaa`: restored Scenario
-  FAQ **232 passed, 16 skipped**, but lanes A/D still spanned five/seven
-  workers, so the test stage failed its safety guard. This matches
-  the pytest 9.2 / pytest-xdist 3.8.0 incompatibility: constrain
-  pytest <9.2 and fail fast for known-broken loadgroup versions.
-  Confirmed Linux recovery at `c39fb659`: `devbox` used pytest
-  9.2.0 and pytest-xdist 3.8.0 before downgrading pytest to **9.1.1**.
-  The targeted B/D browser-lane run passed **12/12 in 13.58 s**:
-  B's six setup events stayed on `gw1`; D's six stayed on `gw0`.
-  Linux at `413a2185` with pytest 9.1.1: **250 passed, 16 skipped**
-  in **257.41 s**; lanes A/B/C/D each stayed on one worker, with Scenario
-  FAQ split across A/D and the assignment guard passing. D remained the
-  long tail (+254 s). At `413a2185`, the grouped full Linux
-  2/4-slot pair passed **4,520 / 330 skipped** in **503.49/380.97 s**,
-  with each of A/B/C/D assigned to one worker in both runs; the
-  four-slot D lane still finished last (+377.62 s). Timestamped
-  metrics are on `devbox` under `local/benchmarks/` (details in
-  `testing.md`). The timeline reconstruction showed **437.69/182.22 s**
-  at full capacity (two/four slots), with **0.22/0.09 s** waiting despite
-  a free slot. Overlap warnings may include separate lock namespaces
-  from capacity self-tests and post-unlock timestamp skew; they do not
-  establish a resource-cap breach. New instrumentation records
-  lock-directory provenance and pre-/post-unlock bounds, and the
-  analyzer isolates the shared xdist lock namespace, distinguishing
-  confirmed interval overlap from unlock-window ambiguity. Focused
-  Windows tests passed. Linux at `25c0da5b` passed **36/36** targeted
-  capacity, Page Footer and Sidebar Density tests (13.86 s); B/D lanes
-  remained on individual workers and fresh metrics were written under
-  `local/benchmarks/chromium-20261102-160356-356643/` on `devbox`.
-  The updated analyzer selected the shared pytest lock namespace,
-  excluded **13** independent capacity self-test records, found two
-  admissions (peak **2/4** slots), negligible waiting and **no**
-  same-slot-overlap warning; summed unlock uncertainty was **0.0001 s**.
-  Targeted Linux namespace/overlap diagnostics are verified.
-  Separate MCP `linux-dev` worker at `413a2185` initially skipped all
-  12 B/D browser tests for missing Playwright, but after environment
-  repair **12/12 real Chromium tests passed**. Its four-lane Scenario FAQ
-  acceptance passed **250/16 skipped in 255.05 s** and showed **0.00
-  worker-s** slot waiting with a +252.44 s lane-D tail. Windows full-suite
-  2/4-slot timelines at `4bda6efb` measured **682.70/114.74 worker-s**
-  of slot waiting; both lock namespaces were isolated correctly. The
-  four-slot run failed one browser visibility timeout, independently
-  reproduced as passing in isolation; see `testing.md`.
-  An independent bounded host CPU/RAM sampler is implemented,
-  recording host-wide CPU counter deltas and physical-memory
-  usage as ignored JSONL alongside separate test jobs.
-  Windows focused sampler tests **21/21** and a real native
-  smoke probe **3/3 samples** passed (9.84% mean host CPU,
-  71.18% mean RAM used); this is instrumentation evidence,
-  not a browser benchmark. The matching Linux worker
-  revision `74d00e7e` passed **21/21** focused sampler
-  tests plus a native **3-sample** probe (mean 0.06%
-  CPU busy and 9.32% RAM used); Windows and Linux
-  instrumentation is now independently verified.
-  Same-revision Windows/Linux full-suite samplers completed
-  **157 samples each**, measuring 780 seconds while the tests
-  lasted 517/571 seconds. Entire-window CPU mean and peak:
-  Windows **60.31% / 100%**, Linux **30.07% / 99.96%**.
-  Entire-window RAM mean and peak: Windows **78.16% /
-  83.75%**, Linux **18.66% / 25.86%**. These durations
-  include post-test idle time, **not** test-window-only
-  averages. Default `-n auto` Linux observed **6,171.14
-  summed Chromium worker-seconds** of setup waiting vs
-  **1,560.39** on Windows, but worker counts differ and
-  the runs both failed one non-browser I/O guard.
-  A new read-only overlap-weighted
-  `tools.analyze_test_host_resources` utility selects
-  exactly the recorded pytest start/duration from these
-  ignored captures and fails closed if the summary or
-  99% interval coverage is absent. **11/11** focused
-  analyzer tests and **15/15** test-section tests passed.
-  The fixed-revision Windows full suite has **100%**
-  sampler coverage, and its test-window-only CPU mean/peak
-  was **86.05% / 100%** and memory mean/peak
-  **70.45% / 72.41%**, not the lower all-window CPU mean.
-  Matching Linux analysis is now verified: at `f9206e06`,
-  the independent worker's analyzer tests passed **11/11**
-  and its fixed-run capture has **100%** coverage across
-  115 intervals, CPU mean/peak **41.22% / 100%** and
-  memory mean/peak **23.24% / 25.66%** (job
-  `linux-dev:eeac1d98f593419a9b273be7247edcec`).
-  Those unmatched worker-count runs did not establish a
-  controlled browser-capacity comparison. At `5ac29416`, both
-  controlled two-/four-slot browser pairs passed **600 / 16 skipped**
-  with consistent lane ownership. Admission waiting fell on Windows
-  from **328.55 to 0.01 worker-s**, on Linux from **442.24 to
-  0.00 worker-s**, with no lock-overlap warnings. CPU/RAM captures
-  covered **100%** of all four test windows. Windows CPU means
-  changed **66.87% → 79.48%**, Linux **22.89% → 38.09%**
-  (two/four slots), with complete RAM statistics, lane traces and
-  artifact identities in `testing.md`.
-  Remaining: alternating clean repeats, Glossary failure
-  investigation if it recurs, and source/skip parity reconciliation.
-  Do not change defaults or retire yet.
-
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -368,7 +278,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0050` (`VR-0023` and `VR-0024` open;
+- Execution: `VR-0050` (`VR-0023` open; `VR-0024` and
   `VR-0044`–`VR-0049` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that

@@ -2210,10 +2210,26 @@ GitHub Source Checks (including cross-platform deterministic outputs),
 Installed Wheel Smoke and Deployment Smoke all passed at that SHA.
 The host-local change does not rewrite application data or CI defaults.
 
-The capacity increase is **not** permission to close VR-0023/24:
-full-suite source/skip parity, long-tail browser lifecycle analysis
-and the Windows four-slot failure remain open. No production
-browser configuration changes.
+**Chromium instrumentation closeout (VR-0024 retired):**
+The timestamped slot-wait/hold metrics, lock-namespace filtering,
+overlap uncertainty, native CPU/RAM sampler, and test-window
+analyzer have now passed repeated focused and real-load
+verification on Windows and Linux. At `6177a8dc`, the operational
+regressions passed **361 / five skipped** on Windows and
+**365 / one skipped** on Linux; all hosted workflows on the
+previous application commit `47122aa5` passed. The four
+same-revision browser experiments at `5ac29416` passed with
+complete CPU/RAM coverage and no slot ownership errors, and
+Linux repeated four-slot acceptance successfully at `48d0cd84`.
+VR-0024 is therefore retired as a *metrics* validation gate.
+The user-approved host-specific capacities remain unchanged.
+
+**VR-0023 remains open:** host-specific source/skip coverage,
+Scenario FAQ lifecycle profiling, and the historical full-load
+Glossary/Spec-Ops visibility timeouts need separate examination.
+Windows four-slot stress is not a target default; its unreliable
+behavior under competing desktop workloads was documented.
+No production browser configuration changes.
 
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and

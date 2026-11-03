@@ -709,14 +709,16 @@ follow-up action. Retain source-native values until official resolution.
   - [x] Adopt a reversible host-local four-slot/four-lane benchmarked test
     profile on the dedicated Linux worker; retain the two-slot Windows and
     clean-CI defaults. See [host-specific decision](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark).
-  - [ ] Repeat alternating full-suite slot comparisons with aligned Windows/Linux
-    source coverage, eight-worker Windows baseline, lane assignments, timestamped
-    occupancy and CPU/RAM observations. Investigate full-load transport/Glossary
-    failures; a passing isolated case does not establish their cause or stability.
+  - [x] Validate timestamped Chromium slot metrics, lock-namespace accounting
+    and full-window CPU/RAM captures on both hosts (VR-0024 retired).
+  - [ ] Reconcile host-specific source-evidence and platform-only skip reasons,
+    and investigate intermittent full-load Glossary and Spec-Ops chart visibility
+    timeouts under the selected Windows two-slot and Linux four-slot limits.
+    Passing isolated tests does not establish the full-load cause.
   - [ ] Profile the Scenario FAQ long tail and browser lifecycle across more
     modules; compare pooling with fresh per-test contexts and verify isolation.
-    Resolve remaining acceptance tracked by VR-0023/0024 in the
-    [validation queue](validation-queue.md).
+    Keep remaining stability/source-coverage acceptance in
+    [VR-0023](validation-queue.md).
   - [ ] If comparing a pinned Playwright container, first verify an available
     Linux container engine; keep the test environment separate from production
     Compose. Adopt defaults only after repeatable speed, stability and resource
