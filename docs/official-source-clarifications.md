@@ -2,7 +2,7 @@
 
 **Project domain:** Data processing
 **Maintained owner:** This is the canonical register of known Infinity rules, Army, Wiki, FAQ and scenario-source ambiguities, inconsistencies, and potential official corrections.
-**Last reviewed:** 2026-11-01
+**Last reviewed:** 2026-11-03
 **Publisher contact:** Not submitted. The entries are *candidate questions*, not claims that Corvus Belli has ruled on them.
 
 ## Purpose and maintenance contract
@@ -226,6 +226,13 @@ This register collects questions that may eventually be sent to Corvus Belli for
 - **Evidence:** Pinned September 29 Army source has **six** Engineer `ReRoll -3` profile occurrences (Sophotects and Chief Mech-Engineer Chung-Hee Jeong, including Reinforcement profiles), alongside **three** Doctor `ReRoll -3` profile occurrences (Bipandra). The N5.3 English rules, pp. **90–91**, describe `Doctor (ReRoll WIP=X)` and `Engineer (ReRoll WIP=X)` as failed Skill Roll rerolls using an *explicit bracketed WIP value*, with the later Command Token reroll excluded from the Skill-specific replacement. The Army `ReRoll -3` string instead supplies a signed `-3`, not an explicit `WIP=X` value. The 2026-09-29 Army Engineer inventory has 389 direct occurrences and 15 qualified ones; the sole `ReRoll -3` signature is source extra 366. This wording difference alone does **not** establish how the signed modifier should apply.
 - **Question:** Does the Army `ReRoll -3` notation mean the Engineer/Doctor reroll is made at the Trooper's ordinary WIP with a -3 MOD, an alternative fixed WIP value, or another defined effect? Does it apply only to the Skill-granted reroll, and does the N5.3 Command Token exception continue to exclude it?
 - **InfinityDB:** Preserve the literal `366/TEXT:ReRoll -3` source qualifier, retain the separately reviewed base Doctor/Engineer mechanics, and leave the specific occurrence parameter unreviewed. Do not transform `-3` into a fixed replacement WIP, a blanket WIP MOD, or an additional reroll until its exact scope is supported.
+
+### SRC-030 — Which Reinforcements Annex procedures govern optional N5 games?
+
+- **Status:** open — source intent unknown. **Aliases:** optional Reinforcements Extra / RS-RF-SECTION-001, RS-RF-COMM-001 and RS-RF-REQ-001.
+- **Evidence:** The pinned English N5.3 Core Rules p. 6 includes games with Reinforcements, and ITS Season 18 (v2026.09.01, p. 27) explicitly offers the Reinforcements Extra and refers to an Annex. However, the [official live Wiki Annex](https://infinitythewiki.com/Infinity_Reinforcements) still labels its detailed instructions as originating in **N4**; the [official English Annex PDF](https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf) is likewise the earlier edition. The September 29 N5 Army snapshot still supplies Section pools and Commlink (+1)/(+2) occurrences, but those facts do not independently establish the applicable N5 procedural text. A public official-source search on 2026-11-03 did not establish a separately versioned N5 Annex or an explicit adoption notice; absence from that search is **not** proof no such publication exists. See [reviewed semantics](rules-semantics.md#rs-rf-section-001--reinforcement-eligibility-is-army-list-sectionoccurrence-context) and [current implementation](TODO.md#100--current-reference-completeness-gate).
+- **Question:** For optional Reinforcements Extra play in N5, including ITS Season 18 where selected, which **Annex edition and effective date** governs? Are the N4-origin Main/Reinforcement Section construction rules (including the 100-point/2-SWC allocation), Commlink maximum-Trooper-count bonuses, Request Reinforcements timing and deployment procedure all adopted unchanged, or are there N5-specific replacements or exceptions? Please identify the authoritative document or ruling for any changes.
+- **InfinityDB:** Publishes a separately labelled **N4-origin optional reference** with explicitly scoped Commlink (+1)/(+2) source semantics, Section/parent Army navigation and source citations. It does **not** present the historical procedures as an independently verified N5 rewrite or perform roster-legality calculations. The clearly disclosed optional reference is usable for agreed play while source adoption remains unresolved.
 
 ## Intake / future publisher correspondence
 

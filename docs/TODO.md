@@ -154,8 +154,9 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     historical Flash Pulse citation and, **at that October 31 baseline**,
     Commlink as the sole pending 1.0 enrichment gap. The subsequent labelled
     N4-origin optional Reinforcements reference resolves missing Commlink
-    *definition* coverage, while N5-native annex authority, typed (+X)
-    parameters and final release/browser acceptance remain separate.
+    *definition* coverage; the exact (+1)/(+2) Army extras were subsequently
+    published in the guarded v9 rules pair. N5-native annex authority and
+    final release/browser acceptance remain separate.
 
 - [ ] **Data processing + Project infrastructure:** Establish the 1.0 completeness baseline
   against the final intended input set; existing bounded reviews are prerequisites.
@@ -1618,9 +1619,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       rollback backup. Source/API/regression and maintained-text checks pass;
       typed Commlink (+X) is now published in the matched v9 pair;
       full manual browser and Army-context acceptance remain open.
-    - [ ] **N5-native source clarification:** Identify an authoritative
-      N5-specific Reinforcements Annex revision or explicit official adoption
-      ruling establishing which N4 procedures remain applicable unchanged.
+    - [ ] **N5-native source clarification:** Resolve
+      [SRC-030](official-source-clarifications.md#src-030--which-reinforcements-annex-procedures-govern-optional-n5-games)
+      by identifying an authoritative N5-specific Reinforcements Annex
+      revision or official adoption ruling establishing which N4 procedures
+      remain applicable unchanged.
       Archive/pin the approved edition/date and reconcile any differences
       before labelling the published N4-origin procedures as N5-native.
       This **does not block** the clearly disclosed optional legacy reference.
