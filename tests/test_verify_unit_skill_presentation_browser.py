@@ -464,6 +464,26 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                 for width in (1440, 390, 320):
                     page = browser.new_page(viewport={"width": width, "height": 900})
                     try:
+                        page_errors: list[str] = []
+                        failed_requests: list[str] = []
+                        api_responses: list[tuple[str, int]] = []
+                        page.on(
+                            "pageerror",
+                            lambda error, errors=page_errors: errors.append(str(error)),
+                        )
+                        page.on(
+                            "requestfailed",
+                            lambda request, failures=failed_requests: failures.append(
+                                f"{request.url}: {request.failure}"
+                            ),
+                        )
+                        page.on(
+                            "response",
+                            lambda response, responses=api_responses: responses.append(
+                                (response.url, response.status)
+                            ) if "/api/units/" in response.url
+                            or "/api/unit-profile-help" in response.url else None,
+                        )
                         for slug, source_id, total in (
                             ("indigo-spec-ops", 1912, 12),
                             ("indigo-team-ops", 1926, 14),
@@ -501,7 +521,37 @@ def test_live_chromium_spec_ops_source_charts() -> None:
                                 wait_until="domcontentloaded",
                             )
                             chart = page.locator(".source-choice-charts")
-                            chart.wait_for(state="visible", timeout=12000)
+                            try:
+                                chart.wait_for(state="visible", timeout=12000)
+                            except playwright_module.TimeoutError as exc:
+                                # Preserve the original 12 s gate. Capture the
+                                # active Unit and API/browser state only on failure.
+                                try:
+                                    state = page.evaluate(
+                                        """() => {
+                                            const byId = id => document.getElementById(id);
+                                            return {
+                                                readyState: document.readyState,
+                                                unitName: byId("unit-name")?.textContent,
+                                                unitStatus: byId("unit-status")?.textContent,
+                                                contentHidden: byId("unit-content")?.hidden,
+                                                sourceChartCount: document.querySelectorAll(
+                                                    ".source-choice-charts"
+                                                ).length,
+                                            };
+                                        }"""
+                                    )
+                                except Exception as probe_error:
+                                    state = {"probeError": str(probe_error)}
+                                pytest.fail(
+                                    f"Spec-Ops chart not visible after 12 s: "
+                                    f"slug={slug}, width={width}, sourceId={source_id}; "
+                                    f"state={state!r}; "
+                                    f"apiResponses={api_responses[-12:]!r}; "
+                                    f"failedRequests={failed_requests[-12:]!r}; "
+                                    f"pageErrors={page_errors[-8:]!r}; timeout={exc}",
+                                    pytrace=False,
+                                )
                             assert chart.locator(".source-choice-chart").count() == 1
                             assert chart.locator("summary").first.inner_text().endswith(
                                 f"Source Unit #{source_id}"

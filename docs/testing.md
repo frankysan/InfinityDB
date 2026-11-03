@@ -2161,6 +2161,15 @@ in **434.84 s** (the Spec-Ops source-chart visibility wait timed out at
 12 s; no gameplay assertion changed). This is evidence of an unreliable
 four-slot Windows acceptance configuration under shared-host load,
 but it does not prove the application or Chromium is defective.
+The failing test was
+`tests/test_verify_unit_skill_presentation_browser.py::test_live_chromium_spec_ops_source_charts`:
+the `.source-choice-charts` visibility assertion exceeded its
+existing 12 s threshold. A failure-only diagnostic now records
+the active Unit slug/source ID and viewport, response statuses
+for Unit/profile-help API calls, failed requests, JavaScript
+exceptions, and Unit/rendered-chart state. It retains the same
+timeout and test selection and does not change the production
+renderer. The previous Glossary diagnostic remains separate.
 The existing two-slot Windows limit remains appropriate.
 
 **Host-specific capacity decision (2026-11-03):** The dedicated Linux

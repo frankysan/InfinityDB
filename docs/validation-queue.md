@@ -239,7 +239,11 @@ profile is host-local and reversible; VR-0023/24 remain open.
   visibility timeout** in **434.84 s**. The user authorized a
   Linux-only four-slot default while retaining two slots on Windows;
   this is implemented as an ignored, opt-in host-local runner profile
-  (VR-0049), not a global or CI default change.
+  (VR-0049, retired), not a global or CI default change. The 12 s
+  Spec-Ops chart acceptance timeout is unchanged; failure-only
+  diagnostics now capture the active Unit/viewport, API results,
+  browser errors and DOM state for a possible next recurrence.
+  No Windows four-slot default increase is planned.
 
 - [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
   timestamped Chromium slot metrics and the timeline analyzer under
