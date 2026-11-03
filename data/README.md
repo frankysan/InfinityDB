@@ -100,6 +100,25 @@ fingerprint. `infinity-db database-health data/generated/infinity.db --require-r
 operator-facing validation command for this pair contract; omitting `--require-raw` validates only
 the published application database.
 
+For local source inspection, the read-only `tools.inspect_raw_archive` CLI
+checks the application/raw sibling pairing *before* reading any lossless
+source rows. It uses the imported table inventory from the paired metadata;
+zero-row source tables remain visible, and table names are never accepted
+outside the normalized source schema. From the repository root:
+
+```powershell
+.venv\Scripts\python.exe -m tools.inspect_raw_archive verify
+.venv\Scripts\python.exe -m tools.inspect_raw_archive tables
+.venv\Scripts\python.exe -m tools.inspect_raw_archive row skills 0
+.venv\Scripts\python.exe -m tools.inspect_raw_archive rows skills --start 0 --limit 20
+```
+
+The `--application` and `--raw` flags select explicit sibling paths when
+inspecting a different local build; a stale or mismatched pair fails closed.
+Rows are exact source JSON, not application identities. Bounded listings
+accept at most 100 entries per invocation. This tool does not change
+imported, curated or published data, and it is not part of the runtime API.
+
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
 `curated/README.md` owns the current format version and validation rules. PDF citations use

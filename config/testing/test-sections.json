@@ -80,6 +80,7 @@
         "test_immunity_combined_critical_completion",
         "test_identities",
         "test_identity_database",
+        "test_inspect_raw_archive",
         "test_interim_reference_consistency",
         "test_legacy_staging_schema_guards",
         "test_logical_unit_identity",

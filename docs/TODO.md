@@ -743,9 +743,11 @@ follow-up action. Retain source-native values until official resolution.
   the duplication on a controlled build, then decide whether post-export workflows need both
   or whether one should be documented as a regenerable/transient artifact.
 
-- [ ] Provide a small development CLI for `infinity.raw.db`: inspect a raw row,
-  list raw rows by normalized table, and verify that an archive matches its
-  application sibling's metadata.
+- [x] Provide a read-only development CLI for paired `infinity.raw.db`:
+  `tools.inspect_raw_archive` verifies the shared export metadata, lists
+  imported normalized tables (including zero-row tables), and retrieves
+  individual or bounded paged lossless source rows. Unknown tables, unpaired
+  siblings and invalid row selectors fail closed; see [data guidance](../data/README.md).
 
 - [ ] Add database-size reporting to `infinity-db build` so snapshot growth is
   visible in build output and CI.
