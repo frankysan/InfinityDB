@@ -1564,6 +1564,22 @@ check was performed. Keep scheduling defaults unchanged, investigate the
 load-sensitive failure, and require repeated fully passing comparisons before
 promotion.
 
+**2026-11-03 Glossary full-load timeout instrumentation (VR-0023/24):**
+The existing three-width
+`test_visibility_zone_terms_normal_browser` acceptance now
+captures `/api/glossary` response status and, **only on the
+unchanged 15-second visibility timeout**, reports page
+`readyState`, loading/error/list panel state, rendered entry
+count, error text, JavaScript page errors and any matching API
+responses. This will distinguish a pending API response from
+client rendering or a visible error state on a future
+full-suite failure without weakening the acceptance gate.
+Targeted Windows Chromium execution passed **3/3** in
+23.68 s (390px case 6.43 s), with Ruff and diff checks green.
+This isolated pass does **not** reproduce or explain the
+earlier full-load failure and does not justify promoting
+four Chromium slots as the default.
+
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and
 Compose **5.6.1** on the Windows MCP host, but both the daemon version

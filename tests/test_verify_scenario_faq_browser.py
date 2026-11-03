@@ -429,7 +429,13 @@ def test_visibility_zone_terms_normal_browser(
     page = chrome.new_page(viewport={"width": width, "height": 900})
     route_browser_page(page, release_scenario_app, ORIGIN)
     errors: list[str] = []
+    api_responses: list[tuple[str, int]] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "response",
+        lambda response: api_responses.append((response.url, response.status))
+        if "/api/glossary" in response.url else None,
+    )
     try:
         cases = (
             ("visibility-zone", "Visibility Zone", "never stack"),
@@ -442,9 +448,33 @@ def test_visibility_zone_terms_normal_browser(
             f"{ORIGIN}/glossary#term-visibility-zone", wait_until="domcontentloaded",
         )
         assert response is not None and response.status == 200
-        page.locator("#term-visibility-zone").wait_for(
-            state="visible", timeout=15000,
-        )
+        try:
+            page.locator("#term-visibility-zone").wait_for(
+                state="visible", timeout=15000,
+            )
+        except pytest.importorskip("playwright.sync_api").TimeoutError as exc:
+            # Keep the original 15 s acceptance gate. On a full-load
+            # timeout, distinguish pending API delivery from a rendered
+            # error/empty state or an actual browser JS exception.
+            try:
+                state = page.evaluate(
+                    """() => ({
+                        readyState: document.readyState,
+                        loadingHidden: document.getElementById("glossary-loading")?.hidden,
+                        errorHidden: document.getElementById("glossary-error")?.hidden,
+                        errorText: document.getElementById("glossary-error-message")?.textContent,
+                        listHidden: document.getElementById("glossary-list")?.hidden,
+                        listCount: document.querySelectorAll(".glossary-entry").length,
+                    })"""
+                )
+            except Exception as probe_error:
+                state = {"probeError": str(probe_error)}
+            pytest.fail(
+                f"Glossary term not visible at width {width} after 15 s; "
+                f"state={state!r}; apiResponses={api_responses!r}; "
+                f"pageErrors={errors!r}; timeout={exc}",
+                pytrace=False,
+            )
         snapshots = page.evaluate(
             """(slugs) => slugs.map((slug) => {
                 const anchor = `term-${slug}`;

@@ -194,8 +194,13 @@ Git updates are explicit agent actions, not background mirroring.
   in **509.91 s**, despite 83.2% less measured slot waiting. The exact
   failure passed in isolation; see `testing.md`. Deferred: resolve this
   full-load failure, aligned Windows/Linux skip-source parity, alternating
-  repeated clean comparisons and CPU/RAM monitoring. Retire only after
-  the remaining evidence is recorded.
+  repeated clean comparisons and CPU/RAM monitoring. A new
+  **failure-only Glossary diagnostic** captures the `/api/glossary`
+  response and pending/loading/error/list/JS state on the original
+  15-second timeout; three isolated normal Chromium widths passed
+  **3/3**, including 390px in 6.43 s. It changes no timeout,
+  lane scheduling or default capacity, and does not yet establish
+  the full-load cause. Retire only after remaining acceptance evidence.
 
 - [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
   timestamped Chromium slot metrics and the timeline analyzer under
