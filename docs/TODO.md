@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-016 (L, review):** Give Core/Hacking PDF sections and current curated families a
-  source-to-storage-to-browser disposition, not citation-only approval.
 - [ ] **V1S-017 (M, review):** Review Wiki-backed Skills, Equipment, Terms, Traits and special source wording
   for missing facts, relationships and normal links.
 - [ ] **V1S-018 (M, review):** Account for four core scenarios, FAQ, symbols and other source categories in
@@ -451,9 +449,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
         pinned Army snapshot. Final release-matched database,
         browser and CI acceptance remain separate gates.
   - [ ] Inventory player-relevant information by source section/category, including the four core
-    scenarios. For each category record its canonical identity/model, maintained input, generated
-    storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or
-    justified exclusion. Distinguish missing facts, missing relationships, and missing presentation.
+    scenarios. Core/Hacking module/family inventory and its bounded source-to-storage-to-browser
+    dispositions are recorded in the [V1S-016 current review overlay](v1.0-source-coverage-audit.md#current-corehacking-section-disposition-overlay-v1s-016-2026-11-03).
+    Remaining work: Wiki/FAQ/annex, source-specific Weaponry, scenario and other category
+    dispositions under V1S-017–022, plus whole-record/source-browser release acceptance.
+    Distinguish missing facts, missing relationships, and missing presentation.
   - [ ] Reuse `audit_source_presentation.py`, `audit_enrichment_coverage.py`, and
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
     not establish PDF, FAQ, or scenario completeness or prove browser usability; add the missing
