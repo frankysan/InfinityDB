@@ -907,6 +907,34 @@ not roster-legality implementation, confirmation of N5 adoption of
 N4-origin procedures, controlled Chromium-capacity benchmarking
 (VR-0023/24), or final hosted/manual release acceptance.
 
+**2026-11-03 legacy staging freshness gate (VR-0043 retired):**
+The Windows implementation added a read-only
+`tools.verify_staged_release_pair` check for exact baseline and candidate
+hashes, curated-source freshness, v8/v9 schema preservation, reviewed
+Restrictions and deployed-object pair integrity; it does not promote
+ignored staged artifacts. Windows focused tests passed **5/5** new
+verifier, **3/3** legacy exporters, and **3/3** promoted terrain; Ruff,
+Pyright, documentation links/lint, rules stage and whitespace checks
+passed. The change was committed and pushed as
+`ad3314dc3da02ec3a9087b5361dcbdc1b374cabf`.
+
+After explicit Linux fetch and fast-forward to that exact SHA, the
+Git-ignored deployed-object publication was rebuilt and separately
+verified with `tools.build_deployed_object_publication --check`.
+Pinned `linux-dev` full-suite job
+`linux-dev:d6afcceb7045465e844ff91bf65c81b5` finished with
+**4,952 passed, 29 skipped, 0 failed** in 578.23 s pytest /
+578.92 s runner. All **808/808** published SVG assets were present;
+29 skips were grouped into 13 reasons, including optional rebuilt
+release inputs, unavailable local PDF/report fixtures, Windows-only
+cases and already-promoted staging. Two existing Python 3.14
+multithreaded `fork()` deprecation warnings remain. The run measured
+6,240.96 summed worker-seconds of Chromium/resource waiting across
+30 setup events, already included in setup timings rather than extra
+wall time. This retires VR-0043; VR-0023/24 remain open for controlled
+capacity and skip-reason comparisons. Hosted CI and release sign-off
+remain separate gates.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at
