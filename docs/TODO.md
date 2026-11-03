@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-004 (M, review):** Revisit interpretations whose September 26 Wiki capture cannot establish a
-  historical before/after claim; disclose uncertainty.
 - [ ] **V1S-005 (M, review):** Reconcile N5.3 English update subjects 01-13 to final PDF, Wiki and maintained
   identities; record confirmed/no-change outcomes.
 - [ ] **V1S-006 (M, review):** Reconcile N5.3 English update subjects 14-26 independently, retaining original
@@ -426,9 +424,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
   assessment are repaired; use the [source-evidence procedures](testing.md#10-source-evidence-baseline)
   when refreshing the frozen-pair baseline, without inferring whole-source or
   browser acceptance from the historical shared-effect approvals.
-  - [ ] Review any change-sensitive curated interpretations that cannot be
-    established from the available September 26 capture; the missing original
-    cannot be used to prove earlier content equivalence.
+  - [x] Review change-sensitive historical Wiki comparisons: the September 26
+    citation replacement is verified, but the missing September 18 original
+    cannot establish a before/after content delta. The bounded dispositions
+    are recorded in the [source evidence](rules-explanation-audit-1.0-sources.md#historical-wiki-comparison-boundary-v1s-004-2026-11-03);
+    source-wide semantic and frozen-release gates remain open.
   - [ ] Pin the intended Army snapshot, rules/FAQ/annex PDF versions, and supported wiki evidence.
     Record archive/content hashes as appropriate, publication dates separately from acquisition
     dates, and the generated database/publication identities. A later source refresh reopens the

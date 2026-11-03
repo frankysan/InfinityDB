@@ -29,6 +29,76 @@ The earlier September 18 ZIP was not recovered and cannot be byte-compared.
 The S18 row above remains historical evidence, not current curated provenance;
 the newer archive is a deliberate source substitution, not the original capture.
 
+## Historical Wiki comparison boundary (V1S-004; 2026-11-03)
+
+The change-sensitive 1.0 review rechecked the available evidence and the
+historical wording in the maintained Core/Hacking source notes. It confirms
+**two different questions**, which must not be conflated:
+
+- **Can the current archived citations be reproduced? Yes, for the selected
+  September 26 capture.** Its SHA-256, 812 ZIP members, all 74 current
+  archived citations and two vocabulary references, 64 distinct cited
+  pages, headings and matching embedded revision IDs in the September 28
+  English history capture were checked in the prior source migration.
+  `tools.audit_1_0_reference_inputs` also completed successfully on
+  2026-11-03 with both currently pinned language captures and histories.
+  Revision-ID agreement across those **later** archives is corroboration
+  for the chosen citation targets; it is not a comparison with S18.
+- **Was the original September 18 content identical or different? Unknown.**
+  S18's expected SHA-256
+  `aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a`
+  is historical metadata, not a freshly verified file. The original
+  812-member ZIP is absent and its bytes have not been recovered. At the
+  original audit it underlay 72 records/74 citations; the replacement did
+  not certify their old wording or prove the existence, absence or timing
+  of a change between September 18 and 26. An archived page's current
+  banner and a later crawler's acquisition date cannot establish an
+  earlier publication or effective date.
+
+Change-sensitive interpretations retain the following independent boundaries:
+
+- **Kobra Pistol (REA-028):** exact English *Mixed Weapons* oldid
+  4021 (2026-08-10), 4077 (2026-08-24) and 4082 (2026-08-27),
+  plus Weapon Chart 4083, support a limited chronology **between those
+  identified Wiki revisions**. Army and bilingual N5.3 PDFs independently
+  support the currently disclosed saving-roll/Anti-materiel conflict.
+  No unobserved September 18-versus-26 change is inferred.
+- **Dodge (ARM+3), REA-042:** September 26 English Wiki text and the
+  Spanish October 9 capture/oldid 4012 show a failed-PH condition;
+  both N5.3 PDFs use unconditional wording. The Spanish oldid has its
+  own 2026-09-08 revision timestamp. This supports a current
+  **PDF-versus-Wiki discrepancy**, not a dated English Wiki delta or an
+  independently established official erratum.
+- **Flash Pulse and other bilingual chart cases (REA-027/041):**
+  pinned Spanish oldids 3987/3988 and 4012, the English chart oldid
+  4083 and the bilingual PDFs can establish scoped conflicts. They do
+  not establish when the missing S18 archive's pages changed, nor
+  authorize Spanish Wiki wording to supersede the PDF.
+- **Pitcher and other embedded older-chart examples:** the reviewed
+  N5.3 PDF, Army and September 26 English Wiki establish the selected
+  current profile; an older chart reproduced within the Wiki is
+  **historical page content**, not recovered S18 bytes. An explicit
+  older/newer chart label alone does not establish a cross-capture delta.
+- **Other cited Skills/Equipment/States:** the existing September 26
+  member and history-revision checks establish citation identity only.
+  Where an individual oldid is pinned (for example Doctor 3979,
+  Engineer 3980, Fireteams Chart 4116), its own recorded revision
+  establishes only that page's historical evidence. No blanket
+  before/after or all-record semantic equivalence is asserted.
+
+**Disposition:** no additional gameplay-data, model, API or ordinary
+browser change follows solely from the missing earlier archive.
+The already published source-conflict notes remain in their canonical
+cards. The surviving history/source limitations are disclosed above,
+not classified as 72 gameplay defects. A later recovered S18 must be
+hash-verified and compared before making a capture-to-capture claim;
+source-wide clause review, N5.3 item reconciliation and frozen-candidate
+browser acceptance remain separate (V1S-005–012, V1S-016–022,
+V1S-028/029 and release gates). The focused existing evidence-auditor
+regressions passed **50/50** at `a20cb616` on Windows. This closes
+the bounded change-sensitive *historical-comparison* review, not
+full semantic reacceptance of all affected records.
+
 ## Evidence classes and portability
 
 - **Tracked:** C/H curated text, source declarations, review policy, validation
