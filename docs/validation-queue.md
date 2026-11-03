@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 3 distinct
-changes** (VR-0023/0024/0040); no deferred test-design requirement is open.
+Only open VR obligations belong here. **Current count: 4 distinct
+changes** (VR-0023/0024/0040/0041); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
 At pinned Linux commit `8e2b2de727afa9695dcd3bc48b7f8b62cf319426`,
@@ -109,6 +109,22 @@ Full execution evidence and the earlier corrected one-failure run are
 in [testing.md](testing.md#parallel-windows-development-and-linux-validation).
 The independent Chromium skip-reason and controlled capacity comparisons
 remain open as VR-0023/24. Git updates are explicit, not background mirroring.
+
+- [ ] **VR-0041** (2026-11-03; ready-to-run): Accept
+  complete published Reinforcement Section profile/loadout source parity.
+  Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
+  base `64793592`, changed
+  `tests/test_reinforcements_optional_reference.py`,
+  `docs/rules-semantics.md`, TODO and testing documentation.
+  Risk: low (source/read-model regression and correction of stale
+  promotion status in docs; no runtime artifact change).
+  Immediate: source-to-runtime full Section cohort **1/1 passed**
+  in 1.77 s on Windows; targeted Ruff **PASS**.
+  Design: none. Deferred: pinned Linux selector
+  `tests/test_reinforcements_optional_reference.py::test_every_published_reinforcement_profile_and_loadout_keeps_source_army`,
+  then cumulative validation at the next queue execution gate.
+  This does not imply that shared Reinforcement pools are independently
+  legal Army Lists or that N4-origin procedures have N5-native authority.
 
 - [ ] **VR-0040** (2026-11-03; ready-to-run): Cross-platform
   acceptance for source-profile/Section context and exact Commlink
@@ -301,8 +317,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0041` (`VR-0023`, `VR-0024`, and `VR-0040`
-  open; all other earlier entries retired).
+- Execution: `VR-0042` (`VR-0023`, `VR-0024`, `VR-0040`,
+  and `VR-0041` open; all other earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

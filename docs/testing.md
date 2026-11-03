@@ -829,6 +829,22 @@ legality or N5-native rule authority. Deferred Linux module/integration
 acceptance is tracked as VR-0040; the earlier `8e2b2de7` cumulative
 suite did not contain these new tests.
 
+**2026-11-03 complete Reinforcement Section source parity (VR-0041):**
+`tests/test_reinforcements_optional_reference.py::test_every_published_reinforcement_profile_and_loadout_keeps_source_army`
+independently assembles all source profile and loadout rows from the
+tracked Army database using `logical_unit_sources`,
+`application_army_sources`, the exact source profile/loadout
+occurrences and `role = reinforcement`. For every affected logical
+Unit, it compares the runtime repository's Section-scoped
+`(group_id, name)` profiles and
+`(group_id, option_id, name, points, swc)` loadouts with those
+independently joined source rows, including the absence of extra
+cross-Section entries. Windows focused regression **1/1 passed**
+(1.77 s pytest), targeted Ruff passed. This establishes **published
+source-identity parity**, not publisher rules adoption, every possible
+Army-list legality constraint or manual browser/AT acceptance.
+Cross-platform/cumulative acceptance is deferred as VR-0041.
+
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
 checkout preparation, Linux asynchronous jobs at

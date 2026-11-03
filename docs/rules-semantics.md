@@ -4721,8 +4721,10 @@ Still unresolved: identify an authoritative N5 annex revision or adoption
 statement, pin its effective date and edition, and reconcile any differences
 before representing those procedures as N5-native. The following RS-RF
 sections describe the retained **N4 annex semantics and source/Army modeling
-implications**; exact typed `Commlink (+X)` parameters are now defined
-in curated source but pending guarded release-pair publication.
+implications**; the exact typed `Commlink (+X)` parameters are published
+in the matched v9 rules/deployed-object pair. The pinned-source
+Reinforcement Section parity regression confirms that the application's
+profiles and loadouts retain their original Army/Section occurrences.
 Army-list legality modeling remains separate work.
 
 Sources:

@@ -1664,8 +1664,16 @@ missing explanations: the existing shared-effects approvals must be reconciled.
       now verifies exact source-profile ownership, optional visibility and
       selected-Army presentation in API and real Chromium. Both exact
       Commlink (+1)/(+2) loadout occurrences also link to their scoped
-      Skill reference. This bounded cohort is **not** a complete audit of
-      every Section/profile, a list-legality model or N5-native annex approval.
+      Skill reference. An additional pinned-source regression now covers
+      **every published Reinforcement Section profile and loadout** against
+      the source Army identity/group and original values (VR-0041).
+      Full manual browser acceptance and any publisher-specific N5
+      procedural authority still remain; this is not list legality.
+    - [x] Audit all published Reinforcement Section profiles and loadouts
+      against their exact source Unit, Army, group, name and option/cost
+      occurrences after logical-Unit reconciliation. The complete
+      Section parity regression passes locally **1/1**; cross-platform
+      and cumulative acceptance are queued as VR-0041.
     - [x] Test a source-backed ordinary/Reinforcement shared Unit, exact
       Commlink (+1)/(+2) Army loadouts, and the separate Tactical Phase
       category. Windows API **1/1**, context Chromium **2/2** and variant

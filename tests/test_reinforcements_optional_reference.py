@@ -332,3 +332,75 @@ def test_annex_read_model_is_discoverable_and_separate_from_core_matrix(tmp_path
     items = [item for section in matrix["sections"] for item in section["items"]]
     assert len(items) == 57
     assert not any(item["name"] == "Request Reinforcements" for item in items)
+
+
+def test_every_published_reinforcement_profile_and_loadout_keeps_source_army() -> None:
+    """Canonical Units must retain each Section's exact source profile/loadout rows."""
+    from collections import defaultdict
+
+    path = ROOT / "data/generated/infinity.db"
+    profiles: dict[int, dict[int, set[tuple[int, str]]]] = defaultdict(
+        lambda: defaultdict(set)
+    )
+    loadouts: dict[int, dict[int, set[tuple[object, ...]]]] = defaultdict(
+        lambda: defaultdict(set)
+    )
+    with sqlite3.connect(path) as connection:
+        for logical_id, army_id, group_id, name in connection.execute(
+            "SELECT lus.logical_unit_id, aas.application_army_id, "
+            "ppo.group_id, pp.name "
+            "FROM profile_payload_occurrences AS ppo "
+            "JOIN logical_unit_sources AS lus ON lus.source_unit_id = ppo.unit_id "
+            "JOIN application_army_sources AS aas ON aas.source_army_id = ppo.army_id "
+            "JOIN application_armies AS a ON a.id = aas.application_army_id "
+            "AND a.role = 'reinforcement' "
+            "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id"
+        ):
+            profiles[logical_id][army_id].add((group_id, name))
+        for logical_id, army_id, group_id, option_id, name, points, swc in connection.execute(
+            "SELECT lus.logical_unit_id, aas.application_army_id, "
+            "lpo.group_id, lpo.option_id, lp.name, lpo.points, lpo.swc "
+            "FROM loadout_payload_occurrences AS lpo "
+            "JOIN logical_unit_sources AS lus ON lus.source_unit_id = lpo.unit_id "
+            "JOIN application_army_sources AS aas ON aas.source_army_id = lpo.army_id "
+            "JOIN application_armies AS a ON a.id = aas.application_army_id "
+            "AND a.role = 'reinforcement' "
+            "JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id"
+        ):
+            loadouts[logical_id][army_id].add(
+                (group_id, option_id, name, points, swc)
+            )
+
+    logical_ids = set(profiles) | set(loadouts)
+    assert len(profiles) > 20, "No substantive published Reinforcement profile corpus"
+    assert len(loadouts) > 20, "No substantive published Reinforcement loadout corpus"
+    database = Database(path)
+    compared_sections = 0
+    for logical_id in sorted(logical_ids):
+        unit = database.get_unit(logical_id)
+        assert unit is not None, logical_id
+        actual_profiles: dict[int, set[tuple[int, str]]] = defaultdict(set)
+        actual_loadouts: dict[int, set[tuple[object, ...]]] = defaultdict(set)
+        for army in unit["armies"]:
+            if army["role"] != "reinforcement":
+                continue
+            if army["profiles"]:
+                actual_profiles[army["id"]].update(
+                    (item["group_id"], item["name"]) for item in army["profiles"]
+                )
+            if army["loadouts"]:
+                actual_loadouts[army["id"]].update(
+                    (item["group_id"], item["option_id"], item["name"],
+                     item["points"], item["swc"])
+                    for item in army["loadouts"]
+                )
+        expected_profiles = dict(profiles.get(logical_id, {}))
+        expected_loadouts = dict(loadouts.get(logical_id, {}))
+        assert dict(actual_profiles) == expected_profiles, (
+            logical_id, unit["name"], actual_profiles, expected_profiles,
+        )
+        assert dict(actual_loadouts) == expected_loadouts, (
+            logical_id, unit["name"], actual_loadouts, expected_loadouts,
+        )
+        compared_sections += len(set(expected_profiles) | set(expected_loadouts))
+    assert compared_sections > 20
