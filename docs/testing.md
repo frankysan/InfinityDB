@@ -2224,12 +2224,41 @@ Linux repeated four-slot acceptance successfully at `48d0cd84`.
 VR-0024 is therefore retired as a *metrics* validation gate.
 The user-approved host-specific capacities remain unchanged.
 
-**VR-0023 remains open:** host-specific source/skip coverage,
-Scenario FAQ lifecycle profiling, and the historical full-load
-Glossary/Spec-Ops visibility timeouts need separate examination.
-Windows four-slot stress is not a target default; its unreliable
-behavior under competing desktop workloads was documented.
-No production browser configuration changes.
+**Cross-host skip diagnostics closeout (VR-0023 retired):**
+At `955c55a02bf4aa74023313506105b29a6620c862`, the maintained
+test runner's optional `--skip-details` prints the exact skipped
+pytest node IDs and reasons, independently of the existing grouped
+`--skip-summary`; neither changes test selection or failure status.
+On the same revision, the **model** section passed Windows
+**3,055 / six skipped** and Linux **3,049 / twelve skipped**.
+Six shared skips concern already-promoted or opt-in source staging.
+The six extra Linux skips were identified exactly: two FAQ PDF
+identity cases, two Silent Immunity FAQ-source identity cases,
+one N5.2/N5.3 pinned-source comparison, and one missing local
+migration-staging report. The files are ignored local evidence,
+not tracked publication artifacts.
+
+The **ops** section passed Windows **363 / five skipped** (all
+symlink-privilege dependent) and Linux **367 / one skipped**
+(a Windows-native API-only test). The separate web-metrics tests
+passed **two / two skipped** on Windows (two Linux-only Gunicorn
+fork cases) and **four / zero skipped** on Linux. All these
+comparisons had **zero failures**. Focused capacity tests passed
+**25/25**, runner tests **108/one expected skip**, Ruff and
+Pyright passed. The prior Linux host-profile full suite at
+`47122aa5` passed **5,001 / 29 skipped / zero failures**.
+The different skip inventories are understood, explicitly
+labeled and do not imply identical optional source-byte coverage.
+
+**The remaining research is explicitly deferred until after v1.0:**
+intermittent Windows Glossary/Spec-Ops full-load visibility
+timeouts, the Scenario FAQ browser lifecycle/long tail,
+pooled-versus-fresh browser comparisons, and optional source
+PDF/staging parity. They are tracked in
+[the Post-1.0 backlog](TODO.md#performance-storage-and-build-tooling),
+not as an open VR-0023 acceptance gate. The validated Linux
+four-slot and Windows two-slot limits remain unchanged; no
+production browser or CI configuration changes.
 
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and

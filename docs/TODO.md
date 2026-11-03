@@ -702,27 +702,27 @@ follow-up action. Retain source-native values until official resolution.
 
 ### Performance, storage, and build tooling
 
-- [ ] **Project infrastructure:** Execute the controlled
-  [Chromium concurrency and browser-reuse benchmark](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark).
-  Existing slot/timeline diagnostics, host CPU/RAM sampling and pooled-browser
-  pilots are implemented; their measurements and limitations belong in testing.
-  - [x] Adopt a reversible host-local four-slot/four-lane benchmarked test
-    profile on the dedicated Linux worker; retain the two-slot Windows and
-    clean-CI defaults. See [host-specific decision](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark).
-  - [x] Validate timestamped Chromium slot metrics, lock-namespace accounting
-    and full-window CPU/RAM captures on both hosts (VR-0024 retired).
-  - [ ] Reconcile host-specific source-evidence and platform-only skip reasons,
-    and investigate intermittent full-load Glossary and Spec-Ops chart visibility
-    timeouts under the selected Windows two-slot and Linux four-slot limits.
-    Passing isolated tests does not establish the full-load cause.
-  - [ ] Profile the Scenario FAQ long tail and browser lifecycle across more
-    modules; compare pooling with fresh per-test contexts and verify isolation.
-    Keep remaining stability/source-coverage acceptance in
-    [VR-0023](validation-queue.md).
-  - [ ] If comparing a pinned Playwright container, first verify an available
-    Linux container engine; keep the test environment separate from production
-    Compose. Adopt defaults only after repeatable speed, stability and resource
-    evidence; keep raw reports under ignored `local/`.
+- [ ] **Post-1.0 infrastructure research — deferred:** Continue the
+  [Chromium lifecycle and concurrency investigation](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)
+  after v1.0 ships. The v1.0 instrumentation gates (VR-0023/24) are
+  complete; Linux uses its validated four-slot profile, Windows retains
+  two slots, and clean CI is unchanged. Raw captures stay in ignored
+  `local/benchmarks/`.
+  - [ ] Diagnose intermittent full-load Windows Glossary and Spec-Ops
+    chart visibility timeouts using the existing failure-only API/DOM
+    diagnostics; passing isolated runs do not establish their cause.
+  - [ ] Profile the Scenario FAQ long tail, fresh browser contexts
+    versus pooled-browser reuse, and CPU/RAM behavior under sustained
+    parallel load; revisit alternate capacities only with repeated
+    stable evidence on a dedicated host.
+  - [ ] Revisit exact cross-host optional source-PDF/staging coverage
+    if equivalent source-byte audit coverage becomes a requirement;
+    platform-only and missing ignored-source skips must remain labeled,
+    not silently treated as equal test coverage.
+  - [ ] Consider a pinned Playwright container only after verifying a
+    Linux test container engine, separate from production Compose.
+    None of these investigations blocks the v1.0 release unless new
+    evidence reveals a release-critical defect.
 
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a

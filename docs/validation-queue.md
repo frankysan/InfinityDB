@@ -95,9 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 1 distinct
-change** (VR-0023); no deferred test-design requirement is open.
-Oldest recorded date: 2026-11-02.
+Only open VR obligations belong here. **Current count: 0**;
+no deferred test-design or test-execution requirement is open.
 
 At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
 the full suite passed **4,946 tests / 28 expected skips / 0 failures**
@@ -108,15 +107,17 @@ The preceding `5d6a30d8` run passed the same suite; a subsequent
 fixed-tuple Pyright correction was retested on the final revision.
 See [testing.md](testing.md#parallel-windows-development-and-linux-validation)
 for the pinned jobs, warnings and residual scope. The independent
-Chromium skip-reason and controlled capacity comparisons remain open
-as VR-0023/24. Git updates are explicit, not background mirroring.
+Chromium skip-reason and controlled capacity comparisons were tracked
+under VR-0023/24, both now retired below. Git updates are explicit,
+not background mirroring.
 
 The later pinned Linux suite at `ad3314dc3da02ec3a9087b5361dcbdc1b374cabf`
 passed **4,952 tests / 29 expected skips / 0 failures** with 808/808
 published SVG assets. It retires VR-0043 (legacy staging freshness guard);
 full evidence and the two existing `fork()` warnings are recorded in
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
-The independent Chromium diagnostics remain open as VR-0023/24.
+The independent Chromium diagnostics were tracked as VR-0023/24;
+both were subsequently retired below.
 
 The 2026-11-03 Lieutenant publication and development tooling batches
 retired **VR-0044/45/46** at pinned `60bd855932f663bf6bec0de5dc29f3439006e6ed`.
@@ -173,7 +174,7 @@ two existing Python 3.14 fork warnings. Windows retained standard
 section passed **361/five skips**. All three GitHub workflows passed,
 including the cross-platform deterministic-output matrix. The
 profile is host-local and reversible; the separate metrics gate
-VR-0024 is retired below, while VR-0023 remains open.
+VR-0024 and VR-0023 are both retired below.
 
 Chromium metrics and timeline instrumentation **VR-0024** retired
 at pinned `6177a8dc0befd544971913db010168254bf431fb`.
@@ -193,80 +194,45 @@ its host-specific four-slot full suite at `47122aa5` passed
 **5,001/29 skipped/zero failed** in **422.07 s**. All hosted
 checks at `47122aa5` passed. This closes the metrics
 implementation/verification obligation, **not** the Windows four-slot
-timeout or cross-host source/skip parity, which remain with VR-0023.
-Linux keeps its opt-in four-slot profile; Windows and CI remain
-unchanged.
+timeout or cross-host source/skip parity. VR-0023 now documents
+the environment-specific differences, while deeper investigation is
+explicitly deferred to after v1.0. Linux keeps its opt-in four-slot
+profile; Windows and CI remain unchanged.
 
-- [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
-  reporting and explicit resource-wait measurements under full Linux and
-  Windows xdist runs. Work: [browser concurrency benchmarking](TODO.md#performance-storage-and-build-tooling);
-  change: `tools/run_checks.py`, `tools/pytest_startup_profile.py`,
-  related focused tests, based on `841acbe0`; risk: low (diagnostic-only).
-  Immediate: capacity/profile **15 passed**, runner **94 passed / 1 expected
-  skip**, real Windows xdist skip-summary **94 passed / 1 expected skip**,
-  12 browser tests passed with measured slot contention; Ruff, Pyright,
-  docs and diff checks passed. Design: none.
-  Linux first-pair evidence: at `c7901f1`, both eight-worker/four-lane
-  runs passed **4,505 / 330 skipped**; two slots took **608.34 s** and
-  four slots **420.25 s**, with measured cumulative Chromium waiting
-  **2,777.73 s** and **1,072.94 s**, respectively. Grouped skip reasons
-  reconcile all 330 cases. See `docs/testing.md` for methodology.
-  Correctly grouped Linux full-suite pair at `413a2185`: both slot
-  counts passed **4,520 / 330 skipped**; two slots took **503.49 s**
-  with **750.74 worker-s** of measured slot waiting; four took
-  **380.97 s** with **93.27 worker-s** waiting (24.3% faster in one
-  pair). Windows full-suite 2/4-slot pair at `4bda6efb`: both reported
-  **28 skips**, but only two slots passed (**4,843/28 in 672.40 s**);
-  four slots had **4,842/28 with one Glossary browser visibility timeout**
-  in **509.91 s**, despite 83.2% less measured slot waiting. The exact
-  failure passed in isolation; see `testing.md`. Deferred: resolve this
-  full-load failure, aligned Windows/Linux skip-source parity, alternating
-  repeated clean comparisons and CPU/RAM monitoring. A new
-  **failure-only Glossary diagnostic** captures the `/api/glossary`
-  response and pending/loading/error/list/JS state on the original
-  15-second timeout; three isolated normal Chromium widths passed
-  **3/3**, including 390px in 6.43 s. Linux acceptance of
-  the same committed test (`ce6d6d8b`) passed **3/3** in
-  19.09 s (390px in 5.15 s), job
-  `linux-dev:c827d624021a438a87a72f1c5fdf9ba0`.
-  It changes no timeout, lane scheduling or default capacity,
-  and does not yet establish the full-load cause.
-  To make same-revision skip parity observable from the
-  restricted async test-job interface, the check runner now
-  automatically groups skip reasons for unfiltered full test
-  suites (also `--all`); targeted and standalone-preflight
-  reporting remains opt-in, with an explicit
-  `--no-skip-summary` override. Focused runner regression
-  passed **106 tests, one expected skip**; Ruff and Pyright
-  passed. The grouped counts are now available from
-  both same-revision full suites at `ea438555`: both reported
-  **4,921 passed, 28 skipped, one shared non-browser
-  deterministic-I/O failure**. Only **22** skips share
-  grouped reasons. Windows skipped two Gunicorn fork tests
-  and four symlink-privilege tests; Linux skipped six tests
-  needing local PDFs or migration staging evidence. The
-  newline-policy defect was fixed in `5e1cdbf6`, and
-  **both** full suites at that revision passed: Windows
-  **4,922/28 skipped in 537.68 s**, Linux **4,922/28
-  skipped in 566.85 s**, with no failures or browser
-  regressions. Six host-specific skip reasons on each side remain.
-  New same-revision eight-worker/four-lane browser comparisons at
-  `5ac29416` passed **600 / 16 skipped / 0 failed** at both capacities
-  on each host (Windows **481.83/402.56 s**, Linux
-  **636.13/396.22 s**, two/four slots). The Glossary timeout did not
-  recur; see `testing.md`. Retire only after alternating repeatability
-  and the remaining host-specific source/skip differences are reconciled.
-  At documentation revision `48d0cd84`, Linux four-slot repetition
-  again passed **600 / 16 skipped** in **395.29 s**, while Windows
-  four-slot repetition had **599 / 16 skipped / one Spec-Ops chart
-  visibility timeout** in **434.84 s**. The user authorized a
-  Linux-only four-slot default while retaining two slots on Windows;
-  this is implemented as an ignored, opt-in host-local runner profile
-  (VR-0049, retired), not a global or CI default change. The 12 s
-  Spec-Ops chart acceptance timeout is unchanged; failure-only
-  diagnostics now capture the active Unit/viewport, API results,
-  browser errors and DOM state for a possible next recurrence.
-  No Windows four-slot default increase is planned.
+Chromium cross-host skip diagnostics **VR-0023** retired at pinned
+`955c55a02bf4aa74023313506105b29a6620c862`. The maintained
+runner's `--skip-details` opt-in lists each skipped pytest node ID
+and reason alongside independently controlled grouped skip counts;
+it changes neither selection, admission slots, nor exit status.
+Focused Windows capacity tests **25/25**, runner tests **108/one
+expected skip**, Ruff and Pyright passed. With `--skip-details`
+and full assets, Windows model tests passed **3,055/6 skipped**
+(job `30eed8ebb1624bf6bc16d81bdb40167e`), Linux model
+**3,049/12 skipped** (job
+`linux-dev:07d181f703904818b9de7a07a58a313c`).
+Exactly **six additional Linux model skips** come from five absent
+ignored FAQ/N5.2–N5.3 PDF checks and one local migration report;
+the other six model skips are shared, pre-promotion/opt-in cases.
+Windows operations passed **363/five skipped**
+(`4e04d81e25d047d7baeb324cc0715d90`); all five skips
+are Windows symlink-privilege checks. Linux operations passed
+**367/one skipped**
+(`linux-dev:beaf812a636044818dc85d7c6026dd1a`), the skip
+being a Windows-only native API test. Separately,
+`tests/test_web_metrics.py` passed Windows **2/two skipped**
+(Linux Gunicorn/fork-only cases) and Linux **4/4**. All compared
+sections have zero failures; unequal skip counts are explicitly
+environment-labeled, not falsely described as equivalent coverage.
+The prior pinned four-slot Linux full suite at `47122aa5`
+passed **5,001/29 skipped/zero failed**, and VR-0024 separately
+retired the slot/resource instrumentation. The deeper analysis
+of Windows full-load Glossary/Spec-Ops timeouts, Scenario FAQ
+long tails, browser pooling, and optional identical PDF/staging
+coverage is **deferred to the Post-1.0 backlog** in
+[TODO.md](TODO.md#performance-storage-and-build-tooling).
+The chosen Linux four-slot and Windows two-slot limits remain
+unchanged. No new 1.0 validation obligation is created by this
+performance investigation.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -278,7 +244,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0050` (`VR-0023` open; `VR-0024` and
+- Execution: `VR-0050` (`VR-0023`, `VR-0024`,
   `VR-0044`–`VR-0049` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
