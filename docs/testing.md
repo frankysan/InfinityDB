@@ -1094,7 +1094,7 @@ at that same SHA; VR-0050 is retired. The inventory at that commit was
 **24 reviewed-extra / 10 unresolved** Skill source IDs. The cross-Army
 usage index remains unimplemented.
 
-**2026-11-03 Infiltration fixed-PH source review (VR-0051 pending):**
+**2026-11-03 Infiltration fixed-PH source review (VR-0051 retired):**
 N5.3 p. 97 permits bracketed PH=X to replace only the PH used for the
 normal PH-3 Infiltration Roll. The pinned Skill source-47 inventory has
 216 direct occurrences: 17 carry five exact fixed-PH signatures,
@@ -1111,8 +1111,17 @@ The Linux export can have a different binary SHA due to SQLite layout or
 ANALYZE statistics; the cross-platform review gate instead compares all
 application-owned tables, schema and database identity. Windows
 source-variant **100/100**, rules, data/build, docs, Ruff and canonical
-Pyright passed. Linux final-revision/hosted acceptance is
-tracked separately as VR-0051; no cross-Army usage index was added.
+Pyright passed. At committed `dd071c4df04d6c90cddc1a84a6974952506a097d`,
+Linux source-variant **100/100** passed
+(`linux-dev:530576cbc3424eef8af7f85e7c2ff9af`), and the full
+four-lane/full-assets suite passed **5,014 tests / 29 expected skips /
+zero failures** in **432.87 s pytest / 433.53 s runner**
+(`linux-dev:fe88bdfebfcd479db587062a2028296b`), with
+**808/808** published SVGs. GitHub Source Checks, Installed Wheel
+Smoke and Deployment Smoke all completed successfully for the same
+SHA (runs `41691029120`, `41691029210`, `41691029257`).
+VR-0051 is retired; these results do not accept later edits or the
+final 1.0 release candidate. No cross-Army usage index was added.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked

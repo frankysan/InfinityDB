@@ -95,23 +95,15 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 1 distinct
-change** (VR-0051); no deferred test-design requirement is open.
+Only open VR obligations belong here. **No pending entries.**
 
-- [ ] **VR-0051** (2026-11-03; ready-to-run): Accept the five exact
-  N5.3 Infiltration source-47 bracketed PH values, guarded paired
-  v9 rules refresh, and no-change deployed-object projection. Work:
-  [source variant coverage](TODO.md#rules-and-reference-completeness);
-  risk: medium (reviewed metadata and tracked rules database).
-  Immediate Windows: pinned N5.3 p. 97, 216 direct occurrences,
-  17 fixed-PH qualifiers and five explicitly unresolved bare ReRoll
-  qualifiers; guarded promotion and read-only matched-pair recheck,
-  exact owner/negative semantics and source-variant **100/100**,
-  rules/data/build/docs/Ruff/Pyright passed. Design: none.
-  Deferred: committed-revision Linux source-variant module and
-  cumulative full-asset suite, plus exact-SHA hosted CI workflows.
-  A fixed PH value substitutes only for the PH-3 Infiltration Roll;
-  do not treat it as a Unit Attribute change or infer missing ReRoll PH=X.
+Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
+`dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
+source-variant **100/100**, full-assets **5,014 passed / 29 expected
+skips / zero failures**, and all three GitHub workflows passed. The
+source-boundary and paired-publication details are in
+[testing.md](testing.md#parallel-windows-development-and-linux-validation).
+Final frozen-candidate release gates remain separate.
 
 Combat Jump source-35 occurrence semantics **VR-0050** retired at
 pinned `c1d8adc6cd547063ee5b8a85e831aa73cd4d4195`. The exact
@@ -279,8 +271,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0052` (`VR-0051` open; `VR-0050`, `VR-0023`,
-  `VR-0024`, `VR-0044`–`VR-0049` and earlier entries retired).
+- Execution: `VR-0052` (`VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

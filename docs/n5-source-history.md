@@ -33,6 +33,40 @@ and DA in CC Mode. It does **not** resolve the printed-versus-Army CC Saving Rol
 count discrepancy. The April 2025 update includes both a dated post and a later
 appendix: preserve that distinction when associating events with snapshots.
 
+## Selected Army input for 1.0 (V1S-001; 2026-11-03)
+
+The intended Army input for the current 1.0 completeness review is the
+**English September 29, 2026 snapshot**:
+`data/raw/JSON 20260929-114335.zip` (59 JSON documents: `metadata.json` and
+58 faction documents). Its generated version-3 provenance manifest is
+`data/manifests/snapshots/JSON 20260929-114335.json`. The exact archive
+SHA-256 is
+`f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`;
+the separately calculated logical content SHA-256 is
+`cc2212506489d4c9cc88936219131c6c645c20362219f6751fe1e0d3ef3102b3`.
+This selection is also the Army archive identity in the tracked
+`data/manifests/symbol-publication.json`.
+
+The manifest records acquisition at **2026-09-29T11:43:35+02:00** from
+`https://api.corvusbelli.com/army`, with source
+`dataChangedOn=2026-09-03`. The 58 faction documents have the embedded
+versions `7.26246.158` (36) and `7.26246.159` (22); these versions and
+the source-data date are **not** independently established publication dates
+for every profile. The September 25 archives also report identical
+archive/content hashes; this does not establish a before/after update.
+The selected ZIP's SHA-256 was verified from the staged bytes on
+`linux-dev` using the read-only
+`tools.activate_synced_assets verify --snapshot "JSON 20260929-114335"`
+at `dd071c4d` (job `linux-dev:81e892a77b864c298b6603bff55344a6`).
+The source ZIP and acquisition manifest remain ignored external inputs.
+
+This is the **selected review baseline**, not final frozen-release acceptance
+or proof that the source has not changed upstream since acquisition.
+Do not silently fetch or swap in a newer snapshot. A deliberately approved
+source change must reopen affected coverage and rebuild the matched Army/rules
+artifacts. Database/publication identity and freeze rechecks remain in
+V1S-003, V1S-081 and V1S-084; source-wide and browser acceptance remain open.
+
 ## Historical Army evidence
 
 The community-maintained

@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-001 (S, review):** Select the final intended Army archive and record exact identity, date and
-  acquisition limits; do not fetch a newer source implicitly.
 - [ ] **V1S-002 (M, review):** Pin rules, annex, English/Spanish FAQ, Wiki revisions, and official update
   posts with separate publication/acquisition dates.
 - [ ] **V1S-003 (S, review):** Record tracked Army/rules database and derived-publication identities and
