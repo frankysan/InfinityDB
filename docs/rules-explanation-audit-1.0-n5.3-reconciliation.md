@@ -184,6 +184,111 @@ read-only reconciliation. Normal browser routes retain their existing
 owners; final pinned-source-wide, browser and hosted release acceptance
 remain separate under V1S-016/021/022 and V1S-081–095.
 
+### V1S-006: English N5.3 changes 14–26 (2026-11-03)
+
+This independent **current selected-change review** covers the remaining 13
+numbered English N5.3 Rules Update subjects. It uses the already pinned
+English v5.3 and prior v5.2 PDFs (S1/S3), the September 1 announcement
+(S11), selected exact Wiki revisions/history (S4/S5), and the September 29
+Army input (S6) where relevant. For bilingual conflicts it retains the
+separately pinned Spanish v5.3 PDF (S17) and Spanish Wiki evidence (S14/S21).
+See the [source register](rules-explanation-audit-1.0-sources.md) for
+exact artifact identities. The historical table below is an **earlier
+assessment**; this overlay does not silently revise its fixed counts or
+certify an entire rule, cross-source corpus, or final browser release.
+
+- **N53-14 — Minelayer / Perimeter: selected change represented.**
+  `skill:minelayer` distinguishes the Trigger Area exclusion from the
+  full Zone of Control exclusion for `trait:perimeter` Weapons *and*
+  Equipment (N5.3 p. 102), while preserving deployment legality and
+  the source-specific Minelayer (X) number of items. No blanket Repeater
+  placement ban or other unreviewed option is inferred.
+- **N53-15 — Cyberplug profiles: current procedure published.**
+  `rule:peripheral-type:cyberplug` records the Connected/Autonomous
+  choice at each Order/ARO, at most one Connected unit, Controller
+  Idle/reaction ownership, recovery delegation and the exception to
+  general Peripheral Disconnected rules (N5.3 pp. 107–108).
+  This is not a general Peripheral/Controller automation model.
+- **N53-16 — Protheion: selected MOD and overkill represented.**
+  `skill:protheion` applies its negative profile MOD to the
+  *opponent's* Face to Face Attribute and denies extra healing/VITA
+  after the target enters Dead (N5.3 p. 109, FAQ p. 2); the +2 VITA
+  cap is preserved. No generic Wound-resolution simulator follows.
+- **N53-17 — Strategos L2: selected transfer verified.**
+  `skill:strategos-l2` transfers the Trooper *and their Peripherals*
+  across Combat Groups without a Command Token in the specified
+  Tactical Phase step (N5.3 p. 113); it does not authorize every other
+  Command Token transfer.
+- **N53-18 — Super-Jump: selected distance verified.**
+  `skill:super-jump` applies the Unit Profile's replacement distance
+  only to the relevant Basic Short Skill Jump (N5.3 p. 113), keeping
+  ordinary Long Skill distance and the independent Jet Propulsion
+  wording/scope separate.
+- **N53-19 — Deployable Cover: current properties represented.**
+  `equipment:deployable-cover` publishes Disposable (2),
+  Perimeter/Indiscriminate, Zone of Control placement, profile-specific
+  Cutting Foam/Vitroferro and Vitroferro's +6 Saving Roll modifier with
+  the 12 pre-PS ceiling (N5.3 p. 122). The FAQ's placement prohibition
+  stays separately scoped; no universal scenery or target model is inferred.
+- **N53-20 — Hacking Devices: source category verified.**
+  `equipment:hacking-device` and relevant Device records identify
+  Automatic Comms Equipment under N5.3 p. 123; Program access is not
+  proof of any additional Upgrade or simultaneous Program permission.
+- **N53-21 — Peripheral / Fireteam Integrity: current distinction
+  represented.** `rule:fireteam-general` separates Controller
+  departure by Leader versus non-Leader, and timing when the
+  `rule:peripheral-type:ancillary` exception ends (N5.3 pp. 107,
+  133–134). This neither generalizes Ancillary exceptions to other
+  Peripherals nor settles every Army-local Fireteam legality question.
+- **N53-22 — Camouflaged AROs: current declaration rule represented.**
+  `state:camouflaged` lists Discover, Dodge, Look Out! and Reset as
+  the permitted AROs *against an unrevealed Marker*, and separately
+  explains delayed ARO/revelation timing and entire-Order State
+  cancellation (N5.3 pp. 157–158). This is not a universal
+  prohibition on reactions to an already revealed Model.
+- **N53-23 — IMM-B example: selected clause verified, no change.**
+  `state:immobilized-b` and `skill:reset` retain the Reset WIP -3
+  requirement, while the p. 165 Hacking example distinguishes
+  Hacking defense from that Reset and applies each Program's own
+  values. It cannot be promoted into a blanket Hacking MOD rule.
+- **N53-24 — Null vocabulary: canonical list published.**
+  `term:null-state` links all five explicit N5.3 p. 174 States:
+  Dead, Disconnected, Possessed, Sepsitorized and Unconscious.
+  Individual State exceptions still govern behavior.
+- **N53-25 — Breaker publication: current public identity verified;
+  announcement mismatch retained.** N5.3 p. 180 and Army source
+  weapon **225** identify *Breaker Marksman Rifle*, not the
+  announcement's “Breaker Sniper Rifle.” The public numeric ID and
+  `breaker-marksman-rifle` slug both resolve to weapon 225, and
+  `breaker-sniper-rifle` does not resolve. The additional AP Red Fury
+  and AP Thunderbolt source profiles remain independent. Do not
+  synthesize a Sniper alias or a separate catalog profile.
+- **N53-26 — Thunderbolt grouping: selected source agreement.**
+  The regular and AP Thunderbolt belong to the same N5.3 p. 186
+  grouping, but retain their respective source profiles. The AP
+  Thunderbolt's PDF/Army AP/ARM/2 versus Wiki N/ARM/2 conflict
+  remains documented rather than silently changed. Complete
+  family-wide weapon acceptance is a separate gate.
+
+**Disposition:** all 13 numbered subjects have a current, explicitly
+bounded no-new-implementation result. The original assessment's
+*selected-clause only* limitations remain, including unresolved
+publication conflicts (especially N53-25's announcement name and
+the AP Thunderbolt Wiki chart). Existing published data already
+handles the reviewed semantics, and no source-proven missing
+data/API fact was found that warrants an additional change in
+this pass. Focused Windows validation at
+`6e04d7128741edb29c9318848afcf3a2ba594944`:
+`tests/test_curated.py` **670/670**,
+`tests/test_rules_database.py` **166/166**,
+`tests/test_marksman_rifle_reference.py` **10/10**, and
+`tests/test_interim_reference_consistency.py` **7/7**,
+and four AP Thunderbolt/Red Fury/Thunderbolt public API cases
+**4/4** passed (857 tests in these targeted modules/selectors).
+This evidence does not replace whole-corpus review, independent full-browser
+or frozen-candidate acceptance under V1S-016–022 and V1S-081–095;
+no VD/VR is required for a read-only reconciliation.
+
 ### Additional Spanish, Army and FAQ subjects
 
 - **ESX-01 to ESX-04 (four items):** retain the historical partially
