@@ -805,11 +805,17 @@ Linux run predated the separate resource-wait reporting implementation,
 so its multi-minute pytest setup durations are not decomposed into
 waiting versus other setup.
 
-For a concise source-coverage audit, the runner now accepts optional
-`--skip-summary` on test/preflight stages. It groups **actual pytest
+For a concise source-coverage audit, the runner groups **actual pytest
 skip reports** by reason and count, rather than printing hundreds of
 individual `-rs` entries; the total must reconcile with pytest's
-skipped count. This is opt-in and does not alter collection or execution.
+skipped count. Starting with the 2026-11-03 diagnostic update, this
+report defaults **on when the unfiltered full test stage is selected**,
+including `--all` and the asynchronous MCP test-job interface.
+An accompanying preflight in `--all` receives the same report.
+Explicit `--skip-summary` still opts in for filtered test sections,
+selected test nodes and standalone preflight.
+`--no-skip-summary` suppresses the full-suite default. No collection, execution, worker grouping,
+slot capacity or skip decision is changed.
 Record the reasons from Linux and Windows at the same commit, then
 synchronize only the pinned source files needed for parity.
 
@@ -1612,11 +1618,21 @@ The two files must be sampled on their respective hosts and
 aligned with separately pinned revision, start time, test flags
 and asset coverage. A missing or prematurely stopped sampler
 is incomplete evidence, **not** zero host load.
-The focused 21-test sampler suite and Windows native two-second
-smoke probe passed. That smoke recorded 3 samples, mean
-**9.84% host CPU busy** and **71.18% physical memory used**,
-but is not a controlled Chromium performance measurement.
-No browser slot defaults or scheduling were changed.
+At committed source `74d00e7ecfc8518b2443bbda721a932eb7510aa3`,
+the focused sampler suite passed **21/21 on both Windows
+and Linux**, with maintained test-section checks **15/15**
+on Windows. Native two-second smoke probes each recorded
+three samples: Windows averaged **9.84% host CPU busy**
+and **71.18% physical memory used**; Linux averaged
+**0.06% host CPU busy** and **9.32% physical memory used**.
+Linux jobs:
+`linux-dev:5d014bac434e4a4f8b07d132bf96e74c` (pytest),
+`linux-dev:3dd2c55769f64836879d980cc7e837b0` (native probe).
+These short independent samples do **not** compare host
+performance or prove Chromium stability; synchronized
+full-load measurements remain pending. Ruff, Pyright, docs
+and diff checks passed before the commit, and no browser
+slot defaults or scheduling were changed.
 
 **Docker host readiness:** the fixed, read-only
 `python -m tools.probe_docker_test_host` probe found the Docker CLI and

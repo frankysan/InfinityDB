@@ -202,6 +202,32 @@ def test_skip_summary_is_opt_in_for_test_and_isolated_preflight() -> None:
     assert all("--infinitydb-skip-summary" not in stage.command for stage in defaults)
 
 
+@pytest.mark.parametrize(
+    ("stages", "targets", "sections", "choice", "expected"),
+    (
+        (("test",), [], (), None, True),
+        (("test",), ["tests/test_api.py"], (), None, False),
+        (("test",), [], ("browser",), None, False),
+        (("preflight",), [], (), None, False),
+        (("test", "preflight"), [], (), None, True),
+        (("test",), [], (), False, False),
+        (("test",), ["tests/test_api.py"], (), True, True),
+    ),
+)
+def test_skip_summary_auto_enables_only_unfiltered_full_suite(
+    stages: tuple[str, ...], targets: list[str], sections: tuple[str, ...],
+    choice: bool | None, expected: bool,
+) -> None:
+    assert run_checks.should_summarize_skips(stages, targets, sections, choice) is expected
+
+
+def test_skip_summary_cli_supports_explicit_opt_out() -> None:
+    parser = run_checks.build_parser()
+    assert parser.parse_args(["--stage", "test"]).skip_summary is None
+    assert parser.parse_args(["--stage", "test", "--skip-summary"]).skip_summary is True
+    assert parser.parse_args(["--stage", "test", "--no-skip-summary"]).skip_summary is False
+
+
 def test_skip_summary_rejects_non_pytest_stage(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

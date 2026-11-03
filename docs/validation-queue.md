@@ -203,8 +203,17 @@ Git updates are explicit agent actions, not background mirroring.
   19.09 s (390px in 5.15 s), job
   `linux-dev:c827d624021a438a87a72f1c5fdf9ba0`.
   It changes no timeout, lane scheduling or default capacity,
-  and does not yet establish the full-load cause. Retire
-  only after remaining acceptance evidence.
+  and does not yet establish the full-load cause.
+  To make same-revision skip parity observable from the
+  restricted async test-job interface, the check runner now
+  automatically groups skip reasons for unfiltered full test
+  suites (also `--all`); targeted and standalone-preflight
+  reporting remains opt-in, with an explicit
+  `--no-skip-summary` override. Focused runner regression
+  passed **106 tests, one expected skip**; Ruff and Pyright
+  passed. The grouped counts are **not** yet
+  cross-host-validated. Retire only after remaining
+  acceptance evidence.
 
 - [ ] **VR-0024** (2026-11-02; ready-to-run): Validate opt-in
   timestamped Chromium slot metrics and the timeline analyzer under
@@ -273,8 +282,12 @@ Git updates are explicit agent actions, not background mirroring.
   Windows focused sampler tests **21/21** and a real native
   smoke probe **3/3 samples** passed (9.84% mean host CPU,
   71.18% mean RAM used); this is instrumentation evidence,
-  not a browser benchmark. Linux verification and aligned
-  full-load samples are pending. Deferred: investigate the
+  not a browser benchmark. The matching Linux worker
+  revision `74d00e7e` passed **21/21** focused sampler
+  tests plus a native **3-sample** probe (mean 0.06%
+  CPU busy and 9.32% RAM used); Windows and Linux
+  instrumentation is now independently verified.
+  Aligned full-load samples remain pending. Deferred: investigate the
   full-load failure, repeat alternating fully passing comparisons
   with concurrent CPU/RAM sampling, and reconcile cross-host
   source coverage. Retire only after the remaining acceptance evidence.

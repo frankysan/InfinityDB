@@ -182,8 +182,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Write per-worker Chromium slot wait/hold JSONL to ignored local/benchmarks.",
     )
     parser.add_argument(
-        "--skip-summary", action="store_true",
-        help="Group actual pytest skip reasons by count for the test/preflight stages.",
+        "--skip-summary", action=argparse.BooleanOptionalAction, default=None,
+        help=(
+            "Group actual pytest skip reasons by count; defaults on for unfiltered "
+            "full test suites. Use --no-skip-summary to suppress this report."
+        ),
     )
     parser.add_argument(
         "--browser-slot-count", type=int, choices=(2, 3, 4), default=2,
@@ -284,6 +287,18 @@ def selected_stage_names(args: argparse.Namespace) -> tuple[str, ...]:
         return PROFILES[args.profile]
     requested = set(args.stage or ())
     return tuple(name for name in STAGE_ORDER if name in requested)
+
+
+def should_summarize_skips(
+    stage_names: tuple[str, ...],
+    targets: list[str],
+    sections: tuple[str, ...],
+    choice: bool | None,
+) -> bool:
+    """Keep targeted/preflight reporting opt-in, but audit full-suite skips."""
+    if choice is not None:
+        return choice
+    return "test" in stage_names and not targets and not sections
 
 
 def stage_definitions(
@@ -546,7 +561,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         if args.browser_metrics and "test" not in stage_names:
             build_parser().error("--browser-metrics requires the test stage")
-        if args.skip_summary and not runs_pytest:
+        if args.skip_summary is not None and not runs_pytest:
             build_parser().error("--skip-summary requires the test or preflight stage")
         if (
             (args.browser_slot_count != 2 or args.browser_lane_count != 2)
@@ -605,7 +620,9 @@ def main(argv: list[str] | None = None) -> int:
             browser_lane_count=args.browser_lane_count,
             split_scenario_faq=args.split_scenario_faq,
             reuse_browser=args.reuse_browser,
-            skip_summary=args.skip_summary,
+            skip_summary=should_summarize_skips(
+                stage_names, args.targets, test_sections, args.skip_summary,
+            ),
         )
     except SystemExit as exc:
         exit_code = exc.code
