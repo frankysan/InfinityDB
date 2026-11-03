@@ -157,8 +157,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Source inventory and gap batches](#source-inventory-and-gap-batches).
 **Project domains:** Acquisition, Data processing, Project infrastructure, Web backend, Web frontend
 
-- [ ] **V1S-019 (M, review):** Triage further Weapon Properties, exceptions, non-four-attribute entries and
-  remaining Weaponry clauses; separate prose from missing facts.
 - [ ] **V1S-020 (M, review):** Verify final FAQ v0.1 source hashes and applicability and classify optional
   Reinforcements N4 PDFs correctly.
 - [ ] **V1S-021 (M, gate):** Reconcile interaction review and catalog scope with current release identities;
@@ -450,8 +448,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     The Core/Hacking module overlay, Wiki-backed families and supplemental
     scenario/FAQ/Army/symbol/annex category owners are recorded in the
     [V1S-016–018 coverage dispositions](v1.0-source-coverage-audit.md#supplementary-category-level-coverage-dispositions-v1s-018-2026-11-03).
-    Remaining work: source-specific Weaponry/FAQ/annex decisions under
-    V1S-019–022, plus whole-record/source-browser release acceptance.
+    The [V1S-019 Weaponry triage](v1.0-source-coverage-audit.md#weaponry-profile-prose-and-exception-triage-v1s-019-2026-11-03) classifies
+    source conflicts separately from incomplete prose, mode and object review.
+    Remaining work: source-specific FAQ/annex and strict source guards under
+    V1S-020–022, plus whole-record/source-browser release acceptance.
     Distinguish missing facts, missing relationships, and missing presentation.
   - [ ] Reuse `audit_source_presentation.py`, `audit_enrichment_coverage.py`, and
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
