@@ -53,9 +53,18 @@ closeout and release readiness, not the feature itself.
 8. For an actual release, resolve applicable queued obligations and every
    gate in `docs/releasing.md`, including its project-wide maintained-
    documentation audit. Queue retirement never substitutes for CI.
-9. Inspect the final diff and Git status. Preserve unrelated changes; do
-   not stage, commit, push, deploy, tag, or publish without authorization.
-   Report the queue counts, deferred gates and precise validation status.
+9. After an authorized push, record the exact SHA and available
+   workflow runs under [non-blocking agent CI monitoring and repair](../../../docs/ci.md#agent-ci-monitoring-and-repair).
+   Continue independent development rather than waiting for CI after
+   every commit; revisit outstanding runs at meaningful task
+   boundaries. Triage and autonomously fix actionable repository
+   failures under the standing development authorization. Only
+   require all relevant workflows and dependent jobs to finish
+   successfully for a release/merge or other mandatory acceptance
+   gate. Distinguish pending/untriggered/skipped CI from success.
+10. Inspect the final diff and Git status. Preserve unrelated changes; do
+    not stage, commit, push, deploy, tag, or publish without authorization.
+    Report the queue counts, deferred gates and precise validation status.
 
 ## References
 

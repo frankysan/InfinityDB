@@ -34,6 +34,69 @@ a local deferral or a green worker run is not a CI exemption.
 6. **Keep extended external checks explicit.** Optional network/acquisition/performance workflows
    must not make an otherwise valid source commit fail because an external service is unavailable.
 
+## Agent CI monitoring and repair
+
+For authorized autonomous InfinityDB development, **CI monitoring is
+non-blocking**. After a successful development-branch push, record the
+full commit SHA and available workflow run IDs, then continue the next
+independent Windows task; **do not wait for a terminal CI result before
+each subsequent commit**. Reconcile outstanding hosted runs at natural
+task boundaries, especially after a due full local/Linux validation.
+Source checks (including every OS/Python matrix leg, clean-index
+preflight and dependent cross-platform deterministic outputs),
+Installed wheel smoke, and Deployment smoke test are the minimum
+required workflows for hosted acceptance. For release preparation,
+include any additional release-specific gates from `releasing.md`.
+
+GitHub CI is **not triggered by a local test run**. Source checks is
+triggered on pull requests, pushes to `main`, and manual dispatch.
+A branch push can therefore have no new Source checks run if no
+applicable pull request is open. When a required workflow is absent,
+untriggered or inaccessible, mark it *not verified*; do not dispatch
+the entire CI matrix on every intermediate development commit.
+Arrange an authorized manual dispatch at a due validation or
+release/merge gate, or report the blocker. Never interpret no run
+as success. Associate findings with the actual SHA and run ID, not
+merely the latest workflow shown in the repository.
+
+During an active development session, maintain a compact record
+of pending SHA/run IDs and inspect them at meaningful implementation
+or full-test completion boundaries. Do not idle-poll CI or let it
+block unrelated development, commits or pushes. If several newer
+commits supersede an older pending run, prioritize the newest relevant
+revision; still triage older failures when their cause may persist.
+A run is accepted only after it and **all required jobs** reach
+successful terminal conclusions. Distinguish `queued`,
+`in_progress`, `success`, `failure`, `cancelled`,
+`timed_out` and `skipped`. Missing and skipped required jobs
+are incomplete coverage, not a pass. Only a final release/merge
+candidate or an explicitly mandatory gate must wait for all
+applicable hosted checks to finish.
+
+On failure, retrieve the failed job and step logs (and artifacts when
+useful), find the first actionable error, and report the affected
+SHA/run and diagnosed cause. The agent has standing authorization to
+fix repository causes without separate permission: make the smallest
+compatible change, validate focused regressions plus applicable
+critical checks, inspect unrelated changes, commit and fast-forward
+push, then record the **replacement SHA** for continued non-blocking
+monitoring. Do not pause independent development waiting for that
+replacement run. Prefer a retry of a single job only for substantiated transient
+runner/network failures, not reproducible test/type/build defects.
+Do not bypass, disable or silently relax required checks. If a
+failure remains unresolved, Git cannot advance safely, or the cause
+requires secrets, external authority or deployment permissions,
+report the blocker and leave hosted acceptance open. Document exact
+terminal outcomes; preserve the active VD/VR queue for local deferred
+validation rather than duplicating every CI run as a VR item.
+
+This is an **agent workflow while a session is running**. It does not
+install a persistent watcher, send push notifications outside the
+session or schedule background GitHub API calls. GitHub-hosted
+failure notifications or an explicitly configured scheduled watcher
+are separate mechanisms; neither should imply unattended repository
+fixes unless those capabilities are actually connected and verified.
+
 ## Source checks
 
 `.github/workflows/source-checks.yml` runs on pull requests, pushes to `main`, and manual dispatch.

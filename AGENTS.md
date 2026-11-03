@@ -261,6 +261,33 @@ normal local working tree:
 - Do not force-update a branch unless the user explicitly requests history
   rewriting or a previously agreed recovery requires it.
 
+## Post-push hosted CI follow-through
+
+After each authorized development-branch push, record the **full commit
+SHA** and any available CI run IDs, then **continue independent Windows
+development immediately**. Do not wait or repeatedly poll for CI after
+each commit; inspect outstanding runs at natural task boundaries and
+after due full local/Linux validation. Follow
+[the CI monitoring and repair protocol](docs/ci.md#agent-ci-monitoring-and-repair)
+for Source checks, Installed wheel smoke, and Deployment smoke test,
+including required matrix and dependent jobs. Newer commits may
+supersede pending runs, but investigate older failures when they
+remain relevant to the current code. A green local suite is not hosted
+acceptance; queued, missing, skipped or still-running checks are not
+successes. Require terminal hosted acceptance only at an actual
+merge, release or other explicitly mandatory gate.
+
+**The user authorizes autonomous CI fixes.** Retrieve failed job and
+step logs, identify the first actionable error, make a focused fix with
+essential regression checks, commit and fast-forward push safely, then
+record the replacement SHA for non-blocking monitoring. Report failures
+and resolutions with run links and precise outcomes. Do not weaken CI, rerun deterministic
+failures instead of correcting them, overwrite unrelated work or
+attribute an older run to the new revision. Escalate external,
+access, source-authority or unsafe-Git blockers without claiming
+acceptance. This is active-session follow-through, not an unattended
+background notification service.
+
 ## Documentation and project tracking
 
 ### Changelog discipline

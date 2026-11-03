@@ -408,6 +408,15 @@ small immediate regressions, or independent confirmation when required.
 Do not compare concurrent multi-host run times as controlled performance
 benchmarks without accounting for contention and host differences. Hosted CI,
 required preflight, and release acceptance remain independent requirements.
+After pushing a development revision, record its SHA and available
+hosted runs under the separate
+[non-blocking agent CI monitoring and repair protocol](ci.md#agent-ci-monitoring-and-repair).
+Continue Windows development while CI runs, and revisit outstanding
+statuses after meaningful task or Linux full-suite checkpoints.
+A full local test run does not itself trigger GitHub Actions;
+post-push monitoring is independent of queued local VD/VR checks.
+Only a mandatory release/merge acceptance gate requires waiting
+for terminal CI results.
 
 **Queued Linux dispatch protocol (VD/VR):**
 
