@@ -95,76 +95,21 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 5 distinct
-changes** (VR-0023/0024/0040/0041/0042); no deferred test-design
-requirement is open. The execution threshold is due: synchronize the
-committed Windows revision, start the pinned Linux cumulative suite,
-and continue unrelated Windows development during that run.
+Only open VR obligations belong here. **Current count: 2 distinct
+changes** (VR-0023/0024); no deferred test-design requirement is open.
 Oldest recorded date: 2026-11-02.
 
-At pinned Linux commit `8e2b2de727afa9695dcd3bc48b7f8b62cf319426`,
-the full suite passed **4,939 tests / 28 expected skips / 0 failures**
-with 808/808 SVG assets, closing VR-0037 (Commlink v9 promotion),
-VR-0038 (optional Annex Chromium coverage) and VR-0039 (Section/parent
-navigation and browser lane registration). Focused Linux tests passed
-**24/24** lane-capacity and **3/3** Chromium cases.
-Full execution evidence and the earlier corrected one-failure run are
-in [testing.md](testing.md#parallel-windows-development-and-linux-validation).
-The independent Chromium skip-reason and controlled capacity comparisons
-remain open as VR-0023/24. Git updates are explicit, not background mirroring.
-
-- [ ] **VR-0042** (2026-11-03; ready-to-run): Source-exact
-  Commlink Army-loadout occurrence signature parity, including the
-  unqualified Skill and both reviewed (+1)/(+2) extras. Work:
-  [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
-  base `b8b02491`; change:
-  `tests/test_reinforcements_optional_reference.py`, TODO/testing/queue.
-  Risk: low (test-only; no runtime artifacts or source semantics changed).
-  Immediate: Windows pinned-source SQL versus runtime loadout identities
-  and complete source signatures **1/1 passed**; targeted Ruff PASS.
-  Design: none. Deferred: pinned Linux selector
-  `tests/test_reinforcements_optional_reference.py::test_commlink_source_extras_remain_on_their_exact_army_loadouts`
-  and the now-due cumulative test suite. This does not calculate roster
-  size or certify an N5-native Annex.
-
-- [ ] **VR-0041** (2026-11-03; ready-to-run): Accept
-  complete published Reinforcement Section profile/loadout source parity.
-  Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
-  base `64793592`, changed
-  `tests/test_reinforcements_optional_reference.py`,
-  `docs/rules-semantics.md`, TODO and testing documentation.
-  Risk: low (source/read-model regression and correction of stale
-  promotion status in docs; no runtime artifact change).
-  Immediate: source-to-runtime full Section cohort **1/1 passed**
-  in 1.77 s on Windows; targeted Ruff **PASS**.
-  Linux pinned `b8b02491`: focused source-parity **1/1** passed
-  (job `linux-dev:66cfc3c91f6b402da58c48e6f90145dc`).
-  Design: none. Deferred: cumulative Linux gate; focused selector
-  `tests/test_reinforcements_optional_reference.py::test_every_published_reinforcement_profile_and_loadout_keeps_source_army`,
-  then cumulative validation at the next queue execution gate.
-  This does not imply that shared Reinforcement pools are independently
-  legal Army Lists or that N4-origin procedures have N5-native authority.
-
-- [ ] **VR-0040** (2026-11-03; ready-to-run): Cross-platform
-  acceptance for source-profile/Section context and exact Commlink
-  (+1)/(+2) loadout navigation. Work: [optional Reinforcements annex](TODO.md#100--current-reference-completeness-gate);
-  Windows base `3ebf7b44`; changed
-  `tests/test_verify_reinforcements_optional_browser.py`, TODO/testing.
-  Risk: low (source-backed acceptance tests only; no runtime changes).
-  Immediate: pinned Army source/API ownership **1/1**, ordinary versus
-  Reinforcement selection Chromium **2/2** at 1440/390 px, Commlink
-  exact-source extra/Skill navigation Chromium **2/2** at 1440/390 px,
-  targeted Ruff **PASS**. Linux pinned `b8b02491`: full real
-  Chromium module **8/8 passed** (job
-  `linux-dev:7b225640da724276bc271f2ccea40979`).
-  Design: none. Deferred: cumulative Linux gate; focused module
-  `tests/test_verify_reinforcements_optional_browser.py`
-  including the new cases, then cumulative Linux when the queue reaches
-  its next dispatch threshold or a release gate is due. Verify the exact
-  committed SHA and ignored deployed-object publication first; the
-  Linux full suite at `8e2b2de7` preceded these tests.
-  Does not establish all-profile parity, source-authoritative N5 adoption
-  or roster-list legality.
+At pinned Linux commit `06ae1c4856d3213a3f03c88f7f6f219b23366ee7`,
+the full suite passed **4,946 tests / 28 expected skips / 0 failures**
+with 808/808 SVG assets. This retires VR-0040 (Army/Section and
+Commlink browser context), VR-0041 (all published Reinforcement profile/
+loadout source parity) and VR-0042 (all source-backed Commlink extras).
+The preceding `5d6a30d8` run passed the same suite; a subsequent
+fixed-tuple Pyright correction was retested on the final revision.
+See [testing.md](testing.md#parallel-windows-development-and-linux-validation)
+for the pinned jobs, warnings and residual scope. The independent
+Chromium skip-reason and controlled capacity comparisons remain open
+as VR-0023/24. Git updates are explicit, not background mirroring.
 
 - [ ] **VR-0023** (2026-11-02; ready-to-run): Validate grouped skip-reason
   reporting and explicit resource-wait measurements under full Linux and
@@ -339,8 +284,8 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0043` (`VR-0023`, `VR-0024`, `VR-0040`,
-  `VR-0041` and `VR-0042` open; other earlier entries retired).
+- Execution: `VR-0043` (`VR-0023` and `VR-0024` open;
+  `VR-0040`–`VR-0042` and other earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

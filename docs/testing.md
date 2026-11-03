@@ -828,7 +828,7 @@ bounded real-source cohort rather than all profiles, event roster
 legality or N5-native rule authority. Linux at `b8b02491` passed
 the complete normal Chromium module **8/8**, including these cases,
 while the prior cumulative suite at `8e2b2de7` predates them.
-New-revision cumulative acceptance is tracked in VR-0040.
+Cumulative cross-platform acceptance passed at `06ae1c48`; VR-0040 retired.
 
 **2026-11-03 complete Reinforcement Section source parity (VR-0041):**
 `tests/test_reinforcements_optional_reference.py::test_every_published_reinforcement_profile_and_loadout_keeps_source_army`
@@ -850,7 +850,7 @@ focused **1/1** passed (job
 the matching Annex normal Chromium module passed **8/8**
 (job `linux-dev:7b225640da724276bc271f2ccea40979`).
 The matched ignored deployed-object publication was verified before
-these runs. Cumulative acceptance remains queued (VR-0040/41).
+these runs. Cumulative acceptance passed at `06ae1c48`; VR-0041 retired.
 
 **2026-11-03 source-wide Commlink occurrence/loadout parity (VR-0042):**
 `tests/test_reinforcements_optional_reference.py::test_commlink_source_extras_remain_on_their_exact_army_loadouts`
@@ -864,7 +864,39 @@ unrelated Army loadout after Unit canonicalization. Windows targeted
 pytest **1/1 passed** and Ruff passed. This checks all materialized
 source identities and variant rendering inputs; it does **not** certify
 an N5-native procedural rewrite or calculate the actual roster limit.
-Linux focused and cumulative testing are queued in VR-0042.
+Linux targeted **1/1** and cumulative validation passed at `06ae1c48`;
+VR-0042 retired.
+
+**2026-11-03 accepted Reinforcements source/Army context (VR-0040–0042):**
+The full published Reinforcement profile/loadout source parity, exact
+Commlink unqualified/+1/+2 loadout signatures and normal-mode
+Army/Section browser navigation passed their focused tests on Windows
+and Linux. Linux Chromium acceptance was **8/8** at `b8b02491`
+(job `linux-dev:7b225640da724276bc271f2ccea40979`);
+source/Section and Commlink occurrence selectors each passed **1/1**
+on Linux. Windows complete Annex source and browser modules both
+passed **8/8**, with Ruff, Pyright (zero errors), data/rules and
+documentation checks green.
+
+A full Linux suite pinned to `5d6a30d8` passed **4,946 / 28 skips /
+0 failures** (job `linux-dev:09fd3c43e0ee4ae484e2be6032210098`).
+After the Pyright-only tuple typing correction and SRC-030 documentation,
+the full suite was rerun at exact commit
+`06ae1c4856d3213a3f03c88f7f6f219b23366ee7`:
+**4,946 passed, 28 skipped, 0 failures**, 808/808 published SVGs,
+597.98 s pytest / 598.61 s runner (job
+`linux-dev:b3a1901e213c4aaaa4f5c1f0706d4831`). The 28 skips
+belong to 12 known categories; the two Python 3.14 `fork()`
+deprecation warnings remain. Chromium resource waiting summed
+6,367.99 worker-seconds across 32 setup events, not additional wall
+time. A subsequent commit `646dee42` changed documentation and
+agent instructions only (verified GitHub compare), without modifying
+tested application code, data or tests.
+
+**VR-0040/41/42 retired.** This is reference/source parity acceptance,
+not roster-legality implementation, confirmation of N5 adoption of
+N4-origin procedures, controlled Chromium-capacity benchmarking
+(VR-0023/24), or final hosted/manual release acceptance.
 
 **2026-11-02 Syncthing staging worker verification (VR-0026 retired):**
 After the `mcpworker` staging ACL/environment and explicit tracked
