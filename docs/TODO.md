@@ -304,7 +304,9 @@ revision, following the established dispatch-and-continue protocol.
 - [ ] **V1S-084 (M, gate):** Rebuild/verify the release-matched Army/rules pair, FAQ parity, deployed-object
   publication and processed symbols.
 - [ ] **V1S-085 (M, gate):** Run source occupancy, source/archive, strict primary interaction, reference
-  baseline and output reproducibility checks.
+  baseline and output reproducibility checks. Treat the
+  [host-SQLite physical-vs-logical rebuild finding](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
+  as a distinct byte-reproducibility question; logical equivalence alone does not pass hosted CI.
 - [ ] **V1S-086 (M, gate):** Run rule fragment and wider source-to-browser checks on the exact candidate;
   document uncovered normal entry points.
 - [ ] **V1S-087 (L, gate):** Run the 81-page local Unit matrix and hosted exact-version representative checks

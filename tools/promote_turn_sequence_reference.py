@@ -21,7 +21,10 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import (
+    export_release_rules,
+    same_logical_rules_contents,
+)
 from tools.restrictions_v9_release import _replace_with_rollback
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -152,8 +155,12 @@ def verify_candidate(
         export_release_rules(docs, second, baseline=active_rules)
         if _sha(first) != _sha(second):
             raise ValueError("Game Sequence release export is not deterministic")
-        if already and not refresh and _sha(first) != _sha(active_rules):
-            raise ValueError("Published rules differ from deterministic rebuild")
+        byte_identical = _sha(first) == _sha(active_rules)
+        logical_match = (
+            byte_identical or same_logical_rules_contents(active_rules, first)
+        ) if already else None
+        if already and not refresh and not logical_match:
+            raise ValueError("Published rules differ logically from reviewed rebuild")
         staged = RulesDatabase(first)
         staged.validate()
         if _all_ids(first) != old_ids | IDENTITIES:
@@ -195,6 +202,9 @@ def verify_candidate(
             "sourceEnglishSha256": SHA_EN,
             "sourceSpanishSha256": SHA_ES,
             "candidateRulesSha256": _sha(first),
+            "publishedRulesSha256": _sha(active_rules) if already else None,
+            "byteIdenticalWithPublished": byte_identical if already else None,
+            "logicallyEquivalentWithPublished": logical_match,
         }
         if not promote:
             return report

@@ -102,6 +102,7 @@
         "test_restriction_storage_candidate",
         "test_rule_relations",
         "test_rules_database",
+        "test_rules_rebuild_logical_equality",
         "test_scenario_catalog",
         "test_scenario_components",
         "test_scenario_definition",

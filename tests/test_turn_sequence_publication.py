@@ -137,4 +137,5 @@ def test_published_turn_sequence_release_pair_rebuilds_deterministically() -> No
     assert report["candidateRecords"] >= 486
     assert report["existingRecordsUnchanged"] == report["candidateRecords"]
     assert report["deterministic"] and report["matchedPublication"]
-    assert report["candidateRulesSha256"] == hashlib.sha256(RULES.read_bytes()).hexdigest()
+    assert report["logicallyEquivalentWithPublished"] is True
+    assert report["publishedRulesSha256"] == hashlib.sha256(RULES.read_bytes()).hexdigest()

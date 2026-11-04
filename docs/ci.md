@@ -223,7 +223,13 @@ A dependent job downloads those manifests and compares SHA-256 identities across
 
 The compared set covers representative database, JSON/report, snapshot/work archive, and
 checksum-bound publication metadata. The matrix pins the same CPython patch line for the
-cross-platform comparison so Python/SQLite drift is not mistaken for an OS difference.
+cross-platform comparison. **This does not itself pin the SQLite library**: CPython's Windows
+build and Linux system packages may provide different SQLite versions, which can encode
+identical rows in different B-tree layouts. The manifest's exact-byte comparison remains
+mandatory. If it fails, inspect the host SQLite versions and run the strict logical
+comparison (`tools.audit_rules_rebuild_equivalence`) before deciding whether to align
+the SQLite toolchain or revise the documented byte-reproducibility contract. Neither
+logical parity nor the installed tracked database alone replaces that hosted check.
 
 Generators remain responsible for canonical bytes; `.gitattributes` only prevents tracked
 checksum-bound files from being rewritten by checkout line-ending conversion.

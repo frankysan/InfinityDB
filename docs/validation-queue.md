@@ -171,6 +171,12 @@ changes** (VR-0052/0053/0054/0055/0056; five-change execution threshold reached)
   Deferred: pinned Linux source/model/browser tests, cumulative
   full suite at the five-change threshold and exact-SHA hosted CI;
   final release-wide source/browser acceptance remains separate.
+  Linux source review at `cd33920d` had **3/4** due to a
+  cross-version SQLite *physical* rebuild hash; its other clauses
+  passed. The complete schema/rows were identical (SQLite
+  3.50.4 Windows vs 3.46.1 Linux). A strict logical rebuild
+  check is staged for a newer committed validation revision;
+  the byte-specific hosted Source checks remain required.
 
 - [ ] **VR-0056** (2026-11-04; ready-to-run): Validate
   V1S-032C2's N5.3 pp. 13–14 Automatic Reaction Order reference
@@ -198,6 +204,13 @@ changes** (VR-0052/0053/0054/0055/0056; five-change execution threshold reached)
   Deferred: Linux exact-commit focused and full tests at this
   five-change threshold, independent source/asset verification,
   exact-SHA hosted CI and final 1.0 source/browser acceptance.
+  Linux source review at `cd33920d` was **4/5** because
+  the SQLite 3.46.1 rebuild differs physically from tracked
+  Windows SQLite 3.50.4 bytes, although the entire table
+  schema and logical rows match. The updated guarded
+  read-only check requires strict logical equality; rerun on
+  the next pinned revision. This is not a cross-host byte
+  determinism approval; see the [recorded boundary](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04).
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux

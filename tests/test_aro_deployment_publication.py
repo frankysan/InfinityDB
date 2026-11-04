@@ -172,4 +172,5 @@ def test_guarded_aro_deployment_pair_rebuild_is_deterministic() -> None:
     assert checked["deterministic"] and checked["matchedPublication"]
     assert checked["candidateRecords"] >= 487
     assert checked["existingRecordsVerifiedUnchanged"] == checked["candidateRecords"] - 1
-    assert checked["candidateRulesSha256"] == hashlib.sha256(RULES.read_bytes()).hexdigest()
+    assert checked["logicallyEquivalentWithPublished"] is True
+    assert checked["publishedRulesSha256"] == hashlib.sha256(RULES.read_bytes()).hexdigest()

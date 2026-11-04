@@ -21,7 +21,10 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from tools.build_deployed_object_publication import build_publication, publication_bytes
-from tools.release_rules_export import export_release_rules
+from tools.release_rules_export import (
+    export_release_rules,
+    same_logical_rules_contents,
+)
 from tools.restrictions_v9_release import _replace_with_rollback
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -135,8 +138,12 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
         export_release_rules(docs, second, baseline=active_path)
         if _digest(first) != _digest(second):
             raise ValueError("Non-deterministic rules export")
-        if published and _digest(first) != _digest(active_path):
-            raise ValueError("Published rules differ from deterministic current export")
+        byte_identical = _digest(first) == _digest(active_path)
+        logical_match = (
+            byte_identical or same_logical_rules_contents(active_path, first)
+        ) if published else None
+        if published and not logical_match:
+            raise ValueError("Published rules differ logically from reviewed rebuild")
         staged = RulesDatabase(first)
         staged.validate()
         if _ids(first) != old_ids | {NEW_ID}:
@@ -176,6 +183,9 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
             "matchedPublication": True,
             "sourceSha256": SOURCE_SHA256,
             "candidateRulesSha256": _digest(first),
+            "publishedRulesSha256": _digest(active_path) if published else None,
+            "byteIdenticalWithPublished": byte_identical if published else None,
+            "logicallyEquivalentWithPublished": logical_match,
         }
         if not promote:
             return report
