@@ -165,26 +165,30 @@ Partial/focused Linux runs do not suspend the due VR drain.
   - [ ] **V1S-033A:** The two shared movement references and expanded Move
     requirements are implemented with source/API/search and three-width
     Chromium checks; [the current contract](data-model.md#domain-ownership)
-    preserves conditional exceptions. Acceptance awaits VR-0060's pinned
-    Linux and hosted checks; do not repeat the implementation.
+    preserves conditional exceptions. Pinned Linux full-suite verification is complete at `c612e546`;
+    hosted CI and final release gates remain open. Do not repeat
+    the implementation.
   - [ ] **V1S-033B:** Six shared geometry references and expanded Silhouette help
     are implemented from pp. 18-22, with source/API/search and three-width
     Chromium checks. The existing Weapon Trait, diagrams and Fireteam-specific
-    effects retain their owners. Acceptance awaits VR-0061's pinned Linux and
-    hosted checks; do not repeat the implementation.
+    effects retain their owners. Pinned Linux full-suite verification is complete at `c612e546`;
+    hosted CI and final release gates remain open. Do not repeat
+    the implementation.
   - [ ] **V1S-033C:** Shared Cover and expanded Climb/Jump procedures are
     implemented from pp. 32-34/41-42, with linked Climbing Plus conditions
     from p. 88. Source/API/search, preserved Skill metadata, dated FAQ and
-    three-width Chromium checks pass. Acceptance awaits VR-0062's pinned
-    Linux and hosted checks; do not repeat the implementation.
+    three-width Chromium checks pass. Pinned Linux full-suite verification is complete at `c612e546`;
+    hosted CI and final release gates remain open. Do not repeat
+    the implementation.
   - [ ] **V1S-033D:** The optional N5.3 Difficult Terrain and Saturation General
     Rule references are implemented from pp. 143–145 with source/API/search,
     deterministic matched v9 publication, conditional `skill:terrain`
     exemption, post-allocation Burst reduction, B1 floor and nonstacking.
     Existing Special Terrain, Access Width, Visibility Zones, Terrain Skill
     parameters and examples remain unchanged. Normal Chrome checks pass at
-    1440/390/320 px. Acceptance awaits VR-0063's pinned Linux/hosted checks;
-    do not repeat this implementation.
+    1440/390/320 px. Pinned Linux full-suite verification is complete at
+    `c612e546`; hosted CI and release gates remain open. Do not
+    repeat this implementation.
   - [ ] **V1S-033E:** Confirm all four families in ordinary 1440/390/320 px browser navigation,
     keyboard/search/source citations, exact matched rules/deployed-object artifacts and scoped
     regressions; register any deferred cross-host/CI obligations in the validation queue.
@@ -350,7 +354,15 @@ Partial/focused Linux runs do not suspend the due VR drain.
 - [ ] **V1S-092 (M, gate):** Finalize coherent Unreleased notes, release metadata and version only after the
   completeness review.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate and obtain exact-main-SHA hosted workflows, optional
-  full-assets, evidence and annotated tag.
+  full-assets, evidence and annotated tag. The open Source-checks requirements include
+  validating the historical-evidence Git-free preflight repair from VR-0059 and
+  the additive-reference review corrections from VR-0058 on a complete
+  hosted matrix. The last recorded Source attempt `41858032642` passed
+  Linux and Windows but cancelled its macOS runner without executing steps;
+  the dependent cross-platform deterministic-byte job was skipped.
+  This remains **unaccepted hosted CI**, not open local VR execution.
+  Preserve exact-candidate Source checks, Installed wheel and Deployment
+  smoke requirements; no passing local/Linux suite substitutes for them.
 - [ ] **V1S-094 (L, external):** With explicit operational approval, validate retained rollback/forward
   procedure and deploy the approved tagged artifact.
 - [ ] **V1S-095 (M, gate):** Verify deployed exact source/runtime pair, release version, static assets and

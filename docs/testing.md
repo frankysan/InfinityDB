@@ -507,8 +507,9 @@ summed worker-seconds. Two existing Python 3.14 multithreaded `fork()`
 warnings remained. Skips include opt-in publication work, absent ignored
 historical PDFs and a local migration report; they are not source acceptance.
 This verifies the Linux obligations for VR-0052 through VR-0058 at that
-revision. Hosted acceptance and VR-0059 remain open; this result does not
-cover subsequent movement-reference or clean-export evidence changes.
+revision. The separate hosted Source acceptance for the cleaned-up
+historical-evidence export remains open under V1S-093; this result does
+not cover subsequent movement-reference or clean-export evidence changes.
 
 The later pinned movement/geometry batch at
 `a9f564650ff0f42d28fca29f5a1daf87f8642edb`, job
@@ -521,6 +522,29 @@ Linux obligations through VR-0061 on that revision, including the repaired
 interaction totals; it does not cover subsequent Cover changes. Source CI
 passed its Linux and Windows jobs but could not acquire a macOS runner,
 so macOS and the dependent byte-comparison gate remain unverified.
+
+**2026-11-04 corrected terrain/Cover cumulative Linux verification:**
+The first pinned `4e4aa664` full-suite job
+`linux-dev:1f7a136e18d44c06a846b7f045426bdf` failed with
+**126 failed, 728 errors, 4,235 passed, 29 skipped** because its
+Git-ignored deployed-object publication had not been regenerated for
+the newly tracked rules database. This is an input preparation failure,
+not evidence of 854 independent gameplay regressions. After explicitly
+fast-forwarding `linux-dev` to
+`c612e54674caa3a33dc20c5df5b201ab0a98dc90` and **building and
+checking** the matching ignored deployed-object publication, the
+pinned full-assets job `linux-dev:b91f8ef9c6944352a248e1114db987bd`
+passed **5,089 tests, 29 skipped, zero failures** in **438.20 s
+pytest / 438.89 s runner**, with all **808/808** published SVG assets.
+This verifies the remaining Linux obligations for VR-0062 (Cover and
+Climb/Jump) and VR-0063 (Difficult Terrain and Saturation), alongside
+the previously accepted local execution for VR-0052–0061. No newly
+edited, uncommitted V1S-033E browser test was part of this run.
+The reviewed, locally complete queue entries are retired under the
+strict drain policy; **hosted Source checks, macOS, cross-platform
+byte determinism, Installed wheel, Deployment smoke, and final
+source/browser release acceptance remain open** under V1S-093 and
+the mandatory `docs/ci.md`/`docs/releasing.md` gates.
 
 The frozen declaration-owner audit now reads a hash-pinned extraction of
 the original 17 retired records from
