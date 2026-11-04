@@ -225,8 +225,6 @@ V1S-068–069, V1S-074 and V1S-081–090.
   unsupported generic modifiers.
 - [ ] **V1S-052 (S, review):** Review exact Doctor occurrence parameters independently of Engineer and
   preserve source-defined differences.
-- [ ] **V1S-054 (M, review):** Review Immunity source-162 occurrence signatures, especially combined/base
-  component boundaries.
 - [ ] **V1S-055 (M, review):** Review BS Attack source-201 variants and modifiers, preserving ordered raw
   signatures.
 - [ ] **V1S-056 (M, review):** Review CC Attack source-240 variants and distinct attribute/attack conditions.
