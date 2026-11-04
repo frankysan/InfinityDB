@@ -168,9 +168,9 @@
       "reviewNote": "PDF p.187 prints [*], referring to the Sepsitor family context (p.73), but Army omits it; a name-matching cause is not confirmed.",
       "semanticReview": {
         "classification": "source-footnote",
-        "state": "partial",
-        "finding": "The N5.3 legend (p.176) defines [*] as a Weaponry reference. N5.3 chart p.187 lists [*] for Sepsitor Plus; the Sepsitor Weaponry section (p.73) covers the weapon family. Army omits the marker.",
-        "remaining": "Preserve the source mismatch. Both weapons now publish their own Sepsitor rules references; why Army omits the marker remains unverified. The proposed Army name-lookup explanation is a hypothesis.",
+        "state": "explained",
+        "finding": "The N5.3 legend (p.176) defines [*] as a Weaponry reference. The chart (p.187) prints [*] for Sepsitor Plus, and p.73 provides the Sepsitor family rules. The curated weapon:sepsitor-plus record cites the legend and chart and discloses the Army omission.",
+        "remaining": "Why Army omits this source marker remains unresolved under SRC-014. Preserve the imported Army profile and its missing marker; the curated record retains its cited Weaponry rules, and the proposed name-matching explanation remains a hypothesis.",
         "pdfPages": [
           73,
           176,

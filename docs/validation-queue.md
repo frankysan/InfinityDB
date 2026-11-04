@@ -144,27 +144,32 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0070 (2026-11-04; ready-to-run): repair the stale source-section
-  total exposed by hosted Source checks. Work:
-  [V1S-033](TODO.md#rules-and-contextual-reference-completion); revision:
-  source-section expectation and VD test-design working tree based on
-  `373848d708aebea485fd67ec1be19c57d1300630`; risk: low.
-  Evidence: hosted run `41886992259` on
-  `0dbef584e552546396349253d55925ca45ced785` failed the summary assertion with
-  787 current sections versus 785 expected; local
-  `reconcile_explanation_inventory()` confirms 787. The two added sections
-  are the Endgame p.182 and WildParrot p.181 chart citations; the frozen audit
-  entry remains a historical 785-count snapshot. Design: VD-0013 retired
-  after static review; no tests executed. Deferred selector:
-  `tests/test_report_reference_baseline.py::test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers`;
-  also run `tools/run_checks.py --stage docs`. Intended host: Windows.
-
-No pending deferred-execution obligations.
+- [ ] VR-0071 (2026-11-04; ready-to-run): verify the Sepsitor Plus source
+  review disposition without changing Army or gameplay data. Work:
+  [V1S-034](TODO.md#rules-and-contextual-reference-completion); revision:
+  source-review and test-design working tree based on
+  `687c8f92d46f0dc51045aeaeb8c13a3474a5abad`; risk: medium. Source evidence:
+  N5.3 PDF SHA-256
+  `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`,
+  Army DB SHA-256
+  `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`,
+  Wiki history ZIP SHA-256
+  `d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`,
+  `Weapon_Chart` revision 4083 and member SHA-256
+  `a3a6230051bc3a03e61a6de917306b403bac35ddfa6dcb8962595316bb3722ed`.
+  SRC-014 remains open — source intent unknown. Design: VD-0014 retired after
+  static review; no tests executed. Deferred selectors:
+  `tests/test_audit_weapon_trait_cross_sources.py::test_sepsitor_plus_review_explains_reference_and_keeps_src014_open`,
+  `tests/test_audit_weapon_trait_cross_sources.py::test_wiki_source_review_requires_exact_pdf_revision_and_member_hash`,
+  and the full `tests/test_audit_weapon_trait_cross_sources.py` module.
+  Also rerun `tools.audit_weapon_trait_cross_sources` with the pinned PDF and
+  Wiki ZIP, and `tools/run_checks.py --stage docs`, on the committed revision.
+  Intended host: Windows.
 
 ## Next unused IDs
 
-- Design: `VD-0014` (through `VD-0013` retired).
-- Execution: `VR-0071` (through `VR-0070` retired).
+- Design: `VD-0015` (through `VD-0014` retired).
+- Execution: `VR-0072` (through `VR-0070` retired; VR-0071 active).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
