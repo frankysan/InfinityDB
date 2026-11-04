@@ -159,10 +159,12 @@ is recorded. Failed or incomplete verification remains open.
   `tests/test_report_reference_baseline.py::test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers`;
   also run `tools/run_checks.py --stage docs`. Intended host: Windows.
 
+No pending deferred-execution obligations.
+
 ## Next unused IDs
 
 - Design: `VD-0014` (through `VD-0013` retired).
-- Execution: `VR-0071` (through `VR-0069` retired; VR-0070 active).
+- Execution: `VR-0071` (through `VR-0070` retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
