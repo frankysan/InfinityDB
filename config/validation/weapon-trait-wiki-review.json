@@ -51,9 +51,9 @@
       "reviewNote": "The N5.3 chart legend on p.176 defines [*] as Weaponry and [**] as Ammunition. PDF/Wiki PARA Mine uses [*], but Army uses [**]; preserve both source values until Army's intended reference is checked.",
       "semanticReview": {
         "classification": "source-footnote",
-        "state": "partial",
-        "finding": "The N5.3 chart legend (p.176) defines [*] as a Weaponry reference and [**] as an Ammunition reference. PARA Mines (p.181) prints [*] and the Mines rule is on p.72; Army records [**].",
-        "remaining": "Review whether Army's marker follows the printed chart legend and why its category differs; retain both original source values.",
+        "state": "explained",
+        "finding": "The N5.3 chart legend (p.176) defines [*] as a Weaponry reference and [**] as an Ammunition reference. The curated weapon:para-mine record links both weapon:mines and ammunition:para and identifies the marker mismatch without changing Army.",
+        "remaining": "Why Army uses [**] while the PDF and Wiki use [*] remains unresolved under SRC-013; retain the imported Army marker and both published rule references.",
         "pdfPages": [
           72,
           176,

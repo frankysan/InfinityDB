@@ -794,8 +794,8 @@ the PDF omits it, and DA alone does not imply it.
 
 The exact-PDF-pinned `semanticReview` results in
 `config/validation/weapon-trait-wiki-review.json` classify all nine comparison
-rows while preserving their raw source fields: **five explained** and
-**four partially explained** interpretations. The evidence below distinguishes
+rows while preserving their raw source fields: **six explained** and
+**three partially explained** interpretations. The evidence below distinguishes
 historical terminology, the chart legend, and current-source differences.
 
 ### N4 terminology provenance and N5 chart-reference legend
@@ -843,8 +843,8 @@ still needs verification. Preserve both source values.
 - **PARA Mine:** N5.3 p. 181 prints `[*]`, with the Mines-specific rules on
   p. 72; Army prints `[**]`. The N5.3 legend makes these Weaponry versus
   Ammunition references respectively. The reviewed `weapon:para-mine` card
-  now links to both applicable rules and identifies the mismatch; the Army
-  marker's intent remains unresolved.
+  now links to both applicable rules and identifies the mismatch; why Army
+  uses `[**]` remains unresolved under SRC-013.
 - **WildParrot:** N5.3 pp. 74, 181 explicitly list `Non-Lethal`, and the weapon
   uses E/M Ammunition and operates like an E/M Mine. Army omits that explicit
   Trait; preserve this difference rather than silently adding a property.

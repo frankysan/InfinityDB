@@ -99,8 +99,8 @@ def test_wiki_source_review_requires_exact_pdf_revision_and_member_hash(tmp_path
     review = json.loads(source.read_text(encoding="utf-8"))
     mapping = _load_review(source, review["corePdfSha256"])
     assert len(mapping) == 9
-    assert sum(item["semanticReview"]["state"] == "explained" for item in mapping) == 5
-    assert sum(item["semanticReview"]["state"] == "partial" for item in mapping) == 4
+    assert sum(item["semanticReview"]["state"] == "explained" for item in mapping) == 6
+    assert sum(item["semanticReview"]["state"] == "partial" for item in mapping) == 3
     assert {item["name"] for item in mapping} == {
         "Cybermine", "Drop Bears", "PARA Mine", "WildParrot", "PT: Endgame",
         "PT: Eraser", "PT: Mirrorball", "Kobra Pistol", "Sepsitor Plus",
@@ -145,6 +145,26 @@ def test_wildparrot_review_tracks_published_trait_and_src015() -> None:
     assert "variantRuleReferences" in semantics["finding"]
     assert "SRC-015" in semantics["remaining"]
     assert "raw imported profile" in semantics["remaining"]
+
+
+def test_para_mine_review_tracks_both_references_and_open_src013() -> None:
+    source = Path(__file__).resolve().parents[1] / (
+        "config/validation/weapon-trait-wiki-review.json"
+    )
+    review = json.loads(source.read_text(encoding="utf-8"))
+    mapping = _load_review(source, review["corePdfSha256"])
+    para_mine = next(item for item in mapping if item["name"] == "PARA Mine")
+    semantics = para_mine["semanticReview"]
+
+    assert semantics["state"] == "explained"
+    assert {72, 176, 181} <= set(semantics["pdfPages"])
+    assert "weapon:para-mine" in semantics["finding"]
+    assert "weapon:mines" in semantics["finding"]
+    assert "ammunition:para" in semantics["finding"]
+    assert "without changing Army" in semantics["finding"]
+    assert "SRC-013" in semantics["remaining"]
+    assert "imported Army marker" in semantics["remaining"]
+    assert "both published rule references" in semantics["remaining"]
 
 
 def test_cross_source_report_keeps_source_evidence_visible() -> None:

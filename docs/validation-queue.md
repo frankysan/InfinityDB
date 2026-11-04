@@ -144,12 +144,33 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending deferred-execution obligations.
+- [ ] VR-0068 (2026-11-04; ready-to-run): correct the PARA Mine review
+  disposition without changing source fields or player-facing behavior.
+  Work: [V1S-034](TODO.md#rules-and-contextual-reference-completion);
+  revision: working tree based on `0dbef584e552546396349253d55925ca45ced785`;
+  risk: medium. Source evidence: read-only audit confirmed PDF SHA-256
+  `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`,
+  Army DB SHA-256
+  `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`,
+  Wiki history ZIP SHA-256
+  `d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`,
+  `Weapon_Chart` revision 4083 and member SHA-256
+  `a3a6230051bc3a03e61a6de917306b403bac35ddfa6dcb8962595316bb3722ed`.
+  The chart/Wiki use `[*]`; Army uses `[**]`; existing curated/API coverage
+  links `weapon:mines` and `ammunition:para` without altering the raw profile.
+  Design: VD-0011 retired. Deferred: rerun
+  `tools.audit_weapon_trait_cross_sources` with the pinned PDF and Wiki ZIP;
+  `tests/test_audit_weapon_trait_cross_sources.py`;
+  `tests/test_weaponry_catalog_api.py::test_para_mine_has_own_reference_without_rewriting_source_marker`;
+  and `tools/run_checks.py --stage docs`, on the committed revision.
+  Intended host: Windows (Linux worker unavailable). Outcome: test design
+  complete without execution; new selector:
+  `tests/test_audit_weapon_trait_cross_sources.py::test_para_mine_review_tracks_both_references_and_open_src013`.
 
 ## Next unused IDs
 
-- Design: `VD-0011` (through `VD-0010` retired).
-- Execution: `VR-0068` (through `VR-0067` retired).
+- Design: `VD-0012` (through `VD-0011` retired).
+- Execution: `VR-0069` (through `VR-0068` pending).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
