@@ -144,28 +144,12 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0067 (2026-11-04; ready-to-run): restore and protect the v9
-  rules release pair. Work: Deployment smoke repair after `1a321fdc`
-  (no open TODO item); revision: working tree based on `1a321fdc`;
-  risk: high. Immediate: guarded stage/promotion verified 14 reviewed
-  Restrictions and 17 deployed objects; `tools.build_deployed_object_publication
-  --check` passed; `RulesDatabase.validate()` and API payload check passed
-  (`available=true`, 14 items). Rules SHA-256
-  `b28b4093e08c15da2466ad59bba544c82f5118e5109c7d11e78d00957a8a582a`;
-  paired publication SHA-256
-  `d1f0241a6918a9c4e46890c2f9323b44d7401970f04e8404321eb23086c16c28`.
-  Design: VD-0010 retired. Deferred: run
-  `tools/run_checks.py --stage test tests/test_restriction_storage_candidate.py tests/test_deployment_scripts.py`
-  and `tools/run_checks.py --stage docs` on the committed revision; hosted
-  CI remains independently owned by `docs/ci.md`. Outcome: test design
-  complete without execution; the new assertions are
-  `tests/test_restriction_storage_candidate.py::test_default_build_rules_cannot_replace_tracked_v9_database`
-  and `::test_default_build_rules_can_rebuild_existing_v8_database`.
+No pending deferred-execution obligations.
 
 ## Next unused IDs
 
 - Design: `VD-0011` (through `VD-0010` retired).
-- Execution: `VR-0068` (through `VR-0067` pending).
+- Execution: `VR-0068` (through `VR-0067` retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
