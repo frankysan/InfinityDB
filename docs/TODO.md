@@ -158,8 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-024 (M, review):** Review remaining Skills by semantic family for missing definitions, typed facts
-  and source-backed browser links.
 - [ ] **V1S-025 (M, review):** Review Equipment and exceptional Army gear wording, including nonstandard
   attributes and source-scoped semantics.
 - [ ] **V1S-026 (M, review):** Review other canonical Rules, game terms, training, scenario terminology and
@@ -511,6 +509,10 @@ missing explanations: the existing shared-effects approvals must be reconciled.
     material in-scope gap has an owning open task. This establishes the baseline, not final acceptance.
 
 ### Rules and reference completeness
+
+The [V1S-024 Skill-family review](v1.0-source-coverage-audit.md#skill-semantic-family-coverage-and-deferred-links-v1s-024-2026-11-04)
+found no missing public Skill definitions; exact occurrence variants,
+conditional relationships and final source/browser acceptance remain open.
 
 - [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned
   curated rules-reference gaps for N5 v5.3 using

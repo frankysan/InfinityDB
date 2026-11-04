@@ -450,6 +450,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         ("cancels-state", "state:possessed"),
     }
     assert ("skill:courage", "rule:guts-roll", "applies-effects-to") in future_keys
+    assert ("skill:immunity", "rule:saving-rolls", "applies-effects-to") in future_keys
+    assert ("skill:immunity", "rule:saving-roll", "applies-effects-to") not in future_keys
+    # Existing rule identities do not automatically authorize unconditional edges.
+    assert ("skill:terrain", "rule:special-terrain", None) in future_keys
+    assert ("skill:g-jumper", "rule:combat-group", None) in future_keys
     assert ("skill:impetuous", "state:prone", "cancels-state") not in future_keys
     assert ("skill:impetuous", "state:prone", None) not in future_keys
     assert ("equipment:gizmokit", "skill:remote-presence", None) not in future_keys

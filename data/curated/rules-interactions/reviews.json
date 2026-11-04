@@ -2828,7 +2828,7 @@
       "relationType": "applies-effects-to",
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Climbing Plus explicitly extends vertical movement to movement caused by a failed Guts Roll; materialize the edge once Guts Rolls have a canonical rules identity."
+      "reason": "Climbing Plus extends vertical movement to a failed Guts Roll. The canonical Guts Roll reference now exists, but its movement-after-failure scope must be preserved before promoting an outgoing typed edge."
     },
     {
       "sourceRecordId": "skill:terrain",
@@ -2844,7 +2844,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "deferred",
-      "reason": "Terrain removes movement restrictions imposed by matching Special Terrain, but the current graph has no canonical Special Terrain identity or precise restriction-bypass edge."
+      "reason": "Terrain bypasses matching Special Terrain movement restrictions. The Special Terrain reference is now canonical, but a typed edge still needs exact terrain-type matching and restriction-bypass scope; do not imply unconditional immunity to all Special Terrain."
     },
     {
       "sourceRecordId": "skill:warhorse",
@@ -2868,7 +2868,7 @@
       "relationType": "applies-effects-to",
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity."
+      "reason": "Courage optionally passes Guts Rolls automatically. The canonical Guts Roll reference and linked explanation now exist; review the optional actor-specific pass before promoting an otherwise overbroad typed edge."
     },
     {
       "sourceRecordId": "skill:courage",
@@ -2932,7 +2932,7 @@
       "relationType": "applies-effects-to",
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Religious Troop changes Guts Roll resolution by automatically passing while allowing a successful WIP Roll to apply failed-Guts effects; materialize when Guts Roll is canonical."
+      "reason": "Religious Troop automatically passes Guts Rolls but may roll WIP to apply the failed-Guts outcome. Guts Roll is now canonical; defer the typed edge until this two-branch resolution is preserved, not flattened into Courage's optional pass."
     },
     {
       "sourceRecordId": "skill:religious-troop",
@@ -3172,7 +3172,7 @@
       "relationType": "modifies-rolls-for",
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Journalist applies opposing Guts Roll MODs to nearby allied and enemy Troopers; materialize this when Guts Roll is a canonical rules identity and participant alignment/range scope can be preserved."
+      "reason": "Journalist modifies Guts Rolls for allied and enemy Troopers in Zone of Control with opposite MODs. Guts Roll now has a canonical reference and links; preserve alignment, range and non-stacking before promoting a typed participant-specific modifier edge."
     },
     {
       "sourceRecordId": "skill:journalist",
@@ -3240,11 +3240,11 @@
     },
     {
       "sourceRecordId": "skill:immunity",
-      "targetRecordId": "rule:saving-roll",
+      "targetRecordId": "rule:saving-rolls",
       "relationType": "applies-effects-to",
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity."
+      "reason": "Some Immunity categories change the effects, number or defensive Attribute of Saving Rolls. The canonical reference is rule:saving-rolls; defer the typed edge until component, Ammunition and target conditions are preserved rather than suggesting a universal Saving Roll modification."
     },
     {
       "sourceRecordId": "skill:immunity",
@@ -3292,7 +3292,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "All Proxies belong to one Combat Group and move between Combat Groups as one Trooper; model this when Combat Group membership and multi-body Trooper identity have canonical rules identities."
+      "reason": "All G: Jumper Proxies belong to one Combat Group and transfer between groups as one Trooper. The Combat Group baseline is now canonical; a typed edge remains deferred because it must model multi-body Proxy ownership and one-Trooper group membership."
     },
     {
       "sourceRecordId": "skill:infinity-spec-ops",

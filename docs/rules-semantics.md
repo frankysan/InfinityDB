@@ -5006,13 +5006,16 @@ prohibitions are modeled explicitly with `prevents-state-entry` relations to tho
 
 Climbing Plus reuses Climb while changing its declaration timing, and explicitly extends its
 vertical-movement effects to Move and Dodge. It therefore authors `uses-effects-of` toward Climb
-and `applies-effects-to` toward Move and Dodge. Its failed-Guts movement and Partial Cover
-interactions stay deferred where the current graph lacks the required generic identity or
+and `applies-effects-to` toward Move and Dodge. The current `rule:guts-roll` reference
+already explains and links the failed-Guts vertical movement exception, but a typed
+edge must preserve its *failed-Roll movement* condition rather than imply that
+Climbing Plus modifies every Guts Roll. Partial Cover still needs a precise
 benefit-suppression relation.
 
 Terrain is a reviewed zero-edge definition at the current graph boundary: its MOV bonus targets
-any Movement-labelled Skill and bypasses matching Special Terrain movement restrictions, which the
-current graph cannot express precisely. Warhorse now authors `negates-effects-of` toward Loss of
+any Movement-labelled Skill and bypasses *matching* Special Terrain movement restrictions.
+The canonical `rule:special-terrain` now exists, but a typed edge must retain the
+specific Terrain type and restriction-bypass condition instead of implying a generic immunity. Warhorse now authors `negates-effects-of` toward Loss of
 Lieutenant and `prevents-state-entry` toward Isolated State. Its Retreat interaction and the exact BS
 Attack (-X) modifier form remain in the maintained future ledger rather than being approximated by
 over-broad edges.
@@ -5031,11 +5034,14 @@ Sources:
 Courage and Religious Troop both alter Guts Roll and Retreat behavior, but in materially different
 ways: Courage optionally lets its user pass a Guts Roll automatically, while Religious Troop
 automatically passes and allows a WIP Roll to apply failed-Guts effects. Both ignore the army-level
-Retreat situation while remaining affected by Loss of Lieutenant. Guts Roll and the Retreat
-situation are not yet canonical graph targets, so those interactions remain in the maintained
-future ledger rather than being approximated through unrelated Skills or States. Loss of Lieutenant
-is canonical, but these Skills do not negate it, so their explicit continued susceptibility remains
-a fact rather than a special graph edge. Foxhole State explicitly grants Courage, so that existing
+Retreat situation while remaining affected by Loss of Lieutenant. Both `rule:guts-roll`
+and `rule:army-retreat` now exist, with scoped prose links to the Skills. The historical
+future ledger still models additional *typed* interactions as planned: optional
+versus compulsory Guts resolution and army-level Retreat immunity must not be
+flattened into identical or unscoped edges. The old `rule:retreat` placeholder is
+not automatically interchangeable with `rule:army-retreat` or `state:retreat`.
+Loss of Lieutenant is canonical, but these Skills do not negate it, so their
+explicit continued susceptibility remains a fact rather than a special graph edge. Foxhole State explicitly grants Courage, so that existing
 planned edge is now a current `uses-effects-of` relationship.
 
 Frenzy grants Impetuous and Limited Cover after its direct-Wound/Dead-State trigger, so it authors
