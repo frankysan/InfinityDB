@@ -4840,6 +4840,27 @@ Reinforcement Section parity regression confirms that the application's
 profiles and loadouts retain their original Army/Section occurrences.
 Army-list legality modeling remains separate work.
 
+**1.0 authority decision (V1S-040; 2026-11-04):** Reaffirm the
+optional N4-origin reference rather than claiming verified N5-native
+procedures. The pinned N5.3 and ITS Season 18 references identify the
+mode's continued availability, whereas both hash-pinned annex PDFs
+identify N4. A fresh check of the [official Wiki annex](https://infinitythewiki.com/Infinity_Reinforcements) still labels the
+detailed rules as originating in N4; no edition-identified N5 annex or
+explicit unchanged-adoption ruling was established in this review.
+Failure to find one does **not** establish that no such source exists.
+The read-only `tools.audit_reinforcements_applicability` check at
+`ba057539` exited 0 with two current references and two historical
+annex PDFs, explicitly reporting N5 procedural publication as
+`BLOCKED`. This is source/applicability evidence, not an acceptance
+of N5 procedural legality or new execution of browser regressions.
+V1S-040 closes as a **documented decision**, with no change to the
+curated source, database pair or public wording. Keep
+[SRC-030](official-source-clarifications.md#src-030--which-reinforcements-annex-procedures-govern-optional-n5-games)
+open for a publisher ruling or new primary publication, and keep
+V1S-041 / final release gates open for matched Section, Commlink and
+ordinary-browser acceptance. No new deferred VD/VR tests are generated
+by this documentation-only decision.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>

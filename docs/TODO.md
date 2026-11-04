@@ -230,8 +230,6 @@ and final candidate acceptance retain their individual owners below.
   Blocked: Corvus Belli ruling or an applicable new official source must establish whether the
   Saving-Roll-triggered protection suppresses the earlier Silent Dodge MOD and reconcile the
   English Face to Face qualifier. Retry when that evidence is available; retain public uncertainty.
-- [ ] **V1S-040 (M, decision):** Document N5-native Reinforcements authority if available, or preserve
-  disclosed optional legacy reference and SRC-030 follow-up.
 - [ ] **V1S-041 (M, gate):** Accept Reinforcement Section, profile and exact Commlink variants in ordinary
   browser/release context, without asserting roster legality.
 
@@ -672,13 +670,14 @@ the remaining source clauses and final release-browser acceptance remain open.
     **Reinforcements Extra**, separately scoped from `n5-core-rules`.
     The N4-origin procedures, Section/parent navigation and exact typed
     Commlink (+1)/(+2) variants are published; see the
-    [scoped reference contract](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data).
-    - [ ] **N5-native source clarification:** Resolve
-      [SRC-030](official-source-clarifications.md#src-030--which-reinforcements-annex-procedures-govern-optional-n5-games)
-      by identifying an authoritative N5-specific Annex revision or official
-      adoption ruling. Pin its edition/date and reconcile differences before
-      labelling the procedures N5-native. This does not block the clearly
-      disclosed optional legacy reference.
+    [scoped reference contract and V1S-040 authority decision](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data).
+    - [ ] **N5-native source clarification (SRC-030; external authority):** Obtain an
+      authoritative N5-specific Annex revision or official adoption ruling.
+      Pin its edition/date and reconcile differences before labelling the
+      procedures N5-native. **Blocked:** Corvus Belli must publish or confirm
+      the governing edition; retry on a new primary publication or publisher
+      response. The [V1S-040 decision](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data)
+      preserves the usable, clearly disclosed N4-origin optional reference.
     - [ ] Finish manual browser and release-matched Section/profile/Commlink
       acceptance. Source-wide profile/loadout and complete Commlink signature
       parity, selected-Army ownership and desktop/mobile navigation already have
