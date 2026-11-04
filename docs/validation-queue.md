@@ -155,6 +155,20 @@ IDs here and link the owning task instead of duplicating its description.
   Target design: `tests/test_audit_source_variant_inputs.py::test_peripheral_source_243_exact_subtypes_and_profile_ownership`.
   Outcome: pending test authorship and static design review; no tests run.
 
+- [ ] **VD-0018 (2026-11-04; needs-design):** Pin all eight Transmutation
+  source-246 single-extra signatures (295 rows), all profile-owned source
+  occurrences, the exact trailing ASCII space in the `Escape System -3` value, and
+  the two unmodified SWITCHERS GRUPPA `WIP` occurrences. Guard
+  threshold, Escape System, Auto and Hatching against loss of the
+  exact Army/Profile/occurrence identity; fail closed on new extras.
+  Work: [V1S-058](TODO.md#rule-variant-usage-index-and-restrictions);
+  change: 2026-11-04 source review; risk: medium.
+  Existing coverage: global pinned inventory only; general Transmutation
+  family facts and unrelated action tests exist, but no exact source-246
+  signature/owner regression. Linked execution: VR-0075.
+  Target design: `tests/test_audit_source_variant_inputs.py::test_transmutation_source_246_exact_signatures_and_profile_owners`.
+  Outcome: pending test authorship and static design review; no tests run.
+
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
 existing coverage, risk, linked VR ID, and resulting test selector and
@@ -216,10 +230,21 @@ is recorded. Failed or incomplete verification remains open.
   relevant source-variant test module; cumulative release acceptance.
   Outcome: not executed; raw archive required on the chosen worker.
 
+- [ ] **VR-0075 (2026-11-04; awaiting-design):** Verify V1S-058's
+  Transmutation source-246 eight signatures, 295 profile owners and
+  unmodified WIP/trailing-space Escape source distinctions.
+  Work: [V1S-058](TODO.md#rule-variant-usage-index-and-restrictions);
+  revision: 2026-11-04 review commit pending; risk: medium.
+  Immediate: read-only audit and all eight exact source-owner queries
+  completed; docs verification to be recorded at commit. Design: VD-0018.
+  Deferred: source-exact regression on the pinned raw Army archive,
+  relevant source-variant test module and eventual release gates.
+  Outcome: not executed; raw archive required on the chosen worker.
+
 ## Next unused IDs
 
-- Design: `VD-0018` (through `VD-0014` retired; `VD-0015`–`VD-0017` open).
-- Execution: `VR-0075` (through `VR-0071` retired; `VR-0072`–`VR-0074` open).
+- Design: `VD-0019` (through `VD-0014` retired; `VD-0015`–`VD-0018` open).
+- Execution: `VR-0076` (through `VR-0071` retired; `VR-0072`–`VR-0075` open).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

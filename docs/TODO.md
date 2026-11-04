@@ -237,8 +237,10 @@ V1S-068–069, V1S-074 and V1S-081–090.
   profile-owned occurrence contexts are characterized in the [2026-11-04 review](v1.0-source-coverage-audit.md#peripheral-source-243-occurrence-review-v1s-057-2026-11-04).
   Finish the pinned ownership/Connected-Autonomous regression under VD-0017/VR-0074;
   do not infer Controller access from a Peripheral Skill annotation.
-- [ ] **V1S-058 (M, review):** Review Transmutation source-246 exact profile transition and qualifier
-  semantics.
+- [ ] **V1S-058 (M, review):** Transmutation source-246's eight qualifier signatures and
+  exact source profile owners are characterized in the [2026-11-04 review](v1.0-source-coverage-audit.md#transmutation-source-246-occurrence-review-v1s-058-2026-11-04).
+  Finish the pinned threshold/Auto/Hatching/WIP regression VD-0018/VR-0075; inferred
+  destination profile links remain excluded pending V1S-062–066.
 - [ ] **V1S-060 (M, review):** Review Hacking Device Plus source-101 compound/Upgrade Programs signatures
   without inferring extra Program access.
 - [ ] **V1S-061 (M, review):** Run cross-family TEXT/DISTANCE, named MOD and unusual variant consistency
