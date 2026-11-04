@@ -232,14 +232,16 @@ and final candidate acceptance retain their individual owners below.
   English Face to Face qualifier. Retry when that evidence is available; retain public uncertainty.
 - [ ] **V1S-041 (M, gate):** Accept Reinforcement Section, profile and exact Commlink variants in ordinary
   browser/release context, without asserting roster legality.
+  Deferred: existing three-width annex/navigation, two-width shared-profile and exact (+1)/(+2)
+  browser regressions cover the current published behavior; repeat manual and automated
+  sign-off against the frozen candidate and release-matched databases after V1S-081/084,
+  alongside V1S-088. Do not substitute earlier runs for that gate.
 
 #### Four core scenarios
 
 **Parent:** [Core-scenario reference completion](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-042 (M, review):** Reconcile objective, setup, scoring and ending facts for the four core
-  scenarios against their pinned source sections.
 - [ ] **V1S-043 (M, gate):** Verify source geometry, markers, 24 points/distance configurations and
   deterministic map publication.
 - [ ] **V1S-044 (M, gate):** Verify scoped Skills, Specialist roles, scenario overlays and FAQ links without
@@ -665,7 +667,9 @@ the remaining source clauses and final release-browser acceptance remain open.
     ITS-only actions and season-specific rules remain post-1.0.
     - Shared concepts, scenario-only Skills and separate collection supplements
       have a [bounded source/API/browser-code review](v1.0-source-coverage-audit.md#shared-core-scenario-concepts-and-collection-supplements-v1s-039-2026-11-04).
-      Final source-clause and live browser acceptance remain with V1S-042–049/088.
+      The [four-scenario mission-fact source reconciliation](v1.0-source-coverage-audit.md#four-core-scenario-objective-setup-scoring-and-ending-reconciliation-v1s-042-2026-11-04)
+      closes V1S-042 without changing publication. Spatial/map and live browser
+      acceptance remain with V1S-043–049/088.
   - [ ] Complete final source-to-browser acceptance for the optional
     **Reinforcements Extra**, separately scoped from `n5-core-rules`.
     The N4-origin procedures, Section/parent navigation and exact typed
