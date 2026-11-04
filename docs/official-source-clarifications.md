@@ -2,7 +2,7 @@
 
 **Project domain:** Data processing
 **Maintained owner:** This is the canonical register of known Infinity rules, Army, Wiki, FAQ and scenario-source ambiguities, inconsistencies, and potential official corrections.
-**Last reviewed:** 2026-11-03
+**Last reviewed:** 2026-11-04
 **Publisher contact:** Not submitted. The entries are *candidate questions*, not claims that Corvus Belli has ruled on them.
 
 ## Purpose and maintenance contract
@@ -233,6 +233,13 @@ This register collects questions that may eventually be sent to Corvus Belli for
 - **Evidence:** The pinned English N5.3 Core Rules p. 6 includes games with Reinforcements, and ITS Season 18 (v2026.09.01, p. 27) explicitly offers the Reinforcements Extra and refers to an Annex. However, the [official live Wiki Annex](https://infinitythewiki.com/Infinity_Reinforcements) still labels its detailed instructions as originating in **N4**; the [official English Annex PDF](https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf) is likewise the earlier edition. The September 29 N5 Army snapshot still supplies Section pools and Commlink (+1)/(+2) occurrences, but those facts do not independently establish the applicable N5 procedural text. A public official-source search on 2026-11-03 did not establish a separately versioned N5 Annex or an explicit adoption notice; absence from that search is **not** proof no such publication exists. See [reviewed semantics](rules-semantics.md#rs-rf-section-001--reinforcement-eligibility-is-army-list-sectionoccurrence-context) and [current implementation](TODO.md#100--current-reference-completeness-gate).
 - **Question:** For optional Reinforcements Extra play in N5, including ITS Season 18 where selected, which **Annex edition and effective date** governs? Are the N4-origin Main/Reinforcement Section construction rules (including the 100-point/2-SWC allocation), Commlink maximum-Trooper-count bonuses, Request Reinforcements timing and deployment procedure all adopted unchanged, or are there N5-specific replacements or exceptions? Please identify the authoritative document or ruling for any changes.
 - **InfinityDB:** Publishes a separately labelled **N4-origin optional reference** with explicitly scoped Commlink (+1)/(+2) source semantics, Section/parent Army navigation and source citations. It does **not** present the historical procedures as an independently verified N5 rewrite or perform roster-legality calculations. The clearly disclosed optional reference is usable for agreed play while source adoption remains unresolved.
+
+### SRC-031 — Lieutenant Order Count: English double-negative versus Spanish non-Null
+
+- **Status:** open — correction requested; **probable English copy error, not a new gameplay exception**. **Alias:** V1S-032B Game Sequence source review.
+- **Evidence:** In the pinned N5.3 English Core PDF **p. 17**, Order Count / Lieutenant Special Order, the eligibility clause for an on-table Lieutenant literally says `not in a non-Null State`. The corresponding Spanish N5.3 Core PDF **p. 17** says `Teniente en estado no Nulo` (non-Null), consistent with English/Spanish Order Count Regular/Tactical Order clauses on p. 17, English Order Pool p. 12 and Loss of Lieutenant p. 18. The English double negative would misleadingly require a Null State if read literally. This is a bilingual printed-wording inconsistency, not evidence of a distinct Lieutenant exception; no publisher correction is confirmed by this review.
+- **Question:** Should N5.3 English p. 17 Lieutenant Special Order / Order Count say that the deployed Lieutenant **is not in a Null State**, matching the Spanish rule and the surrounding Order generation rules? Please identify any intended exception if the English double negative is deliberate.
+- **InfinityDB:** Preserve both exact source phrases as conflicting provenance. Use the corroborated **deployed, non-Null Lieutenant** requirement in the planned Game Sequence reference, with source-version disclosure rather than silently following the inverted English sentence. Do not grant Orders to Null Lieutenants or generalize the proposed copy correction into an official ruling. Source-pinned bilingual regression: `tests/test_phase_source_review.py`.
 
 ## Intake / future publisher correspondence
 
