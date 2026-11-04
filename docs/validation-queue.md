@@ -253,19 +253,22 @@ is recorded. Failed or incomplete verification remains open.
   Preserve actual revision, assets, terminal results and skipped coverage;
   hosted and final-candidate gates remain independently required.
 
-- [ ] **VR-0081 (2026-11-04; ready-to-run):** Verify Phase 1 static integrity
+- [ ] **VR-0081 (2026-11-04; blocked):** Verify Phase 1 static integrity
   checking for the V1S backlog checker. Base revision:
-  `cde1fe7bbb20c426c4705eec0e9252bc8e293de9`; target: the implementation
-  revision to be recorded after Phase 1 is complete. Work:
+  `cde1fe7bbb20c426c4705eec0e9252bc8e293de9`; target:
+  `52744d32ee37a9923efb3d532d8a1a1f370bcbfa`. Work:
   [V1S-096](TODO.md#final-10-acceptance) and its
   [backlog checker plan](v1s-backlog-checker-plan.md); design VD-0024 was
-  statically reviewed and retired without executing tests. Selectors:
-  `tests/test_check_v1_backlog.py`,
-  `tests/test_test_sections.py`, and the default
-  `python -m tools.check_v1_backlog` invocation from the repository root.
-  Confirm deterministic diagnostics and that static mode works without Git.
-  No tests ran during VD design. Intended host: Windows implementation
-  checkout, with Linux parity required before any shared-check integration.
+  statically reviewed and retired without executing tests.
+  Windows immediate checks passed: `tests/test_check_v1_backlog.py` and
+  `tests/test_test_sections.py` passed 20/20; the default CLI reported 53
+  declarations and zero warnings, matching an independent declaration count;
+  Ruff, Pyright, Markdownlint, and documentation links passed.
+  Deferred broader check: `tools/run_checks.py --profile code`.
+  Linux parity is blocked because no `linux-dev` runner is available, Docker's
+  Linux engine is stopped, and WSL has no Linux distribution. Retry on the
+  pinned Linux worker before shared-check integration; do not infer parity
+  from Windows results. No tests ran during VD design.
 
 ## Next unused IDs
 

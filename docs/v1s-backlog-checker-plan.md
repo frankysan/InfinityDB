@@ -2,7 +2,7 @@
 
 **Project domain:** Project infrastructure  
 **Status:** Phase 1 is implemented; Windows checks passed and Linux parity is
-pending in VR-0081. Phases 2–4 remain proposed.
+blocked on runner availability in VR-0081. Phases 2–4 remain proposed.
 **Scope:** The active `V1S-*` execution slices in [TODO.md](TODO.md#pre-planned-10-execution-slices), their documented completion, and the Git history of removals.
 
 ## Goal and constraints
