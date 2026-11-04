@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **224/224** complete, **0** pending.
+- Supporting semantic identities: **225/225** complete, **0** pending.
 - Current authored outgoing relations: **518**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -911,7 +911,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (42/42)
+#### Rule (43/43)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
@@ -992,6 +992,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Supply Boxes** (`rule:scenario:supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Supportware** (`rule:supportware`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
+  - outgoing: none
+- [x] **Template Weapons and Equipment** (`rule:template-weapons-and-equipment`) — reviewed: N5.3 pp. 43-49 shared Template targeting, cancellation, Dodge, Critical and scenery conditions. Typed prose links the canonical Traits, Skills, Ammunition and Cover owners; no unconditional State, delivery, object identity or target-evaluation relation is authored.
   - outgoing: none
 - [x] **Zone of Control** (`rule:zone-of-control`) — reviewed: N5.3 p. 20: 8-inch radius from the Silhouette outer edge, separate top/bottom extensions, active-route checks and scoped reactive opportunities. The shared geometry owner remains distinct from the existing ZoC Weapon Trait and grants no universal reactive Skill permission.
   - outgoing: none

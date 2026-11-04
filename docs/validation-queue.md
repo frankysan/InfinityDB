@@ -251,6 +251,19 @@ is recorded. Failed or incomplete verification remains open.
   deployed-object publication. Adding this fifth VR triggers a drain of all
   execution entries; first design VD-0020/0021/0023 without running tests.
 
+  Cumulative Linux code-profile execution at `1c780010`, job
+  `linux-dev:2e8fd555a2054cf09299180239a2b04c`, finished with 5,099 passed,
+  24 failed, 29 skipped; Ruff/Pyright passed. All fifteen new acceptance cases
+  passed. The remaining failures identified missing Template interaction-review
+  coverage, two unclassified non-catalog mentions, browser-lane registrations,
+  and stale record/source-locator/citation assertions. Repairs are scoped to
+  V1S-034/035 integration, preserving historical 367/D304/S63 counts and all
+  source/API/browser assertions. These entries stay open until corrected focused
+  execution and a pinned cumulative rerun pass. The repaired five-module Windows
+  check passed **261/261**, zero skips, in 34.31 s pytest / 35.67 s runner;
+  the corrected Linux cumulative run is still required. Complete logs remain in the
+  Linux job and ignored run report; dispatch alone does not retire any VR.
+
 ## Next unused IDs
 
 - Design: `VD-0025`; active obligations are listed above.

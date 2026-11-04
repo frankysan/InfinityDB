@@ -699,6 +699,30 @@
         "**Incapacitation while vertical.** If a climbing or hanging Trooper becomes [[state:unconscious|Unconscious]], place its corresponding [[term:state-token|State Token]] beside it. It is still in [[state:prone|Prone State]] while climbing, except for Unit Types that cannot enter [[state:prone|Prone]]."
       ],
       "caveat": "N5.3 p. 32 uses the normal State Token beside a climbing or hanging Unconscious Trooper. This indicator is not a new deployed Weapon/Equipment object or delivery relationship."
+    },
+    {
+      "recordId": "skill:cc-attack",
+      "classification": "combat-state-token-not-deployed-object",
+      "sourcePages": [
+        51
+      ],
+      "summaryEvidence": "A Common Skill used to make",
+      "factsEvidence": [
+        "including one represented by a Shasvastii-Embryo Token"
+      ],
+      "caveat": "The token represents the Unconscious target of Coup de Grace; it does not define a new deployed Weapon/Equipment, object profile or delivery edge."
+    },
+    {
+      "recordId": "rule:template-weapons-and-equipment",
+      "classification": "template-procedure-not-object-profile",
+      "sourcePages": [
+        44
+      ],
+      "summaryEvidence": "Templates establish an Area of Effect for an Attack.",
+      "factsEvidence": [
+        "the attack comes from a [[trait:deployable|Deployable]] Weapon"
+      ],
+      "caveat": "Generic template targeting and Dodge conditions refer to existing Deployable Weapons. They do not create an object identity, source Attributes, placement method, delivery edge or reverse Unit use."
     }
   ]
 }

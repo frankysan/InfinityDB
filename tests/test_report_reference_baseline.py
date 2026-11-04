@@ -50,17 +50,17 @@ RULES_DB = ROOT / "data/generated/rules.db"
 def test_frozen_explanation_inventory_reconciles_current_source_identities() -> None:
     result = reconcile_explanation_inventory()
     assert result["status"] == "identity-bridge-only-pending-clause-and-browser-acceptance"
-    assert (result["frozenCount"], result["currentCount"]) == (367, 465)
+    assert (result["frozenCount"], result["currentCount"]) == (367, 466)
     assert (result["retainedCount"], result["addedCount"], result["removedCount"]) == (
-        350, 115, 17,
+        350, 116, 17,
     )
     assert result["frozenTiers"] == {"D": 304, "S": 63}
     assert len(result["retainedScreeningOnlyIds"]) == 46
     assert result["addedKinds"] == {
-        "declaration-category": 20, "equipment": 3, "rule": 32,
+        "declaration-category": 20, "equipment": 3, "rule": 33,
         "skill": 2, "term": 5, "weapon": 53,
     }
-    assert len(result["currentRecords"]) == 465
+    assert len(result["currentRecords"]) == 466
     assert all(row["id"].startswith("declaration-category:")
                and row["replacementVerified"] is False
                for row in result["retiredIdentityRows"])
@@ -149,7 +149,7 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
     assert summary == {
         "frozen": 367, "historicalD": 304, "historicalS": 63,
         "retained": 350, "retiredDeclarations": 17,
-        "added": 115, "current": 465, "retainedHistoricalS": 46,
+        "added": 116, "current": 466, "retainedHistoricalS": 46,
         "historicalIdentitiesWithLaterEvidence": 26,
         "reviewedDeclarationTransitions": 17,
         "reviewedNewDeclarationHeadings": 20,
@@ -158,11 +158,11 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         "selectedBrowserTestAnchors": 36,
         "currentIdentitiesWithLaterEvidence": 56,
         "wholeRecordApprovals": 0,
-        "pendingSourceSections": 787,
+        "pendingSourceSections": 819,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}
-    assert len(historical) == 367 and len(current) == 465
+    assert len(historical) == 367 and len(current) == 466
     assert {row["historicalTier"] for row in historical.values()} == {"D", "S"}
     assert all(row["fullRecordAcceptance"] == (
         "not-approved-by-identity-or-evidence-join"
@@ -242,7 +242,7 @@ def test_reviewed_explanation_join_cli_is_deterministic_and_non_approving(
     saved = json.loads(first)
     joined = saved["reviewedEvidenceJoin"]
     assert len(joined["historicalRecords"]) == 367
-    assert len(joined["currentRecords"]) == 465
+    assert len(joined["currentRecords"]) == 466
     assert joined["summary"]["wholeRecordApprovals"] == 0
     assert saved["fullRecordApprovalsIssuedByThisAudit"] == 0
     text = markdown.read_text(encoding="utf-8")
@@ -506,7 +506,7 @@ def test_five_visibility_zone_cli_keeps_whole_corpus_gate_open(tmp_path: Path) -
     assert report["visibilityZones"]["reviewedTermCount"] == 5
     assert report["fullRecordApprovalsIssuedByThisAudit"] == 0
     assert report["frozenCount"] == 367
-    assert report["currentCount"] == 465
+    assert report["currentCount"] == 466
     assert "Five post-inventory Visibility Zone" in markdown.read_text(encoding="utf-8")
     assert all(
         row["sourceDisposition"] == "pending-full-material-clause-reconciliation"
@@ -730,7 +730,7 @@ def test_explanation_reconciliation_cli_writes_ignored_style_reports(
         "--markdown-output", str(markdown_path),
     ]) == 0
     result = json.loads(json_path.read_text(encoding="utf-8"))
-    assert (result["currentCount"], result["addedCount"]) == (465, 115)
+    assert (result["currentCount"], result["addedCount"]) == (466, 116)
     markdown = markdown_path.read_text(encoding="utf-8")
     assert "not a v1.0 release gate pass" in markdown
     assert "declaration-category:aro:p40" in markdown

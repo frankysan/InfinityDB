@@ -220,7 +220,9 @@ V1S-068–069, V1S-074 and V1S-081–090.
   The [source review](v1.0-source-coverage-audit.md#attack-weaponry-and-mode-source-review-v1s-034-2026-11-04-partial)
   covers BS/CC declarations, Template procedures and base Ammunition/State clauses; selected
   Weaponry/chart checks remain bounded evidence. Retain this slice until its new references
-  have regression/API/browser acceptance. BTS/Critical/conditional State review remains V1S-037;
+  have regression/API/browser acceptance, including repaired interaction-review coverage,
+  object-discovery classification and browser-lane registration from the cumulative run.
+  BTS/Critical/conditional State review remains V1S-037;
   complete profile/API/browser reconciliation remains V1S-038/070–072.
   Deferred: acceptance is in the phased VD/VR queue; retry at its five-item,
   seven-day or mandatory-gate trigger. Independent source review may continue.

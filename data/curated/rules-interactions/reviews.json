@@ -2620,6 +2620,13 @@
       "status": "reviewed",
       "reviewedOn": "2026-11-04",
       "note": "N5.3 pp. 41-42: total LoF obstruction versus contact plus partial obscuration, conditional LoF-requiring BS Attack prohibition, -3 Attack Roll and +3 Saving Roll MODs. Movement exceptions link their owning Skill conditions; no unconditional Attribute change, State relation or geometry evaluation."
+    },
+    {
+      "recordId": "rule:template-weapons-and-equipment",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 pp. 43-49 shared Template targeting, cancellation, Dodge, Critical and scenery conditions. Typed prose links the canonical Traits, Skills, Ammunition and Cover owners; no unconditional State, delivery, object identity or target-evaluation relation is authored."
     }
   ],
   "futureInteractions": [

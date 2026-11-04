@@ -610,7 +610,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         # Special Terrain, Difficult Terrain, Saturation, Access Width,
         # Initiative Roll and Combat Group are General Rules,
         # not deployed-object identities.
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 498
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 499
         assert connection.execute(
             "SELECT id FROM records WHERE id IN (?, ?) ORDER BY id",
             ("rule:access-width", "rule:special-terrain"),
@@ -907,7 +907,7 @@ def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
         citation["page"]
         for citation in program["citations"]
         if citation["source_id"] == "n5-core-v5.3-pdf"
-    } == {56, 59, 155}
+    } == {55, 59, 155}
     assert any(
         relation["type"] == "modifies-rolls-for"
         and relation["record_id"] == "skill:combat-jump"

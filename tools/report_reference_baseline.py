@@ -2517,7 +2517,7 @@ def render_explanation_reconciliation(report: dict[str, Any]) -> str:
             f"whole-record approvals: {summary['wholeRecordApprovals']}.",
             "",
             "The JSON report records all 367 original identities, each reviewed "
-            "declaration owner mapping, all 450 current identities and the "
+            "declaration owner mapping, all current curated identities and the "
             "specific limited later evidence links. A retired category is not "
             "a rename or a new public alias; a test anchor is not test execution.",
             "",
@@ -2648,7 +2648,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument(
         "--join-reviewed-evidence", action="store_true",
-        help="Join 367 frozen identities to 450 current records and later bounded evidence",
+        help="Join 367 frozen identities to current records and later bounded evidence",
     )
     parser.add_argument(
         "--verify-visibility-pdfs", action="store_true",
