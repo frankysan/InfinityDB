@@ -158,8 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-031 (S, gate):** Give the five newer Visibility Zone terms independent whole-corpus and
-  source/browser dispositions.
 - [ ] **V1S-032 (M, review):** Review unaccepted Orders, game phases, command and activation rule clauses with
   player-facing conditions and exceptions.
 - [ ] **V1S-033 (M, review):** Review movement, visibility, geometry, positioning and terrain clauses for
@@ -515,7 +513,11 @@ claiming publisher rulings. The
 now links all 367 historical records to the 450 current Core/Hacking identities and bounded later evidence without changing D/S tiers or issuing whole-record approvals. The
 [V1S-030 conditional ARO review](v1.0-source-coverage-audit.md#conditional-declaration-and-reactive-eligibility-follow-up-v1s-030-2026-11-04)
 checks twelve more source-scoped declaration/reaction cases with pinned evidence and public routes.
-Exact occurrence variants, source-clause completeness and final browser acceptance remain open.
+The
+[V1S-031 five-term acceptance](v1.0-source-coverage-audit.md#whole-term-visibility-zone-sourcebrowser-acceptance-v1s-031-2026-11-04)
+now independently signs off the five Visibility Zone Game terms against both
+N5.3 languages and the normal Glossary/browser. Exact occurrence variants,
+the remaining source clauses and final release-browser acceptance remain open.
 
 - [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned
   curated rules-reference gaps for N5 v5.3 using
@@ -572,10 +574,11 @@ Exact occurrence variants, source-clause completeness and final browser acceptan
         [V1S-030's twelve-case follow-up](v1.0-source-coverage-audit.md#conditional-declaration-and-reactive-eligibility-follow-up-v1s-030-2026-11-04).
         Source-clause and normal-browser acceptance is still required for
         the unreviewed cases; neither selection is a legality evaluator.
-    - [ ] **Visibility Zone inventory additions:** Include the five newer
-      Visibility Zone Game terms explicitly in final whole-corpus acceptance.
-      Their [bounded source/browser checks](testing.md#10-five-visibility-zone-game-terms-browser-acceptance)
-      do not expand the frozen 367-record explanation-audit denominator.
+    - [x] **Visibility Zone inventory additions:** The five post-inventory
+      Game terms now have independent [complete term source/browser dispositions](v1.0-source-coverage-audit.md#whole-term-visibility-zone-sourcebrowser-acceptance-v1s-031-2026-11-04)
+      in addition to the original [selected browser checks](testing.md#10-five-visibility-zone-game-terms-browser-acceptance).
+      The frozen 367-record denominator remains unchanged; the remaining current
+      source sections still require their own acceptance.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not

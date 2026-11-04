@@ -1,0 +1,65 @@
+{
+  "format": "InfinityDB V1S-031 five Visibility Zone term acceptance",
+  "formatVersion": 1,
+  "reviewedOn": "2026-11-04",
+  "scope": "five-current-n5.3-visibility-zone-terms-only",
+  "historicalFrozenDenominator": 367,
+  "currentCoreHackingDenominator": 450,
+  "otherSourceSectionsApproved": 0,
+  "sourcePages": {
+    "english": 144,
+    "spanish": 148
+  },
+  "sourcePins": {
+    "english": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+    "spanish": "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
+  },
+  "browserWidths": [
+    1440,
+    390,
+    320
+  ],
+  "browserTest": "tests/test_verify_scenario_faq_browser.py::test_visibility_zone_terms_normal_browser",
+  "entries": [
+    {
+      "id": "term:visibility-zone",
+      "name": "Visibility Zone",
+      "href": "/glossary#term-visibility-zone",
+      "sourceDisposition": "all-n5.3-p144-p148-visibility-condition-clauses-reviewed",
+      "browserDisposition": "normal-glossary-and-search-three-widths-verified",
+      "fullRecordAcceptance": "accepted-for-this-term-only"
+    },
+    {
+      "id": "term:low-visibility-zone",
+      "name": "Low Visibility Zone",
+      "href": "/glossary#term-low-visibility-zone",
+      "sourceDisposition": "all-n5.3-p144-p148-visibility-condition-clauses-reviewed",
+      "browserDisposition": "normal-glossary-and-search-three-widths-verified",
+      "fullRecordAcceptance": "accepted-for-this-term-only"
+    },
+    {
+      "id": "term:poor-visibility-zone",
+      "name": "Poor Visibility Zone",
+      "href": "/glossary#term-poor-visibility-zone",
+      "sourceDisposition": "all-n5.3-p144-p148-visibility-condition-clauses-reviewed",
+      "browserDisposition": "normal-glossary-and-search-three-widths-verified",
+      "fullRecordAcceptance": "accepted-for-this-term-only"
+    },
+    {
+      "id": "term:zero-visibility-zone",
+      "name": "Zero Visibility Zone",
+      "href": "/glossary#term-zero-visibility-zone",
+      "sourceDisposition": "all-n5.3-p144-p148-visibility-condition-clauses-reviewed",
+      "browserDisposition": "normal-glossary-and-search-three-widths-verified",
+      "fullRecordAcceptance": "accepted-for-this-term-only"
+    },
+    {
+      "id": "term:white-noise-zone",
+      "name": "White Noise Zone",
+      "href": "/glossary#term-white-noise-zone",
+      "sourceDisposition": "all-n5.3-p144-p148-visibility-condition-clauses-reviewed",
+      "browserDisposition": "normal-glossary-and-search-three-widths-verified",
+      "fullRecordAcceptance": "accepted-for-this-term-only"
+    }
+  ]
+}

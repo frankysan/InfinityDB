@@ -114,6 +114,7 @@
         "test_terrain_scenery_reference_staging",
         "test_promoted_terrain_artifacts",
         "test_verify_staged_release_pair",
+        "test_visibility_zone_whole_record",
         "test_trait_wiki_references",
         "test_weapon_config",
         "test_weapon_properties"
