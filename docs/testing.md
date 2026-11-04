@@ -7628,12 +7628,15 @@ export: exact 29-rule record facts, source/citation metadata and
 with independent pre-effective-date and N5.2 exclusions. It never
 rewrites the artifact.
 
-Run this gate after rebuilding the tracked rules artifact, and repeat it
-against the final frozen release candidate. Normal development checks skip
-this release-only gate:
+Run this gate against the tracked release artifact, and repeat it against
+the final frozen release candidate. It never rebuilds the artifact. The
+default `build-rules` export is v8 and refuses to overwrite an existing
+tracked v9 database; update the v9 rules database only through the guarded
+staging and paired-publication workflow in
+[the data-model contract](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).
+Normal development checks skip this release-only gate:
 
 ```powershell
-.venv\Scripts\python.exe -m infinity_db build-rules --output data/generated/rules.db
 $env:INFINITYDB_RELEASE_FAQ_PARITY = "1"
 try {
     .venv\Scripts\python.exe -m pytest tests/test_faq_ruling_references.py::test_tracked_faq_database_matches_current_curated_release_projection -q
@@ -7645,8 +7648,11 @@ try {
 **Rebuild dependent publication before testing the release pair.**
 The tracked rules DB hash also anchors the ignored
 `data/generated/deployed-objects.json`. Regenerate and verify that
-publication whenever either runtime database changes; application startup
-rejects a mismatched pair. Run:
+publication whenever the release workflow calls for a rebuild. When
+changing the tracked v9 rules database, use its guarded paired-promotion
+workflow rather than replacing either artifact individually; application
+startup rejects a mismatched pair. For a standalone publication rebuild,
+run:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.build_deployed_object_publication

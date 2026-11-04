@@ -4318,6 +4318,51 @@ def test_v9_cli_requires_separate_staging_output() -> None:
         cmd_build_rules(args)
 
 
+def test_default_build_rules_cannot_replace_tracked_v9_database(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import cli
+
+    output = tmp_path / "rules.db"
+    documents = load_curated_directory(ROOT / "data/curated")
+    chart = json.loads(CHART.read_text(encoding="utf-8"))
+    export_rules_database(documents, output, restrictions_manifest=chart)
+    RulesDatabase(output).validate()
+    assert len(RulesDatabase(output).restrictions_payload()["items"]) == 14
+    original = output.read_bytes()
+
+    monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", output)
+    args = cli.build_parser().parse_args([
+        "build-rules", str(ROOT / "data/curated/rules"),
+    ])
+    assert args.output.resolve() == output.resolve()
+    with pytest.raises(ValueError, match="default build-rules export is v8"):
+        cli.cmd_build_rules(args)
+
+    assert output.read_bytes() == original
+
+
+def test_default_build_rules_can_rebuild_existing_v8_database(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db import cli
+
+    output = tmp_path / "rules.db"
+    documents = load_curated_directory(ROOT / "data/curated/rules")
+    export_rules_database(documents, output)
+
+    monkeypatch.setattr(cli, "DEFAULT_RULES_DATABASE", output)
+    args = cli.build_parser().parse_args([
+        "build-rules", str(ROOT / "data/curated/rules"),
+    ])
+    assert args.output.resolve() == output.resolve()
+    assert cli.cmd_build_rules(args) == 0
+
+    database = RulesDatabase(output)
+    database.validate()
+    assert database.restrictions_payload()["available"] is False
+
+
 def test_v8_reader_preserves_preexisting_metadata_contract(
     candidate: tuple[sqlite3.Connection, dict, dict, Path],
 ) -> None:

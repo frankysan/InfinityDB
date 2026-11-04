@@ -2479,7 +2479,10 @@ build outputs. Supplying the optional
 `--restrictions-manifest config/validation/restrictions-source-chart.json`
 produces deterministic v9/compatibility-11 data using the reviewed
 curated records. For safety, this opt-in CLI path refuses the default
-tracked `data/generated/rules.db` output: select a staging file.
+tracked `data/generated/rules.db` output: select a staging file. The
+default v8 export also refuses to overwrite that path when it already
+contains a v9 database; use the guarded staging and paired-publication
+workflow.
 
 The v9 build is byte-deterministic in tests, and read-only HTTP
 checks confirm both v8-unavailable and v9-available responses,
@@ -2487,43 +2490,19 @@ filtering, backward-compatible Skills/Equipment responses, and
 unchanged legacy relations. The application also accepts the original
 v8 snapshot as a rollback source.
 
-**Local release-pair promotion (2026-10-30):**
+**Current development release pair (2026-11-04):**
 
-`tools.build_deployed_object_publication --stage-restrictions-v9`
-generated both artifacts in a new ignored `local/` directory
-after verifying the official PDF, curated review hashes, original
-v8 release pair, complete 14-condition model, and unchanged
-legacy relations. The staged **v9/compatibility-11** rules database
-has SHA-256
-`554bbefc90fa20d5181cd563979b581f5e42f3bfeca1bcbd30cfac1921de5498`.
-Its matching deployed-object publication SHA-256 is
-`1b2fc051f81eef42af104b52058d22c011d22b8819c67d4b6a9624b5662f82e2`.
-All 17 reviewed objects, unresolved deliveries and review
-fingerprints remained unchanged; only the rules database fingerprint
-in the publication changed. The staged source report is
-`local/restrictions-v9-n53-20261030-reviewed/staging-report.json`.
-
-`--promote-restrictions-v9` applied the verified pair to the local
-checkout with guarded replacements and post-promotion application
-startup and provenance verification. The original paired v8
-database/publication bytes are preserved under
-`local/restrictions-v8-recovery-ut9_clv3/` on the development
-machine. The **tracked rules database now uses v9**; the co-located
-ignored publication has been rebuilt accordingly. The normal
-`build-rules` command deliberately still creates standalone
-v8-compatible databases, so reproducing the tracked v9 release
-artifact requires the explicit reviewed manifest and coordinated
-publication workflow. Do not overwrite either artifact individually.
-
-**CI release-image acceptance passed on 2026-10-30** for commit
-`b7230761`: Source checks, Installed wheel smoke and Deployment
-smoke all succeeded with the promoted v9 rules database and its
-generated deployed-object publication. That verifies the release image, **not** a hosted deployment.
-The subsequent v8 overlay-image rollback and v9 forward-image CI
-rehearsal passed at `663a345` (2026-10-30), using a freshly
-rebuilt source-equivalent v8 pair. Rehearsal does not verify byte
-identity with the retained original v8 backup or exercise live-host
-rollback. The hosted operational test remains open.
+The guarded staging workflow verified the pinned official PDF, curated
+review hashes, original v8 pair, complete 14-condition model and
+generated publication before promotion. The **v9/compatibility-11**
+rules database SHA-256 is
+`b28b4093e08c15da2466ad59bba544c82f5118e5109c7d11e78d00957a8a582a`;
+its matching deployed-object publication SHA-256 is
+`d1f0241a6918a9c4e46890c2f9323b44d7401970f04e8404321eb23086c16c28`.
+All 17 reviewed objects were included. The original v8 pair remains
+available in ignored local recovery storage. These hashes identify the
+current development artifacts; local promotion does not establish hosted
+or deployed acceptance.
 
 **Legacy relationship consumer review:** the reviewed Motorcycle →
 Jump and Irregular → Lieutenant graph edges are retained as

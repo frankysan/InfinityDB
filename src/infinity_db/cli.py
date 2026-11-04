@@ -186,6 +186,25 @@ def cmd_validate_curated(args: argparse.Namespace) -> int:
 
 
 def cmd_build_rules(args: argparse.Namespace) -> int:
+    if (
+        args.restrictions_manifest is None
+        and args.output.resolve() == DEFAULT_RULES_DATABASE.resolve()
+        and args.output.is_file()
+    ):
+        connection = sqlite3.connect(args.output)
+        try:
+            current_schema_version = connection.execute(
+                "PRAGMA user_version"
+            ).fetchone()[0]
+        finally:
+            connection.close()
+        if current_schema_version == 9:
+            raise ValueError(
+                "default build-rules export is v8 and cannot replace the tracked "
+                "v9 rules database; use the guarded v9 staging and paired "
+                "publication workflow"
+            )
+
     documents = load_curated_directory(args.input)
     if args.restrictions_manifest is not None:
         if args.output.resolve() == DEFAULT_RULES_DATABASE.resolve():
