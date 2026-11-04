@@ -50,6 +50,7 @@
         "test_availability_schema",
         "test_catalog_rules",
         "test_curated",
+        "test_conditional_reactive_followup",
         "test_database",
         "test_display_identities",
         "test_distance_semantics",

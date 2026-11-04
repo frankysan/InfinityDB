@@ -158,8 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-030 (M, review):** Review conditional declaration, ARO and reactive eligibility clauses outside
-  the already accepted exception examples.
 - [ ] **V1S-031 (S, gate):** Give the five newer Visibility Zone terms independent whole-corpus and
   source/browser dispositions.
 - [ ] **V1S-032 (M, review):** Review unaccepted Orders, game phases, command and activation rule clauses with
@@ -514,7 +512,10 @@ confirms typed reference identities and distinct army-level Retreat versus Troop
 reconciles published disclosure, dated FAQ scope and historical Annex authority without
 claiming publisher rulings. The
 [V1S-029 frozen/current evidence join](v1.0-source-coverage-audit.md#frozen-explanation-audit-to-reviewed-current-evidence-v1s-029-2026-11-04)
-now links all 367 historical records to the 450 current Core/Hacking identities and bounded later evidence without changing D/S tiers or issuing whole-record approvals. Exact occurrence variants, source-clause completeness and final browser acceptance remain open.
+now links all 367 historical records to the 450 current Core/Hacking identities and bounded later evidence without changing D/S tiers or issuing whole-record approvals. The
+[V1S-030 conditional ARO review](v1.0-source-coverage-audit.md#conditional-declaration-and-reactive-eligibility-follow-up-v1s-030-2026-11-04)
+checks twelve more source-scoped declaration/reaction cases with pinned evidence and public routes.
+Exact occurrence variants, source-clause completeness and final browser acceptance remain open.
 
 - [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned
   curated rules-reference gaps for N5 v5.3 using
@@ -566,10 +567,11 @@ now links all 367 historical records to the 450 current Core/Hacking identities 
           categories and source sections under the release checklist, without
           converting historical D/S, current citations, or interaction-review
           flags into whole-record approval.
-      - [ ] Verify other **conditional declaration permissions** beyond
-        the source-backed exception slices already accepted. The whole
-        1.0 corpus and reactive eligibility/activation conditions still
-        require their own clause and normal-browser dispositions.
+      - [ ] Verify remaining **conditional declaration permissions** at final
+        whole-corpus depth, beyond the original ten selected examples and
+        [V1S-030's twelve-case follow-up](v1.0-source-coverage-audit.md#conditional-declaration-and-reactive-eligibility-follow-up-v1s-030-2026-11-04).
+        Source-clause and normal-browser acceptance is still required for
+        the unreviewed cases; neither selection is a legality evaluator.
     - [ ] **Visibility Zone inventory additions:** Include the five newer
       Visibility Zone Game terms explicitly in final whole-corpus acceptance.
       Their [bounded source/browser checks](testing.md#10-five-visibility-zone-game-terms-browser-acceptance)

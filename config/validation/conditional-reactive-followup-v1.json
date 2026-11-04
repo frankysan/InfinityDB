@@ -1,0 +1,134 @@
+{
+  "format": "InfinityDB V1S-030 conditional declaration and reactive scope evidence",
+  "formatVersion": 1,
+  "scope": "selected-follow-up-examples-not-global-aro-legality-or-whole-record-acceptance",
+  "source": {
+    "id": "n5-core-v5.3-pdf",
+    "path": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+    "sha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+  },
+  "reviewedOn": "2026-11-04",
+  "priorReview": "config/validation/conditional-declaration-evidence-v1.json",
+  "entries": [
+    {
+      "key": "cautious-endpoints",
+      "recordId": "skill:cautious-movement",
+      "field": "clarifications",
+      "factNeedle": "both** the starting and ending positions",
+      "page": 32,
+      "pdfNeedle": "outside the LoF and ZoC of all enemy Models and Markers",
+      "sourceEvidence": "selected-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "climbing-plus-first",
+      "recordId": "skill:climbing-plus",
+      "field": "effects",
+      "factNeedle": "If declared as the first Basic Short Skill",
+      "page": 88,
+      "pdfNeedle": "if declared as the first Basic Short Skill of the Order",
+      "sourceEvidence": "selected-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "super-jump-first",
+      "recordId": "skill:super-jump",
+      "field": "effects",
+      "factNeedle": "is declared as the first Basic Short Skill",
+      "page": 113,
+      "pdfNeedle": "if declared as the first Basic Short Skill of the Order",
+      "sourceEvidence": "selected-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "neurocinetics-reactive",
+      "recordId": "skill:neurocinetics",
+      "field": "effects",
+      "factNeedle": "full Burst against a single target",
+      "page": 104,
+      "pdfNeedle": "against a single target",
+      "sourceEvidence": "selected-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "total-reaction-one-target",
+      "recordId": "skill:total-reaction",
+      "field": "restrictions",
+      "factNeedle": "one of the Troopers activated by the Order",
+      "page": 116,
+      "pdfNeedle": "Troopers activated by the Order",
+      "sourceEvidence": "selected-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "camouflaged-delay",
+      "recordId": "state:camouflaged",
+      "field": "clarifications",
+      "factNeedle": "A delayed reaction is lost if the Marker does not reveal itself",
+      "page": 157,
+      "pdfNeedle": "CAMOUFLAGED STATE",
+      "sourceEvidence": "heading-and-curated-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "impersonation-delay",
+      "recordId": "state:impersonation-1",
+      "field": "clarifications",
+      "factNeedle": "A reaction delayed against it is lost",
+      "page": 166,
+      "pdfNeedle": "IMPERSONATION-1",
+      "sourceEvidence": "heading-and-curated-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "suppressive-fire-aro",
+      "recordId": "state:suppressive-fire",
+      "field": "clarifications",
+      "factNeedle": "declares an ARO other than [[skill:bs-attack|BS Attack]]",
+      "page": 171,
+      "pdfNeedle": "declares any ARO other than a BS Attack using the SF Mode profile",
+      "sourceEvidence": "selected-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "g-jumper-one-proxy",
+      "recordId": "skill:g-jumper",
+      "field": "effects",
+      "factNeedle": "other reacting Proxies may only declare",
+      "page": 93,
+      "pdfNeedle": "G: JUMPER AUTOMATIC SKILL",
+      "sourceEvidence": "heading-and-curated-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "peripheral-shared-skill",
+      "recordId": "skill:peripheral",
+      "field": "effects",
+      "factNeedle": "normally must declare the same reaction Skill",
+      "page": 106,
+      "pdfNeedle": "PERIPHERAL",
+      "sourceEvidence": "heading-and-curated-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "coordinated-target",
+      "recordId": "rule:coordinated-orders",
+      "field": "effects",
+      "factNeedle": "Each reactive Trooper can target only one of the coordinated Troopers",
+      "page": 129,
+      "pdfNeedle": "COORDINATED ORDER",
+      "sourceEvidence": "heading-and-curated-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    },
+    {
+      "key": "fireteam-aro-consensus",
+      "recordId": "rule:fireteam-general",
+      "field": "rules",
+      "factNeedle": "If more than half of the members who actually declare an [[trait:aro|ARO]] choose the same Skill",
+      "page": 135,
+      "pdfNeedle": "FIRETEAM",
+      "sourceEvidence": "heading-and-curated-clause",
+      "disposition": "selected-source-and-publication-evidence-only"
+    }
+  ]
+}
