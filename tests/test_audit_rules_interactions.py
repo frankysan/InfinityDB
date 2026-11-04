@@ -355,6 +355,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:hacker", "equipment:hacking-device", None) not in future_keys
     assert ("skill:hacker", "rule:upgrade-program", None) in future_keys
     assert ("equipment:symbiomate", "skill:immunity", "uses-effects-of") not in future_keys
+    # The canonical Firewall exists; retain the exact TinBot-owner/modifier scope.
+    assert ("equipment:tinbot-firewall", "equipment:firewall", "uses-effects-of") in future_keys
+    assert ("uses-effects-of", "equipment:firewall") not in set(
+        items["equipment:tinbot-firewall"]["relations"]
+    )
 
     assert ("skill:request-speedball", "skill:combat-jump", "uses-effects-of") not in future_keys
     assert ("skill:suppressive-fire", "state:suppressive-fire", "enters-state") not in future_keys

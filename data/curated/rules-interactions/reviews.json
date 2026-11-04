@@ -2628,7 +2628,7 @@
       "relationType": "uses-effects-of",
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule."
+      "reason": "TinBot: Firewall provides the now-canonical Firewall reference, with exact Army source-169 (-3/-6) modifiers tied to enemy Comms Attacks targeting the TinBot owner. Keep this variant-specific reuse edge pending until its protection, recipient and Fireteam-sharing scope can be represented without implying a generic or unconditional Firewall effect."
     },
     {
       "sourceRecordId": "skill:limited-cover",

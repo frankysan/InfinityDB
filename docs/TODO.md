@@ -158,8 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-025 (M, review):** Review Equipment and exceptional Army gear wording, including nonstandard
-  attributes and source-scoped semantics.
 - [ ] **V1S-026 (M, review):** Review other canonical Rules, game terms, training, scenario terminology and
   glossary coverage without duplicating Hacking Programs.
 - [ ] **V1S-027 (M, review):** Review remaining States, Traits, Attributes and reference links; keep in-game
@@ -511,8 +509,11 @@ missing explanations: the existing shared-effects approvals must be reconciled.
 ### Rules and reference completeness
 
 The [V1S-024 Skill-family review](v1.0-source-coverage-audit.md#skill-semantic-family-coverage-and-deferred-links-v1s-024-2026-11-04)
-found no missing public Skill definitions; exact occurrence variants,
-conditional relationships and final source/browser acceptance remain open.
+found no missing public Skill definitions. The
+[V1S-025 Equipment-family review](v1.0-source-coverage-audit.md#equipment-semantic-family-and-exceptional-profile-review-v1s-025-2026-11-04)
+likewise confirms public Equipment definition coverage while preserving
+conditional TinBot/Firewall and exceptional object distinctions. Exact
+occurrence variants and final source/browser acceptance remain open.
 
 - [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned
   curated rules-reference gaps for N5 v5.3 using

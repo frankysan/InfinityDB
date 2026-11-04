@@ -5165,8 +5165,12 @@ in the exact source variant. Exact variants therefore carry their own reviewed r
 than inheriting one generic TinBot interaction set. Current canonical targets allow TinBot Albedo
 to `uses-effects-of` Albedo, TinBot Discover to `modifies-rolls-for` Discover, TinBot ECM Guided to
 `uses-effects-of` ECM, TinBot Repeater to `uses-effects-of` Repeater, and TinBot Neurocinetics to
-`uses-effects-of` Neurocinetics. The Firewall variant remains queued because Firewall is not yet a
-standalone canonical Equipment rule.
+`uses-effects-of` Neurocinetics. A canonical `equipment:firewall` now exists and
+`equipment:tinbot-firewall` already links to it in explanatory prose, but its
+future typed reuse edge remains unpromoted: source-169's reviewed (-3/-6)
+modifier applies to enemy Comms Attacks against the TinBot owner, with
+conditional protection and Fireteam sharing governed by their own rules.
+A generic unconditional Equipment edge would not establish those conditions.
 
 Source:
 
