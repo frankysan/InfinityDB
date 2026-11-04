@@ -95,8 +95,13 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 5 distinct
-changes** (VR-0052/0053/0054/0055/0056; five-change execution threshold reached).
+Only open VR obligations belong here. **Current count: 6 distinct
+changes** (VR-0052/0053/0054/0055/0056/0057; five-change execution threshold
+reached). The first pinned Linux cumulative run at `4af5ac14`
+failed during pytest collection, before executing tests: two newly added
+browser modules were missing from the grouped Chromium scheduling maps.
+The fix is implemented on Windows; the six pending items still require
+a successful pinned Linux execution and exact-SHA hosted checks.
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -211,6 +216,27 @@ changes** (VR-0052/0053/0054/0055/0056; five-change execution threshold reached)
   read-only check requires strict logical equality; rerun on
   the next pinned revision. This is not a cross-host byte
   determinism approval; see the [recorded boundary](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04).
+
+- [ ] **VR-0057** (2026-11-04; ready-to-run): Verify the grouped
+  Chromium scheduler registration for the newly published Game Sequence
+  and ARO/Deployment real-browser modules (V1S-032C1/C2).
+  Work: [Rules and contextual reference completion](TODO.md#rules-and-contextual-reference-completion);
+  risk: medium (Linux opt-in four-lane suite fails before collection;
+  ordinary browser/product data are unchanged).
+  Reproduction: Linux full-assets run on `4af5ac14`, job
+  `linux-dev:0bb08ca52bf84dcfbd680dcb2369b77c`, exited 1 at
+  `tests/conftest.py:203` with missing
+  `test_verify_aro_deployment_browser` group; pre-fix Windows
+  `test_two_browser_lanes_cover_all_real_chromium_modules` failed
+  and independently identified `test_verify_turn_sequence_browser`.
+  Immediate Windows: registering both modules in all 2/3/4 lane maps
+  and testing each map against the independent browser-section registry
+  passed `tests/test_browser_test_capacity.py` **25/25**;
+  Ruff on tool/test passed.
+  Design: none; the existing registry parity test was strengthened.
+  Deferred: a pinned Linux cumulative four-lane full-assets suite with
+  collection and browser-lane assertions, plus exact-SHA hosted CI.
+  The five preceding VR items remain open until their own checks pass.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
@@ -386,7 +412,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0057` (`VR-0052/0053/0054/0055/0056` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0058` (`VR-0052/0053/0054/0055/0056/0057` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

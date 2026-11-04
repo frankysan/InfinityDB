@@ -42,7 +42,9 @@ def test_two_browser_lanes_cover_all_real_chromium_modules() -> None:
 @pytest.mark.parametrize("lanes", (2, 3, 4))
 def test_experimental_browser_lanes_cover_all_modules_once(lanes: int) -> None:
     groups = browser_lane_groups(lanes)
-    assert set(groups) == set(CHROMIUM_SCHEDULING_LANES)
+    browser_modules = set(load_test_sections()["browser"].modules)
+    browser_modules.remove("test_verify_rule_fragment_browser")
+    assert set(groups) == browser_modules
     assert set(groups.values()) == {
         f"chromium-{chr(ord('a') + i)}" for i in range(lanes)
     }

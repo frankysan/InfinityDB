@@ -27,6 +27,8 @@ CHROMIUM_SCHEDULING_LANES = {
     "test_verify_fireteam_context_browser": "chromium-a",
     "test_verify_release_candidate_browser": "chromium-a",
     "test_verify_orders_aros_browser": "chromium-a",
+    "test_verify_aro_deployment_browser": "chromium-a",
+    "test_verify_turn_sequence_browser": "chromium-a",
     "test_verify_immunity_plasma_browser": "chromium-b",
     "test_verify_ammunition_publication_browser": "chromium-b",
     "test_verify_weapon_source_cards_browser": "chromium-b",
@@ -44,7 +46,8 @@ CHROMIUM_SCHEDULING_LANES = {
 _EXTRA_BROWSER_LANES: dict[int, tuple[tuple[str, ...], ...]] = {
     3: (
         ("test_verify_scenario_faq_browser", "test_verify_release_candidate_browser",
-         "test_verify_orders_aros_browser"),
+         "test_verify_orders_aros_browser", "test_verify_aro_deployment_browser",
+         "test_verify_turn_sequence_browser"),
         ("test_verify_weapon_source_cards_browser", "test_verify_army_overview_browser",
          "test_verify_fireteam_fto_browser", "test_verify_deployed_object_publication_browser",
          "test_verify_reinforcements_optional_browser"),
@@ -57,6 +60,7 @@ _EXTRA_BROWSER_LANES: dict[int, tuple[tuple[str, ...], ...]] = {
         ("test_verify_weapon_source_cards_browser", "test_verify_ammunition_publication_browser",
          "test_verify_sidebar_density_browser"),
         ("test_verify_unit_skill_presentation_browser", "test_verify_orders_aros_browser",
+         "test_verify_aro_deployment_browser", "test_verify_turn_sequence_browser",
          "test_verify_fireteam_context_browser"),
         ("test_verify_army_overview_browser", "test_verify_fireteam_fto_browser",
          "test_verify_reinforcements_optional_browser",
