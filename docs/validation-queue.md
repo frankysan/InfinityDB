@@ -144,12 +144,32 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending deferred-execution obligations.
+- [ ] VR-0069 (2026-11-04; ready-to-run): verify the PT: Endgame review
+  disposition update without changing source fields or player-facing
+  behavior. Work: [V1S-034](TODO.md#rules-and-contextual-reference-completion);
+  revision: source-review and test-design working tree based on
+  `39b910cde2dfe656e3746e8d2e8227eb26b4cd6a`; risk: medium. Source evidence:
+  N5.3 PDF SHA-256
+  `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`,
+  Army DB SHA-256
+  `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`,
+  Wiki history ZIP SHA-256
+  `d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`,
+  `Weapon_Chart` revision 4083 and member SHA-256
+  `a3a6230051bc3a03e61a6de917306b403bac35ddfa6dcb8962595316bb3722ed`;
+  official update dated 2025-04-03. Design: VD-0012 retired after static
+  review; no tests executed. Deferred selectors:
+  `tests/test_audit_weapon_trait_cross_sources.py::test_pt_endgame_review_explains_trait_and_keeps_army_intent_open`,
+  `tests/test_audit_weapon_trait_cross_sources.py::test_wiki_source_review_requires_exact_pdf_revision_and_member_hash`,
+  and the full `tests/test_audit_weapon_trait_cross_sources.py` module.
+  Also rerun `tools.audit_weapon_trait_cross_sources` with the pinned PDF and
+  Wiki ZIP, and `tools/run_checks.py --stage docs`, on the committed revision.
+  Intended host: Windows.
 
 ## Next unused IDs
 
-- Design: `VD-0012` (through `VD-0011` retired).
-- Execution: `VR-0069` (through `VR-0068` retired).
+- Design: `VD-0013` (through `VD-0012` retired).
+- Execution: `VR-0070` (through `VR-0068` retired; VR-0069 active).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

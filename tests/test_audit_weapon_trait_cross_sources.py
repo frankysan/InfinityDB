@@ -99,8 +99,8 @@ def test_wiki_source_review_requires_exact_pdf_revision_and_member_hash(tmp_path
     review = json.loads(source.read_text(encoding="utf-8"))
     mapping = _load_review(source, review["corePdfSha256"])
     assert len(mapping) == 9
-    assert sum(item["semanticReview"]["state"] == "explained" for item in mapping) == 6
-    assert sum(item["semanticReview"]["state"] == "partial" for item in mapping) == 3
+    assert sum(item["semanticReview"]["state"] == "explained" for item in mapping) == 7
+    assert sum(item["semanticReview"]["state"] == "partial" for item in mapping) == 2
     assert {item["name"] for item in mapping} == {
         "Cybermine", "Drop Bears", "PARA Mine", "WildParrot", "PT: Endgame",
         "PT: Eraser", "PT: Mirrorball", "Kobra Pistol", "Sepsitor Plus",
@@ -114,7 +114,7 @@ def test_wiki_source_review_requires_exact_pdf_revision_and_member_hash(tmp_path
         _load_review(source, "f" * 64)
 
 
-def test_pt_endgame_review_tracks_curated_trait_and_open_army_discrepancy() -> None:
+def test_pt_endgame_review_explains_trait_and_keeps_army_intent_open() -> None:
     source = Path(__file__).resolve().parents[1] / (
         "config/validation/weapon-trait-wiki-review.json"
     )
@@ -123,11 +123,15 @@ def test_pt_endgame_review_tracks_curated_trait_and_open_army_discrepancy() -> N
     endgame = next(item for item in mapping if item["name"] == "PT: Endgame")
     semantics = endgame["semanticReview"]
 
-    assert semantics["state"] == "partial"
-    assert 182 in semantics["pdfPages"]
+    assert semantics["state"] == "explained"
+    assert {62, 182} <= set(semantics["pdfPages"])
     assert "curated weapon:pt-endgame" in semantics["finding"]
+    assert "during the Active Turn" in semantics["finding"]
+    assert "Double Shot may add +1 Burst" in semantics["finding"]
+    assert "both Disposable (2) charges" in semantics["finding"]
     assert "SRC-016" in semantics["remaining"]
-    assert "raw Army profile" in semantics["remaining"]
+    assert "intentional" in semantics["remaining"]
+    assert "imported Army profile" in semantics["remaining"]
 
 
 def test_wildparrot_review_tracks_published_trait_and_src015() -> None:

@@ -794,8 +794,8 @@ the PDF omits it, and DA alone does not imply it.
 
 The exact-PDF-pinned `semanticReview` results in
 `config/validation/weapon-trait-wiki-review.json` classify all nine comparison
-rows while preserving their raw source fields: **six explained** and
-**three partially explained** interpretations. The evidence below distinguishes
+rows while preserving their raw source fields: **seven explained** and
+**two partially explained** interpretations. The evidence below distinguishes
 historical terminology, the chart legend, and current-source differences.
 
 ### N4 terminology provenance and N5 chart-reference legend
@@ -852,7 +852,10 @@ still needs verification. Preserve both source values.
   `Technical Weapon` with `BS Weapon (WIP)`; the old term does not occur in the
   supplied N5.3 PDF, but is explicitly defined in N4 v1.1. Endgame also gains
   `Double Shot`, missing from current Army properties; the published PT: Endgame
-  reference discloses that difference without rewriting the imported profile.
+  reference explains that it may add +1 Burst during the Active Turn by using
+  both `Disposable (2)` charges and discloses the difference without rewriting
+  the imported profile.
+  Whether Army's omission is intentional remains open under SRC-016.
 - **Sepsitor Plus:** N5.3 p. 187 prints `[*]`, referring to the Sepsitor family
   prose on p. 73. Army's omission remains visible. A name-specific matching
   issue in Army is a *hypothesis*, not an observed implementation cause.
