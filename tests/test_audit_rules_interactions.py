@@ -341,6 +341,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:number-2", "state:isolated", None) in future_keys
     assert ("skill:specialist-operative", "rule:specialist-troop", "uses-effects-of") in future_keys
     assert ("skill:journalist", "rule:guts-roll", "modifies-rolls-for") in future_keys
+    # Shared Specialist Troops belongs in General Rules, with scenario-scoped overrides.
+    specialists = items["rule:specialist-troops:standard"]
+    assert "unscoped" in specialists["note"]
+    assert "scenario" in specialists["note"]
     assert ("skill:tagcom", "rule:troop-type:tag", "applies-effects-to") in future_keys
     assert ("skill:booty", "rule:booty-chart", "uses-effects-of") in future_keys
     assert (
@@ -376,9 +380,15 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:minelayer", "trait:disposable-x", None) in future_keys
     assert (
         "skill:surprise-attack",
-        "rule:face-to-face-roll",
+        "rule:face-to-face-rolls",
         "imposes-modifiers-on",
     ) in future_keys
+    assert (
+        "state:suppressive-fire",
+        "rule:face-to-face-rolls",
+        "imposes-modifiers-on",
+    ) in future_keys
+    assert not any(target == "rule:face-to-face-roll" for _, target, _ in future_keys)
     assert ("rule:marker-form", "skill:surprise-attack", "enables-use-of") in future_keys
     assert ("trait:bioweapon", "ammunition:da", "uses-effects-of") in future_keys
     assert ("trait:bioweapon", "ammunition:shock", "uses-effects-of") in future_keys

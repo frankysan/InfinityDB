@@ -2269,7 +2269,7 @@
       "targetRelease": "1.0.0",
       "status": "reviewed",
       "reviewedOn": "2026-10-07",
-      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+      "note": "The shared Specialist Troops baseline is an unscoped, InfinityDB-owned General Rules presentation of N5.3 scenario-cited qualifications. Scenario inclusions add or remove qualifying Skills without changing the general reference or granting a permanent Unit attribute; player eligibility still depends on the selected scenario."
     },
     {
       "recordId": "skill:hack-consoles",
@@ -2640,11 +2640,11 @@
     },
     {
       "sourceRecordId": "skill:surprise-attack",
-      "targetRecordId": "rule:face-to-face-roll",
+      "targetRecordId": "rule:face-to-face-rolls",
       "relationType": "imposes-modifiers-on",
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Surprise Attack applies its listed negative MOD to any Face to Face Roll made in ARO by a target of the Attack; model the generic Roll interaction once Face to Face Rolls have a canonical rules identity rather than incorrectly linking only selected Skills."
+      "reason": "The canonical Face to Face Rolls reference now exists. Surprise Attack imposes its listed negative MOD on the Attack target's Face to Face ARO Roll only; keep the typed generic Roll edge deferred until target, active-turn, Marker/Hidden Deployment and declaration conditions are represented rather than applying this modifier to unrelated Rolls."
     },
     {
       "sourceRecordId": "rule:marker-form",
@@ -2984,11 +2984,11 @@
     },
     {
       "sourceRecordId": "state:suppressive-fire",
-      "targetRecordId": "rule:face-to-face-roll",
+      "targetRecordId": "rule:face-to-face-rolls",
       "relationType": "imposes-modifiers-on",
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Suppressive Fire imposes -3 on enemy Face to Face Rolls within 24 inches; defer until the graph can preserve the range condition."
+      "reason": "The canonical Face to Face Rolls reference now exists. Suppressive Fire applies its -3 MOD only to eligible enemy Face to Face Rolls within the source-specified 24-inch/range and state conditions; defer a typed edge until those conditions can be preserved."
     },
     {
       "sourceRecordId": "skill:dogged",

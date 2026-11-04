@@ -158,8 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-026 (M, review):** Review other canonical Rules, game terms, training, scenario terminology and
-  glossary coverage without duplicating Hacking Programs.
 - [ ] **V1S-027 (M, review):** Review remaining States, Traits, Attributes and reference links; keep in-game
   States separate from static profiles.
 - [ ] **V1S-028 (M, review):** Reconcile player-facing cross-source conflicts, FAQ applicability and explicit
@@ -512,8 +510,11 @@ The [V1S-024 Skill-family review](v1.0-source-coverage-audit.md#skill-semantic-f
 found no missing public Skill definitions. The
 [V1S-025 Equipment-family review](v1.0-source-coverage-audit.md#equipment-semantic-family-and-exceptional-profile-review-v1s-025-2026-11-04)
 likewise confirms public Equipment definition coverage while preserving
-conditional TinBot/Firewall and exceptional object distinctions. Exact
-occurrence variants and final source/browser acceptance remain open.
+conditional TinBot/Firewall and exceptional object distinctions. The
+[V1S-026 General Rules/glossary review](v1.0-source-coverage-audit.md#general-rules-training-and-glossary-scope-v1s-026-2026-11-04)
+reconciles shared Core Rules, two Training definitions, 23 Terms,
+embedded Attribute/Label vocabulary and scenario-owned qualifications.
+Exact occurrence variants and final source/browser acceptance remain open.
 
 - [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned
   curated rules-reference gaps for N5 v5.3 using
