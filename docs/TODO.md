@@ -383,9 +383,17 @@ V1S-068–069, V1S-074 and V1S-081–090.
   procedure and deploy the approved tagged artifact.
 - [ ] **V1S-095 (M, gate):** Verify deployed exact source/runtime pair, release version, static assets and
   representative browser paths after deployment.
+- [ ] **V1S-096 (L, build):** Complete the
+  [V1S backlog checker](v1s-backlog-checker-plan.md): implement Git-aware
+  closeout and selection checks, reliable local/CI integration, and agent
+  workflow guidance. Preserve read-only static checking, distinguish evidence
+  presence from semantic acceptance, and verify deterministic Windows/Linux
+  behavior.
 
 **Initial sizing at this baseline:** 95 planned slices (9 S,
 75 M, 11 L), **203 relative work units**.
+V1S-096 is a later L-sized infrastructure addition; the baseline figures above
+remain historical.
 This is an upper-level capacity indicator, not an elapsed-time forecast:
 review/no-change slices may be short; full-source discovery can add new work;
 separately authorized host/human checks may be schedule dependencies.

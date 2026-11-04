@@ -1,7 +1,8 @@
 # V1S backlog checker — implementation plan
 
 **Project domain:** Project infrastructure  
-**Status:** Proposed; no checker or CLI is implemented by this document.  
+**Status:** Phase 1 is implemented; Windows checks passed and Linux parity is
+pending in VR-0081. Phases 2–4 remain proposed.
 **Scope:** The active `V1S-*` execution slices in [TODO.md](TODO.md#pre-planned-10-execution-slices), their documented completion, and the Git history of removals.
 
 ## Goal and constraints
@@ -116,17 +117,19 @@ This is an invoked **pre-task gate**, not a static CI inference about an agent's
 
 **Acceptance:** new violations fail objective checks locally and in CI; existing historical cleanup is not misrepresented as successful validation; no network or ignored local files are required.
 
-## Proposed CLI (not yet available)
+## Available Phase 1 CLI
 
 From the repository root using PowerShell:
 
 ```powershell
 .\.venv\Scripts\python.exe -m tools.check_v1_backlog
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base origin/dev/v1.0.0
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --select V1S-062
+.\.venv\Scripts\python.exe -m tools.check_v1_backlog --todo docs/TODO.md
 ```
 
-The command interface, baseline semantics, override flag, and JSON schema should be finalized in Phase 1–3 before being documented as implemented commands.
+The Phase 1 command checks only static structure and does not require Git.
+Git-aware `--base` closeout and `--select` modes remain unimplemented; their
+interfaces and baseline/override semantics must be finalized before they are
+documented as available commands.
 
 Example diagnostic:
 
@@ -151,4 +154,6 @@ Record a qualifying blocker/deferment or explicit priority override.
 
 The checker is ready when the current backlog passes static validation; negative tests catch structural and retirement violations; selection mode explains unjustified skips; valid overrides are traceable; errors and warnings are clearly separated; Windows and Linux behavior matches; and the project can run it offline through the established checks.
 
-**Current decision:** This file records an implementation proposal only. No runtime code, tests, CI integration or backlog status changes are authorized merely by saving the plan.
+**Current decision:** The user authorized implementation of this plan. Phase 1
+is the current scope; Git-aware closeout, selection enforcement, check-runner/CI
+integration and rollout remain unimplemented.

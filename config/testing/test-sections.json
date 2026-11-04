@@ -203,6 +203,7 @@
         "test_browser_test_capacity",
         "test_browser_test_host_profile",
         "test_browser_test_metrics",
+        "test_check_v1_backlog",
         "test_browser_wsgi_transport",
         "test_capacity_test",
         "test_compare_determinism_manifests",

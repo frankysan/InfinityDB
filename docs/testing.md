@@ -195,6 +195,16 @@ python tools\run_checks.py --stage lint src/infinity_db/web tests/test_web.py
 python tools\run_checks.py --stage type
 ```
 
+The Phase 1 V1S backlog checker is a separate offline structural check; it does
+not yet perform Git-history closeout or task-selection validation:
+
+```powershell
+python -m tools.check_v1_backlog
+```
+
+It reads the designated execution-slice section from `docs/TODO.md` without
+requiring Git. Use `--todo PATH` to inspect another Markdown backlog file.
+
 Positional targets are passed to pytest/Ruff for their respective stages. The `docs` stage
 always checks the configured Markdown set; `docs`, `type`, `build`, `rules`, and `preflight` ignore positional
 targets. The runner accepts its documented options and test paths/node IDs, not arbitrary
