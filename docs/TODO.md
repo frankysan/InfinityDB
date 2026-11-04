@@ -217,6 +217,9 @@ V1S-068–069, V1S-074 and V1S-081–090.
 
 Basic attack/Template, Hacking and reviewed Ammunition publication references have
 [pinned source/API/browser acceptance](v1.0-source-coverage-audit.md#attack-hacking-and-ammunition-publication-acceptance-v1s-034035038-2026-11-04).
+The [shared core/scenario and collection-supplement review](v1.0-source-coverage-audit.md#shared-core-scenario-concepts-and-collection-supplements-v1s-039-2026-11-04)
+found no additional scoped-publication defect; final source/browser acceptance
+remains with the scenario, FAQ and release gates below.
 Remaining source authority, complete Weapon-profile review, occurrence indexing
 and final candidate acceptance retain their individual owners below.
 
@@ -227,8 +230,6 @@ and final candidate acceptance retain their individual owners below.
   Blocked: Corvus Belli ruling or an applicable new official source must establish whether the
   Saving-Roll-triggered protection suppresses the earlier Silent Dodge MOD and reconcile the
   English Face to Face qualifier. Retry when that evidence is available; retain public uncertainty.
-- [ ] **V1S-039 (M, review):** Review shared core/scenario concepts and collection supplements for scoped
-  applicability, leakage and browser explanation.
 - [ ] **V1S-040 (M, decision):** Document N5-native Reinforcements authority if available, or preserve
   disclosed optional legacy reference and SRC-030 follow-up.
 - [ ] **V1S-041 (M, gate):** Accept Reinforcement Section, profile and exact Commlink variants in ordinary
@@ -664,11 +665,9 @@ the remaining source clauses and final release-browser acceptance remain open.
     separate so one canonical concept can be cited or overlaid by core scenarios
     and FAQ material without duplication or collection-load-order semantics.
     ITS-only actions and season-specific rules remain post-1.0.
-    - [ ] Reuse current scoped definitions/supplements, then identify any missing applicability
-      validation or presentation contract using one concept shared by core and scenario material.
-      Prove that scope is visible and unrelated scenario/season overlays do not leak into core help.
-      - [ ] Review remaining shared scenario concepts, collection-specific
-        supplements and normal browser presentation for the complete 1.0 scope.
+    - Shared concepts, scenario-only Skills and separate collection supplements
+      have a [bounded source/API/browser-code review](v1.0-source-coverage-audit.md#shared-core-scenario-concepts-and-collection-supplements-v1s-039-2026-11-04).
+      Final source-clause and live browser acceptance remain with V1S-042–049/088.
   - [ ] Complete final source-to-browser acceptance for the optional
     **Reinforcements Extra**, separately scoped from `n5-core-rules`.
     The N4-origin procedures, Section/parent navigation and exact typed
