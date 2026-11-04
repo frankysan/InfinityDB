@@ -20,7 +20,11 @@ change, use [Army data pipeline](../infinity-army-data-pipeline/SKILL.md).
 
 ## Procedure
 
-1. Read [architecture](../../../docs/architecture.md),
+1. For autonomous task selection, first apply the
+   [V1S selection checkpoint](../../../docs/TODO.md#v1s-work-selection-and-handoff),
+   not just the most recently active workstream. Disclose earlier open IDs and
+   their blockers or justified priority exceptions. Then read
+   [architecture](../../../docs/architecture.md),
    [data model](../../../docs/data-model.md), [application domains](../../../docs/application-domains.md),
    and [project domains](../../../docs/project-domains.md). Name the owning application domain and
    engineering layer(s); do not add layers that the requirement does not need.
@@ -61,7 +65,9 @@ change, use [Army data pipeline](../infinity-army-data-pipeline/SKILL.md).
    implementation may continue **only while a full Linux suite is
    actually running**; focused/partial jobs do not suspend the VR
    drain. Do not force Git changes or hide skipped coverage;
-   retire only verified entries.
+   retire only verified entries. Before selecting another slice, reconcile
+   the worked V1S and parent: retire fully verified work in the same
+   closeout change, otherwise retain a concrete open action.
 
 ## References
 

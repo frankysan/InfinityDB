@@ -18,9 +18,13 @@ hand those parts to the appropriate workflow after the source semantics are clea
 
 ## Procedure
 
-1. Read the repository instructions and identify the exact question, game edition, source scope,
-   and affected InfinityDB identity. Distinguish an Army profile/mode from a parent weapon or
-   similarly named record.
+1. For autonomous "next task" work, apply the
+   [V1S selection checkpoint](../../../docs/TODO.md#v1s-work-selection-and-handoff)
+   before choosing a convenient source family: check earlier open tasks,
+   record justified blockers/priority exceptions and report what was bypassed.
+   Then identify the exact question, game edition, source scope and affected
+   InfinityDB identity. Distinguish an Army profile/mode from a parent weapon
+   or similarly named record.
 2. Establish the applicable pinned sources before interpreting them. Keep source version,
    publication date, acquisition identity, and archived member/revision distinct. For N5, follow
    the reconciliation order and source-history policy in
@@ -57,6 +61,10 @@ hand those parts to the appropriate workflow after the source semantics are clea
    **Only an actively running pinned Linux full suite** permits unrelated
    Windows implementation during the due VR drain; a partial/focused
    job does not. Never force or implicitly synchronize a checkout.
+   Before moving to the next source, reconcile the reviewed V1S entry:
+   retire a fully evidenced review in the same closeout change, or
+   keep it open with its concrete unresolved action/authority. Completing
+   a source review does not resolve an unknown upstream effect.
 
 ## References
 

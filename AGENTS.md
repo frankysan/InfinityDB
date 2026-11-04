@@ -75,6 +75,29 @@ shared data-files, without substituting for installed-wheel CI. The `code`
 profile remains Python-only.
 See `docs/testing.md` for the complete contract.
 
+### Backlog work selection and closeout
+
+Before an autonomous "proceed" or "next task" pass, apply the
+[V1S selection and handoff checkpoint](docs/TODO.md#v1s-work-selection-and-handoff):
+inspect **all** earlier open 1.0 slices across workstreams, choose the earliest
+actionable task unless a stated dependency/priority justifies an exception,
+and preserve a specific `Blocked:` or `Deferred:` reason and retry trigger on
+skipped open tasks. Do not treat an unclear source interpretation as a blocker
+when another bounded review is actionable. State the selected ID and earlier
+open IDs intentionally passed over with reasons; do not silently advance from
+the previous source family. Explicit user priorities can override the default
+order, but not hide dependencies or unresolved work.
+
+At **every task boundary**, reconcile the previously selected V1S and owning
+parent against the [backlog retirement contract](docs/README.md#backlog-completion-and-retirement),
+current deliverables and VD/VR obligations. A finished task is retired in the
+same closeout change, not left open for a later cleanup. A partial task remains
+unchecked with a concrete next action. When retiring numbered slices, include
+all removed V1S IDs in the Git commit subject/body so completion is traceable
+without a second done-task ledger. Review the final TODO diff before selecting
+another task. This task-status gate is **separate** from, and does not weaken,
+the validation-queue drain loop below.
+
 ### Phased validation workflow
 
 Follow the [strict VD/VR drain loop](docs/validation-queue.md#queue-rules)

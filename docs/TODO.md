@@ -128,9 +128,10 @@ as unimplemented and distinguish them from the published core-scenario foundatio
 actionable slice register for the nine open 1.0 parent outcomes below, not a
 second release gate or a new interpretation of historical audit counts.
 Each numbered slice maps to the named parent section; the existing parent and
-nested acceptance conditions still govern closure. For a new implementation
-pass, select a ready slice here rather than inventing another ad hoc subdivision.
-Remove completed slices as part of the normal backlog retirement rule; Git
+nested acceptance conditions still govern closure. Use the
+[V1S work-selection checkpoint](#v1s-work-selection-and-handoff) before taking
+another slice; "ready" alone is not justification for bypassing earlier open
+work. Remove completed slices under the normal backlog retirement rule; Git
 history retains the original estimate and result.
 
 **Sizing:** S = one bounded source decision/check or focused change (1 unit);
@@ -144,6 +145,53 @@ Labels: **review** = evaluate evidence, **design** = settle a contract,
 **build** = implement, **gate** = verify/accept, **decision** = settle
 a supported boundary, **conditional** = only for confirmed additions,
 **external** = independent authorization/dependency.
+
+#### V1S work selection and handoff
+
+For an autonomous "proceed" or "next task" pass, use this checkpoint **after
+checking due VD/VR work and before any ordinary V1S implementation**:
+
+1. Inventory **all unchecked V1S slices in this 1.0 register**, across every
+   section, along with their owning open parent, prerequisites and already
+   recorded review/acceptance evidence. Do not resume from the last edited
+   section, assume missing ID numbers are complete, or select the nearest
+   convenient source family without comparing earlier work.
+2. Prefer the **earliest actionable** open slice whose prerequisites are met.
+   ID order is a review/default priority, not a false dependency between
+   independent workstreams. If an earlier slice cannot proceed, distinguish
+   **blocked** (specific missing source, ruling, permission, prerequisite or
+   unavailable environment) from **still actionable** (further bounded review
+   or implementation is possible). Do not mark a task blocked merely because
+   its source meaning is uncertain when investigation can still progress.
+3. Preserve skipped work **in its existing open TODO entry**: use a concise
+   `Blocked:` note naming the dependency, authority/owner and retry trigger,
+   or a `Deferred:` note naming the accepted priority decision and revisit
+   trigger. Link existing SRC or other issue IDs when appropriate; do not
+   create another task ledger. Bypassing an earlier *actionable* slice needs
+   an explicit user priority, release-critical dependency or documented
+   time-bounded rationale, not just a preference for a simpler review.
+   Record the affected earlier IDs/ranges and why they remain open in the
+   task-selection handoff. An explicitly user-selected task may take priority,
+   but its relevant prerequisites and skipped work must still be disclosed.
+4. At each task boundary, reconcile the **previously selected V1S and its
+   owning parent** with real deliverables, current source uncertainty,
+   changed canonical documentation and the active VD/VR queue. If the stated
+   outcome and required verification are complete, retire the task in the
+   same change as its acceptance handoff. If partially complete, keep it
+   unchecked and rewrite the *remaining actionable work* rather than leaving
+   a stale "finish validation" instruction. Source-reviewed no-change is a
+   valid review outcome when evidenced; unresolved implementation or official
+   ruling requirements remain open with the correct owner.
+5. Before selecting another slice, state the selected ID, any earlier open
+   IDs intentionally passed over (and their reason), the previous ID's
+   **retired / still open / blocked** disposition, and VD/VR counts. A
+   successful test run does not by itself close a broader feature, and a
+   removed task is not proof of completion without its documented handoff.
+
+This is a **selection and closeout gate**, not a new status log or a change
+to the [strict validation-queue loop](validation-queue.md#queue-rules).
+Completion and removal follow
+[backlog completion and retirement](README.md#backlog-completion-and-retirement).
 
 **Shared completion rule:** Every implementation slice must specify its
 pinned source/variant, affected maintained model/export, API and ordinary

@@ -117,6 +117,24 @@ Apply this to subtasks at every depth during each change's closeout, not only at
 release preparation. Git history retains retired details; do not create another
 completed-task archive or append new status reports to completed entries.
 
+**Make retirement auditable:** when removing numbered `V1S-*` entries, include
+*every retired ID* in the same Git commit's subject or body (for example,
+`task-closeout: v1s-055, v1s-056`). The commit must also contain or link to
+the actual acceptance evidence in its canonical documentation, or identify the
+exact verified tests/revision. This convention makes removal distinguishable
+from accidental omission without keeping checked items in the active backlog.
+Do not retire an open implementation or ruling requirement just because its
+bounded source review or related focused test passed; explicitly retain and
+re-scope the remainder under its existing task or correct independent owner.
+
+Before beginning the next task, reconcile the just-worked task and any touched
+parent against `TODO.md`, the [VD/VR queue](validation-queue.md), current
+documentation and the inspected diff. Retire fully finished work **in that
+closeout commit**; leave partial/blocked work unchecked with a concrete
+remaining action or dependency. For autonomous work selection, follow the
+[V1S checkpoint](TODO.md#v1s-work-selection-and-handoff); numeric gaps alone
+are not evidence of skipped or completed work.
+
 ## Private local workspace
 
 `local/` is Git-ignored and excluded from Docker build contexts. Use it for private audit evidence,

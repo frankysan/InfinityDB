@@ -28,13 +28,18 @@ closeout and release readiness, not the feature itself.
    from the user's or operator's perspective, consolidate related outcomes, and keep implementation
    details in code/tests/history. If the change is internal-only and warrants no entry, state that
    decision in the handoff rather than adding noise.
-4. Follow [backlog completion and retirement](../../../docs/README.md#backlog-completion-and-retirement):
-   check the entire subtree, required validation and documentation handoff before completion.
+4. Follow [backlog completion and retirement](../../../docs/README.md#backlog-completion-and-retirement)
+   and the [V1S selection and handoff gate](../../../docs/TODO.md#v1s-work-selection-and-handoff).
+   Reconcile the *previously selected* task and entire parent subtree against the
+   actual acceptance, remaining dependencies and VD/VR status **before moving on**.
    Reopen affected tasks and checked ancestors before corrections or added subtasks;
    create a separate open task for genuinely new scope. After documenting the practical outcome,
-   remove completed tasks/subtrees or reduce a completed child of an open parent to brief linked
-   context. Rewrite the parent around remaining work; preserve dependencies and unrelated proposals.
-   Apply exact project-domain labels to new or materially revised entries.
+   remove completed tasks/subtrees in the same commit or reduce a completed child of an open parent
+   to brief linked context. Record all retired V1S IDs in that Git commit's subject/body.
+   If incomplete, rewrite the open task around an actionable remainder or an explicit
+   blocker and retry trigger; do not leave stale "finish validation" text.
+   Preserve dependencies and unrelated proposals. Apply exact project-domain labels
+   to new or materially revised entries.
 5. Update `README.md` for user-visible behavior, setup, or major capabilities. Update architecture,
    data-model, AI context, or TODO only when the change affects the responsibilities those documents
    own. Check current schema/compatibility values and rebuild guidance together when either changes.
@@ -65,9 +70,12 @@ closeout and release readiness, not the feature itself.
    require all relevant workflows and dependent jobs to finish
    successfully for a release/merge or other mandatory acceptance
    gate. Distinguish pending/untriggered/skipped CI from success.
-10. Inspect the final diff and Git status. Preserve unrelated changes; do
-    not stage, commit, push, deploy, tag, or publish without authorization.
-    Report the queue counts, deferred gates and precise validation status.
+10. Inspect the final diff and Git status, including removals/rewrites in
+    `docs/TODO.md`. Verify every retired V1S has real completion evidence,
+    every incomplete task remains open, and lower-ID tasks passed over have
+    an explicit reason. Preserve unrelated changes; do not stage, commit,
+    push, deploy, tag, or publish without authorization. Report the selected/
+    retired/still-open V1S IDs, queue counts, deferred gates and exact results.
 
 ## References
 
