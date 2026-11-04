@@ -2976,11 +2976,11 @@
     },
     {
       "sourceRecordId": "state:retreat",
-      "targetRecordId": "rule:retreat-situation",
+      "targetRecordId": "rule:army-retreat",
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Retreat! State is entered and canceled through the army-level Retreat! situation; retain the distinction until that situation is modeled canonically."
+      "reason": "Retreat! State is entered or cleared through the now-canonical army-level rule:army-retreat situation, but an individual Trooper may be exempt or spend a Command Token while the army remains in Retreat!. Defer an unconditional state-transition edge until actor-level exemptions, phase checks and cancellation context can be preserved."
     },
     {
       "sourceRecordId": "state:suppressive-fire",
@@ -3056,11 +3056,11 @@
     },
     {
       "sourceRecordId": "skill:shasvastii",
-      "targetRecordId": "rule:retreat-situation",
+      "targetRecordId": "rule:army-retreat",
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State."
+      "reason": "Shasvastii-Embryo Victory Point counting while a game continues is governed by the now-canonical army-level rule:army-retreat context and the relevant scoring source, not by unconditional entry to state:retreat. Preserve scenario and end-of-game accounting prerequisites before promoting any typed edge."
     },
     {
       "sourceRecordId": "skill:shasvastii",
@@ -3088,11 +3088,11 @@
     },
     {
       "sourceRecordId": "skill:inspiring-leadership",
-      "targetRecordId": "rule:retreat-situation",
+      "targetRecordId": "rule:army-retreat",
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet."
+      "reason": "Inspiring Leadership changes army-level Retreat! applicability. The rule:army-retreat baseline now exists, but a typed edge must preserve its commander/army scope and distinguish prevention of the army situation from immunity to an individual state:retreat transition."
     },
     {
       "sourceRecordId": "skill:inspiring-leadership",

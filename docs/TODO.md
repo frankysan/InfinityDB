@@ -158,8 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-027 (M, review):** Review remaining States, Traits, Attributes and reference links; keep in-game
-  States separate from static profiles.
 - [ ] **V1S-028 (M, review):** Reconcile player-facing cross-source conflicts, FAQ applicability and explicit
   uncertainty before publishing dependent summaries.
 - [ ] **V1S-029 (L, review):** Join the 367 frozen explanation-audit records to the current Core/Hacking set
@@ -513,7 +511,9 @@ likewise confirms public Equipment definition coverage while preserving
 conditional TinBot/Firewall and exceptional object distinctions. The
 [V1S-026 General Rules/glossary review](v1.0-source-coverage-audit.md#general-rules-training-and-glossary-scope-v1s-026-2026-11-04)
 reconciles shared Core Rules, two Training definitions, 23 Terms,
-embedded Attribute/Label vocabulary and scenario-owned qualifications.
+embedded Attribute/Label vocabulary and scenario-owned qualifications. The
+[V1S-027 State/Trait/Attribute review](v1.0-source-coverage-audit.md#states-traits-and-attributes-with-distinct-semantics-v1s-027-2026-11-04)
+confirms typed reference identities and distinct army-level Retreat versus Trooper-State scopes.
 Exact occurrence variants and final source/browser acceptance remain open.
 
 - [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned

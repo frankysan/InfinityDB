@@ -453,6 +453,14 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     ) in future_keys
     assert ("state:stunned", "rule:roll", "modifies-rolls-for") in future_keys
     assert ("state:isolated", "state:disconnected", "causes-state") in future_keys
+    # An army's Retreat! situation is a rule, not the state on each Trooper.
+    assert ("state:retreat", "rule:army-retreat", None) in future_keys
+    assert ("skill:shasvastii", "rule:army-retreat", None) in future_keys
+    assert ("skill:inspiring-leadership", "rule:army-retreat", None) in future_keys
+    assert not any(target == "rule:retreat-situation" for _, target, _ in future_keys)
+    assert ("rule:army-retreat" not in {
+        target for _, target in items["state:retreat"]["relations"]
+    })
     assert ("rule:null-state", "state:disconnected", "causes-state") in future_keys
     assert (
         "equipment:hacking-device-plus",
@@ -476,7 +484,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:dogged", "rule:healing", None) in future_keys
     assert ("skill:no-wound-incapacitation", "state:dead", None) in future_keys
     assert ("skill:remote-presence", "state:dead", None) in future_keys
-    assert ("skill:shasvastii", "rule:retreat-situation", None) in future_keys
+    assert ("skill:shasvastii", "rule:army-retreat", None) in future_keys
     assert ("skill:regeneration", "rule:wound", None) in future_keys
     assert ("skill:protheion", "rule:wound", None) in future_keys
     assert set(items["skill:dogged"]["relations"]) == {
