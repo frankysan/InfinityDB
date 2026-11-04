@@ -114,6 +114,22 @@ def test_wiki_source_review_requires_exact_pdf_revision_and_member_hash(tmp_path
         _load_review(source, "f" * 64)
 
 
+def test_pt_endgame_review_tracks_curated_trait_and_open_army_discrepancy() -> None:
+    source = Path(__file__).resolve().parents[1] / (
+        "config/validation/weapon-trait-wiki-review.json"
+    )
+    review = json.loads(source.read_text(encoding="utf-8"))
+    mapping = _load_review(source, review["corePdfSha256"])
+    endgame = next(item for item in mapping if item["name"] == "PT: Endgame")
+    semantics = endgame["semanticReview"]
+
+    assert semantics["state"] == "partial"
+    assert 182 in semantics["pdfPages"]
+    assert "curated weapon:pt-endgame" in semantics["finding"]
+    assert "SRC-016" in semantics["remaining"]
+    assert "raw Army profile" in semantics["remaining"]
+
+
 def test_cross_source_report_keeps_source_evidence_visible() -> None:
     report = {
         "corePdfSha256": "p" * 64, "wikiArchiveSha256": "w" * 64,

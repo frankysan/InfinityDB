@@ -275,12 +275,12 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     assert "Double Shot" in rule["summary"]
     assert "source discrepancy" in rule["facts"]["sourceNotes"][0]
     assert rule["facts"]["effects"]
-    assert any(
-        citation["source_id"] == "n5-core-v5.3-pdf"
-        and citation["source_version"] == "5.3"
-        and citation["page"] == 181
+    assert {
+        citation["page"]
         for citation in rule["citations"]
-    )
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["source_version"] == "5.3"
+    } >= {181, 182}
     assert any(
         token.get("target") == "trait:double-shot"
         and token["public_reference"] == {"catalog": "traits", "id": "double-shot"}

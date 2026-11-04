@@ -91,10 +91,11 @@
       "semanticReview": {
         "classification": "legacy-terminology-and-trait",
         "state": "partial",
-        "finding": "The April 2025 official Pheroware change replaced Technical Weapon with BS Weapon (WIP) and added Double Shot to Endgame. The N5.3 chart reflects both; Army retains the old label and omits Double Shot.",
-        "remaining": "Reconcile Endgame Double Shot in the current rules model/presentation without rewriting the raw Army source.",
+        "finding": "The April 2025 official Pheroware change replaced Technical Weapon with BS Weapon (WIP) and added Double Shot to Endgame. The N5.3 chart (p. 182) and curated weapon:pt-endgame record represent Double Shot; Army retains the old label and omits the Trait.",
+        "remaining": "Why Army omits Double Shot remains unverified (SRC-016). Preserve the raw Army profile; the current curated record already represents the N5.3 Trait and cites its chart row.",
         "pdfPages": [
-          62
+          62,
+          182
         ]
       }
     },

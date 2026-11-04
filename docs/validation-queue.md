@@ -127,7 +127,12 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+- [ ] VR-0065 (2026-11-04; ready-to-run): Verify the PT: Endgame citation and source-review disposition correction.
+  Work: V1S-034 in `TODO.md`; revision: commit pending; artifact: `data/generated/rules.db` SHA-256 `47a9bc50f0950444f1e4e4fb81b080ea5c00e793cb06dd5129dea3689010c0ec`; risk: medium.
+  Immediate: `build-rules` succeeded; deployed-object publication was rebuilt and `--check` passed; pinned weapon-trait/prose and cross-source audits passed.
+  Design: VD-0008 retired after static review; no tests run during design.
+  Deferred: `tests/test_weaponry_catalog_api.py::test_pt_endgame_rules_apply_only_to_the_endgame_source_variant`; `tests/test_audit_weapon_trait_cross_sources.py::test_pt_endgame_review_tracks_curated_trait_and_open_army_discrepancy`; run both affected test modules before retiring.
+  Outcome: pending.
 
 The most recent pinned Linux full-assets acceptance, including the 2026-11-04
 queue drain, is recorded in
@@ -148,8 +153,8 @@ is recorded. Failed or incomplete verification remains open.
 
 ## Next unused IDs
 
-- Design: `VD-0008` (through `VD-0007` retired).
-- Execution: `VR-0065` (through `VR-0064` retired).
+- Design: `VD-0009` (through `VD-0008` retired).
+- Execution: `VR-0066` (through `VR-0064` retired; VR-0065 active).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
