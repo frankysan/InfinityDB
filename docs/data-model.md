@@ -2930,6 +2930,20 @@ exceptions. They describe measurement, vaulting, contact and posture;
 they do not generate unconditional State/Skill relations or evaluate
 routes, terrain, reactive eligibility or game-session legality.
 
+Shared N5.3 geometry procedures use six additional General Rules owners:
+`rule:line-of-fire`, `rule:zone-of-control`, `rule:zones-and-contact`,
+`rule:coherency`, `rule:distances-and-measurements` and
+`rule:replacing-game-elements` (pp. 18-22). The existing `attribute:s`
+owns the cylindrical volume explanation and its Glossary diagrams;
+the existing `trait:zone-of-control-zc` remains the Weapon range Trait.
+Prose links preserve these domain distinctions and connect movement to LoF.
+Reference Troopers, Coherency failure effects, arc exceptions and replacement
+permissions remain scoped to their governing rule. In particular, a mandatory,
+inevitable Obligatory replacement that cannot fit has its own Immobilized-A
+cancellation condition or Equipment-removal outcome; it does not change the
+ordinary State record or grant a new recovery method. These are descriptive
+references, with no geometry evaluator or unconditional State/Skill relations.
+
 Cross-domain discovery may additionally use reviewed `facts.relatedCategories` category slugs.
 This adds navigation only: it does not change the record's canonical kind/domain, primary category,
 or typed rules relationships.

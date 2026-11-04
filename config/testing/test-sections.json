@@ -26,6 +26,7 @@
         "test_audit_relationship_semantics",
         "test_aro_deployment_publication",
         "test_movement_publication",
+        "test_geometry_publication",
         "test_audit_rules_interactions",
         "test_audit_runtime_database_surface",
         "test_audit_semantic_deduplication",

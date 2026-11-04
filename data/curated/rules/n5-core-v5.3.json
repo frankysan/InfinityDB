@@ -1677,7 +1677,7 @@
             "id": "attribute:s",
             "kind": "attribute",
             "name": "Silhouette (S)",
-            "summary": "Silhouette (S) identifies the Silhouette Template used to represent a Trooper's three-dimensional volume for game purposes.",
+            "summary": "Every Trooper occupies a fixed cylindrical game volume, with width determined by its base and height by the template selected by this Attribute. Ignore parts of the miniature projecting beyond its base when determining the game volume.\n\nUse the template to resolve uncertainty about occupied space and [[rule:line-of-fire|Line of Fire]]. In [[state:prone|Prone]], SX has base height (3 mm), while retaining the base width of the Trooper's original template.",
             "composition": {
                 "role": "definition"
             },
@@ -1696,11 +1696,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 9,
                     "section": "Attributes — Silhouette (S)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 18,
+                    "section": "Silhouette and Silhouette Templates"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-29"
+                "reviewedOn": "2026-11-04"
             }
         },
         {
@@ -28860,10 +28865,10 @@
             "facts": {
                 "category": "basic-rule",
                 "effects": [
-                    "**Distance and facing.** Measure the full route from the same part of the base using [[rule:moving-and-measuring|Moving and Measuring]]. The [[attribute:mov|MOV]] values are maxima, with no minimum distance. A moving Trooper has 360-degree Line of Fire and may choose any final facing without shifting its final position.",
-                    "**Vaulting.** A Trooper may vault over, onto or off scenery no higher than its [[attribute:s|Silhouette]] Template without declaring [[skill:climb|Climb]] or [[skill:jump|Jump]]. Ignore that vertical displacement for movement distance, but treat the Trooper as moving up and over the obstacle for Line of Fire. The height limit must hold on both sides of the obstacle.",
+                    "**Distance and facing.** Measure the full route from the same part of the base using [[rule:moving-and-measuring|Moving and Measuring]]. The [[attribute:mov|MOV]] values are maxima, with no minimum distance. A moving Trooper has 360-degree [[rule:line-of-fire|Line of Fire]] and may choose any final facing without shifting its final position.",
+                    "**Vaulting.** A Trooper may vault over, onto or off scenery no higher than its [[attribute:s|Silhouette]] Template without declaring [[skill:climb|Climb]] or [[skill:jump|Jump]]. Ignore that vertical displacement for movement distance, but treat the Trooper as moving up and over the obstacle for [[rule:line-of-fire|Line of Fire]]. The height limit must hold on both sides of the obstacle.",
                     "**Successive levels.** A single movement may vault several levels even when their combined height exceeds the [[attribute:s|Silhouette]] Template. Each step must meet the height limit and have an intermediate supporting surface at least half the size of the base.",
-                    "**Peeking.** While performing [[skill:move|Move]], a Trooper may extend up to half its [[attribute:s|Silhouette]] over a roof or other surface edge to gain Line of Fire on the same or another level. The supporting-surface and final-position requirements still apply.",
+                    "**Peeking.** While performing [[skill:move|Move]], a Trooper may extend up to half its [[attribute:s|Silhouette]] over a roof or other surface edge to gain [[rule:line-of-fire|Line of Fire]] on the same or another level. The supporting-surface and final-position requirements still apply.",
                     "**Passing friendly elements.** A Trooper may pass through Allied or Neutral Models, Markers and Tokens, but cannot finish in space occupied by another Model, Marker or Token.",
                     "**Enemy contact.** Movement ends immediately on [[attribute:s|Silhouette]] contact with an enemy, even if this cuts the declared route short. To pass between an enemy Trooper and an obstacle without contact, the gap must be wider than the moving Trooper's base.",
                     "**Changing posture.** When performing a Skill or [[trait:aro|ARO]] with the Movement Label, except [[skill:jump|Jump]] and [[skill:berserk|Berserk]], a Trooper may enter or leave [[state:prone|Prone]] at either the start or end of movement at no cost. The same applies to movement after a failed [[rule:guts-roll|Guts Roll]]. Moving while [[state:prone|Prone]] still reduces the available distance.",
@@ -28892,6 +28897,325 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "General_Movement_Rules",
                     "heading": "General Movement Rules"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:line-of-fire",
+            "kind": "rule",
+            "name": "Line of Fire",
+            "summary": "Line of Fire (LoF) determines whether a Trooper can see a valid target. Draw it between points of the game volumes defined by [[attribute:s|Silhouette]], checking the facing arc, visible area and obstructions.\n\nThe ordinary arc is the front **180 degrees**. Movement, [[term:marker|Markers]] and specific Skills or Equipment have their own exceptions; visibility is not automatically reciprocal.",
+            "aliases": [
+                "LoF",
+                "180-degree Line of Fire",
+                "360-degree Line of Fire"
+            ],
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "The target must be at least partly inside the observer's front 180-degree arc, unless a specific Skill or Equipment ignores that limit.",
+                    "The observer must see a portion of the target's volume measuring at least 3 by 3 mm.",
+                    "The line between the chosen [[attribute:s|Silhouette]] points must be clear of scenery and the [[attribute:s|Silhouettes]] of friendly or enemy [[term:model|Models]]."
+                ],
+                "effects": [
+                    "**Game volume.** Use the represented volume of a [[term:model|Model]], [[term:token|Token]], [[term:marker|Marker]] or other valid target, not protruding parts of a miniature. Consult the [[attribute:s|Silhouette]] reference for the template.",
+                    "**Mutual visibility is conditional.** If a Trooper can draw LoF to its target, that target can draw LoF back only while the first Trooper is within the target's front 180-degree arc.",
+                    "**Movement.** A Trooper that declared a Skill with the Movement Label has a 360-degree LoF arc along the entire route. Follow the route and endpoint procedure in [[rule:moving-and-measuring|Moving and Measuring]] and the [[rule:general-movement|General Movement Rules]].",
+                    "**Route and representation exceptions.** A Trooper does not obstruct LoF along its entire movement route. [[term:marker|Markers]] do not obstruct LoF, and their default arc is 360 degrees unless another rule says otherwise."
+                ],
+                "restrictions": [
+                    "**Close combat.** A Trooper in [[state:engaged|Engaged State]] cannot draw LoF to Troopers or game elements outside its own close combat. It is unaffected by Visibility Conditions and other LoF-affecting rules while [[state:engaged|Engaged]]. Apply specifically stated exceptions, such as the one in [[skill:sixth-sense|Sixth Sense]], only within their own conditions."
+                ],
+                "clarifications": [
+                    "For difficult miniature poses or irregular scenery, players agree on the sight line, using templates or measuring aids as needed. A reference link or a visible figure does not establish a legal [[trait:aro|ARO]]; see [[rule:automatic-reaction-order|Automatic Reaction Order]]."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 18,
+                    "section": "Line of Fire: volume, arc and visibility requirements"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 19,
+                    "section": "Line of Fire exceptions and game aids"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Line_of_Fire",
+                    "heading": "Line of Fire"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:zone-of-control",
+            "kind": "rule",
+            "name": "Zone of Control",
+            "summary": "The area is a cylinder around the Trooper's [[attribute:s|Silhouette]]. It reaches [[distance:8:inch]] out from its outer edge, [[distance:8:inch]] above its top and [[distance:8:inch]] below its bottom.\n\nThis general geometry and checking procedure is distinct from the [[trait:zone-of-control-zc|Zone of Control (ZoC)]] Weapon Trait, which uses that range.",
+            "aliases": [
+                "ZoC",
+                "Zone of Control cylinder"
+            ],
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "**Checking the active route.** Measure from the Active Trooper, checking at most [[distance:8:inch]] from any point along its path. Once the active [[term:model|Model]] reaches its endpoint, both players may check the entire route, including its starting and final positions.",
+                    "**Reactive opportunities.** An enemy entering or acting within this area may allow a reaction without [[rule:line-of-fire|Line of Fire]]. Apply the eligibility, permitted declarations and timing in [[rule:automatic-reaction-order|Automatic Reaction Order]] and the [[rule:order-expenditure-sequence|Order Expenditure Sequence]].",
+                    "**Area membership.** Use [[rule:zones-and-contact|Zones, Bases and Silhouettes]] to distinguish touching or partly inside the area from being totally inside it."
+                ],
+                "restrictions": [
+                    "ZoC checks do not grant permission to measure unrelated ranges in advance or to use a Skill without satisfying its own requirements."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 20,
+                    "section": "Zone of Control and AROs; route measurement advice"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Zone_of_Control",
+                    "heading": "Zone of Control"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:zones-and-contact",
+            "kind": "rule",
+            "name": "Zones, Bases and Silhouettes",
+            "summary": "Contact, inside and totally inside describe different geometric conditions. Check the represented [[attribute:s|Silhouette]], including its full volume when a rule requires the Trooper to be totally inside an area.",
+            "aliases": [
+                "Base Contact",
+                "Silhouette Contact",
+                "Inside",
+                "Totally Inside"
+            ],
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "**Base contact / Silhouette contact.** The represented volumes touch. This also covers contact with a game element without a base, such as a [[term:scenery-element|Scenery Element]]. A Trooper is always in contact with themselves.",
+                    "**Inside.** A Trooper is inside a defined area if its [[attribute:s|Silhouette]] touches that area or is at least partly within it. This includes the boundary of a [[rule:zone-of-control|Zone of Control]] or a [[term:zero-visibility-zone|Zero Visibility Zone]].",
+                    "**Totally inside.** The entire [[attribute:s|Silhouette]] must lie within the defined area when a rule specifically requires this stronger condition."
+                ],
+                "restrictions": [
+                    "Contact or partial overlap satisfies inside, but does not by itself satisfy totally inside. Apply the condition actually named by the governing rule."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 20,
+                    "section": "Interaction between Zones, Bases and Silhouettes"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 21,
+                    "section": "Interacting with Zones diagram"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Zones,_Bases_and_Silhouettes",
+                    "heading": "Zones, Bases and Silhouettes"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:coherency",
+            "kind": "rule",
+            "name": "Coherency",
+            "summary": "Linked Troopers remain in Coherency by being inside the [[rule:zone-of-control|Zone of Control]] of the **Reference Trooper** chosen by their governing rule. That reference and the consequences of failure depend on the rule, Skill, Equipment or [[trait:state|State]] being used.\n\nThe shared checks apply to groups such as Fireteams and [[skill:peripheral|Peripherals]] without making their reference roles or failure effects interchangeable.",
+            "aliases": [
+                "Coherency Check",
+                "Reference Trooper"
+            ],
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "Identify the Reference Trooper from the relevant rule. Fireteams use their Team Leader; [[skill:peripheral|Peripheral]] subtypes retain their own Controller or Spearhead requirements."
+                ],
+                "effects": [
+                    "**During deployment.** In the [[rule:deployment-phase|Deployment Phase]], the player may measure the Reference Trooper's [[rule:zone-of-control|Zone of Control]] and adjust the linked Troopers' placement to bring them inside it. The reserve exception below still applies.",
+                    "**Start check.** Check after declaring the first Short Skill, Long Skill or [[trait:aro|ARO]], before measuring any declared movement.",
+                    "**End of an Order.** Check again at the end of the Conclusion step, after movement from a failed [[rule:guts-roll|Guts Roll]] or another rule.",
+                    "**Failure.** Apply the governing rule's consequences immediately when a linked Trooper is outside the Reference Trooper's [[rule:zone-of-control|Zone of Control]]. A Fireteam departure and a [[skill:peripheral|Peripheral]] entering [[state:disconnected|Disconnected]] are separate scoped outcomes; consult their own rules."
+                ],
+                "restrictions": [
+                    "**Deployment reserves.** The deployment adjustment is unavailable for the last figure held in reserve and during its deployment. This also applies when a specific rule permits multiple reserve Troopers."
+                ],
+                "clarifications": [
+                    "**Obvious Coherency.** The source permits omitting a physical measurement when all linked Troopers are clearly close enough, unless the opponent requests the check. This advice does not remove the required timing or consequences when Coherency is in doubt."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 21,
+                    "section": "Coherency, Coherency Check and Breaking Coherency"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Coherency",
+                    "heading": "Coherency"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:distances-and-measurements",
+            "kind": "rule",
+            "name": "Distances and Measurements",
+            "summary": "Table distances are measured in inches with a ruler or tape. Between two Troopers, use the closest points of their [[attribute:s|Silhouettes]]; between objects or scenery items, measure a straight line.\n\nDeclare the Skills composing the Order before measuring, following the [[rule:order-expenditure-sequence|Order Expenditure Sequence]] and the timing of any specific permitted check.",
+            "aliases": [
+                "Distance measurement",
+                "Measuring distances"
+            ],
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "**Trooper-to-Trooper distance.** Measure between the nearest parts of the two game volumes. The base is normally a convenient reference; use the [[attribute:s|Silhouette]] Template when the exact three-dimensional range requires it.",
+                    "**Objects and scenery.** Use a straight-line distance between the two elements.",
+                    "**Movement routes.** [[rule:moving-and-measuring|Moving and Measuring]] separately governs declaring a Movement Skill, measuring its reach and choosing the complete route and endpoint. A route includes detours and uses a consistent base reference point."
+                ],
+                "restrictions": [
+                    "The general distance rule does not allow premeasuring before declarations. Use only the measurement opportunity provided by the relevant rule, such as [[rule:zone-of-control|Zone of Control]] or [[rule:coherency|Coherency]]."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 21,
+                    "section": "Distances and Measurements"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 22,
+                    "section": "Distance between Two Miniatures diagram"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Distances_and_Measurements",
+                    "heading": "Distances and Measurements"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:replacing-game-elements",
+            "kind": "rule",
+            "name": "Replacing Game Elements",
+            "summary": "When a rule, Skill, Equipment or scenario calls for replacing an existing game element with another [[term:model|Model]] or [[term:marker|Marker]], preserve its position according to the base-size conditions below.\n\nA mandatory, inevitable replacement with the Obligatory Label has a special no-fit outcome. This procedure grants no independent permission to replace or reposition a Trooper.",
+            "aliases": [
+                "Replacement positioning",
+                "Matching diameters",
+                "Different diameters"
+            ],
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "A governing rule, Skill, Equipment, game condition or scenario must require the replacement. Determine the original and replacement base sizes and the volume of the replacement [[attribute:s|Silhouette]]."
+                ],
+                "effects": [
+                    "**Matching diameters.** With equal base sizes, place the replacement base in the same position as the original base.",
+                    "**Different diameters.** Choose either matching the centers of the two bases or matching their edges so that the arcs of the borders coincide.",
+                    "**New contact.** The different-base options may gain contact with Cover or enter [[state:engaged|Engaged State]], but cannot be used to cancel [[state:engaged|Engaged]].",
+                    "**Mandatory replacement without room.** If an Obligatory replacement is mandatory and inevitable and the new [[attribute:s|Silhouette]] volume does not fit, the replacement Trooper enters [[state:immobilized-a|Immobilized-A State]]. A piece of Equipment is removed from the table instead of entering that [[trait:state|State]]."
+                ],
+                "restrictions": [
+                    "**Special cancellation condition.** The [[state:immobilized-a|Immobilized-A]] caused by this mandatory no-fit replacement ends only when the conditions of the containing space change. Its ordinary cancellation methods do not apply.",
+                    "Apply that no-fit branch only to a mandatory, inevitable Obligatory replacement. It is not a general permission to make an optional replacement in insufficient space, and does not grant [[skill:engineer|Engineer]] or [[skill:reset|Reset]] a new cancellation method."
+                ],
+                "clarifications": [
+                    "This is a shared positioning reference. Exact profile changes, allowed replacements, attack eligibility and geometry still require the governing rule and actual game position."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 22,
+                    "section": "Replacing Game Elements; Matching and Different Diameters"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Replacing_Game_Elements",
+                    "heading": "Replacing Game Elements"
                 }
             ],
             "review": {

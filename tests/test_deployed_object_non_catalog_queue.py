@@ -59,7 +59,7 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = candidate_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 55
+    assert len(validate_reviews(manifest, curated, candidates)) == 57
     pdf_only_review_idx = next(
         i for i, row in enumerate(manifest["reviews"])
         if row["recordId"] == "skill:transmutation"
@@ -151,8 +151,8 @@ def test_pinned_non_catalog_discovery_closes_bounded_review_queue() -> None:
     report = audit_non_catalog_candidates(CURATED, REVIEWS)
     assert report["scope"] == "non-catalog-keyword-discovery-not-object-inventory"
     assert len(report["curatedSourceSha256"]) == 64
-    assert report["reviewedCount"] == 55
-    assert report["candidateCount"] == 55
+    assert report["reviewedCount"] == 57
+    assert report["candidateCount"] == 57
     assert report["unreviewed"] == []
     access = next(
         entry for entry in report["candidates"]
@@ -198,6 +198,8 @@ def test_pinned_non_catalog_discovery_closes_bounded_review_queue() -> None:
         ("rule:order-pool", "order-resource-token-not-object", [11, 12, 16, 17]),
         ("rule:command-tokens", "command-resource-and-state-marker-not-object", [128, 129]),
         ("rule:general-movement", "movement-through-existing-elements-not-object", [29, 30]),
+        ("rule:line-of-fire", "line-of-fire-volume-not-object-profile", [18, 19]),
+        ("rule:zones-and-contact", "shared-zone-contact-not-object-profile", [20, 21]),
     ):
         assert reviewed[record_id]["classification"] == classification
         assert reviewed[record_id]["sourcePages"] == pages
@@ -268,8 +270,8 @@ def test_non_catalog_cli_reports_reviewed_queue_without_publishing_objects(
     assert main() == 0
     output = capsys.readouterr().out
     assert "Candidate definitions:" in output
-    assert "Candidate definitions: 55" in output
-    assert "Reviewed classifications: 55" in output
+    assert "Candidate definitions: 57" in output
+    assert "Reviewed classifications: 57" in output
     assert "Awaiting manual review: 0" in output
     assert "rule:access-width:" not in output
     count = 6 if any(

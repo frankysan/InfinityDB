@@ -166,9 +166,11 @@ revision, following the established dispatch-and-continue protocol.
     Chromium checks; [the current contract](data-model.md#domain-ownership)
     preserves conditional exceptions. Acceptance awaits VR-0060's pinned
     Linux and hosted checks; do not repeat the implementation.
-  - [ ] **V1S-033B:** Review pp. 18–22 Silhouette, LoF, zones, measurement, Coherency and replacement
-    positioning against existing glossary, Trait and Fireteam owners; publish only missing shared
-    procedures and test boundary exceptions (180/360-degree LoF, contact and replacement).
+  - [ ] **V1S-033B:** Six shared geometry references and expanded Silhouette help
+    are implemented from pp. 18-22, with source/API/search and three-width
+    Chromium checks. The existing Weapon Trait, diagrams and Fireteam-specific
+    effects retain their owners. Acceptance awaits VR-0061's pinned Linux and
+    hosted checks; do not repeat the implementation.
   - [ ] **V1S-033C:** Review pp. 32–34 and 41–42 shared Cover, vertical movement and landing constraints
     against `skill:climb`, `skill:jump` and `skill:climbing-plus`; preserve conditional no-Partial-Cover
     exceptions and verify source/API/browser links.

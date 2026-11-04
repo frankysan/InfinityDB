@@ -2557,6 +2557,48 @@
       "status": "reviewed",
       "reviewedOn": "2026-11-04",
       "note": "N5.3 pp. 29-30: source-scoped vaulting, peeking, facing, contact, posture and no-fall/Idle conditions. Preserve exceptions and link canonical Skill/State owners; descriptive conditional procedures create no unconditional State or movement relation."
+    },
+    {
+      "recordId": "rule:line-of-fire",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 pp. 18-19: game volume, ordinary 180-degree arc, 3-by-3-mm visibility, conditional mutual LoF, movement/Marker 360-degree exceptions and Engaged limits. Typed prose links preserve specific Skill exceptions without a sight-line evaluator or unconditional grants."
+    },
+    {
+      "recordId": "rule:zone-of-control",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 p. 20: 8-inch radius from the Silhouette outer edge, separate top/bottom extensions, active-route checks and scoped reactive opportunities. The shared geometry owner remains distinct from the existing ZoC Weapon Trait and grants no universal reactive Skill permission."
+    },
+    {
+      "recordId": "rule:zones-and-contact",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 pp. 20-21: Silhouette/base contact, self-contact, touching or partly inside an area versus the entire volume totally inside. These shared geometry conditions do not create a deployed object, zone instance or unconditional State relation."
+    },
+    {
+      "recordId": "rule:coherency",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 p. 21: governing-rule Reference Trooper, Deployment adjustments and reserve exception, start/end timing, immediate rule-specific failure consequences and obvious-distance advice. Fireteam and Peripheral roles/effects stay distinct; no unconditional State edge."
+    },
+    {
+      "recordId": "rule:distances-and-measurements",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 pp. 21-22: nearest Silhouette points between Troopers, straight-line object/scenery distances, convenient base reference and declarations before measurements. The separate movement-route procedure retains its own exact timing and consistent base point."
+    },
+    {
+      "recordId": "rule:replacing-game-elements",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 p. 22: matching-base position, different-base center/edge options, new contact without cancelling Engaged, and mandatory inevitable Obligatory no-fit replacement. The special Immobilized-A space-only cancellation and Equipment removal remain scoped, not ordinary Engineer/Reset permissions."
     }
   ],
   "futureInteractions": [

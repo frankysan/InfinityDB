@@ -89,3 +89,88 @@ def test_movement_catalog_skill_links_and_source_citations(chrome: Any, width: i
         assert not errors and not failed, (width, errors, failed)
     finally:
         page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_geometry_reference_navigation_and_existing_silhouette_diagrams(
+    chrome: Any, width: int,
+) -> None:
+    """Browse shared geometry owners without conflating the range Trait."""
+    app = create_app(ROOT / ARMY, rules_database_path=ROOT / RULES)
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    failed: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed.append(request.url))
+    page.on("response", lambda response: failed.append(
+        f"{response.status} {response.url}"
+    ) if response.status >= 400 else None)
+
+    def catalog_card(slug: str, phrases: tuple[str, ...], pages: tuple[int, ...]) -> Any:
+        response = page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator(f'#catalog-list a[href="/rules/{slug}"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/{slug}", timeout=30000)
+        card = page.locator(f"#rule-rule-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        for phrase in phrases:
+            assert phrase in card.inner_text(), (width, slug, phrase)
+        citations = card.locator(".rules-source-citations").inner_text()
+        for number in pages:
+            assert f"p. {number}" in citations, (width, slug, number)
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        return card
+
+    try:
+        card = catalog_card("line-of-fire", (
+            "180-degree", "3 by 3 mm", "360-degree", "Mutual visibility is conditional",
+            "friendly or enemy", "Close combat", "Sixth Sense",
+        ), (18, 19))
+        silhouette = card.locator('a[href="/glossary#attribute-s"]').first
+        silhouette.focus()
+        silhouette.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/glossary#attribute-s", timeout=30000)
+        entry = page.locator("#attribute-s")
+        entry.wait_for(state="visible", timeout=30000)
+        for phrase in ("cylindrical", "projecting beyond", "SX", "3 mm", "base width"):
+            assert phrase in entry.inner_text(), (width, phrase)
+        assert entry.locator('img[src*="/static/silhouettes/"]').count() == 8
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+
+        card = catalog_card("zone-of-control", (
+            "above its top", "below its bottom", "Weapon Trait", "starting and final positions",
+        ), (20,))
+        assert card.locator('a[href="/traits/zone-of-control-zc"]').count() > 0
+        zones = card.locator('a[href="/rules/zones-and-contact"]').first
+        zones.focus()
+        zones.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/zones-and-contact", timeout=30000)
+        card = page.locator("#rule-rule-zones-and-contact")
+        card.wait_for(state="visible", timeout=30000)
+        for phrase in ("always in contact with themselves", "Totally inside", "entire Silhouette"):
+            assert phrase in card.inner_text(), (width, phrase)
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+
+        catalog_card("coherency", (
+            "Reference Trooper", "Controller or Spearhead", "before measuring",
+            "Conclusion step", "multiple reserve Troopers", "unless the opponent requests",
+        ), (21,))
+        card = catalog_card("distances-and-measurements", (
+            "closest points", "straight line", "complete route and endpoint", "before declarations",
+        ), (21, 22))
+        assert card.locator('a[href="/rules/moving-and-measuring"]').count() > 0
+        card = catalog_card("replacing-game-elements", (
+            "same position", "matching the centers", "matching their edges",
+            "cannot be used to cancel Engaged", "mandatory and inevitable",
+            "Equipment is removed", "ends only when", "ordinary cancellation methods",
+            "grants no independent permission",
+        ), (22,))
+        assert card.locator('a[href="/states/immobilized-a"]').count() > 0
+        assert card.locator('a[href="/states/engaged"]').count() > 0
+        assert not errors and not failed, (width, errors, failed)
+    finally:
+        page.close()

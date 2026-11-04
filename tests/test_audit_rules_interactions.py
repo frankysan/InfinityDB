@@ -17,10 +17,28 @@ from tools.audit_rules_interactions import (
 )
 
 
+def _maintained_review_ids(release: str | None = None) -> set[str]:
+    policy = json.loads(DEFAULT_POLICY_PATH.read_text(encoding="utf-8"))
+    rows = [r for r in policy["records"]
+            if release is None or r["targetRelease"] == release]
+    ids = {r["recordId"] for r in rows}
+    assert len(ids) == len(rows)
+    return ids
+
+
+def _maintained_supporting_ids(scope: Path = DEFAULT_CATALOG_SCOPE_PATH) -> set[str]:
+    document = json.loads(scope.read_text(encoding="utf-8"))
+    kinds = {"skills": "skill", "equipment": "equipment", "traits": "trait", "states": "state"}
+    primary = {f"{kinds[catalog]}:{item['id']}"
+               for catalog, items in document["catalogs"].items() for item in items}
+    return _maintained_review_ids() - primary
+
+
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 395
+    assert {r["id"] for r in report["items"]} == _maintained_review_ids()
+    assert report["summary"]["recordCount"] == len(_maintained_review_ids())
     assert not any(item["id"].startswith("faq-ruling:") for item in report["items"])
     assert report["summary"]["authoredOutgoingRelationCount"] == 518
     assert report["summary"]["futureInteractionCount"] == 111
@@ -64,11 +82,14 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "inherited": 0,
         "percentComplete": 100.0,
     }
+    current_ids = _maintained_review_ids("1.0.0")
+    assert len(current_ids) >= 127
+    assert {"rule:moving-and-measuring", "rule:general-movement"} <= current_ids
     assert report["summary"]["releases"]["1.0.0"] == {
-        "total": 127,
-        "complete": 127,
+        "total": len(current_ids),
+        "complete": len(current_ids),
         "pending": 0,
-        "reviewed": 127,
+        "reviewed": len(current_ids),
         "inherited": 0,
         "percentComplete": 100.0,
     }
@@ -117,8 +138,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 213
-    assert report["summary"]["supporting"]["complete"] == 213
+    supporting_ids = _maintained_supporting_ids()
+    assert {r["id"] for r in report["supportingItems"]} == supporting_ids
+    assert report["summary"]["supporting"]["total"] == len(supporting_ids)
+    assert report["summary"]["supporting"]["complete"] == len(supporting_ids)
     assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -603,7 +626,8 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 213/213 complete, 0 pending" in output
+    count = len(_maintained_supporting_ids())
+    assert f"Supporting identities: {count}/{count} complete, 0 pending" in output
 
 
 def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> None:
@@ -612,7 +636,8 @@ def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> 
         "--require-release", "1.0.0",
     ]) == 0
     output = capsys.readouterr().out
-    assert "Supporting identities: 213/213 complete, 0 pending" in output
+    count = len(_maintained_supporting_ids())
+    assert f"Supporting identities: {count}/{count} complete, 0 pending" in output
     assert "Pending identities:" not in output
 
 
@@ -789,7 +814,9 @@ def test_1_0_primary_candidate_preserves_historical_reviews_and_discloses_option
     assert (primary["total"], primary["complete"], primary["pending"]) == (
         186, 186, 0,
     )
-    assert report["summary"]["supporting"]["total"] == 209
+    supporting_ids = _maintained_supporting_ids(candidate)
+    assert {r["id"] for r in report["supportingItems"]} == supporting_ids
+    assert report["summary"]["supporting"]["total"] == len(supporting_ids)
     primary_items = {item["id"]: item for item in report["primaryCatalogItems"]}
     for record_id, release in {
         "skill:activate-disco-ball": "1.0.0",

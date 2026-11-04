@@ -12,8 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Look up movement measurement, vaulting, contact and posture rules, with
-  Move's supporting-surface and landing requirements linked from its card.
+- Look up movement, Line of Fire, zones, Coherency and replacement positioning,
+  with Move's supporting-surface requirements and linked Silhouette help.
 - Follow the N5.3 Player Turn's five phases and Order Count in linked
   Game Sequence and Order Pool references, including which Orders are
   available, private, repeatable or lost. The source disagreement about
@@ -64,10 +64,11 @@ are not retroactively relabeled.
 
 ### Added
 
-- **Data processing + Web backend + Web frontend:** Add linked Moving and
-  Measuring and General Movement Rules references, and explain Move's
-  supporting surfaces, landing requirements and first/second movement
-  distances. Preserve source-specific vaulting, contact and posture exceptions.
+- **Data processing + Web backend + Web frontend:** Expand shared N5.3 movement
+  and geometry help for route measurement, visibility, zones, Coherency and
+  replacement positioning. Explain Move's supporting surfaces and movement
+  distances alongside Silhouette volumes and diagrams, preserving conditional
+  contact, posture, arc and replacement exceptions.
 - **Data processing + Web backend + Web frontend:** Publish a General Rules
   Automatic Reaction Order overview grounded in N5.3 pp. 13-14 with four
   eligibility families, one-ARO/activated-target restrictions, timing,

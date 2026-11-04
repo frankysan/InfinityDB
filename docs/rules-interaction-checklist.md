@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **215/215** complete, **0** pending.
+- Supporting semantic identities: **221/221** complete, **0** pending.
 - Current authored outgoing relations: **518**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -911,7 +911,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (33/33)
+#### Rule (39/39)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
@@ -920,6 +920,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Automatic Reaction Order** (`rule:automatic-reaction-order`) — reviewed: N5.3 pp. 13-14: four reactive ARO trigger families, declared Skill permission, once-per-Order and activated-target limits, default B1/no-split and simultaneous reaction. Source-scoped general rule only; no unconditional typed edge or session-time legality engine.
   - outgoing: none
 - [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Coherency** (`rule:coherency`) — reviewed: N5.3 p. 21: governing-rule Reference Trooper, Deployment adjustments and reserve exception, start/end timing, immediate rule-specific failure consequences and obvious-distance advice. Fireteam and Peripheral roles/effects stay distinct; no unconditional State edge.
   - outgoing: none
 - [x] **Combat Group** (`rule:combat-group`) — reviewed: English/Spanish N5.3 p.10 and archived Army List Wiki revision 3847 substantiate initial assignment, ten Order-contributing/spending member slots, Peripheral/Controller grouping, non-transfer baseline and Open Marker membership; Order Pool context is N5.3 p.11. Published as source-scoped reference only, not list legality or live group calculation.
   - outgoing: none
@@ -934,6 +936,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Deployment Phase** (`rule:deployment-phase`) — reviewed: N5.3 Deployment Phase p. 15 four-step main/reserve sequence, plus p. 16 base fully inside zone, prohibited enemy/neutral/mission-objective contact, initial Prone, whole-base physical fit and allowed pregame measurements. Original p. 15 review was 2026-10-15; p. 16 addition reviewed 2026-11-04. FAQ repositioning/measurement boundary and scenario exceptions remain separate.
   - outgoing: none
 - [x] **Designated Landing Area** (`rule:scenario:designated-landing-area`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Distances and Measurements** (`rule:distances-and-measurements`) — reviewed: N5.3 pp. 21-22: nearest Silhouette points between Troopers, straight-line object/scenery distances, convenient base reference and declarations before measurements. The separate movement-route procedure retains its own exact timing and consistent base point.
   - outgoing: none
 - [x] **Dominate Quadrants** (`rule:scenario:dominate-quadrants`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
@@ -953,6 +957,8 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Killing** (`rule:scenario:killing`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
+- [x] **Line of Fire** (`rule:line-of-fire`) — reviewed: N5.3 pp. 18-19: game volume, ordinary 180-degree arc, 3-by-3-mm visibility, conditional mutual LoF, movement/Marker 360-degree exceptions and Engaged limits. Typed prose links preserve specific Skill exceptions without a sight-line evaluator or unconditional grants.
+  - outgoing: none
 - [x] **Modifiers Explained (MODs)** (`rule:modifiers-explained`) — reviewed: N5.3 pp. 68/75 distinguishes entry-local MODs, positive/negative MOD recipients, Automatic versus non-Automatic negative MODs, one-die ReRoll, and Burst versus Special Dice. Linked explanations preserve mode selection and FTF conditions.
   - outgoing: none
 - [x] **Moving and Measuring** (`rule:moving-and-measuring`) — reviewed: N5.3 pp. 27-28: declaration before measurement, complete route and endpoint, consistent base reference, route checks, stairs/ladders and no extra segment distance. Shared procedure with typed links, not an unconditional grant of Skill or reactive eligibility.
@@ -965,6 +971,8 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Reinforcements Extra** (`rule:reinforcements-extra`) — reviewed: Optional N5-era Extra with explicitly N4-origin annex procedures. The one outbound Request Reinforcements relation is scoped to optional play; it is not N5 proof of unchanged historical procedures. No ordinary core declaration or scenario rule is granted.
   - `enables-use-of` → Request Reinforcements (`skill:request-reinforcements`)
+- [x] **Replacing Game Elements** (`rule:replacing-game-elements`) — reviewed: N5.3 p. 22: matching-base position, different-base center/edge options, new contact without cancelling Engaged, and mandatory inevitable Obligatory no-fit replacement. The special Immobilized-A space-only cancellation and Equipment removal remain scoped, not ordinary Engineer/Reset permissions.
+  - outgoing: none
 - [x] **Saving Rolls** (`rule:saving-rolls`) — reviewed: N5.3 p.37 baseline for PS, defense and Critical Saving Rolls; Profile-specific Ammunition exceptions remain separate reviewed facts.
   - outgoing: none
 - [x] **Special Dice (+1 SD)** (`rule:special-dice`) — reviewed: Shared N5.3 SD resolution, Fireteam/CC applicability and Berserk exception are source-cited prose; no universal Burst or Disposable relation is inferred.
@@ -978,6 +986,10 @@ review. `declaration-category` projection records are excluded.
 - [x] **Supply Boxes** (`rule:scenario:supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Supportware** (`rule:supportware`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
+  - outgoing: none
+- [x] **Zone of Control** (`rule:zone-of-control`) — reviewed: N5.3 p. 20: 8-inch radius from the Silhouette outer edge, separate top/bottom extensions, active-route checks and scoped reactive opportunities. The shared geometry owner remains distinct from the existing ZoC Weapon Trait and grants no universal reactive Skill permission.
+  - outgoing: none
+- [x] **Zones, Bases and Silhouettes** (`rule:zones-and-contact`) — reviewed: N5.3 pp. 20-21: Silhouette/base contact, self-contact, touching or partly inside an area versus the entire volume totally inside. These shared geometry conditions do not create a deployed object, zone instance or unconditional State relation.
   - outgoing: none
 
 #### Scenario (5/5)

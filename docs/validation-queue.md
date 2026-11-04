@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 9 distinct
-changes** (VR-0052 through VR-0060; five-change execution threshold reached).
+Only open VR obligations belong here. **Current count: 10 distinct
+changes** (VR-0052 through VR-0061; five-change execution threshold reached).
 The Linux cumulative full-assets run at `df7191fc` passed **5,056 tests,
 29 skipped, zero failures**; see [the pinned evidence](testing.md#parallel-windows-development-and-linux-validation).
 VR-0052 through VR-0058 retain their outstanding hosted acceptance,
@@ -107,7 +107,7 @@ hash-pinned historical evidence correction. VR-0060 owns the subsequent
 movement reference. A new pinned Linux cumulative run must cover both
 changes; no prior result verifies these later edits.
 
-The due batch is dispatched at exact implementation revision
+The preceding batch used exact implementation revision
 `cae85151037aae8c09fc6577d415033fc5d4bf64`:
 `linux-dev:1b7f55f0fea34e9c992c1f6844271c4a` runs
 `tools.run_checks --stage test --assets required --skip-details`.
@@ -116,15 +116,20 @@ was rebuilt and checked, and read-only movement replay independently
 verified the pinned PDF, deterministic host export and strict logical
 equality with the tracked rules. Linux's SQLite bytes differ, as already
 disclosed in the [cross-host boundary](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04);
-hosted byte comparison remains mandatory. This scheduling checkpoint
-permits independent Windows work; it is not a terminal full-suite result.
+hosted byte comparison remains mandatory. The terminal result was
+**5,062 passed, 29 skipped, four failed** in 424.07 s pytest / 424.71 s
+runner. All four failures were stale interaction-review totals after
+adding the two movement Rules; VR-0060 records the focused correction.
 Hosted runs at that exact SHA are Source checks
 [`41850874089`](https://github.com/frankysan/InfinityDB/actions/runs/41850874089),
 Installed wheel smoke
 [`41850874067`](https://github.com/frankysan/InfinityDB/actions/runs/41850874067)
 and Deployment smoke
 [`41850874023`](https://github.com/frankysan/InfinityDB/actions/runs/41850874023).
-All were queued when recorded; none is claimed passed.
+Installed wheel and Deployment smoke passed. Source checks failed the
+same four count assertions; dependent deterministic outputs were skipped.
+The corrected movement tests and V1S-033B geometry now require a new
+pinned Linux cumulative batch and replacement hosted acceptance.
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -349,6 +354,44 @@ All were queued when recorded; none is claimed passed.
   Installed wheel and Deployment smoke. The parent V1S-033B-E and
   final source/browser release acceptance remain separately open.
 
+  Follow-through: Linux full-assets job
+  `linux-dev:1b7f55f0fea34e9c992c1f6844271c4a` and hosted Source run
+  `41850874089`, both at `cae85151037aae8c09fc6577d415033fc5d4bf64`,
+  exposed four stale `tests/test_audit_rules_interactions.py` totals
+  (395/213/209 before the two new Rules; current movement-only counts
+  were 397/215/211). Assertions now compare the entire report identity
+  sets with maintained review/catalog identities, retaining fixed
+  historical release counts, complete/pending checks and 1.0 source scope.
+  All four failing selectors passed immediately, and the full interaction
+  module subsequently passed within the **960/960** integrity regression
+  batch. No audit gate, reviewed identity, scope exception or source
+  status was weakened. The actual Git-free index export passed both
+  interaction and baseline modules: **57 passed / 9 expected source/history
+  skips**, with the matching ignored publication built and checked.
+  Linux cumulative and hosted reruns remain required.
+
+- [ ] **VR-0061** (2026-11-04; ready-to-run): Validate V1S-033B's six
+  shared geometry Rules, expanded `attribute:s` help and movement-to-LoF
+  links, based on `fcfa1453` and pinned English N5.3 pp. 18-22.
+  Work: [Rules and contextual reference completion](TODO.md#rules-and-contextual-reference-completion);
+  risk: medium (public conditional rules prose and synchronized v9 pair).
+  Rules SHA-256: `4414819fbc9246cc283ccc36c1261b4a9ce5d5a4cb4d999e624680c7a97b95f5`.
+  Immediate Windows: source/boundary **3/3**, storage/API/search and matched
+  pair/refusal **2/2**, real Chrome **3/3** at 1440/390/320 px with keyboard
+  links, source citations, S1-S8 diagrams, request/page-error and overflow
+  assertions; integrity modules **960/960**. Ruff, Pyright, Army/rules build
+  and strict interaction checks pass. The deterministic promotion preserved
+  487 unrelated records, Restrictions and all deployed-object contents.
+  The existing Weapon range Trait, Fireteam-specific effects and diagrams
+  retain their owners. No unconditional State relation or geometry engine
+  was introduced; three new lexical mentions are explicitly reviewed as
+  existing game-element geometry/replacement rather than new object profiles.
+  Design: none; essential source, publication, negative guard and browser
+  assertions exist. Deferred: pinned `linux-dev` focused/cumulative full-assets
+  suite and exact-SHA hosted Source checks, including deterministic outputs,
+  Installed wheel and Deployment smoke. V1S-033C-E and final release-wide
+  source/browser acceptance remain separate.
+
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
 source-variant **100/100**, full-assets **5,014 passed / 29 expected
@@ -523,7 +566,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0061` (`VR-0052` through `VR-0060` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0062` (`VR-0052` through `VR-0061` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

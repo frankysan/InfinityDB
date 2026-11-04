@@ -339,6 +339,18 @@
         "**Checking along a route.** Mark the endpoint if necessary and temporarily place the Model or Marker at positions along the declared route to check Line of Fire and [[trait:aro|AROs]]. Return it to the declared endpoint once those checks are settled."
       ],
       "caveat": "N5.3 pp. 27-28 describe placing an existing Model or Marker along a declared route to check Line of Fire and AROs. This is a measuring technique, not a new object or delivery path."
+    },
+    {
+      "recordId": "rule:replacing-game-elements",
+      "classification": "existing-element-replacement-not-new-object",
+      "sourcePages": [
+        22
+      ],
+      "summaryEvidence": "When a rule, Skill, Equipment or scenario calls for replacing an existing game element with another [[term:model|Model]] or [[term:marker|Marker]], preserve its position according to the base-size conditions below.\n\nA mandatory, inevitable replacement with the Obligatory Label has a special no-fit outcome. This procedure grants no independent permission to replace or reposition a Trooper.",
+      "factsEvidence": [
+        "**Mandatory replacement without room.** If an Obligatory replacement is mandatory and inevitable and the new [[attribute:s|Silhouette]] volume does not fit, the replacement Trooper enters [[state:immobilized-a|Immobilized-A State]]. A piece of Equipment is removed from the table instead of entering that [[trait:state|State]]."
+      ],
+      "caveat": "N5.3 p. 22 positions a replacement required by a separate rule. Model/Marker representation and the mandatory no-fit Equipment-removal branch establish no new deployed object or Army delivery edge."
     }
   ]
 }
