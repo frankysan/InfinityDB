@@ -116,7 +116,18 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No pending test-design obligations.
+- [ ] **VD-0015 (2026-11-04; needs-design):** Pin all ten exact single-extra
+  BS Attack source-201 signatures, their counts (1,531 total), absence of
+  raw/multi-extra variants, and all nine profile-owned `SR-2` occurrences
+  against the selected raw Army archive. Reject an added, reordered,
+  duplicated or changed signature without independent source review.
+  Work: [V1S-055](TODO.md#rule-variant-usage-index-and-restrictions);
+  change: 2026-11-04 source review; risk: medium.
+  Existing coverage: `test_pinned_source_variant_inventory_is_complete_and_conservative`
+  checks aggregate counts only; generic exact-combination checks do not pin
+  source 201. Linked execution: VR-0072.
+  Target design: `tests/test_audit_source_variant_inputs.py::test_bs_attack_source_201_exact_signatures_and_sr2_owners`.
+  Outcome: pending test authorship and static design review; no tests run.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -144,12 +155,22 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending deferred-execution obligations.
+- [ ] **VR-0072 (2026-11-04; awaiting-design):** Verify V1S-055's
+  pinned BS Attack source-201 signature and source-owner characterization.
+  Work: [V1S-055](TODO.md#rule-variant-usage-index-and-restrictions);
+  revision: 2026-11-04 review commit pending; risk: medium.
+  Immediate: read-only source-variant audit reports 1,531 direct source rows,
+  ten single-extra signatures, zero raw values and nine `SR-2` profile owners;
+  documentation checks to be recorded at commit.
+  Design: VD-0015.
+  Deferred: new exact pinned-source regression and relevant source-variant
+  module, then shared full-suite evidence when required for release.
+  Outcome: not executed; raw archive required on the chosen worker.
 
 ## Next unused IDs
 
-- Design: `VD-0015` (through `VD-0014` retired).
-- Execution: `VR-0072` (through `VR-0071` retired).
+- Design: `VD-0016` (through `VD-0014` retired; `VD-0015` open).
+- Execution: `VR-0073` (through `VR-0071` retired; `VR-0072` open).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

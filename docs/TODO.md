@@ -225,8 +225,10 @@ V1S-068–069, V1S-074 and V1S-081–090.
   unsupported generic modifiers.
 - [ ] **V1S-052 (S, review):** Review exact Doctor occurrence parameters independently of Engineer and
   preserve source-defined differences.
-- [ ] **V1S-055 (M, review):** Review BS Attack source-201 variants and modifiers, preserving ordered raw
-  signatures.
+- [ ] **V1S-055 (M, review):** BS Attack source-201's ten exact qualifier signatures and
+  source-scoped modifiers are inventoried in the [2026-11-04 review](v1.0-source-coverage-audit.md#bs-attack-source-201-occurrence-review-v1s-055-2026-11-04).
+  Finish the pinned signature/owner regression under VD-0015/VR-0072 before retiring this review;
+  subsequent typed publication and cross-Army usage remain V1S-062–066.
 - [ ] **V1S-056 (M, review):** Review CC Attack source-240 variants and distinct attribute/attack conditions.
 - [ ] **V1S-057 (M, review):** Review Peripheral source-243 modifiers and separate controller/attached option
   contexts.
