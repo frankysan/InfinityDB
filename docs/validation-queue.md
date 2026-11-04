@@ -144,27 +144,7 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0071 (2026-11-04; ready-to-run): verify the Sepsitor Plus source
-  review disposition without changing Army or gameplay data. Work:
-  [V1S-034](TODO.md#rules-and-contextual-reference-completion); revision:
-  source-review and test-design working tree based on
-  `687c8f92d46f0dc51045aeaeb8c13a3474a5abad`; risk: medium. Source evidence:
-  N5.3 PDF SHA-256
-  `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`,
-  Army DB SHA-256
-  `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`,
-  Wiki history ZIP SHA-256
-  `d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`,
-  `Weapon_Chart` revision 4083 and member SHA-256
-  `a3a6230051bc3a03e61a6de917306b403bac35ddfa6dcb8962595316bb3722ed`.
-  SRC-014 remains open — source intent unknown. Design: VD-0014 retired after
-  static review; no tests executed. Deferred selectors:
-  `tests/test_audit_weapon_trait_cross_sources.py::test_sepsitor_plus_review_explains_reference_and_keeps_src014_open`,
-  `tests/test_audit_weapon_trait_cross_sources.py::test_wiki_source_review_requires_exact_pdf_revision_and_member_hash`,
-  and the full `tests/test_audit_weapon_trait_cross_sources.py` module.
-  Also rerun `tools.audit_weapon_trait_cross_sources` with the pinned PDF and
-  Wiki ZIP, and `tools/run_checks.py --stage docs`, on the committed revision.
-  Intended host: Windows.
+No pending deferred-execution obligations.
 
 ## Next unused IDs
 
