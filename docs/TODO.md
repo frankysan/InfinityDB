@@ -158,10 +158,24 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-033 (M, review):** Review movement, visibility, geometry, positioning and terrain clauses for
-  missing operative conditions. The [first pinned movement/LoF/Cover/terrain source pass](v1.0-source-coverage-audit.md#movement-lof-cover-and-terrain-source-review-v1s-033-2026-11-04-partial)
-  identifies incomplete shared movement procedures and uncategorized geometry/Cover reference candidates; finish
-  browser-owner reconciliation and the remaining environmental review before closing.
+- [ ] **V1S-033 (M, review):** Reconcile N5.3 movement, geometry, positioning and optional
+  terrain/visibility clauses against the [pinned source findings](v1.0-source-coverage-audit.md#movement-lof-cover-and-terrain-source-review-v1s-033-2026-11-04-partial).
+  Preserve existing reviewed Special Terrain, Access Width, Terrain Skill and Visibility Zone identities.
+  - [ ] **V1S-033A:** Map pp. 27–30 Moving and Measuring/General Movement and the `skill:move` conditions
+    to canonical rule/Skill owners. Publish missing source-cited procedures without implementing pathfinding,
+    and verify rules/Skills API, search, responsive browser and matched artifacts.
+  - [ ] **V1S-033B:** Review pp. 18–22 Silhouette, LoF, zones, measurement, Coherency and replacement
+    positioning against existing glossary, Trait and Fireteam owners; publish only missing shared
+    procedures and test boundary exceptions (180/360-degree LoF, contact and replacement).
+  - [ ] **V1S-033C:** Review pp. 32–34 and 41–42 shared Cover, vertical movement and landing constraints
+    against `skill:climb`, `skill:jump` and `skill:climbing-plus`; preserve conditional no-Partial-Cover
+    exceptions and verify source/API/browser links.
+  - [ ] **V1S-033D:** Reconcile optional pp. 143–145 Difficult Terrain/Saturation rule mechanics with
+    already published terrain setup, Access Width and Visibility Zones; preserve conditional `skill:terrain`
+    exemptions, Burst allocation order, nonstacking and the non-canonical examples table.
+  - [ ] **V1S-033E:** Confirm all four families in ordinary 1440/390/320 px browser navigation,
+    keyboard/search/source citations, exact matched rules/deployed-object artifacts and scoped
+    regressions; register any deferred cross-host/CI obligations in the validation queue.
 - [ ] **V1S-034 (M, review):** Review remaining attacks, Weaponry, mode, ammunition and state interaction
   clauses against exact source text.
 - [ ] **V1S-035 (M, review):** Review unaccepted Hacking, firewall, Supportware and scoped interaction
