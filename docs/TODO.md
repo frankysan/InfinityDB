@@ -159,7 +159,9 @@ revision, following the established dispatch-and-continue protocol.
 **Project domains:** Data processing, Web backend, Web frontend
 
 - [ ] **V1S-033 (M, review):** Review movement, visibility, geometry, positioning and terrain clauses for
-  missing operative conditions.
+  missing operative conditions. The [first pinned movement/LoF/Cover/terrain source pass](v1.0-source-coverage-audit.md#movement-lof-cover-and-terrain-source-review-v1s-033-2026-11-04-partial)
+  identifies incomplete shared movement procedures and uncategorized geometry/Cover reference candidates; finish
+  browser-owner reconciliation and the remaining environmental review before closing.
 - [ ] **V1S-034 (M, review):** Review remaining attacks, Weaponry, mode, ammunition and state interaction
   clauses against exact source text.
 - [ ] **V1S-035 (M, review):** Review unaccepted Hacking, firewall, Supportware and scoped interaction
