@@ -159,39 +159,14 @@ Partial/focused Linux runs do not suspend the due VR drain.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-033 (M, review):** Reconcile N5.3 movement, geometry, positioning and optional
-  terrain/visibility clauses against the [pinned source findings](v1.0-source-coverage-audit.md#movement-lof-cover-and-terrain-source-review-v1s-033-2026-11-04-partial).
-  Preserve existing reviewed Special Terrain, Access Width, Terrain Skill and Visibility Zone identities.
-  Combined 1440/390/320 px browser acceptance (V1S-033E) passed on Windows
-  and pinned Linux (`c4cbffe`), including keyboard search, citations and
-  matched publication; hosted CI and release acceptance remain open.
-  - [ ] **V1S-033A:** The two shared movement references and expanded Move
-    requirements are implemented with source/API/search and three-width
-    Chromium checks; [the current contract](data-model.md#domain-ownership)
-    preserves conditional exceptions. Pinned Linux full-suite verification is complete at `c612e546`;
-    hosted CI and final release gates remain open. Do not repeat
-    the implementation.
-  - [ ] **V1S-033B:** Six shared geometry references and expanded Silhouette help
-    are implemented from pp. 18-22, with source/API/search and three-width
-    Chromium checks. The existing Weapon Trait, diagrams and Fireteam-specific
-    effects retain their owners. Pinned Linux full-suite verification is complete at `c612e546`;
-    hosted CI and final release gates remain open. Do not repeat
-    the implementation.
-  - [ ] **V1S-033C:** Shared Cover and expanded Climb/Jump procedures are
-    implemented from pp. 32-34/41-42, with linked Climbing Plus conditions
-    from p. 88. Source/API/search, preserved Skill metadata, dated FAQ and
-    three-width Chromium checks pass. Pinned Linux full-suite verification is complete at `c612e546`;
-    hosted CI and final release gates remain open. Do not repeat
-    the implementation.
-  - [ ] **V1S-033D:** The optional N5.3 Difficult Terrain and Saturation General
-    Rule references are implemented from pp. 143–145 with source/API/search,
-    deterministic matched v9 publication, conditional `skill:terrain`
-    exemption, post-allocation Burst reduction, B1 floor and nonstacking.
-    Existing Special Terrain, Access Width, Visibility Zones, Terrain Skill
-    parameters and examples remain unchanged. Normal Chrome checks pass at
-    1440/390/320 px. Pinned Linux full-suite verification is complete at
-    `c612e546`; hosted CI and release gates remain open. Do not
-    repeat this implementation.
+V1S-033’s N5.3 movement, geometry, Cover, positioning and optional terrain
+references are published with source/API/search, matched-publication and
+combined cross-host three-width browser acceptance. Current explanations are
+in [rules-semantics](rules-semantics.md#movement), with detailed evidence in the
+[source review](v1.0-source-coverage-audit.md#movement-lof-cover-and-terrain-source-review-v1s-033-2026-11-04-partial).
+Remaining State-link, scenery/object and release-wide work stays under
+V1S-068–069, V1S-074 and V1S-081–090.
+
 - [ ] **V1S-034 (M, review):** Review remaining attacks, Weaponry, mode, ammunition and state interaction
   clauses against exact source text.
 - [ ] **V1S-035 (M, review):** Review unaccepted Hacking, firewall, Supportware and scoped interaction
