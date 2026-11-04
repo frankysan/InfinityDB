@@ -27,10 +27,10 @@ def app() -> Any:
     )
 
 
-def _get(app: Any, path: str) -> tuple[int, bytes]:
+def _get(app: Any, path: str, *, query: str = "") -> tuple[int, bytes]:
     environment: dict[str, Any] = {}
     setup_testing_defaults(environment)
-    environment.update(REQUEST_METHOD="GET", PATH_INFO=path)
+    environment.update(REQUEST_METHOD="GET", PATH_INFO=path, QUERY_STRING=query)
     statuses: list[int] = []
 
     def start_response(
@@ -66,6 +66,15 @@ def _get(app: Any, path: str) -> tuple[int, bytes]:
             "rules", "special-dice", "rule:special-dice",
             ("Spanish N5.3 p. 140", "pending a scoped official ruling"),
             {"n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf"},
+        ),
+        (
+            "weapons", "flash-pulse", "weapon:flash-pulse",
+            ("two PB/BTS Saving Rolls", "Spanish N5.3 PDF Weapon Chart"),
+            {
+                "n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf",
+                "wiki-es-weapon-chart-oldid-3987",
+                "wiki-es-weapon-chart-alternatives-oldid-3988",
+            },
         ),
     ),
 )
@@ -123,3 +132,27 @@ def test_normal_reference_scripts_render_source_notes_as_player_copy(app: Any) -
     assert status == 200
     assert b'paragraph.className = "rules-source-note"' in fireteam_script
     assert b"levels.fact_tokens?.sourceNotes?.[index]" in fireteam_script
+
+
+def test_domination_350_point_language_conflict_stays_scenario_scoped(app: Any) -> None:
+    """Publish the English 6 SWC without treating Spanish 7 SWC as corrected."""
+    status, body = _get(app, "/api/scenarios/domination", query="army_points=350")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["selected_army_points"] == 350
+    assert payload["setup"]["game_size"]["swc"] == 6
+
+    issues = payload["source_issues"]
+    assert len(issues) == 1
+    assert issues[0]["status"] == "needs-verification"
+    description = issues[0]["description"]
+    assert "Spanish N5.3 Domination chart" in description
+    assert "Wiki Domination revision 3264" in description
+    assert "official language editions" in description
+
+    status, page = _get(app, "/scenarios/domination")
+    assert status == 200
+    assert b"<html" in page.lower()
+    # Scoring and SWC remain a selected scenario configuration,
+    # never a global Army-profile Attribute or default game value.
+

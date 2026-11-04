@@ -158,8 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-028 (M, review):** Reconcile player-facing cross-source conflicts, FAQ applicability and explicit
-  uncertainty before publishing dependent summaries.
 - [ ] **V1S-029 (L, review):** Join the 367 frozen explanation-audit records to the current Core/Hacking set
   and later reviewed evidence; preserve original counts.
 - [ ] **V1S-030 (M, review):** Review conditional declaration, ARO and reactive eligibility clauses outside
@@ -513,8 +511,10 @@ conditional TinBot/Firewall and exceptional object distinctions. The
 reconciles shared Core Rules, two Training definitions, 23 Terms,
 embedded Attribute/Label vocabulary and scenario-owned qualifications. The
 [V1S-027 State/Trait/Attribute review](v1.0-source-coverage-audit.md#states-traits-and-attributes-with-distinct-semantics-v1s-027-2026-11-04)
-confirms typed reference identities and distinct army-level Retreat versus Trooper-State scopes.
-Exact occurrence variants and final source/browser acceptance remain open.
+confirms typed reference identities and distinct army-level Retreat versus Trooper-State scopes. The
+[V1S-028 source-conflict review](v1.0-source-coverage-audit.md#cross-source-conflicts-faq-applicability-and-public-uncertainty-v1s-028-2026-11-04)
+reconciles published disclosure, dated FAQ scope and historical Annex authority without
+claiming publisher rulings. Exact occurrence variants and final source/browser acceptance remain open.
 
 - [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned
   curated rules-reference gaps for N5 v5.3 using
