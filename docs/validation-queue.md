@@ -129,6 +129,18 @@ IDs here and link the owning task instead of duplicating its description.
   Target design: `tests/test_audit_source_variant_inputs.py::test_bs_attack_source_201_exact_signatures_and_sr2_owners`.
   Outcome: pending test authorship and static design review; no tests run.
 
+- [ ] **VD-0016 (2026-11-04; needs-design):** Pin CC Attack source-240's
+  ten exact single-extra signatures (625 direct occurrences), including
+  owner/position/type and literal `+1 Dam` on exactly two Reinforcement
+  profiles, and confirm the unknown qualifier remains unreviewed.
+  Work: [V1S-056](TODO.md#rule-variant-usage-index-and-restrictions),
+  clarification SRC-032; change: 2026-11-04 raw-source review; risk: medium.
+  Existing coverage: aggregate inventory fixture and generic unknown-extra
+  tests, but no source-240 signatures/owners.
+  Linked execution: VR-0073.
+  Target design: `tests/test_audit_source_variant_inputs.py::test_cc_attack_source_240_exact_signatures_and_damage_owners`.
+  Outcome: pending test authorship and static design review; no tests run.
+
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
 existing coverage, risk, linked VR ID, and resulting test selector and
@@ -167,10 +179,22 @@ is recorded. Failed or incomplete verification remains open.
   module, then shared full-suite evidence when required for release.
   Outcome: not executed; raw archive required on the chosen worker.
 
+- [ ] **VR-0073 (2026-11-04; awaiting-design):** Verify V1S-056's exact
+  CC Attack source-240 signatures and the two `+1 Dam` owner records.
+  Work: [V1S-056](TODO.md#rule-variant-usage-index-and-restrictions),
+  SRC-032; revision: 2026-11-04 review commit pending; risk: medium.
+  Immediate: read-only source audit confirms 625 direct rows, ten
+  single-extra signatures and two `4/TEXT:+1 Dam` profile owners;
+  docs verification to be recorded at commit.
+  Design: VD-0016.
+  Deferred: exact pinned-source regression and the relevant source-variant
+  test module; full-suite evidence when required for release.
+  Outcome: not executed; raw archive required on the chosen worker.
+
 ## Next unused IDs
 
-- Design: `VD-0016` (through `VD-0014` retired; `VD-0015` open).
-- Execution: `VR-0073` (through `VR-0071` retired; `VR-0072` open).
+- Design: `VD-0017` (through `VD-0014` retired; `VD-0015`–`VD-0016` open).
+- Execution: `VR-0074` (through `VR-0071` retired; `VR-0072`–`VR-0073` open).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
