@@ -7,6 +7,7 @@ from typing import Any
 
 import pytest
 
+from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.web import create_app
 from tools.browser_wsgi_transport import route_browser_page
 from tools.promote_movement_reference import ARMY, ROOT, RULES
@@ -319,3 +320,96 @@ def test_cover_and_vertical_skills_with_separate_dated_faq(chrome: Any, width: i
         assert not errors and not failed, (width, errors, failed)
     finally:
         page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_shared_movement_geometry_cover_and_terrain_family_browser_acceptance(
+    chrome: Any, width: int,
+) -> None:
+    """V1S-033E integrates the four published rule families and ordinary search."""
+    published = load_deployed_object_publication(
+        ROOT / "data/generated/deployed-objects.json", ROOT / ARMY, ROOT / RULES,
+    )
+    assert published is not None  # Only the exact release-matched artifacts qualify.
+    app = create_app(ROOT / ARMY, rules_database_path=ROOT / RULES)
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    failed: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed.append(request.url))
+    page.on("response", lambda response: failed.append(
+        f"{response.status} {response.url}"
+    ) if response.status >= 400 else None)
+
+    def select_rule(slug: str, phrases: tuple[str, ...], pages: tuple[int, ...]) -> Any:
+        response = page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator(f'#catalog-list a[href="/rules/{slug}"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/{slug}", timeout=30000)
+        card = page.locator(f"#rule-rule-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        text = card.inner_text()
+        for phrase in phrases:
+            assert phrase in text, (width, slug, phrase)
+        source = card.locator(".rules-source-citations").inner_text()
+        for number in pages:
+            assert f"p. {number}" in source, (width, slug, number)
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (width, slug)
+        return card
+
+    try:
+        movement = select_rule("general-movement",
+                               ("360-degree", "both sides", "No falling"), (29, 30))
+        assert movement.locator('a[href="/skills/move"]').count() > 0
+        geometry = select_rule("line-of-fire",
+                               ("180-degree", "360-degree", "Mutual visibility"), (18, 19))
+        assert geometry.locator('a[href="/glossary#attribute-s"]').count() > 0
+        cover = select_rule("cover",
+                            ("Total Cover", "Partial Cover", "Saving Roll"), (41, 42))
+        assert cover.locator('a[href="/skills/climb"]').count() > 0
+        assert cover.locator('a[href="/skills/jump"]').count() > 0
+        difficult = select_rule("difficult-terrain",
+                                ("remainder of that Order", "-1 inch", "Terrain Special Skill"),
+                                (143, 144))
+        assert difficult.locator('a[href="/skills/terrain"]').count() > 0
+
+        # Use the real responsive global search rather than a direct API shortcut.
+        toggle = page.locator(".global-search-toggle")
+        if toggle.is_visible():
+            toggle.focus()
+            toggle.press("Enter")
+            assert toggle.get_attribute("aria-expanded") == "true"
+        query = page.locator("#global-search-query")
+        query.wait_for(state="visible", timeout=30000)
+        query.fill("Saturation")
+        query.press("Enter")
+        page.wait_for_url(
+            lambda url: url.startswith(f"{ORIGIN}/search?s=v1.s."),
+            timeout=30000,
+        )
+        assert page.locator("#search-query").input_value() == "Saturation"
+        result = page.locator('#search-list a[href="/rules/saturation"]')
+        result.wait_for(state="visible", timeout=30000)
+        result.focus()
+        result.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/saturation", timeout=30000)
+        saturation = page.locator("#rule-rule-saturation")
+        saturation.wait_for(state="visible", timeout=30000)
+        text = saturation.inner_text()
+        for phrase in ("Burst", "Minimum Burst", "Nonstacking", "after"):
+            assert phrase in text, (width, phrase)
+        citations = saturation.locator(".rules-source-citations").inner_text()
+        assert "p. 143" in citations and "p. 144" in citations
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
+        assert not errors and not failed, (width, errors, failed)
+    finally:
+        page.close()
+

@@ -127,7 +127,22 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+Only open VR obligations belong here.
+
+- [ ] VR-0064 (2026-11-04; ready-to-run): Verify the V1S-033E combined
+  movement, geometry, Cover and optional-terrain browser acceptance at
+  1440/390/320 px, matched publication, real keyboard search and citations.
+  Work: [V1S-033E](TODO.md#rules-and-reference-completeness);
+  revision: pending commit; risk: medium. Design: VD-0007 retired
+  after static review: versioned `s=v1.s.*` navigation, decoded
+  `#search-query` value and keyboard-activated Saturation result;
+  no test was executed during design.
+  Deferred: `tests/test_verify_movement_browser.py` (three responsive widths),
+  relevant static checks and integrated Linux evidence where required.
+  Outcome: Windows `pytest` combined browser acceptance **3/3 passed**
+  (1440/390/320 px), and the complete movement browser module
+  **15/15 passed** (102.05 s). Ruff on the changed test and the docs
+  stage passed. Pinned Linux execution remains pending; keep VR open.
 
 The most recent pinned Linux full-assets acceptance, including the 2026-11-04
 queue drain, is recorded in
@@ -148,9 +163,8 @@ is recorded. Failed or incomplete verification remains open.
 
 ## Next unused IDs
 
-- Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0064` (through `VR-0063` retired or migrated
-  to separately owned hosted CI acceptance; no pending VR items).
+- Design: `VD-0008` (through `VD-0007` assigned).
+- Execution: `VR-0065` (through `VR-0064` assigned).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
