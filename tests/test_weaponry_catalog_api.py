@@ -201,7 +201,7 @@ def test_wildparrot_rules_keep_perimeter_deployment_separate_from_boost(
     assert profile["saving_num"] == "2"
     assert "Perimeter" in profile["traits"]
     assert "Boost" not in profile["traits"]
-    # PDF v5.3 p. 74 and the Wiki include this Trait, but Army does not.
+    # PDF v5.3 pp. 74 and 181 plus the Wiki include this Trait; Army does not.
     assert "Non-lethal" not in profile["traits"]
 
     rules = _weapon_rules(payload)
@@ -210,12 +210,12 @@ def test_wildparrot_rules_keep_perimeter_deployment_separate_from_boost(
     assert "WildParrot Token or Model" in record["summary"]
     assert "source discrepancy" in record["facts"]["sourceNotes"][0]
     assert record["summary_tokens"]
-    assert any(
-        citation["source_id"] == "n5-core-v5.3-pdf"
-        and citation["source_version"] == "5.3"
-        and citation["page"] == 74
+    assert {
+        citation["page"]
         for citation in record["citations"]
-    )
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["source_version"] == "5.3"
+    } >= {74, 181}
     assert {
         relation["record"]["id"]
         for relation in record["display_relations"]

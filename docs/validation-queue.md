@@ -127,7 +127,12 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **No pending entries.**
+- [ ] VR-0066 (2026-11-04; ready-to-run): Verify the WildParrot chart citation and source-review disposition correction.
+  Work: V1S-034 in `TODO.md`; revision: working tree, pending commit; artifact: `data/generated/rules.db` SHA-256 `df1d7dbacb2c86fbab59e6f80663c96ff8270ca031a647890feae0cb484c95c3`; risk: medium.
+  Immediate: `build-rules` succeeded; deployed-object publication was rebuilt and `--check` passed; pinned weapon-trait/prose and cross-source audits passed on PDF SHA-256 `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.
+  Design: VD-0009 retired after static review; no tests run during design.
+  Deferred: `tests/test_weaponry_catalog_api.py::test_wildparrot_rules_keep_perimeter_deployment_separate_from_boost`; `tests/test_audit_weapon_trait_cross_sources.py::test_wildparrot_review_tracks_published_trait_and_src015`; run both affected test modules before retiring.
+  Outcome: pending.
 
 The most recent pinned Linux full-assets acceptance, including the 2026-11-04
 queue drain, is recorded in
@@ -148,8 +153,8 @@ is recorded. Failed or incomplete verification remains open.
 
 ## Next unused IDs
 
-- Design: `VD-0009` (through `VD-0008` retired).
-- Execution: `VR-0066` (through `VR-0065` retired).
+- Design: `VD-0010` (through `VD-0009` retired).
+- Execution: `VR-0067` (through `VR-0065` retired; VR-0066 active).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

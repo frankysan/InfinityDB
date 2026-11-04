@@ -69,8 +69,8 @@
       "semanticReview": {
         "classification": "ammunition-and-explicit-trait",
         "state": "explained",
-        "finding": "N5.3 pp.74 and 181 explicitly list Non-Lethal for WildParrot and identify its E/M ammunition. The rule describes its behavior as an E/M Mine; the Army Trait list omits Non-Lethal.",
-        "remaining": "Do not add an Army property by inference. Review whether the app should expose the printed Trait as separately sourced or as derived effect context.",
+        "finding": "N5.3 pp. 74 and 181 explicitly list Non-Lethal for WildParrot and identify its E/M ammunition. The curated weapon:wildparrot record exposes the source-backed Trait through variantRuleReferences while preserving the Army Trait omission.",
+        "remaining": "Whether Army should list Non-Lethal remains unresolved under SRC-015. Preserve the raw imported profile; no further presentation change is identified.",
         "pdfPages": [
           64,
           74,

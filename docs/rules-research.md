@@ -171,10 +171,10 @@ Its own Army profile remains E/M, BTS/2, two Saving Rolls. The printed source's
 Non-Lethal Trait is absent from the Army source Traits, and the curated card
 explicitly identifies this unresolved source mismatch. Linked E/M, State, and
 Non-Lethal references do not modify the imported source fields. This review
-uses the pinned N5 v5.3 PDF p. 74 and the reviewed exact Wiki Trait discrepancy
-in `config/validation/weapon-trait-wiki-review.json`; the live N5 Wiki
-WildParrot page currently identifies revision 3610, but that live page is not
-a substitute for the pinned PDF or historical source evidence.
+uses the pinned N5 v5.3 PDF pp. 74 and 181 and the reviewed exact Wiki
+Trait discrepancy in `config/validation/weapon-trait-wiki-review.json`. The live
+N5 Wiki WildParrot page currently identifies revision 3610, but that live page
+is not a substitute for the pinned PDF or historical source evidence.
 
 The initial PDF-hash-pinned 21-clause inventory classified **all 21 selected clauses
 as explicitly represented** in the curated summaries, rather than inferring

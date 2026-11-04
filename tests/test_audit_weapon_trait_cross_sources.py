@@ -130,6 +130,23 @@ def test_pt_endgame_review_tracks_curated_trait_and_open_army_discrepancy() -> N
     assert "raw Army profile" in semantics["remaining"]
 
 
+def test_wildparrot_review_tracks_published_trait_and_src015() -> None:
+    source = Path(__file__).resolve().parents[1] / (
+        "config/validation/weapon-trait-wiki-review.json"
+    )
+    review = json.loads(source.read_text(encoding="utf-8"))
+    mapping = _load_review(source, review["corePdfSha256"])
+    wildparrot = next(item for item in mapping if item["name"] == "WildParrot")
+    semantics = wildparrot["semanticReview"]
+
+    assert semantics["state"] == "explained"
+    assert 181 in semantics["pdfPages"]
+    assert "weapon:wildparrot" in semantics["finding"]
+    assert "variantRuleReferences" in semantics["finding"]
+    assert "SRC-015" in semantics["remaining"]
+    assert "raw imported profile" in semantics["remaining"]
+
+
 def test_cross_source_report_keeps_source_evidence_visible() -> None:
     report = {
         "corePdfSha256": "p" * 64, "wikiArchiveSha256": "w" * 64,
