@@ -95,16 +95,17 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 8 distinct
-changes** (VR-0052/0053/0054/0055/0056/0057/0058/0059; five-change
-execution threshold reached). The Linux cumulative runs at `4af5ac14`
-and `ad1416a0` first exposed Chromium registration and additive Rule
-review/test drift. Both corrections are committed at `df7191fc`;
-the matched Linux full suite is now running at that pinned revision.
-The previous hosted Source checks additionally revealed a shallow-checkout
-failure when the frozen-reference tests tried to read historical Git
-objects. VR-0059 owns the full-history CI checkout repair. No VR item
-is retired merely because its first validation attempt failed.
+Only open VR obligations belong here. **Current count: 9 distinct
+changes** (VR-0052 through VR-0060; five-change execution threshold reached).
+The Linux cumulative full-assets run at `df7191fc` passed **5,056 tests,
+29 skipped, zero failures**; see [the pinned evidence](testing.md#parallel-windows-development-and-linux-validation).
+VR-0052 through VR-0058 retain their outstanding hosted acceptance,
+not an unrun Linux full suite. The `60c4ddbc` hosted run confirmed the
+full-history repair on all four source jobs, but Ubuntu 3.11's separate
+index-only preflight still failed without `.git`. VR-0059 owns the
+hash-pinned historical evidence correction. VR-0060 owns the subsequent
+movement reference. A new pinned Linux cumulative run must cover both
+changes; no prior result verifies these later edits.
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -241,7 +242,7 @@ is retired merely because its first validation attempt failed.
   collection and browser-lane assertions, plus exact-SHA hosted CI.
   The five preceding VR items remain open until their own checks pass.
 
-- [ ] **VR-0058** (2026-11-04; validation under way):
+- [ ] **VR-0058** (2026-11-04; hosted acceptance pending):
   Reconcile V1S-032 additive General Rules and Deployment source revision
   with tests/negative-review evidence, without weakening publication
   equivalence or treating Deployment Tokens as deployed devices.
@@ -272,8 +273,8 @@ is retired merely because its first validation attempt failed.
   non-catalog 4/4, expanded lexical 4/4, legacy staging 3/3,
   citation migration 7 passed/1 skipped and the affected WSGI
   General Rules API 1/1; Ruff passed.
-  Deferred: exact pinned Linux full-assets rerun and hosted
-  exact-SHA CI; final release acceptance remains separate.
+  Linux full-assets rerun passed at `df7191fc` (5,056/29 skipped/zero failed).
+  Deferred: hosted exact-SHA CI; final release acceptance remains separate.
 
 - [ ] **VR-0059** (2026-11-04; ready-to-run):
   Restore historical Git evidence for hosted Source checks. All four
@@ -293,6 +294,41 @@ is retired merely because its first validation attempt failed.
   retrieves and uses the frozen revision on all platforms, including
   the cross-platform deterministic-output job. Do not retire based
   solely on local full-history success.
+
+  Follow-through: hosted run `41846453882` at full SHA
+  `60c4ddbc3172d52d16e8471083a2216b54b2a921` passed three matrix
+  jobs but failed Ubuntu 3.11's clean-index preflight on the same three
+  frozen-evidence tests: that export intentionally has no Git repository.
+  The default audit now reads the exact hash-pinned extraction of the
+  original 17 retired declaration records, preserving historical commit,
+  full-file digest and exact original contents. No transition approval or
+  frozen inventory is changed. Direct no-Git/drift, extraction replay and
+  reviewed-join tests pass. The actual Git-free index export passed the
+  full baseline module **42 passed / 9 expected source/history skips**,
+  with its ignored publication built and verified. Replacement hosted checks
+  remain required. The latest Installed wheel and Deployment smoke runs
+  passed, but their success does not accept the failed Source workflow.
+
+- [ ] **VR-0060** (2026-11-04; ready-to-run): Validate the V1S-033A
+  Moving and Measuring / General Movement Rules references and expanded
+  `skill:move` conditions, based on `60c4ddbc` and pinned N5.3 pp. 27-30.
+  Work: [Rules and contextual reference completion](TODO.md#rules-and-contextual-reference-completion);
+  risk: medium (new public Rules, revised Skill, synchronized v9 artifacts).
+  Rules SHA-256: `b71ddbaed6bba191e1c7b6b87bd385e8965f22283f72eb24731895920c15bd85`.
+  Immediate Windows: source/conditional boundaries **2/2**, API/search and
+  deterministic matched-pair replay **2/2**, normal Chrome **3/3** at
+  1440/390/320 px, repeat/mismatch write-refusal **1/1**, and registry
+  parity **4/4** across the supported lane maps. The guarded promotion
+  preserved 486 unrelated records and all deployed-object contents;
+  only the rules/curated fingerprints changed in the ignored publication.
+  New lexical mentions are reviewed as existing game-element movement,
+  not new object identities. Updated inventory assertions preserve the
+  frozen 367-record baseline and its original D/S tiers.
+  Design: none; direct source, API/search, browser and pair checks exist.
+  Deferred: pinned `linux-dev` focused/cumulative full-assets tests,
+  exact-SHA hosted Source checks including deterministic outputs,
+  Installed wheel and Deployment smoke. The parent V1S-033B-E and
+  final source/browser release acceptance remain separately open.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
@@ -468,7 +504,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0060` (`VR-0052/0053/0054/0055/0056/0057/0058/0059` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0061` (`VR-0052` through `VR-0060` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

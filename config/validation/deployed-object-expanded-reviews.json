@@ -326,6 +326,19 @@
         "**One [[trait:aro|ARO]].** Each eligible Reactive Trooper has **a single [[trait:aro|ARO]] per enemy Order**"
       ],
       "caveat": "N5.3 pp. 13–14 grant an eligible Reactive Trooper one ARO per Order, including when represented by a Model or Marker. This is a reaction procedure involving an existing Trooper, not a new independently deployed Weapon or Equipment profile, delivery permission or object carrier."
+    },
+    {
+      "recordId": "rule:moving-and-measuring",
+      "classification": "movement-route-representation-not-object",
+      "sourcePages": [
+        27,
+        28
+      ],
+      "summaryEvidence": "Declare a Skill with the Movement Label before measuring its reach. Then choose its exact route and endpoint, and place the Trooper there. Use the same point on the outer edge and underside of the base throughout.\n\nThis shared procedure applies alongside the declared Skill and the [[rule:general-movement|General Movement Rules]].",
+      "factsEvidence": [
+        "**Checking along a route.** Mark the endpoint if necessary and temporarily place the Model or Marker at positions along the declared route to check Line of Fire and [[trait:aro|AROs]]. Return it to the declared endpoint once those checks are settled."
+      ],
+      "caveat": "N5.3 pp. 27-28 describe placing an existing Model or Marker along a declared route to check Line of Fire and AROs. This is a measuring technique, not a new object or delivery path."
     }
   ]
 }

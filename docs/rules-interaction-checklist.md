@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **213/213** complete, **0** pending.
+- Supporting semantic identities: **215/215** complete, **0** pending.
 - Current authored outgoing relations: **518**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -911,7 +911,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (31/31)
+#### Rule (33/33)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
@@ -943,6 +943,8 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Game Sequence** (`rule:game-sequence`) — reviewed: N5.3 Game Sequence pp. 16-17: source-ordered Tactical/Impetuous/Orders/States/End procedures and session-specific Checks. The prose links existing rule owners; no unconditional outgoing relation grants phase or activation eligibility.
   - outgoing: none
+- [x] **General Movement Rules** (`rule:general-movement`) — reviewed: N5.3 pp. 29-30: source-scoped vaulting, peeking, facing, contact, posture and no-fall/Idle conditions. Preserve exceptions and link canonical Skill/State owners; descriptive conditional procedures create no unconditional State or movement relation.
+  - outgoing: none
 - [x] **Guts Roll** (`rule:guts-roll`) — reviewed: N5.3 p.38 baseline for Guts timing, movement hierarchy and exception-scoped linked references; no state-transition evaluator is implied.
   - outgoing: none
 - [x] **Hacking Area** (`rule:hacking-area`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
@@ -952,6 +954,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Killing** (`rule:scenario:killing`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Modifiers Explained (MODs)** (`rule:modifiers-explained`) — reviewed: N5.3 pp. 68/75 distinguishes entry-local MODs, positive/negative MOD recipients, Automatic versus non-Automatic negative MODs, one-die ReRoll, and Burst versus Special Dice. Linked explanations preserve mode selection and FTF conditions.
+  - outgoing: none
+- [x] **Moving and Measuring** (`rule:moving-and-measuring`) — reviewed: N5.3 pp. 27-28: declaration before measurement, complete route and endpoint, consistent base reference, route checks, stairs/ladders and no extra segment distance. Shared procedure with typed links, not an unconditional grant of Skill or reactive eligibility.
   - outgoing: none
 - [x] **Order Expenditure Sequence** (`rule:order-expenditure-sequence`) — reviewed: N5.3 pp.14-15 declaration, ARO checks, requirements and simultaneous effects; descriptive timing links do not implement a universal declaration evaluator.
   - outgoing: none

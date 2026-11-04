@@ -51,8 +51,8 @@ def test_pinned_extended_queue_keeps_scenario_and_device_identities_separate() -
     report = audit_expanded_candidates(CURATED, REVIEWS)
     assert report["scope"] == "expanded-lexical-discovery-not-object-completeness"
     assert len(report["curatedSourceSha256"]) == 64
-    assert report["candidateCount"] == 26
-    assert report["reviewedCount"] == 26
+    assert report["candidateCount"] == 27
+    assert report["reviewedCount"] == 27
     assert report["unreviewed"] == []
     assert len(report["reviewedPdfOnly"]) in (0, 5)
     assert len(report["missingMaintainedN5Citation"]) == len(report["reviewedPdfOnly"])
@@ -84,9 +84,14 @@ def test_pinned_extended_queue_keeps_scenario_and_device_identities_separate() -
         "skill:tactical-awareness",
         "skill:explode",
         "rule:automatic-reaction-order",
+        "rule:moving-and-measuring",
     }
     assert reviewed["rule:automatic-reaction-order"]["classification"] == (
         "reactive-trooper-marker-not-object"
+    )
+    assert reviewed["rule:moving-and-measuring"]["sourcePages"] == [27, 28]
+    assert reviewed["rule:moving-and-measuring"]["classification"] == (
+        "movement-route-representation-not-object"
     )
     assert reviewed["rule:automatic-reaction-order"]["sourcePages"] == [13, 14]
     assert reviewed["rule:scenario:consoles"]["sourcePages"] == [151]
@@ -137,7 +142,7 @@ def test_extended_reviews_reject_unsupported_or_stale_evidence() -> None:
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = expanded_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 26
+    assert len(validate_reviews(manifest, curated, candidates)) == 27
     pdf_only_review_idx = next(
         i for i, row in enumerate(manifest["reviews"])
         if row["recordId"] == "skill:explode"
@@ -205,8 +210,8 @@ def test_extended_cli_reports_open_queue(
     monkeypatch.setattr(sys, "argv", ["audit_deployed_object_expanded_queue"])
     assert main() == 0
     output = capsys.readouterr().out
-    assert "Additional candidate definitions: 26" in output
-    assert "Reviewed distinctions: 26" in output
+    assert "Additional candidate definitions: 27" in output
+    assert "Reviewed distinctions: 27" in output
     assert "Open additional candidates: 0" in output
     count = 5 if any(
         review.get("citationStatus") == "pdf-verified-manifest-only"

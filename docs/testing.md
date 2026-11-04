@@ -494,6 +494,31 @@ terminal status, subprocess exit code, and final report. For the recent
 Windows suite (~8–10 minutes), allow **1,800 s** for full pytest and
 **3,600 s** for a full validation profile (server job maximum: **7,200 s**).
 
+**2026-11-04 cumulative Linux validation of V1S-032 and source-audit repairs:**
+The pinned full-assets job `linux-dev:267d0d526f3242e3baef5efaec5b0116`
+at `df7191fcbf9821b7b914afbf19e6123b0bc47508` passed **5,056 tests,
+29 skipped, zero failures** in **423.66 s pytest / 424.34 s runner**.
+All **808/808** published SVGs were present, and the ignored deployed-object
+publication was built and checked before dispatch. Eight workers used four
+Chromium lanes with one worker per lane; resource waiting totalled 41.71
+summed worker-seconds. Two existing Python 3.14 multithreaded `fork()`
+warnings remained. Skips include opt-in publication work, absent ignored
+historical PDFs and a local migration report; they are not source acceptance.
+This verifies the Linux obligations for VR-0052 through VR-0058 at that
+revision. Hosted acceptance and VR-0059 remain open; this result does not
+cover subsequent movement-reference or clean-export evidence changes.
+
+The frozen declaration-owner audit now reads a hash-pinned extraction of
+the original 17 retired records from
+`config/validation/frozen-declaration-source-v1.json`. It retains the exact
+historical commit, source path, full historical-file digest and original
+record contents. This lets the indexed preflight export exercise the audit
+without `.git`; it does not replace current curated rules or approve historical
+identity transitions. A separate optional replay compares every extracted
+record with the original Git object when that history is available. Changed
+snapshot bytes fail closed, and other explicitly requested historical commits
+still require Git evidence.
+
 **2026-11-02 pinned Linux queue execution and prerequisite recovery:**
 The async `linux-dev` full-suite job
 `linux-dev:9360ac9d03034bff9a7a9384e54cf917` used

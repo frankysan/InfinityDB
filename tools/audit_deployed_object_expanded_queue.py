@@ -26,6 +26,7 @@ EXPANDED_TERMS = re.compile(
     re.IGNORECASE,
 )
 CLASSIFICATIONS = {
+    "rule:moving-and-measuring": ("rule", "movement-route-representation-not-object"),
     "term:marker": ("term", "representation-type-not-object-identity"),
     "rule:scenario:consoles": ("rule", "scenario-object-separate-domain"),
     "rule:scenario:supply-boxes": ("rule", "scenario-object-separate-domain"),

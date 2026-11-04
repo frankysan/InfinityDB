@@ -22,6 +22,7 @@ TERMS = re.compile(r"\b(?:deployables?|tokens?|scenery elements?)\b", re.IGNOREC
 # These are source-reviewed decisions, not a generic classification heuristic.
 # Adding another decision requires explicit review of its exact source clause.
 CLASSIFICATIONS = {
+    "rule:general-movement": ("rule", "movement-through-existing-elements-not-object"),
     "skill:minelayer": ("skill", "skill-deployment-method-not-object"),
     "skill:place-deployable": ("skill", "skill-delivery-method-not-object"),
     "skill:request-speedball": ("skill", "support-state-token-not-standard-deployable"),

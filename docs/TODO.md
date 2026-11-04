@@ -161,9 +161,11 @@ revision, following the established dispatch-and-continue protocol.
 - [ ] **V1S-033 (M, review):** Reconcile N5.3 movement, geometry, positioning and optional
   terrain/visibility clauses against the [pinned source findings](v1.0-source-coverage-audit.md#movement-lof-cover-and-terrain-source-review-v1s-033-2026-11-04-partial).
   Preserve existing reviewed Special Terrain, Access Width, Terrain Skill and Visibility Zone identities.
-  - [ ] **V1S-033A:** Map pp. 27–30 Moving and Measuring/General Movement and the `skill:move` conditions
-    to canonical rule/Skill owners. Publish missing source-cited procedures without implementing pathfinding,
-    and verify rules/Skills API, search, responsive browser and matched artifacts.
+  - [ ] **V1S-033A:** The two shared movement references and expanded Move
+    requirements are implemented with source/API/search and three-width
+    Chromium checks; [the current contract](data-model.md#domain-ownership)
+    preserves conditional exceptions. Acceptance awaits VR-0060's pinned
+    Linux and hosted checks; do not repeat the implementation.
   - [ ] **V1S-033B:** Review pp. 18–22 Silhouette, LoF, zones, measurement, Coherency and replacement
     positioning against existing glossary, Trait and Fireteam owners; publish only missing shared
     procedures and test boundary exceptions (180/360-degree LoF, contact and replacement).

@@ -1360,6 +1360,12 @@ FROZEN_EXPLANATION_INVENTORY = (
     PROJECT_ROOT / "docs/rules-explanation-audit-1.0-inventory.md"
 )
 FROZEN_DECLARATION_COMMIT = "c5400ab1b950990fdacc509be91c110fe85431fb"
+FROZEN_DECLARATION_SOURCE = (
+    PROJECT_ROOT / "config/validation/frozen-declaration-source-v1.json"
+)
+FROZEN_DECLARATION_SOURCE_SHA256 = (
+    "9fed4f072387882f80d18f1e0dfb6c4db4827ab8233001f5ad21c96e809fa10f"
+)
 DECLARATION_REVIEW = PROJECT_ROOT / "config/validation/declaration-inventory-migration-v1.json"
 FROZEN_EXPLANATION_INVENTORY_SHA256 = (
     "3f6b21bc6ba7e508e63cfaa74b1bdb3fdefe3ab3968418d813be18a36275675e"
@@ -1607,25 +1613,46 @@ def reconcile_declaration_owners(
     *,
     repository: Path = PROJECT_ROOT,
     historical_commit: str = FROZEN_DECLARATION_COMMIT,
+    historical_snapshot: Path = FROZEN_DECLARATION_SOURCE,
 ) -> dict[str, Any]:
     """Recover original category ownership; never infer rename from page numbers."""
     if not re.fullmatch(r"[0-9a-f]{40}", historical_commit):
         raise ReferenceBaselineError("Historical commit must be an exact SHA-1")
     historical_file = "data/curated/rules/n5-core-v5.3.json"
-    result = subprocess.run(
-        ["git", "show", f"{historical_commit}:{historical_file}"],
-        cwd=repository, capture_output=True, text=True, check=False,
-        encoding="utf-8",
-    )
-    if result.returncode != 0:
-        raise ReferenceBaselineError(
-            f"Historical curated snapshot unavailable: {historical_commit} "
-            f"({result.stderr.strip()[:180]})"
+    if historical_commit == FROZEN_DECLARATION_COMMIT:
+        # Exact historical records, extracted once from Git, must also work in
+        # the index-only preflight export where no .git directory exists.
+        try:
+            raw = historical_snapshot.read_bytes()
+        except OSError as exc:
+            raise ReferenceBaselineError("Frozen declaration source unavailable") from exc
+        if hashlib.sha256(raw).hexdigest() != FROZEN_DECLARATION_SOURCE_SHA256:
+            raise ReferenceBaselineError("Frozen declaration source hash changed")
+        historical = json.loads(raw)
+        if (
+            historical.get("formatVersion") != 1
+            or historical.get("historicalCommit") != historical_commit
+            or historical.get("historicalPath") != historical_file
+            or historical.get("historicalFileSha256") != (
+                "bb17f2013a1b8bc32961689789e4afff6fcc30f1476248d5d53d4b96587ab9a5"
+            )
+        ):
+            raise ReferenceBaselineError("Frozen declaration source provenance changed")
+    else:
+        result = subprocess.run(
+            ["git", "show", f"{historical_commit}:{historical_file}"],
+            cwd=repository, capture_output=True, text=True, check=False,
+            encoding="utf-8",
         )
-    try:
-        historical = json.loads(result.stdout)
-    except json.JSONDecodeError as exc:
-        raise ReferenceBaselineError("Historical curated snapshot has invalid JSON") from exc
+        if result.returncode != 0:
+            raise ReferenceBaselineError(
+                f"Historical curated snapshot unavailable: {historical_commit} "
+                f"({result.stderr.strip()[:180]})"
+            )
+        try:
+            historical = json.loads(result.stdout)
+        except json.JSONDecodeError as exc:
+            raise ReferenceBaselineError("Historical curated snapshot has invalid JSON") from exc
     from infinity_db.curated import load_curated_document
 
     current = load_curated_document(CURRENT_EXPLANATION_COLLECTIONS[0])

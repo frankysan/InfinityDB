@@ -14681,7 +14681,7 @@
             "id": "skill:move",
             "kind": "skill",
             "name": "Move",
-            "summary": "A Common Skill used to move a Trooper up to its applicable MOV value.",
+            "summary": "A Basic Short Skill for movement up to the applicable [[attribute:mov|MOV]] value. Check its supporting-surface and landing requirements when declaring it, and follow [[rule:moving-and-measuring|Moving and Measuring]] and the [[rule:general-movement|General Movement Rules]].",
             "composition": {
                 "role": "definition"
             },
@@ -14696,15 +14696,20 @@
                 "typeIds": [
                     "basic-short-skill"
                 ],
-                "requirements": [],
+                "requirements": [
+                    "Check these requirements when declaring [[skill:move|Move]]: at least half the base must stay in contact with its supporting surface, except while vaulting under the [[rule:general-movement|General Movement Rules]].",
+                    "Every traversed surface must be at least half as wide as the base.",
+                    "The endpoint must have a surface at least as large as the entire base."
+                ],
                 "effects": [
-                    "The user moves up to the applicable MOV value."
+                    "The first [[skill:move|Move]] in an Order may use up to the first [[attribute:mov|MOV]] value in inches.",
+                    "A second [[skill:move|Move]], declared as the second Basic Short Skill of that Order, may use up to the second [[attribute:mov|MOV]] value in inches."
                 ],
                 "restrictions": [
-                    "Movement must follow the general movement rules."
+                    "Both [[rule:general-movement|General Movement Rules]] and [[rule:moving-and-measuring|Moving and Measuring]] apply. Each declaration needs its own valid endpoint; a valid final position after two declarations does not excuse an invalid endpoint after the first."
                 ],
                 "clarifications": [
-                    "Declare the full movement path when choosing this Skill. Follow the shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] for reactive opportunities and timing."
+                    "The pp. 29-30 examples distinguish a narrow traversed surface from a full-base landing surface. Check the complete route and each endpoint, including the endpoint between two [[skill:move|Move]] declarations. Use the shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] for reactive timing."
                 ]
             },
             "labelIds": [
@@ -14714,6 +14719,16 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 28,
+                    "section": "Move"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 29,
+                    "section": "Move examples and General Movement Rules"
+                },
+                {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Move",
                     "heading": "Move"
@@ -14721,7 +14736,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-11-04"
             }
         },
         {
@@ -28772,6 +28787,116 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-10-30"
+            }
+        },
+        {
+            "id": "rule:moving-and-measuring",
+            "kind": "rule",
+            "name": "Moving and Measuring",
+            "summary": "Declare a Skill with the Movement Label before measuring its reach. Then choose its exact route and endpoint, and place the Trooper there. Use the same point on the outer edge and underside of the base throughout.\n\nThis shared procedure applies alongside the declared Skill and the [[rule:general-movement|General Movement Rules]].",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "Declare the Movement Skill before measuring its possible destinations; measurement precedes the final choice of endpoint."
+                ],
+                "effects": [
+                    "**Sequence.** Declare the Skill, measure its available reach, declare the final location and complete route, then place the Model or Marker at that endpoint. Follow the [[rule:order-expenditure-sequence|Order Expenditure Sequence]] for reactive opportunities.",
+                    "**One reference point.** Measure the entire route, including detours, from the same point on the base's outer edge and underside. A change of direction does not provide extra distance.",
+                    "**Checking along a route.** Mark the endpoint if necessary and temporarily place the Model or Marker at positions along the declared route to check Line of Fire and [[trait:aro|AROs]]. Return it to the declared endpoint once those checks are settled.",
+                    "**Stairs and ladders.** Scenery representing stairs or ladders lets a Trooper treat its vertical or diagonal surface as horizontal. Any Skill or [[trait:aro|ARO]] with the Movement Label may use it without declaring [[skill:jump|Jump]] or [[skill:climb|Climb]] or applying their restrictions. Measure distance along the travelled surface."
+                ],
+                "clarifications": [
+                    "Measuring and placing the Trooper in successive segments is acceptable only if it stays immediately behind each measurement point and gains no extra movement. This is an alternative measuring technique, not a new allowance."
+                ],
+                "sourceNotes": [
+                    "English N5.3 pp. 27-28 and the archived Moving_and_Measuring Wiki member supply this procedure. InfinityDB describes it without calculating routes or reactive eligibility."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 27,
+                    "section": "Moving and Measuring"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 28,
+                    "section": "Vertical Measurement and Sibylla explains"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Moving_and_Measuring",
+                    "heading": "Moving and Measuring"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:general-movement",
+            "kind": "rule",
+            "name": "General Movement Rules",
+            "summary": "Movement follows the complete measured route, including detours, and may use less than its maximum distance. [[skill:move|Move]] additionally requires a valid supporting surface and endpoint.\n\nVaulting, contact, facing and [[state:prone|Prone]] transitions have distinct conditions. A declared route cannot cause a fall; successful enemy Attacks along the route do not by themselves stop its completion.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "**Distance and facing.** Measure the full route from the same part of the base using [[rule:moving-and-measuring|Moving and Measuring]]. The [[attribute:mov|MOV]] values are maxima, with no minimum distance. A moving Trooper has 360-degree Line of Fire and may choose any final facing without shifting its final position.",
+                    "**Vaulting.** A Trooper may vault over, onto or off scenery no higher than its [[attribute:s|Silhouette]] Template without declaring [[skill:climb|Climb]] or [[skill:jump|Jump]]. Ignore that vertical displacement for movement distance, but treat the Trooper as moving up and over the obstacle for Line of Fire. The height limit must hold on both sides of the obstacle.",
+                    "**Successive levels.** A single movement may vault several levels even when their combined height exceeds the [[attribute:s|Silhouette]] Template. Each step must meet the height limit and have an intermediate supporting surface at least half the size of the base.",
+                    "**Peeking.** While performing [[skill:move|Move]], a Trooper may extend up to half its [[attribute:s|Silhouette]] over a roof or other surface edge to gain Line of Fire on the same or another level. The supporting-surface and final-position requirements still apply.",
+                    "**Passing friendly elements.** A Trooper may pass through Allied or Neutral Models, Markers and Tokens, but cannot finish in space occupied by another Model, Marker or Token.",
+                    "**Enemy contact.** Movement ends immediately on [[attribute:s|Silhouette]] contact with an enemy, even if this cuts the declared route short. To pass between an enemy Trooper and an obstacle without contact, the gap must be wider than the moving Trooper's base.",
+                    "**Changing posture.** When performing a Skill or [[trait:aro|ARO]] with the Movement Label, except [[skill:jump|Jump]] and [[skill:berserk|Berserk]], a Trooper may enter or leave [[state:prone|Prone]] at either the start or end of movement at no cost. The same applies to movement after a failed [[rule:guts-roll|Guts Roll]]. Moving while [[state:prone|Prone]] still reduces the available distance.",
+                    "**Attacks along the route.** Once declared, movement reaches its endpoint even if successful enemy Attacks cause a [[term:null-state|Null State]], [[state:immobilized-a|Immobilized-A State]] or [[state:immobilized-b|Immobilized-B State]] along the way. This does not remove the separate enemy-contact stopping condition."
+                ],
+                "restrictions": [
+                    "**No falling.** No type of movement, including [[skill:move|Move]], [[skill:jump|Jump]] or [[skill:climb|Climb]], may cause the Trooper to fall. If it cannot reach a new location, it makes no movement and performs [[skill:idle|Idle]] instead.",
+                    "Apply the declared Skill's own conditions as well as these shared rules. [[rule:access-width|Access Width]] restrictions take precedence where the scenery opening has an agreed access category. InfinityDB does not determine pathfinding, contact, surface legality or [[trait:aro|ARO]] eligibility."
+                ],
+                "sourceNotes": [
+                    "English N5.3 p. 29 supplies the shared clauses; p. 30 illustrates both-side vault height and successive levels. The archived General_Movement_Rules member (oldid 4024) is corroborating evidence, not a separate grant of movement."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 29,
+                    "section": "General Movement Rules"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 30,
+                    "section": "Movement and Obstacles; Vaulting on or off Surface"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "General_Movement_Rules",
+                    "heading": "General Movement Rules"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
             }
         }
     ],

@@ -634,6 +634,19 @@
         "Form a new Fireteam by placing a Fireteam Leader Token"
       ],
       "caveat": "N5.3 pp. 128–129 define player-owned Command Token spending modes. A Command Token is a game resource, while Fireteam Leader and Speedball Tokens reflect separately scoped roles or states; none is a new deployed Weapon/Equipment profile or delivery edge."
+    },
+    {
+      "recordId": "rule:general-movement",
+      "classification": "movement-through-existing-elements-not-object",
+      "sourcePages": [
+        29,
+        30
+      ],
+      "summaryEvidence": "Movement follows the complete measured route, including detours, and may use less than its maximum distance. [[skill:move|Move]] additionally requires a valid supporting surface and endpoint.\n\nVaulting, contact, facing and [[state:prone|Prone]] transitions have distinct conditions. A declared route cannot cause a fall; successful enemy Attacks along the route do not by themselves stop its completion.",
+      "factsEvidence": [
+        "**Passing friendly elements.** A Trooper may pass through Allied or Neutral Models, Markers and Tokens, but cannot finish in space occupied by another Model, Marker or Token."
+      ],
+      "caveat": "N5.3 pp. 29-30 describe passing existing Models, Markers and Tokens and avoiding occupied endpoints. These are movement conditions, not new deployed Weapon/Equipment identities or delivery edges."
     }
   ]
 }

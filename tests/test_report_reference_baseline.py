@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+import subprocess
 import zipfile
 from io import BytesIO
 from pathlib import Path
@@ -14,6 +15,8 @@ import pytest
 from infinity_army_data.merge import load_sources
 from tools.report_reference_baseline import (
     _NESTED_SOURCE_FIELDS,
+    FROZEN_DECLARATION_COMMIT,
+    FROZEN_DECLARATION_SOURCE,
     ReferenceBaselineError,
     _artifact_evidence,
     _revision_oldid,
@@ -47,17 +50,17 @@ RULES_DB = ROOT / "data/generated/rules.db"
 def test_frozen_explanation_inventory_reconciles_current_source_identities() -> None:
     result = reconcile_explanation_inventory()
     assert result["status"] == "identity-bridge-only-pending-clause-and-browser-acceptance"
-    assert (result["frozenCount"], result["currentCount"]) == (367, 454)
+    assert (result["frozenCount"], result["currentCount"]) == (367, 456)
     assert (result["retainedCount"], result["addedCount"], result["removedCount"]) == (
-        350, 104, 17,
+        350, 106, 17,
     )
     assert result["frozenTiers"] == {"D": 304, "S": 63}
     assert len(result["retainedScreeningOnlyIds"]) == 46
     assert result["addedKinds"] == {
-        "declaration-category": 20, "equipment": 3, "rule": 21,
+        "declaration-category": 20, "equipment": 3, "rule": 23,
         "skill": 2, "term": 5, "weapon": 53,
     }
-    assert len(result["currentRecords"]) == 454
+    assert len(result["currentRecords"]) == 456
     assert all(row["id"].startswith("declaration-category:")
                and row["replacementVerified"] is False
                for row in result["retiredIdentityRows"])
@@ -111,6 +114,33 @@ def _reviewed_explanation_join_inputs() -> dict[str, Any]:
     return report
 
 
+def test_frozen_declaration_evidence_works_without_git_and_rejects_drift(tmp_path: Path) -> None:
+    report = reconcile_explanation_inventory()
+    with patch("tools.report_reference_baseline.subprocess.run", side_effect=AssertionError(
+        "The clean export must not require Git history"
+    )):
+        crosswalk = reconcile_declaration_owners(report, repository=tmp_path)
+        assert verify_declaration_review(crosswalk)["retiredReviewed"] == 17
+        changed = tmp_path / "changed.json"
+        changed.write_bytes(FROZEN_DECLARATION_SOURCE.read_bytes() + b" ")
+        with pytest.raises(ReferenceBaselineError, match="source hash changed"):
+            reconcile_declaration_owners(report, historical_snapshot=changed)
+
+
+def test_frozen_declaration_extract_matches_original_git_records_when_available() -> None:
+    source = subprocess.run(
+        ["git", "show", f"{FROZEN_DECLARATION_COMMIT}:data/curated/rules/n5-core-v5.3.json"],
+        cwd=ROOT, capture_output=True, check=False,
+    )
+    if source.returncode != 0:
+        pytest.skip("Optional extraction replay requires historical Git evidence")
+    snapshot = json.loads(FROZEN_DECLARATION_SOURCE.read_bytes())
+    assert hashlib.sha256(source.stdout).hexdigest() == snapshot["historicalFileSha256"]
+    original = {r["id"]: r for r in json.loads(source.stdout)["records"]}
+    assert len(snapshot["records"]) == 17
+    assert all(r == original[r["id"]] for r in snapshot["records"])
+
+
 def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> None:
     report = _reviewed_explanation_join_inputs()
     evidence = join_explanation_reviewed_evidence(report)
@@ -119,7 +149,7 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
     assert summary == {
         "frozen": 367, "historicalD": 304, "historicalS": 63,
         "retained": 350, "retiredDeclarations": 17,
-        "added": 104, "current": 454, "retainedHistoricalS": 46,
+        "added": 106, "current": 456, "retainedHistoricalS": 46,
         "historicalIdentitiesWithLaterEvidence": 26,
         "reviewedDeclarationTransitions": 17,
         "reviewedNewDeclarationHeadings": 20,
@@ -128,11 +158,11 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         "selectedBrowserTestAnchors": 36,
         "currentIdentitiesWithLaterEvidence": 56,
         "wholeRecordApprovals": 0,
-        "pendingSourceSections": 755,
+        "pendingSourceSections": 762,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}
-    assert len(historical) == 367 and len(current) == 454
+    assert len(historical) == 367 and len(current) == 456
     assert {row["historicalTier"] for row in historical.values()} == {"D", "S"}
     assert all(row["fullRecordAcceptance"] == (
         "not-approved-by-identity-or-evidence-join"
@@ -212,7 +242,7 @@ def test_reviewed_explanation_join_cli_is_deterministic_and_non_approving(
     saved = json.loads(first)
     joined = saved["reviewedEvidenceJoin"]
     assert len(joined["historicalRecords"]) == 367
-    assert len(joined["currentRecords"]) == 454
+    assert len(joined["currentRecords"]) == 456
     assert joined["summary"]["wholeRecordApprovals"] == 0
     assert saved["fullRecordApprovalsIssuedByThisAudit"] == 0
     text = markdown.read_text(encoding="utf-8")
@@ -476,7 +506,7 @@ def test_five_visibility_zone_cli_keeps_whole_corpus_gate_open(tmp_path: Path) -
     assert report["visibilityZones"]["reviewedTermCount"] == 5
     assert report["fullRecordApprovalsIssuedByThisAudit"] == 0
     assert report["frozenCount"] == 367
-    assert report["currentCount"] == 454
+    assert report["currentCount"] == 456
     assert "Five post-inventory Visibility Zone" in markdown.read_text(encoding="utf-8")
     assert all(
         row["sourceDisposition"] == "pending-full-material-clause-reconciliation"
@@ -700,7 +730,7 @@ def test_explanation_reconciliation_cli_writes_ignored_style_reports(
         "--markdown-output", str(markdown_path),
     ]) == 0
     result = json.loads(json_path.read_text(encoding="utf-8"))
-    assert (result["currentCount"], result["addedCount"]) == (454, 104)
+    assert (result["currentCount"], result["addedCount"]) == (456, 106)
     markdown = markdown_path.read_text(encoding="utf-8")
     assert "not a v1.0 release gate pass" in markdown
     assert "declaration-category:aro:p40" in markdown

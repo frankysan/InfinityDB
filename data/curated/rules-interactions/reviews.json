@@ -2543,6 +2543,20 @@
       "status": "reviewed",
       "reviewedOn": "2026-11-02",
       "note": "Source-bound N4-origin Tactical Phase step with no outbound interactions. Not an Order declaration, ARO, or new core N5 rule. Verifying an updated N5 annex is separate from reviewing this published optional reference."
+    },
+    {
+      "recordId": "rule:moving-and-measuring",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 pp. 27-28: declaration before measurement, complete route and endpoint, consistent base reference, route checks, stairs/ladders and no extra segment distance. Shared procedure with typed links, not an unconditional grant of Skill or reactive eligibility."
+    },
+    {
+      "recordId": "rule:general-movement",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 pp. 29-30: source-scoped vaulting, peeking, facing, contact, posture and no-fall/Idle conditions. Preserve exceptions and link canonical Skill/State owners; descriptive conditional procedures create no unconditional State or movement relation."
     }
   ],
   "futureInteractions": [

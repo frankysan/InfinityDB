@@ -83,6 +83,8 @@ its application metrics.
   rules instead of redefining the effects.
 - Links to **Orders and AROs** from the home page and navigation, with searchable
   declarations by Order type and links to their rules and scenario context.
+- Includes linked N5.3 movement references for measuring routes, supporting
+  surfaces, vaulting, contact and posture, with Move's declaration requirements.
 - Includes a browsable **Scenarios** reference with four N5.3 Core missions
   and a separately selectable ITS Season 18 Battleground pilot. Explicit
   Army Points selection, structured setup/objectives/scoring, scenario Rules

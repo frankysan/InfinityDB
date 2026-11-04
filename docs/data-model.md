@@ -2920,6 +2920,16 @@ vocabularies. Fireteam general rules remain owned by the Fireteams surface.
 A semantic identity may exist without a dedicated detail route. Search/Glossary/presentation code
 must preserve kind/domain and not merge same-name concepts from different namespaces.
 
+The N5.3 movement reference has two shared General Rules owners:
+`rule:moving-and-measuring` (pp. 27-28) and `rule:general-movement`
+(pp. 29-30). `skill:move` retains its Basic Short Skill identity and
+Movement/No LoF/No Roll labels, with declaration-time supporting-surface
+requirements, a full-base endpoint and distinct first/second MOV values.
+Typed prose links connect the owners and their conditional Skill/State
+exceptions. They describe measurement, vaulting, contact and posture;
+they do not generate unconditional State/Skill relations or evaluate
+routes, terrain, reactive eligibility or game-session legality.
+
 Cross-domain discovery may additionally use reviewed `facts.relatedCategories` category slugs.
 This adds navigation only: it does not change the record's canonical kind/domain, primary category,
 or typed rules relationships.
