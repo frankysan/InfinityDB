@@ -128,8 +128,24 @@ and Deployment smoke
 [`41850874023`](https://github.com/frankysan/InfinityDB/actions/runs/41850874023).
 Installed wheel and Deployment smoke passed. Source checks failed the
 same four count assertions; dependent deterministic outputs were skipped.
-The corrected movement tests and V1S-033B geometry now require a new
-pinned Linux cumulative batch and replacement hosted acceptance.
+The corrected movement tests and V1S-033B geometry are now dispatched
+at exact implementation revision `a9f564650ff0f42d28fca29f5a1daf87f8642edb`.
+Job `linux-dev:c4d857d310ab47949ccd94feb06f7f56` runs
+`tools.run_checks --stage test --assets required --skip-details` for all
+compatible open VR obligations. Safe fetch/fast-forward and the ignored
+publication build/check passed. Read-only geometry replay verified the pinned
+PDF, all 495 records, deterministic host export and strict logical equality;
+the known cross-host SQLite byte distinction remains, without claiming the
+hosted byte gate passed. This dispatch addresses the due scheduling checkpoint
+and permits independent Windows development; it is not terminal acceptance.
+At this exact SHA, Installed wheel
+[`41856754841`](https://github.com/frankysan/InfinityDB/actions/runs/41856754841)
+and Deployment smoke
+[`41856754856`](https://github.com/frankysan/InfinityDB/actions/runs/41856754856)
+passed; Source checks
+[`41856754845`](https://github.com/frankysan/InfinityDB/actions/runs/41856754845)
+remained queued when recorded. The failed predecessor is not accepted, and
+no open VR entry is retired from these partial outcomes.
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
