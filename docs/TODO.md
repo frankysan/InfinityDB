@@ -225,25 +225,6 @@ V1S-068–069, V1S-074 and V1S-081–090.
   unsupported generic modifiers.
 - [ ] **V1S-052 (S, review):** Review exact Doctor occurrence parameters independently of Engineer and
   preserve source-defined differences.
-- [ ] **V1S-055 (M, review):** BS Attack source-201's ten exact qualifier signatures and
-  source-scoped modifiers are inventoried in the [2026-11-04 review](v1.0-source-coverage-audit.md#bs-attack-source-201-occurrence-review-v1s-055-2026-11-04).
-  Finish the pinned signature/owner regression under VD-0015/VR-0072 before retiring this review;
-  subsequent typed publication and cross-Army usage remain V1S-062–066.
-- [ ] **V1S-056 (M, review):** CC Attack source-240's ten signatures and modifier/attack scopes
-  are inventoried in the [2026-11-04 review](v1.0-source-coverage-audit.md#cc-attack-source-240-occurrence-review-v1s-056-2026-11-04).
-  Two `+1 Dam` profiles require source clarification (SRC-032); retire after the
-  pinned regression VD-0016/VR-0073, keeping unsupported effects excluded.
-- [ ] **V1S-057 (M, review):** Peripheral source-243's five subtype signatures and 439
-  profile-owned occurrence contexts are characterized in the [2026-11-04 review](v1.0-source-coverage-audit.md#peripheral-source-243-occurrence-review-v1s-057-2026-11-04).
-  Finish the pinned ownership/Connected-Autonomous regression under VD-0017/VR-0074;
-  do not infer Controller access from a Peripheral Skill annotation.
-- [ ] **V1S-058 (M, review):** Transmutation source-246's eight qualifier signatures and
-  exact source profile owners are characterized in the [2026-11-04 review](v1.0-source-coverage-audit.md#transmutation-source-246-occurrence-review-v1s-058-2026-11-04).
-  Finish the pinned threshold/Auto/Hatching/WIP regression VD-0018/VR-0075; inferred
-  destination profile links remain excluded pending V1S-062–066.
-- [ ] **V1S-061 (M, review):** The [cross-family signature collision review](v1.0-source-coverage-audit.md#cross-family-variant-collision-review-v1s-061-2026-11-04)
-  found no new unresolved source family. Finish the fail-closed collision regression
-  VD-0019/VR-0076 before retiring; source-specific semantics remain V1S-050–060.
 - [ ] **V1S-062 (M, design):** Finalize occurrence identity, ordering, duplicate-handling and
   Unit/profile/loadout/Army ownership contract for the usage index.
 - [ ] **V1S-063 (L, build):** Generate and validate exact-variant occurrence projections from matched

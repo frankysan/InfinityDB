@@ -144,74 +144,12 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] **VR-0072 (2026-11-04; ready-to-run):** Verify V1S-055's
-  pinned BS Attack source-201 signature and source-owner characterization.
-  Work: [V1S-055](TODO.md#rule-variant-usage-index-and-restrictions);
-  revision: 2026-11-04 review commit pending; risk: medium.
-  Immediate: read-only source-variant audit reports 1,531 direct source rows,
-  ten single-extra signatures, zero raw values and nine `SR-2` profile owners;
-  documentation checks to be recorded at commit.
-  Design: VD-0015 complete (statically reviewed; no tests run).
-  Selector: `tests/test_audit_source_variant_inputs.py::test_bs_attack_source_201_exact_signatures_and_sr2_owners`.
-  Static checks: targeted Ruff and documentation/link checks passed.
-  Deferred: new exact pinned-source regression and relevant source-variant
-  module, then shared full-suite evidence when required for release.
-  Outcome: not executed; raw archive required on the chosen worker.
-
-- [ ] **VR-0073 (2026-11-04; ready-to-run):** Verify V1S-056's exact
-  CC Attack source-240 signatures and the two `+1 Dam` owner records.
-  Work: [V1S-056](TODO.md#rule-variant-usage-index-and-restrictions),
-  SRC-032; revision: 2026-11-04 review commit pending; risk: medium.
-  Immediate: read-only source audit confirms 625 direct rows, ten
-  single-extra signatures and two `4/TEXT:+1 Dam` profile owners;
-  docs verification to be recorded at commit.
-  Design: VD-0016 complete (statically reviewed; no tests run).
-  Selector: `tests/test_audit_source_variant_inputs.py::test_cc_attack_source_240_exact_signatures_and_damage_owners`.
-  Static checks: targeted Ruff and documentation/link checks passed.
-  Deferred: exact pinned-source regression and the relevant source-variant
-  test module; full-suite evidence when required for release.
-  Outcome: not executed; raw archive required on the chosen worker.
-
-- [ ] **VR-0074 (2026-11-04; ready-to-run):** Verify V1S-057's
-  five exact Peripheral subtype signatures, 439 profile-owner rows
-  and the separate Cyberplug Connected/Autonomous pairs.
-  Work: [V1S-057](TODO.md#rule-variant-usage-index-and-restrictions);
-  revision: 2026-11-04 review commit pending; risk: medium.
-  Immediate: read-only source audit and exact owner queries completed;
-  docs verification to be recorded at commit. Design: VD-0017 complete (statically reviewed; no tests run).
-  Selector: `tests/test_audit_source_variant_inputs.py::test_peripheral_source_243_exact_subtypes_and_profile_ownership`.
-  Static checks: targeted Ruff and documentation/link checks passed.
-  Deferred: pinned source-variant regression with raw Army archive and
-  relevant source-variant test module; cumulative release acceptance.
-  Outcome: not executed; raw archive required on the chosen worker.
-
-- [ ] **VR-0075 (2026-11-04; ready-to-run):** Verify V1S-058's
-  Transmutation source-246 eight signatures, 295 profile owners and
-  unmodified WIP/trailing-space Escape source distinctions.
-  Work: [V1S-058](TODO.md#rule-variant-usage-index-and-restrictions);
-  revision: 2026-11-04 review commit pending; risk: medium.
-  Immediate: read-only audit and all eight exact source-owner queries
-  completed; docs verification to be recorded at commit. Design: VD-0018 complete (statically reviewed; no tests run).
-  Selector: `tests/test_audit_source_variant_inputs.py::test_transmutation_source_246_exact_signatures_and_profile_owners`.
-  Static checks: targeted Ruff and documentation/link checks passed.
-  Deferred: source-exact regression on the pinned raw Army archive,
-  relevant source-variant test module and eventual release gates.
-  Outcome: not executed; raw archive required on the chosen worker.
-
-- [ ] **VR-0076 (2026-11-04; ready-to-run):** Verify cross-family
-  exact source identity and fail-closed collisions against the pinned
-  Army/rules pair. Work: V1S-061; change: review commit pending.
-  Immediate: read-only unresolved Skill/Equipment inventory audited;
-  documentation checks to be recorded. Design: VD-0019 complete (statically reviewed; no tests run).
-  Selector: `tests/test_audit_source_variant_inputs.py::test_unresolved_source_extras_do_not_inherit_other_families_review`.
-  Static checks: targeted Ruff and documentation/link checks passed.
-  Deferred: exact source regression, relevant pinned-source test module.
-  Outcome: not executed; raw archive required on the chosen worker.
+No pending deferred-execution obligations.
 
 ## Next unused IDs
 
 - Design: `VD-0020` (through `VD-0019` retired).
-- Execution: `VR-0077` (through `VR-0071` retired; `VR-0072`–`VR-0076` open).
+- Execution: `VR-0077` (through `VR-0076` retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

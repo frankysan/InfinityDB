@@ -564,6 +564,39 @@ application, database or generated publication was changed. The earlier
 unchanged application code/data; a new full-suite run was not made for
 this test-only commit. Hosted CI and final release gates remain open.
 
+**2026-11-04 pinned source-variant queue closeout (VD-0015–0019 / VR-0072–0076):**
+The five exact-source regressions were authored and statically reviewed
+during a VD-only drain with **no tests executed**; targeted Ruff,
+Markdownlint and local Markdown-link checks all passed.
+The new tests pin BS Attack source 201 (1,531 occurrences), CC Attack
+240 (625), Peripheral 243 (439), Transmutation 246 (295), and the
+cross-family fail-closed source/extra collision boundaries, including
+profile-owner identities, both Cyberplug modes, raw trailing whitespace,
+and unreviewed `+1 Dam` (SRC-032). Windows committed
+`b381756d317685c3acc1f0e57366cb1da73f25ef`; Linux `linux-dev`
+was explicitly fetched and fast-forwarded from `c4cbffe9` to this
+revision, retaining its independent checkout.
+
+The initial pinned Linux source-variant module
+`linux-dev:79d5ad2ab9f54e40bafcaeedd0edf897` produced
+**100 passed / 5 failed**, all five failures in *existing* paired-publication
+review gates because the ignored `data/generated/deployed-objects.json`
+still referenced an older Army/rules fingerprint; **all five new
+tests passed**. The tracked `tools.build_deployed_object_publication`
+was then run on Linux without any tracked-file edits, and a separate
+`--check` verified the regenerated artifact matched the current
+Army/rules pair. The repeated complete source-variant module
+`linux-dev:876cd4527b5d4dfe85239e56a6eb59a8` passed
+**105/105, zero skipped, zero failed** at `b381756d` in
+**104.76 s pytest / 105.13 s runner**. Each VR selector
+0072–0076 was covered by that same verified module run and retired
+individually. The initial input-preparation failure does not
+indicate five new gameplay defects; neither run is a full-suite gate.
+No runtime code, tracked Army/rules database, or source profile
+was changed. Source-unknown effects remain unpromoted; complete
+cross-Army usage indexing (V1S-062–066), publisher clarifications,
+hosted CI and final 1.0 acceptance remain open.
+
 The frozen declaration-owner audit now reads a hash-pinned extraction of
 the original 17 retired records from
 `config/validation/frozen-declaration-source-v1.json`. It retains the exact
