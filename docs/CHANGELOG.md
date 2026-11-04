@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Follow the N5.3 Player Turn's five phases and Order Count in linked
+  Game Sequence and Order Pool references, including which Orders are
+  available, private, repeatable or lost. The source disagreement about
+  Lieutenant Order eligibility is disclosed rather than silently discarded.
 - Find candidate Specialist Troops for a selected scenario, and browse Orders
   and AROs with their declaration categories and source links.
 - Explore the optional Reinforcements Extra, Commlink and Request Reinforcements
@@ -55,6 +59,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Add N5.3 Game Sequence
+  and Order Pool General Rules references, preserving the five-phase turn
+  order, Tactical checks, Combat Group Order ownership, hidden/off-table
+  Orders, unspent and repeatedly spent Orders, and States Phase checks
+  without AROs. Cite bilingual source text and disclose SRC-031's English
+  Lieutenant Order wording conflict; do not infer a live Order legality engine.
 - **Data processing + Web backend + Web frontend:** Publish a source-cited
   N5.3 Command Tokens general reference covering the shared four-token match
   pool and Strategic, Executive and Operational expenditure, including

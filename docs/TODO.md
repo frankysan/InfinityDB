@@ -164,17 +164,12 @@ revision, following the established dispatch-and-continue protocol.
   now publishes the three use modes with pinned source and matched artifacts.
   The [V1S-032B phase/activation review](v1.0-source-coverage-audit.md#turn-sequence-order-pool-and-aro-clause-dispositions-v1s-032b-2026-11-04)
   now distinguishes the existing rule owners from missing source sections,
-  including the previously omitted N5.3 pp. **16–17**. This parent remains
-  open for the two source-backed publication slices below.
-  - [ ] **V1S-032C1 (M, implementation):** Publish the source-native
-    Player Turn/Game Sequence and Order Pool procedures from N5.3
-    pp. 11–12 and 16–17: five phases in printed order, Tactical checks,
-    counted/hidden/unused Orders, repeat activations and end-of-turn
-    States Phase with no generated AROs. Reuse existing Command Tokens,
-    Combat Group, Training, Lieutenant, Impetuous and Order references;
-    disclose [SRC-031](official-source-clarifications.md#src-031--lieutenant-order-count-english-double-negative-versus-spanish-non-null).
-    Stage exact matched v9 rules and deployed-object publication and
-    verify source/API/normal-browser routes.
+  including the previously omitted N5.3 pp. **16–17**.
+  [V1S-032C1](v1.0-source-coverage-audit.md#game-sequence-and-order-pool-publication-v1s-032c1-2026-11-04)
+  now publishes the complete Game Sequence and Order Pool reference
+  with [SRC-031](official-source-clarifications.md#src-031--lieutenant-order-count-english-double-negative-versus-spanish-non-null)
+  explicitly disclosed. This parent remains open for the ARO/Deployment
+  publication slice below.
   - [ ] **V1S-032C2 (M, implementation):** Give source p. 13's general
     ARO eligibility/activated-target/one-ARO/reactive-B1 and no-split
     restrictions a discoverable non-executable general reference, without

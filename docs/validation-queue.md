@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 3 distinct
-changes** (VR-0052/0053/0054; not yet due by the five-change threshold).
+Only open VR obligations belong here. **Current count: 4 distinct
+changes** (VR-0052/0053/0054/0055; not yet due by the five-change threshold).
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -149,6 +149,28 @@ changes** (VR-0052/0053/0054; not yet due by the five-change threshold).
   including Source checks cross-platform deterministic rules/database
   output comparison. The final release-wide browser/source gate remains
   separately mandatory.
+
+- [ ] **VR-0055** (2026-11-04; ready-to-run): Validate
+  V1S-032C1's two source-backed Game Sequence/Order Pool
+  references, bilingual SRC-031 disclosure and matched
+  schema-v9 publication. Work:
+  [Rules and contextual reference completion](TODO.md#rules-and-contextual-reference-completion);
+  artifact: tracked `rules.db` SHA-256
+  `871a76f8fb69c4d4f9ba9120494635713cdc4970a79b448c191d83cff08a42ea`.
+  Risk: medium (two new public Rule identities and matched release pair).
+  Immediate: exact English/Spanish source hashes and clauses,
+  deterministic double export; all 484 prior composed rules unchanged;
+  phase/source 3/3, source/API/publication 4/4, Chromium 3/3 at
+  1440/390/320, baseline 49/49, rules DB 166/166, curated
+  670/670, interactions 15/15, deployed-object publication 12/12,
+  maintained-text 38/38 (**960 focused tests**);
+  guarded matched-pair check, full Ruff, Pyright, data/rules build
+  and docs checks passed.
+  Design: none; source, scope, route and paired-publication
+  assertions are implemented; no runtime evaluator.
+  Deferred: pinned Linux source/model/browser tests, cumulative
+  full suite at the five-change threshold and exact-SHA hosted CI;
+  final release-wide source/browser acceptance remains separate.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
@@ -324,7 +346,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0055` (`VR-0052/0053/0054` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0056` (`VR-0052/0053/0054/0055` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

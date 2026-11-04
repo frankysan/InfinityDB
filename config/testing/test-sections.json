@@ -18,6 +18,7 @@
         "test_audit_loadout_semantics",
         "test_audit_normalization_links",
         "test_phase_source_review",
+        "test_turn_sequence_publication",
         "test_paired_audit_connection",
         "test_audit_peripheral_semantics",
         "test_audit_profile_semantics",
@@ -162,6 +163,7 @@
         "test_verify_rule_fragment_browser",
         "test_verify_scenario_faq_browser",
         "test_verify_sidebar_density_browser",
+        "test_verify_turn_sequence_browser",
         "test_verify_unit_skill_presentation_browser",
         "test_verify_weapon_source_cards_browser"
       ]

@@ -1772,6 +1772,20 @@
       "reviewedOn": "2026-09-24"
     },
     {
+      "recordId": "rule:game-sequence",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 Game Sequence pp. 16-17: source-ordered Tactical/Impetuous/Orders/States/End procedures and session-specific Checks. The prose links existing rule owners; no unconditional outgoing relation grants phase or activation eligibility."
+    },
+    {
+      "recordId": "rule:order-pool",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 Orders pp. 11-12, 16-17: distinct Combat Group Regular Pools, counted/hidden/unused Orders and specific Order types; non-Null Lieutenant source conflict remains visibly disclosed as SRC-031. Count and expenditure are runtime resources, not unconditional typed interactions."
+    },
+    {
       "recordId": "rule:command-tokens",
       "targetRelease": "1.0.0",
       "status": "reviewed",

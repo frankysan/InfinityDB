@@ -21204,6 +21204,147 @@
             }
         },
         {
+            "kind": "rule",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            },
+            "id": "rule:game-sequence",
+            "name": "Game Sequence",
+            "aliases": [
+                "Player Turn",
+                "Game Round",
+                "Tactical Phase",
+                "Orders Phase",
+                "States Phase",
+                "End of the Turn"
+            ],
+            "summary": "Every Infinity Game Round contains **two Player Turns**, one per player, in the turn order set by [[rule:initiative-roll|Initiative]].\n\nEach Player Turn proceeds in this order: **1. Tactical Phase → 2. [[skill:impetuous|Impetuous]] Phase → 3. Orders Phase → 4. [[trait:state|States]] Phase → 5. End of the Turn**. The Active Player activates Troopers; the Reactive Player responds when the rules allow an [[trait:aro|ARO]].\n\nThe Tactical Phase itself has a fixed sequence: **Executive Use of [[rule:command-tokens|Command Tokens]] → [[rule:army-retreat|Retreat!]] check → [[rule:loss-of-lieutenant|Loss of Lieutenant]] check → [[rule:order-pool|Order Count]]**. This is a *game-session procedure*, not a property of a Unit Profile.",
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "A Game Round has one Player Turn for each player. The order chosen during [[rule:initiative-roll|Initiative]] remains the same in subsequent Rounds.",
+                    "During a Player Turn, the current player is the **Active Player** and can activate eligible Troopers; the opponent is the **Reactive Player** and may declare an [[trait:aro|ARO]] only when allowed. This overview does not independently grant an [[trait:aro|ARO]]."
+                ],
+                "effects": [
+                    "**1. Tactical Phase (Start of the Turn).** The Active Player performs four steps **in source order**: (a) **Executive Use** of [[rule:command-tokens|Command Tokens]]; (b) check Victory Points for [[rule:army-retreat|Retreat!]]; (c) check [[rule:loss-of-lieutenant|Loss of Lieutenant]]; (d) carry out [[rule:order-pool|Order Count]] based on the Troopers' number, Training, deployment and [[trait:state|States]].",
+                    "**2. [[skill:impetuous|Impetuous]] Phase.** The Active Player may activate eligible [[skill:impetuous|Impetuous]] Troopers once each **without spending an Order**, following all of that Skill's restrictions. A player in [[rule:army-retreat|Retreat!]] does not conduct this phase.",
+                    "**3. Orders Phase.** The Active Player may activate eligible Troopers by expending available [[rule:order-pool|Orders]] (Regular Pools, Irregular, Tactical and [[rule:special-lieutenant-order|Special Lieutenant Orders]]) subject to their specific owners and [[rule:order-expenditure-sequence|Order Expenditure Sequence]].",
+                    "**4. [[trait:state|States]] Phase.** After the Active Player spends the Orders they choose to use, **both players** perform the checks and Rolls required by the applicable [[trait:state|States]] and Skills. **These [[trait:state|States]] Phase Rolls do not generate [[trait:aro|AROs]].** Remove all Order Tokens still on the table.",
+                    "**5. End of the Turn.** Once the required checks are resolved, that Player Turn ends. The next Player Turn follows the fixed sequence of the Game Round."
+                ],
+                "restrictions": [
+                    "**No carry-over.** The Active Player is **not required to spend all Orders** in the Orders Phase. However, unspent Orders **cannot be saved for a later Turn**; they are lost, and their Tokens are removed during the [[trait:state|States]] Phase.",
+                    "**Phase-specific actions are not universal permissions.** The Command Token reference defines its own Strategic, Executive and Operational timing and prohibits spending Tokens during the Reactive Turn; [[skill:impetuous|Impetuous]] activations are neither ordinary Regular Orders nor a universal free activation for all Troopers."
+                ],
+                "clarifications": [
+                    "The N5.3 p.16 *Game Sequence* chart lists the Tactical Phase as step 1, with substeps 1.2 Executive Use, 1.3 [[rule:army-retreat|Retreat!]] check, 1.4 [[rule:loss-of-lieutenant|Loss of Lieutenant]] check, and 1.5 Order Count. The printed substep numbers do not imply an unlisted additional executable 1.1 rule.",
+                    "This reference describes *when* players perform game-session procedures. Calculating a particular Army's current Order Pool, eligibility to react, [[rule:loss-of-lieutenant|Loss of Lieutenant]] or other [[trait:state|State]] changes still requires the actual list and turn context; InfinityDB does not calculate them here."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 16,
+                    "section": "Game Sequence — Game Round and Player Turn"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 17,
+                    "section": "Tactical, Impetuous, Orders, States Phases and End of Turn"
+                }
+            ]
+        },
+        {
+            "kind": "rule",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            },
+            "id": "rule:order-pool",
+            "name": "Order Pool",
+            "aliases": [
+                "Order Count",
+                "Order Pools",
+                "Regular Order Pool",
+                "Order generation"
+            ],
+            "summary": "At the start of each Active Turn, the player recalculates the **Regular Order Pool separately for every [[rule:combat-group|Combat Group]]** during the [[rule:game-sequence|Tactical Phase]]'s **Order Count**.\n\nOnly eligible on-table **Regular Troopers** contribute Regular Orders to that Pool. [[rule:irregular-order|Irregular]], [[rule:special-lieutenant-order|Special Lieutenant]] and [[rule:tactical-order|Tactical Orders]] remain outside all Regular Order Pools.\n\nThe Pool is **a match/Turn resource**, not a fixed number inferred from a Unit's catalog record.",
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "**Regular Order contribution.** For each Regular Trooper deployed as a Model or Marker on the battlefield **and not in a Null [[trait:state|State]]** during Order Count, add one [[rule:regular-order|Regular Order]] to that Trooper's own [[rule:combat-group|Combat Group]] Pool.",
+                    "**Irregular Order contribution.** For each on-table, non-Null Trooper with [[rule:irregular-order|Irregular]] Training, place an [[rule:irregular-order|Irregular Order]] Token and identify the owning [[rule:combat-group|Combat Group]]. It is for that Trooper's use and **not part of the Regular Order Pool**.",
+                    "**[[rule:special-lieutenant-order|Special Lieutenant Order]].** If an eligible [[skill:lieutenant|Lieutenant]] is deployed as a Model or Marker and **not in a Null [[trait:state|State]]**, place that [[skill:lieutenant|Lieutenant]]'s [[rule:special-lieutenant-order|Special Order]] visibly. **Source discrepancy SRC-031:** English N5.3 p.17 says *“not in a non-Null [[trait:state|State]]”*, whereas Spanish N5.3 p.17 says *“Teniente en estado no Nulo”* (non-Null). The non-Null interpretation agrees with the neighboring Order types and [[rule:loss-of-lieutenant|Loss of Lieutenant]]; the English wording has **not** been officially corrected.",
+                    "**Tactical Order contribution.** For each on-table, non-Null Trooper with [[skill:tactical-awareness|Tactical Awareness]], place its [[rule:tactical-order|Tactical Order]] Token next to that Trooper. Its specific Skill controls exceptional timing and use."
+                ],
+                "effects": [
+                    "**Separate pools.** Each [[rule:combat-group|Combat Group]] has its own Regular Order Pool. Any Trooper belonging to that same group can spend those Regular Orders when otherwise eligible, including an Irregular Trooper. Orders cannot normally transfer to another group.",
+                    "**Flexible spending.** During the [[rule:game-sequence|Orders Phase]], spend Regular Orders in any order, activating different Troopers alternately or activating the **same Trooper repeatedly**. There is no separate per-Trooper limit on spending Regular Orders; only available Pool size and other eligibility rules limit their use.",
+                    "**Open Order status.** Once on-table and contributed, the type, Combat Group, status and expenditure of each Order—including the [[rule:special-lieutenant-order|Special Lieutenant Order]]—are **Open Information**. Display the Order Tokens and inform the opponent when an Order activates a Trooper, even the [[skill:lieutenant|Lieutenant]].",
+                    "**Off-table exception.** Troopers not present as Models or Markers due to Special Skills (such as [[skill:combat-jump|Combat Jump]] or [[state:hidden-deployment|Hidden Deployment]]) **do not add Regular Orders to the Pool at Order Count**. Their existence/status and Orders may remain **Private Information**. Under N5.3 p.12 they do not start contributing until they start an Active Turn on-table as a Model or Marker.",
+                    "**End of Turn.** Any Orders left unspent are **lost**, not saved for later Player Turns; remove remaining Order Tokens during the [[rule:game-sequence|States Phase]]."
+                ],
+                "restrictions": [
+                    "Only [[rule:regular-order|Regular Orders]] belong in the Pool. [[rule:irregular-order|Irregular Orders]], [[rule:special-lieutenant-order|Special Lieutenant Orders]] and [[rule:tactical-order|Tactical Orders]] are kept separate, even though some may activate a Trooper in the Orders Phase or under specific advanced rules.",
+                    "An off-table or **Null-[[trait:state|State]] Trooper does not contribute an ordinary Order merely by appearing in the source Army list**. The game's actual current Training, deployment and [[trait:state|States]] determine the Count. Source-native exceptions (e.g., [[skill:tactical-awareness|Tactical Awareness]] granted later) must be read in their own contexts.",
+                    "Orders are not interchangeable between independent [[rule:combat-group|Combat Groups]], and unused Orders cannot be stockpiled. Some [[rule:command-tokens|Command Token]] or other specific effects change group composition or convert an eligible Order; this reference never performs those conversions automatically."
+                ],
+                "sourceNotes": [
+                    "**SRC-031 (publisher clarification pending):** the printed English N5.3 p.17 [[rule:special-lieutenant-order|Lieutenant Special Order]] sentence contains a double negative (*“not in a non-Null [[trait:state|State]]”*) absent from Spanish N5.3 p.17 (*“Teniente en estado no Nulo”*). InfinityDB follows the corroborated non-Null prerequisite and preserves both official source wordings rather than treating the English inversion as permission for Null [[skill:lieutenant|Lieutenants]] to generate Orders. See the official source clarification register."
+                ],
+                "clarifications": [
+                    "The Regular Order Pool is recalculated **at the beginning of each Active Turn**, not every time a Trooper activates. A specifically named Skill or rule may permit different timing; that exception remains distinct.",
+                    "The Order Pool model does not evaluate Army List legality or a live Game [[trait:state|State]]. [[rule:order-expenditure-sequence|Order Expenditure]] separately defines how an activation is declared and resolved."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 11,
+                    "section": "Orders and the Order Pool — Types of Orders and Open Information"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 12,
+                    "section": "Order Pool — contribution, group ownership and spending"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 16,
+                    "section": "Game Sequence — Tactical Phase and Order Count"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 17,
+                    "section": "Order Count, Orders Phase and States Phase"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 17,
+                    "section": "Recuento de Órdenes — Orden especial del Teniente"
+                }
+            ]
+        },
+        {
             "id": "rule:command-tokens",
             "kind": "rule",
             "name": "Command Tokens",
