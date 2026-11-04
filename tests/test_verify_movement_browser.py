@@ -177,6 +177,61 @@ def test_geometry_reference_navigation_and_existing_silhouette_diagrams(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_optional_terrain_conditions_are_navigable_in_normal_browser(
+    chrome: Any, width: int,
+) -> None:
+    """V1S-033D's optional terrain effects are not static profile modifiers."""
+    app = create_app(ROOT / ARMY, rules_database_path=ROOT / RULES)
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    failed: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed.append(request.url))
+    page.on("response", lambda response: failed.append(
+        f"{response.status} {response.url}"
+    ) if response.status >= 400 else None)
+    try:
+        for slug, phrases in (
+            ("difficult-terrain", ("remainder of that Order", "-1 inch",
+                                   "Terrain Special Skill", "Difficult Movement")),
+            ("saturation", ("after", "Minimum Burst", "Nonstacking",
+                            "cannot reduce", "printed Burst")),
+        ):
+            response = page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+            assert response is not None and response.status == 200
+            link = page.locator(f'#catalog-list a[href="/rules/{slug}"]')
+            link.wait_for(state="visible", timeout=30000)
+            link.focus()
+            link.press("Enter")
+            page.wait_for_url(f"{ORIGIN}/rules/{slug}", timeout=30000)
+            card = page.locator(f"#rule-rule-{slug}")
+            card.wait_for(state="visible", timeout=30000)
+            for phrase in phrases:
+                assert phrase in card.inner_text(), (width, slug, phrase)
+            citations = card.locator(".rules-source-citations").inner_text()
+            assert "p. 143" in citations and "p. 144" in citations
+            assert card.locator('a[href="/rules/special-terrain"]').count() > 0
+            assert page.evaluate(
+                "() => document.documentElement.scrollWidth <= innerWidth + 1"
+            ), (width, slug)
+            if slug == "difficult-terrain":
+                terrain = card.locator('a[href="/skills/terrain"]').first
+                terrain.focus()
+                terrain.press("Enter")
+                page.wait_for_url(f"{ORIGIN}/skills/terrain", timeout=30000)
+                skill = page.locator("#rule-skill-terrain")
+                skill.wait_for(state="visible", timeout=30000)
+                assert "matching Terrain areas" in skill.inner_text()
+                assert page.evaluate(
+                    "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                )
+        assert not errors and not failed, (width, errors, failed)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_cover_and_vertical_skills_with_separate_dated_faq(chrome: Any, width: int) -> None:
     app = create_app(ROOT / ARMY, rules_database_path=ROOT / RULES)
     page = chrome.new_page(viewport={"width": width, "height": 900})

@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 11 distinct
-changes** (VR-0052 through VR-0062; five-change execution threshold reached).
+Only open VR obligations belong here. **Current count: 12 distinct
+changes** (VR-0052 through VR-0063; five-change execution threshold reached).
 No VD item is pending. The oldest open entries are dated 2026-11-03,
 due 2026-11-10; no age threshold is overdue.
 
@@ -413,6 +413,43 @@ is still mandatory.
   tests and exact-SHA hosted Source checks, including macOS and deterministic
   outputs, Installed wheel and Deployment smoke. Final V1S-033D-E and
   source-wide release acceptance remain separate.
+
+- [ ] **VR-0063** (2026-11-04; ready-to-run): Validate V1S-033D's
+  optional Difficult Terrain and Saturation reference pair from N5.3
+  pp. 143–145, with historic terminology alias and conditional modifiers.
+  Work: [Rules and contextual reference completion](TODO.md#rules-and-contextual-reference-completion);
+  risk: medium (two public General Rule identities and synchronized v9 pair).
+  Rules SHA-256:
+  `bff440233627e2f0fce8a69cec40a34f2ed45d8285db3989f7adcae29e1c000c`.
+  Immediate Windows: source/scope/conditions, API/search and paired publication
+  **4/4**, Chrome **3/3** at 1440/390/320 px (keyboard, citations,
+  navigation, request/page errors and overflow). The deterministic
+  promoter preserved 496 previous Rule records, Restrictions and all
+  deployed-object contents; the historical `Difficult Movement` alias
+  introduces no second mechanic. Existing Skill variants, Visibility
+  Zones, Access Width and illustrative combinations remain unchanged.
+  Promoter and affected tests pass Ruff; full Ruff, Pyright, docs, data,
+  strict rules-interaction audit and rules build pass. Curated **670/670**,
+  interaction review **15/15**, reference baseline **51/51**,
+  deployed-object publication **12/12**, and rules database
+  **165/166** with the one stale total corrected by a direct **1/1**
+  rerun. Design: none; source, negative-scope, publication/refusal and
+  normal-browser checks exist.
+  Deferred: exact-pinned `linux-dev` cumulative full-assets suite and
+  hosted Source checks, including macOS and cross-platform deterministic
+  outputs, Installed Wheel and Deployment smoke. V1S-033E and final
+  release-wide acceptance remain separate.
+
+The pinned `e31094c6` full-assets Linux attempt
+`linux-dev:738388c1295e4f0fa82d7881fe36c5ec` ran
+**5,081 passed / 29 skipped / 1 failed** in 431.86 s pytest.
+The only failure was a stale literal Jump tooltip-preview expectation in
+`tests/test_web.py::test_maintained_text_tokens_resolve_links_distances_and_tooltips`
+following V1S-033C's reviewed Jump summary expansion. Its assertion
+now checks link identity and the live matching Jump summary rather than
+the superseded sentence, and passed **1/1** directly on Windows.
+This failed Linux run is not retrospective acceptance; rerun on the
+new committed revision before retiring VR-0062/63 or other open obligations.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux

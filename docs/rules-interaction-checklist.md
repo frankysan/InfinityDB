@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **222/222** complete, **0** pending.
+- Supporting semantic identities: **224/224** complete, **0** pending.
 - Current authored outgoing relations: **518**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -417,7 +417,7 @@ review. `declaration-category` projection records are excluded.
   - `modifies-rolls-for` → Sepsitor Plus (`weapon:sepsitor-plus`)
 - [x] **Dazer** (`equipment:dazer`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:difficult-terrain` — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Difficult Terrain (`rule:difficult-terrain`) — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [x] **Deactivator** (`equipment:deactivator`) — reviewed
   - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
   - future [post-0.7.0; deferred]: `relation type TBD` → Deployable (`trait:deployable`) — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
@@ -911,7 +911,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (40/40)
+#### Rule (42/42)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
@@ -938,6 +938,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Deployment Phase** (`rule:deployment-phase`) — reviewed: N5.3 Deployment Phase p. 15 four-step main/reserve sequence, plus p. 16 base fully inside zone, prohibited enemy/neutral/mission-objective contact, initial Prone, whole-base physical fit and allowed pregame measurements. Original p. 15 review was 2026-10-15; p. 16 addition reviewed 2026-11-04. FAQ repositioning/measurement boundary and scenario exceptions remain separate.
   - outgoing: none
 - [x] **Designated Landing Area** (`rule:scenario:designated-landing-area`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Difficult Terrain** (`rule:difficult-terrain`) — reviewed: English N5.3 pp.143-144 define optional agreed area-specific movement requirements. Silhouette contact ends Movement for the remainder of the Order, and continuing through that area in a new Order applies -1 inch to both MOV values or the movement Skill's own value. Matching Terrain Special Skill parameters exempt the Trooper. These are current table/Order facts, not changes to a Unit's printed MOV or an unconditional graph relation to every Movement Skill. Historical Difficult Movement is an alias only.
   - outgoing: none
 - [x] **Distances and Measurements** (`rule:distances-and-measurements`) — reviewed: N5.3 pp. 21-22: nearest Silhouette points between Troopers, straight-line object/scenery distances, convenient base reference and declarations before measurements. The separate movement-route procedure retains its own exact timing and consistent base point.
   - outgoing: none
@@ -974,6 +976,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Reinforcements Extra** (`rule:reinforcements-extra`) — reviewed: Optional N5-era Extra with explicitly N4-origin annex procedures. The one outbound Request Reinforcements relation is scoped to optional play; it is not N5 proof of unchanged historical procedures. No ordinary core declaration or scenario rule is granted.
   - `enables-use-of` → Request Reinforcements (`skill:request-reinforcements`)
 - [x] **Replacing Game Elements** (`rule:replacing-game-elements`) — reviewed: N5.3 p. 22: matching-base position, different-base center/edge options, new contact without cancelling Engaged, and mandatory inevitable Obligatory no-fit replacement. The special Immobilized-A space-only cancellation and Equipment removal remain scoped, not ordinary Engineer/Reset permissions.
+  - outgoing: none
+- [x] **Saturation** (`rule:saturation`) — reviewed: English N5.3 pp.143-144 define an optional, session-scoped -1 Burst modifier to BS Attacks from, into or through a Saturation Zone, applied after assigning Burst to targets, with B1 floor and nonstacking across zones. This does not modify a Weapon's printed Burst, grant Skill permissions, assign terrain unconditionally or imply an outgoing Equipment/Weapon graph edge; the p.145 area examples are illustrative only.
   - outgoing: none
 - [x] **Saving Rolls** (`rule:saving-rolls`) — reviewed: N5.3 p.37 baseline for PS, defense and Critical Saving Rolls; Profile-specific Ammunition exceptions remain separate reviewed facts.
   - outgoing: none
@@ -1347,7 +1351,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] Shasvastii (`skill:shasvastii`) → Shock Ammunition (`ammunition:shock`); `relation type TBD`; **1.0.0 / planned** — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass.
 - [ ] BioWeapon (`trait:bioweapon`) → Double Action (DA) Ammunition (`ammunition:da`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies DA together with Shock Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
 - [ ] BioWeapon (`trait:bioweapon`) → Shock Ammunition (`ammunition:shock`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies Shock together with DA Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
-- [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
+- [ ] Dazer (`equipment:dazer`) → Difficult Terrain (`rule:difficult-terrain`); `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → Cover (`rule:cover`); `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
 - [ ] Deployable Cover (`equipment:deployable-cover`) → `rule:partial-cover`; `uses-effects-of`; **post-0.7.0 / planned** — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.

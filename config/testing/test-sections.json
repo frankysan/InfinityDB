@@ -28,6 +28,7 @@
         "test_movement_publication",
         "test_geometry_publication",
         "test_cover_publication",
+        "test_terrain_condition_publication",
         "test_audit_rules_interactions",
         "test_audit_runtime_database_surface",
         "test_audit_semantic_deduplication",

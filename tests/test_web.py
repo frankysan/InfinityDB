@@ -6650,18 +6650,20 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     reference = next(
         token for token in rule["summary_tokens"] if token["type"] == "reference"
     )
-    assert reference == {
+    assert {key: reference[key] for key in (
+        "type", "target", "label", "public_reference"
+    )} == {
         "type": "reference",
         "target": "skill:jump",
         "label": "Jump",
         "public_reference": {"catalog": "skills", "id": "jump"},
-        "preview_tokens": [
-            {
-                "type": "text",
-                "text": "A Long Common Skill used to clear obstacles and move through the air.",
-            }
-        ],
     }
+    status, _, jump_body = request(rules_app, "/api/skills/jump")
+    assert status == 200
+    jump = json.loads(jump_body)["rules"][0]
+    assert reference["preview_tokens"][0] == jump["summary_tokens"][0]
+    assert reference["preview_tokens"][0]["text"].startswith("A Long Common Skill")
+    assert all("preview_tokens" not in token for token in reference["preview_tokens"])
     distances = [
         token
         for token in rule["fact_tokens"]["effects"][1]

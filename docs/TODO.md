@@ -176,9 +176,14 @@ revision, following the established dispatch-and-continue protocol.
     from p. 88. Source/API/search, preserved Skill metadata, dated FAQ and
     three-width Chromium checks pass. Acceptance awaits VR-0062's pinned
     Linux and hosted checks; do not repeat the implementation.
-  - [ ] **V1S-033D:** Reconcile optional pp. 143–145 Difficult Terrain/Saturation rule mechanics with
-    already published terrain setup, Access Width and Visibility Zones; preserve conditional `skill:terrain`
-    exemptions, Burst allocation order, nonstacking and the non-canonical examples table.
+  - [ ] **V1S-033D:** The optional N5.3 Difficult Terrain and Saturation General
+    Rule references are implemented from pp. 143–145 with source/API/search,
+    deterministic matched v9 publication, conditional `skill:terrain`
+    exemption, post-allocation Burst reduction, B1 floor and nonstacking.
+    Existing Special Terrain, Access Width, Visibility Zones, Terrain Skill
+    parameters and examples remain unchanged. Normal Chrome checks pass at
+    1440/390/320 px. Acceptance awaits VR-0063's pinned Linux/hosted checks;
+    do not repeat this implementation.
   - [ ] **V1S-033E:** Confirm all four families in ordinary 1440/390/320 px browser navigation,
     keyboard/search/source citations, exact matched rules/deployed-object artifacts and scoped
     regressions; register any deferred cross-host/CI obligations in the validation queue.

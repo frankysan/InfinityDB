@@ -2293,6 +2293,20 @@
       "note": "N5.3 p.143 optional table context: Special Terrain combines one of five Terrain Types with at least one Difficult/Saturation/Visibility characteristic. Locations, composition, current affected Troopers and Terrain Skill eligibility remain table/session scoped; no unconditional outgoing Skill or Equipment edge is inferred."
     },
     {
+      "recordId": "rule:difficult-terrain",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "English N5.3 pp.143-144 define optional agreed area-specific movement requirements. Silhouette contact ends Movement for the remainder of the Order, and continuing through that area in a new Order applies -1 inch to both MOV values or the movement Skill's own value. Matching Terrain Special Skill parameters exempt the Trooper. These are current table/Order facts, not changes to a Unit's printed MOV or an unconditional graph relation to every Movement Skill. Historical Difficult Movement is an alias only."
+    },
+    {
+      "recordId": "rule:saturation",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "English N5.3 pp.143-144 define an optional, session-scoped -1 Burst modifier to BS Attacks from, into or through a Saturation Zone, applied after assigning Burst to targets, with B1 floor and nonstacking across zones. This does not modify a Weapon's printed Burst, grant Skill permissions, assign terrain unconditionally or imply an outgoing Equipment/Weapon graph edge; the p.145 area examples are illustrative only."
+    },
+    {
       "recordId": "rule:specialist-troops:standard",
       "targetRelease": "1.0.0",
       "status": "reviewed",

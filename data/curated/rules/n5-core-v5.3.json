@@ -29239,6 +29239,116 @@
             }
         },
         {
+            "id": "rule:difficult-terrain",
+            "kind": "rule",
+            "name": "Difficult Terrain",
+            "aliases": [
+                "Difficult Movement"
+            ],
+            "summary": "An optional [[rule:special-terrain|Special Terrain]] characteristic that interrupts Movement on contact and reduces movement in a later Order while crossing the area. A matching [[skill:terrain|Terrain Special Skill]] exempts its user from that area's movement restrictions; this does not change the Trooper's printed [[attribute:mov|MOV]].",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "The affected Trooper has its [[attribute:s|Silhouette]] inside or in contact with a area and declares a Skill with the Movement Label, such as [[skill:move|Move]], [[skill:cautious-movement|Cautious Movement]], [[skill:climb|Climb]], [[skill:jump|Jump]] or [[skill:berserk|Berserk]].",
+                    "The characteristic also affects a Trooper that makes Silhouette contact with the area during an Order."
+                ],
+                "effects": [
+                    "**Contact ends movement.** Entering Silhouette contact with the affected area immediately ends the Trooper's Movement, regardless of its type, for the remainder of that Order.",
+                    "**Continuing in a later Order.** To continue further through the area, declare a new Order. Apply -1 inch to both values of the Trooper's [[attribute:mov|MOV]], or to the movement value of the declared Skill (such as [[skill:jump|Jump]])."
+                ],
+                "restrictions": [
+                    "The matching [[skill:terrain|Terrain Special Skill]] allows its user to travel normally through the corresponding area Type without applying that area's movement restrictions. Preserve the Skill's own fixed, choose-one and Total type applicability.",
+                    "The effect depends on a pre-agreed battlefield area and the actual route, contact and Order; it is not a permanent adjustment to the Trooper's profile, or a rule that applies to every movement action."
+                ],
+                "clarifications": [
+                    "The former term **Difficult Movement** is an alias for this N5.3 characteristic, not a separate current rule. [[rule:general-movement|General Movement Rules]] and the declared Skill's own conditions still apply."
+                ],
+                "sourceNotes": [
+                    "N5.3 pp. 143–144 make this an optional agreed battlefield characteristic. The illustrative p. 145 scenery table does not define additional area Types or universal assignments."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 143,
+                    "section": "Terrain and Scenery Structures — Optional Special Terrain"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 144,
+                    "section": "Difficult Terrain — Requirements and Effects"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:saturation",
+            "kind": "rule",
+            "name": "Saturation",
+            "aliases": [
+                "Saturation Zone"
+            ],
+            "summary": "An optional [[rule:special-terrain|Special Terrain]] characteristic. A [[skill:bs-attack|BS Attack]] made from, into or through a Saturation Zone takes a -1 Burst MOD **after** Burst is divided among targets. The assigned Burst cannot fall below 1, and multiple Saturation Zones do not stack.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "The [[skill:bs-attack|BS Attack]] originates in, targets into, or passes through an agreed Saturation Zone."
+                ],
+                "effects": [
+                    "**Timing.** Divide the attack's Burst among its targets first; then apply the -1 Burst MOD to the Burst assigned to each affected target.",
+                    "**Minimum Burst.** Saturation cannot reduce the Burst assigned to any one target below 1.",
+                    "**Nonstacking.** Multiple Saturation Zones affecting the same [[skill:bs-attack|BS Attack]] contribute only one -1 Burst MOD."
+                ],
+                "restrictions": [
+                    "Saturation is a battlefield-zone effect, not a change to a Weapon's printed Burst, and does not define additional ammunition or Weapon Traits.",
+                    "The optional p. 145 suggestions table provides examples only; its named areas do not become mandatory zones, additional canonical Types or deployed Equipment."
+                ],
+                "clarifications": [
+                    "Saturation modifies Burst, not the Roll Attribute. [[term:low-visibility-zone|Visibility Conditions]] are separate zone characteristics with their own MOD and nonstacking rules."
+                ],
+                "sourceNotes": [
+                    "N5.3 p. 144 defines the complete Saturation effects; p. 143 makes the battlefield configuration optional. Its effects may coexist with other independently agreed zone characteristics."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 143,
+                    "section": "Terrain and Scenery Structures — Optional Special Terrain"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 144,
+                    "section": "Saturation — Effects"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
             "id": "rule:cover",
             "kind": "rule",
             "name": "Cover",
