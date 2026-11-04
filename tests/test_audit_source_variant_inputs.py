@@ -1428,6 +1428,219 @@ def test_charontid_unqualified_sr_owners_are_exact_source_loadouts() -> None:
     }]
 
 
+def _assert_unreviewed_source_extras(
+    catalog: str,
+    source_id: int,
+    name: str,
+    total: int,
+    signatures: tuple[tuple[int, str, int], ...],
+) -> None:
+    """Pin full raw signatures rather than approving a shared extra by its ID."""
+    [item] = select_source_variants(_inventory(), catalog, [source_id])["items"]
+    assert (item["name"], item["applicationId"], item["occurrences"]) == (
+        name, source_id, total,
+    )
+    assert item["status"] == "unresolved-occurrence-parameter"
+    assert item["rawValues"] == []
+    assert item["reviewedCombinations"] is None
+    assert item["extraSignatures"] == [
+        {"extras": [[extra_id, "TEXT", raw]], "reviewed": False, "count": count}
+        for extra_id, raw, count in signatures
+    ]
+    assert sum(count for _extra_id, _raw, count in signatures) == total
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_bs_attack_source_201_exact_signatures_and_sr2_owners() -> None:
+    """VD-0015: exact BS Attack strings and nine profile-owned SR-2 rows."""
+    _assert_unreviewed_source_extras("skills", 201, "BS Attack", 1531, (
+        (6, "-3", 77), (8, "+1B", 273), (30, "Shock", 231),
+        (31, "Guided", 63), (249, "AP", 116),
+        (292, "Continous Damage", 26), (294, "T2", 53),
+        (305, "SR-1", 507), (308, "+1SD", 176), (337, "SR-2", 9),
+    ))
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=201, extra_id=337,
+    )
+    assert len(owners) == 9
+    assert {row["occurrence_id"] for row in owners} == {
+        25072, 42566, 44046, 51704, 54767,
+        60450, 50781, 56876, 13814,
+    }
+    assert {row["unit_id"] for row in owners} == {
+        251, 432, 533, 1618, 1624, 1642,
+    }
+    assert all(
+        row["owner"] == "profile" and row["extra_position"] == 1
+        and (row["extra_type"], row["extra_raw"]) == ("TEXT", "SR-2")
+        and row["source_raw"] is None
+        for row in owners
+    )
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_cc_attack_source_240_exact_signatures_and_damage_owners() -> None:
+    """VD-0016: source-240 identity; +1 Dam is not an inferred PS modifier."""
+    _assert_unreviewed_source_extras("skills", 240, "CC Attack", 625, (
+        (1, "+3", 2), (3, "+9", 2), (4, "+1 Dam", 2),
+        (6, "-3", 77), (7, "-6", 136), (8, "+1B", 181),
+        (30, "Shock", 70), (249, "AP", 48),
+        (292, "Continous Damage", 1), (293, "Antimaterial", 106),
+    ))
+    owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=240, extra_id=4,
+    )
+    assert [
+        (row["owner"], row["occurrence_id"], row["unit_id"], row["army_id"])
+        for row in owners
+    ] == [
+        ("profile", 13859, 1639, 199),
+        ("profile", 69477, 1675, 899),
+    ]
+    assert all(
+        row["extra_position"] == 1
+        and (row["extra_type"], row["extra_raw"]) == ("TEXT", "+1 Dam")
+        and row["source_raw"] is None
+        for row in owners
+    )
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_peripheral_source_243_exact_subtypes_and_profile_ownership() -> None:
+    """VD-0017: subtype Skill owners are not inferred Controller access."""
+    specs = (
+        (40, "Synchronized", 206), (41, "Servant", 56),
+        (47, "Control", 6), (322, "Ancillary", 163),
+        (374, "Cyberplug", 8),
+    )
+    _assert_unreviewed_source_extras("skills", 243, "Peripheral", 439, specs)
+    occurrence_ids: set[int] = set()
+    for extra_id, raw, expected_count in specs:
+        owners = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=243, extra_id=extra_id,
+        )
+        assert len(owners) == expected_count
+        assert all(
+            row["owner"] == "profile" and row["group_id"] is not None
+            and row["parent_id"] is not None
+            and row["extra_position"] == 1
+            and row["extra_type"] == "TEXT"
+            and row["extra_raw"] == raw and row["source_raw"] is None
+            for row in owners
+        )
+        ids = {row["occurrence_id"] for row in owners}
+        assert len(ids) == expected_count
+        assert not ids & occurrence_ids
+        occurrence_ids.update(ids)
+        if extra_id == 374:
+            assert {
+                (row["army_id"], row["unit_id"]) for row in owners
+            } == {(601, 1885), (605, 1885), (601, 1886), (605, 1886)}
+            for army_id in (601, 605):
+                for unit_id in (1885, 1886):
+                    names = {
+                        row["parent_name"] for row in owners
+                        if row["army_id"] == army_id and row["unit_id"] == unit_id
+                    }
+                    assert len(names) == 2
+                    assert any("CONNECTED PROFILE" in name for name in names)
+                    assert any("AUTONOMOUS PROFILE" in name for name in names)
+    assert len(occurrence_ids) == 439
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_transmutation_source_246_exact_signatures_and_profile_owners() -> None:
+    """VD-0018: thresholds, trigger labels and trailing-space provenance."""
+    specs = (
+        (44, "1", 146), (254, "Auto", 14), (267, "2", 64),
+        (321, "Escape System -2", 57),
+        (323, "Escape System -3 ", 8), (332, "WIP", 2),
+        (346, "Hatching", 3), (354, "3", 1),
+    )
+    _assert_unreviewed_source_extras("skills", 246, "Transmutation", 295, specs)
+    occurrence_ids: set[int] = set()
+    for extra_id, raw, expected_count in specs:
+        owners = source_extra_owner_context(
+            ROOT / "data/generated/infinity.raw.db",
+            catalog="skills", source_id=246, extra_id=extra_id,
+        )
+        assert len(owners) == expected_count
+        assert all(
+            row["owner"] == "profile" and row["extra_position"] == 1
+            and row["extra_type"] == "TEXT" and row["extra_raw"] == raw
+            and row["source_raw"] is None
+            for row in owners
+        )
+        ids = {row["occurrence_id"] for row in owners}
+        assert len(ids) == expected_count
+        assert not ids & occurrence_ids
+        occurrence_ids.update(ids)
+        if extra_id == 332:
+            assert {
+                (row["occurrence_id"], row["unit_id"], row["army_id"])
+                for row in owners
+            } == {(41956, 1848, 501), (48271, 1848, 504)}
+        if extra_id == 254:
+            assert {
+                row["parent_name"] for row in owners
+                if row["unit_id"] == 155 and row["army_id"] == 201
+            } == {"HIGH MOBILITY FORM", "COMBAT FORM"}
+    assert len(occurrence_ids) == 295
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_unresolved_source_extras_do_not_inherit_other_families_review() -> None:
+    """VD-0019: shared raw extra IDs cannot leak semantics across Skill owners."""
+    catalogs = _inventory()["catalogs"]
+    skills = {item["id"]: item for item in catalogs["skills"]["items"]}
+    equipment = {item["id"]: item for item in catalogs["equipment"]["items"]}
+    assert {
+        source_id for source_id, item in skills.items()
+        if item["status"] == "unresolved-occurrence-parameter"
+    } == {47, 49, 53, 83, 162, 201, 240, 243, 246, 272}
+    assert {
+        source_id for source_id, item in equipment.items()
+        if item["status"] == "unresolved-occurrence-parameter"
+    } == {101}
+
+    def signature_reviewed(item: dict, extra_id: int, raw: str) -> bool:
+        matches = [
+            entry for entry in item["extraSignatures"]
+            if entry["extras"] == [[extra_id, "TEXT", raw]]
+        ]
+        assert len(matches) == 1
+        return bool(matches[0]["reviewed"])
+
+    # Same extra identity, distinct owner/target/action applicability.
+    for source_id in (49, 53, 240):
+        assert signature_reviewed(skills[source_id], 1, "+3") is False
+    for source_id in (201, 240):
+        assert signature_reviewed(skills[source_id], 6, "-3") is False
+    for source_id in (162, 201, 240):
+        assert signature_reviewed(skills[source_id], 30, "Shock") is False
+        assert signature_reviewed(skills[source_id], 249, "AP") is False
+        assert signature_reviewed(
+            skills[source_id], 292, "Continous Damage",
+        ) is False
+    for source_id in (47, 49):
+        assert signature_reviewed(skills[source_id], 277, "ReRoll") is False
+    for source_id in (49, 53):
+        assert signature_reviewed(skills[source_id], 366, "ReRoll -3") is False
+    assert signature_reviewed(skills[58], 33, "Total") is True
+    assert signature_reviewed(skills[83], 33, "Total") is False
+    assert signature_reviewed(equipment[183], 6, "-3") is True
+    assert signature_reviewed(
+        equipment[101], 344, "UPGRADE: SR-1",
+    ) is False
+    assert not any(
+        entry["extras"] == [[344, "TEXT", "UPGRADE: SR-1"]]
+        for entry in equipment[100]["extraSignatures"]
+    )
+
+
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
     report = _inventory()

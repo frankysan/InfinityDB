@@ -116,72 +116,7 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-- [ ] **VD-0015 (2026-11-04; needs-design):** Pin all ten exact single-extra
-  BS Attack source-201 signatures, their counts (1,531 total), absence of
-  raw/multi-extra variants, and all nine profile-owned `SR-2` occurrences
-  against the selected raw Army archive. Reject an added, reordered,
-  duplicated or changed signature without independent source review.
-  Work: [V1S-055](TODO.md#rule-variant-usage-index-and-restrictions);
-  change: 2026-11-04 source review; risk: medium.
-  Existing coverage: `test_pinned_source_variant_inventory_is_complete_and_conservative`
-  checks aggregate counts only; generic exact-combination checks do not pin
-  source 201. Linked execution: VR-0072.
-  Target design: `tests/test_audit_source_variant_inputs.py::test_bs_attack_source_201_exact_signatures_and_sr2_owners`.
-  Outcome: pending test authorship and static design review; no tests run.
-
-- [ ] **VD-0016 (2026-11-04; needs-design):** Pin CC Attack source-240's
-  ten exact single-extra signatures (625 direct occurrences), including
-  owner/position/type and literal `+1 Dam` on exactly two Reinforcement
-  profiles, and confirm the unknown qualifier remains unreviewed.
-  Work: [V1S-056](TODO.md#rule-variant-usage-index-and-restrictions),
-  clarification SRC-032; change: 2026-11-04 raw-source review; risk: medium.
-  Existing coverage: aggregate inventory fixture and generic unknown-extra
-  tests, but no source-240 signatures/owners.
-  Linked execution: VR-0073.
-  Target design: `tests/test_audit_source_variant_inputs.py::test_cc_attack_source_240_exact_signatures_and_damage_owners`.
-  Outcome: pending test authorship and static design review; no tests run.
-
-- [ ] **VD-0017 (2026-11-04; needs-design):** Pin Peripheral source-243's
-  five single-extra subtype signatures (439 rows), all profile-owned
-  source records and the eight distinct Cyberplug profile occurrences
-  (four Connected/Autonomous pairs across two Armies). Assert no
-  Controller/Unit/Loadout source owner is manufactured by the subtype
-  lookup and no unreviewed extras are promoted.
-  Work: [V1S-057](TODO.md#rule-variant-usage-index-and-restrictions);
-  change: 2026-11-04 source review; risk: medium.
-  Existing coverage: source inventory global counts and synthetic
-  Controller/Peripheral relationships; no source-243 owner regression.
-  Linked execution: VR-0074.
-  Target design: `tests/test_audit_source_variant_inputs.py::test_peripheral_source_243_exact_subtypes_and_profile_ownership`.
-  Outcome: pending test authorship and static design review; no tests run.
-
-- [ ] **VD-0018 (2026-11-04; needs-design):** Pin all eight Transmutation
-  source-246 single-extra signatures (295 rows), all profile-owned source
-  occurrences, the exact trailing ASCII space in the `Escape System -3` value, and
-  the two unmodified SWITCHERS GRUPPA `WIP` occurrences. Guard
-  threshold, Escape System, Auto and Hatching against loss of the
-  exact Army/Profile/occurrence identity; fail closed on new extras.
-  Work: [V1S-058](TODO.md#rule-variant-usage-index-and-restrictions);
-  change: 2026-11-04 source review; risk: medium.
-  Existing coverage: global pinned inventory only; general Transmutation
-  family facts and unrelated action tests exist, but no exact source-246
-  signature/owner regression. Linked execution: VR-0075.
-  Target design: `tests/test_audit_source_variant_inputs.py::test_transmutation_source_246_exact_signatures_and_profile_owners`.
-  Outcome: pending test authorship and static design review; no tests run.
-
-- [ ] **VD-0019 (2026-11-04; needs-design):** Guard against cross-family
-  source-extra aliasing: the same `+3`, `-3`, Shock/AP/Continuous Damage,
-  ReRoll, and `Total` values must not authorize a different Skill's
-  occurrence semantics; preserve unqualified Device Plus `SR-1` as unknown.
-  Pin ten unresolved Skill source IDs and one unresolved Equipment ID
-  without converting reviewed neighboring variants into global effects.
-  Work: [V1S-061](TODO.md#rule-variant-usage-index-and-restrictions);
-  change: 2026-11-04 cross-family review; risk: medium.
-  Existing coverage: individual source extras and generic fail-closed
-  combinations, but no cross-family source collision assertion.
-  Linked execution: VR-0076.
-  Target design: `tests/test_audit_source_variant_inputs.py::test_unresolved_source_extras_do_not_inherit_other_families_review`.
-  Outcome: pending static test design, not execution.
+No pending test-design obligations.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -209,63 +144,73 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] **VR-0072 (2026-11-04; awaiting-design):** Verify V1S-055's
+- [ ] **VR-0072 (2026-11-04; ready-to-run):** Verify V1S-055's
   pinned BS Attack source-201 signature and source-owner characterization.
   Work: [V1S-055](TODO.md#rule-variant-usage-index-and-restrictions);
   revision: 2026-11-04 review commit pending; risk: medium.
   Immediate: read-only source-variant audit reports 1,531 direct source rows,
   ten single-extra signatures, zero raw values and nine `SR-2` profile owners;
   documentation checks to be recorded at commit.
-  Design: VD-0015.
+  Design: VD-0015 complete (statically reviewed; no tests run).
+  Selector: `tests/test_audit_source_variant_inputs.py::test_bs_attack_source_201_exact_signatures_and_sr2_owners`.
+  Static checks: targeted Ruff and documentation/link checks passed.
   Deferred: new exact pinned-source regression and relevant source-variant
   module, then shared full-suite evidence when required for release.
   Outcome: not executed; raw archive required on the chosen worker.
 
-- [ ] **VR-0073 (2026-11-04; awaiting-design):** Verify V1S-056's exact
+- [ ] **VR-0073 (2026-11-04; ready-to-run):** Verify V1S-056's exact
   CC Attack source-240 signatures and the two `+1 Dam` owner records.
   Work: [V1S-056](TODO.md#rule-variant-usage-index-and-restrictions),
   SRC-032; revision: 2026-11-04 review commit pending; risk: medium.
   Immediate: read-only source audit confirms 625 direct rows, ten
   single-extra signatures and two `4/TEXT:+1 Dam` profile owners;
   docs verification to be recorded at commit.
-  Design: VD-0016.
+  Design: VD-0016 complete (statically reviewed; no tests run).
+  Selector: `tests/test_audit_source_variant_inputs.py::test_cc_attack_source_240_exact_signatures_and_damage_owners`.
+  Static checks: targeted Ruff and documentation/link checks passed.
   Deferred: exact pinned-source regression and the relevant source-variant
   test module; full-suite evidence when required for release.
   Outcome: not executed; raw archive required on the chosen worker.
 
-- [ ] **VR-0074 (2026-11-04; awaiting-design):** Verify V1S-057's
+- [ ] **VR-0074 (2026-11-04; ready-to-run):** Verify V1S-057's
   five exact Peripheral subtype signatures, 439 profile-owner rows
   and the separate Cyberplug Connected/Autonomous pairs.
   Work: [V1S-057](TODO.md#rule-variant-usage-index-and-restrictions);
   revision: 2026-11-04 review commit pending; risk: medium.
   Immediate: read-only source audit and exact owner queries completed;
-  docs verification to be recorded at commit. Design: VD-0017.
+  docs verification to be recorded at commit. Design: VD-0017 complete (statically reviewed; no tests run).
+  Selector: `tests/test_audit_source_variant_inputs.py::test_peripheral_source_243_exact_subtypes_and_profile_ownership`.
+  Static checks: targeted Ruff and documentation/link checks passed.
   Deferred: pinned source-variant regression with raw Army archive and
   relevant source-variant test module; cumulative release acceptance.
   Outcome: not executed; raw archive required on the chosen worker.
 
-- [ ] **VR-0075 (2026-11-04; awaiting-design):** Verify V1S-058's
+- [ ] **VR-0075 (2026-11-04; ready-to-run):** Verify V1S-058's
   Transmutation source-246 eight signatures, 295 profile owners and
   unmodified WIP/trailing-space Escape source distinctions.
   Work: [V1S-058](TODO.md#rule-variant-usage-index-and-restrictions);
   revision: 2026-11-04 review commit pending; risk: medium.
   Immediate: read-only audit and all eight exact source-owner queries
-  completed; docs verification to be recorded at commit. Design: VD-0018.
+  completed; docs verification to be recorded at commit. Design: VD-0018 complete (statically reviewed; no tests run).
+  Selector: `tests/test_audit_source_variant_inputs.py::test_transmutation_source_246_exact_signatures_and_profile_owners`.
+  Static checks: targeted Ruff and documentation/link checks passed.
   Deferred: source-exact regression on the pinned raw Army archive,
   relevant source-variant test module and eventual release gates.
   Outcome: not executed; raw archive required on the chosen worker.
 
-- [ ] **VR-0076 (2026-11-04; awaiting-design):** Verify cross-family
+- [ ] **VR-0076 (2026-11-04; ready-to-run):** Verify cross-family
   exact source identity and fail-closed collisions against the pinned
   Army/rules pair. Work: V1S-061; change: review commit pending.
   Immediate: read-only unresolved Skill/Equipment inventory audited;
-  documentation checks to be recorded. Design: VD-0019.
+  documentation checks to be recorded. Design: VD-0019 complete (statically reviewed; no tests run).
+  Selector: `tests/test_audit_source_variant_inputs.py::test_unresolved_source_extras_do_not_inherit_other_families_review`.
+  Static checks: targeted Ruff and documentation/link checks passed.
   Deferred: exact source regression, relevant pinned-source test module.
   Outcome: not executed; raw archive required on the chosen worker.
 
 ## Next unused IDs
 
-- Design: `VD-0020` (through `VD-0014` retired; `VD-0015`–`VD-0019` open).
+- Design: `VD-0020` (through `VD-0019` retired).
 - Execution: `VR-0077` (through `VR-0071` retired; `VR-0072`–`VR-0076` open).
 
 Increment the relevant next-unused ID when adding a task, even if that
