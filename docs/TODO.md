@@ -162,6 +162,9 @@ Partial/focused Linux runs do not suspend the due VR drain.
 - [ ] **V1S-033 (M, review):** Reconcile N5.3 movement, geometry, positioning and optional
   terrain/visibility clauses against the [pinned source findings](v1.0-source-coverage-audit.md#movement-lof-cover-and-terrain-source-review-v1s-033-2026-11-04-partial).
   Preserve existing reviewed Special Terrain, Access Width, Terrain Skill and Visibility Zone identities.
+  Combined 1440/390/320 px browser acceptance (V1S-033E) passed on Windows
+  and pinned Linux (`c4cbffe`), including keyboard search, citations and
+  matched publication; hosted CI and release acceptance remain open.
   - [ ] **V1S-033A:** The two shared movement references and expanded Move
     requirements are implemented with source/API/search and three-width
     Chromium checks; [the current contract](data-model.md#domain-ownership)
@@ -189,9 +192,6 @@ Partial/focused Linux runs do not suspend the due VR drain.
     1440/390/320 px. Pinned Linux full-suite verification is complete at
     `c612e546`; hosted CI and release gates remain open. Do not
     repeat this implementation.
-  - [ ] **V1S-033E:** Confirm all four families in ordinary 1440/390/320 px browser navigation,
-    keyboard/search/source citations, exact matched rules/deployed-object artifacts and scoped
-    regressions; register any deferred cross-host/CI obligations in the validation queue.
 - [ ] **V1S-034 (M, review):** Review remaining attacks, Weaponry, mode, ammunition and state interaction
   clauses against exact source text.
 - [ ] **V1S-035 (M, review):** Review unaccepted Hacking, firewall, Supportware and scoped interaction

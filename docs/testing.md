@@ -546,6 +546,24 @@ byte determinism, Installed wheel, Deployment smoke, and final
 source/browser release acceptance remain open** under V1S-093 and
 the mandatory `docs/ci.md`/`docs/releasing.md` gates.
 
+**2026-11-04 V1S-033E browser closeout:** The previously uncommitted
+combined browser test was reviewed in VD-0007 (no tests during design),
+correcting its legacy search-URL expectation to `?s=v1.s.*`. The first
+VR execution revealed Playwright passes a string to URL predicates;
+correcting that test matcher yielded the passing runs below.
+Windows passed **3/3** combined acceptance cases and **15/15**
+complete movement browser tests in **102.05 s**, covering
+1440/390/320 px keyboard navigation, citations, search and responsive
+layout. On the committed `c4cbffe95388d71c599312f80540c251a6c3d580`,
+Linux verified the unchanged matched ignored deployed-object publication
+and passed the identical browser module **15/15** in **84.61 s**
+(job `linux-dev:9bb988ab8480415fbbda62eddab9f11f`). Changed-test
+Ruff and documentation checks also passed. VR-0064 is retired; no
+application, database or generated publication was changed. The earlier
+`c612e546` **5,089-pass full Linux suite** remains the baseline for
+unchanged application code/data; a new full-suite run was not made for
+this test-only commit. Hosted CI and final release gates remain open.
+
 The frozen declaration-owner audit now reads a hash-pinned extraction of
 the original 17 retired records from
 `config/validation/frozen-declaration-source-v1.json`. It retains the exact
