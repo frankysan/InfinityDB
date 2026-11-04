@@ -220,7 +220,7 @@ rechecked for this audit, and no older N5 snapshot delta is inferred.
 The maintained read-only source anchors and concept associations are in
 `config/validation/weaponry-family-clauses.json`. Reproduce the current
 snapshot comparison using `tools/audit_weaponry_family_clauses.py`.
-The current 75 reviewed anchors and twelve required typed relations
+The current 90 reviewed anchors and seventeen required typed relations
 are **selected evidence**, not a complete clause or relationship
 inventory of Weaponry pp. 68-74. See RR-WPN-FAMILY-004;
 summary matches do not establish browser acceptance.
