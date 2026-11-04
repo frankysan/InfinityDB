@@ -134,6 +134,26 @@ IDs here and link the owning task instead of duplicating its description.
   Existing coverage: `tests/test_catalog_rules.py`,
   `tests/test_other_source_variant_provenance.py`; linked execution: VR-0077.
 
+- [ ] **VD-0021 (2026-11-04; needs-design):** Pin shared Template and distinct
+  Direct/Impact reference procedures under
+  [V1S-034](TODO.md#rules-and-contextual-reference-completion).
+  Change: curated SHA-256 `ad0b2b0da3eea1258ef6dceebd7821bdc201d026a94c6a644c20d68de1b2d5e8`;
+  risk: conditional player-facing rules. Design
+  `tests/test_template_reference.py` with pinned N5.3 pp. 43–49/FAQ p. 1 and
+  exact archived Wiki members: Main Target miss, partial Burst cancellation,
+  allied/neutral no-PS/no-condition conjunction, retained ARO/Disposable,
+  whole-engagement effect, Partial Cover SR exclusion, scenery, main-only
+  Criticals, separate target opposition and single-Dodge comparisons.
+  Distinguish ordinary Direct no-roll fire, Intuitive WIP exception,
+  Direct placement/self-exclusion and FAQ corners from Impact placement,
+  Targetless and Speculative exceptions. Verify sourceIdentity preservation,
+  new General Rule export/API/search and typed-link resolution.
+  Add real Chromium normal-mode catalog/detail/link checks at 1440/390/320 px
+  for General Rules and both Traits, with matching API content, page errors,
+  failed requests and overflow assertions. Existing coverage:
+  `tests/test_catalog_rules.py`, `tests/test_rules_database.py`,
+  `tests/test_faq_ruling_references.py`; linked execution: VR-0078.
+
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
 existing coverage, risk, linked VR ID, and resulting test selector and
@@ -179,10 +199,28 @@ is recorded. Failed or incomplete verification remains open.
   actual revision, source pins, terminal counts and skips. Hosted and final
   candidate acceptance remain independently owned.
 
+- [ ] **VR-0078 (2026-11-04; awaiting-design):** Verify V1S-034 Template
+  references. Base revision: `c451a22d8d7311d0fdc136751839f9e63eda91bb`;
+  target: committed implementation with VD-0021 curated hash and rules DB
+  `3fd3b9209d5702eb24c9b8bbf6404d70db0ecafafcdce5fd8020d465ebab464f`.
+  Design: VD-0021. Immediate artifact-integrity exception: deterministic twin
+  exports, 498 prior identities retained plus one General Rule, unchanged
+  Restrictions and 496 unrelated composed records, matched publication and
+  verified recovery pair. Maintained-text audit: zero candidates/residuals.
+  No routine tests run. Deferred: `tests/test_template_reference.py`,
+  `tests/test_catalog_rules.py`, `tests/test_rules_database.py`,
+  `tests/test_faq_ruling_references.py`, and cumulative
+  `tools/run_checks.py --stage test --assets required`.
+  Intended host: pinned `linux-dev` with PDF/Wiki/FAQ, Chromium and full assets;
+  rebuild/verify ignored deployed-object publication before execution. Record
+  actual commit, source identity, results and skips; do not substitute this
+  check for final candidate or hosted acceptance. A newer cumulative snapshot
+  can also verify VR-0077 after confirming both attack records are unchanged.
+
 ## Next unused IDs
 
-- Design: `VD-0021` (through `VD-0019` retired; `VD-0020` open).
-- Execution: `VR-0078` (through `VR-0076` retired; `VR-0077` open).
+- Design: `VD-0022` (through `VD-0019` retired; `VD-0020–0021` open).
+- Execution: `VR-0079` (through `VR-0076` retired; `VR-0077–0078` open).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

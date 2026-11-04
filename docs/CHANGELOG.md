@@ -30,7 +30,7 @@ are not retroactively relabeled.
   annex text was officially reissued unchanged for N5.
 - Find more linked N5.3 explanations for Weapons, deployed objects, Peripherals,
   Hacking, Orders, Fireteams and Saving Rolls, including shooting into close combat,
-  Coup de Grâce and multiple-Trooper attack conditions.
+  Coup de Grâce, multiple-Trooper attack conditions and Template targeting.
 - Browse reviewed deployed-object profiles and their source links independently of the
   carrying Weapon or Equipment; disputed and unavailable attributes remain visible.
 - Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties
@@ -69,6 +69,8 @@ are not retroactively relabeled.
 - **Data processing:** Expand the BS Attack and CC Attack references with
   declaration and range limits, friendly hits when shooting into close combat,
   Coup de Grâce exceptions, and separate Active/Reactive multi-Trooper conditions.
+  Linked Template guidance explains targeting, cancellation, Dodge, Criticals
+  and scenery, with distinct Direct and Impact procedures.
 - **Data processing + Web backend + Web frontend:** Expand shared N5.3 movement
   and geometry help for routes, visibility, Cover, zones, Coherency and
   replacement positioning. Explain Move, Climb and Jump requirements and

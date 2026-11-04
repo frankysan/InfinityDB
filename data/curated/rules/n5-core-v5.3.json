@@ -3436,18 +3436,54 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Direct Template"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 45,
+                    "section": "Direct Template Weapons"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 46,
+                    "section": "Direct Template examples and Important notes"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Direct_Template_Weapons",
+                    "heading": "Direct Template Weapons"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 1,
+                    "section": "Direct Template secondary targets and Line of Fire"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-11-04"
             },
             "facts": {
                 "sourceIdentity": {
                     "prefixes": [
                         "Direct Template ("
                     ]
-                }
+                },
+                "requirements": [
+                    "Use the shared [[rule:template-weapons-and-equipment|Template Weapons and Equipment]] targeting, Area of Effect, cancellation and scenery rules. Place the template when declaring the Attack to establish its Main Target and other affected game elements."
+                ],
+                "effects": [
+                    "An ordinary [[trait:direct-template|Direct Template]] Attack needs no [[attribute:bs|BS]] Roll to hit. A target's rolled Attack against the user is normally unopposed; that Attack does not cancel the incoming template.",
+                    "For a teardrop, place the narrow end (Blast Focus) against the edge of the attacker's Silhouette, without passing through that Silhouette. For a circular template, center the Blast Focus on the attacker's base.",
+                    "Burst greater than 1 permits that many template placements and can be allocated among different targets. During an [[trait:aro|ARO]], any Active Trooper within the template during the Order counts as a Main Target when checking cancellation."
+                ],
+                "restrictions": [
+                    "The September 2026 FAQ confirms that [[trait:direct-template|Direct Template]] Weapons cannot fire around corners to reach secondary targets outside the firing Trooper's Line of Fire. Blast Focus visibility does not remove this restriction.",
+                    "The attacker is not affected by its own [[trait:direct-template|Direct Template]] merely through contact, unless the Weapon, Skill or Ammunition expressly says otherwise."
+                ],
+                "clarifications": [
+                    "One unopposed [[attribute:ph|PH]] Roll, with the applicable -3 if required, lets a Trooper [[skill:dodge|Dodge]] all incoming [[trait:direct-template|Direct Templates]] in the same Order. This is different from comparing an [[trait:impact-template|Impact Template]] Attack Roll against each target.",
+                    "[[skill:intuitive-attack|Intuitive Attack]] has its own unmodified [[attribute:wip|WIP]] Roll and eligible [[rule:face-to-face-rolls|Face to Face Rolls]]. Its procedure is an explicit exception to ordinary no-roll template fire."
+                ]
             }
         },
         {
@@ -3545,18 +3581,45 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Impact Template"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 47,
+                    "section": "Impact Template Weapons"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 50,
+                    "section": "Impact Template example and Blast Focus"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Impact_Template_Weapons",
+                    "heading": "Impact Template Weapons"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-11-04"
             },
             "facts": {
                 "sourceIdentity": {
                     "prefixes": [
                         "Impact Template ("
                     ]
-                }
+                },
+                "requirements": [
+                    "Use the shared [[rule:template-weapons-and-equipment|Template Weapons and Equipment]] rules. An [[trait:impact-template|Impact Template]] requires an Attack Roll using [[attribute:bs|BS]], [[attribute:ph|PH]] or the specified Attribute.",
+                    "Ordinarily declare a valid Main Target in Line of Fire and center the circular template on that target's base at declaration. This establishes which other game elements are affected."
+                ],
+                "effects": [
+                    "Determine the Attack Roll's MODs from the Main Target. Compare that same Roll separately against each affected enemy's eligible reaction; success against one target does not decide another target's outcome.",
+                    "Apply the template's effects to a target only if the applicable unopposed or [[rule:face-to-face-rolls|Face to Face Roll]] succeeds. Each affected target can [[skill:dodge|Dodge]] with [[attribute:ph|PH]], applying the shared template -3 exceptions when appropriate."
+                ],
+                "clarifications": [
+                    "For several incoming [[trait:impact-template|Impact Templates]] in one Order, compare each Attack Roll separately against the target's single [[skill:dodge|Dodge]] Roll. One comparison cannot cancel the other incoming attacks.",
+                    "[[trait:targetless|Targetless]], including a weapon using [[ammunition:smoke|Smoke Ammunition]], permits a point on the table instead of an enemy Trooper as Main Target. [[skill:speculative-attack|Speculative Attack]] separately permits an offset circular template; its own targeting, trajectory, Burst and placement restrictions still apply."
+                ]
             }
         },
         {
@@ -29469,6 +29532,73 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Cover",
                     "heading": "Cover"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:template-weapons-and-equipment",
+            "kind": "rule",
+            "name": "Template Weapons and Equipment",
+            "summary": "Templates establish an Area of Effect for an Attack. [[trait:direct-template|Direct Templates]] normally hit without an Attack Roll; [[trait:impact-template|Impact Templates]] require one. Main Target, placement, cancellation and scenery conditions determine which game elements can be affected.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "Designate a valid Main Target under the chosen Attack's rules. If that Main Target is outside the template's Area of Effect, the Attack fails and the template affects no game element."
+                ],
+                "effects": [
+                    "A base or Silhouette touching, partly inside or wholly inside the template is affected, subject to scenery and the Attack's restrictions. With simultaneous activations, such as a Fireteam or [[rule:coordinated-orders|Coordinated Order]], check contact at any time during that Order.",
+                    "An affected Trooper may declare [[skill:dodge|Dodge]] as its second Short Skill or [[trait:aro|ARO]], even without Line of Fire to the attacker. Use [[attribute:ph|PH]], applying -3 when the target cannot see the attacker or the attack comes from a [[trait:deployable|Deployable]] Weapon.",
+                    "Templates normally have height equal to their radius or half their width; Ammunition can specify a different volume. Keep the placed template until Resolution while determining the Attack's effects."
+                ],
+                "restrictions": [
+                    "An affected Trooper does not receive the +3 [[rule:saving-rolls|Saving Roll]] MOD for [[rule:cover|Partial Cover]]. This does not grant permission to ignore every other Cover or targeting rule.",
+                    "If a shot would affect an allied or neutral Trooper, cancel that shot unless its template has neither a PS value nor an imposed condition. Other shots in the Burst remain eligible. Reactive Troopers in the cancelled shot's area may still declare [[trait:aro|AROs]], and an initially declared [[trait:disposable-x|Disposable]] use is spent.",
+                    "A template placed on a group in close combat affects every Trooper in that combat, even if it touches only some of them. Apply the allied/neutral cancellation rule to that complete group."
+                ],
+                "clarifications": [
+                    "**Rolled attacks and Criticals:** an eligible rolled template Attack is compared independently against each affected enemy under [[rule:face-to-face-rolls|Face to Face Rolls]]. A Critical counts as Critical only against the Main Target; against secondary targets it is an ordinary success.",
+                    "**Scenery and Blast Focus:** the Blast Focus is the center of a circular template or narrow end of a teardrop. Trace Line of Fire from it to the target within the template's Area of Effect; intervening [[rule:cover|Total Cover]] blocks the effect. The additional firing-Trooper Line of Fire restriction for [[trait:direct-template|Direct Templates]] still applies.",
+                    "**Special procedures:** [[skill:intuitive-attack|Intuitive Attack]], [[skill:speculative-attack|Speculative Attack]], [[ammunition:smoke|Smoke Ammunition]] and [[ammunition:eclipse|Eclipse Ammunition]] retain their own Roll, targeting and visibility exceptions. A template does not grant every special procedure to every weapon."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 43,
+                    "section": "Template Weapons and Equipment; Types of Templates"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 44,
+                    "section": "Area of Effect; Allied and Neutral Troopers"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 45,
+                    "section": "Template Weapons into Close Combat"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Template Weapons, Scenery Elements and Total Cover"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Template_Weapons_and_Equipment",
+                    "heading": "Template Weapons and Equipment"
                 }
             ],
             "review": {

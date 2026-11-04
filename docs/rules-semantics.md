@@ -2218,6 +2218,35 @@ be supplied by a Weapon or Equipment item.
 semantics attached to the relevant profile rather than being used to decide that
 the source item belongs in the Weapon catalog.
 
+`rule:template-weapons-and-equipment` now owns the shared Main Target, Area of
+Effect, Dodge, Critical, cancellation and scenery explanation. The two canonical
+Traits link to that General Rule and own their distinct placement and resolution
+procedures. These are descriptive references, not a template-placement evaluator.
+
+The shared rule preserves failure when the Main Target is outside the template,
+secondary-target comparisons and Main-Target-only Criticals. A template affecting
+an allied or neutral Trooper cancels that shot unless it has neither PS nor an
+imposed condition; other Burst shots and eligible reactions remain independent,
+and Disposable use is still spent. A template touching a close combat affects
+every Trooper involved. Partial Cover grants no +3 Saving Roll MOD against a
+template; scenery can still block its Area of Effect from the Blast Focus.
+
+Direct Templates ordinarily require no Attack Roll. They have teardrop/circular
+placement requirements, a one-Roll Dodge against multiple incoming templates,
+and an explicit attacker exclusion unless a specific rule overrides it.
+The retained FAQ prohibits firing around corners at secondary targets outside
+the firing Trooper's Line of Fire, even if Blast Focus visibility exists.
+Intuitive Attack retains its separate WIP/opposition procedure.
+
+Impact Templates require an Attack Roll and ordinarily center on a valid visible
+Main Target. Its MODs determine the shared Attack Roll, which is compared
+independently against each target. One Dodge Roll is compared separately against
+each incoming Impact Template Attack. Targetless and Speculative Attack retain
+their expressly scoped placement exceptions.
+
+The [V1S-034 follow-up](v1.0-source-coverage-audit.md#template-and-base-ammunition-follow-up-v1s-034-2026-11-04)
+records exact source members and pending source/API/browser acceptance.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Template_Weapons_and_Equipment>
