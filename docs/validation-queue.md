@@ -107,6 +107,25 @@ hash-pinned historical evidence correction. VR-0060 owns the subsequent
 movement reference. A new pinned Linux cumulative run must cover both
 changes; no prior result verifies these later edits.
 
+The due batch is dispatched at exact implementation revision
+`cae85151037aae8c09fc6577d415033fc5d4bf64`:
+`linux-dev:1b7f55f0fea34e9c992c1f6844271c4a` runs
+`tools.run_checks --stage test --assets required --skip-details`.
+The worker was safely fetched/fast-forwarded; its ignored publication
+was rebuilt and checked, and read-only movement replay independently
+verified the pinned PDF, deterministic host export and strict logical
+equality with the tracked rules. Linux's SQLite bytes differ, as already
+disclosed in the [cross-host boundary](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04);
+hosted byte comparison remains mandatory. This scheduling checkpoint
+permits independent Windows work; it is not a terminal full-suite result.
+Hosted runs at that exact SHA are Source checks
+[`41850874089`](https://github.com/frankysan/InfinityDB/actions/runs/41850874089),
+Installed wheel smoke
+[`41850874067`](https://github.com/frankysan/InfinityDB/actions/runs/41850874067)
+and Deployment smoke
+[`41850874023`](https://github.com/frankysan/InfinityDB/actions/runs/41850874023).
+All were queued when recorded; none is claimed passed.
+
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
   `tools/audit_army_faction_semantics.py` from V1S-013.
