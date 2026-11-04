@@ -158,28 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-032 (M, review):** Review unaccepted Orders, game phases, command and activation rule clauses with
-  player-facing conditions and exceptions. The
-  [V1S-032A Command Token reference](v1.0-source-coverage-audit.md#command-token-reference-publication-v1s-032a-2026-11-04)
-  now publishes the three use modes with pinned source and matched artifacts.
-  The [V1S-032B phase/activation review](v1.0-source-coverage-audit.md#turn-sequence-order-pool-and-aro-clause-dispositions-v1s-032b-2026-11-04)
-  now distinguishes the existing rule owners from missing source sections,
-  including the previously omitted N5.3 pp. **16–17**.
-  [V1S-032C1](v1.0-source-coverage-audit.md#game-sequence-and-order-pool-publication-v1s-032c1-2026-11-04)
-  now publishes the complete Game Sequence and Order Pool reference
-  with [SRC-031](official-source-clarifications.md#src-031--lieutenant-order-count-english-double-negative-versus-spanish-non-null)
-  explicitly disclosed. This parent remains open for the ARO/Deployment
-  publication slice below.
-  - [ ] **V1S-032C2 (M, implementation):** Give source p. 13's general
-    ARO eligibility/activated-target/one-ARO/reactive-B1 and no-split
-    restrictions a discoverable non-executable general reference, without
-    changing the ARO Trait or projecting general legality into the
-    Orders/AROs declaration matrix. Complete omitted N5.3 p. 16
-    Deployment Phase constraints (legal contact, base fit, Prone,
-    source-allowed measurements) on the existing reference. Preserve
-    existing Order Expenditure pp. 14–15 and Coordinated Orders
-    pp. 129–131; confirm catalog, API, contextual and browser
-    presentation against pinned text.
 - [ ] **V1S-033 (M, review):** Review movement, visibility, geometry, positioning and terrain clauses for
   missing operative conditions.
 - [ ] **V1S-034 (M, review):** Review remaining attacks, Weaponry, mode, ammunition and state interaction

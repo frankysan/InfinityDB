@@ -21345,6 +21345,68 @@
             ]
         },
         {
+            "id": "rule:automatic-reaction-order",
+            "kind": "rule",
+            "name": "Automatic Reaction Order",
+            "aliases": [
+                "Automatic Reaction Orders",
+                "ARO eligibility",
+                "Reactive ARO rules"
+            ],
+            "summary": "An **Automatic Reaction Order** ([[trait:aro|ARO]]) is a permitted reaction by an eligible Trooper, Model or Marker belonging to the Reactive Player when the Active Player activates a Trooper using an Order.\n\n**One reaction, not one per Skill:** an eligible Reactive Trooper may declare at most **one [[trait:aro|ARO]] against each Order**. An [[trait:aro|ARO]] must target one of the Troopers activated by that Order; it never targets a different Trooper just because they are on the battlefield.\n\nUnless a specific exception applies, an [[trait:aro|ARO]] uses **Burst B1**. Higher permitted reactive Burst cannot be split among targets.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "**Line of Fire.** An enemy Trooper activates within the Reactive Trooper's Line of Fire (LoF).",
+                    "**[[trait:zone-of-control-zc|Zone of Control]] / Hacking Area.** An enemy Trooper activates within the Reactive Trooper's [[trait:zone-of-control-zc|Zone of Control]] (ZoC) or [[rule:hacking-area|Hacking Area]], under the applicable source-defined checks.",
+                    "**Specific outside-area permission.** A Special Skill, Weapon or Equipment explicitly permits the reaction without LoF or ZoC. Such an exception must come from that specific effect; this general reference grants no new one.",
+                    "**Affected by attack.** A Reactive Trooper is affected by a Template Weapon or is the target of a Comms Attack, under the usual rules for that attack."
+                ],
+                "effects": [
+                    "**Declaration timing.** After the Active Player's first Basic Short Skill or Long Skill, all eligible Reactive Troopers may declare their [[trait:aro|AROs]] at the first [[rule:order-expenditure-sequence|ARO Check]]. Troopers that could react but do not declare **forfeit their [[trait:aro|ARO]]** against that Order. After the second Skill, only previously ineligible Troopers newly given an [[trait:aro|ARO]] can declare at the second Check.",
+                    "**One [[trait:aro|ARO]].** Each eligible Reactive Trooper has **a single [[trait:aro|ARO]] per enemy Order**, regardless of how many Skills the activated Trooper declares or how many of those Skills would otherwise meet the eligibility criteria. There is no limit on how many different eligible Reactive Troopers can each respond.",
+                    "**Activated target.** The target of an [[trait:aro|ARO]] must be **one of the Troopers activated by the Order**. Troopers cannot react to another [[trait:aro|ARO]], because only the Active Player's Orders grant [[trait:aro|AROs]] and only the Reactive Player can declare them.",
+                    "**Simultaneous resolution.** Orders and [[trait:aro|AROs]], and all declared [[trait:aro|AROs]], are considered **simultaneous** regardless of declaration sequence. See [[rule:order-expenditure-sequence|Order Expenditure Sequence]] and [[rule:face-to-face-rolls|Face to Face Rolls]] for separate declaration and opposition rules."
+                ],
+                "restrictions": [
+                    "**[[trait:aro|ARO]]-authorized Skills only.** A Reactive Trooper can only declare a Skill the rules explicitly allow in [[trait:aro|ARO]], including specific Special Skill, Weapon, Equipment or scenario exceptions; ordinary Active-Turn Skills are not automatically reactive.",
+                    "**Burst B1 by default.** Unless a Special Skill, Equipment or scenario rule explicitly modifies it, an [[trait:aro|ARO]] has **Burst B1**. If an effect grants higher Burst, the Reactive Trooper **cannot split that Burst among different targets** in [[trait:aro|ARO]].",
+                    "**Delayed marker reactions are separate.** Rules such as [[state:camouflaged|Camouflaged]] can allow a specifically delayed [[trait:aro|ARO]], with distinct reveal and forfeiture conditions. An [[trait:aro|ARO]] delayed under those rules is **not a second [[trait:aro|ARO]]** or automatic permission to attack an unrevealed Marker.",
+                    "**No executable eligibility prediction.** LoF, distance, Hackability, actual activation, affected area and currently available Skills are game-state questions. This reference does not evaluate a particular Trooper's right to react or create a new declarable Skill."
+                ],
+                "clarifications": [
+                    "An enemy activation in LoF or ZoC is a *possible [[trait:aro|ARO]] trigger*, not a free choice of any Skill. The chosen Skill must be independently legal in [[trait:aro|ARO]].",
+                    "The N5.3 p.14 *All at Once* condition prevents sequencing one Reactive Trooper's [[skill:discover|Discover]] outcome to justify an already-declared [[skill:bs-attack|BS Attack]] by another; actual [[state:camouflaged|Camouflaged]] Marker rules remain authoritative.",
+                    "The N5.3 pp. 13–14 general [[trait:aro|ARO]] rules govern ordinary Orders. [[rule:coordinated-orders|Coordinated Orders]] additionally limit each Reactive Trooper's choice to one of the activated participants, with other participant-specific restrictions."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 13,
+                    "section": "ARO — Automatic Reaction Order: eligibility, target, one ARO and B1"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 14,
+                    "section": "All at Once; Order Expenditure Sequence: ARO Check"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
             "id": "rule:command-tokens",
             "kind": "rule",
             "name": "Command Tokens",
@@ -28583,7 +28645,7 @@
             "id": "rule:deployment-phase",
             "kind": "rule",
             "name": "Deployment Phase",
-            "summary": "After the [[rule:initiative-roll|Initiative Roll]], the players deploy their Troopers before the game begins, in the order determined by the player who kept Deployment. Each player deploys their main force and then the Trooper or Troopers kept back under applicable reserve rules.",
+            "summary": "After the [[rule:initiative-roll|Initiative Roll]], players deploy their Troopers **before the game** in the order chosen by the player who kept Deployment: first player's main force, second player's main force, first player's reserved Trooper(s), then second player's reserved Trooper(s).\n\n**Legal baseline placement:** keep the *entire base* inside the Deployment Zone, avoid prohibited contact with enemy/neutral game elements and mission objectives, and ensure the whole base fits. Applicable Special Skills and scenario rules may change the allowed zone or reserves, **not** the universal contact prohibition.",
             "composition": {
                 "role": "definition"
             },
@@ -28596,14 +28658,20 @@
             "facts": {
                 "category": "basic-rule",
                 "requirements": [
-                    "Complete the [[rule:initiative-roll|Initiative Roll]] and resolve the separate Initiative and Deployment choices before starting Deployment."
+                    "Complete the [[rule:initiative-roll|Initiative Roll]] and resolve the separate Initiative and Deployment choices before starting Deployment.",
+                    "**Base fully inside zone.** Unless a specific source rule changes the permitted deployment area, place each Trooper with their **entire base totally inside** their Deployment Zone.",
+                    "**Physical fit.** Unless both players previously agree otherwise, do **not** deploy a Trooper where there is insufficient space for the **whole base**."
                 ],
                 "effects": [
                     "The first player places their Troopers in their Deployment Zone, holding back the reserve permitted by baseline and applicable exceptional rules. The second player then deploys their main force.",
-                    "The first player deploys their held-back Trooper or Troopers, followed by the second player deploying their held-back Trooper or Troopers."
+                    "The first player deploys their held-back Trooper or Troopers, followed by the second player deploying their held-back Trooper or Troopers.",
+                    "**Initial [[state:prone|Prone]] choice.** When deploying a Trooper, its owner may choose to place it [[state:prone|Prone]] and mark that [[state:prone|Prone State]] with a Token beside the Trooper.",
+                    "**Allowed measurements.** During Deployment, players may measure Deployment Zone dimensions, areas eligible for [[skill:forward-deployment|Forward Deployment]], the game table's central line and any scenario-specified Exclusion Zone."
                 ],
                 "restrictions": [
-                    "Rules such as [[skill:forward-deployment|Forward Deployment]], [[skill:combat-jump|Combat Jump]], [[skill:strategos|Strategos]], Command Tokens, and scenario conditions can modify placement and reserve allowances. Apply each relevant rule in its own scope."
+                    "Rules such as [[skill:forward-deployment|Forward Deployment]], [[skill:combat-jump|Combat Jump]], [[skill:strategos|Strategos]], [[rule:command-tokens|Command Tokens]], and scenario conditions can modify placement and reserve allowances. Apply each relevant rule in its own scope.",
+                    "**Prohibited contact.** A Trooper **cannot be deployed in contact** with an enemy or Neutral Model, Marker or Token, or with **any mission objective**, even if that Trooper has a Special Skill allowing exceptional placement. This prohibition is not waived by [[skill:forward-deployment|Forward Deployment]], [[skill:combat-jump|Combat Jump]] or a reserved-Trooper allowance.",
+                    "**Special placement is separately scoped.** Other Skill or scenario rules may extend the allowed zone or alter the reserve count; those exceptions do not grant general permission to ignore the baseline deployment physical-fit or contact rules."
                 ]
             },
             "citations": [
@@ -28611,11 +28679,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 15,
                     "section": "Deployment Phase"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 16,
+                    "section": "Deployment Rules — base, contact, Prone and measurements"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-15"
+                "reviewedOn": "2026-11-04"
             }
         },
         {

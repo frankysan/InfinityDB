@@ -24,6 +24,7 @@
         "test_audit_profile_semantics",
         "test_audit_reinforcements_applicability",
         "test_audit_relationship_semantics",
+        "test_aro_deployment_publication",
         "test_audit_rules_interactions",
         "test_audit_runtime_database_surface",
         "test_audit_semantic_deduplication",
@@ -151,6 +152,7 @@
       "description": "Real Chromium acceptance and browser verifier contract tests.",
       "modules": [
         "test_verify_ammunition_publication_browser",
+        "test_verify_aro_deployment_browser",
         "test_verify_army_overview_browser",
         "test_verify_deployed_object_publication_browser",
         "test_verify_fireteam_context_browser",

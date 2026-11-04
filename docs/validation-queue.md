@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 4 distinct
-changes** (VR-0052/0053/0054/0055; not yet due by the five-change threshold).
+Only open VR obligations belong here. **Current count: 5 distinct
+changes** (VR-0052/0053/0054/0055/0056; five-change execution threshold reached).
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -171,6 +171,33 @@ changes** (VR-0052/0053/0054/0055; not yet due by the five-change threshold).
   Deferred: pinned Linux source/model/browser tests, cumulative
   full suite at the five-change threshold and exact-SHA hosted CI;
   final release-wide source/browser acceptance remains separate.
+
+- [ ] **VR-0056** (2026-11-04; ready-to-run): Validate
+  V1S-032C2's N5.3 pp. 13–14 Automatic Reaction Order reference
+  and p. 16 Deployment Phase conditions without affecting
+  existing ARO Trait, Order Expenditure or declaration legality.
+  Work: [Rules and contextual reference completion](TODO.md#rules-and-contextual-reference-completion);
+  tracked rules SHA-256
+  `1334b79375af5d4cf10ecb108225dc9df9bcd06f74454152b31d2ad3a4aba790`.
+  Risk: medium (new General Rule and updated existing Deployment Rule;
+  tracked database and ignored deployed-object publication).
+  Immediate Windows: source/api/pair **5/5**, Chrome **3/3**
+  at 1440/390/320, frozen baseline **49/49**,
+  rules database **166/166**, curated **670/670**,
+  interactions **15/15**, deployed-object **12/12**,
+  maintained-text **38/38**, C1 source/API **4/4**,
+  C1 Chrome **3/3**, pinned phase-source **3/3**:
+  **968 focused tests**. Deterministic matched pair,
+  all 485 unrelated composed records unchanged;
+  full Ruff/Pyright, data/rules build and docs pass.
+  The C1 deterministic regression now compares with the
+  *current* published SHA rather than freezing C1's historical
+  whole-database count/hash, preserving future additive releases.
+  Design: none; source PDF clauses and normal-browser
+  assertions already added.
+  Deferred: Linux exact-commit focused and full tests at this
+  five-change threshold, independent source/asset verification,
+  exact-SHA hosted CI and final 1.0 source/browser acceptance.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
@@ -346,7 +373,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0056` (`VR-0052/0053/0054/0055` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0057` (`VR-0052/0053/0054/0055/0056` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

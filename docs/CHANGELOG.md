@@ -16,6 +16,9 @@ are not retroactively relabeled.
   Game Sequence and Order Pool references, including which Orders are
   available, private, repeatable or lost. The source disagreement about
   Lieutenant Order eligibility is disclosed rather than silently discarded.
+- Explore a complete source-linked ARO primer with one reaction per
+  Order, valid triggers/targets and Burst limits, alongside the
+  Deployment Phase's placement, Prone and measurement restrictions.
 - Find candidate Specialist Troops for a selected scenario, and browse Orders
   and AROs with their declaration categories and source links.
 - Explore the optional Reinforcements Extra, Commlink and Request Reinforcements
@@ -59,6 +62,13 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Publish a General Rules
+  Automatic Reaction Order overview grounded in N5.3 pp. 13-14 with four
+  eligibility families, one-ARO/activated-target restrictions, timing,
+  default B1 and no Burst splitting. Extend existing Deployment Phase
+  from N5.3 p. 16 with base, contact, fit, Prone and pregame measurements.
+  Keep the ARO Trait, source-specific exceptions and Orders/AROs legality
+  semantics unchanged; promote the guarded matched v9 rules/publication pair.
 - **Data processing + Web backend + Web frontend:** Add N5.3 Game Sequence
   and Order Pool General Rules references, preserving the five-phase turn
   order, Tactical checks, Combat Group Order ownership, hidden/off-table

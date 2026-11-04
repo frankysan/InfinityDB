@@ -1786,6 +1786,13 @@
       "note": "N5.3 Orders pp. 11-12, 16-17: distinct Combat Group Regular Pools, counted/hidden/unused Orders and specific Order types; non-Null Lieutenant source conflict remains visibly disclosed as SRC-031. Count and expenditure are runtime resources, not unconditional typed interactions."
     },
     {
+      "recordId": "rule:automatic-reaction-order",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 pp. 13-14: four reactive ARO trigger families, declared Skill permission, once-per-Order and activated-target limits, default B1/no-split and simultaneous reaction. Source-scoped general rule only; no unconditional typed edge or session-time legality engine."
+    },
+    {
       "recordId": "rule:command-tokens",
       "targetRelease": "1.0.0",
       "status": "reviewed",
@@ -2471,8 +2478,8 @@
       "recordId": "rule:deployment-phase",
       "targetRelease": "1.0.0",
       "status": "reviewed",
-      "reviewedOn": "2026-10-15",
-      "note": "General N5.3 Deployment Phase sequence authored from official printed page 15. The dated FAQ repositioning/measurement boundary has its own FAQ ruling and never changes the core rule or any particular Deployment Skill. Scenario-specific deployment rules remain scoped separately."
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 Deployment Phase p. 15 four-step main/reserve sequence, plus p. 16 base fully inside zone, prohibited enemy/neutral/mission-objective contact, initial Prone, whole-base physical fit and allowed pregame measurements. Original p. 15 review was 2026-10-15; p. 16 addition reviewed 2026-11-04. FAQ repositioning/measurement boundary and scenario exceptions remain separate."
     },
     {
       "recordId": "scenario:battleground",

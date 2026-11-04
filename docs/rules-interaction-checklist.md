@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **212/212** complete, **0** pending.
+- Supporting semantic identities: **213/213** complete, **0** pending.
 - Current authored outgoing relations: **518**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -911,11 +911,13 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (30/30)
+#### Rule (31/31)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
 - [x] **Army Retreat!** (`rule:army-retreat`) — reviewed: N5.3 English p.146, Spanish p.150, and archived Retreat Situation revision 3942 reconcile surviving points including undeployed Troopers, the 25% trigger/recovery threshold, automatic Loss of Lieutenant, Impetuous Phase, evacuation, State distinction, and scenario-owned end conditions. No live army state or roster calculator.
+  - outgoing: none
+- [x] **Automatic Reaction Order** (`rule:automatic-reaction-order`) — reviewed: N5.3 pp. 13-14: four reactive ARO trigger families, declared Skill permission, once-per-Order and activated-target limits, default B1/no-split and simultaneous reaction. Source-scoped general rule only; no unconditional typed edge or session-time legality engine.
   - outgoing: none
 - [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
@@ -929,7 +931,7 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Coordinated Orders** (`rule:coordinated-orders`) — reviewed: N5.3 pp.129-131 and N5 FAQ v0.1 p.3 baseline for Command Token cost, Spearhead, Burst, targeting, recovery, Hacking and Special Dice; no unqualified simulation relations.
   - outgoing: none
-- [x] **Deployment Phase** (`rule:deployment-phase`) — reviewed: General N5.3 Deployment Phase sequence authored from official printed page 15. The dated FAQ repositioning/measurement boundary has its own FAQ ruling and never changes the core rule or any particular Deployment Skill. Scenario-specific deployment rules remain scoped separately.
+- [x] **Deployment Phase** (`rule:deployment-phase`) — reviewed: N5.3 Deployment Phase p. 15 four-step main/reserve sequence, plus p. 16 base fully inside zone, prohibited enemy/neutral/mission-objective contact, initial Prone, whole-base physical fit and allowed pregame measurements. Original p. 15 review was 2026-10-15; p. 16 addition reviewed 2026-11-04. FAQ repositioning/measurement boundary and scenario exceptions remain separate.
   - outgoing: none
 - [x] **Designated Landing Area** (`rule:scenario:designated-landing-area`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
