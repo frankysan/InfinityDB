@@ -173,7 +173,10 @@
         "test_verify_sidebar_density_browser",
         "test_verify_turn_sequence_browser",
         "test_verify_unit_skill_presentation_browser",
-        "test_verify_weapon_source_cards_browser"
+        "test_verify_weapon_source_cards_browser",
+        "test_combat_attack_reference",
+        "test_template_reference",
+        "test_hacking_source_followup"
       ]
     },
     "build": {

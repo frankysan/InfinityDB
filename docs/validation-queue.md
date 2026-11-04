@@ -116,62 +116,7 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-- [ ] **VD-0020 (2026-11-04; needs-design):** Pin the basic attack/close-combat
-  source-to-reference conditions added under
-  [V1S-034](TODO.md#rules-and-contextual-reference-completion).
-  Change: `n5-core-v5.3.json` SHA-256
-  `8249fd75b6eb42f1aa1a76ab9d7667ef5fa57fc10c32d97414aeadf55a122dae`;
-  risk: player-facing conditional rules prose. Design
-  `tests/test_combat_attack_reference.py` for pinned PDF/Wiki evidence,
-  whole-Burst selection/invalid-dice/range limits, -6 per engaged ally and
-  failed-roll hits, Coup de Grâce with both exceptions, two-or-more eligibility,
-  separate Active/Reactive contributor exclusions and engaged-allied contact.
-  Verify curated-to-runtime/API parity while leaving base Weapon B unchanged.
-  Add a real-Chromium Skill-page check at 1440/390/320 px with Developer Mode
-  off, visible new text and semantic links, API assertions, page-error and
-  failed-request capture, and no horizontal overflow. Reuse current browser
-  fixtures; inspect selectors statically without executing tests in VD.
-  Existing coverage: `tests/test_catalog_rules.py`,
-  `tests/test_other_source_variant_provenance.py`; linked execution: VR-0077.
-
-- [ ] **VD-0021 (2026-11-04; needs-design):** Pin shared Template and distinct
-  Direct/Impact reference procedures under
-  [V1S-034](TODO.md#rules-and-contextual-reference-completion).
-  Change: curated SHA-256 `ad0b2b0da3eea1258ef6dceebd7821bdc201d026a94c6a644c20d68de1b2d5e8`;
-  risk: conditional player-facing rules. Design
-  `tests/test_template_reference.py` with pinned N5.3 pp. 43–49/FAQ p. 1 and
-  exact archived Wiki members: Main Target miss, partial Burst cancellation,
-  allied/neutral no-PS/no-condition conjunction, retained ARO/Disposable,
-  whole-engagement effect, Partial Cover SR exclusion, scenery, main-only
-  Criticals, separate target opposition and single-Dodge comparisons.
-  Distinguish ordinary Direct no-roll fire, Intuitive WIP exception,
-  Direct placement/self-exclusion and FAQ corners from Impact placement,
-  Targetless and Speculative exceptions. Verify sourceIdentity preservation,
-  new General Rule export/API/search and typed-link resolution.
-  Add real Chromium normal-mode catalog/detail/link checks at 1440/390/320 px
-  for General Rules and both Traits, with matching API content, page errors,
-  failed requests and overflow assertions. Existing coverage:
-  `tests/test_catalog_rules.py`, `tests/test_rules_database.py`,
-  `tests/test_faq_ruling_references.py`; linked execution: VR-0078.
-
-- [ ] **VD-0023 (2026-11-04; needs-design):** Pin V1S-035 Hacking provenance
-  corrections and the White Noise/Zero Pain procedures.
-  Work: [V1S-035](TODO.md#rules-and-contextual-reference-completion).
-  Change: Core `7c5ce6ac3196d6c3427f6a73c2cdf65fae21237af3fa9f7dceb7709191f29bdc`,
-  Hacking `b8a1cd9ed669d0549989f335ff52fbd26fe3dd661131ee078db801ac7d9592ea`;
-  risk: source links and conditional rules text. Design
-  `tests/test_hacking_source_followup.py` to pin Repeater p. 56, shared
-  Supportware p. 55 (including three Program citations), all twelve exact
-  primary Program sections on pp. 59–61, White Noise end-of-Order placement
-  versus Controlled Jump declaration timing, and Zero Pain B2 in both turns,
-  either-die cancellation and no Saving Rolls/special effects without creating
-  new ARO eligibility. Preserve source/Army statistics, labels, grants and
-  unresolved Charontid extras. Verify curated-to-runtime/API citations/facts
-  and real Chromium normal-mode Program/Supportware/Repeater links at
-  1440/390/320 px, with page errors, failed requests and overflow assertions.
-  Existing coverage: `tests/test_hacking_program_publication.py`,
-  `tests/test_rules_database.py`, `tests/test_audit_source_variant_inputs.py`;
-  linked execution: VR-0080. No tests run during VD.
+No pending test-design obligations.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -199,12 +144,16 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] **VR-0077 (2026-11-04; awaiting-design):** Verify the V1S-034 basic
+- [ ] **VR-0077 (2026-11-04; ready-to-run):** Verify the V1S-034 basic
   BS/CC attack reference expansion. Base revision: `dd0b894b40691aa0a68dea47ee4d8abb76792bcd`;
   target: the committed implementation containing the VD-0020 curated hash and
   rules DB `8f2fa36b3ce3f0293fa217641d780db9d2c300da2f82438d1a6e9adcbc88b609`.
   Work: [V1S-034](TODO.md#rules-and-contextual-reference-completion);
-  design: VD-0020. Immediate: maintained-text audit zero candidates/residuals;
+  design: VD-0020 completed by static review of `tests/test_combat_attack_reference.py`
+  and shared `tests/reference_acceptance_support.py`: pinned PDF/Wiki, curated/runtime/API
+  parity and 1440/390/320 px ordinary Skill navigation/semantic links with errors,
+  failed requests, Developer Mode off and overflow assertions. No tests ran in VD.
+  Immediate: maintained-text audit zero candidates/residuals;
   guarded paired publication and two-build determinism passed, 498 identities
   retained and 496 unrelated composed records unchanged. Publication integrity
   required this immediate gate; no routine tests were run in implementation.
@@ -218,11 +167,14 @@ is recorded. Failed or incomplete verification remains open.
   actual revision, source pins, terminal counts and skips. Hosted and final
   candidate acceptance remain independently owned.
 
-- [ ] **VR-0078 (2026-11-04; awaiting-design):** Verify V1S-034 Template
+- [ ] **VR-0078 (2026-11-04; ready-to-run):** Verify V1S-034 Template
   references. Base revision: `c451a22d8d7311d0fdc136751839f9e63eda91bb`;
   target: committed implementation with VD-0021 curated hash and rules DB
   `3fd3b9209d5702eb24c9b8bbf6404d70db0ecafafcdce5fd8020d465ebab464f`.
-  Design: VD-0021. Immediate artifact-integrity exception: deterministic twin
+  Design: VD-0021 completed by static review of `tests/test_template_reference.py`
+  and the shared helper: source/FAQ/Wiki, exact Trait identity, runtime/API/search,
+  three-width normal General Rule/Trait catalog entry points and keyboard links,
+  captured browser errors/failed requests and overflow. No tests ran in VD. Immediate artifact-integrity exception: deterministic twin
   exports, 498 prior identities retained plus one General Rule, unchanged
   Restrictions and 496 unrelated composed records, matched publication and
   verified recovery pair. Maintained-text audit: zero candidates/residuals.
@@ -236,11 +188,15 @@ is recorded. Failed or incomplete verification remains open.
   check for final candidate or hosted acceptance. A newer cumulative snapshot
   can also verify VR-0077 after confirming both attack records are unchanged.
 
-- [ ] **VR-0080 (2026-11-04; awaiting-design):** Verify V1S-035 Hacking
+- [ ] **VR-0080 (2026-11-04; ready-to-run):** Verify V1S-035 Hacking
   source/citation and scoped procedure updates. Base:
   `67e3f0447ca9a5990bd8d818105434ef70ea53f8`; target: committed VD-0023
   curation with rules DB `121480b02d2ec81223d167ea1b1c00a556ddd256a42c418b9622059667493349`.
-  Design: VD-0023. Immediate: read-only four-Device and 12-Program source
+  Design: VD-0023 completed by static review of `tests/test_hacking_source_followup.py`
+  and shared helper: printed pages, twelve primary citations, Supportware/Repeater
+  corrections, scoped timing/defense, runtime/API parity and 1440/390/320 px
+  Program/General Rule/Equipment catalog and link acceptance. No tests ran in VD.
+  Immediate: read-only four-Device and 12-Program source
   audits passed; maintained-text candidates/residuals zero. Mandatory
   publication-integrity gate passed with two identical exports, 499 identities,
   485 unrelated records unchanged, original recovery bytes and matched pair.
@@ -253,7 +209,7 @@ is recorded. Failed or incomplete verification remains open.
   Preserve actual revision, assets, terminal results and skipped coverage;
   hosted and final-candidate gates remain independently required.
 
-- [ ] **VR-0081 (2026-11-04; blocked):** Verify Phase 1 static integrity
+- [ ] **VR-0081 (2026-11-04; ready-to-run):** Verify Phase 1 static integrity
   checking for the V1S backlog checker. Base revision:
   `cde1fe7bbb20c426c4705eec0e9252bc8e293de9`; target:
   `52744d32ee37a9923efb3d532d8a1a1f370bcbfa`. Work:
@@ -265,15 +221,33 @@ is recorded. Failed or incomplete verification remains open.
   declarations and zero warnings, matching an independent declaration count;
   Ruff, Pyright, Markdownlint, and documentation links passed.
   Deferred broader check: `tools/run_checks.py --profile code`.
-  Linux parity is blocked because no `linux-dev` runner is available, Docker's
-  Linux engine is stopped, and WSL has no Linux distribution. Retry on the
-  pinned Linux worker before shared-check integration; do not infer parity
-  from Windows results. No tests ran during VD design.
+  The connected MCP `linux-dev` worker was independently rediscovered and a
+  bounded fetch completed on its clean `dev/v1.0.0` checkout. The earlier
+  Windows-only workflow's unavailable-runner finding is superseded for this
+  handoff. Pin the cumulative committed revision before Linux parity/full-code
+  execution; do not infer parity from Windows results. No tests ran during VD design.
+
+- [ ] **VR-0082 (2026-11-04; ready-to-run):** Execute V1S-038's complete
+  reviewed Ammunition source/storage/API/browser parity gate. Target: the
+  cumulative committed test-design revision following
+  `c00e12596043387ad5b7f516dc88bd3401dc6509`, with the unchanged release pair.
+  Work: [V1S-038](TODO.md#rules-and-contextual-reference-completion).
+  No new test design: existing `tests/test_ammunition_publication_parity.py`,
+  `tests/test_ammunition_visibility_opposition.py` and
+  `tests/test_verify_ammunition_publication_browser.py` cover eleven base
+  identities, five exact ordered combined forms, full source/API publication
+  parity and ordinary browser links at 1440/390/320 px. Preserve disclosed
+  T2/Flash Pulse and chart conflicts, Combined Saving Roll distinction and
+  unreported/sentinel data. Require real Chromium, pinned sources, full assets
+  and no skips in these selectors. Run the cumulative full-assets suite and
+  `--profile code` on pinned `linux-dev`, after rebuilding/checking ignored
+  deployed-object publication. Adding this fifth VR triggers a drain of all
+  execution entries; first design VD-0020/0021/0023 without running tests.
 
 ## Next unused IDs
 
 - Design: `VD-0025`; active obligations are listed above.
-- Execution: `VR-0082`; active obligations are listed above.
+- Execution: `VR-0083`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
