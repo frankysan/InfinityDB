@@ -169,6 +169,20 @@ IDs here and link the owning task instead of duplicating its description.
   Target design: `tests/test_audit_source_variant_inputs.py::test_transmutation_source_246_exact_signatures_and_profile_owners`.
   Outcome: pending test authorship and static design review; no tests run.
 
+- [ ] **VD-0019 (2026-11-04; needs-design):** Guard against cross-family
+  source-extra aliasing: the same `+3`, `-3`, Shock/AP/Continuous Damage,
+  ReRoll, and `Total` values must not authorize a different Skill's
+  occurrence semantics; preserve unqualified Device Plus `SR-1` as unknown.
+  Pin ten unresolved Skill source IDs and one unresolved Equipment ID
+  without converting reviewed neighboring variants into global effects.
+  Work: [V1S-061](TODO.md#rule-variant-usage-index-and-restrictions);
+  change: 2026-11-04 cross-family review; risk: medium.
+  Existing coverage: individual source extras and generic fail-closed
+  combinations, but no cross-family source collision assertion.
+  Linked execution: VR-0076.
+  Target design: `tests/test_audit_source_variant_inputs.py::test_unresolved_source_extras_do_not_inherit_other_families_review`.
+  Outcome: pending static test design, not execution.
+
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
 existing coverage, risk, linked VR ID, and resulting test selector and
@@ -241,10 +255,18 @@ is recorded. Failed or incomplete verification remains open.
   relevant source-variant test module and eventual release gates.
   Outcome: not executed; raw archive required on the chosen worker.
 
+- [ ] **VR-0076 (2026-11-04; awaiting-design):** Verify cross-family
+  exact source identity and fail-closed collisions against the pinned
+  Army/rules pair. Work: V1S-061; change: review commit pending.
+  Immediate: read-only unresolved Skill/Equipment inventory audited;
+  documentation checks to be recorded. Design: VD-0019.
+  Deferred: exact source regression, relevant pinned-source test module.
+  Outcome: not executed; raw archive required on the chosen worker.
+
 ## Next unused IDs
 
-- Design: `VD-0019` (through `VD-0014` retired; `VD-0015`–`VD-0018` open).
-- Execution: `VR-0076` (through `VR-0071` retired; `VR-0072`–`VR-0075` open).
+- Design: `VD-0020` (through `VD-0014` retired; `VD-0015`–`VD-0019` open).
+- Execution: `VR-0077` (through `VR-0071` retired; `VR-0072`–`VR-0076` open).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

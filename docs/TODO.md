@@ -241,8 +241,9 @@ V1S-068–069, V1S-074 and V1S-081–090.
   exact source profile owners are characterized in the [2026-11-04 review](v1.0-source-coverage-audit.md#transmutation-source-246-occurrence-review-v1s-058-2026-11-04).
   Finish the pinned threshold/Auto/Hatching/WIP regression VD-0018/VR-0075; inferred
   destination profile links remain excluded pending V1S-062–066.
-- [ ] **V1S-061 (M, review):** Run cross-family TEXT/DISTANCE, named MOD and unusual variant consistency
-  sweep; classify remaining unknowns fail closed.
+- [ ] **V1S-061 (M, review):** The [cross-family signature collision review](v1.0-source-coverage-audit.md#cross-family-variant-collision-review-v1s-061-2026-11-04)
+  found no new unresolved source family. Finish the fail-closed collision regression
+  VD-0019/VR-0076 before retiring; source-specific semantics remain V1S-050–060.
 - [ ] **V1S-062 (M, design):** Finalize occurrence identity, ordering, duplicate-handling and
   Unit/profile/loadout/Army ownership contract for the usage index.
 - [ ] **V1S-063 (L, build):** Generate and validate exact-variant occurrence projections from matched
