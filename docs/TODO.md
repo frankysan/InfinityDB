@@ -231,8 +231,13 @@ V1S-068–069, V1S-074 and V1S-081–090.
   twelve Program profiles without recreating imported statistics. Keep this slice open for
   source/API/browser acceptance; SRC-001 and cross-Army variant publication retain their own owners.
   Deferred: acceptance resumes at the phased VD/VR five-item, seven-day or mandatory-gate trigger.
-- [ ] **V1S-037 (M, review):** Review BTS/non-Comms Weapon exceptions, Criticals, affected attributes and
-  conditional State relationships separately.
+- [ ] **V1S-037 (M, review):** Resolve the remaining Silent/Attribute-Immunity timing and bilingual
+  qualifier question under [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier).
+  The [BTS/Critical/State review](v1.0-source-coverage-audit.md#bts-critical-and-state-immunity-review-v1s-037-2026-11-04)
+  found the existing source-scoped exceptions represented without further data changes.
+  Blocked: Corvus Belli ruling or an applicable new official source must establish whether the
+  Saving-Roll-triggered protection suppresses the earlier Silent Dodge MOD and reconcile the
+  English Face to Face qualifier. Retry when that evidence is available; retain public uncertainty.
 - [ ] **V1S-038 (M, gate):** Reconcile every published base and combined Ammunition fact against pinned Weapon
   data and validate stored/API/browser semantics.
 - [ ] **V1S-039 (M, review):** Review shared core/scenario concepts and collection supplements for scoped
@@ -655,10 +660,11 @@ the remaining source clauses and final release-browser acceptance remain open.
     [source/browser acceptance](testing.md#10-reviewed-immunity-interactions-browser-acceptance-rea-011).
     Component Immunity and combined-effect boundaries are reconciled in the
     [bounded source review](v1.0-source-coverage-audit.md#component-immunity-and-combined-effect-review-v1s-036-2026-11-04).
-    - [ ] Review remaining exact BTS-based non-Comms Weapon exceptions, Critical
-      interactions, affected Attributes and conditional State links under V1S-037,
-      preserving SRC-002's unresolved Silent timing. Do not generalize printed
-      examples or name-scoped Viral Vulnerability into a resolver.
+    - [ ] Resolve V1S-037 / SRC-002's Silent timing and bilingual qualifier question.
+      The other exact BTS/non-Comms, Critical, Attribute and conditional State
+      exceptions are reconciled in the linked source review; retain their
+      scoped explanations without a general target evaluator. Retry on a
+      publisher ruling or applicable new official source.
     - [ ] Revalidate all published base identities and reviewed combined forms
       against the final pinned source and shared Weapon/Ammunition facts.
       Keep any future comparison-view consumer separate; no comparison UI or
