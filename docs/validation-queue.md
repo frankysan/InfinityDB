@@ -154,6 +154,25 @@ IDs here and link the owning task instead of duplicating its description.
   `tests/test_catalog_rules.py`, `tests/test_rules_database.py`,
   `tests/test_faq_ruling_references.py`; linked execution: VR-0078.
 
+- [ ] **VD-0023 (2026-11-04; needs-design):** Pin V1S-035 Hacking provenance
+  corrections and the White Noise/Zero Pain procedures.
+  Work: [V1S-035](TODO.md#rules-and-contextual-reference-completion).
+  Change: Core `7c5ce6ac3196d6c3427f6a73c2cdf65fae21237af3fa9f7dceb7709191f29bdc`,
+  Hacking `b8a1cd9ed669d0549989f335ff52fbd26fe3dd661131ee078db801ac7d9592ea`;
+  risk: source links and conditional rules text. Design
+  `tests/test_hacking_source_followup.py` to pin Repeater p. 56, shared
+  Supportware p. 55 (including three Program citations), all twelve exact
+  primary Program sections on pp. 59–61, White Noise end-of-Order placement
+  versus Controlled Jump declaration timing, and Zero Pain B2 in both turns,
+  either-die cancellation and no Saving Rolls/special effects without creating
+  new ARO eligibility. Preserve source/Army statistics, labels, grants and
+  unresolved Charontid extras. Verify curated-to-runtime/API citations/facts
+  and real Chromium normal-mode Program/Supportware/Repeater links at
+  1440/390/320 px, with page errors, failed requests and overflow assertions.
+  Existing coverage: `tests/test_hacking_program_publication.py`,
+  `tests/test_rules_database.py`, `tests/test_audit_source_variant_inputs.py`;
+  linked execution: VR-0080. No tests run during VD.
+
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
 existing coverage, risk, linked VR ID, and resulting test selector and
@@ -217,10 +236,27 @@ is recorded. Failed or incomplete verification remains open.
   check for final candidate or hosted acceptance. A newer cumulative snapshot
   can also verify VR-0077 after confirming both attack records are unchanged.
 
+- [ ] **VR-0080 (2026-11-04; awaiting-design):** Verify V1S-035 Hacking
+  source/citation and scoped procedure updates. Base:
+  `67e3f0447ca9a5990bd8d818105434ef70ea53f8`; target: committed VD-0023
+  curation with rules DB `121480b02d2ec81223d167ea1b1c00a556ddd256a42c418b9622059667493349`.
+  Design: VD-0023. Immediate: read-only four-Device and 12-Program source
+  audits passed; maintained-text candidates/residuals zero. Mandatory
+  publication-integrity gate passed with two identical exports, 499 identities,
+  485 unrelated records unchanged, original recovery bytes and matched pair.
+  No routine tests run. Deferred: `tests/test_hacking_source_followup.py`,
+  `tests/test_hacking_program_publication.py`, `tests/test_rules_database.py`,
+  `tests/test_audit_source_variant_inputs.py`, and cumulative
+  `tools/run_checks.py --stage test --assets required`.
+  Intended host: pinned `linux-dev` with PDF/Wiki/FAQ/raw archive and Chromium;
+  regenerate/verify ignored deployed-object publication before the full suite.
+  Preserve actual revision, assets, terminal results and skipped coverage;
+  hosted and final-candidate gates remain independently required.
+
 ## Next unused IDs
 
-- Design: `VD-0022` (through `VD-0019` retired; `VD-0020–0021` open).
-- Execution: `VR-0079` (through `VR-0076` retired; `VR-0077–0078` open).
+- Design: `VD-0024`; active obligations are listed above.
+- Execution: `VR-0081`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

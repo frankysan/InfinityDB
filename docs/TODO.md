@@ -222,8 +222,14 @@ V1S-068–069, V1S-074 and V1S-081–090.
   Weaponry/chart checks remain bounded evidence. Retain this slice until its new references
   have regression/API/browser acceptance. Combined/Immunity precedence remains V1S-036/037;
   complete profile/API/browser reconciliation remains V1S-038/070–072.
-- [ ] **V1S-035 (M, review):** Review unaccepted Hacking, firewall, Supportware and scoped interaction
-  clauses, without recreating existing program facts.
+  Deferred: acceptance is in the phased VD/VR queue; retry at its five-item,
+  seven-day or mandatory-gate trigger. Independent source review may continue.
+- [ ] **V1S-035 (M, review):** Accept the Hacking source/citation and White Noise/Zero Pain
+  clarifications through VD-0023 / VR-0080. The
+  [source review](v1.0-source-coverage-audit.md#hacking-firewall-and-supportware-follow-up-v1s-035-2026-11-04)
+  reconciles N5.3 pp. 54–62, existing Firewall/Supportware ownership, four Device sets and
+  twelve Program profiles without recreating imported statistics. Keep this slice open for
+  source/API/browser acceptance; SRC-001 and cross-Army variant publication retain their own owners.
 - [ ] **V1S-036 (M, review):** Review remaining component Immunity and combined-effect precedence cases with
   exact target, source and non-executable semantics.
 - [ ] **V1S-037 (M, review):** Review BTS/non-Comms Weapon exceptions, Criticals, affected attributes and

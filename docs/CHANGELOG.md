@@ -263,6 +263,9 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing:** Correct Repeater and Supportware source-page links and add
+  primary rules citations for all Hacking Programs. Clarify White Noise placement
+  timing and Zero Pain's two-roll defense in either turn.
 - **Project infrastructure:** Restore clean-hosted CI portability for
   optional Chromium pooling and Windows host sampling under Linux Pyright,
   and make Syncthing symlink activation idempotent when Windows stores

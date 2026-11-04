@@ -16234,7 +16234,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 55,
+                    "page": 56,
                     "section": "Repeater"
                 },
                 {
@@ -16250,7 +16250,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-11-04"
             },
             "variantSemantics": {
                 "inheritance": "family"
@@ -27990,7 +27990,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 56,
+                    "page": 55,
                     "section": "Supportware"
                 },
                 {
@@ -28001,7 +28001,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-13"
+                "reviewedOn": "2026-11-04"
             }
         },
         {

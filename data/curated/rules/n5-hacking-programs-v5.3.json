@@ -101,13 +101,18 @@
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 56,
+                    "page": 55,
                     "section": "Supportware"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 59,
+                    "section": "Assisted Fire"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "supportware",
@@ -147,11 +152,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Carbonite",
                     "heading": "Carbonite"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 59,
+                    "section": "Carbonite"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "comms-attack"
@@ -219,7 +229,7 @@
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 56,
+                    "page": 55,
                     "section": "Supportware"
                 },
                 {
@@ -230,7 +240,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "supportware",
@@ -271,11 +281,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Cybermask",
                     "heading": "Cybermask"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 59,
+                    "section": "Cybermask"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "negative-feedback",
@@ -316,13 +331,18 @@
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 56,
+                    "page": 55,
                     "section": "Supportware"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 60,
+                    "section": "Enhanced Reaction"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "supportware",
@@ -368,11 +388,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 60,
                     "section": "Supportware use and cancellation example"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 60,
+                    "section": "Fairy Dust"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "supportware",
@@ -412,11 +437,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Oblivion",
                     "heading": "Oblivion"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 60,
+                    "section": "Oblivion"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "comms-attack"
@@ -455,11 +485,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Spotlight",
                     "heading": "Spotlight"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 60,
+                    "section": "Spotlight"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "comms-attack"
@@ -502,11 +537,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Total_Control",
                     "heading": "Total Control"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 61,
+                    "section": "Total Control"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "comms-attack"
@@ -539,11 +579,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Trinity",
                     "heading": "Trinity"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 61,
+                    "section": "Trinity"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "comms-attack"
@@ -573,6 +618,9 @@
                 ],
                 "restrictions": [
                     "Troopers with [[equipment:multispectral-visor]] or [[skill:marksmanship]] cannot draw Line of Fire through the [[term:white-noise-zone|White Noise Zone]]."
+                ],
+                "clarifications": [
+                    "Place the circular [[term:white-noise-zone|White Noise Zone]] at the end of the Order, after a successful unopposed [[attribute:wip|WIP]] Roll. The whole template must be inside the user's [[rule:hacking-area|Hacking Area]]; its height is infinite and it lasts until the start of the [[rule:game-sequence|States Phase]]. This placement timing differs from the immediate declaration effect of [[hacking-program:controlled-jump|Controlled Jump]]."
                 ]
             },
             "citations": [
@@ -580,11 +628,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "White_Noise",
                     "heading": "White Noise"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 61,
+                    "section": "White Noise"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "negative-feedback"
@@ -610,6 +663,9 @@
                 ],
                 "effects": [
                     "The user rolls twice in the Face to Face Roll, imposes -3 on enemy Comms Attacks, and nullifies the attack if either user Roll wins."
+                ],
+                "clarifications": [
+                    "In either the Active or Reactive Turn, make two [[attribute:wip|WIP]] Rolls in the eligible [[rule:face-to-face-rolls|Face to Face Roll]] against enemy Comms Attacks; the enemy applies -3 [[attribute:wip|WIP]]. Winning with either die makes the opposed Comms Attack fail, so the user makes no [[rule:saving-rolls|Saving Rolls]] and avoids that Attack's special effects. This Program does not grant an otherwise ineligible [[trait:aro|ARO]]."
                 ]
             },
             "citations": [
@@ -617,11 +673,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Zero_Pain",
                     "heading": "Zero Pain"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 61,
+                    "section": "Zero Pain"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-26"
+                "reviewedOn": "2026-11-04"
             },
             "labelIds": [
                 "comms-attack"

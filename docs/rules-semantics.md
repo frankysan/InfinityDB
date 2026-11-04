@@ -2475,6 +2475,31 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Repeater>
 - PDF: Infinity N5 V5.3, printed pages 55-56
 
+### RS-CM-HACK-006 — Program resolution timing and defensive rolls stay scoped
+
+**Project domain:** Data processing
+
+**Classification:** source-native, curated explanatory context.
+
+White Noise is placed at the end of the Order after its successful Normal WIP
+Roll. Its Circular Template must be wholly inside the user's Hacking Area,
+extends infinitely upwards and lasts until the start of the States Phase.
+Its existing NFB restriction applies to the creating Hacker while the template
+remains. This timing differs from Controlled Jump's immediate declaration effect.
+
+Zero Pain permits two WIP dice in the applicable Face to Face Roll in either
+turn, with WIP -3 to the enemy Comms Attack. Winning with either die makes
+that Attack fail: the user makes no Saving Rolls and avoids its special effects.
+The Program still requires an eligible Active declaration or ARO; its reactive
+Burst does not independently create an ARO opportunity.
+
+The maintained Program records now cite their primary N5.3 pp. 59–61 sections.
+Supportware's general conditions are on p. 55, with its use/cancellation example
+on p. 60; Repeater is on p. 56. These corrections preserve source identity,
+the Program statistics and existing scoped relationships. The
+[V1S-035 review](v1.0-source-coverage-audit.md#hacking-firewall-and-supportware-follow-up-v1s-035-2026-11-04)
+owns the exact source inventory and outstanding acceptance.
+
 ### RS-CM-HACK-004 — Hacking Programs have a dedicated typed profile schema
 
 **Classification:** source-native rules-domain semantics.
