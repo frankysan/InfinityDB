@@ -141,6 +141,20 @@ IDs here and link the owning task instead of duplicating its description.
   Target design: `tests/test_audit_source_variant_inputs.py::test_cc_attack_source_240_exact_signatures_and_damage_owners`.
   Outcome: pending test authorship and static design review; no tests run.
 
+- [ ] **VD-0017 (2026-11-04; needs-design):** Pin Peripheral source-243's
+  five single-extra subtype signatures (439 rows), all profile-owned
+  source records and the eight distinct Cyberplug profile occurrences
+  (four Connected/Autonomous pairs across two Armies). Assert no
+  Controller/Unit/Loadout source owner is manufactured by the subtype
+  lookup and no unreviewed extras are promoted.
+  Work: [V1S-057](TODO.md#rule-variant-usage-index-and-restrictions);
+  change: 2026-11-04 source review; risk: medium.
+  Existing coverage: source inventory global counts and synthetic
+  Controller/Peripheral relationships; no source-243 owner regression.
+  Linked execution: VR-0074.
+  Target design: `tests/test_audit_source_variant_inputs.py::test_peripheral_source_243_exact_subtypes_and_profile_ownership`.
+  Outcome: pending test authorship and static design review; no tests run.
+
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
 existing coverage, risk, linked VR ID, and resulting test selector and
@@ -191,10 +205,21 @@ is recorded. Failed or incomplete verification remains open.
   test module; full-suite evidence when required for release.
   Outcome: not executed; raw archive required on the chosen worker.
 
+- [ ] **VR-0074 (2026-11-04; awaiting-design):** Verify V1S-057's
+  five exact Peripheral subtype signatures, 439 profile-owner rows
+  and the separate Cyberplug Connected/Autonomous pairs.
+  Work: [V1S-057](TODO.md#rule-variant-usage-index-and-restrictions);
+  revision: 2026-11-04 review commit pending; risk: medium.
+  Immediate: read-only source audit and exact owner queries completed;
+  docs verification to be recorded at commit. Design: VD-0017.
+  Deferred: pinned source-variant regression with raw Army archive and
+  relevant source-variant test module; cumulative release acceptance.
+  Outcome: not executed; raw archive required on the chosen worker.
+
 ## Next unused IDs
 
-- Design: `VD-0017` (through `VD-0014` retired; `VD-0015`–`VD-0016` open).
-- Execution: `VR-0074` (through `VR-0071` retired; `VR-0072`–`VR-0073` open).
+- Design: `VD-0018` (through `VD-0014` retired; `VD-0015`–`VD-0017` open).
+- Execution: `VR-0075` (through `VR-0071` retired; `VR-0072`–`VR-0074` open).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

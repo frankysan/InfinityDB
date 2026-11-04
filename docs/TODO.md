@@ -233,8 +233,10 @@ V1S-068–069, V1S-074 and V1S-081–090.
   are inventoried in the [2026-11-04 review](v1.0-source-coverage-audit.md#cc-attack-source-240-occurrence-review-v1s-056-2026-11-04).
   Two `+1 Dam` profiles require source clarification (SRC-032); retire after the
   pinned regression VD-0016/VR-0073, keeping unsupported effects excluded.
-- [ ] **V1S-057 (M, review):** Review Peripheral source-243 modifiers and separate controller/attached option
-  contexts.
+- [ ] **V1S-057 (M, review):** Peripheral source-243's five subtype signatures and 439
+  profile-owned occurrence contexts are characterized in the [2026-11-04 review](v1.0-source-coverage-audit.md#peripheral-source-243-occurrence-review-v1s-057-2026-11-04).
+  Finish the pinned ownership/Connected-Autonomous regression under VD-0017/VR-0074;
+  do not infer Controller access from a Peripheral Skill annotation.
 - [ ] **V1S-058 (M, review):** Review Transmutation source-246 exact profile transition and qualifier
   semantics.
 - [ ] **V1S-060 (M, review):** Review Hacking Device Plus source-101 compound/Upgrade Programs signatures
