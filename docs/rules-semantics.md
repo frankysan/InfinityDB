@@ -2754,6 +2754,11 @@ Immunity result or a computation for arbitrary Weapon profiles.
 
 The record's `reviewedCombinedCases` gives the exact Army Ammunition source ID,
 ordered component IDs, applicability, original rolls and covered-attack rolls.
+The current nine cases distinguish Attribute-wide protection from AP-, Shock-
+and E/M-component protection. A surviving component retains its own roll count,
+Saving Attribute modifiers and failed-save effects; removing one component
+does not authorize discarding the others. The cases are a closed descriptive
+set: unlisted pairings are not automatically evaluated or published as a result.
 An additional **explicit source example** now has its own validated
 `reviewedVulnerabilityCases` entry: a defender with Immunity (Enhanced) and
 Vulnerability (Viral) cannot use that Immunity against a weapon whose **name**

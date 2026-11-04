@@ -220,7 +220,7 @@ V1S-068–069, V1S-074 and V1S-081–090.
   The [source review](v1.0-source-coverage-audit.md#attack-weaponry-and-mode-source-review-v1s-034-2026-11-04-partial)
   covers BS/CC declarations, Template procedures and base Ammunition/State clauses; selected
   Weaponry/chart checks remain bounded evidence. Retain this slice until its new references
-  have regression/API/browser acceptance. Combined/Immunity precedence remains V1S-036/037;
+  have regression/API/browser acceptance. BTS/Critical/conditional State review remains V1S-037;
   complete profile/API/browser reconciliation remains V1S-038/070–072.
   Deferred: acceptance is in the phased VD/VR queue; retry at its five-item,
   seven-day or mandatory-gate trigger. Independent source review may continue.
@@ -230,8 +230,7 @@ V1S-068–069, V1S-074 and V1S-081–090.
   reconciles N5.3 pp. 54–62, existing Firewall/Supportware ownership, four Device sets and
   twelve Program profiles without recreating imported statistics. Keep this slice open for
   source/API/browser acceptance; SRC-001 and cross-Army variant publication retain their own owners.
-- [ ] **V1S-036 (M, review):** Review remaining component Immunity and combined-effect precedence cases with
-  exact target, source and non-executable semantics.
+  Deferred: acceptance resumes at the phased VD/VR five-item, seven-day or mandatory-gate trigger.
 - [ ] **V1S-037 (M, review):** Review BTS/non-Comms Weapon exceptions, Criticals, affected attributes and
   conditional State relationships separately.
 - [ ] **V1S-038 (M, gate):** Reconcile every published base and combined Ammunition fact against pinned Weapon
@@ -646,10 +645,12 @@ the remaining source clauses and final release-browser acceptance remain open.
     preserve the distinction between composition and Combined Saving Rolls.
     Reviewed cases belong in [rules semantics](rules-semantics.md), with bounded
     [source/browser acceptance](testing.md#10-reviewed-immunity-interactions-browser-acceptance-rea-011).
-    - [ ] Review remaining component-level Immunities, exact BTS-based non-Comms
-      Weapon exceptions, combined-effect precedence, Critical interactions,
-      affected Attributes and conditional State links. Do not generalize the
-      printed examples or name-scoped Viral Vulnerability into a resolver.
+    Component Immunity and combined-effect boundaries are reconciled in the
+    [bounded source review](v1.0-source-coverage-audit.md#component-immunity-and-combined-effect-review-v1s-036-2026-11-04).
+    - [ ] Review remaining exact BTS-based non-Comms Weapon exceptions, Critical
+      interactions, affected Attributes and conditional State links under V1S-037,
+      preserving SRC-002's unresolved Silent timing. Do not generalize printed
+      examples or name-scoped Viral Vulnerability into a resolver.
     - [ ] Revalidate all published base identities and reviewed combined forms
       against the final pinned source and shared Weapon/Ammunition facts.
       Keep any future comparison-view consumer separate; no comparison UI or
