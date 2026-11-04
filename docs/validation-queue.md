@@ -144,10 +144,25 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
+- [ ] VR-0070 (2026-11-04; ready-to-run): repair the stale source-section
+  total exposed by hosted Source checks. Work:
+  [V1S-033](TODO.md#rules-and-contextual-reference-completion); revision:
+  source-section expectation and VD test-design working tree based on
+  `373848d708aebea485fd67ec1be19c57d1300630`; risk: low.
+  Evidence: hosted run `41886992259` on
+  `0dbef584e552546396349253d55925ca45ced785` failed the summary assertion with
+  787 current sections versus 785 expected; local
+  `reconcile_explanation_inventory()` confirms 787. The two added sections
+  are the Endgame p.182 and WildParrot p.181 chart citations; the frozen audit
+  entry remains a historical 785-count snapshot. Design: VD-0013 retired
+  after static review; no tests executed. Deferred selector:
+  `tests/test_report_reference_baseline.py::test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers`;
+  also run `tools/run_checks.py --stage docs`. Intended host: Windows.
+
 ## Next unused IDs
 
-- Design: `VD-0013` (through `VD-0012` retired).
-- Execution: `VR-0070` (through `VR-0069` retired).
+- Design: `VD-0014` (through `VD-0013` retired).
+- Execution: `VR-0071` (through `VR-0069` retired; VR-0070 active).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
