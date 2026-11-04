@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **209/209** complete, **0** pending.
+- Supporting semantic identities: **210/210** complete, **0** pending.
 - Current authored outgoing relations: **518**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -911,7 +911,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (27/27)
+#### Rule (28/28)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
@@ -920,6 +920,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Combat Group** (`rule:combat-group`) — reviewed: English/Spanish N5.3 p.10 and archived Army List Wiki revision 3847 substantiate initial assignment, ten Order-contributing/spending member slots, Peripheral/Controller grouping, non-transfer baseline and Open Marker membership; Order Pool context is N5.3 p.11. Published as source-scoped reference only, not list legality or live group calculation.
+  - outgoing: none
+- [x] **Command Tokens** (`rule:command-tokens`) — reviewed: N5.3 Command Module pp. 128-129: one player-level four-token pool and three conditional use modes. Uses are documented in source-linked prose; no unconditional outbound interaction edge models runtime expenditure, eligibility, or Reactive Turn permissions.
   - outgoing: none
 - [x] **Consoles** (`rule:scenario:consoles`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none

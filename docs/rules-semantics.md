@@ -3576,9 +3576,13 @@ The core Command rules normally give each player four for the match. Strategic,
 Executive, and Operational are use modes for that same resource rather than
 different token identities.
 
-InfinityDB may explain and cross-link Command Token interactions, but a current
-token balance is not an invariant Unit/Profile/catalog fact. Actual availability
-and expenditure belong to a constructed-list/game-session context.
+InfinityDB now publishes `rule:command-tokens` as a General Rules overview
+for Strategic, Executive and Operational use, with exact N5.3 pp.128–129
+timing, recipient and Reactive-Turn restrictions. The pre-existing
+`rule:command-token-strategic-use` remains separately linked.
+A current token balance is not an invariant Unit/Profile/catalog fact;
+actual availability and expenditure belong to a constructed-list/game-session
+context. The overview is reference prose, not a token-use evaluator.
 
 Sources:
 

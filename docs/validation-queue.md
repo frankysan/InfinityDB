@@ -95,8 +95,8 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 2 distinct
-changes** (VR-0052/0053; not yet due by the five-change threshold).
+Only open VR obligations belong here. **Current count: 3 distinct
+changes** (VR-0052/0053/0054; not yet due by the five-change threshold).
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -130,6 +130,25 @@ changes** (VR-0052/0053; not yet due by the five-change threshold).
   exact-SHA hosted CI. A future separately approved
   re-review may rebind historical endpoint evidence; do
   not count this current-only mode as such approval.
+
+- [ ] **VR-0054** (2026-11-04; ready-to-run): Validate the
+  V1S-032A source-backed Command Token general reference and matched
+  schema-v9 `rules.db` / deployed-object publication.
+  Work: [Rules and contextual reference completion](TODO.md#rules-and-contextual-reference-completion);
+  artifact: `data/generated/rules.db` SHA-256
+  `e3d367cf881833d9a4820c1d659467e51556a249146c63d7d933769e3240e6aa`;
+  risk: medium (new public canonical Rule plus tracked matched release pair).
+  Immediate: deterministic double export, all 483 prior rule identities unchanged,
+  source/API 3/3, Chromium 3/3 at three widths, baseline 49/49,
+  rules database 166/166, curated rules 670/670, interactions 15/15,
+  deployed-object publication 12/12 and maintained links 38/38;
+  strict interaction audit, rules build, Ruff, Pyright and docs pass.
+  Design: none; the source, publication, mismatch/rollback guard
+  and normal-browser checks are implemented.
+  Deferred: pinned Linux focused/full suite and exact-candidate hosted CI,
+  including Source checks cross-platform deterministic rules/database
+  output comparison. The final release-wide browser/source gate remains
+  separately mandatory.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
@@ -305,7 +324,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0054` (`VR-0052/0053` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0055` (`VR-0052/0053/0054` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

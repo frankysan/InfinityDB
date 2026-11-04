@@ -1772,6 +1772,13 @@
       "reviewedOn": "2026-09-24"
     },
     {
+      "recordId": "rule:command-tokens",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 Command Module pp. 128-129: one player-level four-token pool and three conditional use modes. Uses are documented in source-linked prose; no unconditional outbound interaction edge models runtime expenditure, eligibility, or Reactive Turn permissions."
+    },
+    {
       "recordId": "skill:chain-of-command",
       "targetRelease": "0.7.0",
       "status": "reviewed",

@@ -55,6 +55,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Publish a source-cited
+  N5.3 Command Tokens general reference covering the shared four-token match
+  pool and Strategic, Executive and Operational expenditure, including
+  first-turn and Tactical/Active/Reactive timing, eligible recipient actions,
+  repeat-use limits and linked related rules. Keep the existing Strategic Use
+  reference, and do not imply automatic Unit resources or a rules evaluator.
 - **Data processing + Web backend + Web frontend:** Add an Orders/AROs quick
   reference linking current core declarations to their owning rules. Keep optional
   scenario actions and the Reinforcements Tactical Phase action separately scoped.

@@ -1,14 +1,18 @@
-"""V1S-032 Command Module source gap evidence, not an acceptance verdict."""
+"""V1S-032A N5.3 Command Module source and public-reference regressions."""
 
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
+from typing import Any
+from wsgiref.util import setup_testing_defaults
 
 import pytest
 
 from infinity_db.curated import load_curated_document
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.web import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
@@ -16,9 +20,7 @@ RULES = ROOT / "data/generated/rules.db"
 SOURCE = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
 SOURCE_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
-# Comprehensive check of the three mode headings, pool, permitted options
-# and the Reactive Turn prohibition. These are proof of the source obligation,
-# not a claim that the still-missing general reference has been published.
+# Pinned Command Module mode and restriction evidence, not an executable engine.
 COMMAND_CLAUSES = {
     128: (
         "Each player has four Command Tokens per game.",
@@ -80,5 +82,73 @@ def test_existing_strategic_use_has_source_citations_and_is_not_full_overview() 
     assert published["name"] == strategic["name"]
     assert published["summary"] == strategic["summary"]
     assert published["facts"]["effects"] == strategic["facts"]["effects"]
-    # Source p.128 describes Executive and Operational uses beyond this
-    # Strategic-only record. V1S-032 remains open pending normal publication.
+    # The previous narrow Strategic record remains unchanged.
+
+
+def _get(app: Any, path: str, query: str = "") -> tuple[str, bytes]:
+    environ: dict[str, object] = {}
+    setup_testing_defaults(environ)
+    environ.update(PATH_INFO=path, QUERY_STRING=query, REQUEST_METHOD="GET")
+    statuses: list[str] = []
+    response = app(environ, lambda status, _headers, _exc=None: statuses.append(status))
+    try:
+        body = b"".join(response)
+    finally:
+        close = getattr(response, "close", None)
+        if close:
+            close()
+    return statuses[0], body
+
+
+def test_general_command_token_uses_are_published_with_exact_scope() -> None:
+    records = {
+        row["id"]: row
+        for row in load_curated_document(CORE)["records"]
+    }
+    general = records["rule:command-tokens"]
+    assert general["name"] == "Command Tokens"
+    assert general["composition"] == {"role": "definition"}
+    assert general["scope"] == {"game": "N5", "seasons": ["current"]}
+    assert general["facts"]["category"] == "command-token-use"
+    assert [(c["sourceId"], c["page"]) for c in general["citations"]] == [
+        ("n5-core-v5.3-pdf", 128), ("n5-core-v5.3-pdf", 129),
+    ]
+    content = " ".join(
+        [general["summary"]]
+        + [
+            detail
+            for key in ("requirements", "effects", "restrictions", "clarifications")
+            for detail in general["facts"].get(key, [])
+        ]
+    )
+    for fragment in (
+        "four Command Tokens", "Strategic", "Executive", "Operational",
+        "first Player Turn", "second Player Turn", "Tactical Phase",
+        "Speedball Tokens", "more than ten", "ten-member limit",
+        "Possessed State", "Coordinated Order", "Guts Roll",
+        "Irregular Order", "Regular Order", "Fireteam Leader",
+        "Doctor", "Remote Presence", "Reactive Turn",
+    ):
+        assert fragment.casefold() in content.casefold(), fragment
+    published = RulesDatabase(RULES).composed_record(general["id"])
+    assert published is not None
+    assert published["summary"] == general["summary"]
+    assert published["facts"] == general["facts"]
+    assert {(c["source_id"], c["page"]) for c in published["citations"]} == {
+        ("n5-core-v5.3-pdf", 128), ("n5-core-v5.3-pdf", 129),
+    }
+
+    app = create_app(ROOT / "data/generated/infinity.db", rules_database_path=RULES)
+    for route in ("/rules", "/rules/command-tokens"):
+        status, body = _get(app, route)
+        assert status == "200 OK", route
+        assert b"<html" in body.lower(), route
+    status, body = _get(app, "/api/rules/command-tokens")
+    assert status == "200 OK"
+    assert json.loads(body)["rules"][0]["id"] == "rule:command-tokens"
+    status, body = _get(app, "/api/search", "q=command+tokens")
+    assert status == "200 OK"
+    assert any(
+        item.get("href") == "/rules/command-tokens"
+        for item in json.loads(body)["items"]
+    )

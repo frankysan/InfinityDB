@@ -1603,10 +1603,14 @@ spending Command Tokens. They are useful glossary/thesaurus terms because player
 discussion and related Skills can reference one use mode specifically
 (Counterintelligence, for example, targets Strategic Use).
 
-The current General Rules reference already publishes Command Token: Strategic Use for its
-Counterintelligence interaction. Broader coverage of Executive and Operational Use remains
-research; any expansion should keep these as use modes of Command Tokens rather than separate
-token types or application domains.
+The N5.3 `rule:command-tokens` General Rules reference now publishes the
+shared four-token match resource and all three use modes, with source-backed
+timing, eligibility and repeat-use restrictions. The earlier
+`rule:command-token-strategic-use` identity remains published for
+Counterintelligence and procedural/Logistical interactions.
+These are use modes of one player resource, not new token types or
+separate application domains; spending and recipient eligibility remain
+session-state questions, not an executable rules engine.
 
 Sources:
 

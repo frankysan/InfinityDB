@@ -159,14 +159,10 @@ revision, following the established dispatch-and-continue protocol.
 **Project domains:** Data processing, Web backend, Web frontend
 
 - [ ] **V1S-032 (M, review):** Review unaccepted Orders, game phases, command and activation rule clauses with
-  player-facing conditions and exceptions. The [Command Token source review](v1.0-source-coverage-audit.md#command-token-resource-and-phase-coverage-gap-v1s-032-2026-11-04)
-  confirmed a player-facing general-rule gap, so this parent stays open.
-  - [ ] **V1S-032A (M, implementation):** Add the N5.3 Command Token general reference
-    (four-token match pool; Strategic, Executive, Operational use; first-turn,
-    Tactical/Active/Reactive restrictions; recipient prerequisites and repeat-use
-    limits), while retaining the existing Strategic reference. Rebuild and stage
-    the matched `rules.db` / deployed-object publication pair and verify
-    normal `/rules`/context routes, source citations and browser tests.
+  player-facing conditions and exceptions. The
+  [V1S-032A Command Token reference](v1.0-source-coverage-audit.md#command-token-reference-publication-v1s-032a-2026-11-04)
+  now publishes the three use modes with pinned source and matched artifacts.
+  This parent remains open for the remaining phase/activation review.
   - [ ] **V1S-032B (S, review):** Finish N5.3 Orders/Tactical/Impetuous/States
     phase and activation source-clause dispositions (pp. 10–15, 128–131),
     separating already reviewed Order Expenditure/Coordinated Order facts

@@ -321,6 +321,55 @@ def test_modifiers_explained_normal_reference_navigation(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_command_token_general_reference_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1S-032A: command module is discoverable and links its scoped uses."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator('#catalog-list a[href="/rules/command-tokens"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.click()
+        page.wait_for_url(f"{ORIGIN}/rules/command-tokens", timeout=30000)
+        card = page.locator("#rule-rule-command-tokens")
+        card.wait_for(state="visible", timeout=30000)
+        body = card.inner_text()
+        for phrase in (
+            "four Command Tokens", "Strategic", "Executive", "Operational",
+            "one Procedural", "one Logistical", "more than ten",
+            "two Speedball Tokens", "ten-member limit", "Possessed State",
+            "Irregular Order", "Guts Roll", "Fireteam Leader",
+            "Reactive Turn", "cannot be spent",
+        ):
+            assert phrase in body, (width, phrase)
+        cites = card.locator(".rules-source-citations").inner_text()
+        assert "p. 128" in cites and "p. 129" in cites
+        strategic = card.locator(
+            'a[href="/rules/command-token-strategic-use"]'
+        ).first
+        strategic.wait_for(state="visible", timeout=10000)
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        strategic.focus()
+        strategic.press("Enter")
+        page.wait_for_url(
+            f"{ORIGIN}/rules/command-token-strategic-use", timeout=30000,
+        )
+        page.locator("#rule-rule-command-token-strategic-use").wait_for(
+            state="visible", timeout=30000,
+        )
+        assert not errors, (width, errors)
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_source_ecm_variant_summaries_normal_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:
