@@ -25,14 +25,16 @@ make frontend acceptance a substitute for backend or data validation.
 2. State the observable behavior and acceptance conditions. Include relevant states, navigation
    paths, content lengths, input/error states, and representative narrow and wide viewports.
    Consider keyboard use, focus, semantic markup, contrast, and touch behavior where applicable.
-3. Find and extend the existing test harness or verifier. Reuse the project fixtures and browser
-   transport; keep API/DOM assertions and real page/module behavior. Avoid a parallel custom test
-   framework or a browser-only implementation of backend-owned semantics.
-4. Run essential targeted tests first under the
-   [phased validation workflow](../../../docs/testing.md#phased-development-and-validation).
-   When diagnosing failure, preserve the first useful HTTP, JavaScript, console,
-   page-status, or screenshot evidence. Do not silently retry a failed page or
-   weaken assertions to hide nondeterminism.
+3. Specify missing browser assertions and reusable fixtures as VD
+   obligations; add their test code **only in the VD design drain, without
+   running tests**. Reuse the project's browser harness and distinguish
+   backend-owned semantics from DOM assertions. Existing checks to rerun
+   belong to VR, not VD.
+4. Follow the [strict queue workflow](../../../docs/validation-queue.md#queue-rules):
+   design all due VD entries first without execution, then run and reconcile
+   each due VR. Preserve first useful failure evidence, do not weaken tests
+   to hide nondeterminism, and run only an explicit correctness-critical
+   implementation-time exception.
 5. Verify the exact requirement in the browser where risk-critical visual
    or interaction evidence cannot safely be deferred. Exercise the affected
    paths at the necessary viewports and themes and compare rendered content
@@ -47,8 +49,10 @@ make frontend acceptance a substitute for backend or data validation.
    source inputs are verified; unexpected skips do not satisfy acceptance.
    For a due VR batch, safely fetch/fast-forward the intended committed
    revision on the MCP worker using the authorized explicit Git tools,
-   dispatch the pinned test job, then immediately resume independent
-   Windows implementation. Do not wait or repeatedly poll.
+   dispatch the pinned test job, and reconcile the VR when it completes.
+   Independent Windows development is allowed **only while an actual
+   Linux full suite runs**; partial/focused test jobs do not suspend the
+   VR drain.
 7. Report actual viewports, interactions, check stages, immediate results,
    and outstanding VR acceptance. Do not conflate focused UI tests with the
    final release browser gate.

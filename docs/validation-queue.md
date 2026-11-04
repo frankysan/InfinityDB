@@ -11,17 +11,22 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Queue rules
 
-- Separate the four activities: **essential test creation** and
-  **essential targeted execution** happen within the implementation pass;
-  **additional test design** is deferred as VD; **broader test execution**
-  is deferred as VR. A design pass may run newly written tests for sanity
-  without turning into a general execution pass. See
+- Separate **implementation**, **test design (VD)** and **test execution
+  (VR)**. Implementation normally records concrete missing tests as VD
+  instead of writing and executing a regression suite immediately. VD
+  work creates or edits tests and links their execution to VR; **no tests
+  run during a VD pass**, including new-test sanity runs. VR is the only
+  deferred test-execution phase. Exceptionally urgent correctness,
+  security, migration or artifact-safety checks remain immediate and
+  must be named explicitly. See
   [testing.md](testing.md#phased-development-and-validation).
-- Before ending an implementation pass, record every concrete missing
-  regression **design** as VD and each change's deferred broader **execution**
-  as VR, including changes needing only an existing full-suite or browser run.
-  Record exact immediate test selectors and results separately. Never call an
-  unrun check passed or defer a required safety, migration or publication gate.
+- Before ending an implementation pass, record **all concrete missing test
+  designs** as VD, including new focused regression tests unless an immediate
+  safety exception requires them, and each change's **deferred execution** as
+  VR. A VR may await one or more VD items; existing tests requiring reruns
+  need only VR. Record exact immediate exception selectors/results separately.
+  Never call an unrun check passed or defer a required safety, migration or
+  publication gate.
 - Design items are `VD-0001`, `VD-0002`, etc. Each ID is one independently
   actionable test requirement, not one test function or a speculative idea.
   Count open `needs-design` IDs toward the **5-requirement design threshold**.
@@ -31,14 +36,29 @@ IDs here and link the owning task instead of duplicating its description.
   implementation changes, not files, tests, commits, or repeated runs, toward
   the **5-change execution threshold**. Combine multiple checks for the same
   change under one VR item. Link any blocking VD IDs.
-- When design reaches 5, the next pass handles test design only. When execution
-  reaches 5, the next pass handles test execution only, after required test
-  design is ready. If both thresholds are reached, design goes first wherever
-  it blocks execution. Do not start another ordinary implementation pass until
-  the due pass is addressed. For asynchronous Linux validation, correctly
-  dispatching the due jobs addresses the scheduling checkpoint; return
-  immediately to independent Windows work while they run. Failed jobs
-  remain open and actionable, not silently accepted or ignored.
+- **Strict drain loop (check at every work boundary):**
+  1. If **VD >= 5**, process VD entries **one at a time until no open VD
+     remains**. Write or revise the required tests and create/update their
+     linked VR entries, but **do not execute any tests**. When VD is empty,
+     proceed to the VR check.
+  2. If **VR >= 5**, process VR entries **one at a time until no open VR
+     remains**, verifying the exact tests, state and acceptance evidence for
+     each. Shared full-suite results may satisfy several entries, but review
+     and retire each independently. **Dispatch is not completion**.
+  3. Recount both queues. If either has reached 5, return to step 1.
+     Otherwise ordinary implementation can resume.
+  The threshold is a trigger for draining to **zero**, not permission to
+  resume as soon as the count falls below 5. Never start another ordinary
+  implementation pass while a due queue is idle or running focused VR work.
+  **Exception:** while an actual full test suite is running asynchronously on
+  a pinned, independent `linux-dev` checkout, unrelated Windows development
+  may continue. Its new VD/VR obligations still enter the queue, and the
+  outstanding VR entries remain open; resume the drain when the full run
+  completes. This exception does not apply to focused or partial Linux jobs,
+  nor to merely scheduling a future run. Failed and blocked entries remain
+  open and must be triaged individually; if no safe action can clear them,
+  report the blockers and leave the queue explicitly undrained rather than
+  claiming success or looping indefinitely.
   A critical gate or an overdue item takes priority.
 - **Maximum age:** process any open deferrable item within 7 calendar days of
   its recorded date, even below threshold. Also process it before the relevant
@@ -62,9 +82,11 @@ IDs here and link the owning task instead of duplicating its description.
   for the validation handoff. Never force, reset, rebase or disturb a
   divergent/dirty checkout; report an unsafe or unavailable revision
   as a blocker. Batch compatible selectors into one pinned asynchronous
-  `linux-dev` job with `expected_commit`; **after dispatch, resume
-  independent Windows development immediately**, not a polling/waiting
-  loop. Check status at meaningful Windows task boundaries and respond
+  `linux-dev` job with `expected_commit`. **Only while the entire
+  full-suite run is actually executing on Linux** may independent Windows
+  development continue; a focused/partial job does not suspend VR
+  draining. Check the full-suite result at meaningful boundaries,
+  resume processing open VR entries after it finishes, and respond
   to actionable failures. A Linux run cannot verify later Windows
   edits. Git synchronization remains explicit, bounded and
   validation-triggered, never a background mirror.
@@ -73,12 +95,12 @@ IDs here and link the owning task instead of duplicating its description.
   At each pass boundary, report queue counts, due/blocked items and what
   was actually dispatched; do not equate green immediate tests with an
   empty deferred-execution queue.
-- **Retire completed entries immediately after processing:** remove a VD item
-  once its tests are designed and the direct sanity checks pass; carry any
-  relevant selector/dependency into its open VR item. Remove a VR item when
-  its required execution has passed on the intended state and the outcome is
-  recorded. Keep failed, blocked, or unrun work open; independent hosted CI
-  and release gates are not implicitly accepted.
+- **Retire completed entries immediately after processing:** remove each VD
+  item once the test code/selector has been inspected for design completeness,
+  and carry the selector to an open VR item **without executing it**. Remove
+  each VR only after its required execution and evidence have passed for the
+  exact intended state. Keep failed, blocked or unrun work open; separately
+  owned hosted CI and release gates are not implicitly accepted.
 - This is an **active queue, not a completion log**. Git history retains
   retired detail; do not copy finished items into another running diary.
   Advance the next-unused-ID counters on creation and never reuse an ID.
@@ -89,9 +111,10 @@ Only open VD requirements belong here. **No pending entries.**
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
-existing coverage, risk, linked VR ID, and test selector/sanity-check
-outcome as it is processed. Retire the entry once designed and checked;
-retain required dependencies in any still-open VR item.
+existing coverage, risk, linked VR ID, and resulting test selector and
+static design-review outcome. Do not record a test result in VD. Retire
+the entry when its design review is complete; retain the unrun test
+selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
@@ -625,7 +648,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0063` (`VR-0052` through `VR-0062` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0064` (`VR-0052` through `VR-0063` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
@@ -643,7 +666,7 @@ entries for work fully verified during implementation.
 - [ ] VD-NNNN (YYYY-MM-DD; needs-design): <required assertion/edge case>.
   Work: <TODO anchor>; change: <revision/files>; risk: <level>.
   Existing coverage: <selector or none>; linked execution: VR-NNNN.
-  Outcome: <selector and design-sanity result, when performed>.
+  Outcome: <authored test selectors and static design review; no tests run>.
 
 - [ ] VR-NNNN (YYYY-MM-DD; awaiting-design): <one implementation change>.
   Work: <TODO anchor>; revision: <commit/artifact>; risk: <level>.

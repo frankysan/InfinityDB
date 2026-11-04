@@ -40,14 +40,15 @@ change, use [Army data pipeline](../infinity-army-data-pipeline/SKILL.md).
 5. Implement the smallest complete slice. Preserve exact source/profile/mode identity, ordering,
    scope, citations, and unknown/disputed status. Do not imply a legal roster, deployed state, or
    calculated game outcome unless the maintained contract explicitly supports it.
-6. Test changed boundaries directly: source/config validation, deterministic export or publication,
-   API shape and resolver behavior, and browser links/rendering as applicable. Add parity assertions
-   so published API/browser output is checked against the generated contract, not raw-source
-   assumptions.
+6. Register concrete boundary tests (source/config, deterministic export,
+   API, resolver, browser, parity and failure cases) as VD. **Create/edit
+   them during the VD drain but do not execute any tests then**. Existing
+   reruns and newly designed tests execute during VR.
 7. For browser-facing changes, follow [browser acceptance](../infinity-browser-acceptance/SKILL.md).
-   Run the essential focused tests and risk-critical checks from
-   [phased validation](../../../docs/testing.md#phased-development-and-validation), then inspect
-   the full diff for missing documentation owners or changed behavior.
+   Honor the [strict VD/VR drain loop](../../../docs/validation-queue.md#queue-rules)
+   before ordinary implementation. Immediate tests are exceptional and
+   require a named safety-critical reason; inspect the diff for missing
+   documentation owners and changed behavior.
 8. **Before implementation and at closeout**, inspect the
    [active validation queue](../../../docs/validation-queue.md). Register missing
    additional test design as VD and deferred integration/browser/module/full-suite
@@ -56,9 +57,11 @@ change, use [Army data pipeline](../infinity-army-data-pipeline/SKILL.md).
    Batch due VR items on the pinned asynchronous Linux worker when prepared,
    following the [Windows/Linux handoff](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
    When due, perform the separately invoked safe Git handoff steps
-   agentically, pin the worker revision, dispatch the job and **return
-   immediately to independent Windows implementation**. Do not force
-   Git changes or hide skipped coverage; retire only verified entries.
+   agentically and pin the worker revision. Independent Windows
+   implementation may continue **only while a full Linux suite is
+   actually running**; focused/partial jobs do not suspend the VR
+   drain. Do not force Git changes or hide skipped coverage;
+   retire only verified entries.
 
 ## References
 

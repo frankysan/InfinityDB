@@ -149,9 +149,10 @@ a supported boundary, **conditional** = only for confirmed additions,
 pinned source/variant, affected maintained model/export, API and ordinary
 browser entry point (or a justified no-change), essential regressions,
 deferred validation-queue obligations and documentation handoff. No slice
-alone replaces final source-wide or release-candidate acceptance. Work on
-independent slices can overlap Linux validation of an earlier committed
-revision, following the established dispatch-and-continue protocol.
+alone replaces final source-wide or release-candidate acceptance. Work on independent Windows slices can overlap an actively running
+**full Linux test suite** on an earlier pinned revision, following the
+[validation-queue drain policy](validation-queue.md#queue-rules).
+Partial/focused Linux runs do not suspend the due VR drain.
 
 #### Rules and contextual reference completion
 

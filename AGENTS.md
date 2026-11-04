@@ -77,26 +77,27 @@ See `docs/testing.md` for the complete contract.
 
 ### Phased validation workflow
 
-Follow [phased development and validation](docs/testing.md#phased-development-and-validation)
-for ordinary implementation, test design, and test execution. At the start
-and end of each task, inspect `docs/validation-queue.md` and its age/threshold
-triggers: **5 pending test-design requirements** force a design-only pass;
-**5 distinct implementation changes awaiting deferred test execution**
-force an execution-only pass, after any blocking design. An item older than
-**7 calendar days** is due even below threshold. Critical checks, CI, and
-release/merge/deployment gates override batching.
+Follow the [strict VD/VR drain loop](docs/validation-queue.md#queue-rules)
+**before beginning any ordinary implementation task and at each boundary**:
+when VD >= 5, design **every VD one at a time to an empty queue**,
+writing tests and linked VR obligations but **running no tests**.
+Then when VR >= 5, execute/reconcile **every VR one at a time to an empty
+queue**, retiring only fully verified entries. Recheck both thresholds
+and repeat if either is >= 5. Five is the drain trigger, **not** a
+target count after dispatch; dispatch alone never retires a VR.
+Seven-day-old items and mandatory security, correctness, CI or release
+gates remain due irrespective of counts. If an unresolved blocker prevents
+emptying a due queue, report it and leave the due work explicitly open.
 
-Distinguish **essential test creation**, **deferred test design**,
-**essential test execution**, and **deferred broader test execution**.
-During implementation, create a direct regression only where needed to
-establish the changed contract; run that specific test and applicable
-risk-critical validators immediately. Prefer individual pytest selectors,
-not entire neighboring modules by default. Only expand immediate execution
-when narrower tests cannot establish safety (especially for rules, migrations,
-security, database schema or synchronized artifacts), or a mandatory gate
-requires it. Explain any such expansion. Do **not** routinely write a full
-negative/edge-case matrix or run every adjacent test module during an
-implementation pass.
+Separate **implementation**, **VD test creation**, and **VR test
+execution**. Ordinarily record new concrete regression requirements as VD,
+rather than writing/running them in implementation. A VD pass **only
+creates or edits tests, reviews their selectors and updates corresponding
+VR entries**; no focused sanity tests, module tests or full suites run
+in VD. VR owns those executions and existing-test reruns. Essential
+security, schema, migration, provenance and publication-integrity gates
+may run immediately when postponement would be unsafe; document the
+specific exception. Do not let routine focused testing bypass VD.
 
 Record further concrete regression requirements as VD items; record existing
 tests, broader modules and integrated/full-suite checks deferred for each
@@ -109,18 +110,17 @@ oldest due item and intended execution host. Passing focused local tests
 does not implicitly discharge deferred full-suite, browser, integration
 or cross-platform validation. If nothing remains deferred, explicitly
 record that decision in the handoff rather than adding an empty item.
-A design-only pass writes queued tests and runs each new test
-directly to verify it; an execution-only pass batches the broader runs.
-Neither is a blanket exemption from essential tests. Never report deferred
-checks as passed or acceptance complete before verification. Failures
-remain open and link to the TODO fix. Retire completed VD/VR entries promptly
-after recording results; keep the queue active-only and advance next-unused
-IDs without reuse. Git history retains completed records. Dispatching a
-due asynchronous Linux validation batch addresses its scheduling
-checkpoint; its completion is **not** a prerequisite for resuming
-independent Windows development. Failed executions remain in the queue
-until corrected and verified. The queue does not replace the
-implementation backlog or weaken CI/release gates.
+In VD, retire an entry only after its test design is complete **without
+running any tests** and its VR execution obligation is recorded. In VR,
+execute/reconcile each item and retire only after verifying terminal results
+against the intended revision; failures remain open. A shared full-suite run
+can provide evidence for several VR entries, but retire them individually.
+**Only while a full test suite is actually running asynchronously on the
+independent Linux worker may unrelated Windows development proceed during
+a due VR drain.** Focused/partial Linux runs, a scheduled but unstarted job,
+or merely dispatching a job do not grant this exception. Return to the VR
+drain when the full suite finishes. This does not weaken critical or CI/
+release checks.
 
 Prefer asynchronous Linux (`worker="linux-dev"`) jobs for broader tests
 when the dedicated Linux checkout has the intended code, dependencies and
@@ -134,14 +134,14 @@ for a specific revision; associate every result with its actual revision,
 asset state and skip reasons. Never infer that an earlier Linux run validates
 subsequent Windows edits or silently skip missing dependencies.
 
-**Dispatch-and-continue is the normal workflow:** once an asynchronous
-`linux-dev` test job starts, immediately resume the next independent
-implementation or test-design task in the **Windows** working tree.
-Do not spend the run repeatedly polling, waiting for completion, or
-substituting status narration for development. Poll at natural task
-boundaries or when output identifies an actionable blocker; retrieve
-the terminal result and reconcile the queue when appropriate. The
-Linux job validates its pinned snapshot, not later Windows edits.
+**Full-suite dispatch-and-continue exception:** while a pinned
+`linux-dev` **full-suite** test job runs, work on unrelated Windows
+development or VD design is permitted; commit and record its new
+obligations separately. This does not mark the executing VRs complete.
+When the full-suite job terminates, stop unrelated implementation and
+resume draining the queue. For a focused or partial Linux test job,
+remain in VR-processing mode. Do not repeatedly poll without reason;
+check at useful task boundaries. Linux validates only its pinned snapshot.
 Read-only review, analysis, planning and triage remain appropriate
 when the next implementation cannot safely proceed. Do not mutate
 inputs or artifacts visible to the running **Linux** tests; use a

@@ -37,15 +37,18 @@ For source meaning or rules conflicts, first establish the evidence with
 5. If changing a schema, compatibility contract, or runtime artifact, identify all consumers,
    migration/rebuild guidance, and current documented values. Update the canonical owner and
    relevant user/operator guidance in the same change.
-6. Add or extend tests at the changed boundary. Check exact source-to-output parity and failure
-   cases, including stale/mismatched inputs where applicable. Persistent generated artifacts must
-   remain deterministic across supported platforms for the same pinned inputs and toolchain.
-7. Run essential focused checks from the
-   [phased testing workflow](../../../docs/testing.md#phased-development-and-validation).
-   Use `tools/run_checks.py --profile data` when the combined Army/rules data
-   gate is immediately required, not as an automatic full-profile step for
-   every implementation. Never defer required artifact/provenance integrity
-   verification or claim an unavailable stage passed.
+6. Specify concrete source-to-output parity, stale/mismatched-input and
+   deterministic-artifact regressions as VD items; **write these tests
+   in the VD drain without executing any tests**, then verify under VR.
+   Only an explicitly urgent artifact/provenance/schema integrity gate
+   remains immediate during implementation.
+7. Follow the [strict VD/VR drain loop](../../../docs/validation-queue.md#queue-rules)
+   before implementation. At VD >= 5, write linked tests until VD is empty,
+   **running none**. At VR >= 5, execute/reconcile entries individually
+   until VR is empty. A Linux **full-suite run in progress** uniquely permits
+   independent Windows development; focused/partial jobs do not.
+   Use `tools/run_checks.py --profile data` only as required by a due
+   VR or immediate integrity gate; never imply an unrun test passed.
 8. Inspect [the validation queue](../../../docs/validation-queue.md) before
    and after the pass. Add VD items for concrete additional regressions and a
    VR item for each distinct change needing deferred modules, integration,
@@ -56,8 +59,9 @@ For source meaning or rules conflicts, first establish the evidence with
    committed Windows revision onto the dedicated MCP worker checkout.
    This handoff is already authorized when tests are due; do not ask
    again for ordinary safe synchronization, force a divergent checkout,
-   or interrupt independent Windows development. Do not retire an
-   item based on unrelated or skipped-asset test coverage.
+   or interrupt independent Windows development **during an actual
+   Linux full-suite run**. Focused/partial jobs do not suspend the
+   VR drain. Do not retire items based on unrelated/skipped coverage.
 9. Summarize changed inputs/contracts, generated consequences, immediate
    results, queued obligations, and any unresolved data. Do not update pinned
    source artifacts or publish acquisition output unless explicitly required.

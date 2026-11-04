@@ -44,9 +44,12 @@ closeout and release readiness, not the feature itself.
    deferred broader executions (VR) registered, with selectors, evidence
    requirements and exact commit. A green focused suite is not a reason to
    omit a full-suite or cross-platform obligation still due. Check the
-   five-item/seven-day triggers and [pinned asynchronous Linux dispatch](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
-   Retire only entries with terminal passing evidence for the intended state;
-   allow independent Windows implementation while Linux jobs execute.
+   [strict five-item/seven-day drain loop](../../../docs/validation-queue.md#queue-rules):
+   VD >= 5 means design all tests to an empty VD queue **without executing
+   tests**; then VR >= 5 means execute/reconcile entries individually until
+   VR is empty. Retire only items with verified terminal evidence.
+   Unrelated Windows development is permitted during an **actively running
+   pinned Linux full suite**, not focused/partial Linux test jobs.
 7. Run the smallest necessary documentation and immediate code checks from
    [phased development checks](../../../docs/testing.md#phased-development-and-validation).
    Reuse verified focused results rather than repeating entire modules.

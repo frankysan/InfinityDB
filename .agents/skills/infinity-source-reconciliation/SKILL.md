@@ -50,11 +50,13 @@ hand those parts to the appropriate workflow after the source semantics are clea
    deferred source-audit, cross-platform or cumulative execution, naming the
    exact source evidence, test selectors and target commit. A pure read-only
    investigation without pending test work needs no artificial queue entry.
-   Use the [phased Linux execution workflow](../../../docs/testing.md#parallel-windows-development-and-linux-validation)
-   for eligible broader checks. When execution is due, use the
-   authorized, separately invoked safe Git fetch/fast-forward handoff
-   to prepare the Linux worker, then dispatch and continue Windows
-   development; never force or implicitly synchronize a checkout.
+   Follow the [strict VD/VR drain loop](../../../docs/validation-queue.md#queue-rules):
+   at VD >= 5, create all required tests **without running any**; at
+   VR >= 5, execute/reconcile each to an empty queue. Prepare the
+   Linux worker with authorized explicit safe Git fetch/fast-forward.
+   **Only an actively running pinned Linux full suite** permits unrelated
+   Windows implementation during the due VR drain; a partial/focused
+   job does not. Never force or implicitly synchronize a checkout.
 
 ## References
 
