@@ -232,8 +232,6 @@ V1S-068–069, V1S-074 and V1S-081–090.
   contexts.
 - [ ] **V1S-058 (M, review):** Review Transmutation source-246 exact profile transition and qualifier
   semantics.
-- [ ] **V1S-059 (S, review):** Review Journalist source-272 qualifiers and establish whether a typed rule
-  variant is justified.
 - [ ] **V1S-060 (M, review):** Review Hacking Device Plus source-101 compound/Upgrade Programs signatures
   without inferring extra Program access.
 - [ ] **V1S-061 (M, review):** Run cross-family TEXT/DISTANCE, named MOD and unusual variant consistency
