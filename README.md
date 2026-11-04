@@ -84,7 +84,7 @@ its application metrics.
 - Links to **Orders and AROs** from the home page and navigation, with searchable
   declarations by Order type and links to their rules and scenario context.
 - Includes linked N5.3 movement and geometry references for routes, supporting
-  surfaces, visibility, zones, Coherency and replacement positioning, with
+  surfaces, visibility, Cover, zones, Coherency and replacement positioning, with
   Move's declaration requirements and Silhouette diagrams.
 - Includes a browsable **Scenarios** reference with four N5.3 Core missions
   and a separately selectable ITS Season 18 Battleground pilot. Explicit

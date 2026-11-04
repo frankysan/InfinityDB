@@ -95,57 +95,39 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 10 distinct
-changes** (VR-0052 through VR-0061; five-change execution threshold reached).
-The Linux cumulative full-assets run at `df7191fc` passed **5,056 tests,
-29 skipped, zero failures**; see [the pinned evidence](testing.md#parallel-windows-development-and-linux-validation).
-VR-0052 through VR-0058 retain their outstanding hosted acceptance,
-not an unrun Linux full suite. The `60c4ddbc` hosted run confirmed the
-full-history repair on all four source jobs, but Ubuntu 3.11's separate
-index-only preflight still failed without `.git`. VR-0059 owns the
-hash-pinned historical evidence correction. VR-0060 owns the subsequent
-movement reference. A new pinned Linux cumulative run must cover both
-changes; no prior result verifies these later edits.
+Only open VR obligations belong here. **Current count: 11 distinct
+changes** (VR-0052 through VR-0062; five-change execution threshold reached).
+No VD item is pending. The oldest open entries are dated 2026-11-03,
+due 2026-11-10; no age threshold is overdue.
 
-The preceding batch used exact implementation revision
-`cae85151037aae8c09fc6577d415033fc5d4bf64`:
-`linux-dev:1b7f55f0fea34e9c992c1f6844271c4a` runs
-`tools.run_checks --stage test --assets required --skip-details`.
-The worker was safely fetched/fast-forwarded; its ignored publication
-was rebuilt and checked, and read-only movement replay independently
-verified the pinned PDF, deterministic host export and strict logical
-equality with the tracked rules. Linux's SQLite bytes differ, as already
-disclosed in the [cross-host boundary](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04);
-hosted byte comparison remains mandatory. The terminal result was
-**5,062 passed, 29 skipped, four failed** in 424.07 s pytest / 424.71 s
-runner. All four failures were stale interaction-review totals after
-adding the two movement Rules; VR-0060 records the focused correction.
-Hosted runs at that exact SHA are Source checks
-[`41850874089`](https://github.com/frankysan/InfinityDB/actions/runs/41850874089),
-Installed wheel smoke
-[`41850874067`](https://github.com/frankysan/InfinityDB/actions/runs/41850874067)
-and Deployment smoke
-[`41850874023`](https://github.com/frankysan/InfinityDB/actions/runs/41850874023).
-Installed wheel and Deployment smoke passed. Source checks failed the
-same four count assertions; dependent deterministic outputs were skipped.
-The corrected movement tests and V1S-033B geometry are now dispatched
-at exact implementation revision `a9f564650ff0f42d28fca29f5a1daf87f8642edb`.
-Job `linux-dev:c4d857d310ab47949ccd94feb06f7f56` runs
-`tools.run_checks --stage test --assets required --skip-details` for all
-compatible open VR obligations. Safe fetch/fast-forward and the ignored
-publication build/check passed. Read-only geometry replay verified the pinned
-PDF, all 495 records, deterministic host export and strict logical equality;
-the known cross-host SQLite byte distinction remains, without claiming the
-hosted byte gate passed. This dispatch addresses the due scheduling checkpoint
-and permits independent Windows development; it is not terminal acceptance.
-At this exact SHA, Installed wheel
-[`41856754841`](https://github.com/frankysan/InfinityDB/actions/runs/41856754841)
-and Deployment smoke
-[`41856754856`](https://github.com/frankysan/InfinityDB/actions/runs/41856754856)
-passed; Source checks
-[`41856754845`](https://github.com/frankysan/InfinityDB/actions/runs/41856754845)
-remained queued when recorded. The failed predecessor is not accepted, and
-no open VR entry is retired from these partial outcomes.
+The pinned Linux cumulative batch at
+`a9f564650ff0f42d28fca29f5a1daf87f8642edb`, job
+`linux-dev:c4d857d310ab47949ccd94feb06f7f56`, passed **5,074 tests,
+29 skipped, zero failures** in 431.85 s pytest / 432.51 s runner,
+with all 808 SVGs and its rebuilt/checked ignored matched publication.
+This completes the Linux obligations through VR-0061 on that revision;
+the earlier four movement-only count failures are corrected. See
+[the pinned evidence](testing.md#parallel-windows-development-and-linux-validation).
+
+Hosted acceptance remains open. At documentation successor `6a4b05aa`,
+Source checks passed both Linux jobs and Windows, and both smoke workflows
+passed. GitHub could not acquire a macOS hosted runner: the cancelled job
+had **no runner and no steps**, with an explicit macOS arm64 capacity
+annotation. The dependent cross-platform byte-comparison job was skipped.
+The latest affected macOS job was retried once under the transient-runner
+policy: Source run
+[`41858032642`](https://github.com/frankysan/InfinityDB/actions/runs/41858032642),
+attempt 2, replacement job
+[`126684025015`](https://github.com/frankysan/InfinityDB/actions/runs/41858032642/job/126684025015).
+It was queued when recorded. No audit assertion or workflow gate was weakened,
+and no entry is retired before the missing hosted acceptance is verified.
+
+VR-0062 owns the later Cover/vertical-movement change and requires a new
+pinned `linux-dev` full-assets batch and exact-candidate hosted checks.
+The preceding Linux result does not validate those later edits. The known
+cross-host SQLite byte boundary remains separate from strict logical replay;
+the [hosted byte gate](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
+is still mandatory.
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -408,6 +390,30 @@ no open VR entry is retired from these partial outcomes.
   Installed wheel and Deployment smoke. V1S-033C-E and final release-wide
   source/browser acceptance remain separate.
 
+- [ ] **VR-0062** (2026-11-04; ready-to-run): Validate V1S-033C's
+  shared Cover reference and Climb/Jump procedures, with linked Climbing
+  Plus conditions, based on `6a4b05aa` and N5.3 pp. 32-34/41-42/88.
+  Work: [Rules and contextual reference completion](TODO.md#rules-and-contextual-reference-completion);
+  risk: medium (conditional public prose and synchronized schema-v9 pair).
+  Rules SHA-256: `a6cbdd5e94d35f00263b72a7a1325ac3cfe7b71ff2a494abbdbd152a2a8a674d`.
+  Immediate Windows: pinned source, preserved Skill metadata and boundary
+  checks **3/3**, storage/API/search/FAQ and pair/refusal **2/2**, Chrome
+  **3/3** at 1440/390/320 px. Integrity modules passed **959** tests; the
+  remaining legacy LoF-text assertion was updated to require the new typed
+  link and passed directly **1/1**, retaining Super-Jump's existing check.
+  Ruff, Pyright, Army/rules builds and strict interaction checks pass.
+  Maintained-text audit has zero unlinked candidates and zero residuals;
+  four obsolete ordinary-word fingerprints were removed, without adding
+  or broadening an exception. The existing Silent (X) review marker remains.
+  Publication preserved 492 unrelated records, Restrictions, all object
+  contents and the separate dated vaulting FAQ. Native declaration types,
+  Army source mappings, distance parameters and State relations are unchanged.
+  Design: none; essential source, metadata, browser, FAQ and negative-guard
+  coverage exists. Deferred: pinned `linux-dev` focused/cumulative full-assets
+  tests and exact-SHA hosted Source checks, including macOS and deterministic
+  outputs, Installed wheel and Deployment smoke. Final V1S-033D-E and
+  source-wide release acceptance remain separate.
+
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
 source-variant **100/100**, full-assets **5,014 passed / 29 expected
@@ -582,7 +588,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0062` (`VR-0052` through `VR-0061` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0063` (`VR-0052` through `VR-0062` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

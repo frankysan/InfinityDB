@@ -477,13 +477,10 @@
           "reason": "ordinary-movement-verb",
           "occurrenceSha256s": [
             "10b0bc9d82fc42350c84795e65d185fd0d056f889b96a8c469ff138bf38a974c",
-            "163588555aa14ef7b39c3588d4136dfa9912a7d8961743178db5b0905f5be1a0",
             "3fd7514371b06e7e811d3b39863d9b58160b4715e688c90cfce3aade17f5b59e",
             "406eed2a87e9ea15323a3895197f75c97ed014c5f1131db0c3a35bc90de1f1f0",
             "5b02f57bc085c74abe0923a2424b7211122e101ff86026fd3c531446c87c8c96",
-            "9490c7b015735419a85fac1584485161799d2b2f85bb3925f825806444e0f46f",
             "ac3a4ff19fbf4032f44edf3bf77c3c38fbb807a4fd9beee298ff5e290b1e041e",
-            "c3e4d542cf3f21ecf270d69659bad7fd649835c1b0c87f5b68c526403c144a33",
             "c5d534f04df929885d3e34c8e94eb36ebbdea29e5103794c3829f47bc5d3921c",
             "ee45c55b8f5469f99a1355417a125a82765b938aac3ebfcf444e1ee3eaa7083d"
           ]
@@ -492,7 +489,6 @@
           "text": "moves",
           "reason": "ordinary-movement-verb",
           "occurrenceSha256s": [
-            "143448d6a583d297ca9ed8d02b2debe80d0ad6273fe6a43cd6368910606e17b7",
             "15996ec9d86ac1406ce9cc3742551b8be2ff3d14206d51bf6d1eabbe019523e6",
             "8f3eb9f2e5c5bf90081fb324606a95124da19377829281a24b34b67af9c5ddc8"
           ]

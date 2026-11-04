@@ -508,6 +508,18 @@ This verifies the Linux obligations for VR-0052 through VR-0058 at that
 revision. Hosted acceptance and VR-0059 remain open; this result does not
 cover subsequent movement-reference or clean-export evidence changes.
 
+The later pinned movement/geometry batch at
+`a9f564650ff0f42d28fca29f5a1daf87f8642edb`, job
+`linux-dev:c4d857d310ab47949ccd94feb06f7f56`, passed **5,074 tests,
+29 skipped, zero failures** in **431.85 s pytest / 432.51 s runner**.
+All 808 published SVGs and the rebuilt/checked ignored deployed-object
+publication were present. Existing source/history/opt-in skips and two
+Python 3.14 multithreaded `fork()` warnings remain. This verifies the
+Linux obligations through VR-0061 on that revision, including the repaired
+interaction totals; it does not cover subsequent Cover changes. Source CI
+passed its Linux and Windows jobs but could not acquire a macOS runner,
+so macOS and the dependent byte-comparison gate remain unverified.
+
 The frozen declaration-owner audit now reads a hash-pinned extraction of
 the original 17 retired records from
 `config/validation/frozen-declaration-source-v1.json`. It retains the exact

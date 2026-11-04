@@ -22,6 +22,8 @@ TERMS = re.compile(r"\b(?:deployables?|tokens?|scenery elements?)\b", re.IGNOREC
 # These are source-reviewed decisions, not a generic classification heuristic.
 # Adding another decision requires explicit review of its exact source clause.
 CLASSIFICATIONS = {
+    "rule:cover": ("rule", "scenery-cover-condition-not-object-profile"),
+    "skill:climb": ("skill", "vertical-trooper-state-indicator-not-object"),
     "rule:line-of-fire": ("rule", "line-of-fire-volume-not-object-profile"),
     "rule:zones-and-contact": ("rule", "shared-zone-contact-not-object-profile"),
     "rule:general-movement": ("rule", "movement-through-existing-elements-not-object"),

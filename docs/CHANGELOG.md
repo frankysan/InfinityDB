@@ -12,8 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Look up movement, Line of Fire, zones, Coherency and replacement positioning,
-  with Move's supporting-surface requirements and linked Silhouette help.
+- Look up movement, Line of Fire, Cover, zones, Coherency and replacement
+  positioning, with supporting-surface requirements, vertical-movement
+  exceptions and linked Silhouette help.
 - Follow the N5.3 Player Turn's five phases and Order Count in linked
   Game Sequence and Order Pool references, including which Orders are
   available, private, repeatable or lost. The source disagreement about
@@ -65,10 +66,10 @@ are not retroactively relabeled.
 ### Added
 
 - **Data processing + Web backend + Web frontend:** Expand shared N5.3 movement
-  and geometry help for route measurement, visibility, zones, Coherency and
-  replacement positioning. Explain Move's supporting surfaces and movement
+  and geometry help for routes, visibility, Cover, zones, Coherency and
+  replacement positioning. Explain Move, Climb and Jump requirements and
   distances alongside Silhouette volumes and diagrams, preserving conditional
-  contact, posture, arc and replacement exceptions.
+  contact, posture, Cover, arc and replacement exceptions.
 - **Data processing + Web backend + Web frontend:** Publish a General Rules
   Automatic Reaction Order overview grounded in N5.3 pp. 13-14 with four
   eligibility families, one-ARO/activated-target restrictions, timing,

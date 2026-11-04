@@ -2944,6 +2944,18 @@ cancellation condition or Equipment-removal outcome; it does not change the
 ordinary State record or grant a new recovery method. These are descriptive
 references, with no geometry evaluator or unconditional State/Skill relations.
 
+`rule:cover` owns the N5.3 pp. 41-42 baseline: total LoF obstruction versus
+scenery contact with partial Silhouette obstruction, the conditional prohibition
+on LoF-requiring BS Attacks, and -3 Attack Roll / +3 Saving Roll MODs.
+`skill:climb` and `skill:jump` own their measurement, endpoint, declaration
+and Cover restrictions; Climbing Plus retains its separate permissions and
+vertical-surface conditions. Native Climb may remain on a wall between Orders,
+stops on full-base horizontal contact and cannot spend excess distance across
+that surface. Jump's Cover restriction lasts for its entire declared Order.
+These references preserve the existing distance parameters, declaration types
+and State relations. The carried-forward vaulting FAQ remains a separately
+dated overlay on Climb/Jump, not duplicated undated core prose.
+
 Cross-domain discovery may additionally use reviewed `facts.relatedCategories` category slugs.
 This adds navigation only: it does not change the record's canonical kind/domain, primary category,
 or typed rules relationships.

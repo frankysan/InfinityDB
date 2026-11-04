@@ -171,9 +171,11 @@ revision, following the established dispatch-and-continue protocol.
     Chromium checks. The existing Weapon Trait, diagrams and Fireteam-specific
     effects retain their owners. Acceptance awaits VR-0061's pinned Linux and
     hosted checks; do not repeat the implementation.
-  - [ ] **V1S-033C:** Review pp. 32–34 and 41–42 shared Cover, vertical movement and landing constraints
-    against `skill:climb`, `skill:jump` and `skill:climbing-plus`; preserve conditional no-Partial-Cover
-    exceptions and verify source/API/browser links.
+  - [ ] **V1S-033C:** Shared Cover and expanded Climb/Jump procedures are
+    implemented from pp. 32-34/41-42, with linked Climbing Plus conditions
+    from p. 88. Source/API/search, preserved Skill metadata, dated FAQ and
+    three-width Chromium checks pass. Acceptance awaits VR-0062's pinned
+    Linux and hosted checks; do not repeat the implementation.
   - [ ] **V1S-033D:** Reconcile optional pp. 143–145 Difficult Terrain/Saturation rule mechanics with
     already published terrain setup, Access Width and Visibility Zones; preserve conditional `skill:terrain`
     exemptions, Burst allocation order, nonstacking and the non-canonical examples table.

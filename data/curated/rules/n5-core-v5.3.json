@@ -14433,7 +14433,7 @@
             "id": "skill:climb",
             "kind": "skill",
             "name": "Climb",
-            "summary": "A Long Common Skill used to move on vertical surfaces.",
+            "summary": "A Long Common Skill for vertical movement. Check its contact and supporting-surface requirements when declaring it, then measure the route using [[rule:moving-and-measuring|Moving and Measuring]].\n\nNative declaration limits and the [[rule:cover|Partial Cover]] restriction still apply; [[skill:climbing-plus|Climbing Plus]] has separately defined exceptions.",
             "composition": {
                 "role": "definition"
             },
@@ -14449,17 +14449,25 @@
                     "long-skill"
                 ],
                 "requirements": [
-                    "The user must be in base contact with a vertical surface.",
-                    "At least half of the user's base must remain in contact with the surface while moving.",
-                    "The movement must finish on a surface at least as large as the base."
+                    "When declaring [[skill:climb|Climb]], the base must be in contact with a vertical surface.",
+                    "At least half the base must stay in contact with the traversed surface; for visualization, keep that part of the base's underside against the vertical surface.",
+                    "The movement must be able to finish on a surface at least as large as the base."
                 ],
                 "effects": [
-                    "The user moves on the vertical surface up to its first MOV value plus [[distance:2:inch]]; a Climb distance listed in the Unit Profile replaces the [[distance:2:inch]] bonus."
+                    "Traverse the vertical surface up to the first [[attribute:mov|MOV]] value plus [[distance:2:inch]]. An applicable [[skill:climb|Climb]] distance listed in the Unit Profile replaces that [[distance:2:inch]] bonus, not the underlying [[attribute:mov|MOV]] value.",
+                    "**Measuring.** Measure from the starting point to the destination using the same point on the base's outer edge and underside. Follow the [[rule:general-movement|General Movement Rules]] and [[rule:moving-and-measuring|Moving and Measuring]].",
+                    "**Reaching a horizontal surface.** The movement ends as soon as the whole base is in contact with a horizontal surface. Unused allowance does not permit continuing across it with this Skill.",
+                    "**Between Orders.** A Trooper may remain holding the vertical surface when no further Orders are spent on it; reaching horizontal ground is not mandatory in every Order.",
+                    "**Incapacitation while vertical.** If a climbing or hanging Trooper becomes [[state:unconscious|Unconscious]], place its corresponding [[term:state-token|State Token]] beside it. It is still in [[state:prone|Prone State]] while climbing, except for Unit Types that cannot enter [[state:prone|Prone]]."
                 ],
                 "restrictions": [
-                    "Climb only permits movement on vertical surfaces and follows the General Movement Rules.",
-                    "While holding onto a vertical surface, the Trooper cannot declare Skills other than Climb.",
-                    "A Trooper performing Climb or holding onto a vertical surface cannot benefit from Partial Cover MODs."
+                    "Native [[skill:climb|Climb]] permits vertical movement only. It cannot spend excess distance on a horizontal surface.",
+                    "While holding onto a vertical surface, a Trooper cannot declare Skills other than [[skill:climb|Climb]] without a specific exception. Native [[skill:climb|Climb]] is a Long Skill, so a hanging Trooper cannot declare it as a Reactive Turn [[rule:automatic-reaction-order|ARO]]. See [[skill:climbing-plus|Climbing Plus]] for its own declaration permissions.",
+                    "A Trooper performing [[skill:climb|Climb]] or holding onto a vertical surface cannot benefit from [[rule:cover|Partial Cover]] MODs.",
+                    "Troopers cannot deploy on vertical surfaces during the [[rule:deployment-phase|Deployment Phase]] or during the game."
+                ],
+                "clarifications": [
+                    "**Printed Cover example.** N5.3 p. 33 still denies [[rule:cover|Partial Cover]] when an enemy reacts after the active Trooper reaches a horizontal upper surface during its declared [[skill:climb|Climb]]. Do not reduce the native Skill's restriction to the final position alone."
                 ]
             },
             "armyLinks": [
@@ -14490,6 +14498,11 @@
                     "section": "Climb"
                 },
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 33,
+                    "section": "Climb Examples 1-3: stopping, hanging and Cover"
+                },
+                {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Climb",
                     "heading": "Climb"
@@ -14497,7 +14510,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-11-04"
             }
         },
         {
@@ -14611,7 +14624,7 @@
             "id": "skill:jump",
             "kind": "skill",
             "name": "Jump",
-            "summary": "A Long Common Skill used to clear obstacles and move through the air.",
+            "summary": "A Long Common Skill for horizontal, vertical, diagonal or parabolic movement to a reachable horizontal landing surface. Check the full-base landing requirement when declaring it.\n\nDeclaring [[skill:jump|Jump]] cancels [[state:prone|Prone]] and prevents [[rule:cover|Partial Cover]] benefits for that entire Order.",
             "composition": {
                 "role": "definition"
             },
@@ -14627,15 +14640,17 @@
                     "long-skill"
                 ],
                 "requirements": [
-                    "The user must be able to reach a horizontal landing surface at least as large as its base."
+                    "When declaring [[skill:jump|Jump]], the Trooper must be able to reach a horizontal landing surface at least as large as its base."
                 ],
                 "effects": [
-                    "The user may Jump up to its first MOV value plus [[distance:2:inch]]; a Jump distance listed in the Unit Profile replaces the [[distance:2:inch]] bonus.",
-                    "Declaring Jump automatically cancels [[state:prone]]."
+                    "The user may [[skill:jump|Jump]] up to the first [[attribute:mov|MOV]] value plus [[distance:2:inch]]. An applicable profile-listed [[skill:jump|Jump]] distance replaces that [[distance:2:inch]] bonus, not the underlying [[attribute:mov|MOV]] value.",
+                    "**Trajectory.** Measure the horizontal, vertical, diagonal or parabolic route from the starting location to the landing spot, using the same point on the base's outer edge and underside. A flexible ruler can follow a parabolic route.",
+                    "**Landing.** The jump ends when the Trooper touches the landing surface. The declared trajectory and endpoint must follow [[rule:moving-and-measuring|Moving and Measuring]] and the [[rule:general-movement|General Movement Rules]].",
+                    "Declaring [[skill:jump|Jump]] automatically cancels [[state:prone|Prone State]]."
                 ],
                 "restrictions": [
-                    "The trajectory and landing must follow the Jump and General Movement Rules.",
-                    "The user cannot benefit from Partial Cover MODs during an Order in which it declared Jump."
+                    "The Trooper cannot benefit from [[rule:cover|Partial Cover]] MODs during the entire Order in which [[skill:jump|Jump]] was declared, including after landing.",
+                    "**No falling.** If the Trooper cannot reach a valid new location and has no safe alternative landing spot, it performs [[skill:idle|Idle]] without moving; it cannot use an insufficient jump distance to fall the rest of the way."
                 ]
             },
             "armyLinks": [
@@ -14673,7 +14688,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-11-04"
             },
             "relations": [
                 {
@@ -19329,20 +19344,20 @@
                 ],
                 "effects": [
                     "If declared as the first Basic Short Skill of the Order, [[skill:climb]] is treated as a Basic Short Skill instead of a Long Skill.",
-                    "The user may move on vertical surfaces as though they were horizontal while declaring [[skill:move]] or [[skill:dodge]], and while moving because of a failed Guts Roll.",
+                    "The user may travel on vertical surfaces as though they were horizontal while declaring [[skill:move]] or [[skill:dodge]], and while moving because of a failed [[rule:guts-roll|Guts Roll]].",
                     "The user may declare other compatible Basic Short Skills or Short Skills while moving on a vertical surface or hanging from a height.",
                     "During the Reactive Turn, the user may declare an ARO while on a vertical surface when otherwise permitted.",
                     "A Trooper that is or becomes [[skill:impetuous|Impetuous]] may use [[skill:climbing-plus|Climbing Plus]] during the [[skill:impetuous|Impetuous]] Phase."
                 ],
                 "restrictions": [
-                    "[[skill:climb]] can be declared as a Basic Short Skill only once per Order; a following [[skill:move]] uses the second MOV value.",
-                    "The user cannot benefit from Partial Cover MODs while on a vertical surface.",
-                    "Troopers cannot deploy on vertical surfaces during the Deployment Phase or during the game."
+                    "[[skill:climb]] can be declared as a Basic Short Skill only once per Order; a following [[skill:move]] uses the second [[attribute:mov|MOV]] value.",
+                    "The user cannot benefit from [[rule:cover|Partial Cover]] MODs while on a vertical surface.",
+                    "Troopers cannot deploy on vertical surfaces during the [[rule:deployment-phase|Deployment Phase]] or during the game."
                 ],
                 "clarifications": [
                     "The vertical movement permission also applies during movement required by a failed [[rule:guts-roll|Guts Roll]].",
-                    "When declaring [[skill:climbing-plus|Climbing Plus]], specify the entire exact movement trajectory before [[trait:aro|ARO]] declarations; the Trooper has 360° LoF throughout that trajectory.",
-                    "When traversing a vertical surface, keep at least half the base's underside in contact with it, following the General Movement and Moving and Measuring rules."
+                    "When declaring [[skill:climbing-plus|Climbing Plus]], specify the entire exact movement trajectory before [[trait:aro|ARO]] declarations; the Trooper has 360-degree [[rule:line-of-fire|LoF]] throughout that trajectory.",
+                    "When traversing a vertical surface, keep at least half the base's underside in contact with it, following the [[rule:general-movement|General Movement Rules]] and [[rule:moving-and-measuring|Moving and Measuring]]."
                 ]
             },
             "labelIds": [
@@ -19368,7 +19383,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-11-04"
             },
             "relations": [
                 {
@@ -29216,6 +29231,69 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Replacing_Game_Elements",
                     "heading": "Replacing Game Elements"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-04"
+            }
+        },
+        {
+            "id": "rule:cover",
+            "kind": "rule",
+            "name": "Cover",
+            "aliases": [
+                "Total Cover",
+                "Partial Cover"
+            ],
+            "summary": "Cover describes scenery that obstructs [[rule:line-of-fire|Line of Fire]] to a target's [[attribute:s|Silhouette]]. **Total Cover** blocks all LoF to it. **Partial Cover** requires contact with scenery that obscures part of its volume.\n\nAgainst a [[skill:bs-attack|BS Attack]], Partial Cover normally gives the attacker a -3 Roll MOD and the target a +3 [[rule:saving-rolls|Saving Roll]] MOD when a roll is required. Apply any specific exception that denies these benefits.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "**Total obstruction.** One or more pieces of scenery completely block [[rule:line-of-fire|LoF]] to the target's [[attribute:s|Silhouette]].",
+                    "**Partial obstruction.** The target touches a [[term:scenery-element|Scenery Element]] that obscures part of its [[attribute:s|Silhouette]] from the attacker."
+                ],
+                "effects": [
+                    "**Total Cover.** The attacker cannot perform a [[skill:bs-attack|BS Attack]] with a Weapon, Skill or Equipment that requires [[rule:line-of-fire|LoF]] to that target.",
+                    "**Partial Cover.** Apply -3 to the attacker's [[skill:bs-attack|BS Attack]] Roll and +3 to the target's [[rule:saving-rolls|Saving Roll]], if a roll is necessary."
+                ],
+                "restrictions": [
+                    "Scenery contact alone is insufficient for Partial Cover: it must also partially obscure the target's [[attribute:s|Silhouette]] from this attacker.",
+                    "The Total Cover prohibition concerns [[skill:bs-attack|BS Attacks]] that require [[rule:line-of-fire|LoF]]. Any Skill that works without LoF still needs its own permission and requirements.",
+                    "Apply a specific Skill, Weapon or Equipment exception when it removes Cover benefits; an otherwise suitable position does not override that exception."
+                ],
+                "clarifications": [
+                    "**Movement context.** [[skill:climb|Climb]] and [[skill:jump|Jump]] deny Partial Cover under different conditions; [[skill:climbing-plus|Climbing Plus]] has its own vertical-surface conditions. Consult the linked cards rather than treating all movement as a single Cover permission or prohibition.",
+                    "**Roll modifier.** The printed +3 modifies the [[rule:saving-rolls|Saving Roll]]; it is not a permanent increase to the Trooper's [[attribute:arm|ARM]] or [[attribute:bts|BTS]] Attribute."
+                ],
+                "sourceNotes": [
+                    "English N5.3 pp. 41-42 supply the baseline and diagrams. The archived English Cover member contains the Ballistic Skills page, revision 4094, with its Cover heading and retained historical wording. Skill-specific exceptions remain owned by their cited Skill references."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 41,
+                    "section": "Cover: Effects, Total and Partial Cover"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 42,
+                    "section": "Cover and Game Situations diagrams"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Cover",
+                    "heading": "Cover"
                 }
             ],
             "review": {

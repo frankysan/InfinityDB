@@ -673,6 +673,32 @@
         "**Base contact / Silhouette contact.** The represented volumes touch. This also covers contact with a game element without a base, such as a [[term:scenery-element|Scenery Element]]. A Trooper is always in contact with themselves."
       ],
       "caveat": "N5.3 pp. 20-21 define contact and membership of existing areas. A cited Scenery Element is an example of an existing game element, not a new Weapon/Equipment object profile."
+    },
+    {
+      "recordId": "rule:cover",
+      "classification": "scenery-cover-condition-not-object-profile",
+      "sourcePages": [
+        41,
+        42
+      ],
+      "summaryEvidence": "Cover describes scenery that obstructs [[rule:line-of-fire|Line of Fire]] to a target's [[attribute:s|Silhouette]]. **Total Cover** blocks all LoF to it. **Partial Cover** requires contact with scenery that obscures part of its volume.\n\nAgainst a [[skill:bs-attack|BS Attack]], Partial Cover normally gives the attacker a -3 Roll MOD and the target a +3 [[rule:saving-rolls|Saving Roll]] MOD when a roll is required. Apply any specific exception that denies these benefits.",
+      "factsEvidence": [
+        "**Partial obstruction.** The target touches a [[term:scenery-element|Scenery Element]] that obscures part of its [[attribute:s|Silhouette]] from the attacker."
+      ],
+      "caveat": "N5.3 pp. 41-42 describe LoF obstruction and scenery contact. An existing Scenery Element supplies Cover conditions; the reference does not create a deployed object, profile or delivery edge."
+    },
+    {
+      "recordId": "skill:climb",
+      "classification": "vertical-trooper-state-indicator-not-object",
+      "sourcePages": [
+        32,
+        33
+      ],
+      "summaryEvidence": "A Long Common Skill for vertical movement. Check its contact and supporting-surface requirements when declaring it, then measure the route using [[rule:moving-and-measuring|Moving and Measuring]].\n\nNative declaration limits and the [[rule:cover|Partial Cover]] restriction still apply; [[skill:climbing-plus|Climbing Plus]] has separately defined exceptions.",
+      "factsEvidence": [
+        "**Incapacitation while vertical.** If a climbing or hanging Trooper becomes [[state:unconscious|Unconscious]], place its corresponding [[term:state-token|State Token]] beside it. It is still in [[state:prone|Prone State]] while climbing, except for Unit Types that cannot enter [[state:prone|Prone]]."
+      ],
+      "caveat": "N5.3 p. 32 uses the normal State Token beside a climbing or hanging Unconscious Trooper. This indicator is not a new deployed Weapon/Equipment object or delivery relationship."
     }
   ]
 }

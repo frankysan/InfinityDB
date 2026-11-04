@@ -4044,10 +4044,11 @@ def test_n5_conditional_climb_jump_declarations_keep_base_types() -> None:
         assert "first Basic Short Skill" in facts["effects"][0]
         assert any("once per Order" in rule for rule in facts["restrictions"])
         assert any("[[skill:impetuous|Impetuous]] Phase" in item for item in facts["effects"])
-        assert any(
-            "entire exact" in item and ("360" + chr(176) + " LoF") in item
-            for item in facts["clarifications"]
+        arc = (
+            "360-degree [[rule:line-of-fire|LoF]]" if helper == "climbing-plus"
+            else "360" + chr(176) + " LoF"
         )
+        assert any("entire exact" in item and arc in item for item in facts["clarifications"])
     climbing = records["skill:climbing-plus"]["facts"]
     assert any("base's underside" in note for note in climbing["clarifications"])
     assert any("vertical surface" in effect and "ARO" in effect

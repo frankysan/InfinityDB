@@ -174,3 +174,93 @@ def test_geometry_reference_navigation_and_existing_silhouette_diagrams(
         assert not errors and not failed, (width, errors, failed)
     finally:
         page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_cover_and_vertical_skills_with_separate_dated_faq(chrome: Any, width: int) -> None:
+    app = create_app(ROOT / ARMY, rules_database_path=ROOT / RULES)
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    failed: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed.append(request.url))
+    page.on("response", lambda response: failed.append(
+        f"{response.status} {response.url}"
+    ) if response.status >= 400 else None)
+
+    def visible_card(identity: str, phrases: tuple[str, ...], numbers: tuple[int, ...]) -> Any:
+        card = page.locator("#rule-" + identity.replace(":", "-"))
+        card.wait_for(state="visible", timeout=30000)
+        for phrase in phrases:
+            assert phrase in card.inner_text(), (width, identity, phrase)
+        citations = card.locator(".rules-source-citations").inner_text()
+        for number in numbers:
+            assert f"p. {number}" in citations
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        return card
+
+    def dated_vaulting_faq() -> None:
+        faq = page.locator(".faq-rulings .faq-ruling").filter(
+            has_text="Can a Trooper vault while Climbing or Jumping?"
+        )
+        faq.wait_for(state="visible", timeout=30000)
+        assert faq.count() == 1
+        text = faq.inner_text()
+        assert "version 0.1" in text and "first documented v0.0" in text
+
+    try:
+        response = page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator('#catalog-list a[href="/rules/cover"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/cover", timeout=30000)
+        card = visible_card("rule:cover", (
+            "Total Cover", "Partial Cover", "-3 to the attacker's", "+3 to the target's",
+            "if a roll is necessary", "contact alone is insufficient", "not a permanent increase",
+        ), (41, 42))
+        climb = card.locator('a[href="/skills/climb"]').first
+        climb.focus()
+        climb.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/skills/climb", timeout=30000)
+        card = visible_card("skill:climb", (
+            "When declaring", "outer edge and underside", "whole base", "Unused allowance",
+            "not mandatory in every Order", "Reactive Turn", "State Token",
+            "except for Unit Types", "horizontal upper surface",
+        ), (32, 33))
+        dated_vaulting_faq()
+        cover = card.locator('a[href="/rules/cover"]').first
+        cover.focus()
+        cover.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/cover", timeout=30000)
+        card = page.locator("#rule-rule-cover")
+        card.wait_for(state="visible", timeout=30000)
+        jump = card.locator('a[href="/skills/jump"]').first
+        jump.focus()
+        jump.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/skills/jump", timeout=30000)
+        visible_card("skill:jump", (
+            "horizontal landing surface", "parabolic route", "touches the landing surface",
+            "entire Order", "including after landing", "automatically cancels",
+            "no safe alternative", "Idle",
+        ), (34,))
+        dated_vaulting_faq()
+
+        response = page.goto(f"{ORIGIN}/skills", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator('#catalog-list a[href="/skills/climbing-plus"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/skills/climbing-plus", timeout=30000)
+        card = visible_card("skill:climbing-plus", (
+            "first Basic Short Skill", "once per Order", "second MOV value",
+            "Partial Cover MODs while on a vertical surface", "General Movement Rules",
+        ), (88,))
+        assert card.locator('a[href="/rules/cover"]').count() > 0
+        assert card.locator('a[href="/rules/line-of-fire"]').count() > 0
+        assert not errors and not failed, (width, errors, failed)
+    finally:
+        page.close()

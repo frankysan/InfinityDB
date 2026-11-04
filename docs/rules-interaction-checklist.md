@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **221/221** complete, **0** pending.
+- Supporting semantic identities: **222/222** complete, **0** pending.
 - Current authored outgoing relations: **518**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -421,7 +421,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Deactivator** (`equipment:deactivator`) — reviewed
   - `ignores-modifiers-from` → Mimetism (`skill:mimetism`)
   - future [post-0.7.0; deferred]: `relation type TBD` → Deployable (`trait:deployable`) — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
-  - future [post-0.7.0; planned]: `ignores-modifiers-from` → `rule:cover` — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
+  - future [post-0.7.0; planned]: `ignores-modifiers-from` → Cover (`rule:cover`) — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [x] **Deployable Cover** (`equipment:deployable-cover`) — reviewed
   - `modifies-rolls-for` → BS Attack (`skill:bs-attack`)
   - future [post-0.7.0; planned]: `uses-effects-of` → `rule:partial-cover` — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
@@ -911,7 +911,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (39/39)
+#### Rule (40/40)
 
 - [x] **Access Width** (`rule:access-width`) — reviewed: N5.3 p.145 Scenery Structures access reference: Narrow/Wide Gate tokens label agreed scenery openings, not deployable objects. Narrow checks S 2 or lower with the explicit Prone/Silhouette X exception; wide access permits all Silhouettes. Geometry and current Trooper State are session context, so no unconditional outgoing Unit/State interaction edge is claimed.
   - outgoing: none
@@ -932,6 +932,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Controlling Supply Boxes** (`rule:scenario:controlling-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Coordinated Orders** (`rule:coordinated-orders`) — reviewed: N5.3 pp.129-131 and N5 FAQ v0.1 p.3 baseline for Command Token cost, Spearhead, Burst, targeting, recovery, Hacking and Special Dice; no unqualified simulation relations.
+  - outgoing: none
+- [x] **Cover** (`rule:cover`) — reviewed: N5.3 pp. 41-42: total LoF obstruction versus contact plus partial obscuration, conditional LoF-requiring BS Attack prohibition, -3 Attack Roll and +3 Saving Roll MODs. Movement exceptions link their owning Skill conditions; no unconditional Attribute change, State relation or geometry evaluation.
   - outgoing: none
 - [x] **Deployment Phase** (`rule:deployment-phase`) — reviewed: N5.3 Deployment Phase p. 15 four-step main/reserve sequence, plus p. 16 base fully inside zone, prohibited enemy/neutral/mission-objective contact, initial Prone, whole-base physical fit and allowed pregame measurements. Original p. 15 review was 2026-10-15; p. 16 addition reviewed 2026-11-04. FAQ repositioning/measurement boundary and scenario exceptions remain separate.
   - outgoing: none
@@ -1346,7 +1348,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] BioWeapon (`trait:bioweapon`) → Double Action (DA) Ammunition (`ammunition:da`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies DA together with Shock Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
 - [ ] BioWeapon (`trait:bioweapon`) → Shock Ammunition (`ammunition:shock`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies Shock together with DA Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
-- [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
+- [ ] Deactivator (`equipment:deactivator`) → Cover (`rule:cover`); `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
 - [ ] Deployable Cover (`equipment:deployable-cover`) → `rule:partial-cover`; `uses-effects-of`; **post-0.7.0 / planned** — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
 - [ ] Repeater (`equipment:repeater`) → Hacking Area (`rule:hacking-area`); `relation type TBD`; **post-0.7.0 / deferred** — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.

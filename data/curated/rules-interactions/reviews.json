@@ -2599,6 +2599,13 @@
       "status": "reviewed",
       "reviewedOn": "2026-11-04",
       "note": "N5.3 p. 22: matching-base position, different-base center/edge options, new contact without cancelling Engaged, and mandatory inevitable Obligatory no-fit replacement. The special Immobilized-A space-only cancellation and Equipment removal remain scoped, not ordinary Engineer/Reset permissions."
+    },
+    {
+      "recordId": "rule:cover",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-04",
+      "note": "N5.3 pp. 41-42: total LoF obstruction versus contact plus partial obscuration, conditional LoF-requiring BS Attack prohibition, -3 Attack Roll and +3 Saving Roll MODs. Movement exceptions link their owning Skill conditions; no unconditional Attribute change, State relation or geometry evaluation."
     }
   ],
   "futureInteractions": [
