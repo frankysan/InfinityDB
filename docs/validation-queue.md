@@ -149,7 +149,7 @@ No pending deferred-execution obligations.
 ## Next unused IDs
 
 - Design: `VD-0015` (through `VD-0014` retired).
-- Execution: `VR-0072` (through `VR-0070` retired; VR-0071 active).
+- Execution: `VR-0072` (through `VR-0071` retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
