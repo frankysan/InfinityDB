@@ -95,13 +95,15 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 6 distinct
-changes** (VR-0052/0053/0054/0055/0056/0057; five-change execution threshold
-reached). The first pinned Linux cumulative run at `4af5ac14`
-failed during pytest collection, before executing tests: two newly added
-browser modules were missing from the grouped Chromium scheduling maps.
-The fix is implemented on Windows; the six pending items still require
-a successful pinned Linux execution and exact-SHA hosted checks.
+Only open VR obligations belong here. **Current count: 7 distinct
+changes** (VR-0052/0053/0054/0055/0056/0057/0058; five-change execution
+threshold reached). The first pinned Linux cumulative run at `4af5ac14`
+failed during pytest collection before executing tests; the second, on
+`ad1416a0`, confirmed correct browser-lane scheduling but exposed stale
+General Rule baseline counts and one legacy non-catalog review excerpt
+after the V1S-032 additive publications. Both fixes are now on Windows
+for focused and repeated cross-host validation. No VR item is retired
+merely because its first Linux attempt completed with failures.
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -237,6 +239,40 @@ a successful pinned Linux execution and exact-SHA hosted checks.
   Deferred: a pinned Linux cumulative four-lane full-assets suite with
   collection and browser-lane assertions, plus exact-SHA hosted CI.
   The five preceding VR items remain open until their own checks pass.
+
+- [ ] **VR-0058** (2026-11-04; validation under way):
+  Reconcile V1S-032 additive General Rules and Deployment source revision
+  with tests/negative-review evidence, without weakening publication
+  equivalence or treating Deployment Tokens as deployed devices.
+  Work: [Rules and contextual reference completion](TODO.md#rules-and-contextual-reference-completion);
+  risk: medium (source-review manifest and General Rule catalog
+  invariant tests; no runtime source/binary changes).
+  Reproduction: pinned Linux full-assets job
+  `linux-dev:0a90f21cf1944c5a8d4a3d486e505213` at
+  `ad1416a0`: **5,042 passed, 28 skipped, 15 failed**;
+  three tests froze the General Rules count at 30 despite 34 current
+  source-backed rules, and twelve other failures cascaded from stale
+  `rule:deployment-phase` summary evidence in the non-catalog
+  review manifest after the reviewed p. 16 placement additions.
+  Correction: match published General Rule slugs against the *entire
+  current curated source*, retaining the original 30-rule baseline and
+  explicitly checking all four V1S-032 additions. The browser verifier
+  now accepts additive General Rules without relaxing the fixed
+  Ammunition/Label/State/Trait inventories or source/slug equality.
+  Re-pin the exact Deployment excerpt and pp. 15–16 provenance;
+  source-backed reviews classify new game-sequence, order-pool and
+  Command Token resources as **non-objects** (54/54 reviewed), and
+  new Automatic Reaction Order Marker mentions as **non-objects**
+  in the separate expanded scan (26/26 reviewed).
+  The legacy citation staging inserter now bounds a record by the next
+  sibling object rather than assuming the next record begins with
+  `id`; the three schema-v9 staging cases pass.
+  Immediate Windows evidence: General Rules parity 17/17,
+  non-catalog 4/4, expanded lexical 4/4, legacy staging 3/3,
+  citation migration 7 passed/1 skipped and the affected WSGI
+  General Rules API 1/1; Ruff passed.
+  Deferred: exact pinned Linux full-assets rerun and hosted
+  exact-SHA CI; final release acceptance remains separate.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
@@ -412,7 +448,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0058` (`VR-0052/0053/0054/0055/0056/0057` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0059` (`VR-0052/0053/0054/0055/0056/0057/0058` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

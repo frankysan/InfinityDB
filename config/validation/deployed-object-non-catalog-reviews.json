@@ -492,13 +492,14 @@
       "recordId": "rule:deployment-phase",
       "classification": "deployment-procedure-not-object",
       "sourcePages": [
-        15
+        15,
+        16
       ],
-      "summaryEvidence": "After the [[rule:initiative-roll|Initiative Roll]], the players deploy their Troopers before the game begins",
+      "summaryEvidence": "After the [[rule:initiative-roll|Initiative Roll]], players deploy their Troopers **before the game**",
       "factsEvidence": [
         "Rules such as [[skill:forward-deployment|Forward Deployment]]"
       ],
-      "caveat": "Deployment Phase governs reserve ordering and adjustments such as Command Tokens. It does not define new deployed objects or deliveries."
+      "caveat": "Deployment Phase governs reserve ordering, legal placement/contact and allowed measurements, including Command Token adjustments. It does not define new deployed objects or deliveries."
     },
     {
       "recordId": "skill:frenzy",
@@ -603,6 +604,36 @@
         "When Transmutation occurs, the first Unit Profile and its Model or representation are replaced by the second Unit Profile and corresponding Model or Token."
       ],
       "caveat": "N5.3 p. 117 describes replacement of an existing Trooper's profile/Model or indication of its new form using a Transmuted/Seed-Embryo Token. This is a Trooper representation, not a Weapon/Equipment Deployable; variant-specific behavior must not be collapsed into a single object identity."
+    },
+    {
+      "recordId": "rule:game-sequence",
+      "classification": "turn-phase-command-resource-not-object",
+      "sourcePages": [16, 17],
+      "summaryEvidence": "Every Infinity Game Round contains **two Player Turns**",
+      "factsEvidence": [
+        "The Active Player performs four steps **in source order**"
+      ],
+      "caveat": "N5.3 pp. 16–17 describe the player-turn sequence and the timing of Command Token and Order-resource actions. Phase timing does not create a deployed Weapon, Equipment profile or independently deliverable object."
+    },
+    {
+      "recordId": "rule:order-pool",
+      "classification": "order-resource-token-not-object",
+      "sourcePages": [11, 12, 16, 17],
+      "summaryEvidence": "At the start of each Active Turn, the player recalculates the **Regular Order Pool separately for every [[rule:combat-group|Combat Group]]**",
+      "factsEvidence": [
+        "place an [[rule:irregular-order|Irregular Order]] Token and identify the owning [[rule:combat-group|Combat Group]]"
+      ],
+      "caveat": "N5.3 pp. 11–12 and 16–17 define Order counting, information and group resources. Order Tokens identify a participant's turn resources, not independent deployed game elements or an Army-to-object delivery relationship."
+    },
+    {
+      "recordId": "rule:command-tokens",
+      "classification": "command-resource-and-state-marker-not-object",
+      "sourcePages": [128, 129],
+      "summaryEvidence": "The N5.3 Command Module gives each player **four Command Tokens for the game**",
+      "factsEvidence": [
+        "Form a new Fireteam by placing a Fireteam Leader Token"
+      ],
+      "caveat": "N5.3 pp. 128–129 define player-owned Command Token spending modes. A Command Token is a game resource, while Fireteam Leader and Speedball Tokens reflect separately scoped roles or states; none is a new deployed Weapon/Equipment profile or delivery edge."
     }
   ]
 }

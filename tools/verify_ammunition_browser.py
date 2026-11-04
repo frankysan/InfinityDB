@@ -48,9 +48,13 @@ def verify(
     if catalog not in {"ammunition", "labels", "rules", "states", "traits"}:
         raise ValueError(f"Unsupported reference catalog: {catalog}")
     expected = source_names() if expected_names is None else expected_names
-    required = {"ammunition": 11, "labels": 24, "rules": 30, "states": 24, "traits": 33}[catalog]
-    if len(expected) != required:
+    # Other catalog inventories are pinned; General Rules grow additively.
+    # The General Rules caller supplies the complete current curated source set.
+    required = {"ammunition": 11, "labels": 24, "states": 24, "traits": 33}.get(catalog)
+    if required is not None and len(expected) != required:
         raise ValueError(f"Expected {required} reviewed {catalog} entries; found {len(expected)}")
+    if catalog == "rules" and len(expected) < 30:
+        raise ValueError(f"Expected at least 30 reviewed rules entries; found {len(expected)}")
     if catalog == "rules" and (
         expected_record_ids is None or set(expected_record_ids) != set(expected)
     ):

@@ -55,6 +55,7 @@ CLASSIFICATIONS = {
     "skill:mnemonica": ("skill", "existing-trooper-host-transfer-not-object"),
     "skill:tactical-awareness": ("skill", "order-marker-not-object"),
     "skill:explode": ("skill", "trooper-centered-template-not-object"),
+    "rule:automatic-reaction-order": ("rule", "reactive-trooper-marker-not-object"),
 }
 
 # Read-only N5.3 PDF review evidence for definitions whose maintained source

@@ -82,7 +82,10 @@ def insert_citations_without_reformatting(
         if text.count(marker) != 1:
             raise ValueError(f"Ambiguous curated record anchor: {record_id}")
         start = text.index(marker)
-        following = text.find('\n        {\n            "id": ', start + len(marker))
+        # The next record need not begin with "id" (newer curated records
+        # may put kind/composition before their ID). Bound the block by
+        # the next sibling object, never by the next ID field.
+        following = text.find('\n        {\n', start + len(marker))
         end = following if following >= 0 else len(text)
         record_segment = text[start:end]
         pattern = re.compile(

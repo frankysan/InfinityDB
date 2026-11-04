@@ -59,7 +59,11 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
     curated = json.loads(CURATED.read_text(encoding="utf-8"))
     manifest = json.loads(REVIEWS.read_text(encoding="utf-8"))
     candidates = candidate_mentions(curated)
-    assert len(validate_reviews(manifest, curated, candidates)) == 51
+    assert len(validate_reviews(manifest, curated, candidates)) == 54
+    pdf_only_review_idx = next(
+        i for i, row in enumerate(manifest["reviews"])
+        if row["recordId"] == "skill:transmutation"
+    )
 
     for key, bad_value, error in (
         ("classification", "fully-reviewed-four-stat-object", "classification"),
@@ -69,7 +73,7 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
         ("objectProfile", {"ARM": 0}, "review scope"),
     ):
         changed = copy.deepcopy(manifest)
-        changed["reviews"][-1][key] = bad_value
+        changed["reviews"][pdf_only_review_idx][key] = bad_value
         with pytest.raises(ValueError, match=error):
             validate_reviews(changed, curated, candidates)
 
@@ -120,7 +124,7 @@ def test_non_catalog_reviews_fail_closed_on_evidence_and_classification() -> Non
         ("pdfExcerpt", "a different quote"),
     ):
         changed = copy.deepcopy(manifest)
-        changed["reviews"][-1][key] = bad
+        changed["reviews"][pdf_only_review_idx][key] = bad
         with pytest.raises(ValueError, match="PDF-only provenance"):
             validate_reviews(changed, curated, candidates)
 
@@ -147,8 +151,8 @@ def test_pinned_non_catalog_discovery_closes_bounded_review_queue() -> None:
     report = audit_non_catalog_candidates(CURATED, REVIEWS)
     assert report["scope"] == "non-catalog-keyword-discovery-not-object-inventory"
     assert len(report["curatedSourceSha256"]) == 64
-    assert report["reviewedCount"] == 51
-    assert report["candidateCount"] == 51
+    assert report["reviewedCount"] == 54
+    assert report["candidateCount"] == 54
     assert report["unreviewed"] == []
     access = next(
         entry for entry in report["candidates"]
@@ -189,6 +193,16 @@ def test_pinned_non_catalog_discovery_closes_bounded_review_queue() -> None:
     assert speedball["sourcePages"] == [84]
     assert "State Tokens" in speedball["caveat"]
     reviewed = {decision["recordId"]: decision for decision in report["reviews"]}
+    for record_id, classification, pages in (
+        ("rule:game-sequence", "turn-phase-command-resource-not-object", [16, 17]),
+        ("rule:order-pool", "order-resource-token-not-object", [11, 12, 16, 17]),
+        ("rule:command-tokens", "command-resource-and-state-marker-not-object", [128, 129]),
+    ):
+        assert reviewed[record_id]["classification"] == classification
+        assert reviewed[record_id]["sourcePages"] == pages
+        assert reviewed[record_id]["summaryEvidence"]
+        assert reviewed[record_id]["factsEvidence"]
+    assert reviewed["rule:deployment-phase"]["sourcePages"] == [15, 16]
     assert reviewed["rule:access-width"]["classification"] == (
         "scenery-access-gate-label-not-deployed-object"
     )
@@ -253,8 +267,8 @@ def test_non_catalog_cli_reports_reviewed_queue_without_publishing_objects(
     assert main() == 0
     output = capsys.readouterr().out
     assert "Candidate definitions:" in output
-    assert "Candidate definitions: 51" in output
-    assert "Reviewed classifications: 51" in output
+    assert "Candidate definitions: 54" in output
+    assert "Reviewed classifications: 54" in output
     assert "Awaiting manual review: 0" in output
     assert "rule:access-width:" not in output
     count = 6 if any(

@@ -316,6 +316,16 @@
         "If the template would affect an allied Model or Marker, the Template Attack is canceled, but the user still enters [[state:dead]]."
       ],
       "caveat": "N5.3 p. 92 defines an Attack centered on the existing Trooper, with cancellation if allied Models/Markers are affected. An Attack Template is not an independently deployed persistent object or new Weapon/Equipment carrier. The maintained Skill is Wiki-cited only."
+    },
+    {
+      "recordId": "rule:automatic-reaction-order",
+      "classification": "reactive-trooper-marker-not-object",
+      "sourcePages": [13, 14],
+      "summaryEvidence": "An **Automatic Reaction Order** ([[trait:aro|ARO]]) is a permitted reaction by an eligible Trooper, Model or Marker",
+      "factsEvidence": [
+        "**One [[trait:aro|ARO]].** Each eligible Reactive Trooper has **a single [[trait:aro|ARO]] per enemy Order**"
+      ],
+      "caveat": "N5.3 pp. 13–14 grant an eligible Reactive Trooper one ARO per Order, including when represented by a Model or Marker. This is a reaction procedure involving an existing Trooper, not a new independently deployed Weapon or Equipment profile, delivery permission or object carrier."
     }
   ]
 }
