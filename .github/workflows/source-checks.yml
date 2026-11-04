@@ -47,6 +47,9 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v7
+        with:
+          # Historical reference-evidence tests read pinned older revisions via git show.
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v7

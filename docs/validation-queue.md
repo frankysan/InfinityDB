@@ -95,15 +95,16 @@ retain required dependencies in any still-open VR item.
 
 ## Pending deferred execution
 
-Only open VR obligations belong here. **Current count: 7 distinct
-changes** (VR-0052/0053/0054/0055/0056/0057/0058; five-change execution
-threshold reached). The first pinned Linux cumulative run at `4af5ac14`
-failed during pytest collection before executing tests; the second, on
-`ad1416a0`, confirmed correct browser-lane scheduling but exposed stale
-General Rule baseline counts and one legacy non-catalog review excerpt
-after the V1S-032 additive publications. Both fixes are now on Windows
-for focused and repeated cross-host validation. No VR item is retired
-merely because its first Linux attempt completed with failures.
+Only open VR obligations belong here. **Current count: 8 distinct
+changes** (VR-0052/0053/0054/0055/0056/0057/0058/0059; five-change
+execution threshold reached). The Linux cumulative runs at `4af5ac14`
+and `ad1416a0` first exposed Chromium registration and additive Rule
+review/test drift. Both corrections are committed at `df7191fc`;
+the matched Linux full suite is now running at that pinned revision.
+The previous hosted Source checks additionally revealed a shallow-checkout
+failure when the frozen-reference tests tried to read historical Git
+objects. VR-0059 owns the full-history CI checkout repair. No VR item
+is retired merely because its first validation attempt failed.
 
 - [ ] **VR-0052** (2026-11-03; ready-to-run): Validate the
   Windows CP1252-safe JSON stdout change in
@@ -273,6 +274,25 @@ merely because its first Linux attempt completed with failures.
   General Rules API 1/1; Ruff passed.
   Deferred: exact pinned Linux full-assets rerun and hosted
   exact-SHA CI; final release acceptance remains separate.
+
+- [ ] **VR-0059** (2026-11-04; ready-to-run):
+  Restore historical Git evidence for hosted Source checks. All four
+  platform jobs in the prior `d22096be` run failed three
+  `tests/test_report_reference_baseline.py` cases because the
+  default shallow `actions/checkout` could not resolve frozen
+  curated source commit `c5400ab1`; this is not a source-content
+  mismatch. The Source checks matrix now uses `fetch-depth: 0`
+  without altering the unrelated packaging/deployment checkouts.
+  Work: [source inventory and gap batches](TODO.md#source-inventory-and-gap-batches);
+  risk: low (CI source checkout and one regression guard; no product
+  data, published assets or Python runtime changed).
+  Immediate Windows: the workflow regression
+  `test_source_ci_builds_ignored_release_publication_before_tests`
+  **1/1** and Ruff pass; docs/link validation passed.
+  Deferred: verify that an exact-commit hosted Source checks run
+  retrieves and uses the frozen revision on all platforms, including
+  the cross-platform deterministic-output job. Do not retire based
+  solely on local full-history success.
 
 Infiltration fixed-PH source-47 review **VR-0051** retired at pinned
 `dd071c4df04d6c90cddc1a84a6974952506a097d` after Linux
@@ -448,7 +468,7 @@ is recorded. Failed or incomplete verification remains open.
 ## Next unused IDs
 
 - Design: `VD-0007` (through `VD-0006` retired).
-- Execution: `VR-0059` (`VR-0052/0053/0054/0055/0056/0057/0058` open; `VR-0051` and earlier entries retired).
+- Execution: `VR-0060` (`VR-0052/0053/0054/0055/0056/0057/0058/0059` open; `VR-0051` and earlier entries retired).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

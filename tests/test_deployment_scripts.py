@@ -402,6 +402,11 @@ def test_deployment_smoke_builds_and_exercises_v8_rollback_image() -> None:
 
 def test_source_ci_builds_ignored_release_publication_before_tests() -> None:
     workflow = _read(".github/workflows/source-checks.yml")
+    source_checkout = workflow.split("- name: Check out source", 1)[1].split(
+        "- name: Set up Python", 1
+    )[0]
+    # Frozen reference-evidence tests use git show against pinned older commits.
+    assert "fetch-depth: 0" in source_checkout
     generate = workflow.index("python -m tools.build_deployed_object_publication")
     verify = workflow.index("python -m tools.build_deployed_object_publication --check")
     source_checks = workflow.index("- name: Run source checks")
