@@ -2190,10 +2190,12 @@ all five rulebook Types. The exact `reviewed-extra` effects are
 add a second MOV bonus, override area conditions, or rewrite any
 Army occurrence. A guarded schema-v9 refresh changed only this reviewed
 family parameter and regenerated the matched deployed-object pair;
-the separately reported `Religious Troop (Total)` misassignment
-(SRC-028) remains unreviewed. The source audit now reports 22 reviewed
-extra and 12 unresolved Skill source IDs. No cross-Army usage index
-or terrain effect evaluator was published.
+the separately reported `Religious Troop (Total)` source anomaly
+(SRC-028) has a completed raw-profile investigation and pinned regression,
+but its occurrence parameter remains unreviewed pending an upstream correction.
+The 2026-11-04 source audit reports 24 reviewed-extra and 10 unresolved
+Skill source IDs; this does not change the unresolved status of source 83.
+No cross-Army usage index or terrain effect evaluator was published.
 
 **Reviewed Surprise Attack occurrence MODs (2026-10-30):** Source Skill
 `191` has 767 direct relationships, all with one exact extra: `TEXT: -3`

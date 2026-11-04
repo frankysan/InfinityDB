@@ -225,8 +225,6 @@ V1S-068–069, V1S-074 and V1S-081–090.
   unsupported generic modifiers.
 - [ ] **V1S-052 (S, review):** Review exact Doctor occurrence parameters independently of Engineer and
   preserve source-defined differences.
-- [ ] **V1S-053 (S, review):** Investigate the Religious Troop/Total anomaly (SRC-028) against raw Terrain and
-  profile sources; do not invent a correction.
 - [ ] **V1S-054 (M, review):** Review Immunity source-162 occurrence signatures, especially combined/base
   component boundaries.
 - [ ] **V1S-055 (M, review):** Review BS Attack source-201 variants and modifiers, preserving ordered raw
@@ -704,8 +702,9 @@ the remaining source clauses and final release-browser acceptance remain open.
       review adds seven exact typed Terrain applicability selectors (1,235
       qualified direct rows, one unqualified), distinguishing Total/all
       Types, single fixed Types and Aquatic/Jungle/choose-one on placement.
-      SRC-028's Religious Troop anomaly remains unreviewed. The
-      Camouflage source-29 `1 Use` review certifies 223 one-use Army
+      SRC-028's Religious Troop/Total source anomaly has been reviewed against
+      pinned raw profiles and remains unresolved pending an upstream
+      correction. The Camouflage source-29 `1 Use` review certifies 223 one-use Army
       qualifiers using N5 FAQ v0.0/v0.1, without inventing a match-state
       tracker or changing the existing FAQ. The Combat Jump source-35
       review adds six exact landing-roll/Explosion parameters across 121
