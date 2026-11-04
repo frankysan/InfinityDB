@@ -158,8 +158,6 @@ revision, following the established dispatch-and-continue protocol.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-029 (L, review):** Join the 367 frozen explanation-audit records to the current Core/Hacking set
-  and later reviewed evidence; preserve original counts.
 - [ ] **V1S-030 (M, review):** Review conditional declaration, ARO and reactive eligibility clauses outside
   the already accepted exception examples.
 - [ ] **V1S-031 (S, gate):** Give the five newer Visibility Zone terms independent whole-corpus and
@@ -514,7 +512,9 @@ embedded Attribute/Label vocabulary and scenario-owned qualifications. The
 confirms typed reference identities and distinct army-level Retreat versus Trooper-State scopes. The
 [V1S-028 source-conflict review](v1.0-source-coverage-audit.md#cross-source-conflicts-faq-applicability-and-public-uncertainty-v1s-028-2026-11-04)
 reconciles published disclosure, dated FAQ scope and historical Annex authority without
-claiming publisher rulings. Exact occurrence variants and final source/browser acceptance remain open.
+claiming publisher rulings. The
+[V1S-029 frozen/current evidence join](v1.0-source-coverage-audit.md#frozen-explanation-audit-to-reviewed-current-evidence-v1s-029-2026-11-04)
+now links all 367 historical records to the 450 current Core/Hacking identities and bounded later evidence without changing D/S tiers or issuing whole-record approvals. Exact occurrence variants, source-clause completeness and final browser acceptance remain open.
 
 - [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned
   curated rules-reference gaps for N5 v5.3 using

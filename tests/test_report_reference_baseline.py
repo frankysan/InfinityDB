@@ -6,6 +6,7 @@ import sqlite3
 import zipfile
 from io import BytesIO
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -28,6 +29,7 @@ from tools.report_reference_baseline import (
     audit_numeric_army_replacement_variants,
     audit_visibility_zone_evidence,
     build_baseline,
+    join_explanation_reviewed_evidence,
     main,
     parse_frozen_explanation_inventory,
     reconcile_declaration_owners,
@@ -97,6 +99,125 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
             "selected-route-smoke-evidence-not-full-acceptance",
             "source-variant-pending-owner-context-presentation-review",
         }
+
+
+def _reviewed_explanation_join_inputs() -> dict[str, Any]:
+    report = reconcile_explanation_inventory()
+    report["conditionalDeclarations"] = audit_conditional_declaration_evidence()
+    report["visibilityZones"] = audit_visibility_zone_evidence()
+    migration = reconcile_declaration_owners(report)
+    migration["review"] = verify_declaration_review(migration)
+    report["declarationMigrations"] = migration
+    return report
+
+
+def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> None:
+    report = _reviewed_explanation_join_inputs()
+    evidence = join_explanation_reviewed_evidence(report)
+    assert evidence["status"] == "reviewed-evidence-joined-no-full-record-acceptance"
+    summary = evidence["summary"]
+    assert summary == {
+        "frozen": 367, "historicalD": 304, "historicalS": 63,
+        "retained": 350, "retiredDeclarations": 17,
+        "added": 100, "current": 450, "retainedHistoricalS": 46,
+        "historicalIdentitiesWithLaterEvidence": 26,
+        "reviewedDeclarationTransitions": 17,
+        "reviewedNewDeclarationHeadings": 20,
+        "selectedConditionalCases": 10,
+        "selectedVisibilityTerms": 5,
+        "selectedBrowserTestAnchors": 36,
+        "currentIdentitiesWithLaterEvidence": 56,
+        "wholeRecordApprovals": 0,
+        "pendingSourceSections": 743,
+    }
+    historical = {row["id"]: row for row in evidence["historicalRecords"]}
+    current = {row["id"]: row for row in evidence["currentRecords"]}
+    assert len(historical) == 367 and len(current) == 450
+    assert {row["historicalTier"] for row in historical.values()} == {"D", "S"}
+    assert all(row["fullRecordAcceptance"] == (
+        "not-approved-by-identity-or-evidence-join"
+    ) for row in historical.values())
+    assert all(row["fullRecordAcceptance"] == "not-assessed-in-this-audit"
+               for row in current.values())
+    assert historical["declaration-category:aro:p103"]["currentRecordIds"] == [
+        "declaration-category:short-skill:p103"
+    ]
+    assert historical["declaration-category:aro:p103"]["migrationDisposition"] == (
+        "corrected-classification"
+    )
+    assert historical["declaration-category:aro:p103"]["historicalTier"] == "S"
+    assert historical["skill:stealth"]["currentRecordIds"] == ["skill:stealth"]
+    assert historical["skill:stealth"]["laterEvidence"] == [{
+        "currentRecordId": "skill:stealth",
+        "evidenceKinds": [
+            "selected-browser-test-anchor", "selected-conditional-clause",
+        ],
+    }]
+    assert historical["declaration-category:aro:p103"]["laterEvidence"] == [{
+        "currentRecordId": "declaration-category:short-skill:p103",
+        "evidenceKinds": ["reviewed-declaration-heading"],
+    }]
+    assert any(row["kind"] == "selected-conditional-clause"
+               for row in current["skill:stealth"]["laterEvidence"])
+    assert any(row["kind"] == "reviewed-declaration-heading"
+               for row in current["declaration-category:short-skill:p103"]["laterEvidence"])
+    assert any(row["kind"] == "selected-visibility-term"
+               for row in current["term:visibility-zone"]["laterEvidence"])
+    assert any(row["kind"] == "selected-browser-test-anchor"
+               for row in current["rule:army-retreat"]["laterEvidence"])
+    assert current["equipment:ecm-hacker"]["laterEvidence"] == []
+    assert current["skill:stealth"]["sourceDisposition"] == (
+        "pending-full-material-clause-reconciliation"
+    )
+    assert current["skill:stealth"]["sourceLocatorCount"] > 0
+    assert current["skill:stealth"]["curatedReviewedOn"] is not None
+    assert report["fullRecordApprovalsIssuedByThisAudit"] == 0
+
+
+def test_frozen_reviewed_join_rejects_missing_or_changed_evidence(tmp_path: Path) -> None:
+    report = _reviewed_explanation_join_inputs()
+    with pytest.raises(ReferenceBaselineError, match="requires declaration"):
+        join_explanation_reviewed_evidence(reconcile_explanation_inventory())
+    altered = json.loads(json.dumps(report))
+    altered["currentRecords"].pop()
+    with pytest.raises(ReferenceBaselineError, match="identity count drift"):
+        join_explanation_reviewed_evidence(altered)
+    altered = json.loads(json.dumps(report))
+    altered["visibilityZones"]["records"][0]["id"] = "term:nonexistent"
+    with pytest.raises(ReferenceBaselineError, match="evidence target or count drift"):
+        join_explanation_reviewed_evidence(altered)
+    manifest = json.loads((ROOT / "config/validation/declaration-inventory-migration-v1.json")
+                          .read_text(encoding="utf-8"))
+    manifest["retiredTransitions"][0]["currentIds"] = ["declaration-category:aro:p40"]
+    changed = tmp_path / "bad-declaration-owners.json"
+    changed.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(ReferenceBaselineError):
+        join_explanation_reviewed_evidence(report, declaration_manifest=changed)
+
+
+def test_reviewed_explanation_join_cli_is_deterministic_and_non_approving(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "joined.json"
+    markdown = tmp_path / "joined.md"
+    args = [
+        "--reconcile-explanation-inventory", "--reconcile-declarations",
+        "--audit-conditional-declarations", "--audit-visibility-zones",
+        "--join-reviewed-evidence",
+        "--json-output", str(output), "--markdown-output", str(markdown),
+    ]
+    assert main(args) == 0
+    first = output.read_bytes()
+    assert main(args) == 0 and output.read_bytes() == first
+    saved = json.loads(first)
+    joined = saved["reviewedEvidenceJoin"]
+    assert len(joined["historicalRecords"]) == 367
+    assert len(joined["currentRecords"]) == 450
+    assert joined["summary"]["wholeRecordApprovals"] == 0
+    assert saved["fullRecordApprovalsIssuedByThisAudit"] == 0
+    text = markdown.read_text(encoding="utf-8")
+    assert "Frozen-to-current reviewed evidence join" in text
+    assert "test anchor is not test execution" in text
 
 
 def test_selected_weapon_browser_evidence_fails_closed_on_missing_test() -> None:

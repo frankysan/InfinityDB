@@ -1839,6 +1839,186 @@ def verify_declaration_review(
     }
 
 
+def join_explanation_reviewed_evidence(
+    report: dict[str, Any],
+    *,
+    declaration_manifest: Path = DECLARATION_REVIEW,
+) -> dict[str, Any]:
+    """Join each frozen record to current identities and bounded later evidence.
+
+    This is a provenance crosswalk, never an additional approval tier.
+    Retired declaration IDs map by reviewed historical owner, not by name/page.
+    """
+    required = {"declarationMigrations", "conditionalDeclarations", "visibilityZones"}
+    if not required <= report.keys():
+        raise ReferenceBaselineError(
+            "Reviewed explanation join requires declaration, conditional and visibility audits"
+        )
+    if _sha256(FROZEN_EXPLANATION_INVENTORY) != FROZEN_EXPLANATION_INVENTORY_SHA256:
+        raise ReferenceBaselineError("Frozen explanation inventory hash changed")
+    frozen = parse_frozen_explanation_inventory(
+        FROZEN_EXPLANATION_INVENTORY.read_text(encoding="utf-8")
+    )
+    current = {item["id"]: item for item in report["currentRecords"]}
+    if len(current) != report["currentCount"] or len(frozen) != report["frozenCount"]:
+        raise ReferenceBaselineError("Frozen/current explanation join identity count drift")
+    retained = set(frozen) & set(current)
+    removed = set(frozen) - set(current)
+    if (len(retained), len(removed), len(set(current) - set(frozen))) != (
+        report["retainedCount"], report["removedCount"], report["addedCount"]
+    ):
+        raise ReferenceBaselineError("Frozen/current explanation join lineage drift")
+
+    migration = report["declarationMigrations"]
+    verified = verify_declaration_review(migration, manifest_path=declaration_manifest)
+    if migration.get("review") != verified:
+        # A caller's source-PDF-enhanced verification may have a stronger status.
+        if not (migration.get("review", {}).get("status") ==
+                "pinned-n5.3-pdf-headings-verified"
+                and {k: v for k, v in migration["review"].items() if k != "status"} ==
+                {k: v for k, v in verified.items() if k != "status"}):
+            raise ReferenceBaselineError("Retired declaration review evidence drift")
+    manifest = json.loads(declaration_manifest.read_text(encoding="utf-8"))
+    transitions = {entry["oldId"]: entry for entry in manifest["retiredTransitions"]}
+    added_headings = {entry["id"]: entry for entry in manifest["addedHeadings"]}
+    if (set(transitions) != removed or
+            set(added_headings) != {
+                row["id"] for row in migration["addedDeclarations"]
+            } or len(added_headings) != 20):
+        raise ReferenceBaselineError("Historical declaration transition coverage drift")
+
+    conditional = report["conditionalDeclarations"]["cases"]
+    visibility = report["visibilityZones"]["records"]
+    conditional_by_id: dict[str, list[dict[str, Any]]] = {}
+    for entry in conditional:
+        conditional_by_id.setdefault(entry["recordId"], []).append(entry)
+    visibility_by_id = {row["id"]: row for row in visibility}
+    if (len(conditional) != 10 or len(visibility_by_id) != 5
+            or len(set(conditional_by_id) - set(current)) != 0
+            or len(set(visibility_by_id) - set(current)) != 0
+            or not set(added_headings) <= set(current)):
+        raise ReferenceBaselineError("Later selected evidence target or count drift")
+
+    current_rows = []
+    selected_browser = 0
+    evidenced_ids: set[str] = set()
+    for identity in sorted(current):
+        row = current[identity]
+        evidence: list[dict[str, Any]] = []
+        if row["selectedBrowserTest"]:
+            selected_browser += 1
+            evidence.append({
+                "kind": "selected-browser-test-anchor",
+                "test": row["selectedBrowserTest"],
+                "disposition": "maintained-test-exists-not-executed-by-join",
+            })
+        for case in conditional_by_id.get(identity, []):
+            evidence.append({
+                "kind": "selected-conditional-clause",
+                "key": case["key"], "page": case["sourcePage"],
+                "test": case["supportingTest"],
+                "disposition": case["disposition"],
+            })
+        if identity in visibility_by_id:
+            source = visibility_by_id[identity]
+            evidence.append({
+                "kind": "selected-visibility-term",
+                "href": source["href"],
+                "disposition": source["fullRecordAcceptance"],
+                "verifiedPdfLanguages": report["visibilityZones"]["verifiedPdfLanguages"],
+            })
+        if identity in added_headings:
+            heading = added_headings[identity]
+            evidence.append({
+                "kind": "reviewed-declaration-heading",
+                "owner": heading["owner"],
+                "printedClassification": heading["printedClassification"],
+                "disposition": "owner-and-heading-reviewed-not-full-record-acceptance",
+            })
+        if evidence:
+            evidenced_ids.add(identity)
+        current_rows.append({
+            "id": identity,
+            "lineage": row["lineage"],
+            "historicalTier": row["historicalTier"],
+            "curatedReviewStatus": row["curatedReviewStatus"],
+            "curatedReviewedOn": row["curatedReviewedOn"],
+            "sourceSpecificVariant": row["sourceSpecificVariant"],
+            "sourceLocatorCount": len(row["citations"]),
+            "sourceDisposition": row["sourceDisposition"],
+            "browserDisposition": row["browserDisposition"],
+            "laterEvidence": evidence,
+            "fullRecordAcceptance": row["fullRecordAcceptance"],
+        })
+
+    current_evidence = {
+        row["id"]: [entry["kind"] for entry in row["laterEvidence"]]
+        for row in current_rows if row["laterEvidence"]
+    }
+    historical_rows = []
+    for identity in sorted(frozen):
+        entry = frozen[identity]
+        if identity in current:
+            modern_ids = [identity]
+            disposition = "retained-identity-with-source-and-browser-gates-open"
+            transition = None
+        else:
+            transition = transitions[identity]
+            modern_ids = transition["currentIds"]
+            if not modern_ids or not set(modern_ids) <= set(current):
+                raise ReferenceBaselineError(
+                    f"Retired declaration lacks validated current owner: {identity}"
+                )
+            disposition = "owner-and-heading-reviewed-no-alias-or-full-record-approval"
+        later_links = [
+            {"currentRecordId": linked, "evidenceKinds": current_evidence[linked]}
+            for linked in modern_ids if linked in current_evidence
+        ]
+        historical_rows.append({
+            "id": identity,
+            "originalCollection": entry["collection"],
+            "historicalTier": entry["historicalTier"],
+            "lineage": "retained" if identity in current else "retired-declaration",
+            "currentRecordIds": modern_ids,
+            "laterEvidence": later_links,
+            "migrationDisposition": transition["disposition"] if transition else None,
+            "disposition": disposition,
+            "fullRecordAcceptance": "not-approved-by-identity-or-evidence-join",
+        })
+    if (len(historical_rows) != 367 or
+            sum(row["historicalTier"] == "S" for row in historical_rows) != 63):
+        raise ReferenceBaselineError("Historical D/S denominator changed during join")
+    return {
+        "format": "InfinityDB frozen/current selected evidence join",
+        "formatVersion": 1,
+        "status": "reviewed-evidence-joined-no-full-record-acceptance",
+        "frozenInventorySha256": report["frozenInventorySha256"],
+        "currentCuratedSha256": report["currentCuratedSha256"],
+        "historicalRecords": historical_rows,
+        "currentRecords": current_rows,
+        "summary": {
+            "frozen": 367, "historicalD": 304, "historicalS": 63,
+            "retained": len(retained), "retiredDeclarations": len(removed),
+            "added": report["addedCount"], "current": len(current),
+            "retainedHistoricalS": sum(
+                row["historicalTier"] == "S" and row["lineage"] == "retained"
+                for row in historical_rows
+            ),
+            "historicalIdentitiesWithLaterEvidence": sum(
+                bool(row["laterEvidence"]) for row in historical_rows
+            ),
+            "reviewedDeclarationTransitions": len(transitions),
+            "reviewedNewDeclarationHeadings": len(added_headings),
+            "selectedConditionalCases": len(conditional),
+            "selectedVisibilityTerms": len(visibility_by_id),
+            "selectedBrowserTestAnchors": selected_browser,
+            "currentIdentitiesWithLaterEvidence": len(evidenced_ids),
+            "wholeRecordApprovals": 0,
+            "pendingSourceSections": report["sourceSectionCount"],
+        },
+    }
+
+
 NUMERIC_ARMY_VARIANTS = {
     279: ("skill:bs-11", "BS=11", "BS", 11, "skill:bs-attack", 39),
     278: ("skill:bs-12", "BS=12", "BS", 12, "skill:bs-attack", 39),
@@ -2279,6 +2459,42 @@ def render_explanation_reconciliation(report: dict[str, Any]) -> str:
                 f"— {owners}"
             )
         lines.append("")
+    if "reviewedEvidenceJoin" in report:
+        summary = report["reviewedEvidenceJoin"]["summary"]
+        lines.extend([
+            "## Frozen-to-current reviewed evidence join",
+            "",
+            "**Provenance bridge, not full-source or browser acceptance.**",
+            f"- Historical: {summary['frozen']} (D {summary['historicalD']}, "
+            f"S {summary['historicalS']}); {summary['retained']} retained, "
+            f"{summary['retiredDeclarations']} reviewed declaration retirements.",
+            f"- Current: {summary['current']} records, including "
+            f"{summary['added']} post-inventory additions.",
+            f"- Retained historical S: {summary['retainedHistoricalS']}; "
+            "all historical tiers and original denominators unchanged.",
+            f"- Frozen identities pointing to later selected evidence: "
+            f"{summary['historicalIdentitiesWithLaterEvidence']} of "
+            f"{summary['frozen']} (not whole-record approvals).",
+            f"- Selected evidence: {summary['reviewedDeclarationTransitions']} "
+            "retired declaration ownership transitions; "
+            f"{summary['reviewedNewDeclarationHeadings']} current declaration "
+            "headings; "
+            f"{summary['selectedConditionalCases']} conditional clause cases; "
+            f"{summary['selectedVisibilityTerms']} Visibility Zone terms; "
+            f"{summary['selectedBrowserTestAnchors']} browser test anchors.",
+            f"- Distinct current identities with some later evidence: "
+            f"{summary['currentIdentitiesWithLaterEvidence']}. "
+            "This is not a whole-record approval count.",
+            f"- Pending source section/locator dispositions: "
+            f"{summary['pendingSourceSections']}; "
+            f"whole-record approvals: {summary['wholeRecordApprovals']}.",
+            "",
+            "The JSON report records all 367 original identities, each reviewed "
+            "declaration owner mapping, all 450 current identities and the "
+            "specific limited later evidence links. A retired category is not "
+            "a rename or a new public alias; a test anchor is not test execution.",
+            "",
+        ])
     if "numericArmyVariants" in report:
         evidence = report["numericArmyVariants"]
         lines.extend([
@@ -2343,10 +2559,18 @@ def render_explanation_reconciliation(report: dict[str, Any]) -> str:
                 f"{entry['browserDisposition']}; full gate pending"
             )
         lines.append("")
+    remaining = report["remainingWork"]
+    if "reviewedEvidenceJoin" in report:
+        remaining = [
+            "Carry the 17 owner-verified declaration retirements and their "
+            "20 current heading owners through clause and normal-browser "
+            "acceptance; never publish old page/category IDs as aliases",
+            *remaining[1:],
+        ]
     lines.extend([
         "## Remaining acceptance",
         "",
-        *[f"- [ ] {item}" for item in report["remainingWork"]],
+        *[f"- [ ] {item}" for item in remaining],
         "",
         "The JSON report contains every current identity, source locator, historical tier "
         "and explicit pending disposition. Do not convert a reviewed curation flag, "
@@ -2396,6 +2620,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Reconcile five post-inventory visibility terms and selected evidence",
     )
     parser.add_argument(
+        "--join-reviewed-evidence", action="store_true",
+        help="Join 367 frozen identities to 450 current records and later bounded evidence",
+    )
+    parser.add_argument(
         "--verify-visibility-pdfs", action="store_true",
         help="Verify exact pinned English and Spanish Visibility Zone clauses",
     )
@@ -2407,6 +2635,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             parser.error("--verify-conditional-pdf requires --audit-conditional-declarations")
         if args.verify_visibility_pdfs and not args.audit_visibility_zones:
             parser.error("--verify-visibility-pdfs requires --audit-visibility-zones")
+        if args.join_reviewed_evidence and not (
+            args.reconcile_declarations and args.audit_conditional_declarations
+            and args.audit_visibility_zones
+        ):
+            parser.error(
+                "--join-reviewed-evidence requires --reconcile-declarations, "
+                "--audit-conditional-declarations and --audit-visibility-zones"
+            )
         report = reconcile_explanation_inventory()
         if args.audit_visibility_zones:
             evidence = audit_visibility_zone_evidence(
@@ -2431,6 +2667,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 crosswalk, pdf_path=args.verify_declaration_pdf,
             )
             report["declarationMigrations"] = crosswalk
+        if args.join_reviewed_evidence:
+            report["reviewedEvidenceJoin"] = join_explanation_reviewed_evidence(report)
         for path, content in (
             (args.json_output, json.dumps(report, indent=2, ensure_ascii=False) + "\n"),
             (args.markdown_output, render_explanation_reconciliation(report)),
@@ -2448,7 +2686,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if (args.reconcile_declarations or args.verify_declaration_pdf is not None
             or args.verify_numeric_army_archive is not None
             or args.audit_conditional_declarations or args.verify_conditional_pdf is not None
-            or args.audit_visibility_zones or args.verify_visibility_pdfs):
+            or args.audit_visibility_zones or args.verify_visibility_pdfs
+            or args.join_reviewed_evidence):
         parser.error("reconciliation flags require --reconcile-explanation-inventory")
     report = build_baseline(
         args.army_db, args.rules_db, army_archive=args.army_archive,
