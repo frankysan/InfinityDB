@@ -2110,6 +2110,12 @@ Stored Weapon/Program B is therefore a base profile fact. Runtime ARO Burst,
 Fireteam bonuses, multiple-Trooper CC bonuses, and similar effects must not be
 written back into canonical source profiles.
 
+The maintained BS Attack reference now states that shots allocated across
+targets originate at one declared firing position and use one Ammunition type
+for the whole Burst. Dice allocated to a target that fails the Requirements
+are lost; eligible dice still resolve normally (N5.3 pp. 36, 39). Maximum
+Range failure still spends the Order and a Disposable use (p. 42).
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Combat_Module#Burst_.28B.29>
@@ -2233,11 +2239,49 @@ bonuses as runtime rules context. Peripheral/controller identity can inform the
 relationship graph without turning the situational bonus into a canonical loadout
 fact.
 
+The CC Attack reference distinguishes the N5.3 p. 52 conditions. With at least
+two Troopers in contact with the target, the Active Player selects one attacker
+activated by the Order. Each eligible ally or Peripheral in contact contributes
++1 Burst; Null or Immobilized allies do not. In the Reactive Turn, only one
+attacker is selected, and allies that declared Dodge, Idle or Reset also cannot
+contribute. Contact limits remain four Models around a 25 mm base and six around
+a base of 40 mm or larger; no limit for other sizes is inferred here.
+
+Contact with an allied Model in Engaged State also restricts declarations to
+CC Attack, Dodge or other Skills permitted in close combat. It does not authorize
+Doctor or Engineer on the engaged ally (p. 51).
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Close_Combat>
 - Wiki: <https://infinitythewiki.com/CC_Attack>
 - PDF: Infinity N5 V5.3, printed pages 51-53
+
+### RS-CM-CC-002 — Attacking an engagement and Coup de Grâce have different conditions
+
+**Project domain:** Data processing
+
+**Classification:** source-native, curated descriptive reference.
+
+Against an enemy engaged in close combat, a BS Attack takes an additional -6
+MOD for each allied Trooper engaged with that target. Every failed BS Attack
+Roll hits an ally in that combat, requiring the applicable Saving Rolls; with
+several allies, their player assigns each hit (N5.3 p. 40).
+
+CC Attack instead permits Coup de Grâce against an Unconscious enemy, including
+a Shasvastii-Embryo Token: the target enters Dead State without an Attack Roll
+or Saving Roll. An activated Dogged or No Wound Incapacitation requires an
+ordinary CC Attack instead (p. 51). These conditional explanations do not
+assert that a Unit is currently engaged, Unconscious or Dead, or create a
+general unconditional State transition.
+
+The owning BS Attack and CC Attack records carry printed-page and archived
+Wiki member citations. The pinned September 26 Wiki agrees: Ballistic Skills
+revision 4094, CC Attack revision 3953 and Close Combat revision 4023. The
+last preserves the older “more than two” wording separately from the N5.3
+“two or more” update; the current explanation follows the latter. The
+[source review](v1.0-source-coverage-audit.md#basic-attack-and-close-combat-follow-up-v1s-034-2026-11-04)
+owns evidence and outstanding acceptance.
 
 ### RS-CM-HACK-001 — Hacking Device variants grant explicit Program sets
 

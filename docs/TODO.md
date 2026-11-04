@@ -215,10 +215,13 @@ in [rules-semantics](rules-semantics.md#movement), with detailed evidence in the
 Remaining State-link, scenery/object and release-wide work stays under
 V1S-068–069, V1S-074 and V1S-081–090.
 
-- [ ] **V1S-034 (M, review):** Continue exact-source review of non-weapon attack/target/roll and remaining
-  Ammunition/State interaction clauses. The selected Weaponry clauses, chart profiles and Trait comparisons
-  are recorded in the [partial source review](v1.0-source-coverage-audit.md#attack-weaponry-and-mode-source-review-v1s-034-2026-11-04-partial);
-  they do not establish whole-module acceptance.
+- [ ] **V1S-034 (M, review):** Continue exact-source review of Template attack/target/roll clauses
+  (N5.3 pp. 43–49) and remaining Ammunition/State interactions (pp. 63–67).
+  Basic BS/CC declaration, shooting into close combat, Coup de Grâce and multiple-Trooper conditions
+  are now represented in the existing Skill references; their regression/API/browser acceptance
+  remains VD-0020 / VR-0077. The [partial source review](v1.0-source-coverage-audit.md#attack-weaponry-and-mode-source-review-v1s-034-2026-11-04-partial)
+  records reviewed clauses and remaining boundaries; neither it nor the selected chart checks
+  establishes whole-module acceptance. Combined/Immunity precedence remains V1S-036/037.
 - [ ] **V1S-035 (M, review):** Review unaccepted Hacking, firewall, Supportware and scoped interaction
   clauses, without recreating existing program facts.
 - [ ] **V1S-036 (M, review):** Review remaining component Immunity and combined-effect precedence cases with

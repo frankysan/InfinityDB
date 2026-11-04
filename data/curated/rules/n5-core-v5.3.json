@@ -11798,6 +11798,7 @@
                 ],
                 "effects": [
                     "The user makes the attack using the selected item's profile and applicable Attributes, Burst, Ammunition, and MODs.",
+                    "If Burst is divided among several targets, declare every shot from one firing position and choose one Ammunition type for the entire Burst. Dice assigned to a target whose Requirements are not met are lost; resolve the other eligible dice normally.",
                     "Where an applicable rule grants +1 SD, resolve the additional die and discard using [[rule:special-dice|Special Dice]]; it does not increase Burst."
                 ],
                 "restrictions": [
@@ -11806,7 +11807,9 @@
                 "clarifications": [
                     "When a target's action directly opposes this Attack, resolve [[rule:face-to-face-rolls|Face to Face Rolls]]; otherwise make independent, unopposed Rolls. Uncanceled hits use [[rule:saving-rolls|Saving Rolls]] as specified by the weapon.",
                     "Declare the chosen weapon or mode, targets, firing position, and Burst allocation before Resolution. The shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] defines when Requirements are checked.",
-                    "During [[rule:coordinated-orders|Coordinated Orders]], participants may choose different BS Weapons but must share the required target; Burst and reactive targeting are restricted."
+                    "During [[rule:coordinated-orders|Coordinated Orders]], participants may choose different BS Weapons but must share the required target; Burst and reactive targeting are restricted.",
+                    "**Shooting into close combat:** against an enemy in [[state:engaged|Engaged State]], apply an additional -6 MOD for each allied Trooper in [[state:engaged|Engaged State]] with that target, alongside the other applicable MODs. Every failed [[skill:bs-attack|BS Attack]] Roll hits an allied Trooper in that combat, who must make the applicable [[rule:saving-rolls|Saving Rolls]]. If several allies are present, their player chooses which ally receives each hit.",
+                    "A target beyond the selected weapon, Equipment, or Skill's maximum Range causes the [[skill:bs-attack|BS Attack]] to fail automatically. The Order is still spent, and a [[trait:disposable-x|Disposable]] weapon still expends a use."
                 ]
             },
             "labelIds": [
@@ -11828,11 +11831,41 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 75,
                     "section": "Modifiers Explained (MODs)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 36,
+                    "section": "Burst (B)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 40,
+                    "section": "BS Attack Into a Close Combat"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 42,
+                    "section": "Range"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Combat_Module",
+                    "heading": "Burst (B)"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "BS_Attack",
+                    "heading": "BS Attack"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Ballistic_Skills",
+                    "heading": "BS Attack Into a Close Combat"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-11-04"
             },
             "variantSemantics": {
                 "inheritance": "family"
@@ -11977,17 +12010,24 @@
                     "aro"
                 ],
                 "requirements": [
-                    "The user must be in Silhouette contact with the target and select an eligible CC Weapon or rule."
+                    "The user must be in Silhouette contact with the target and select an eligible CC Weapon or rule.",
+                    "Use a Melee Weapon, Skill, or Equipment item that permits a [[skill:cc-attack|CC Attack]] against an enemy Model or other eligible target. A weapon used for this declaration must have the [[trait:cc|CC]] Trait."
                 ],
                 "effects": [
-                    "The user makes the attack using the selected item's profile and applicable CC, Ammunition, and MODs."
+                    "The user makes the attack using the selected item's profile and applicable CC, Ammunition, and MODs.",
+                    "When Burst is greater than 1 and several targets are available, declare its allocation among those targets when declaring the [[skill:cc-attack|CC Attack]]. Apply the relevant MODs during Resolution."
                 ],
                 "restrictions": [
-                    "The selected item's effects and close-combat rules limit the attack."
+                    "The selected item's effects and close-combat rules limit the attack.",
+                    "At most four Models can be in Silhouette contact with a Model on a 25 mm base, or six with a Model on a base of 40 mm or larger. [[state:engaged|Engaged State]] separately limits declarations and Line of Fire in close combat."
                 ],
                 "clarifications": [
                     "Opposing Close Combat actions use [[rule:face-to-face-rolls|Face to Face Rolls]] when they directly affect one another. An uncanceled damaging hit then uses the weapon's [[rule:saving-rolls|Saving Rolls]].",
-                    "In [[rule:coordinated-orders|Coordinated Orders]], only the Spearhead makes the attack, gaining +1 Burst for each participating ally in Silhouette contact."
+                    "In [[rule:coordinated-orders|Coordinated Orders]], only the Spearhead makes the attack, gaining +1 Burst for each participating ally in Silhouette contact.",
+                    "**Coup de Grâce:** declaring [[skill:cc-attack|CC Attack]] against an enemy in [[state:unconscious|Unconscious State]], including one represented by a Shasvastii-Embryo Token, sends that target directly to [[state:dead|Dead State]] without an Attack Roll or [[rule:saving-rolls|Saving Roll]]. If the target has activated [[skill:dogged|Dogged]] or [[skill:no-wound-incapacitation|No Wound Incapacitation]], resolve an ordinary [[skill:cc-attack|CC Attack]] instead.",
+                    "**Several Troopers, Active Turn:** when at least two Troopers are in Silhouette contact with the target and one is activated, select one Trooper or [[term:peripheral|Peripheral]] activated by the Order to make the [[skill:cc-attack|CC Attack]]. It gains +1 Burst for each ally or [[term:peripheral|Peripheral]] in contact with that target who is neither in [[term:null-state|a Null State]] nor Immobilized.",
+                    "**Several Troopers, Reactive Turn:** select only one Trooper or [[term:peripheral|Peripheral]] in Silhouette contact with the target to make the [[skill:cc-attack|CC Attack]] [[trait:aro|ARO]]. It gains +1 Burst for each ally or [[term:peripheral|Peripheral]] in contact with that target who is neither in [[term:null-state|a Null State]] nor Immobilized and has not declared [[skill:dodge|Dodge]], [[skill:idle|Idle]], or [[skill:reset|Reset]]. These situational bonuses do not change the weapon's stored profile.",
+                    "**Contact with an ally in close combat:** a Trooper touching an allied Model in [[state:engaged|Engaged State]] may declare only [[skill:cc-attack|CC Attack]], [[skill:dodge|Dodge]], or another Skill permitted in close combat. This contact does not permit [[skill:doctor|Doctor]] or [[skill:engineer|Engineer]] on that ally while this condition applies."
                 ]
             },
             "labelIds": [
@@ -12009,11 +12049,26 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 75,
                     "section": "Modifiers Explained (MODs)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 52,
+                    "section": "Close Combat with Multiple Troopers; Other CC Restrictions"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "CC_Attack",
+                    "heading": "Coup de Grâce"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Close_Combat",
+                    "heading": "Close Combat With Multiple Troopers"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-11-04"
             },
             "variantSemantics": {
                 "inheritance": "family"

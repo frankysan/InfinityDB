@@ -116,7 +116,23 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No pending test-design obligations.
+- [ ] **VD-0020 (2026-11-04; needs-design):** Pin the basic attack/close-combat
+  source-to-reference conditions added under
+  [V1S-034](TODO.md#rules-and-contextual-reference-completion).
+  Change: `n5-core-v5.3.json` SHA-256
+  `8249fd75b6eb42f1aa1a76ab9d7667ef5fa57fc10c32d97414aeadf55a122dae`;
+  risk: player-facing conditional rules prose. Design
+  `tests/test_combat_attack_reference.py` for pinned PDF/Wiki evidence,
+  whole-Burst selection/invalid-dice/range limits, -6 per engaged ally and
+  failed-roll hits, Coup de Grâce with both exceptions, two-or-more eligibility,
+  separate Active/Reactive contributor exclusions and engaged-allied contact.
+  Verify curated-to-runtime/API parity while leaving base Weapon B unchanged.
+  Add a real-Chromium Skill-page check at 1440/390/320 px with Developer Mode
+  off, visible new text and semantic links, API assertions, page-error and
+  failed-request capture, and no horizontal overflow. Reuse current browser
+  fixtures; inspect selectors statically without executing tests in VD.
+  Existing coverage: `tests/test_catalog_rules.py`,
+  `tests/test_other_source_variant_provenance.py`; linked execution: VR-0077.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -144,12 +160,29 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending deferred-execution obligations.
+- [ ] **VR-0077 (2026-11-04; awaiting-design):** Verify the V1S-034 basic
+  BS/CC attack reference expansion. Base revision: `dd0b894b40691aa0a68dea47ee4d8abb76792bcd`;
+  target: the committed implementation containing the VD-0020 curated hash and
+  rules DB `8f2fa36b3ce3f0293fa217641d780db9d2c300da2f82438d1a6e9adcbc88b609`.
+  Work: [V1S-034](TODO.md#rules-and-contextual-reference-completion);
+  design: VD-0020. Immediate: maintained-text audit zero candidates/residuals;
+  guarded paired publication and two-build determinism passed, 498 identities
+  retained and 496 unrelated composed records unchanged. Publication integrity
+  required this immediate gate; no routine tests were run in implementation.
+  Deferred selectors: new `tests/test_combat_attack_reference.py` (including
+  real Chromium), `tests/test_catalog_rules.py`,
+  `tests/test_other_source_variant_provenance.py`, `tests/test_rules_database.py`,
+  and cumulative full-suite `tools/run_checks.py --stage test --assets required`.
+  Intended host: pinned `linux-dev` after safe fetch/fast-forward, full source
+  inputs/browser dependencies, and rebuilding/verifying ignored deployed-object
+  publication; Windows may supply complementary browser evidence. Preserve
+  actual revision, source pins, terminal counts and skips. Hosted and final
+  candidate acceptance remain independently owned.
 
 ## Next unused IDs
 
-- Design: `VD-0020` (through `VD-0019` retired).
-- Execution: `VR-0077` (through `VR-0076` retired).
+- Design: `VD-0021` (through `VD-0019` retired; `VD-0020` open).
+- Execution: `VR-0078` (through `VR-0076` retired; `VR-0077` open).
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

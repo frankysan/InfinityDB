@@ -29,7 +29,8 @@ are not retroactively relabeled.
   N5/ITS references confirm the Extra is still offered, not that all historic
   annex text was officially reissued unchanged for N5.
 - Find more linked N5.3 explanations for Weapons, deployed objects, Peripherals,
-  Hacking, Orders, Fireteams and Saving Rolls, with clearer conditions and exceptions.
+  Hacking, Orders, Fireteams and Saving Rolls, including shooting into close combat,
+  Coup de Grâce and multiple-Trooper attack conditions.
 - Browse reviewed deployed-object profiles and their source links independently of the
   carrying Weapon or Equipment; disputed and unavailable attributes remain visible.
 - Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties
@@ -65,6 +66,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing:** Expand the BS Attack and CC Attack references with
+  declaration and range limits, friendly hits when shooting into close combat,
+  Coup de Grâce exceptions, and separate Active/Reactive multi-Trooper conditions.
 - **Data processing + Web backend + Web frontend:** Expand shared N5.3 movement
   and geometry help for routes, visibility, Cover, zones, Coherency and
   replacement positioning. Explain Move, Climb and Jump requirements and
