@@ -215,24 +215,11 @@ in [rules-semantics](rules-semantics.md#movement), with detailed evidence in the
 Remaining State-link, scenery/object and release-wide work stays under
 V1S-068–069, V1S-074 and V1S-081–090.
 
-- [ ] **V1S-034 (M, review):** Accept the newly expanded basic attack and Template references
-  through VD-0020–0021 / VR-0077–0078, including ordinary Skill/Trait/General Rule browser entry points.
-  The [source review](v1.0-source-coverage-audit.md#attack-weaponry-and-mode-source-review-v1s-034-2026-11-04-partial)
-  covers BS/CC declarations, Template procedures and base Ammunition/State clauses; selected
-  Weaponry/chart checks remain bounded evidence. Retain this slice until its new references
-  have regression/API/browser acceptance, including repaired interaction-review coverage,
-  object-discovery classification and browser-lane registration from the cumulative run.
-  BTS/Critical/conditional State review remains V1S-037;
-  complete profile/API/browser reconciliation remains V1S-038/070–072.
-  Deferred: acceptance is in the phased VD/VR queue; retry at its five-item,
-  seven-day or mandatory-gate trigger. Independent source review may continue.
-- [ ] **V1S-035 (M, review):** Accept the Hacking source/citation and White Noise/Zero Pain
-  clarifications through VD-0023 / VR-0080. The
-  [source review](v1.0-source-coverage-audit.md#hacking-firewall-and-supportware-follow-up-v1s-035-2026-11-04)
-  reconciles N5.3 pp. 54–62, existing Firewall/Supportware ownership, four Device sets and
-  twelve Program profiles without recreating imported statistics. Keep this slice open for
-  source/API/browser acceptance; SRC-001 and cross-Army variant publication retain their own owners.
-  Deferred: acceptance resumes at the phased VD/VR five-item, seven-day or mandatory-gate trigger.
+Basic attack/Template, Hacking and reviewed Ammunition publication references have
+[pinned source/API/browser acceptance](v1.0-source-coverage-audit.md#attack-hacking-and-ammunition-publication-acceptance-v1s-034035038-2026-11-04).
+Remaining source authority, complete Weapon-profile review, occurrence indexing
+and final candidate acceptance retain their individual owners below.
+
 - [ ] **V1S-037 (M, review):** Resolve the remaining Silent/Attribute-Immunity timing and bilingual
   qualifier question under [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier).
   The [BTS/Critical/State review](v1.0-source-coverage-audit.md#bts-critical-and-state-immunity-review-v1s-037-2026-11-04)
@@ -240,8 +227,6 @@ V1S-068–069, V1S-074 and V1S-081–090.
   Blocked: Corvus Belli ruling or an applicable new official source must establish whether the
   Saving-Roll-triggered protection suppresses the earlier Silent Dodge MOD and reconcile the
   English Face to Face qualifier. Retry when that evidence is available; retain public uncertainty.
-- [ ] **V1S-038 (M, gate):** Reconcile every published base and combined Ammunition fact against pinned Weapon
-  data and validate stored/API/browser semantics.
 - [ ] **V1S-039 (M, review):** Review shared core/scenario concepts and collection supplements for scoped
   applicability, leakage and browser explanation.
 - [ ] **V1S-040 (M, decision):** Document N5-native Reinforcements authority if available, or preserve

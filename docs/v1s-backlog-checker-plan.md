@@ -1,8 +1,11 @@
 # V1S backlog checker — implementation plan
 
 **Project domain:** Project infrastructure  
-**Status:** Phase 1 is implemented; Windows checks passed and Linux parity is
-blocked on runner availability in VR-0081. Phases 2–4 remain proposed.
+**Status:** Phase 1 is implemented and verified on Windows and pinned Linux.
+The Linux CLI passed with 53 declarations and zero warnings; its tests passed
+in the cumulative code profile at `1d0d5c19`, recorded in
+[testing.md](testing.md#parallel-windows-development-and-linux-validation).
+Phases 2–4 remain proposed under V1S-096.
 **Scope:** The active `V1S-*` execution slices in [TODO.md](TODO.md#pre-planned-10-execution-slices), their documented completion, and the Git history of removals.
 
 ## Goal and constraints

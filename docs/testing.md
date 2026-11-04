@@ -506,6 +506,41 @@ terminal status, subprocess exit code, and final report. For the recent
 Windows suite (~8–10 minutes), allow **1,800 s** for full pytest and
 **3,600 s** for a full validation profile (server job maximum: **7,200 s**).
 
+**2026-11-04 attack, Template, Hacking and Ammunition queue acceptance:**
+The pinned `linux-dev` code-profile job
+`linux-dev:92c4757c631b4bfe90b0adcf71392a13` at
+`1d0d5c196b87983737981b8b8244321b552527a4` passed **5,123 tests,
+29 skipped, zero failures**, plus Ruff and Pyright (**zero errors/warnings**).
+Command: `tools/run_checks.py --profile code --assets required --test-workers 8 --browser-slot-count 4 --report`.
+Pytest took **451.84 s** (452.51 s runner); Ruff took 0.08 s and Pyright
+73.13 s. All **808/808** published/browser-referenced SVGs were present.
+The ignored deployed-object publication had been rebuilt for the current
+Army/rules pair and independently checked at the tested revision before dispatch.
+Army SHA-256: `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`;
+rules SHA-256: `121480b02d2ec81223d167ea1b1c00a556ddd256a42c418b9622059667493349`.
+
+VR-0077, VR-0078, VR-0080, VR-0081 and VR-0082 were individually reconciled
+against this cumulative result. All fifteen new attack/Template/Hacking source,
+API and real Chromium cases passed, including ordinary navigation and semantic
+links at 1440/390/320 px. The three Ammunition publication/opposition/browser
+modules ran without skips, covering all eleven base identities and five ordered
+combined forms. The static backlog checker also passed its Linux CLI at
+`1c780010` (job `linux-dev:670df4e39b4a4002a7faa8f8fe721e21`, 53 declarations,
+zero warnings); its complete regression coverage passed in the corrected code profile.
+
+The preceding cumulative `1c780010` job returned 5,099 passed / 24 failed /
+29 skipped. The failures exposed missing interaction-review coverage for the new
+Template rule, two unclassified object-discovery mentions, browser-lane registration
+and stale citation/current-inventory assertions. The focused repair passed
+**261/261**, zero skips, on Windows before the corrected cumulative run above.
+No source uncertainty, historical D304/S63 classification, or negative guard was waived.
+The 29 remaining skips cover opt-in rebuilt-publication gates, unavailable ignored
+historical PDFs/local migration evidence, already-promoted staging checks and a
+Windows-kernel-only check. None belongs to the required new reference or Ammunition
+selectors. Two existing Python 3.14 multithreaded `fork()` warnings remain.
+This closes the five local VR obligations; hosted CI, final candidate/source-wide
+acceptance and unresolved source authority remain independently owned.
+
 **2026-11-04 cumulative Linux validation of V1S-032 and source-audit repairs:**
 The pinned full-assets job `linux-dev:267d0d526f3242e3baef5efaec5b0116`
 at `df7191fcbf9821b7b914afbf19e6123b0bc47508` passed **5,056 tests,
