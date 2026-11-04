@@ -49,7 +49,8 @@ def test_template_conditions_match_pinned_pdf_wiki_and_faq(require_source_files)
     )
     import pymupdf
     with pymupdf.open(faq) as document:
-        first = " ".join(str(document[0].get_text("text")).casefold().split())
+        # File page 1 is the cover; printed FAQ page 1 is file page 2.
+        first = " ".join(str(document[1].get_text("text")).casefold().split())
     assert "corners" in first and "secondary targets" in first
 
 
@@ -96,5 +97,5 @@ def test_template_catalogs_links_and_conditional_prose(browser: Any, width: int)
             "Intuitive Attack", "Main Target"),
            ("/rules/template-weapons-and-equipment", "/skills/intuitive-attack"))
     browse(browser, width, "traits", "impact-template", "trait:impact-template",
-           ("independently", "single", "Targetless", "Speculative Attack"),
+           ("Compare that same Roll separately", "single", "Targetless", "Speculative Attack"),
            ("/rules/template-weapons-and-equipment", "/skills/speculative-attack"))

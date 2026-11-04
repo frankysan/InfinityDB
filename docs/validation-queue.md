@@ -209,6 +209,13 @@ is recorded. Failed or incomplete verification remains open.
   Preserve actual revision, assets, terminal results and skipped coverage;
   hosted and final-candidate gates remain independently required.
 
+  First execution of the three new modules at `b064fd2c`, Linux job
+  `linux-dev:477be92e0b784d4e98508b285f477ff0`, returned 10 passed / 5 failed.
+  The failures were test expectations: Supportware's literal “only sustain one”
+  phrase, FAQ printed-page versus cover offset, and Impact Template's rendered
+  “separately” wording at three widths. Corrected assertions retain byte pins,
+  API/browser invariants and conditions; execution is still pending on the fix.
+
 - [ ] **VR-0081 (2026-11-04; ready-to-run):** Verify Phase 1 static integrity
   checking for the V1S backlog checker. Base revision:
   `cde1fe7bbb20c426c4705eec0e9252bc8e293de9`; target:

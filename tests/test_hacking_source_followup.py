@@ -17,7 +17,8 @@ PROGRAM_PAGES = {
 def test_hacking_sources_pin_citation_pages_and_distinct_procedures(require_source_files) -> None:
     require_source_files(PDF)
     pages = pdf_pages((55, 56, 59, 60, 61))
-    assert "supportware programs" in pages[55] and "only one active supportware" in pages[55]
+    assert "supportware programs" in pages[55]
+    assert "only sustain one active supportware" in pages[55]
     assert "this is a range amplifier" in pages[56]
     assert "instead of in the resolution step" in pages[59]
     for phrase in ("at the end of the order", "totally inside", "infinite height",
