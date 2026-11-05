@@ -169,14 +169,6 @@ is bounded to the development pair; final-input checks remain.
 **Parent:** [Player-facing navigation and reference clarity](#player-facing-navigation-and-reference-clarity).
 **Project domains:** Web frontend, Project infrastructure
 
-- [ ] **V1S-079 (M, gate):** Complete actual assistive-technology
-  acceptance for notice roles, focus, announcements, back/forward
-  and keyboard navigation. Soft-navigation focus/status code and
-  browser regressions are validated; browser tests do not replace
-  actual screen-reader sign-off.
-  Blocked: Required spoken-output review needs a human operating a supported
-  screen reader; authority: release owner; retry: when a human tester records
-  the screen-reader acceptance.
 - [ ] **V1S-080 (M, gate):** Complete final-candidate touch, theme,
   320/390px viewport and notice expand/collapse verification; fix
   reproducible 1.0 defects. Development touch regressions passed;
@@ -360,13 +352,13 @@ of already-reviewed catalogs.
 
 **Project domains:** Web frontend, Project infrastructure
 
-- [ ] Complete manual assistive-technology, keyboard, touch, responsive
-  and theme acceptance of the floating accuracy notice and navigation
-  against the final candidate (**V1S-079/080**). Automated focus,
-  announcement and notice regressions remain unrun under
-  [VR-0102](validation-queue.md#pending-deferred-execution); they are not
-  screen-reader sign-off. The
-  [web design guidelines](web-design-guidelines.md) own the UI contract.
+- [ ] Complete final-candidate touch, 320/390px responsive and theme
+  acceptance of the floating accuracy notice and navigation under
+  **V1S-080**. The 7/7 human screen-reader walkthrough passed under
+  retired V1S-079; its reported result and the earlier automated focus,
+  announcement and notice regressions are recorded in
+  [testing](testing.md#parallel-windows-development-and-linux-validation).
+  The [web design guidelines](web-design-guidelines.md) own the UI contract.
 
 ### Final 1.0 acceptance
 

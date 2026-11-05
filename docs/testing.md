@@ -387,6 +387,19 @@ Markdownlint, link checks and `git diff --check` passed before commit.
 This closes the **local** Phase 2/3 deferred-execution entries; Phase 4
 integration, hosted CI and final release acceptance remain independent.
 
+**2026-11-05 V1S-079 human assistive-technology acceptance:**
+The release owner reported **7/7 manual screen-reader checks passed** using the
+NVDA/Chrome walkthrough: initial page semantics; expanded notice and its
+accessible name; Enter/Space disclosure operation; spoken soft-navigation
+announcements and main focus; persistent sidebar navigation; browser Back/Forward
+history, focus and scroll restoration; and keyboard navigation and notice state
+continuity. This is human spoken-output acceptance, distinct from the earlier
+Chromium accessibility regressions and separate final-candidate touch/theme/
+responsive acceptance (V1S-080). The tested Git SHA and software versions were
+not supplied in the report, so this evidence must not be cited as exact-SHA
+frozen-release acceptance; repeat affected manual checks if the navigation or
+notice implementation changes.
+
 **2026-11-05 v1.0 publication and accessibility regression (VR-0102/0103):**
 The first pinned Linux run at `a1f78bcd` exposed two over-strict
 accessibility URL assertions, an incomplete deployment fixture, stale
