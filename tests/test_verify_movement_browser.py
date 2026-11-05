@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from typing import Any
+from urllib.parse import quote
 
 import pytest
 
@@ -13,6 +14,73 @@ from tools.browser_wsgi_transport import route_browser_page
 from tools.promote_movement_reference import ARMY, ROOT, RULES
 
 ORIGIN = "http://infinitydb-movement.test"
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_suggested_terrain_table_and_gate_label_discovery(chrome: Any, width: int) -> None:
+    """Source-value examples and Gate labels have normal player entry points."""
+    app = create_app(ROOT / ARMY, rules_database_path=ROOT / RULES)
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    failed: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed.append(request.url))
+    page.on("response", lambda response: failed.append(
+        f"{response.status} {response.url}"
+    ) if response.status >= 400 else None)
+
+    def no_overflow() -> None:
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+
+    try:
+        for label in ("Narrow Gate", "Wide Gate"):
+            for entry, selector in (("search", "#search-list"), ("glossary", "#glossary-list")):
+                response = page.goto(
+                    f"{ORIGIN}/{entry}?q={quote(label)}", wait_until="domcontentloaded",
+                )
+                assert response is not None and response.status == 200
+                search = page.locator("#search-query" if entry == "search" else "#glossary-search")
+                assert search.input_value() == label
+                link = page.locator(f'{selector} a[href="/rules/access-width"]')
+                link.wait_for(state="visible", timeout=30000)
+                no_overflow()
+                link.focus()
+                link.press("Enter")
+                page.wait_for_url(f"{ORIGIN}/rules/access-width", timeout=30000)
+                card = page.locator("#rule-rule-access-width")
+                card.wait_for(state="visible", timeout=30000)
+                assert label in card.inner_text()
+                assert "p. 145" in card.locator(".rules-source-citations").inner_text()
+                no_overflow()
+        response = page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator('#catalog-list a[href="/rules/special-terrain"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/special-terrain", timeout=30000)
+        table = page.get_by_role("table", name="Suggested terrain combinations", exact=True)
+        table.wait_for(state="visible", timeout=30000)
+        assert table.locator("thead th").all_text_contents() == [
+            "Example", "Terrain Type", "Difficult Terrain", "Visibility Conditions",
+            "Saturation Zone",
+        ]
+        payload = page.evaluate("async () => (await fetch('/api/rules/special-terrain')).json()")
+        fields = ("name", "terrainType", "difficultTerrain", "visibility", "saturation")
+        rows = payload["rules"][0]["facts"]["terrainExamples"]["rows"]
+        rendered = table.locator("tbody tr").evaluate_all(
+            "rows => rows.map(row => [...row.cells].map(cell => cell.textContent))"
+        )
+        assert rendered == [[row[field] for field in fields] for row in rows]
+        assert len(rendered) == table.locator('tbody th[scope="row"]').count() == 18
+        card = page.locator("#rule-rule-special-terrain")
+        assert "not additional Terrain Types or mandatory scenery" in card.inner_text()
+        assert "p. 145" in card.locator(".rules-source-citations").inner_text()
+        no_overflow()
+        assert not errors and not failed, (width, errors, failed)
+    finally:
+        page.close()
 
 
 @pytest.fixture(scope="module")

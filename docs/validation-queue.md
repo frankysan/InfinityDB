@@ -120,23 +120,7 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-- [ ] VD-0044 (2026-11-05; needs-design): Source-table, validation, alias and
-  artifact parity for V1S-077. Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects).
-  Change: Special Terrain `terrainExamples`, Access Width aliases and source audit;
-  risk: source-value loss, interpreted dashes, stale publication or unrelated delta.
-  Assert all 18 rows/five columns against pinned p. 145, malformed/duplicate rows,
-  wrong owner/scope, null/Boolean cells, changed optional/conditional values,
-  canonical search/Glossary target, and unchanged objects/Restrictions/schema.
-  Existing: terrain/scenery source, staging and promoted-artifact modules;
-  linked execution: VR-0099. No tests authored or run yet.
-- [ ] VD-0045 (2026-11-05; needs-design): Ordinary V1S-077 navigation and source-table
-  rendering at 1440/390/320 px. Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects).
-  Change: `rules-reference.js`; risk: invisible table, lost source values,
-  horizontal page overflow or unreachable aliases. Reuse movement browser fixture;
-  assert search and Glossary entry, keyboard-followed canonical link, all table
-  cells/API parity, p. 145 citations, no extra device identity, JS/request/HTTP
-  errors and page overflow. Existing: `tests/test_verify_movement_browser.py`;
-  linked execution: VR-0100. No tests authored or run yet.
+No open test-design obligations.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -168,24 +152,31 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-- [ ] VR-0099 (2026-11-05; awaiting-design): V1S-077 source-reference publication.
+- [ ] VR-0099 (2026-11-05; ready-to-run): V1S-077 source-reference publication.
   Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects); revision:
-  in-progress curated/schema/audit and matched-pair change after `0b25acba`.
+  implementation `85e9e0f`; dedicated regression-design commit follows.
   Immediate: curated structural load and pinned PDF cell comparison passed;
   deterministic two-build staging, exact two-record delta, unchanged Restrictions
   and object payloads, rollback-backed promotion and matched publication check
   passed. Refreshed rules SHA-256:
   `5dc249ced04b1180aab4b81ea233964adbc5df37cbcffdb54dff619b55375762`.
-  Design: VD-0044. Deferred: terrain source,
-  staging/promoted artifacts, RulesDatabase/API/alias tests, curated/rules
-  validation, affected publication/variant binding and cumulative integration.
+  Design: VD-0044 completed by static review, no tests executed. Selectors:
+  `tests/test_terrain_scenery_source_gaps.py` (source/schema/API/aliases),
+  `tests/test_terrain_scenery_reference_staging.py`,
+  `tests/test_promoted_terrain_artifacts.py`,
+  `tests/test_terrain_condition_publication.py`, and publication/variant binding
+  regressions. Deferred: those selectors, curated/rules validation and cumulative
+  full-assets code suite. Due at V1S-077 publication acceptance before V1S-078.
   Host: linux-dev, pinned committed revision and matching ignored publications.
-- [ ] VR-0100 (2026-11-05; awaiting-design): V1S-077 suggested-terrain table renderer
+- [ ] VR-0100 (2026-11-05; ready-to-run): V1S-077 suggested-terrain table renderer
   and Gate-label navigation. Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects);
-  revision: in-progress browser/curated change after `0b25acba`; risk: medium.
-  Immediate: none; design: VD-0045. Deferred: three-width movement/terrain browser
-  acceptance with normal search/Glossary and served API parity, plus browser-lane
-  registration regression. Host: linux-dev with Chromium and matched inputs.
+  revision: implementation `85e9e0f`; risk: medium.
+  Immediate: JS syntax/static checks passed; design: VD-0045 completed by static
+  review, no tests executed. Deferred: `tests/test_verify_movement_browser.py`
+  including `test_suggested_terrain_table_and_gate_label_discovery` at all three
+  widths, plus `tests/test_browser_test_capacity.py`. No new browser module/lane
+  required. Due at V1S-077 source-to-browser acceptance before V1S-078.
+  Host: linux-dev with Chromium and matched inputs.
 
 ## Next unused IDs
 
