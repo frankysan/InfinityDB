@@ -266,7 +266,7 @@ Runtime/API/browser publication and final source-pair acceptance remain below.
 - [ ] **V1S-065 (M, build):** Verify ordinary Skill/Equipment detail links to exact reviewed
   Unit/Army profile and loadout occurrences. The optional shared renderer, published
   capability flag and Unit group-anchor navigation are implemented; retire only after
-  the VD-0034–0036 / VR-0095 browser and API acceptance checks pass.
+  the designed VR-0095 browser and API acceptance checks pass.
 - [ ] **V1S-066 (M, gate):** Validate full cross-Army publication parity, unknown exclusion, browser coverage
   and source-pair freshness for the new index.
 - [ ] **V1S-067 (M, external):** With separate authorization, rehearse Restrictions v8/v9 real-host

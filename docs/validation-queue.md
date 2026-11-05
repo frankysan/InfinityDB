@@ -120,25 +120,7 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-- [ ] VD-0034 (2026-11-05; needs-design): Assert Skill/Equipment detail APIs expose the
-  matched-variant-publication capability flag and that the browser never requests an
-  unavailable index on an unmatched release. Work: [V1S-065](TODO.md#rules-and-contextual-reference-completion);
-  change: `api_handler.py`, `skill.js`, `catalog-detail.js`; risk: browser API errors.
-  Existing coverage: `test_variant_usage_api_is_unavailable_without_a_matched_publication`;
-  linked execution: VR-0095. Outcome: pending test design; no tests run.
-- [ ] VD-0035 (2026-11-05; needs-design): Assert reviewed source rows link exact logical
-  Unit/Army/profile/loadout contexts, repeated identical contexts deduplicate, and
-  unverified shared options or unreviewed signatures never acquire fabricated links.
-  Work: V1S-065; change: `variant-usage.js`; risk: false direct usage claims.
-  Existing coverage: `test_variant_usage_publication_exposes_only_exact_source_variants`;
-  linked execution: VR-0095. Outcome: pending test design; no tests run.
-- [ ] VD-0036 (2026-11-05; needs-design): Verify static module packaging and real browser
-  navigation through selected Army/profile anchors at desktop and mobile widths,
-  including missing-source and optional Unit visibility cases.
-  Work: V1S-065; change: `presentation.py`, `unit.js`, Skill/Equipment pages;
-  risk: browser links and hidden/invalid anchors. Existing coverage: browser Unit
-  and catalog smoke tests; linked execution: VR-0095.
-  Outcome: pending test design; no tests run.
+No open test-design obligations.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -170,13 +152,21 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-- [ ] VR-0095 (2026-11-05; awaiting-design): Verify the optional V1S-065 reviewed
-  source-variant occurrence links across Skill/Equipment pages and Unit targets.
-  Work: [V1S-065](TODO.md#rules-and-contextual-reference-completion); implementation
-  based on `4b111659`; final commit SHA pending. Requires VD-0034–0036;
-  no tests executed during implementation. Deferred: capability gating, exact
-  source-context selection/dedup, unverified exclusion, static packaging, Unit
-  group anchors, Chromium 1440/390/320 px navigation and missing-artifact fallback.
+- [ ] VR-0095 (2026-11-05; ready-to-run): Verify optional V1S-065 reviewed
+  source-variant links across Skill/Equipment pages and Unit targets.
+  Work: [V1S-065](TODO.md#rules-and-contextual-reference-completion);
+  implementation `4b57ae6e9cbf30884824a539d7777bf947adb91b`;
+  test selectors are authored in the revision containing this queue entry. Pin that
+  revision (or a later unchanged one) for execution. VD-0034–0036 are statically
+  reviewed and retired without running tests. Deferred selectors: `tests/test_web.py::test_catalog_detail_advertises_only_matched_variant_usage_publication`,
+  `tests/test_web.py::test_variant_usage_page_modules_are_packaged_and_capability_gated`,
+  `tests/test_web.py::test_variant_usage_browser_does_not_fetch_unpublished_index`,
+  `tests/test_web.py::test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`,
+  `tests/test_web.py::test_skill_details_page_and_api_are_served`,
+  `tests/test_web.py::test_equipment_and_weapon_details_are_served`.
+  Browser checks include 1440/390/320 px navigation and optional-unit rerenders;
+  source-row duplication, shared Unit-option exclusion and missing-publication
+  fallback are explicit. No tests have been executed for this change.
   Outcome: unrun.
 
 ## Next unused IDs

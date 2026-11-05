@@ -6120,6 +6120,201 @@ def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> N
     assert item["source_ids"] == [21, 244]
 
 
+@pytest.mark.parametrize(
+    ("catalog", "identifier"),
+    [("skills", "11"), ("equipment", "21")],
+)
+def test_catalog_detail_advertises_only_matched_variant_usage_publication(
+    app: Callable, catalog: str, identifier: str,
+) -> None:
+    path = f"/api/{catalog}/{identifier}"
+    status, _, body = request(app, path)
+    assert status == 200
+    assert json.loads(body)["variant_usage_published"] is False
+
+    app.api.variant_usage = {"sourceSnapshot": {}, "variants": []}
+    status, _, body = request(app, path)
+    assert status == 200
+    assert json.loads(body)["variant_usage_published"] is True
+
+
+def test_variant_usage_page_modules_are_packaged_and_capability_gated(
+    app: Callable,
+) -> None:
+    status, _, module = request(app, "/static/variant-usage.js")
+    assert status == 200
+    assert b'from "./share-state.js"' in module
+    assert b'from "./view-components.js"' in module
+
+    for filename in ("skill.js", "catalog-detail.js"):
+        status, _, body = request(app, f"/static/{filename}")
+        assert status == 200
+        assert b'from "./variant-usage.js"' in body
+        assert b"variant_usage_published" in body
+        assert b"getVariantUsage(topicId, pageController.signal)" in body
+
+    status, _, unit = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function revealProfileGroupHash()" in unit
+    assert b"requestAnimationFrame(revealProfileGroupHash)" in unit
+
+
+@pytest.mark.parametrize("catalog", ("skills", "equipment"))
+def test_variant_usage_browser_does_not_fetch_unpublished_index(
+    app: Callable, catalog: str,
+    chromium_test_slot: None,
+) -> None:
+    from tools.browser_wsgi_transport import route_browser_page
+
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    app.api.variant_usage = None
+    with playwright_api.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch(channel="chrome")
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                pytest.skip(f"Chrome unavailable: {exc}")
+            raise
+        try:
+            page = browser.new_page()
+            route_browser_page(page, app, "http://variant-usage.test")
+            requests: list[str] = []
+            page.on("request", lambda request: requests.append(request.url)
+                    if "/api/variant-usage" in request.url else None)
+            slug = "stealth" if catalog == "skills" else "medikit"
+            page.goto(f"http://variant-usage.test/{catalog}/{slug}", wait_until="domcontentloaded")
+            selector = "#skill-content" if catalog == "skills" else "#item-content"
+            page.locator(selector).wait_for(state="visible", timeout=30000)
+            assert not requests
+            assert page.locator(".exact-variant-usage").count() == 0
+            page.close()
+        finally:
+            browser.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
+    app: Callable, width: int, chromium_test_slot: None,
+) -> None:
+    from tools.browser_wsgi_transport import route_browser_page
+
+    code, _, content = request(app, "/api/units/1")
+    assert code == 200
+    unit = json.loads(content)
+    # Use a real profile group so that navigation targets an actual rendered section.
+    army = next(
+        item for item in unit["armies"]
+        if item["id"] in {101, 201} and item["profiles"]
+        and not item.get("availability_flags")
+    )
+    group_id = army["profiles"][0]["group_id"]
+    army_id = army["id"]
+    anchor = f"profile-group-{army_id}-{group_id}"
+
+    groups = []
+    for record_id in ("skill:stealth", "equipment:medikit"):
+        base = {
+            "catalog": "skills" if record_id.startswith("skill:") else "equipment",
+            "unitId": 1,
+            "groupId": group_id,
+            "parentId": 1,
+        }
+        direct = {
+            **base, "ownerKind": "profile", "occurrenceId": 1,
+            "context": {
+                "logicalUnitId": 1, "applicationArmyId": army_id,
+                "payloadSha256": "a" * 64,
+            },
+        }
+        repeated = {**direct, "occurrenceId": 2}
+        loadout = {
+            **base, "ownerKind": "option", "occurrenceId": 3,
+            "context": {
+                "logicalUnitId": 1, "applicationArmyId": army_id,
+                "payloadSha256": "b" * 64,
+            },
+        }
+        shared = {
+            **base, "ownerKind": "unit_option", "occurrenceId": 4,
+            "context": {"logicalUnitId": None, "applicationArmyId": None},
+        }
+        groups.append({
+            "variantKey": record_id,
+            "variant": {
+                "recordId": record_id, "collectionId": "n5-core-v5.3",
+                "effect": {"sourceVariant": {"kind": "level", "value": 1}},
+            },
+            "uniqueUnits": 1,
+            "sourceRelationshipRows": 4,
+            "sourceRows": [direct, repeated, loadout, shared],
+        })
+    app.api.variant_usage = {"sourceSnapshot": {}, "variants": groups}
+
+    playwright_api = pytest.importorskip("playwright.sync_api")
+    with playwright_api.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch(channel="chrome")
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                pytest.skip(f"Chrome unavailable: {exc}")
+            raise
+        try:
+            for catalog, slug in (("skills", "stealth"), ("equipment", "medikit")):
+                page = browser.new_page(viewport={"width": width, "height": 900})
+                route_browser_page(page, app, "http://variant-usage.test")
+                errors: list[str] = []
+                page.on("pageerror", lambda error, failures=errors: failures.append(str(error)))
+                try:
+                    response = page.goto(
+                        f"http://variant-usage.test/{catalog}/{slug}",
+                        wait_until="domcontentloaded",
+                    )
+                    assert response is not None and response.status == 200
+                    usage = page.locator(".exact-variant-usage")
+                    usage.wait_for(state="visible", timeout=30000)
+                    assert "Only complete, source-reviewed variants" in usage.inner_text()
+                    group = usage.locator(".exact-variant-group")
+                    assert group.count() == 1
+                    group.locator("summary").click()
+                    group.locator("tr[data-owner-kind]").first.wait_for(
+                        state="visible", timeout=30000,
+                    )
+                    assert group.locator("tr[data-owner-kind]").count() == 2
+                    assert "shared Unit-option source row" in group.inner_text()
+                    links = group.locator('a[href^="/units/"]')
+                    assert links.count() == 2
+                    previous_group = group.element_handle()
+                    page.evaluate("() => window.dispatchEvent(new Event('optionalunitschange'))")
+                    page.wait_for_function(
+                        "(previous) => !previous.isConnected",
+                        arg=previous_group, timeout=30000,
+                    )
+                    assert usage.count() == 1
+                    group.locator("summary").click()
+                    group.locator("tr[data-owner-kind]").first.wait_for(
+                        state="visible", timeout=30000,
+                    )
+                    assert links.count() == 2
+                    assert all(
+                        f"#{anchor}" in (links.nth(index).get_attribute("href") or "")
+                        for index in range(links.count())
+                    )
+                    assert page.evaluate(
+                        "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                    ), width
+                    links.first.click()
+                    page.wait_for_url(re.compile(r".*/units/ranger-prototype\?.*#profile-group-.*"))
+                    page.locator(f'#{anchor}').wait_for(state="visible", timeout=30000)
+                    assert page.locator(f'#{anchor}').evaluate(
+                        "(element) => element.closest('details')?.open"
+                    )
+                    assert not errors, (catalog, width, errors)
+                finally:
+                    page.close()
+        finally:
+            browser.close()
+
+
 def test_variant_usage_api_filters_exact_groups_by_canonical_rule(app: Callable) -> None:
     requested = {
         "variantKey": '{"recordId":"skill:stealth","sourceVariant":"level-1"}',
@@ -6198,6 +6393,7 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
         "name": "Stealth",
         "wiki": None,
         "slug": "stealth",
+        "variant_usage_published": False,
         "categories": [
             {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
         ],
@@ -6578,6 +6774,9 @@ def test_equipment_and_weapon_details_are_served(
     assert payload["name"] == name
     if catalog == "equipment":
         assert payload["wiki"] == "https://infinitythewiki.com/Medikit"
+        assert payload["variant_usage_published"] is False
+    else:
+        assert "variant_usage_published" not in payload
     assert payload["slug"] == slug
     assert payload["variants"][0]["units"][0]["id"] == 1
 
