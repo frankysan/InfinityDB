@@ -6,6 +6,7 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import tempfile
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any, cast
@@ -840,19 +841,25 @@ def test_scenario_browser_aborts_map_and_unit_listener_on_soft_navigation() -> N
             pytest.skip("Node.js is unavailable for scenario browser lifecycle contract")
         command = [sys.executable, "-m", "nodejs_wheel"]
     root = Path(__file__).parents[1]
-    completed = subprocess.run(
-        [
-            *command,
-            str(root / "tests" / "scenario_lifecycle_harness.cjs"),
-            str(root / "src" / "infinity_db" / "web" / "static" / "scenario.js"),
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-        timeout=15,
-    )
-    assert completed.returncode == 0, completed.stdout + completed.stderr
-    assert "scenario navigation lifecycle: passed" in completed.stdout
+    # Windows CI timed out joining subprocess pipe-reader threads. Capture to a
+    # file so the same deadline measures process completion rather than pipe EOF;
+    # keep all harness lifecycle assertions and require its success marker.
+    with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as output:
+        completed = subprocess.run(
+            [
+                *command,
+                str(root / "tests" / "scenario_lifecycle_harness.cjs"),
+                str(root / "src" / "infinity_db" / "web" / "static" / "scenario.js"),
+            ],
+            check=False,
+            stdout=output,
+            stderr=subprocess.STDOUT,
+            timeout=15,
+        )
+        output.seek(0)
+        diagnostic = output.read()
+    assert completed.returncode == 0, diagnostic
+    assert "scenario navigation lifecycle: passed" in diagnostic
 
 
 def test_scenario_selection_ignores_stale_requests() -> None:

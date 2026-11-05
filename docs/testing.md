@@ -310,6 +310,16 @@ Source matrix/deterministic, wheel and deployment acceptance require the
 replacement commit's own runs. This focused result does not accept the
 final v1.0 candidate or the wider browser suite.
 
+Subsequent Windows Source jobs in runs `42060534503` and `42060899666`
+failed only the scenario navigation lifecycle harness: Python timed out in
+`subprocess._communicate` while joining a pipe-reader thread. The test now
+captures combined output in a temporary file and retains the same 15-second
+process deadline, exit-code check, success marker and every JavaScript lifecycle
+assertion. Windows `tests/test_scenario_api.py` passed **97/97** with full assets
+and Ruff after this transport change. Hosted confirmation remains required;
+local success does not prove the hosted timeout's underlying cause. This is an
+internal test-infrastructure change and needs no release-note entry.
+
 **Full-suite parallelism exception: run on Linux, develop on Windows.**
 Only while a **full test suite** is actively running against a pinned
 revision in the separate `linux-dev` MCP checkout may the agent continue
