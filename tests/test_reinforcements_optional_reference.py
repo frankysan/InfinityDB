@@ -65,6 +65,25 @@ def test_commlink_candidate_stages_matched_pair_without_promoting(tmp_path: Path
         stage_commlink_candidate(destination, root=root)
 
 
+def test_commlink_candidate_rejects_unrelated_curated_drift(tmp_path: Path) -> None:
+    root = _disposable_commlink_release(tmp_path)
+    source = root / "data/curated/rules/n5-core-v5.3.json"
+    document = json.loads(source.read_text(encoding="utf-8"))
+    doctor = next(record for record in document["records"] if record["id"] == "skill:doctor")
+    doctor["summary"] += " Unexpected unrelated staging change."
+    source.write_text(json.dumps(document, ensure_ascii=False) + "\n",
+                      encoding="utf-8", newline="\n")
+    originals = {
+        name: (root / "data/generated" / name).read_bytes()
+        for name in ("rules.db", "deployed-objects.json")
+    }
+    with pytest.raises(ValueError, match="Variant refresh changed unrelated rows: records"):
+        stage_commlink_candidate(root / "local/rejected", root=root)
+    assert not (root / "local/rejected").exists()
+    assert all((root / "data/generated" / name).read_bytes() == content
+               for name, content in originals.items())
+
+
 def _disposable_commlink_release(tmp_path: Path) -> Path:
     """Copy only required release inputs into a disposable Git-backed checkout."""
     root = tmp_path / "release"
@@ -84,6 +103,13 @@ def _disposable_commlink_release(tmp_path: Path) -> Path:
     # Exercise one-time promotion even after the real tracked release is promoted:
     # reconstruct the exact prior family-only row in a disposable v9 database.
     rules = root / "data/generated/rules.db"
+    # A one-record staging test needs a source-consistent baseline. The tracked
+    # release may intentionally await other reviewed curation (V1S-084); do not
+    # make those unrelated changes part of this disposable Commlink migration.
+    current = root / "local/current-rules.db"
+    export_release_rules(load_curated_directory(root / "data/curated/rules"),
+                         current, baseline=rules)
+    current.replace(rules)
     if "commlink" in RulesDatabase(rules).skill_reviewed_extra_semantics():
         with closing(sqlite3.connect(rules)) as database:
             row = database.execute(
@@ -247,20 +273,21 @@ def test_annex_current_optional_reference_discloses_n4_source_boundary() -> None
 
 
 def test_annex_read_model_is_discoverable_and_separate_from_core_matrix(tmp_path: Path) -> None:
+    baseline_root = _disposable_commlink_release(tmp_path)
     documents = load_curated_directory(ROOT / "data/curated/rules")
     output = tmp_path / "rules.db"
     export_release_rules(documents, output)
     rules = RulesDatabase(output)
     rules.validate()
-    # Accept either the pre-promotion v9 pair or the future promoted one.
-    # The only permitted pending record delta is Commlink's exact metadata.
+    # The disposable baseline reconstructs pre-promotion Commlink on otherwise
+    # current sources. Preserve the full-database one-record delta guard.
     commlink = next(
         record
         for _, document in documents
         for record in document["records"]
         if record["id"] == "skill:commlink"
     )
-    baseline = ROOT / "data/generated/rules.db"
+    baseline = baseline_root / "data/generated/rules.db"
     with sqlite3.connect(baseline) as old, sqlite3.connect(output) as new:
         old_rows = {
             (row[0], row[1]): row

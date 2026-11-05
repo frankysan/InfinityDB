@@ -410,7 +410,7 @@
       ],
       "summaryEvidence": "A Short Special Skill that normally recovers a [[state:unconscious|Unconscious]] VITA Trooper",
       "factsEvidence": [
-        "Doctor (2W) removes two Wounds on successful ordinary recovery."
+        "Doctor (2W) removes up to two Wounds on successful ordinary recovery."
       ],
       "caveat": "Doctor is recovery and State cancellation; its Command Token rerolls concern a spendable resource, not a deployed Token or newly created target identity."
     },

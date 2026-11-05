@@ -152,14 +152,29 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-No open deferred-execution obligations. Candidate source-row, Include,
-Peripheral/shared-option and artifact acceptance is recorded in the
-[candidate evidence](v1.0-source-coverage-audit.md#peripheral-shared-option-and-candidate-artifact-acceptance-2026-11-05).
+- [ ] VR-0089 (2026-11-05; ready-to-run): V1S-090 disposable Commlink
+  baseline/strict staging repair; base: 63e9e4ba; design: VD-0031 statically
+  reviewed without execution. Added selector:
+  test_commlink_candidate_rejects_unrelated_curated_drift verifies full-record
+  rejection, no destination and byte-preservation of both baseline artifacts.
+  Deferred: tests/test_reinforcements_optional_reference.py, then complete
+  code/full-assets and Git-index preflight on linux-dev. Due now: hosted CI failure.
+- [ ] VR-0090 (2026-11-05; ready-to-run): V1S-090 exact Doctor evidence
+  manifest refresh; base: 63e9e4ba; no missing design (existing mutation coverage).
+  Deferred: tests/test_deployed_object_non_catalog_queue.py,
+  tests/test_deployed_object_citation_migrations.py and
+  tests/test_legacy_staging_schema_guards.py, then cumulative linux-dev checks.
+  Due now: hosted CI failure; preserve source/provenance guards.
+- [ ] VR-0091 (2026-11-05; ready-to-run): V1S-090 frozen reference-section
+  expectation refresh after the reviewed Doctor citation addition; base: 63e9e4ba.
+  No missing design; existing tests/test_report_reference_baseline.py covers
+  frozen/current identity/evidence joins. Deferred: that module and complete
+  code/full-assets checks on linux-dev. Due now: hosted CI failure.
 
 ## Next unused IDs
 
-- Design: `VD-0031`; active obligations are listed above.
-- Execution: `VR-0089`; active obligations are listed above.
+- Design: `VD-0032`; active obligations are listed above.
+- Execution: `VR-0092`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
