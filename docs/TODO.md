@@ -291,10 +291,9 @@ The [V1S-074 scenery and scenario boundary review](v1.0-source-coverage-audit.md
 classifies Gate labels, optional terrain examples and scenario objectives separately
 from deployed devices. Its confirmed reference gaps remain under V1S-077.
 
-- [ ] **V1S-075 (M, review):** Rerun source snapshot and full-depth Include audits; preserve exact Army,
-  Unit-option and profile ownership.
-- [ ] **V1S-076 (M, review):** Audit reverse-use delivery, carrier and source-position edges; avoid inferred
-  uses from prose.
+The [V1S-075/076 source and reverse-use acceptance](v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05)
+preserves exact source ownership and found no additional transitive delivery uses.
+
 - [ ] **V1S-077 (L, conditional):** For each confirmed new object or edge, extend curated inventory,
   deterministic publication and API with targeted regressions.
   Confirmed V1S-074 reference gaps: make Narrow Gate and Wide Gate discoverable
