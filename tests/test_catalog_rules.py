@@ -1830,7 +1830,7 @@ def test_state_cancellation_clarifications_are_scoped_and_published(
             "army leaves the [[rule:army-retreat|Retreat!]] situation", "Command Token",
         ),
         "state:suppressive-fire": ("[[rule:guts-roll|Guts Roll]]",
-                                     "joins a Fireteam"),
+                                     "joins a [[rule:fireteam-general|Fireteam]]"),
     }
     for identity, expected in cases.items():
         rule = database.composed_record(identity)
