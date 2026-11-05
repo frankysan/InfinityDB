@@ -145,7 +145,7 @@ def test_ci_manual_explicit_adoption_and_limited_fallback(
     assert limited.origin == "manual-last-commit"
     assert not limited.complete
 
-    with pytest.raises(ValueError, match="manual baseline"):
+    with pytest.raises(ValueError, match="manual backlog base"):
         choose_ci_range(
             "workflow_dispatch", {"inputs": {"backlog_base": "x" * 40}},
             head, repository=root,
