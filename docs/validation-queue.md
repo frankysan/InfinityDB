@@ -127,6 +127,20 @@ IDs here and link the owning task instead of duplicating its description.
   archive pairing but not these negative display/duplicate cases.
   Linked execution: VR-0083. Design only; do not run tests in this phase.
 
+- [ ] VD-0026 (2026-11-05; needs-design): Verify exact, scoped
+  `(catalog, owner_kind, occurrence_id)` source-row keys and full owner-path
+  preservation across reused profile/loadout payloads, repeated distinct
+  source positions and cross-Army contexts. Negatively exercise duplicate or
+  missing source IDs/parent keys, multiple mappings for a source catalog ID
+  and duplicate published shared Unit-option owners; distinct owner kinds
+  may legitimately reuse numeric occurrence IDs.
+  Work: [V1S-063](TODO.md#rule-variant-usage-index-and-restrictions);
+  change: `src/infinity_db/variant_usage.py` after `7359d1c0`;
+  risk: fabricated membership or lost source identity.
+  Existing coverage: `tests/test_variant_usage.py` has source/published parity
+  and a pinned-pair integration case but lacks these source-key fixtures.
+  Linked execution: VR-0084. Design only; do not run tests in this phase.
+
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
 existing coverage, risk, linked VR ID, and resulting test selector and
@@ -172,10 +186,26 @@ summary above. Hosted CI and final release gates retain separate owners.
   plus a matched local/Linux candidate build and broader source checks as due.
   Outcome: unrun; do not mark V1S-063 complete.
 
+- [ ] VR-0084 (2026-11-05; awaiting-design): Verify scoped source-key
+  uniqueness, deterministic owner-path retention and ambiguous catalog-link
+  exclusion in the V1S-063 read-only candidate.
+  Work: [V1S-063](TODO.md#rule-variant-usage-index-and-restrictions);
+  revision: implementation commit after `7359d1c0` (record exact SHA on run);
+  risk: silent source identity collision or misattributed Army membership.
+  Immediate: post-change read-only matched candidate build PASS
+  (151 exact groups, 10,923 reviewed rows, 4,938 unresolved);
+  Ruff PASS, Pyright 0 errors/0 warnings, docs lint/links PASS,
+  V1S backlog checker PASS (37 declarations, zero warnings).
+  Design: VD-0026.
+  Deferred: negative source-row/catalog-mapping fixtures in
+  `tests/test_variant_usage.py`, reused-payload and cross-Army context cases,
+  matched candidate run and wider checks when due.
+  Outcome: unrun; do not mark V1S-063 complete.
+
 ## Next unused IDs
 
-- Design: `VD-0026`; active obligations are listed above.
-- Execution: `VR-0084`; active obligations are listed above.
+- Design: `VD-0027`; active obligations are listed above.
+- Execution: `VR-0085`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -275,6 +275,11 @@ and final candidate acceptance retain their individual owners below.
     A follow-up source-parity hardening rejects changed published
     `display_order` values and ambiguous context joins; its regression
     fixtures and execution are tracked as VD-0025/VR-0083.
+    Scoped source-row keys and full parent-path tuples are now retained in
+    the read-only candidate, with duplicate/missing source keys and conflicting
+    source-catalog mappings rejected or excluded; VD-0026/VR-0084 cover their
+    pending negative and reused-payload regressions. Shared Unit-option
+    compatibility remains unverified and does not create inferred Army usage.
     **Still required before closing V1S-063:** source-key and repeated-row
     fixture coverage across shared payloads and Army contexts, validated
     Include path/cycle handling and positive Peripheral path against appropriate

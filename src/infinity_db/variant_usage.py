@@ -98,7 +98,16 @@ def _source_mapping(
         direct = linked.get((entity, str(source["source_item_id"])), {})
         fallback = linked.get((entity, source["slug"]), {}) if source["slug"] else {}
         candidates = direct if direct else fallback
-        mapping[(source["catalog"], source["source_item_id"])] = {
+        key = (source["catalog"], source["source_item_id"])
+        if key in mapping:
+            # The source catalog ID must not pick an arbitrary application
+            # identity when several canonical catalog entries claim it.
+            mapping[key] = {
+                "applicationItemId": None, "slug": None, "rules": None,
+                "ambiguous": True, "duplicateSourceMapping": True,
+            }
+            continue
+        mapping[key] = {
             "applicationItemId": source["application_item_id"],
             "slug": source["slug"],
             "rules": next(iter(candidates.values())) if len(candidates) == 1 else None,
@@ -191,13 +200,16 @@ def _direct_context(
 ) -> dict[str, Any] | None:
     """Validate the actual published source occurrence and its payload position."""
     if owner == "unit_option":
-        match = application.execute(
+        matches = application.execute(
             f"SELECT item_id, position, display_order, quantity, raw FROM "
             f"unit_option_{row['catalog']} WHERE occurrence_id = ? "
             "AND unit_id = ? AND option_id = ?",
             (row["occurrenceId"], row["unitId"], row["optionId"]),
-        ).fetchone()
-        if match is None or any(match[field] != row[key] for field, key in (
+        ).fetchall()
+        if len(matches) != 1:
+            return None
+        match = matches[0]
+        if any(match[field] != row[key] for field, key in (
             ("item_id", "sourceId"), ("position", "position"),
             ("display_order", "displayOrder"), ("quantity", "quantity"),
             ("raw", "raw"),
@@ -269,10 +281,21 @@ def _source_rows(raw: sqlite3.Connection, catalog: str, owner: str) -> list[dict
             "extraType": extra["type"], "rawValue": extra["name"],
         })
     result = []
+    seen_keys: set[tuple[str, str, int]] = set()
     for item in rows:
-        parent = dict(zip(fields, (item[field] for field in fields), strict=True))
+        source_key = (catalog, owner, item["occurrence_id"])
+        if item["occurrence_id"] is None:
+            raise ValueError(f"Missing variant source-row identity: {catalog}/{owner}")
+        if source_key in seen_keys:
+            raise ValueError(f"Duplicate variant source-row key: {source_key!r}")
+        seen_keys.add(source_key)
+        owner_path = tuple(item[field] for field in fields)
+        if any(value is None for value in owner_path):
+            raise ValueError(f"Incomplete variant source owner path: {source_key!r}")
+        parent = dict(zip(fields, owner_path, strict=True))
         result.append({
             "catalog": catalog, "ownerKind": owner,
+            "sourceKey": list(source_key), "ownerPathKey": list(owner_path),
             "occurrenceId": item["occurrence_id"], "sourceId": item["item_id"],
             "position": item["position"], "displayOrder": item["display_order"],
             "quantity": item["quantity"], "raw": item["raw"],
@@ -371,7 +394,9 @@ def build_variant_usage_projection(
                 )
                 for row in source_rows:
                     source = mapping.get((catalog, row["sourceId"]))
-                    if source is None or source["rules"] is None:
+                    if source is not None and source.get("duplicateSourceMapping"):
+                        reason = "ambiguous-source-catalog"
+                    elif source is None or source["rules"] is None:
                         reason = "unmapped-or-ambiguous-rule"
                     else:
                         reason = ""
