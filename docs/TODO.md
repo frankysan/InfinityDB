@@ -259,8 +259,6 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Generated rules-reference projections](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend, Deployment
 
-- [ ] **V1S-051 (S, review):** Review exact Engineer occurrence parameters and operational exceptions; no
-  unsupported generic modifiers.
 - [ ] **V1S-052 (S, review):** Review exact Doctor occurrence parameters independently of Engineer and
   preserve source-defined differences.
 - [ ] **V1S-062 (M, design):** Finalize occurrence identity, ordering, duplicate-handling and
@@ -786,7 +784,14 @@ the remaining source clauses and final release-browser acceptance remain open.
       [SRC-033](official-source-clarifications.md#src-033--infiltration-reroll-without-the-rulebooks-phx-parameter);
       this review is closed without claiming publisher resolution.
       These do not yet publish the cross-Army usage index.
-      Other unresolved source families remain.
+      The [V1S-051 Engineer source review](v1.0-source-coverage-audit.md#engineer-occurrence-and-operational-boundary-v1s-051-2026-11-05)
+      reconfirmed 389 direct rows and the exact four source extras (15
+      profile occurrences), with their repair/cancellation, self-use,
+      Remote Presence and Command Token distinctions. All four source
+      extras remain untyped; the historical-versus-N5.3 `ReRoll -3`
+      question is retained in
+      [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope)
+      pending official authority. Other unresolved source families remain.
     - [ ] Materialize public context links and verify duplicate sources, reused
       payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
       ambiguous variants before publication. An audited source signature alone
