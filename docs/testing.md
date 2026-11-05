@@ -5968,7 +5968,7 @@ Madtraps); Flash Pulse remains a separately accepted historical citation. The
 output includes `resolvedSharedReviews` and `resolvedSharedReviewCount` so those
 two approvals remain auditable without counting them as missing definitions. This
 is triage evidence, not whole-Weapon or v1.0 completeness acceptance. The original
-finding and reproduction remain documented in
+baseline failure, reproduction and resolution remain documented in
 [V1-A05](v1.0-source-coverage-audit.md#v1-a05--weapon-gap-triage-aborts-on-completed-definitions).
 
 For the opt-in **1.0 enrichment source-triage assessment**, add
