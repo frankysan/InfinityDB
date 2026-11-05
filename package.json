@@ -5,6 +5,6 @@
   "name": "infinitydb-documentation-checks",
   "private": true,
   "scripts": {
-    "lint:docs": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#local\" \"#reports\" \"#docs/audits\" \"#.venv\""
+    "lint:docs": "markdownlint-cli2 \"**/*.md\" \"#node_modules\" \"#local\" \"#reports\" \"#docs/audits\" \"#.venv\" \"#AGENTS.local.md\""
   }
 }

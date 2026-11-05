@@ -1108,7 +1108,7 @@ but arbitrary combinations and the unqualified SR
 remain unresolved. Raw `UPGRADE:` spellings, including
 nonbreaking spaces, remain source evidence rather than a
 generic parser contract. See
-[the source-parameter audit](../../docs/data-model.md#rule-variant-usage-index--accepted-design-direction-candidate-only).
+[the source-parameter audit](../../docs/data-model.md#rule-variant-usage-index--implemented-release-artifact-gated).
 
 For Hacking Device `100` and Plus `101`, reviewed program-specific
 single extras may also use `program-burst-mod` with
