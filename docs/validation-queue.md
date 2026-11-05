@@ -169,7 +169,14 @@ summary above. Hosted CI and final release gates retain separate owners.
   checkout, explicitly regenerate the ignored paired deployed-object
   and variant-usage publications after Git fast-forward. Execute the
   pinned test selectors with required assets; the final frozen release
-  rebuild remains V1S-084. Outcome: unrun.
+  rebuild remains V1S-084. First Linux run
+  `linux-dev:25b11ea40d9f4d20b78a327482d4981b` on `650c233a`
+  passed seven tests (source/API plus two desktop paths), failed seven
+  browser cases solely due to the test choosing a hidden navigation-menu
+  link at narrow widths and double-clicking during an asynchronous
+  document navigation. Corrected the harness to select visible maintained
+  reference links and wait after a single desktop click; rerun is pending.
+  Outcome: verification incomplete.
 
 ## Next unused IDs
 

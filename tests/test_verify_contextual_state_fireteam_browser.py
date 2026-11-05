@@ -113,17 +113,17 @@ def test_state_fireteam_links_navigate_in_real_browser(
                     f"{ORIGIN}/states/{slug}", wait_until="domcontentloaded"
                 )
                 assert response and response.status == 200
-                forward = page.locator("a[href='/fireteams']").first
+                forward = page.locator(
+                    "#item-content a.maintained-reference[href='/fireteams']"
+                ).first
                 forward.wait_for(state="visible", timeout=15000)
                 forward.click()
-                if not page.url.endswith("/fireteams"):
-                    forward.click()
                 page.wait_for_url(ORIGIN + "/fireteams", timeout=15000)
-                reverse = page.locator(f"a[href='/states/{slug}']").first
+                reverse = page.locator(
+                    f"a.maintained-reference[href='/states/{slug}']"
+                ).first
                 reverse.wait_for(state="visible", timeout=15000)
                 reverse.click()
-                if not page.url.endswith(f"/states/{slug}"):
-                    reverse.click()
                 page.wait_for_url(ORIGIN + f"/states/{slug}", timeout=15000)
                 assert page.evaluate(
                     "() => document.documentElement.scrollWidth <= innerWidth + 1"
