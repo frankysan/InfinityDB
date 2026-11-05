@@ -154,7 +154,7 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 - [ ] VR-0094 (2026-11-05; ready-to-run): Verify the V1S-064 exact variant usage read model and API.
   Work: [V1S-064](TODO.md#rules-and-contextual-reference-completion); implementation revision is
-  the commit containing this entry. Risk: source identity and public payload correctness.
+  `b2763b90a9d129e82618d76ca37de0bc0e0849bd`. Risk: source identity and public payload correctness.
   Immediate: Ruff PASS; Pyright 0 errors/warnings; Markdownlint PASS (43 files) and offline links
   PASS (41 files); `git diff --check` PASS. No tests run during implementation.
   Design: VD-0033 reviewed and retired without executing tests.
