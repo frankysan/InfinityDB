@@ -86,6 +86,10 @@ async function navigate(url, { replace = false, restoreScroll } = {}) {
   syncActiveNavigation(new URL(url, window.location.href).pathname);
   await runPageModules(nextDocument);
   window.scrollTo(0, restoreScroll ?? 0);
+  // A full document navigation resets focus. Replacing <main> does not.
+  nextMain.focus({ preventScroll: true });
+  const pageStatus = document.getElementById("page-navigation-status");
+  if (pageStatus) pageStatus.textContent = `Loaded ${document.title}`;
   document.dispatchEvent(new CustomEvent("infinity:navigation"));
 }
 

@@ -297,10 +297,16 @@ release-matched source/publication and browser gates under V1S-081–090.
 **Parent:** [Player-facing navigation and reference clarity](#player-facing-navigation-and-reference-clarity).
 **Project domains:** Web frontend, Project infrastructure
 
-- [ ] **V1S-079 (M, gate):** Perform assistive-technology review of floating accuracy notice and navigation:
-  roles, focus, announcement, keyboard.
+- [ ] **V1S-079 (M, gate):** Complete assistive-technology review of the floating accuracy notice and navigation:
+  roles, focus, announcement and keyboard. The shared soft-navigation focus handoff
+  and polite page announcement have been implemented; focused browser regressions
+  are authored but unrun under VR-0102. Native notice semantics and keyboard tests are
+  a baseline, not actual screen-reader sign-off. Retain manual AT checks across
+  expanded/collapsed notice, keyboard navigation, back/forward and changed pages.
 - [ ] **V1S-080 (M, gate):** Verify touch, theme, narrow viewport and notice collapse/expand behavior; fix
-  only reproducible 1.0 regressions.
+  only reproducible 1.0 regressions. Existing desktop/mobile light/dark geometry and
+  keyboard checks are supplemented by a new unrun touch activation regression
+  under VR-0102; final-candidate sign-off remains open.
 
 #### Final frozen-candidate acceptance and release
 

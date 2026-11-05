@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Page navigation now directs keyboard focus to the new content and announces
+  the loaded page to assistive technologies without disturbing scroll restoration.
 - Find Narrow Gate and Wide Gate through search or Glossary, and browse the
   eighteen suggested terrain combinations with their optional and conditional values.
 - Fireteam rules and contextual State help now link both ways for

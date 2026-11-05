@@ -152,12 +152,17 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-No open deferred-execution obligations.
+- [ ] VR-0102 (2026-11-05; ready-to-run): Shared soft-navigation focus handoff and polite page-change announcement, plus existing floating-notice touch/keyboard acceptance.
+  Work: [V1S-079/080](TODO.md#accessibility-and-navigation); revision: this implementation/design batch (use its introducing Git commit as the exact test target); risk: medium.
+  Immediate: Ruff on both modified/new test modules and `git diff --check` passed; no tests executed.
+  Design: VD-0047/0048/0049 retired after static review (no test execution).
+  Deferred: `tests/test_verify_accessible_navigation_browser.py` (soft link, persistent-shell link, back/scroll, focus/status at 1440/390px); `tests/test_verify_page_footer_browser.py` (native disclosure semantics and touch at 390/320px in light/dark), existing `tests/test_verify_sidebar_density_browser.py`, and applicable normal broader checks at next due drain.
+  Outcome: unrun; actual screen-reader sign-off and frozen-candidate visual acceptance remain separately required under V1S-079/080.
 
 ## Next unused IDs
 
-- Design: `VD-0047`; active obligations are listed above.
-- Execution: `VR-0102`; active obligations are listed above.
+- Design: `VD-0050`; active obligations are listed above.
+- Execution: `VR-0103`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

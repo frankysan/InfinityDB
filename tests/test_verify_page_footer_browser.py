@@ -67,6 +67,13 @@ def test_accuracy_notice_floats_and_remembers_session_toggle(
         assert summary.get_attribute("aria-label") == (
             "Toggle InfinityDB accuracy and independence notice"
         )
+        # Leave expanded/collapsed semantics to the native disclosure, not
+        # a parallel hand-maintained ARIA button or interrupting alert.
+        assert details.evaluate("(node) => node.tagName === 'DETAILS'")
+        assert summary.evaluate("(node) => node.tagName === 'SUMMARY'")
+        assert details.get_attribute("role") is None
+        assert summary.get_attribute("role") is None
+        assert summary.get_attribute("aria-expanded") is None
         assert details.evaluate(
             "(node) => getComputedStyle(node).position === 'fixed'"
         )
@@ -108,6 +115,55 @@ def test_accuracy_notice_floats_and_remembers_session_toggle(
         assert details.locator("p").is_visible()
         page.locator(".page-footer-notice-body a[href='/about']").click()
         page.wait_for_url(f"{ORIGIN}/about")
+        assert details.evaluate("(node) => node.open")
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width,height", [(390, 640), (320, 540)])
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_accuracy_notice_touch_activation_and_keyboard_reopen(
+    app: Any, chrome: Any, width: int, height: int, theme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": height}, has_touch=True)
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/", wait_until="domcontentloaded")
+        page.evaluate(
+            "(theme) => document.documentElement.setAttribute('data-theme', theme)",
+            theme,
+        )
+        details = page.locator("main .page-footer-notice")
+        summary = details.locator("summary")
+        assert details.evaluate("(node) => node.open")
+        summary.tap()
+        assert not details.evaluate("(node) => node.open")
+        closed = details.bounding_box()
+        assert closed is not None
+        assert 43 <= closed["width"] <= 45 and 43 <= closed["height"] <= 45
+        assert summary.get_attribute("aria-label") == (
+            "Toggle InfinityDB accuracy and independence notice"
+        )
+        page.wait_for_function(
+            "() => sessionStorage.getItem('infinitydb-accuracy-notice-collapsed') === 'true'"
+        )
+
+        # The native disclosure persists across soft navigation and remains
+        # keyboard-operable even when the visible text label is collapsed.
+        page.evaluate("() => window.infinityNavigate('/about')")
+        page.locator("main .page-footer-notice").wait_for(state="visible")
+        assert not details.evaluate("(node) => node.open")
+        summary.focus()
+        summary.press("Enter")
+        assert details.evaluate("(node) => node.open")
+        assert summary.evaluate("(node) => document.activeElement === node")
+        summary.tap()
+        assert not details.evaluate("(node) => node.open")
+        summary.focus()
+        summary.press("Space")
         assert details.evaluate("(node) => node.open")
         assert not errors, errors
     finally:
