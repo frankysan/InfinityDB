@@ -182,6 +182,11 @@ summary above. Hosted CI and final release gates retain separate owners.
   widths, plus `tests/test_browser_test_capacity.py`. No new browser module/lane
   required. Due at V1S-077 source-to-browser acceptance before V1S-078.
   Host: linux-dev with Chromium and matched inputs.
+  Narrow-page screenshot review added an explicitly labelled, focusable table
+  region. The revised three-width selector passes on Windows, including
+  ArrowRight scrolling and reaching the final column at 390/320 px; direct
+  file Ruff and JS syntax checks pass. Rerun that revised selector on Linux
+  after the independent full suite at `b3e65759` completes.
 
 ## Next unused IDs
 

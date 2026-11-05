@@ -276,7 +276,11 @@ function appendTerrainExamples(container, rule) {
     body.append(row);
   }
   table.append(head, body);
-  group.append(heading, guidance, tableViewport(table));
+  const viewport = tableViewport(table);
+  viewport.tabIndex = 0;
+  viewport.setAttribute("role", "region");
+  viewport.setAttribute("aria-label", "Suggested terrain combinations, scroll for all columns");
+  group.append(heading, guidance, viewport);
   container.append(group);
 }
 

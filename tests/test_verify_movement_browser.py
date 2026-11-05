@@ -74,6 +74,21 @@ def test_suggested_terrain_table_and_gate_label_discovery(chrome: Any, width: in
         )
         assert rendered == [[row[field] for field in fields] for row in rows]
         assert len(rendered) == table.locator('tbody th[scope="row"]').count() == 18
+        viewport = table.locator("..")
+        assert viewport.get_attribute("role") == "region"
+        assert viewport.get_attribute("tabindex") == "0"
+        if width < 400:
+            viewport.focus()
+            viewport.press("ArrowRight")
+            page.wait_for_function(
+                "() => document.querySelector('.terrain-examples-reference .table-viewport')"
+                ".scrollLeft > 0"
+            )
+            viewport.evaluate("node => { node.scrollLeft = node.scrollWidth; }")
+            assert viewport.evaluate(
+                "node => node.querySelector('thead th:last-child').getBoundingClientRect().right"
+                " <= node.getBoundingClientRect().right + 1"
+            )
         card = page.locator("#rule-rule-special-terrain")
         assert "not additional Terrain Types or mandatory scenery" in card.inner_text()
         assert "p. 145" in card.locator(".rules-source-citations").inner_text()
