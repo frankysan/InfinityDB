@@ -126,6 +126,50 @@ def test_deployed_object_publication_is_generated_and_verified_for_each_release_
     assert 'http://127.0.0.1:8000/deployed-objects' in smoke
 
 
+def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -> None:
+    gitignore = _read(".gitignore")
+    attributes = _read(".gitattributes")
+    dockerignore = _read(".dockerignore")
+    dockerfile = _read("Dockerfile")
+    deploy = _read("scripts/deploy.sh")
+    smoke = _read("scripts/verify-container-image.sh")
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    source_workflow = _read(".github/workflows/source-checks.yml")
+
+    assert "!data/generated/variant-usage.json" in gitignore
+    assert "data/generated/variant-usage.json binary" in attributes
+    assert "!data/generated/variant-usage.json" in dockerignore
+    assert (
+        "COPY --chown=appuser:appuser data/generated/variant-usage.json "
+        "/app/data/variant-usage.json"
+    ) in dockerfile
+    assert (ROOT / "data/generated/variant-usage.json").is_file()
+    assert "tools.build_variant_usage --publish" not in deploy
+    assert "tools.build_deployed_object_publication --check" in deploy
+    assert 'expected_files.add("variant-usage.json")' in smoke
+    assert "load_variant_usage_publication(" in smoke
+    assert "/api/variant-usage?record_id=" in smoke
+    assert "tools.verify_deployment_assets --skip-svg" in source_workflow
+    assert "tools.verify_deployment_assets --skip-svg" in workflow
+    assert workflow.index("Validate pinned exact-variant release publication") < workflow.index(
+        "Build application image from tracked databases"
+    )
+
+
+def test_variant_usage_legacy_image_removes_v9_publication_before_smoke() -> None:
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    smoke = _read("scripts/verify-container-image.sh")
+
+    assert "RUN rm /app/data/variant-usage.json" in workflow
+    assert workflow.index("RUN rm /app/data/variant-usage.json") < workflow.index(
+        "Validate v8 rollback image and production startup"
+    )
+    assert 'if restrictions["available"]:' in smoke
+    assert 'expected_files.add("variant-usage.json")' in smoke
+    assert 'if not restrictions["available"] and usage is not None:' in smoke
+    assert "Legacy compatibility image unexpectedly published variant usage" in smoke
+
+
 def test_release_installer_deploys_tracked_runtime_databases_without_rebuilding() -> None:
     script = _read("scripts/install-or-update.sh")
     assert "infinity-db build" not in script

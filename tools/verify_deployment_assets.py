@@ -12,6 +12,7 @@ from infinity_db.deployment_provenance import (
     validate_database_symbol_provenance,
 )
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.variant_usage_reference import load_variant_usage_publication
 
 try:
     from tools.asset_validation import (
@@ -71,6 +72,7 @@ def verify_deployment_assets(
     _require_complete_asset_set(validation)
 
     verify_runtime_artifacts(database_path, rules_database_path, publication_manifest_path)
+    verify_variant_release_publication(database_path, rules_database_path)
     return validation
 
 
@@ -82,6 +84,21 @@ def verify_runtime_artifacts(
     """Validate database schemas and source binding independently of SVG availability."""
     validate_database_symbol_provenance(database_path, publication_manifest_path)
     RulesDatabase(rules_database_path).validate()
+
+
+def verify_variant_release_publication(
+    database_path: Path, rules_database_path: Path,
+) -> None:
+    """Require the tracked, release-paired exact-variant publication before packaging."""
+    directory = database_path.parent
+    publication = load_variant_usage_publication(
+        directory / "variant-usage.json",
+        database_path,
+        rules_database_path,
+        directory / "deployed-objects.json",
+    )
+    if publication is None or not publication["variants"]:
+        raise DeploymentAssetError("Release-matched variant-usage.json is missing or empty")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -121,7 +138,8 @@ def main(argv: list[str] | None = None) -> int:
             verify_runtime_artifacts(
                 args.database, args.rules_database, args.publication_manifest,
             )
-            print("Runtime databases valid and snapshot-matched; SVG validation skipped")
+            verify_variant_release_publication(args.database, args.rules_database)
+            print("Runtime databases and variant publication valid; SVG validation skipped")
             return 0
         validation = verify_deployment_assets(
             args.static_root,
@@ -143,7 +161,7 @@ def main(argv: list[str] | None = None) -> int:
         "Deployment release artifacts verified: "
         f"{validation.present_count}/{validation.expected_count} published SVGs; "
         f"{validation.browser_present_count}/{validation.browser_expected_count} "
-        "browser-referenced; runtime databases valid and snapshot-matched"
+        "browser-referenced; runtime databases and variant publication source-matched"
     )
     return 0
 

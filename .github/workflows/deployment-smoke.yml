@@ -44,6 +44,9 @@ jobs:
           assert paired is not None and len(paired["objects"]) == 17
           PY
 
+      - name: Validate pinned exact-variant release publication
+        run: PYTHONPATH=src python -m tools.verify_deployment_assets --skip-svg
+
       - name: Build application image from tracked databases and generated publication
         run: docker build --tag infinity-db:deployment-smoke .
 
@@ -123,6 +126,8 @@ jobs:
           FROM ${BASE_IMAGE}
           COPY --chown=appuser:appuser rules.db /app/data/rules.db
           COPY --chown=appuser:appuser deployed-objects.json /app/data/deployed-objects.json
+          # The v8 compatibility image deliberately exposes no v9-only usage index.
+          RUN rm /app/data/variant-usage.json
           DOCKERFILE
           docker build --build-arg BASE_IMAGE=infinity-db:deployment-smoke --tag infinity-db:rollback-v8 local/restrictions-v8-ci
 

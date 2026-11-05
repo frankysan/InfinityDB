@@ -83,6 +83,9 @@ jobs:
           python -m tools.build_deployed_object_publication
           python -m tools.build_deployed_object_publication --check
 
+      - name: Validate tracked exact-variant publication provenance
+        run: python -m tools.verify_deployment_assets --skip-svg
+
       - name: Run source checks
         env:
           PYTEST_ADDOPTS: "--durations=20 -ra"

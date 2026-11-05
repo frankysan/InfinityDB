@@ -120,7 +120,10 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No open test-design obligations.
+No open test-design obligations. VD-0050/0051/0052 were retired after
+static review of the authored tests in `tests/test_deployment_scripts.py`
+and `tests/test_verify_deployment_assets.py` (Ruff and Pyright passed);
+none of the tests ran during design. Their selectors remain under VR-0103.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -159,10 +162,17 @@ summary above. Hosted CI and final release gates retain separate owners.
   Deferred: `tests/test_verify_accessible_navigation_browser.py` (soft link, persistent-shell link, back/scroll, focus/status at 1440/390px); `tests/test_verify_page_footer_browser.py` (native disclosure semantics and touch at 390/320px in light/dark), existing `tests/test_verify_sidebar_density_browser.py`, and applicable normal broader checks at next due drain.
   Outcome: unrun; actual screen-reader sign-off and frozen-candidate visual acceptance remain separately required under V1S-079/080.
 
+- [ ] VR-0103 (2026-11-05; ready-to-run): Track and require the byte-exact v1.0 variant-usage release publication throughout source CI, deployment packaging, preflight/image smoke and v8 compatibility checks.
+  Work: [variant usage projection](TODO.md#rules-and-reference-completeness); revision: current changes from d1f315a1, pin the resulting commit for execution; risk: high.
+  Immediate: `tools.build_variant_usage --check-publication` PASS (151 groups, 10,923 reviewed rows); `tools.verify_deployment_assets --skip-svg` PASS against current source-matched artifacts; no pytest executed.
+  Design: VD-0050/0051/0052 retired after static review; tests authored but not run.
+  Deferred: `tests/test_deployment_scripts.py` (tracked/image/v8 guards), `tests/test_verify_deployment_assets.py` (missing/empty/stale and matched preflight), `tests/test_variant_usage.py` and relevant `tests/test_web.py` selectors; normal source/CI smoke and actual container build at release candidate gate.
+  Outcome: unrun; runtime and hosted exact-release acceptance not yet claimed.
+
 ## Next unused IDs
 
-- Design: `VD-0050`; active obligations are listed above.
-- Execution: `VR-0103`; active obligations are listed above.
+- Design: `VD-0053`; active obligations are listed above.
+- Execution: `VR-0104`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

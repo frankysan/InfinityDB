@@ -213,8 +213,12 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
   even when source and browser tests using fresh exports pass.
 - [ ] After rebuilding either database, regenerate and `--check` the
   pinned `data/generated/deployed-objects.json` with
-  `tools.build_deployed_object_publication`. Its exact Army/rules
-  SHA-256 pair must match or application startup intentionally fails.
+  `tools.build_deployed_object_publication`. Regenerate the tracked
+  `data/generated/variant-usage.json` with `tools.build_variant_usage --publish`
+  from the matched raw Army archive, then run `--check-publication` before
+  staging the exact bytes. Deployment/CI without raw inputs must validate the
+  tracked variant publication against the released Army/rules/deployed-object
+  fingerprints; a stale or absent publication blocks current-release packaging.
   With `INFINITYDB_RELEASE_FAQ_PARITY=1`, run the tracked-pair FAQ
   primary, secondary and conflict Chromium tests. Fresh-export browser
   tests alone do not verify the release database pair.

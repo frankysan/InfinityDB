@@ -37,6 +37,7 @@ data/generated/*
 !data/generated/.gitkeep
 !data/generated/infinity.db
 !data/generated/rules.db
+!data/generated/variant-usage.json
 data/manifests/*
 !data/manifests/symbol-publication.json
 data/curated/*

@@ -35,6 +35,7 @@ from pathlib import Path
 from infinity_db.database import Database
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.variant_usage_reference import load_variant_usage_publication
 
 expected_environment = {
     "INFINITY_DB_DATABASE": "/app/data/infinity.db",
@@ -49,7 +50,15 @@ if hasattr(os, "geteuid") and os.geteuid() == 0:
     raise SystemExit("Application image must not run as root")
 
 data_dir = Path("/app/data")
+Database(data_dir / "infinity.db").validate()
+rules = RulesDatabase(data_dir / "rules.db")
+rules.validate()
+restrictions = rules.restrictions_payload()
+# v8 is a disposable compatibility image: it cannot carry a mismatched
+# v9-only generated publication. Current v9 release images must carry it.
 expected_files = {"infinity.db", "rules.db", "deployed-objects.json"}
+if restrictions["available"]:
+    expected_files.add("variant-usage.json")
 actual_files = {path.name for path in data_dir.iterdir()}
 if actual_files != expected_files:
     raise SystemExit(
@@ -57,10 +66,6 @@ if actual_files != expected_files:
         f"expected {sorted(expected_files)!r}"
     )
 
-Database(data_dir / "infinity.db").validate()
-rules = RulesDatabase(data_dir / "rules.db")
-rules.validate()
-restrictions = rules.restrictions_payload()
 if restrictions["available"]:
     if (
         restrictions["source"]["id"] != "n5-core-v5.3-pdf"
@@ -78,6 +83,16 @@ if publication is None or len(publication["objects"]) != 17:
     raise SystemExit("Release image has no complete reviewed deployed-object publication")
 if len(publication["unresolvedDeliveries"]) != 1:
     raise SystemExit("Release image lost the unresolved deployed-object delivery")
+usage = load_variant_usage_publication(
+    data_dir / "variant-usage.json",
+    data_dir / "infinity.db",
+    data_dir / "rules.db",
+    data_dir / "deployed-objects.json",
+)
+if restrictions["available"] and (usage is None or not usage["variants"]):
+    raise SystemExit("Release image is missing the reviewed exact-variant publication")
+if not restrictions["available"] and usage is not None:
+    raise SystemExit("Legacy compatibility image unexpectedly published variant usage")
 '
 
 if [ "$published_assets" -eq 1 ]; then
@@ -305,6 +320,27 @@ with urlopen("http://127.0.0.1:8000/changes", timeout=3) as response:
 expected_release_notes = render_current_release_notes_html()
 if not expected_release_notes or expected_release_notes not in changes:
     raise SystemExit("/changes did not render the installed canonical changelog")
+'
+
+# v9 releases must expose a real reviewed source group through the installed API.
+# The v8 compatibility image deliberately contains no variant publication.
+docker exec "$container" python -c '
+import json
+from pathlib import Path
+from urllib.parse import quote
+from urllib.request import urlopen
+
+path = Path("/app/data/variant-usage.json")
+if path.is_file():
+    publication = json.loads(path.read_text(encoding="utf-8"))
+    record_id = publication["variants"][0]["variant"]["recordId"]
+    url = "http://127.0.0.1:8000/api/variant-usage?record_id=" + quote(record_id)
+    with urlopen(url, timeout=3) as response:
+        result = json.load(response)
+    if result.get("recordId") != record_id or not result.get("items"):
+        raise SystemExit("Exact-variant usage API is missing the installed publication")
+    if result.get("sourceSnapshot") != publication["sourceSnapshot"]:
+        raise SystemExit("Exact-variant usage API returned unexpected source provenance")
 '
 
 if [ "$packaged_assets" -eq 1 ]; then

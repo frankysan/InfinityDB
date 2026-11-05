@@ -264,8 +264,14 @@ images still require the complete tracked publication through deployment-smoke v
 ## Deployment smoke
 
 `.github/workflows/deployment-smoke.yml` builds the production container directly from the tracked
-release `infinity.db`, `rules.db`, and processed SVG publication, then runs
+release `infinity.db`, `rules.db`, byte-exact tracked `variant-usage.json`,
+generated `deployed-objects.json`, and processed SVG publication, then runs
 `scripts/verify-container-image.sh` with published-asset validation.
+
+Deployment smoke validates the variant publication's co-located Army/rules/deployed-object
+fingerprints, image presence and representative exact-variant API response. The separate
+source matrix also checks the tracked publication against the regenerated deployed-object
+bytes, without requiring an ignored raw archive in CI.
 
 Deployment smoke first tests the exact v9 artifact model used by tagged production deployment.
 It does not rebuild the tracked release databases and is not a substitute for the source or
@@ -281,13 +287,16 @@ and canonical legacy relationship graph to remain unchanged, and confirms that t
 reports Restrictions as unavailable rather than inventing permissions. A Docker image
 derived from the already validated v9 release image replaces **only** `rules.db` and
 `deployed-objects.json`, leaving the installed application, Army database, symbols,
-and runtime configuration unchanged. The full production-startup/image verifier runs
-against that v8 overlay image, followed by another check of the original v9 image.
+and runtime configuration unchanged. The v8 image explicitly removes the v9-only
+exact-variant publication; it must not expose stale usage against the substituted
+rules database. The full production-startup/image verifier runs against that v8
+overlay image, followed by another check of the original v9 image.
 
 This tests application compatibility with a reconstructed source-equivalent v8 pair;
-it does **not** claim byte identity with the retained historical v8 recovery files,
-test a host-level deployment, or swap live containers. The production rollback path
-and exact retained backup still require separate operational validation.
+it does **not** claim byte identity with retained historical v8 recovery files,
+test a host-level deployment, or swap live containers. The single-operator 1.0
+release requires retaining the documented recovery path and prior artifacts,
+not a live-host rollback/forward rehearsal.
 
 ## Release evidence retention
 

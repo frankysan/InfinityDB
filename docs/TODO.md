@@ -317,11 +317,11 @@ of already-reviewed catalogs.
   1.0 prerequisites. See the
   [FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
 
-- [ ] **Rule-variant usage projection:** Deliver the verified exact
-  Skill/Equipment variant-to-Unit/profile/loadout index as a release-matched
-  runtime publication, not merely an ignored local candidate. The
-  [source-pair/API/browser acceptance](v1.0-source-coverage-audit.md#full-exact-variant-usage-source-pair-acceptance-2026-11-05)
-  covers the current candidate; final source/publishing/hosted gates remain.
+- [ ] **Rule-variant usage projection:** Accept the byte-exact tracked
+  `variant-usage.json` artifact, its deployment/image guards and Skill/Equipment
+  API/browser links against the **frozen** release source/runtime pair. The
+  [development source-pair/API/browser acceptance](v1.0-source-coverage-audit.md#full-exact-variant-usage-source-pair-acceptance-2026-11-05)
+  is complete; final candidate, exact-SHA hosted and deployed checks remain.
   - [ ] Reconcile any newly reviewed exact occurrence parameters,
     reused payloads, shared Unit options, Include/Peripheral paths and
     incompatible/unknown signatures against final input revisions. Fail

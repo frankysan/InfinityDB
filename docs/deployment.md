@@ -4,7 +4,8 @@
 
 InfinityDB is deployed as an immutable Docker image containing the web application,
 tracked processed graphical assets, the release-matched `infinity.db` and `rules.db`
-snapshots, and their generated `deployed-objects.json` reference publication. Caddy listens on HTTP and proxies traffic to the application, which is not
+snapshots, generated `deployed-objects.json` and the tracked exact-variant
+`variant-usage.json` publication. Caddy listens on HTTP and proxies traffic to the application, which is not
 exposed directly on the host. Put Caddy behind an external TLS reverse proxy for public
 HTTPS.
 
@@ -18,8 +19,9 @@ tracked release artifacts. See
 
 Deployment is intentionally **release-only**. Database and symbol generation happen in a
 development/release checkout. A tagged server checkout consumes the exact tracked databases and
-symbols reviewed for that release, and deterministically produces the matching deployed-object
-publication from tracked curated reviews; it does not acquire raw data or rebuild databases.
+symbols and exact-variant publication reviewed for that release, and deterministically
+produces the matching deployed-object publication from tracked curated reviews;
+it does not acquire raw data, rebuild databases or regenerate variant usage.
 For moving an installation to a new host, see the
 [server migration guide](server-migration.md).
 
@@ -74,6 +76,7 @@ Every deploy requires these release-controlled files to be present in the checko
 ```text
 data/generated/infinity.db
 data/generated/rules.db
+data/generated/variant-usage.json
 data/manifests/symbol-publication.json
 src/infinity_db/web/static/{armies,characteristics,orders,peripherals,units}/...
 ```
@@ -90,10 +93,17 @@ checks the ignored `data/generated/deployed-objects.json` publication from the
 tracked database pair and reviewed curated source files. It fails rather than
 ship a missing or mismatched publication. No raw snapshots or database rebuilds
 are needed on the deployment host. A direct `docker build` requires that
-publication to have been generated in the checkout first.
+publication to have been generated in the checkout first. In contrast, the
+exact-variant publication is a **tracked release file** built during development
+with `tools.build_variant_usage --publish` and `--check-publication`, using the
+pinned ignored raw source. Deployment and clean CI have no raw archive;
+they validate the committed publication against the tracked databases and
+generated deployed-object bytes without regenerating it. Changes to either
+database or the deployed-object publication require rebuilding and committing
+matching variant JSON during release preparation.
 
 The Docker image explicitly configures both runtime database paths. Missing, invalid, or
-incompatible tracked databases or deployed-object publication fail before activation. After building the image,
+incompatible tracked databases or reference publications fail before activation. After building the image,
 `scripts/verify-container-image.sh --published-assets` revalidates the installed publication,
 the embedded database/publication provenance, package contents, representative symbol routes,
 and production startup. Compose is started with `--no-build` only after that exact image has

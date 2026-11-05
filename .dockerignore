@@ -22,6 +22,7 @@ data/generated/*
 !data/generated/infinity.db
 !data/generated/rules.db
 !data/generated/deployed-objects.json
+!data/generated/variant-usage.json
 data/manifests/*
 !data/manifests/symbol-publication.json
 data/work/

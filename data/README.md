@@ -58,22 +58,24 @@ provenance/state, and build outputs.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the application `infinity.db`, development-only `infinity.raw.db`, and the
   separate curated-rules `rules.db` and deterministic `deployed-objects.json`
-  and `variant-usage.json` reference publications. The two SQLite databases are
-  tracked release artifacts; the publications remain ignored. Deployed-object
-  publication is regenerated from the pinned databases and reviewed sources
-  before Docker packaging. Variant usage is rebuilt from the paired raw source,
-  Army/rules databases and deployed-object publication; its release packaging
-  remains part of the V1S-066 acceptance.
+  and `variant-usage.json` reference publications. The two SQLite databases and
+  the **byte-exact variant-usage JSON** are tracked release artifacts;
+  `deployed-objects.json` remains ignored and is regenerated from the pinned
+  databases and reviewed source before Docker packaging. Variant usage requires
+  the paired raw archive to regenerate, so a tagged/deployment checkout uses
+  the tracked JSON and validates its Army/rules/deployed-object fingerprints
+  rather than trying to regenerate it without the raw archive.
   Intermediate JSON/raw archives and other generated build products remain ignored.
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
 source control so machine-local snapshot state does not obscure code changes.
 For the private Linux worker, [Syncthing-staged development assets](../docs/syncthing-assets.md)
-defines the separate source staging and explicit, verified checkout activation procedure. The two
-runtime SQLite databases are the deliberate exception: their deterministic bytes are
-reviewed/tracked with each release so a tagged checkout contains the exact runtime data that
-production will serve. Generated snapshot manifests remain local provenance records rather
-than maintained project knowledge.
+defines the separate source staging and explicit, verified checkout activation procedure.
+The tracked SQLite databases and byte-exact variant-usage publication are release artifacts:
+a tagged checkout includes what production serves. The variant JSON also pins the verified
+raw archive digest, which may differ between independent host rebuilds even when the
+logical export pair agrees. Never regenerate it on a deployment host or rewrite its bytes
+through line-ending conversion. Generated manifests remain local provenance records.
 
 Generated Army database data is replaceable. Builds create temporary application
 and raw-archive siblings, validate both before publication, and bind them with the

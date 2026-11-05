@@ -108,6 +108,9 @@ def test_deployment_assets_require_complete_tracked_publication(
             pass
 
     monkeypatch.setattr(deployment_assets, "RulesDatabase", FakeRulesDatabase)
+    # This test isolates symbol coverage; variant publication has separate
+    # required-path and missing/stale-source regressions below.
+    monkeypatch.setattr(deployment_assets, "verify_variant_release_publication", lambda *_: None)
     validation = verify_deployment_assets(
         static,
         database_path=tmp_path / "infinity.db",
@@ -148,6 +151,47 @@ def test_deployment_assets_validate_rules_database(
             rules_database_path=tmp_path / "missing-rules.db",
             publication_manifest_path=publication_manifest,
         )
+
+
+@pytest.mark.parametrize(
+    ("state", "expected_error"),
+    [
+        ("missing", "missing or empty"),
+        ("empty", "missing or empty"),
+        ("stale", "does not match release artifacts"),
+    ],
+)
+def test_deployment_requires_release_paired_variant_publication(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, state: str, expected_error: str,
+) -> None:
+    def load(publication: Path, army: Path, rules: Path, objects: Path) -> dict | None:
+        assert publication == tmp_path / "variant-usage.json"
+        assert army == tmp_path / "infinity.db"
+        assert rules == tmp_path / "rules.db"
+        assert objects == tmp_path / "deployed-objects.json"
+        if state == "missing":
+            return None
+        if state == "empty":
+            return {"variants": []}
+        raise ValueError("Variant usage publication does not match release artifacts")
+
+    monkeypatch.setattr(deployment_assets, "load_variant_usage_publication", load)
+    with pytest.raises((DeploymentAssetError, ValueError), match=expected_error):
+        deployment_assets.verify_variant_release_publication(
+            tmp_path / "infinity.db", tmp_path / "rules.db",
+        )
+
+
+def test_deployment_accepts_release_paired_variant_publication(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        deployment_assets, "load_variant_usage_publication",
+        lambda *_: {"variants": [{"variantKey": "reviewed"}]},
+    )
+    deployment_assets.verify_variant_release_publication(
+        tmp_path / "infinity.db", tmp_path / "rules.db",
+    )
 
 
 def test_deployment_rejects_database_for_different_publication_snapshot(tmp_path: Path) -> None:
