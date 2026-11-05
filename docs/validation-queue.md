@@ -122,7 +122,8 @@ IDs here and link the owning task instead of duplicating its description.
 
 No pending design obligations. VD-0062 was retired after static review without
 execution; its curated-export, Glossary API, and responsive browser selectors
-are carried by VR-0110.
+were executed and accepted under VR-0110, as recorded in the
+[coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-trooper-glossary-2026-11-05).
 
 VD-0059/0060/0061 were retired after
 static review without execution; their docs-stage, JSON, synthetic Git
