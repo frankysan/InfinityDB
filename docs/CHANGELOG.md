@@ -219,7 +219,10 @@ are not retroactively relabeled.
   beside their Equipment, Scenario, Skill, Trait, State, General Rule, Hacking Program
   and Fireteam topics. Twenty retain their original v0.0 provenance alongside current
   English/Spanish v0.1 citations. General Deployment repositioning has its own rule page;
-  the Ancillary scoring clarification remains explicitly Annihilation-scoped.
+  the Ancillary scoring clarification identifies its Annihilation-only scope
+  as InfinityDB's conservative reviewed choice, not an official mission assignment.
+- **Data processing + Web backend + Web frontend:** Correct Doctor (2W) to remove
+  **up to two Wounds**, with the corroborating Spanish N5.3 citation.
 - **Data processing + Web backend + Web frontend:** Add exact scenario collection/revision
   selection and the ITS Season 18 Battleground pilot, including its Sectors, size-dependent
   maps, end-of-game scoring and special rules. Shared links retain collection and game size.

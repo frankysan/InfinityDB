@@ -159,22 +159,41 @@ summary above. Hosted CI and final release gates retain separate owners.
   rejection, no destination and byte-preservation of both baseline artifacts.
   Deferred: tests/test_reinforcements_optional_reference.py, then complete
   code/full-assets and Git-index preflight on linux-dev. Due now: hosted CI failure.
+  Execution: full job `linux-dev:3a1ca0d3752b48ddb2423d407c713492` at
+  `8391ba6cc389a16d141fc6bfabb0f38b43f9b0fc` failed eleven publication
+  guards (5,219 passed / 29 skipped), plus missing Linux Markdownlint setup;
+  preflight did not run. Rerun full code/data/preflight after VR-0092's paired
+  correction. Docs run on Windows and hosted CI until Linux npm setup is available.
 - [ ] VR-0090 (2026-11-05; ready-to-run): V1S-090 exact Doctor evidence
   manifest refresh; base: 63e9e4ba; no missing design (existing mutation coverage).
   Deferred: tests/test_deployed_object_non_catalog_queue.py,
   tests/test_deployed_object_citation_migrations.py and
   tests/test_legacy_staging_schema_guards.py, then cumulative linux-dev checks.
   Due now: hosted CI failure; preserve source/provenance guards.
+  Execution: same failed pinned full job as VR-0089; corrected-pair rerun pending.
 - [ ] VR-0091 (2026-11-05; ready-to-run): V1S-090 frozen reference-section
   expectation refresh after the reviewed Doctor citation addition; base: 63e9e4ba.
   No missing design; existing tests/test_report_reference_baseline.py covers
   frozen/current identity/evidence joins. Deferred: that module and complete
   code/full-assets checks on linux-dev. Due now: hosted CI failure.
+  Execution: same failed pinned full job as VR-0089; corrected-pair rerun pending.
+- [ ] VR-0092 (2026-11-05; ready-to-run): V1S-084 prerequisite: synchronize
+  the two previously reviewed Doctor/Ancillary records and Doctor citations
+  with the tracked v9 rules/deployed-object pair. Base: 8391ba6c.
+  Existing source, runtime and guarded publication regressions cover the change;
+  no missing test design. Immediate artifact-safety gate: full schema/table
+  multiset comparison permits only those two records, their Doctor citations
+  and affected citation statistics; preserve all 17 deployed-object payloads
+  and unrelated fingerprints; retain recovery copies and post-validate both files.
+  Deferred: all eleven failed publication/source selectors from the pinned
+  Linux --all run, full assets/code and isolated preflight; linux-dev.
+  The previous run failed 11 provenance tests and Linux Markdownlint setup;
+  passing lint/type/build/rules stages do not accept the pair.
 
 ## Next unused IDs
 
 - Design: `VD-0032`; active obligations are listed above.
-- Execution: `VR-0092`; active obligations are listed above.
+- Execution: `VR-0093`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

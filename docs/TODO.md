@@ -331,19 +331,11 @@ Runtime/API/browser publication and final source-pair acceptance remain below.
   and player-facing source claims.
 - [ ] **V1S-084 (M, gate):** Rebuild/verify the release-matched Army/rules pair, FAQ parity, deployed-object
   publication and processed symbols.
-  The V1S-048 Ancillary `selectionReason` correction in
-  `data/curated/rules/n5-faq-v0.1.json` must reach regenerated
-  `data/generated/rules.db` and its dependent deployed-object
-  publication before opt-in tracked FAQ parity and release acceptance.
-  Do not mistake the focused fresh-export API pass for a matched tracked pair.
-  Rerun the read-only Infiltration source reviewer after pairing: before
-  this rebuild, `tools.review_infiltration_ph_variant` detects a
-  `records` mismatch between tracked rules.db and fresh curation,
-  consistent with the separately queued V1S-048 FAQ source change.
-  Also publish V1S-052's N5.3 Doctor `2W` clarification ("up to two
-  Wounds") and Spanish p. 100 corroborating citation in the same
-  guarded rules/deployed-object pair; passing fresh exports do not
-  certify the currently tracked database.
+  The reviewed V1S-048 Ancillary source-selection disclosure and V1S-052
+  Doctor `2W` clarification now reach the guarded v9 development pair;
+  final frozen-input rebuild, FAQ parity, symbol and source-pair acceptance
+  remain required. Do not substitute the bounded prerequisite refresh for
+  this final candidate gate.
 - [ ] **V1S-085 (M, gate):** Run source occupancy, source/archive, strict primary interaction, reference
   baseline and output reproducibility checks. Treat the
   [host-SQLite physical-vs-logical rebuild finding](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
@@ -358,23 +350,23 @@ Runtime/API/browser publication and final source-pair acceptance remain below.
   required human visual review.
 - [ ] **V1S-090 (L, gate):** Drain validation queue and run all relevant complete local/Linux full-asset,
   docs, source and preflight suites.
-  First repair the inherited Source-check failures at `8d7e0d90`
-  ([run 42017297698](https://github.com/frankysan/InfinityDB/actions/runs/42017297698)):
-  stale Doctor non-catalog evidence, frozen source-section count and disposable
-  Commlink staging baseline assumptions. Preserve unrelated-drift rejection
-  and the separately owned V1S-084 tracked-pair publication requirements.
+  Complete cumulative acceptance of the Source-check and development-pair
+  repairs: stale Doctor evidence, source-section expectation, disposable
+  Commlink baseline and the reviewed Doctor/Ancillary runtime corrections.
+  Preserve unrelated-drift rejection and the separately owned final V1S-084
+  acceptance. Linux Markdownlint is unavailable until the worker's pinned npm
+  dependency is installed; Windows docs checks and hosted CI remain available.
 - [ ] **V1S-091 (L, gate):** Audit the entire tracked Markdown corpus, stale version/command references,
   canonical contracts and browser copy.
 - [ ] **V1S-092 (M, gate):** Finalize coherent Unreleased notes, release metadata and version only after the
   completeness review.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate and obtain exact-main-SHA hosted workflows, optional
-  full-assets, evidence and annotated tag. The open Source-checks requirements include
-  validating the historical-evidence Git-free preflight repair from VR-0059 and
-  the additive-reference review corrections from VR-0058 on a complete
-  hosted matrix. The last recorded Source attempt `41858032642` passed
-  Linux and Windows but cancelled its macOS runner without executing steps;
-  the dependent cross-platform deterministic-byte job was skipped.
-  This remains **unaccepted hosted CI**, not open local VR execution.
+  full-assets, evidence and annotated tag. Development revision `8391ba6c`
+  passed all four Source matrix legs and Cross-platform deterministic outputs
+  ([run 42020461026](https://github.com/frankysan/InfinityDB/actions/runs/42020461026)),
+  plus Installed wheel and Deployment smoke. That supersedes the older
+  incomplete development-matrix evidence; it does not accept later changes,
+  the frozen release candidate or exact-main-SHA workflows.
   Preserve exact-candidate Source checks, Installed wheel and Deployment
   smoke requirements; no passing local/Linux suite substitutes for them.
 - [ ] **V1S-094 (L, external):** With explicit operational approval, validate retained rollback/forward

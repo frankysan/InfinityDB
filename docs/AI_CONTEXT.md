@@ -14,7 +14,7 @@ architecture mirror, release diary, or backlog. Before substantial work, use the
 - checks/CI: `docs/testing.md`, `docs/ci.md`;
 - deferred test design/execution and asynchronous Linux dispatch:
   `docs/validation-queue.md` (strict VD-to-zero then VR-to-zero drain
-  at threshold 5; VD never runs tests; parallel Windows work permitted
+  under its current thresholds; VD never runs tests; parallel Windows work permitted
   only while an independent Linux full suite is running);
 - unfinished implementation work: `docs/TODO.md`;
 - upstream rules/Army/Wiki/FAQ inconsistencies and publisher ruling questions:
