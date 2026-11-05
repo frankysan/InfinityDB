@@ -82,7 +82,6 @@ only when it contains unique rationale that still guides active work.
 ## Planning and history
 
 - `TODO.md` — only work that is still unimplemented or intentionally deferred.
-- [v1s-backlog-checker-plan.md](v1s-backlog-checker-plan.md) — phased plan for a read-only V1S structure, Git retirement and task-selection checker; see the plan for current implementation status.
 - [workflow-improvement-review-2026-11-04.md](workflow-improvement-review-2026-11-04.md) — dated review of task, validation, CI and tooling workflow improvements; recommendations, not an active task ledger.
 - `CHANGELOG.md` — concise release outcomes and upgrade consequences.
 - `AI_CONTEXT.md` — compact agent-oriented index of non-obvious current invariants and pointers to

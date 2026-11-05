@@ -169,13 +169,13 @@ is bounded to the development pair; final-input checks remain.
 
 - [ ] **V1S-079 (M, gate):** Complete actual assistive-technology
   acceptance for notice roles, focus, announcements, back/forward
-  and keyboard navigation. Soft-navigation focus/status code is
-  implemented; [VR-0102](validation-queue.md#pending-deferred-execution)
-  holds unrun browser regressions. Browser tests are not screen-reader sign-off.
+  and keyboard navigation. Soft-navigation focus/status code and
+  browser regressions are validated; browser tests do not replace
+  actual screen-reader sign-off.
 - [ ] **V1S-080 (M, gate):** Complete final-candidate touch, theme,
   320/390px viewport and notice expand/collapse verification; fix
-  reproducible 1.0 defects. The new touch regressions remain unrun
-  under VR-0102.
+  reproducible 1.0 defects. Development touch regressions passed;
+  release-candidate manual/browser acceptance remains open.
 
 #### Final frozen-candidate acceptance and release
 
@@ -216,13 +216,6 @@ is bounded to the development pair; final-input checks remain.
   A live-host rollback rehearsal is not required.
 - [ ] **V1S-095 (M, gate):** Verify the deployed exact source/runtime
   pair, release version, static assets and representative browser paths.
-- [ ] **V1S-096 (L, build):** Complete Git-aware closeout/task-selection
-  checks, local/CI integration and cross-platform validation of the
-  [backlog checker](v1s-backlog-checker-plan.md), without treating evidence
-  presence as semantic acceptance.
-  Priority: Complete the user-requested backlog checker before frozen-candidate
-  acceptance; authority: user; revisit: resume the earliest actionable V1S
-  slice after V1S-096 is complete.
 
 ### Source inventory and gap batches
 

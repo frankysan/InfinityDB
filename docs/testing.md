@@ -95,11 +95,8 @@ every earlier open ID across workstreams and fails unexplained skips:
 A user-directed priority exception is permitted **only** when the selected
 task already includes an exact `Priority: <reason>; authority: <owner>;
 revisit: <trigger>` annotation in `docs/TODO.md`, and the CLI supplies
-the same reason. For the current V1S-096 implementation priority:
-
-```powershell
-.\.venv\Scripts\python.exe -m tools.check_v1_backlog --select V1S-096 --priority-reason "Complete the user-requested backlog checker before frozen-candidate acceptance"
-```
+the same reason using `--priority-reason`. No standing priority override
+is needed after the V1S-096 checker implementation was accepted.
 
 Earlier `Blocked:` or `Deferred:` annotations must name a concrete reason,
 owner/authority and `retry:` or `revisit:` trigger, respectively. Incomplete
@@ -352,8 +349,9 @@ registry; the corrected commit is the acceptance target. Windows Ruff,
 Pyright and the full docs stage passed, including **20 V1S declarations
 with no static warnings**. This closes local VR-0107/0108; **hosted Source
 workflow, cross-platform deterministic outputs, full candidate checks and
-V1S-096 final acceptance remain separately open** under
-[CI policy](ci.md) and [release scope](releasing.md).
+the final candidate's full Source matrix acceptance remain separate**
+under [CI policy](ci.md) and [release scope](releasing.md).
+V1S-096's checker-specific hosted acceptance is recorded under CI policy.
 
 **2026-11-05 V1S-096 checker acceptance (VR-0104/0105/0106):**
 Linux worker `linux-dev` pinned to

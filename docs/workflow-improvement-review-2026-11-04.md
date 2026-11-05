@@ -31,7 +31,7 @@ These were correlated downstream effects of a catalog change rather than 19 inde
 
 ### 2. Backlog integrity needs coverage beyond numbered V1S entries
 
-The original [V1S backlog-checker plan](v1s-backlog-checker-plan.md) concentrated on numbered execution-slice declarations. A different, actual checkbox issue appears under the parent **Establish the 1.0 completeness baseline** in [TODO.md](TODO.md#source-inventory-and-gap-batches): the *Select and pin the intended Army, rules/FAQ/annex and Wiki review inputs* subtask is checked while its nested *Refresh the release-candidate baseline and source occupancy gate* subtask remains unchecked. This conflicts with the [backlog-retirement contract](README.md#backlog-completion-and-retirement).
+The original V1S backlog-checker plan (retired after implementation; current commands are in [the testing guide](testing.md#v1s-backlog-checks)) concentrated on numbered execution-slice declarations. A different, actual checkbox issue appears under the parent **Establish the 1.0 completeness baseline** in [TODO.md](TODO.md#source-inventory-and-gap-batches): the *Select and pin the intended Army, rules/FAQ/annex and Wiki review inputs* subtask is checked while its nested *Refresh the release-candidate baseline and source occupancy gate* subtask remains unchecked. This conflicts with the [backlog-retirement contract](README.md#backlog-completion-and-retirement).
 
 At the time this report was saved, Phase 1 of `tools/check_v1_backlog.py` was implemented for the V1S register; Linux parity was still tracked separately in its validation obligation, and Phases 2–4 remained proposed. This report does **not** imply those phases are still unimplemented in a future checkout.
 

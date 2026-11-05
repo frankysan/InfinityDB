@@ -140,8 +140,20 @@ explicitly selected, first-parent-compatible range, with the same
 The helper fails closed on missing event data, invalid revisions, inaccessible
 history, incompatible ancestry and malformed target backlogs. Commit-message
 ID attribution is an objective check; evidence-pointer warnings still need
-review and do not approve semantic completion. This event-scoped gate must pass
-its own local and hosted checks before claiming CI rollout accepted.
+review and do not approve semantic completion.
+
+**V1S-096 acceptance (2026-11-05):** Phases 1–4 and the Windows/Linux
+focused checker tests passed locally at `0bac3369` and `bf0821af`.
+The hosted Ubuntu 3.11 Source job for PR #23 at
+[`702536fe`](https://github.com/frankysan/InfinityDB/actions/runs/42096775320)
+successfully executed **Check V1S retirement history**, the complete
+documentation check stage including static V1S validation, and its source
+checks. The installed-wheel and deployment-smoke workflows also passed
+for that SHA. This accepts the backlog checker's own CI integration; it
+does **not** accept the independent final Source matrix, Windows test
+stability or cross-platform deterministic-output comparison required by
+[V1S-093](TODO.md#final-10-acceptance). Evidence-presence checks cannot
+substitute for semantic closeout review.
 
 The development dependencies include PyMuPDF so PDF-aware test modules collect and
 research tools type-check in a clean environment. Official PDFs under `data/pdf/`
