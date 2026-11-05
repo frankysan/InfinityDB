@@ -152,6 +152,8 @@ def test_deployed_reference_api_has_reviewed_objects_and_no_invented_units(
 
     # Every source link is a real Army-backed catalog entry, not a guessed slug.
     for obj in result["items"]:
+        status, detail = _request(app, f"/api/deployed-objects/{obj['id']}")
+        assert status == 200 and json.loads(detail) == obj
         source = obj["sourceProfile"]
         if source is not None:
             catalog = "weapons" if source["catalog"] == "weapon" else "equipment"
@@ -190,8 +192,9 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
     app, origin = published_app
     status, body = _request(app, "/api/deployed-objects")
     assert status == 200
+    objects = json.loads(body)["items"]
     include_object = next(
-        obj for obj in json.loads(body)["items"]
+        obj for obj in objects
         if any(use["kind"] == "unit-option-include" for use in obj["unitUses"])
     )
     sync_api = pytest.importorskip("playwright.sync_api")
@@ -203,16 +206,46 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                 pytest.skip(f"Chrome unavailable: {exc}")
             raise
         try:
-            for width in (1440, 390):
+            for width in (1440, 390, 320):
                 page = browser.new_page(viewport={"width": width, "height": 900})
                 route_browser_page(page, app, origin)
                 errors: list[str] = []
+                failed: list[str] = []
                 page.on("pageerror", lambda error, failures=errors: failures.append(str(error)))
+                page.on("requestfailed", lambda request, failures=failed:
+                        failures.append(request.url))
+                page.on("response", lambda response, failures=failed:
+                        failures.append(f"{response.status} {response.url}")
+                        if response.status >= 400 else None)
                 try:
-                    page.goto(f"{origin}/deployed-objects", wait_until="domcontentloaded")
+                    response = page.goto(f"{origin}/equipment", wait_until="domcontentloaded")
+                    assert response is not None and response.status == 200
+                    entry = page.locator('main a[href="/deployed-objects"]')
+                    entry.wait_for(state="visible", timeout=30000)
+                    page.locator("#catalog-list").wait_for(state="visible", timeout=30000)
+                    entry.focus()
+                    entry.press("Enter")
+                    page.wait_for_url(f"{origin}/deployed-objects", timeout=30000)
                     page.locator("#deployed-list").wait_for(state="visible", timeout=60000)
                     assert page.locator(".deployed-object-entry").count() == 17
                     assert "17 reviewed" in page.locator("#deployed-count").inner_text()
+                    for obj in objects:
+                        card = page.locator(f'.deployed-object-entry[id="{obj["id"]}"]')
+                        heading = card.get_by_role("heading", name=obj["name"], exact=True)
+                        assert heading.count() == 1
+                        for key, attribute in obj["attributes"].items():
+                            field = card.locator(".weapon-data-row").filter(
+                                has=page.get_by_role("heading", name=key, exact=True)
+                            )
+                            value = field.locator(".weapon-data-value").inner_text()
+                            if attribute["status"] == "unreported":
+                                assert value == "Not reported", (width, obj["id"], key)
+                            elif attribute["status"] == "disputed":
+                                assert "sources disagree" in value, (width, obj["id"], key)
+                                assert all(str(part["value"]) in value
+                                           for part in attribute["provenance"])
+                            else:
+                                assert value == str(attribute["value"]), (width, obj["id"], key)
 
                     cover = page.locator(".deployed-object-entry").filter(
                         has=page.get_by_role("heading", name="Deployable Cover", exact=True)
@@ -285,7 +318,7 @@ def test_chromium_reviewed_attributes_delivery_navigation_and_missing_values(
                     included.locator("li").first.wait_for(state="visible", timeout=10000)
                     assert "includes" in included.inner_text()
                     assert "no Army assignment" in included.inner_text()
-                    assert not errors, errors
+                    assert not errors and not failed, (width, errors, failed)
                     assert page.evaluate(
                         "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
                     ), width

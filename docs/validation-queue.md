@@ -194,10 +194,22 @@ summary above. Hosted CI and final release gates retain separate owners.
   file Ruff and JS syntax checks pass. Rerun that revised selector on Linux
   after the independent full suite at `b3e65759` completes.
 
+- [ ] VR-0101 (2026-11-05; ready-to-run): V1S-078 deployed-object API/browser
+  acceptance. Work: [V1S-078](TODO.md#weapons-ammunition-and-deployed-objects);
+  revision: dedicated test-design commit after `10e73ead`; unchanged source pair
+  and object payload. Design: VD-0046 completed by static review, no tests run.
+  Selector: `tests/test_verify_deployed_object_publication_browser.py`.
+  Assert all 17 API/detail payloads, all four attributes of every rendered object,
+  1440/390/320 px, Equipment catalog keyboard entry, failed requests/HTTP,
+  explicit Mine/Dazer/Turret disputes, unknown values, Include/Unit-context links
+  and legacy/missing-publication behavior. Existing browser module/lane reused.
+  Host: linux-dev, exact committed revision, Chromium and matched publication.
+  Due at this named acceptance gate after the current full suite finishes.
+
 ## Next unused IDs
 
-- Design: `VD-0046`; active obligations are listed above.
-- Execution: `VR-0101`; active obligations are listed above.
+- Design: `VD-0047`; active obligations are listed above.
+- Execution: `VR-0102`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
