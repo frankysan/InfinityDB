@@ -4613,11 +4613,12 @@ are required; the synthetic parser tests do not require them.
 `tests/test_deployed_object_quick_profiles.py` additionally verifies the
 real table when both local PDF and Army database are present.
 
-`config/validation/deployed-object-delivery-reviews.json` now pins an
-**audit-only first batch** of six reviewed delivery paths. They distinguish
-Pitcher-fired and Place Deployable delivery of the same Deployable Repeater
-source profile; Disco Baller versus its Disco Ball mode/object; Drop Bears'
-thrown versus deployed mode; and Mine Dispenser's loadout-dependent Mine subtype.
+`config/validation/deployed-object-delivery-reviews.json` pins **28
+audit-only delivery paths** across the 17 reviewed object identities. They
+distinguish Pitcher-fired and Place Deployable delivery of the same
+Deployable Repeater source profile; Disco Baller versus its Disco Ball
+mode/object; Drop Bears' thrown versus deployed mode; and Mine Dispenser's
+loadout-dependent Mine subtype.
 The audit resolves exact catalog names/modes and validates cited N5.3 pages
 and maintained rules text. It does **not** publish new object IDs, infer Unit
 carriers, grant any mode to another item, or resolve the Mine Dispenser subtype.
@@ -4638,20 +4639,21 @@ exact English N5.3 citations:
 - **SymbioBomb** (p. 74): assignable single-use Weapon, not a separately
   profiled deployed battlefield object.
 
-The remaining seven summary-keyword candidates are separately reviewed and pinned:
+The review also classifies seven summary-keyword cases:
 **WildParrot** (N5.3 p. 74), **Dazer** (pp. 121/186), and **FastPanda**
 (pp. 82/186) have exact Army-source object profiles; Dazer's S0/S1
 disagreement stays explicit. **Mines** (p. 72) is a shared rules family, not
 one generic object or Mine subtype. **D-Charges** (p. 70) resolve during
 the same Order and have no persistent four-stat object profile. **Cube**
 (p. 121) is automatic equipment; **TinBot** (p. 127) uses a non-targetable
-State Token rather than an independently targetable Deployable. The existing
-five reviewed delivery origin records count as covered candidates, not
+State Token rather than an independently targetable Deployable. The current
+19 reviewed delivery-origin records count as covered candidates, not
 unreviewed objects.
 
-For this pinned curated-summary keyword scan, all 15 matching definitions
-are accounted for by reviewed classifications or delivery paths. A second
-read-only audit also searches structured **Requirements, Effects,
+The current curated-summary scan finds 24 matching definitions; the 12
+candidate decisions and 19 delivery-origin records (which overlap) account
+for all 24, leaving no unreviewed candidate. A second read-only audit also
+searches structured **Requirements, Effects,
 Restrictions, Clarifications, and source notes** for Deployable/Token/Scenery
 Element mentions that may be absent from summaries:
 
@@ -4672,7 +4674,7 @@ different wording, sources outside maintained Weapon/Equipment definitions,
 Army/Unit/loadout semantics, and edition changes still need reconciliation.
 
 The same read-only inventory now performs an **additional source-domain clause
-scan** across all **104 curated Weapon/Equipment definitions**. Unlike the
+scan** across all **106 curated Weapon/Equipment definitions**. Unlike the
 original 24 summary mentions, this examines the complete summary plus
 structured Requirements, Effects, Restrictions, Clarifications and source notes
 for placement, deployment, representation and related language. The report
@@ -4716,7 +4718,7 @@ Their source-only PDF metadata was removed from the review manifest.
 The validator now checks each exact maintained source page and continues
 to reject unsupported object profiles, delivery claims and citation drift.
 
-The 104-record census is limited to maintained Weapon/Equipment
+The 106-record census is limited to maintained Weapon/Equipment
 definitions; closed lexical queues cannot establish overall source-table,
 Army/Unit/loadout or gameplay completeness. No new identities, attributes
 or delivery links are inferred.
@@ -4759,7 +4761,7 @@ structured detail fields without turning keyword mentions into object IDs:
 ```
 
 The separate `config/validation/deployed-object-non-catalog-reviews.json`
-manifest pins **51 source-reviewed definitions** in this bounded keyword scan,
+manifest pins **61 source-reviewed definitions** in this bounded keyword scan,
 with no unreviewed candidates. Access Width gate Tokens label scenery
 openings (p. 145); Army Retreat Tokens indicate existing Trooper conditions
 (p. 146); Combat Group affiliation identifies the group of an existing
@@ -4833,6 +4835,14 @@ and `skill:transmutation` (p. 117, changes the same Trooper's
 Unit Profile and representation). None establishes a separate
 Weapon/Equipment deployed-object identity.
 
+The current 61-record set also covers ten broader clauses: Game Sequence
+and Order Pool resources, Command Tokens, General Movement, Line of Fire,
+Zones and Contact, Cover, Climb, CC Attack, and the Template
+Weapons/Equipment procedure (N5.3 pp. 11–21, 29–33, 41–44, 51, and
+128–129). These distinguish resources, existing Troopers and
+representations, movement/attack procedures, and scenery conditions; they
+add no deployed Weapon/Equipment identity or delivery edge.
+
 These six definitions now have **maintained N5.3 PDF citations** in the
 curated rules and regenerated `rules.db`. Their former
 `citationStatus: pdf-verified-manifest-only` and `pdfExcerpt` fields
@@ -4847,14 +4857,14 @@ or explicit transitional PDF-only review evidence, plus curated summary
 and detail evidence; it does **not** parse the PDF in CI. No new ARM/BTS/STR/S
 value, Army carrier, delivery edge or runtime object is inferred.
 Summary-only glossary/trait reviews remain valid only while they lack
-detailed source fields. All 48 keyword-matching definitions are classified,
+detailed source fields. All 61 keyword-matching definitions are classified,
 but the scan covers neither unmentioned terms nor other source domains and
 is **not** a complete N5.3 object inventory.
 `tests/test_deployed_object_non_catalog_queue.py` checks these boundaries.
 
 ### Expanded non-catalog battlefield-element discovery
 
-The initial 48-definition queue excludes other relevant wording, including
+The current 61-definition queue excludes other relevant wording, including
 Consoles, Supply Boxes, Disco Balls, and Marker/decoy representations. Run a
 separate, read-only pass over Skill/Rule/Trait/Term/State definitions:
 
@@ -4863,13 +4873,12 @@ separate, read-only pass over Skill/Rule/Trait/Term/State definitions:
 .venv\Scripts\python.exe -m tools.audit_deployed_object_expanded_queue --json
 ```
 
-The expanded audit excludes all 48 candidates from the original scan rather
-than recounting them. It identifies **25 additional definitions, all
-classified** in `config/validation/deployed-object-expanded-reviews.json`.
-Five decisions use audit-only PDF evidence because their maintained
-definitions still cite only the Wiki. N5.3 pp. 151 and 153 establish that
-Domination's four
-Consoles and Supplies' three Supply Boxes are *scenario-specific objectives*,
+The expanded audit excludes all 61 candidates from the original scan rather
+than recounting them. It identifies **28 additional definitions, all
+classified** in `config/validation/deployed-object-expanded-reviews.json`,
+with no PDF-only decisions or missing maintained N5.3 citations. N5.3 pp. 151
+and 153 establish that Domination's four Consoles and Supplies' three Supply
+Boxes are *scenario-specific objectives*,
 represented by scenario Markers or scenery; Hack Consoles and controlling
 Supply Boxes act on those existing objectives and create no further objects.
 N5.3 p. 71 makes Activate Disco Ball an interaction with the previously
@@ -4901,6 +4910,12 @@ Attack Template, not a new independently deployed Weapon/Equipment.
 Decoy replicas are static, but can affect LoF and be targeted under the
 State rules. The Concealed Trait describes S2 Camouflage Markers for
 existing Weapons/Equipment, not an additional deployed item.
+
+Three additional source-reviewed cases cover **Automatic Reaction Order**
+(pp. 13–14), **Moving and Measuring** (pp. 27–28), and **Replacing Game
+Elements** (p. 22). They describe an existing Trooper Marker/ARO, movement
+route representations, and replacement of an existing game element,
+respectively—not another deployed Weapon/Equipment identity.
 
 The five previously PDF-only records—`state:decoy`,
 `trait:concealed`, `skill:mnemonica`, `skill:tactical-awareness`

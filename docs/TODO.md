@@ -287,8 +287,6 @@ State-side contexts, without inferring live Unit States or broader edges.
 **Parent:** [Weapon, Ammunition and Deployable presentation](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-073 (M, review):** Extend deployed-object discovery across independent N5 tables, unusual
-  Weapon/Equipment entries and alternate wording.
 - [ ] **V1S-074 (M, review):** Review scenery, Gate glossary terms, terrain combinations and scenario
   elements; classify devices versus non-devices.
 - [ ] **V1S-075 (M, review):** Rerun source snapshot and full-depth Include audits; preserve exact Army,
@@ -844,19 +842,17 @@ the remaining source clauses and final release-browser acceptance remain open.
   2026-11-05 (see the
   [acceptance evidence](v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05)).
   - [ ] Complete deployed-object inventory and final reference acceptance.
-    Seventeen reviewed profiles, delivery paths, API/browser entry points and
-    typed reverse uses are published; see the
+    Seventeen reviewed object identities, delivery paths, API/browser entry
+    points and typed reverse uses are published; see the
     [current contract](data-model.md#deployed-object-read-model-and-artifact-gated-browser-reference).
     Keep carrier, delivery mode, deployed-object identity and Unit ownership
     separate, with known/unreported/disputed attributes individually represented.
-    - [ ] Expand discovery beyond the 14 four-attribute chart entries, maintained
-      definitions and both bounded lexical scans. Check independent source tables,
-      scenarios, alternate wording, Weapon/Equipment variants and nonstandard
-      Scenery Elements against exact N5.3 clauses and the pinned Army source.
-      Terrain, core scenarios, Game Modes, Retreat!, Silhouette Templates, Hacking
-      Devices, the Weapon Chart and p. 74 have bounded reviews; none certifies
-      total game-element coverage. Classify confirmed identities/delivery edges
-      in the reviewed inventory before extending storage or reverse uses.
+    The [V1S-073 source-discovery review](v1.0-source-coverage-audit.md#deployed-object-source-discovery-v1s-073-2026-11-05)
+    found no new deployed-object identity or delivery edge across the reviewed
+    N5 tables, unusual profiles and alternate-wording leads; the 17-object,
+    28-path inventory is unchanged. V1S-074–078 still own scenery/scenario
+    classification, reverse-use gaps, any source-confirmed additions and final
+    API/browser acceptance.
     - [ ] Decide whether Narrow/Wide Gate glossary terms or typed terrain
       combinations are needed for player discoverability. Their existing
       [terrain/scenery semantics](rules-semantics.md#terrain-and-scenery-structures)
