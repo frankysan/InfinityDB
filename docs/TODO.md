@@ -242,8 +242,6 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Core-scenario reference completion](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-043 (M, gate):** Verify source geometry, markers, 24 points/distance configurations and
-  deterministic map publication.
 - [ ] **V1S-044 (M, gate):** Verify scoped Skills, Specialist roles, scenario overlays and FAQ links without
   ITS-season or core-rule leakage.
 - [ ] **V1S-045 (M, gate):** Run normal browser accessibility/navigation, desktop/mobile/theme/rapid-selection
@@ -698,6 +696,10 @@ the remaining source clauses and final release-browser acceptance remain open.
   APIs, browser selection and deterministic theme/distance-aware maps are implemented
   and included in 0.10.1. The current contract belongs in
   [the data model](data-model.md#scenario-model-implemented-core-and-future-extensions).
+  The [V1S-043 geometry/source/SVG acceptance](v1.0-source-coverage-audit.md#core-scenario-geometry-and-deterministic-map-acceptance-v1s-043-2026-11-05)
+  passed all 24 point selections, both marker-display units, and the
+  existing two-width ordinary browser check; final frozen-candidate
+  reruns remain separately open.
   - **Browser acceptance:** The separate
     [1.0 core-scenario browser checklist](#final-10-acceptance) owns
     keyboard/touch, rapid selection, theme/distance, direct/soft navigation,
