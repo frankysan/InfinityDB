@@ -152,57 +152,9 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-- [ ] VR-0089 (2026-11-05; ready-to-run): V1S-090 disposable Commlink
-  baseline/strict staging repair; base: 63e9e4ba; design: VD-0031 statically
-  reviewed without execution. Added selector:
-  test_commlink_candidate_rejects_unrelated_curated_drift verifies full-record
-  rejection, no destination and byte-preservation of both baseline artifacts.
-  Deferred: tests/test_reinforcements_optional_reference.py, then complete
-  code/full-assets and Git-index preflight on linux-dev. Due now: hosted CI failure.
-  Execution: full job `linux-dev:3a1ca0d3752b48ddb2423d407c713492` at
-  `8391ba6cc389a16d141fc6bfabb0f38b43f9b0fc` failed eleven publication
-  guards (5,219 passed / 29 skipped), plus missing Linux Markdownlint setup;
-  preflight did not run. Rerun full code/data/preflight after VR-0092's paired
-  correction. Docs run on Windows and hosted CI until Linux npm setup is available.
-  Corrected execution: job `linux-dev:bae1f465c5bf414fb9050086fe012fdd` at
-  `0cbcf65aaec0d6a8e9644142c9b57ec360cc252b` is running full
-  test/lint/type/build/rules/preflight stages with required assets and the
-  controlled build fixture. No accepted result yet.
-- [ ] VR-0090 (2026-11-05; ready-to-run): V1S-090 exact Doctor evidence
-  manifest refresh; base: 63e9e4ba; no missing design (existing mutation coverage).
-  Deferred: tests/test_deployed_object_non_catalog_queue.py,
-  tests/test_deployed_object_citation_migrations.py and
-  tests/test_legacy_staging_schema_guards.py, then cumulative linux-dev checks.
-  Due now: hosted CI failure; preserve source/provenance guards.
-  Execution: same failed pinned full job as VR-0089; corrected-pair rerun pending.
-- [ ] VR-0091 (2026-11-05; ready-to-run): V1S-090 frozen reference-section
-  expectation refresh after the reviewed Doctor citation addition; base: 63e9e4ba.
-  No missing design; existing tests/test_report_reference_baseline.py covers
-  frozen/current identity/evidence joins. Deferred: that module and complete
-  code/full-assets checks on linux-dev. Due now: hosted CI failure.
-  Execution: same failed pinned full job as VR-0089; corrected-pair rerun pending.
-- [ ] VR-0092 (2026-11-05; ready-to-run): V1S-084 prerequisite: synchronize
-  the two previously reviewed Doctor/Ancillary records and Doctor citations
-  with the tracked v9 rules/deployed-object pair. Base: 8391ba6c.
-  Existing source, runtime and guarded publication regressions cover the change;
-  no missing test design. Immediate artifact-safety gate: full schema/table
-  multiset comparison permits only those two records, their Doctor citations
-  and affected citation statistics; preserve all 17 deployed-object payloads
-  and unrelated fingerprints; retain recovery copies and post-validate both files.
-  Deferred: all eleven failed publication/source selectors from the pinned
-  Linux --all run, full assets/code and isolated preflight; linux-dev.
-  The previous run failed 11 provenance tests and Linux Markdownlint setup;
-  passing lint/type/build/rules stages do not accept the pair.
-- [ ] VR-0093 (2026-11-05; ready-to-run): V1S-090 normal-mode scenario FAQ
-  scope disclosure. Base: 0cbcf65a; design: VD-0032 statically reviewed without
-  execution. Existing API assertions now cover the backend note and its absence
-  on general FAQs; the browser selector adds 320 px, the normal non-discrepancy
-  note, Hacking FAQ exclusion, Firefight exclusion, overflow and failed requests.
-  Deferred: tests/test_faq_ruling_references.py and
-  test_supplies_faq_is_visible_and_does_not_leak_to_other_scenarios in
-  tests/test_verify_scenario_faq_browser.py, plus exact-pair browser checks.
-  Due now: materially misleading omission of the reviewed applicability limit;
-  intended execution host: linux-dev, with Windows corroboration.
+No open deferred-execution obligations. The latest bounded occurrence-index,
+CI/data-pair and normal FAQ disclosure acceptance is recorded in the
+[candidate evidence](v1.0-source-coverage-audit.md#development-pair-and-ci-consistency-repair-2026-11-05).
 
 ## Next unused IDs
 

@@ -265,8 +265,6 @@ Runtime/API/browser publication and final source-pair acceptance remain below.
 
 - [ ] **V1S-064 (M, build):** Expose source-scoped variant usage through a stable API/read model with negative
   and duplicate-source cases.
-  Deferred: bounded repair of confirmed hosted Source-check failures takes
-  priority; resume after the linked V1S-090 regression/validation repair below.
 - [ ] **V1S-065 (M, build):** Add discoverable ordinary reference links from canonical Skill/Equipment
   variants to Unit/profile/loadout occurrences.
 - [ ] **V1S-066 (M, gate):** Validate full cross-Army publication parity, unknown exclusion, browser coverage
@@ -350,16 +348,11 @@ Runtime/API/browser publication and final source-pair acceptance remain below.
   required human visual review.
 - [ ] **V1S-090 (L, gate):** Drain validation queue and run all relevant complete local/Linux full-asset,
   docs, source and preflight suites.
-  Complete cumulative acceptance of the Source-check and development-pair
-  repairs: stale Doctor evidence, source-section expectation, disposable
-  Commlink baseline and the reviewed Doctor/Ancillary runtime corrections.
-  Preserve unrelated-drift rejection and the separately owned final V1S-084
-  acceptance. Linux Markdownlint is unavailable until the worker's pinned npm
-  dependency is installed; Windows docs checks and hosted CI remain available.
-  - [ ] **Web backend + Web frontend:** Expose the backend-owned scenario FAQ
-    applicability explanation in normal cards even without conflicting citations;
-    verify the conservative Annihilation-only choice stays visible and does not
-    extend Ancillary eligibility to Firefight.
+  The bounded CI/data-pair and normal FAQ applicability-disclosure repair has
+  [pinned cumulative and focused acceptance](v1.0-source-coverage-audit.md#development-pair-and-ci-consistency-repair-2026-11-05).
+  Repeat the complete gate on final candidate inputs. Linux Markdownlint still
+  requires its pinned npm setup; Windows docs checks and hosted CI remain
+  independently available.
 - [ ] **V1S-091 (L, gate):** Audit the entire tracked Markdown corpus, stale version/command references,
   canonical contracts and browser copy.
 - [ ] **V1S-092 (M, gate):** Finalize coherent Unreleased notes, release metadata and version only after the
