@@ -259,8 +259,6 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Generated rules-reference projections](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend, Deployment
 
-- [ ] **V1S-052 (S, review):** Review exact Doctor occurrence parameters independently of Engineer and
-  preserve source-defined differences.
 - [ ] **V1S-062 (M, design):** Finalize occurrence identity, ordering, duplicate-handling and
   Unit/profile/loadout/Army ownership contract for the usage index.
 - [ ] **V1S-063 (L, build):** Generate and validate exact-variant occurrence projections from matched
@@ -340,6 +338,10 @@ and final candidate acceptance retain their individual owners below.
   this rebuild, `tools.review_infiltration_ph_variant` detects a
   `records` mismatch between tracked rules.db and fresh curation,
   consistent with the separately queued V1S-048 FAQ source change.
+  Also publish V1S-052's N5.3 Doctor `2W` clarification ("up to two
+  Wounds") and Spanish p. 100 corroborating citation in the same
+  guarded rules/deployed-object pair; passing fresh exports do not
+  certify the currently tracked database.
 - [ ] **V1S-085 (M, gate):** Run source occupancy, source/archive, strict primary interaction, reference
   baseline and output reproducibility checks. Treat the
   [host-SQLite physical-vs-logical rebuild finding](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
@@ -791,7 +793,13 @@ the remaining source clauses and final release-browser acceptance remain open.
       extras remain untyped; the historical-versus-N5.3 `ReRoll -3`
       question is retained in
       [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope)
-      pending official authority. Other unresolved source families remain.
+      pending official authority. The
+      [V1S-052 Doctor review](v1.0-source-coverage-audit.md#doctor-occurrence-and-scoped-recovery-review-v1s-052-2026-11-05)
+      independently pinned 235 direct occurrences, with 103 source-
+      qualified rows and three untyped signatures, preserving VITA/
+      Unconscious and Stunned exceptions. Doctor (2W) now says "up to
+      two Wounds" on ordinary recovery, with Spanish p. 100 citation.
+      Other unresolved source families remain.
     - [ ] Materialize public context links and verify duplicate sources, reused
       payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
       ambiguous variants before publication. An audited source signature alone

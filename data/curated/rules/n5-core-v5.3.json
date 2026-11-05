@@ -10582,7 +10582,7 @@
                 "effects": [
                     "For ordinary recovery, a successful [[attribute:wip|WIP]] Roll cancels [[state:unconscious|Unconscious State]] and removes one Wound (or more if a specific rule permits). A failed Roll puts the target directly into [[state:dead|Dead State]].",
                     "[[state:stunned|Stunned State]] may instead be canceled on a successful WIP Roll for a VITA target under that condition's cancellation rule.",
-                    "Doctor (2W) removes two Wounds on successful ordinary recovery. Doctor (ReRoll WIP=X) permits one reroll of a failed Roll per Order at the stated WIP value; that replacement value does not apply to a subsequent Command Token reroll."
+                    "Doctor (2W) removes up to two Wounds on successful ordinary recovery. Doctor (ReRoll WIP=X) permits one reroll of a failed Roll per Order at the stated WIP value; that replacement value does not apply to a subsequent Command Token reroll."
                 ],
                 "restrictions": [
                     "Self-use can cancel applicable conditions only while the user is not in a Null State; [[skill:no-wound-incapacitation|No Wound Incapacitation]] and [[skill:technorganic|Technorganic]] have explicit recovery exceptions.",
@@ -10613,6 +10613,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 90,
                     "section": "Doctor"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 100,
+                    "section": "Médico"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",

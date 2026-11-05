@@ -605,7 +605,10 @@ def test_doctor_source_53_exact_qualifiers_preserve_2w_and_reroll_boundary() -> 
         if record["id"] == "skill:doctor"
     )
     effects = " ".join(doctor["facts"]["effects"])
-    assert "Doctor (2W) removes two Wounds" in effects
+    assert "Doctor (2W) removes up to two Wounds on successful ordinary recovery" in effects
+    assert {"sourceId": "n5-core-v5.3-es-pdf", "page": 100, "section": "Médico"} in (
+        doctor["citations"]
+    )
     assert "Doctor (ReRoll WIP=X)" in effects
     assert "subsequent Command Token reroll" in effects
     assert doctor["variantSemantics"] == {"inheritance": "family"}
