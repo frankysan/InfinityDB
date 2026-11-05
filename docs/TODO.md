@@ -356,6 +356,10 @@ Runtime/API/browser publication and final source-pair acceptance remain below.
   Preserve unrelated-drift rejection and the separately owned final V1S-084
   acceptance. Linux Markdownlint is unavailable until the worker's pinned npm
   dependency is installed; Windows docs checks and hosted CI remain available.
+  - [ ] **Web backend + Web frontend:** Expose the backend-owned scenario FAQ
+    applicability explanation in normal cards even without conflicting citations;
+    verify the conservative Annihilation-only choice stays visible and does not
+    extend Ancillary eligibility to Firefight.
 - [ ] **V1S-091 (L, gate):** Audit the entire tracked Markdown corpus, stale version/command references,
   canonical contracts and browser copy.
 - [ ] **V1S-092 (M, gate):** Finalize coherent Unreleased notes, release metadata and version only after the

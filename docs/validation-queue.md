@@ -164,6 +164,10 @@ summary above. Hosted CI and final release gates retain separate owners.
   guards (5,219 passed / 29 skipped), plus missing Linux Markdownlint setup;
   preflight did not run. Rerun full code/data/preflight after VR-0092's paired
   correction. Docs run on Windows and hosted CI until Linux npm setup is available.
+  Corrected execution: job `linux-dev:bae1f465c5bf414fb9050086fe012fdd` at
+  `0cbcf65aaec0d6a8e9644142c9b57ec360cc252b` is running full
+  test/lint/type/build/rules/preflight stages with required assets and the
+  controlled build fixture. No accepted result yet.
 - [ ] VR-0090 (2026-11-05; ready-to-run): V1S-090 exact Doctor evidence
   manifest refresh; base: 63e9e4ba; no missing design (existing mutation coverage).
   Deferred: tests/test_deployed_object_non_catalog_queue.py,
@@ -189,11 +193,21 @@ summary above. Hosted CI and final release gates retain separate owners.
   Linux --all run, full assets/code and isolated preflight; linux-dev.
   The previous run failed 11 provenance tests and Linux Markdownlint setup;
   passing lint/type/build/rules stages do not accept the pair.
+- [ ] VR-0093 (2026-11-05; ready-to-run): V1S-090 normal-mode scenario FAQ
+  scope disclosure. Base: 0cbcf65a; design: VD-0032 statically reviewed without
+  execution. Existing API assertions now cover the backend note and its absence
+  on general FAQs; the browser selector adds 320 px, the normal non-discrepancy
+  note, Hacking FAQ exclusion, Firefight exclusion, overflow and failed requests.
+  Deferred: tests/test_faq_ruling_references.py and
+  test_supplies_faq_is_visible_and_does_not_leak_to_other_scenarios in
+  tests/test_verify_scenario_faq_browser.py, plus exact-pair browser checks.
+  Due now: materially misleading omission of the reviewed applicability limit;
+  intended execution host: linux-dev, with Windows corroboration.
 
 ## Next unused IDs
 
-- Design: `VD-0032`; active obligations are listed above.
-- Execution: `VR-0093`; active obligations are listed above.
+- Design: `VD-0033`; active obligations are listed above.
+- Execution: `VR-0094`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

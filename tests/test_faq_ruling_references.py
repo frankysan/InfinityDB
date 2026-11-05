@@ -1211,6 +1211,7 @@ def test_undeployed_ancillary_does_not_inherit_firefight_killing_scope(
             "sourceId": "n5-faq-v0.1-en-pdf", "page": 4,
         }
         assert "Annihilation only as a conservative reviewed choice" in ruling["selection_reason"]
+        assert ruling["applicability_note"] == ruling["selection_reason"]
         assert "not an official scenario assignment" in ruling["selection_reason"]
         assert "Firefight shares the Killing Rule" in ruling["selection_reason"]
         assert "not an independently verified FAQ PDF publication day" in (
@@ -1257,6 +1258,7 @@ def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
     status, response = request("equipment:hacking-device")
     assert status == 200
     assert response["items"][0]["id"] == "faq-ruling:hacking-device-firewall-disabled"
+    assert response["items"][0]["applicability_note"] is None
     assert response["items"][0]["selected_source"]["published_date"] == "2026-09-01"
     assert response["items"][0]["selected_citation"]["page"] == 1
     status, response = request(
@@ -1270,6 +1272,7 @@ def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
     assert "not an official scenario assignment" in (
         response["items"][0]["selection_reason"]
     )
+    assert response["items"][0]["applicability_note"] == response["items"][0]["selection_reason"]
     status, response = request(
         "scenario:annihilation", scenario_id="scenario:domination",
     )

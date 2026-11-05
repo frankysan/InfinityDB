@@ -382,6 +382,10 @@ def select_applicable_faq_rulings(
             "selected_citation": record["facts"]["selectedCitation"],
             "selected_source": record["selected_source"],
             "selection_reason": record["facts"]["selectionReason"],
+            "applicability_note": (
+                record["facts"]["selectionReason"]
+                if any(scope.get("scenarioIds") for scope in matches) else None
+            ),
             "conflicting_citations": record["facts"]["conflictingCitations"],
             "supersedes": record["facts"]["supersedes"],
             "citations": record["citations"],

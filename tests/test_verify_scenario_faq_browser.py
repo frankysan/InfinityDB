@@ -2061,14 +2061,16 @@ def test_scenario_rule_cards_omit_only_redundant_subtitles(
         page.close()
 
 
-@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("width", [1440, 390, 320])
 def test_supplies_faq_is_visible_and_does_not_leak_to_other_scenarios(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:
     page = chrome.new_page(viewport={"width": width, "height": 900})
     route_browser_page(page, scenario_app, ORIGIN)
     errors: list[str] = []
+    failed_requests: list[str] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failed_requests.append(request.url))
     try:
         for slug, expected in (
             ("supplies", "Can a Trooper carrying a scenario element"),
@@ -2101,7 +2103,19 @@ def test_supplies_faq_is_visible_and_does_not_leak_to_other_scenarios(
                 ).count() == 0
             else:
                 assert "cannot enter Marker State" not in rulings.first.inner_text()
+                note = rulings.first.locator(".faq-applicability-note")
+                assert note.is_visible()
+                assert "Annihilation only as a conservative reviewed choice" in note.inner_text()
+                assert "not an official scenario assignment" in note.inner_text()
+                assert rulings.first.locator(".faq-source-discrepancy").count() == 0
+            assert page.evaluate(
+                "document.documentElement.scrollWidth <= window.innerWidth + 1"
+            ), (width, slug)
+        page.goto(f"{ORIGIN}/equipment/hacking-device", wait_until="domcontentloaded")
+        page.locator(".faq-rulings").wait_for(state="visible", timeout=60000)
+        assert page.locator(".faq-applicability-note").count() == 0
         assert not errors, errors
+        assert not failed_requests, failed_requests
     finally:
         page.close()
 

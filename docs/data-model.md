@@ -2997,6 +2997,11 @@ and matched applicability, separate from the unmodified base Rule/Skill.
 that projection. The API requires `topic_id`, `rules_revision`, and
 `as_of`, with optional paired `season_id`/`season_revision` and
 `scenario_id`; it never defaults to the newest publication.
+For matched scenario-scoped applicability, the backend also supplies
+`applicability_note` from the reviewed source-selection explanation; general
+FAQ matches return `null`. Normal browser cards show that note in secondary
+source text even without conflicting citations. Conflicting-source cards
+retain their existing discrepancy disclosure instead of duplicating the note.
 
 Twenty-nine reviewed FAQ entries are now published from
 `data/curated/rules/n5-faq-v0.1.json`: nine first recorded in v0.1 and

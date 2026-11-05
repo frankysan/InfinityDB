@@ -78,6 +78,11 @@ export function faqRulingsSection(items) {
       }
       discrepancy.append(label, explanation);
       card.append(discrepancy);
+    } else if (ruling.applicability_note) {
+      const note = document.createElement("p");
+      note.className = "detail-source faq-applicability-note";
+      note.textContent = ruling.applicability_note;
+      card.append(note);
     }
     group.append(card);
   }
