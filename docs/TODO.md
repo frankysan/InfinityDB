@@ -287,12 +287,6 @@ State-side contexts, without inferring live Unit States or broader edges.
 **Parent:** [Weapon, Ammunition and Deployable presentation](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-070 (M, review):** Audit single/multimode, multi-ammunition and Combined Saving Roll
-  source/profile presentation in the existing catalog.
-- [ ] **V1S-071 (M, design):** Specify any missing structured mode/profile/conditional/sentinel fields before
-  frontend changes; do not parse display strings.
-- [ ] **V1S-072 (L, gate):** Reconcile the full published Weapon profile set through storage, API and browser,
-  including range, damage and Traits.
 - [ ] **V1S-073 (M, review):** Extend deployed-object discovery across independent N5 tables, unusual
   Weapon/Equipment entries and alternate wording.
 - [ ] **V1S-074 (M, review):** Review scenery, Gate glossary terms, terrain combinations and scenario
@@ -841,19 +835,14 @@ the remaining source clauses and final release-browser acceptance remain open.
   profiles, modes, ranges, linked effects and Traits. Additional comparison/filter
   controls are an enhancement; the [1.0 gate](releasing.md#version-10-data-completeness-gate)
   requires usable access to in-scope information, not a final comparison UI.
-  - [ ] Verify remaining multi-mode/multi-ammunition presentation gaps against those
-    existing surfaces before designing another quick-reference view.
-    Preserve the field-specific meaning of `+`: Ammunition
-    composition and Combined Saving Rolls are separate rules operations. Validate
-    the view against Army metadata; do not copy source charts wholesale into the
-    application.
-    - [ ] Define any additional read model needed for missing information using existing
-      weapon identities/profiles and the enriched Ammunition model. Keep mode/profile identity,
-      conditional values, range bands, damage/saving notation, Traits, and unavailable values
-      explicit. Browser code renders these semantics rather than parsing display strings.
-    - [ ] Reconcile representative single/multi-mode, combined-ammunition, Combined Saving Roll,
-      and conditional/sentinel profiles through storage, API, and browser output. Verify the
-      complete published profile set against the inventory, not only representative examples.
+  The [V1S-070 source review](v1.0-source-coverage-audit.md#weapon-profile-and-multimode-chart-review-v1s-070-2026-11-05)
+  reconciles all 171 printed Weapon profile/mode rows, preserving the documented
+  Kobra Pistol conflict and Katyusha MRL sign omission without changing source
+  values. V1S-071 found the existing profile fields sufficient (see the
+  [profile contract](data-model.md#weapon-profile-row-and-api-contract)), and
+  V1S-072's full published-profile storage/API/browser acceptance passed on
+  2026-11-05 (see the
+  [acceptance evidence](v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05)).
   - [ ] Complete deployed-object inventory and final reference acceptance.
     Seventeen reviewed profiles, delivery paths, API/browser entry points and
     typed reverse uses are published; see the

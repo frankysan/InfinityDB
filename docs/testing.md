@@ -4549,10 +4549,15 @@ The supplied v5.3 PDF yields 171/171 uniquely aligned rows, with 170 five-field
 matches and 170 range-band matches. Kobra Pistol CC Mode has a Saving Rolls
 source discrepancy candidate (PDF 1, Army 2); Katyusha MRL prints unsigned `3`
 where Army has `+3`. The separate Disco Ball object's attributes match.
-This remains partial evidence: other auxiliary/equipment profiles, special-weapon
-prose semantics, and API/browser projection still need review. The chart report
-also records the exact Army database SHA-256 so it can be safely combined with
-enrichment evidence from the same snapshot.
+The [V1S-070 source review](v1.0-source-coverage-audit.md#weapon-profile-and-multimode-chart-review-v1s-070-2026-11-05)
+records the existing source dispositions for both candidates; the Kobra
+correction request remains open under SRC-021. This is still partial evidence:
+the V1S-072 acceptance now covers the full published profile storage/API/browser
+projection (see the [acceptance evidence](v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05)),
+while remaining auxiliary/equipment discovery and special-weapon prose semantics
+stay under their separate 1.0 tasks. The chart report also records the exact Army
+database SHA-256 so it can be safely combined with enrichment evidence from the
+same snapshot.
 
 For the seven supplementary object Silhouette conflicts, cross-check both
 N5.3 language PDFs and both archived Wiki Weapon Charts as **distinct

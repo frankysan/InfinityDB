@@ -80,6 +80,29 @@ mode, but must attach to that one profile only, not to the parent Weapon/source
 variant or sibling modes. Mode qualifiers describe identity, not permission to
 resolve a disputed Trait automatically.
 
+### Weapon profile row and API contract
+
+Army `metadata_weapons` rows are source profiles, not normalized weapon behaviors.
+The catalog API preserves each profile's source ID and mode as row identity, including
+mode-specific rows, and exposes the source-backed ammunition ID and label, type, Burst,
+Damage, Saving, Saving count, profile text, Traits, and range bands. It does not merge
+sibling modes into one profile.
+
+Burst, Damage, Saving, and Saving count remain source values rather than parsed
+numbers or enums. Profile text remains source text; Traits and distance bands are
+decoded into lists/maps without interpreting their rules. A source `distance = null`
+currently projects as `ranges: {}`; this means no range bands were supplied to the
+projection, not an adjudication of weapon reach. The browser omits the range table
+when there are no bands. Blank or sentinel Saving values may display as `--`, a
+presentation fallback that does not change the source value or establish a game
+effect. Conditional wording and other source sentinels are not evaluated.
+
+The existing exact-profile enrichments remain narrow and source-pinned, including
+reviewed Ammunition composition and Combined Saving Roll annotations. No generic
+condition or sentinel field is needed for the current profile model. Any future
+structured status must follow a source-reviewed distinction; display punctuation
+alone is not evidence for new semantics.
+
 ### Deployed-object read-model and artifact-gated browser reference
 
 `infinity_db.deployed_object_reference.project_deployed_references` consumes

@@ -156,8 +156,8 @@ No open deferred-execution obligations.
 
 ## Next unused IDs
 
-- Design: `VD-0043`; active obligations are listed above.
-- Execution: `VR-0098`; active obligations are listed above.
+- Design: `VD-0044`; active obligations are listed above.
+- Execution: `VR-0099`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

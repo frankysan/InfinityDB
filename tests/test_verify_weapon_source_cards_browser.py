@@ -456,6 +456,76 @@ def _ammunition_display(profile: dict[str, Any]) -> str:
     return _stat_display(profile.get("ammunition"))
 
 
+def _expected_weapon_trait_groups(profile: dict[str, Any]) -> dict[str, str]:
+    references = profile.get("trait_references") or []
+    canonical_slugs = {
+        reference["slug"] for reference in references
+        if reference.get("slug") and not reference.get("source_alias")
+    }
+    groups: dict[str, list[str]] = {
+        "Traits": [],
+        "Labels": [],
+        "States": [],
+        "Properties": [],
+    }
+    for reference in references:
+        slug = reference.get("slug")
+        source_alias = bool(reference.get("source_alias"))
+        if source_alias and slug in canonical_slugs:
+            continue
+
+        source_label = reference.get("label") or ""
+        state_references = reference.get("state_references") or []
+        public_reference = reference.get("public_reference") or {}
+        if public_reference.get("catalog") == "labels":
+            group = "Labels"
+        elif (
+            public_reference.get("catalog") == "states"
+            or state_references
+            or source_label.casefold().startswith("state:")
+        ):
+            group = "States"
+        elif slug:
+            group = "Traits"
+        else:
+            group = "Properties"
+
+        if state_references:
+            label = " / ".join(state["label"] for state in state_references)
+        else:
+            label = (
+                reference.get("name") if source_alias else reference.get("label")
+            ) or reference.get("name") or ""
+            if group == "States" and label.casefold().startswith("state:"):
+                label = label.split(":", 1)[1].strip()
+        if label:
+            groups[group].append(label)
+
+    return {
+        group: " · ".join(labels)
+        for group, labels in groups.items()
+        if labels
+    }
+
+
+def _rendered_weapon_trait_groups(card: Any) -> dict[str, str]:
+    return card.evaluate(
+        """card => Object.fromEntries(
+          [...card.querySelectorAll('.weapon-data-row')]
+            .flatMap(row => {
+              const heading = row.querySelector('.weapon-data-heading')?.textContent ?? '';
+              if (!['Traits', 'Labels', 'States', 'Properties'].includes(heading)) {
+                return [];
+              }
+              return [[
+                heading,
+                row.querySelector('.weapon-data-value')?.innerText.trim() ?? ''
+              ]];
+            })
+        )"""
+    )
+
+
 def test_all_published_multi_profile_weapon_statlines_render_on_mobile(
     origin: str, chrome: Any, multi_profile_weapons: list[dict[str, Any]],
 ) -> None:
@@ -509,6 +579,9 @@ def test_all_published_multi_profile_weapon_statlines_render_on_mobile(
                 assert card.locator(".weapon-ranges tbody td").all_text_contents() == (
                     expected_modifiers if any(expected_modifiers) else []
                 ), (slug, profile["mode"], expected_modifiers)
+                assert _rendered_weapon_trait_groups(card) == (
+                    _expected_weapon_trait_groups(profile)
+                ), (slug, profile["mode"])
                 parts = profile.get("ammunition_parts")
                 if not isinstance(parts, list):
                     continue
@@ -585,6 +658,9 @@ def test_published_weapon_profiles_preserve_source_metadata(
             ]
             assert matching, (weapon["slug"], key, comparable, candidates)
             source = matching[0]
+            assert [
+                reference["label"] for reference in profile.get("trait_references", [])
+            ] == profile["traits"], (weapon["slug"], key, profile["traits"])
             for source_column, api_key, default in (
                 ("properties", "traits", []),
                 ("distance", "ranges", {}),
@@ -678,6 +754,9 @@ def test_all_published_single_profile_weapon_cards_at_mobile_width(
             assert rendered_range == (
                 source_modifiers if any(source_modifiers) else []
             ), (slug, rendered_range, source_modifiers)
+            assert _rendered_weapon_trait_groups(card) == (
+                _expected_weapon_trait_groups(profile)
+            ), (slug, profile["mode"])
 
             parts = profile.get("ammunition_parts")
             if isinstance(parts, list):
