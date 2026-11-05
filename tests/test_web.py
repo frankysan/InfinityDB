@@ -5713,6 +5713,29 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "Pool, can spend Orders to activate themselves, and can declare and receive "
         "Attacks."
     )
+    peripheral = next(item for item in items if item["id"] == "term:peripheral")
+    assert peripheral["domain"] == "Game term"
+    assert peripheral["href"] == "/glossary#term-peripheral"
+    assert peripheral["embedded"] is True
+    assert peripheral["description"] == (
+        "A [[skill:peripheral|Peripheral]] is a special Trooper category. It cannot "
+        "contribute or spend "
+        "Orders on its own and does not take a place in the Army List. Normally, it "
+        "activates when its Controller spends an Order and copies the Controller's "
+        "actions; its type-specific rules may differ.\n\n"
+        "Its own Troop Profile lists its Cost, which is also added to the Controller's "
+        "Cost. The Special Skill explains the Controller relationship and each type."
+    )
+    assert any(
+        token.get("type") == "reference"
+        and token.get("text") == "Peripheral"
+        and token.get("target") == "skill:peripheral"
+        and token.get("public_reference") == {
+            "catalog": "skills",
+            "id": "peripheral",
+        }
+        for token in peripheral["description_tokens"]
+    )
     movement = next(item for item in items if item["id"] == "attribute:mov")
     assert movement == {
         "id": "attribute:mov",

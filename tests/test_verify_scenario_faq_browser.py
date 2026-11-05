@@ -597,6 +597,69 @@ def test_trooper_term_normal_browser(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_peripheral_term_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    api_responses: list[tuple[str, int]] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "response",
+        lambda response: api_responses.append((response.url, response.status))
+        if "/api/glossary" in response.url else None,
+    )
+    try:
+        response = page.goto(
+            f"{ORIGIN}/glossary#term-peripheral", wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        entry = page.locator("#term-peripheral")
+        entry.wait_for(state="visible", timeout=15000)
+        snapshot = entry.evaluate(
+            """node => {
+                const description = node.querySelector(".glossary-description");
+                const skillLink = description?.querySelector("a");
+                return {
+                    heading: node.querySelector("h3")?.textContent?.trim(),
+                    text: description?.innerText || "",
+                    domain: node.querySelector(".glossary-domain")?.textContent?.trim(),
+                    linkText: skillLink?.textContent?.trim(),
+                    linkHref: skillLink?.getAttribute("href"),
+                    linkTabIndex: skillLink?.tabIndex,
+                    overflow: document.documentElement.scrollWidth > innerWidth + 1,
+                };
+            }"""
+        )
+        assert snapshot["heading"] == "Peripheral"
+        assert " ".join(snapshot["text"].split()) == (
+            "A Peripheral is a special Trooper category. It cannot contribute or spend "
+            "Orders on its own and does not take a place in the Army List. Normally, it "
+            "activates when its Controller spends an Order and copies the Controller's "
+            "actions; its type-specific rules may differ. Its own Troop Profile lists "
+            "its Cost, which is also added to the Controller's Cost. The Special Skill "
+            "explains the Controller relationship and each type."
+        )
+        assert snapshot["domain"] == "Game term"
+        assert snapshot["linkText"] == "Peripheral"
+        assert snapshot["linkHref"] == "/skills/peripheral"
+        assert snapshot["linkTabIndex"] >= 0
+        skill_link = entry.locator(".glossary-description a")
+        assert skill_link.is_visible()
+        skill_link.focus()
+        assert skill_link.evaluate("node => node === document.activeElement")
+        assert not snapshot["overflow"], width
+        assert any(
+            url.endswith("/api/glossary") and status == 200
+            for url, status in api_responses
+        ), api_responses
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
     ("route", "record_id", "page_numbers", "clauses", "related"),
     (

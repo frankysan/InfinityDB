@@ -268,6 +268,14 @@ Unit Profile notation, Peripherals are distinct from ordinary Weapons and
 Equipment, and the profile example explicitly identifies the Unit option as the
 Controller of its Peripheral.
 
+The N5.3 Glossary further states that a Peripheral cannot contribute or spend
+Orders by itself and takes no space in the Army List. It is activated when its
+Controller spends an Order, replicating the Controller's actions. The
+Peripheral's own Troop Profile shows its Cost, which is also added to the
+Controller's Cost. Type-specific Peripheral rules can qualify that baseline.
+The Spanish N5.3 terminology definition on p. 7 confirms the Order, Army List,
+and activation facets but does not state the Cost treatment.
+
 This is relationship semantics, not merely display text. It supports treating
 Peripheral/controller identity and eligibility as a reviewed relationship layer
 rather than flattening a Peripheral into a generic equipment or weapon value.
@@ -276,6 +284,9 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Unit_Profile>
 - PDF: Infinity N5 V5.3, printed page 8
+- PDF: Infinity N5 V5.3, printed page 173 (Glossary)
+- PDF: Spanish Infinity N5 V5.3, printed page 7 (Terminology and Alignment)
+- PDF: Infinity N5 V5.3, printed pages 106-108 (Peripheral Special Skill)
 
 ### RS-BR-UP-010 — Unit Profile notation carries domain meaning
 

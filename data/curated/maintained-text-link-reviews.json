@@ -392,8 +392,8 @@
       "includeAliases": true,
       "includeSimplePlurals": true,
       "caseInsensitive": true,
-      "reviewedOn": "2026-09-29",
-      "note": "Reviewed Skill names/aliases case-insensitively with simple plurals. Clear Skill references are typed links; same-text game categories/states/modes and ordinary-language uses are bound to exact reviewed passage fingerprints. The former source/collision review-needed queue was manually resolved on 2026-09-29; Infiltration's descriptive forward deployment wording remains reviewed plain text.",
+      "reviewedOn": "2026-11-05",
+      "note": "Reviewed Skill names/aliases case-insensitively with simple plurals. Clear Skill references are typed links; same-text game categories/states/modes and ordinary-language uses are bound to exact reviewed passage fingerprints. The former source/collision review-needed queue was manually resolved on 2026-09-29; Infiltration's descriptive forward deployment wording remains reviewed plain text. Retired the obsolete lowercase 'peripheral' occurrence after the V1S-082 Glossary revision removed that wording.",
       "reviewedPlainSurfaces": [
         {
           "text": "Camouflage",
@@ -509,13 +509,6 @@
             "c90fbd10d49f7c73ee1385f7f06d12e9ccbb9a826691e33b7e3b0363771dcfe9",
             "cd0b52e5af7a0d77e3ea03728e9751ddbcee134a03378059f9e9d69133bcf62c",
             "f18251da4fa978daefcd9ce6d3df1ca0384ed26aab3206292a3beca1a085e982"
-          ]
-        },
-        {
-          "text": "peripheral",
-          "reason": "game-category-not-skill",
-          "occurrenceSha256s": [
-            "db39345a7990c1fcb053fd66e4ddd6bae111ffdb840708b1fe121e20892a4374"
           ]
         },
         {
