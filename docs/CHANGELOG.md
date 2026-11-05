@@ -272,6 +272,8 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Deployment:** Keep aggregate metrics-history collection working when
+  reviewed variant-usage requests appear, without retaining query values.
 - **Data processing:** Correct Repeater and Supportware source-page links and add
   primary rules citations for all Hacking Programs. Clarify White Noise placement
   timing and Zero Pain's two-roll defense in either turn.

@@ -73,6 +73,7 @@ SAFE_ROUTES = frozenset(
         "/api/states",
         "/api/states/:id",
         "/api/skill-extras",
+        "/api/variant-usage",
         "/api/search",
         "/api/scenarios",
         "/api/scenarios/:id",

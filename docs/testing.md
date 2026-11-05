@@ -292,6 +292,24 @@ can also affect test timing and Chromium stability, so limit contention.
 
 ### Parallel Windows development and Linux validation
 
+**2026-11-05 hosted integration repair:** Source run `42049878323` at
+`d4ffce43004e53b030af6f02184a7325e1878191` failed all four matrix legs:
+the two- and experimental three/four-lane Chromium registries omitted the
+variant-usage and contextual State/Fireteam modules, and metrics history
+rejected the runtime's fixed `/api/variant-usage` label. The repair registers
+both modules in every lane layout and reviews that one bounded route;
+query/path-specific labels remain refused. As an immediate CI-correctness
+and metrics-privacy gate, Windows ran `tools/run_checks.py --stage test
+--stage lint tests/test_browser_test_capacity.py tests/test_metrics_history.py
+tools/browser_test_capacity.py tools/metrics_history.py --assets required`:
+**48 passed, zero skips/failures**, Ruff passed, and all **808/808** published
+and browser-referenced SVGs were available. Tests cover accepted aggregate
+variant-usage counters and refusal of query values and path suffixes.
+No deferred local test obligation remains for this bounded repair; hosted
+Source matrix/deterministic, wheel and deployment acceptance require the
+replacement commit's own runs. This focused result does not accept the
+final v1.0 candidate or the wider browser suite.
+
 **Full-suite parallelism exception: run on Linux, develop on Windows.**
 Only while a **full test suite** is actively running against a pinned
 revision in the separate `linux-dev` MCP checkout may the agent continue

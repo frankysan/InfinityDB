@@ -262,6 +262,9 @@ persisting a new high-cardinality dimension. Latency and response-size histogram
 allowlisted so a future metrics-layout change cannot silently mix incompatible bucket schemas in one
 historical store.
 
+The reviewed vocabulary includes the fixed `/api/variant-usage` route label;
+its catalog, variant and Army query values are never retained as labels.
+
 The engine can also be exercised manually from a checkout against the trusted LAN metrics listener:
 
 ```powershell
