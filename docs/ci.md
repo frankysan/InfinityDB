@@ -149,10 +149,14 @@ The hosted Ubuntu 3.11 Source job for PR #23 at
 successfully executed **Check V1S retirement history**, the complete
 documentation check stage including static V1S validation, and its source
 checks. The installed-wheel and deployment-smoke workflows also passed
-for that SHA. This accepts the backlog checker's own CI integration; it
-does **not** accept the independent final Source matrix, Windows test
-stability or cross-platform deterministic-output comparison required by
-[V1S-093](TODO.md#final-10-acceptance). Evidence-presence checks cannot
+for that SHA. After a repeated Windows-only Node lifecycle test timeout,
+the Source workflow's second attempt passed all four platform jobs and
+cross-platform deterministic-output comparison. This accepts the backlog
+checker's CI integration at this development SHA; it does **not** replace
+the exact-main-SHA acceptance required by
+[V1S-093](TODO.md#final-10-acceptance). A targeted Node harness exit
+stability fix was later committed as `34282616`, with separate focused
+Windows/Linux regression acceptance. Evidence-presence checks cannot
 substitute for semantic closeout review.
 
 The development dependencies include PyMuPDF so PDF-aware test modules collect and

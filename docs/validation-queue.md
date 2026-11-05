@@ -124,7 +124,9 @@ No pending design obligations. VD-0059/0060/0061 were retired after
 static review without execution; their docs-stage, JSON, synthetic Git
 ancestry and CI regressions passed under VR-0107/0108 on pinned Linux
 `bf0821af`. Earlier VD-0053–VD-0058 passed on `0bac3369`, and
-VD-0050–VD-0052 on `e957c43e`. Hosted CI/release acceptance is independent.
+VD-0050–VD-0052 on `e957c43e`. VR-0109's existing Node harness selector
+passed on committed Windows/Linux `34282616` and was retired. Hosted
+CI/release acceptance remains independent.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -155,13 +157,6 @@ is recorded. Failed or incomplete verification remains open.
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
-
-- [ ] VR-0109 (2026-11-05; ready-to-run): Stabilize Node scenario-navigation lifecycle harness termination on Windows CI.
-  Work: [V1S-093](TODO.md#final-10-acceptance); change: `tests/scenario_lifecycle_harness.cjs` after `447e3c34`; risk: medium.
-  Immediate: prior hosted Source checks at `bf0821af` and `702536fe` timed out on the same 15-second Node child process; local Windows test passed in 0.07 s.
-  Design: none; existing `tests/test_scenario_api.py::test_scenario_browser_aborts_map_and_unit_listener_on_soft_navigation` already asserts aborts, no stale parse, success marker and exit status.
-  Deferred: rerun the focused Windows selector and matched Linux selector; keep full hosted Source/determinism acceptance under CI release owner.
-  Outcome: unrun on corrected revision; do not conflate local regression with hosted CI approval.
 
 ## Next unused IDs
 

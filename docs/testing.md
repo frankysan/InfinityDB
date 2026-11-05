@@ -335,6 +335,26 @@ can also affect test timing and Chromium stability, so limit contention.
 
 ### Parallel Windows development and Linux validation
 
+**2026-11-05 full-assets post-checker regression:**
+The independent `linux-dev` worker tested
+`702536feecc3d2dddfd854ecd8e51e38509509e1` with the complete
+published assets (808/808 SVGs), eight xdist workers and four Chromium
+lanes: **5,349 passed, 29 skipped, two fork deprecation warnings,
+zero failures in 508.78 s**. The companion hosted Source checks
+[rerun](https://github.com/frankysan/InfinityDB/actions/runs/42096775320)
+eventually passed all four operating-system/Python legs and the
+cross-platform deterministic-output comparison after a reproducible
+first-attempt Windows Node lifecycle harness timeout. The exact-main-SHA
+release gate is still separate.
+
+**2026-11-05 Windows scenario lifecycle harness stability (VR-0109):**
+`tests/scenario_lifecycle_harness.cjs` now exits deterministically after
+all lifecycle assertions and a synchronous success marker. Its existing
+`tests/test_scenario_api.py::test_scenario_browser_aborts_map_and_unit_listener_on_soft_navigation`
+selector passed at committed `342826160e49ebef71c82d1e58d09aa850cdbcf7`
+on Windows (0.06 s call) and Linux (0.22 s call), without weakening the
+assertions. Hosted validation of that later revision is distinct.
+
 **2026-11-05 V1S-096 Phase 4 local integration (VR-0107/0108):**
 The docs stage now runs static V1S backlog checking after Markdownlint
 and local links. The explicit CI retirement helper checks GitHub event
