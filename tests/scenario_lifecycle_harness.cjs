@@ -83,5 +83,8 @@ resolveMapRequest({ ok: true, text: () => Promise.resolve("<svg/>") });
 
 setImmediate(() => {
   assert.equal(parses, 0, "late fetch resolution must not mutate a navigated-away page");
-  console.log("scenario navigation lifecycle: passed");
+  // The contract is complete once the pending promise microtasks have settled.
+  // Terminate deterministically so unrelated Node handles cannot stall Windows CI.
+  fs.writeSync(1, "scenario navigation lifecycle: passed\n");
+  process.exit(0);
 });
