@@ -24,8 +24,8 @@ Use these documents when deciding how the project works now:
 - `data/curated/README.md` — authored/curated data schemas and review contracts.
 - `testing.md` — local validation entry points, phased validation policy, test slices,
   asset modes, reports, and benchmark tooling.
-- `validation-queue.md` — the active VD/VR register for deferred test design and
-  execution, with strict five-item drain-to-zero triggers and evidence; not an implementation backlog.
+- `validation-queue.md` — canonical VD/VR scheduling and active deferred-validation
+  register (design/execution thresholds, dependencies, drain and retirement); not an implementation backlog.
 - `ci.md` — hosted CI workflows and repository-level validation policy.
 - `deployment.md` — production install/update/rollback/operations contract.
 - `server-migration.md` — moving released or development environments between hosts.
@@ -34,7 +34,14 @@ Use these documents when deciding how the project works now:
 - `releasing.md` — mandatory release gate and the 1.0 completeness definition.
 
 When two documents appear to overlap, prefer the owner above. Correct the owner first, then reduce
-secondary text to a link or short boundary statement.
+secondary text to a link or short boundary statement. Keep **current behavior**,
+**accepted but unimplemented design direction**, and **historical evidence** clearly
+distinguished. Unimplemented tasks live only in `TODO.md`; historical acceptance
+may remain in source audits without being treated as current status. Agent entry
+points (`AGENTS.md` and `.agents/skills/`) should provide task-boundary and
+domain-specific actions, not second copies of operational thresholds or rules.
+`AGENTS.local.md` is private, machine/user-specific guidance and must not
+override tracked project policy.
 
 ## Maintained evidence and research
 

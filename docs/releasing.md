@@ -167,6 +167,18 @@ will actively guide later work.
 
 ## 3. Prepare release notes and metadata
 
+**Changelog entry discipline (also applies during development):** Document
+meaningful **player- or operator-visible outcomes**, not individual commits,
+test coverage, internal refactors, implementation mechanics, or bare schema
+versions. Consolidate related outcomes. For a release containing entries,
+begin with a concise `Player summary` (use `No player-facing changes.` for
+operator-only releases), followed by `Added`, `Changed` and `Fixed` as
+applicable, and `Upgrade notes` for required operator actions. Keep language
+accessible without internal development context. Empty `Unreleased` needs
+no filler; review its entries together before promotion. `docs/CHANGELOG.md`
+contains release content, not maintainer instructions, because the web
+application parses it to render **What's changed**.
+
 - [ ] Cross-check `Unreleased` against substantive player/operator changes in Git
   history since the previous release and the last changelog update. Restore
   missing outcomes, but do not turn commits, tests or internal refactors into

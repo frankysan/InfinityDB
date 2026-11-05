@@ -21,7 +21,7 @@ Design constraints:
 - Remain read-only, deterministic, offline, cross-platform, and usable without ignored local data.
 - Prefer Python standard-library parsing, subprocess Git operations with bounded output, and the existing `tools/run_checks.py` integration.
 - Distinguish **objective violations** from **advisory heuristics**. Avoid claiming to verify task meaning, upstream authority, or actual test coverage.
-- Preserve the existing [selection checkpoint](TODO.md#v1s-work-selection-and-handoff) and strict five-item VD/VR drain loop.
+- Preserve the existing [selection checkpoint](TODO.md#v1s-work-selection-and-handoff) and the current [VD/VR scheduling contract](validation-queue.md#queue-rules); this plan does not set queue thresholds.
 
 ## Proposed architecture
 

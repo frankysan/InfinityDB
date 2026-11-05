@@ -248,92 +248,36 @@ Do not report Ruff/Pyright as run when those tools are unavailable in the active
 
 ## Phased development and validation
 
-For ordinary v1.0 development, split work into **implementation**, **test design**,
-and **test execution** passes. This minimizes redundant full-suite runs without
-weakening targeted checks, required CI, or [release acceptance](releasing.md).
-The [validation queue](validation-queue.md) owns pending obligations and their
-status; `docs/TODO.md` continues to own features, fixes, and milestone scope.
+Ordinary v1.0 work separates **implementation**, **test design (VD)**, and
+**test execution (VR)** to avoid running a regression suite after every small
+change. The [active validation queue](validation-queue.md#queue-rules) is the
+**sole authority** for counts, trigger thresholds, age limits, drain order,
+dependencies, status changes, and retirement. In particular, check it at
+each task boundary; do not reproduce its numeric thresholds in agent skills
+or secondary documentation.
 
-1. **Implementation pass:** define the behavior and concrete acceptance
-   requirements, implement a bounded change and inspect its diff. **Queue
-   new regression-test design as VD**, rather than habitually creating and
-   running tests immediately. Queue every changed behavior needing deferred
-   execution as VR, linking any prerequisite VD items. Existing tests that
-   only need to be rerun require VR, not VD. Immediate **non-test** lint,
-   documentation, type and structural checks remain appropriate. Do not
-   defer genuinely risk-critical security, migration, provenance,
-   publication-pair, schema or correctness gates: execute the smallest
-   necessary check as an explicit exception and record its selector/result.
-   Other tests wait for VR. Report `implemented; validation pending` when
-   obligations remain; creating test code is not evidence of a pass.
-2. **Test-design pass (VD):** when the VD count reaches five, work through
-   **every open VD item individually until VD is empty**. Add or revise
-   the specified assertions, negative cases and fixtures, without unrelated
-   production edits. Review test code and selectors statically, create/update
-   the corresponding VR entry, and retire each designed VD. **Do not run any
-   tests during this entire design pass**, including focused test sanity
-   checks or a whole module. Test failures and behavioral confirmation
-   belong to VR. Record defects requiring production changes in
-   `docs/TODO.md`, preserving the dependent execution obligation.
-3. **Test-execution pass (VR):** when VR reaches five, handle its entries
-   **one by one until VR is empty**. Execute deferred focused, module,
-   browser, integration and cumulative checks against a verified revision.
-   Reuse one shared full-suite run for overlapping obligations where
-   coverage and commit match, but evaluate and retire each VR independently.
-   Record exact selectors, tested revision, pass/fail/skip counts and
-   source/asset coverage. A launched job is still an **open** VR until
-   its terminal results are inspected. Failed, skipped-required or blocked
-   entries stay open; resolve their blockers before declaring the queue
-   drained. Do not resume ordinary implementation merely because the count
-   dropped below five.
+- **Implementation:** record concrete missing assertions as VD and each
+  distinct changed behavior needing deferred verification as VR. Existing
+  tests needing only reruns require VR, not VD. Immediate non-test lint,
+  documentation, type, and structural checks remain appropriate. Execute
+  a test immediately only for an explicitly documented safety-critical
+  correctness, security, schema, migration, provenance or publication gate
+  that cannot safely wait; record what ran and its outcome.
+- **Design (VD):** author or revise tests and review selectors/fixtures
+  statically. Do **not** execute any tests, including sanity or focused tests.
+  Link the resulting selectors to the dependent VR.
+- **Execution (VR):** run the deferred focused, browser, integration and
+  cumulative checks against a pinned revision, and verify actual results and
+  source/asset coverage. Reuse shared runs where their revision and coverage
+  match; reconcile each VR separately. A dispatched, failed, blocked or
+  required-skipped job is not a passed verification.
 
-**Test ownership:** VD owns new or revised test code and assertions;
-VR owns executing them and rerunning existing tests. Implementation
-should not conflate the two, even for a single focused test. Explicit
-immediate safety exceptions remain allowed only when deferral would
-make the implementation unsafe; document why they could not wait for
-VR. Avoid speculative VD entries with no concrete missing assertion.
-Never run a test inside the dedicated VD drain.
-
-**Scheduling — strict drain loop:** At **VD >= 5**, drain VD to zero,
-one item at a time, writing tests and linked VR obligations but **running
-no tests**. Then at **VR >= 5**, drain VR to zero, one item at a time,
-executing, inspecting and retiring each independently (reusing matching
-shared-run evidence). Recheck VD and VR; if either is again >= 5, repeat
-from VD. At all other times, continue ordinary development. Every item
-also becomes due after **7 calendar days** and before relevant mandatory
-release/merge/deployment acceptance. An incomplete or failed VR is not
-retired merely because a job was dispatched. Only while a **full test
-suite** is actually running asynchronously in the **independent Linux
-workspace** may the agent continue unrelated Windows implementation
-during an otherwise due VR drain. Record any new VD/VR obligations; when
-that full-suite run finishes, immediately resume the queue drain.
-Focused/partial Linux tests do **not** unlock this parallel-development
-exception. See the authoritative [queue rules](validation-queue.md#queue-rules).
-If remaining blocked entries cannot be cleared safely, report the
-explicitly undrained state instead of bypassing the threshold.
-
-**Never defer safety-critical checks:** migrations, schema changes,
-artifact/publication integrity, provenance, security and correctness-critical
-player-facing behavior may require direct validation at implementation time.
-Limit such exceptions to checks genuinely required to avoid an unsafe change;
-identify the specific risk and selector in the VR record. Other new and
-existing tests go through VD/VR. Deferral never waives a mandatory
-migration, integration or release-acceptance gate.
-Existing push/pull-request CI runs on its configured triggers; its checks
-are not disabled, postponed, or replaced by this local queue. Before merge,
-deploy, tagging, or release-candidate acceptance, clear all relevant VD/VR
-obligations and run the gates in `docs/ci.md` and `docs/releasing.md`.
-Unrelated post-release work must remain classified in TODO.
-
-A bounded implementation with successful **relevant immediate checks** may
-be reported as implemented, but not as fully validated if VD/VR obligations
-remain. Distinguish precisely between `implemented`, `targeted checks passed`
-and `acceptance validated`; never report an unrun test as passed. This
-respects local validation requirements without requiring an unconditional
-full-module/full-suite run after every ordinary implementation. Keep check
-evidence and deferred obligations explicit in agent handoffs. The workflow
-does not change `tools/run_checks.py`, its profiles or hosted CI execution.
+A bounded change with successful immediate checks is **implemented, pending
+validation** while VD/VR obligations remain. The queue never waives hosted
+[CI](ci.md), [release acceptance](releasing.md), or required immediate
+integrity gates. The Linux full-suite parallel-development exception and
+explicit Git handoff are specified below, under
+[parallel Windows development and Linux validation](#parallel-windows-development-and-linux-validation).
 
 **Parallel work while a test job runs:** An asynchronous test job does not
 require the agent to idle. Continue with read-only audits, source inspection,
@@ -440,16 +384,13 @@ does not itself lower the VR count.
    only named immediate safety exceptions bypass that separation.
    Record separately which immediate checks actually ran. Update
    next-unused-ID counters; do not maintain another pending-test list.
-2. If VD >= 5 (or any VD is overdue), **drain every VD individually
-   without executing any tests**. Write its tests, inspect the selectors,
-   create/update linked VR, then remove the completed VD. If VR >= 5
-   (or any VR is overdue), process **every VR individually until none is
-   open**, verifying actual results and retiring only passing entries.
-   Group compatible selectors into a shared run only where revision
-   and coverage match; inspect each affected VR separately. Failed or
-   blocked items remain open. Explicit safe Git prerequisites are
-   authorized; an unsafe handoff is a blocker, not permission to skip
-   the VR drain.
+2. Apply the queue's current [thresholds, prerequisite-design rule,
+   overdue-item handling and drain order](validation-queue.md#queue-rules).
+   Design all required VD tests **without executing any tests** before
+   their dependent VR runs. Group compatible VR selectors only where
+   revision and coverage match, and reconcile each result individually.
+   Failed/blocked items remain open; an unsafe Git handoff is a blocker,
+   never permission to skip due validation.
 3. Select the intended committed/frozen revision and verify that the
    **MCP Linux worker checkout** (not the interactive `devbox` checkout)
    has exactly that HEAD and required dependencies/source inputs. If it

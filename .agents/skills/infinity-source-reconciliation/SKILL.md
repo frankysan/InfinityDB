@@ -48,23 +48,15 @@ hand those parts to the appropriate workflow after the source semantics are clea
 7. Report the supported conclusion, unresolved conflicts, source citations, and essential
    focused validation. Do not turn a reviewed descriptive fact into an executable game mechanic
    or infer legality from a source relationship.
-8. Check the [validation queue](../../../docs/validation-queue.md) at entry
-   and closeout. If this pass changed maintained sources or associated regression
-   contracts, create VD items for concrete missing assertions and VR items for
-   deferred source-audit, cross-platform or cumulative execution, naming the
-   exact source evidence, test selectors and target commit. A pure read-only
-   investigation without pending test work needs no artificial queue entry.
-   Follow the [strict VD/VR drain loop](../../../docs/validation-queue.md#queue-rules):
-   at VD >= 5, create all required tests **without running any**; at
-   VR >= 5, execute/reconcile each to an empty queue. Prepare the
-   Linux worker with authorized explicit safe Git fetch/fast-forward.
-   **Only an actively running pinned Linux full suite** permits unrelated
-   Windows implementation during the due VR drain; a partial/focused
-   job does not. Never force or implicitly synchronize a checkout.
+8. Check the [canonical VD/VR queue](../../../docs/validation-queue.md#queue-rules)
+   at entry and closeout. For a changed maintained source or regression
+   contract, register missing assertions as VD and deferred source-audit or
+   cumulative execution as VR; pure read-only review needs no artificial
+   queue entry. Author tests only in VD without running them, and execute
+   due VR work through the [pinned Linux protocol](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
    Before moving to the next source, reconcile the reviewed V1S entry:
-   retire a fully evidenced review in the same closeout change, or
-   keep it open with its concrete unresolved action/authority. Completing
-   a source review does not resolve an unknown upstream effect.
+   retire a fully evidenced review or keep its unresolved action/authority
+   open. Completing source review does not resolve an unknown upstream effect.
 
 ## References
 

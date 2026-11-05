@@ -25,179 +25,46 @@ design contract.
 The engineering principles in `docs/architecture.md` are authoritative for
 technical design decisions.
 
-## Python environment
+## Tooling and validation
 
-Use the project virtual environment for Python tooling. Do not intentionally use
-a system Python when the project virtual environment is available.
-
-Virtual-environment interpreters are normally:
-
-- Windows: `.venv\Scripts\python.exe`
-- Linux/macOS: `.venv/bin/python`
-
-Use `tools/run_checks.py` as the standard entry point for repository checks. It
-invokes pytest, Ruff, Pyright type checking, Army data-build validation, and
-curated rules-database validation through the same Python interpreter that launched
-it. The separate `docs` stage invokes Markdownlint through a lockfile-pinned local
-npm dependency and then checks relative Markdown file/heading links offline
-using the project Python. All stages share check selection/reporting across local development
-and agent handoffs. Examples:
-
-```text
-<venv-python> tools/run_checks.py --profile code
-<venv-python> tools/run_checks.py --profile data
-<venv-python> tools/run_checks.py --all
-<venv-python> tools/run_checks.py --stage docs
-<venv-python> tools/run_checks.py --stage preflight
-<venv-python> tools/run_checks.py --stage test tests/test_availability.py
-<venv-python> tools/run_checks.py --profile code --report
-<venv-python> tools/run_checks.py --stage test --assets off
-<venv-python> tools/run_checks.py --stage test --assets required
-```
-
-With `--report` and no path, the runner writes an ignored repository-local
-`reports/CHECKS YYYYMMDD-HHMMSS.txt` file using the same run-start timestamp as
-the report header. An explicit report path overrides that convention. Requested
-stages continue after failures by default; use `--fail-fast` when appropriate.
-For `--stage docs` or `--all`, bootstrap the lockfile-pinned Node.js Markdownlint
-dependency with `npm ci --ignore-scripts --no-audit --no-fund` first (Node.js 22+).
-The docs check stage itself works offline and does not install packages.
-The `preflight` stage builds and audits a wheel, installs declared development/symbol
-dependencies in a fresh virtual environment, verifies real indexed deployment artifacts,
-and runs indexed Ruff, pytest and Pyright. It also smoke-tests the built wheel in a
-separate clean installation outside the checkout. These pip operations may download
-packages. `--all` and `--profile all`
-include this isolated validation; preflight is skipped if an earlier stage fails.
-It compares the Git **index**, not unstaged tracked edits; use it after staging the
-proposed commit. It checks
-all tracked `src/` files except explicit design-source exemptions, plus configured
-shared data-files, without substituting for installed-wheel CI. The `code`
-profile remains Python-only.
-See `docs/testing.md` for the complete contract.
+Use the project's virtual environment (normally
+`.venv\\Scripts\\python.exe` on Windows or `.venv/bin/python` on
+Linux/macOS), not system Python. The [testing guide](docs/testing.md)
+owns `tools/run_checks.py` stages, profiles, asset policy, setup,
+test dispatch, reports and preflight requirements. Use its current
+commands rather than maintaining a second command reference here.
 
 ### Backlog work selection and closeout
 
-Before an autonomous "proceed" or "next task" pass, apply the
-[V1S selection and handoff checkpoint](docs/TODO.md#v1s-work-selection-and-handoff):
-inspect **all** earlier open 1.0 slices across workstreams, choose the earliest
-actionable task unless a stated dependency/priority justifies an exception,
-and preserve a specific `Blocked:` or `Deferred:` reason and retry trigger on
-skipped open tasks. Do not treat an unclear source interpretation as a blocker
-when another bounded review is actionable. State the selected ID and earlier
-open IDs intentionally passed over with reasons; do not silently advance from
-the previous source family. Explicit user priorities can override the default
-order, but not hide dependencies or unresolved work.
+For autonomous work, apply the [V1S selection checkpoint](docs/TODO.md#v1s-work-selection-and-handoff),
+including earlier open slices and explicit blocked/deferred reasons.
+At every task boundary apply the [backlog retirement contract](docs/README.md#backlog-completion-and-retirement):
+reconcile the worked task and parent against actual evidence and VD/VR
+obligations; retire complete work in the same change, leave actionable
+incomplete work open, and record removed V1S IDs in its commit.
 
-At **every task boundary**, reconcile the previously selected V1S and owning
-parent against the [backlog retirement contract](docs/README.md#backlog-completion-and-retirement),
-current deliverables and VD/VR obligations. A finished task is retired in the
-same closeout change, not left open for a later cleanup. A partial task remains
-unchecked with a concrete next action. When retiring numbered slices, include
-all removed V1S IDs in the Git commit subject/body so completion is traceable
-without a second done-task ledger. Review the final TODO diff before selecting
-another task. This task-status gate is **separate** from, and does not weaken,
-the validation-queue drain loop below.
+### Phased validation and task-boundary checkpoint
 
-### Phased validation workflow
+The [active VD/VR queue](docs/validation-queue.md#queue-rules) is the sole
+authority for design/execution thresholds, drain order, due dates, linked
+dependencies, and retirement evidence. **Check it before ordinary
+implementation, at every task boundary, and at closeout**. Design due VD
+tests without running them; execute and reconcile due VR work separately.
+Register concrete missing regression designs and each distinct changed
+behavior's deferred execution before reporting an implementation complete.
+Report counts, oldest due/blocked entry, and intended execution host.
+Do not call unrun tests passed or claim a task accepted while its required
+validation is pending.
 
-Follow the [strict VD/VR drain loop](docs/validation-queue.md#queue-rules)
-**before beginning any ordinary implementation task and at each boundary**:
-when VD >= 5, design **every VD one at a time to an empty queue**,
-writing tests and linked VR obligations but **running no tests**.
-Then when VR >= 5, execute/reconcile **every VR one at a time to an empty
-queue**, retiring only fully verified entries. Recheck both thresholds
-and repeat if either is >= 5. Five is the drain trigger, **not** a
-target count after dispatch; dispatch alone never retires a VR.
-Seven-day-old items and mandatory security, correctness, CI or release
-gates remain due irrespective of counts. If an unresolved blocker prevents
-emptying a due queue, report it and leave the due work explicitly open.
-
-Separate **implementation**, **VD test creation**, and **VR test
-execution**. Ordinarily record new concrete regression requirements as VD,
-rather than writing/running them in implementation. A VD pass **only
-creates or edits tests, reviews their selectors and updates corresponding
-VR entries**; no focused sanity tests, module tests or full suites run
-in VD. VR owns those executions and existing-test reruns. Essential
-security, schema, migration, provenance and publication-integrity gates
-may run immediately when postponement would be unsafe; document the
-specific exception. Do not let routine focused testing bypass VD.
-
-Record further concrete regression requirements as VD items; record existing
-tests, broader modules and integrated/full-suite checks deferred for each
-distinct change as VR items, with exact selectors, revision and immediate
-evidence. **This is a mandatory closeout checkpoint for every implementation
-pass, including a data-only or source-curation change:** examine
-`docs/validation-queue.md`, add or update outstanding VD/VR obligations
-*before* reporting the task complete, and state the current queue counts,
-oldest due item and intended execution host. Passing focused local tests
-does not implicitly discharge deferred full-suite, browser, integration
-or cross-platform validation. If nothing remains deferred, explicitly
-record that decision in the handoff rather than adding an empty item.
-In VD, retire an entry only after its test design is complete **without
-running any tests** and its VR execution obligation is recorded. In VR,
-execute/reconcile each item and retire only after verifying terminal results
-against the intended revision; failures remain open. A shared full-suite run
-can provide evidence for several VR entries, but retire them individually.
-**Only while a full test suite is actually running asynchronously on the
-independent Linux worker may unrelated Windows development proceed during
-a due VR drain.** Focused/partial Linux runs, a scheduled but unstarted job,
-or merely dispatching a job do not grant this exception. Return to the VR
-drain when the full suite finishes. This does not weaken critical or CI/
-release checks.
-
-Prefer asynchronous Linux (`worker="linux-dev"`) jobs for broader tests
-when the dedicated Linux checkout has the intended code, dependencies and
-source evidence. Verify the generated ignored deployed-object publication
-is present and reproducible **before** a cumulative Linux suite; matching
-Git HEADs alone cannot supply ignored artifacts. Windows implementation
-may continue concurrently because
-its checkout is separate. The interactive Linux checkout is also separate
-from the MCP worker checkout. Require/record the Linux `expected_commit`
-for a specific revision; associate every result with its actual revision,
-asset state and skip reasons. Never infer that an earlier Linux run validates
-subsequent Windows edits or silently skip missing dependencies.
-
-**Full-suite dispatch-and-continue exception:** while a pinned
-`linux-dev` **full-suite** test job runs, work on unrelated Windows
-development or VD design is permitted; commit and record its new
-obligations separately. This does not mark the executing VRs complete.
-When the full-suite job terminates, stop unrelated implementation and
-resume draining the queue. For a focused or partial Linux test job,
-remain in VR-processing mode. Do not repeatedly poll without reason;
-check at useful task boundaries. Linux validates only its pinned snapshot.
-Read-only review, analysis, planning and triage remain appropriate
-when the next implementation cannot safely proceed. Do not mutate
-inputs or artifacts visible to the running **Linux** tests; use a
-separate worktree for concurrent edits on the same host. **For a due
-validation batch, the approved handoff includes agent-initiated, safe
-Git synchronization:** verify a committed Windows test revision, then
-fetch and fast-forward the matching `dev/v1.0.0` branch on `linux-dev`
-using distinct bounded Git tool calls, without requiring another user
-prompt. An already-published Windows revision needs no push. Refuse
-divergence, dirty checkouts, unexpected branches, and non-fast-forward
-updates; never reset, force-push, rebase or change the interactive
-Linux checkout. Under the user's standing authorization, the agent
-may also stage only validated, task-related files, create conventional
-commits, and fast-forward push the intended development branch; these
-are distinct, inspected Git operations, not background mirroring.
-Do not deploy, publish a release, change branches, or use destructive
-Git operations without separate authorization. Syncthing staging is
-not checkout synchronization. See
-[parallel Windows/Linux validation](docs/testing.md#parallel-windows-development-and-linux-validation).
-
-Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
-tools in isolation, and package installation still runs through the virtual-environment
-Python, for example:
-
-```text
-<venv-python> -m pytest tests/test_specific.py -q
-<venv-python> -m ruff check path/to/file.py
-<venv-python> -m pyright
-<venv-python> -m pip install ...
-```
-
-Local developer wrappers or command-launching tools may be used, but repository
-instructions must not depend on a particular user's machine configuration.
+The [testing guide](docs/testing.md#phased-development-and-validation)
+owns immediate safety-check exceptions, test selection and reports.
+Its [Linux dispatch protocol](docs/testing.md#parallel-windows-development-and-linux-validation)
+owns explicit safe Git preparation, pinned asynchronous test execution,
+input/artifact verification and the narrowly scoped Windows-development
+exception while a full Linux suite is **actually running**. Hosted
+[CI](docs/ci.md#agent-ci-monitoring-and-repair) and
+[release acceptance](docs/releasing.md) remain independent. Never use a
+partial Linux run or job dispatch as permission to bypass a due drain.
 
 ## Repository access and change delivery
 
@@ -286,164 +153,43 @@ normal local working tree:
 
 ## Post-push hosted CI follow-through
 
-After each authorized development-branch push, record the **full commit
-SHA** and any available CI run IDs, then **continue independent Windows
-development immediately**. Do not wait or repeatedly poll for CI after
-each commit; inspect outstanding runs at natural task boundaries and
-after due full local/Linux validation. Follow
-[the CI monitoring and repair protocol](docs/ci.md#agent-ci-monitoring-and-repair)
-for Source checks, Installed wheel smoke, and Deployment smoke test,
-including required matrix and dependent jobs. Newer commits may
-supersede pending runs, but investigate older failures when they
-remain relevant to the current code. A green local suite is not hosted
-acceptance; queued, missing, skipped or still-running checks are not
-successes. Require terminal hosted acceptance only at an actual
-merge, release or other explicitly mandatory gate.
-
-**The user authorizes autonomous CI fixes.** Retrieve failed job and
-step logs, identify the first actionable error, make a focused fix with
-essential regression checks, commit and fast-forward push safely, then
-record the replacement SHA for non-blocking monitoring. Report failures
-and resolutions with run links and precise outcomes. Do not weaken CI, rerun deterministic
-failures instead of correcting them, overwrite unrelated work or
-attribute an older run to the new revision. Escalate external,
-access, source-authority or unsafe-Git blockers without claiming
-acceptance. This is active-session follow-through, not an unattended
-background notification service.
+Follow the [CI monitoring and repair protocol](docs/ci.md#agent-ci-monitoring-and-repair)
+after authorized pushes: record the exact SHA and available runs, inspect
+statuses at task boundaries rather than waiting for each run, and
+autonomously repair actionable repository failures with a focused,
+validated and safely pushed fix. Do not treat local success, incomplete
+CI or an older commit's result as hosted acceptance. External,
+source-authority or unsafe-Git blockers require explicit escalation;
+actual merge/release gates still require terminal results.
 
 ## Documentation and project tracking
 
-### Changelog discipline
+Follow the [documentation map and ownership rules](docs/README.md).
+Update the canonical current-state owner for changed behavior, with
+planned or unimplemented contracts clearly labelled. The
+[backlog](docs/TODO.md) owns unfinished work and its V1S selection rules;
+[retirement](docs/README.md#backlog-completion-and-retirement) requires
+the corresponding acceptance evidence and same-change closeout.
+Use the [release-note writing rules](docs/releasing.md#3-prepare-release-notes-and-metadata)
+for substantive user/operator outcomes; do not add entries for
+internal-only tests, refactors or process updates.
 
-`docs/CHANGELOG.md` is the canonical release history and should be written so it can also serve as the source for the user-facing **What's changed** page.
+Review the actual diff for documentation impact, update public
+`README.md` for user-visible capabilities or setup, and use canonical
+[project-domain labels](docs/project-domains.md) for new/revised
+documentation. An actual release requires the complete
+[release and project-wide documentation audit](docs/releasing.md).
+Do not duplicate active task lists, reference semantics or operational
+instructions in agent guidance.
 
-Record **meaningful release outcomes**, not a detailed implementation history. Prefer describing what was added, what behaves differently, what was fixed, or what an operator must do when upgrading.
+## Source-reference safeguards
 
-When adding or consolidating changelog entries:
-
-- Write from the perspective of a user or operator of InfinityDB.
-- Describe the resulting capability, behavior, correctness improvement, or upgrade consequence rather than the implementation steps that produced it.
-- Consolidate related engineering changes into a single outcome-oriented entry where they form one coherent improvement.
-- Begin every nonempty release with a `Player summary` section. Keep it concise and include only changes that are visible or directly useful to players; use `No player-facing changes.` when a release has operator-only changes. The browser publishes this section openly and keeps the fuller release detail collapsed by default. A completely empty `Unreleased` section may be left as a bare heading (or an empty Player summary) and must not appear on **What's changed**. A lone `No player-facing changes.` placeholder without detailed entries also counts as empty; released versions must still contain notes.
-- Keep `Added`, `Changed`, and `Fixed` as the normal detailed categories. Use an `Upgrade notes` section when a release requires an explicit action such as rebuilding generated databases.
-- Keep wording understandable without requiring knowledge of InfinityDB's internal architecture, build pipeline, CI setup, or implementation tools.
-- Retain technical terminology only when it identifies a meaningful user-visible concept or is necessary for an operator to act on the change.
-- Prefer concise entries. A release should communicate its important changes without becoming an inventory of commits.
-
-Normally omit standalone changelog entries for:
-
-- version-number or release-metadata updates;
-- schema or compatibility revision numbers when the only important consequence is that generated data must be rebuilt;
-- linting, formatting, type-checking, or test-coverage work;
-- internal refactors with no externally meaningful behavioral change;
-- query plans, indexes, batching strategies, or other implementation-level performance work when these can instead be summarized as a performance improvement;
-- cache-busting, asset fingerprints, or similar implementation details unless they directly fix a user-visible problem;
-- CI workflow details, validation mechanics, acceptance-test milestones, or individual regression tests;
-- exact tool or script names unless users or operators interact with them directly;
-- project-management milestones whose durable outcome is already described elsewhere in the release notes.
-
-Detailed implementation history should remain available through Git history, architecture and data-model documentation, deployment documentation, manifests, generated reports, and tests rather than being duplicated in the changelog.
-
-Before finalizing a release, review the complete `Unreleased` section as a whole rather than only promoting individual accumulated entries. Merge overlapping entries, remove implementation-only details, and ensure the resulting release notes tell a concise and coherent story of the release.
-
-Before finalizing **any release**, follow the canonical checklist in `docs/releasing.md`. A project-wide documentation audit is a mandatory release gate: review the complete maintained documentation corpus, not only files changed since the previous release, and correct stale current-state claims before tagging. Version-specific release requirements may add gates but do not replace this process.
-
-- Update `docs/architecture.md` when changing architectural boundaries,
-  engineering principles, or lasting design decisions.
-- Update `docs/data-model.md` when changing documented data semantics or
-  persistence structure.
-- Update `docs/AI_CONTEXT.md` when introducing a durable, non-obvious project
-  invariant or development constraint.
-- Add identified future work to `docs/TODO.md`.
-- For 1.0 work, select a ready, numbered item from the
-  [pre-planned execution slices](docs/TODO.md#pre-planned-10-execution-slices),
-  then check the owning parent and its acceptance conditions. Do not routinely
-  subdivide a parent during implementation when an existing slice covers the
-  work. Add another slice only for source-confirmed new scope or a demonstrated
-  dependency, preserving a bounded outcome and validation gate. Retire completed
-  slices using the same active-backlog rules as their parents. Planning units
-  are relative workload indicators, not elapsed-time or completion promises.
-- Follow [backlog completion and retirement](docs/README.md#backlog-completion-and-retirement)
-  at every task closeout. A checkmark means the entire task subtree, required
-  acceptance and documentation handoff are complete. Reopen affected tasks and
-  checked ancestors before adding or correcting work; put genuinely new scope
-  in a separate open entry. Remove completed tasks after documenting outcomes,
-  or reduce a completed child of an open parent to brief linked context.
-- Record meaningful changes under `Unreleased` in `docs/CHANGELOG.md`.
-  Do this as part of the work that delivers the outcome, not as a deferred
-  release-preparation task. Before reporting a substantive task complete,
-  review its actual diff for documentation impact: update the canonical
-  behavior/design owner, `Unreleased` if users or operators experience a
-  meaningful change, and `docs/TODO.md` only for remaining work. If a change
-  is internal-only and warrants no changelog entry, explicitly state that
-  decision in the handoff instead of adding implementation noise.
-- Label new or materially revised change/feature/design/backlog documentation with
-  its canonical project domain. Use the exact labels and multi-domain rules from
-  `docs/project-domains.md`; do not invent near-synonyms.
-- Update `README.md` for user-visible behavior, setup, or major capabilities.
-- When changing the Army database schema or compatibility revision, update all
-  documented current schema/compatibility values and related rebuild guidance in
-  the same change.
-
-Do not duplicate canonical documentation unnecessarily; link to the
-authoritative document instead.
-
-### Documentation status discipline
-
-Keep implementation status explicit throughout the documentation corpus:
-
-- **Current design/behavior** describes what the repository and application do
-  now. Unqualified statements in reference documentation should normally mean
-  current behavior.
-- **Design direction** describes an accepted architectural decision or intended
-  boundary that is not fully implemented yet. Label it explicitly; do not write
-  it as though the corresponding files, schema fields, tooling, or runtime
-  behavior already exist.
-- **Planned/unimplemented work** belongs in `docs/TODO.md`. Architecture and
-  data-model documents may explain the intended shape and rationale, but should
-  point to the backlog instead of maintaining a second task list.
-
-When one topic has both a current implementation and a future design, separate
-them with explicit headings or wording. Do not silently rewrite legacy source or
-curated data to match a future contract; document the current limitation and
-track the migration until the responsible implementation is changed.
-
-## Local rules reference
-
-User-supplied PDFs and wiki snapshots under `data/` may be used as research
-sources for rules-aware features and data review. They are not inputs to the
-Infinity Army merge/normalization/build pipeline.
-
-When deriving structured facts from these materials:
-
-- record source version/date and printed-page citations for PDFs;
-- preserve the wiki source identity actually available to the current curated
-  contract. Archived sources use the exact timestamped ZIP path/hash, acquisition
-  metadata, and snapshot-local member; pinned `oldid=` revisions remain URL-backed
-  when they are not members of that archive;
-- keep core rules, FAQ/errata, ITS season material, and historical sources
-  distinct;
-- treat dated official Corvus Belli news/rules-update posts as supplementary
-  publication-change evidence, with their URL/date and scope recorded; do not
-  substitute a blog changelog for the versioned rules PDF, FAQ, or Army data;
-- for N5 questions, cross-check the pinned Army, rules/FAQ/annex, exact Wiki
-  revision, relevant official update posts, and available historical N5 versions;
-  use `docs/n5-source-history.md` for the source timeline and reconciliation policy;
-  keep official current authority distinct from unofficial historical backups;
-- do not bulk-extract or serve copyrighted text or artwork.
-
-Official Infinity Army data and current official publications remain
-authoritative where they supersede archived local material.
-
-When curating material player-facing rules interactions, follow the explanation standard in
-`data/curated/README.md#explaining-rules-interactions`: make conditions, baseline mechanic,
-modifying rule, explicit exceptions, outcome, and source certainty understandable to players.
-Do not mark an interaction adequately explained solely because its result or relation is correct.
-The browser presentation target is in `docs/web-design-guidelines.md`.
-
-Maintained rules prose must use the semantic maintained-text token syntax whenever it names an
-existing supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program,
-or Attribute. The pre-token migration is complete: reviewed batches reject newly authored plain
-semantic candidates. Do not weaken or expand reviewed-plain exceptions merely to make an audit
-pass. Link a clear reference; use an explicit `review-needed` marker when the meaning is genuinely
-ambiguous.
+For rules/Army/FAQ/Wiki source reconciliation, use the
+[source-reconciliation skill](.agents/skills/infinity-source-reconciliation/SKILL.md),
+the [N5 source-history policy](docs/n5-source-history.md), and the
+[curated explanation contract](data/curated/README.md#explaining-rules-interactions).
+Preserve exact source version, provenance, scope and uncertainty. Research
+PDFs/Wiki archives are not implicitly Army pipeline inputs; consult
+[data lifecycle ownership](data/README.md). Do not bulk-reproduce
+copyrighted text or artwork or silently promote an inferred interpretation
+into a verified rule.

@@ -29,7 +29,7 @@ IDs here and link the owning task instead of duplicating its description.
   publication gate.
 - Design items are `VD-0001`, `VD-0002`, etc. Each ID is one independently
   actionable test requirement, not one test function or a speculative idea.
-  Count open `needs-design` IDs toward the **5-requirement design threshold**.
+  Count open `needs-design` IDs toward the **3-requirement design threshold**.
 - Execution items are `VR-0001`, `VR-0002`, etc. Each item represents one
   distinct implementation change awaiting deferred verification, including
   changes whose required test design is unfinished. Count distinct open
@@ -37,19 +37,23 @@ IDs here and link the owning task instead of duplicating its description.
   the **5-change execution threshold**. Combine multiple checks for the same
   change under one VR item. Link any blocking VD IDs.
 - **Strict drain loop (check at every work boundary):**
-  1. If **VD >= 5**, process VD entries **one at a time until no open VD
-     remains**. Write or revise the required tests and create/update their
-     linked VR entries, but **do not execute any tests**. When VD is empty,
-     proceed to the VR check.
-  2. If **VR >= 5**, process VR entries **one at a time until no open VR
-     remains**, verifying the exact tests, state and acceptance evidence for
-     each. Shared full-suite results may satisfy several entries, but review
+  1. If **VD >= 3**, process **all open VD entries to zero**, one at a
+     time. Otherwise, process any VD due by age or a mandatory gate.
+     Write/revise the tests and link them to VR, but **run no tests**.
+  2. If **VR >= 5** or any VR is due by age or a mandatory gate, first
+     complete **all open VD prerequisites** of those due VR entries,
+     even when VD is below 3. A blocked VD leaves its dependent VR
+     blocked; never bypass the prerequisite.
+  3. If **VR >= 5**, execute and reconcile **all open VR entries to zero**,
+     one at a time. Otherwise, process VR entries due by age or gate.
+     Shared full-suite results may satisfy several entries, but review
      and retire each independently. **Dispatch is not completion**.
-  3. Recount both queues. If either has reached 5, return to step 1.
-     Otherwise ordinary implementation can resume.
-  The threshold is a trigger for draining to **zero**, not permission to
-  resume as soon as the count falls below 5. Never start another ordinary
-  implementation pass while a due queue is idle or running focused VR work.
+  4. Recount both queues and check overdue/gated entries. If VD >= 3 or
+     VR >= 5, restart at step 1; otherwise resume ordinary implementation
+     only after all individually due work is handled.
+  Reaching a numeric threshold triggers a drain to **zero**, not a pause
+  when the count falls below its threshold. Never start ordinary
+  implementation while due queue work is idle or running focused VR tests.
   **Exception:** while an actual full test suite is running asynchronously on
   a pinned, independent `linux-dev` checkout, unrelated Windows development
   may continue. Its new VD/VR obligations still enter the queue, and the

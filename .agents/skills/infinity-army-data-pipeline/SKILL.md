@@ -37,33 +37,17 @@ For source meaning or rules conflicts, first establish the evidence with
 5. If changing a schema, compatibility contract, or runtime artifact, identify all consumers,
    migration/rebuild guidance, and current documented values. Update the canonical owner and
    relevant user/operator guidance in the same change.
-6. Specify concrete source-to-output parity, stale/mismatched-input and
-   deterministic-artifact regressions as VD items; **write these tests
-   in the VD drain without executing any tests**, then verify under VR.
-   Only an explicitly urgent artifact/provenance/schema integrity gate
-   remains immediate during implementation.
-7. Follow the [strict VD/VR drain loop](../../../docs/validation-queue.md#queue-rules)
-   before implementation. At VD >= 5, write linked tests until VD is empty,
-   **running none**. At VR >= 5, execute/reconcile entries individually
-   until VR is empty. A Linux **full-suite run in progress** uniquely permits
-   independent Windows development; focused/partial jobs do not.
-   Use `tools/run_checks.py --profile data` only as required by a due
-   VR or immediate integrity gate; never imply an unrun test passed.
-8. Inspect [the validation queue](../../../docs/validation-queue.md) before
-   and after the pass. Add VD items for concrete additional regressions and a
-   VR item for each distinct change needing deferred modules, integration,
-   cross-platform, or cumulative tests, with source snapshot/asset requirements
-   and exact selectors. Prefer pinned asynchronous
-   [Linux execution](../../../docs/testing.md#parallel-windows-development-and-linux-validation)
-   after safe, validation-triggered Git fetch/fast-forward of the
-   committed Windows revision onto the dedicated MCP worker checkout.
-   This handoff is already authorized when tests are due; do not ask
-   again for ordinary safe synchronization, force a divergent checkout,
-   or interrupt independent Windows development **during an actual
-   Linux full-suite run**. Focused/partial jobs do not suspend the
-   VR drain. Do not retire items based on unrelated/skipped coverage.
-9. Summarize changed inputs/contracts, generated consequences, immediate
-   results, queued obligations, and any unresolved data. Do not update pinned
+6. Register missing source-to-output parity, stale/mismatched-input and
+   determinism assertions as VD, plus each change's deferred verification as
+   VR, with exact selectors and source/asset requirements. Only an explicitly
+   urgent schema, provenance or artifact-integrity check runs immediately.
+7. At task boundaries, follow the [canonical VD/VR queue rules](../../../docs/validation-queue.md#queue-rules)
+   and the [pinned Linux execution protocol](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
+   During VD author/review tests **without running them**; VR owns execution,
+   result reconciliation and retirement. Never treat a dispatched or skipped
+   test as passed, or change a worker checkout implicitly.
+8. Summarize changed inputs/contracts, generated consequences, immediate
+   results, queued obligations, and unresolved data. Do not update pinned
    source artifacts or publish acquisition output unless explicitly required.
 
 ## References

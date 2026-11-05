@@ -320,8 +320,10 @@ stable entry point; do not add a CSS build step or link the source parts directl
 - Database exporters explicitly begin schema/data write transactions after deterministic connection
   configuration. A SQLite connection context manager alone does not group schema DDL; rules-schema
   `executescript` must begin inside its script. Preserve validation, finalization and atomic publication.
-- `tools/run_checks.py` is the canonical local orchestrator. For ordinary patch work, focused tests
-  are appropriate; the full release gate is run explicitly by the maintainer/CI when required.
+- `tools/run_checks.py` is the canonical local orchestrator. Test design and
+  execution follow the [active VD/VR queue](validation-queue.md#queue-rules);
+  focused tests are immediate only for an explicitly justified safety-critical
+  exception or when VR is due. Mandatory CI and release gates remain separate.
 - Required hosted CI covers source/build checks, cross-platform deterministic outputs, installed
   wheel behavior, and deployment smoke. See `docs/ci.md` for current workflow/ruleset details.
 - A release requires a project-wide documentation audit, release-matched runtime artifacts, hosted

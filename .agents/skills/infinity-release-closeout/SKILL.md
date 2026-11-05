@@ -43,18 +43,12 @@ closeout and release readiness, not the feature itself.
 5. Update `README.md` for user-visible behavior, setup, or major capabilities. Update architecture,
    data-model, AI context, or TODO only when the change affects the responsibilities those documents
    own. Check current schema/compatibility values and rebuild guidance together when either changes.
-6. Inspect [the active validation queue](../../../docs/validation-queue.md)
-   before and after closeout. Confirm each implementation change has its
-   essential checks recorded and concrete missing test designs (VD) or
-   deferred broader executions (VR) registered, with selectors, evidence
-   requirements and exact commit. A green focused suite is not a reason to
-   omit a full-suite or cross-platform obligation still due. Check the
-   [strict five-item/seven-day drain loop](../../../docs/validation-queue.md#queue-rules):
-   VD >= 5 means design all tests to an empty VD queue **without executing
-   tests**; then VR >= 5 means execute/reconcile entries individually until
-   VR is empty. Retire only items with verified terminal evidence.
-   Unrelated Windows development is permitted during an **actively running
-   pinned Linux full suite**, not focused/partial Linux test jobs.
+6. Inspect the [active VD/VR queue](../../../docs/validation-queue.md#queue-rules)
+   before and after closeout. Register any concrete missing test design and
+   each change's deferred execution with selectors, source/asset coverage and
+   exact revision. Apply the canonical scheduling, prerequisite-design and
+   retirement rules rather than maintaining another threshold description.
+   Never infer broader or hosted acceptance from focused test success.
 7. Run the smallest necessary documentation and immediate code checks from
    [phased development checks](../../../docs/testing.md#phased-development-and-validation).
    Reuse verified focused results rather than repeating entire modules.

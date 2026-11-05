@@ -44,30 +44,19 @@ change, use [Army data pipeline](../infinity-army-data-pipeline/SKILL.md).
 5. Implement the smallest complete slice. Preserve exact source/profile/mode identity, ordering,
    scope, citations, and unknown/disputed status. Do not imply a legal roster, deployed state, or
    calculated game outcome unless the maintained contract explicitly supports it.
-6. Register concrete boundary tests (source/config, deterministic export,
-   API, resolver, browser, parity and failure cases) as VD. **Create/edit
-   them during the VD drain but do not execute any tests then**. Existing
-   reruns and newly designed tests execute during VR.
+6. Specify concrete source/config, export, API, resolver, browser,
+   parity and negative-case assertions as VD; record this change's deferred
+   execution (including existing tests) as VR. Tests are authored/reviewed
+   **without execution** in VD; VR owns execution and evidence.
 7. For browser-facing changes, follow [browser acceptance](../infinity-browser-acceptance/SKILL.md).
-   Honor the [strict VD/VR drain loop](../../../docs/validation-queue.md#queue-rules)
-   before ordinary implementation. Immediate tests are exceptional and
-   require a named safety-critical reason; inspect the diff for missing
-   documentation owners and changed behavior.
-8. **Before implementation and at closeout**, inspect the
-   [active validation queue](../../../docs/validation-queue.md). Register missing
-   additional test design as VD and deferred integration/browser/module/full-suite
-   execution for this change as VR, with exact selectors and target revision.
-   Do not treat targeted green tests as completion of broader verification.
-   Batch due VR items on the pinned asynchronous Linux worker when prepared,
-   following the [Windows/Linux handoff](../../../docs/testing.md#parallel-windows-development-and-linux-validation).
-   When due, perform the separately invoked safe Git handoff steps
-   agentically and pin the worker revision. Independent Windows
-   implementation may continue **only while a full Linux suite is
-   actually running**; focused/partial jobs do not suspend the VR
-   drain. Do not force Git changes or hide skipped coverage;
-   retire only verified entries. Before selecting another slice, reconcile
-   the worked V1S and parent: retire fully verified work in the same
-   closeout change, otherwise retain a concrete open action.
+   Follow the [canonical queue rules](../../../docs/validation-queue.md#queue-rules)
+   before implementation and at closeout. Pin Linux runs using the
+   [Windows/Linux validation protocol](../../../docs/testing.md#parallel-windows-development-and-linux-validation);
+   never force Git handoff, hide skipped coverage, or treat dispatch as success.
+8. Before selecting another slice, reconcile the worked V1S and parent:
+   retire fully verified work in the same closeout change, otherwise retain
+   a concrete remaining action or blocked dependency. Update only the
+   canonical documentation owners for changed behavior.
 
 ## References
 
