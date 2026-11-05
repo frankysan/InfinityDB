@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Fireteam rules and contextual State help now link both ways for
+  Suppressive Fire, Retreat! and the Ancillary-specific Disconnected exception.
 - Skill and Equipment details link reviewed, source-exact variants to their
   Army-specific Unit profile or loadout context when a matching variant-usage
   publication is available. Unreviewed and unassigned shared Unit options remain

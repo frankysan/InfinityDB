@@ -15356,7 +15356,8 @@
                 "clarifications": [
                     "If the [[skill:peripheral|Peripheral]] became Disconnected because its Controller was [[state:isolated|Isolated]] or in a Null condition, the [[skill:peripheral|Peripheral]] reconnects automatically when that Controller recovers from the triggering condition.",
                     "If the cause was a failed Coherency Check, passing a Coherency Check at the end of an Order or ARO automatically cancels Disconnected. If the cause was an Attack, scenery or scenario rule applied to the [[skill:peripheral|Peripheral]], [[skill:engineer|Engineer]] (or an equivalent Skill) can cancel it with the required contact and successful Roll. These are separate recovery routes.",
-                    "[[rule:peripheral-type:synchronized|Synchronized]] and [[rule:peripheral-type:control|Control]] [[skill:peripheral|Peripherals]] can reconnect after their subtype's Coherency Check. A [[rule:peripheral-type:cyberplug|Cyberplug]] whose Controller enters [[state:isolated|Isolated]] or a Null condition changes to Autonomous instead of becoming [[state:disconnected|Disconnected]]."
+                    "[[rule:peripheral-type:synchronized|Synchronized]] and [[rule:peripheral-type:control|Control]] [[skill:peripheral|Peripherals]] can reconnect after their subtype's Coherency Check. A [[rule:peripheral-type:cyberplug|Cyberplug]] whose Controller enters [[state:isolated|Isolated]] or a Null condition changes to Autonomous instead of becoming [[state:disconnected|Disconnected]].",
+                    "[[rule:fireteam-general|Fireteam General Rules]] allow an [[rule:peripheral-type:ancillary|Ancillary]] Controller to retain Fireteam membership while its Ancillary is undeployed, [[state:disconnected|Disconnected]], or Null. This exception ends when the Ancillary deploys or that Disconnected/Null condition is canceled; the Controller then leaves, and a departing Team Leader cancels the Fireteam. Other [[skill:peripheral|Peripheral]] Controllers do not gain this exception."
                 ]
             },
             "labelIds": [
@@ -15386,6 +15387,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 107,
                     "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 134,
+                    "section": "Fireteam Integrity and Fireteam Order"
                 }
             ],
             "review": {
@@ -20493,7 +20499,8 @@
                 ],
                 "clarifications": [
                     "[[state:retreat|Retreat! State]] ends when the army leaves the [[rule:army-retreat|Retreat!]] situation at the beginning of its Player Turn. Alternatively, spending a Command Token cancels Retreat! for one Trooper; that Trooper ignores the condition for the rest of the game.",
-                    "Entering Retreat! removes Marker conditions, [[state:holoecho|Holoecho]], and [[state:holomask|HoloMask]]; this is not the same as permitting one Trooper to ignore Retreat! by spending a Command Token."
+                    "Entering Retreat! removes Marker conditions, [[state:holoecho|Holoecho]], and [[state:holomask|HoloMask]]; this is not the same as permitting one Trooper to ignore Retreat! by spending a Command Token.",
+                    "Under [[rule:fireteam-general|Fireteam General Rules]], Retreat! also cancels a Fireteam. This is a team-level consequence, distinct from a Command Token exception that cancels [[state:retreat|Retreat! State]] for one Trooper."
                 ]
             },
             "labelIds": [],
@@ -20541,6 +20548,11 @@
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 174,
                     "section": "Retreat! State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 134,
+                    "section": "Fireteam Integrity and Fireteam Order"
                 }
             ],
             "review": {
@@ -20628,7 +20640,7 @@
                 ],
                 "clarifications": [
                     "This condition ends when the Trooper declares an Order; declares an ARO other than [[skill:bs-attack|BS Attack]] with its SF Mode weapon; uses a weapon without the [[trait:suppressive-fire|Suppressive Fire]] Trait; or fails a Guts Roll.",
-                    "It also ends if the Trooper enters [[state:engaged|Engaged]], [[state:isolated|Isolated]], [[state:retreat|Retreat!]], a Null or Immobilized condition, or another condition that cancels this condition; if its army enters Loss of [[skill:lieutenant|Lieutenant]]; or if the Trooper joins a Fireteam.",
+                    "It also ends if the Trooper enters [[state:engaged|Engaged]], [[state:isolated|Isolated]], [[state:retreat|Retreat!]], a Null or Immobilized condition, or another condition that cancels this condition; if its army enters Loss of [[skill:lieutenant|Lieutenant]]; or if the Trooper joins a [[rule:fireteam-general|Fireteam]].",
                     "Failing a [[rule:guts-roll|Guts Roll]] cancels this condition."
                 ]
             },
@@ -20647,6 +20659,11 @@
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 167,
                     "section": "Suppressive Fire State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 136,
+                    "section": "Fireteams and Close Combat / Suppressive Fire"
                 }
             ],
             "review": {
