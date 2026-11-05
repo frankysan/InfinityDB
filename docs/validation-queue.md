@@ -152,31 +152,7 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-- [ ] VR-0097 (2026-11-05; ready-to-run): V1S-069 contextual
-  State/Fireteam reciprocal navigation. VD-0040–0042 were statically
-  reviewed and retired without tests. Selectors:
-  `tests/test_verify_contextual_state_fireteam_browser.py`, plus existing
-  `tests/test_state_catalog.py::test_every_current_state_reaches_published_api_and_player_template`
-  after guarded paired-artifact promotion. The new cases cover three
-  cited State prose links, unchanged typed relations, curated-export API
-  tokens and actual State -> Fireteams -> State navigation at
-  1440/390/320 px. Immediate: rules export, interaction audit, Ruff,
-  Pyright, docs, backlog and diff checks green. A guarded v9 rules/
-  deployed-object pair was staged and promoted on Windows using the
-  existing release publisher; logical drift was limited to three State
-  records, three citations and SQLite statistics. The published rules DB
-  matches its curated rebuild byte-for-byte. On the independent Linux
-  checkout, explicitly regenerate the ignored paired deployed-object
-  and variant-usage publications after Git fast-forward. Execute the
-  pinned test selectors with required assets; the final frozen release
-  rebuild remains V1S-084. First Linux run
-  `linux-dev:25b11ea40d9f4d20b78a327482d4981b` on `650c233a`
-  passed seven tests (source/API plus two desktop paths), failed seven
-  browser cases solely due to the test choosing a hidden navigation-menu
-  link at narrow widths and double-clicking during an asynchronous
-  document navigation. Corrected the harness to select visible maintained
-  reference links and wait after a single desktop click; rerun is pending.
-  Outcome: verification incomplete.
+No open deferred-execution obligations.
 
 ## Next unused IDs
 
