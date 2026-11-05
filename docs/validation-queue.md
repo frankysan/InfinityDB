@@ -173,6 +173,12 @@ summary above. Hosted CI and final release gates retain separate owners.
   catalog aliases/search matching are corrected. On Windows, the exact failing
   API selector and all three new browser widths passed (4/4, no skips) against
   the corrected working tree. Linux cumulative acceptance remains outstanding.
+  Full suite at `b3e65759`: 5,292 passed, 1 failed, 29 expected skips; the only
+  failure is the stale 820 source-section expectation after adding Special
+  Terrain's p. 145 citation (now 821). Correct the explicit fixture and assert
+  that owner's two locators without granting whole-record approval; rerun the
+  cumulative suite at the corrected revision, including the later keyboard and
+  scenario pipe-capture fixes.
 - [ ] VR-0100 (2026-11-05; ready-to-run): V1S-077 suggested-terrain table renderer
   and Gate-label navigation. Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects);
   revision: implementation `85e9e0f`; risk: medium.

@@ -158,11 +158,13 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         "selectedBrowserTestAnchors": 36,
         "currentIdentitiesWithLaterEvidence": 56,
         "wholeRecordApprovals": 0,
-        "pendingSourceSections": 820,
+        # V1S-077 adds the explicit p. 145 terrain-suggestions source locator.
+        "pendingSourceSections": 821,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}
     assert len(historical) == 367 and len(current) == 466
+    assert current["rule:special-terrain"]["sourceLocatorCount"] == 2
     assert {row["historicalTier"] for row in historical.values()} == {"D", "S"}
     assert all(row["fullRecordAcceptance"] == (
         "not-approved-by-identity-or-evidence-join"
