@@ -152,12 +152,23 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-No open deferred-execution obligations.
+- [ ] VR-0096 (2026-11-05; ready-to-run): Verify full V1S-066 cross-Army
+  exact-variant publication and ordinary-browser source-pair gate.
+  Work: [V1S-066](TODO.md#rules-and-contextual-reference-completion);
+  implementation base `2adb9145`; test-design revision pending.
+  VD-0037–0039 were statically reviewed and retired without running tests.
+  Execute `tests/test_verify_variant_usage_publication_browser.py` on a pinned
+  Linux checkout with an explicitly generated and checked ignored
+  `data/generated/variant-usage.json`. It covers deterministic publication/API
+  parity, all published row keys versus unresolved identities, every canonical
+  owner, stale-pair rejection and ordinary Chromium discovery/navigation at
+  1440/390/320 px. Skip-free source/browser acceptance is required.
+  Outcome: unrun.
 
 ## Next unused IDs
 
-- Design: `VD-0037`; active obligations are listed above.
-- Execution: `VR-0096`; active obligations are listed above.
+- Design: `VD-0040`; active obligations are listed above.
+- Execution: `VR-0097`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
