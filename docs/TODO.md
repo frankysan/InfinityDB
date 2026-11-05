@@ -254,8 +254,6 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Dated FAQ/errata acceptance](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-046 (M, review):** Reconcile all 29 published rulings, original citations and 48 topic
-  associations to the final pinned FAQ/core sources.
 - [ ] **V1S-047 (M, review):** Review carried-forward versus newly added FAQ identities, supersession and
   effective source/season boundaries.
 - [ ] **V1S-048 (M, gate):** Verify source precedence, disputed interpretations, excluded ITS-only answers and
@@ -724,6 +722,10 @@ the remaining source clauses and final release-browser acceptance remain open.
   The authoring contract, source-precedence policy, export validation, runtime selector,
   explicit-context API and 29 reviewed current-source rulings are implemented; see the
   [current contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
+  The [V1S-046 source reconciliation](v1.0-source-coverage-audit.md#current-faq-question-citation-and-topic-reconciliation-v1s-046-2026-11-05)
+  checked all 29 selected and original FAQ citations and 48 topic links against
+  pinned source inventories and focused tests, without accepting release artifact
+  parity or final browser coverage.
   - [ ] Revalidate this bounded 29-ruling/48-topic FAQ acceptance against
     the **final 1.0 release candidate** and release-matched rules database,
     including browser evidence and final source/disclaimer review. This is
