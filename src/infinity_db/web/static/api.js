@@ -42,6 +42,10 @@ export function getCatalogItem(catalog, itemId, signal) {
   return getJson(`/api/${encodeURIComponent(catalog)}/${encodeURIComponent(itemId)}`, signal);
 }
 
+export function getVariantUsage(recordId, signal) {
+  return getJson(`/api/variant-usage?${new URLSearchParams({ record_id: recordId })}`, signal);
+}
+
 export function getUnitFilters(signal) {
   return getJson("/api/unit-filters", signal);
 }

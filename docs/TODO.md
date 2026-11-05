@@ -263,8 +263,10 @@ The [read-only occurrence candidate](data-model.md#current-read-only-variant-can
 has [source-row, relationship and artifact acceptance](v1.0-source-coverage-audit.md#peripheral-shared-option-and-candidate-artifact-acceptance-2026-11-05).
 Runtime/API/browser publication and final source-pair acceptance remain below.
 
-- [ ] **V1S-065 (M, build):** Add discoverable ordinary reference links from canonical Skill/Equipment
-  variants to Unit/profile/loadout occurrences.
+- [ ] **V1S-065 (M, build):** Verify ordinary Skill/Equipment detail links to exact reviewed
+  Unit/Army profile and loadout occurrences. The optional shared renderer, published
+  capability flag and Unit group-anchor navigation are implemented; retire only after
+  the VD-0034–0036 / VR-0095 browser and API acceptance checks pass.
 - [ ] **V1S-066 (M, gate):** Validate full cross-Army publication parity, unknown exclusion, browser coverage
   and source-pair freshness for the new index.
 - [ ] **V1S-067 (M, external):** With separate authorization, rehearse Restrictions v8/v9 real-host

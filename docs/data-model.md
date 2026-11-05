@@ -2354,8 +2354,20 @@ The API requires one canonical `record_id` such as
 variant groups in stable variant-key order, with the source-pair provenance,
 set-based counts, and source-scoped occurrence contexts. Unknown query
 parameters, repeated filters and non-Skill/Equipment record IDs return `400`.
-The generated read model is a backend reference contract; normal Skill and
-Equipment pages do not link to it until the separate browser slice is complete.
+When a matched publication is loaded, canonical Skill and Equipment detail APIs
+expose `variant_usage_published: true`. Their ordinary pages then request their
+canonical `record_id` and render an optional **Exact reviewed source occurrences**
+section alongside the existing catalog-wide Unit-usage lists. Each exact group
+retains its reviewed signature and source-row count; expanded rows link to the
+logical Unit and selected application Army, with separate profile/loadout source
+IDs and group anchors where the Army presentation has an unambiguous identity.
+Repeated source rows in one published profile/loadout context have only one
+browser link; `unit_option` rows without verified Army compatibility remain
+unlinked, with an explicit notice. These are not source-inferred Army memberships.
+When the publication is missing, the catalog detail flag is `false` and browsers
+do not request the unavailable endpoint or present an empty index as proof of no
+usage. The renderer is implemented; V1S-065's deferred browser regression and
+V1S-066's complete release-pair/browser acceptance remain open.
 
 #### V1S-062 — finalized identity, ordering and ownership contract (2026-11-05)
 

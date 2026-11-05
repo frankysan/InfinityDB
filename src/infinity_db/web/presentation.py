@@ -88,6 +88,7 @@ ASSETS = {
         "text/javascript; charset=utf-8",
     ),
     "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
+    "/static/variant-usage.js": ("variant-usage.js", "text/javascript; charset=utf-8"),
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
     "/static/faq-rulings.js": ("faq-rulings.js", "text/javascript; charset=utf-8"),

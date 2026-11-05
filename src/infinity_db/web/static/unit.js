@@ -1446,7 +1446,25 @@ function render(unit, helpItems = [], attributeItems = []) {
     content.append(section);
   }
   content.hidden = false;
+  requestAnimationFrame(revealProfileGroupHash);
 }
+
+function revealProfileGroupHash() {
+  if (!window.location.hash.startsWith("#profile-group-")) return;
+  let targetId;
+  try {
+    targetId = decodeURIComponent(window.location.hash.slice(1));
+  } catch {
+    return;
+  }
+  const target = document.getElementById(targetId);
+  if (!target || !content.contains(target)) return;
+  const details = target.closest("details");
+  if (details) details.open = true;
+  target.scrollIntoView({ block: "start" });
+}
+
+window.addEventListener("hashchange", revealProfileGroupHash, { signal: pageController.signal });
 
 document.addEventListener(
   "infinity:beforenavigation",

@@ -1,12 +1,13 @@
 import { formatSkillDistanceExtra } from "./distance.js";
 import { optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, getRestrictionsReference, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, getVariantUsage, visibleUnitIds } from "./api.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
 import { tableViewport } from "./view-components.js";
+import { exactVariantUsageSection } from "./variant-usage.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
   || window.location.pathname.split("/").pop();
@@ -18,6 +19,7 @@ let currentSkill;
 let displayedSkill;
 let faqItems = [];
 let restrictionsData = null;
+let exactUsage = null;
 const pageController = new AbortController();
 
 function displayWikiUrl(url) {
@@ -296,6 +298,8 @@ function render(skill) {
   const structuredReference = structuredReferenceSection(skill.structured_reference);
   if (structuredReference) children.push(structuredReference);
   if (faqItems.length) children.push(faqRulingsSection(faqItems));
+  const exactSection = exactVariantUsageSection(exactUsage, currentSkill || skill);
+  if (exactSection) children.push(exactSection);
   children.push(sections);
   sections.append(...variants.map((variant) => variantSection(variant, skill.parameter_semantics)));
   content.replaceChildren(...children);
@@ -328,6 +332,17 @@ if (!skillId) {
     render(skill);
     const topicId = skill.rules?.find((rule) => rule.id?.startsWith("skill:"))?.id
       || `skill:${skillId}`;
+    if (skill.variant_usage_published && /^skill:[a-z0-9][a-z0-9-]*$/.test(topicId)) {
+      getVariantUsage(topicId, pageController.signal).then((payload) => {
+        if (pageController.signal.aborted) return;
+        exactUsage = payload;
+        if (displayedSkill) render(displayedSkill);
+      }).catch((error) => {
+        if (error.name !== "AbortError" && !error.message?.includes("not published")) {
+          console.error("Exact Skill occurrences unavailable", error);
+        }
+      });
+    }
     fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
       .then((payload) => {
         if (pageController.signal.aborted) return;

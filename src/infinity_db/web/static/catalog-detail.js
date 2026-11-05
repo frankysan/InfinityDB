@@ -1,11 +1,12 @@
 import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, getRestrictionsReference, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, getVariantUsage, visibleUnitIds } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
 import { tableViewport } from "./view-components.js";
+import { exactVariantUsageSection } from "./variant-usage.js";
 import {
   gameplayVariantRules,
   levelEffectsSection,
@@ -30,6 +31,7 @@ let currentItem;
 let displayedItem;
 let faqItems = [];
 let restrictionsData = null;
+let exactUsage = null;
 const pageController = new AbortController();
 
 function displayWikiUrl(url) {
@@ -647,6 +649,8 @@ function render(item) {
       ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])] : []),
     ...(catalog === "equipment" && item.hacking_programs?.length
       ? [hackingProgramsSection(item.hacking_programs)] : []),
+    ...(catalog === "equipment" && exactUsage
+      ? [exactVariantUsageSection(exactUsage, currentItem || item)].filter(Boolean) : []),
     ...(sections.length ? [catalog === "traits" ? traitUsageSectionGroup(item) : usageSectionGroup(sections)] : []),
     ...(faqItems.length ? [faqRulingsSection(faqItems)] : []),
   );
@@ -695,6 +699,18 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
     const prefix = { equipment: "equipment", traits: "trait", states: "state" }[catalog];
     const topicId = item.rules?.find((rule) => rule.id?.startsWith(`${prefix}:`))?.id
       || `${prefix}:${itemId}`;
+    if (catalog === "equipment" && item.variant_usage_published
+        && /^equipment:[a-z0-9][a-z0-9-]*$/.test(topicId)) {
+      getVariantUsage(topicId, pageController.signal).then((payload) => {
+        if (pageController.signal.aborted) return;
+        exactUsage = payload;
+        if (displayedItem) render(displayedItem);
+      }).catch((error) => {
+        if (error.name !== "AbortError" && !error.message?.includes("not published")) {
+          console.error("Exact Equipment occurrences unavailable", error);
+        }
+      });
+    }
     fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
       .then((payload) => {
         if (pageController.signal.aborted) return;

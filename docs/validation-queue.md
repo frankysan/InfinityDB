@@ -120,7 +120,25 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No open test-design obligations.
+- [ ] VD-0034 (2026-11-05; needs-design): Assert Skill/Equipment detail APIs expose the
+  matched-variant-publication capability flag and that the browser never requests an
+  unavailable index on an unmatched release. Work: [V1S-065](TODO.md#rules-and-contextual-reference-completion);
+  change: `api_handler.py`, `skill.js`, `catalog-detail.js`; risk: browser API errors.
+  Existing coverage: `test_variant_usage_api_is_unavailable_without_a_matched_publication`;
+  linked execution: VR-0095. Outcome: pending test design; no tests run.
+- [ ] VD-0035 (2026-11-05; needs-design): Assert reviewed source rows link exact logical
+  Unit/Army/profile/loadout contexts, repeated identical contexts deduplicate, and
+  unverified shared options or unreviewed signatures never acquire fabricated links.
+  Work: V1S-065; change: `variant-usage.js`; risk: false direct usage claims.
+  Existing coverage: `test_variant_usage_publication_exposes_only_exact_source_variants`;
+  linked execution: VR-0095. Outcome: pending test design; no tests run.
+- [ ] VD-0036 (2026-11-05; needs-design): Verify static module packaging and real browser
+  navigation through selected Army/profile anchors at desktop and mobile widths,
+  including missing-source and optional Unit visibility cases.
+  Work: V1S-065; change: `presentation.py`, `unit.js`, Skill/Equipment pages;
+  risk: browser links and hidden/invalid anchors. Existing coverage: browser Unit
+  and catalog smoke tests; linked execution: VR-0095.
+  Outcome: pending test design; no tests run.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -152,12 +170,19 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-No open deferred-execution obligations.
+- [ ] VR-0095 (2026-11-05; awaiting-design): Verify the optional V1S-065 reviewed
+  source-variant occurrence links across Skill/Equipment pages and Unit targets.
+  Work: [V1S-065](TODO.md#rules-and-contextual-reference-completion); implementation
+  based on `4b111659`; final commit SHA pending. Requires VD-0034–0036;
+  no tests executed during implementation. Deferred: capability gating, exact
+  source-context selection/dedup, unverified exclusion, static packaging, Unit
+  group anchors, Chromium 1440/390/320 px navigation and missing-artifact fallback.
+  Outcome: unrun.
 
 ## Next unused IDs
 
-- Design: `VD-0034`; active obligations are listed above.
-- Execution: `VR-0095`; active obligations are listed above.
+- Design: `VD-0037`; active obligations are listed above.
+- Execution: `VR-0096`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

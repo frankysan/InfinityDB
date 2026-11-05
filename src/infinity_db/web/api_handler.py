@@ -890,6 +890,7 @@ class ApiHandler:
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
+                    payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read skill")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -918,6 +919,7 @@ class ApiHandler:
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
+                    payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
