@@ -5,7 +5,9 @@
 The Linux CLI passed with 53 declarations and zero warnings; its tests passed
 in the cumulative code profile at `1d0d5c19`, recorded in
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
-Phases 2–4 remain proposed under V1S-096.
+Phase 2's committed-history audit is implemented but its regression design and
+execution remain pending under VD-0053/0054 and VR-0104. Git index/worktree
+closeout, Phase 3 selection, and Phase 4 integration remain open under V1S-096.
 **Scope:** The active `V1S-*` execution slices in [TODO.md](TODO.md#pre-planned-10-execution-slices), their documented completion, and the Git history of removals.
 
 ## Goal and constraints
@@ -130,9 +132,11 @@ From the repository root using PowerShell:
 ```
 
 The Phase 1 command checks only static structure and does not require Git.
-Git-aware `--base` closeout and `--select` modes remain unimplemented; their
-interfaces and baseline/override semantics must be finalized before they are
-documented as available commands.
+Committed-history `--base REV [--target REV]` closeout is available in
+advisory mode, with explicit `--enforce-closeout` opt-in. Its validation is
+pending under VR-0104, so it is **not yet** an accepted release check. Targeting
+a staged index or worktree and `--select` are not implemented; do not document
+them as working commands or use this historical check to approve release scope.
 
 Example diagnostic:
 
@@ -158,5 +162,6 @@ Record a qualifying blocker/deferment or explicit priority override.
 The checker is ready when the current backlog passes static validation; negative tests catch structural and retirement violations; selection mode explains unjustified skips; valid overrides are traceable; errors and warnings are clearly separated; Windows and Linux behavior matches; and the project can run it offline through the established checks.
 
 **Current decision:** The user authorized implementation of this plan. Phase 1
-is the current scope; Git-aware closeout, selection enforcement, check-runner/CI
-integration and rollout remain unimplemented.
+is verified; Phase 2's committed-history path is awaiting its VD/VR acceptance.
+Git-aware worktree/index closeout, selection enforcement, check-runner/CI
+integration and rollout remain open under V1S-096.

@@ -120,10 +120,18 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No open test-design obligations. VD-0050/0051/0052 were retired after
-static review of the authored tests in `tests/test_deployment_scripts.py`
-and `tests/test_verify_deployment_assets.py` (Ruff and Pyright passed);
-none of the tests ran during design. Their selectors remain under VR-0103.
+- [ ] VD-0053 (2026-11-05; needs-design): Verify per-commit Git-aware V1S retirement attribution, including valid closeout, missing ID mention, multiple IDs in one commit, and reopen/no-op or reordered tasks that must not count as removals.
+  Work: [V1S-096](TODO.md#final-10-acceptance); change: `tools/check_v1_backlog.py` Git-aware audit on Windows after a1f78bcd; risk: medium.
+  Existing coverage: `tests/test_check_v1_backlog.py` checks static parsing only; linked execution: VR-0104.
+  Outcome: pending design; no tests executed.
+
+- [ ] VD-0054 (2026-11-05; needs-design): Verify advisory/enforced closeout severity, acceptance-pointer warnings, bad or diverged revisions, non-first-parent range, missing files, and CLI error reporting.
+  Work: [V1S-096](TODO.md#final-10-acceptance); change: `tools/check_v1_backlog.py`; risk: medium.
+  Existing coverage: no Git-history CLI fixtures; linked execution: VR-0104.
+  Outcome: pending design; no tests executed.
+
+VD-0050/0051/0052 were previously retired after static test-design review;
+their still-unrun selectors remain under VR-0103.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -169,10 +177,17 @@ summary above. Hosted CI and final release gates retain separate owners.
   Deferred: `tests/test_deployment_scripts.py` (tracked/image/v8 guards), `tests/test_verify_deployment_assets.py` (missing/empty/stale and matched preflight), `tests/test_variant_usage.py` and relevant `tests/test_web.py` selectors; normal source/CI smoke and actual container build at release candidate gate.
   Outcome: unrun; runtime and hosted exact-release acceptance not yet claimed.
 
+- [ ] VR-0104 (2026-11-05; awaiting-design): Git-aware V1S backlog closeout auditor, initial committed-history mode.
+  Work: [V1S-096](TODO.md#final-10-acceptance); revision: pending commit from Windows implementation after a1f78bcd; risk: medium.
+  Immediate: Ruff and Pyright passed; no implementation regression tests executed.
+  Design: VD-0053/0054.
+  Deferred: `tests/test_check_v1_backlog.py` with synthetic temporary Git repositories, CLI baselines/enforcement, and applicable normal checks on the committed revision.
+  Outcome: unrun; phase 2 worktree/index mode and phase 3/4 integration remain outside this batch.
+
 ## Next unused IDs
 
-- Design: `VD-0053`; active obligations are listed above.
-- Execution: `VR-0104`; active obligations are listed above.
+- Design: `VD-0055`; active obligations are listed above.
+- Execution: `VR-0105`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
