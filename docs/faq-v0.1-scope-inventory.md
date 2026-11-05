@@ -273,6 +273,21 @@ five-page PDF file's indices.
   Firefight remains unselected pending scenario-specific source evidence
   and a reviewed applicability change; do not silently broaden it.
 
+  **Public API rationale, 2026-11-05 (V1S-048):** the Annihilation
+  FAQ record's `facts.selectionReason` now explicitly distinguishes
+  its conservative InfinityDB scope choice from an official assignment
+  of the ITS-section question to any Core scenario. It names the
+  shared Firefight Killing rule as insufficient authority for
+  additional applicability, and labels the selected 2026-09-01 date
+  as a reference anchor rather than a verified PDF publication day.
+  `/api/faq-rulings` exposes this as `selection_reason`; focused
+  read-model and WSGI API tests pin the wording. The ruling's
+  answer, current English/Spanish citations, topic edges and
+  Annihilation-only selector are unchanged. The tracked release
+  `data/generated/rules.db` must be regenerated in the paired
+  v1.0 release gate before this explanation can be treated as
+  deployed.
+
 ## Fireteam bilingual source qualification
 
 **Checked 2026-10-29:** English FAQ v0.1 p. 3 says that the Fireteam

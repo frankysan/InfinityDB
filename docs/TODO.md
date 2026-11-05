@@ -254,8 +254,6 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Dated FAQ/errata acceptance](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-048 (M, gate):** Verify source precedence, disputed interpretations, excluded ITS-only answers and
-  explicit uncertainty in public API output.
 - [ ] **V1S-049 (M, gate):** Recheck discoverability, topic/scenario reverse links and base-rule versus
   clarification presentation in ordinary browser.
 
@@ -340,6 +338,11 @@ and final candidate acceptance retain their individual owners below.
   and player-facing source claims.
 - [ ] **V1S-084 (M, gate):** Rebuild/verify the release-matched Army/rules pair, FAQ parity, deployed-object
   publication and processed symbols.
+  The V1S-048 Ancillary `selectionReason` correction in
+  `data/curated/rules/n5-faq-v0.1.json` must reach regenerated
+  `data/generated/rules.db` and its dependent deployed-object
+  publication before opt-in tracked FAQ parity and release acceptance.
+  Do not mistake the focused fresh-export API pass for a matched tracked pair.
 - [ ] **V1S-085 (M, gate):** Run source occupancy, source/archive, strict primary interaction, reference
   baseline and output reproducibility checks. Treat the
   [host-SQLite physical-vs-logical rebuild finding](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
@@ -725,8 +728,12 @@ the remaining source clauses and final release-browser acceptance remain open.
   pinned source inventories and focused tests. The
   [V1S-047 temporal and supersession review](v1.0-source-coverage-audit.md#faq-provenance-supersession-and-effective-boundary-review-v1s-047-2026-11-05)
   also confirmed reviewed historical identity, no unintended supersession and
-  fail-closed source/revision/season gates. Release artifact parity and final
-  browser coverage remain independently open.
+  fail-closed source/revision/season gates. The
+  [V1S-048 public-uncertainty gate](v1.0-source-coverage-audit.md#faq-public-precedence-disputed-sources-and-exclusions-v1s-048-2026-11-05)
+  made the conservative Annihilation-only Ancillary FAQ selection
+  explicit in the API, retaining the disputed Haris citation and
+  excluding eight unreviewed ITS-only rulings. Release artifact parity
+  and final browser coverage remain independently open.
   - [ ] Revalidate this bounded 29-ruling/48-topic FAQ acceptance against
     the **final 1.0 release candidate** and release-matched rules database,
     including browser evidence and final source/disclaimer review. This is

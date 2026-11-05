@@ -1722,7 +1722,7 @@
           "sourceId": "n5-faq-v0.1-en-pdf",
           "page": 4
         },
-        "selectionReason": "English FAQ v0.1 primary text cross-checked against Spanish FAQ v0.1 at the same printed page; no contradictory interpretation identified.",
+        "selectionReason": "English FAQ v0.1 printed p. 4 selected and cross-checked against Spanish FAQ v0.1 p. 4; no contradictory answer identified. The question refers to scenario objectives but names no Core mission. InfinityDB currently applies the exception to Annihilation only as a conservative reviewed choice, not an official scenario assignment; Firefight shares the Killing Rule but is not included without explicit applicability evidence. The 2026-09-01 reference date is an update-era anchor, not an independently verified FAQ PDF publication day.",
         "conflictingCitations": [],
         "supersedes": []
       }
