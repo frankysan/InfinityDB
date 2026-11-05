@@ -190,8 +190,11 @@ is bounded to the development pair; final-input checks remain.
 **Parent:** [Final 1.0 acceptance](#final-10-acceptance).
 **Project domains:** Data processing, Web backend, Web frontend, Project infrastructure, Deployment
 
-- [ ] **V1S-081 (M, gate):** Freeze source inputs, tracked databases
-  and derived assets; repeat the category/source inventory.
+The current input baseline is pinned and artifact-validated; its source inventory
+and remaining source/browser dispositions are recorded in the
+[coverage audit](v1.0-source-coverage-audit.md). V1S-082 owns the remaining
+source-to-browser gap review; final release acceptance remains open.
+
 - [ ] **V1S-082 (L, gate):** Resolve confirmed source-to-normal-browser
   gaps and review all explicit omissions under the 1.0 definition.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
