@@ -259,10 +259,11 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Generated rules-reference projections](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend, Deployment
 
-- [ ] **V1S-062 (M, design):** Finalize occurrence identity, ordering, duplicate-handling and
-  Unit/profile/loadout/Army ownership contract for the usage index.
 - [ ] **V1S-063 (L, build):** Generate and validate exact-variant occurrence projections from matched
-  Army/rules data, including Includes and Peripherals.
+  Army/rules data, including Includes and Peripherals. Implement the
+  [V1S-062 accepted identity, counting and ownership contract](data-model.md#v1s-062--finalized-identity-ordering-and-ownership-contract-2026-11-05)
+  with the specified negative/duplicate/source-pair tests; do not count an
+  unresolved source extra or unverified Include/Peripheral link as direct usage.
 - [ ] **V1S-064 (M, build):** Expose source-scoped variant usage through a stable API/read model with negative
   and duplicate-source cases.
 - [ ] **V1S-065 (M, build):** Add discoverable ordinary reference links from canonical Skill/Equipment
@@ -751,7 +752,12 @@ the remaining source clauses and final release-browser acceptance remain open.
   - [ ] Add the generated cross-army rule-variant usage index:
     canonical Skill/Equipment -> exact Level/MOD/typed variant ->
     Unit/profile/loadout occurrences. Reuse the
-    [accepted index design](data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
+    [accepted index design](data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented),
+    now finalized by [V1S-062](data-model.md#v1s-062--finalized-identity-ordering-and-ownership-contract-2026-11-05)
+    for exact source-row keys, typed signatures, deterministic ordering,
+    deduplicated counts and source-bound Include/Peripheral ownership.
+    This design decision closes V1S-062 only; V1S-063–066 remain
+    responsible for the actual index, API, browser and release tests.
     - [ ] Reconcile remaining unresolved Skill/Equipment occurrence parameters,
       mixed TEXT/DISTANCE sources and named variants with extra MODs.
       Reuse `python -m tools.audit_source_variant_inputs --catalog skills

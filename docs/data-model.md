@@ -2289,6 +2289,137 @@ join semantics, not new public routes. Validate duplicate-source, reused
 payload, repeated-row, cross-Army, shared-family/different-Level,
 profile-versus-loadout and unresolved-variant fixtures before publishing.
 
+#### V1S-062 — finalized identity, ordering and ownership contract (2026-11-05)
+
+**Contract boundary:** this makes the existing design executable for
+V1S-063–066, but **does not implement** a projection, endpoint, cache,
+route or new release artifact. All identities below are scoped to a
+verified Army snapshot and matching curated rules release; never
+interpret an ID or cached index from another input pair.
+
+1. **One source fact, one source-row identity.** Use
+   `(catalog, owner_kind, occurrence_id)` as the source-row key,
+   with `owner_kind = profile | option | unit_option` and catalog
+   `skills | equipment`. Validate the row's full parent foreign
+   key: `(army_id, unit_id, group_id, profile_id)` for profiles,
+   `(army_id, unit_id, group_id, option_id)` for Army loadouts,
+   or `(unit_id, option_id)` for shared Unit options. Store the
+   numeric source catalog ID, its display and source position,
+   quantity, raw field, **ordered** extra tuples
+   `(extra_position, extra_id, extra_type, raw_value)`, and the
+   owner-path key. A raw occurrence ID alone is not a stable
+   public identifier and is not assumed unique across owner
+   tables or future snapshots.
+2. **Exact reviewed variant, not a loose display label.**
+   Resolve `(catalog, source_item_id)` through the pinned
+   `application_catalog_sources`, then the reviewed rules
+   catalog mapping. The semantic key contains the canonical
+   rules record/family and **all** source-reviewed variant
+   dimensions (Level, named source variant, typed MOD or
+   replacement, effect scope and typed occurrence parameters).
+   Serialize typed fields canonically with explicit kind names
+   and value types; `+1 SD`, `+1B`, `PH=18` and
+   `ReRoll` must never collapse to a shared numeric/string
+   label. Preserve source IDs, ordered raw extras, and citations
+   alongside the key as evidence. Merge different source IDs
+   into one variant only through an explicit reviewed
+   equivalence; matching display names alone cannot merge.
+   A nonempty unreviewed or partly matched extra signature
+   **excludes that source row from the exact-variant result**,
+   even when another extra on the row is reviewed.
+   Reviewed family membership may be reported separately,
+   expressly labelled family-only; it must not inflate
+   a variant-specific total.
+3. **Owner scope and concrete Army membership.** A profile
+   row attaches only to its matching source profile; an
+   option row only to its source loadout. A `unit_option`
+   is a shared Unit choice and is **not** an extra direct
+   profile Skill or an automatic Army-wide field:
+   attribute it to an application Army only after checking
+   `army_units`, `application_army_sources`,
+   `logical_unit_sources` and its actual compatible
+   Unit-option context. The raw `army_id` is a source
+   list, not interchangeable with an application Army ID.
+   Attach a reused profile/loadout payload through
+   `profile_payload_occurrences` or
+   `loadout_payload_occurrences`, retaining every
+   source path, Army-specific AVA/Points/SWC and
+   profile/group/option identity; never turn shared
+   payload IDs or hashes into source ownership.
+4. **Include and Peripheral provenance is not direct
+   possession.** The `profile_occurrence_includes`,
+   `loadout_occurrence_includes` and
+   `unit_option_include_targets` tables give contextual
+   include edges to a target loadout payload; retain the
+   parent source context, include position/quantity,
+   target payload and separately evidenced chain. Detect
+   cycles, duplicate paths and missing/ambiguous targets;
+   report only validated, explicitly labelled derived
+   membership. Do not add a target's direct occurrence
+   to the source owner or create a selectable standalone
+   loadout from an included payload. Controller/Peripheral
+   links come from the separately reviewed
+   `application_peripheral_*` relationships; do not copy
+   the Peripheral's Skills or Equipment to its Controller
+   or extrapolate TinBot Fireteam sharing as new direct
+   source occurrences.
+5. **Deterministic ordering and counting.** Sort public
+   groups by published rules identity and canonical typed
+   variant signature; within a group sort by application
+   Army identity, logical Unit identity, source Army/Unit,
+   owner kind, group, source profile/loadout position,
+   relationship display/source position and source-row
+   identity as the last tie breaker. Source extra order
+   remains `extra_position`, never incidental SQLite
+   fetch order. Counts are **set cardinalities**:
+   distinct logical Unit globally, distinct
+   `(application_army_id, logical_unit_id)` per Army,
+   and distinct normalized profile/loadout context per
+   owner kind and typed variant (using the existing
+   logical-Unit-scoped payload hash). The raw
+   relationship-row total is exposed separately as
+   provenance, not as a player-facing Unit count;
+   multiple Army source copies and repeated same-variant
+   rows do not inflate the grouped totals. The context
+   result retains each original source path for drilldown.
+6. **Publication and negative acceptance.** Build only
+   from the exact accepted `infinity.db`,
+   `infinity.raw.db`, `rules.db`, reviewed source
+   mappings and matched archive identity; record
+   fingerprints/revisions with the projection. A
+   stale pair, unsupported source mapping, unknown
+   variant, unresolved scoped qualifier, missing
+   owner, invalid Include graph or ambiguous source
+   link fails closed or appears in a separate
+   diagnostic count, never as a fabricated variant
+   membership. For V1S-063 tests, cover direct
+   profile/option/shared Unit-option ownership,
+   exact multi-extra order and reviewed-combination
+   matching, identical payloads across Armies,
+   duplicate rows/positions, same-family different
+   Levels, a 2W Doctor source-only qualifier,
+   source-47 bare Infiltration `ReRoll`, Include
+   repetition/cycles, Peripheral controller versus
+   owned Skills, no direct usage for uninstantiated
+   TinBot variants, and snapshot/stale rules-pair
+   mismatch. V1S-064 checks stable API ordering
+   and fail-closed filters; V1S-065–066 check
+   actual normal-player links and source-to-browser
+   parity without inventing route shapes here.
+
+**Review disposition:** normalized row keys and extra-order fields
+are grounded in `src/infinity_db/database/schema.py`; reuse/
+dedup follows `profile_payloads.py`,
+`loadout_payloads.py` and the explicit source-to-logical
+Unit tables. Existing source audit
+`tools.audit_source_variant_inputs` proves these are
+usable source relationships, but no Unit-use projection
+or new automated acceptance suite is claimed by
+this design-only decision. V1S-063 owns implementing
+and testing the accepted contract; any schema
+extension must preserve existing persisted data and
+public identifier compatibility.
+
 **Lieutenant occurrence-resource review (2026-11-03):** N5.3 English
 p. 99 explicitly distinguishes `+1 Command Token` (one additional
 match Command Token if this Trooper is selected as Lieutenant) from
