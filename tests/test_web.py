@@ -6149,7 +6149,7 @@ def test_variant_usage_api_filters_exact_groups_by_canonical_rule(app: Callable)
     assert payload["items"] == [requested, other]
     status, _, metrics = request(app, "/internal/metrics")
     assert status == 200
-    assert b'route="/api/variant-usage",status_class="2xx" 1' in metrics
+    assert b'route="/api/variant-usage",status_class="2xx"} 1' in metrics
 
 
 @pytest.mark.parametrize(
