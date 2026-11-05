@@ -128,6 +128,23 @@ def test_variant_usage_publication_exposes_only_exact_source_variants(
     assert len(result["variants"]) == 1
     assert "diagnosticCounts" not in result
     assert "unresolvedSourceRows" not in result
+    assert "rawDatabaseSha256" not in result["sourceSnapshot"]
+
+
+def test_variant_usage_publication_ignores_raw_sqlite_byte_layout() -> None:
+    snapshot = {
+        "armyArchiveSha256": "a" * 64,
+        "armyDatabaseSha256": "b" * 64,
+        "rawDatabaseSha256": "c" * 64,
+        "rulesDatabaseSha256": "d" * 64,
+        "exportPairSha256": "e" * 64,
+        "deployedObjectPublicationSha256": "f" * 64,
+    }
+    original = publication_from_candidate(_variant_usage_candidate(snapshot))
+    changed = {**snapshot, "rawDatabaseSha256": "0" * 64}
+    assert publication_from_candidate(_variant_usage_candidate(changed)) == original
+    assert original["sourceSnapshot"]["exportPairSha256"] == "e" * 64
+    assert "rawDatabaseSha256" not in original["sourceSnapshot"]
 
 
 def test_variant_usage_publication_rejects_duplicate_source_rows(

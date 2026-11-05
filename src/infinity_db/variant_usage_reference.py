@@ -38,7 +38,13 @@ def publication_from_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
         "format": PUBLICATION_FORMAT,
         "formatVersion": PUBLICATION_VERSION,
         "scope": PUBLICATION_SCOPE,
-        "sourceSnapshot": candidate["sourceSnapshot"],
+        # Raw SQLite bytes may differ across hosts even for the same validated
+        # export pair. Keep the raw byte digest in build diagnostics, not in
+        # the portable publication; runtime release artifacts remain byte-bound.
+        "sourceSnapshot": {
+            key: value for key, value in candidate["sourceSnapshot"].items()
+            if key != "rawDatabaseSha256"
+        },
         "variants": candidate["variants"],
     }
     return _validate_publication(publication)
@@ -75,7 +81,6 @@ def _validate_publication(document: Any) -> dict[str, Any]:
     digest_fields = (
         "armyArchiveSha256",
         "armyDatabaseSha256",
-        "rawDatabaseSha256",
         "rulesDatabaseSha256",
         "exportPairSha256",
         "deployedObjectPublicationSha256",

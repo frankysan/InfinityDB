@@ -237,6 +237,11 @@ def test_svg_skip_still_checks_real_database_publication_binding(
             validated.append(self.path)
 
     monkeypatch.setattr(deployment_assets, "RulesDatabase", Rules)
+    # This fixture checks the symbol/database source binding, not the separately
+    # tested variant-publication gate; it has no variant-usage source pair.
+    monkeypatch.setattr(
+        deployment_assets, "verify_variant_release_publication", lambda *_: None,
+    )
     monkeypatch.setattr(deployment_assets, "validate_asset_set", lambda *_args, **_kwargs: (
         pytest.fail("SVG availability must not be checked in skip mode")
     ))

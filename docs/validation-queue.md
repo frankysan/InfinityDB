@@ -164,21 +164,21 @@ The five-item November 4 drain was verified at
 summary above. Hosted CI and final release gates retain separate owners.
 
 - [ ] VR-0102 (2026-11-05; ready-to-run): Shared soft-navigation focus handoff and polite page-change announcement, plus existing floating-notice touch/keyboard acceptance.
-  Work: [V1S-079/080](TODO.md#accessibility-and-navigation); revision: this implementation/design batch (use its introducing Git commit as the exact test target); risk: medium.
-  Immediate: Ruff on both modified/new test modules and `git diff --check` passed; no tests executed.
+  Work: [V1S-079/080](TODO.md#accessibility-and-navigation); revision: corrected acceptance test in current Windows batch after 52c09f9f; pin resulting commit for Linux verification; risk: medium.
+  Immediate: Linux full run at a1f78bcd exposed two over-strict URL assertions (`/units?s=...` is valid restored state); corrected test passed 2/2 on Windows, Ruff passed.
   Design: VD-0047/0048/0049 retired after static review (no test execution).
   Deferred: `tests/test_verify_accessible_navigation_browser.py` (soft link, persistent-shell link, back/scroll, focus/status at 1440/390px); `tests/test_verify_page_footer_browser.py` (native disclosure semantics and touch at 390/320px in light/dark), existing `tests/test_verify_sidebar_density_browser.py`, and applicable normal broader checks at next due drain.
-  Outcome: unrun; actual screen-reader sign-off and frozen-candidate visual acceptance remain separately required under V1S-079/080.
+  Outcome: Windows focused browser tests passed; Linux regression rerun on the corrected commit pending. Actual screen-reader sign-off and frozen-candidate visual acceptance remain separately required under V1S-079/080.
 
 - [ ] VR-0103 (2026-11-05; ready-to-run): Track and require the byte-exact v1.0 variant-usage release publication throughout source CI, deployment packaging, preflight/image smoke and v8 compatibility checks.
-  Work: [variant usage projection](TODO.md#rules-and-reference-completeness); revision: current changes from d1f315a1, pin the resulting commit for execution; risk: high.
-  Immediate: `tools.build_variant_usage --check-publication` PASS (151 groups, 10,923 reviewed rows); `tools.verify_deployment_assets --skip-svg` PASS against current source-matched artifacts; no pytest executed.
+  Work: [variant usage projection](TODO.md#rules-and-reference-completeness); revision: corrected portable publication and deployment fixture in current Windows batch after 52c09f9f; pin resulting commit; risk: high.
+  Immediate: Linux full run at a1f78bcd found a raw SQLite byte-digest difference despite identical export/Army/rules/object hashes, plus one missing publication fixture. Portable publication excludes the diagnostic raw digest, and the fixture now isolates the tested gate; Windows `--check-publication` and `--skip-svg` PASS (151 groups, 10,923 rows), targeted 97 variant tests, 9 real-browser tests and 12 deployment tests PASS.
   Design: VD-0050/0051/0052 retired after static review; tests authored but not run.
   Deferred: `tests/test_deployment_scripts.py` (tracked/image/v8 guards), `tests/test_verify_deployment_assets.py` (missing/empty/stale and matched preflight), `tests/test_variant_usage.py` and relevant `tests/test_web.py` selectors; normal source/CI smoke and actual container build at release candidate gate.
-  Outcome: unrun; runtime and hosted exact-release acceptance not yet claimed.
+  Outcome: Windows focused regression and real-browser tests passed; Linux source-parity/full test rerun and hosted source/deployment acceptance still pending.
 
 - [ ] VR-0104 (2026-11-05; awaiting-design): Git-aware V1S backlog closeout auditor, initial committed-history mode.
-  Work: [V1S-096](TODO.md#final-10-acceptance); revision: pending commit from Windows implementation after a1f78bcd; risk: medium.
+  Work: [V1S-096](TODO.md#final-10-acceptance); revision: 52c09f9f (Git-history implementation); risk: medium.
   Immediate: Ruff and Pyright passed; no implementation regression tests executed.
   Design: VD-0053/0054.
   Deferred: `tests/test_check_v1_backlog.py` with synthetic temporary Git repositories, CLI baselines/enforcement, and applicable normal checks on the committed revision.

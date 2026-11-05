@@ -7,7 +7,6 @@
     "armyDatabaseSha256": "8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8",
     "deployedObjectPublicationSha256": "86b1ce569dc8de9a69a10a1408db7c2d4089b4d331e1ad4aa6d5416cab50b0b7",
     "exportPairSha256": "babe75c00a818eee4828f2b16a70b13f6aa8fa352a5d0ec3d7c4e9309982e122",
-    "rawDatabaseSha256": "91267605abb34ee50f37c43529ab94e6e61121546098630323d7377372e87c13",
     "rulesDatabaseSha256": "5dc249ced04b1180aab4b81ea233964adbc5df37cbcffdb54dff619b55375762"
   },
   "variants": [

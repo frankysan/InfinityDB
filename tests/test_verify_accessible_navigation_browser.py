@@ -47,7 +47,10 @@ def chrome(pooled_chromium_browser: Any) -> Iterator[Any]:
 
 
 def assert_soft_navigation_handoff(page: Any, pathname: str) -> None:
-    page.wait_for_url(f"{ORIGIN}{pathname}")
+    # Soft navigation can retain the Units page’s shareable ?s= state.
+    page.wait_for_function(
+        "expected => window.location.pathname === expected", arg=pathname,
+    )
     page.wait_for_function(
         """() => {
           const main = document.querySelector('main#main');
@@ -84,6 +87,7 @@ def test_soft_navigation_focuses_main_and_announces_route(
         page.evaluate("() => window.scrollTo(0, 160)")
         previous_scroll = page.evaluate("() => window.scrollY")
         assert previous_scroll >= 60
+        units_url = page.url
 
         # The persistent shell stays mounted; keyboard navigation must not leave
         # focus on its old link or on a detached main-content element.
@@ -98,6 +102,7 @@ def test_soft_navigation_focuses_main_and_announces_route(
         ) == "false"
 
         page.go_back(wait_until="domcontentloaded")
+        assert page.url == units_url, f"back lost Units state: {page.url}"
         assert_soft_navigation_handoff(page, "/units")
         page.wait_for_function(
             "expected => Math.abs(window.scrollY - expected) <= 2",
