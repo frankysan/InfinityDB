@@ -6,16 +6,24 @@ import argparse
 import json
 from pathlib import Path
 
-from infinity_db.variant_usage import build_variant_usage_projection
+from infinity_db.variant_usage import (
+    build_variant_usage_projection,
+    validate_variant_usage_candidate,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
+    destinations = parser.add_mutually_exclusive_group()
+    destinations.add_argument(
         "--output", type=Path,
         help="optional ignored local/*.json candidate; no tracked release publication",
+    )
+    destinations.add_argument(
+        "--check", type=Path,
+        help="verify an existing candidate against the exact current inputs without writing",
     )
     args = parser.parse_args()
     result = build_variant_usage_projection(
@@ -24,6 +32,8 @@ def main() -> None:
         ROOT / "data/generated/rules.db",
         ROOT / "data/generated/deployed-objects.json",
     )
+    if args.check is not None:
+        validate_variant_usage_candidate(ROOT / args.check, result)
     if args.output is not None:
         destination = (ROOT / args.output).resolve()
         local_root = (ROOT / "local").resolve()
@@ -38,6 +48,7 @@ def main() -> None:
         temporary.write_text(
             json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
             encoding="utf-8",
+            newline="\n",
         )
         temporary.replace(destination)
     print(json.dumps({
@@ -51,6 +62,7 @@ def main() -> None:
         "unresolvedCounts": result["diagnosticCounts"],
         "includeEdges": len(result["relationships"]["includes"]),
         "includePaths": len(result["relationships"]["includePaths"]),
+        "peripheralAttachments": len(result["relationships"]["peripheralAttachments"]),
         "peripheralControllerEdges": len(
             result["relationships"]["peripheralControllerEdges"]
         ),

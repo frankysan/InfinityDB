@@ -152,13 +152,31 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-No open deferred-execution obligations. The latest source-row and Include
-acceptance is recorded in the [candidate evidence](v1.0-source-coverage-audit.md#source-row-and-include-chain-hardening-2026-11-05).
+- [ ] VR-0086 (2026-11-05; ready-to-run): V1S-063 independent Peripheral
+  validation. Revision: working tree based on 8d7e0d90; design: VD-0028 reviewed
+  without execution. Selectors: `test_variant_peripheral_*` in
+  tests/test_peripheral_relationships.py and
+  test_variant_usage_source_only_peripheral_attachments_require_exact_parity.
+  Deferred: tests/test_peripheral_relationships.py and tests/test_variant_usage.py
+  on linux-dev with matched raw/application/rules/publication inputs.
+- [ ] VR-0087 (2026-11-05; ready-to-run): V1S-063 shared-option compatibility
+  exclusion and source parity. Revision: working tree based on 8d7e0d90;
+  Design: VD-0029 reviewed without execution; selectors:
+  `test_variant_usage_shared_option_*` plus
+  test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts.
+  Deferred: tests/test_variant_usage.py on linux-dev.
+- [ ] VR-0088 (2026-11-05; ready-to-run): V1S-063 candidate artifact acceptance.
+  Revision: working tree based on 8d7e0d90; design: VD-0030 reviewed without execution.
+  Selectors: `test_variant_usage_saved_candidate_*`, `test_variant_usage_unreadable_*`,
+  `test_variant_usage_mismatched_export_generation_*` and `test_variant_usage_cli_check_*`.
+  Deferred: tests/test_variant_usage.py, tests/test_database.py and candidate
+  generation/recheck with matched full inputs on linux-dev. Mandatory V1S-063
+  artifact gate makes these three linked entries due before slice acceptance.
 
 ## Next unused IDs
 
-- Design: `VD-0028`; active obligations are listed above.
-- Execution: `VR-0086`; active obligations are listed above.
+- Design: `VD-0031`; active obligations are listed above.
+- Execution: `VR-0089`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

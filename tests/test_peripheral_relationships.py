@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import sqlite3
 
+import pytest
+
 from infinity_db.database.peripheral_relationships import (
     materialize_peripheral_relationships,
     materialize_peripheral_source_labels,
@@ -15,6 +17,114 @@ from infinity_db.peripheral_identities import (
     parse_peripheral_identity_curated,
     peripheral_identity_metadata,
 )
+from infinity_db.variant_usage_peripherals import build_peripheral_provenance
+
+
+def _usage_connection(kind: str = "loadout") -> sqlite3.Connection:
+    connection, curated = _connection()
+    connection.row_factory = sqlite3.Row
+    if kind == "profile":
+        document = curated.document
+        access = document["controllerAccess"][0]
+        access["controllerKind"] = "profile"
+        connection.execute(
+            "INSERT INTO profiles (army_id,unit_id,group_id,profile_id,name) "
+            "VALUES (101,20,1,1,'Cyberplug Controller')"
+        )
+        connection.execute(
+            "INSERT INTO profile_skills "
+            "(occurrence_id,army_id,unit_id,group_id,profile_id,position,item_id) "
+            "VALUES (2,101,20,1,1,1,277)"
+        )
+        curated = parse_peripheral_identity_curated(document)
+        for key, value in peripheral_identity_metadata(curated).items():
+            connection.execute("UPDATE __infinity_metadata SET value=? WHERE key=?",
+                               (json.dumps(value), key))
+    materialize_peripheral_relationships(connection, curated)
+    connection.execute(
+        "INSERT INTO application_army_sources (source_army_id,application_army_id) "
+        "VALUES (101,10)"
+    )
+    prefix = "profile" if kind == "profile" else "loadout"
+    identity = "profile_id" if kind == "profile" else "option_id"
+    connection.execute(
+        f"INSERT INTO {prefix}_payloads (id,logical_unit_id,payload_sha256) "
+        "VALUES (20,20,'controller')"
+    )
+    connection.execute(
+        f"INSERT INTO {prefix}_payload_occurrences "
+        f"(army_id,unit_id,group_id,{identity},{prefix}_payload_id) VALUES (101,20,1,1,20)"
+    )
+    connection.execute(
+        "INSERT INTO profile_payloads (id,logical_unit_id,payload_sha256) "
+        "VALUES (30,30,'peripheral')"
+    )
+    connection.execute(
+        "INSERT INTO profile_payload_occurrences "
+        "(army_id,unit_id,group_id,profile_id,profile_payload_id) VALUES (101,30,1,1,30)"
+    )
+    return connection
+
+
+@pytest.mark.parametrize("kind", ["profile", "loadout"])
+def test_variant_peripheral_reviewed_pool_preserves_independent_owner_contexts(kind: str) -> None:
+    connection = _usage_connection(kind)
+    try:
+        result = build_peripheral_provenance(connection, connection)
+        edge, = result["peripheralControllerEdges"]
+        assert edge["relationship"] == "access-pool"
+        assert edge["controllerContext"]["logicalUnitId"] == 20
+        assert edge["controllerContext"]["ownerKind"] == kind
+        target, = edge["targetContexts"]
+        assert target["logicalUnitId"] == 30
+        assert target["sourceArmyId"] == 101
+        assert target["payloadSha256"] == "peripheral"
+        assert "skills" not in edge and "sourceRows" not in edge
+        assert result["peripheralAttachments"] == []
+    finally:
+        connection.close()
+
+
+@pytest.mark.parametrize("mutation", [
+    "DELETE FROM __infinity_metadata WHERE key LIKE 'peripheralIdentity%'",
+    "UPDATE application_peripheral_controller_targets SET target_logical_unit_id=20",
+    "DELETE FROM application_peripheral_controller_targets",
+    "UPDATE application_peripheral_unit_sources SET type_id='rule:peripheral-type:servant'",
+    "UPDATE application_peripheral_controller_access SET source_id='other'",
+    "DELETE FROM profile_skills WHERE unit_id=30",
+    "DELETE FROM army_units WHERE unit_id=30",
+    "DELETE FROM loadout_payload_occurrences WHERE unit_id=20",
+    "DELETE FROM profile_payload_occurrences WHERE unit_id=30",
+    "UPDATE profile_payload_occurrences SET army_id=102 WHERE unit_id=30",
+    "UPDATE profile_payloads SET logical_unit_id=20 WHERE id=30",
+    "DELETE FROM application_army_sources",
+])
+def test_variant_peripheral_unreviewed_or_drifted_relationships_fail_closed(mutation: str) -> None:
+    connection = _usage_connection()
+    try:
+        connection.execute(mutation)
+        with pytest.raises(ValueError):
+            build_peripheral_provenance(connection, connection)
+    finally:
+        connection.close()
+
+
+def test_variant_peripheral_duplicate_published_context_fails_closed() -> None:
+    connection = _usage_connection()
+    try:
+        connection.execute(
+            "CREATE TABLE bad_rows AS SELECT * FROM profile_payload_occurrences"
+        )
+        connection.execute("DROP TABLE profile_payload_occurrences")
+        connection.execute("ALTER TABLE bad_rows RENAME TO profile_payload_occurrences")
+        connection.execute(
+            "INSERT INTO profile_payload_occurrences "
+            "SELECT * FROM profile_payload_occurrences WHERE unit_id=30"
+        )
+        with pytest.raises(ValueError, match="ambiguous Peripheral source context"):
+            build_peripheral_provenance(connection, connection)
+    finally:
+        connection.close()
 
 
 def _curated() -> PeripheralIdentityCurated:

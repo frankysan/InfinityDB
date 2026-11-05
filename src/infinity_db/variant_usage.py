@@ -15,9 +15,11 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
+from infinity_db.database.publication import validate_database_pair
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import _variant_semantics
 from infinity_db.variant_usage_includes import build_include_provenance
+from infinity_db.variant_usage_peripherals import build_peripheral_provenance
 
 CATALOGS = ("skills", "equipment")
 OWNERS = ("profile", "option", "unit_option")
@@ -201,6 +203,13 @@ def _direct_context(
 ) -> dict[str, Any] | None:
     """Validate the actual published source occurrence and its payload position."""
     if owner == "unit_option":
+        options = application.execute(
+            "SELECT compatible, disabled, raw FROM unit_options "
+            "WHERE unit_id=? AND option_id=?", (row["unitId"], row["optionId"]),
+        ).fetchall()
+        source_options = row.get("sharedOption")
+        if len(options) != 1 or source_options != dict(options[0]):
+            return None
         matches = application.execute(
             f"SELECT item_id, position, display_order, quantity, raw FROM "
             f"unit_option_{row['catalog']} WHERE occurrence_id = ? "
@@ -219,7 +228,12 @@ def _direct_context(
         # Shared Unit options have no globally valid Army or profile attribution.
         return {"ownerKind": owner, "sourceUnitId": row["unitId"],
                 "optionId": row["optionId"], "applicationArmyId": None,
-                "logicalUnitId": None, "payloadSha256": None}
+                "logicalUnitId": None, "payloadSha256": None,
+                "compatibility": {
+                    "status": "source-only-unverified",
+                    "source": source_options,
+                    "policy": "excluded from Army, Unit and profile/loadout totals",
+                }}
     (occurrence_table, payload_table, skill_table, equipment_table) = PAYLOADS[owner]
     table = skill_table if row["catalog"] == "skills" else equipment_table
     id_field = "profile_id" if owner == "profile" else "option_id"
@@ -294,6 +308,15 @@ def _source_rows(raw: sqlite3.Connection, catalog: str, owner: str) -> list[dict
         if any(value is None for value in owner_path):
             raise ValueError(f"Incomplete variant source owner path: {source_key!r}")
         parent = dict(zip(fields, owner_path, strict=True))
+        shared_option = None
+        if owner == "unit_option":
+            matches = raw.execute(
+                "SELECT compatible, disabled, raw FROM unit_options "
+                "WHERE unit_id=? AND option_id=?", owner_path,
+            ).fetchall()
+            if len(matches) != 1:
+                raise ValueError(f"Missing or ambiguous shared Unit option: {owner_path!r}")
+            shared_option = dict(matches[0])
         result.append({
             "catalog": catalog, "ownerKind": owner,
             "sourceKey": list(source_key), "ownerPathKey": list(owner_path),
@@ -305,6 +328,7 @@ def _source_rows(raw: sqlite3.Connection, catalog: str, owner: str) -> list[dict
             "parentId": parent.get("profile_id", parent.get("option_id")),
             "optionId": parent.get("option_id"),
             "extras": extras.pop(item["occurrence_id"], []),
+            **({"sharedOption": shared_option} if owner == "unit_option" else {}),
         })
     if extras:
         raise ValueError(f"Orphan source extras: {catalog}/{owner}")
@@ -340,17 +364,8 @@ def _include_peripheral_provenance(
 ) -> dict[str, Any]:
     """Expose only relationship edges, never copied Skill/Equipment memberships."""
     includes = build_include_provenance(application, raw)
-    peripheral: list[dict[str, Any]] = []
-    for row in application.execute(
-        "SELECT a.id AS access_id, a.source_id, a.controller_kind, "
-        "a.army_id, a.unit_id, a.group_id, a.parent_id, "
-        "t.target_logical_unit_id "
-        "FROM application_peripheral_controller_access AS a "
-        "JOIN application_peripheral_controller_targets AS t ON t.access_id = a.id "
-        "ORDER BY a.id, t.target_logical_unit_id"
-    ):
-        peripheral.append(dict(row))
-    return {**includes, "peripheralControllerEdges": peripheral,
+    peripheral = build_peripheral_provenance(application, raw)
+    return {**includes, **peripheral,
             "policy": "context-only; never counted as direct rule ownership"}
 
 
@@ -368,6 +383,9 @@ def build_variant_usage_projection(
                                                 rules_path)
     if verified is None:
         raise ValueError("Variant usage requires a matched deployed-object publication")
+    export_pair = validate_database_pair(application_path, raw_path=raw_path)
+    if export_pair is None:
+        raise ValueError("Variant usage requires a pinned Army export pair")
     with (
         closing(_connect(application_path)) as application,
         closing(_connect(raw_path)) as raw,
@@ -460,6 +478,8 @@ def build_variant_usage_projection(
                 "uniqueUnits": len(unit_keys),
                 "uniqueArmyUnits": len(army_keys),
                 "distinctContexts": len(context_keys),
+                "distinctProfileContexts": sum(key[2] == "profile" for key in context_keys),
+                "distinctLoadoutContexts": sum(key[2] == "option" for key in context_keys),
                 "sourceRelationshipRows": len(rows),
                 "sourceRows": rows,
             })
@@ -467,13 +487,15 @@ def build_variant_usage_projection(
             x["catalog"], OWNERS.index(x["ownerKind"]), x["occurrenceId"]
         ))
         return {
-            "format": "infinitydb-rule-variant-usage", "formatVersion": 1,
+            "format": "infinitydb-rule-variant-usage", "formatVersion": 2,
             "scope": "read-only-candidate-not-published",
             "sourceSnapshot": {
                 "armyArchiveSha256": snapshot,
                 "armyDatabaseSha256": _digest(application_path),
                 "rawDatabaseSha256": _digest(raw_path),
                 "rulesDatabaseSha256": _digest(rules_path),
+                "exportPairSha256": export_pair,
+                "deployedObjectPublicationSha256": _digest(publication_path),
             },
             "variants": ordered,
             "familyOnlyUniqueUnitCounts": {
@@ -483,3 +505,14 @@ def build_variant_usage_projection(
             "unresolvedSourceRows": unresolved,
             "relationships": _include_peripheral_provenance(application, raw),
         }
+
+
+def validate_variant_usage_candidate(candidate_path: Path, expected: dict[str, Any]) -> None:
+    """Require full structural and typed parity with a freshly source-verified candidate."""
+    try:
+        candidate = json.loads(candidate_path.read_text(encoding="utf-8"))
+        matches = _canonical(candidate) == _canonical(expected)
+    except (OSError, ValueError, TypeError) as exc:
+        raise ValueError("Unreadable or invalid variant usage candidate") from exc
+    if not matches:
+        raise ValueError("Variant usage candidate is stale or differs from verified inputs")

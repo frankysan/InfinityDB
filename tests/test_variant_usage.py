@@ -18,8 +18,10 @@ from infinity_db.variant_usage import (
     _published_extras_match,
     _resolve_effect,
     build_variant_usage_projection,
+    validate_variant_usage_candidate,
 )
 from infinity_db.variant_usage_includes import build_include_provenance
+from infinity_db.variant_usage_peripherals import build_peripheral_provenance
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -47,11 +49,16 @@ def usage_databases() -> Iterator[tuple[sqlite3.Connection, sqlite3.Connection]]
         create_schema(connection, {})
         _insert(connection, "__infinity_metadata", key="_meta",
                 value=json.dumps({"snapshotArchiveSha256": "a" * 64}))
+        _insert(connection, "__infinity_metadata", key="export_pair_sha256",
+                value=json.dumps("b" * 64))
+    _insert(raw, "unit_options", unit_id=185, option_id=9)
     _insert(application, "logical_unit_sources", source_unit_id=185, logical_unit_id=18)
     _insert(application, "profile_payloads", id=10, logical_unit_id=18, payload_sha256="profile")
     _insert(application, "loadout_payloads", id=20, logical_unit_id=18, payload_sha256="loadout")
     _insert(application, "unit_options", unit_id=185, option_id=9)
     for army, app_army in ((701, 70), (702, 71)):
+        _insert(raw, "profiles", army_id=army, unit_id=185, group_id=1, profile_id=1)
+        _insert(raw, "loadout_options", army_id=army, unit_id=185, group_id=1, option_id=1)
         _insert(application, "application_army_sources",
                 source_army_id=army, application_army_id=app_army)
         _insert(application, "army_units", army_id=army, unit_id=185)
@@ -283,6 +290,8 @@ def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
             source.backup(destination)
     with sqlite3.connect(paths[2]) as rules:
         rules.execute("CREATE TABLE marker (id)")
+    publication = tmp_path / "publication.json"
+    publication.write_text("{}", encoding="utf-8")
     monkeypatch.setattr(variant_usage, "load_deployed_object_publication", lambda *_args: {})
     monkeypatch.setattr(variant_usage, "_source_mapping", lambda *_args: {
         ("skills", 47): {"applicationItemId": 47, "rules": {
@@ -291,11 +300,13 @@ def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
         }},
     })
     projection = build_variant_usage_projection(
-        paths[0], paths[1], paths[2], tmp_path / "publication.json",
+        paths[0], paths[1], paths[2], publication,
     )
     group, = projection["variants"]
     assert (group["uniqueUnits"], group["uniqueArmyUnits"], group["distinctContexts"],
             group["sourceRelationshipRows"]) == (1, 2, 4, 7)
+    assert group["distinctProfileContexts"] == 2
+    assert group["distinctLoadoutContexts"] == 2
     rows = group["sourceRows"]
     assert len({tuple(row["sourceKey"]) for row in rows}) == 7
     assert {(row["ownerKind"], tuple(row["ownerPathKey"]), row["position"])
@@ -307,6 +318,7 @@ def test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts(
     shared, = [row for row in rows if row["ownerKind"] == "unit_option"]
     assert shared["context"]["applicationArmyId"] is None
     assert shared["context"]["logicalUnitId"] is None
+    assert shared["context"]["compatibility"]["status"] == "source-only-unverified"
     assert [row["armyId"] for row in rows if row["ownerKind"] == "profile"] == [
         701, 701, 702, 702,
     ]
@@ -456,20 +468,10 @@ def test_variant_usage_include_and_peripheral_edges_are_context_only(
     include_databases: tuple[sqlite3.Connection, sqlite3.Connection],
 ) -> None:
     application, raw = include_databases
-    _insert(application, "application_peripheral_controller_access", id=7,
-            source_id="pinned", controller_kind="profile", army_id=701,
-            unit_id=185, group_id=1, parent_id=1)
-    _insert(application, "application_peripheral_controller_targets", access_id=7,
-            target_logical_unit_id=42)
     result = _include_peripheral_provenance(application, raw)
     assert len(result["includes"]) == 6
     assert len(result["includePaths"]) == 10
-    assert result["peripheralControllerEdges"] == [{
-        "access_id": 7, "source_id": "pinned",
-        "controller_kind": "profile", "army_id": 701,
-        "unit_id": 185, "group_id": 1, "parent_id": 1,
-        "target_logical_unit_id": 42,
-    }]
+    assert result["peripheralControllerEdges"] == []
     assert "never counted as direct" in result["policy"]
 
 
@@ -508,10 +510,11 @@ def test_variant_usage_pinned_pair_has_source_ownership_not_inferred_includes() 
         ROOT / "data/generated/deployed-objects.json",
     )
     assert projection["scope"] == "read-only-candidate-not-published"
-    assert projection["formatVersion"] == 1
+    assert projection["formatVersion"] == 2
     assert len(projection["sourceSnapshot"]["armyArchiveSha256"]) == 64
     assert projection["relationships"]["policy"].startswith("context-only")
     assert projection["relationships"]["includes"]
+    assert len(projection["relationships"]["peripheralAttachments"]) == 818
     assert isinstance(projection["relationships"]["peripheralControllerEdges"], list)
     assert projection["variants"]
     assert {f"skill:martial-arts-l{level}" for level in range(1, 6)} <= {
@@ -524,6 +527,9 @@ def test_variant_usage_pinned_pair_has_source_ownership_not_inferred_includes() 
         for group in projection["variants"]
     )
     for group in projection["variants"]:
+        assert group["distinctContexts"] == (
+            group["distinctProfileContexts"] + group["distinctLoadoutContexts"]
+        )
         contexts = [
             row["context"] for row in group["sourceRows"]
             if row["context"]["applicationArmyId"] is not None
@@ -554,3 +560,177 @@ def test_variant_usage_pinned_pair_has_source_ownership_not_inferred_includes() 
             assert not any(k in owner for k in ("includePosition", "peripheralId"))
     # Stable canonical output independent of incidental dict iteration.
     assert json.loads(json.dumps(projection, sort_keys=True)) == projection
+
+
+@pytest.mark.parametrize("compatible", [None, "[]", "[1]", "unreviewed"])
+@pytest.mark.parametrize("disabled", [0, 1])
+def test_variant_usage_shared_option_never_infers_compatible_armies(
+    usage_databases: tuple[sqlite3.Connection, sqlite3.Connection],
+    compatible: str | None, disabled: int,
+) -> None:
+    application, raw = usage_databases
+    for database in (application, raw):
+        database.execute("UPDATE unit_options SET compatible=?, disabled=?, raw=?",
+                         (compatible, disabled, "opaque source data"))
+    _add_direct(application, raw, "skills", "unit_option")
+    row, = variant_usage._source_rows(raw, "skills", "unit_option")
+    context = variant_usage._direct_context(application, row, "unit_option")
+    assert context is not None
+    assert context["applicationArmyId"] is None
+    assert context["logicalUnitId"] is None
+    assert context["payloadSha256"] is None
+    assert context["compatibility"]["source"] == {
+        "compatible": compatible, "disabled": disabled, "raw": "opaque source data",
+    }
+    assert context["compatibility"]["status"] == "source-only-unverified"
+
+
+@pytest.mark.parametrize("mutation", [
+    "UPDATE unit_options SET compatible='[701]'",
+    "UPDATE unit_options SET disabled=1",
+    "UPDATE unit_options SET raw='changed'",
+    "DELETE FROM unit_options",
+])
+def test_variant_usage_shared_option_owner_drift_is_rejected(
+    usage_databases: tuple[sqlite3.Connection, sqlite3.Connection], mutation: str,
+) -> None:
+    application, raw = usage_databases
+    _add_direct(application, raw, "skills", "unit_option")
+    row, = variant_usage._source_rows(raw, "skills", "unit_option")
+    application.execute(mutation)
+    assert variant_usage._direct_context(application, row, "unit_option") is None
+
+
+@pytest.mark.parametrize("mutation", [
+    "DELETE FROM unit_options",
+    "INSERT INTO unit_options SELECT * FROM unit_options",
+])
+def test_variant_usage_shared_option_source_owner_is_required(
+    usage_databases: tuple[sqlite3.Connection, sqlite3.Connection], mutation: str,
+) -> None:
+    application, raw = usage_databases
+    _add_direct(application, raw, "skills", "unit_option")
+    _relax_keys(raw, "unit_options")
+    raw.execute(mutation)
+    with pytest.raises(ValueError, match="Missing or ambiguous shared Unit option"):
+        variant_usage._source_rows(raw, "skills", "unit_option")
+
+
+@pytest.mark.parametrize("tamper", ["version", "count", "row", "hash", "typed", "unknown"])
+def test_variant_usage_saved_candidate_rejects_stale_and_tampered_content(
+    tmp_path: Path, tamper: str,
+) -> None:
+    expected = {
+        "formatVersion": 2, "sourceSnapshot": {"armyDatabaseSha256": "a" * 64},
+        "variants": [{"uniqueUnits": 1, "sourceRows": [{"occurrenceId": 7}]}],
+    }
+    candidate = tmp_path / "candidate.json"
+    # Whitespace and JSON key ordering are presentation, not source identity.
+    candidate.write_text(json.dumps(expected, sort_keys=True), encoding="utf-8")
+    validate_variant_usage_candidate(candidate, expected)
+    changed = json.loads(json.dumps(expected))
+    if tamper == "version":
+        changed["formatVersion"] = 1
+    elif tamper == "count":
+        changed["variants"][0]["uniqueUnits"] = 2
+    elif tamper == "row":
+        changed["variants"][0]["sourceRows"] = []
+    elif tamper == "hash":
+        changed["sourceSnapshot"]["armyDatabaseSha256"] = "b" * 64
+    elif tamper == "typed":
+        changed["variants"][0]["uniqueUnits"] = True
+    else:
+        changed["unverified"] = True
+    candidate.write_text(json.dumps(changed), encoding="utf-8")
+    with pytest.raises(ValueError, match="stale or differs"):
+        validate_variant_usage_candidate(candidate, expected)
+
+
+@pytest.mark.parametrize("content", [None, "{", "NaN"])
+def test_variant_usage_unreadable_candidate_fails_closed(
+    tmp_path: Path, content: str | None,
+) -> None:
+    candidate = tmp_path / "candidate.json"
+    if content is not None:
+        candidate.write_text(content, encoding="utf-8")
+    with pytest.raises(ValueError, match="Unreadable or invalid"):
+        validate_variant_usage_candidate(candidate, {})
+
+
+def test_variant_usage_mismatched_export_generation_fails_before_reading_rows(
+    usage_databases: tuple[sqlite3.Connection, sqlite3.Connection],
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    application, raw = usage_databases
+    raw.execute("UPDATE __infinity_metadata SET value=? WHERE key='export_pair_sha256'",
+                (json.dumps("c" * 64),))
+    paths = [tmp_path / name for name in ("application.db", "raw.db")]
+    for connection, path in zip((application, raw), paths, strict=True):
+        connection.commit()
+        with sqlite3.connect(path) as destination:
+            connection.backup(destination)
+    monkeypatch.setattr(variant_usage, "load_deployed_object_publication", lambda *_args: {})
+    with pytest.raises(ValueError, match="different exports"):
+        build_variant_usage_projection(
+            paths[0], paths[1], tmp_path / "rules.db", tmp_path / "pub.json",
+        )
+
+
+@pytest.mark.parametrize("owner", ["profile", "option"])
+@pytest.mark.parametrize("mutation", [None, "quantity", "raw", "name", "owner"])
+def test_variant_usage_source_only_peripheral_attachments_require_exact_parity(
+    usage_databases: tuple[sqlite3.Connection, sqlite3.Connection],
+    owner: str, mutation: str | None,
+) -> None:
+    application, raw = usage_databases
+    identity = "profile_id" if owner == "profile" else "option_id"
+    _insert(raw, "peripherals", army_id=701, id=7, name="Source-only bot")
+    _insert(application, "application_peripheral_source_labels", army_id=701,
+            peripheral_id=7, source_name="Source-only bot")
+    for connection in (application, raw):
+        _insert(connection, f"{owner}_peripherals", occurrence_id=9, army_id=701,
+                unit_id=185, group_id=1, **{identity: 1}, position=1, item_id=7,
+                quantity=2, raw=None)
+    result = build_peripheral_provenance(application, raw)
+    attachment, = result["peripheralAttachments"]
+    assert attachment["source"]["quantity"] == 2
+    assert attachment["source"]["occurrence_id"] == 9
+    assert attachment["context"]["logicalUnitId"] == 18
+    assert result["peripheralControllerEdges"] == []
+    if mutation is None:
+        return
+    if mutation == "name":
+        raw.execute("UPDATE peripherals SET name='Drifted'")
+    elif mutation == "owner":
+        table = "profiles" if owner == "profile" else "loadout_options"
+        raw.execute(f"DELETE FROM {table}")
+    else:
+        value = "3" if mutation == "quantity" else "'changed'"
+        application.execute(f"UPDATE {owner}_peripherals SET {mutation}={value}")
+    with pytest.raises(ValueError):
+        build_peripheral_provenance(application, raw)
+
+
+def test_variant_usage_cli_check_never_writes_candidate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tools import build_variant_usage as cli
+
+    result = {
+        "scope": "read-only-candidate-not-published", "variants": [],
+        "familyOnlyUniqueUnitCounts": {}, "unresolvedSourceRows": [],
+        "diagnosticCounts": {}, "sourceSnapshot": {},
+        "relationships": {"includes": [], "includePaths": [],
+                          "peripheralAttachments": [], "peripheralControllerEdges": []},
+    }
+    candidate = tmp_path / "candidate.json"
+    original = json.dumps(result).encode("utf-8")
+    candidate.write_bytes(original)
+    monkeypatch.setattr(cli, "build_variant_usage_projection", lambda *_args: result)
+    monkeypatch.setattr("sys.argv", ["build_variant_usage", "--check", str(candidate)])
+    cli.main()
+    assert candidate.read_bytes() == original
+    result["scope"] = "changed"
+    with pytest.raises(ValueError, match="stale or differs"):
+        cli.main()
+    assert candidate.read_bytes() == original

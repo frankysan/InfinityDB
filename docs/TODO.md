@@ -268,11 +268,11 @@ and final candidate acceptance retain their individual owners below.
   preserves direct source-row identities and validates context-only Include
   chains. Its [acceptance evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05)
   distinguishes focused checks from final projection acceptance.
-  **Remaining:** independently validate positive/negative Peripheral paths
-  against reviewed relationships, settle shared Unit-option compatibility
-  explicitly, and accept the matched candidate artifact. Source-row and Include
-  validation is accepted for the pinned development candidate; this does not
-  close the remaining relationship or artifact boundaries.
+  **Remaining:** complete pinned Linux acceptance of independent Peripheral
+  validation, explicit source-only shared-option compatibility and format-2
+  candidate generation/recheck. Windows focused validation passed; the linked
+  VR-0086–0088 remain open until execution evidence is reconciled. Source-row
+  and Include validation remains accepted for the pinned development candidate.
   No runtime API, release publication or variant-specific totals for unresolved
   rows exist; downstream delivery stays with V1S-064–066.
 - [ ] **V1S-064 (M, build):** Expose source-scoped variant usage through a stable API/read model with negative

@@ -2306,11 +2306,35 @@ drift and cycles fail closed. Repeated targets through different source
 positions retain separate deterministic paths. A shared Unit option's target
 Army identifies only its target, not compatible membership for its parent.
 
+Peripheral validation reuses the reviewed identity validator against an
+in-memory combination of independent raw source tables and materialized
+application relationships. Every source attachment must match its published
+row and named source definition. Reviewed Controller access pools retain their
+relationship/type/source identity and independently resolved Controller and
+target profile contexts. Missing metadata, changed access pools, ambiguous
+owners and cross-Army targets fail closed. An access pool describes eligibility,
+not actual selection or possession of the Peripheral's Skills.
+
+Shared Unit-option occurrences retain exact `compatible`, `disabled` and `raw`
+source fields, with parity against their published parent. No reviewed
+compatibility resolver currently establishes a concrete Army/profile context
+for these options: the explicit status is `source-only-unverified`. They remain
+source rows, excluded from Army, Unit and profile/loadout totals even when a
+raw compatibility value is populated. Neither an available Unit nor an Include
+target proves parent-option compatibility. Supporting a reviewed compatibility
+shape later requires a separate validated mapping/contract; the current snapshot
+has no direct Skill/Equipment rows on shared Unit options.
+
 Both edges and paths remain explicitly context-only; they do not contribute
-to direct variant totals. This is an ignored local candidate, with no
-runtime API or browser publication. [V1S-063](TODO.md#rule-variant-usage-index-and-restrictions)
-retains the remaining acceptance, including independent Peripheral contexts
-and explicit shared-option compatibility. See the
+to direct variant totals. Candidate format 2 pins the shared Army export-pair
+identity plus exact Army/raw/rules/publication file digests. The builder rejects
+different export generations even when their Army snapshot matches. Its
+`--check` mode regenerates from verified inputs and compares the entire saved
+candidate, including JSON value types, without rewriting it. Rebuild an older
+candidate when the format or any input changes. Profile and loadout context
+cardinalities are also reported separately alongside their combined total.
+This is an ignored local
+candidate, with no runtime API or browser publication. See the
 [candidate evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
 
 #### V1S-062 — finalized identity, ordering and ownership contract (2026-11-05)
