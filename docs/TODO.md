@@ -287,14 +287,24 @@ State-side contexts, without inferring live Unit States or broader edges.
 **Parent:** [Weapon, Ammunition and Deployable presentation](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-074 (M, review):** Review scenery, Gate glossary terms, terrain combinations and scenario
-  elements; classify devices versus non-devices.
+The [V1S-074 scenery and scenario boundary review](v1.0-source-coverage-audit.md#scenery-gates-terrain-combinations-and-scenario-elements-v1s-074-2026-11-05)
+classifies Gate labels, optional terrain examples and scenario objectives separately
+from deployed devices. Its confirmed reference gaps remain under V1S-077.
+
 - [ ] **V1S-075 (M, review):** Rerun source snapshot and full-depth Include audits; preserve exact Army,
   Unit-option and profile ownership.
 - [ ] **V1S-076 (M, review):** Audit reverse-use delivery, carrier and source-position edges; avoid inferred
   uses from prose.
 - [ ] **V1S-077 (L, conditional):** For each confirmed new object or edge, extend curated inventory,
   deterministic publication and API with targeted regressions.
+  Confirmed V1S-074 reference gaps: make Narrow Gate and Wide Gate discoverable
+  through normal search/Glossary navigation to their Access Width owner; publish
+  the eighteen suggested terrain combinations with their independent Type,
+  Difficult Terrain, Visibility and Saturation values. Preserve optional values,
+  source dashes, conditional Zero-G and Storm's visibility adjustment without
+  inventing extra Terrain Types, devices, carrier uses or scenario requirements.
+  Include source/storage/API and three-width browser regressions and the matched
+  rules/publication refresh. The bounded source review found no new device identity.
 - [ ] **V1S-078 (M, gate):** Accept deployed-object API/browser navigation, incomplete attributes, variants
   and documented Mine/Dazer/Turret conflicts.
 
