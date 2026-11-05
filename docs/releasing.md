@@ -76,14 +76,16 @@ The 1.0 release gate requires:
 - [ ] Resolve any known defect that materially misrepresents a player's unit, profile,
   weapon, skill, equipment, army relationship, or rule information.
 
-**Unresolved official rulings are not release blockers.** A known discrepancy
-may remain open when users can clearly identify the relevant sources/versions,
-the nature of the disagreement, the value or interpretation InfinityDB presents,
-and its uncertainty or applicability limit. The release gate requires accurate,
-usable disclosure; it does not require an external publisher to issue an erratum
-or choose between conflicting publications. Missing or misleading disclosure and
+**Unresolved official rulings are not release blockers.** Open entries in the
+[SRC clarification register](official-source-clarifications.md) may remain
+unanswered at 1.0. A known discrepancy may remain open when users can clearly
+identify the relevant sources/versions, the nature of the disagreement, the
+value or interpretation InfinityDB presents, and its uncertainty or
+applicability limit. The release gate requires accurate, usable disclosure;
+it does not require an external publisher to issue an erratum or choose
+between conflicting publications. Missing or misleading disclosure and
 independently confirmed implementation errors remain release-blocking defects.
-Track requests for official corrections as non-blocking follow-up work in TODO.
+Track requests for official corrections as non-blocking post-1.0 work in TODO.
 
 Immediately before 1.0, perform a final source-by-source completeness audit. Record
 where each discovered player-relevant information type is represented, verify every
@@ -320,8 +322,11 @@ For releases that are deployed to the hosted InfinityDB instance:
   of the release's other changed surfaces.
 - [ ] Confirm required database/schema rebuilds and published assets are actually the
   release-matched versions.
-- [ ] Confirm rollback remains available before considering deployment acceptance
-  complete.
+- [ ] Confirm the retained prior release image/database and documented recovery
+  path remain available before considering deployment acceptance complete.
+  For the single-operator 1.0 deployment, this is an availability check,
+  **not** a required live-host rollback/forward rehearsal. Retain the normal
+  deployment smoke, exact-version and runtime-pair verification gates.
 
 Record durable release outcomes in the changelog/reference documentation. Detailed
 check logs and one-off acceptance evidence should remain in their normal reports, CI,

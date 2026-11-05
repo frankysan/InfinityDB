@@ -223,13 +223,13 @@ remains with the scenario, FAQ and release gates below.
 Remaining source authority, complete Weapon-profile review, occurrence indexing
 and final candidate acceptance retain their individual owners below.
 
-- [ ] **V1S-037 (M, review):** Resolve the remaining Silent/Attribute-Immunity timing and bilingual
-  qualifier question under [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier).
-  The [BTS/Critical/State review](v1.0-source-coverage-audit.md#bts-critical-and-state-immunity-review-v1s-037-2026-11-04)
-  found the existing source-scoped exceptions represented without further data changes.
-  Blocked: Corvus Belli ruling or an applicable new official source must establish whether the
-  Saving-Roll-triggered protection suppresses the earlier Silent Dodge MOD and reconcile the
-  English Face to Face qualifier. Retry when that evidence is available; retain public uncertainty.
+The [V1S-037 Silent/Attribute-Immunity source review](v1.0-source-coverage-audit.md#bts-critical-and-state-immunity-review-v1s-037-2026-11-04)
+confirmed that reviewed exceptions and public uncertainty are represented. The
+unanswered [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier)
+publisher question is a non-blocking post-1.0 clarification, not missing 1.0
+implementation. Reopen a release task only if an independently verified defect
+materially misrepresents the published rules.
+
 - [ ] **V1S-041 (M, gate):** Accept Reinforcement Section, profile and exact Commlink variants in ordinary
   browser/release context, without asserting roster legality.
   Deferred: existing three-width annex/navigation, two-width shared-profile and exact (+1)/(+2)
@@ -267,8 +267,10 @@ browser gate](v1.0-source-coverage-audit.md#full-exact-variant-usage-source-pair
 passes on the pinned development inputs. Hosted CI, artifact delivery, and final
 release acceptance remain separate.
 
-- [ ] **V1S-067 (M, external):** With separate authorization, rehearse Restrictions v8/v9 real-host
-  rollback/forward; CI simulation is not host acceptance.
+Restrictions v8/v9 migration safety has staged-pair validation and CI image
+rehearsal. A live-host rollback/forward rehearsal (former V1S-067) is not
+required for this operator-managed 1.0 deployment; retain ordinary recovery
+artifacts and deployment smoke checks.
 
 #### Game States context
 
@@ -358,8 +360,9 @@ release-matched source/publication and browser gates under V1S-081–090.
   the frozen release candidate or exact-main-SHA workflows.
   Preserve exact-candidate Source checks, Installed wheel and Deployment
   smoke requirements; no passing local/Linux suite substitutes for them.
-- [ ] **V1S-094 (L, external):** With explicit operational approval, validate retained rollback/forward
-  procedure and deploy the approved tagged artifact.
+- [ ] **V1S-094 (L, external):** With explicit operational approval, deploy the approved
+  tagged artifact using the documented operator procedure. Confirm recovery assets remain
+  available; a live-host rollback/forward rehearsal is not a 1.0 prerequisite.
 - [ ] **V1S-095 (M, gate):** Verify deployed exact source/runtime pair, release version, static assets and
   representative browser paths after deployment.
 - [ ] **V1S-096 (L, build):** Complete the
@@ -391,9 +394,11 @@ slice then addresses confirmed gaps. The variant index V1S-062–066 follows
 reviewed occurrence semantics, not the other way around. V1S-081–095 are
 frozen-candidate/release gates and must not be marked complete from earlier
 development checks. V1S-040 can close by accurate legacy-annex disclosure
-without a publisher response; V1S-067 and V1S-094 need separate operational
-authorization. After a new source acquisition, revisit affected review and
-downstream acceptance rather than accepting a previous baseline silently.
+without a publisher response. V1S-037's publisher question is post-1.0,
+and V1S-067's real-host rehearsal is inapplicable; only V1S-094 still
+requires deployment authorization. After a new source acquisition, revisit
+affected review and downstream acceptance rather than accepting a previous
+baseline silently.
 
 ### Source inventory and gap batches
 
@@ -634,11 +639,12 @@ the remaining source clauses and final release-browser acceptance remain open.
     [source/browser acceptance](testing.md#10-reviewed-immunity-interactions-browser-acceptance-rea-011).
     Component Immunity and combined-effect boundaries are reconciled in the
     [bounded source review](v1.0-source-coverage-audit.md#component-immunity-and-combined-effect-review-v1s-036-2026-11-04).
-    - [ ] Resolve V1S-037 / SRC-002's Silent timing and bilingual qualifier question.
-      The other exact BTS/non-Comms, Critical, Attribute and conditional State
+    - The Silent timing and bilingual qualifier question (SRC-002) remains
+      open for post-1.0 official clarification, not 1.0 acceptance. Other
+      exact BTS/non-Comms, Critical, Attribute and conditional State
       exceptions are reconciled in the linked source review; retain their
-      scoped explanations without a general target evaluator. Retry on a
-      publisher ruling or applicable new official source.
+      scoped explanations and disclose uncertainty without inferring a
+      general target evaluator.
     - [ ] Revalidate all published base identities and reviewed combined forms
       against the final pinned source and shared Weapon/Ammunition facts.
       Keep any future comparison-view consumer separate; no comparison UI or
@@ -661,13 +667,12 @@ the remaining source clauses and final release-browser acceptance remain open.
     The N4-origin procedures, Section/parent navigation and exact typed
     Commlink (+1)/(+2) variants are published; see the
     [scoped reference contract and V1S-040 authority decision](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data).
-    - [ ] **N5-native source clarification (SRC-030; external authority):** Obtain an
-      authoritative N5-specific Annex revision or official adoption ruling.
-      Pin its edition/date and reconcile differences before labelling the
-      procedures N5-native. **Blocked:** Corvus Belli must publish or confirm
-      the governing edition; retry on a new primary publication or publisher
-      response. The [V1S-040 decision](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data)
-      preserves the usable, clearly disclosed N4-origin optional reference.
+    - **N5-native authority boundary (SRC-030):** An official N5-specific
+      Annex revision or adoption ruling remains unavailable; request it
+      post-1.0. Do not label historic procedures N5-native without a
+      publisher source. The [V1S-040 decision](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data)
+      preserves a usable, clearly disclosed N4-origin optional reference.
+      This external clarification is not part of 1.0 acceptance.
     - [ ] Finish manual browser and release-matched Section/profile/Commlink
       acceptance. Source-wide profile/loadout and complete Commlink signature
       parity, selected-Army ownership and desktop/mobile navigation already have
@@ -797,22 +802,16 @@ the remaining source clauses and final release-browser acceptance remain open.
       payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
       ambiguous variants before publication. An audited source signature alone
       does not publish a Unit-usage index.
-  - [ ] Complete remaining Restrictions migration safety and operational
-    acceptance. The six-subject, 14-condition chart, typed v9 API, scoped
-    reverse links and qualified legacy labels are published; see the
-    [current contract](data-model.md#reviewed-restrictions-chart-projection).
-    Negative conditions do not establish affirmative action legality.
-    - The three legacy staging-only exporters now preserve the active v8/v9
-      release schema and reviewed Restrictions. Their focused regressions and
-      `tools.verify_staged_release_pair` reject stale release baselines,
-      modified candidate binaries and source drift before reviewed manual
-      promotion. Historical ignored staging directories without baseline
-      fingerprints remain evidence only; they must be rebuilt before reuse.
-      These tools do not promote artifacts automatically.
-    - [ ] **Deployment:** Validate real host rollback/forward with the retained
-      original v8 database/publication pair. The passing CI image rehearsal is
-      not a hosted deployment. Obtain explicit operational authorization and
-      a reviewed rollback plan before changing the host.
+  - Restrictions migration safety is implemented: the six-subject, 14-condition
+    chart, typed v9 API, scoped reverse links and qualified legacy labels are
+    published under the [current contract](data-model.md#reviewed-restrictions-chart-projection).
+    Negative conditions do not establish affirmative action legality. The three
+    legacy staging-only exporters preserve the active v8/v9 schema; their
+    focused regressions and `tools.verify_staged_release_pair` reject stale
+    baselines, modified candidates and source drift. Historical ignored staging
+    directories without fingerprints must be rebuilt before reuse. The tools
+    do not automatically promote artifacts; host rollback rehearsal is not
+    required for 1.0.
   - **Completion:** each projection has a normal browser entry point, source reconciliation, and
     regression coverage for its exceptional rows. Exact variant reconciliation gates the usage
     index; it need not block independently ready lookup or Restrictions views.
@@ -939,7 +938,9 @@ follow-up action. Retain source-native values until official resolution.
   Record each publisher response against its stable SRC ID, then add only
   implementation follow-ups that a verified ruling actually requires.
   This external work is non-blocking for 1.0 while the published
-  reference accurately discloses uncertainty.
+  reference accurately discloses uncertainty. In particular, former
+  V1S-037/SRC-002 and SRC-030 remain pending publisher authority, not
+  unresolved 1.0 implementation tasks.
 
 ### Source notation and rule references
 
