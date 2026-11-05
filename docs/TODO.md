@@ -259,8 +259,6 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Generated rules-reference projections](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend, Deployment
 
-- [ ] **V1S-050 (S, review):** Resolve Infiltration's five bare ReRoll occurrences only with explicit source
-  authority; preserve the five reviewed fixed-PH values.
 - [ ] **V1S-051 (S, review):** Review exact Engineer occurrence parameters and operational exceptions; no
   unsupported generic modifiers.
 - [ ] **V1S-052 (S, review):** Review exact Doctor occurrence parameters independently of Engineer and
@@ -340,6 +338,10 @@ and final candidate acceptance retain their individual owners below.
   `data/generated/rules.db` and its dependent deployed-object
   publication before opt-in tracked FAQ parity and release acceptance.
   Do not mistake the focused fresh-export API pass for a matched tracked pair.
+  Rerun the read-only Infiltration source reviewer after pairing: before
+  this rebuild, `tools.review_infiltration_ph_variant` detects a
+  `records` mismatch between tracked rules.db and fresh curation,
+  consistent with the separately queued V1S-048 FAQ source change.
 - [ ] **V1S-085 (M, gate):** Run source occupancy, source/archive, strict primary interaction, reference
   baseline and output reproducibility checks. Treat the
   [host-SQLite physical-vs-logical rebuild finding](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
@@ -777,8 +779,14 @@ the remaining source clauses and final release-browser acceptance remain open.
       adds five exact bracketed PH values for 17 Army occurrences under
       N5.3 p. 97, applying only to the PH-3 Infiltration Roll; five bare
       `ReRoll` extras remain unresolved because the printed reroll
-      requires an explicit PH=X value. These do not yet publish the
-      cross-Army usage index. Other unresolved source families remain.
+      requires an explicit PH=X value. The
+      [V1S-050 bounded source review](v1.0-source-coverage-audit.md#infiltration-bare-reroll-source-boundary-v1s-050-2026-11-05)
+      reconfirmed the five exact profile owners (Bandits ×2, Dasyus ×3)
+      and retained their untyped Army notation pending
+      [SRC-033](official-source-clarifications.md#src-033--infiltration-reroll-without-the-rulebooks-phx-parameter);
+      this review is closed without claiming publisher resolution.
+      These do not yet publish the cross-Army usage index.
+      Other unresolved source families remain.
     - [ ] Materialize public context links and verify duplicate sources, reused
       payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
       ambiguous variants before publication. An audited source signature alone

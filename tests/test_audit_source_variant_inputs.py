@@ -3330,6 +3330,32 @@ def test_infiltration_ph_exact_source_47_and_unreviewed_reroll(tmp_path: Path) -
             for owner in owners
         )
 
+    # V1S-050: preserve all five bare ReRoll source owners without promoting
+    # the missing PH=X to an invented Infiltration Roll modifier.
+    bare_owners = source_extra_owner_context(
+        ROOT / "data/generated/infinity.raw.db",
+        catalog="skills", source_id=47, extra_id=277,
+    )
+    assert len(bare_owners) == 5
+    assert {
+        (row["occurrence_id"], row["unit_id"], row["army_id"], row["source_position"])
+        for row in bare_owners
+    } == {
+        (44546, 400, 502, 9),   # Corregidor Bandits / Corregidor
+        (74177, 400, 905, 9),   # Corregidor Bandits / StarCo
+        (61511, 587, 701, 7),  # Dasyus / ALEPH
+        (65105, 587, 703, 7),  # Dasyus / OSS
+        (67248, 1727, 799, 7), # REINF: Dasyus / Ank Program
+    }
+    assert all(
+        row["owner"] == "profile"
+        and row["extra_position"] == 1
+        and row["extra_type"] == "TEXT"
+        and row["extra_raw"] == "ReRoll"
+        and row["source_raw"] is None
+        for row in bare_owners
+    )
+
 
 def test_infiltration_ph_review_rejects_unapproved_values_and_type() -> None:
     links: list[object] = [{"entity": "skill", "id": "infiltration"}]

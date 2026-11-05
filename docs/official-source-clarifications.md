@@ -2,7 +2,7 @@
 
 **Project domain:** Data processing
 **Maintained owner:** This is the canonical register of known Infinity rules, Army, Wiki, FAQ and scenario-source ambiguities, inconsistencies, and potential official corrections.
-**Last reviewed:** 2026-11-04
+**Last reviewed:** 2026-11-05
 **Publisher contact:** Not submitted. The entries are *candidate questions*, not claims that Corvus Belli has ruled on them.
 
 ## Purpose and maintenance contract
@@ -247,6 +247,13 @@ This register collects questions that may eventually be sent to Corvus Belli for
 - **Evidence:** Pinned September 29, 2026 Army raw source lists precisely two `CC Attack (+1 Dam)` direct occurrences: REINF: SHONA CARANO, Special Instructor and Aristeia! Swordmaster, unit 1639, source profile occurrence 13859 (Code: Capital / Army 199), and REINF: CHAKSA AUXILIARS, unit 1675, occurrence 69477 (Deras kaar / Army 899). Both are profile-owned, not Army-wide effects. English N5.3 p. 37 defines Possibility of Survival (PS) and notes that *lower* numerical PS is more lethal; pp. 51–52 describe CC Attack, and p. 75 explains modern Skill modifier notation but never defines `+1 Dam`. These sources do not establish a translation between legacy Damage notation and current PS or an additional-Wounds effect. See the [bounded V1S-056 review](v1.0-source-coverage-audit.md#cc-attack-source-240-occurrence-review-v1s-056-2026-11-04).
 - **Question:** In the N5 Army profiles for these two Reinforcements, what exactly does `CC Attack (+1 Dam)` change under N5 rules: weapon PS (and, if so, in which numerical direction), Wounds inflicted, another attack statistic, or only an obsolete display string? Is there an official updated notation for both occurrences?
 - **InfinityDB:** Preserve the literal raw qualifier and its exact source owners, but do not turn it into a positive numerical PS adjustment, a negative PS adjustment or additional Wounds without authority. No global CC Attack modifier, Weapon override or proposed gameplay ruling is published. The exact owner/signature test is pending under VD-0016/VR-0073.
+
+### SRC-033 — Infiltration (ReRoll) without the rulebook's PH=X parameter
+
+- **Status:** open — source intent unknown; **not** an established permission to use an unspecified replacement PH. **Alias:** V1S-050 / Army Skill source `47`, extra `277/TEXT:ReRoll`.
+- **Evidence:** In the pinned September 29, 2026 Army source, **216** direct Infiltration occurrences comprise **17** occurrences with five explicitly reviewed `PH=X` values, **five** bare `ReRoll` occurrences and **194** unqualified instances. The five bare extras are profile-owned: CORREGIDOR BANDITS unit 400, occurrences **44546** (Corregidor/Army 502) and **74177** (StarCo/905); DASYUS unit 587, occurrences **61511** (ALEPH/701) and **65105** (OSS/703); and REINF: DASYUS unit 1727, occurrence **67248** (Ank Program/799). Each has the sole source extra `277/TEXT:ReRoll` with **no PH=X**. N5.3 English p. **97** defines the specific Infiltration reroll as `ReRoll PH=X`, applying the named PH to the **PH-3** Roll and accepting the second result; Spanish N5.3 p. **97** likewise requires `ReRoll FIS=X`. English N5.3 pp. **68, 75** independently allow a generic bracketed `ReRoll` to reroll one die when using the named Skill. The [official Infiltration Wiki](https://infinitythewiki.com/Infiltration) retains the explicit `PH=X` form; the pinned English FAQ v0.1 provides no rule resolving this notation mismatch. The generic and Skill-specific texts therefore leave the intended bare-Infiltration reroll parameter/application unclear, without proving an upstream mistake.
+- **Question:** Is the Army `Infiltration (ReRoll)` notation for Bandits/Dasyus intended to use the general one-die `ReRoll` modifier on the Trooper's ordinary PH-3 Infiltration Roll, or is it an incomplete `Infiltration (ReRoll PH=X)` entry? If it requires `X`, what exact PH applies to these profiles? Does the player have to accept the second Roll?
+- **InfinityDB:** Preserve all five source-owned `277/TEXT:ReRoll` qualifiers without a typed gameplay effect, while retaining the five separately reviewed fixed-PH values (**17** occurrences). Do not invent a replacement PH, silently assume generic reroll precedence over the specific Infiltration wording, or change the Unit's PH. V1S-050's exact owner and negative-typing regressions guard this boundary; the source/season decision remains open until a verified official correction or clarification.
 
 ## Intake / future publisher correspondence
 
