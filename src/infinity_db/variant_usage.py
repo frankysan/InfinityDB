@@ -192,14 +192,15 @@ def _direct_context(
     """Validate the actual published source occurrence and its payload position."""
     if owner == "unit_option":
         match = application.execute(
-            f"SELECT item_id, position, quantity, raw FROM "
+            f"SELECT item_id, position, display_order, quantity, raw FROM "
             f"unit_option_{row['catalog']} WHERE occurrence_id = ? "
             "AND unit_id = ? AND option_id = ?",
             (row["occurrenceId"], row["unitId"], row["optionId"]),
         ).fetchone()
         if match is None or any(match[field] != row[key] for field, key in (
             ("item_id", "sourceId"), ("position", "position"),
-            ("quantity", "quantity"), ("raw", "raw"),
+            ("display_order", "displayOrder"), ("quantity", "quantity"),
+            ("raw", "raw"),
         )) or not _published_extras_match(application, row, owner):
             return None
         # Shared Unit options have no globally valid Army or profile attribution.
@@ -212,7 +213,8 @@ def _direct_context(
     payload_field = "profile_payload_id" if owner == "profile" else "loadout_payload_id"
     result = application.execute(
         f"SELECT o.{payload_field} AS payload_id, p.payload_sha256, "
-        "o.position AS context_position, t.item_id, t.quantity, t.raw, "
+        "o.position AS context_position, t.item_id, t.display_order, "
+        "t.quantity, t.raw, "
         "a.application_army_id, l.logical_unit_id "
         f"FROM {occurrence_table} AS o "
         f"JOIN {table} AS t ON t.{payload_field} = o.{payload_field} "
@@ -224,22 +226,27 @@ def _direct_context(
         f"AND o.{id_field} = ? AND t.position = ?",
         (row["armyId"], row["unitId"], row["groupId"], row["parentId"],
          row["position"]),
-    ).fetchone()
-    if (result is None or result["item_id"] != row["sourceId"]
-            or result["quantity"] != row["quantity"]
-            or result["raw"] != row["raw"]
+    ).fetchall()
+    # Do not silently pick one published owner if the path joins ambiguously.
+    if len(result) != 1:
+        return None
+    match = result[0]
+    if (match["item_id"] != row["sourceId"]
+            or match["display_order"] != row["displayOrder"]
+            or match["quantity"] != row["quantity"]
+            or match["raw"] != row["raw"]
             or not _published_extras_match(
-                application, row, owner, result["payload_id"]
+                application, row, owner, match["payload_id"]
             )):
         return None
     return {
         "ownerKind": owner,
-        "applicationArmyId": result["application_army_id"],
-        "logicalUnitId": result["logical_unit_id"],
+        "applicationArmyId": match["application_army_id"],
+        "logicalUnitId": match["logical_unit_id"],
         "sourceArmyId": row["armyId"], "sourceUnitId": row["unitId"],
         "groupId": row["groupId"], "parentId": row["parentId"],
-        "payloadSha256": result["payload_sha256"],
-        "contextPosition": result["context_position"],
+        "payloadSha256": match["payload_sha256"],
+        "contextPosition": match["context_position"],
     }
 
 

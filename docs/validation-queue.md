@@ -116,7 +116,16 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No pending test-design obligations.
+- [ ] VD-0025 (2026-11-05; needs-design): Prove exact source/published
+  `display_order` parity for profile, loadout-option and shared Unit-option
+  Skill/Equipment rows, and reject a duplicate published owner join rather
+  than taking its first row.
+  Work: [V1S-063](TODO.md#rule-variant-usage-index-and-restrictions);
+  change: `src/infinity_db/variant_usage.py` after `802e47c1`;
+  risk: source-row integrity.
+  Existing coverage: `tests/test_variant_usage.py` checks source extras and
+  archive pairing but not these negative display/duplicate cases.
+  Linked execution: VR-0083. Design only; do not run tests in this phase.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -144,15 +153,29 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending deferred-execution obligations. The five-item November 4 drain is
-verified at 1d0d5c196b87983737981b8b8244321b552527a4; see the linked testing
-evidence above. No concrete design or local execution remains deferred for
-this batch. Hosted CI and final release gates retain their separate owners.
+The five-item November 4 drain was verified at
+`1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
+summary above. Hosted CI and final release gates retain separate owners.
+
+- [ ] VR-0083 (2026-11-05; awaiting-design): Verify strengthened V1S-063
+  source-to-published row integrity and candidate stability.
+  Work: [V1S-063](TODO.md#rule-variant-usage-index-and-restrictions);
+  revision: implementation commit after `802e47c1` (record exact SHA on run);
+  risk: source-row parity and ambiguous ownership.
+  Immediate: Ruff target PASS; Pyright 0 errors/0 warnings; docs lint/links
+  PASS; V1S static checker PASS (37 declarations, 0 warnings).
+  Publication-integrity exception: read-only `tools.build_variant_usage`
+  passed on the paired local candidate (151 exact groups, 10,923 rows,
+  4,938 unresolved); no tests run in implementation.
+  Design: VD-0025.
+  Deferred: `tests/test_variant_usage.py` with designed negative fixture,
+  plus a matched local/Linux candidate build and broader source checks as due.
+  Outcome: unrun; do not mark V1S-063 complete.
 
 ## Next unused IDs
 
-- Design: `VD-0025`; active obligations are listed above.
-- Execution: `VR-0083`; active obligations are listed above.
+- Design: `VD-0026`; active obligations are listed above.
+- Execution: `VR-0084`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -272,6 +272,9 @@ and final candidate acceptance retain their individual owners below.
     groups 151 exact variants from 10,923 direct source rows and flags
     4,938 rows unresolved; 1,273 Include edges and zero present Peripheral
     controller edges remain context-only. **Seven** focused tests pass.
+    A follow-up source-parity hardening rejects changed published
+    `display_order` values and ambiguous context joins; its regression
+    fixtures and execution are tracked as VD-0025/VR-0083.
     **Still required before closing V1S-063:** source-key and repeated-row
     fixture coverage across shared payloads and Army contexts, validated
     Include path/cycle handling and positive Peripheral path against appropriate
