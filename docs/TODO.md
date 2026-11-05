@@ -264,6 +264,20 @@ and final candidate acceptance retain their individual owners below.
   [V1S-062 accepted identity, counting and ownership contract](data-model.md#v1s-062--finalized-identity-ordering-and-ownership-contract-2026-11-05)
   with the specified negative/duplicate/source-pair tests; do not count an
   unresolved source extra or unverified Include/Peripheral link as direct usage.
+  - **2026-11-05 implemented foundation (not yet closed):** the read-only
+    `src/infinity_db/variant_usage.py` builder and
+    `tools.build_variant_usage` CLI verify the matched Army/rules publication,
+    raw snapshot and all source-vs-published direct row counts/extras. Its
+    [candidate run](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05)
+    groups 151 exact variants from 10,923 direct source rows and flags
+    4,938 rows unresolved; 1,273 Include edges and zero present Peripheral
+    controller edges remain context-only. **Seven** focused tests pass.
+    **Still required before closing V1S-063:** source-key and repeated-row
+    fixture coverage across shared payloads and Army contexts, validated
+    Include path/cycle handling and positive Peripheral path against appropriate
+    real/synthetic evidence, explicit treatment of shared Unit-option
+    compatibility, and matched candidate artifact acceptance. No runtime API,
+    release publication or variant-specific totals for unresolved rows exist.
 - [ ] **V1S-064 (M, build):** Expose source-scoped variant usage through a stable API/read model with negative
   and duplicate-source cases.
 - [ ] **V1S-065 (M, build):** Add discoverable ordinary reference links from canonical Skill/Equipment
