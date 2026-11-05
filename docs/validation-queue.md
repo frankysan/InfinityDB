@@ -124,8 +124,8 @@ No pending test-design obligations. VD-0053/0054/0055 were retired
 after static design review of the authored Git-history and index/worktree
 fixtures in `tests/test_check_v1_backlog.py` (Ruff and Pyright passed);
 **no tests ran during design**. The selectors remain under VR-0104/0105.
-Earlier VD-0050/0051/0052 selectors remain under VR-0103 pending its
-current-release full-run acceptance.
+Earlier VD-0050/0051/0052 selectors were verified by the pinned
+`e957c43e` full-assets run; hosted follow-through is tracked in CI policy.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -156,13 +156,6 @@ is recorded. Failed or incomplete verification remains open.
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
-
-- [ ] VR-0103 (2026-11-05; ready-to-run): Track and require the byte-exact v1.0 variant-usage release publication throughout source CI, deployment packaging, preflight/image smoke and v8 compatibility checks.
-  Work: [variant usage projection](TODO.md#rules-and-reference-completeness); revision: e957c43e (portable release publication), Linux and hosted CI targeted at that exact revision; risk: high.
-  Immediate: Linux full run at a1f78bcd found a raw SQLite byte-digest difference despite identical export/Army/rules/object hashes, plus one missing publication fixture. Portable publication excludes the diagnostic raw digest, and the fixture now isolates the tested gate; Windows `--check-publication` and `--skip-svg` PASS (151 groups, 10,923 rows), targeted 97 variant tests, 9 real-browser tests and 12 deployment tests PASS.
-  Design: VD-0050/0051/0052 retired after static review; tests authored but not run.
-  Deferred: `tests/test_deployment_scripts.py` (tracked/image/v8 guards), `tests/test_verify_deployment_assets.py` (missing/empty/stale and matched preflight), `tests/test_variant_usage.py` and relevant `tests/test_web.py` selectors; normal source/CI smoke and actual container build at release candidate gate.
-  Outcome: Linux full assets PASS at e957c43e (5,306 passed, 29 skipped); regeneration parity PASS. Hosted wheel and deployment smoke PASS; Source jobs Windows 3.11, macOS 3.11 and Ubuntu 3.14 PASS, but Ubuntu 3.11 was cancelled, so cross-platform deterministic-output comparison was skipped. Keep open until a complete hosted Source run passes. Frozen candidate approval remains separately owned.
 
 - [ ] VR-0104 (2026-11-05; ready-to-run): Git-aware V1S backlog closeout auditor, initial committed-history mode.
   Work: [V1S-096](TODO.md#final-10-acceptance); revision: 52c09f9f (Git-history implementation); risk: medium.

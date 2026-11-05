@@ -309,8 +309,12 @@ reconfirmed `tools.build_variant_usage --check-publication` (151 groups,
 508.16 seconds** (8 xdist workers, four browser lanes, 808/808 SVGs).
 This validates only the pinned revision, not subsequent V1S-096 edits.
 Manual assistive-technology sign-off and final release candidate gates remain
-separate. Hosted wheel and deployment smoke for the same revision passed;
-Source matrix/deterministic-output acceptance remain tracked by CI.
+separate. Hosted wheel and deployment smoke for the same revision passed.
+Three Source matrix legs (Windows 3.11, macOS 3.11, Ubuntu 3.14) passed,
+but Ubuntu 3.11 was cancelled, leaving cross-platform deterministic-output
+comparison skipped. Those hosted gaps remain mandatory under
+[CI policy](ci.md) and final release acceptance; they do not extend VR-0103
+after its local checks passed.
 
 **2026-11-05 hosted integration repair:** Source run `42049878323` at
 `d4ffce43004e53b030af6f02184a7325e1878191` failed all four matrix legs:
