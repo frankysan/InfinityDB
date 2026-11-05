@@ -120,9 +120,7 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No pending design obligations. VD-0063 was retired after static review without
-execution; the curated-export, Glossary API, and 1440/390/320 px browser
-selectors are carried by VR-0111.
+No pending design obligations.
 
 VD-0062 was retired after static review without execution; its curated-export,
 Glossary API, and responsive browser selectors were executed and accepted under
@@ -146,23 +144,7 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-- [ ] VR-0111 (2026-11-05; ready-to-run): Expand the Peripheral Glossary
-  definition and correct the Spanish Trooper source-page reference.
-  Work: [TODO.md#final-10-acceptance](TODO.md#final-10-acceptance);
-  revision: commit pending; risk: medium. Rules SHA-256:
-  `163a88ae0896b3b66d54d1f49eebac581383778bbbb9495f3825753a2cc1bc3c`.
-  Immediate: two v9 exports were byte-identical; only `term:peripheral`
-  changed among 499 records, with schema, Restrictions and legacy relations
-  unchanged. The matched 17-object and 151-group variant-usage publications
-  passed their checks; hashes and structural comparisons are in the
-  [coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-peripheral-glossary-2026-11-05).
-  Design: VD-0063, retired after static review without execution.
-  Deferred:
-  `tests/test_application_rule_references.py::test_game_terms_are_current_canonical_embedded_records`;
-  `tests/test_web.py::test_glossary_projects_canonical_rules_and_embedded_attributes`;
-  `tests/test_verify_scenario_faq_browser.py::test_peripheral_term_normal_browser`
-  at 1440/390/320 px with required browser assets.
-  Outcome: immediate artifact checks passed; selectors await VR.
+No pending deferred execution.
 
 The most recent pinned Linux full-assets acceptance, including the 2026-11-04
 queue drain, is recorded in
