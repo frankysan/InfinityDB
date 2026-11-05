@@ -111,10 +111,10 @@ not a 1.0 gate.
 - [ ] **V1S-041 (M, gate):** Accept the optional Reinforcements
   Section, profiles and exact Commlink (+1)/(+2) variants in the
   ordinary browser on the frozen, release-matched source pair.
-  Deferred: Final release-paired acceptance depends on V1S-081/084/088;
-  authority: release owner; revisit: after those frozen-input gates pass.
   Preserve N4-origin disclosure; do not assert roster legality or
   N5-native authority.
+  Deferred: Final release-paired acceptance depends on V1S-081/084/088;
+  authority: release owner; revisit: after those frozen-input gates pass.
 
 #### Four core scenarios
 
@@ -126,6 +126,8 @@ not a 1.0 gate.
   and navigation/race-recovery acceptance alongside V1S-088.
   Existing [bounded source/browser checks](v1.0-source-coverage-audit.md#core-scenario-scoped-skills-specialists-overlays-and-faq-v1s-044-2026-11-05)
   do not certify the frozen candidate.
+  Deferred: Final-input acceptance requires V1S-081/084 and runs with V1S-088;
+  authority: release owner; revisit: after the frozen candidate is ready.
 
 #### FAQ and errata
 
@@ -172,10 +174,16 @@ is bounded to the development pair; final-input checks remain.
   and keyboard navigation. Soft-navigation focus/status code and
   browser regressions are validated; browser tests do not replace
   actual screen-reader sign-off.
+  Blocked: Required spoken-output review needs a human operating a supported
+  screen reader; authority: release owner; retry: when a human tester records
+  the screen-reader acceptance.
 - [ ] **V1S-080 (M, gate):** Complete final-candidate touch, theme,
   320/390px viewport and notice expand/collapse verification; fix
   reproducible 1.0 defects. Development touch regressions passed;
   release-candidate manual/browser acceptance remains open.
+  Deferred: Final-candidate checks depend on frozen inputs and V1S-088 paired
+  acceptance; authority: release owner; revisit: after V1S-081/084/088 produce
+  the candidate.
 
 #### Final frozen-candidate acceptance and release
 
