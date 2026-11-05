@@ -2370,8 +2370,10 @@ browser link; `unit_option` rows without verified Army compatibility remain
 unlinked, with an explicit notice. These are not source-inferred Army memberships.
 When the publication is missing, the catalog detail flag is `false` and browsers
 do not request the unavailable endpoint or present an empty index as proof of no
-usage. V1S-065's focused browser regression is accepted; V1S-066's complete
-cross-Army release-pair/browser acceptance remains open.
+usage. V1S-065's focused browser regression and V1S-066's full source-pair,
+canonical owner, and normal-browser acceptance are verified on the pinned
+2026-11-05 development inputs. Final release-candidate and hosted acceptance
+remain separate; ignored local publications are not deployed automatically.
 
 #### V1S-062 — finalized identity, ordering and ownership contract (2026-11-05)
 

@@ -262,10 +262,11 @@ and final candidate acceptance retain their individual owners below.
 The [read-only occurrence candidate](data-model.md#current-read-only-variant-candidate)
 has [source-row, relationship and artifact acceptance](v1.0-source-coverage-audit.md#peripheral-shared-option-and-candidate-artifact-acceptance-2026-11-05).
 The [matched-publication API and ordinary browser links](v1.0-source-coverage-audit.md#exact-variant-usage-browser-acceptance-2026-11-05)
-are implemented and focused-tested. Full cross-Army/source-pair acceptance remains below.
+are implemented and focused-tested. [V1S-066's complete cross-Army/source-pair
+browser gate](v1.0-source-coverage-audit.md#full-exact-variant-usage-source-pair-acceptance-2026-11-05)
+passes on the pinned development inputs. Hosted CI, artifact delivery, and final
+release acceptance remain separate.
 
-- [ ] **V1S-066 (M, gate):** Validate full cross-Army publication parity, unknown exclusion, browser coverage
-  and source-pair freshness for the new index.
 - [ ] **V1S-067 (M, external):** With separate authorization, rehearse Restrictions v8/v9 real-host
   rollback/forward; CI simulation is not host acceptance.
 
