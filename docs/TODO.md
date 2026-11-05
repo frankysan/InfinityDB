@@ -259,22 +259,10 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Generated rules-reference projections](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend, Deployment
 
-- [ ] **V1S-063 (L, build):** Generate and validate exact-variant occurrence projections from matched
-  Army/rules data, including Includes and Peripherals. Implement the
-  [V1S-062 accepted identity, counting and ownership contract](data-model.md#v1s-062--finalized-identity-ordering-and-ownership-contract-2026-11-05)
-  with the specified negative/duplicate/source-pair tests; do not count an
-  unresolved source extra or unverified Include/Peripheral link as direct usage.
-  The [read-only candidate](data-model.md#current-read-only-variant-candidate)
-  preserves direct source-row identities and validates context-only Include
-  chains. Its [acceptance evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05)
-  distinguishes focused checks from final projection acceptance.
-  **Remaining:** complete pinned Linux acceptance of independent Peripheral
-  validation, explicit source-only shared-option compatibility and format-2
-  candidate generation/recheck. Windows focused validation passed; the linked
-  VR-0086–0088 remain open until execution evidence is reconciled. Source-row
-  and Include validation remains accepted for the pinned development candidate.
-  No runtime API, release publication or variant-specific totals for unresolved
-  rows exist; downstream delivery stays with V1S-064–066.
+The [read-only occurrence candidate](data-model.md#current-read-only-variant-candidate)
+has [source-row, relationship and artifact acceptance](v1.0-source-coverage-audit.md#peripheral-shared-option-and-candidate-artifact-acceptance-2026-11-05).
+Runtime/API/browser publication and final source-pair acceptance remain below.
+
 - [ ] **V1S-064 (M, build):** Expose source-scoped variant usage through a stable API/read model with negative
   and duplicate-source cases.
 - [ ] **V1S-065 (M, build):** Add discoverable ordinary reference links from canonical Skill/Equipment
