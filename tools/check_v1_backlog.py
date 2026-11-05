@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import sys
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -769,6 +770,10 @@ def main(argv: list[str] | None = None) -> int:
         "--priority-reason",
         help="explicit priority override; must match the selected TODO annotation",
     )
+    parser.add_argument(
+        "--json", action="store_true",
+        help="print one machine-readable JSON result instead of console diagnostics",
+    )
     args = parser.parse_args(argv)
     if args.enforce_closeout and not args.base:
         parser.error("--enforce-closeout requires --base")
@@ -779,7 +784,14 @@ def main(argv: list[str] | None = None) -> int:
     try:
         markdown = args.todo.read_text(encoding="utf-8")
     except OSError as exc:
-        print(f"{args.todo}: unable to read backlog: {exc}", file=sys.stderr)
+        if args.json:
+            print(json.dumps({
+                "formatVersion": 1, "status": "error",
+                "message": f"Unable to read backlog: {exc}",
+                "source": str(args.todo),
+            }, sort_keys=True))
+        else:
+            print(f"{args.todo}: unable to read backlog: {exc}", file=sys.stderr)
         return 2
 
     analysis = analyze_backlog(markdown, source=str(args.todo))
@@ -790,27 +802,49 @@ def main(argv: list[str] | None = None) -> int:
         ))
         if args.target_state != "commit":
             diagnostics.extend(audit_pending_retirements(state=args.target_state))
+    review = None
     if args.select is not None:
         review = review_selection(
             analysis, args.select, priority_reason=args.priority_reason,
         )
-        print(f"V1S selection: {review.selected}")
-        print("Earlier open IDs: " + (", ".join(review.earlier_open) or "none"))
-        print("Documented pauses: " + (", ".join(review.documented_pauses) or "none"))
-        print("Earlier actionable: " + (", ".join(review.actionable) or "none"))
-        if review.actionable:
-            print(f"Earliest actionable: {review.actionable[0]}")
-        if review.override_applied:
-            print("Priority override: explicitly documented; earlier IDs remain open")
+        if not args.json:
+            print(f"V1S selection: {review.selected}")
+            print("Earlier open IDs: " + (", ".join(review.earlier_open) or "none"))
+            print("Documented pauses: " + (", ".join(review.documented_pauses) or "none"))
+            print("Earlier actionable: " + (", ".join(review.actionable) or "none"))
+            if review.actionable:
+                print(f"Earliest actionable: {review.actionable[0]}")
+            if review.override_applied:
+                print("Priority override: explicitly documented; earlier IDs remain open")
         diagnostics.extend(review.diagnostics)
+    errors = sum(item.severity == "error" for item in diagnostics)
+    warnings = sum(item.severity == "warning" for item in diagnostics)
+    if args.json:
+        result = {
+            "formatVersion": 1,
+            "status": "fail" if errors else "pass",
+            "source": str(args.todo),
+            "declarations": len(analysis.tasks),
+            "errors": errors,
+            "warnings": warnings,
+            "diagnostics": [asdict(item) for item in diagnostics],
+        }
+        if review is not None:
+            result["selection"] = {
+                "selected": review.selected,
+                "earlierOpen": list(review.earlier_open),
+                "documentedPauses": list(review.documented_pauses),
+                "actionable": list(review.actionable),
+                "overrideApplied": review.override_applied,
+            }
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+        return int(bool(errors))
     for diagnostic in diagnostics:
         print(
             f"{diagnostic.source}:{diagnostic.line}: {diagnostic.severity} "
             f"{diagnostic.code}: {diagnostic.message}\n"
             f"  Suggested correction: {diagnostic.suggestion}"
         )
-    errors = sum(item.severity == "error" for item in diagnostics)
-    warnings = sum(item.severity == "warning" for item in diagnostics)
     if errors:
         print(f"V1S backlog: FAIL ({errors} error(s), {warnings} warning(s))", file=sys.stderr)
         return 1

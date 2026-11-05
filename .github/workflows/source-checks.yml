@@ -6,6 +6,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      backlog_base:
+        description: Optional first-parent SHA for complete V1S closeout audit
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -57,6 +62,10 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
           cache-dependency-path: pyproject.toml
+
+      - name: Check V1S retirement history
+        if: matrix.check_args == '--all'
+        run: python -m tools.check_v1_backlog_ci
 
       - name: Install development dependencies
         run: python -m pip install -e ".[dev,symbols]"

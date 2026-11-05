@@ -25,7 +25,7 @@ The runner exposes seven stages:
 
 - `test` — pytest;
 - `lint` — Ruff;
-- `docs` — Markdownlint plus offline local Markdown path/heading checks;
+- `docs` — Markdownlint, offline Markdown path/heading checks and static V1S backlog integrity;
 - `type` — Pyright;
 - `build` — Army data/database build validation;
 - `rules` - interaction-review coverage and generated-checklist validation, followed by
@@ -63,6 +63,9 @@ The link checker excludes ignored private files, does not access external
 URLs, validate application routes or substitute for browser acceptance;
 it checks ordinary inline links and reference definitions, not arbitrary
 embedded HTML. Its file count can differ from Markdownlint's glob selection.
+The final docs-stage command, `tools.check_v1_backlog`, checks only the
+tracked V1S register's static structure. It needs no Git history or ignored
+inputs, and it does **not** automatically choose a task or approve closeout.
 Install the Markdownlint dependency **explicitly** before `docs` or `--all`:
 
 ```powershell
@@ -71,13 +74,56 @@ npm ci --ignore-scripts --no-audit --no-fund
 ```
 
 Node.js 22 or newer is required (CI uses Node.js 24). `npm run lint:docs`
-runs **Markdownlint only**; use `--stage docs` for both checks or invoke
-`python -m tools.check_doc_links` directly for the offline link audit.
+runs **Markdownlint only**; use `--stage docs` for the complete documentation
+checks or invoke the individual Python checkers directly.
 The stage invokes the pinned installed tool via `npm run`, not `npx`;
 checks neither install dependencies nor fetch packages automatically.
 Bootstrap downloads happen only with the separate `npm ci` step.
 Missing npm or dependencies cause an explicit check failure. No Node.js
 build step is part of the application's runtime or packaging.
+
+## V1S backlog checks
+
+The static V1S register check is part of the regular `docs` stage. For each
+autonomous numbered task, first run the explicit selection check. It examines
+every earlier open ID across workstreams and fails unexplained skips:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.check_v1_backlog --select V1S-041
+```
+
+A user-directed priority exception is permitted **only** when the selected
+task already includes an exact `Priority: <reason>; authority: <owner>;
+revisit: <trigger>` annotation in `docs/TODO.md`, and the CLI supplies
+the same reason. For the current V1S-096 implementation priority:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.check_v1_backlog --select V1S-096 --priority-reason "Complete the user-requested backlog checker before frozen-candidate acceptance"
+```
+
+Earlier `Blocked:` or `Deferred:` annotations must name a concrete reason,
+owner/authority and `retry:` or `revisit:` trigger, respectively. Incomplete
+annotations are warned about and **do not** excuse earlier IDs. Neither a
+selection pass nor a priority override retires any task.
+
+Before **removing** a numbered task from TODO, inspect the proposed index
+(or worktree) without altering it, then include each retired ID and canonical
+acceptance evidence in the eventual commit. After committing, audit the
+introducing history from a deliberately chosen ancestor revision:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base HEAD --target-state index
+.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base HEAD --target-state worktree
+.\.venv\Scripts\python.exe -m tools.check_v1_backlog --base HEAD~1 --enforce-closeout
+```
+
+The `HEAD~1` example checks only the most recent first-parent commit; use
+a verified earlier base when multiple closeouts are involved. Historical
+advisory mode omits `--enforce-closeout`. Merge ancestry errors are not
+clean passes, and evidence-pointer detection does not assess semantic
+acceptance. Pass `--json` for machine-readable status, diagnostics and
+selection metadata with the same exit codes. Git-aware CI has its own
+event-specific base-revision contract in [CI policy](ci.md).
 
 Requested stages continue after a failure by default so one run can report the complete failure set.
 Use `--fail-fast` when the first failure is sufficient.
@@ -291,6 +337,20 @@ for edits made after its tested state. Concurrent CPU/IO-intensive tasks
 can also affect test timing and Chromium stability, so limit contention.
 
 ### Parallel Windows development and Linux validation
+
+**2026-11-05 V1S-096 checker acceptance (VR-0104/0105/0106):**
+Linux worker `linux-dev` pinned to
+`0bac336999d102fe94a3bcadbeec83eca1ae7788` ran
+`tests/test_check_v1_backlog.py`: **39 passed, zero skipped/failures**
+in 0.86 seconds of pytest execution. The separate
+`tools.check_v1_backlog` static CLI passed with 20 declarations and
+zero warnings. Explicit `--select V1S-096` with its exact documented
+`--priority-reason` passed, reporting all **19** earlier open IDs,
+including the earliest (V1S-041), and one warning for the intentional
+user-priority override; no older task was retired. Windows Ruff, Pyright,
+Markdownlint, link checks and `git diff --check` passed before commit.
+This closes the **local** Phase 2/3 deferred-execution entries; Phase 4
+integration, hosted CI and final release acceptance remain independent.
 
 **2026-11-05 v1.0 publication and accessibility regression (VR-0102/0103):**
 The first pinned Linux run at `a1f78bcd` exposed two over-strict

@@ -116,6 +116,33 @@ For the `--all` leg, CI sets up Node.js 24 and explicitly runs
 check runner starts. The `docs` stage uses this local installation without acquiring dependencies
 at execution time; other matrix legs do not require npm.
 
+### V1S Git-aware retirement gate
+
+The primary Ubuntu 3.11 Source leg uses a full-history checkout and runs
+`python -m tools.check_v1_backlog_ci` before installing dependencies.
+The regular `docs` stage separately checks current TODO structure without Git.
+The CI retirement check enforces newly removed V1S identifiers only within an
+explicitly selected, first-parent-compatible range, with the same
+`V1B005`/evidence-pointer distinction as the offline checker:
+
+- Pull requests audit the PR **head commit**, not the synthetic merge commit;
+  choose the nearest shared first-parent revision from the PR base history,
+  narrowed to the adopted checker baseline when it is later.
+- Pushes to `main` audit the event's `before..after` range and fail if
+  the prior SHA is not in first-parent history. Force/divergent history is
+  not silently accepted.
+- Manual dispatches may provide an explicit `backlog_base` SHA. Otherwise,
+  the adopted `0bac3369` baseline is used when on the target's first-parent
+  path. Older branches fall back to the preceding commit with a prominent
+  **limited-history warning**; that partial check cannot certify full
+  retirement history for release acceptance.
+
+The helper fails closed on missing event data, invalid revisions, inaccessible
+history, incompatible ancestry and malformed target backlogs. Commit-message
+ID attribution is an objective check; evidence-pointer warnings still need
+review and do not approve semantic completion. This event-scoped gate must pass
+its own local and hosted checks before claiming CI rollout accepted.
+
 The development dependencies include PyMuPDF so PDF-aware test modules collect and
 research tools type-check in a clean environment. Official PDFs under `data/pdf/`
 remain ignored local evidence. Only tests requiring absent PDF bytes skip; data/API

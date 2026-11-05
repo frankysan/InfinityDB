@@ -5,11 +5,11 @@
 The Linux CLI passed with 53 declarations and zero warnings; its tests passed
 in the cumulative code profile at `1d0d5c19`, recorded in
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
-Phase 2's committed-history and pending index/worktree audits are implemented.
-The test designs were reviewed without execution; regression acceptance remains
-pending under VR-0104/0105. Phase 3's explicit selection gate is implemented
-with a required TODO-recorded priority reason; its VD/VR acceptance is pending.
-Phase 4 integration remains open under V1S-096.
+Phases 2 and 3 passed 39 checker regressions on pinned Linux `0bac3369`;
+their local VR-0104/0105/0106 entries were retired. Phase 4 integrates static
+checking with the normal docs stage, explicit agent selection and a bounded,
+event-scoped CI closeout audit. Its tests and hosted verification remain open
+under V1S-096; no release gate has been accepted by this implementation.
 **Scope:** The active `V1S-*` execution slices in [TODO.md](TODO.md#pre-planned-10-execution-slices), their documented completion, and the Git history of removals.
 
 ## Goal and constraints
@@ -139,7 +139,7 @@ advisory mode, with explicit `--enforce-closeout` opt-in. Pending-retirement
 inspection uses `--base REV --target-state index` or
 `--base REV --target-state worktree`: it warns about every removed ID
 and missing canonical documentation evidence, but cannot validate a future
-commit message. Those modes await regression acceptance under VR-0104/0105.
+commit message. Those modes passed local regression acceptance at `0bac3369`.
 The explicit selection mode is available with `--select V1S-NNN` and fails
 unexplained bypasses. A user-priority exception requires both
 `--priority-reason "EXACT RECORDED REASON"` and a matching
@@ -147,8 +147,9 @@ unexplained bypasses. A user-priority exception requires both
 the selected TODO entry. Earlier `Blocked:` and `Deferred:` annotations
 need a concrete reason, an `owner:` or `authority:`, and a `retry:` or
 `revisit:` trigger respectively; incomplete annotations do not excuse a skip.
-Selection behavior awaits the Phase 3 VR acceptance, so **none of these new
-modes are accepted release checks yet**. No mode infers semantic closeout.
+Selection behavior passed local regressions at `0bac3369`. The full
+CI integration remains unaccepted until its pending tests and hosted
+verification pass. No mode infers semantic closeout.
 
 Example diagnostic:
 
@@ -173,7 +174,8 @@ Record a qualifying blocker/deferment or explicit priority override.
 
 The checker is ready when the current backlog passes static validation; negative tests catch structural and retirement violations; selection mode explains unjustified skips; valid overrides are traceable; errors and warnings are clearly separated; Windows and Linux behavior matches; and the project can run it offline through the established checks.
 
-**Current decision:** The user authorized implementation of this plan. Phase 1
-is verified; Phase 2's committed-history and pending index/worktree paths
-are awaiting their VR-0104/0105 acceptance. Selection enforcement,
-check-runner/CI integration and rollout remain open under V1S-096.
+**Current decision:** The user authorized implementation of this plan.
+Phases 1–3 are locally verified. Phase 4's docs-stage, JSON and Git-aware
+CI contracts are implemented but awaiting VD/VR regression and hosted
+acceptance under V1S-096. Keep the canonical documentation owners and do
+not close the plan or V1S-096 before that evidence exists.

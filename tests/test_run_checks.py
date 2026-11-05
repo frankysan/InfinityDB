@@ -648,7 +648,37 @@ def test_docs_stage_runs_markdownlint_before_local_link_validation(
     assert commands == [
         ("npm", "run", "lint:docs"),
         (sys.executable, "-m", "tools.check_doc_links"),
+        (sys.executable, "-m", "tools.check_v1_backlog"),
     ]
+
+
+def test_docs_stage_fails_after_static_backlog_rejection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[tuple[str, ...]] = []
+
+    class FakeProcess:
+        stdout = io.StringIO("validated\n")
+
+        def __init__(self, code: int) -> None:
+            self.code = code
+
+        def wait(self) -> int:
+            return self.code
+
+    def fake_popen(command, **kwargs):
+        commands.append(tuple(command))
+        return FakeProcess(1 if command[-1] == "tools.check_v1_backlog" else 0)
+
+    monkeypatch.setattr(run_checks.subprocess, "Popen", fake_popen)
+    with run_checks.Reporter() as reporter:
+        result = run_checks.run_stage(
+            run_checks.Stage("docs", ("npm", "run", "lint:docs")), reporter,
+        )
+    assert result.status == "FAIL"
+    assert result.returncode == 1
+    assert len(commands) == 3
+    assert commands[-1] == (sys.executable, "-m", "tools.check_v1_backlog")
 
 
 def test_rules_stage_runs_interaction_audit_before_database_build(

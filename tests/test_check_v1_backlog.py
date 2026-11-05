@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -388,6 +389,60 @@ def test_selection_cli_rejects_priority_without_selection() -> None:
     with pytest.raises(SystemExit) as error:
         main(["--priority-reason", "User requested work"])
     assert error.value.code == 2
+
+
+def test_json_cli_reports_selection_failure_without_console_text(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    todo = tmp_path / "TODO.md"
+    todo.write_text(_todo(34, 62), encoding="utf-8")
+    assert main(["--todo", str(todo), "--select", "V1S-062", "--json"]) == 1
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert captured.err == ""
+    assert payload["formatVersion"] == 1
+    assert payload["status"] == "fail"
+    assert payload["declarations"] == 2
+    assert payload["errors"] == 1
+    assert payload["warnings"] == 0
+    assert [item["code"] for item in payload["diagnostics"]] == ["V1B012"]
+    assert payload["selection"] == {
+        "selected": "V1S-062",
+        "earlierOpen": ["V1S-034"],
+        "documentedPauses": [],
+        "actionable": ["V1S-034"],
+        "overrideApplied": False,
+    }
+
+
+def test_json_cli_preserves_warning_success_and_file_errors(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    reason = "Finish requested backlog audit first"
+    todo = tmp_path / "TODO.md"
+    todo.write_text(
+        "# Backlog\n### Pre-planned 1.0 execution slices\n#### Workstream\n"
+        "- [ ] **V1S-034 (S, review):** An earlier task.\n"
+        "- [ ] **V1S-062 (S, review):** Current task.\n"
+        f"  Priority: {reason}; authority: user; revisit: after auditor acceptance.\n",
+        encoding="utf-8",
+    )
+    assert main([
+        "--todo", str(todo), "--select", "V1S-062",
+        "--priority-reason", reason, "--json",
+    ]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "pass"
+    assert payload["errors"] == 0
+    assert payload["warnings"] == 1
+    assert payload["selection"]["overrideApplied"] is True
+    assert payload["diagnostics"][0]["code"] == "V1B014"
+
+    assert main(["--todo", str(tmp_path / "missing.md"), "--json"]) == 2
+    missing = json.loads(capsys.readouterr().out)
+    assert missing["status"] == "error"
+    assert missing["formatVersion"] == 1
+    assert "Unable to read backlog" in missing["message"]
 
 
 def test_duplicate_and_malformed_v1s_declarations_have_stable_diagnostics() -> None:

@@ -36,9 +36,16 @@ commands rather than maintaining a second command reference here.
 
 ### Backlog work selection and closeout
 
-For autonomous work, apply the [V1S selection checkpoint](docs/TODO.md#v1s-work-selection-and-handoff),
-including earlier open slices and explicit blocked/deferred reasons.
-At every task boundary apply the [backlog retirement contract](docs/README.md#backlog-completion-and-retirement):
+For autonomous work, apply the [V1S selection checkpoint](docs/TODO.md#v1s-work-selection-and-handoff).
+**Invoke the explicit selection gate** from the [testing guide](docs/testing.md#v1s-backlog-checks)
+before starting a numbered slice; inspect all earlier open IDs, documented
+blocked/deferred reasons and any exact TODO-recorded user-priority override.
+Do not use a free-form override argument to bypass earlier work.
+Before retiring a V1S entry, run the Git-aware closeout check for the proposed
+staged index and cite the removed ID in the eventual commit. The historical
+audit requires a deliberate, documented baseline; it does not approve
+semantic completion. At every task boundary apply the
+[backlog retirement contract](docs/README.md#backlog-completion-and-retirement):
 reconcile the worked task and parent against actual evidence and VD/VR
 obligations; retire complete work in the same change, leave actionable
 incomplete work open, and record removed V1S IDs in its commit.

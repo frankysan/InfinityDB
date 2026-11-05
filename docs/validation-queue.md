@@ -120,13 +120,14 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No pending design obligations. VD-0056/0057/0058 were retired after
-static inspection of new numeric selection, pause-classification and durable
-override/CLI fixtures in `tests/test_check_v1_backlog.py`. Ruff and Pyright
-passed; **no tests were executed during design**. Their selectors are pending
-under VR-0106. VD-0053/0054/0055 were similarly reviewed without execution;
-their selectors remain under VR-0104/0105. Earlier VD-0050/0051/0052 selectors
-passed the `e957c43e` full-assets run; hosted follow-through belongs to CI.
+No pending design obligations. VD-0059/0060/0061 were retired after
+static inspection of docs-stage sequence/JSON and synthetic GitHub event
+ancestry/CI integration fixtures in `tests/test_run_checks.py`,
+`tests/test_check_v1_backlog.py` and `tests/test_check_v1_backlog_ci.py`.
+Ruff and Pyright passed; **no tests were run during design**. Execution
+remains under VR-0107/0108. Earlier VD-0053–VD-0058 passed on pinned
+Linux `0bac3369`, and VD-0050–VD-0052 on `e957c43e`;
+hosted acceptance remains separate.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -158,31 +159,24 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-- [ ] VR-0104 (2026-11-05; ready-to-run): Git-aware V1S backlog closeout auditor, initial committed-history mode.
-  Work: [V1S-096](TODO.md#final-10-acceptance); revision: 52c09f9f (Git-history implementation); risk: medium.
-  Immediate: Ruff and Pyright passed; no implementation regression tests executed.
-  Design: VD-0053/0054 retired after static review of authored Git history, merge, reopen, missing-file and CLI fixtures; no tests ran.
-  Deferred: `tests/test_check_v1_backlog.py` on an exact committed Windows/Linux revision and applicable normal checks.
-  Outcome: unrun; Phase 3/4 integration remains outside this batch.
+- [ ] VR-0107 (2026-11-05; ready-to-run): Run static V1S backlog validation as a standard docs-stage check, with JSON output for agent/MCP reporting.
+  Work: [V1S-096](TODO.md#final-10-acceptance); revision: Windows Phase 4 code after 0bac3369, pin the resulting commit; risk: medium.
+  Immediate: Ruff, Pyright and full docs stage PASS (including 20-declaration static checker); no regression tests run during VD.
+  Design: VD-0059 retired after static review without execution.
+  Deferred: `tests/test_run_checks.py`, `tests/test_check_v1_backlog.py` and applicable normal stages on exact committed Linux/Windows state.
+  Outcome: unrun.
 
-- [ ] VR-0105 (2026-11-05; ready-to-run): Pending-index/worktree V1S retirement audit in the read-only CLI.
-  Work: [V1S-096](TODO.md#final-10-acceptance); revision: Windows follow-up to e957c43e, to be pinned after commit; risk: medium.
-  Immediate: Ruff and Pyright passed; no tests executed during VD design.
-  Design: VD-0055 retired after static review of authored staged/unstaged source, malformed backlog, acceptance documentation, and CLI fixtures.
-  Deferred: `tests/test_check_v1_backlog.py` pending-removal and CLI fixtures on pinned Windows/Linux revisions.
-  Outcome: unrun; Phase 3 selection gate and Phase 4 integration remain separate.
-
-- [ ] VR-0106 (2026-11-05; ready-to-run): Explicit V1S selection ordering, blocker/deferment classification, and durable user-priority override.
-  Work: [V1S-096](TODO.md#final-10-acceptance); revision: Windows selection implementation after a1766b75, pin its commit for execution; risk: high.
-  Immediate: Ruff on tool and authored test fixtures, Pyright, Markdownlint, Markdown links and diff check PASS; no tests run during VD.
-  Design: VD-0056/0057/0058 retired after static review without test execution.
-  Deferred: `tests/test_check_v1_backlog.py` selection fixtures, `--select V1S-096` CLI check and applicable normal checks, on a pinned revision.
-  Outcome: unrun; Phase 4 integration stays separate.
+- [ ] VR-0108 (2026-11-05; ready-to-run): CI closeout event-scoped Git ancestry and enforced removal checks.
+  Work: [V1S-096](TODO.md#final-10-acceptance); revision: `tools/check_v1_backlog_ci.py` and Source workflow after 0bac3369; risk: high.
+  Immediate: Ruff, Pyright, docs and diff checks PASS; hosted execution remains independently required.
+  Design: VD-0060/0061 retired after static review without execution.
+  Deferred: `tests/test_check_v1_backlog_ci.py` with temporary Git fixtures, Source workflow static coverage and pinned Linux regression.
+  Outcome: unrun; hosted Source and deterministic-output acceptance must be handled by CI owner, not held indefinitely in VR.
 
 ## Next unused IDs
 
-- Design: `VD-0059`; active obligations are listed above.
-- Execution: `VR-0107`; active obligations are listed above.
+- Design: `VD-0062`; active obligations are listed above.
+- Execution: `VR-0109`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

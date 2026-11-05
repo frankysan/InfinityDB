@@ -488,6 +488,7 @@ def run_stage(
     commands.append(stage.command)
     if stage.name == "docs":
         commands.append((sys.executable, "-m", "tools.check_doc_links"))
+        commands.append((sys.executable, "-m", "tools.check_v1_backlog"))
     for command in commands:
         reporter.write(f"Command: {format_command(command)}")
         reporter.write()

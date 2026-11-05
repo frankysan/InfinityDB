@@ -111,8 +111,10 @@ not a 1.0 gate.
 - [ ] **V1S-041 (M, gate):** Accept the optional Reinforcements
   Section, profiles and exact Commlink (+1)/(+2) variants in the
   ordinary browser on the frozen, release-matched source pair.
-  Deferred until V1S-081/084/088; preserve N4-origin disclosure
-  and do not assert roster legality or N5-native authority.
+  Deferred: Final release-paired acceptance depends on V1S-081/084/088;
+  authority: release owner; revisit: after those frozen-input gates pass.
+  Preserve N4-origin disclosure; do not assert roster legality or
+  N5-native authority.
 
 #### Four core scenarios
 
