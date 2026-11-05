@@ -275,10 +275,14 @@ release acceptance remain separate.
 **Parent:** [Contextual Game States](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-068 (M, review):** Inventory new state references from Fireteam, Hacking, ammunition, scenarios
-  and FAQ; classify entry/cancellation/override.
+The [V1S-068 inventory](v1.0-source-coverage-audit.md#contextual-game-states-reference-inventory-v1s-068-2026-11-05)
+classifies Fireteam, Hacking, Ammunition, scenario and FAQ references against
+the existing State graph, including contextual exceptions and unsupported
+unconditional transitions.
+
 - [ ] **V1S-069 (M, gate):** Curate only source-backed missing links and verify two-way Rule/State browser
-  navigation, conditions and scope.
+  navigation, conditions and scope. Prioritize State-side Fireteam context links;
+  preserve Ancillary/Leader distinctions and avoid inferring current Unit States.
 
 #### Weapons, Ammunition and deployed objects
 
