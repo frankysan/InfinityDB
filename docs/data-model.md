@@ -3011,6 +3011,8 @@ the General Rules API and ordinary detail card expose the same rows. Source
 dashes, optional and conditional values remain text rather than inferred game
 state. Narrow Gate and Wide Gate are aliases of the Access Width reference in
 search and Glossary, without creating separate devices or canonical Terrain Types.
+Simple rules-backed catalog lists expose their curated aliases; global search
+matches those labels while retaining the canonical name, slug and destination.
 
 A semantic record has a stable typed ID such as `skill:move`, `state:targeted`, or
 `ammunition:shock`. Current composition is contribution-based:

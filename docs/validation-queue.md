@@ -168,6 +168,11 @@ summary above. Hosted CI and final release gates retain separate owners.
   regressions. Deferred: those selectors, curated/rules validation and cumulative
   full-assets code suite. Due at V1S-077 publication acceptance before V1S-078.
   Host: linux-dev, pinned committed revision and matching ignored publications.
+  Failed run at `b29cb652`: 80 passed, 4 failed, 2 historical pre-promotion skips.
+  API and three browser failures exposed name-only global search; canonical
+  catalog aliases/search matching are corrected. On Windows, the exact failing
+  API selector and all three new browser widths passed (4/4, no skips) against
+  the corrected working tree. Linux cumulative acceptance remains outstanding.
 - [ ] VR-0100 (2026-11-05; ready-to-run): V1S-077 suggested-terrain table renderer
   and Gate-label navigation. Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects);
   revision: implementation `85e9e0f`; risk: medium.

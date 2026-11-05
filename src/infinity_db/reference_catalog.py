@@ -133,6 +133,7 @@ class RulesRecordCatalog:
                 "slug": self._slug(record),
                 "name": record["name"],
                 "description": record["summary"],
+                "aliases": list(record.get("aliases", [])),
             }
             for record in self._records()
         ]
