@@ -2289,6 +2289,28 @@ join semantics, not new public routes. Validate duplicate-source, reused
 payload, repeated-row, cross-Army, shared-family/different-Level,
 profile-versus-loadout and unresolved-variant fixtures before publishing.
 
+#### Current read-only variant candidate
+
+**Project domain:** Data processing
+
+The candidate builder (`tools.build_variant_usage`) validates direct source
+rows and typed signatures against the matched local Army/rules publication.
+`variant_usage_includes.py` also compares every retained raw Include with
+its materialized edge, preserving multiplicity, quantity, raw fields and
+the full source owner/target path. Include traversal uses source contexts,
+not payload IDs: equivalent payloads never create cross-Army paths.
+Missing or ambiguous owners/targets, duplicate source keys, materialized-row
+drift and cycles fail closed. Repeated targets through different source
+positions retain separate deterministic paths. A shared Unit option's target
+Army identifies only its target, not compatible membership for its parent.
+
+Both edges and paths remain explicitly context-only; they do not contribute
+to direct variant totals. This is an ignored local candidate, with no
+runtime API or browser publication. [V1S-063](TODO.md#rule-variant-usage-index-and-restrictions)
+retains the remaining acceptance, including independent Peripheral contexts
+and explicit shared-option compatibility. See the
+[candidate evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
+
 #### V1S-062 — finalized identity, ordering and ownership contract (2026-11-05)
 
 **Contract boundary:** this makes the existing design executable for

@@ -50,6 +50,7 @@ def main() -> None:
         "unresolvedRows": len(result["unresolvedSourceRows"]),
         "unresolvedCounts": result["diagnosticCounts"],
         "includeEdges": len(result["relationships"]["includes"]),
+        "includePaths": len(result["relationships"]["includePaths"]),
         "peripheralControllerEdges": len(
             result["relationships"]["peripheralControllerEdges"]
         ),

@@ -17,6 +17,7 @@ from typing import Any
 
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import _variant_semantics
+from infinity_db.variant_usage_includes import build_include_provenance
 
 CATALOGS = ("skills", "equipment")
 OWNERS = ("profile", "option", "unit_option")
@@ -335,16 +336,10 @@ def _assert_complete_owner_rows(
 
 def _include_peripheral_provenance(
     application: sqlite3.Connection,
+    raw: sqlite3.Connection,
 ) -> dict[str, Any]:
     """Expose only relationship edges, never copied Skill/Equipment memberships."""
-    includes: list[dict[str, Any]] = []
-    for table in (
-        "profile_occurrence_includes", "loadout_occurrence_includes",
-        "unit_option_include_targets",
-    ):
-        for row in application.execute(f"SELECT * FROM {table}"):
-            includes.append({"kind": table, "owner": dict(row)})
-    includes.sort(key=lambda item: _canonical(item))
+    includes = build_include_provenance(application, raw)
     peripheral: list[dict[str, Any]] = []
     for row in application.execute(
         "SELECT a.id AS access_id, a.source_id, a.controller_kind, "
@@ -355,7 +350,7 @@ def _include_peripheral_provenance(
         "ORDER BY a.id, t.target_logical_unit_id"
     ):
         peripheral.append(dict(row))
-    return {"includes": includes, "peripheralControllerEdges": peripheral,
+    return {**includes, "peripheralControllerEdges": peripheral,
             "policy": "context-only; never counted as direct rule ownership"}
 
 
@@ -486,5 +481,5 @@ def build_variant_usage_projection(
             },
             "diagnosticCounts": dict(sorted(diagnostics.items())),
             "unresolvedSourceRows": unresolved,
-            "relationships": _include_peripheral_provenance(application),
+            "relationships": _include_peripheral_provenance(application, raw),
         }

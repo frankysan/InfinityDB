@@ -264,28 +264,16 @@ and final candidate acceptance retain their individual owners below.
   [V1S-062 accepted identity, counting and ownership contract](data-model.md#v1s-062--finalized-identity-ordering-and-ownership-contract-2026-11-05)
   with the specified negative/duplicate/source-pair tests; do not count an
   unresolved source extra or unverified Include/Peripheral link as direct usage.
-  - **2026-11-05 implemented foundation (not yet closed):** the read-only
-    `src/infinity_db/variant_usage.py` builder and
-    `tools.build_variant_usage` CLI verify the matched Army/rules publication,
-    raw snapshot and all source-vs-published direct row counts/extras. Its
-    [candidate run](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05)
-    groups 151 exact variants from 10,923 direct source rows and flags
-    4,938 rows unresolved; 1,273 Include edges and zero present Peripheral
-    controller edges remain context-only. **Seven** focused tests pass.
-    A follow-up source-parity hardening rejects changed published
-    `display_order` values and ambiguous context joins; its regression
-    fixtures and execution are tracked as VD-0025/VR-0083.
-    Scoped source-row keys and full parent-path tuples are now retained in
-    the read-only candidate, with duplicate/missing source keys and conflicting
-    source-catalog mappings rejected or excluded; VD-0026/VR-0084 cover their
-    pending negative and reused-payload regressions. Shared Unit-option
-    compatibility remains unverified and does not create inferred Army usage.
-    **Still required before closing V1S-063:** source-key and repeated-row
-    fixture coverage across shared payloads and Army contexts, validated
-    Include path/cycle handling and positive Peripheral path against appropriate
-    real/synthetic evidence, explicit treatment of shared Unit-option
-    compatibility, and matched candidate artifact acceptance. No runtime API,
-    release publication or variant-specific totals for unresolved rows exist.
+  The [read-only candidate](data-model.md#current-read-only-variant-candidate)
+  preserves direct source-row identities and validates context-only Include
+  chains. Its [acceptance evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05)
+  distinguishes focused checks from final projection acceptance.
+  **Remaining:** independently validate positive/negative Peripheral paths
+  against reviewed relationships, settle shared Unit-option compatibility
+  explicitly, and accept the matched candidate artifact. Finish the queued
+  source-row/Include execution in VR-0083–0085 before accepting those boundaries.
+  No runtime API, release publication or variant-specific totals for unresolved
+  rows exist; downstream delivery stays with V1S-064–066.
 - [ ] **V1S-064 (M, build):** Expose source-scoped variant usage through a stable API/read model with negative
   and duplicate-source cases.
 - [ ] **V1S-065 (M, build):** Add discoverable ordinary reference links from canonical Skill/Equipment
