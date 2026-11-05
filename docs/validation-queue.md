@@ -148,72 +148,8 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-- [ ] VR-0083 (2026-11-05; ready-to-run): Verify strengthened V1S-063
-  source-to-published row integrity and candidate stability.
-  Work: [V1S-063](TODO.md#rule-variant-usage-index-and-restrictions);
-  revision: implementation commit after `802e47c1` (record exact SHA on run);
-  risk: source-row parity and ambiguous ownership.
-  Immediate: Ruff target PASS; Pyright 0 errors/0 warnings; docs lint/links
-  PASS; V1S static checker PASS (37 declarations, 0 warnings).
-  Publication-integrity exception: read-only `tools.build_variant_usage`
-  passed on the paired local candidate (151 exact groups, 10,923 rows,
-  4,938 unresolved); no tests run in implementation.
-  Design: VD-0025 complete without execution. Static review confirms
-  `test_variant_usage_display_order_parity` covers both catalogs/all three
-  owners; `test_variant_usage_ambiguous_published_owner_is_rejected` proves
-  a valid positive baseline before duplicating each published owner kind.
-  Deferred: `tests/test_variant_usage.py` with designed negative fixtures,
-  plus a matched local/Linux candidate build and broader source checks as due.
-  Outcome: Windows module run PASS (56 tests, zero skips) on the working
-  tree based on `a0c49350`; Linux matched-candidate/module acceptance pending.
-  Do not mark V1S-063 complete.
-
-- [ ] VR-0084 (2026-11-05; ready-to-run): Verify scoped source-key
-  uniqueness, deterministic owner-path retention and ambiguous catalog-link
-  exclusion in the V1S-063 read-only candidate.
-  Work: [V1S-063](TODO.md#rule-variant-usage-index-and-restrictions);
-  revision: implementation commit after `7359d1c0` (record exact SHA on run);
-  risk: silent source identity collision or misattributed Army membership.
-  Immediate: post-change read-only matched candidate build PASS
-  (151 exact groups, 10,923 reviewed rows, 4,938 unresolved);
-  Ruff PASS, Pyright 0 errors/0 warnings, docs lint/links PASS,
-  V1S backlog checker PASS (37 declarations, zero warnings).
-  Design: VD-0026 complete without execution. Static review confirms
-  `test_variant_usage_invalid_source_keys_fail_closed` covers both catalogs,
-  all owners and duplicate/missing source keys; catalog-mapping negatives
-  and `test_variant_usage_reused_payloads_preserve_all_source_paths_and_set_counts`
-  cover shared payloads, repeated positions, cross-Army counts and numeric-ID
-  reuse across owner kinds. VR-0083's shared-owner negative is reused.
-  Deferred: negative source-row/catalog-mapping fixtures in
-  `tests/test_variant_usage.py`, reused-payload and cross-Army context cases,
-  matched candidate run and wider checks when due.
-  Outcome: Windows module run PASS (56 tests, zero skips) on the working
-  tree based on `a0c49350`; Linux matched-candidate/module acceptance pending.
-  Do not mark V1S-063 complete.
-
-- [ ] VR-0085 (2026-11-05; ready-to-run): Verify source-validated
-  Include provenance and all context-only paths without changing direct
-  variant counts.
-  Work: [V1S-063](TODO.md#rule-variant-usage-index-and-restrictions);
-  revision: Include implementation after `a0c49350` (record exact SHA on run).
-  Immediate publication-integrity exception: read-only
-  `tools.build_variant_usage --output local/variant-usage-includes.json`
-  PASS on the matched local pair (151 groups, 10,923 reviewed rows,
-  4,938 unresolved, 1,273 source-verified Include edges); Ruff PASS.
-  This checks retained-source/materialized-edge integrity before accepting
-  the changed candidate; no tests run in implementation.
-  Design: VD-0027 complete without execution. Static review of
-  `tests/test_variant_usage.py` covers repeated Include positions and
-  two-edge chains, shared roots with two target Armies, deterministic
-  output after row reordering, exact source/materialized parity,
-  duplicate/missing owners and keys, and self/multinode/disconnected cycles.
-  The positive Peripheral fixture remains separate from direct ownership.
-  Deferred: `tests/test_variant_usage.py`, matched candidate reproducibility
-  and broader source checks on the pinned Linux revision.
-  Outcome: Windows module run PASS (56 tests, zero skips) on the working
-  tree based on `a0c49350`; Linux reproducibility/module acceptance pending.
-  Peripheral paths, shared-option compatibility and final candidate
-  acceptance still belong to V1S-063.
+No open deferred-execution obligations. The latest source-row and Include
+acceptance is recorded in the [candidate evidence](v1.0-source-coverage-audit.md#source-row-and-include-chain-hardening-2026-11-05).
 
 ## Next unused IDs
 

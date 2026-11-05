@@ -736,15 +736,17 @@ Exact structural equality is useful evidence but does not by itself justify sema
 source context says two records mean different things. Conversely, equivalent payloads may be shared
 when the contextual relationships remain explicit.
 
-### Rule-variant usage index — accepted design direction (not implemented)
+### Rule-variant usage index — accepted design direction (candidate only)
 
 **Project domains:** Data processing, Web backend, Web frontend
 
 The planned cross-Army index answers **which Units can field a reviewed
 Skill/Equipment variant**. It is a read-only projection of existing identity,
 payload and occurrence relationships, not a second source of Skill definitions,
-a loadout builder, or a record of randomized game results. The index is not
-generated or served yet; see `docs/TODO.md`.
+a loadout builder, or a record of randomized game results. An ignored read-only
+development candidate now exists; the release index is not published or served.
+See [the current candidate boundary](#current-read-only-variant-candidate)
+and `docs/TODO.md` for remaining delivery.
 
 **Rule identity and variant identity.** The primary grouping key is the
 published canonical rules identity (for example `skill:martial-arts`),

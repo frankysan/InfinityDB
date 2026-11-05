@@ -72,8 +72,8 @@ These foundations are implemented; final source-to-browser acceptance remains se
   [structured charts](data-model.md#structured-skill-reference-charts) and
   [source provenance](n5-source-history.md#reviewed-10-structured-skill-chart-provenance).
 - Reviewed exact source variants, including Mimetism, Berserk and Dodge mappings;
-  the cross-army usage index remains unimplemented:
-  [variant contract](data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented).
+  the cross-army usage index has a development candidate and remains unpublished:
+  [variant contract](data-model.md#rule-variant-usage-index--accepted-design-direction-candidate-only).
 - Published deployed-object profiles, delivery paths and typed reverse uses:
   [current contract](data-model.md#deployed-object-read-model-and-artifact-gated-browser-reference).
 - The optional Reinforcements reference and typed Commlink (+1)/(+2) Army extras
@@ -270,8 +270,9 @@ and final candidate acceptance retain their individual owners below.
   distinguishes focused checks from final projection acceptance.
   **Remaining:** independently validate positive/negative Peripheral paths
   against reviewed relationships, settle shared Unit-option compatibility
-  explicitly, and accept the matched candidate artifact. Finish the queued
-  source-row/Include execution in VR-0083–0085 before accepting those boundaries.
+  explicitly, and accept the matched candidate artifact. Source-row and Include
+  validation is accepted for the pinned development candidate; this does not
+  close the remaining relationship or artifact boundaries.
   No runtime API, release publication or variant-specific totals for unresolved
   rows exist; downstream delivery stays with V1S-064–066.
 - [ ] **V1S-064 (M, build):** Expose source-scoped variant usage through a stable API/read model with negative
@@ -762,7 +763,7 @@ the remaining source clauses and final release-browser acceptance remain open.
   - [ ] Add the generated cross-army rule-variant usage index:
     canonical Skill/Equipment -> exact Level/MOD/typed variant ->
     Unit/profile/loadout occurrences. Reuse the
-    [accepted index design](data-model.md#rule-variant-usage-index--accepted-design-direction-not-implemented),
+    [accepted index design](data-model.md#rule-variant-usage-index--accepted-design-direction-candidate-only),
     now finalized by [V1S-062](data-model.md#v1s-062--finalized-identity-ordering-and-ownership-contract-2026-11-05)
     for exact source-row keys, typed signatures, deterministic ordering,
     deduplicated counts and source-bound Include/Peripheral ownership.
