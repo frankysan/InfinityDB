@@ -5728,7 +5728,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     )
     assert any(
         token.get("type") == "reference"
-        and token.get("text") == "Peripheral"
+        and token.get("label") == "Peripheral"
         and token.get("target") == "skill:peripheral"
         and token.get("public_reference") == {
             "catalog": "skills",
