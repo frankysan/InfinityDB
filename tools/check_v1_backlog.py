@@ -511,6 +511,76 @@ def audit_retirements(
         ),)
 
 
+def audit_pending_retirements(
+    *, state: str, repository: Path = ROOT,
+) -> tuple[Diagnostic, ...]:
+    """Report uncommitted V1S removals without pretending a commit exists."""
+    if state not in {"index", "worktree"}:
+        raise ValueError("Pending closeout state must be 'index' or 'worktree'")
+    try:
+        committed = analyze_backlog(
+            _git(repository, "show", "HEAD:docs/TODO.md"),
+            source="HEAD:docs/TODO.md",
+        )
+        if state == "index":
+            proposed_text = _git(repository, "show", ":docs/TODO.md")
+            changed = _git(
+                repository, "diff", "--cached", "--name-only", "HEAD", "--", "docs/",
+            ).splitlines()
+        else:
+            destination = repository / "docs" / "TODO.md"
+            if destination.stat().st_size > 8 * 1024 * 1024:
+                raise ValueError("worktree TODO exceeds the 8 MiB limit")
+            proposed_text = destination.read_text(encoding="utf-8")
+            changed = _git(
+                repository, "diff", "--name-only", "HEAD", "--", "docs/",
+            ).splitlines()
+        proposed = analyze_backlog(
+            proposed_text, source=f"{state}:docs/TODO.md",
+        )
+        if any(d.severity == "error" for d in (*committed.diagnostics, *proposed.diagnostics)):
+            raise ValueError("current or proposed backlog contains invalid V1S declarations")
+        survivors = {task.task_id for task in proposed.tasks}
+        evidence = any(
+            name not in {"docs/TODO.md", "docs/validation-queue.md"}
+            for name in changed
+        )
+        diagnostics: list[Diagnostic] = []
+        for task in committed.tasks:
+            if task.task_id in survivors:
+                continue
+            diagnostics.append(Diagnostic(
+                code="V1B009", severity="warning",
+                source="HEAD:docs/TODO.md", line=task.line_start,
+                message=(
+                    f"{task.task_id} removed from {state}; no closeout commit exists yet"
+                ),
+                suggestion=(
+                    "Review the retirement evidence and cite this V1S ID in the "
+                    "eventual closeout commit, then audit that committed range."
+                ),
+            ))
+            if not evidence:
+                diagnostics.append(Diagnostic(
+                    code="V1B006", severity="warning",
+                    source="HEAD:docs/TODO.md", line=task.line_start,
+                    message=(
+                        f"{task.task_id} pending retirement has no changed "
+                        "canonical documentation evidence pointer"
+                    ),
+                    suggestion=(
+                        "Record acceptance in the owning canonical documentation "
+                        "and link the verified selector/revision or no-change review."
+                    ),
+                ))
+        return tuple(diagnostics)
+    except (OSError, UnicodeError, ValueError) as exc:
+        return (_retirement_error(
+            "V1B007", str(exc),
+            "Verify the Git index/worktree and the committed docs/TODO.md.",
+        ),)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -528,12 +598,18 @@ def main(argv: list[str] | None = None) -> int:
         help="Git target revision for retirement audit (default: HEAD)",
     )
     parser.add_argument(
+        "--target-state", choices=("commit", "index", "worktree"), default="commit",
+        help="Audit committed history, staged index, or current worktree",
+    )
+    parser.add_argument(
         "--enforce-closeout", action="store_true",
         help="Fail on unaccounted retirements after an explicitly chosen base",
     )
     args = parser.parse_args(argv)
     if args.enforce_closeout and not args.base:
         parser.error("--enforce-closeout requires --base")
+    if args.target_state != "commit" and (not args.base or args.target != "HEAD"):
+        parser.error("index/worktree closeout requires --base and --target HEAD")
     try:
         markdown = args.todo.read_text(encoding="utf-8")
     except OSError as exc:
@@ -546,6 +622,8 @@ def main(argv: list[str] | None = None) -> int:
         diagnostics.extend(audit_retirements(
             args.base, args.target, enforce=args.enforce_closeout,
         ))
+        if args.target_state != "commit":
+            diagnostics.extend(audit_pending_retirements(state=args.target_state))
     for diagnostic in diagnostics:
         print(
             f"{diagnostic.source}:{diagnostic.line}: {diagnostic.severity} "

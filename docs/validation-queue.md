@@ -120,18 +120,12 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-- [ ] VD-0053 (2026-11-05; needs-design): Verify per-commit Git-aware V1S retirement attribution, including valid closeout, missing ID mention, multiple IDs in one commit, and reopen/no-op or reordered tasks that must not count as removals.
-  Work: [V1S-096](TODO.md#final-10-acceptance); change: `tools/check_v1_backlog.py` Git-aware audit on Windows after a1f78bcd; risk: medium.
-  Existing coverage: `tests/test_check_v1_backlog.py` checks static parsing only; linked execution: VR-0104.
-  Outcome: pending design; no tests executed.
-
-- [ ] VD-0054 (2026-11-05; needs-design): Verify advisory/enforced closeout severity, acceptance-pointer warnings, bad or diverged revisions, non-first-parent range, missing files, and CLI error reporting.
-  Work: [V1S-096](TODO.md#final-10-acceptance); change: `tools/check_v1_backlog.py`; risk: medium.
-  Existing coverage: no Git-history CLI fixtures; linked execution: VR-0104.
-  Outcome: pending design; no tests executed.
-
-VD-0050/0051/0052 were previously retired after static test-design review;
-their still-unrun selectors remain under VR-0103.
+No pending test-design obligations. VD-0053/0054/0055 were retired
+after static design review of the authored Git-history and index/worktree
+fixtures in `tests/test_check_v1_backlog.py` (Ruff and Pyright passed);
+**no tests ran during design**. The selectors remain under VR-0104/0105.
+Earlier VD-0050/0051/0052 selectors remain under VR-0103 pending its
+current-release full-run acceptance.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -163,31 +157,31 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-- [ ] VR-0102 (2026-11-05; ready-to-run): Shared soft-navigation focus handoff and polite page-change announcement, plus existing floating-notice touch/keyboard acceptance.
-  Work: [V1S-079/080](TODO.md#accessibility-and-navigation); revision: corrected acceptance test in current Windows batch after 52c09f9f; pin resulting commit for Linux verification; risk: medium.
-  Immediate: Linux full run at a1f78bcd exposed two over-strict URL assertions (`/units?s=...` is valid restored state); corrected test passed 2/2 on Windows, Ruff passed.
-  Design: VD-0047/0048/0049 retired after static review (no test execution).
-  Deferred: `tests/test_verify_accessible_navigation_browser.py` (soft link, persistent-shell link, back/scroll, focus/status at 1440/390px); `tests/test_verify_page_footer_browser.py` (native disclosure semantics and touch at 390/320px in light/dark), existing `tests/test_verify_sidebar_density_browser.py`, and applicable normal broader checks at next due drain.
-  Outcome: Windows focused browser tests passed; Linux regression rerun on the corrected commit pending. Actual screen-reader sign-off and frozen-candidate visual acceptance remain separately required under V1S-079/080.
-
 - [ ] VR-0103 (2026-11-05; ready-to-run): Track and require the byte-exact v1.0 variant-usage release publication throughout source CI, deployment packaging, preflight/image smoke and v8 compatibility checks.
-  Work: [variant usage projection](TODO.md#rules-and-reference-completeness); revision: corrected portable publication and deployment fixture in current Windows batch after 52c09f9f; pin resulting commit; risk: high.
+  Work: [variant usage projection](TODO.md#rules-and-reference-completeness); revision: e957c43e (portable release publication), Linux and hosted CI targeted at that exact revision; risk: high.
   Immediate: Linux full run at a1f78bcd found a raw SQLite byte-digest difference despite identical export/Army/rules/object hashes, plus one missing publication fixture. Portable publication excludes the diagnostic raw digest, and the fixture now isolates the tested gate; Windows `--check-publication` and `--skip-svg` PASS (151 groups, 10,923 rows), targeted 97 variant tests, 9 real-browser tests and 12 deployment tests PASS.
   Design: VD-0050/0051/0052 retired after static review; tests authored but not run.
   Deferred: `tests/test_deployment_scripts.py` (tracked/image/v8 guards), `tests/test_verify_deployment_assets.py` (missing/empty/stale and matched preflight), `tests/test_variant_usage.py` and relevant `tests/test_web.py` selectors; normal source/CI smoke and actual container build at release candidate gate.
-  Outcome: Windows focused regression and real-browser tests passed; Linux source-parity/full test rerun and hosted source/deployment acceptance still pending.
+  Outcome: Linux full assets PASS at e957c43e (5,306 passed, 29 skipped); regeneration parity PASS. Hosted wheel and deployment smoke PASS; Source jobs Windows 3.11, macOS 3.11 and Ubuntu 3.14 PASS, but Ubuntu 3.11 was cancelled, so cross-platform deterministic-output comparison was skipped. Keep open until a complete hosted Source run passes. Frozen candidate approval remains separately owned.
 
-- [ ] VR-0104 (2026-11-05; awaiting-design): Git-aware V1S backlog closeout auditor, initial committed-history mode.
+- [ ] VR-0104 (2026-11-05; ready-to-run): Git-aware V1S backlog closeout auditor, initial committed-history mode.
   Work: [V1S-096](TODO.md#final-10-acceptance); revision: 52c09f9f (Git-history implementation); risk: medium.
   Immediate: Ruff and Pyright passed; no implementation regression tests executed.
-  Design: VD-0053/0054.
-  Deferred: `tests/test_check_v1_backlog.py` with synthetic temporary Git repositories, CLI baselines/enforcement, and applicable normal checks on the committed revision.
-  Outcome: unrun; phase 2 worktree/index mode and phase 3/4 integration remain outside this batch.
+  Design: VD-0053/0054 retired after static review of authored Git history, merge, reopen, missing-file and CLI fixtures; no tests ran.
+  Deferred: `tests/test_check_v1_backlog.py` on an exact committed Windows/Linux revision and applicable normal checks.
+  Outcome: unrun; Phase 3/4 integration remains outside this batch.
+
+- [ ] VR-0105 (2026-11-05; ready-to-run): Pending-index/worktree V1S retirement audit in the read-only CLI.
+  Work: [V1S-096](TODO.md#final-10-acceptance); revision: Windows follow-up to e957c43e, to be pinned after commit; risk: medium.
+  Immediate: Ruff and Pyright passed; no tests executed during VD design.
+  Design: VD-0055 retired after static review of authored staged/unstaged source, malformed backlog, acceptance documentation, and CLI fixtures.
+  Deferred: `tests/test_check_v1_backlog.py` pending-removal and CLI fixtures on pinned Windows/Linux revisions.
+  Outcome: unrun; Phase 3 selection gate and Phase 4 integration remain separate.
 
 ## Next unused IDs
 
-- Design: `VD-0055`; active obligations are listed above.
-- Execution: `VR-0105`; active obligations are listed above.
+- Design: `VD-0056`; active obligations are listed above.
+- Execution: `VR-0106`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -1,10 +1,220 @@
 from __future__ import annotations
 
-from tools.check_v1_backlog import BacklogAnalysis, analyze_backlog
+import subprocess
+from pathlib import Path
+
+import pytest
+
+from tools.check_v1_backlog import (
+    BacklogAnalysis,
+    analyze_backlog,
+    audit_pending_retirements,
+    audit_retirements,
+    main,
+)
+
+
+def _git(root: Path, *args: str) -> str:
+    return subprocess.run(
+        ["git", "-C", str(root), *args], check=True, text=True,
+        capture_output=True,
+    ).stdout.strip()
+
+
+def _repo(tmp_path: Path) -> tuple[Path, str]:
+    root = tmp_path / "InfinityDB"
+    root.mkdir()
+    subprocess.run(
+        ["git", "init", "-q", "--initial-branch=main", str(root)],
+        check=True, capture_output=True,
+    )
+    _git(root, "config", "user.name", "Test Agent")
+    _git(root, "config", "user.email", "agent@example.invalid")
+    backlog = root / "docs" / "TODO.md"
+    backlog.parent.mkdir()
+    backlog.write_text(_todo(1, 2, 3), encoding="utf-8")
+    _git(root, "add", "docs/TODO.md")
+    _git(root, "commit", "-qm", "Seed V1S backlog")
+    return root, _git(root, "rev-parse", "HEAD")
+
+
+def _todo(*numbers: int) -> str:
+    return (
+        "# Backlog\n### Pre-planned 1.0 execution slices\n"
+        "#### Workstream\n"
+        + "".join(
+            f"- [ ] V1S-{number:03d} (S, test): Task {number}.\n"
+            for number in numbers
+        )
+    )
 
 
 def _analyze(markdown: str) -> BacklogAnalysis:
     return analyze_backlog(markdown, source="docs/TODO.md")
+
+
+def test_git_retirement_accepts_cited_id_and_evidence(tmp_path: Path) -> None:
+    root, base = _repo(tmp_path)
+    (root / "docs" / "TODO.md").write_text(_todo(2, 3), encoding="utf-8")
+    (root / "docs" / "testing.md").write_text("Accepted test results.\n", encoding="utf-8")
+    _git(root, "add", "docs/TODO.md", "docs/testing.md")
+    _git(root, "commit", "-qm", "docs: close V1S-001 after tests/test_audit.py")
+    assert audit_retirements(base, repository=root, enforce=True) == ()
+
+
+@pytest.mark.parametrize("enforce", [False, True])
+def test_git_retirement_requires_each_id_and_advises_evidence(
+    tmp_path: Path, enforce: bool,
+) -> None:
+    root, base = _repo(tmp_path)
+    (root / "docs" / "TODO.md").write_text(_todo(2, 3), encoding="utf-8")
+    _git(root, "add", "docs/TODO.md")
+    _git(root, "commit", "-qm", "docs: shorten the backlog")
+    report = audit_retirements(base, repository=root, enforce=enforce)
+    assert [item.code for item in report] == ["V1B005", "V1B006"]
+    assert report[0].severity == ("error" if enforce else "warning")
+    assert report[1].severity == "warning"
+
+
+def test_git_retirement_multiple_ids_casefold_and_reorder_are_safe(
+    tmp_path: Path,
+) -> None:
+    root, base = _repo(tmp_path)
+    (root / "docs" / "TODO.md").write_text(_todo(3, 2, 1), encoding="utf-8")
+    _git(root, "add", "docs/TODO.md")
+    _git(root, "commit", "-qm", "docs: reorder V1S rows")
+    assert audit_retirements(base, repository=root, enforce=True) == ()
+
+    (root / "docs" / "TODO.md").write_text(_todo(3), encoding="utf-8")
+    _git(root, "add", "docs/TODO.md")
+    _git(root, "commit", "-qm", "docs: close v1s-001 and V1S-002; verified: checks")
+    assert audit_retirements(base, repository=root, enforce=True) == ()
+
+
+def test_git_retirement_does_not_misattribute_first_parent_merges(tmp_path: Path) -> None:
+    root, base = _repo(tmp_path)
+    _git(root, "checkout", "-qb", "feature")
+    (root / "docs" / "TODO.md").write_text(_todo(2, 3), encoding="utf-8")
+    _git(root, "add", "docs/TODO.md")
+    _git(root, "commit", "-qm", "docs: close V1S-001 verified: example")
+    feature = _git(root, "rev-parse", "HEAD")
+    _git(root, "checkout", "-q", "main")
+    (root / "docs" / "other.md").write_text("Independent change.\n", encoding="utf-8")
+    _git(root, "add", "docs/other.md")
+    _git(root, "commit", "-qm", "docs: separate change")
+    _git(root, "merge", "-q", "--no-ff", "-m", "Merge feature", "feature")
+    assert [item.code for item in audit_retirements(feature, repository=root)] == [
+        "V1B008"
+    ]
+    # A first-parent comparison is still allowed, but never silently
+    # attributes the feature's original commit message as the merge's message.
+    report = audit_retirements(base, repository=root, enforce=True)
+    assert any(item.code == "V1B005" for item in report)
+
+
+@pytest.mark.parametrize("fault", ["missing-base", "diverged", "invalid-backlog"])
+def test_git_retirement_fails_closed_on_invalid_ranges(
+    tmp_path: Path, fault: str,
+) -> None:
+    root, base = _repo(tmp_path)
+    if fault == "missing-base":
+        assert [item.code for item in audit_retirements(
+            "deadbeef" * 5, repository=root
+        )] == ["V1B007"]
+        return
+    if fault == "diverged":
+        _git(root, "checkout", "-qb", "feature")
+        (root / "docs" / "side.md").write_text("Side history.\n", encoding="utf-8")
+        _git(root, "add", "docs/side.md")
+        _git(root, "commit", "-qm", "Side commit")
+        side = _git(root, "rev-parse", "HEAD")
+        _git(root, "checkout", "-q", "main")
+        assert [item.code for item in audit_retirements(
+            side, base, repository=root
+        )] == ["V1B008"]
+        return
+    (root / "docs" / "TODO.md").write_text(
+        _todo(1, 2, 3) + "- [ ] V1S-bad: Malformed.\n",
+        encoding="utf-8",
+    )
+    _git(root, "add", "docs/TODO.md")
+    _git(root, "commit", "-qm", "Malformed backlog")
+    assert [item.code for item in audit_retirements(
+        base, repository=root
+    )] == ["V1B007"]
+
+
+def test_git_retirement_reopened_id_does_not_hide_unattributed_removal(
+    tmp_path: Path,
+) -> None:
+    root, base = _repo(tmp_path)
+    (root / "docs" / "TODO.md").write_text(_todo(2, 3), encoding="utf-8")
+    _git(root, "add", "docs/TODO.md")
+    _git(root, "commit", "-qm", "docs: removed old entry without evidence")
+    (root / "docs" / "TODO.md").write_text(_todo(1, 2, 3), encoding="utf-8")
+    _git(root, "add", "docs/TODO.md")
+    _git(root, "commit", "-qm", "docs: reopen V1S-001")
+    report = audit_retirements(base, repository=root, enforce=True)
+    assert [item.code for item in report] == ["V1B005", "V1B006"]
+
+
+def test_git_retirement_missing_target_todo_fails_closed(tmp_path: Path) -> None:
+    root, base = _repo(tmp_path)
+    _git(root, "rm", "docs/TODO.md")
+    _git(root, "commit", "-qm", "docs: file accidentally deleted")
+    assert [item.code for item in audit_retirements(
+        base, repository=root,
+    )] == ["V1B007"]
+
+
+def test_pending_retirement_distinguishes_worktree_index_and_evidence(
+    tmp_path: Path,
+) -> None:
+    root, _ = _repo(tmp_path)
+    assert audit_pending_retirements(state="worktree", repository=root) == ()
+    assert audit_pending_retirements(state="index", repository=root) == ()
+    (root / "docs" / "TODO.md").write_text(_todo(2, 3), encoding="utf-8")
+    assert [item.code for item in audit_pending_retirements(
+        state="worktree", repository=root,
+    )] == ["V1B009", "V1B006"]
+    assert audit_pending_retirements(state="index", repository=root) == ()
+    _git(root, "add", "docs/TODO.md")
+    assert [item.code for item in audit_pending_retirements(
+        state="index", repository=root,
+    )] == ["V1B009", "V1B006"]
+    (root / "docs" / "testing.md").write_text("Verified details.\n", encoding="utf-8")
+    _git(root, "add", "docs/testing.md")
+    assert [item.code for item in audit_pending_retirements(
+        state="index", repository=root,
+    )] == ["V1B009"]
+
+
+def test_pending_retirement_rejects_malformed_worktree_and_invalid_state(
+    tmp_path: Path,
+) -> None:
+    root, _ = _repo(tmp_path)
+    (root / "docs" / "TODO.md").write_text(
+        _todo(1) + "- [ ] V1S-bad: Incorrect declaration.\n",
+        encoding="utf-8",
+    )
+    assert [item.code for item in audit_pending_retirements(
+        state="worktree", repository=root,
+    )] == ["V1B007"]
+    with pytest.raises(ValueError, match="Pending closeout state"):
+        audit_pending_retirements(state="commit", repository=root)
+
+
+@pytest.mark.parametrize("arguments", [
+    ["--target-state", "worktree"],
+    ["--base", "HEAD", "--target-state", "index", "--target", "HEAD~1"],
+    ["--enforce-closeout"],
+])
+def test_retirement_cli_rejects_ambiguous_options(
+    arguments: list[str],
+) -> None:
+    with pytest.raises(SystemExit) as error:
+        main(arguments)
+    assert error.value.code == 2
 
 
 def test_duplicate_and_malformed_v1s_declarations_have_stable_diagnostics() -> None:

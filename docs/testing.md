@@ -292,6 +292,26 @@ can also affect test timing and Chromium stability, so limit contention.
 
 ### Parallel Windows development and Linux validation
 
+**2026-11-05 v1.0 publication and accessibility regression (VR-0102/0103):**
+The first pinned Linux run at `a1f78bcd` exposed two over-strict
+accessibility URL assertions, an incomplete deployment fixture, stale
+documentation anchors, and a raw SQLite byte-hash difference between
+otherwise matching Army export pairs. The corrected tracked
+`data/generated/variant-usage.json` excludes that machine-specific diagnostic
+hash but preserves the validated export-pair and runtime release-artifact
+digests. Windows passed **97 variant-unit**, **9 real-browser publication**,
+**12 deployment**, and **2 accessibility** focused tests, plus publication
+regeneration/preflight, documentation, Ruff and Pyright checks. The separate
+`linux-dev` worker, pinned to `e957c43e1e09646012e95d53009c340402c3d95f`,
+reconfirmed `tools.build_variant_usage --check-publication` (151 groups,
+10,923 reviewed rows), then passed the **full-assets pytest suite:
+5,306 passed, 29 skipped, 2 fork deprecation warnings, zero failures in
+508.16 seconds** (8 xdist workers, four browser lanes, 808/808 SVGs).
+This validates only the pinned revision, not subsequent V1S-096 edits.
+Manual assistive-technology sign-off and final release candidate gates remain
+separate. Hosted wheel and deployment smoke for the same revision passed;
+Source matrix/deterministic-output acceptance remain tracked by CI.
+
 **2026-11-05 hosted integration repair:** Source run `42049878323` at
 `d4ffce43004e53b030af6f02184a7325e1878191` failed all four matrix legs:
 the two- and experimental three/four-lane Chromium registries omitted the
