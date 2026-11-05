@@ -121,13 +121,10 @@ IDs here and link the owning task instead of duplicating its description.
 ## Pending test design
 
 No pending design obligations. VD-0059/0060/0061 were retired after
-static inspection of docs-stage sequence/JSON and synthetic GitHub event
-ancestry/CI integration fixtures in `tests/test_run_checks.py`,
-`tests/test_check_v1_backlog.py` and `tests/test_check_v1_backlog_ci.py`.
-Ruff and Pyright passed; **no tests were run during design**. Execution
-remains under VR-0107/0108. Earlier VD-0053–VD-0058 passed on pinned
-Linux `0bac3369`, and VD-0050–VD-0052 on `e957c43e`;
-hosted acceptance remains separate.
+static review without execution; their docs-stage, JSON, synthetic Git
+ancestry and CI regressions passed under VR-0107/0108 on pinned Linux
+`bf0821af`. Earlier VD-0053–VD-0058 passed on `0bac3369`, and
+VD-0050–VD-0052 on `e957c43e`. Hosted CI/release acceptance is independent.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -158,20 +155,6 @@ is recorded. Failed or incomplete verification remains open.
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
-
-- [ ] VR-0107 (2026-11-05; ready-to-run): Run static V1S backlog validation as a standard docs-stage check, with JSON output for agent/MCP reporting.
-  Work: [V1S-096](TODO.md#final-10-acceptance); revision: Windows Phase 4 code after 0bac3369, pin the resulting commit; risk: medium.
-  Immediate: Ruff, Pyright and full docs stage PASS (including 20-declaration static checker); no regression tests run during VD.
-  Design: VD-0059 retired after static review without execution.
-  Deferred: `tests/test_run_checks.py`, `tests/test_check_v1_backlog.py` and applicable normal stages on exact committed Linux/Windows state.
-  Outcome: unrun.
-
-- [ ] VR-0108 (2026-11-05; ready-to-run): CI closeout event-scoped Git ancestry and enforced removal checks.
-  Work: [V1S-096](TODO.md#final-10-acceptance); revision: `tools/check_v1_backlog_ci.py` and Source workflow after 0bac3369; risk: high.
-  Immediate: Ruff, Pyright, docs and diff checks PASS; hosted execution remains independently required.
-  Design: VD-0060/0061 retired after static review without execution.
-  Deferred: `tests/test_check_v1_backlog_ci.py` with temporary Git fixtures, Source workflow static coverage and pinned Linux regression.
-  Outcome: unrun; hosted Source and deterministic-output acceptance must be handled by CI owner, not held indefinitely in VR.
 
 ## Next unused IDs
 

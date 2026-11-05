@@ -338,6 +338,23 @@ can also affect test timing and Chromium stability, so limit contention.
 
 ### Parallel Windows development and Linux validation
 
+**2026-11-05 V1S-096 Phase 4 local integration (VR-0107/0108):**
+The docs stage now runs static V1S backlog checking after Markdownlint
+and local links. The explicit CI retirement helper checks GitHub event
+ranges without silently accepting diverged/insufficient history.
+At pinned Linux revision `bf0821afec7f3cb70268589a9c56032e8e494ee4`,
+the focused regressions passed: `tests/test_check_v1_backlog.py`
+**41/41**, `tests/test_check_v1_backlog_ci.py` **6/6**,
+`tests/test_run_checks.py` **110/110**, and
+`tests/test_test_sections.py` **15/15** (all zero skips).
+An initially unregistered CI test module was added to the test-section
+registry; the corrected commit is the acceptance target. Windows Ruff,
+Pyright and the full docs stage passed, including **20 V1S declarations
+with no static warnings**. This closes local VR-0107/0108; **hosted Source
+workflow, cross-platform deterministic outputs, full candidate checks and
+V1S-096 final acceptance remain separately open** under
+[CI policy](ci.md) and [release scope](releasing.md).
+
 **2026-11-05 V1S-096 checker acceptance (VR-0104/0105/0106):**
 Linux worker `linux-dev` pinned to
 `0bac336999d102fe94a3bcadbeec83eca1ae7788` ran

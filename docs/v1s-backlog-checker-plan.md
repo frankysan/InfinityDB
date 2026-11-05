@@ -5,11 +5,13 @@
 The Linux CLI passed with 53 declarations and zero warnings; its tests passed
 in the cumulative code profile at `1d0d5c19`, recorded in
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
-Phases 2 and 3 passed 39 checker regressions on pinned Linux `0bac3369`;
-their local VR-0104/0105/0106 entries were retired. Phase 4 integrates static
-checking with the normal docs stage, explicit agent selection and a bounded,
-event-scoped CI closeout audit. Its tests and hosted verification remain open
-under V1S-096; no release gate has been accepted by this implementation.
+Phases 2 and 3 passed their local Linux regressions on `0bac3369`.
+Phase 4 integrates static checks into the normal docs stage, JSON diagnostics,
+explicit agent selection, and event-scoped CI retirement checks. The complete
+local Phase 4 regression set passed on Linux `bf0821af`; local VR-0107/0108
+are retired. Hosted Source, cross-platform deterministic outputs and final
+V1S-096 release-candidate acceptance remain open and must not be inferred
+from local checks.
 **Scope:** The active `V1S-*` execution slices in [TODO.md](TODO.md#pre-planned-10-execution-slices), their documented completion, and the Git history of removals.
 
 ## Goal and constraints
@@ -175,7 +177,6 @@ Record a qualifying blocker/deferment or explicit priority override.
 The checker is ready when the current backlog passes static validation; negative tests catch structural and retirement violations; selection mode explains unjustified skips; valid overrides are traceable; errors and warnings are clearly separated; Windows and Linux behavior matches; and the project can run it offline through the established checks.
 
 **Current decision:** The user authorized implementation of this plan.
-Phases 1–3 are locally verified. Phase 4's docs-stage, JSON and Git-aware
-CI contracts are implemented but awaiting VD/VR regression and hosted
-acceptance under V1S-096. Keep the canonical documentation owners and do
-not close the plan or V1S-096 before that evidence exists.
+Phases 1–4 have passed their focused local validation. The CI history gate
+is implemented but **not hosted-accepted**; retain V1S-096 and this plan
+until hosted acceptance and final documentation handoff can be verified.
