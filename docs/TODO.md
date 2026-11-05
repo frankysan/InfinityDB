@@ -189,6 +189,9 @@ source-to-browser gap review; final release acceptance remains open.
 
 - [ ] **V1S-082 (L, gate):** Resolve confirmed source-to-normal-browser
   gaps and review all explicit omissions under the 1.0 definition.
+  The [coverage audit](v1.0-source-coverage-audit.md) records a confirmed
+  `term:trooper` glossary-definition omission and the remaining browser
+  acceptance needed to close that bounded gap.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
