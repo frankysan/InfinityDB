@@ -2359,7 +2359,9 @@ expose `variant_usage_published: true`. Their ordinary pages then request every
 reviewed canonical rule ID actually attached to the item's family and source
 variants, deduplicate those IDs, and render the matching groups together in an
 optional **Exact reviewed source occurrences** section alongside the existing
-catalog-wide Unit-usage lists. The UI never guesses IDs from display labels. Each exact group
+catalog-wide Unit-usage lists. If no curated rule IDs are attached, a verified
+canonical catalog slug may be used as a single fallback identity. The UI never
+guesses rule IDs from display names. Each exact group
 retains its reviewed signature and source-row count; expanded rows link to the
 logical Unit and selected application Army, with separate profile/loadout source
 IDs and group anchors where the Army presentation has an unambiguous identity.

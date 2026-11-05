@@ -98,9 +98,16 @@ export function exactVariantRuleIds(item, prefix) {
   ];
   const pattern = prefix === "skill" ? /^skill:[a-z0-9][a-z0-9-]*$/
     : /^equipment:[a-z0-9][a-z0-9-]*$/;
-  return [...new Set(records.map((rule) => rule.id).filter(
+  const ids = [...new Set(records.map((rule) => rule.id).filter(
     (id) => typeof id === "string" && pattern.test(id),
   ))].sort();
+  // A resolved canonical catalog slug is a safe fallback when the page has no
+  // curated rule records (for example a lightweight Army-only catalog view).
+  if (!ids.length && typeof item.slug === "string"
+      && /^[a-z0-9][a-z0-9-]*$/.test(item.slug)) {
+    ids.push(`${prefix}:${item.slug}`);
+  }
+  return ids;
 }
 
 /** Optional matched-publication view; never infer membership from catalog display names. */
