@@ -242,10 +242,12 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Core-scenario reference completion](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-044 (M, gate):** Verify scoped Skills, Specialist roles, scenario overlays and FAQ links without
-  ITS-season or core-rule leakage.
 - [ ] **V1S-045 (M, gate):** Run normal browser accessibility/navigation, desktop/mobile/theme/rapid-selection
   and empty/error acceptance on final inputs.
+  Deferred: repeat the wider browser checklist on the frozen release candidate after V1S-081/084,
+  including assistive/keyboard/touch and race/error recovery, with V1S-088. The bounded
+  [V1S-043/044 source/scoped publication checks](v1.0-source-coverage-audit.md#core-scenario-scoped-skills-specialists-overlays-and-faq-v1s-044-2026-11-05)
+  do not certify this final-input gate.
 
 #### FAQ and errata
 
@@ -698,8 +700,10 @@ the remaining source clauses and final release-browser acceptance remain open.
   [the data model](data-model.md#scenario-model-implemented-core-and-future-extensions).
   The [V1S-043 geometry/source/SVG acceptance](v1.0-source-coverage-audit.md#core-scenario-geometry-and-deterministic-map-acceptance-v1s-043-2026-11-05)
   passed all 24 point selections, both marker-display units, and the
-  existing two-width ordinary browser check; final frozen-candidate
-  reruns remain separately open.
+  existing two-width ordinary browser check. The
+  [V1S-044 scoped Skill/Specialist/FAQ gate](v1.0-source-coverage-audit.md#core-scenario-scoped-skills-specialists-overlays-and-faq-v1s-044-2026-11-05)
+  also passed without a new publication defect. Final frozen-candidate
+  browser and source/FAQ reruns remain separately open.
   - **Browser acceptance:** The separate
     [1.0 core-scenario browser checklist](#final-10-acceptance) owns
     keyboard/touch, rapid selection, theme/distance, direct/soft navigation,
