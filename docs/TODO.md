@@ -24,898 +24,359 @@ when all contained work shares the same owner.
 
 **Project domain:** Project infrastructure
 
-Version **0.10.1** was released and deployed on 2026-10-10. The current
-development milestone is **1.0.0 — current-reference completeness**.
-Completed Scenarios, Ammunition, rules-reference and stabilization changes
-belong to the [0.10.1 changelog](CHANGELOG.md#0101---2026-10-10), not a
-pending release checklist.
-
-Release history belongs in [the changelog](CHANGELOG.md#0101---2026-10-10).
-Earlier offline and bounded development-browser checks do not establish final
-1.0 acceptance. Current test/verifier procedures belong in [testing](testing.md);
-the [release checklist](releasing.md) requires fresh evidence for the final candidate.
-
-General performance/storage experiments, major pipeline refactors,
-persistent-user-data features, ITS content/season/tournament tooling and native
-applications remain post-1.0 unless needed to fix release-critical defects.
-Previously implemented ITS content is retained but is not a 1.0 requirement or
-release blocker. The four N5 core-rules scenarios remain in 1.0 scope.
-
-The public roadmap lives in README.md; the durable 1.0 release gate
-lives in docs/releasing.md. All unchecked tasks below belong to 1.0
-or post-1.0.
+Released version: **0.10.1**; current development: **1.0.0**.
+The [changelog](CHANGELOG.md) owns release history,
+[testing](testing.md) owns verification procedures and
+[releasing](releasing.md) owns the final acceptance definition.
+Bounded development checks do not approve the frozen candidate.
+Core N5 scenarios remain in scope; optional ITS, user-data,
+performance experiments and native clients are post-1.0.
 
 ## 1.0.0 — current-reference completeness gate
 
-1.0.0 is the final completeness release for the supported current reference data. It
-should resolve remaining material source/rules gaps, certify completeness of the published
-core-scenario reference surface, and validate the whole application without expanding into
-broader ITS/tournament tooling.
+Close material source-to-browser reference gaps and verify the complete
+current-data release against the [1.0 definition](releasing.md#version-10-data-completeness-gate).
 
 ### Implemented foundations and remaining scope
 
 **Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
 
-These foundations are implemented; final source-to-browser acceptance remains separate:
-
-- Four Core scenarios and the optional ITS Season 18 Battleground pilot, shared
-  scenario components, scoped Rules/Skills and deterministic maps:
-  [current scenario contract](data-model.md#scenario-model-implemented-core-and-future-extensions).
-- Eleven base Ammunition references, reviewed combined forms, Weapon Properties,
-  shared/specific Weapon definitions and disclosed source discrepancies:
-  [data model](data-model.md#pipeline-and-persistent-artifacts).
-- Twenty-nine dated FAQ rulings, twenty carried from v0.0, with validated
-  applicability, supersession, explicit-context API and topic/scenario cards:
-  [published FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
-- Martial Arts, Booty and MetaChemistry typed, linked charts with reviewed PDF,
-  Wiki-history and FAQ evidence:
-  [structured charts](data-model.md#structured-skill-reference-charts) and
-  [source provenance](n5-source-history.md#reviewed-10-structured-skill-chart-provenance).
-- Reviewed exact source variants, including Mimetism, Berserk and Dodge mappings;
-  the cross-army usage index has a development candidate and remains unpublished:
-  [variant contract](data-model.md#rule-variant-usage-index--accepted-design-direction-candidate-only).
-- Published deployed-object profiles, delivery paths and typed reverse uses:
-  [current contract](data-model.md#deployed-object-read-model-and-artifact-gated-browser-reference).
-- The optional Reinforcements reference and typed Commlink (+1)/(+2) Army extras
-  are published in the guarded v9 rules pair. N5-native annex authority and final
-  release/browser acceptance remain separate:
-  [scoped contract](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data).
-- The historical interaction-review ledger and its frozen checklist remain
-  unchanged. The [V1S-021 strict 1.0 identity gate](v1.0-source-coverage-audit.md#strict-10-interaction-identity-gate-v1s-021-2026-11-03)
-  passes against the paired Army/rules databases (186/186 primary and
-  205/205 supporting). Full source-clause and browser acceptance remain
-  separate: [historical checklist](rules-interaction-checklist.md).
-- Source archive/storage/API parity checks, optional Chromium verifiers and an
-  exact-runtime hosted candidate verifier exist:
-  [validation procedures](testing.md#10-source-evidence-baseline).
-  Local development-browser passes do not accept a future release or deployment.
+The canonical [data model](data-model.md), [source-coverage audit](v1.0-source-coverage-audit.md)
+and [test procedures](testing.md) own implemented facts, bounded acceptance
+and source identities. Published foundations include the core scenarios,
+dated FAQ, structured skill charts, Weapon/Ammunition and deployed-object
+references, scoped Reinforcements and exact-variant usage API/browser paths.
+The usage publication is still conditional on a verified matched artifact;
+an ignored development candidate is not a release artifact.
 
 ### Development sequence
 
-**Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
-
-This sequence organizes the remaining work around the implemented foundations above;
-it is not a new completeness definition or a claim that those foundations are absent. Use [the release gate](releasing.md#version-10-data-completeness-gate)
-to decide whether a gap blocks 1.0. Do not wait until release preparation to discover missing
-information or browser surfaces.
-
-| Stage | Reviewable output | Dependencies |
-| --- | --- | --- |
-| 1. Inventory and scope | Pinned inputs, source-to-browser coverage inventory, prioritized gap batches | Existing Army/rules databases and audit tools |
-| 2. Remaining semantics | Unresolved exact variants, combined-effect boundaries and supported Reinforcements annex facts | Inventory; reuse current scoped identity, FAQ, Ammunition and scenario contracts |
-| 3. Complete vertical slices | Remaining catalog/FAQ coverage and final four-Core-scenario reconciliation | Relevant Stage 2 contract; each slice includes storage, API and usable browser access |
-| 4. Derived references | Variant usage index; remaining Restrictions and Deployables gaps/acceptance | Reviewed owning facts and exact variant/scope semantics; declaration matrix and linked charts are published; comparison controls are optional |
-| 5. Closeout | Reconciled completeness evidence and final release acceptance | Every in-scope gap resolved; canonical release checklist |
-
-Stages may overlap where dependencies are satisfied. In particular, ordinary catalog curation can
-continue alongside remaining shared-semantic work, and projections need only their owning facts to
-be ready. Keep model/export, curation, backend, and browser substeps visible under each open parent;
-a populated JSON collection alone does not complete a player-facing task.
-
-For each implementation slice, record the source/version being covered, remaining decisions,
-affected canonical documents, and evidence needed to close it. Extend existing validators and
-audit tools before introducing another coverage system. Keep new private evidence under
-ignored `local/audits/` (legacy ignored `reports/` and `docs/audits/` remain supported);
-keep maintained semantic decisions in validated curated data or configuration.
-Use [the standard checks](testing.md) for the affected contracts, and add manual
-browser acceptance for new visual/interaction surfaces. Promote durable contracts to their
-canonical owners as implementation lands; keep remaining design extensions explicitly labelled
-as unimplemented and distinguish them from the published core-scenario foundation.
+Review and close the earliest actionable numbered V1S slice below after
+checking the [VD/VR queue](validation-queue.md). Source/inventory
+reconciliation precedes its dependent curation or projection; final
+release-input checks remain V1S-081–095. The
+[1.0 release definition](releasing.md#version-10-data-completeness-gate)
+determines scope. Do not make optional ITS tooling or publisher answers
+release blockers.
 
 ### Pre-planned 1.0 execution slices
 
-**Planning baseline:** dev/v1.0.0 at dd071c4d (2026-11-03). This is the
-actionable slice register for the nine open 1.0 parent outcomes below, not a
-second release gate or a new interpretation of historical audit counts.
-Each numbered slice maps to the named parent section; the existing parent and
-nested acceptance conditions still govern closure. Use the
-[V1S work-selection checkpoint](#v1s-work-selection-and-handoff) before taking
-another slice; "ready" alone is not justification for bypassing earlier open
-work. Remove completed slices under the normal backlog retirement rule; Git
-history retains the original estimate and result.
-
-**Sizing:** S = one bounded source decision/check or focused change (1 unit);
-M = a small, independently reviewable multi-step source/data/browser slice
-(2 units); L = a larger bounded multi-family or end-to-end gate (4 units).
-Units are relative planning weights, **not days, hours or commitments**.
-A review may close as source-verified no-change; a conditional slice produces
-code only when the reviewed source confirms a gap. Source uncertainties,
-newer inputs and previously undiscovered 1.0 omissions can expand the plan.
-Labels: **review** = evaluate evidence, **design** = settle a contract,
-**build** = implement, **gate** = verify/accept, **decision** = settle
-a supported boundary, **conditional** = only for confirmed additions,
-**external** = independent authorization/dependency.
+The numbered V1S register is the actionable decomposition of the
+1.0 parent outcomes below, not a second release definition.
+The original 2026-11-03 sizing and retired ID history remain in Git.
+S/M/L are relative bounded/small multi-step/larger acceptance slices,
+not time estimates. A source-reviewed no-change is a valid closeout;
+conditional implementation requires a confirmed gap.
 
 #### V1S work selection and handoff
 
-For an autonomous "proceed" or "next task" pass, use this checkpoint **after
-checking due VD/VR work and before any ordinary V1S implementation**:
+After the [VD/VR checkpoint](validation-queue.md#queue-rules), before
+each autonomous "proceed" pass:
 
-1. Inventory **all unchecked V1S slices in this 1.0 register**, across every
-   section, along with their owning open parent, prerequisites and already
-   recorded review/acceptance evidence. Do not resume from the last edited
-   section, assume missing ID numbers are complete, or select the nearest
-   convenient source family without comparing earlier work.
-2. Prefer the **earliest actionable** open slice whose prerequisites are met.
-   ID order is a review/default priority, not a false dependency between
-   independent workstreams. If an earlier slice cannot proceed, distinguish
-   **blocked** (specific missing source, ruling, permission, prerequisite or
-   unavailable environment) from **still actionable** (further bounded review
-   or implementation is possible). Do not mark a task blocked merely because
-   its source meaning is uncertain when investigation can still progress.
-3. Preserve skipped work **in its existing open TODO entry**: use a concise
-   `Blocked:` note naming the dependency, authority/owner and retry trigger,
-   or a `Deferred:` note naming the accepted priority decision and revisit
-   trigger. Link existing SRC or other issue IDs when appropriate; do not
-   create another task ledger. Bypassing an earlier *actionable* slice needs
-   an explicit user priority, release-critical dependency or documented
-   time-bounded rationale, not just a preference for a simpler review.
-   Record the affected earlier IDs/ranges and why they remain open in the
-   task-selection handoff. An explicitly user-selected task may take priority,
-   but its relevant prerequisites and skipped work must still be disclosed.
-4. At each task boundary, reconcile the **previously selected V1S and its
-   owning parent** with real deliverables, current source uncertainty,
-   changed canonical documentation and the active VD/VR queue. If the stated
-   outcome and required verification are complete, retire the task in the
-   same change as its acceptance handoff. If partially complete, keep it
-   unchecked and rewrite the *remaining actionable work* rather than leaving
-   a stale "finish validation" instruction. Source-reviewed no-change is a
-   valid review outcome when evidenced; unresolved implementation or official
-   ruling requirements remain open with the correct owner.
-5. Before selecting another slice, state the selected ID, any earlier open
-   IDs intentionally passed over (and their reason), the previous ID's
-   **retired / still open / blocked** disposition, and VD/VR counts. A
-   successful test run does not by itself close a broader feature, and a
-   removed task is not proof of completion without its documented handoff.
+1. Inventory **all unchecked V1S IDs**, prerequisites, owners and
+   available evidence; do not resume from the latest edited section
+   or assume missing IDs have passed.
+2. Select the **earliest actionable** ID. For earlier IDs, record
+   a concrete `Blocked:` dependency/owner/retry trigger or
+   `Deferred:` priority/revisit trigger in their existing entries.
+   Source uncertainty alone is not a blocker when further review is
+   possible. Bypass actionable earlier work only for explicit user
+   priority or a documented critical dependency.
+3. At each boundary reconcile the selected ID, its parent, source
+   evidence, changed contracts and VD/VR obligations. Retire it only
+   with completed acceptance and documentation; otherwise rewrite
+   the remaining action. Preserve every retired V1S ID in the
+   closeout commit per [the retirement contract](README.md#backlog-completion-and-retirement).
+4. Report the selected/previous ID disposition, reasons for passing
+   over earlier IDs, and current VD/VR counts. Do not equate a
+   focused test pass or Git commit with final release acceptance.
 
-This is a **selection and closeout gate**, not a new status log or a change
-to the [strict validation-queue loop](validation-queue.md#queue-rules).
-Completion and removal follow
-[backlog completion and retirement](README.md#backlog-completion-and-retirement).
-
-**Shared completion rule:** Every implementation slice must specify its
-pinned source/variant, affected maintained model/export, API and ordinary
-browser entry point (or a justified no-change), essential regressions,
-deferred validation-queue obligations and documentation handoff. No slice
-alone replaces final source-wide or release-candidate acceptance. Work on independent Windows slices can overlap an actively running
-**full Linux test suite** on an earlier pinned revision, following the
-[validation-queue drain policy](validation-queue.md#queue-rules).
-Partial/focused Linux runs do not suspend the due VR drain.
+An implementation slice needs source/variant provenance, affected
+model/export, API and ordinary browser route (or justified no-change),
+regressions and documentation handoff. Final candidate and CI gates
+remain separate. Only an actively running **full Linux suite** allows
+independent Windows work while validation drains; see the
+[queue rules](validation-queue.md#queue-rules).
 
 #### Rules and contextual reference completion
 
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-V1S-033’s N5.3 movement, geometry, Cover, positioning and optional terrain
-references are published with source/API/search, matched-publication and
-combined cross-host three-width browser acceptance. Current explanations are
-in [rules-semantics](rules-semantics.md#movement), with detailed evidence in the
-[source review](v1.0-source-coverage-audit.md#movement-lof-cover-and-terrain-source-review-v1s-033-2026-11-04-partial).
-Remaining State-link, scenery/object and release-wide work stays under
-V1S-068–069, V1S-074 and V1S-081–090.
+Previous source reviews and exact browser acceptance are retained in
+[the coverage audit](v1.0-source-coverage-audit.md). The remaining external
+Silent/Immunity question is [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier),
+not a 1.0 gate.
 
-Basic attack/Template, Hacking and reviewed Ammunition publication references have
-[pinned source/API/browser acceptance](v1.0-source-coverage-audit.md#attack-hacking-and-ammunition-publication-acceptance-v1s-034035038-2026-11-04).
-The [shared core/scenario and collection-supplement review](v1.0-source-coverage-audit.md#shared-core-scenario-concepts-and-collection-supplements-v1s-039-2026-11-04)
-found no additional scoped-publication defect; final source/browser acceptance
-remains with the scenario, FAQ and release gates below.
-Remaining source authority, complete Weapon-profile review, occurrence indexing
-and final candidate acceptance retain their individual owners below.
-
-The [V1S-037 Silent/Attribute-Immunity source review](v1.0-source-coverage-audit.md#bts-critical-and-state-immunity-review-v1s-037-2026-11-04)
-confirmed that reviewed exceptions and public uncertainty are represented. The
-unanswered [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier)
-publisher question is a non-blocking post-1.0 clarification, not missing 1.0
-implementation. Reopen a release task only if an independently verified defect
-materially misrepresents the published rules.
-
-- [ ] **V1S-041 (M, gate):** Accept Reinforcement Section, profile and exact Commlink variants in ordinary
-  browser/release context, without asserting roster legality.
-  Deferred: existing three-width annex/navigation, two-width shared-profile and exact (+1)/(+2)
-  browser regressions cover the current published behavior; repeat manual and automated
-  sign-off against the frozen candidate and release-matched databases after V1S-081/084,
-  alongside V1S-088. Do not substitute earlier runs for that gate.
+- [ ] **V1S-041 (M, gate):** Accept the optional Reinforcements
+  Section, profiles and exact Commlink (+1)/(+2) variants in the
+  ordinary browser on the frozen, release-matched source pair.
+  Deferred until V1S-081/084/088; preserve N4-origin disclosure
+  and do not assert roster legality or N5-native authority.
 
 #### Four core scenarios
 
 **Parent:** [Core-scenario reference completion](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-045 (M, gate):** Run normal browser accessibility/navigation, desktop/mobile/theme/rapid-selection
-  and empty/error acceptance on final inputs.
-  Deferred: repeat the wider browser checklist on the frozen release candidate after V1S-081/084,
-  including assistive/keyboard/touch and race/error recovery, with V1S-088. The bounded
-  [V1S-043/044 source/scoped publication checks](v1.0-source-coverage-audit.md#core-scenario-scoped-skills-specialists-overlays-and-faq-v1s-044-2026-11-05)
-  do not certify this final-input gate.
+- [ ] **V1S-045 (M, gate):** Run final-input four-scenario
+  keyboard/touch/theme/responsive, rapid-selection, empty/error
+  and navigation/race-recovery acceptance alongside V1S-088.
+  Existing [bounded source/browser checks](v1.0-source-coverage-audit.md#core-scenario-scoped-skills-specialists-overlays-and-faq-v1s-044-2026-11-05)
+  do not certify the frozen candidate.
 
 #### FAQ and errata
 
-**Parent:** [Dated FAQ/errata acceptance](#rules-and-reference-completeness).
+**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
+
+No independently open FAQ slice precedes the final V1S-084/088
+release-matched acceptance.
 
 #### Rule-variant usage index and Restrictions
 
-**Parent:** [Generated rules-reference projections](#rules-and-reference-completeness).
+**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend, Deployment
 
-The [read-only occurrence candidate](data-model.md#current-read-only-variant-candidate)
-has [source-row, relationship and artifact acceptance](v1.0-source-coverage-audit.md#peripheral-shared-option-and-candidate-artifact-acceptance-2026-11-05).
-The [matched-publication API and ordinary browser links](v1.0-source-coverage-audit.md#exact-variant-usage-browser-acceptance-2026-11-05)
-are implemented and focused-tested. [V1S-066's complete cross-Army/source-pair
-browser gate](v1.0-source-coverage-audit.md#full-exact-variant-usage-source-pair-acceptance-2026-11-05)
-passes on the pinned development inputs. Hosted CI, artifact delivery, and final
-release acceptance remain separate.
-
-Restrictions v8/v9 migration safety has staged-pair validation and CI image
-rehearsal. A live-host rollback/forward rehearsal (former V1S-067) is not
-required for this operator-managed 1.0 deployment; retain ordinary recovery
-artifacts and deployment smoke checks.
+The [variant usage source-pair and browser gate](v1.0-source-coverage-audit.md#full-exact-variant-usage-source-pair-acceptance-2026-11-05)
+is accepted on development inputs; final artifact/hosted checks are
+still required. Restrictions migration has staged-pair and CI image
+rehearsal; the former V1S-067 live-host rehearsal is out of scope.
 
 #### Game States context
 
-**Parent:** [Contextual Game States](#rules-and-reference-completeness).
+**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-The [V1S-068 inventory](v1.0-source-coverage-audit.md#contextual-game-states-reference-inventory-v1s-068-2026-11-05)
-classifies Fireteam, Hacking, Ammunition, scenario and FAQ references against
-the existing State graph, including contextual exceptions and unsupported
-unconditional transitions. The [V1S-069 acceptance](v1.0-source-coverage-audit.md#contextual-state-fireteam-browser-acceptance-2026-11-05)
-verifies source-backed reciprocal Fireteam links for the three uncovered
-State-side contexts, without inferring live Unit States or broader edges.
+The [State/Fireteam review](v1.0-source-coverage-audit.md#contextual-state-fireteam-browser-acceptance-2026-11-05)
+records reviewed source-backed reciprocal links. Final source-input
+acceptance remains under V1S-081–088.
 
 #### Weapons, Ammunition and deployed objects
 
-**Parent:** [Weapon, Ammunition and Deployable presentation](#rules-and-reference-completeness).
+**Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-The [terrain/Gate reference acceptance](v1.0-source-coverage-audit.md#terrain-suggestions-and-gate-discovery-acceptance-v1s-077-2026-11-05)
-and [deployed-object API/browser acceptance](v1.0-source-coverage-audit.md#deployed-object-api-and-ordinary-browser-acceptance-v1s-078-2026-11-05)
-complete the bounded source, classification and publication reviews. Repeat the
-release-matched source/publication and browser gates under V1S-081–090.
+The [deployed-object acceptance](v1.0-source-coverage-audit.md#deployed-object-api-and-ordinary-browser-acceptance-v1s-078-2026-11-05)
+is bounded to the development pair; final-input checks remain.
 
 #### Accessibility and navigation
 
 **Parent:** [Player-facing navigation and reference clarity](#player-facing-navigation-and-reference-clarity).
 **Project domains:** Web frontend, Project infrastructure
 
-- [ ] **V1S-079 (M, gate):** Complete assistive-technology review of the floating accuracy notice and navigation:
-  roles, focus, announcement and keyboard. The shared soft-navigation focus handoff
-  and polite page announcement have been implemented; focused browser regressions
-  are authored but unrun under VR-0102. Native notice semantics and keyboard tests are
-  a baseline, not actual screen-reader sign-off. Retain manual AT checks across
-  expanded/collapsed notice, keyboard navigation, back/forward and changed pages.
-- [ ] **V1S-080 (M, gate):** Verify touch, theme, narrow viewport and notice collapse/expand behavior; fix
-  only reproducible 1.0 regressions. Existing desktop/mobile light/dark geometry and
-  keyboard checks are supplemented by a new unrun touch activation regression
-  under VR-0102; final-candidate sign-off remains open.
+- [ ] **V1S-079 (M, gate):** Complete actual assistive-technology
+  acceptance for notice roles, focus, announcements, back/forward
+  and keyboard navigation. Soft-navigation focus/status code is
+  implemented; [VR-0102](validation-queue.md#pending-deferred-execution)
+  holds unrun browser regressions. Browser tests are not screen-reader sign-off.
+- [ ] **V1S-080 (M, gate):** Complete final-candidate touch, theme,
+  320/390px viewport and notice expand/collapse verification; fix
+  reproducible 1.0 defects. The new touch regressions remain unrun
+  under VR-0102.
 
 #### Final frozen-candidate acceptance and release
 
 **Parent:** [Final 1.0 acceptance](#final-10-acceptance).
 **Project domains:** Data processing, Web backend, Web frontend, Project infrastructure, Deployment
 
-- [ ] **V1S-081 (M, gate):** Freeze intended source inputs, tracked databases and derived asset identities;
-  rerun complete category/source disposition.
-- [ ] **V1S-082 (L, gate):** Close all confirmed source-to-storage-to-normal-browser gaps and review every
-  explicit exclusion against the 1.0 definition.
-- [ ] **V1S-083 (M, gate):** Reconcile cross-source uncertainty, empty/unavailable/not-applicable semantics
-  and player-facing source claims.
-- [ ] **V1S-084 (M, gate):** Rebuild/verify the release-matched Army/rules pair, FAQ parity, deployed-object
-  publication and processed symbols.
-  The reviewed V1S-048 Ancillary source-selection disclosure and V1S-052
-  Doctor `2W` clarification now reach the guarded v9 development pair;
-  final frozen-input rebuild, FAQ parity, symbol and source-pair acceptance
-  remain required. Do not substitute the bounded prerequisite refresh for
-  this final candidate gate.
-- [ ] **V1S-085 (M, gate):** Run source occupancy, source/archive, strict primary interaction, reference
-  baseline and output reproducibility checks. Treat the
-  [host-SQLite physical-vs-logical rebuild finding](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
-  as a distinct byte-reproducibility question; logical equivalence alone does not pass hosted CI.
-- [ ] **V1S-086 (M, gate):** Run rule fragment and wider source-to-browser checks on the exact candidate;
-  document uncovered normal entry points.
-- [ ] **V1S-087 (L, gate):** Run the 81-page local Unit matrix and hosted exact-version representative checks
-  with pinned assets/databases.
-- [ ] **V1S-088 (M, gate):** Rerun scenario 24-configuration and FAQ browser/source gates against the
-  candidate; include applicable other surfaces.
-- [ ] **V1S-089 (M, gate):** Obtain manual Silhouette hover/keyboard/touch/theme/narrow-width sign-off plus
-  required human visual review.
-- [ ] **V1S-090 (L, gate):** Drain validation queue and run all relevant complete local/Linux full-asset,
-  docs, source and preflight suites.
-  The bounded CI/data-pair and normal FAQ applicability-disclosure repair has
-  [pinned cumulative and focused acceptance](v1.0-source-coverage-audit.md#development-pair-and-ci-consistency-repair-2026-11-05).
-  Repeat the complete gate on final candidate inputs. Linux Markdownlint still
-  requires its pinned npm setup; Windows docs checks and hosted CI remain
-  independently available.
-- [ ] **V1S-091 (L, gate):** Audit the entire tracked Markdown corpus, stale version/command references,
-  canonical contracts and browser copy.
-- [ ] **V1S-092 (M, gate):** Finalize coherent Unreleased notes, release metadata and version only after the
-  completeness review.
-- [ ] **V1S-093 (L, gate):** Merge the approved candidate and obtain exact-main-SHA hosted workflows, optional
-  full-assets, evidence and annotated tag. Development revision `8391ba6c`
-  passed all four Source matrix legs and Cross-platform deterministic outputs
-  ([run 42020461026](https://github.com/frankysan/InfinityDB/actions/runs/42020461026)),
-  plus Installed wheel and Deployment smoke. That supersedes the older
-  incomplete development-matrix evidence; it does not accept later changes,
-  the frozen release candidate or exact-main-SHA workflows.
-  Preserve exact-candidate Source checks, Installed wheel and Deployment
-  smoke requirements; no passing local/Linux suite substitutes for them.
-- [ ] **V1S-094 (L, external):** With explicit operational approval, deploy the approved
-  tagged artifact using the documented operator procedure. Confirm recovery assets remain
-  available; a live-host rollback/forward rehearsal is not a 1.0 prerequisite.
-- [ ] **V1S-095 (M, gate):** Verify deployed exact source/runtime pair, release version, static assets and
-  representative browser paths after deployment.
-- [ ] **V1S-096 (L, build):** Complete the
-  [V1S backlog checker](v1s-backlog-checker-plan.md): implement Git-aware
-  closeout and selection checks, reliable local/CI integration, and agent
-  workflow guidance. Preserve read-only static checking, distinguish evidence
-  presence from semantic acceptance, and verify deterministic Windows/Linux
-  behavior.
-
-**Initial sizing at this baseline:** 95 planned slices (9 S,
-75 M, 11 L), **203 relative work units**.
-V1S-096 is a later L-sized infrastructure addition; the baseline figures above
-remain historical.
-This is an upper-level capacity indicator, not an elapsed-time forecast:
-review/no-change slices may be short; full-source discovery can add new work;
-separately authorized host/human checks may be schedule dependencies.
-The pre-existing validation queue is not counted as new implementation.
-Recalculate open counts from unchecked V1S entries as slices retire.
-The initial mix is 56 review, 30 gate, two design, three build,
-one boundary decision, one conditional implementation and two external
-operations. These are not 95 code changes.
-
-**Dependency order (not a serial schedule):** Source/version pinning
-V1S-001–003 and the bounded current-state audits can start alongside existing
-source-backed variant review V1S-050–061, published-reference verification
-V1S-023, and Weapon/deployed-object discovery V1S-070–076. Source review
-V1S-004–022 qualifies any new omissions; the relevant owning rules/reference
-slice then addresses confirmed gaps. The variant index V1S-062–066 follows
-reviewed occurrence semantics, not the other way around. V1S-081–095 are
-frozen-candidate/release gates and must not be marked complete from earlier
-development checks. V1S-040 can close by accurate legacy-annex disclosure
-without a publisher response. V1S-037's publisher question is post-1.0,
-and V1S-067's real-host rehearsal is inapplicable; only V1S-094 still
-requires deployment authorization. After a new source acquisition, revisit
-affected review and downstream acceptance rather than accepting a previous
-baseline silently.
+- [ ] **V1S-081 (M, gate):** Freeze source inputs, tracked databases
+  and derived assets; repeat the category/source inventory.
+- [ ] **V1S-082 (L, gate):** Resolve confirmed source-to-normal-browser
+  gaps and review all explicit omissions under the 1.0 definition.
+- [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
+  and empty/unavailable/not-applicable semantics.
+- [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
+  Army/rules pair, FAQ parity, deployed objects and processed symbols.
+- [ ] **V1S-085 (M, gate):** Run source occupancy, archive,
+  strict interaction, baseline and reproducibility gates; distinguish
+  [physical SQLite byte differences](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
+  from logical equivalence.
+- [ ] **V1S-086 (M, gate):** Run final-candidate rule-fragment
+  and broader source-to-browser checks; identify uncovered routes.
+- [ ] **V1S-087 (L, gate):** Run the 81-page local Unit matrix
+  and exact-version hosted representative checks.
+- [ ] **V1S-088 (M, gate):** Repeat all 24 core-scenario
+  configurations and FAQ source/browser acceptance.
+- [ ] **V1S-089 (M, gate):** Obtain manual Silhouette
+  hover/keyboard/touch/theme/narrow-width and human visual sign-off.
+- [ ] **V1S-090 (L, gate):** Drain due VD/VR work and run the full
+  local/Linux, source, docs, preflight and applicable full-asset checks.
+- [ ] **V1S-091 (L, gate):** Audit the complete tracked Markdown
+  corpus, links, commands, contracts and browser copy.
+- [ ] **V1S-092 (M, gate):** Finalize Unreleased notes,
+  release metadata and version after completeness acceptance.
+- [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
+  exact-main-SHA hosted Source, wheel and deployment smoke evidence,
+  optional full-assets and annotated tag.
+- [ ] **V1S-094 (L, external):** With explicit operator approval,
+  deploy the tagged artifact and verify recovery assets exist.
+  A live-host rollback rehearsal is not required.
+- [ ] **V1S-095 (M, gate):** Verify the deployed exact source/runtime
+  pair, release version, static assets and representative browser paths.
+- [ ] **V1S-096 (L, build):** Complete Git-aware closeout/task-selection
+  checks, local/CI integration and cross-platform validation of the
+  [backlog checker](v1s-backlog-checker-plan.md), without treating evidence
+  presence as semantic acceptance.
 
 ### Source inventory and gap batches
 
-The [2026-10-31 source-coverage assessment](v1.0-source-coverage-audit.md)
-records four confirmed core-reference/presentation gaps, two reproducible audit/test
-defects and four quantified existing dependencies against `9d820602`. Its findings
-are dated evidence; the unchecked tasks here own their resolution. In particular,
-the enrichment report's missing standalone Weapon definitions are not 62 confirmed
-missing explanations: the existing shared-effects approvals must be reconciled.
+**Project domains:** Data processing, Project infrastructure
 
-- [ ] **Data processing + Project infrastructure:** Establish the 1.0 completeness baseline
-  against the final intended input set; existing bounded reviews are prerequisites.
-  Weapon triage, supporting-target expectations and opt-in 1.0 enrichment
-  assessment are repaired; use the [source-evidence procedures](testing.md#10-source-evidence-baseline)
-  when refreshing the frozen-pair baseline, without inferring whole-source or
-  browser acceptance from the historical shared-effect approvals.
-  - [x] Review change-sensitive historical Wiki comparisons: the September 26
-    citation replacement is verified, but the missing September 18 original
-    cannot establish a before/after content delta. The bounded dispositions
-    are recorded in the [source evidence](rules-explanation-audit-1.0-sources.md#historical-wiki-comparison-boundary-v1s-004-2026-11-03);
-    source-wide semantic and frozen-release gates remain open.
-  - [x] Select and pin the intended Army, rules/FAQ/annex and Wiki review inputs,
-    including source/derived-publication identities in the
-    [N5 source history](n5-source-history.md#selected-army-input-for-10-v1s-001-2026-11-03).
-    Publication dates are separate from acquisition dates. A later source refresh reopens
-    affected coverage; normal checks must not acquire newer inputs implicitly.
-    Official update posts are supplementary change evidence, not replacements
-    for versioned primary sources. Final candidate freeze is still due below.
-    - [ ] Refresh the release-candidate baseline and source occupancy gate once
-      the Army/rules database pair is frozen for 1.0. Do not reuse the
-      pre-Peripheral-projection publication SHA or paired runtime revision.
-  - [ ] Reconcile each N5 update-post changelog item with its applicable versioned
-    Army snapshot, rules/FAQ PDF, exact Wiki revision, and available historical N5
-    versions. Record unmatched announcement claims and unknown release/snapshot
-    boundaries as open review work, not confirmed database defects.
-    - [ ] **Data processing:** Before 1.0, explicitly review Corvus Belli's
-      **N5.3 update blog post** and trace each published change against the pinned
-      N5.3 rules, FAQ, Wiki revision and Army snapshot as applicable. Record
-      affected maintained identities, confirmed mismatches, no-change results
-      and unresolved source/version boundaries; update player-facing data only
-      for source-confirmed discrepancies. This is a named N5.3 review within
-      the wider update-post reconciliation task, not a substitute for it.
-      - [ ] Close the current N5.3 reconciliation inventory against
-        the final 1.0 source and browser evidence. See the
-        [current disposition](rules-explanation-audit-1.0-n5.3-reconciliation.md#current-reconciliation-inventory-2026-10-29).
-        Review four additional Spanish-only subjects, all 20 Army update
-        subjects and the nine added FAQ rulings in their own source/scope
-        boundaries. Current-rule ESX-01..04 checks have local acceptance;
-        continue Army current-state coverage while preserving disclosed
-        publisher conflicts and the ITS-only Ancillary ruling boundary.
-        Finish release-matched database, derived-publication and browser
-        acceptance without replacing the original audit's historical counts.
-      - [ ] **ARMY-01 remaining semantics and release gates:** Retain the
-        unresolved current N5 Reinforcements authority boundary;
-        review further profile-specific annotations if the source
-        inventory identifies them. The reviewed
-        [Fireteam annotation contract](data-model.md#fireteams)
-        does not establish a general-purpose selector or legality model.
-        ARMY-02–20 native profile/loadout publication parity is recorded in
-        the linked reconciliation inventory; this does not validate roster legality or
-        profile-transition/upgrade semantics. Do not infer
-        a historical before/after delta without an earlier
-        pinned Army snapshot. Final release-matched database,
-        browser and CI acceptance remain separate gates.
-  - [ ] Inventory player-relevant information by source section/category, including the four core
-    scenarios. Core/Hacking module/family inventory and its bounded source-to-storage-to-browser
-    dispositions are recorded in the [V1S-016 current review overlay](v1.0-source-coverage-audit.md#current-corehacking-section-disposition-overlay-v1s-016-2026-11-03).
-    The Core/Hacking module overlay, Wiki-backed families and supplemental
-    scenario/FAQ/Army/symbol/annex category owners are recorded in the
-    [V1S-016–018 coverage dispositions](v1.0-source-coverage-audit.md#supplementary-category-level-coverage-dispositions-v1s-018-2026-11-03).
-    The [V1S-019 Weaponry triage](v1.0-source-coverage-audit.md#weaponry-profile-prose-and-exception-triage-v1s-019-2026-11-03) classifies
-    source conflicts separately from incomplete prose, mode and object review.
-    [V1S-020](v1.0-source-coverage-audit.md#faq-byte-provenance-and-optional-reinforcements-scope-v1s-020-2026-11-03)
-    confirms the final pinned FAQ byte identities, current FAQ scope and separate
-    N4-origin optional Reinforcements reference. The
-    [V1S-021 strict 1.0 catalog gate](v1.0-source-coverage-audit.md#strict-10-interaction-identity-gate-v1s-021-2026-11-03)
-    also passes without changing the historical 0.7 checklist.
-    The [V1S-022 ranked gap register](v1.0-source-coverage-audit.md#ranked-confirmed-gaps-and-evidence-batches-v1s-022-2026-11-03)
-    assigns exact variant review, unimplemented cross-Army usage projection,
-    whole-record acceptance and remaining source/browser gates to their
-    existing owners, separating proven omissions from unchecked evidence and
-    cross-source uncertainty. Remaining work is implementing/reviewing those
-    batches and final candidate acceptance; distinguish missing facts,
-    relationships and presentation.
-  - [ ] Reuse `audit_source_presentation.py`, `audit_enrichment_coverage.py`, and
-    `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
-    not establish PDF, FAQ, or scenario completeness or prove browser usability; add the missing
-    source review and presentation checks explicitly.
-    - [x] Cross-check the **derived Army relationships** that source-field occupancy alone
-      cannot certify: canonical Unit/profile/loadout identities, shared Unit-option Includes,
-      Peripheral/controller targets, Reinforcement parent/pool membership and Army-local
-      Fireteam availability. The bounded dispositions are in the
-      [V1S-013–015 source history](n5-source-history.md#fireteam-reinforcement-and-normal-navigation-v1s-015-2026-11-03):
-      source-boundary warnings remain open without inventing roster legality.
-      - [x] Verify normal Unit/Army/Fireteam browser reachability and applicability,
-        including Reinforcement pool parent context, notes and source-backed
-        uncertainty; **90/90** focused Chromium cases passed. Final release
-        acceptance and unrelated source-section review remain separate.
-    - [ ] Obtain independent human visual acceptance if required for the 1.0
-      release; agent-reviewed screenshots and automated browser assertions
-      are evidence, not a human sign-off.
-    - [ ] Continue extending the reviewed Weapon Properties inventory beyond
-      Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced, four
-      AP-based combinations and the reviewed N+E/M form. Review further
-      name/Traits exceptions and
-      consolidate repeated weapon prose where source/mode-specific information
-      remains intact. Initial Viral CC/Sniper, Plasma Sniper, Silenced Pistol
-      and the printed Monofilament Immunity example now link their relevant
-      Properties directly in maintained-text prose; the E/M CC Weapon
-      now links its printed N+E/M combination. Other candidates still
-      need source-by-source review.
-    - [ ] Continue the broader auxiliary/equipment-object and special-weapon
-      prose review, including entries without four printed Attributes.
-      Identify missing facts, relationships and browser coverage separately
-      from source notation differences.
-    - [ ] Continue auditing remaining Weaponry source clauses,
-      unreviewed exceptions, exact profile semantics and
-      API/browser relationships. The 90 selected clauses and seventeen
-      typed edges are not an exhaustive N5.3 pp. 68-74 inventory.
-    - [ ] Complete the remaining FAQ v0.1 source-hash/coverage and
-      applicability review against the final pinned inputs. Distinguish
-      core-relevant answers from ITS-season-only scope before adding
-      further rulings; keep locally available FAQ/core PDF/history ZIP
-      hash evidence separately versioned. Locally available Reinforcements
-      PDFs are N4 publications; verify a supported N5 annex rather than inferring
-      current rules from those older files or the related Wiki page.
-      Do not make full ITS-season publication a 1.0 requirement.
-  - [ ] Reconcile `data/curated/rules-interactions/reviews.json` and
-    `catalog-scope.json` with the pinned 1.0 input set. Historical release labels
-    and the passing supporting-identity slice do not certify the primary catalog.
-    Use the separate 1.0 primary assessment, strict release guard and scope-drift
-    report from the [source-evidence procedures](testing.md#10-source-evidence-baseline).
-    Account for later published identities, including Activate Disco Ball,
-    Request SpecBall, Firewall and optional Commlink, without rewriting historical
-    approvals or attributing N5-native authority to the N4-origin annex.
-  - [x] Turn confirmed gaps into [ranked, owned batches](v1.0-source-coverage-audit.md#ranked-confirmed-gaps-and-evidence-batches-v1s-022-2026-11-03)
-    with pinned source/version, dependency, required normal browser surface and checks.
-    The register distinguishes unreviewed source parameters, missing usage-index
-    delivery, pending whole-record/source acceptance and external publisher disputes.
-    This is discovery/ownership closure, **not** implementation or release approval.
-  - **Completion:** every supported source/category has an explicit coverage disposition and every
-    material in-scope gap has an owning open task. This establishes the baseline, not final acceptance.
+The [source-coverage audit](v1.0-source-coverage-audit.md) owns reviewed
+dispositions, source identities and confirmed omissions. These tasks own the
+remaining work; the final-input freeze and complete release check remain
+V1S-081–085 rather than independent acceptance ledgers.
+
+- [ ] Reconcile the final pinned Army, N5.3 Rules, Wiki, FAQ, annex, scenario and
+  symbol inputs against the complete source-section-to-storage-to-browser
+  inventory. Identify every material omitted fact, relationship or ordinary
+  browser route; distinguish a confirmed defect from a source conflict,
+  unreviewed clause or deliberate exclusion. Re-run the
+  [source-evidence tools](testing.md#10-source-evidence-baseline) and strict
+  interaction-catalog scope check on the frozen pair.
+- [ ] Finish official N5 change-post reconciliation, explicitly including the
+  N5.3 post, Spanish-only cases, all 20 Army-update subjects and nine added
+  FAQ rulings. Compare announcements with pinned primary sources; close the
+  [reconciliation inventory](rules-explanation-audit-1.0-n5.3-reconciliation.md#current-reconciliation-inventory-2026-10-29)
+  without inventing historical deltas. Unanswered publisher questions, such as
+  optional Reinforcements authority, remain in the [SRC register](official-source-clarifications.md).
+- [ ] Reconcile the final `data/curated/rules-interactions/reviews.json` and
+  `catalog-scope.json` with all current in-scope identities and cited
+  exceptions, retaining historical review decisions without treating them
+  as whole-record approval. Final source-clause and browser acceptance belong
+  to the [completeness gate](releasing.md#version-10-data-completeness-gate).
+
+The [bounded source/relationship findings](n5-source-history.md) and
+[ranked gap batches](v1.0-source-coverage-audit.md#ranked-confirmed-gaps-and-evidence-batches-v1s-022-2026-11-03)
+remain evidence, not extra TODO entries. Final human visual sign-off is owned
+by V1S-045/089 and the [release checklist](releasing.md).
 
 ### Rules and reference completeness
 
-The [V1S-024 Skill-family review](v1.0-source-coverage-audit.md#skill-semantic-family-coverage-and-deferred-links-v1s-024-2026-11-04)
-found no missing public Skill definitions. The
-[V1S-025 Equipment-family review](v1.0-source-coverage-audit.md#equipment-semantic-family-and-exceptional-profile-review-v1s-025-2026-11-04)
-likewise confirms public Equipment definition coverage while preserving
-conditional TinBot/Firewall and exceptional object distinctions. The
-[V1S-026 General Rules/glossary review](v1.0-source-coverage-audit.md#general-rules-training-and-glossary-scope-v1s-026-2026-11-04)
-reconciles shared Core Rules, two Training definitions, 23 Terms,
-embedded Attribute/Label vocabulary and scenario-owned qualifications. The
-[V1S-027 State/Trait/Attribute review](v1.0-source-coverage-audit.md#states-traits-and-attributes-with-distinct-semantics-v1s-027-2026-11-04)
-confirms typed reference identities and distinct army-level Retreat versus Trooper-State scopes. The
-[V1S-028 source-conflict review](v1.0-source-coverage-audit.md#cross-source-conflicts-faq-applicability-and-public-uncertainty-v1s-028-2026-11-04)
-reconciles published disclosure, dated FAQ scope and historical Annex authority without
-claiming publisher rulings. The
-[V1S-029 frozen/current evidence join](v1.0-source-coverage-audit.md#frozen-explanation-audit-to-reviewed-current-evidence-v1s-029-2026-11-04)
-now links all 367 historical records to the 450 current Core/Hacking identities and bounded later evidence without changing D/S tiers or issuing whole-record approvals. The
-[V1S-030 conditional ARO review](v1.0-source-coverage-audit.md#conditional-declaration-and-reactive-eligibility-follow-up-v1s-030-2026-11-04)
-checks twelve more source-scoped declaration/reaction cases with pinned evidence and public routes.
-The
-[V1S-031 five-term acceptance](v1.0-source-coverage-audit.md#whole-term-visibility-zone-sourcebrowser-acceptance-v1s-031-2026-11-04)
-now independently signs off the five Visibility Zone Game terms against both
-N5.3 languages and the normal Glossary/browser. Exact occurrence variants,
-the remaining source clauses and final release-browser acceptance remain open.
+**Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned
-  curated rules-reference gaps for N5 v5.3 using
-  `data/pdf/rules/n5-rules-v5-3-en.pdf` (dated 2026-08-10) and other explicitly scoped
-  current reference sources.
-  - [ ] Plan curation batches from the inventory by missing semantic family or source section.
-    Separate already-reviewed content from absent definitions, unresolved variants, missing typed
-    relations, and facts that exist but cannot yet be reached in the normal browser experience.
-    Reuse the current [curated contract](../data/curated/README.md#curated-rules-reference-data);
-    extend closed fact/relation vocabularies with validation and presentation support before use.
-  - [ ] Review player-facing explanations of material rules interactions during
-    remaining curation batches against the
-    [explanation standard](../data/curated/README.md#explaining-rules-interactions).
-    Verify conditions, the general rule, modifiers, explicit exceptions, the
-    resulting game effect, and source certainty; do not generalize a printed
-    example into an undocumented rules engine. Sample the normal browser view
-    as well as the authored text, and keep source conflicts visible. Track
-    the [1.0 explanation audit](rules-explanation-audit-1.0.md#prioritized-remediation-plan)
-    through the individual checks below; published cards still require the
-    stated browser/source acceptance before their findings can be closed.
-    - [ ] **Cross-source applicability and disclosure:** Review material source
-      disagreements and FAQ scope before dependent curation. Users must be able
-      to identify the conflicting sources/versions, what differs, the published
-      value or interpretation and its uncertainty. Use the
-      [source manifest](rules-explanation-audit-1.0-sources.md) and
-      [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).
-      Preserve S17/S21 provenance; do not present an audit interpretation as an
-      official ruling. External corrections are tracked under
-      [non-blocking follow-up](#external-source-clarifications).
-    - [ ] **Clause-review coverage gate:** Complete the
-      [inventory gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate).
-      The 304 selected clause reviews and 63 screening-only records
-      do not constitute 367 full approvals.
-      - [ ] Reconcile the frozen inventory with the current Core/Hacking record
-        set and later source/browser evidence
-        ([V1-A08](v1.0-source-coverage-audit.md#v1-a08--the-frozen-inventory-does-not-cover-the-current-record-set)).
-        Preserve historical counts, independently verify metadata migrations and
-        later source-reviewed additions, and give every current in-scope source
-        section a clause/presentation disposition. Same-page citations alone do
-        not certify the procedures on that page.
-        - [ ] **Clause and browser dispositions:** Reconcile each current source
-          section and record with later documented source/FAQ decisions,
-          reviewed conditional effects, and normal-player browser evidence.
-          Prior A01–04 and the selected Equipment/MOD/Weapon mode
-          browser tests cover specific routes, not the entire current catalog.
-          Prioritize added Skills, the five Visibility Zone terms, source-scoped
-          Rules, and Weapon family/mode cases; retain unresolved source conflicts.
-        - [ ] **Final completeness gate:** Sign off all relevant current
-          categories and source sections under the release checklist, without
-          converting historical D/S, current citations, or interaction-review
-          flags into whole-record approval.
-      - [ ] Verify remaining **conditional declaration permissions** at final
-        whole-corpus depth, beyond the original ten selected examples and
-        [V1S-030's twelve-case follow-up](v1.0-source-coverage-audit.md#conditional-declaration-and-reactive-eligibility-follow-up-v1s-030-2026-11-04).
-        Source-clause and normal-browser acceptance is still required for
-        the unreviewed cases; neither selection is a legality evaluator.
-    - [x] **Visibility Zone inventory additions:** The five post-inventory
-      Game terms now have independent [complete term source/browser dispositions](v1.0-source-coverage-audit.md#whole-term-visibility-zone-sourcebrowser-acceptance-v1s-031-2026-11-04)
-      in addition to the original [selected browser checks](testing.md#10-five-visibility-zone-game-terms-browser-acceptance).
-      The frozen 367-record denominator remains unchanged; the remaining current
-      source sections still require their own acceptance.
-  - [ ] Expand remaining canonical rule identities across Skills, Equipment,
-    Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
-    rule domains, retaining rulebook version and printed-page citation. Do not
-    duplicate Hacking Program facts already owned by the current Hacking Program
-    domain.
-  - [ ] Complete the remaining typed Ammunition facts and relationships.
-    The eleven base identities and reviewed combined forms are published;
-    preserve the distinction between composition and Combined Saving Rolls.
-    Reviewed cases belong in [rules semantics](rules-semantics.md), with bounded
-    [source/browser acceptance](testing.md#10-reviewed-immunity-interactions-browser-acceptance-rea-011).
-    Component Immunity and combined-effect boundaries are reconciled in the
-    [bounded source review](v1.0-source-coverage-audit.md#component-immunity-and-combined-effect-review-v1s-036-2026-11-04).
-    - The Silent timing and bilingual qualifier question (SRC-002) remains
-      open for post-1.0 official clarification, not 1.0 acceptance. Other
-      exact BTS/non-Comms, Critical, Attribute and conditional State
-      exceptions are reconciled in the linked source review; retain their
-      scoped explanations and disclose uncertainty without inferring a
-      general target evaluator.
-    - [ ] Revalidate all published base identities and reviewed combined forms
-      against the final pinned source and shared Weapon/Ammunition facts.
-      Keep any future comparison-view consumer separate; no comparison UI or
-      executable attack adjudication is required for 1.0.
-  - [ ] Include scenario-defined catalog concepts needed for the core-rules
-    scenario reference, including core-scenario Skills, contextual roles such as
-    Specialist Troop, and the scenario elements those concepts act on. Preserve
-    scenario scope and keep temporary effects out of static Unit/Profile facts.
-    Keep semantic identity, source publication provenance, and applicability
-    separate so one canonical concept can be cited or overlaid by core scenarios
-    and FAQ material without duplication or collection-load-order semantics.
-    ITS-only actions and season-specific rules remain post-1.0.
-    - Shared concepts, scenario-only Skills and separate collection supplements
-      have a [bounded source/API/browser-code review](v1.0-source-coverage-audit.md#shared-core-scenario-concepts-and-collection-supplements-v1s-039-2026-11-04).
-      The [four-scenario mission-fact source reconciliation](v1.0-source-coverage-audit.md#four-core-scenario-objective-setup-scoring-and-ending-reconciliation-v1s-042-2026-11-04)
-      closes V1S-042 without changing publication. Spatial/map and live browser
-      acceptance remain with V1S-043–049/088.
-  - [ ] Complete final source-to-browser acceptance for the optional
-    **Reinforcements Extra**, separately scoped from `n5-core-rules`.
-    The N4-origin procedures, Section/parent navigation and exact typed
-    Commlink (+1)/(+2) variants are published; see the
-    [scoped reference contract and V1S-040 authority decision](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data).
-    - **N5-native authority boundary (SRC-030):** An official N5-specific
-      Annex revision or adoption ruling remains unavailable; request it
-      post-1.0. Do not label historic procedures N5-native without a
-      publisher source. The [V1S-040 decision](rules-semantics.md#rs-rf-scope-001--reinforcements-is-a-separately-scoped-annex-not-core-n5-rules-data)
-      preserves a usable, clearly disclosed N4-origin optional reference.
-      This external clarification is not part of 1.0 acceptance.
-    - [ ] Finish manual browser and release-matched Section/profile/Commlink
-      acceptance. Source-wide profile/loadout and complete Commlink signature
-      parity, selected-Army ownership and desktop/mobile navigation already have
-      bounded checks; use the [acceptance evidence](testing.md#parallel-windows-development-and-linux-validation)
-      and [validation queue](validation-queue.md) for remaining execution.
-      These checks do not establish roster legality or publisher authority.
-  - **Completion:** each covered batch builds into `rules.db`, passes maintained-text and
-    interaction review, and is navigable with citations in normal mode. Use semantic maintained-text
-    tokens; preserve genuine ambiguity with `review-needed` rather than weakening plain-text review.
+The [rules explanation audit](rules-explanation-audit-1.0.md) and
+[source-coverage audit](v1.0-source-coverage-audit.md) own detailed
+findings and historical test results. Existing Skill, Equipment,
+General Rule, State, Trait, Attribute, FAQ, scenario and Weapon
+definitions are the foundation; the tasks below cover outstanding
+source clauses, semantics and release publication, not a rebuild
+of already-reviewed catalogs.
 
-- [ ] **Data processing + Web backend + Web frontend:** Complete source reconciliation
-  and 1.0 acceptance for the already-published core-scenario domain. All four scenarios,
-  shared definition v2, scoped Rules/Skills, relational publication indexes, list/detail
-  APIs, browser selection and deterministic theme/distance-aware maps are implemented
-  and included in 0.10.1. The current contract belongs in
-  [the data model](data-model.md#scenario-model-implemented-core-and-future-extensions).
-  The [V1S-043 geometry/source/SVG acceptance](v1.0-source-coverage-audit.md#core-scenario-geometry-and-deterministic-map-acceptance-v1s-043-2026-11-05)
-  passed all 24 point selections, both marker-display units, and the
-  existing two-width ordinary browser check. The
-  [V1S-044 scoped Skill/Specialist/FAQ gate](v1.0-source-coverage-audit.md#core-scenario-scoped-skills-specialists-overlays-and-faq-v1s-044-2026-11-05)
-  also passed without a new publication defect. Final frozen-candidate
-  browser and source/FAQ reruns remain separately open.
-  - **Browser acceptance:** The separate
-    [1.0 core-scenario browser checklist](#final-10-acceptance) owns
-    keyboard/touch, rapid selection, theme/distance, direct/soft navigation,
-    and loading/empty/error states. The tracked
-    `test_verify_scenario_faq_browser.py` now repeats source-chart-to-browser
-    checks for all 24 configurations at 1440/390 px, plus keyboard catalog
-    and scoped Skill navigation, soft navigation/back, rapid selections,
-    empty/error and recovery cases (320 px catalog coverage included).
-    See [the repeatable acceptance procedure](testing.md#10-four-core-scenario-browser-acceptance).
-    Rerun against the final candidate, including broader visual/touch,
-    full-source and hosted gates; this does not itself certify 1.0 completeness.
-  - **Completion:** the final source inventory accounts for every in-scope fact and
-    scoped concept, and all four scenarios remain understandable and navigable in
-    every supported configuration. No mutable match state or live scoring engine is required.
+- [ ] Close the remaining versioned N5.3 rules-reference and explanation
+  gaps by source section and semantic family. Reconcile the frozen
+  [367-record clause inventory](rules-explanation-audit-1.0-inventory.md#audit-completion-gate)
+  with the current Core/Hacking catalog and later source/browser evidence;
+  historical D/S labels, cited pages and selected browser tests do not imply
+  full-record acceptance.
+  - [ ] Review remaining source clauses and material conditional declaration,
+    ARO and reactive-eligibility cases beyond the bounded
+    [V1S-030 sample](v1.0-source-coverage-audit.md#conditional-declaration-and-reactive-eligibility-follow-up-v1s-030-2026-11-04).
+    For each material interaction, verify conditions, baseline, modifiers,
+    exceptions, effect and uncertainty against
+    [the explanation standard](../data/curated/README.md#explaining-rules-interactions)
+    and its ordinary browser presentation. Do not infer a general legality
+    or combat-resolution engine.
+  - [ ] Curate confirmed missing facts, links or explanations across Skills,
+    Equipment, Weaponry, Ammunition, Traits, States, Fireteams and glossary
+    terms. Preserve versioned source provenance and scoped application
+    identities, and extend the validated fact vocabulary where required.
+    Do not duplicate Hacking Program facts or create a separate
+    scenario-only identity for a shared rule.
+  - [ ] Verify remaining Weapon Properties, special weapons, auxiliary
+    equipment/objects, mode-specific prose and unreviewed N5.3 Weaponry
+    clauses. Keep combined-effect relationships distinct from raw Traits
+    and source-specific discrepancies; selected examples are not a
+    whole-Weaponry audit.
+- [ ] Reconcile reviewed base and combined Ammunition, Attribute Immunity,
+  critical and State interactions against the final pinned Weapon/Rules
+  publication. Preserve composition versus Combined Saving Rolls, conditional
+  exceptions and cited uncertainty; unanswered
+  [SRC-002](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier)
+  does not require a publisher response before 1.0.
+- [ ] Accept the published, separately scoped optional Reinforcements
+  Section/profile/Commlink reference on release-matched inputs and ordinary
+  desktop/mobile browser routes under **V1S-041**. Disclose its N4-origin
+  procedures without asserting N5-native adoption or roster legality;
+  [SRC-030](official-source-clarifications.md) is non-blocking.
 
-- [ ] **Data processing + Web backend + Web frontend:** Complete source coverage and
-  applicability review of the published dated FAQ/errata layer from `data/pdf/faq/`.
-  The authoring contract, source-precedence policy, export validation, runtime selector,
-  explicit-context API and 29 reviewed current-source rulings are implemented; see the
-  [current contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
-  The [V1S-046 source reconciliation](v1.0-source-coverage-audit.md#current-faq-question-citation-and-topic-reconciliation-v1s-046-2026-11-05)
-  checked all 29 selected and original FAQ citations and 48 topic links against
-  pinned source inventories and focused tests. The
-  [V1S-047 temporal and supersession review](v1.0-source-coverage-audit.md#faq-provenance-supersession-and-effective-boundary-review-v1s-047-2026-11-05)
-  also confirmed reviewed historical identity, no unintended supersession and
-  fail-closed source/revision/season gates. The
-  [V1S-048 public-uncertainty gate](v1.0-source-coverage-audit.md#faq-public-precedence-disputed-sources-and-exclusions-v1s-048-2026-11-05)
-  made the conservative Annihilation-only Ancillary FAQ selection
-  explicit in the API, retaining the disputed Haris citation and
-  excluding eight unreviewed ITS-only rulings. The
-  [V1S-049 browser-route acceptance](v1.0-source-coverage-audit.md#faq-ordinary-browser-entry-points-and-rule-distinction-v1s-049-2026-11-05)
-  verified every normal FAQ primary/secondary topic association,
-  dated clarification versus base-rule provenance, and both
-  scenario overlaps at desktop and mobile widths. Release artifact
-  parity and final-candidate browser coverage remain independently open.
-  - [ ] Revalidate this bounded 29-ruling/48-topic FAQ acceptance against
-    the **final 1.0 release candidate** and release-matched rules database,
-    including browser evidence and final source/disclaimer review. This is
-    a release acceptance task, not a requirement for historical replay,
-    official resolution of the Haris conflict or the eight ITS-only Q&As.
-  - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
-    missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
-    or scenario, and the reader can distinguish base rules from applicable clarifications.
+- [ ] **Core scenarios:** Finish the four published scenarios' final
+  source-to-storage-to-browser reconciliation and keyboard/touch/theme/
+  narrow-width acceptance. Keep scenario-only concepts, spatial geometry,
+  derived SVG, scoped FAQ and ordinary rules links consistent; use
+  **V1S-045/088** for frozen-candidate checks and
+  [the scenario contract](data-model.md#scenario-model-implemented-core-and-future-extensions).
+  A live scoring or match-state engine is not required.
 
-- [ ] **Data processing + Web backend + Web frontend:** Extend generated rules-reference
-  projections that build on the enriched canonical data rather than duplicating its facts.
-  - [ ] Add the generated cross-army rule-variant usage index:
-    canonical Skill/Equipment -> exact Level/MOD/typed variant ->
-    Unit/profile/loadout occurrences. Reuse the
-    [accepted index design](data-model.md#rule-variant-usage-index--accepted-design-direction-candidate-only),
-    now finalized by [V1S-062](data-model.md#v1s-062--finalized-identity-ordering-and-ownership-contract-2026-11-05)
-    for exact source-row keys, typed signatures, deterministic ordering,
-    deduplicated counts and source-bound Include/Peripheral ownership.
-    This design decision closes V1S-062 only; V1S-063–066 remain
-    responsible for the actual index, API, browser and release tests.
-    - [ ] Reconcile remaining unresolved Skill/Equipment occurrence parameters,
-      mixed TEXT/DISTANCE sources and named variants with extra MODs.
-      Reuse `python -m tools.audit_source_variant_inputs --catalog skills
-      --unresolved-only --brief` (or `--catalog equipment`) and
-      `tests/test_audit_source_variant_inputs.py`; revalidate the release-matched
-      pair with the ignored raw Army archive. Preserve complete ordered source
-      signatures, exclude unreviewed combinations, fail closed on unknowns,
-      and promote metadata only through guarded matched-v9 publication.
-      The 2026-11-03 Lieutenant source-119 review adds typed, distinct
-      `+1 Command Token` (30 options) and `+1 Order` (53 options) effects
-      under N5.3 p. 99; it does not treat either as a generic MOD or
-      publish the cross-Army usage index. The same day's Terrain source-58
-      review adds seven exact typed Terrain applicability selectors (1,235
-      qualified direct rows, one unqualified), distinguishing Total/all
-      Types, single fixed Types and Aquatic/Jungle/choose-one on placement.
-      SRC-028's Religious Troop/Total source anomaly has been reviewed against
-      pinned raw profiles and remains unresolved pending an upstream
-      correction. The Camouflage source-29 `1 Use` review certifies 223 one-use Army
-      qualifiers using N5 FAQ v0.0/v0.1, without inventing a match-state
-      tracker or changing the existing FAQ. The Combat Jump source-35
-      review adds six exact landing-roll/Explosion parameters across 121
-      direct qualified Army occurrences under N5.3 p. 89; the one-use
-      template attack remains separate from the PH landing Roll and is
-      not a general attack resolver. The Infiltration source-47 review
-      adds five exact bracketed PH values for 17 Army occurrences under
-      N5.3 p. 97, applying only to the PH-3 Infiltration Roll; five bare
-      `ReRoll` extras remain unresolved because the printed reroll
-      requires an explicit PH=X value. The
-      [V1S-050 bounded source review](v1.0-source-coverage-audit.md#infiltration-bare-reroll-source-boundary-v1s-050-2026-11-05)
-      reconfirmed the five exact profile owners (Bandits ×2, Dasyus ×3)
-      and retained their untyped Army notation pending
-      [SRC-033](official-source-clarifications.md#src-033--infiltration-reroll-without-the-rulebooks-phx-parameter);
-      this review is closed without claiming publisher resolution.
-      These do not yet publish the cross-Army usage index.
-      The [V1S-051 Engineer source review](v1.0-source-coverage-audit.md#engineer-occurrence-and-operational-boundary-v1s-051-2026-11-05)
-      reconfirmed 389 direct rows and the exact four source extras (15
-      profile occurrences), with their repair/cancellation, self-use,
-      Remote Presence and Command Token distinctions. All four source
-      extras remain untyped; the historical-versus-N5.3 `ReRoll -3`
-      question is retained in
-      [SRC-029](official-source-clarifications.md#src-029--doctorengineer-reroll--3-lacks-explicit-n5-wip-scope)
-      pending official authority. The
-      [V1S-052 Doctor review](v1.0-source-coverage-audit.md#doctor-occurrence-and-scoped-recovery-review-v1s-052-2026-11-05)
-      independently pinned 235 direct occurrences, with 103 source-
-      qualified rows and three untyped signatures, preserving VITA/
-      Unconscious and Stunned exceptions. Doctor (2W) now says "up to
-      two Wounds" on ordinary recovery, with Spanish p. 100 citation.
-      Other unresolved source families remain.
-    - [ ] Materialize public context links and verify duplicate sources, reused
-      payloads, cross-Army and profile/loadout scope, Includes/Peripherals and
-      ambiguous variants before publication. An audited source signature alone
-      does not publish a Unit-usage index.
-  - Restrictions migration safety is implemented: the six-subject, 14-condition
-    chart, typed v9 API, scoped reverse links and qualified legacy labels are
-    published under the [current contract](data-model.md#reviewed-restrictions-chart-projection).
-    Negative conditions do not establish affirmative action legality. The three
-    legacy staging-only exporters preserve the active v8/v9 schema; their
-    focused regressions and `tools.verify_staged_release_pair` reject stale
-    baselines, modified candidates and source drift. Historical ignored staging
-    directories without fingerprints must be rebuilt before reuse. The tools
-    do not automatically promote artifacts; host rollback rehearsal is not
-    required for 1.0.
-  - **Completion:** each projection has a normal browser entry point, source reconciliation, and
-    regression coverage for its exceptional rows. Exact variant reconciliation gates the usage
-    index; it need not block independently ready lookup or Restrictions views.
+- [ ] **FAQ/errata:** Repeat the reviewed 29-ruling/48-topic source,
+  supersession, exclusion, applicability and normal-browser acceptance
+  on the final paired rules database under **V1S-084/088**. Maintain
+  core-versus-ITS scope, provenance and conservative disputed-source
+  disclosure; historical season replay and external rulings are not
+  1.0 prerequisites. See the
+  [FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
 
-- [ ] **Data processing + Web backend + Web frontend:** Extend the completed Game States reference
-  catalog with any remaining contextual state links needed by later Fireteam, Hacking,
-  weapon/ammunition, and scenario guidance;
-  do not infer a Unit's current in-game State from its static Army profile.
-  - [ ] Drive additions from the coverage inventory and new typed Ammunition/scenario/FAQ facts.
-    Author each relation once and verify derived navigation in both directions; distinguish entry,
-    cancellation, immunity/override, and objective completion from the resulting State.
-  - **Completion:** relevant context is linked from the owning rule and State help with applicable
-    conditions/scope; no duplicate definitions or static assertions of a Trooper's live State.
+- [ ] **Rule-variant usage projection:** Deliver the verified exact
+  Skill/Equipment variant-to-Unit/profile/loadout index as a release-matched
+  runtime publication, not merely an ignored local candidate. The
+  [source-pair/API/browser acceptance](v1.0-source-coverage-audit.md#full-exact-variant-usage-source-pair-acceptance-2026-11-05)
+  covers the current candidate; final source/publishing/hosted gates remain.
+  - [ ] Reconcile any newly reviewed exact occurrence parameters,
+    reused payloads, shared Unit options, Include/Peripheral paths and
+    incompatible/unknown signatures against final input revisions. Fail
+    closed when Army/profile membership or a typed variant cannot be
+    established; do not attribute source-only rows as direct uses.
+    Use the [variant contract](data-model.md#current-read-only-variant-candidate).
+  The reviewed Restrictions chart/projection and staging safety are
+  implemented. Real-host v8/v9 rollback rehearsal is not required for 1.0.
 
-- [ ] **Data processing + Web backend + Web frontend:** Revalidate Weapon,
-  Ammunition and Deployable presentation against the final frozen source inventory
-  and publication, resolving any newly confirmed in-scope omission.
-  The unit-neutral `/weapons` catalog/detail and `/ammunition` pages already expose
-  profiles, modes, ranges, linked effects and Traits. Additional comparison/filter
-  controls are an enhancement; the [1.0 gate](releasing.md#version-10-data-completeness-gate)
-  requires usable access to in-scope information, not a final comparison UI.
-  The [reviewed profile contract](data-model.md#weapon-profile-row-and-api-contract)
-  has [pinned source/storage/API/browser acceptance](v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05),
-  retaining the disclosed source discrepancies.
-  - [ ] Complete frozen-candidate deployed-object inventory and reference acceptance.
-    Seventeen reviewed object identities, delivery paths, API/browser entry
-    points and typed reverse uses are published; see the
-    [current contract](data-model.md#deployed-object-read-model-and-artifact-gated-browser-reference).
-    Keep carrier, delivery mode, deployed-object identity and Unit ownership
-    separate, with known/unreported/disputed attributes individually represented.
-    The [source/Include reconciliation](v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05)
-    found no further device or transitive delivery use on the pinned snapshot;
-    [terrain/Gate references](rules-semantics.md#terrain-and-scenery-structures)
-    and [three-width object acceptance](v1.0-source-coverage-audit.md#deployed-object-api-and-ordinary-browser-acceptance-v1s-078-2026-11-05)
-    are delivered. Remaining work is the final frozen-candidate/source-wide
-    validation below; repeat source/Include review if its inputs change.
-    - [ ] Validate final API/browser navigation, shared carriers, variant and
-      missing/not-applicable data against the release-matched publication.
-      Retain conflicting Mine/Dazer/Armed Turret Silhouettes and the unresolved
-      Mine Dispenser subtype unless reviewed source evidence resolves them.
-  - **Completion:** players can inspect Weapon profiles and reach Ammunition/Traits and
-    deployed-object statistics without selecting a carrier first; reverse uses preserve
-    Army/loadout context. Missing in-scope facts must be exposed; dedicated comparison
-    controls are not a separate release blocker.
+- [ ] **Game States:** Add any genuinely missing contextual links revealed
+  by final Fireteam, Hacking, Ammunition, FAQ and scenario review.
+  Distinguish entry, cancellation, immunity and objective effects;
+  check reciprocal navigation and do not infer a Unit's live game State.
+
+- [ ] **Weapons and deployed objects:** Resolve any final-input
+  Weapon-profile, Ammunition/Trait relationship and deployed-object
+  source/publication omission. Repeat normal browser reachability and
+  source-context checks for shared carriers, delivery modes, Include
+  edges, variants and known/unreported/disputed attributes under
+  **V1S-081–088**. The
+  [Weapon profile](data-model.md#weapon-profile-row-and-api-contract) and
+  [deployed-object](data-model.md#deployed-object-read-model-and-artifact-gated-browser-reference)
+  contracts own implemented behavior; comparison controls are post-1.0.
+  Keep unresolved Mine/Dazer/Armed Turret differences disclosed.
 
 ### Player-facing navigation and reference clarity
 
-**Project domains:** Data processing, Web backend, Web frontend
+**Project domains:** Web frontend, Project infrastructure
 
-The shared navigation, contextual Specialist Troops reference/filter,
-provenance labels and collapsible accuracy/independence notice are published;
-their contracts belong in the [web design guidelines](web-design-guidelines.md).
-
-- [ ] Complete dedicated assistive-technology acceptance of the floating notice
-  and affected navigation against the final candidate. Automated browser checks
-  do not provide that sign-off; keep keyboard, touch, theme and narrow-screen
-  acceptance under the [final gate](#final-10-acceptance).
+- [ ] Complete manual assistive-technology, keyboard, touch, responsive
+  and theme acceptance of the floating accuracy notice and navigation
+  against the final candidate (**V1S-079/080**). Automated focus,
+  announcement and notice regressions remain unrun under
+  [VR-0102](validation-queue.md#pending-deferred-execution); they are not
+  screen-reader sign-off. The
+  [web design guidelines](web-design-guidelines.md) own the UI contract.
 
 ### Final 1.0 acceptance
 
-**Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
+**Project domains:** Data processing, Web backend, Web frontend,
+Project infrastructure, Deployment
 
-Development-browser results are dated, bounded evidence. The procedures in
-[testing](testing.md) cover catalog navigation, source-conflict disclosure,
-Weapon/Glossary fragments, Fireteams, all 24 Core scenario selections,
-Visibility Zone previews, structured charts and representative Unit layouts/settings.
-Rerun affected checks against the final pinned candidate; local results alone
-do not establish exhaustive source coverage or hosted acceptance.
-
-- [ ] **Data processing + Web backend + Web frontend + Project infrastructure:**
-  Execute the final 1.0 source-to-storage-to-browser completeness gate defined by
-  `docs/releasing.md` against pinned current Army, rules, wiki, database, and symbol
-  inputs. Resolve every material in-scope gap or document an explicit exclusion with
-  rationale, then complete normal project checks, hosted release checks, and
-  full-asset validation before tagging 1.0.0.
-  - [ ] Re-run the baseline inventory against the final pinned input set. Follow every in-scope
-    category from source citation through maintained representation and generated storage to a
-    usable normal browser surface; schema coverage, passing validators, and an API route alone
-    are insufficient evidence. Re-review exclusions against the canonical completeness definition.
-  - [ ] Run `tools.report_reference_baseline --verify-server <origin>` against
-    the final candidate/deployment and retained Army/rules database pair,
-    alongside separate source/archive, symbol and source-to-browser gates.
-  - [ ] Run `tools.verify_rule_fragment_browser` on the final candidate and
-    expand source-to-browser completeness beyond the bounded reference samples.
-  - [ ] Re-run the full local 81-page Unit Chromium matrix and the separate
-    exact-version hosted representative check using the final candidate databases
-    and static assets. Retain successful evidence with the target revision.
-    The hosted command defaults to 21 pages; it does not run the full local matrix.
-  - [ ] Complete [Silhouette manual browser acceptance](testing.md#silhouette-manual-browser-acceptance)
-    with hover, keyboard, touch, both themes and narrow widths. Automated DOM or
-    screenshot checks do not supply the required interaction sign-off.
-  - [ ] Review the final tracked Markdown corpus against the candidate, including
-    current behavior, source and REA dispositions, command contracts and complete
-    Unreleased notes. Revisit this development audit after later implementation
-    or release-metadata changes.
-  - [ ] Reconcile cross-source conflicts and empty/unavailable/not-applicable values; retain cited
-    uncertainty where appropriate and fix every defect that materially misrepresents in-scope data.
-    Record evidence by category and source identity in ignored reports/audits rather than keeping
-    completed release narrative in this backlog.
-  - [ ] Run [the complete release checklist](releasing.md), including the mandatory whole-corpus
-    documentation audit, rebuilt release-matched artifacts where needed, local/hosted checks for
-    the final candidate, annotated-tag evidence, and deployed smoke/rollback acceptance where
-    applicable. Keep repeatable procedures in `docs/testing.md` and dated execution
-    reports in ignored `local/audits/`, rather than adding another acceptance diary.
+- [ ] Complete **V1S-081–095** against the exact frozen source,
+  database, generated-publication, static-asset and release-candidate
+  revisions. This includes full source/semantic/browser disposition,
+  81-page Unit matrix, core scenario and FAQ gates, manual Silhouette
+  and visual acceptance, all due VD/VR checks, full local/Linux checks,
+  documentation audit, exact-SHA hosted CI, annotated tag, authorized
+  deployment and post-deploy smoke. Use the
+  [canonical release checklist](releasing.md); keep detailed commands,
+  logs and intermediate acceptance counts in their maintained owners
+  rather than a second checklist here.
+  Preserve unresolved but accurately disclosed publisher issues as
+  non-blocking; verify recovery assets without requiring a live-host
+  rollback rehearsal.
 
 ## Post-1.0 — maintenance and product expansion
 
@@ -926,21 +387,12 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 **Project domain:** Data processing
 
-These external corrections and rulings do **not** block 1.0 while
-the affected player references disclose the unresolved source scope.
-The canonical [official-source-clarifications.md](official-source-clarifications.md)
-register owns the evidence, question wording, stable SRC IDs and publisher
-response status. This TODO section tracks only the remaining request/
-follow-up action. Retain source-native values until official resolution.
-
-- [ ] Prepare and submit a consolidated set of official source clarification
-  requests from the [canonical register](official-source-clarifications.md).
-  Record each publisher response against its stable SRC ID, then add only
-  implementation follow-ups that a verified ruling actually requires.
-  This external work is non-blocking for 1.0 while the published
-  reference accurately discloses uncertainty. In particular, former
-  V1S-037/SRC-002 and SRC-030 remain pending publisher authority, not
-  unresolved 1.0 implementation tasks.
+- [ ] Prepare and submit consolidated publisher questions from the
+  [SRC register](official-source-clarifications.md), including
+  SRC-002 and SRC-030; record dated official responses under their
+  stable IDs and open implementation tasks only when needed.
+  Unanswered questions do not block 1.0 when the player-facing
+  uncertainty is accurately disclosed.
 
 ### Source notation and rule references
 
@@ -984,9 +436,8 @@ follow-up action. Retain source-native values until official resolution.
     explanations and links to evidence/history; do not mark unchanged records or
     claim an inferred motivation as an official reason. Explicitly indicate when
     the reason or effective date is unknown.
-  - [ ] Preserve multiple successive changes and supersession without overwriting
-    previous revisions. Keep historical events distinct from current canonical
-    facts and do not turn this feature into a 1.0 completeness blocker.
+  Preserve multiple successive changes and supersession without overwriting
+  earlier events or conflating history with current canonical facts.
 
 ### List and session configuration
 
@@ -1110,17 +561,6 @@ follow-up action. Retain source-native values until official resolution.
   the duplication on a controlled build, then decide whether post-export workflows need both
   or whether one should be documented as a regenerable/transient artifact.
 
-- [x] Provide a read-only development CLI for paired `infinity.raw.db`:
-  `tools.inspect_raw_archive` verifies the shared export metadata, lists
-  imported normalized tables (including zero-row tables), and retrieves
-  individual or bounded paged lossless source rows. Unknown tables, unpaired
-  siblings and invalid row selectors fail closed; see [data guidance](../data/README.md).
-
-- [x] Report the application `infinity.db` and paired `infinity.raw.db`
-  byte sizes after a successful `infinity-db build`, in ordinary build and
-  CI output. A focused regression checks the reported sizes against the
-  actual generated files.
-
 ### Army snapshot and symbol-pipeline maintenance
 
 Remaining pipeline work covers maintenance, selective refactoring, richer diagnostics/performance
@@ -1175,9 +615,8 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
     a prior event must see its matching scenario, objectives, extras, and FAQ
     rulings rather than a mixture of seasons. Retain a curated, human-reviewed
     change log/diff rather than relying on raw PDF text diffing.
-  - [ ] Treat the official Army app/site as the authority for army-list legality.
-    InfinityDB may provide read-only explanation and planning support, but must
-    label its snapshot/date and avoid claiming tournament validation.
+  The official Army app/site remains authoritative for list legality;
+  InfinityDB labels its snapshot/date and does not claim tournament validation.
   - [ ] Publish ITS-only FAQ clarifications after verifying each exact
     season/scenario identity, version and bilingual source citation. Model
     seasonal action identities such as `Activate Communication Antenna`,
@@ -1209,8 +648,8 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
     per-table-size overrides rather than blind scaling.
   - [ ] Preserve season/scenario source provenance and add compatibility fixtures from current and
     archived ITS material before promoting new geometry features into the schema contract.
-  - [ ] Build a web-based editor/preview UI over the same schema and rendering engine rather than
-    creating a separate browser-only map format; coordinate this with the scenario creator below.
+  A future geometry editor/preview must reuse the scenario creator below and
+  the shared schema/renderer, not introduce an ITS-only browser format.
 
 - [ ] **Data processing + Web frontend:** Build a **post-1.0 scenario creator/editor**
   using the canonical scenario component model and map renderer, with no server-side
@@ -1228,7 +667,7 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   - [ ] Reuse schema validation, renderer and reference resolvers; test composition,
     conflicting overlays, source-version compatibility, untrusted text, and offline
     round trips with self-contained URLs and portable file import/export.
-  - [ ] Keep the editor a post-1.0 feature, not a core-scenario release blocker.
+  The editor remains post-1.0, independent of core-scenario release acceptance.
 
 - [ ] **Web backend + Web frontend:** Add an interactive Fireteam builder within a
   selected Army context. Build compositions from the canonical Fireteam projection and general
@@ -1249,10 +688,9 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
     Reinforcement or Team-Ops constraints, and scenario interactions. Explain
     missing capabilities without declaring a list illegal or strategically
     inadequate.
-  - [ ] Keep temporary scenario-granted skills, designated Troopers, classified
-    cards, tactical support, and private information out of static unit
-    profiles. They belong to a per-game/session layer, which is not yet part of
-    InfinityDB's replaceable imported snapshot.
+  Temporary scenario-granted skills, designated Troopers, classified
+  cards, tactical support and private information belong to per-game/session
+  state, never to the replaceable Army snapshot.
 
 - [ ] Provide an optional ITS organizer/event companion using portable, local
   event data rather than requiring server-side user-authored storage.
@@ -1280,46 +718,30 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   - [ ] Build a small read-only proof of concept for at least one representative workflow (for
     example Unit or Fireteam browsing) before choosing a framework, and record which existing web
     assumptions would need to be separated into shared application services.
-  - [ ] If a native-client direction is accepted, keep the canonical data/rules artifacts and
-    semantics shared with the web application rather than creating a second interpretation layer;
-    revisit the project-domain taxonomy if a permanent native-frontend domain becomes warranted.
+  If accepted, share canonical data/rules artifacts and semantics with the
+  web client; revisit the domain taxonomy only for a permanent native frontend.
 
 ### User-owned tools and portable data
 
-- [ ] **Web frontend + Project infrastructure:** For future authored-content tools,
-  provide transient editing, privacy-preserving URL sharing where practical, and
-  deliberate local file import/export. Do **not** introduce server-side user-content
-  storage, account-backed saves, or share-token registries as prerequisites.
-  Evaluate optional device-local saves only as an explicit, separate privacy
-  decision; the baseline works without persistent browser storage.
+**Project domains:** Web frontend, Project infrastructure
 
-- [ ] When an army-list builder/export tool is introduced, use the rules reference
-  to add game-mode and list-review guidance—not hidden-information disclosure.
-  Keep share/export privacy-aware and treat the Army app/data as authoritative
-  for list legality. Use portable state rather than a server-side saved-list store.
+Future personal-content tools use transient editing, privacy-aware
+self-contained URLs and portable import/export, without mandatory accounts,
+server-side saves or share-token registries. Optional device-local
+persistence needs a separate privacy decision; the official Army app
+remains authoritative for list legality.
 
-- [ ] Create a curated unit-model image repository; do not assume open user uploads.
-
-- [ ] Evaluate a device-local/portable model-collection tracker without accounts
-  or server-hosted collections.
-
-- [ ] Support portable army lists, favourites and personal notes, with explicit
-  export/import instead of server persistence or coupling to imported snapshots.
-
-- [ ] Unit comparison view for profiles, loadouts, weapons, skills, and
-  equipment across selected units or armies.
-
-- [ ] Army-list builder/export integration using the same portable-data contract.
-
-- [ ] Data-review screens in Developer mode: normalization warnings, source
-  record links through `infinity.raw.db`, and unresolved placeholder records.
-
-- [ ] Low priority: provide access to prior imported-data versions when JSON
-  source files change. Existing archived JSON ZIP files and Army snapshots are
-  sufficient for recovery until this is needed.
-
-- [ ] Low priority: add a JSON-snapshot comparison page showing added, removed,
-  and updated data between two snapshots.
-
-- [ ] Low priority: optionally highlight added, removed, and updated data
-  elsewhere in the application when comparing snapshots.
+- [ ] Build a curated unit-model image repository; do not assume open uploads.
+- [ ] Evaluate an offline/portable model-collection tracker without accounts.
+- [ ] Support portable army lists, favourites and notes with export/import,
+  independent of replaceable Army snapshots.
+- [ ] Add Unit comparison across profiles, loadouts, weapons, Skills and Equipment.
+- [ ] Build army-list export/integration with game-mode and mission-aware
+  capability guidance, without claiming tournament legality or disclosing
+  hidden information; coordinate with the ITS guidance above.
+- [ ] Add Developer-mode data-review screens for normalization warnings,
+  unresolved placeholders and raw-archive record provenance.
+- [ ] Optionally browse archived imported versions when snapshot history
+  becomes player-useful; existing ZIPs already provide recovery.
+- [ ] Add a two-snapshot JSON comparison screen for added, removed and
+  updated records, with optional changes highlighted elsewhere in the UI.
