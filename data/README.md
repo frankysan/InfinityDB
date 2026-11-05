@@ -58,9 +58,12 @@ provenance/state, and build outputs.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the application `infinity.db`, development-only `infinity.raw.db`, and the
   separate curated-rules `rules.db` and deterministic `deployed-objects.json`
-  reference publication. The two SQLite databases are tracked release artifacts;
-  the reference publication remains ignored and is regenerated from the pinned
-  databases and reviewed sources before being packaged in the Docker image.
+  and `variant-usage.json` reference publications. The two SQLite databases are
+  tracked release artifacts; the publications remain ignored. Deployed-object
+  publication is regenerated from the pinned databases and reviewed sources
+  before Docker packaging. Variant usage is rebuilt from the paired raw source,
+  Army/rules databases and deployed-object publication; its release packaging
+  remains part of the V1S-066 acceptance.
   Intermediate JSON/raw archives and other generated build products remain ignored.
 
 Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside

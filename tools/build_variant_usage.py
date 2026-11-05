@@ -10,6 +10,7 @@ from infinity_db.variant_usage import (
     build_variant_usage_projection,
     validate_variant_usage_candidate,
 )
+from infinity_db.variant_usage_reference import publication_from_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -24,6 +25,14 @@ def main() -> None:
     destinations.add_argument(
         "--check", type=Path,
         help="verify an existing candidate against the exact current inputs without writing",
+    )
+    destinations.add_argument(
+        "--publish", action="store_true",
+        help="write the generated read-only exact-variant API publication",
+    )
+    destinations.add_argument(
+        "--check-publication", action="store_true",
+        help="verify the generated exact-variant API publication without writing",
     )
     args = parser.parse_args()
     result = build_variant_usage_projection(
@@ -51,6 +60,24 @@ def main() -> None:
             newline="\n",
         )
         temporary.replace(destination)
+    if args.publish or args.check_publication:
+        destination = ROOT / "data/generated/variant-usage.json"
+        expected = (
+            json.dumps(
+                publication_from_candidate(result),
+                ensure_ascii=False,
+                sort_keys=True,
+                indent=2,
+            ) + "\n"
+        ).encode("utf-8")
+        if args.check_publication:
+            if not destination.is_file() or destination.read_bytes() != expected:
+                raise SystemExit("Variant usage publication missing or stale; rebuild it")
+        else:
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            temporary = destination.with_suffix(".json.tmp")
+            temporary.write_bytes(expected)
+            temporary.replace(destination)
     print(json.dumps({
         "scope": result["scope"],
         "variantGroups": len(result["variants"]),
@@ -68,6 +95,8 @@ def main() -> None:
         ),
         "sourceSnapshot": result["sourceSnapshot"],
         "output": str(args.output) if args.output is not None else None,
+        "publication": "data/generated/variant-usage.json"
+        if args.publish or args.check_publication else None,
     }, indent=2))
 
 

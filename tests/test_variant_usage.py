@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from collections.abc import Iterator
@@ -22,8 +23,134 @@ from infinity_db.variant_usage import (
 )
 from infinity_db.variant_usage_includes import build_include_provenance
 from infinity_db.variant_usage_peripherals import build_peripheral_provenance
+from infinity_db.variant_usage_reference import (
+    load_variant_usage_publication,
+    publication_from_candidate,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _variant_usage_candidate(
+    snapshot: dict[str, str], *, duplicate: bool = False,
+) -> dict[str, Any]:
+    rows = [{
+        "catalog": "skills",
+        "ownerKind": "profile",
+        "sourceKey": ["skills", "profile", 1],
+        "occurrenceId": 1,
+        "sourceId": 47,
+        "unitId": 185,
+        "position": 1,
+        "applicationItemId": 11,
+        "context": {
+            "ownerKind": "profile",
+            "sourceUnitId": 185,
+            "applicationArmyId": 70,
+            "logicalUnitId": 18,
+            "payloadSha256": "f" * 64,
+        },
+    }]
+    variants = []
+    for source_variant in (("level-1", "level-2") if duplicate else ("level-1",)):
+        variant = {
+            "recordId": "skill:stealth",
+            "collectionId": "n5-core-v5.3",
+            "effect": {"sourceVariant": source_variant},
+        }
+        variants.append({
+            "variantKey": json.dumps(
+                variant, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+            ),
+            "variant": variant,
+            "uniqueUnits": 1,
+            "uniqueArmyUnits": 1,
+            "distinctContexts": 1,
+            "distinctProfileContexts": 1,
+            "distinctLoadoutContexts": 0,
+            "sourceRelationshipRows": 1,
+            "sourceRows": rows,
+        })
+    variants.sort(key=lambda group: group["variantKey"])
+    return {
+        "format": "infinitydb-rule-variant-usage",
+        "formatVersion": 2,
+        "scope": "read-only-candidate-not-published",
+        "sourceSnapshot": snapshot,
+        "variants": variants,
+        "diagnosticCounts": {"unreviewed-signature": 1},
+        "unresolvedSourceRows": [{"rawValue": "not published"}],
+    }
+
+
+def _write_variant_usage_artifacts(
+    tmp_path: Path, *, duplicate: bool = False,
+) -> tuple[Path, Path, Path, Path]:
+    army = tmp_path / "infinity.db"
+    rules = tmp_path / "rules.db"
+    objects = tmp_path / "deployed-objects.json"
+    publication = tmp_path / "variant-usage.json"
+    army.write_bytes(b"army")
+    rules.write_bytes(b"rules")
+    objects.write_bytes(b"deployed objects")
+    snapshot = {
+        "armyArchiveSha256": "a" * 64,
+        "armyDatabaseSha256": hashlib.sha256(army.read_bytes()).hexdigest(),
+        "rawDatabaseSha256": "b" * 64,
+        "rulesDatabaseSha256": hashlib.sha256(rules.read_bytes()).hexdigest(),
+        "exportPairSha256": "c" * 64,
+        "deployedObjectPublicationSha256": hashlib.sha256(objects.read_bytes()).hexdigest(),
+    }
+    candidate = _variant_usage_candidate(snapshot, duplicate=duplicate)
+    if duplicate:
+        document = {
+            "format": "infinitydb-rule-variant-usage",
+            "formatVersion": 1,
+            "scope": "exact-reviewed-source-variants",
+            "sourceSnapshot": snapshot,
+            "variants": candidate["variants"],
+        }
+    else:
+        document = publication_from_candidate(candidate)
+    publication.write_text(json.dumps(document), encoding="utf-8")
+    return army, rules, objects, publication
+
+
+def test_variant_usage_publication_exposes_only_exact_source_variants(
+    tmp_path: Path,
+) -> None:
+    army, rules, objects, publication = _write_variant_usage_artifacts(tmp_path)
+
+    result = load_variant_usage_publication(publication, army, rules, objects)
+
+    assert result is not None
+    assert result["scope"] == "exact-reviewed-source-variants"
+    assert len(result["variants"]) == 1
+    assert "diagnosticCounts" not in result
+    assert "unresolvedSourceRows" not in result
+
+
+def test_variant_usage_publication_rejects_duplicate_source_rows(
+    tmp_path: Path,
+) -> None:
+    army, rules, objects, publication = _write_variant_usage_artifacts(
+        tmp_path, duplicate=True,
+    )
+
+    with pytest.raises(ValueError, match="duplicate variant usage source identity"):
+        load_variant_usage_publication(publication, army, rules, objects)
+
+
+@pytest.mark.parametrize("artifact", ["army", "rules", "objects"])
+def test_variant_usage_publication_rejects_stale_release_artifacts(
+    tmp_path: Path, artifact: str,
+) -> None:
+    army, rules, objects, publication = _write_variant_usage_artifacts(tmp_path)
+    stale = {"army": army, "rules": rules, "objects": objects}[artifact]
+    stale.write_bytes(f"changed {artifact}".encode())
+
+    with pytest.raises(ValueError, match="does not match release artifacts"):
+        load_variant_usage_publication(publication, army, rules, objects)
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: Any) -> None:

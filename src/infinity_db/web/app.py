@@ -8,11 +8,13 @@ from hashlib import file_digest, sha256
 from http import HTTPStatus
 from pathlib import Path
 from time import perf_counter
+from typing import Any
 
 from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.variant_usage_reference import load_variant_usage_publication
 from infinity_db.web.api_handler import ApiHandler
 from infinity_db.web.metrics import RequestMetrics
 from infinity_db.web.presentation import ASSETS, STATIC_ASSET_REVISION, PresentationHandler
@@ -85,6 +87,8 @@ class Application:
             snapshot_downloaded_on=self.snapshot_downloaded_on,
             snapshot_revision=self.snapshot_revision,
         )
+        self.variant_usage: dict[str, Any] | None = None
+        self.variant_usage_revision: str | None = None
         # The publication belongs to a co-located *release database pair*.
         # An explicitly supplied rules database in another directory is an
         # independent test/development source, not the release rules.db.
@@ -96,17 +100,38 @@ class Application:
         ):
             self.deployed_objects = None
         else:
+            deployed_objects_path = self.database.path.with_name("deployed-objects.json")
             self.deployed_objects = load_deployed_object_publication(
-                self.database.path.with_name("deployed-objects.json"),
+                deployed_objects_path,
                 self.database.path,
                 rules_path,
             )
+            variant_usage_path = self.database.path.with_name("variant-usage.json")
+            self.variant_usage = load_variant_usage_publication(
+                variant_usage_path,
+                self.database.path,
+                rules_path,
+                deployed_objects_path,
+            )
+            self.variant_usage_revision = (
+                _snapshot_revision(variant_usage_path)
+                if self.variant_usage is not None
+                else None
+            )
+        if (
+            rules_path is None
+            or rules_path.resolve().parent != self.database.path.resolve().parent
+        ):
+            self.variant_usage = None
+            self.variant_usage_revision = None
         self.api = ApiHandler(
             self.database,
             self.rules_database,
             static_revision=STATIC_ASSET_REVISION,
             snapshot_revision=self.snapshot_revision,
             deployed_objects=self.deployed_objects,
+            variant_usage=self.variant_usage,
+            variant_usage_revision=self.variant_usage_revision,
         )
         # Preserve the existing Application service attributes while request ownership moves
         # behind the API handler. They remain internal compatibility aliases, not dispatch logic.
@@ -241,6 +266,12 @@ class Application:
             if path.startswith("/api/") and response.status == HTTPStatus.OK
             else None
         )
+        if etag and path == "/api/variant-usage" and self.api.variant_usage_revision:
+            representation = sha256(f"{path}?{query}".encode()).hexdigest()[:16]
+            etag = (
+                f'"{__version__}-{self.snapshot_revision}-'
+                f'{self.api.variant_usage_revision}-{representation}"'
+            )
         status = response.status
         body = response.body
         if etag and _etag_matches(environ.get("HTTP_IF_NONE_MATCH"), etag):

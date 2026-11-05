@@ -152,14 +152,25 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-No open deferred-execution obligations. The latest bounded occurrence-index,
-CI/data-pair and normal FAQ disclosure acceptance is recorded in the
-[candidate evidence](v1.0-source-coverage-audit.md#development-pair-and-ci-consistency-repair-2026-11-05).
+- [ ] VR-0094 (2026-11-05; ready-to-run): Verify the V1S-064 exact variant usage read model and API.
+  Work: [V1S-064](TODO.md#rules-and-contextual-reference-completion); implementation revision is
+  the commit containing this entry. Risk: source identity and public payload correctness.
+  Immediate: Ruff PASS; Pyright 0 errors/warnings; Markdownlint PASS (43 files) and offline links
+  PASS (41 files); `git diff --check` PASS. No tests run during implementation.
+  Design: VD-0033 reviewed and retired without executing tests.
+  Deferred: `tests/test_variant_usage.py::test_variant_usage_publication_exposes_only_exact_source_variants`,
+  `tests/test_variant_usage.py::test_variant_usage_publication_rejects_duplicate_source_rows`,
+  `tests/test_variant_usage.py::test_variant_usage_publication_rejects_stale_release_artifacts`,
+  and `tests/test_web.py::test_variant_usage_api_filters_exact_groups_by_canonical_rule`,
+  `tests/test_web.py::test_variant_usage_api_rejects_invalid_filters`,
+  `tests/test_web.py::test_variant_usage_api_is_unavailable_without_a_matched_publication`.
+  Execute on the committed revision with the pinned Linux worker; retain all results and skips.
+  Outcome: unrun.
 
 ## Next unused IDs
 
-- Design: `VD-0033`; active obligations are listed above.
-- Execution: `VR-0094`; active obligations are listed above.
+- Design: `VD-0034`; active obligations are listed above.
+- Execution: `VR-0095`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -6120,6 +6120,69 @@ def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> N
     assert item["source_ids"] == [21, 244]
 
 
+def test_variant_usage_api_filters_exact_groups_by_canonical_rule(app: Callable) -> None:
+    requested = {
+        "variantKey": '{"recordId":"skill:stealth","sourceVariant":"level-1"}',
+        "variant": {"recordId": "skill:stealth", "sourceVariant": "level-1"},
+    }
+    other = {
+        "variantKey": '{"recordId":"skill:stealth","sourceVariant":"level-2"}',
+        "variant": {"recordId": "skill:stealth", "sourceVariant": "level-2"},
+    }
+    unrelated = {
+        "variantKey": '{"recordId":"equipment:medikit","sourceVariant":"default"}',
+        "variant": {"recordId": "equipment:medikit", "sourceVariant": "default"},
+    }
+    app.api.variant_usage = {
+        "sourceSnapshot": {"armyArchiveSha256": "a" * 64},
+        "variants": [other, unrelated, requested],
+    }
+
+    status, _, body = request(
+        app, "/api/variant-usage", query="record_id=skill%3Astealth",
+    )
+
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["recordId"] == "skill:stealth"
+    assert payload["scope"] == "exact-reviewed-source-variants"
+    assert payload["items"] == [requested, other]
+    status, _, metrics = request(app, "/internal/metrics")
+    assert status == 200
+    assert b'route="/api/variant-usage",status_class="2xx" 1' in metrics
+
+
+@pytest.mark.parametrize(
+    ("query", "message"),
+    [
+        ("", "Provide record_id exactly once"),
+        ("record_id=", "Provide record_id exactly once"),
+        ("record_id=skill%3Astealth&record_id=skill%3Astealth",
+         "Provide record_id only once"),
+        ("record_id=state%3Aretreat", "record_id must identify a Skill or Equipment rule"),
+        ("record_id=skill%3Astealth&unknown=1", "Unknown query parameter: unknown"),
+    ],
+)
+def test_variant_usage_api_rejects_invalid_filters(
+    app: Callable, query: str, message: str,
+) -> None:
+    status, _, body = request(app, "/api/variant-usage", query=query)
+
+    assert status == 400
+    assert message in json.loads(body)["error"]
+
+
+def test_variant_usage_api_is_unavailable_without_a_matched_publication(
+    app: Callable,
+) -> None:
+    status, _, body = request(
+        app, "/api/variant-usage", query="record_id=skill%3Astealth",
+    )
+
+    assert status == 503
+    assert "not published" in json.loads(body)["error"]
+
+
 def test_skill_details_page_and_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/skills/11")
     assert status == 200

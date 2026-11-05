@@ -467,12 +467,16 @@ class ApiHandler:
         static_revision: str,
         snapshot_revision: str,
         deployed_objects: dict[str, Any] | None = None,
+        variant_usage: dict[str, Any] | None = None,
+        variant_usage_revision: str | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
         self.static_revision = static_revision
         self.snapshot_revision = snapshot_revision
         self.deployed_objects = deployed_objects
+        self.variant_usage = variant_usage
+        self.variant_usage_revision = variant_usage_revision
         self._deployed_by_id = (
             {obj["id"]: obj for obj in deployed_objects["objects"]}
             if deployed_objects is not None else {}
@@ -777,6 +781,41 @@ class ApiHandler:
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Deployed-object reference not found"}
+        elif path == "/api/variant-usage":
+            cache_control = API_CACHE_CONTROL
+            try:
+                params = _validated_query_params(
+                    query_string, {"record_id", "cache_bust"},
+                )
+                record_ids = params.get("record_id", [])
+                if len(record_ids) != 1 or not record_ids[0]:
+                    raise ValueError("Provide record_id exactly once")
+                record_id = record_ids[0]
+                if not re.fullmatch(r"(?:skill|equipment):[a-z0-9][a-z0-9-]*", record_id):
+                    raise ValueError("record_id must identify a Skill or Equipment rule")
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            if self.variant_usage is None:
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "Rule variant usage is not published for this release."
+                }
+            else:
+                items = [
+                    group for group in self.variant_usage["variants"]
+                    if group["variant"]["recordId"] == record_id
+                ]
+                items.sort(key=lambda group: group["variantKey"])
+                payload = {
+                    "formatVersion": 1,
+                    "scope": "exact-reviewed-source-variants",
+                    "recordId": record_id,
+                    "sourceSnapshot": self.variant_usage["sourceSnapshot"],
+                    "items": items,
+                }
         elif path in {"/api/skills", "/api/equipment", "/api/weapons"}:
             cache_control = API_CACHE_CONTROL
             try:

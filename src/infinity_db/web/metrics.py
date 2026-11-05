@@ -36,6 +36,7 @@ ROUTES = (
     "/scenarios/:id",
     "/search",
     "/api/version",
+    "/api/variant-usage",
     "/api/armies",
     "/api/units",
     "/api/units/:id",
