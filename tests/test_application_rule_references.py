@@ -315,6 +315,16 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
         "trooper-category",
         "visibility-condition",
     }
+    trooper = next(record for record in terms if record["id"] == "term:trooper")
+    assert trooper["summary"] == (
+        "Troopers are game elements represented by Unit Profiles and belonging to "
+        "a player's Army List. They have Attributes, contribute Orders to the Order "
+        "Pool, can spend Orders to activate themselves, and can declare and receive "
+        "Attacks."
+    )
+    assert [
+        (citation["source_id"], citation["page"]) for citation in trooper["citations"]
+    ] == [("n5-core-v5.3-pdf", 173)]
 
 
 def test_null_state_glossary_lists_the_five_n53_source_states(tmp_path: Path) -> None:

@@ -2033,7 +2033,7 @@
             "id": "term:trooper",
             "kind": "term",
             "name": "Trooper",
-            "summary": "A Trooper is a game element represented by a Unit Profile and belonging to a player’s force.",
+            "summary": "Troopers are game elements represented by Unit Profiles and belonging to a player's Army List. They have Attributes, contribute Orders to the Order Pool, can spend Orders to activate themselves, and can declare and receive Attacks.",
             "composition": {
                 "role": "definition"
             },
@@ -2055,7 +2055,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-29"
+                "reviewedOn": "2026-11-05"
             }
         },
         {

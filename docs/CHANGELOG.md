@@ -70,6 +70,8 @@ are not retroactively relabeled.
   term as a counts-as rule.
 - All canonical Trait pages offer official Wiki heading links. Glossary deep links
   and reference previews behave more reliably when moving between pages.
+- The Trooper Glossary entry now explains its connection to Unit Profiles,
+  Army Lists, Attributes, Orders and Attacks.
 - Rules references explain source disagreements alongside the supported interpretation,
   including disputed Weapon profiles, Silhouettes, Dodge and Fireteam examples.
 - **What's changed** now shows upcoming-release notes when there are changes to show.
@@ -79,6 +81,9 @@ are not retroactively relabeled.
 - **Data processing + Web backend + Web frontend:** Publish the N5.3 suggested terrain
   combinations on Special Terrain, preserving source dashes, optional difficulty,
   combined visibility and conditional Zero-G. Gate labels lead to Access Width.
+- **Data processing + Web backend + Web frontend:** Expand the N5.3 Trooper
+  Glossary definition with its Unit Profile/Army List, Attribute, Order Pool and
+  Attack facets, retaining the pinned source citation.
 - **Data processing:** Expand the BS Attack and CC Attack references with
   declaration and range limits, friendly hits when shooting into close combat,
   Coup de Grâce exceptions, and separate Active/Reactive multi-Trooper conditions.

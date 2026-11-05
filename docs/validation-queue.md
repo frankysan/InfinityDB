@@ -120,7 +120,11 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No pending design obligations. VD-0059/0060/0061 were retired after
+No pending design obligations. VD-0062 was retired after static review without
+execution; its curated-export, Glossary API, and responsive browser selectors
+are carried by VR-0110.
+
+VD-0059/0060/0061 were retired after
 static review without execution; their docs-stage, JSON, synthetic Git
 ancestry and CI regressions passed under VR-0107/0108 on pinned Linux
 `bf0821af`. Earlier VD-0053–VD-0058 passed on `0bac3369`, and
@@ -136,6 +140,27 @@ the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
 ## Pending deferred execution
+
+- [ ] **VR-0110 (2026-11-05; ready-to-run):** Correct the maintained
+  `term:trooper` glossary definition and publish the corresponding tracked
+  rules database. Work: [V1S-082](TODO.md#final-frozen-candidate-acceptance-and-release);
+  base: `8425e879`, implementation commit pending; risk: medium.
+  Immediate artifact gate: deterministic schema-preserving v9 export, 498
+  unchanged records, `RulesDatabase.validate()` and matched publication checks
+  passed. Rules SHA-256: `a8ab4b267257d6b2cca3a00605c3c7a30711d57872b332db70c31c3b89bee3cf`;
+  publication SHA-256: `987503f7e8619d97f774fec2f653ee197144527313fea29abf50c5ed31eb53b5`.
+  Design: VD-0062.
+  VD static review confirmed assertions for the canonical summary/citation,
+  Glossary identity/projection, and ordinary browser display at 1440/390/320 px;
+  no tests ran during design. The deferred selectors remain unrun and are
+  intended for Linux after the implementation commit.
+  Deferred: `tests/test_application_rule_references.py::test_game_terms_are_current_canonical_embedded_records`;
+  `tests/test_web.py::test_glossary_projects_canonical_rules_and_embedded_attributes`;
+  `tests/test_verify_scenario_faq_browser.py::test_trooper_term_normal_browser`
+  at 1440/390/320 px; a deterministic guarded v9 rules/deployed-object pair
+  refresh with `RulesDatabase.validate()`; and
+  `.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check`.
+  Outcome: artifact pair updated; deferred tests awaiting commit/execution.
 
 The most recent pinned Linux full-assets acceptance, including the 2026-11-04
 queue drain, is recorded in
@@ -160,8 +185,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0062`; active obligations are listed above.
-- Execution: `VR-0110`; active obligations are listed above.
+- Design: `VD-0063`; active obligations are listed above.
+- Execution: `VR-0111`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

@@ -5703,6 +5703,16 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     status, _, body = request(rules_app, "/api/glossary")
     assert status == 200
     items = json.loads(body)["items"]
+    trooper = next(item for item in items if item["id"] == "term:trooper")
+    assert trooper["domain"] == "Game term"
+    assert trooper["href"] == "/glossary#term-trooper"
+    assert trooper["embedded"] is True
+    assert trooper["description"] == (
+        "Troopers are game elements represented by Unit Profiles and belonging to "
+        "a player's Army List. They have Attributes, contribute Orders to the Order "
+        "Pool, can spend Orders to activate themselves, and can declare and receive "
+        "Attacks."
+    )
     movement = next(item for item in items if item["id"] == "attribute:mov")
     assert movement == {
         "id": "attribute:mov",

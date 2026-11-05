@@ -551,6 +551,52 @@ def test_visibility_zone_terms_normal_browser(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_trooper_term_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    api_responses: list[tuple[str, int]] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "response",
+        lambda response: api_responses.append((response.url, response.status))
+        if "/api/glossary" in response.url else None,
+    )
+    try:
+        response = page.goto(
+            f"{ORIGIN}/glossary#term-trooper", wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        page.locator("#term-trooper").wait_for(state="visible", timeout=15000)
+        snapshot = page.locator("#term-trooper").evaluate(
+            """node => ({
+                heading: node.querySelector("h3")?.textContent?.trim(),
+                text: node.querySelector(".glossary-description")?.textContent || "",
+                domain: node.querySelector(".glossary-domain")?.textContent?.trim(),
+                overflow: document.documentElement.scrollWidth > innerWidth + 1,
+            })"""
+        )
+        assert snapshot["heading"] == "Trooper"
+        assert snapshot["text"] == (
+            "Troopers are game elements represented by Unit Profiles and belonging "
+            "to a player's Army List. They have Attributes, contribute Orders to the "
+            "Order Pool, can spend Orders to activate themselves, and can declare "
+            "and receive Attacks."
+        )
+        assert snapshot["domain"] == "Game term"
+        assert not snapshot["overflow"], width
+        assert any(
+            url.endswith("/api/glossary") and status == 200
+            for url, status in api_responses
+        ), api_responses
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
     ("route", "record_id", "page_numbers", "clauses", "related"),
     (
@@ -2503,4 +2549,3 @@ def test_release_faq_haris_conflict_uses_tracked_database(
     test_fireteam_faq_discloses_real_source_conflict_not_language_omission(
         release_scenario_app, chrome, width,
     )
-
