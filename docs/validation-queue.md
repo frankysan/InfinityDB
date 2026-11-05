@@ -142,25 +142,38 @@ selector and other dependencies in its VR item.
 ## Pending deferred execution
 
 - [ ] **VR-0110 (2026-11-05; ready-to-run):** Correct the maintained
-  `term:trooper` glossary definition and publish the corresponding tracked
-  rules database. Work: [V1S-082](TODO.md#final-frozen-candidate-acceptance-and-release);
-  base: `8425e879`, implementation commit pending; risk: medium.
-  Immediate artifact gate: deterministic schema-preserving v9 export, 498
-  unchanged records, `RulesDatabase.validate()` and matched publication checks
-  passed. Rules SHA-256: `a8ab4b267257d6b2cca3a00605c3c7a30711d57872b332db70c31c3b89bee3cf`;
-  publication SHA-256: `987503f7e8619d97f774fec2f653ee197144527313fea29abf50c5ed31eb53b5`.
+  `term:trooper` glossary definition and refresh its dependent release
+  publications. Work: [V1S-082](TODO.md#final-frozen-candidate-acceptance-and-release);
+  implementation: `538fcebdf1cde9b8b31f0cb91fb95bdea9eb5465`; dependent-artifact
+  repair commit pending; risk: medium.
+  Immediate artifact gates: deterministic schema-preserving v9 export, 498
+  unchanged records, `RulesDatabase.validate()` and matched deployed-object
+  publication checks passed. Rules SHA-256:
+  `a8ab4b267257d6b2cca3a00605c3c7a30711d57872b332db70c31c3b89bee3cf`;
+  deployed-object publication SHA-256:
+  `987503f7e8619d97f774fec2f653ee197144527313fea29abf50c5ed31eb53b5`.
+  The dependent variant-usage candidate retains 151 groups, 10,923 reviewed
+  rows and 4,938 unresolved rows; structural comparison found only the rules
+  and deployed-object source-snapshot fingerprints changed. Candidate and
+  publication checks passed. Published JSON SHA-256:
+  `96344e1f96d3c4529b8e5dd7e13e154b8598d64589a1d5331a56354a4aa5449c`.
+  At `538fceb`, hosted Installed wheel smoke passed, while all four Source
+  matrix legs and Deployment smoke failed on the stale variant-usage
+  fingerprints (runs `42112870240`, `42112870248`, and `42112870216`).
   Design: VD-0062.
   VD static review confirmed assertions for the canonical summary/citation,
   Glossary identity/projection, and ordinary browser display at 1440/390/320 px;
   no tests ran during design. The deferred selectors remain unrun and are
-  intended for Linux after the implementation commit.
+  intended for Linux after the dependent-artifact repair commit.
   Deferred: `tests/test_application_rule_references.py::test_game_terms_are_current_canonical_embedded_records`;
   `tests/test_web.py::test_glossary_projects_canonical_rules_and_embedded_attributes`;
   `tests/test_verify_scenario_faq_browser.py::test_trooper_term_normal_browser`
-  at 1440/390/320 px; a deterministic guarded v9 rules/deployed-object pair
-  refresh with `RulesDatabase.validate()`; and
+  at 1440/390/320 px; `tools.build_variant_usage --check-publication`; a
+  deterministic guarded v9 rules/deployed-object pair refresh with
+  `RulesDatabase.validate()`; and
   `.venv\Scripts\python.exe -m tools.build_deployed_object_publication --check`.
-  Outcome: artifact pair updated; deferred tests awaiting commit/execution.
+  Outcome: rules, deployed-object and variant-usage publications are refreshed;
+  deferred tests await the repair commit and execution.
 
 The most recent pinned Linux full-assets acceptance, including the 2026-11-04
 queue drain, is recorded in
