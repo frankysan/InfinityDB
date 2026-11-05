@@ -254,9 +254,6 @@ and final candidate acceptance retain their individual owners below.
 **Parent:** [Dated FAQ/errata acceptance](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-- [ ] **V1S-049 (M, gate):** Recheck discoverability, topic/scenario reverse links and base-rule versus
-  clarification presentation in ordinary browser.
-
 #### Rule-variant usage index and Restrictions
 
 **Parent:** [Generated rules-reference projections](#rules-and-reference-completeness).
@@ -732,8 +729,12 @@ the remaining source clauses and final release-browser acceptance remain open.
   [V1S-048 public-uncertainty gate](v1.0-source-coverage-audit.md#faq-public-precedence-disputed-sources-and-exclusions-v1s-048-2026-11-05)
   made the conservative Annihilation-only Ancillary FAQ selection
   explicit in the API, retaining the disputed Haris citation and
-  excluding eight unreviewed ITS-only rulings. Release artifact parity
-  and final browser coverage remain independently open.
+  excluding eight unreviewed ITS-only rulings. The
+  [V1S-049 browser-route acceptance](v1.0-source-coverage-audit.md#faq-ordinary-browser-entry-points-and-rule-distinction-v1s-049-2026-11-05)
+  verified every normal FAQ primary/secondary topic association,
+  dated clarification versus base-rule provenance, and both
+  scenario overlaps at desktop and mobile widths. Release artifact
+  parity and final-candidate browser coverage remain independently open.
   - [ ] Revalidate this bounded 29-ruling/48-topic FAQ acceptance against
     the **final 1.0 release candidate** and release-matched rules database,
     including browser evidence and final source/disclaimer review. This is
