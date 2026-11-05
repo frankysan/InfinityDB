@@ -2355,9 +2355,11 @@ variant groups in stable variant-key order, with the source-pair provenance,
 set-based counts, and source-scoped occurrence contexts. Unknown query
 parameters, repeated filters and non-Skill/Equipment record IDs return `400`.
 When a matched publication is loaded, canonical Skill and Equipment detail APIs
-expose `variant_usage_published: true`. Their ordinary pages then request their
-canonical `record_id` and render an optional **Exact reviewed source occurrences**
-section alongside the existing catalog-wide Unit-usage lists. Each exact group
+expose `variant_usage_published: true`. Their ordinary pages then request every
+reviewed canonical rule ID actually attached to the item's family and source
+variants, deduplicate those IDs, and render the matching groups together in an
+optional **Exact reviewed source occurrences** section alongside the existing
+catalog-wide Unit-usage lists. The UI never guesses IDs from display labels. Each exact group
 retains its reviewed signature and source-row count; expanded rows link to the
 logical Unit and selected application Army, with separate profile/loadout source
 IDs and group anchors where the Army presentation has an unambiguous identity.

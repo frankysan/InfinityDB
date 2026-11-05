@@ -1,12 +1,12 @@
 import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, getRestrictionsReference, getVariantUsage, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, getVariantUsages, visibleUnitIds } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
 import { tableViewport } from "./view-components.js";
-import { exactVariantUsageSection } from "./variant-usage.js";
+import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.js";
 import {
   gameplayVariantRules,
   levelEffectsSection,
@@ -699,9 +699,10 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
     const prefix = { equipment: "equipment", traits: "trait", states: "state" }[catalog];
     const topicId = item.rules?.find((rule) => rule.id?.startsWith(`${prefix}:`))?.id
       || `${prefix}:${itemId}`;
-    if (catalog === "equipment" && item.variant_usage_published
-        && /^equipment:[a-z0-9][a-z0-9-]*$/.test(topicId)) {
-      getVariantUsage(topicId, pageController.signal).then((payload) => {
+    const variantRuleIds = catalog === "equipment"
+      ? exactVariantRuleIds(item, "equipment") : [];
+    if (item.variant_usage_published && variantRuleIds.length) {
+      getVariantUsages(variantRuleIds, pageController.signal).then((payload) => {
         if (pageController.signal.aborted) return;
         exactUsage = payload;
         if (displayedItem) render(displayedItem);

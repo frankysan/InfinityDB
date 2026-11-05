@@ -6151,7 +6151,8 @@ def test_variant_usage_page_modules_are_packaged_and_capability_gated(
         assert status == 200
         assert b'from "./variant-usage.js"' in body
         assert b"variant_usage_published" in body
-        assert b"getVariantUsage(topicId, pageController.signal)" in body
+        assert b"exactVariantRuleIds" in body
+        assert b"getVariantUsages(variantRuleIds, pageController.signal)" in body
 
     status, _, unit = request(app, "/static/unit.js")
     assert status == 200

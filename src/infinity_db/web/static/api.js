@@ -46,6 +46,23 @@ export function getVariantUsage(recordId, signal) {
   return getJson(`/api/variant-usage?${new URLSearchParams({ record_id: recordId })}`, signal);
 }
 
+/** Keep source-specific rule groups distinct while sharing one page section. */
+export async function getVariantUsages(recordIds, signal) {
+  const payloads = await Promise.all(recordIds.map((recordId) => getVariantUsage(recordId, signal)));
+  if (!payloads.length) return null;
+  const fingerprint = JSON.stringify(payloads[0].sourceSnapshot);
+  if (payloads.some((payload) => payload.scope !== "exact-reviewed-source-variants"
+      || JSON.stringify(payload.sourceSnapshot) !== fingerprint)) {
+    throw new Error("Inconsistent reviewed variant usage publication");
+  }
+  return {
+    ...payloads[0],
+    items: payloads.flatMap((payload) => payload.items).sort(
+      (left, right) => left.variantKey.localeCompare(right.variantKey),
+    ),
+  };
+}
+
 export function getUnitFilters(signal) {
   return getJson("/api/unit-filters", signal);
 }

@@ -90,6 +90,19 @@ function occurrenceTable(rows, units) {
   return fragment;
 }
 
+/** Only curated rule IDs actually attached to the canonical item are queried. */
+export function exactVariantRuleIds(item, prefix) {
+  const records = [
+    ...(item.rules || []),
+    ...(item.variants || []).flatMap((variant) => variant.rules || []),
+  ];
+  const pattern = prefix === "skill" ? /^skill:[a-z0-9][a-z0-9-]*$/
+    : /^equipment:[a-z0-9][a-z0-9-]*$/;
+  return [...new Set(records.map((rule) => rule.id).filter(
+    (id) => typeof id === "string" && pattern.test(id),
+  ))].sort();
+}
+
 /** Optional matched-publication view; never infer membership from catalog display names. */
 export function exactVariantUsageSection(payload, item) {
   if (payload?.scope !== "exact-reviewed-source-variants" || !Array.isArray(payload.items)

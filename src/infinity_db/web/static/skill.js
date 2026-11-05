@@ -1,13 +1,13 @@
 import { formatSkillDistanceExtra } from "./distance.js";
 import { optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, getRestrictionsReference, getVariantUsage, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, getVariantUsages, visibleUnitIds } from "./api.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
 import { tableViewport } from "./view-components.js";
-import { exactVariantUsageSection } from "./variant-usage.js";
+import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
   || window.location.pathname.split("/").pop();
@@ -332,8 +332,9 @@ if (!skillId) {
     render(skill);
     const topicId = skill.rules?.find((rule) => rule.id?.startsWith("skill:"))?.id
       || `skill:${skillId}`;
-    if (skill.variant_usage_published && /^skill:[a-z0-9][a-z0-9-]*$/.test(topicId)) {
-      getVariantUsage(topicId, pageController.signal).then((payload) => {
+    const variantRuleIds = exactVariantRuleIds(skill, "skill");
+    if (skill.variant_usage_published && variantRuleIds.length) {
+      getVariantUsages(variantRuleIds, pageController.signal).then((payload) => {
         if (pageController.signal.aborted) return;
         exactUsage = payload;
         if (displayedSkill) render(displayedSkill);

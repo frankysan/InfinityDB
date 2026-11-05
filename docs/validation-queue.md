@@ -155,8 +155,12 @@ summary above. Hosted CI and final release gates retain separate owners.
 - [ ] VR-0096 (2026-11-05; ready-to-run): Verify full V1S-066 cross-Army
   exact-variant publication and ordinary-browser source-pair gate.
   Work: [V1S-066](TODO.md#rules-and-contextual-reference-completion);
-  implementation base `2adb9145`; test-design revision pending.
+  implementation base `2adb9145`; test design committed at `1e9bab60`.
   VD-0037–0039 were statically reviewed and retired without running tests.
+  First pinned Linux execution `linux-dev:d7f6295958054cfb9290db89a96a9c4c`
+  passed three source/API/pair tests but failed six real-browser cases: the
+  page queried only its first family rule, missing source-specific variant
+  records. A focused frontend correction is pending pinned re-execution.
   Execute `tests/test_verify_variant_usage_publication_browser.py` on a pinned
   Linux checkout with an explicitly generated and checked ignored
   `data/generated/variant-usage.json`. It covers deterministic publication/API
