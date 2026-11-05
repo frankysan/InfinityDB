@@ -106,8 +106,17 @@ def audit_terrain_scenery_boundary(
             "accessWidthRule": (
                 "maintained" if present else "unmodelled"
             ),
-            "accessWidthTokens": "unmodelled",
-            "exampleTable": "unmodelled-not-18-missing-types",
+            "accessWidthTokens": (
+                "owner-aliases" if set(GATE_MARKERS) <= set(
+                    records.get("rule:access-width", {}).get("aliases", [])
+                ) else "unmodelled"
+            ),
+            "exampleTable": (
+                "maintained-source-suggestions" if records.get(
+                    "rule:special-terrain", {}
+                ).get("facts", {}).get("terrainExamples")
+                else "unmodelled-not-18-missing-types"
+            ),
         },
         "publishedDeployedObjectCount": len(objects),
     }
@@ -166,12 +175,37 @@ def audit_source_files(
         load_curated_document(curated_path),
         json.loads(published),
     )
+    if pdf_path is not None:
+        curated = load_curated_document(curated_path)
+        for record in curated["records"]:
+            if record["id"] == "rule:special-terrain":
+                examples = record["facts"].get("terrainExamples")
+                if examples is not None:
+                    verify_example_values(pdf_path, examples["rows"])
     return {
         **report,
         "curatedSha256": hashlib.sha256(source).hexdigest(),
         "publishedObjectSha256": hashlib.sha256(published).hexdigest(),
         "verifiedPdfSha256": verify_pinned_pdf(pdf_path) if pdf_path else None,
     }
+
+
+def verify_example_values(source: Path, rows: list[dict[str, str]]) -> None:
+    """Compare every printed cell in order, ignoring only case and PDF wrapping."""
+    import pymupdf  # type: ignore[import-untyped]
+
+    with pymupdf.open(source) as pdf:
+        text = pdf[144].get_text("text", sort=False)
+    if not isinstance(text, str):
+        raise ValueError("Pinned PDF lacks terrain example text")
+    expected = "".join(
+        row[field] for row in rows
+        for field in ("name", "terrainType", "difficultTerrain", "visibility", "saturation")
+    )
+    def normalize(value: str) -> str:
+        return re.sub(r"\s+", "", value).casefold()
+    if normalize(expected) not in normalize(text):
+        raise ValueError("Published terrain example values differ from the pinned source table")
 
 
 def main() -> int:
@@ -192,6 +226,7 @@ def main() -> int:
         print(f"Special Terrain rule: {status['specialTerrainRule']}")
         print(f"Access Width rule: {status['accessWidthRule']}")
         print(f"Separate gate-label terms: {status['accessWidthTokens']}")
+        print(f"Suggested combinations table: {status['exampleTable']}")
         print(f"Unchanged deployed objects: {report['publishedDeployedObjectCount']}")
     return 0
 

@@ -120,7 +120,23 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No open test-design obligations.
+- [ ] VD-0044 (2026-11-05; needs-design): Source-table, validation, alias and
+  artifact parity for V1S-077. Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects).
+  Change: Special Terrain `terrainExamples`, Access Width aliases and source audit;
+  risk: source-value loss, interpreted dashes, stale publication or unrelated delta.
+  Assert all 18 rows/five columns against pinned p. 145, malformed/duplicate rows,
+  wrong owner/scope, null/Boolean cells, changed optional/conditional values,
+  canonical search/Glossary target, and unchanged objects/Restrictions/schema.
+  Existing: terrain/scenery source, staging and promoted-artifact modules;
+  linked execution: VR-0099. No tests authored or run yet.
+- [ ] VD-0045 (2026-11-05; needs-design): Ordinary V1S-077 navigation and source-table
+  rendering at 1440/390/320 px. Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects).
+  Change: `rules-reference.js`; risk: invisible table, lost source values,
+  horizontal page overflow or unreachable aliases. Reuse movement browser fixture;
+  assert search and Glossary entry, keyboard-followed canonical link, all table
+  cells/API parity, p. 145 citations, no extra device identity, JS/request/HTTP
+  errors and page overflow. Existing: `tests/test_verify_movement_browser.py`;
+  linked execution: VR-0100. No tests authored or run yet.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -152,12 +168,29 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-No open deferred-execution obligations.
+- [ ] VR-0099 (2026-11-05; awaiting-design): V1S-077 source-reference publication.
+  Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects); revision:
+  in-progress curated/schema/audit and matched-pair change after `0b25acba`.
+  Immediate: curated structural load and pinned PDF cell comparison passed;
+  deterministic two-build staging, exact two-record delta, unchanged Restrictions
+  and object payloads, rollback-backed promotion and matched publication check
+  passed. Refreshed rules SHA-256:
+  `5dc249ced04b1180aab4b81ea233964adbc5df37cbcffdb54dff619b55375762`.
+  Design: VD-0044. Deferred: terrain source,
+  staging/promoted artifacts, RulesDatabase/API/alias tests, curated/rules
+  validation, affected publication/variant binding and cumulative integration.
+  Host: linux-dev, pinned committed revision and matching ignored publications.
+- [ ] VR-0100 (2026-11-05; awaiting-design): V1S-077 suggested-terrain table renderer
+  and Gate-label navigation. Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects);
+  revision: in-progress browser/curated change after `0b25acba`; risk: medium.
+  Immediate: none; design: VD-0045. Deferred: three-width movement/terrain browser
+  acceptance with normal search/Glossary and served API parity, plus browser-lane
+  registration regression. Host: linux-dev with Chromium and matched inputs.
 
 ## Next unused IDs
 
-- Design: `VD-0044`; active obligations are listed above.
-- Execution: `VR-0099`; active obligations are listed above.
+- Design: `VD-0046`; active obligations are listed above.
+- Execution: `VR-0101`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

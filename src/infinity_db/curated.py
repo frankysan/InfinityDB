@@ -3149,6 +3149,28 @@ def _validate_game_setup_table(value: object, context: str) -> None:
                 raise ValueError(f"{row_context}.{field}: expected two positive inches")
 
 
+def _validate_terrain_examples(value: object, context: str) -> None:
+    """Preserve the optional source table as reference values, not zone mechanics."""
+    if not isinstance(value, dict) or set(value) != {"scope", "rows"}:
+        raise ValueError(f"{context}: expected scope and rows")
+    if value["scope"] != "optional-source-suggestions-not-terrain-types":
+        raise ValueError(f"{context}: unsupported terrain example scope")
+    rows = value["rows"]
+    if not isinstance(rows, list) or len(rows) != 18:
+        raise ValueError(f"{context}: expected eighteen source examples")
+    names: set[str] = set()
+    fields = {"name", "terrainType", "difficultTerrain", "visibility", "saturation"}
+    for index, row in enumerate(rows):
+        if not isinstance(row, dict) or set(row) != fields:
+            raise ValueError(f"{context}.rows[{index}]: invalid source columns")
+        if any(not isinstance(cell, str) or not cell.strip() for cell in row.values()):
+            raise ValueError(f"{context}.rows[{index}]: expected nonempty source values")
+        name = row["name"].strip().casefold()
+        if name in names:
+            raise ValueError(f"{context}: duplicate terrain example")
+        names.add(name)
+
+
 def load_curated_document(path: Path) -> dict[str, Any]:
     """Load and validate one curated JSON document.
 
@@ -3432,6 +3454,12 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 raise ValueError(
                     f"{context}: Equipment supplements must not redefine declaration types"
                 )
+        if "terrainExamples" in (record.get("facts") or {}):
+            if record["id"] != "rule:special-terrain":
+                raise ValueError(f"{context}: only Special Terrain may own terrainExamples")
+            _validate_terrain_examples(
+                record["facts"]["terrainExamples"], f"{context}.facts.terrainExamples"
+            )
         if (record.get("facts") or {}).get("gameSetupTable") is not None:
             if record["id"] != "rule:game-modes" or record["kind"] != "rule":
                 raise ValueError(f"{context}: only Game Modes may own gameSetupTable")

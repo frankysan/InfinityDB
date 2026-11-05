@@ -3982,6 +3982,13 @@ InfinityDB should not infer a permanent terrain taxonomy from the examples. A
 future scenario/table record may preserve a named area's display identity while
 representing its mechanical characteristics separately.
 
+The current Special Terrain reference publishes all eighteen p. 145 suggested
+combinations in a source-value table. Optional difficulty, dashes, conditional
+Zero-G and Storm's relative visibility change remain explicit. Players still
+agree on their actual areas before play; a suggested row neither creates an
+Army/Unit property nor overrides scenario setup. Narrow Gate and Wide Gate
+are discoverable aliases of Access Width, whose passage rules remain unchanged.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Terrain_and_Scenery_Structures>

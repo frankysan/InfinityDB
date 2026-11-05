@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Find Narrow Gate and Wide Gate through search or Glossary, and browse the
+  eighteen suggested terrain combinations with their optional and conditional values.
 - Fireteam rules and contextual State help now link both ways for
   Suppressive Fire, Retreat! and the Ancillary-specific Disconnected exception.
 - Skill and Equipment details link reviewed, source-exact variants to their
@@ -72,6 +74,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web frontend:** Publish the N5.3 suggested terrain
+  combinations on Special Terrain, preserving source dashes, optional difficulty,
+  combined visibility and conditional Zero-G. Gate labels lead to Access Width.
 - **Data processing:** Expand the BS Attack and CC Attack references with
   declaration and range limits, friendly hits when shooting into close combat,
   Coup de Grâce exceptions, and separate Active/Reactive multi-Trooper conditions.

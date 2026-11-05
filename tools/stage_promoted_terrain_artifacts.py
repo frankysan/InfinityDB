@@ -57,8 +57,22 @@ def stage_promoted_terrain_artifacts(
     proposal = verify_additions(json.loads(ADDITIONS.read_text(encoding="utf-8")))
     curated = load_curated_document(curated_path)
     records = {row["id"]: row for row in curated["records"]}
+    # The insertion proposal is historical. Current definitions may gain reviewed
+    # aliases, citations and the validated source-example table after promotion.
+    # Retain the original definition contract without requiring whole-record equality.
+    def baseline_matches(proposed: dict[str, Any]) -> bool:
+        current = records.get(proposed["id"], {})
+        return (
+            all(current.get(key) == proposed[key] for key in (
+                "id", "kind", "name", "summary", "composition", "scope", "relations",
+            ))
+            and all(current.get("facts", {}).get(key) == value
+                    for key, value in proposed["facts"].items())
+            and all(cite in current.get("citations", []) for cite in proposed["citations"])
+        )
+
     if tuple(record["id"] for record in proposal) != EXPECTED_IDS or any(
-        records.get(record["id"]) != record for record in proposal
+        not baseline_matches(record) for record in proposal
     ):
         raise ValueError("Promoted terrain records differ from reviewed proposal")
     audit = audit_terrain_scenery_boundary(

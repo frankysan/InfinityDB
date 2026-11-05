@@ -192,6 +192,19 @@ reference-table component; the source text explicitly preserves scenario
 overrides and the distinction between recommended duration and Game
 Round count.
 
+### Suggested terrain reference table
+
+`rule:special-terrain` may own `facts.terrainExamples`, a closed reference
+table with scope `optional-source-suggestions-not-terrain-types` and eighteen
+uniquely named rows. Every row has five nonempty source-value strings:
+`name`, `terrainType`, `difficultTerrain`, `visibility` and `saturation`.
+These preserve the printed suggestions, including `--`, optional values,
+conditional Zero-G and relative visibility adjustments; they are not Boolean
+zone mechanics or additional Terrain Types. The source auditor compares every
+cell in order with pinned N5.3 p. 145, ignoring only case and PDF wrapping.
+Access Width owns the Narrow Gate/Wide Gate discovery aliases; those labels
+do not define deployed-device identities.
+
 ### Explaining rules interactions
 
 **Accepted authoring and review standard, not a new JSON schema or a rules engine.**

@@ -240,6 +240,46 @@ function appendGameSetupTable(container, rule) {
   container.append(group);
 }
 
+function appendTerrainExamples(container, rule) {
+  if (rule.id !== "rule:special-terrain") return;
+  const examples = rule.facts?.terrainExamples;
+  if (!Array.isArray(examples?.rows)) return;
+  const group = document.createElement("section");
+  group.className = "detail-fact-group terrain-examples-reference";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = "Suggested terrain combinations";
+  const guidance = document.createElement("p");
+  guidance.className = "detail-copy";
+  guidance.textContent = "Examples to agree before play, not additional Terrain Types or mandatory scenery. A dash preserves a dash in the source; optional and conditional values remain as printed.";
+  const table = document.createElement("table");
+  table.className = "data-table--reference";
+  table.setAttribute("aria-label", "Suggested terrain combinations");
+  const head = document.createElement("thead");
+  const headingRow = document.createElement("tr");
+  for (const label of ["Example", "Terrain Type", "Difficult Terrain", "Visibility Conditions", "Saturation Zone"]) {
+    const cell = document.createElement("th");
+    cell.scope = "col";
+    cell.textContent = label;
+    headingRow.append(cell);
+  }
+  head.append(headingRow);
+  const body = document.createElement("tbody");
+  for (const example of examples.rows) {
+    const row = document.createElement("tr");
+    for (const [index, field] of ["name", "terrainType", "difficultTerrain", "visibility", "saturation"].entries()) {
+      const cell = document.createElement(index === 0 ? "th" : "td");
+      if (index === 0) cell.scope = "row";
+      cell.textContent = example[field];
+      row.append(cell);
+    }
+    body.append(row);
+  }
+  table.append(head, body);
+  group.append(heading, guidance, tableViewport(table));
+  container.append(group);
+}
+
 function appendAmmunitionFacts(container, rule) {
   if (rule.kind !== "ammunition") return;
   const states = new Map((rule.display_relations || [])
@@ -365,6 +405,7 @@ function appendRuleDetails(
   appendRuleFactGroup(container, rule, "requirements", "Requirements");
   appendRuleFactGroup(container, rule, "effects", "Effects");
   appendGameSetupTable(container, rule);
+  appendTerrainExamples(container, rule);
   appendAmmunitionFacts(container, rule);
 
   const specialists = facts.specialists?.anyOfSkills;

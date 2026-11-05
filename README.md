@@ -83,6 +83,8 @@ its application metrics.
   rules instead of redefining the effects.
 - Links to **Orders and AROs** from the home page and navigation, with searchable
   declarations by Order type and links to their rules and scenario context.
+- Shows eighteen suggested terrain combinations on Special Terrain, preserving
+  optional and conditional values; Narrow Gate and Wide Gate searches lead to Access Width.
 - Includes linked N5.3 movement and geometry references for routes, supporting
   surfaces, visibility, Cover, zones, Coherency and replacement positioning, with
   Move's declaration requirements and Silhouette diagrams.

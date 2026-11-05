@@ -3004,6 +3004,14 @@ Curated rules collections are versioned and built into `rules.db`. The rules lay
 semantic/reference data, not mutable game state. `data/curated/README.md` owns the current curated
 format and validation contract.
 
+Special Terrain's `facts.terrainExamples` retains the eighteen source-suggested
+combinations as independent printed Type, difficulty, visibility and saturation
+values. `rules.db` stores these with the owning definition and p. 145 citation;
+the General Rules API and ordinary detail card expose the same rows. Source
+dashes, optional and conditional values remain text rather than inferred game
+state. Narrow Gate and Wide Gate are aliases of the Access Width reference in
+search and Glossary, without creating separate devices or canonical Terrain Types.
+
 A semantic record has a stable typed ID such as `skill:move`, `state:targeted`, or
 `ammunition:shock`. Current composition is contribution-based:
 

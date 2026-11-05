@@ -28903,7 +28903,138 @@
                     "Special Terrain is optional and requires agreement between players before play.",
                     "The named examples in the Special Terrain suggestions table are illustrative combinations, not additional canonical Terrain Types or mandatory game-table elements."
                 ],
-                "definesSkills": []
+                "definesSkills": [],
+                "terrainExamples": {
+                    "scope": "optional-source-suggestions-not-terrain-types",
+                    "rows": [
+                        {
+                            "name": "Beach",
+                            "terrainType": "Aquatic",
+                            "difficultTerrain": "Yes",
+                            "visibility": "--",
+                            "saturation": "No"
+                        },
+                        {
+                            "name": "Open Sea",
+                            "terrainType": "Aquatic",
+                            "difficultTerrain": "Yes",
+                            "visibility": "--",
+                            "saturation": "No"
+                        },
+                        {
+                            "name": "Swamp",
+                            "terrainType": "Aquatic",
+                            "difficultTerrain": "Yes",
+                            "visibility": "--",
+                            "saturation": "Yes"
+                        },
+                        {
+                            "name": "Rocky Ground",
+                            "terrainType": "Desert",
+                            "difficultTerrain": "Optional",
+                            "visibility": "--",
+                            "saturation": "Yes"
+                        },
+                        {
+                            "name": "Sand Dunes",
+                            "terrainType": "Desert",
+                            "difficultTerrain": "Yes",
+                            "visibility": "--",
+                            "saturation": "No"
+                        },
+                        {
+                            "name": "Low Mountain or Steep Hills",
+                            "terrainType": "Mountain",
+                            "difficultTerrain": "--",
+                            "visibility": "--",
+                            "saturation": "No"
+                        },
+                        {
+                            "name": "Artic Plains",
+                            "terrainType": "Mountain",
+                            "difficultTerrain": "Optional",
+                            "visibility": "--",
+                            "saturation": "No"
+                        },
+                        {
+                            "name": "Mid-Mountain",
+                            "terrainType": "Mountain",
+                            "difficultTerrain": "Yes",
+                            "visibility": "Low Visibility",
+                            "saturation": "No"
+                        },
+                        {
+                            "name": "High Mountain",
+                            "terrainType": "Mountain",
+                            "difficultTerrain": "Yes",
+                            "visibility": "Low Visibility",
+                            "saturation": "Yes"
+                        },
+                        {
+                            "name": "Woods",
+                            "terrainType": "Jungle",
+                            "difficultTerrain": "Optional",
+                            "visibility": "Low Visibility",
+                            "saturation": "Yes"
+                        },
+                        {
+                            "name": "Jungle",
+                            "terrainType": "Jungle",
+                            "difficultTerrain": "Yes",
+                            "visibility": "Poor Visibility",
+                            "saturation": "Yes"
+                        },
+                        {
+                            "name": "Dense Jungle",
+                            "terrainType": "Jungle",
+                            "difficultTerrain": "Yes",
+                            "visibility": "Poor Visibility",
+                            "saturation": "Yes"
+                        },
+                        {
+                            "name": "Primeval Forest",
+                            "terrainType": "Jungle",
+                            "difficultTerrain": "Yes",
+                            "visibility": "Zero Visibility",
+                            "saturation": "Yes"
+                        },
+                        {
+                            "name": "Zero-G",
+                            "terrainType": "Zero-G",
+                            "difficultTerrain": "Yes",
+                            "visibility": "--",
+                            "saturation": "No"
+                        },
+                        {
+                            "name": "Storm",
+                            "terrainType": "Aquatic / Desert / Mountain / Jungle",
+                            "difficultTerrain": "--",
+                            "visibility": "Increases Visibility Conditions by one level",
+                            "saturation": "--"
+                        },
+                        {
+                            "name": "Engine Room",
+                            "terrainType": "Optional Zero-G",
+                            "difficultTerrain": "Yes if Zero-G",
+                            "visibility": "Low Visibility",
+                            "saturation": "Yes"
+                        },
+                        {
+                            "name": "Generator Room",
+                            "terrainType": "Optional Zero-G",
+                            "difficultTerrain": "Yes if Zero-G",
+                            "visibility": "White Noise",
+                            "saturation": "Yes"
+                        },
+                        {
+                            "name": "Energy Core Room",
+                            "terrainType": "Optional Zero-G",
+                            "difficultTerrain": "Yes if Zero-G",
+                            "visibility": "Low Visibility + White Noise",
+                            "saturation": "--"
+                        }
+                    ]
+                }
             },
             "relations": [],
             "citations": [
@@ -28911,11 +29042,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 143,
                     "section": "Terrain and Scenery Structures — Special Terrain"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 145,
+                    "section": "Special Terrain Suggestions and Examples"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-30"
+                "reviewedOn": "2026-11-05"
             }
         },
         {
@@ -28956,8 +29092,12 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-30"
-            }
+                "reviewedOn": "2026-11-05"
+            },
+            "aliases": [
+                "Narrow Gate",
+                "Wide Gate"
+            ]
         },
         {
             "id": "rule:moving-and-measuring",

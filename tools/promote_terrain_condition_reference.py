@@ -38,7 +38,7 @@ CHANGED_IDS: set[str] = set()
 CITATIONS = {
     "rule:difficult-terrain": {143, 144},
     "rule:saturation": {143, 144},
-    "rule:special-terrain": {143},
+    "rule:special-terrain": {143, 145},
     "skill:terrain": {116},
 }
 
