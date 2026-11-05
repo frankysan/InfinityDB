@@ -218,6 +218,9 @@ is bounded to the development pair; final-input checks remain.
   checks, local/CI integration and cross-platform validation of the
   [backlog checker](v1s-backlog-checker-plan.md), without treating evidence
   presence as semantic acceptance.
+  Priority: Complete the user-requested backlog checker before frozen-candidate
+  acceptance; authority: user; revisit: resume the earliest actionable V1S
+  slice after V1S-096 is complete.
 
 ### Source inventory and gap batches
 

@@ -11,6 +11,7 @@ from tools.check_v1_backlog import (
     audit_pending_retirements,
     audit_retirements,
     main,
+    review_selection,
 )
 
 
@@ -214,6 +215,178 @@ def test_retirement_cli_rejects_ambiguous_options(
 ) -> None:
     with pytest.raises(SystemExit) as error:
         main(arguments)
+    assert error.value.code == 2
+
+
+def test_selection_orders_earlier_open_ids_across_workstreams() -> None:
+    analysis = _analyze("""# Backlog
+### Pre-planned 1.0 execution slices
+#### Later workstream
+- [ ] **V1S-052 (S, review):** Earlier actionable task.
+#### First workstream
+- [x] **V1S-034 (S, review):** Accepted and checked.
+- [ ] **V1S-062 (S, review):** Proposed selection.
+#### Middle workstream
+- [ ] **V1S-041 (S, review):** Earlier task, source is ambiguous.
+""")
+    review = review_selection(analysis, "V1S-062")
+    assert review.earlier_open == ("V1S-041", "V1S-052")
+    assert review.actionable == ("V1S-041", "V1S-052")
+    assert review.documented_pauses == ()
+    assert [(item.code, item.severity) for item in review.diagnostics] == [
+        ("V1B012", "error"),
+    ]
+    assert "V1S-041, V1S-052" in review.diagnostics[0].message
+    assert not review.override_applied
+
+
+@pytest.mark.parametrize("selected", ["V1S-002", "V1S-003", "V1S-1", "v1s-001"])
+def test_selection_rejects_closed_missing_and_malformed_ids(
+    selected: str,
+) -> None:
+    analysis = _analyze("""# Backlog
+### Pre-planned 1.0 execution slices
+#### Workstream
+- [ ] **V1S-001 (S, review):** Open.
+- [x] **V1S-002 (S, review):** Closed.
+""")
+    review = review_selection(analysis, selected)
+    assert [item.code for item in review.diagnostics] == ["V1B010"]
+    assert review.diagnostics[0].severity == "error"
+
+
+def test_selection_accepts_only_documented_pauses_and_not_ambiguous_sources() -> None:
+    analysis = _analyze("""# Backlog
+### Pre-planned 1.0 execution slices
+#### First workstream
+- [ ] **V1S-034 (S, review):** Need upstream response.
+  Blocked: Missing primary-source pages; owner: curator; retry: when SRC-034 is answered.
+- [ ] **V1S-041 (S, review):** Release candidate work.
+  Deferred: Needs pinned release inputs; authority: release owner; revisit: after source freeze.
+#### Second workstream
+- [ ] **V1S-052 (S, review):** Work remains possible despite uncertain rules.
+#### Final workstream
+- [ ] **V1S-062 (S, review):** Proposed task.
+""")
+    review = review_selection(analysis, "V1S-062")
+    assert review.documented_pauses == ("V1S-034", "V1S-041")
+    assert review.actionable == ("V1S-052",)
+    assert [item.code for item in review.diagnostics] == ["V1B012"]
+
+
+@pytest.mark.parametrize("annotation", [
+    "Blocked: Waiting for clarification; owner: rules reviewer",
+    "Blocked: Waiting; owner: rules reviewer; retry: after source update",
+    "Deferred: Release milestone; revisit: after input freeze",
+    "Deferred: Release milestone; owner: release owner; revisit: soon",
+    "Blocked: Need source check; owner: curator; retry: after response "
+    "Deferred: Wait for later date; owner: maintainer; revisit: after freeze",
+])
+def test_selection_incomplete_pauses_remain_actionable(annotation: str) -> None:
+    analysis = _analyze(
+        "# Backlog\n### Pre-planned 1.0 execution slices\n#### Workstream\n"
+        f"- [ ] **V1S-041 (S, review):** Preceding work.\n  {annotation}\n"
+        "- [ ] **V1S-062 (S, review):** Selected.\n"
+    )
+    review = review_selection(analysis, "V1S-062")
+    assert review.actionable == ("V1S-041",)
+    assert [item.code for item in review.diagnostics] == ["V1B011", "V1B012"]
+    assert review.diagnostics[0].severity == "warning"
+
+
+def test_selection_all_documented_pauses_allow_later_work_without_override() -> None:
+    analysis = _analyze("""# Backlog
+### Pre-planned 1.0 execution slices
+#### First workstream
+- [ ] **V1S-034 (S, review):** Blocked by an external answer.
+  Blocked: Requires original source erratum; owner: curator; retry: when erratum arrives.
+#### Other workstream
+- [ ] **V1S-041 (S, review):** Deferred until freeze.
+  Deferred: Source rebuild is gated; owner: release owner; revisit: once snapshot is frozen.
+- [ ] **V1S-062 (S, review):** Proposed.
+""")
+    review = review_selection(analysis, "V1S-062")
+    assert review.earlier_open == ("V1S-034", "V1S-041")
+    assert review.documented_pauses == review.earlier_open
+    assert review.actionable == ()
+    assert review.diagnostics == ()
+
+
+def test_selection_priority_requires_matching_durable_reason() -> None:
+    reason = "Finish backlog safeguards first"
+    analysis = _analyze("""# Backlog
+### Pre-planned 1.0 execution slices
+#### First workstream
+- [ ] **V1S-034 (S, review):** Still open.
+#### Final workstream
+- [ ] **V1S-062 (S, review):** Selected.
+  Priority: Finish backlog safeguards first; authority: user; revisit: after V1S-062 closeout.
+""")
+    assert analysis.diagnostics == ()
+    no_override = review_selection(analysis, "V1S-062")
+    assert [item.code for item in no_override.diagnostics] == ["V1B012"]
+    selected = review_selection(analysis, "V1S-062", priority_reason=reason)
+    assert selected.override_applied
+    assert [item.code for item in selected.diagnostics] == ["V1B014"]
+    assert selected.diagnostics[0].severity == "warning"
+    assert selected.actionable == ("V1S-034",)
+    for invalid in ("", "User requested", reason + " and other changes"):
+        rejected = review_selection(analysis, "V1S-062", priority_reason=invalid)
+        assert [item.code for item in rejected.diagnostics] == ["V1B013", "V1B012"]
+
+
+@pytest.mark.parametrize("annotation", [
+    "",
+    "Priority: Complete requested backlog safeguards before final candidate",
+    "Priority: Complete requested backlog safeguards before final candidate; "
+    "authority: user",
+    "Priority: Complete requested backlog safeguards before final candidate; "
+    "authority: user; revisit: soon",
+])
+def test_priority_override_without_complete_durable_note_is_refused(
+    annotation: str,
+) -> None:
+    analysis = _analyze(
+        "# Backlog\n### Pre-planned 1.0 execution slices\n#### Workstream\n"
+        "- [ ] **V1S-034 (S, review):** Preceding.\n"
+        f"- [ ] **V1S-062 (S, review):** Chosen.\n  {annotation}\n"
+    )
+    report = review_selection(
+        analysis, "V1S-062",
+        priority_reason="Complete requested backlog safeguards before final candidate",
+    )
+    assert not report.override_applied
+    assert [item.code for item in report.diagnostics] == ["V1B013", "V1B012"]
+
+
+def test_selection_cli_reports_earlier_open_and_explicit_override(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str],
+) -> None:
+    reason = "Finish the user-requested backlog checker first"
+    todo = tmp_path / "selected.md"
+    todo.write_text(
+        "# Backlog\n### Pre-planned 1.0 execution slices\n#### First\n"
+        "- [ ] **V1S-041 (S, review):** Other task.\n"
+        "#### Second\n"
+        "- [ ] **V1S-062 (S, review):** Selected task.\n"
+        f"  Priority: {reason}; authority: user; "
+        "revisit: when this selected task is completed.\n",
+        encoding="utf-8",
+    )
+    assert main(["--todo", str(todo), "--select", "V1S-062"]) == 1
+    assert "Earliest actionable: V1S-041" in capsys.readouterr().out
+    assert main([
+        "--todo", str(todo), "--select", "V1S-062",
+        "--priority-reason", reason,
+    ]) == 0
+    output = capsys.readouterr().out
+    assert "Priority override: explicitly documented" in output
+    assert "V1S-041" in output
+
+
+def test_selection_cli_rejects_priority_without_selection() -> None:
+    with pytest.raises(SystemExit) as error:
+        main(["--priority-reason", "User requested work"])
     assert error.value.code == 2
 
 

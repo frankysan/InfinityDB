@@ -7,8 +7,9 @@ in the cumulative code profile at `1d0d5c19`, recorded in
 [testing.md](testing.md#parallel-windows-development-and-linux-validation).
 Phase 2's committed-history and pending index/worktree audits are implemented.
 The test designs were reviewed without execution; regression acceptance remains
-pending under VR-0104/0105. Phase 3 selection and Phase 4 integration remain
-open under V1S-096.
+pending under VR-0104/0105. Phase 3's explicit selection gate is implemented
+with a required TODO-recorded priority reason; its VD/VR acceptance is pending.
+Phase 4 integration remains open under V1S-096.
 **Scope:** The active `V1S-*` execution slices in [TODO.md](TODO.md#pre-planned-10-execution-slices), their documented completion, and the Git history of removals.
 
 ## Goal and constraints
@@ -138,9 +139,16 @@ advisory mode, with explicit `--enforce-closeout` opt-in. Pending-retirement
 inspection uses `--base REV --target-state index` or
 `--base REV --target-state worktree`: it warns about every removed ID
 and missing canonical documentation evidence, but cannot validate a future
-commit message. The new modes await regression acceptance under VR-0104/0105;
-they are **not yet** accepted release checks. `--select` remains unimplemented,
-and no mode may infer semantic closeout approval.
+commit message. Those modes await regression acceptance under VR-0104/0105.
+The explicit selection mode is available with `--select V1S-NNN` and fails
+unexplained bypasses. A user-priority exception requires both
+`--priority-reason "EXACT RECORDED REASON"` and a matching
+`Priority: <reason>; authority: <owner>; revisit: <trigger>` annotation on
+the selected TODO entry. Earlier `Blocked:` and `Deferred:` annotations
+need a concrete reason, an `owner:` or `authority:`, and a `retry:` or
+`revisit:` trigger respectively; incomplete annotations do not excuse a skip.
+Selection behavior awaits the Phase 3 VR acceptance, so **none of these new
+modes are accepted release checks yet**. No mode infers semantic closeout.
 
 Example diagnostic:
 

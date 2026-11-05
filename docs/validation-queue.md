@@ -120,12 +120,13 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No pending test-design obligations. VD-0053/0054/0055 were retired
-after static design review of the authored Git-history and index/worktree
-fixtures in `tests/test_check_v1_backlog.py` (Ruff and Pyright passed);
-**no tests ran during design**. The selectors remain under VR-0104/0105.
-Earlier VD-0050/0051/0052 selectors were verified by the pinned
-`e957c43e` full-assets run; hosted follow-through is tracked in CI policy.
+No pending design obligations. VD-0056/0057/0058 were retired after
+static inspection of new numeric selection, pause-classification and durable
+override/CLI fixtures in `tests/test_check_v1_backlog.py`. Ruff and Pyright
+passed; **no tests were executed during design**. Their selectors are pending
+under VR-0106. VD-0053/0054/0055 were similarly reviewed without execution;
+their selectors remain under VR-0104/0105. Earlier VD-0050/0051/0052 selectors
+passed the `e957c43e` full-assets run; hosted follow-through belongs to CI.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -171,10 +172,17 @@ summary above. Hosted CI and final release gates retain separate owners.
   Deferred: `tests/test_check_v1_backlog.py` pending-removal and CLI fixtures on pinned Windows/Linux revisions.
   Outcome: unrun; Phase 3 selection gate and Phase 4 integration remain separate.
 
+- [ ] VR-0106 (2026-11-05; ready-to-run): Explicit V1S selection ordering, blocker/deferment classification, and durable user-priority override.
+  Work: [V1S-096](TODO.md#final-10-acceptance); revision: Windows selection implementation after a1766b75, pin its commit for execution; risk: high.
+  Immediate: Ruff on tool and authored test fixtures, Pyright, Markdownlint, Markdown links and diff check PASS; no tests run during VD.
+  Design: VD-0056/0057/0058 retired after static review without test execution.
+  Deferred: `tests/test_check_v1_backlog.py` selection fixtures, `--select V1S-096` CLI check and applicable normal checks, on a pinned revision.
+  Outcome: unrun; Phase 4 integration stays separate.
+
 ## Next unused IDs
 
-- Design: `VD-0056`; active obligations are listed above.
-- Execution: `VR-0106`; active obligations are listed above.
+- Design: `VD-0059`; active obligations are listed above.
+- Execution: `VR-0107`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

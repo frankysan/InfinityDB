@@ -19,7 +19,10 @@ LIST_ITEM = re.compile(
 CHECKBOX = re.compile(r"^\[(?P<state>[ xX])\](?:\s+(?P<body>.*))?$")
 V1S_ID = re.compile(r"V1S-\d{3}")
 V1S_PREFIX = re.compile(r"^(?:\*\*)?(?P<token>V1S-[^\s*]*)(?:\*\*)?")
-ANNOTATION = re.compile(r"(?:^|\s)(?P<kind>Blocked|Deferred):\s*(?P<detail>.*)$")
+ANNOTATION = re.compile(
+    r"(?:^|\s)(?P<kind>Blocked|Deferred|Priority):\s*"
+    r"(?P<detail>.*?)(?=(?:\s+(?:Blocked|Deferred|Priority):)|$)"
+)
 
 
 @dataclass(frozen=True)
@@ -34,6 +37,7 @@ class BacklogTask:
     text: str
     blocked: str | None
     deferred: str | None
+    priority: str | None
 
 
 @dataclass(frozen=True)
@@ -65,15 +69,10 @@ class _TaskBuilder:
 
     def finish(self) -> BacklogTask:
         text = " ".join(part.strip() for part in self.text_parts if part.strip())
-        blocked = None
-        deferred = None
-        for line in text.splitlines():
-            match = ANNOTATION.search(line)
-            if match:
-                if match.group("kind") == "Blocked":
-                    blocked = match.group("detail").strip()
-                else:
-                    deferred = match.group("detail").strip()
+        annotations = {
+            match.group("kind"): match.group("detail").strip()
+            for match in ANNOTATION.finditer(text)
+        }
         return BacklogTask(
             task_id=self.task_id,
             checked=self.checked,
@@ -83,8 +82,9 @@ class _TaskBuilder:
             parent_lines=self.parent_lines,
             section_path=self.section_path,
             text=text,
-            blocked=blocked,
-            deferred=deferred,
+            blocked=annotations.get("Blocked"),
+            deferred=annotations.get("Deferred"),
+            priority=annotations.get("Priority"),
         )
 
 
@@ -581,6 +581,162 @@ def audit_pending_retirements(
         ),)
 
 
+@dataclass(frozen=True)
+class SelectionReview:
+    """Selection is a human-priority checkpoint, not evidence of task completion."""
+
+    selected: str
+    earlier_open: tuple[str, ...]
+    documented_pauses: tuple[str, ...]
+    actionable: tuple[str, ...]
+    override_applied: bool
+    diagnostics: tuple[Diagnostic, ...]
+
+
+def _note_details(note: str, *, kind: str) -> tuple[str, bool]:
+    """Require a concrete reason, named owner/authority and retry condition."""
+    segments = [part.strip() for part in note.split(";")]
+    reason = segments[0]
+    details: dict[str, str] = {}
+    for segment in segments[1:]:
+        if ":" not in segment:
+            return reason, False
+        key, value = (part.strip() for part in segment.split(":", 1))
+        if not key or not value or key.casefold() in details:
+            return reason, False
+        details[key.casefold()] = value
+    trigger = "retry" if kind == "Blocked" else "revisit"
+    owner = details.get("owner") or details.get("authority")
+    return reason, (
+        len(reason) >= 12 and bool(owner) and len(owner) >= 3
+        and len(details.get(trigger, "")) >= 8
+    )
+
+
+def _selection_error(
+    code: str, message: str, suggestion: str, *, line: int = 1,
+    severity: str = "error",
+) -> Diagnostic:
+    return Diagnostic(
+        code=code, severity=severity, source="docs/TODO.md", line=line,
+        message=message, suggestion=suggestion,
+    )
+
+
+def review_selection(
+    analysis: BacklogAnalysis, selected: str, *,
+    priority_reason: str | None = None,
+) -> SelectionReview:
+    """Enumerate earlier open IDs across all sections; fail unexplained skips.
+
+    A priority override requires both an explicit command argument and a
+    matching, durable Priority: reason + revisit trigger in the selected TODO.
+    Blocking/deferment labels alone cannot excuse a preceding open task.
+    """
+    empty: tuple[str, ...] = ()
+    if any(item.severity == "error" for item in analysis.diagnostics):
+        return SelectionReview(
+            selected, empty, empty, empty, False,
+            (_selection_error(
+                "V1B010", "cannot select from an invalid V1S register",
+                "Correct the structural diagnostics before selecting work.",
+            ),),
+        )
+    if not V1S_ID.fullmatch(selected):
+        return SelectionReview(
+            selected, empty, empty, empty, False,
+            (_selection_error(
+                "V1B010", f"invalid selected V1S ID {selected!r}",
+                "Use a declared, open V1S-NNN identifier.",
+            ),),
+        )
+    by_id = {task.task_id: task for task in analysis.tasks}
+    chosen = by_id.get(selected)
+    if chosen is None or chosen.checked:
+        return SelectionReview(
+            selected, empty, empty, empty, False,
+            (_selection_error(
+                "V1B010", f"{selected} is missing or already completed",
+                "Choose an open V1S declaration; a retired ID is not a task.",
+                line=chosen.line_start if chosen is not None else 1,
+            ),),
+        )
+
+    earlier = sorted(
+        (task for task in analysis.tasks if not task.checked
+         and int(task.task_id[4:]) < int(selected[4:])),
+        key=lambda task: int(task.task_id[4:]),
+    )
+    pauses: list[str] = []
+    actionable: list[str] = []
+    diagnostics: list[Diagnostic] = []
+    for task in earlier:
+        note_kind = "Blocked" if task.blocked is not None else "Deferred"
+        note = task.blocked if task.blocked is not None else task.deferred
+        if task.blocked is not None and task.deferred is not None:
+            note = None
+        if note is None:
+            if task.blocked is not None or task.deferred is not None:
+                diagnostics.append(_selection_error(
+                    "V1B011", f"{task.task_id} has conflicting pause annotations",
+                    "Keep only one explicit Blocked: or Deferred: annotation.",
+                    line=task.line_start, severity="warning",
+                ))
+            actionable.append(task.task_id)
+            continue
+        _, complete = _note_details(note, kind=note_kind)
+        if not complete:
+            diagnostics.append(_selection_error(
+                "V1B011", f"{task.task_id} has an incomplete {note_kind}: annotation",
+                "Specify a concrete reason; owner: or authority:; and "
+                + ("retry:" if note_kind == "Blocked" else "revisit:")
+                + " with a specific trigger.",
+                line=task.line_start, severity="warning",
+            ))
+            actionable.append(task.task_id)
+        else:
+            pauses.append(task.task_id)
+
+    override = False
+    if priority_reason is not None:
+        declared = chosen.priority
+        reason, valid = _note_details(declared or "", kind="Deferred")
+        override = (
+            valid and declared is not None
+            and reason == priority_reason.strip()
+        )
+        if not override:
+            diagnostics.append(_selection_error(
+                "V1B013", f"{selected} has no matching documented priority override",
+                "Record 'Priority: <concrete reason>; owner: <authority>; "
+                "revisit: <trigger>' on the selected TODO entry, and pass "
+                "that exact reason with --priority-reason.",
+                line=chosen.line_start,
+            ))
+
+    if actionable:
+        if override:
+            diagnostics.append(_selection_error(
+                "V1B014", f"{selected} overrides {len(actionable)} earlier actionable task(s)",
+                "Revisit the passed-over IDs at the documented trigger; "
+                "priority does not retire them.",
+                line=chosen.line_start, severity="warning",
+            ))
+        else:
+            diagnostics.append(_selection_error(
+                "V1B012",
+                f"{selected} bypasses earlier actionable tasks: "
+                + ", ".join(actionable),
+                "Select the earliest actionable ID or document a user-approved "
+                "priority reason on the chosen V1S entry.",
+                line=chosen.line_start,
+            ))
+    return SelectionReview(
+        selected, tuple(task.task_id for task in earlier),
+        tuple(pauses), tuple(actionable), override, tuple(diagnostics),
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -605,11 +761,21 @@ def main(argv: list[str] | None = None) -> int:
         "--enforce-closeout", action="store_true",
         help="Fail on unaccounted retirements after an explicitly chosen base",
     )
+    parser.add_argument(
+        "--select", metavar="V1S-NNN",
+        help="check a proposed task against every earlier open V1S ID",
+    )
+    parser.add_argument(
+        "--priority-reason",
+        help="explicit priority override; must match the selected TODO annotation",
+    )
     args = parser.parse_args(argv)
     if args.enforce_closeout and not args.base:
         parser.error("--enforce-closeout requires --base")
     if args.target_state != "commit" and (not args.base or args.target != "HEAD"):
         parser.error("index/worktree closeout requires --base and --target HEAD")
+    if args.priority_reason is not None and args.select is None:
+        parser.error("--priority-reason requires --select")
     try:
         markdown = args.todo.read_text(encoding="utf-8")
     except OSError as exc:
@@ -624,6 +790,19 @@ def main(argv: list[str] | None = None) -> int:
         ))
         if args.target_state != "commit":
             diagnostics.extend(audit_pending_retirements(state=args.target_state))
+    if args.select is not None:
+        review = review_selection(
+            analysis, args.select, priority_reason=args.priority_reason,
+        )
+        print(f"V1S selection: {review.selected}")
+        print("Earlier open IDs: " + (", ".join(review.earlier_open) or "none"))
+        print("Documented pauses: " + (", ".join(review.documented_pauses) or "none"))
+        print("Earlier actionable: " + (", ".join(review.actionable) or "none"))
+        if review.actionable:
+            print(f"Earliest actionable: {review.actionable[0]}")
+        if review.override_applied:
+            print("Priority override: explicitly documented; earlier IDs remain open")
+        diagnostics.extend(review.diagnostics)
     for diagnostic in diagnostics:
         print(
             f"{diagnostic.source}:{diagnostic.line}: {diagnostic.severity} "
