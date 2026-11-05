@@ -207,9 +207,12 @@ the tracked database pair and reviewed source files immediately before the
 Docker build. The image copies it beside both databases; its startup smoke
 test verifies source-pair hashes, 17 reviewed objects, the unresolved Mine
 Dispenser origin and the HTTP/browser entry points. Hosted release packaging passed on commit `9c9a09f` (2026-10-22);
-repeat against the final release candidate. Transitive Includes,
-other as-yet-unverified usage contexts, extra objects and full-source
-inventory remain v1.0 tasks.
+repeat against the final release candidate. The selected snapshot's source,
+full-depth Include and reverse-use reviews and three-width object browser
+acceptance are complete; their evidence is in the
+[source audit](v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05).
+Repeat those reviews after source changes. Final frozen-input source-wide and
+release-matched acceptance remain v1.0 gates.
 Do not describe these delivery origins or partial reverse uses as proof of
 complete Unit ownership, Army List legality or an exhaustive N5.3 model.
 Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition

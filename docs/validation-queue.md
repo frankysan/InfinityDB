@@ -152,59 +152,7 @@ The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. Hosted CI and final release gates retain separate owners.
 
-- [ ] VR-0099 (2026-11-05; ready-to-run): V1S-077 source-reference publication.
-  Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects); revision:
-  implementation `85e9e0f`; dedicated regression-design commit follows.
-  Immediate: curated structural load and pinned PDF cell comparison passed;
-  deterministic two-build staging, exact two-record delta, unchanged Restrictions
-  and object payloads, rollback-backed promotion and matched publication check
-  passed. Refreshed rules SHA-256:
-  `5dc249ced04b1180aab4b81ea233964adbc5df37cbcffdb54dff619b55375762`.
-  Design: VD-0044 completed by static review, no tests executed. Selectors:
-  `tests/test_terrain_scenery_source_gaps.py` (source/schema/API/aliases),
-  `tests/test_terrain_scenery_reference_staging.py`,
-  `tests/test_promoted_terrain_artifacts.py`,
-  `tests/test_terrain_condition_publication.py`, and publication/variant binding
-  regressions. Deferred: those selectors, curated/rules validation and cumulative
-  full-assets code suite. Due at V1S-077 publication acceptance before V1S-078.
-  Host: linux-dev, pinned committed revision and matching ignored publications.
-  Failed run at `b29cb652`: 80 passed, 4 failed, 2 historical pre-promotion skips.
-  API and three browser failures exposed name-only global search; canonical
-  catalog aliases/search matching are corrected. On Windows, the exact failing
-  API selector and all three new browser widths passed (4/4, no skips) against
-  the corrected working tree. Linux cumulative acceptance remains outstanding.
-  Full suite at `b3e65759`: 5,292 passed, 1 failed, 29 expected skips; the only
-  failure is the stale 820 source-section expectation after adding Special
-  Terrain's p. 145 citation (now 821). Correct the explicit fixture and assert
-  that owner's two locators without granting whole-record approval; rerun the
-  cumulative suite at the corrected revision, including the later keyboard and
-  scenario pipe-capture fixes.
-- [ ] VR-0100 (2026-11-05; ready-to-run): V1S-077 suggested-terrain table renderer
-  and Gate-label navigation. Work: [V1S-077](TODO.md#weapons-ammunition-and-deployed-objects);
-  revision: implementation `85e9e0f`; risk: medium.
-  Immediate: JS syntax/static checks passed; design: VD-0045 completed by static
-  review, no tests executed. Deferred: `tests/test_verify_movement_browser.py`
-  including `test_suggested_terrain_table_and_gate_label_discovery` at all three
-  widths, plus `tests/test_browser_test_capacity.py`. No new browser module/lane
-  required. Due at V1S-077 source-to-browser acceptance before V1S-078.
-  Host: linux-dev with Chromium and matched inputs.
-  Narrow-page screenshot review added an explicitly labelled, focusable table
-  region. The revised three-width selector passes on Windows, including
-  ArrowRight scrolling and reaching the final column at 390/320 px; direct
-  file Ruff and JS syntax checks pass. Rerun that revised selector on Linux
-  after the independent full suite at `b3e65759` completes.
-
-- [ ] VR-0101 (2026-11-05; ready-to-run): V1S-078 deployed-object API/browser
-  acceptance. Work: [V1S-078](TODO.md#weapons-ammunition-and-deployed-objects);
-  revision: dedicated test-design commit after `10e73ead`; unchanged source pair
-  and object payload. Design: VD-0046 completed by static review, no tests run.
-  Selector: `tests/test_verify_deployed_object_publication_browser.py`.
-  Assert all 17 API/detail payloads, all four attributes of every rendered object,
-  1440/390/320 px, Equipment catalog keyboard entry, failed requests/HTTP,
-  explicit Mine/Dazer/Turret disputes, unknown values, Include/Unit-context links
-  and legacy/missing-publication behavior. Existing browser module/lane reused.
-  Host: linux-dev, exact committed revision, Chromium and matched publication.
-  Due at this named acceptance gate after the current full suite finishes.
+No open deferred-execution obligations.
 
 ## Next unused IDs
 

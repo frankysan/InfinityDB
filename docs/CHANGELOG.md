@@ -74,7 +74,7 @@ are not retroactively relabeled.
 
 ### Added
 
-- **Data processing + Web frontend:** Publish the N5.3 suggested terrain
+- **Data processing + Web backend + Web frontend:** Publish the N5.3 suggested terrain
   combinations on Special Terrain, preserving source dashes, optional difficulty,
   combined visibility and conditional Zero-G. Gate labels lead to Access Width.
 - **Data processing:** Expand the BS Attack and CC Attack references with

@@ -287,25 +287,10 @@ State-side contexts, without inferring live Unit States or broader edges.
 **Parent:** [Weapon, Ammunition and Deployable presentation](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-The [V1S-074 scenery and scenario boundary review](v1.0-source-coverage-audit.md#scenery-gates-terrain-combinations-and-scenario-elements-v1s-074-2026-11-05)
-classifies Gate labels, optional terrain examples and scenario objectives separately
-from deployed devices. Its confirmed reference gaps remain under V1S-077.
-
-The [V1S-075/076 source and reverse-use acceptance](v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05)
-preserves exact source ownership and found no additional transitive delivery uses.
-
-- [ ] **V1S-077 (L, conditional):** For each confirmed new object or edge, extend curated inventory,
-  deterministic publication and API with targeted regressions.
-  Confirmed V1S-074 reference gaps: make Narrow Gate and Wide Gate discoverable
-  through normal search/Glossary navigation to their Access Width owner; publish
-  the eighteen suggested terrain combinations with their independent Type,
-  Difficult Terrain, Visibility and Saturation values. Preserve optional values,
-  source dashes, conditional Zero-G and Storm's visibility adjustment without
-  inventing extra Terrain Types, devices, carrier uses or scenario requirements.
-  Include source/storage/API and three-width browser regressions and the matched
-  rules/publication refresh. The bounded source review found no new device identity.
-- [ ] **V1S-078 (M, gate):** Accept deployed-object API/browser navigation, incomplete attributes, variants
-  and documented Mine/Dazer/Turret conflicts.
+The [terrain/Gate reference acceptance](v1.0-source-coverage-audit.md#terrain-suggestions-and-gate-discovery-acceptance-v1s-077-2026-11-05)
+and [deployed-object API/browser acceptance](v1.0-source-coverage-audit.md#deployed-object-api-and-ordinary-browser-acceptance-v1s-078-2026-11-05)
+complete the bounded source, classification and publication reviews. Repeat the
+release-matched source/publication and browser gates under V1S-081–090.
 
 #### Accessibility and navigation
 
@@ -836,42 +821,28 @@ the remaining source clauses and final release-browser acceptance remain open.
   - **Completion:** relevant context is linked from the owning rule and State help with applicable
     conditions/scope; no duplicate definitions or static assertions of a Trooper's live State.
 
-- [ ] **Data processing + Web backend + Web frontend:** Complete remaining Weapon,
-  Ammunition and Deployable reference presentation against the source inventory.
+- [ ] **Data processing + Web backend + Web frontend:** Revalidate Weapon,
+  Ammunition and Deployable presentation against the final frozen source inventory
+  and publication, resolving any newly confirmed in-scope omission.
   The unit-neutral `/weapons` catalog/detail and `/ammunition` pages already expose
   profiles, modes, ranges, linked effects and Traits. Additional comparison/filter
   controls are an enhancement; the [1.0 gate](releasing.md#version-10-data-completeness-gate)
   requires usable access to in-scope information, not a final comparison UI.
-  The [V1S-070 source review](v1.0-source-coverage-audit.md#weapon-profile-and-multimode-chart-review-v1s-070-2026-11-05)
-  reconciles all 171 printed Weapon profile/mode rows, preserving the documented
-  Kobra Pistol conflict and Katyusha MRL sign omission without changing source
-  values. V1S-071 found the existing profile fields sufficient (see the
-  [profile contract](data-model.md#weapon-profile-row-and-api-contract)), and
-  V1S-072's full published-profile storage/API/browser acceptance passed on
-  2026-11-05 (see the
-  [acceptance evidence](v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05)).
-  - [ ] Complete deployed-object inventory and final reference acceptance.
+  The [reviewed profile contract](data-model.md#weapon-profile-row-and-api-contract)
+  has [pinned source/storage/API/browser acceptance](v1.0-source-coverage-audit.md#v1s-072-full-profile-storageapibrowser-acceptance-2026-11-05),
+  retaining the disclosed source discrepancies.
+  - [ ] Complete frozen-candidate deployed-object inventory and reference acceptance.
     Seventeen reviewed object identities, delivery paths, API/browser entry
     points and typed reverse uses are published; see the
     [current contract](data-model.md#deployed-object-read-model-and-artifact-gated-browser-reference).
     Keep carrier, delivery mode, deployed-object identity and Unit ownership
     separate, with known/unreported/disputed attributes individually represented.
-    The [V1S-073 source-discovery review](v1.0-source-coverage-audit.md#deployed-object-source-discovery-v1s-073-2026-11-05)
-    found no new deployed-object identity or delivery edge across the reviewed
-    N5 tables, unusual profiles and alternate-wording leads; the 17-object,
-    28-path inventory is unchanged. V1S-074–078 still own scenery/scenario
-    classification, reverse-use gaps, any source-confirmed additions and final
-    API/browser acceptance.
-    - [ ] Decide whether Narrow/Wide Gate glossary terms or typed terrain
-      combinations are needed for player discoverability. Their existing
-      [terrain/scenery semantics](rules-semantics.md#terrain-and-scenery-structures)
-      do not make them persistent deployed Weapon/Equipment devices.
-    - [ ] Review unrepresented reverse-use contexts against exact source
-      occurrences. Direct profile/loadout/Unit-option uses and one-level Includes
-      are already typed; Unit options retain null Army context and Include
-      targets use only their resolved Army. Rerun the full-depth Include and raw
-      source-schema audits after snapshot changes, preserving source positions
-      and ownership. Do not infer uses from prose or catalog membership.
+    The [source/Include reconciliation](v1.0-source-coverage-audit.md#deployed-object-source-include-and-reverse-use-reconciliation-v1s-075076-2026-11-05)
+    found no further device or transitive delivery use on the pinned snapshot;
+    [terrain/Gate references](rules-semantics.md#terrain-and-scenery-structures)
+    and [three-width object acceptance](v1.0-source-coverage-audit.md#deployed-object-api-and-ordinary-browser-acceptance-v1s-078-2026-11-05)
+    are delivered. Remaining work is the final frozen-candidate/source-wide
+    validation below; repeat source/Include review if its inputs change.
     - [ ] Validate final API/browser navigation, shared carriers, variant and
       missing/not-applicable data against the release-matched publication.
       Retain conflicting Mine/Dazer/Armed Turret Silhouettes and the unresolved
