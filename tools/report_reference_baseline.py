@@ -1754,6 +1754,15 @@ def plan_explanation_review_batches(
 V1S082_PILOT_MANIFEST = PROJECT_ROOT / "config/validation/v1s082-review-pilot-v1.json"
 
 
+def _source_page_identity(source_id: str, page: Any) -> tuple[str, str] | None:
+    if type(page) is int and page > 0:
+        return source_id, f"page:{page}"
+    if (page is None and source_id.startswith("wiki-")
+            and re.search(r"-oldid-[0-9]+$", source_id)):
+        return source_id, "revision"
+    return None
+
+
 def build_explanation_review_pilot(
     report: dict[str, Any], *, manifest_path: Path = V1S082_PILOT_MANIFEST,
 ) -> dict[str, Any]:
@@ -1802,6 +1811,7 @@ def build_explanation_review_pilot(
     selected_rows: list[dict[str, Any]] = []
     all_locators: set[tuple[str, str, str]] = set()
     all_source_pages: set[tuple[str, str]] = set()
+    unresolved_source_page_locators: set[tuple[str, str, str]] = set()
     naive_locator_count = 0
     repeated_shared = 0
     for item in selected:
@@ -1832,7 +1842,13 @@ def build_explanation_review_pilot(
             })
             repeated_shared += len(sections[key]) > 1
             all_locators.add(key)
-            all_source_pages.add((key[0], key[1]))
+            page_identity = _source_page_identity(
+                citation["sourceId"], citation["page"],
+            )
+            if page_identity is None:
+                unresolved_source_page_locators.add(key)
+            else:
+                all_source_pages.add(page_identity)
             naive_locator_count += 1
         curated_bytes = json.dumps(
             curated[identifier], sort_keys=True, ensure_ascii=False,
@@ -1856,6 +1872,7 @@ def build_explanation_review_pilot(
         })
     if len(cohorts) < 6 or len(selected_rows) != manifest["selectedRecordCount"]:
         raise ReferenceBaselineError("Pilot selection does not cover enough semantic families")
+    source_page_identity_complete = not unresolved_source_page_locators
     source_ids = {key[0] for key in sections}
     probe_ids: set[str] = set()
     probe_rows: list[dict[str, Any]] = []
@@ -1873,7 +1890,7 @@ def build_explanation_review_pilot(
         probe_rows.append({**probe, "status": "pending-independent-source-scan"})
     return {
         "format": "InfinityDB V1S-082 review pilot work packet",
-        "formatVersion": 1,
+        "formatVersion": 2,
         "status": "planned-not-reviewed-no-source-or-browser-approvals",
         "inputFingerprints": {
             "frozenInventorySha256": report["frozenInventorySha256"],
@@ -1885,9 +1902,20 @@ def build_explanation_review_pilot(
             "semanticCohorts": len(cohorts),
             "selectedSourceCitationOccurrences": naive_locator_count,
             "uniqueSelectedSourceLocators": len(all_locators),
-            "uniqueSelectedSourcePages": len(all_source_pages),
+            "sourcePageIdentityComplete": source_page_identity_complete,
+            "knownUniqueSourcePageIdentities": len(all_source_pages),
+            "unresolvedSourcePageIdentityLocators": len(unresolved_source_page_locators),
+            "unresolvedSourcePageIdentitySources": sorted({
+                key[0] for key in unresolved_source_page_locators
+            }),
+            "uniqueSelectedSourcePages": (
+                len(all_source_pages) if source_page_identity_complete else None
+            ),
             "duplicateSelectedLocatorOccurrences": naive_locator_count - len(all_locators),
-            "sourcePageOpensPotentiallyReusable": naive_locator_count - len(all_source_pages),
+            "sourcePageOpensPotentiallyReusable": (
+                naive_locator_count - len(all_source_pages)
+                if source_page_identity_complete else None
+            ),
             "sharedWithOtherRecordsOccurrences": repeated_shared,
             "sourceFirstProbes": len(probe_rows),
             "sourceApprovals": 0,
@@ -1899,7 +1927,9 @@ def build_explanation_review_pilot(
         "caveat": (
             "Locator duplication is only a potential research shortcut, not proof "
             "that two records express the same semantic clause or that any source "
-            "fact or browser route has been accepted."
+            "fact or browser route has been accepted. Page-open reuse is estimated "
+            "only when every source-page identity is known; it is unknown while any "
+            "identity is unresolved and is never measured source-open or review-time evidence."
         ),
     }
 
@@ -2986,12 +3016,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                 newline="\n",
             )
             summary = pilot["summary"]
+            if summary["sourcePageIdentityComplete"]:
+                page_summary = (
+                    f"{summary['uniqueSelectedSourcePages']} source pages / "
+                    f"{summary['sourcePageOpensPotentiallyReusable']} potentially "
+                    "reusable page opens"
+                )
+            else:
+                page_summary = (
+                    f"{summary['knownUniqueSourcePageIdentities']} known source-page "
+                    f"identities / {summary['unresolvedSourcePageIdentityLocators']} "
+                    "unresolved page-identity locators; page-open reuse unknown"
+                )
             print(
                 f"Review pilot: {summary['selectedRecords']} records / "
                 f"{summary['semanticCohorts']} cohorts / "
                 f"{summary['selectedSourceCitationOccurrences']} citation occurrences / "
                 f"{summary['uniqueSelectedSourceLocators']} unique locators / "
-                f"{summary['uniqueSelectedSourcePages']} source pages / "
+                f"{page_summary} / "
                 f"{summary['sourceFirstProbes']} source-first probes; zero approvals"
             )
         if args.review_batches_output is not None:

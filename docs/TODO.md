@@ -200,12 +200,16 @@ source-to-browser gap review; final release acceptance remains open.
   scope; its source/API/browser execution remains under VR-0118.
   The [coverage optimization plan](v1.0-coverage-workflow-plan.md) introduces a
   read-only, source-family batch planner built on the existing identity/locator
-  inventory (currently 466 records / 828 source locators). Its output is triage
+  inventory (currently 466 records / 830 source locators). Its output is triage
   only; it does not retire any source or browser acceptance obligation.
   A fixed [35-record pilot](v1.0-coverage-workflow-plan.md#p1--tracked-disposition-and-source-evidence-contract)
   spans 10 cohorts and three source-first probes; its read-only work packet reports
-  129 citation occurrences, 125 exact locators and 97 distinct source pages.
-  These locator counts are not measured review time or actual source opens.
+  129 citation occurrences, 125 exact source/page/heading locators and 97
+  `(sourceId, page)` buckets. The 97 buckets are not distinct pages: the planner
+  finds 95 known source-page identities and 9 unresolved page-identity locators
+  under two snapshot-wide Wiki IDs, and suppresses the total-page and page-open
+  reuse figures while identities are incomplete. These locator counts are not
+  measured review time or actual source opens.
   The source-only pilot has now screened **35/35 distinct identities** at
   selected-clause scope across 39 record-cohort screen events, with **0/35
   whole-record or current-revision browser approvals**. The Trait cohort

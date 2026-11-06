@@ -22,6 +22,7 @@ from tools.report_reference_baseline import (
     _revision_oldid,
     _route_hint,
     _source_location,
+    _source_page_identity,
     _verify_army_archive_sources,
     _verify_published_characteristics_orders,
     _verify_published_peripherals_includes,
@@ -148,6 +149,17 @@ def test_explanation_review_planner_is_complete_deterministic_and_pending() -> N
         plan_explanation_review_batches(malformed)
 
 
+def test_source_page_identity_requires_addressable_locator() -> None:
+    assert _source_page_identity("n5-rules-v5.3-en", 8) == (
+        "n5-rules-v5.3-en", "page:8",
+    )
+    assert _source_page_identity("wiki-hacking-oldid-12345", None) == (
+        "wiki-hacking-oldid-12345", "revision",
+    )
+    assert _source_page_identity("wiki-en-20260926-200832", None) is None
+    assert _source_page_identity("n5-rules-v5.3-en", True) is None
+
+
 def test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved(
     tmp_path: Path,
 ) -> None:
@@ -159,11 +171,17 @@ def test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved(
     assert summary["semanticCohorts"] >= 6
     assert summary["sourceFirstProbes"] >= 1
     assert summary["sourceApprovals"] == summary["browserApprovals"] == 0
+    assert pilot["formatVersion"] == 2
     assert summary["uniqueSelectedSourceLocators"] <= summary["selectedSourceCitationOccurrences"]
-    assert summary["uniqueSelectedSourcePages"] <= summary["uniqueSelectedSourceLocators"]
-    assert summary["sourcePageOpensPotentiallyReusable"] == (
-        summary["selectedSourceCitationOccurrences"] - summary["uniqueSelectedSourcePages"]
-    )
+    assert summary["sourcePageIdentityComplete"] is False
+    assert summary["knownUniqueSourcePageIdentities"] == 95
+    assert summary["unresolvedSourcePageIdentityLocators"] == 9
+    assert summary["unresolvedSourcePageIdentitySources"] == [
+        "wiki-en-20260926-200832",
+        "wiki-es-20261009-211304",
+    ]
+    assert summary["uniqueSelectedSourcePages"] is None
+    assert summary["sourcePageOpensPotentiallyReusable"] is None
     assert all(
         row["sourceDisposition"] == "pending-semantic-acceptance"
         and row["normalBrowserDisposition"] == "pending-browser-acceptance"
