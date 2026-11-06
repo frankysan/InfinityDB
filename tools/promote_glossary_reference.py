@@ -22,6 +22,7 @@ from infinity_db.deployed_object_publication import load_deployed_object_publica
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.variant_usage import build_variant_usage_projection
 from infinity_db.variant_usage_reference import publication_from_candidate
+from tools.audit_deployed_object_non_catalog_queue import audit_non_catalog_candidates
 from tools.build_deployed_object_publication import build_publication, publication_bytes
 from tools.promote_aro_deployment_reference import (
     ARMY,
@@ -127,6 +128,12 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
         ):
             raise ValueError(f"Unreviewed glossary owner drift: {identity}")
 
+    provenance = audit_non_catalog_candidates(
+        root / CURATED,
+        root / "config/validation/deployed-object-non-catalog-reviews.json",
+    )
+    if provenance["unreviewed"]:
+        raise ValueError("Unreviewed deployed-object classification after glossary edit")
     baseline = {key: (root / key).read_bytes() for key in (RULES, OBJECTS, USAGE)}
     curated_digest = _sha(root / CURATED)
     with tempfile.TemporaryDirectory(prefix="glossary-v9-", dir=root / "local") as tmp:
@@ -143,6 +150,7 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
         for identity in sorted(old_ids - set(REQUIRED)):
             if staged.composed_record(identity) != existing.composed_record(identity):
                 raise ValueError(f"Unrelated composed rule changed: {identity}")
+        changed = []
         for record in selected:
             candidate = staged.composed_record(record["id"])
             if candidate is None or any(
@@ -150,8 +158,17 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
             ):
                 raise ValueError(f"Reviewed glossary did not publish: {record['id']}")
             baseline_record = existing.composed_record(record["id"])
-            if baseline_record is None or baseline_record["summary"] == candidate["summary"]:
-                raise ValueError(f"Expected unpublished glossary delta: {record['id']}")
+            if baseline_record is None:
+                raise ValueError(f"Missing previous glossary record: {record['id']}")
+            changed.append(baseline_record["summary"] != candidate["summary"])
+        if any(changed) and not all(changed):
+            raise ValueError("Partially published glossary changes")
+        already_published = not any(changed)
+        if already_published:
+            if promote:
+                raise ValueError("Glossary corrections are already published")
+            if _sha(first) != _sha(root / RULES):
+                raise ValueError("Published rules DB differs from deterministic candidate")
 
         candidate_objects = build_publication(
             root / ARMY, first, root / CURATED, root / DELIVERY, root / CANDIDATES
@@ -178,7 +195,8 @@ def verify_candidate(root: Path = ROOT, *, promote: bool = False) -> dict[str, A
             raise ValueError("Source or release inputs changed during staging")
         report: dict[str, Any] = {
             "scope": "v1s-082-glossary",
-            "changedRecords": sorted(REQUIRED),
+            "changedRecords": [] if already_published else sorted(REQUIRED),
+            "alreadyPublished": already_published,
             "unchangedRecordsVerified": len(old_ids - set(REQUIRED)),
             "candidateRulesSha256": _sha(first),
             "candidateObjectsSha256": _sha(object_file),

@@ -60,7 +60,7 @@
       "sourcePages": [
         173
       ],
-      "summaryEvidence": "Equipment with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element",
+      "summaryEvidence": "[[trait:deployable|Deployable]] Equipment is a game element with Attributes belonging to a player's Army List.",
       "factsEvidence": [],
       "caveat": "Generic Deployable Equipment terminology provides neither a concrete Equipment identity nor four-attribute values; review each source item separately."
     },
@@ -70,7 +70,7 @@
       "sourcePages": [
         173
       ],
-      "summaryEvidence": "A Weapon with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element",
+      "summaryEvidence": "A [[trait:deployable|Deployable]] Weapon is a game element with Attributes that may belong to a player's Army List",
       "factsEvidence": [],
       "caveat": "Generic Deployable Weapon terminology is not an object instance or source-specific delivery edge; source Weapon and mode must be verified separately."
     },
