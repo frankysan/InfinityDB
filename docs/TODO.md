@@ -218,8 +218,10 @@ bounded rule-citation/route check; final release acceptance remains open.
   Equipment definitions absent from the federated Glossary despite working
   source-card routes; VR-0127 passed the focused API and browser regressions.
   Label detail pages now expose the existing, explicitly vocabulary-scoped
-  source locators; their API and browser regressions await VR-0128.
-  Then finish the applicable maintained-reference reachability review.
+  source locators; VR-0128 passed the focused API and browser regressions.
+  Next review source visibility for embedded Glossary Attributes, Game terms
+  and Unit Profile help, then reconcile any remaining in-scope non-detail
+  references.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are

@@ -602,6 +602,31 @@ The `pytest -q -ra --infinitydb-skip-summary` selection covered:
 This closes VR-0127 for the Equipment Glossary change; V1S-082 and the
 independent hosted and final-candidate gates remain open.
 
+### V1S-082 Label vocabulary source visibility (VR-0128)
+
+The focused Windows run at `d87681c8b948b23a4b6fc4568ada6f0e1c82e03a`
+passed **76 tests with no skips**. The first run at
+`819ec5a4b2bb0e8571f32014db9e81ef7b34b495` stopped after two passes
+and a failing synthetic fixture: its Label-only collection still contained
+scenario components. The corrected fixture and the entire focused set passed
+on the later revision. The dedicated MCP Linux worker was unavailable in this
+session, so this is Windows evidence, not a Linux result.
+
+The 17 exact pytest selectors are preserved in the VR-0128 queue entry at
+the tested revision. The selected source/API, database and shared-renderer tests covered the pinned
+Wiki `Labels` member and revision, all 24 published Label details, v8/v9
+database compatibility, collection-scoped duplicate and unavailable sources,
+broken source references, and existing Label/Glossary behavior. Chrome covered
+normal keyboard navigation, source links, vocabulary-scope disclosure and
+missing-source feedback at 1440/390/320 px in light and dark themes, plus
+the existing Label browser regressions. The run used development `infinity.db`
+SHA-256 `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
+and `rules.db` SHA-256
+`5bc1ef3c70d1d14ad5f043bd1ad6fe159c608e86755d0ec0ac9a8b99f8b052f8`.
+The pinned Wiki archive and N5.3 English/Spanish and N5.2 English PDFs were
+present and their required source checks passed. This closes VR-0128, not
+V1S-082, hosted CI or the frozen-candidate release gates.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not
