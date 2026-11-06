@@ -71,6 +71,16 @@ registry revision 23. These are immediate Git-integrity checks, with no deferred
 regression obligation for this bounded recovery slice. Abandoned-task transfer,
 live cross-host operation and this revision's hosted matrix remain separate.
 
+A live Windows/Linux probe at `b6a1632f` used a newly created, isolated Linux
+development clone. Both hosts read the same version-2 registry at revision 25;
+Linux correctly refused an existing Windows-owned file scope. A non-overlapping
+Linux claim could not be published: the metadata push was rejected, with the
+underlying access/policy cause unverified. Both hosts confirmed unchanged remote
+revision and claims afterward. Temporary Linux local claims were explicitly
+released, source HEADs and existing checkouts were preserved, and no permissions
+were changed. This is partial operational evidence; bidirectional live claim/
+release acceptance remains blocked in [TODO](TODO.md#concurrent-agent-development-safety).
+
 ## Local invocation
 
 Use the project virtual-environment interpreter when available:
