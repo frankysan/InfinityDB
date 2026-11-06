@@ -211,7 +211,9 @@ source-to-browser gap review; final release acceptance remains open.
   citation-occurrence page-reuse candidates; it suppresses page totals and the
   reuse estimate if any identity is missing or ambiguous. Neither locator
   count nor candidate reuse is measured review time, actual source opens or
-  saved work.
+  saved work. Including the three source-first probes yields a 26/132 (19.7%)
+  citation-occurrence ceiling under one-open-per-citation assumptions, still
+  not a measured effort reduction.
   The source-only pilot has now screened **35/35 distinct identities** at
   selected-clause scope across 39 record-cohort screen events, with **0/35
   whole-record or current-revision browser approvals**. The Trait cohort
