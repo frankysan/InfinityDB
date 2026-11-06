@@ -3933,6 +3933,30 @@ certify the complete rules corpus, select random outcomes or persist game state.
 
 ## 1.0 source evidence baseline
 
+### Versioned source-clause dispositions (V1S-082 P1)
+
+The read-only validator checks the tracked, initially empty
+`config/validation/source-coverage-dispositions-v1.json` contract against
+current Core/Hacking curated records and declared source fingerprints:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.source_coverage_dispositions
+```
+
+Each review has one stable clause key, exact source identity/page/member and
+SHA-256, explicit record owners (or `source-first` origin), a narrowly described
+claim, dependencies, and **independent** semantic/browser statuses. Accepted
+scoped decisions require reviewer/date/evidence and matching full-record
+fingerprints; browser acceptance additionally requires a recorded Git SHA,
+matched database hashes, test selectors and unchanged source/test contract
+files. Missing/stale keys, duplicate clauses, bogus statuses, unaddressable
+sources and dependency cycles fail closed. A clean run validates **evidence
+shape and current pins only**, not reviewer correctness, source-wide omission
+detection, test execution or whole-record acceptance. Keep the manifest
+empty until individually supported reviews are signed off; never import
+historic pilot/benchmark triage as approval. The phased validation queue
+remains authoritative for missing or deferred regressions.
+
 ### Frozen explanation-inventory reconciliation (V1-A08)
 
 The original October 9 [367-record explanation inventory](rules-explanation-audit-1.0-inventory.md)

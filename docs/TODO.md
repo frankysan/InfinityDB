@@ -251,8 +251,10 @@ source-to-browser gap review; final release acceptance remains open.
   Next: execute VR-0122 against the committed matched artifacts; add direct
   normal-browser assertions for the MOV glossary anchor and TinBot source-169
   Firewall variant usage; and reconcile **SRC-002**, **SRC-006**, **SRC-020**,
-  **SRC-021** and **SRC-034** without inventing rules. Then design fingerprinted
-  signed-off dispositions and an equal-scope benchmark of active repeated
+  **SRC-021** and **SRC-034** without inventing rules. The P1 tracked
+  disposition schema and read-only fingerprint validator are implemented with
+  zero signed-off entries; populate them only from clause-scoped reviewed
+  source evidence, then run an equal-scope benchmark of active repeated
   review effort with independent quality controls.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
