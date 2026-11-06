@@ -5736,6 +5736,33 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         }
         for token in peripheral["description_tokens"]
     )
+    reviewed = {
+        record["id"]: record
+        for _, document in load_curated_directory(root / "data/curated/rules")
+        for record in document["records"]
+        if record["id"] in {
+            "term:deployable-equipment", "term:deployable-weapon",
+            "term:target", "term:hostile", "term:neutral",
+        }
+    }
+    assert len(reviewed) == 5
+    for identity, source in reviewed.items():
+        item = next(row for row in items if row["id"] == identity)
+        assert item["domain"] == "Game term"
+        assert item["embedded"] is True
+        assert item["href"] == "/glossary#" + identity.replace(":", "-")
+        assert item["description"] == source["summary"]
+        if identity in {"term:deployable-equipment", "term:deployable-weapon"}:
+            assert any(
+                token.get("type") == "reference"
+                and token.get("label") == "Deployable"
+                and token.get("target") == "trait:deployable"
+                for token in item["description_tokens"]
+            )
+        if identity == "term:deployable-weapon":
+            assert "may belong" in item["description"]
+            assert "must belong" not in item["description"]
+
     unit_profile = next(item for item in items if item["id"] == "term:unit-profile")
     assert unit_profile["domain"] == "Game term"
     assert unit_profile["href"] == "/glossary#term-unit-profile"

@@ -356,6 +356,46 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
     ] == [("n5-core-v5.3-pdf", 173)]
 
 
+@pytest.mark.parametrize(
+    ("identity", "required"),
+    (
+        ("term:deployable-equipment", ("Attributes belonging", "receive Attacks")),
+        ("term:deployable-weapon", ("may belong", "perform and receive Attacks")),
+        ("term:target", ("capable of being chosen", "Skills or Equipment")),
+        ("term:hostile", ("own Attributes", "Enemy by all players")),
+        ("term:neutral", ("has Attributes", "no player's Army List")),
+    ),
+)
+def test_v1s082_p173_glossary_matches_published_release(
+    identity: str, required: tuple[str, str],
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data/curated/rules")
+    source = next(
+        record for _, document in documents for record in document["records"]
+        if record["id"] == identity
+    )
+    published = RulesDatabase(root / "data/generated/rules.db").composed_record(identity)
+    assert published is not None
+    assert published["summary"] == source["summary"]
+    assert published["facts"] == source["facts"]
+    assert source["review"] == {"status": "reviewed", "reviewedOn": "2026-11-06"}
+    assert len(source["citations"]) == 1
+    assert source["citations"][0]["sourceId"] == "n5-core-v5.3-pdf"
+    assert source["citations"][0]["page"] == 173
+    assert [
+        (citation["source_id"], citation["page"], citation["section"])
+        for citation in published["citations"]
+    ] == [(
+        "n5-core-v5.3-pdf", 173, source["citations"][0]["section"],
+    )]
+    assert all(fragment in published["summary"] for fragment in required)
+    if identity == "term:deployable-weapon":
+        assert "must belong" not in published["summary"]
+    if identity == "term:neutral":
+        assert "treated as an Enemy" not in published["summary"]
+
+
 def test_null_state_glossary_lists_the_five_n53_source_states(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules.db"

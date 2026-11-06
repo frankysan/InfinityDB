@@ -122,6 +122,13 @@ IDs here and link the owning task instead of duplicating its description.
 
 No pending design obligations.
 
+VD-0066/0067/0068 were designed and statically reviewed on 2026-11-06,
+without executing tests. The release-paired curated/citation and Glossary
+API selectors are in `tests/test_application_rule_references.py` and
+`tests/test_web.py`; the 15-case 1440/390/320 px normal-browser selector
+is in `tests/test_verify_scenario_faq_browser.py`. All are awaiting
+execution under VR-0113; this is not a test pass.
+
 VD-0062 was retired after static review without execution; its curated-export,
 Glossary API, and responsive browser selectors were executed and accepted under
 VR-0110, as recorded in the
@@ -144,7 +151,15 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-No pending execution obligations.
+- [ ] **VR-0113** (2026-11-06; ready-to-run): Five
+  N5.3 p. 173 glossary-summary corrections and release-matched artifacts.
+  Work: V1S-082. Design: VD-0066/0067/0068 complete without execution;
+  revision: commit the matched implementation before Linux dispatch.
+  Immediate: guarded deterministic v9 rebuild, matched deployed-object
+  and variant-usage publication checks, unchanged 494 other rules and typed
+  Restrictions; Windows Ruff/Pyright pass. Deferred: new curated-export,
+  Glossary API and ordinary Chromium selectors at 1440/390/320, 808/808
+  assets on exact committed Linux SHA; no unexamined skips.
 
 The most recent pinned Linux full-assets acceptance, including the 2026-11-04
 queue drain, is recorded in
@@ -169,8 +184,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0066`; active obligations are listed above.
-- Execution: `VR-0113`; active obligations are listed above.
+- Design: `VD-0069`; active obligations are listed above.
+- Execution: `VR-0114`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

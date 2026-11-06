@@ -1888,7 +1888,7 @@
             "id": "term:deployable-equipment",
             "kind": "term",
             "name": "Deployable Equipment",
-            "summary": "Equipment with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element with its own Attributes and can be targeted.",
+            "summary": "[[trait:deployable|Deployable]] Equipment is a game element with Attributes belonging to a player's Army List. It can use a Special Skill or Trait, be designated as a target, and receive Attacks. Equipment with the [[trait:deployable|Deployable]] Trait can be placed independently on the battlefield and targeted.",
             "composition": {
                 "role": "definition"
             },
@@ -1910,14 +1910,14 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-29"
+                "reviewedOn": "2026-11-06"
             }
         },
         {
             "id": "term:deployable-weapon",
             "kind": "term",
             "name": "Deployable Weapon",
-            "summary": "A Weapon with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element with its own Attributes and can be targeted.",
+            "summary": "A [[trait:deployable|Deployable]] Weapon is a game element with Attributes that may belong to a player's Army List and can perform and receive Attacks. A Weapon with the [[trait:deployable|Deployable]] Trait can be placed independently on the battlefield and targeted.",
             "composition": {
                 "role": "definition"
             },
@@ -1939,7 +1939,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-29"
+                "reviewedOn": "2026-11-06"
             }
         },
         {
@@ -2004,7 +2004,7 @@
             "id": "term:target",
             "kind": "term",
             "name": "Target",
-            "summary": "A Target is the game element designated by a Skill or Attack as the subject of its effects.",
+            "summary": "A Target is a game element capable of being chosen as the target of Attacks or effects from Skills or Equipment. Actual target eligibility depends on the declaring rule; this definition alone does not establish legality.",
             "composition": {
                 "role": "definition"
             },
@@ -2026,7 +2026,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-29"
+                "reviewedOn": "2026-11-06"
             }
         },
         {
@@ -2244,7 +2244,7 @@
             "id": "term:hostile",
             "kind": "term",
             "name": "Hostile",
-            "summary": "A Hostile game element belongs to neither player’s Army List but is treated as an Enemy by both players and can declare or receive Attacks.",
+            "summary": "A Hostile game element has its own Attributes and belongs to no player's Army List. It is treated as an Enemy by all players and can declare and receive Attacks.",
             "composition": {
                 "role": "definition"
             },
@@ -2266,14 +2266,14 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-29"
+                "reviewedOn": "2026-11-06"
             }
         },
         {
             "id": "term:neutral",
             "kind": "term",
             "name": "Neutral",
-            "summary": "A Neutral game element belongs to neither player’s Army List and does not gain the additional Hostile rule that makes it an Enemy to both players.",
+            "summary": "A Neutral game element has Attributes and belongs to no player's Army List. Unlike a Hostile, its classification does not itself make it an Enemy of every player.",
             "composition": {
                 "role": "definition"
             },
@@ -2295,7 +2295,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-29"
+                "reviewedOn": "2026-11-06"
             }
         },
         {

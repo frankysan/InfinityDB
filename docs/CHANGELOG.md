@@ -73,7 +73,9 @@ are not retroactively relabeled.
 - The Unit Profile Glossary entry explains the Troopers in each Unit, their
   profile data and options. The Trooper entry covers Army Lists, Attributes,
   Orders and Attacks; the Peripheral entry covers its Order and Army List
-  limits, Controller activation and Cost accounting.
+  limits, Controller activation and Cost accounting. Additional glossary
+  definitions clarify Deployable Equipment and Weapons, valid Targets, and
+  the distinction between Hostile and Neutral game elements.
 - Rules references explain source disagreements alongside the supported interpretation,
   including disputed Weapon profiles, Silhouettes, Dodge and Fireteam examples.
 - **What's changed** now shows upcoming-release notes when there are changes to show.

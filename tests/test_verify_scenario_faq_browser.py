@@ -711,6 +711,84 @@ def test_unit_profile_term_normal_browser(
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
+    ("slug", "name", "required", "deployable_link"),
+    (
+        ("deployable-equipment", "Deployable Equipment", (
+            "Attributes belonging", "receive Attacks",
+        ), True),
+        ("deployable-weapon", "Deployable Weapon", (
+            "may belong", "perform and receive Attacks",
+        ), True),
+        ("target", "Target", (
+            "capable of being chosen", "Skills or Equipment",
+        ), False),
+        ("hostile", "Hostile", (
+            "own Attributes", "Enemy by all players",
+        ), False),
+        ("neutral", "Neutral", (
+            "has Attributes", "no player's Army List",
+        ), False),
+    ),
+)
+def test_v1s082_p173_glossary_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    slug: str, name: str, required: tuple[str, str], deployable_link: bool,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    api_responses: list[tuple[str, int]] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "response",
+        lambda response: api_responses.append((response.url, response.status))
+        if "/api/glossary" in response.url else None,
+    )
+    try:
+        response = page.goto(
+            f"{ORIGIN}/glossary?q={name.replace(' ', '%20')}#term-{slug}",
+            wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        entry = page.locator(f"#term-{slug}")
+        entry.wait_for(state="visible", timeout=15000)
+        snapshot = entry.evaluate(
+            """node => ({
+                heading: node.querySelector("h3")?.textContent?.trim(),
+                text: node.querySelector(".glossary-description")?.innerText || "",
+                domain: node.querySelector(".glossary-domain")?.textContent?.trim(),
+                links: Array.from(node.querySelectorAll(".glossary-description a"))
+                    .map(a => [a.textContent?.trim(), a.getAttribute("href")]),
+                query: document.querySelector("#glossary-search")?.value,
+                overflow: document.documentElement.scrollWidth > innerWidth + 1,
+            })"""
+        )
+        assert snapshot["heading"] == name
+        assert snapshot["domain"] == "Game term"
+        assert snapshot["query"] == name
+        assert all(fragment in snapshot["text"] for fragment in required)
+        if deployable_link:
+            assert ["Deployable", "/traits/deployable"] in snapshot["links"]
+            assert any(
+                link.get_attribute("href") == "/traits/deployable"
+                for link in entry.locator(".glossary-description a").all()
+            )
+        if slug == "deployable-weapon":
+            assert "must belong" not in snapshot["text"]
+        if slug == "neutral":
+            assert "treated as an Enemy" not in snapshot["text"]
+        assert not snapshot["overflow"], width
+        assert any(
+            url.endswith("/api/glossary") and status == 200
+            for url, status in api_responses
+        ), api_responses
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
     ("route", "record_id", "page_numbers", "clauses", "related"),
     (
         (
