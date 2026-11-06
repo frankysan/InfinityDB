@@ -222,6 +222,7 @@ class LabelCatalog:
                     raise ValueError(
                         f"Current Label {label_id!r} has conflicting definitions"
                     )
+                existing["vocabulary_sources"].extend(label["vocabulary_sources"])
                 continue
             labels[label_id] = label
         self._labels_cache = sorted(
@@ -254,5 +255,6 @@ class LabelCatalog:
                 "name": label["name"],
                 "description": label["description"],
                 "collection": deepcopy(label["collection"]),
+                "vocabulary_sources": deepcopy(label["vocabulary_sources"]),
             }
         return None

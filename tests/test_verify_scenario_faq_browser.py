@@ -1070,6 +1070,88 @@ def test_v1s082_labels_normal_browser(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+@pytest.mark.parametrize("slug", ("hackable", "faqs"))
+def test_label_vocabulary_sources_in_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    theme: str, slug: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}')")
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/labels", wait_until="domcontentloaded")
+        link = page.locator(f'#catalog-list a[href="/labels/{slug}"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        assert link.evaluate("node => document.activeElement === node")
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/labels/{slug}", timeout=30000)
+        citations = page.locator("#item-content .rules-source-citations")
+        citations.wait_for(state="visible", timeout=30000)
+        assert page.locator("html").get_attribute("data-theme") == theme
+        text = citations.inner_text()
+        assert "Label vocabulary sources:" in text
+        assert "Infinity Wiki snapshot (English) v20260926-200832, Labels" in text
+        assert "archived member Labels; link opens source site" in text
+        assert "N5 Core Rules v5.3, p. 174" in text
+        assert page.get_by_text(
+            "These sources describe the Label vocabulary as a whole; "
+            "a source may not cover this specific Label.",
+            exact=True,
+        ).is_visible()
+        wiki = citations.locator('a[href="https://infinitythewiki.com/"]')
+        pdf = citations.locator(
+            'a[href="https://experience.corvusbelli.com/en/infinity/resources"]'
+        )
+        assert wiki.count() == pdf.count() == 1
+        for source in (wiki, pdf):
+            assert source.get_attribute("target") == "_blank"
+            assert source.get_attribute("rel") == "noopener noreferrer"
+            source.focus()
+            assert source.evaluate("node => document.activeElement === node")
+        assert not page.evaluate(
+            "() => document.documentElement.scrollWidth > innerWidth + 1"
+        ), (slug, width, theme)
+        assert not errors, (slug, width, theme, errors)
+    finally:
+        page.close()
+
+
+def test_label_vocabulary_sources_unavailable_in_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+) -> None:
+    page = chrome.new_page(viewport={"width": 320, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+
+    def omit_sources(route: Any) -> None:
+        status, _, body = wsgi_response(release_scenario_app, route.request.url)
+        assert status == 200
+        payload = json.loads(body)
+        payload["vocabulary_sources"] = []
+        route.fulfill(status=status, content_type="application/json", body=json.dumps(payload))
+
+    page.route("**/api/labels/hackable*", omit_sources)
+    try:
+        page.goto(f"{ORIGIN}/labels/hackable", wait_until="domcontentloaded")
+        citations = page.locator("#item-content .rules-source-citations")
+        citations.wait_for(state="visible", timeout=30000)
+        assert citations.inner_text() == "Label vocabulary sources: Unavailable."
+        assert citations.locator("a").count() == 0
+        assert page.locator("#item-content .detail-copy").first.is_visible()
+        assert not page.evaluate(
+            "() => document.documentElement.scrollWidth > innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize("slug,clauses", (
     ("deployable", ("chosen as a target", "without requiring another Wound")),
     ("disposable-x", ("number of available uses", "When all uses are spent",

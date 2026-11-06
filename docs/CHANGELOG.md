@@ -19,7 +19,8 @@ are not retroactively relabeled.
   the SWC definition preserves its support-weapon context.
 - Label definitions now explain deployment limits, attack and hacking eligibility,
   close-combat modifiers and fixed results, with Assignable's English/Spanish
-  timing difference shown explicitly.
+  timing difference shown explicitly. Label detail pages also show scoped
+  vocabulary source locators.
 - Trait definitions clarify targetability, spent Disposable uses and Unloaded,
   attribute-specific effects and Silent's stacking with other Dodge modifiers.
   The unresolved Silent/Immunity question remains visible.
@@ -100,6 +101,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Web backend + Web frontend:** Show Label vocabulary source locators on
+  detail pages, distinguishing vocabulary-wide sources from coverage of an
+  individual Label.
 - **Data processing + Web backend + Web frontend:** Complete bilingual N5.3
   Hackable Unit Profile help with default Troop Types, the Hacker exception,
   eligible allied/enemy targeting and a typed Hacker link, while retaining

@@ -1478,6 +1478,30 @@ class RulesDatabase:
                 "FROM labels AS l JOIN collections AS c ON c.id = l.collection_id "
                 "WHERE c.status = 'current' ORDER BY l.collection_id, l.id"
             ).fetchall()
+            sources_by_collection: dict[str, list[dict[str, Any]]] = {}
+            source_rows = connection.execute(
+                "SELECT v.collection_id, c.title AS collection_title, "
+                "v.source_id, s.title AS source_title, s.version AS source_version, "
+                "s.url AS source_url, v.page, v.member, v.heading "
+                "FROM vocabulary_sources AS v "
+                "JOIN collections AS c ON c.id = v.collection_id "
+                "LEFT JOIN sources AS s "
+                "ON s.collection_id = v.collection_id AND s.id = v.source_id "
+                "WHERE c.status = 'current' AND v.vocabulary = 'labels' "
+                "AND EXISTS (SELECT 1 FROM labels AS l WHERE l.collection_id = v.collection_id) "
+                "ORDER BY v.collection_id, v.position"
+            ).fetchall()
+            for source_row in source_rows:
+                source = dict(source_row)
+                collection_id = source.pop("collection_id")
+                collection_title = source.pop("collection_title")
+                if source["source_title"] is None:
+                    raise ValueError(
+                        f"Unknown Label vocabulary source {source['source_id']!r} "
+                        f"in collection {collection_id!r}"
+                    )
+                source["collection"] = {"id": collection_id, "title": collection_title}
+                sources_by_collection.setdefault(collection_id, []).append(source)
             return [
                 {
                     "id": row["id"],
@@ -1487,6 +1511,9 @@ class RulesDatabase:
                         "id": row["collection_id"],
                         "title": row["collection_title"],
                     },
+                    "vocabulary_sources": deepcopy(
+                        sources_by_collection.get(row["collection_id"], [])
+                    ),
                 }
                 for row in rows
             ]

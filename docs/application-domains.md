@@ -306,7 +306,9 @@ model; incomplete work belongs in `docs/TODO.md`.
 Labels are a first-class rules/reference domain backed directly by the canonical current rules
 Label vocabulary already used by Skills, States, Hacking Programs, and other references. The
 browser exposes those existing identities through catalog/detail/search surfaces rather than copying
-Label definitions into generic rule records.
+Label definitions into generic rule records. Detail pages show the current collections'
+vocabulary-level source locators, explaining that an individual source may not cover every Label;
+the Wiki-only FAQs category is not presented as a printed gameplay Label.
 
 Typed Label identity is important because surface terms can legitimately overlap other concept kinds
 (for example a term can exist as both a Label and a Trait/Characteristic). Domain/kind information

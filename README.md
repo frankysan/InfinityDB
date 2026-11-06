@@ -83,6 +83,7 @@ its application metrics.
   canonical rules and reviewed, source-cited Weapon examples instead of redefining the effects.
 - Label definitions include deployment, targeting, modifier and fixed-result
   qualifications, with Assignable's English/Spanish timing difference disclosed.
+  Detail pages show the vocabulary's source locators and their scope.
 - Trait help explains Disposable exhaustion, Non-Reloadable cancellation,
   attribute-specific target effects and Silent's conditional Dodge modifiers.
 - Links to **Orders and AROs** from the home page and navigation, with searchable

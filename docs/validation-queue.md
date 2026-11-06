@@ -143,6 +143,40 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
+- [ ] VR-0128 (2026-11-06; ready-to-run): Expose collection-level
+  Label vocabulary sources in API and ordinary browser detail pages.
+  Work: V1S-082; revision: commit containing this entry and the designed tests;
+  risk: medium. No curated input or generated database changes. Development
+  `infinity.db` SHA-256 `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`;
+  `rules.db` SHA-256 `5bc1ef3c70d1d14ad5f043bd1ad6fe159c608e86755d0ec0ac9a8b99f8b052f8`.
+  Immediate: targeted Ruff and Pyright, JavaScript syntax, the docs stage
+  and Git diff whitespace checks passed on the implementation worktree.
+  Design: VD-0096/0097 statically reviewed and retired without executing tests;
+  targeted Ruff and Pyright passed for both test modules.
+  Deferred: `tests/test_application_rule_references.py` selectors
+  `test_label_vocabulary_sources_reach_published_details`,
+  `test_label_vocabulary_archived_wiki_member_covers_published_headings`,
+  `test_label_vocabulary_sources_keep_collection_scope_and_missing_data`,
+  `test_all_published_labels_preserve_curated_vocabulary_and_public_routes`,
+  `test_ammunition_and_label_catalogs_reuse_current_rules_data`,
+  `test_v1s082_label_review_pinned_sources`,
+  `test_v1s082_label_vocabulary_primary_citation_and_export` and
+  `test_v1s082_label_definition_api_qualifications`;
+  `tests/test_web.py::test_reference_catalog_pages_and_rules_backed_apis_are_served`,
+  `tests/test_web.py::test_glossary_projects_canonical_rules_and_embedded_attributes`,
+  `tests/test_web.py::test_detail_frontends_share_curated_rules_reference_renderer`,
+  `tests/test_rules_database.py::test_hacking_programs_reuse_canonical_current_labels`,
+  `tests/test_rules_database.py::test_negative_feedback_has_owner_scoped_effect_and_program_lifetimes`,
+  `tests/test_database.py::test_published_weapon_properties_have_navigable_reference_destinations`;
+  and
+  `tests/test_verify_scenario_faq_browser.py` selectors
+  `test_label_vocabulary_sources_in_normal_browser`,
+  `test_label_vocabulary_sources_unavailable_in_normal_browser` and
+  `test_v1s082_labels_normal_browser`.
+  The Wiki archive, English/Spanish PDF pins and Chrome are required for their
+  applicable selectors. Preferred host: `linux-dev`; use documented Windows
+  fallback if unavailable. Outcome: awaiting execution on the pinned revision.
+
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. The
@@ -153,8 +187,8 @@ separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0096`; active obligations are listed above.
-- Execution: `VR-0128`; active obligations are listed above.
+- Design: `VD-0098`; active obligations are listed above.
+- Execution: `VR-0129`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

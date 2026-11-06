@@ -3043,8 +3043,13 @@ A semantic record has a stable typed ID such as `skill:move`, `state:targeted`, 
 The current Label vocabulary retains the original Wiki citation and the reviewed
 English N5.3 p. 174 citation in `vocabulary_sources`. Label descriptions are
 stored once in `labels`; Label API/detail, Glossary and contextual help reuse
-those definitions rather than creating `label:*` rule records. The 23 printed
-gameplay Labels are distinct from the Wiki-only FAQs category. The
+those definitions rather than creating `label:*` rule records. Label detail
+responses expose the contributing current collections' ordered
+`vocabulary_sources`, including source identity, locator and collection. They
+are vocabulary-level references, not an assertion that each source covers
+each Label; a definition with no available vocabulary source exposes an empty
+list. The 23 printed gameplay Labels are distinct from the Wiki-only FAQs
+category. The
 [reviewed conditions](rules-semantics.md#rs-br-base-003--label-definitions-retain-their-conditions-and-exceptions)
 include the visible Assignable bilingual timing caveat; no eligibility or effects
 calculation follows from this reference vocabulary.

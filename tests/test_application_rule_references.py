@@ -4,8 +4,10 @@ import hashlib
 import json
 import re
 import sqlite3
+import zipfile
 from collections.abc import Callable, Iterable
 from contextlib import closing
+from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from wsgiref.util import setup_testing_defaults
@@ -36,6 +38,7 @@ from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.web import create_app
+from tools.audit_1_0_reference_inputs import _WikiHeadings
 from tools.verify_ammunition_browser import WIDTHS, source_names, verify
 from tools.verify_general_rules_browser import source_rules
 from tools.verify_labels_browser import source_names as label_source_names
@@ -892,6 +895,168 @@ def test_all_published_labels_preserve_curated_vocabulary_and_public_routes() ->
     )
     assert "definitionSection(item)" in script
     assert "content.hidden = false;" in script
+
+
+def test_label_vocabulary_sources_reach_published_details() -> None:
+    root = Path(__file__).parents[1]
+    document = next(
+        doc for _, doc in load_curated_directory(root / "data/curated")
+        if doc["collection"]["id"] == "n5-core-v5.3"
+    )
+    sources = {source["id"]: source for source in document["sources"]}
+    expected = []
+    for reference in document["vocabularySources"]["labels"]:
+        source = sources[reference["sourceId"]]
+        expected.append({
+            "source_id": source["id"],
+            "source_title": source["title"],
+            "source_version": source["version"],
+            "source_url": source["url"],
+            "page": reference.get("page"),
+            "member": reference.get("member"),
+            "heading": reference["heading"],
+            "collection": {
+                "id": document["collection"]["id"],
+                "title": document["collection"]["title"],
+            },
+        })
+    assert [source["source_id"] for source in expected] == [
+        "wiki-en-20260926-200832", "n5-core-v5.3-pdf",
+    ]
+    assert expected[0]["member"] == "Labels"
+    assert expected[1]["page"] == 174
+
+    rules_path = root / "data/generated/rules.db"
+    with sqlite3.connect(rules_path) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone() == (9,)
+    rules = RulesDatabase(rules_path)
+    labels = rules.current_labels()
+    assert len(labels) == len(document["labels"]) == 24
+    assert all(label["vocabulary_sources"] == expected for label in labels)
+
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+    for label in labels:
+        status, body = _published_get(app, f"/api/labels/{label['id']}")
+        assert status == "200 OK", label["id"]
+        detail = json.loads(body)
+        assert detail["vocabulary_sources"] == expected, label["id"]
+        assert "citations" not in detail
+    faqs = next(label for label in labels if label["id"] == "faqs")
+    assert faqs["description"] == "A label category for FAQ-related rule references."
+
+
+def test_label_vocabulary_archived_wiki_member_covers_published_headings() -> None:
+    root = Path(__file__).parents[1]
+    wiki = root / "data/wiki/WIKI-en 20260926-200832.zip"
+    if not wiki.is_file():
+        pytest.skip("Pinned Label Wiki archive unavailable")
+    assert hashlib.sha256(wiki.read_bytes()).hexdigest() == (
+        "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"
+    )
+    with zipfile.ZipFile(wiki) as archive:
+        member = archive.read("Labels")
+    assert hashlib.sha256(member).hexdigest() == (
+        "3b731a8f3ac150c66b79c4e5f0f57220fe10f257a2b18e7651ef68c2a3840bb9"
+    )
+    html = member.decode("utf-8")
+    assert re.search(r'"wgRevisionId"\s*:\s*4067\b', html)
+    headings = _WikiHeadings()
+    headings.feed(html)
+    document = next(
+        doc for _, doc in load_curated_directory(root / "data/curated")
+        if doc["collection"]["id"] == "n5-core-v5.3"
+    )
+    assert {label["name"].casefold() for label in document["labels"]} <= headings.headings
+
+
+def test_label_vocabulary_sources_keep_collection_scope_and_missing_data(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data/curated")
+    core_path, core = next(
+        item for item in documents if item[1]["collection"]["id"] == "n5-core-v5.3"
+    )
+    secondary = deepcopy(core)
+    secondary.pop("scenarioCollection", None)
+    secondary["collection"] = {
+        **secondary["collection"], "id": "test-label-secondary",
+        "title": "Secondary Label collection",
+    }
+    secondary["records"] = []
+    secondary["skillTypes"] = []
+    secondary["labels"] = [
+        deepcopy(next(label for label in core["labels"] if label["id"] == "hackable"))
+    ]
+    secondary["sources"] = [
+        deepcopy(next(source for source in core["sources"] if source["id"] == "n5-core-v5.3-pdf"))
+    ]
+    secondary["vocabularySources"] = {
+        "skillTypes": [],
+        "labels": [{"sourceId": "n5-core-v5.3-pdf", "page": 42, "heading": "Test"}],
+    }
+    unsourced = deepcopy(secondary)
+    unsourced["collection"] = {
+        **unsourced["collection"], "id": "test-label-unsourced",
+        "title": "Unsourced Label collection",
+    }
+    unsourced["labels"] = [
+        {"id": "unsourced-label", "name": "Unsourced Label", "description": "Example."}
+    ]
+    unsourced["sources"] = []
+    unsourced["vocabularySources"]["labels"] = []
+    historical = deepcopy(secondary)
+    historical["collection"] = {
+        **historical["collection"], "id": "test-label-historical",
+        "title": "Historical Label collection", "status": "superseded",
+    }
+    historical["vocabularySources"]["labels"][0]["page"] = 99
+    rules_path = tmp_path / "rules-v8.db"
+    export_rules_database(
+        [
+            *documents,
+            (core_path.with_name("test-label-secondary.json"), secondary),
+            (core_path.with_name("test-label-unsourced.json"), unsourced),
+            (core_path.with_name("test-label-historical.json"), historical),
+        ],
+        rules_path,
+        finalize=False,
+    )
+    rules = RulesDatabase(rules_path)
+    rules.validate()
+    with sqlite3.connect(rules_path) as connection:
+        assert connection.execute("PRAGMA user_version").fetchone() == (8,)
+
+    catalog = LabelCatalog(rules)
+    detail = catalog.get_item("hackable")
+    assert detail is not None
+    sources = detail["vocabulary_sources"]
+    assert [
+        (source["collection"]["id"], source["source_id"], source["page"])
+        for source in sources
+    ] == [
+        ("n5-core-v5.3", "wiki-en-20260926-200832", None),
+        ("n5-core-v5.3", "n5-core-v5.3-pdf", 174),
+        ("test-label-secondary", "n5-core-v5.3-pdf", 42),
+    ]
+    assert sources[-1]["collection"]["title"] == "Secondary Label collection"
+    other = catalog.get_item("attack")
+    assert other is not None and len(other["vocabulary_sources"]) == 2
+    unavailable = catalog.get_item("unsourced-label")
+    assert unavailable is not None and unavailable["vocabulary_sources"] == []
+    sources[0]["source_title"] = "Client mutation"
+    fresh = catalog.get_item("hackable")
+    assert fresh is not None
+    assert fresh["vocabulary_sources"][0]["source_title"] != "Client mutation"
+
+    with sqlite3.connect(rules_path) as connection:
+        connection.execute("PRAGMA foreign_keys = OFF")
+        connection.execute(
+            "DELETE FROM sources WHERE collection_id = ? AND id = ?",
+            ("test-label-secondary", "n5-core-v5.3-pdf"),
+        )
+    with pytest.raises(ValueError, match="Unknown Label vocabulary source"):
+        RulesDatabase(rules_path).current_labels()
 
 
 @pytest.mark.parametrize(
