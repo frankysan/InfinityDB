@@ -7695,10 +7695,10 @@ counts/Attributes, lost T2 components or reversed Wound
 assignments. `tests/test_verify_immunity_plasma_browser.py`
 covers the tenth Immunity card at 1440/390/320 px,
 including conditional wording, semantic links and no
-horizontal overflow. `tools/stage_immunity_ap_t2_cc.py`
-stages and promotes synchronized `rules.db`/deployed-object
-publication with recovery backups, keeping all 17 reviewed
-deployed objects unchanged and Army Weapon profiles intact.
+horizontal overflow. The completed one-off promotion synchronized `rules.db`
+and deployed-object publication with recovery backups, keeping all 17 reviewed
+deployed objects unchanged and Army Weapon profiles intact. The migration
+script is retired; Git history retains it.
 
 **Silenced Pistol / partial Immunity (AP), 2026-10-30:**
 `tests/test_immunity_ap_silenced_pistol.py` pins English N5.3
@@ -7711,9 +7711,9 @@ reject changed Weapon identity, Comms scope, source components,
 roll counts, BTS attributes and retained Shock. Public
 Immunity API and Chromium at 1440/390/320 px verify
 the ninth reviewed case without altering Weapon profile data.
-The synchronized rules DB/deployed-object publication uses
-`tools/stage_immunity_ap_silenced_pistol.py`, retaining all
-17 reviewed objects with recovery backups.
+The completed one-off rules DB/deployed-object publication retained all
+17 reviewed objects with recovery backups. The migration script is retired;
+Git history retains it.
 
 **Standalone E/Mitter / Immunity (BTS), 2026-10-30:**
 `tests/test_immunity_bts_emitter.py` pins N5.3 pp. 64, 95–96
@@ -7725,10 +7725,9 @@ Weapon API profile. The curated validator rejects unsupported
 weapon IDs, source Ammunition, Comms scope, altered roll counts,
 suppressed Non-Lethal and mislabeled evidence. The eighth
 player-facing Immunity card, source/restriction text and links
-pass real Chromium at 1440/390/320 px. Coordinated rules
-database/publication staging and promotion in
-`tools/stage_immunity_bts_emitter.py` retains 17 deployed objects
-and recovery backups. This is not a Comms/immunity evaluator
+pass real Chromium at 1440/390/320 px. The completed one-off coordinated rules database/publication promotion
+retained 17 deployed objects and recovery backups. The migration script is
+retired; Git history retains it. This is not a Comms/immunity evaluator
 or an Armed Turret adjudication.
 
 **BTS Immunity / E/M CC Weapon, 2026-10-30:**
@@ -7737,10 +7736,9 @@ pp. 64, 67, 95–96 and 177 excerpts, exact Army E/M CC Weapon
 source identity and BTS/2 × 2 profile, fourth source-scoped Immunity
 case, API publication and preservation of Weapon profile fields.
 Curated mutations reject unrelated weapons, Comms Attack scope,
-source/component changes and unsupported roll results. The
-coordinated stage/promotion in `tools/stage_immunity_bts_cc.py`
-checks the exact record and preserves all 17 deployed objects
-with a rollback backup.
+source/component changes and unsupported roll results. The completed one-off coordinated promotion checked the exact record and
+preserved all 17 deployed objects with a rollback backup. The migration
+script is retired; Git history retains it.
 `tests/test_verify_immunity_plasma_browser.py` also covers this
 seventh reviewed interaction at 1440/390/320 px, with links,
 source-scope labeling and no overflow or JS errors. This is local
