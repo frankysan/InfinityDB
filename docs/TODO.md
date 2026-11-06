@@ -243,12 +243,17 @@ source-to-browser gap review; final release acceptance remains open.
   [remaining Core, Conditional Skills and Declaration Metadata screen](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-remaining-core-conditional-skills-and-declaration-metadata-2026-11-06)
   retains existing source scopes and leaves the Dodge PDF/Wiki modifier
   discrepancy **SRC-006** unresolved. These results remain screening evidence,
-  not completed semantic or browser acceptance; reviewer time was not measured.
+  not completed semantic or browser acceptance; reviewer time was not measured
+  for that fixed screen. A separate [40-record mixed-screen benchmark](v1.0-source-coverage-audit.md#v1s-082-mixed-screen-benchmark-2026-11-06)
+  logged page-access events and wall time, but did not measure active effort or
+  establish full-review savings. Its six unresolved scoped decisions and four
+  browser observations are not whole-record or browser approvals.
   Next: execute VR-0122 against the committed matched artifacts; add direct
   normal-browser assertions for the MOV glossary anchor and TinBot source-169
   Firewall variant usage; and reconcile **SRC-002**, **SRC-006**, **SRC-020**,
   **SRC-021** and **SRC-034** without inventing rules. Then design fingerprinted
-  signed-off dispositions using measured evidence reuse.
+  signed-off dispositions and an equal-scope benchmark of active repeated
+  review effort with independent quality controls.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
