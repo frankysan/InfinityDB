@@ -81,6 +81,68 @@ checkout isolation. Activate optional Syncthing/source inputs explicitly and
 record their identity for test evidence. Read-only immutable inputs may be
 shared only when the underlying execution cannot modify them.
 
+## Local coordination CLI (Phase 2, single-machine scope)
+
+The portable `tools.agent_coordination` module provides durable **local**
+claims shared by all worktrees using the *same Git common directory*.
+It uses an OS-exclusive file lock for every read-modify-write transaction,
+writes state atomically, never expires or steals ownership automatically,
+and refuses invalid state. This is a cooperative safety layer for direct-file,
+IDE and MCP agents alike, **not** a credential or OS permission boundary.
+Other clones, other machines and unrelated Git object stores do not share it.
+
+An assigned development agent runs from its worktree (with its own Python
+environment available):
+
+```powershell
+python -m tools.agent_coordination claim --agent chatgpt --task workspace-bootstrap --path tools/ --path tests/
+python -m tools.agent_coordination status
+```
+
+The first command returns an opaque, non-secret claim ID. Before a handoff,
+check the active claim and full changed-file scope, then explicitly release
+it after the integrator has received the proposal:
+
+```powershell
+python -m tools.agent_coordination check --agent chatgpt --task workspace-bootstrap --claim-id <claim-id>
+python -m tools.agent_coordination release --agent chatgpt --task workspace-bootstrap --claim-id <claim-id>
+```
+
+Development claims refuse duplicate task ownership, one agent worktree
+claiming twice, overlapping exact-file/directory scopes, and protected
+integration-owned TODO/VD/VR and publication paths. A claim does not grant
+permission to write files outside its declared scope. Register it **before**
+editing; revise changed file scope by releasing and taking a new claim only
+after inspecting the checkout. Scope checking examines committed/uncommitted
+tracked differences from the recorded baseline plus non-ignored new files.
+State is kept outside worktree files at
+`<git-common-dir>/infinitydb-agent-coordination/state.json`, **never
+Git-tracked or automatically synchronized**.
+
+On the designated primary, the integration owner may acquire an exclusive
+*local* integration reservation pinned to an exact SHA:
+
+```powershell
+python -m tools.agent_coordination acquire-integration --owner integrator --expected-head <40-character-sha>
+python -m tools.agent_coordination check-integration --owner integrator --claim-id <claim-id> --expected-head <40-character-sha>
+python -m tools.agent_coordination release-integration --owner integrator --claim-id <claim-id>
+```
+
+Check ownership immediately before integration Git operations. The integration
+reservation persists until explicitly released; it is not an automatic lock
+over arbitrary `git` processes and does not authorize a non-integration agent
+to advance the primary. If a process crashes, state remains reserved. **Stop**
+and investigate instead of deleting/reassigning the claim. Recovery and a
+globally enforceable cross-host authority remain unimplemented.
+
+**Important limitation:** The local coordinator cannot detect a concurrent
+claim on the independent Linux clone or stop an unrestricted external Git
+client. Cross-host assignments still require the integration owner to arbitrate
+manually; this is **not** complete Phase 2 integration-leadership enforcement.
+Do not run two machine-local integration owners just because each machine
+reports its own reservation available. The Windows integration owner alone
+owns `dev/v1.0.0` until a global coordination service is implemented.
+
 ## Assignment and edit boundaries
 
 Before work begins, an integration coordinator assigns a distinct agent,
@@ -148,9 +210,10 @@ If two proposed patches conflict, keep both original workspaces intact and
 resolve the conflict under the integration owner. An in-flight test result
 belongs only to its pinned revision and actual inputs.
 
-**Implemented in the initial phase:** this maintained contract,
-`tools.agent_workspaces create/guard`, and focused tests of worktree safety.
-These are usable without MCP. **Not yet implemented:** a durable cross-host
+**Implemented:** this maintained contract, `tools.agent_workspaces`
+create/guard, the local-Git-store `tools.agent_coordination` claim/integration
+CLI and focused isolation/concurrency tests. These are usable without MCP.
+**Not yet implemented:** a durable cross-host
 task-claim service, independently enforceable integration lease, protected
 command gateway for arbitrary shell clients, automatic conflict checks,
 worktree lifecycle/cleanup automation, and MCP named-checkout routing for
