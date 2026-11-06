@@ -237,9 +237,10 @@ source-to-browser gap review; final release acceptance remains open.
   VR-0122 still owns the unrun record/database/API/browser regressions, so this
   does not add whole-record or current-revision browser approvals. The
   [Terms, Attribute and Equipment screen](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-terms-attribute-and-equipment-2026-11-06)
-  confirms the bilingual Firewall/TinBot and MOV clauses; direct normal-browser
-  assertions remain missing for the MOV glossary anchor and TinBot source-169
-  Firewall variant usage. The
+  confirms the bilingual Firewall/TinBot and MOV clauses. Direct normal-browser
+  assertions for the MOV glossary anchor and TinBot source-169 Firewall variant
+  usage are now authored but **unrun under VR-0124**; no new browser acceptance
+  is claimed. The
   [remaining Core, Conditional Skills and Declaration Metadata screen](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-remaining-core-conditional-skills-and-declaration-metadata-2026-11-06)
   retains existing source scopes and leaves the Dodge PDF/Wiki modifier
   discrepancy **SRC-006** unresolved. These results remain screening evidence,
@@ -248,10 +249,10 @@ source-to-browser gap review; final release acceptance remains open.
   logged page-access events and wall time, but did not measure active effort or
   establish full-review savings. Its six unresolved scoped decisions and four
   browser observations are not whole-record or browser approvals.
-  Next: execute VR-0122 against the committed matched artifacts; add direct
-  normal-browser assertions for the MOV glossary anchor and TinBot source-169
-  Firewall variant usage; and reconcile **SRC-002**, **SRC-006**, **SRC-020**,
-  **SRC-021** and **SRC-034** without inventing rules. The P1 tracked
+  Next: drain the five due VR obligations (including VR-0122 and new
+  VR-0124 browser assertions) against compatible pinned artifacts, then
+  reconcile **SRC-002**, **SRC-006**, **SRC-020**, **SRC-021** and **SRC-034**
+  without inventing rules. The P1 tracked
   disposition schema and read-only fingerprint validator now have four
   source-specific scoped approvals across two Trait identities
   ([evidence](v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06)).

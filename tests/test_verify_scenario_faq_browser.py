@@ -470,6 +470,66 @@ def test_unpublished_tinbot_source_variant_is_not_a_fake_public_route(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_tinbot_firewall_source_169_usage_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1S-082: the published TinBot family exposes exact source-169 usage."""
+    status, _, body = wsgi_response(release_scenario_app, "/api/equipment/tinbot")
+    assert status == 200
+    source_variants = [
+        variant for variant in json.loads(body)["variants"]
+        if any(rule["id"] == "equipment:tinbot-firewall"
+               for rule in variant.get("rules", []))
+    ]
+    assert source_variants
+    assert {variant["item_id"] for variant in source_variants} == {169}
+    assert {extra["name"] for variant in source_variants
+            for extra in variant.get("extras", [])} >= {"-3", "-6"}
+
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    failures: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failures.append(request.url))
+    try:
+        response = page.goto(f"{ORIGIN}/equipment", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator('#catalog-list a[href="/equipment/tinbot"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        assert link.evaluate("node => document.activeElement === node")
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/equipment/tinbot", timeout=30000)
+        family = page.locator("#rule-equipment-tinbot")
+        family.wait_for(state="visible", timeout=30000)
+        assert "most advantageous" in family.inner_text()
+        variant = page.locator("#rule-equipment-tinbot-firewall")
+        variant.wait_for(state="visible", timeout=30000)
+        assert "Check the Unit Profile for the listed MOD" in variant.inner_text()
+        assert "p. 127" in variant.locator(".rules-source-citations").inner_text()
+        assert variant.locator('a[href="/equipment/firewall"]').count() >= 1
+
+        summaries = page.locator(
+            "#item-content .usage-section-group:not(.exact-variant-usage)"
+            " > details > summary"
+        )
+        summaries.first.wait_for(state="visible", timeout=30000)
+        visible_usage = summaries.all_inner_texts()
+        for modifier in ("-3", "-6"):
+            assert any(
+                "TinBot: Firewall" in row and modifier in row for row in visible_usage
+            ), (width, modifier, visible_usage)
+        assert page.locator("#rule-equipment-tinbot-neurocinetics").count() == 0
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        assert not errors and not failures, (width, errors, failures)
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390, 320])
 def test_visibility_zone_terms_normal_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
@@ -604,6 +664,46 @@ def test_attribute_dash_and_swc_normal_browser(
         assert any("/api/glossary" in url for url, _ in responses)
         assert not errors, errors
         assert not failures, failures
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_movement_attribute_glossary_anchor_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1S-082: keyboard navigation reaches the actual MOV definition, not just a link."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    failures: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failures.append(request.url))
+    try:
+        response = page.goto(
+            f"{ORIGIN}/glossary#rule-profile-help-attributes",
+            wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        parent = page.locator("#rule-profile-help-attributes")
+        parent.wait_for(state="visible", timeout=30000)
+        link = parent.locator('a[href="/glossary#attribute-mov"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        assert link.evaluate("node => document.activeElement === node")
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/glossary#attribute-mov", timeout=30000)
+        movement = page.locator("#attribute-mov")
+        movement.wait_for(state="visible", timeout=30000)
+        assert movement.locator("h3").inner_text() == "Movement (MOV)"
+        summary = " ".join(movement.locator(".glossary-description").inner_text().split())
+        assert "first-move and second-move values" in summary
+        assert "stationary" in summary
+        assert "[[" not in summary
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+        assert not errors and not failures, (width, errors, failures)
     finally:
         page.close()
 

@@ -218,6 +218,26 @@ selector and other dependencies in its VR item.
   `tests/test_report_reference_baseline.py::test_v1s082_pilot_suppresses_page_metrics_when_wiki_member_is_missing`.
   Intended hosts: Windows and pinned `linux-dev`. No tests run during VD.
 
+- [ ] VR-0124 (2026-11-06; ready-to-run): V1S-082 MOV Glossary-anchor
+  navigation and source-169 TinBot Firewall usage browser coverage.
+  Work: V1S-082; revision: browser-test-design commit, pin exact SHA
+  and unchanged tracked Army/rules/variant-usage publications before execution.
+  Risk: semantic source variants being hidden, incorrectly labeled, or
+  disconnected from the normal keyboard navigation path.
+  Design: VD-0087 (follow MOV link into the actual Glossary card) and
+  VD-0088 (source ID 169 family/variant/usage), both statically reviewed
+  and retired without test execution. Ruff passed on the changed module.
+  Deferred: `tests/test_verify_scenario_faq_browser.py::test_movement_attribute_glossary_anchor_normal_browser`
+  and `tests/test_verify_scenario_faq_browser.py::test_tinbot_firewall_source_169_usage_normal_browser`
+  (each 1440/390/320 px Chromium), plus the existing
+  `test_attribute_dash_and_swc_normal_browser`,
+  `test_unpublished_tinbot_source_variant_is_not_a_fake_public_route`
+  and relevant catalog/source-variant checks.
+  Intended host: pinned `linux-dev` with required browser assets and
+  matched variant-usage publication. No skip or merely static design
+  review counts as acceptance. Hosted CI and source-wide acceptance
+  remain separately owned.
+
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -231,8 +251,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0087`; active obligations are listed above.
-- Execution: `VR-0124`; active obligations are listed above.
+- Design: `VD-0089`; VD-0087/0088 were reviewed and retired without running tests.
+- Execution: `VR-0125`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
