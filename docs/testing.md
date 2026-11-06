@@ -3110,12 +3110,12 @@ regression pins every owner occurrence ID, owner class, signature
 and exact raw string. Database tests compare both the tracked and
 fresh rules export; 13 mutation cases reject unknown signatures,
 wrong WIP scope, unreviewed ReRoll behavior and numeric type drift.
-`tools.stage_discover_extras --output-dir local/<unique-name>`
-stages the guarded v9 rules/deployed-object pair, and the
-`--promote-staged` flag verifies pinned SHA-256 inputs, unchanged
-reviewed-object content and retained rollback copies. The audit now
-reports **15** unresolved Skill source IDs. Full release-candidate
-browser acceptance and the Unit-usage projection are still open.
+The completed one-use Discover migration staged and promoted a guarded
+v9 rules/deployed-object pair, verified pinned SHA-256 inputs, preserved
+reviewed-object content and retained rollback copies. The audit then
+reported **15** unresolved Skill source IDs. Git history retains the
+retired script; final release-candidate acceptance and the independent
+Unit-usage projection remain separate.
 
 **Parachutist (Dep. Zone) source promotion (2026-11-02):**
 Pinned Army Skill source `33` has 305 direct occurrences and exactly
@@ -3126,13 +3126,12 @@ while the base restriction and N5.3 p. 105 explanation remain intact.
 `tests/test_audit_source_variant_inputs.py` verifies source-owner IDs,
 full signatures, the published and fresh rules exports; the curated
 mutation tests reject incorrect IDs, raw strings, effect scope and
-non-Boolean permissions. Run
-`tools.stage_parachutist_deployment_zone --output-dir local/<unique-name>`
-to stage the paired v9 rules/publication output and
-`--promote-staged` to verify hashes, preserve the 17 reviewed objects
-and retain rollback copies. The audit now reports **16** unresolved
-Skill IDs. Browser verification, cross-Army usage projection and final
-release candidate acceptance remain separate.
+non-Boolean permissions. The completed one-use Parachutist migration
+staged and promoted the paired v9 rules/publication output, verified
+hashes, preserved all 17 reviewed objects and retained rollback copies.
+Git history retains the retired script. The audit then reported **16**
+unresolved Skill IDs. Browser verification, cross-Army usage projection
+and final release candidate acceptance remain separate.
 
 **Minelayer (2) source-quantity promotion (2026-11-01):**
 The source audit verifies Skill source `56` has 546 direct

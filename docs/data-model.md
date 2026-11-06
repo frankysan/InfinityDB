@@ -797,9 +797,10 @@ parameter therefore uses `discover-wip-roll-mod` with `modifier`
 types, signatures, effect kinds and scopes, including Boolean numeric
 MODs and unreviewed combinations. Exact source-owner ID sets and
 tracked/fresh rules exports are covered by regression tests.
-`tools.stage_discover_extras` promoted the paired rules database and
-deployed-object publication after verifying hashes and all 17 unchanged
-reviewed objects, retaining ignored rollback copies. This does not
+The completed one-use Discover migration promoted the paired rules database
+and deployed-object publication after verifying hashes and all 17 unchanged
+reviewed objects, retaining ignored rollback copies. Its code is retained in
+Git history. This does not
 apply to other Skills or grant an independent Fireteam bonus, and
 does not implement a runtime roll engine or Unit-usage index.
 
