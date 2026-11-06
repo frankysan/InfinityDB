@@ -204,7 +204,8 @@ source-to-browser gap review; final release acceptance remains open.
   only; it does not retire any source or browser acceptance obligation.
   A fixed [35-record pilot](v1.0-coverage-workflow-plan.md#p1--tracked-disposition-and-source-evidence-contract)
   spans 10 cohorts and three source-first probes; its read-only work packet reports
-  127 citation occurrences, 123 exact locators and 96 distinct source pages.
+  129 citation occurrences, 125 exact locators and 97 distinct source pages.
+  These locator counts are not measured review time or actual source opens.
   The source-only pilot has now screened **35/35 distinct identities** at
   selected-clause scope across 39 record-cohort screen events, with **0/35
   whole-record or current-revision browser approvals**. The Trait cohort
