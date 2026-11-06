@@ -229,11 +229,15 @@ remains available. Both checkouts are rechecked after network preflight and
 after integration; local success is then recorded as completed. Neither source
 publication nor reservation release is automatic.
 
-The first operation upgrades both registries to **version 2**. Upgrade every
-coordination client before integrating: older version-1 clients deliberately
-reject version 2 instead of silently ignoring the running-operation guard.
-No source checkout is upgraded or synchronized automatically. Until updated,
-an older checkout cannot use its bundled coordination CLI against either registry.
+The first operation upgrades both registries to **version 2**. The designated
+integration owner schedules this transition and publishes the updated primary.
+Older version-1 clients deliberately reject version 2 instead of silently
+ignoring the running-operation guard; their coordination writes pause while
+existing claims stay held. Each owner must inspect its checkout and explicitly
+merge the published primary revision into its own branch before its next
+coordination write. No other source checkout is upgraded or synchronized
+automatically. Until updated, an older checkout cannot use its bundled
+coordination CLI against either registry.
 
 On success, publish using the separately reviewed fast-forward protocol, then
 explicitly release both integration reservations before releasing task claims.
