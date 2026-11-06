@@ -73,16 +73,22 @@ exception while a full Linux suite is **actually running**. Hosted
 [release acceptance](docs/releasing.md) remain independent. Never use a
 partial Linux run or job dispatch as permission to bypass a due drain.
 
-## Concurrent-agent workspace ownership
+## Optional multi-agent coordination
 
-For simultaneous MCP, IDE, terminal or human work, follow the
-[multi-agent workspace protocol](docs/multi-agent-workspaces.md). Development
-agents must edit and commit only in their assigned isolated checkout/branch;
-run its ownership guard before writes. The designated integration owner alone
-may change or push the shared `dev/v1.0.0` branch. This checkout-role rule
-overrides generic autonomous commit/push guidance below for agents that do
-not own integration. MCP is not required for this protocol, and a clean
-`git status` is not proof of exclusive ownership.
+Use the ordinary authorized Git workflow by default. The
+[multi-agent coordination protocol](docs/multi-agent-workspaces.md#activation-and-default-workflow)
+is **opt-in for an explicitly requested scope**: use it only when the user
+explicitly asks to run that work with the coordination system. Multiple agents,
+existing worktrees or registry claims, and work on the coordination tools do
+not activate it. Do not require registry access, claim acquisition, an ownership
+guard, client upgrades or an integration-leader designation for ordinary work.
+
+Preserve existing assignments and unrelated changes. Concurrent writers must
+agree on separate working trees or non-overlapping work and serialize Git
+operations against a shared checkout. Never modify another agent's checkout or
+move a validation checkout while its pinned jobs are running. When the user
+explicitly enables coordinated mode, its checkout roles, claims, guards and
+designated integration owner apply within that scope.
 
 ## Repository access and change delivery
 
@@ -95,8 +101,8 @@ not own integration. MCP is not required for this protocol, and a clean
   status, relevant files, and existing local instructions first. Treat that
   checkout as the source of truth; use remote Git services only for information
   that cannot be established locally or for explicitly requested remote work.
-- Edit and validate directly in the **assigned** working tree (an isolated
-  development checkout when other agents are active). Preserve unrelated
+- Edit and validate directly in the authorized working tree, preserving any
+  existing checkout assignment and concurrent work. Preserve unrelated
   tracked and untracked changes. Do not require a repository ZIP or produce an
   apply-yourself patch as the primary delivery when the files are already edited.
   Generate a Git-native patch only when requested or needed for transfer/review.
@@ -107,10 +113,11 @@ not own integration. MCP is not required for this protocol, and a clean
 - After local edits, inspect the actual diff and status and run relevant
   focused checks. For InfinityDB's authorized autonomous workflow, stage
   only reviewed task-related files and commit a coherent validated batch with
-  a lowercase conventional message. **Development checkout owners hand off
-  their committed proposal; only the designated integration owner may safely
-  fast-forward push the shared development branch** after reviewing ancestry
-  and integrating accepted changes. Report each SHA and exact validation
+  a lowercase conventional message, then safely fast-forward push the authorized
+  branch after reviewing its remote tip and ancestry. **Only in explicitly
+  enabled coordinated mode**, development checkout owners hand off committed
+  proposals and the designated integration owner publishes the shared branch.
+  Report each SHA and exact validation
   outcomes, and proceed to the next clearly identifiable open task only when
   the validation queue and workspace assignment permit it. Do not commit failed
   or uncertain changes as accepted, fold unrelated user edits into the

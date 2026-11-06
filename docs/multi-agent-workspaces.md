@@ -2,12 +2,47 @@
 
 **Project domain:** Project infrastructure
 
-This is the canonical InfinityDB contract for simultaneous work by ChatGPT/MCP,
-VS Code Copilot, terminal agents and human developers. It is independent of the
-interface used to edit files. This protocol supplements Git and the
+This is the canonical contract for InfinityDB's **optional, explicitly enabled**
+coordination system for ChatGPT/MCP, VS Code Copilot, terminal agents and human
+developers. It is independent of the interface used to edit files. When enabled,
+this protocol supplements Git and the
 [phased validation workflow](testing.md#phased-development-and-validation);
 it does not change the [VD/VR queue's](validation-queue.md#queue-rules)
 thresholds or the release gate.
+
+## Activation and default workflow
+
+**Default: this coordination system is not enabled.** Agents use the ordinary
+authorized checkout, validation, commit and safe fast-forward publication
+workflow. Automated task claims, registry access, workspace identity guards,
+client upgrades and a designated integration leader are not prerequisites for
+ordinary work. Concurrent work still requires agreed edit boundaries and
+serialized Git operations; preserve other agents' files, branches and running
+validation jobs.
+
+Enable this protocol only when the user explicitly requests its use for a
+defined scope. The remaining checkout-role and registry requirements in this
+document apply only to that scope. Neither the presence of multiple agents,
+existing claims/worktrees, an earlier task's activation nor discussion or
+development of these tools enables it for new work. Generic requests to
+continue InfinityDB development do not authorize adoption or further development
+of this optional infrastructure.
+
+For work resuming after the mandatory rollout, preserve each existing proposal
+and checkout assignment. An existing registry entry does not require an agent
+to repair or upgrade the coordination client before ordinary work can resume;
+the user's opt-out instruction takes precedence over older checkout instructions.
+Review the actual Git state and hand off or integrate the proposal using the
+ordinary authorized workflow, respecting other active work. Do not require a
+merge solely to refresh the coordination CLI. Leave old claims and registry
+history intact unless their owners explicitly release them or the user requests
+an inspected cleanup. Opting out does not authorize discarding another agent's
+work, deleting reservations or silently synchronizing another checkout.
+
+The CLI commands remain available and keep their fail-closed checks when
+explicitly invoked. They do not install Git hooks or automatically gate normal
+Git commands. Do not weaken their guards to implement the default workflow;
+ordinary work does not invoke them.
 
 ## Checkout roles
 

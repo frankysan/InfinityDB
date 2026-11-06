@@ -533,9 +533,13 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 **Project domain:** Project infrastructure
 
-- [ ] Complete tool-independent multi-agent workspace coordination. The
-  [checkout and claim protocol](multi-agent-workspaces.md) is approved
-  infrastructure safety work, **not a v1.0 completeness gate**.
+- [ ] **Optional; explicit user request only:** Complete tool-independent
+  multi-agent workspace coordination. The
+  [checkout and claim protocol](multi-agent-workspaces.md#activation-and-default-workflow)
+  is disabled by default and is **not a v1.0 completeness gate**.
+  Deferred: further coordination infrastructure work is outside ordinary
+  autonomous development; authority: user; revisit: only when the user explicitly
+  requests that work. Existing tools and acceptance evidence do not activate it.
   Worktrees, local/global claims, dual-registry pinned fast-forward integration
   and MCP named-checkout pytest/non-test checks are implemented. The real
   coordination ref is initialized; its version-2 transition preserves existing

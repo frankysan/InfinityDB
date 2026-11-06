@@ -13,6 +13,11 @@ environment in the shell.
 
 ## Agent coordination safety acceptance
 
+These checks validate the optional coordination CLI. They do not enable it or
+create ordinary development prerequisites; the
+[explicit activation policy](multi-agent-workspaces.md#activation-and-default-workflow)
+owns when its workflow applies.
+
 **2026-11-06, Project infrastructure:** proposal
 `1ced58c7b57e27b583476c5ab9450463ec710669` passed **58 tests on Windows**
 (asynchronous MCP job `2a806d44540045258054d4179ec27e2a`) and **58 on Linux**
