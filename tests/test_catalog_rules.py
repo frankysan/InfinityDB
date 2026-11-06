@@ -84,6 +84,8 @@ def test_catalog_rules_leave_army_item_raw_without_rules_database() -> None:
 
     assert CatalogRules(None).enrich_catalog_item("weapons", item) == item
     assert "special_profile" not in item
+    equipment = {"id": 235, "slug": "tinbot", "variants": []}
+    assert CatalogRules(None).enrich_catalog_item("equipment", equipment) == equipment
 
 
 def test_catalog_rules_apply_curated_tinbot_family_and_named_variant_rules(
@@ -132,6 +134,141 @@ def test_catalog_rules_apply_curated_tinbot_family_and_named_variant_rules(
         "label": "Discover",
     }
     assert discover["extras"] == [{"id": 2, "name": "+3"}]
+
+
+def test_equipment_reference_only_variants_follow_army_snapshot(
+    tmp_path: Path,
+) -> None:
+    catalog = CatalogRules(_rules_database(tmp_path))
+    family = {"id": 235, "name": "TinBot", "slug": "tinbot"}
+    expected = [
+        "equipment:tinbot-albedo",
+        "equipment:tinbot-discover",
+        "equipment:tinbot-ecm-guided",
+        "equipment:tinbot-firewall",
+        "equipment:tinbot-neurocinetics",
+        "equipment:tinbot-repeater",
+    ]
+
+    for variants in (None, []):
+        item = {**family, **({} if variants is None else {"variants": variants})}
+        references = catalog.enrich_catalog_item("equipment", item)[
+            "reference_only_variants"
+        ]
+        assert [record["id"] for record in references] == expected
+        assert [record["name"].casefold() for record in references] == sorted(
+            record["name"].casefold() for record in references
+        )
+        for record in references:
+            assert record["variant_semantics"]["inheritance"] == "source"
+            assert any(
+                relation["type"] == "variant-of"
+                and relation["direction"] == "outbound"
+                and relation["record"]["id"] == "equipment:tinbot"
+                for relation in record["display_relations"]
+            )
+            assert any(
+                citation["source_id"] == "n5-core-v5.3-pdf"
+                and citation["page"] == 127
+                for citation in record["citations"]
+            )
+            assert not {"units", "extras", "item_id"} & record.keys()
+
+    variants = [
+        {"item_id": 169, "item_name": "TinBot: Firewall", "extras": [], "units": []},
+        {"item_id": 169, "item_name": "TinBot: Firewall", "extras": [], "units": []},
+        {"item_id": 244, "item_name": "TinBot: Discover", "extras": [], "units": []},
+        {"item_id": 188, "item_name": "TinBot: Neurocinetics", "extras": [], "units": []},
+    ]
+    item = {**family, "variants": variants}
+    original = copy.deepcopy(item)
+    result = catalog.enrich_catalog_item("equipment", item)
+    assert item == original
+    assert [record["id"] for record in result["reference_only_variants"]] == [
+        "equipment:tinbot-albedo",
+        "equipment:tinbot-ecm-guided",
+        "equipment:tinbot-repeater",
+    ]
+    assert [variant["item_id"] for variant in result["variants"]] == [
+        169, 169, 244, 188,
+    ]
+    assert all(variant["units"] == [] for variant in result["variants"])
+    assert result["variants"][-1]["rules"][0]["id"] == "equipment:tinbot-neurocinetics"
+
+    all_variants = [
+        {"item_id": source_id, "extras": [], "units": []}
+        for source_id in (169, 188, 193, 244, 247, 248)
+    ]
+    result = catalog.enrich_catalog_item(
+        "equipment", {**family, "variants": all_variants},
+    )
+    assert "reference_only_variants" not in result
+    assert "reference_only_variants" not in catalog.enrich_catalog_item(
+        "equipment", {"id": "firewall", "slug": "firewall", "variants": []},
+    )
+
+
+def test_equipment_reference_only_variants_deduplicate_related_records(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    rules = _rules_database(tmp_path)
+    lookup = rules.composed_records_for_army_link
+
+    def repeated_relations(entity: str, reference: int | str) -> list[dict[str, Any]]:
+        records = lookup(entity, reference)
+        for record in records:
+            if record["id"] != "equipment:tinbot":
+                continue
+            relations = record["display_relations"]
+            albedo = next(
+                relation for relation in relations
+                if relation["record"]["id"] == "equipment:tinbot-albedo"
+            )
+            relations.extend([
+                copy.deepcopy(albedo),
+                {
+                    "type": "variant-of",
+                    "direction": "inbound",
+                    "record": {"id": "equipment:albedo", "kind": "equipment"},
+                },
+                {
+                    "type": "variant-of",
+                    "direction": "outbound",
+                    "record": {"id": "equipment:unrelated", "kind": "equipment"},
+                },
+                {
+                    "type": "uses-effects-of",
+                    "direction": "inbound",
+                    "record": {"id": "equipment:unrelated", "kind": "equipment"},
+                },
+                {
+                    "type": "variant-of",
+                    "direction": "inbound",
+                    "record": {"id": "skill:unrelated", "kind": "skill"},
+                },
+            ])
+        return records
+
+    monkeypatch.setattr(rules, "composed_records_for_army_link", repeated_relations)
+    item = {"id": 235, "slug": "tinbot", "variants": []}
+    references = CatalogRules(rules).enrich_catalog_item(
+        "equipment", item,
+    )["reference_only_variants"]
+    identifiers = [record["id"] for record in references]
+    assert len(identifiers) == len(set(identifiers)) == 6
+    assert identifiers.count("equipment:tinbot-albedo") == 1
+    assert "equipment:albedo" not in identifiers
+
+
+def test_equipment_reference_only_variants_reject_missing_related_record(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    rules = _rules_database(tmp_path)
+    monkeypatch.setattr(rules, "composed_record", lambda _record_id: None)
+    with pytest.raises(ValueError, match="Unknown Equipment variant reference"):
+        CatalogRules(rules).enrich_catalog_item(
+            "equipment", {"id": 235, "slug": "tinbot", "variants": []},
+        )
 
 
 def test_catalog_rules_keep_source_specific_rules_on_matching_variant(

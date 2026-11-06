@@ -1676,6 +1676,63 @@ def test_equipment_glossary_source_cited_routes_cover_current_concepts() -> None
         }, identifier
 
 
+def test_tinbot_reference_only_variants_preserve_citations_and_routes() -> None:
+    root = Path(__file__).parents[1]
+    rules = RulesDatabase(root / "data/generated/rules.db")
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules.path)
+    status, body = _published_get(app, "/api/equipment/tinbot")
+    assert status == "200 OK"
+    item = json.loads(body)
+    assert {variant["item_id"] for variant in item["variants"]} == {169, 244, 247, 248}
+    expected = {
+        "equipment:tinbot-albedo": ("equipment:albedo", "equipment", "albedo"),
+        "equipment:tinbot-neurocinetics": (
+            "skill:neurocinetics", "skills", "neurocinetics",
+        ),
+    }
+    references = item["reference_only_variants"]
+    assert [record["id"] for record in references] == list(expected)
+    for record in references:
+        canonical = rules.composed_record(record["id"])
+        assert canonical is not None
+        assert record["summary"] == canonical["summary"]
+        assert record["citations"] == canonical["citations"]
+        assert any(
+            citation["source_id"] == "n5-core-v5.3-pdf"
+            and citation["source_version"] == "5.3"
+            and citation["page"] == 127
+            and citation["source_url"]
+            for citation in record["citations"]
+        )
+        assert not {"units", "extras", "item_id"} & record.keys()
+        target, catalog, slug = expected[record["id"]]
+        tokens = {
+            token["target"]: token.get("public_reference")
+            for token in record["summary_tokens"] if token["type"] == "reference"
+        }
+        assert tokens == {
+            "equipment:tinbot": {"catalog": "equipment", "id": "tinbot"},
+            target: {"catalog": catalog, "id": slug},
+        }
+        assert any(
+            relation["type"] == "variant-of"
+            and relation["direction"] == "outbound"
+            and relation["record"]["id"] == "equipment:tinbot"
+            and relation["record"]["public_reference"]
+            == {"catalog": "equipment", "id": "tinbot"}
+            for relation in record["display_relations"]
+        )
+
+    for slug in ("tinbot-albedo", "tinbot-neurocinetics"):
+        status, _ = _published_get(app, f"/api/equipment/{slug}")
+        assert status == "404 Not Found", slug
+    status, body = _published_get(app, "/api/equipment")
+    assert status == "200 OK"
+    assert not {"tinbot-albedo", "tinbot-neurocinetics"} & {
+        record["slug"] for record in json.loads(body)["items"]
+    }
+
+
 def test_embedded_glossary_and_profile_help_preserve_definition_citations() -> None:
     root = Path(__file__).parents[1]
     rules = RulesDatabase(root / "data/generated/rules.db")

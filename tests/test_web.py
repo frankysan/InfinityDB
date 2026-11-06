@@ -4997,7 +4997,7 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert rules_app.api.equipment_catalog.get_equipment("tinbot-firewall") is None
 
     # Source 188 is reviewed, but absent from this Army snapshot: it is not
-    # a standalone Equipment page or a member of the published TinBot family.
+    # a standalone Equipment page or a member of the Army-variant list.
     neuro_variant = rules_database.composed_record("equipment:tinbot-neurocinetics")
     assert neuro_variant is not None
     assert neuro_variant["variant_semantics"]["inheritance"] == "source"

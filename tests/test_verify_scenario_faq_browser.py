@@ -429,6 +429,142 @@ def test_added_equipment_firewall_normal_browser(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+def test_tinbot_reference_only_variants_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
+) -> None:
+    status, _, body = wsgi_response(release_scenario_app, "/api/equipment/tinbot")
+    assert status == 200
+    item = json.loads(body)
+    references = {
+        record["id"]: record for record in item["reference_only_variants"]
+    }
+    expected = {
+        "albedo": ("/equipment/albedo", "#rule-equipment-albedo"),
+        "neurocinetics": ("/skills/neurocinetics", "#rule-skill-neurocinetics"),
+    }
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}')")
+    errors: list[str] = []
+    failures: list[str] = []
+    usage_requests: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failures.append(request.url))
+    page.on(
+        "request",
+        lambda request: usage_requests.append(request.url)
+        if "/api/variant-usage?" in request.url else None,
+    )
+    try:
+        response = page.goto(f"{ORIGIN}/equipment", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator('#catalog-list a[href="/equipment/tinbot"]')
+        entry.wait_for(state="visible", timeout=30000)
+        entry.focus()
+        assert entry.evaluate("node => document.activeElement === node")
+        entry.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/equipment/tinbot", timeout=30000)
+        section = page.locator("section.rules-reference").filter(
+            has=page.get_by_role("heading", name="Other variant references", exact=True),
+        )
+        section.wait_for(state="visible", timeout=30000)
+        page.wait_for_load_state("networkidle")
+        if item["variant_usage_published"]:
+            assert any("tinbot-firewall" in url for url in usage_requests)
+        assert all(
+            "tinbot-albedo" not in url and "tinbot-neurocinetics" not in url
+            for url in usage_requests
+        )
+        assert page.locator("html").get_attribute("data-theme") == theme
+        assert section.locator(":scope > .detail-copy").inner_text() == (
+            "These variants are not listed for this Equipment in the current Army data. "
+            "The references do not imply Unit availability."
+        )
+        for slug, (href, _) in expected.items():
+            record = references[f"equipment:tinbot-{slug}"]
+            card = section.locator(f"#rule-equipment-tinbot-{slug}")
+            assert card.locator("h3").inner_text() == record["name"]
+            assert "[[" not in card.inner_text()
+            citations = card.locator(".rules-source-citations")
+            assert "p. 127" in citations.inner_text()
+            links = citations.locator("a")
+            sources = [citation for citation in record["citations"] if citation["source_url"]]
+            assert links.count() == len(sources) >= 1
+            for index, citation in enumerate(sources):
+                source = links.nth(index)
+                assert source.get_attribute("href") == citation["source_url"]
+                assert source.get_attribute("target") == "_blank"
+                assert source.get_attribute("rel") == "noopener noreferrer"
+                source.focus()
+                page.keyboard.press("Shift+Tab")
+                page.keyboard.press("Tab")
+                assert source.evaluate("node => document.activeElement === node")
+            assert card.locator(f'a[href="{href}"]').count() >= 1
+            assert page.locator(f'a[href="/equipment/tinbot-{slug}"]').count() == 0
+        assert not page.evaluate(
+            "() => document.documentElement.scrollWidth > innerWidth + 1"
+        ), (width, theme)
+
+        slug = "albedo" if theme == "light" else "neurocinetics"
+        href, destination = expected[slug]
+        link = section.locator(f"#rule-equipment-tinbot-{slug}").locator(
+            f'a[href="{href}"]',
+        ).first
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}{href}", timeout=30000)
+        page.locator(destination).wait_for(state="visible", timeout=30000)
+        assert not errors and not failures, (width, theme, errors, failures)
+    finally:
+        page.close()
+
+
+def test_tinbot_reference_only_variants_keep_unfiltered_classification(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+) -> None:
+    page = chrome.new_page(viewport={"width": 1440, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    requests = 0
+
+    def filter_units(route: Any) -> None:
+        nonlocal requests
+        requests += 1
+        if requests == 1:
+            status, _, body = wsgi_response(release_scenario_app, route.request.url)
+            route.fulfill(status=status, content_type="application/json", body=body)
+        else:
+            route.fulfill(status=200, content_type="application/json", body='{"ids":[]}')
+
+    page.route("**/api/visible-unit-ids*", filter_units)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/equipment/tinbot", wait_until="domcontentloaded")
+        page.locator("#rule-equipment-tinbot-firewall").wait_for(
+            state="visible", timeout=30000,
+        )
+        page.wait_for_load_state("networkidle")
+        page.locator('button[aria-controls="settings-menu"]').click()
+        toggle = page.locator("#mercs-filter")
+        with page.expect_response("**/api/visible-unit-ids*"):
+            toggle.set_checked(not toggle.is_checked())
+        page.wait_for_function(
+            """() => !document.querySelector("#rule-equipment-tinbot-firewall")
+                && document.querySelector("#rule-equipment-tinbot-albedo")
+                && document.querySelector("#rule-equipment-tinbot-neurocinetics")"""
+        )
+        assert requests >= 2
+        assert page.locator("#rule-equipment-tinbot-albedo").count() == 1
+        assert page.locator("#rule-equipment-tinbot-neurocinetics").count() == 1
+        assert page.get_by_role("heading", name="Other variant references").count() == 1
+        assert page.locator("#item-content .usage-section-group").count() == 0
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_unpublished_tinbot_source_variant_is_not_a_fake_public_route(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:
@@ -450,8 +586,10 @@ def test_unpublished_tinbot_source_variant_is_not_a_fake_public_route(
         details = page.locator("#item-content")
         details.wait_for(state="visible", timeout=30000)
         assert "TinBot" in page.locator("#item-name").inner_text()
-        assert details.locator("#rule-equipment-tinbot-neurocinetics").count() == 0
-        assert details.locator('a[href="/skills/neurocinetics"]').count() == 0
+        reference = details.locator("#rule-equipment-tinbot-neurocinetics")
+        reference.wait_for(state="visible", timeout=30000)
+        assert reference.locator('a[href="/skills/neurocinetics"]').count() >= 1
+        assert details.locator('a[href="/equipment/tinbot-neurocinetics"]').count() == 0
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= innerWidth + 1"
         ), width
@@ -521,7 +659,11 @@ def test_tinbot_firewall_source_169_usage_normal_browser(
             assert any(
                 "TinBot: Firewall" in row and modifier in row for row in visible_usage
             ), (width, modifier, visible_usage)
-        assert page.locator("#rule-equipment-tinbot-neurocinetics").count() == 0
+        assert page.locator("#rule-equipment-tinbot-neurocinetics").count() == 1
+        assert all(
+            "TinBot: Neurocinetics" not in row and "TinBot: Albedo" not in row
+            for row in visible_usage
+        )
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= innerWidth + 1"
         ), width

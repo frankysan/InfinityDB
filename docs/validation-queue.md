@@ -134,22 +134,7 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
-- [ ] VD-0100 (2026-11-07; needs-design): Verify Equipment family
-  source-only variant projection from maintained `variant-of` relations,
-  including current source/citation and API token parity, deterministic
-  ordering, partial/absent Army variants, duplicate suppression and no
-  fabricated Unit usage or standalone route. Work: V1S-082; change:
-  `catalog_rules.py` and Equipment detail API; risk: medium. Existing
-  coverage: `tests/test_catalog_rules.py` and
-  `tests/test_application_rule_references.py`; linked execution: VR-0130.
-- [ ] VD-0101 (2026-11-07; needs-design): Verify normal Equipment-to-family
-  keyboard navigation and cited reference-only cards at 1440/390/320 px in
-  light/dark themes, with explicit absence-of-Army-availability disclosure,
-  links to related rules and unchanged real variant usage. Update the old
-  absent-card negative assertions without allowing fake standalone routes.
-  Work: V1S-082; change: Equipment detail browser; risk: medium. Existing
-  coverage: `tests/test_verify_scenario_faq_browser.py`; linked execution:
-  VR-0130.
+No pending design entries.
 
 ## Pending deferred execution
 
@@ -160,15 +145,38 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0130 (2026-11-07; awaiting-design): Equipment family
-  reference-only variant presentation. Work: V1S-082; revision:
-  implementation and completed test-design commit to be pinned; risk: medium.
+- [ ] VR-0130 (2026-11-07; ready-to-run): Equipment family reference-only
+  variant presentation. Work: V1S-082; implementation: `890eb430`;
+  execution revision: commit containing the completed test designs; risk: medium.
   Immediate: targeted Ruff, Pyright (zero diagnostics), `node --check`
-  and the repository docs stage passed; no tests executed.
-  Design: VD-0100 and VD-0101. Deferred: designed source/API/browser
-  selectors plus existing TinBot, Equipment routing and exact-variant usage
-  regressions on the matched development Army/rules pair. Verify no required
-  skips, tested revision and source/artifact identities before retirement.
+  and the repository docs stage passed for the implementation; targeted Ruff
+  and Pyright passed for the designs. VD-0100 and VD-0101 were authored and
+  statically reviewed without executing tests. Deferred selectors:
+  - `tests/test_catalog_rules.py::test_catalog_rules_leave_army_item_raw_without_rules_database`
+  - `tests/test_catalog_rules.py::test_catalog_rules_apply_curated_tinbot_family_and_named_variant_rules`
+  - `tests/test_catalog_rules.py::test_equipment_reference_only_variants_follow_army_snapshot`
+  - `tests/test_catalog_rules.py::test_equipment_reference_only_variants_deduplicate_related_records`
+  - `tests/test_catalog_rules.py::test_equipment_reference_only_variants_reject_missing_related_record`
+  - `tests/test_catalog_rules.py::test_catalog_rules_keep_source_specific_rules_on_matching_variant`
+  - `tests/test_application_rule_references.py::test_tinbot_reference_only_variants_preserve_citations_and_routes`
+  - `tests/test_application_rule_references.py::test_equipment_glossary_source_cited_routes_cover_current_concepts`
+  - `tests/test_verify_scenario_faq_browser.py::test_tinbot_reference_only_variants_normal_browser`
+  - `tests/test_verify_scenario_faq_browser.py::test_tinbot_reference_only_variants_keep_unfiltered_classification`
+  - `tests/test_verify_scenario_faq_browser.py::test_unpublished_tinbot_source_variant_is_not_a_fake_public_route`
+  - `tests/test_verify_scenario_faq_browser.py::test_tinbot_firewall_source_169_usage_normal_browser`
+  - `tests/test_web.py::test_reference_catalog_pages_and_rules_backed_apis_are_served`
+  - `tests/test_web.py::test_catalog_detail_advertises_only_matched_variant_usage_publication`
+  - `tests/test_web.py::test_variant_usage_page_modules_are_packaged_and_capability_gated`
+  - `tests/test_web.py::test_variant_usage_browser_does_not_fetch_unpublished_index`
+  - `tests/test_web.py::test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`
+  - `tests/test_web.py::test_variant_usage_api_filters_exact_groups_by_canonical_rule`
+  - `tests/test_web.py::test_detail_frontends_share_curated_rules_reference_renderer`
+  - `tests/test_web.py::test_catalog_detail_reveals_async_rule_fragment_after_render`
+
+  Run the compatible selectors together on the matched development
+  Army/rules pair, including Chromium at 1440/390/320 px in both themes.
+  Verify no required skips, the tested revision and source/artifact identities
+  before retirement. Hosted CI and frozen-candidate checks remain separate.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
