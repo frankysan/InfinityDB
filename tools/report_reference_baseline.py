@@ -2983,6 +2983,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(
                 json.dumps(pilot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8",
+                newline="\n",
             )
             summary = pilot["summary"]
             print(
@@ -3001,7 +3002,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(
                 json.dumps(plan, indent=2, ensure_ascii=False) + "\n",
-                encoding="utf-8",
+                encoding="utf-8", newline="\n",
             )
             summary = plan["summary"]
             print(
