@@ -198,6 +198,12 @@ source-to-browser gap review; final release acceptance remains open.
   the frozen release candidate. The [Hackable profile-help review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-hackable-profile-help-2026-11-06)
   now publishes default Troop Type/Hacker conditions and per-Program target
   scope; its source/API/browser execution remains under VR-0118.
+  The [coverage optimization plan](v1.0-coverage-workflow-plan.md) introduces a
+  read-only, source-family batch planner built on the existing identity/locator
+  inventory (currently 466 records / 828 source locators). Its output is triage
+  only; it does not retire any source or browser acceptance obligation.
+  Next: pilot the batches on 30–40 varied records, measure evidence reuse and
+  review time, then design the fingerprinted, reviewed disposition contract.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched

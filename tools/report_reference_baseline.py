@@ -1608,6 +1608,149 @@ def reconcile_explanation_inventory(
     }
 
 
+def plan_explanation_review_batches(
+    report: dict[str, Any], *, batch_limit: int = 40,
+) -> dict[str, Any]:
+    """Cluster existing evidence pointers for review; approve no gameplay facts."""
+    if not 1 <= batch_limit <= 100:
+        raise ReferenceBaselineError("Review batch limit must be between 1 and 100")
+    if report.get("status") != "identity-bridge-only-pending-clause-and-browser-acceptance":
+        raise ReferenceBaselineError(
+            "Review planner requires the current explanation reconciliation"
+        )
+    records = report["currentRecords"]
+    sections = report["sourceSections"]
+    by_id = {row["id"]: row for row in records}
+    if len(by_id) != len(records) or len(records) != report["currentCount"]:
+        raise ReferenceBaselineError("Duplicate or missing current review identities")
+
+    def locator_key(row: dict[str, Any]) -> tuple[str, str, str]:
+        page = row["page"] if row["page"] is not None else "-"
+        return row["sourceId"], str(page), row["heading"]
+
+    owners: dict[tuple[str, str, str], set[str]] = {}
+    for row in records:
+        if row["fullRecordAcceptance"] != "not-assessed-in-this-audit":
+            raise ReferenceBaselineError("Planner cannot import presumed full-record approvals")
+        keys = [locator_key(citation) for citation in row["citations"]]
+        if not keys:
+            keys = [("unattributed", "-", "no-citations")]
+        for key in keys:
+            owners.setdefault(key, set()).add(row["id"])
+
+    section_map: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for section in sections:
+        key = locator_key(section)
+        if key in section_map:
+            raise ReferenceBaselineError(f"Duplicate source locator: {key!r}")
+        section_map[key] = section
+        if set(section["currentRecordIds"]) != owners.get(key):
+            raise ReferenceBaselineError(f"Source locator owners disagree: {key!r}")
+    if set(section_map) != set(owners) or len(sections) != report["sourceSectionCount"]:
+        raise ReferenceBaselineError("Source locator coverage differs from the baseline")
+
+    def source_ref(key: tuple[str, str, str]) -> dict[str, str]:
+        return {"sourceId": key[0], "page": key[1], "heading": key[2]}
+
+    grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for row in records:
+        grouped.setdefault((row["collection"], row["kind"]), []).append(row)
+    batches: list[dict[str, Any]] = []
+    owner_batch: dict[str, str] = {}
+    for (collection, kind), family in sorted(grouped.items()):
+        def sort_key(row: dict[str, Any]) -> tuple[tuple[str, str, str], str]:
+            citations = row["citations"]
+            key = min(map(locator_key, citations)) if citations else (
+                "unattributed", "-", "no-citations"
+            )
+            return key, row["id"]
+
+        ordered = sorted(family, key=sort_key)
+        for offset in range(0, len(ordered), batch_limit):
+            chunk = ordered[offset:offset + batch_limit]
+            batch_id = f"{collection.lower()}-{kind}-{offset // batch_limit + 1:02d}"
+            keys = sorted({
+                key
+                for row in chunk
+                for key in (
+                    [locator_key(citation) for citation in row["citations"]]
+                    or [("unattributed", "-", "no-citations")]
+                )
+            })
+            for row in chunk:
+                owner_batch[row["id"]] = batch_id
+            batches.append({
+                "id": batch_id,
+                "collection": collection,
+                "kind": kind,
+                "status": "pending-source-and-normal-browser-review",
+                "recordCount": len(chunk),
+                "sourceLocatorCount": len(keys),
+                "records": [
+                    {
+                        "id": row["id"],
+                        "historicalTier": row["historicalTier"],
+                        "lineage": row["lineage"],
+                        "sourceSpecificVariant": row["sourceSpecificVariant"],
+                        "selectedBrowserTestHint": row["selectedBrowserTest"],
+                        "sourceLocators": [
+                            source_ref(locator_key(citation))
+                            for citation in row["citations"]
+                        ],
+                        "status": "pending-full-material-review",
+                    }
+                    for row in chunk
+                ],
+                "sourceLocators": [source_ref(key) for key in keys],
+            })
+
+    if set(owner_batch) != set(by_id):
+        raise ReferenceBaselineError("Review batches omit current record identities")
+    shared = [
+        {
+            **source_ref(key),
+            "recordIds": sorted(owners[key]),
+            "batchIds": sorted({owner_batch[record_id] for record_id in owners[key]}),
+            "status": "shared-source-pointer-not-semantic-approval",
+        }
+        for key in sorted(owners)
+        if len(owners[key]) > 1
+    ]
+    return {
+        "format": "InfinityDB V1S-082 review batch plan",
+        "formatVersion": 1,
+        "status": "triage-only-no-source-or-browser-approvals",
+        "inputs": {
+            "frozenInventorySha256": report["frozenInventorySha256"],
+            "currentCuratedSha256": report["currentCuratedSha256"],
+        },
+        "summary": {
+            "currentRecords": len(records),
+            "sourceLocators": len(sections),
+            "recordLocatorLinks": sum(len(ids) for ids in owners.values()),
+            "sharedSourceLocators": len(shared),
+            "historicalScreeningRecords": sum(
+                row["historicalTier"] == "S" for row in records
+            ),
+            "addedAfterFrozenInventory": sum(
+                row["lineage"] == "added-after-frozen-inventory" for row in records
+            ),
+            "sourceSpecificVariantRecords": sum(
+                bool(row["sourceSpecificVariant"]) for row in records
+            ),
+            "selectedBrowserTestHints": sum(
+                bool(row["selectedBrowserTest"]) for row in records
+            ),
+            "batches": len(batches),
+            "maxRecordsPerBatch": batch_limit,
+            "approvedRecords": 0,
+            "approvedSourceLocators": 0,
+        },
+        "batches": batches,
+        "sharedSourceLocators": shared,
+    }
+
+
 def reconcile_declaration_owners(
     report: dict[str, Any],
     *,
@@ -2619,6 +2762,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
     parser.add_argument(
+        "--review-batches-output", type=Path,
+        help="Write a triage-only review batch plan under ignored local/",
+    )
+    parser.add_argument(
         "--reconcile-explanation-inventory", action="store_true",
         help="Compare frozen 367-record explanation inventory to current Core/Hacking",
     )
@@ -2671,6 +2818,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "--audit-conditional-declarations and --audit-visibility-zones"
             )
         report = reconcile_explanation_inventory()
+        if args.review_batches_output is not None:
+            target = args.review_batches_output.resolve()
+            if not target.is_relative_to((PROJECT_ROOT / "local").resolve()):
+                parser.error("--review-batches-output must be under ignored local/")
+            plan = plan_explanation_review_batches(report)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(
+                json.dumps(plan, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            summary = plan["summary"]
+            print(
+                f"Review batches: {summary['batches']} batches / "
+                f"{summary['currentRecords']} records / "
+                f"{summary['sourceLocators']} source locators / "
+                f"{summary['sharedSourceLocators']} shared locators; "
+                "zero approvals issued"
+            )
         if args.audit_visibility_zones:
             evidence = audit_visibility_zone_evidence(
                 verify_pdfs=args.verify_visibility_pdfs,
@@ -2710,7 +2875,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{report['sourceSectionCount']} source locators pending clause review"
         )
         return 0
-    if (args.reconcile_declarations or args.verify_declaration_pdf is not None
+    if (args.review_batches_output is not None or args.reconcile_declarations
+            or args.verify_declaration_pdf is not None
             or args.verify_numeric_army_archive is not None
             or args.audit_conditional_declarations or args.verify_conditional_pdf is not None
             or args.audit_visibility_zones or args.verify_visibility_pdfs

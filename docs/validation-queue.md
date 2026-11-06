@@ -131,6 +131,17 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
+- [ ] VR-0119 (2026-11-06; ready-to-run): V1S-082 read-only source-review
+  batch planner. Work: V1S-082; revision: coverage plan, baseline planner and
+  designed regression at the corresponding implementation commit.
+  Design: VD-0080 (completeness, deterministic grouping, fail-closed locator
+  mismatch and no implied approvals) statically reviewed and retired without
+  executing tests. Immediate: read-only baseline CLI inventory generation and
+  focused Ruff/type/docs checks; no rules/runtime publication changed.
+  Deferred: `tests/test_report_reference_baseline.py::test_explanation_review_planner_is_complete_deterministic_and_pending`
+  and the existing baseline reconciliation suite, on an explicitly pinned
+  checkout. No skip counts as acceptance; 1.0 source/route sign-off remains open.
+
 - [ ] VR-0118 (2026-11-06; ready-to-run): N5.3 Hackable Unit Profile
   help correction. Work: V1S-082; revision: implementation commit containing
   the guarded v9 publication; risk: source and browser reference accuracy.
@@ -165,8 +176,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0080`; active obligations are listed above.
-- Execution: `VR-0119`; active obligations are listed above.
+- Design: `VD-0081`; active obligations are listed above.
+- Execution: `VR-0120`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

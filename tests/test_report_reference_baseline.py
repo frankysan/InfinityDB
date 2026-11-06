@@ -35,6 +35,7 @@ from tools.report_reference_baseline import (
     join_explanation_reviewed_evidence,
     main,
     parse_frozen_explanation_inventory,
+    plan_explanation_review_batches,
     reconcile_declaration_owners,
     reconcile_explanation_inventory,
     render_markdown,
@@ -102,6 +103,48 @@ def test_frozen_explanation_inventory_reconciles_current_source_identities() -> 
             "selected-route-smoke-evidence-not-full-acceptance",
             "source-variant-pending-owner-context-presentation-review",
         }
+
+
+def test_explanation_review_planner_is_complete_deterministic_and_pending() -> None:
+    report = reconcile_explanation_inventory()
+    plan = plan_explanation_review_batches(report, batch_limit=35)
+    summary = plan["summary"]
+    assert plan["status"] == "triage-only-no-source-or-browser-approvals"
+    assert summary["currentRecords"] == report["currentCount"]
+    assert summary["sourceLocators"] == report["sourceSectionCount"]
+    assert summary["approvedRecords"] == summary["approvedSourceLocators"] == 0
+    assert summary["recordLocatorLinks"] >= summary["sourceLocators"]
+    assert summary["sharedSourceLocators"] == sum(
+        section["recordCount"] > 1 for section in report["sourceSections"]
+    )
+    assert summary["historicalScreeningRecords"] == len(report["retainedScreeningOnlyIds"])
+    assert summary["addedAfterFrozenInventory"] == report["addedCount"]
+    assert sum(batch["recordCount"] for batch in plan["batches"]) == report["currentCount"]
+    assert all(batch["recordCount"] <= 35 for batch in plan["batches"])
+    assert len({batch["id"] for batch in plan["batches"]}) == len(plan["batches"])
+    assert {
+        record["id"]
+        for batch in plan["batches"]
+        for record in batch["records"]
+    } == {record["id"] for record in report["currentRecords"]}
+    assert all(
+        record["status"] == "pending-full-material-review"
+        for batch in plan["batches"] for record in batch["records"]
+    )
+    assert json.dumps(plan, sort_keys=True) == json.dumps(
+        plan_explanation_review_batches(report, batch_limit=35), sort_keys=True,
+    )
+    with pytest.raises(ReferenceBaselineError, match="batch limit"):
+        plan_explanation_review_batches(report, batch_limit=0)
+    malformed = {
+        **report,
+        "sourceSections": [
+            {**report["sourceSections"][0], "currentRecordIds": []},
+            *report["sourceSections"][1:],
+        ],
+    }
+    with pytest.raises(ReferenceBaselineError, match="Source locator owners disagree"):
+        plan_explanation_review_batches(malformed)
 
 
 def _reviewed_explanation_join_inputs() -> dict[str, Any]:
