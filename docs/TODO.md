@@ -541,13 +541,16 @@ only when required to fix correctness, reproducibility, or release reliability.
   coordination ref is initialized; its version-2 transition preserves existing
   claims and requires each older client to update explicitly. See
   [focused safety acceptance](testing.md#agent-coordination-safety-acceptance).
+  [Inspected integration recovery](multi-agent-workspaces.md#inspected-integration-recovery)
+  now settles interrupted metadata while retaining claims and reservations.
   - [ ] After explicitly updating its coordination client, exercise a
     non-destructive real claim/status round trip from an owned Linux development
     checkout. Preserve the independent interactive checkout and pinned test
     checkout; disposable-clone race tests do not satisfy this operational gate.
-  - [ ] Define inspected recovery and ownership transfers for interrupted
-    jobs and abandoned claims; never expire ownership automatically or
-    assume an unresponsive agent's checkout is safe to overwrite.
+  - [ ] Implement inspected abandoned-task recovery and ownership-transfer
+    tooling, including disconnected owners, task reassignment and cross-machine
+    handoff. Preserve the documented inspection/idle-job requirements; never
+    expire claims or assume an unresponsive owner's checkout can be overwritten.
   - [ ] Complete MCP named-checkout Git operations and the remote worker
     allowlist without broadening validation-checkout write privileges.
   - [ ] Add read-only workspace/claim/integration status to the monitor and

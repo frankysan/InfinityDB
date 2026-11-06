@@ -54,6 +54,23 @@ approvals; VR-0118's source/API/browser acceptance remains open. The five option
 skips do not accept absent source/archive coverage. Replacement hosted Source,
 wheel and deployment results remain independently required.
 
+Bounded inspected integration recovery at
+`2188aaa1ab4b0bd3ac2d45a2764af6c010a1fc8e` passed **79 Windows tests** in MCP
+job `75dd86f4848b471786a729c6ec637043`, followed by the final remote-CAS race
+test in job `23c1331c16f2443d9baa48386a5a0941` (**1 passed**). The complete
+**80-test** selection then passed on isolated Linux; its input archive SHA-256
+was `f253133b5c0eb389da0e78d1917d63375cd781b5847c9a754a57ad79b8aab629`.
+Both coordinator source files were unchanged between the Windows runs; the
+second run adds the competing-write assertion. Recovery cases cover unchanged
+and already-integrated/published source, lost pin/completion/recovery responses,
+failed local persistence, stale receipts/revisions, dirty files/indexes, missing
+idle-job confirmation and competing callers. Every case preserves source Git
+state and held ownership until explicit release. Ruff, focused Pyright, docs
+and backlog checks passed; the real guarded fast-forward completed at global
+registry revision 23. These are immediate Git-integrity checks, with no deferred
+regression obligation for this bounded recovery slice. Abandoned-task transfer,
+live cross-host operation and this revision's hosted matrix remain separate.
+
 ## Local invocation
 
 Use the project virtual-environment interpreter when available:
