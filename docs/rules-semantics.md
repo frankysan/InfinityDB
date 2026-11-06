@@ -72,6 +72,48 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Basic_Rules#Labels_and_Traits_in_Infinity>
 - PDF: Infinity N5 V5.3, printed page 7
 
+### RS-BR-BASE-003 — Label definitions retain their conditions and exceptions
+
+**Classification:** source-native, with an explicitly disclosed bilingual timing difference.
+
+The Label vocabulary is maintained independently of rule-record identities. Its
+English N5.3 definitions preserve the following qualifications through `rules.db`,
+the Label API, ordinary Label pages and contextual Label help:
+
+- Airborne Deployment and Superior Deployment group every Skill carrying the
+  corresponding Label when another rule refers to that group.
+- Assignable (Transmutation) requires a Transmutation recipient represented by a
+  Model during Deployment, limits each recipient to one item of each type, and
+  keeps the assigned State Token in contact with its recipient. English N5.3 and
+  N5.2 additionally tie assignment to deploying the owner. Spanish N5.3 specifies
+  the Deployment Phase without that extra timing phrase; the ordinary definition
+  discloses this difference rather than inventing a shared timing ruling.
+- Attack prohibits declarations against Allies and Neutral elements, including
+  Models and Markers. CC Special Skill requires Silhouette contact and permits
+  combining its MODs with other CC Special Skills in either Turn, subject to the
+  Skill's own exceptions. Comms Attack uses Reset rather than Dodge; Partial Cover
+  does not protect against it under the English definition.
+- Hackable allows applicable Programs from Allies as well as Enemies, without
+  making every Program eligible. Hostile elements have Attributes, no player's
+  Army List membership, Enemy treatment by all players and Attack capability.
+- Non-Reloadable applies to Disposable Weapons/Equipment carrying the Label.
+  No Roll retains a fixed result when one is supplied, using the English source's
+  bracket notation (Spanish says parentheses). Null identifies the Trooper's
+  Order/Victory Point loss and the five States explicitly listed in N5.3; that
+  explicit list is absent from the reviewed N5.2 Label paragraph.
+- Private Information concerns possession of the labelled Skill or Equipment
+  until use or game end; public reference definitions are not secret game data.
+
+The 23 printed Labels remain distinct from the existing Wiki-only FAQs category.
+The original Wiki vocabulary citation is retained alongside English N5.3 p. 174;
+the PDF citation does not make FAQs a printed gameplay Label. These definitions
+are reference facts, not target validation, roster legality or an effects engine.
+
+Sources: pinned English N5.3 p. 174, Spanish N5.3 p. 181, English N5.2 p. 173,
+and the archived English Wiki `Labels` revision 4067. Exact hashes and the
+bounded review disposition are maintained in the
+[coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-label-definitions-2026-11-06).
+
 ### RS-BR-BASE-002 — Game States are transient, cumulative game conditions
 
 **Classification:** source-native with an InfinityDB data-boundary consequence.

@@ -189,16 +189,11 @@ source-to-browser gap review; final release acceptance remains open.
 
 - [ ] **V1S-082 (L, gate):** Resolve confirmed source-to-normal-browser
   gaps and review all explicit omissions under the 1.0 definition.
-  The [coverage audit](v1.0-source-coverage-audit.md) records the completed
-  `term:trooper`, `term:peripheral` and `term:unit-profile` corrections,
-  including their bounded curated/API/browser regressions. The
-  [next reviewed glossary batch](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-remaining-p-173-glossary-terms-2026-11-06)
-  records five published, source-reviewed glossary corrections
-  (`term:deployable-equipment`, `term:deployable-weapon`, `term:target`,
-  `term:hostile`, `term:neutral`) and a guarded three-artifact v9
-  refresh. Their curated/API/15-case normal-browser regression passed on
-  the pinned Linux release pair under VR-0113. The broader source inventory
-  remains open.
+  The [coverage audit](v1.0-source-coverage-audit.md) records accepted bounded
+  glossary corrections and the remaining source inventory. The
+  [Label definition review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-label-definitions-2026-11-06)
+  is implemented with source, API and normal-browser execution pending under
+  VR-0114; complete that acceptance when due and continue the wider inventory.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched

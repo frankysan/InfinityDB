@@ -81,6 +81,8 @@ its application metrics.
   embedded Attributes, scoped Game terms and searchable Weapon Properties (such as Viral,
   Plasma and combined Ammunition). Weapon Properties link to their underlying canonical
   rules instead of redefining the effects.
+- Label definitions include deployment, targeting, modifier and fixed-result
+  qualifications, with Assignable's English/Spanish timing difference disclosed.
 - Links to **Orders and AROs** from the home page and navigation, with searchable
   declarations by Order type and links to their rules and scenario context.
 - Shows eighteen suggested terrain combinations on Special Terrain, preserving

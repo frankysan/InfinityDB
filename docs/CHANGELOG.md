@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Label definitions now explain deployment limits, attack and hacking eligibility,
+  close-combat modifiers and fixed results, with Assignable's English/Spanish
+  timing difference shown explicitly.
 - Page navigation now directs keyboard focus to the new content and announces
   the loaded page to assistive technologies without disturbing scroll restoration.
 - Find Narrow Gate and Wide Gate through search or Glossary, and browse the
@@ -82,6 +85,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing:** Complete twelve Label definitions with their N5.3 conditions,
+  exclusions and exceptions, including the five Null States and Private Information
+  disclosure scope. Retain the original Wiki citation alongside the primary PDF
+  reference and disclose Assignable's bilingual timing difference.
 - **Data processing + Web backend + Web frontend:** Publish the N5.3 suggested terrain
   combinations on Special Terrain, preserving source dashes, optional difficulty,
   combined visibility and conditional Zero-G. Gate labels lead to Access Width.

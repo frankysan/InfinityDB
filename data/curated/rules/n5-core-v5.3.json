@@ -41,6 +41,11 @@
                 "sourceId": "wiki-en-20260926-200832",
                 "heading": "Labels",
                 "member": "Labels"
+            },
+            {
+                "sourceId": "n5-core-v5.3-pdf",
+                "page": 174,
+                "heading": "Labels"
             }
         ]
     },
@@ -122,17 +127,17 @@
         {
             "id": "airborne-deployment",
             "name": "Airborne Deployment (AD)",
-            "description": "Encompasses Skills related to Airborne Infantry."
+            "description": "Groups Skills related to Airborne Infantry. Rules referring to Airborne Deployment apply to every Skill carrying this Label."
         },
         {
             "id": "assignable-transmutation",
             "name": "Assignable (Transmutation)",
-            "description": "Allows certain weapons or Equipment to be assigned to Troopers with [[skill:transmutation]] (X)."
+            "description": "During the Deployment Phase, assign this Weapon or Equipment only to a Trooper with [[skill:transmutation]] (X) already represented on the table by a Model. Troopers using Airborne Deployment, [[skill:hidden-deployment]] or [[skill:impersonation]] do not qualify. A recipient can have at most one Assignable item of each type.\n\nThe item stays in base contact with its recipient and accompanies them; it is a [[term:state-token|State Token]], not a Model. The English rules allow assignment only when deploying the owner; the Spanish rules specify the Deployment Phase without that additional timing condition."
         },
         {
             "id": "attack",
             "name": "Attack",
-            "description": "The use of the Special Skill or Equipment is considered an Attack."
+            "description": "Using the Special Skill or Equipment counts as an Attack. Attacks cannot be declared against Allies or Neutral game elements, whether represented by Models or Markers."
         },
         {
             "id": "bs-attack",
@@ -147,12 +152,12 @@
         {
             "id": "cc-special-skill",
             "name": "CC Special Skill",
-            "description": "The Skill can only be used when the user is in Silhouette contact with the target."
+            "description": "Use this Skill only in Silhouette contact with its target. Its MODs can combine with other CC Special Skills and apply in both Active and Reactive Turns, unless the Skill specifies otherwise."
         },
         {
             "id": "comms-attack",
             "name": "Comms Attack",
-            "description": "The weapon, Special Skill, or Equipment is an Attack avoided with [[skill:reset]] rather than [[skill:dodge]]."
+            "description": "This Weapon, Special Skill or Equipment makes an Attack that is opposed with [[skill:reset]], not [[skill:dodge]]. Partial Cover has no effect against it."
         },
         {
             "id": "comms-equipment",
@@ -162,12 +167,12 @@
         {
             "id": "hackable",
             "name": "Hackable",
-            "description": "A Trooper, Peripheral, weapon, or Equipment that can be targeted by certain Hacking Programs."
+            "description": "A Trooper, [[term:peripheral|Peripheral]], Weapon or Equipment carrying the Hackable Characteristic or Label can be chosen as a target by certain Hacking Programs from either Allies or Enemies. Each Program still determines its eligible targets."
         },
         {
             "id": "hostile",
             "name": "Hostile",
-            "description": "A game element with its own Attributes that belongs to neither player's Army List."
+            "description": "A game element with its own Attributes belonging to no player's Army List. Every player treats it as an Enemy, and it can declare and receive Attacks."
         },
         {
             "id": "optional",
@@ -197,17 +202,17 @@
         {
             "id": "non-reloadable",
             "name": "Non-Reloadable",
-            "description": "An [[state:unloaded]] cannot be canceled and expended uses cannot be regained."
+            "description": "For [[trait:disposable-x|Disposable]] Weapons or Equipment with this Label, [[state:unloaded|Unloaded State]] cannot be canceled and spent uses cannot be recovered."
         },
         {
             "id": "no-roll",
             "name": "No Roll",
-            "description": "The weapon, Special Skill, or Equipment works automatically without requiring a Roll."
+            "description": "The Weapon, Special Skill or Equipment works without a Roll. If it supplies a result, that result is fixed and shown in brackets."
         },
         {
             "id": "null",
             "name": "Null",
-            "description": "A State with this Label does not provide an Order or Victory Points."
+            "description": "A Trooper in a State carrying this Label supplies neither an Order nor Victory Points. [[term:null-state|Null States]] are [[state:dead|Dead]], [[state:disconnected|Disconnected]], [[state:possessed|Possessed]], [[state:sepsitorized|Sepsitorized]] and [[state:unconscious|Unconscious]]."
         },
         {
             "id": "obligatory",
@@ -217,7 +222,7 @@
         {
             "id": "private-information",
             "name": "Private Information",
-            "description": "Whether Troopers have this Label is Private Information until it is used or the game ends."
+            "description": "A player need not reveal that a Trooper possesses a Special Skill or Equipment carrying this Label until that Skill or Equipment is used, or the game ends. This concerns the Trooper's game information, not access to reference definitions."
         },
         {
             "id": "states-phase",
@@ -227,7 +232,7 @@
         {
             "id": "superior-deployment",
             "name": "Superior Deployment",
-            "description": "Encompasses Skills that allow Troopers to deploy outside their Deployment Zone."
+            "description": "Groups Skills allowing deployment outside the Deployment Zone. Rules referring to Superior Deployment apply to every Skill carrying this Label."
         },
         {
             "id": "supportware",

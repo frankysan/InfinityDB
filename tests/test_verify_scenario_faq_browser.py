@@ -789,6 +789,83 @@ def test_v1s082_p173_glossary_normal_browser(
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
+    ("slug", "required"),
+    (
+        ("airborne-deployment", ("every Skill carrying this Label",)),
+        ("assignable-transmutation", ("already represented", "at most one",
+            "base contact", "State Token", "English rules", "Spanish rules",
+            "additional timing condition")),
+        ("attack", ("cannot be declared against Allies or Neutral", "Models or Markers")),
+        ("cc-special-skill", ("Silhouette contact", "combine", "Active and Reactive",
+                              "unless")),
+        ("comms-attack", ("Reset", "Dodge", "Partial Cover has no effect")),
+        ("hackable", ("Characteristic or Label", "either Allies or Enemies", "Each Program")),
+        ("hostile", ("own Attributes", "Every player", "declare and receive")),
+        ("non-reloadable", ("Disposable", "with this Label", "cannot be canceled",
+                             "cannot be recovered")),
+        ("no-roll", ("without a Roll", "fixed", "brackets")),
+        ("null", ("Trooper", "neither an Order nor Victory Points", "Dead", "Disconnected",
+                  "Possessed", "Sepsitorized", "Unconscious")),
+        ("private-information", ("possesses a Special Skill or Equipment", "is used",
+                                 "game ends")),
+        ("superior-deployment", ("outside the Deployment Zone", "every Skill carrying")),
+    ),
+)
+def test_v1s082_labels_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    slug: str, required: tuple[str, ...],
+) -> None:
+    """The corrected Label definition must be reachable in normal player mode."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    failures: list[str] = []
+    responses: list[tuple[str, int]] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failures.append(request.url))
+    page.on("response", lambda response: responses.append((response.url, response.status)))
+    try:
+        response = page.goto(f"{ORIGIN}/labels", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator(f'#catalog-list a[href="/labels/{slug}"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        assert link.evaluate("node => document.activeElement === node")
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/labels/{slug}", timeout=30000)
+        copy = page.locator("#item-content .detail-copy").first
+        copy.wait_for(state="visible", timeout=30000)
+        visible = copy.inner_text()
+        assert all(phrase in visible for phrase in required), (slug, width, visible)
+        assert "[[" not in visible
+        status, _, body = wsgi_response(release_scenario_app, f"/api/labels/{slug}")
+        assert status == 200
+        item = json.loads(body)
+        assert page.locator("#item-name").inner_text() == item["name"]
+        expected = "".join(
+            token["label"] if token["type"] == "reference" else token["text"]
+            for token in item["description_tokens"]
+        )
+        for token in item["description_tokens"]:
+            if token["type"] == "reference":
+                assert token["label"] in visible
+        assert " ".join(visible.split()) == " ".join(expected.split())
+        assert any(
+            url.endswith(f"/api/labels/{slug}") and status == 200
+            for url, status in responses
+        ), responses
+        assert not any(status >= 400 for _, status in responses), responses
+        assert not page.evaluate(
+            "() => document.documentElement.scrollWidth > innerWidth + 1"
+        ), (slug, width)
+        assert not errors, errors
+        assert not failures, failures
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
     ("route", "record_id", "page_numbers", "clauses", "related"),
     (
         (

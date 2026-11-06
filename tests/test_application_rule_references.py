@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 import sqlite3
 from collections.abc import Callable, Iterable
+from contextlib import closing
 from functools import partial
 from pathlib import Path
 from wsgiref.util import setup_testing_defaults
@@ -735,6 +738,141 @@ def test_all_published_labels_preserve_curated_vocabulary_and_public_routes() ->
     )
     assert "definitionSection(item)" in script
     assert "content.hidden = false;" in script
+
+
+@pytest.mark.parametrize(
+    ("filename", "digest", "page", "clause"),
+    (
+        ("n5-rules-v5-3-en.pdf",
+         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+         174, "When deploying its owner during the Deployment Phase"),
+        ("esp-n5-update-5-3.pdf",
+         "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f",
+         181, "Únicamente durante la Fase de Despliegue"),
+        ("n5-rules-v5-2-en.pdf",
+         "643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b",
+         173, "When deploying its owner during the Deployment Phase"),
+    ),
+)
+def test_v1s082_label_review_pinned_sources(
+    filename: str, digest: str, page: int, clause: str,
+) -> None:
+    """Pin the reviewed versions and preserve the bilingual timing difference."""
+    root = Path(__file__).parents[1]
+    path = root / "data/pdf/rules" / filename
+    if not path.is_file():
+        pytest.skip(f"Pinned local PDF unavailable: {filename}")
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == digest
+    pdf = pytest.importorskip("pymupdf")
+    with pdf.open(path) as document:
+        text = " ".join(document[page - 1].get_text().split())
+    assert clause in text
+    if filename == "esp-n5-update-5-3.pdf":
+        assert "Los MOD que otorgue son combinables" in text
+        assert "Turno Activo y Reactivo" in text
+        assert "éste será fijo" in text
+    else:
+        for phrase in (
+            "cannot receive more than one", "Game State Tokens rather than Model",
+            "combined with other CC Special Skills", "Active Turn and the Reactive Turn",
+            "Partial Cover has no effect", "both allies and enemies",
+            "fixed one which will be shown between brackets",
+        ):
+            assert phrase in text
+        labels_text = text.split("LABELS Labels describe", 1)[1].split(
+            "TRAITS Traits are", 1,
+        )[0]
+        headings = re.findall(r"»\s*([^»]+?)\. ", labels_text)
+        source_names = {heading.strip() for heading in headings}
+        curated = json.loads((root / "data/curated/rules/n5-core-v5.3.json").read_text(
+            encoding="utf-8",
+        ))
+        assert len(source_names) == 23
+        assert source_names == {
+            label["name"] for label in curated["labels"] if label["id"] != "faqs"
+        }
+        if filename == "n5-rules-v5-3-en.pdf":
+            assert "Dead, Disconnected, Possessed, Sepsitorized, and Unconscious" in text
+        else:
+            assert "Sepsitorized" not in labels_text
+
+
+def test_v1s082_label_vocabulary_primary_citation_and_export() -> None:
+    root = Path(__file__).parents[1]
+    document = next(
+        doc for _, doc in load_curated_directory(root / "data/curated")
+        if doc["collection"]["id"] == "n5-core-v5.3"
+    )
+    assert document["vocabularySources"]["labels"] == [
+        {"sourceId": "wiki-en-20260926-200832", "heading": "Labels", "member": "Labels"},
+        {"sourceId": "n5-core-v5.3-pdf", "page": 174, "heading": "Labels"},
+    ]
+    with closing(sqlite3.connect(root / "data/generated/rules.db")) as connection:
+        assert connection.execute(
+            "SELECT source_id, page, heading FROM vocabulary_sources "
+            "WHERE collection_id = 'n5-core-v5.3' AND vocabulary = 'labels' "
+            "ORDER BY position"
+        ).fetchall() == [
+            ("wiki-en-20260926-200832", None, "Labels"),
+            ("n5-core-v5.3-pdf", 174, "Labels"),
+        ]
+        assert connection.execute("PRAGMA user_version").fetchone() == (9,)
+    assert len(document["labels"]) == 24  # 23 printed Labels plus the Wiki FAQs category.
+    assert next(row for row in document["labels"] if row["id"] == "faqs")[
+        "description"
+    ] == "A label category for FAQ-related rule references."
+
+
+@pytest.mark.parametrize(
+    ("slug", "required", "targets"),
+    (
+        ("airborne-deployment", ("every Skill carrying this Label",), set()),
+        ("assignable-transmutation", (
+            "only to a Trooper", "already represented", "at most one",
+            "base contact", "State Token", "English rules", "Spanish rules",
+        ), {"skill:transmutation", "skill:hidden-deployment", "skill:impersonation",
+            "term:state-token"}),
+        ("attack", ("cannot be declared against Allies or Neutral", "Models or Markers"),
+         set()),
+        ("cc-special-skill", ("Silhouette contact", "combine", "Active and Reactive",
+                              "unless"), set()),
+        ("comms-attack", ("Partial Cover has no effect",), {"skill:reset", "skill:dodge"}),
+        ("hackable", ("Characteristic or Label", "either Allies or Enemies",
+                      "Each Program"), {"term:peripheral"}),
+        ("hostile", ("own Attributes", "Every player", "declare and receive"), set()),
+        ("non-reloadable", ("with this Label", "cannot be canceled", "cannot be recovered"),
+         {"trait:disposable-x", "state:unloaded"}),
+        ("no-roll", ("without a Roll", "If it supplies", "fixed", "brackets"), set()),
+        ("null", ("Trooper", "neither an Order nor Victory Points"),
+         {"term:null-state", "state:dead", "state:disconnected", "state:possessed",
+          "state:sepsitorized", "state:unconscious"}),
+        ("private-information", ("possesses a Special Skill or Equipment", "is used",
+                                 "game ends"), set()),
+        ("superior-deployment", ("outside the Deployment Zone", "every Skill carrying"),
+         set()),
+    ),
+)
+def test_v1s082_label_definition_api_qualifications(
+    slug: str, required: tuple[str, ...], targets: set[str],
+) -> None:
+    root = Path(__file__).parents[1]
+    app = create_app(root / "data/generated/infinity.db",
+                     rules_database_path=root / "data/generated/rules.db")
+    status, body = _published_get(app, f"/api/labels/{slug}")
+    assert status == "200 OK"
+    item = json.loads(body)
+    assert item["id"] == item["slug"] == slug
+    assert all(phrase in item["description"] for phrase in required), slug
+    assert targets <= {
+        token["target"] for token in item["description_tokens"]
+        if token["type"] == "reference"
+    }
+    assert all(
+        token.get("public_reference")
+        for token in item["description_tokens"] if token["type"] == "reference"
+    )
+    assert len({row["href"] for row in item["used_by"]}) == len(item["used_by"])
+    assert all(row["href"].startswith("/") for row in item["used_by"])
 
 
 def test_all_current_general_rules_preserve_category_scoped_publication() -> None:

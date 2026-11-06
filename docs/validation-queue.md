@@ -122,6 +122,10 @@ IDs here and link the owning task instead of duplicating its description.
 
 No pending design obligations.
 
+VD-0069/0070/0071 were retired after static review of the source/vocabulary,
+API and 36-case ordinary-browser designs without executing tests. VR-0114
+retains all resulting selectors and required source/asset prerequisites.
+
 VD-0066/0067/0068 were retired following static design review without
 execution; their three selector groups were subsequently accepted on the
 pinned Linux revision under VR-0113 (see below).
@@ -148,7 +152,23 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-No pending execution obligations.
+- [ ] VR-0114 (2026-11-06; ready-to-run): Twelve N5.3 Label definition
+  corrections and primary vocabulary citation. Work: V1S-082; revision:
+  implementation commit containing this entry; risk: source/publication parity.
+  Design: VD-0069/0070/0071 completed without execution. Deferred selectors:
+  `tests/test_application_rule_references.py::test_v1s082_label_review_pinned_sources`,
+  `::test_v1s082_label_vocabulary_primary_citation_and_export`,
+  `::test_v1s082_label_definition_api_qualifications`,
+  `::test_all_published_labels_preserve_curated_vocabulary_and_public_routes`;
+  `tests/test_verify_scenario_faq_browser.py::test_v1s082_labels_normal_browser`;
+  `tests/test_web.py::test_reference_catalog_pages_and_rules_backed_apis_are_served`.
+  Intended host: pinned `linux-dev`, required assets and pinned
+  English/Spanish/N5.2 PDFs. The source tests must not skip for acceptance.
+  Immediate publication-integrity checks passed: deterministic v9 double export,
+  exact twelve-Label change set, unchanged other stored rule fields/schema and
+  Restrictions, maintained-text coverage, and guarded matched three-artifact
+  promotion. Semantic/browser execution is pending. Broader source inventory,
+  hosted CI and frozen-candidate acceptance remain separate.
 
 VR-0113 was accepted on 2026-11-06 against `af806f6016e9c1ae38bf567dc0db6aba5380f28c`
 using Linux job `linux-dev:299fff7559554529b55ac0f80d3b0dc7`:
@@ -183,8 +203,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0069`; active obligations are listed above.
-- Execution: `VR-0114`; active obligations are listed above.
+- Design: `VD-0072`; active obligations are listed above.
+- Execution: `VR-0115`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
