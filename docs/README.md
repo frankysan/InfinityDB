@@ -24,8 +24,9 @@ Use these documents when deciding how the project works now:
 - `data/curated/README.md` — authored/curated data schemas and review contracts.
 - `testing.md` — local validation entry points, phased validation policy, test slices,
   asset modes, reports, and benchmark tooling.
-- [multi-agent-workspaces.md](multi-agent-workspaces.md) — tool-independent checkout ownership,
-  isolated development branches, serial integration, and pinned validation boundaries.
+- [multi-agent-workspaces.md](multi-agent-workspaces.md) — optional coordination, enabled only
+  by explicit user request; its checkout roles, claims and serialized integration apply within
+  that requested scope, rather than to ordinary development by default.
 - `validation-queue.md` — canonical VD/VR scheduling and active deferred-validation
   register (design/execution thresholds, dependencies, drain and retirement); not an implementation backlog.
 - `ci.md` — hosted CI workflows and repository-level validation policy.

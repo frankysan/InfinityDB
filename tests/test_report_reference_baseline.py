@@ -239,13 +239,22 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         "selectedBrowserTestAnchors": 36,
         "currentIdentitiesWithLaterEvidence": 56,
         "wholeRecordApprovals": 0,
-        # V1S-077 adds one terrain locator; the Trait review adds six PDF locators.
-        "pendingSourceSections": 827,
+        # Terrain and Trait review locators plus Hackable's Spanish p. 9 citation.
+        "pendingSourceSections": 828,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}
     assert len(historical) == 367 and len(current) == 466
     assert current["rule:special-terrain"]["sourceLocatorCount"] == 2
+    hackable_locators = {
+        (row["sourceId"], row["page"], row["heading"])
+        for row in report["sourceSections"]
+        if "rule:profile-help:hackable" in row["currentRecordIds"]
+    }
+    assert hackable_locators == {
+        ("n5-core-v5.3-pdf", "8", "Trooper Characteristics"),
+        ("n5-core-v5.3-es-pdf", "9", "Características de las Tropas"),
+    }
     trait_pdf_locators = {
         (row["sourceId"], row["page"], row["heading"])
         for row in report["sourceSections"]

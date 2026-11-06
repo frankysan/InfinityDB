@@ -533,23 +533,32 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 **Project domain:** Project infrastructure
 
-- [ ] Complete tool-independent multi-agent workspace coordination. The
-  [checkout and claim protocol](multi-agent-workspaces.md) is approved
-  infrastructure safety work, **not a v1.0 completeness gate**.
-  - [x] Implement isolated worktrees, local durable task claims, a verified
-    fast-forward integration path and independent-clone claims using an
-    append-only Git coordination ref. Keep source checkouts unsynchronized.
-  - [x] Support verified named local worktrees through MCP non-test checks
-    and asynchronous pytest, without requiring MCP for direct-file agents.
-  - [ ] Initialize and verify the real cross-host coordination ref, then
-    exercise a non-destructive claim/status round trip from the Linux
-    interactive checkout. Preserve the separate pinned Linux test checkout.
-  - [ ] Enforce the global integration reservation within the integration
-    command, including remote-head/claim revision preflight, rather than
-    relying on a manual global status check.
-  - [ ] Define inspected recovery and ownership transfers for interrupted
-    jobs and abandoned claims; never expire ownership automatically or
-    assume an unresponsive agent's checkout is safe to overwrite.
+- [ ] **Optional; explicit user request only:** Complete tool-independent
+  multi-agent workspace coordination. The
+  [checkout and claim protocol](multi-agent-workspaces.md#activation-and-default-workflow)
+  is disabled by default and is **not a v1.0 completeness gate**.
+  Deferred: further coordination infrastructure work is outside ordinary
+  autonomous development; authority: user; revisit: only when the user explicitly
+  requests that work. Existing tools and acceptance evidence do not activate it.
+  Worktrees, local/global claims, dual-registry pinned fast-forward integration
+  and MCP named-checkout pytest/non-test checks are implemented. The real
+  coordination ref is initialized; its version-2 transition preserves existing
+  claims and requires each older client to update explicitly. See
+  [focused safety acceptance](testing.md#agent-coordination-safety-acceptance).
+  [Inspected integration recovery](multi-agent-workspaces.md#inspected-integration-recovery)
+  now settles interrupted metadata while retaining claims and reservations.
+  - [ ] After explicitly updating its coordination client, exercise a
+    non-destructive real claim/status round trip from an owned Linux development
+    checkout. Preserve the independent interactive checkout and pinned test
+    checkout; disposable-clone race tests do not satisfy this operational gate.
+    Blocked: the live Linux probe read version 2 and rejected a Windows-owned
+    scope, but its metadata push was rejected; authority: integration owner;
+    retry: after authorized remote write access/policy verification. The remote
+    registry and existing claims stayed unchanged.
+  - [ ] Implement inspected abandoned-task recovery and ownership-transfer
+    tooling, including disconnected owners, task reassignment and cross-machine
+    handoff. Preserve the documented inspection/idle-job requirements; never
+    expire claims or assume an unresponsive owner's checkout can be overwritten.
   - [ ] Complete MCP named-checkout Git operations and the remote worker
     allowlist without broadening validation-checkout write privileges.
   - [ ] Add read-only workspace/claim/integration status to the monitor and

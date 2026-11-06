@@ -265,7 +265,7 @@ def main() -> int:
             "candidates are not rulings"
         ),
         "pairs": results,
-    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(f"Report: {output.relative_to(ROOT)}")
     return 0
 

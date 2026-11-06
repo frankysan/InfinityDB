@@ -69,7 +69,7 @@ def _token(value: object, label: str) -> str:
 
 
 def _validate(state: object) -> dict:
-    if not isinstance(state, dict) or state.get("version") != 1:
+    if not isinstance(state, dict) or state.get("version") not in (1, 2):
         raise GlobalClaimError("Unsupported coordination registry version")
     if type(state.get("revision")) is not int or state["revision"] < 0:
         raise GlobalClaimError("Invalid coordination registry revision")
@@ -109,6 +109,19 @@ def _validate(state: object) -> dict:
             integration["expected_head"]
         ):
             raise GlobalClaimError("Invalid global integration revision")
+        operation = integration.get("operation")
+        if operation is not None:
+            if state["version"] != 2 or not isinstance(operation, dict):
+                raise GlobalClaimError("Invalid integration operation")
+            if (
+                not isinstance(operation.get("id"), str)
+                or not _ID.fullmatch(operation["id"])
+                or operation.get("phase") not in ("running", "completed")
+                or not isinstance(operation.get("proposal_head"), str)
+                or not _SHA.fullmatch(operation["proposal_head"])
+                or operation.get("task_claim") not in claims
+            ):
+                raise GlobalClaimError("Invalid integration operation identity")
     return state
 
 
@@ -175,7 +188,9 @@ def _write(remote: Path, parent: str | None, state: dict, message: str) -> bool:
     raise GlobalClaimError("Coordination push rejected; inspect remote access or branch policy")
 
 
-def _operation(root: Path, action, *, initialize: bool = False) -> dict:
+def _operation(
+    root: Path, action, *, initialize: bool = False, finish_integration: bool = False,
+) -> dict:
     root = _checkout(root)
     origin = _require(_git(root, "remote", "get-url", "origin"), "origin lookup")
     if not origin or "\n" in origin:
@@ -190,6 +205,11 @@ def _operation(root: Path, action, *, initialize: bool = False) -> dict:
                 if not initialize:
                     raise GlobalClaimError("Global registry is not initialized")
                 state = {"version": 1, "revision": 0, "claims": {}, "integration": None}
+            active = (state["integration"] or {}).get("operation", {})
+            if active.get("phase") == "running" and not finish_integration:
+                raise GlobalClaimError(
+                    "Integration operation is unresolved; inspect state before recovery",
+                )
             result = action(state)
             if result is None:
                 return {"revision": state["revision"], "status": "unchanged"}
@@ -225,6 +245,7 @@ def status(root: Path) -> dict:
         return {"status": "uninitialized", "scope": "origin-only"}
     return {
         "status": "available", "scope": "origin-only",
+        "version": state["version"],
         "revision": state["revision"],
         "claims": list(state["claims"].values()), "integration": state["integration"],
     }
@@ -285,6 +306,8 @@ def release(root: Path, agent: str, task: str, claim_id: str) -> dict:
     if not _ID.fullmatch(claim_id):
         raise GlobalClaimError("Invalid global claim ID")
     def action(state: dict) -> dict:
+        if (state["integration"] or {}).get("operation", {}).get("task_claim") == claim_id:
+            raise GlobalClaimError("Release integration before releasing its task claim")
         entry = state["claims"].get(claim_id)
         if not entry or any((
             entry["agent"] != agent, entry["task"] != task,
@@ -295,6 +318,132 @@ def release(root: Path, agent: str, task: str, claim_id: str) -> dict:
         return {"message": "chore: release agent work scope",
                 "payload": {"released": claim_id}}
     return _operation(root, action)
+
+
+def _source_head(root: Path, expected_head: str) -> None:
+    """Read origin's source tip without updating any local ref or FETCH_HEAD."""
+    if source_head(root) != expected_head:
+        raise GlobalClaimError("Remote source HEAD differs from expected primary HEAD")
+
+
+def source_head(root: Path) -> str:
+    """Inspect the source ref without fetching or changing source Git state."""
+    output = _require(
+        _git(root, "ls-remote", "--exit-code", "origin", "refs/heads/dev/v1.0.0"),
+        "source HEAD lookup",
+    )
+    fields = output.split()
+    if (len(fields) != 2 or not _SHA.fullmatch(fields[0])
+            or fields[1] != "refs/heads/dev/v1.0.0"):
+        raise GlobalClaimError("Invalid remote source HEAD response")
+    return fields[0]
+
+
+def _recover_integration(root: Path, inspection: dict) -> dict:
+    """CAS settlement used only after the local inspection/idle-job guard."""
+    def action(state: dict) -> dict:
+        lease = state["integration"]
+        if (
+            state["revision"] != inspection["global_revision"]
+            or not lease or lease["id"] != inspection["global_integration"]
+            or lease["owner"] != inspection["owner"]
+            or lease["expected_head"] != inspection["expected_head"]
+            or lease.get("operation") != inspection["global_operation"]
+            or inspection["global_claim"] not in state["claims"]
+        ):
+            raise GlobalClaimError("Recovery registry changed; inspect again")
+        _source_head(root, inspection["remote_source_head"])
+        operation = dict(lease.get("operation") or {
+            "id": uuid4().hex, "proposal_head": inspection["proposal_head"],
+            "task_claim": inspection["global_claim"],
+        })
+        operation.update(
+            phase="completed", outcome=inspection["outcome"],
+            recovered_utc=datetime.now(UTC).isoformat(timespec="seconds"),
+        )
+        state["version"] = 2
+        lease["operation"] = operation
+        return {"message": "chore: settle inspected integration operation",
+                "payload": {"operation": operation}}
+
+    return _operation(root, action, finish_integration=True)
+
+
+def begin_integration(
+    root: Path, agent: str, task: str, claim_id: str, *, owner: str,
+    integration_id: str, expected_head: str, proposal_head: str,
+    expected_revision: int, scope: list[str], paths: list[str],
+) -> dict:
+    """Pin ownership durably before local Git mutation; never release on failure.
+
+    Version 2 makes older clients refuse mutations instead of ignoring the
+    in-flight operation. All cooperative registry writes freeze until completion.
+    """
+    current = guard(root, agent, task)
+    if (
+        type(expected_revision) is not int or expected_revision < 0
+        or not _SHA.fullmatch(expected_head) or not _SHA.fullmatch(proposal_head)
+        or current["head"] != proposal_head
+    ):
+        raise GlobalClaimError("Invalid integration revision or proposal HEAD")
+    operation = {"id": uuid4().hex, "phase": "running",
+                 "proposal_head": proposal_head, "task_claim": claim_id}
+
+    def action(state: dict) -> dict:
+        if state["revision"] != expected_revision:
+            raise GlobalClaimError("Global registry revision differs; inspect before retrying")
+        lease = state["integration"]
+        entry = state["claims"].get(claim_id)
+        if (
+            not lease or lease["id"] != integration_id or lease["owner"] != owner
+            or lease["expected_head"] != expected_head or lease.get("operation")
+        ):
+            raise GlobalClaimError("Global integration reservation changed or missing")
+        if (
+            not entry or entry["agent"] != agent or entry["task"] != task
+            or entry["branch"] != current["branch"]
+            or entry["baseline"] != current["baseline"]
+            or entry["scope"] != sorted(set(path.casefold() for path in scope))
+            or any(not any(_overlaps(path.casefold(), allowed) for allowed in entry["scope"])
+                   for path in paths)
+        ):
+            raise GlobalClaimError("Global task ownership or file scope differs")
+        _source_head(root, expected_head)
+        state["version"] = 2
+        lease["operation"] = operation
+        return {"message": "chore: pin integration operation",
+                "payload": {"operation": operation}}
+
+    return _operation(root, action)
+
+
+def finish_integration(
+    root: Path, owner: str, integration_id: str, operation_id: str,
+    expected_revision: int,
+) -> dict:
+    """Record a verified local success; reservations remain explicitly held."""
+    def action(state: dict) -> dict:
+        lease = state["integration"]
+        operation = (lease or {}).get("operation", {})
+        if (
+            state["revision"] != expected_revision
+            or not lease or lease["owner"] != owner or lease["id"] != integration_id
+            or operation.get("id") != operation_id or operation.get("phase") != "running"
+        ):
+            raise GlobalClaimError("In-flight integration changed; inspect before recovery")
+        if (
+            root.name != "InfinityDB"
+            or _require(_git(root, "symbolic-ref", "--short", "HEAD"), "branch") != "dev/v1.0.0"
+            or _require(_git(root, "rev-parse", "HEAD"), "HEAD") != operation["proposal_head"]
+            or _require(_git(root, "status", "--porcelain"), "status")
+        ):
+            raise GlobalClaimError("Integrated primary state differs; inspect before recovery")
+        _source_head(root, lease["expected_head"])
+        operation["phase"] = "completed"
+        return {"message": "chore: confirm local integration",
+                "payload": {"operation": operation}}
+
+    return _operation(root, action, finish_integration=True)
 
 
 def acquire_integration(root: Path, owner: str, expected_head: str) -> dict:

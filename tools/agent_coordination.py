@@ -7,6 +7,7 @@ service, OS access-control mechanism, or replacement for remote Git checks.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -105,11 +106,8 @@ def _mutex(root: Path) -> Iterator[Path]:
     if path.is_symlink():
         raise CoordinationError("Coordination mutex cannot be a link")
     with path.open("a+b") as handle:
-        handle.seek(0)
-        if handle.read(1) != b"\0":
-            handle.seek(0)
-            handle.write(b"\0")
-            handle.flush()
+        # Windows permits a byte-range lock past EOF. Do not read or write the
+        # byte before locking: another process may already hold that byte.
         deadline = time.monotonic() + 5
         while True:
             try:
@@ -147,7 +145,7 @@ def _state(directory: Path) -> dict:
         raise CoordinationError("Coordination state is invalid; no writes permitted") from exc
     if (
         not isinstance(state, dict)
-        or state.get("version") != 1
+        or state.get("version") not in (1, 2)
         or type(state.get("revision")) is not int
         or not isinstance(state.get("claims"), dict)
         or not (
@@ -267,6 +265,8 @@ def release(root: Path, agent: str, task: str, claim_id: str) -> dict:
     with _mutex(root) as directory:
         state = _state(directory)
         entry = _get_claim(root, claim_id, agent, task, state)
+        if (state["integration"] or {}).get("local_task_claim") == claim_id:
+            raise CoordinationError("Release integration before releasing its task claim")
         del state["claims"][entry["id"]]
         _save(directory, state)
         return {"released": claim_id, "revision": state["revision"]}
@@ -330,6 +330,8 @@ def release_integration(root: Path, owner: str, claim_id: str) -> dict:
             raise CoordinationError("Integration owner or claim differs")
         if entry["workspace"] != str(root):
             raise CoordinationError("Integration checkout differs")
+        if entry.get("operation", {}).get("phase") == "running":
+            raise CoordinationError("Integration operation is unresolved; inspect before recovery")
         state["integration"] = None
         _save(directory, state)
         return {"released": claim_id, "revision": state["revision"]}
@@ -354,12 +356,23 @@ def primary_for_agent(root: Path) -> Path:
 def integrate_proposal(
     root: Path, agent: str, task: str, claim_id: str, *,
     owner: str, integration_id: str, expected_head: str, proposal_head: str,
+    global_claim_id: str, global_integration_id: str, global_revision: int,
 ) -> dict:
     """Integrate one reviewed local agent commit by a pinned fast-forward only.
 
-    The local integration reservation stays held until explicitly released.
+    Both integration reservations stay held until explicitly released.
     This operation never pushes, rebases, resets or changes another checkout.
     """
+    # Lazy import: global claims reuse this module's normalized scope contract.
+    from tools.agent_global_coordination import (
+        GlobalClaimError,
+        begin_integration,
+        finish_integration,
+    )
+    from tools.agent_global_coordination import (
+        status as global_status,
+    )
+
     root = _root(root)
     current = guard(root, agent, task)
     if root.name == "InfinityDB":
@@ -381,6 +394,8 @@ def integrate_proposal(
             or lease.get("expected_head") != expected_head
         ):
             raise CoordinationError("Integration reservation differs")
+        if lease.get("operation", {}).get("phase") == "running":
+            raise CoordinationError("Integration operation is unresolved; inspect before recovery")
         _primary(primary, expected_head)
         if _git(primary, "status", "--porcelain", "--untracked-files=normal").stdout.strip():
             raise CoordinationError("Primary checkout is dirty")
@@ -405,6 +420,44 @@ def integrate_proposal(
         ]
         if unexpected:
             raise CoordinationError("Proposal changes outside claimed scope")
+        # Older local-only integrators must refuse this registry too: they never
+        # consult the global ref and otherwise could bypass its version guard.
+        state["version"] = 2
+        lease["local_task_claim"] = claim_id
+        lease["operation"] = {
+            "phase": "running", "proposal_head": proposal_head,
+            "task_claim": global_claim_id,
+        }
+        # Persist intent before the remote write. Even a lost push response
+        # leaves both local reservations held for inspected recovery.
+        _save(directory, state)
+        try:
+            pinned = begin_integration(
+                root, agent, task, global_claim_id, owner=owner,
+                integration_id=global_integration_id, expected_head=expected_head,
+                proposal_head=proposal_head, expected_revision=global_revision,
+                scope=entry["scope"], paths=changed,
+            )
+            lease["operation"] = pinned["operation"]
+            _save(directory, state)
+            remote = global_status(root)
+            if (
+                remote.get("revision") != pinned["revision"]
+                or (remote.get("integration") or {}).get("operation") != pinned["operation"]
+            ):
+                raise CoordinationError(
+                    "Pinned global integration changed; inspect before recovery",
+                )
+        except GlobalClaimError as exc:
+            raise CoordinationError(str(exc)) from exc
+        # Network operations can take time. Recheck both checkouts immediately
+        # before Git; the mutex covers cooperative local writers throughout.
+        if guard(root, agent, task) != current:
+            raise CoordinationError("Proposal checkout changed during global preflight")
+        _primary(primary, expected_head)
+        for checkout in (root, primary):
+            if _git(checkout, "status", "--porcelain", "--untracked-files=normal").stdout.strip():
+                raise CoordinationError("Checkout changed during global preflight")
         # Avoid executing checkout-provided post-merge hooks. A second Git
         # writer outside this advisory registry remains a separate risk.
         _git(
@@ -416,10 +469,155 @@ def integrate_proposal(
             raise CoordinationError("Primary HEAD changed unexpectedly during integration")
         if _git(primary, "status", "--porcelain", "--untracked-files=normal").stdout.strip():
             raise CoordinationError("Primary checkout is dirty after integration")
+        if guard(root, agent, task) != current or _git(
+            root, "status", "--porcelain", "--untracked-files=normal",
+        ).stdout.strip():
+            raise CoordinationError("Proposal checkout changed during integration")
+        try:
+            completed = finish_integration(
+                primary, owner, global_integration_id,
+                pinned["operation"]["id"], pinned["revision"],
+            )
+        except GlobalClaimError as exc:
+            raise CoordinationError(str(exc)) from exc
+        lease["operation"] = completed["operation"]
+        _save(directory, state)
         return {
             "status": "integrated", "before": expected_head, "after": actual,
             "paths": changed, "claim": claim_id, "integration": integration_id,
+            "global_integration": global_integration_id,
+            "global_revision": completed["revision"],
         }
+
+
+def _recovery_inspection(
+    root: Path, state: dict, agent: str, task: str, claim_id: str, *,
+    owner: str, integration_id: str, expected_head: str, proposal_head: str,
+    global_claim_id: str, global_integration_id: str,
+) -> dict:
+    from tools import agent_global_coordination as remote
+
+    current = guard(root, agent, task)
+    entry = _get_claim(root, claim_id, agent, task, state)
+    lease = state["integration"]
+    operation = (lease or {}).get("operation", {})
+    primary = primary_for_agent(root)
+    actual = _git(primary, "rev-parse", "HEAD").stdout.strip()
+    if (
+        not lease or lease["id"] != integration_id or lease["owner"] != owner
+        or lease["workspace"] != str(primary) or lease["expected_head"] != expected_head
+        or lease.get("local_task_claim") != claim_id or operation.get("phase") != "running"
+        or operation.get("proposal_head") != proposal_head
+        or operation.get("task_claim") != global_claim_id
+        or current["head"] != proposal_head or entry["branch"] != current["branch"]
+        or entry["baseline"] != current["baseline"]
+        or actual not in (expected_head, proposal_head) or expected_head == proposal_head
+    ):
+        raise CoordinationError("Recovery identities or local Git revision differ")
+    _primary(primary, actual)
+    for checkout in (root, primary):
+        if _git(checkout, "status", "--porcelain", "--untracked-files=normal").stdout.strip():
+            raise CoordinationError("Recovery requires clean primary and proposal checkouts")
+    _git(primary, "merge-base", "--is-ancestor", entry["baseline"], expected_head)
+    _git(primary, "merge-base", "--is-ancestor", expected_head, proposal_head)
+    paths = _git(primary, "diff", "--no-renames", "--name-only",
+                 expected_head, proposal_head).stdout.splitlines()
+    snapshot = remote.status(root)
+    global_lease = snapshot.get("integration")
+    global_entry = next((item for item in snapshot.get("claims", [])
+                         if item["id"] == global_claim_id), None)
+    if (
+        not global_lease or global_lease["id"] != global_integration_id
+        or global_lease["owner"] != owner or global_lease["expected_head"] != expected_head
+        or not global_entry or global_entry["agent"] != agent or global_entry["task"] != task
+        or global_entry["branch"] != current["branch"]
+        or global_entry["baseline"] != current["baseline"]
+        or global_entry["scope"] != sorted(set(path.casefold() for path in entry["scope"]))
+        or not paths or any(not any(_overlaps(path, scope) for scope in entry["scope"])
+                            for path in paths)
+    ):
+        raise CoordinationError("Recovery global ownership or file scope differs")
+    global_operation = global_lease.get("operation")
+    outcome = "not-integrated" if actual == expected_head else "integrated"
+    if global_operation is None:
+        if outcome != "not-integrated":
+            raise CoordinationError("Integrated source has no recorded global operation")
+    elif (
+        global_operation["task_claim"] != global_claim_id
+        or global_operation["proposal_head"] != proposal_head
+        or operation.get("id", global_operation["id"]) != global_operation["id"]
+        or (global_operation["phase"] == "completed"
+            and global_operation.get("outcome", "integrated") != outcome)
+    ):
+        raise CoordinationError("Recovery operation identity or outcome differs")
+    source = remote.source_head(root)
+    allowed = (expected_head,) if outcome == "not-integrated" else (expected_head, proposal_head)
+    if source not in allowed:
+        raise CoordinationError("Recovery remote source HEAD differs")
+    report = {
+        "agent": agent, "task": task, "owner": owner,
+        "local_claim": claim_id, "local_integration": integration_id,
+        "global_claim": global_claim_id, "global_integration": global_integration_id,
+        "expected_head": expected_head, "proposal_head": proposal_head,
+        "primary_head": actual, "remote_source_head": source,
+        "baseline": current["baseline"],
+        "local_revision": state["revision"], "global_revision": snapshot["revision"],
+        "global_operation": global_operation, "outcome": outcome,
+        "paths": paths, "scope": entry["scope"], "proposal_branch": current["branch"],
+    }
+    digest = hashlib.sha256(json.dumps(report, sort_keys=True).encode("utf-8")).hexdigest()
+    return {**report, "inspection": digest}
+
+
+def inspect_integration(root: Path, agent: str, task: str, claim_id: str, **identity) -> dict:
+    """Read a reproducible recovery receipt without changing Git or registries."""
+    from tools.agent_global_coordination import GlobalClaimError
+
+    root = _root(root)
+    with _mutex(root) as directory:
+        try:
+            return _recovery_inspection(root, _state(directory), agent, task, claim_id, **identity)
+        except GlobalClaimError as exc:
+            raise CoordinationError(str(exc)) from exc
+
+
+def recover_integration(
+    root: Path, agent: str, task: str, claim_id: str, *,
+    inspection: str, jobs_inspected: bool, **identity,
+) -> dict:
+    """Settle inspected metadata only; retain reservations, claims and Git state."""
+    from tools import agent_global_coordination as remote
+
+    if jobs_inspected is not True:
+        raise CoordinationError("Inspect affected jobs and confirm they are idle before recovery")
+    root = _root(root)
+    with _mutex(root) as directory:
+        state = _state(directory)
+        try:
+            report = _recovery_inspection(root, state, agent, task, claim_id, **identity)
+            if report["inspection"] != inspection:
+                raise CoordinationError("Recovery inspection is stale; inspect again")
+            result = remote._recover_integration(root, report)
+            primary = primary_for_agent(root)
+            _primary(primary, report["primary_head"])
+            if guard(root, agent, task)["head"] != report["proposal_head"]:
+                raise CoordinationError("Proposal changed during recovery; inspect again")
+            for checkout in (root, primary):
+                dirty = _git(checkout, "status", "--porcelain", "--untracked-files=normal")
+                if dirty.stdout.strip():
+                    raise CoordinationError("Checkout changed during recovery; inspect again")
+            confirmed = remote.status(root)
+            if (confirmed["revision"] != result["revision"]
+                    or (confirmed["integration"] or {}).get("operation") != result["operation"]):
+                raise CoordinationError("Recovery remote result is unverified; inspect again")
+            remote._source_head(root, report["remote_source_head"])
+        except remote.GlobalClaimError as exc:
+            raise CoordinationError(str(exc)) from exc
+        state["integration"]["operation"] = result["operation"]
+        _save(directory, state)
+        return {"status": "recovered", "outcome": report["outcome"],
+                "primary_head": report["primary_head"], "reservations": "held",
+                "global_revision": result["revision"]}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -452,12 +650,18 @@ def main(argv: list[str] | None = None) -> int:
     integration_release.add_argument("--owner", required=True)
     integration_release.add_argument("--claim-id", required=True)
     integration_release.add_argument("--primary", action="store_true")
-    proposal = commands.add_parser("integrate-proposal", help="Fast-forward an approved proposal")
-    for name in (
-        "agent", "task", "claim-id", "owner", "integration-id",
-        "expected-head", "proposal-head",
-    ):
-        proposal.add_argument("--" + name, required=True)
+    for command in ("integrate-proposal", "inspect-integration", "recover-integration"):
+        proposal = commands.add_parser(command)
+        for name in (
+            "agent", "task", "claim-id", "owner", "integration-id",
+            "expected-head", "proposal-head", "global-claim-id", "global-integration-id",
+        ):
+            proposal.add_argument("--" + name, required=True)
+        if command == "integrate-proposal":
+            proposal.add_argument("--global-revision", required=True, type=int)
+        elif command == "recover-integration":
+            proposal.add_argument("--inspection", required=True)
+            proposal.add_argument("--jobs-inspected", required=True, action="store_true")
     args = parser.parse_args(argv)
     try:
         root = Path.cwd()
@@ -479,10 +683,24 @@ def main(argv: list[str] | None = None) -> int:
             target = primary_for_agent(root) if args.primary else root
             result = release_integration(target, args.owner, args.claim_id)
         else:
-            result = integrate_proposal(
-                root, args.agent, args.task, args.claim_id,
+            identity: dict = dict(
                 owner=args.owner, integration_id=args.integration_id,
                 expected_head=args.expected_head, proposal_head=args.proposal_head,
+                global_claim_id=args.global_claim_id,
+                global_integration_id=args.global_integration_id,
+            )
+            operation = {
+                "integrate-proposal": integrate_proposal,
+                "inspect-integration": inspect_integration,
+                "recover-integration": recover_integration,
+            }[args.command]
+            if args.command == "integrate-proposal":
+                identity["global_revision"] = args.global_revision
+            elif args.command == "recover-integration":
+                identity.update(inspection=args.inspection, jobs_inspected=args.jobs_inspected)
+            result = operation(
+                root, args.agent, args.task, args.claim_id,
+                **identity,
             )
     except (WorkspaceError, CoordinationError, OSError, subprocess.TimeoutExpired) as exc:
         parser.exit(2, f"coordination refused: {exc}\n")
