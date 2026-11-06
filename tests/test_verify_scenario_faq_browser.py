@@ -841,7 +841,9 @@ def test_v1s082_labels_normal_browser(
         status, _, body = wsgi_response(release_scenario_app, f"/api/labels/{slug}")
         assert status == 200
         item = json.loads(body)
-        assert page.locator("#item-name").inner_text() == item["name"]
+        assert page.locator("#item-name").evaluate(
+            "node => node.firstChild.textContent"
+        ) == item["name"]
         expected = "".join(
             token["label"] if token["type"] == "reference" else token["text"]
             for token in item["description_tokens"]

@@ -170,6 +170,15 @@ selector and other dependencies in its VR item.
   Windows immediate CI regression passed 1/1 with 808/808 SVGs. Execute the
   complete selector group on the corrected committed revision before resuming
   ordinary implementation.
+  Linux `f2ec34ee` passed 15 API/export checks, but all 36 browser cases failed
+  a test-only heading assertion that included the shared decorative full stop.
+  The corrected test uses the existing browser verifier's first-text-node
+  heading contract and retains content/API, requests, keyboard and overflow
+  assertions. Linux passed the two N5.3 source cases; historical N5.2 was
+  unavailable there. All three pinned-source cases passed on Windows at
+  `f2ec34ee`, with zero source skips. Rerun the browser group on the repair.
+  Immediate Windows validation of the heading repair passed all 36 browser
+  cases with 808/808 assets (20.26 s pytest); pinned Linux rerun remains due.
   Immediate publication-integrity checks passed: deterministic v9 double export,
   exact twelve-Label change set, unchanged other stored rule fields/schema and
   Restrictions, maintained-text coverage, and guarded matched three-artifact
