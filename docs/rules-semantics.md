@@ -502,6 +502,27 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Loss_of_Lieutenant>
 - PDF: Infinity N5 V5.3, printed page 18
 
+### RS-BR-LOL-002 — Isolated Lieutenant triggers Loss of Lieutenant on its next Active Turn
+
+**Classification:** source-native.
+
+An Isolated Lieutenant does not trigger Loss of Lieutenant immediately. If the
+Lieutenant is still Isolated at the beginning of its next Active Turn, the Army
+enters the army-level situation; canceling Isolated before then prevents that
+trigger. Once Loss of Lieutenant has begun for this reason, canceling Isolated
+alone does not end the situation. The existing Loss of Lieutenant cancellation
+conditions still apply.
+
+Keep the trigger and its persistence in the State/Rule reference facts and link
+the Lieutenant Skill to the canonical Loss of Lieutenant rule. Do not treat
+clearing the Trooper's State as an automatic cancellation of the army-level
+situation.
+
+Sources:
+
+- PDF: Infinity N5 V5.3, English printed page 168 and Spanish printed page 161
+- Wiki: archived English `Isolated State`, oldid 4095; `Loss of Lieutenant`, oldid 3508
+
 ## Basic Rules / Spatial semantics
 
 ### RS-BR-GEO-001 — Silhouette is a template identity with defined geometry

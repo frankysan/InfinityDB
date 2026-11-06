@@ -66,6 +66,9 @@ are not retroactively relabeled.
   conditional outcomes and links to reviewed Weapon, Skill and Equipment references.
 - Unit details put Equipment, Training and Attribute overrides in their proper
   categories and remain readable on narrow screens.
+- Lieutenant help distinguishes an Isolated Lieutenant's next-Active-Turn
+  Loss of Lieutenant trigger from clearing Isolated after the army-level
+  situation has begun.
 - Hacking Program pages explain when the source chart does not specify a Troop Type,
   instead of leaving the Target dash ambiguous about eligibility or effects.
 - General Rules now includes a linked N5.3 Restrictions chart, showing six
@@ -97,6 +100,11 @@ are not retroactively relabeled.
   Hackable Unit Profile help with default Troop Types, the Hacker exception,
   eligible allied/enemy targeting and a typed Hacker link, while retaining
   individual Hacking Program target restrictions.
+- **Data processing + Web backend + Web frontend:** Add the bilingual N5.3
+  Isolated Lieutenant timing to the State and Loss of Lieutenant references.
+  Distinguish cancellation before the Lieutenant's next Active Turn from
+  canceling Isolated after the army-level situation has begun, and link the
+  Lieutenant Skill to the owning rule.
 - **Data processing:** Complete five Trait summaries with Deployable targetability,
   Disposable count/exhaustion and item scope, Non-Reloadable cancellation,
   Target (Attribute)'s no-Saving-Roll condition and Silent's conditional stacking.

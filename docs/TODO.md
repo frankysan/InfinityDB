@@ -220,9 +220,13 @@ source-to-browser gap review; final release acceptance remains open.
   cohort reuses unchanged records and prior bounded source/API/browser evidence;
   **SRC-002** remains unresolved. The
   [State cohort review](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-state-cohort-2026-11-06)
-  confirms a missing Isolated/Loss-of-Lieutenant clause in maintained facts
-  against agreeing English/Spanish N5.3 sources; this is a source-to-record
-  coverage gap, not a source conflict or approval. The
+  identified a missing Isolated/Loss-of-Lieutenant clause against agreeing
+  English/Spanish N5.3 sources. The three owning curated records now jointly
+  encode the bilingual timing distinction and typed Lieutenant-to-rule link;
+  a guarded v9 promotion changed exactly those records and verified matched
+  publications.
+  VR-0122 still owns the unrun record/database/API/browser regressions, so this
+  does not add whole-record or current-revision browser approvals. The
   [Terms, Attribute and Equipment screen](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-terms-attribute-and-equipment-2026-11-06)
   confirms the bilingual Firewall/TinBot and MOV clauses; direct normal-browser
   assertions remain missing for the MOV glossary anchor and TinBot source-169
@@ -231,11 +235,11 @@ source-to-browser gap review; final release acceptance remains open.
   retains existing source scopes and leaves the Dodge PDF/Wiki modifier
   discrepancy **SRC-006** unresolved. These results remain screening evidence,
   not completed semantic or browser acceptance; reviewer time was not measured.
-  Next: resolve the Isolated/Loss-of-Lieutenant owning record and normal-browser
-  presentation, design or run the missing focused browser assertions under the
-  VD/VR queue, and reconcile **SRC-002**, **SRC-006**, **SRC-020**, **SRC-021**
-  and **SRC-034** without inventing rules. Then design fingerprinted signed-off
-  dispositions using measured evidence reuse.
+  Next: execute VR-0122 against the committed matched artifacts; add direct
+  normal-browser assertions for the MOV glossary anchor and TinBot source-169
+  Firewall variant usage; and reconcile **SRC-002**, **SRC-006**, **SRC-020**,
+  **SRC-021** and **SRC-034** without inventing rules. Then design fingerprinted
+  signed-off dispositions using measured evidence reuse.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched

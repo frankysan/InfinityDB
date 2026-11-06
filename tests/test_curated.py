@@ -6178,6 +6178,52 @@ def test_checked_in_n5_collection_models_state_self_recovery_rolls() -> None:
     } >= {("modifies-rolls-for", "skill:reset")}
 
 
+def test_checked_in_n5_collection_sources_isolated_lieutenant_timing() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+    official_state_sources = {
+        ("n5-core-v5.3-pdf", 168),
+        ("n5-core-v5.3-es-pdf", 161),
+    }
+
+    for record_id in ("state:isolated", "rule:loss-of-lieutenant"):
+        citations = {
+            (citation["sourceId"], citation.get("page"))
+            for citation in records[record_id]["citations"]
+        }
+        assert official_state_sources <= citations
+
+    isolated_effects = " ".join(records["state:isolated"]["facts"]["effects"])
+    assert "At the beginning of the [[skill:lieutenant|Lieutenant]]'s next Active Turn" in (
+        isolated_effects
+    )
+    assert "Canceling [[state:isolated|Isolated]] before then prevents that trigger" in (
+        isolated_effects
+    )
+    assert "[[rule:loss-of-lieutenant" in isolated_effects
+    assert (
+        "canceling it after [[rule:loss-of-lieutenant|Loss of Lieutenant]] has begun "
+        "does not itself end the army-level situation"
+    ) in isolated_effects
+
+    loss = records["rule:loss-of-lieutenant"]
+    requirements = " ".join(loss["facts"]["requirements"])
+    effects = " ".join(loss["facts"]["effects"])
+    assert "[[state:isolated" in requirements
+    assert "at the beginning of the [[skill:lieutenant|Lieutenant]]'s next Active Turn" in (
+        requirements
+    )
+    assert "unless [[state:isolated|Isolated]] has been canceled before then" in requirements
+    assert (
+        "after it has triggered this army-level situation does not itself "
+        "cancel that situation"
+    ) in effects
+
+    lieutenant = " ".join(records["skill:lieutenant"]["facts"]["effects"])
+    assert "[[rule:loss-of-lieutenant|" in lieutenant
+
+
 def test_checked_in_n5_collection_models_first_full_catalog_equipment_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

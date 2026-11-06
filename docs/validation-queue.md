@@ -120,23 +120,6 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-- [ ] VD-0082 (2026-11-06; needs-design): Read-only development-status local
-  parsing and V1S recommendation. Work: user-requested Project infrastructure
-  dev-status CLI; change: `tools/dev_status.py`; risk: incorrect task/queue
-  prioritization. Existing coverage: maintained V1S backlog parser tests;
-  linked execution: VR-0121. Design: add offline cases for valid/invalid
-  backlog, documented pauses, VD threshold exclusions for blocked items, VR
-  aging and malformed/duplicate active queue entries. No tests run during VD.
-- [ ] VD-0083 (2026-11-06; needs-design): Read-only MCP and exact-SHA GitHub
-  status reporting. Work: user-requested Project infrastructure dev-status
-  CLI; change: `tools/dev_status.py`; risk: stale/misleading CI or job state.
-  Existing coverage: MCP monitor contract and GitHub CI policy;
-  linked execution: VR-0121. Design: mock local monitor and GitHub responses
-  (including unavailable, stale/unverified, missing, skipped, failed, queued,
-  superseded and cross-checkout jobs), and verify SHA filtering, token
-  non-disclosure, timeouts and read-only behavior. No live CI dispatch or
-  tests during VD.
-
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
 existing coverage, risk, linked VR ID, and resulting test selector and
@@ -146,17 +129,25 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-- [ ] VR-0121 (2026-11-06; awaiting-design): Read-only development-status
+- [ ] VR-0121 (2026-11-06; ready-to-run): Read-only development-status
   CLI reporting Git/V1S, VD/VR, MCP jobs and GitHub exact-SHA workflows.
   Work: user-requested Project infrastructure status command; revision:
-  commit introducing `tools/dev_status.py` (pin exact SHA for VR execution);
+  implementation and test-design commit for `tools/dev_status.py` (pin exact
+  SHA for VR execution);
   risk: misleading acceptance or stale status.
-  Immediate: read-only local/online CLI smoke, Ruff, Pyright, docs and Git
-  diff checks; these are not deferred regression tests.
-  Design: VD-0082 and VD-0083. Deferred: `tests/test_dev_status.py`
-  local parser and mocked provider cases, plus selected existing V1S/parser
-  regressions on a pinned Windows and Linux revision. No running tests count
-  as accepted until the designed cases are executed and reconciled.
+  Immediate: offline read-only CLI smoke, Ruff, Pyright, docs and Git diff
+  checks passed; no online provider smoke was run. These are not deferred
+  regression tests.
+  Design: VD-0082/0083 completed and retired without executing tests.
+  Deferred: `tests/test_dev_status.py` local backlog/queue parsing, exact-SHA
+  mocked GitHub responses, monitor filtering/timeout, offline behavior and
+  read-only Git inspection; plus
+  `tests/test_check_v1_backlog.py::test_selection_accepts_only_documented_pauses_and_not_ambiguous_sources`
+  and
+  `tests/test_check_v1_backlog.py::test_selection_all_documented_pauses_allow_later_work_without_override`.
+  No live CI dispatch or test was run during VD. No skip counts as evidence.
+  Intended hosts: Windows and pinned `linux-dev`; reconcile exact-SHA results
+  and required providers independently.
 - [ ] VR-0118 (2026-11-06; ready-to-run): N5.3 Hackable Unit Profile
   help correction. Work: V1S-082; revision: implementation commit containing
   the guarded v9 publication; risk: source and browser reference accuracy.
@@ -177,6 +168,31 @@ selector and other dependencies in its VR item.
   `linux-dev` for API/browser/cumulative acceptance with required assets.
   No skip on the intended host counts as evidence. Hosted matrix and
   frozen-candidate release gates remain independently required.
+- [ ] VR-0122 (2026-11-06; ready-to-run): Isolated Lieutenant
+  Loss-of-Lieutenant timing. Work: V1S-082; revision: curated-rule and
+  matched tracked rules-database/publication commit (pin exact SHA for
+  execution); risk: source-to-record and normal-browser presentation accuracy.
+  Design: VD-0084 completed and retired without executing tests. Immediate:
+  passed exact bilingual PDF pins, deterministic double export, unchanged
+  496 unrelated records/schema/Restrictions, matched deployed-object and
+  variant-usage publications, rollback-safe promotion and semantic-link audit.
+  Promoted rules SHA-256
+  `a2a1e1e4ccd6bd5e79375fa98762f4bf4eebcd189e0dc7279ccc97d223094729`;
+  deployed-object SHA-256
+  `13450656eec1764a9cfcc2663133474c94ba762aff5572b4b30be6ca99e46919`;
+  variant-usage SHA-256
+  `f5ddfc569768b522b3ab93cb59e75453dd30a4c2fa900258959354f7c88d8d74`.
+  Deferred: cited-claim/record assertion in
+  `tests/test_curated.py::test_checked_in_n5_collection_sources_isolated_lieutenant_timing`,
+  rules-database assertion in
+  `tests/test_rules_database.py::test_command_order_skill_relations_are_bidirectional`,
+  API parity in
+  `tests/test_web.py::test_reference_catalog_pages_and_rules_backed_apis_are_served`,
+  and Chromium route/citation/keyboard/responsive assertions in
+  `tests/test_verify_scenario_faq_browser.py::test_isolated_lieutenant_loss_timing_normal_browser`
+  at 1440/390/320 px. No tests run during VD.
+  Intended hosts: Windows for pinned bilingual PDF evidence; pinned
+  `linux-dev` for rules/API/browser/cumulative checks with required assets.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -191,8 +207,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0084`; active obligations are listed above.
-- Execution: `VR-0122`; active obligations are listed above.
+- Design: `VD-0085`; active obligations are listed above.
+- Execution: `VR-0123`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

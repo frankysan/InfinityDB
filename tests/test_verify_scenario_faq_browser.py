@@ -1371,6 +1371,53 @@ def test_army_retreat_standard_game_normal_reference_navigation(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_isolated_lieutenant_loss_timing_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """V1S-082: Isolated Lieutenant timing is readable and linked in the normal Rule card."""
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        response = page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        entry = page.locator(
+            '#catalog-list a[href="/rules/loss-of-lieutenant"]'
+        )
+        entry.wait_for(state="visible", timeout=30000)
+        entry.click()
+        page.wait_for_url(f"{ORIGIN}/rules/loss-of-lieutenant", timeout=30000)
+
+        card = page.locator("#rule-rule-loss-of-lieutenant")
+        card.wait_for(state="visible", timeout=30000)
+        visible = card.inner_text()
+        assert "At the beginning of the Lieutenant's next Active Turn" in visible
+        assert "unless Isolated has been canceled before then" in visible
+        assert (
+            "Canceling Isolated after it has triggered this army-level situation does not "
+            "itself cancel that situation." in visible
+        )
+        citations = card.locator(".rules-source-citations").inner_text()
+        assert "p. 168" in citations and "p. 161" in citations
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+
+        isolated = card.locator('a[href="/states/isolated"]').first
+        isolated.wait_for(state="visible", timeout=10000)
+        isolated.focus()
+        isolated.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/states/isolated", timeout=30000)
+        page.locator("#rule-state-isolated").wait_for(
+            state="visible", timeout=30000,
+        )
+        assert not errors, (width, errors)
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390, 320])
 def test_combat_group_normal_reference_navigation(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,

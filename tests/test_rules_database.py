@@ -4467,6 +4467,31 @@ def test_command_order_skill_relations_are_bidirectional(
     strategic_use = records["rule:command-token-strategic-use"]
     isolated = records["state:isolated"]
 
+    isolated_effects = " ".join(isolated["facts"]["effects"])
+    assert "At the beginning of the [[skill:lieutenant|Lieutenant]]'s next Active Turn" in (
+        isolated_effects
+    )
+    assert "Canceling [[state:isolated|Isolated]] before then prevents that trigger" in (
+        isolated_effects
+    )
+    assert (
+        "canceling it after [[rule:loss-of-lieutenant|Loss of Lieutenant]] has begun "
+        "does not itself end the army-level situation"
+    ) in isolated_effects
+
+    loss_requirements = " ".join(loss["facts"]["requirements"])
+    loss_effects = " ".join(loss["facts"]["effects"])
+    assert "at the beginning of the [[skill:lieutenant|Lieutenant]]'s next Active Turn" in (
+        loss_requirements
+    )
+    assert "unless [[state:isolated|Isolated]] has been canceled before then" in (
+        loss_requirements
+    )
+    assert (
+        "after it has triggered this army-level situation does not itself "
+        "cancel that situation"
+    ) in loss_effects
+
     assert {
         (relation["type"], relation["direction"], relation["record"]["name"])
         for relation in chain["display_relations"]
@@ -5539,4 +5564,3 @@ def test_perimeter_boost_weapons_have_distinct_source_backed_rules(
         if cite["source_id"] == "n5-core-v5.3-pdf"
     }
     assert {69, 82, chart_page} <= pages
-

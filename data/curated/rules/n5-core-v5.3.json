@@ -15579,7 +15579,8 @@
                 "effects": [
                     "The Trooper cannot receive Orders from its Order Pool and becomes Irregular in following Active Turns while still Isolated.",
                     "Comms Attack and Comms Equipment capabilities, including Hacking Programs, are disabled.",
-                    "[[skill:reset]] is made at WIP -9; a successful qualifying [[skill:reset]] or [[skill:engineer]] WIP Roll can cancel the state."
+                    "[[skill:reset]] is made at WIP -9; a successful qualifying [[skill:reset]] or [[skill:engineer]] WIP Roll can cancel the state.",
+                    "At the beginning of the [[skill:lieutenant|Lieutenant]]'s next Active Turn, the Army enters [[rule:loss-of-lieutenant|Loss of Lieutenant]] if the [[skill:lieutenant|Lieutenant]] is still [[state:isolated|Isolated]]. Canceling [[state:isolated|Isolated]] before then prevents that trigger; canceling it after [[rule:loss-of-lieutenant|Loss of Lieutenant]] has begun does not itself end the army-level situation."
                 ],
                 "requirements": [],
                 "restrictions": [
@@ -15591,11 +15592,19 @@
                 {
                     "sourceId": "wiki-isolated-state-oldid-4095",
                     "heading": "Isolated State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 168
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 161
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-11-06"
             },
             "relations": [
                 {
@@ -21190,7 +21199,7 @@
             "id": "rule:loss-of-lieutenant",
             "kind": "rule",
             "name": "Loss of Lieutenant",
-            "summary": "An army-level situation declared when the active player lacks an operational deployed [[skill:lieutenant]] during the Tactical Phase. An army in [[rule:army-retreat|Retreat!]] also enters [[rule:loss-of-lieutenant|Loss of Lieutenant]] automatically.",
+            "summary": "An army-level situation caused by the absence of an operational deployed [[skill:lieutenant|Lieutenant]] or its presence in a [[term:null-state|Null State]]; an [[state:isolated|Isolated]] [[skill:lieutenant|Lieutenant]] triggers it at the beginning of its next Active Turn unless [[state:isolated|Isolated]] was canceled beforehand. An army in [[rule:army-retreat|Retreat!]] also enters [[rule:loss-of-lieutenant|Loss of Lieutenant]] automatically.",
             "composition": {
                 "role": "definition"
             },
@@ -21203,11 +21212,13 @@
             "facts": {
                 "category": "basic-rule",
                 "requirements": [
-                    "During the Tactical Phase, the active player has no deployed [[skill:lieutenant]] because the [[skill:lieutenant]] is absent, [[state:isolated|Isolated]], or in a Null State."
+                    "During the Tactical Phase, the active player has no deployed [[skill:lieutenant|Lieutenant]] because the [[skill:lieutenant|Lieutenant]] is absent from the table or in a [[term:null-state|Null State]].",
+                    "If the [[skill:lieutenant|Lieutenant]] is [[state:isolated|Isolated]], this army-level situation begins at the beginning of the [[skill:lieutenant|Lieutenant]]'s next Active Turn unless [[state:isolated|Isolated]] has been canceled before then."
                 ],
                 "effects": [
                     "All Troopers in the Army List are Irregular while the Loss of Lieutenant situation applies.",
-                    "Outside [[rule:army-retreat|Retreat!]], at the end of the Turn the player appoints a new eligible [[skill:lieutenant]] at no cost, canceling the situation."
+                    "Outside [[rule:army-retreat|Retreat!]], at the end of the Turn the player appoints a new eligible [[skill:lieutenant]] at no cost, canceling the situation.",
+                    "Canceling [[state:isolated|Isolated]] after it has triggered this army-level situation does not itself cancel that situation."
                 ],
                 "restrictions": [
                     "Troopers with Irregular Training or the REM Troop Type cannot be appointed as the replacement [[skill:lieutenant]].",
@@ -21228,11 +21239,19 @@
                 {
                     "sourceId": "wiki-loss-of-lieutenant-oldid-3508",
                     "heading": "Loss of Lieutenant"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 168
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 161
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-11-06"
             }
         },
         {
@@ -21945,7 +21964,7 @@
                 "requirements": [],
                 "effects": [
                     "The user has a Special Lieutenant Order.",
-                    "If the Lieutenant is absent from the table, [[state:isolated|Isolated]], or in a Null State during the Tactical Phase, Loss of Lieutenant applies.",
+                    "The army-level consequences of an absent, [[state:isolated|Isolated]], or [[term:null-state|Null State]] [[skill:lieutenant|Lieutenant]] are described in [[rule:loss-of-lieutenant|Loss of Lieutenant]].",
                     "The Lieutenant Skill remains active while its owner is in a Null State until a new Lieutenant is appointed."
                 ],
                 "clarifications": [
@@ -21993,7 +22012,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-11-06"
             },
             "variantSemantics": {
                 "inheritance": "family",

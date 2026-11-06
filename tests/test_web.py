@@ -5025,6 +5025,32 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     loss_of_lieutenant = json.loads(body)
     assert loss_of_lieutenant["slug"] == "loss-of-lieutenant"
     assert loss_of_lieutenant["rules"][0]["id"] == "rule:loss-of-lieutenant"
+    loss_rule = loss_of_lieutenant["rules"][0]
+    loss_requirements = " ".join(loss_rule["facts"]["requirements"])
+    loss_effects = " ".join(loss_rule["facts"]["effects"])
+    assert "at the beginning of the [[skill:lieutenant|Lieutenant]]'s next Active Turn" in (
+        loss_requirements
+    )
+    assert "unless [[state:isolated|Isolated]] has been canceled before then" in (
+        loss_requirements
+    )
+    assert (
+        "after it has triggered this army-level situation does not itself "
+        "cancel that situation"
+    ) in loss_effects
+    assert {
+        (citation["source_id"], citation["page"])
+        for citation in loss_rule["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 168),
+        ("n5-core-v5.3-es-pdf", 161),
+    }
+    assert any(
+        token.get("target") == "state:isolated"
+        and token.get("public_reference") is not None
+        for clause in loss_rule["fact_tokens"]["requirements"]
+        for token in clause
+    )
     lieutenant_reference = next(
         token
         for token in loss_of_lieutenant["rules"][0]["summary_tokens"]

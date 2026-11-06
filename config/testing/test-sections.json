@@ -224,6 +224,7 @@
         "test_deployment_alerts",
         "test_deployment_diagnostics",
         "test_deployment_resources",
+        "test_dev_status",
         "test_doc_links",
         "test_installed_wheel_smoke",
         "test_metrics_history",
