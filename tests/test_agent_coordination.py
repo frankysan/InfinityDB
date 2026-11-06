@@ -18,6 +18,8 @@ from tools.agent_coordination import (
     check,
     check_integration,
     claim,
+    integrate_proposal,
+    primary_for_agent,
     release,
     release_integration,
     status,
@@ -155,6 +157,103 @@ def test_separate_processes_cannot_claim_same_scope(tmp_path: Path) -> None:
     results = [first.communicate(timeout=30), second.communicate(timeout=30)]
     assert sorted([first.returncode, second.returncode]) == [0, 2], results
     assert len(status(root)["claims"]) == 1
+
+
+def test_pinned_proposal_fast_forward_integration(tmp_path: Path) -> None:
+    root, head = _repo(tmp_path)
+    a = _worktree(root, "agent-a", "task-a")
+    assert primary_for_agent(a) == root
+    item = claim(a, "agent-a", "task-a", ["src/a.py"])
+    (a / "src/a.py").write_text("VALUE = 5\n", encoding="utf-8")
+    _git(a, "add", "src/a.py")
+    _git(a, "commit", "-qm", "feat: update source")
+    proposal = _git(a, "rev-parse", "HEAD")
+    lease = acquire_integration(root, "integrator", head)
+    result = integrate_proposal(
+        a, "agent-a", "task-a", item["id"],
+        owner="integrator", integration_id=lease["id"],
+        expected_head=head, proposal_head=proposal,
+    )
+    assert result["status"] == "integrated"
+    assert result["paths"] == ["src/a.py"]
+    assert _git(root, "rev-parse", "HEAD") == proposal
+    assert _git(root, "status", "--porcelain") == ""
+    assert (root / "src/a.py").read_text(encoding="utf-8") == "VALUE = 5\n"
+    with pytest.raises(CoordinationError, match="HEAD differs"):
+        integrate_proposal(
+            a, "agent-a", "task-a", item["id"],
+            owner="integrator", integration_id=lease["id"],
+            expected_head=head, proposal_head=proposal,
+        )
+    release_integration(root, "integrator", lease["id"])
+
+
+def test_integration_refuses_unclaimed_file_or_missing_lease(tmp_path: Path) -> None:
+    root, head = _repo(tmp_path)
+    a = _worktree(root, "agent-a", "task-a")
+    item = claim(a, "agent-a", "task-a", ["src/a.py"])
+    (a / "README.md").write_text("Unclaimed\n", encoding="utf-8")
+    _git(a, "add", "README.md")
+    _git(a, "commit", "-qm", "test: unexpected path")
+    proposal = _git(a, "rev-parse", "HEAD")
+    with pytest.raises(CoordinationError, match="Integration reservation differs"):
+        integrate_proposal(
+            a, "agent-a", "task-a", item["id"],
+            owner="integrator", integration_id="0" * 32,
+            expected_head=head, proposal_head=proposal,
+        )
+    lease = acquire_integration(root, "integrator", head)
+    with pytest.raises(CoordinationError, match="outside claimed scope"):
+        integrate_proposal(
+            a, "agent-a", "task-a", item["id"],
+            owner="integrator", integration_id=lease["id"],
+            expected_head=head, proposal_head=proposal,
+        )
+    assert _git(root, "rev-parse", "HEAD") == head
+    release_integration(root, "integrator", lease["id"])
+
+
+def test_second_agent_merges_primary_then_fast_forwards(tmp_path: Path) -> None:
+    root, baseline = _repo(tmp_path)
+    a = _worktree(root, "agent-a", "task-a")
+    b = _worktree(root, "agent-b", "task-b")
+    ca = claim(a, "agent-a", "task-a", ["src/a.py"])
+    cb = claim(b, "agent-b", "task-b", ["README.md"])
+    (a / "src/a.py").write_text("VALUE = 9\n", encoding="utf-8")
+    _git(a, "add", "src/a.py")
+    _git(a, "commit", "-qm", "feat: agent a")
+    head_a = _git(a, "rev-parse", "HEAD")
+    (b / "README.md").write_text("Agent B\n", encoding="utf-8")
+    _git(b, "add", "README.md")
+    _git(b, "commit", "-qm", "feat: agent b")
+    head_b = _git(b, "rev-parse", "HEAD")
+
+    lease_a = acquire_integration(root, "integrator", baseline)
+    integrate_proposal(
+        a, "agent-a", "task-a", ca["id"],
+        owner="integrator", integration_id=lease_a["id"],
+        expected_head=baseline, proposal_head=head_a,
+    )
+    release_integration(root, "integrator", lease_a["id"])
+
+    lease_b = acquire_integration(root, "integrator", head_a)
+    with pytest.raises(CoordinationError, match="Git merge-base"):
+        integrate_proposal(
+            b, "agent-b", "task-b", cb["id"],
+            owner="integrator", integration_id=lease_b["id"],
+            expected_head=head_a, proposal_head=head_b,
+        )
+    assert _git(root, "rev-parse", "HEAD") == head_a
+    _git(b, "merge", "--no-edit", head_a)
+    merged_b = _git(b, "rev-parse", "HEAD")
+    assert check(b, "agent-b", "task-b", cb["id"])["files_checked"] == 1
+    integrate_proposal(
+        b, "agent-b", "task-b", cb["id"],
+        owner="integrator", integration_id=lease_b["id"],
+        expected_head=head_a, proposal_head=merged_b,
+    )
+    assert _git(root, "rev-parse", "HEAD") == merged_b
+    release_integration(root, "integrator", lease_b["id"])
 
 
 def test_state_corruption_fails_closed(tmp_path: Path) -> None:

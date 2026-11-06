@@ -232,9 +232,20 @@ def check(root: Path, agent: str, task: str, claim_id: str) -> dict:
         entry = _get_claim(root, claim_id, agent, task, _state(directory))
         if current["branch"] != entry["branch"] or current["baseline"] != entry["baseline"]:
             raise CoordinationError("Checkout identity differs from claimed identity")
-        # Check both committed/staged/unstaged tracked changes AND nonignored new files.
+        # After an agent merges the new primary HEAD, exclude already-integrated
+        # changes when checking its claimed scope. Otherwise use its own baseline.
+        diff_base = entry["baseline"]
+        primary_head = _git(primary_for_agent(root), "rev-parse", "HEAD").stdout.strip()
+        try:
+            _git(root, "merge-base", "--is-ancestor", diff_base, primary_head)
+            _git(root, "merge-base", "--is-ancestor", primary_head, current["head"])
+        except CoordinationError:
+            pass
+        else:
+            diff_base = primary_head
+        # Check committed/staged/unstaged changes and nonignored new files.
         tracked = _git(
-            root, "diff", "--no-renames", "--name-only", entry["baseline"],
+            root, "diff", "--no-renames", "--name-only", diff_base,
         ).stdout.splitlines()
         untracked = _git(root, "ls-files", "--others", "--exclude-standard").stdout.splitlines()
         unexpected = [
@@ -324,6 +335,93 @@ def release_integration(root: Path, owner: str, claim_id: str) -> dict:
         return {"released": claim_id, "revision": state["revision"]}
 
 
+def primary_for_agent(root: Path) -> Path:
+    """Locate the primary via a registered worktree's shared Git common directory."""
+    root = _root(root)
+    common = _common_dir(root)
+    primary = common.parent
+    if (
+        primary.name != "InfinityDB"
+        or primary.is_symlink()
+        or not primary.is_dir()
+        or not (primary / ".git").is_dir()
+        or _common_dir(primary) != common
+    ):
+        raise CoordinationError("No verified primary InfinityDB checkout")
+    return primary
+
+
+def integrate_proposal(
+    root: Path, agent: str, task: str, claim_id: str, *,
+    owner: str, integration_id: str, expected_head: str, proposal_head: str,
+) -> dict:
+    """Integrate one reviewed local agent commit by a pinned fast-forward only.
+
+    The local integration reservation stays held until explicitly released.
+    This operation never pushes, rebases, resets or changes another checkout.
+    """
+    root = _root(root)
+    current = guard(root, agent, task)
+    if root.name == "InfinityDB":
+        raise CoordinationError("Integration proposal must come from an agent checkout")
+    if not _SHA.fullmatch(proposal_head) or current["head"] != proposal_head:
+        raise CoordinationError("Proposal HEAD differs from expected revision")
+    if _git(root, "status", "--porcelain", "--untracked-files=normal").stdout.strip():
+        raise CoordinationError("Proposal checkout is dirty")
+    primary = primary_for_agent(root)
+    with _mutex(primary) as directory:
+        state = _state(directory)
+        entry = _get_claim(root, claim_id, agent, task, state)
+        lease = state["integration"]
+        if (
+            not lease
+            or lease.get("id") != integration_id
+            or lease.get("owner") != owner
+            or lease.get("workspace") != str(primary)
+            or lease.get("expected_head") != expected_head
+        ):
+            raise CoordinationError("Integration reservation differs")
+        _primary(primary, expected_head)
+        if _git(primary, "status", "--porcelain", "--untracked-files=normal").stdout.strip():
+            raise CoordinationError("Primary checkout is dirty")
+        if (
+            entry["branch"] != current["branch"]
+            or entry["baseline"] != current["baseline"]
+        ):
+            raise CoordinationError("Proposal checkout differs from its task claim")
+        # Allow later proposals to merge in the latest primary revision without
+        # rebasing: original baseline <= current primary <= proposal HEAD.
+        _git(primary, "merge-base", "--is-ancestor", entry["baseline"], expected_head)
+        _git(primary, "merge-base", "--is-ancestor", expected_head, proposal_head)
+        changed = _git(
+            primary, "diff", "--no-renames", "--name-only",
+            expected_head, proposal_head,
+        ).stdout.splitlines()
+        if not changed:
+            raise CoordinationError("Proposal has no changes to integrate")
+        unexpected = [
+            path for path in changed
+            if not any(_overlaps(path, allowed) for allowed in entry["scope"])
+        ]
+        if unexpected:
+            raise CoordinationError("Proposal changes outside claimed scope")
+        # Avoid executing checkout-provided post-merge hooks. A second Git
+        # writer outside this advisory registry remains a separate risk.
+        _git(
+            primary, "-c", f"core.hooksPath={os.devnull}", "merge",
+            "--ff-only", "--no-edit", proposal_head,
+        )
+        actual = _git(primary, "rev-parse", "HEAD").stdout.strip()
+        if actual != proposal_head:
+            raise CoordinationError("Primary HEAD changed unexpectedly during integration")
+        if _git(primary, "status", "--porcelain", "--untracked-files=normal").stdout.strip():
+            raise CoordinationError("Primary checkout is dirty after integration")
+        return {
+            "status": "integrated", "before": expected_head, "after": actual,
+            "paths": changed, "claim": claim_id, "integration": integration_id,
+        }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -340,17 +438,26 @@ def main(argv: list[str] | None = None) -> int:
     integration = commands.add_parser("acquire-integration", help="Claim local primary integration")
     integration.add_argument("--owner", required=True)
     integration.add_argument("--expected-head", required=True)
+    integration.add_argument("--primary", action="store_true")
     integration_check = commands.add_parser(
         "check-integration", help="Verify local primary integration",
     )
     integration_check.add_argument("--owner", required=True)
     integration_check.add_argument("--claim-id", required=True)
     integration_check.add_argument("--expected-head", required=True)
+    integration_check.add_argument("--primary", action="store_true")
     integration_release = commands.add_parser(
         "release-integration", help="Release local primary integration",
     )
     integration_release.add_argument("--owner", required=True)
     integration_release.add_argument("--claim-id", required=True)
+    integration_release.add_argument("--primary", action="store_true")
+    proposal = commands.add_parser("integrate-proposal", help="Fast-forward an approved proposal")
+    for name in (
+        "agent", "task", "claim-id", "owner", "integration-id",
+        "expected-head", "proposal-head",
+    ):
+        proposal.add_argument("--" + name, required=True)
     args = parser.parse_args(argv)
     try:
         root = Path.cwd()
@@ -363,11 +470,20 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "release":
             result = release(root, args.agent, args.task, args.claim_id)
         elif args.command == "acquire-integration":
-            result = acquire_integration(root, args.owner, args.expected_head)
+            target = primary_for_agent(root) if args.primary else root
+            result = acquire_integration(target, args.owner, args.expected_head)
         elif args.command == "check-integration":
-            result = check_integration(root, args.owner, args.claim_id, args.expected_head)
+            target = primary_for_agent(root) if args.primary else root
+            result = check_integration(target, args.owner, args.claim_id, args.expected_head)
+        elif args.command == "release-integration":
+            target = primary_for_agent(root) if args.primary else root
+            result = release_integration(target, args.owner, args.claim_id)
         else:
-            result = release_integration(root, args.owner, args.claim_id)
+            result = integrate_proposal(
+                root, args.agent, args.task, args.claim_id,
+                owner=args.owner, integration_id=args.integration_id,
+                expected_head=args.expected_head, proposal_head=args.proposal_head,
+            )
     except (WorkspaceError, CoordinationError, OSError, subprocess.TimeoutExpired) as exc:
         parser.exit(2, f"coordination refused: {exc}\n")
     print(json.dumps(result, indent=2, sort_keys=True))

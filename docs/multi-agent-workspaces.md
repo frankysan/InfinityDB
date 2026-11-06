@@ -128,12 +128,36 @@ python -m tools.agent_coordination check-integration --owner integrator --claim-
 python -m tools.agent_coordination release-integration --owner integrator --claim-id <claim-id>
 ```
 
-Check ownership immediately before integration Git operations. The integration
-reservation persists until explicitly released; it is not an automatic lock
-over arbitrary `git` processes and does not authorize a non-integration agent
-to advance the primary. If a process crashes, state remains reserved. **Stop**
-and investigate instead of deleting/reassigning the claim. Recovery and a
-globally enforceable cross-host authority remain unimplemented.
+Once an agent's proposal is **committed and its scope verified**, the designated
+integration owner can operate from that agent's worktree without changing
+its branch. The `--primary` option resolves the locally registered primary
+checkout through Git's common directory:
+
+```powershell
+python -m tools.agent_coordination acquire-integration --primary --owner integrator --expected-head <primary-sha>
+python -m tools.agent_coordination integrate-proposal --agent chatgpt --task workspace-bootstrap --claim-id <task-claim-id> --owner integrator --integration-id <integration-claim-id> --expected-head <primary-sha> --proposal-head <proposal-sha>
+python -m tools.agent_coordination release-integration --primary --owner integrator --claim-id <integration-claim-id>
+```
+
+`integrate-proposal` requires the primary checkout and agent checkout to be
+clean, verifies their Git identities and claims, and refuses any changed file
+outside the task's scope. It accepts only a local **fast-forward** from the
+specified primary HEAD to the exact proposal SHA; hooks are disabled. It
+does not push or run tests. If another proposal was integrated first, this
+agent must **merge the current primary branch into its own isolated branch**
+and resolve conflicts deliberately. The original baseline must remain an
+ancestor of the current primary HEAD, and the new proposal commit must include
+that primary HEAD. Force updates, rebases, implicit synchronization and
+automatic conflict resolution are not part of this operation.
+
+Check active jobs and exclusive integration ownership immediately before the
+Git operation. Revalidate the integrated revision and publish it separately
+using the existing safe fast-forward push protocol; release the integration
+reservation only after the operation and required follow-through are complete.
+This is a cooperative, *local* reservation, not an automatic lock over
+arbitrary `git` processes. If a process crashes, state remains reserved.
+**Stop** and investigate instead of deleting/reassigning the claim.
+Recovery and a globally enforceable cross-host authority remain unimplemented.
 
 **Important limitation:** The local coordinator cannot detect a concurrent
 claim on the independent Linux clone or stop an unrestricted external Git
