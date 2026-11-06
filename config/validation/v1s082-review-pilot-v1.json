@@ -1,0 +1,215 @@
+{
+  "format": "InfinityDB V1S-082 review pilot sample",
+  "formatVersion": 1,
+  "status": "selection-only-no-approved-mechanics",
+  "owner": "V1S-082",
+  "selectedOn": "2026-11-06",
+  "selectedRecordCount": 35,
+  "selectionNotes": "Fixed stratified source/semantic-risk pilot. Inspect exact pinned source and normal-browser path; output is a work packet, never an acceptance ledger.",
+  "records": [
+    {
+      "recordId": "rule:profile-help:hackable",
+      "cohort": "core-procedures",
+      "reviewQuestion": "Source-native phases, ownership, eligibility and cross-links; reuse earlier scoped proof without whole-record approval"
+    },
+    {
+      "recordId": "rule:combat-group",
+      "cohort": "core-procedures",
+      "reviewQuestion": "Source-native phases, ownership, eligibility and cross-links; reuse earlier scoped proof without whole-record approval"
+    },
+    {
+      "recordId": "rule:game-sequence",
+      "cohort": "core-procedures",
+      "reviewQuestion": "Source-native phases, ownership, eligibility and cross-links; reuse earlier scoped proof without whole-record approval"
+    },
+    {
+      "recordId": "rule:hacking-area",
+      "cohort": "core-procedures",
+      "reviewQuestion": "Source-native phases, ownership, eligibility and cross-links; reuse earlier scoped proof without whole-record approval"
+    },
+    {
+      "recordId": "rule:order-pool",
+      "cohort": "core-procedures",
+      "reviewQuestion": "Source-native phases, ownership, eligibility and cross-links; reuse earlier scoped proof without whole-record approval"
+    },
+    {
+      "recordId": "skill:doctor",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "skill:engineer",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "skill:stealth",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "skill:dodge",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "skill:discover",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "skill:reset",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "skill:berserk",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "skill:minelayer",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "skill:super-jump",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "skill:infiltration",
+      "cohort": "conditional-skills",
+      "reviewQuestion": "Declarations, target/roll conditions, exceptions, negative evidence and source-specific variants"
+    },
+    {
+      "recordId": "hacking-program:trinity",
+      "cohort": "hacking-programs",
+      "reviewQuestion": "Per-Program target legality, active/reactive context, device access and FAQ scope"
+    },
+    {
+      "recordId": "hacking-program:cybermask",
+      "cohort": "hacking-programs",
+      "reviewQuestion": "Per-Program target legality, active/reactive context, device access and FAQ scope"
+    },
+    {
+      "recordId": "hacking-program:spotlight",
+      "cohort": "hacking-programs",
+      "reviewQuestion": "Per-Program target legality, active/reactive context, device access and FAQ scope"
+    },
+    {
+      "recordId": "weapon:kobra-pistol",
+      "cohort": "weapon-profiles",
+      "reviewQuestion": "Actual source Weapon/mode, saving rolls, chart exceptions and conflicting publications"
+    },
+    {
+      "recordId": "weapon:multi-rifle",
+      "cohort": "weapon-profiles",
+      "reviewQuestion": "Actual source Weapon/mode, saving rolls, chart exceptions and conflicting publications"
+    },
+    {
+      "recordId": "weapon:flash-pulse",
+      "cohort": "weapon-profiles",
+      "reviewQuestion": "Actual source Weapon/mode, saving rolls, chart exceptions and conflicting publications"
+    },
+    {
+      "recordId": "trait:silent-x",
+      "cohort": "traits",
+      "reviewQuestion": "Known glossary-type conditions and whether prior bounded reviews can be reused"
+    },
+    {
+      "recordId": "trait:disposable-x",
+      "cohort": "traits",
+      "reviewQuestion": "Known glossary-type conditions and whether prior bounded reviews can be reused"
+    },
+    {
+      "recordId": "trait:deployable",
+      "cohort": "traits",
+      "reviewQuestion": "Known glossary-type conditions and whether prior bounded reviews can be reused"
+    },
+    {
+      "recordId": "trait:target-attribute",
+      "cohort": "traits",
+      "reviewQuestion": "Known glossary-type conditions and whether prior bounded reviews can be reused"
+    },
+    {
+      "recordId": "state:isolated",
+      "cohort": "states",
+      "reviewQuestion": "Entry/cancellation and exception checks, not static record existence"
+    },
+    {
+      "recordId": "state:prone",
+      "cohort": "states",
+      "reviewQuestion": "Entry/cancellation and exception checks, not static record existence"
+    },
+    {
+      "recordId": "state:camouflaged",
+      "cohort": "states",
+      "reviewQuestion": "Entry/cancellation and exception checks, not static record existence"
+    },
+    {
+      "recordId": "term:trooper",
+      "cohort": "terms",
+      "reviewQuestion": "Definition-only versus consequential conditions; route and reciprocal link"
+    },
+    {
+      "recordId": "term:visibility-zone",
+      "cohort": "terms",
+      "reviewQuestion": "Definition-only versus consequential conditions; route and reciprocal link"
+    },
+    {
+      "recordId": "attribute:mov",
+      "cohort": "attribute",
+      "reviewQuestion": "Profile field explanation and absent-value semantics"
+    },
+    {
+      "recordId": "equipment:firewall",
+      "cohort": "equipment",
+      "reviewQuestion": "Owner, sharing, firewall effects, exceptions, selected usage"
+    },
+    {
+      "recordId": "equipment:tinbot",
+      "cohort": "equipment",
+      "reviewQuestion": "Owner, sharing, firewall effects, exceptions, selected usage"
+    },
+    {
+      "recordId": "declaration-category:automatic:p86",
+      "cohort": "declaration-metadata",
+      "reviewQuestion": "Source-heading ownership, classification and ARO permission; historical screening-only cohort"
+    },
+    {
+      "recordId": "declaration-category:aro:p77",
+      "cohort": "declaration-metadata",
+      "reviewQuestion": "Source-heading ownership, classification and ARO permission; historical screening-only cohort"
+    }
+  ],
+  "sourceFirstProbes": [
+    {
+      "id": "n5-core-p5-overview",
+      "sourceId": "n5-core-v5.3-pdf",
+      "printedPage": 5,
+      "question": "Independently enumerate player-relevant introduction/game-summary mechanics and verify a maintained, browser-reachable owner or a justified exclusion. Do not assume the source page is already covered."
+    },
+    {
+      "id": "n5-core-p71-weaponry",
+      "sourceId": "n5-core-v5.3-pdf",
+      "printedPage": 71,
+      "question": "Independently enumerate material Weaponry exceptions and check for unowned source clauses, not just the records selected above."
+    },
+    {
+      "id": "n5-core-p144-terrain",
+      "sourceId": "n5-core-v5.3-pdf",
+      "printedPage": 144,
+      "question": "Independently inspect terrain/scenery conditions for material concepts absent from current maintained identities; source headings are discovery hints only."
+    }
+  ],
+  "benchmarkFields": [
+    "minutesSpentReviewing",
+    "sourceOpensActual",
+    "distinctSemanticClauseDecisions",
+    "confirmedDefects",
+    "reusedScopedEvidenceCount",
+    "browserAssertionsNeeded",
+    "manualSourceFirstOmissions"
+  ]
+}

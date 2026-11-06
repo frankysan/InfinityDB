@@ -202,8 +202,12 @@ source-to-browser gap review; final release acceptance remains open.
   read-only, source-family batch planner built on the existing identity/locator
   inventory (currently 466 records / 828 source locators). Its output is triage
   only; it does not retire any source or browser acceptance obligation.
-  Next: pilot the batches on 30–40 varied records, measure evidence reuse and
-  review time, then design the fingerprinted, reviewed disposition contract.
+  A fixed [35-record pilot](v1.0-coverage-workflow-plan.md#p1--tracked-disposition-and-source-evidence-contract)
+  spans 10 cohorts and three source-first probes; its read-only work packet reports
+  127 citation occurrences, 123 exact locators and 96 distinct source pages.
+  This is **selection only**, not a completed semantic or browser review.
+  Next: execute measured source/normal-browser review of the fixed sample, then
+  design fingerprinted signed-off dispositions using observed evidence reuse.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched

@@ -32,6 +32,7 @@ from tools.report_reference_baseline import (
     audit_numeric_army_replacement_variants,
     audit_visibility_zone_evidence,
     build_baseline,
+    build_explanation_review_pilot,
     join_explanation_reviewed_evidence,
     main,
     parse_frozen_explanation_inventory,
@@ -145,6 +146,43 @@ def test_explanation_review_planner_is_complete_deterministic_and_pending() -> N
     }
     with pytest.raises(ReferenceBaselineError, match="Source locator owners disagree"):
         plan_explanation_review_batches(malformed)
+
+
+def test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved(
+    tmp_path: Path,
+) -> None:
+    report = reconcile_explanation_inventory()
+    pilot = build_explanation_review_pilot(report)
+    summary = pilot["summary"]
+    assert pilot["status"] == "planned-not-reviewed-no-source-or-browser-approvals"
+    assert summary["selectedRecords"] == 35
+    assert summary["semanticCohorts"] >= 6
+    assert summary["sourceFirstProbes"] >= 1
+    assert summary["sourceApprovals"] == summary["browserApprovals"] == 0
+    assert summary["uniqueSelectedSourceLocators"] <= summary["selectedSourceCitationOccurrences"]
+    assert summary["uniqueSelectedSourcePages"] <= summary["uniqueSelectedSourceLocators"]
+    assert summary["sourcePageOpensPotentiallyReusable"] == (
+        summary["selectedSourceCitationOccurrences"] - summary["uniqueSelectedSourcePages"]
+    )
+    assert all(
+        row["sourceDisposition"] == "pending-semantic-acceptance"
+        and row["normalBrowserDisposition"] == "pending-browser-acceptance"
+        and len(row["curatedRecordSha256"]) == 64
+        and all(value is None for value in row["measurements"].values())
+        for row in pilot["records"]
+    )
+    assert all(
+        row["status"] == "pending-independent-source-scan"
+        for row in pilot["sourceFirstProbes"]
+    )
+    assert pilot == build_explanation_review_pilot(report)
+    source = ROOT / "config/validation/v1s082-review-pilot-v1.json"
+    manifest = json.loads(source.read_text(encoding="utf-8"))
+    manifest["records"][1]["recordId"] = manifest["records"][0]["recordId"]
+    changed = tmp_path / "duplicate-pilot.json"
+    changed.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(ReferenceBaselineError, match="Missing/duplicate pilot record"):
+        build_explanation_review_pilot(report, manifest_path=changed)
 
 
 def _reviewed_explanation_join_inputs() -> dict[str, Any]:

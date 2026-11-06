@@ -1751,6 +1751,159 @@ def plan_explanation_review_batches(
     }
 
 
+V1S082_PILOT_MANIFEST = PROJECT_ROOT / "config/validation/v1s082-review-pilot-v1.json"
+
+
+def build_explanation_review_pilot(
+    report: dict[str, Any], *, manifest_path: Path = V1S082_PILOT_MANIFEST,
+) -> dict[str, Any]:
+    """Prepare pinned, representative work packets; no automatic rule approval."""
+    from infinity_db.curated import load_curated_document
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise ReferenceBaselineError(f"V1S-082 pilot manifest is unreadable: {exc}") from exc
+    if (manifest.get("format") != "InfinityDB V1S-082 review pilot sample"
+            or manifest.get("formatVersion") != 1
+            or manifest.get("status") != "selection-only-no-approved-mechanics"):
+        raise ReferenceBaselineError("V1S-082 pilot manifest format/status mismatch")
+    selected = manifest.get("records")
+    probes = manifest.get("sourceFirstProbes")
+    benchmarks = manifest.get("benchmarkFields")
+    if (not isinstance(benchmarks, list) or not benchmarks
+            or any(not isinstance(field, str) or not field for field in benchmarks)
+            or len(set(benchmarks)) != len(benchmarks)):
+        raise ReferenceBaselineError("V1S-082 benchmark field contract is invalid")
+    if (not isinstance(selected, list) or not 30 <= len(selected) <= 40
+            or len(selected) != manifest.get("selectedRecordCount")
+            or not isinstance(probes, list) or not probes):
+        raise ReferenceBaselineError("V1S-082 pilot must select 30-40 records and source probes")
+
+    indexed = {record["id"]: record for record in report["currentRecords"]}
+    if len(indexed) != report["currentCount"]:
+        raise ReferenceBaselineError("Pilot baseline has duplicate or missing current identities")
+    curated: dict[str, dict[str, Any]] = {}
+    for source in CURRENT_EXPLANATION_COLLECTIONS:
+        for row in load_curated_document(source)["records"]:
+            if row["id"] in curated:
+                raise ReferenceBaselineError(f"Duplicate pilot curated identity: {row['id']}")
+            curated[row["id"]] = row
+
+    sections: dict[tuple[str, str, str], set[str]] = {}
+    for row in report["sourceSections"]:
+        key = (row["sourceId"], str(row["page"]), row["heading"])
+        if key in sections:
+            raise ReferenceBaselineError(f"Duplicate pilot source locator: {key!r}")
+        sections[key] = set(row["currentRecordIds"])
+
+    record_ids: set[str] = set()
+    cohorts: set[str] = set()
+    selected_rows: list[dict[str, Any]] = []
+    all_locators: set[tuple[str, str, str]] = set()
+    all_source_pages: set[tuple[str, str]] = set()
+    naive_locator_count = 0
+    repeated_shared = 0
+    for item in selected:
+        if not isinstance(item, dict):
+            raise ReferenceBaselineError("Pilot record must be an object")
+        identifier = item.get("recordId")
+        cohort = item.get("cohort")
+        question = item.get("reviewQuestion")
+        if (not isinstance(identifier, str) or identifier not in indexed
+                or identifier in record_ids):
+            raise ReferenceBaselineError(f"Missing/duplicate pilot record: {identifier!r}")
+        if (not isinstance(cohort, str) or not re.fullmatch(r"[a-z][a-z-]+", cohort)
+                or not isinstance(question, str) or not question.strip()):
+            raise ReferenceBaselineError(f"Missing pilot cohort/review question: {identifier}")
+        record_ids.add(identifier)
+        cohorts.add(cohort)
+        row = indexed[identifier]
+        source_locators = []
+        for citation in row["citations"]:
+            page = citation["page"] if citation["page"] is not None else "-"
+            key = (citation["sourceId"], str(page), citation["heading"])
+            if identifier not in sections.get(key, set()):
+                raise ReferenceBaselineError(f"Pilot source ownership mismatch: {identifier}")
+            source_locators.append({
+                "sourceId": key[0], "page": key[1], "heading": key[2],
+                "otherRecordOwners": sorted(sections[key] - {identifier}),
+                "status": "citation-pointer-not-reviewed-clause",
+            })
+            repeated_shared += len(sections[key]) > 1
+            all_locators.add(key)
+            all_source_pages.add((key[0], key[1]))
+            naive_locator_count += 1
+        curated_bytes = json.dumps(
+            curated[identifier], sort_keys=True, ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        selected_rows.append({
+            "id": identifier,
+            "cohort": cohort,
+            "reviewQuestion": question,
+            "kind": row["kind"],
+            "lineage": row["lineage"],
+            "historicalTier": row["historicalTier"],
+            "selectedBrowserTestHint": row["selectedBrowserTest"],
+            "curatedRecordSha256": hashlib.sha256(curated_bytes).hexdigest(),
+            "citations": source_locators,
+            "sourceDisposition": "pending-semantic-acceptance",
+            "normalBrowserDisposition": "pending-browser-acceptance",
+            "measurements": {
+                field: None for field in manifest["benchmarkFields"]
+            },
+        })
+    if len(cohorts) < 6 or len(selected_rows) != manifest["selectedRecordCount"]:
+        raise ReferenceBaselineError("Pilot selection does not cover enough semantic families")
+    source_ids = {key[0] for key in sections}
+    probe_ids: set[str] = set()
+    probe_rows: list[dict[str, Any]] = []
+    for probe in probes:
+        if (not isinstance(probe, dict)
+                or not isinstance(probe.get("id"), str)
+                or probe["id"] in probe_ids
+                or probe.get("sourceId") not in source_ids
+                or type(probe.get("printedPage")) is not int
+                or probe["printedPage"] < 1
+                or not isinstance(probe.get("question"), str)
+                or not probe["question"].strip()):
+            raise ReferenceBaselineError(f"Invalid source-first probe: {probe!r}")
+        probe_ids.add(probe["id"])
+        probe_rows.append({**probe, "status": "pending-independent-source-scan"})
+    return {
+        "format": "InfinityDB V1S-082 review pilot work packet",
+        "formatVersion": 1,
+        "status": "planned-not-reviewed-no-source-or-browser-approvals",
+        "inputFingerprints": {
+            "frozenInventorySha256": report["frozenInventorySha256"],
+            "currentCuratedSha256": report["currentCuratedSha256"],
+            "selectionManifestSha256": _sha256(manifest_path),
+        },
+        "summary": {
+            "selectedRecords": len(selected_rows),
+            "semanticCohorts": len(cohorts),
+            "selectedSourceCitationOccurrences": naive_locator_count,
+            "uniqueSelectedSourceLocators": len(all_locators),
+            "uniqueSelectedSourcePages": len(all_source_pages),
+            "duplicateSelectedLocatorOccurrences": naive_locator_count - len(all_locators),
+            "sourcePageOpensPotentiallyReusable": naive_locator_count - len(all_source_pages),
+            "sharedWithOtherRecordsOccurrences": repeated_shared,
+            "sourceFirstProbes": len(probe_rows),
+            "sourceApprovals": 0,
+            "browserApprovals": 0,
+        },
+        "records": selected_rows,
+        "sourceFirstProbes": probe_rows,
+        "benchmarkFields": manifest["benchmarkFields"],
+        "caveat": (
+            "Locator duplication is only a potential research shortcut, not proof "
+            "that two records express the same semantic clause or that any source "
+            "fact or browser route has been accepted."
+        ),
+    }
+
+
 def reconcile_declaration_owners(
     report: dict[str, Any],
     *,
@@ -2766,6 +2919,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Write a triage-only review batch plan under ignored local/",
     )
     parser.add_argument(
+        "--review-pilot-output", type=Path,
+        help="Write the fixed 35-record source-review pilot to ignored local/",
+    )
+    parser.add_argument(
         "--reconcile-explanation-inventory", action="store_true",
         help="Compare frozen 367-record explanation inventory to current Core/Hacking",
     )
@@ -2818,6 +2975,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "--audit-conditional-declarations and --audit-visibility-zones"
             )
         report = reconcile_explanation_inventory()
+        if args.review_pilot_output is not None:
+            target = args.review_pilot_output.resolve()
+            if not target.is_relative_to((PROJECT_ROOT / "local").resolve()):
+                parser.error("--review-pilot-output must be under ignored local/")
+            pilot = build_explanation_review_pilot(report)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(
+                json.dumps(pilot, indent=2, ensure_ascii=False) + "\n", encoding="utf-8",
+            )
+            summary = pilot["summary"]
+            print(
+                f"Review pilot: {summary['selectedRecords']} records / "
+                f"{summary['semanticCohorts']} cohorts / "
+                f"{summary['selectedSourceCitationOccurrences']} citation occurrences / "
+                f"{summary['uniqueSelectedSourceLocators']} unique locators / "
+                f"{summary['uniqueSelectedSourcePages']} source pages / "
+                f"{summary['sourceFirstProbes']} source-first probes; zero approvals"
+            )
         if args.review_batches_output is not None:
             target = args.review_batches_output.resolve()
             if not target.is_relative_to((PROJECT_ROOT / "local").resolve()):
@@ -2875,7 +3050,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{report['sourceSectionCount']} source locators pending clause review"
         )
         return 0
-    if (args.review_batches_output is not None or args.reconcile_declarations
+    if (args.review_batches_output is not None or args.review_pilot_output is not None
+            or args.reconcile_declarations
             or args.verify_declaration_pdf is not None
             or args.verify_numeric_army_archive is not None
             or args.audit_conditional_declarations or args.verify_conditional_pdf is not None

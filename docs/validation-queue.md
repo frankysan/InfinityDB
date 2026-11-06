@@ -131,6 +131,21 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
+- [ ] VR-0120 (2026-11-06; ready-to-run): fixed 35-record mixed-semantic
+  V1S-082 pilot selection and read-only work-packet generator. Work: V1S-082;
+  selection: `config/validation/v1s082-review-pilot-v1.json`; generated work
+  packet: ignored `local/audits/v1s082-review-pilot.json`.
+  Design: VD-0081 (exact selection IDs, source-owner crosswalk, duplicate/missing
+  rejection, deterministic fingerprinted output, no semantic/browser approvals),
+  statically reviewed and retired **without running tests**.
+  Immediate: read-only CLI processed 35 records / 10 cohorts / 3 source-first
+  probes, 127 citations / 123 locators / 96 source pages; Ruff and docs/type
+  checks remain independent; no runtime/database publication changed.
+  Deferred: `tests/test_report_reference_baseline.py::test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved`
+  and relevant baseline planner regression on exact pinned revision.
+  Measuring and performing the actual semantic/browser pilot is **not** satisfied
+  by generating this packet. No skipped test counts as passed acceptance.
+
 - [ ] VR-0119 (2026-11-06; ready-to-run): V1S-082 read-only source-review
   batch planner. Work: V1S-082; revision: coverage plan, baseline planner and
   designed regression at the corresponding implementation commit.
@@ -176,8 +191,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0081`; active obligations are listed above.
-- Execution: `VR-0120`; active obligations are listed above.
+- Design: `VD-0082`; active obligations are listed above.
+- Execution: `VR-0121`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
