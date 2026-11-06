@@ -533,21 +533,27 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 **Project domain:** Project infrastructure
 
-- [ ] Complete tool-independent multi-agent workspace coordination, building on
-  the [initial checkout protocol](multi-agent-workspaces.md). This is approved
-  pre-release infrastructure safety work, **not a v1.0 completeness gate**.
-  - [ ] Add a durable, cross-client workspace/agent/task claim registry with
-    explicit assignment, ownership transfers and stale-owner recovery; do not
-    treat an expired claim as permission to overwrite a working tree.
-  - [ ] Provide exclusive integration ownership with baseline-SHA and changed-file
-    preflight checks that detect overlapping proposals, Git index changes and
-    unexpected branch movement before staging or committing.
-  - [ ] Extend MCP named-checkout discovery and bounded Git/test routing without
-    forcing direct-file agents to use MCP. Preserve the separate pinned Linux
-    validation checkout and explicit cross-host synchronization.
-  - [ ] Add read-only workspace/claim/integration status to the existing monitor;
-    validate refusal, interrupted operations and multi-agent races with
-    cross-platform tests before enabling unattended integration.
+- [ ] Complete tool-independent multi-agent workspace coordination. The
+  [checkout and claim protocol](multi-agent-workspaces.md) is approved
+  infrastructure safety work, **not a v1.0 completeness gate**.
+  - [x] Implement isolated worktrees, local durable task claims, a verified
+    fast-forward integration path and independent-clone claims using an
+    append-only Git coordination ref. Keep source checkouts unsynchronized.
+  - [x] Support verified named local worktrees through MCP non-test checks
+    and asynchronous pytest, without requiring MCP for direct-file agents.
+  - [ ] Initialize and verify the real cross-host coordination ref, then
+    exercise a non-destructive claim/status round trip from the Linux
+    interactive checkout. Preserve the separate pinned Linux test checkout.
+  - [ ] Enforce the global integration reservation within the integration
+    command, including remote-head/claim revision preflight, rather than
+    relying on a manual global status check.
+  - [ ] Define inspected recovery and ownership transfers for interrupted
+    jobs and abandoned claims; never expire ownership automatically or
+    assume an unresponsive agent's checkout is safe to overwrite.
+  - [ ] Complete MCP named-checkout Git operations and the remote worker
+    allowlist without broadening validation-checkout write privileges.
+  - [ ] Add read-only workspace/claim/integration status to the monitor and
+    verify race/refusal behavior on actual Linux before unattended use.
 
 ### Performance, storage, and build tooling
 

@@ -62,7 +62,7 @@ def _checkout(root: Path) -> Path:
     return root
 
 
-def _token(value: str, label: str) -> str:
+def _token(value: object, label: str) -> str:
     if not isinstance(value, str) or not _TOKEN.fullmatch(value):
         raise GlobalClaimError(f"Invalid {label}")
     return value
