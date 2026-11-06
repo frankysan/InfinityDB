@@ -650,6 +650,35 @@ and `rules.db` SHA-256
 `5bc1ef3c70d1d14ad5f043bd1ad6fe159c608e86755d0ec0ac9a8b99f8b052f8`.
 This closes VR-0129, not V1S-082, hosted CI or frozen-candidate acceptance.
 
+### V1S-082 reference-only Equipment variants (VR-0130)
+
+The complete focused Windows run at `0be12102b2b2c1459fb40591ac3969771f6eedd0`
+passed **33 tests with no skips**, using Chrome 156 and the full set of
+**808/808** published, browser-referenced SVGs. The first run at `b074f672`
+passed 31 and failed two test-harness assertions: a mock intercepted
+constructor lookups, and a filter assertion overlooked intentionally
+filter-independent exact usage. Both tests were corrected and the whole
+selection passed at the later revision. The dedicated MCP Linux worker was
+unavailable; this is Windows evidence, not Linux acceptance.
+
+The 20 exact pytest selectors are preserved in the VR-0130 queue entry at
+the tested revision. Backend/API checks covered maintained relation ownership,
+ordering, duplicate suppression, partial and absent Army variants, source and
+token parity, explicit missing-record errors, and the absence of fabricated
+usage or standalone routes. Chromium verified keyboard navigation, both cited
+reference-only cards and related links, the Army-availability disclaimer,
+actual Firewall usage, and optional-filter behavior at 1440/390/320 px in light
+and dark themes. Existing exact-usage and Equipment route regressions also ran.
+The development `infinity.db` SHA-256 was
+`8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
+and `rules.db` SHA-256 was
+`5bc1ef3c70d1d14ad5f043bd1ad6fe159c608e86755d0ec0ac9a8b99f8b052f8`.
+The matched deployed-object publication SHA-256 was
+`8424278c5538c136f0bae7aaa98a363a28363d0877d0dc19d05f9546a9caf428`
+and the exact-usage publication SHA-256 was
+`5393b6ddfd9b3feb43f7977a8d50f2e4a601351ee89f944f0af3c3ad67a4120f`.
+This closes VR-0130, not V1S-082, hosted CI or frozen-candidate acceptance.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not

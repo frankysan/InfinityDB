@@ -145,42 +145,7 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0130 (2026-11-07; ready-to-run): Equipment family reference-only
-  variant presentation. Work: V1S-082; implementation: `890eb430`;
-  execution revision: commit containing the completed test designs; risk: medium.
-  Immediate: targeted Ruff, Pyright (zero diagnostics), `node --check`
-  and the repository docs stage passed for the implementation; targeted Ruff
-  and Pyright passed for the designs. VD-0100 and VD-0101 were authored and
-  statically reviewed without executing tests. The first Windows execution at
-  `b074f672` passed 31 and failed two test assertions: a mock intercepted
-  constructor lookups and a filter assertion incorrectly excluded the
-  intentionally independent exact-usage section. The revised tests below
-  require a complete rerun at a new pinned commit. Deferred selectors:
-  - `tests/test_catalog_rules.py::test_catalog_rules_leave_army_item_raw_without_rules_database`
-  - `tests/test_catalog_rules.py::test_catalog_rules_apply_curated_tinbot_family_and_named_variant_rules`
-  - `tests/test_catalog_rules.py::test_equipment_reference_only_variants_follow_army_snapshot`
-  - `tests/test_catalog_rules.py::test_equipment_reference_only_variants_deduplicate_related_records`
-  - `tests/test_catalog_rules.py::test_equipment_reference_only_variants_reject_missing_related_record`
-  - `tests/test_catalog_rules.py::test_catalog_rules_keep_source_specific_rules_on_matching_variant`
-  - `tests/test_application_rule_references.py::test_tinbot_reference_only_variants_preserve_citations_and_routes`
-  - `tests/test_application_rule_references.py::test_equipment_glossary_source_cited_routes_cover_current_concepts`
-  - `tests/test_verify_scenario_faq_browser.py::test_tinbot_reference_only_variants_normal_browser`
-  - `tests/test_verify_scenario_faq_browser.py::test_tinbot_reference_only_variants_keep_unfiltered_classification`
-  - `tests/test_verify_scenario_faq_browser.py::test_unpublished_tinbot_source_variant_is_not_a_fake_public_route`
-  - `tests/test_verify_scenario_faq_browser.py::test_tinbot_firewall_source_169_usage_normal_browser`
-  - `tests/test_web.py::test_reference_catalog_pages_and_rules_backed_apis_are_served`
-  - `tests/test_web.py::test_catalog_detail_advertises_only_matched_variant_usage_publication`
-  - `tests/test_web.py::test_variant_usage_page_modules_are_packaged_and_capability_gated`
-  - `tests/test_web.py::test_variant_usage_browser_does_not_fetch_unpublished_index`
-  - `tests/test_web.py::test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`
-  - `tests/test_web.py::test_variant_usage_api_filters_exact_groups_by_canonical_rule`
-  - `tests/test_web.py::test_detail_frontends_share_curated_rules_reference_renderer`
-  - `tests/test_web.py::test_catalog_detail_reveals_async_rule_fragment_after_render`
-
-  Run the compatible selectors together on the matched development
-  Army/rules pair, including Chromium at 1440/390/320 px in both themes.
-  Verify no required skips, the tested revision and source/artifact identities
-  before retirement. Hosted CI and frozen-candidate checks remain separate.
+No pending execution entries.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -189,6 +154,7 @@ summary above. The
 and [VR-0127 Equipment regression](testing.md#v1s-082-equipment-glossary-navigation-regression-vr-0127)
 and [VR-0128 Label source visibility](testing.md#v1s-082-label-vocabulary-source-visibility-vr-0128)
 and [VR-0129 embedded source visibility](testing.md#v1s-082-embedded-glossary-source-visibility-vr-0129)
+and [VR-0130 reference-only Equipment variants](testing.md#v1s-082-reference-only-equipment-variants-vr-0130)
 passed on pinned Windows revisions. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs

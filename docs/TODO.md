@@ -226,8 +226,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   scenario-scoped Rules have bounded source and browser evidence.
   Two retained TinBot variant definitions lacked a normal reference despite
   having no current Army occurrence; their family page now separates cited
-  reference-only definitions from Army options. **VR-0130** owns the
-  pending regression design/execution. Continue reconciling remaining
+  reference-only definitions from Army options;
+  [VR-0130 passed](testing.md#v1s-082-reference-only-equipment-variants-vr-0130)
+  its focused source/API/browser regressions. Continue reconciling remaining
   maintained references and routes before closing this gate.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
@@ -270,32 +271,34 @@ bounded rule-citation/route check; final release acceptance remains open.
 **Project domains:** Data processing, Project infrastructure
 
 The [source-coverage audit](v1.0-source-coverage-audit.md) owns reviewed
-dispositions, source identities and confirmed omissions. These tasks own the
-remaining work; the final-input freeze and complete release check remain
-V1S-081–085 rather than independent acceptance ledgers.
+dispositions, source identities and confirmed omissions. These tasks cover
+maintained references and known material defects; exhaustive source-first
+inventory is optional research, not a 1.0 prerequisite. The final-input freeze
+and complete release checks remain V1S-081–085.
 
 - [ ] Reconcile the final pinned Army, N5.3 Rules, Wiki, FAQ, annex, scenario and
-  symbol inputs against the complete source-section-to-storage-to-browser
-  inventory. Identify every material omitted fact, relationship or ordinary
-  browser route; distinguish a confirmed defect from a source conflict,
-  unreviewed clause or deliberate exclusion. Re-run the
+  symbol inputs with the maintained in-scope references and their ordinary
+  browser routes. Correct confirmed material errors and missing citations;
+  distinguish them from source conflicts, unreviewed clauses or deliberate
+  exclusions. Re-run the
   [source-evidence tools](testing.md#10-source-evidence-baseline) and strict
   interaction-catalog scope check on the frozen pair.
   Review the newly available [PDF revisions](n5-source-history.md#local-pdf-revision-inventory-2026-11-06),
   including ITS 18 version 2026.09.11 in both languages, before selecting the
   final ITS input; compare content and migrate affected citations explicitly.
   Current citations remain pinned to 2026.09.01.
-- [ ] Finish official N5 change-post reconciliation, explicitly including the
-  N5.3 post, Spanish-only cases, all 20 Army-update subjects and nine added
-  FAQ rulings. Compare announcements with pinned primary sources; close the
+- [ ] Reconcile known material N5 change-post, Army-update and FAQ issues
+  affecting maintained references against pinned primary sources, without
+  inventing historical deltas. The broader
   [reconciliation inventory](rules-explanation-audit-1.0-n5.3-reconciliation.md#current-reconciliation-inventory-2026-10-29)
-  without inventing historical deltas. Unanswered publisher questions, such as
-  optional Reinforcements authority, remain in the [SRC register](official-source-clarifications.md).
+  and unresolved publisher questions in the [SRC register](official-source-clarifications.md)
+  remain optional investigations rather than independent 1.0 blockers.
 - [ ] Reconcile the final `data/curated/rules-interactions/reviews.json` and
   `catalog-scope.json` with all current in-scope identities and cited
   exceptions, retaining historical review decisions without treating them
-  as whole-record approval. Final source-clause and browser acceptance belong
-  to the [completeness gate](releasing.md#version-10-data-completeness-gate).
+  as whole-record approval. Final citation and browser acceptance belong to
+  the [completeness gate](releasing.md#version-10-data-completeness-gate),
+  without requiring exhaustive source-clause approval.
 
 The [bounded source/relationship findings](n5-source-history.md) and
 [ranked gap batches](v1.0-source-coverage-audit.md#ranked-confirmed-gaps-and-evidence-batches-v1s-022-2026-11-03)
@@ -311,7 +314,7 @@ The [rules explanation audit](rules-explanation-audit-1.0.md) and
 findings and historical test results. Existing Skill, Equipment,
 General Rule, State, Trait, Attribute, FAQ, scenario and Weapon
 definitions are the foundation; the tasks below cover outstanding
-source clauses, semantics and release publication, not a rebuild
+known material source concerns, semantics and release publication, not a rebuild
 of already-reviewed catalogs.
 
 - [ ] Verify each **maintained current rules-reference identity** has at
