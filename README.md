@@ -80,7 +80,7 @@ its application metrics.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   embedded Attributes, scoped Game terms and searchable Weapon Properties (such as Viral,
   Plasma and combined Ammunition). Weapon Properties link to their underlying canonical
-  rules instead of redefining the effects.
+  rules and reviewed, source-cited Weapon examples instead of redefining the effects.
 - Label definitions include deployment, targeting, modifier and fixed-result
   qualifications, with Assignable's English/Spanish timing difference disclosed.
 - Trait help explains Disposable exhaustion, Non-Reloadable cancellation,

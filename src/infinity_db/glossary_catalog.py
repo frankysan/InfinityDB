@@ -23,7 +23,8 @@ class GlossaryCatalog:
         self.rules_database = rules_database
         self._entries_cache: list[dict[str, Any]] | None = None
         self._weapon_properties = (
-            WeaponProperties(rules_database) if rules_database is not None else None
+            WeaponProperties(rules_database, database=database)
+            if rules_database is not None else None
         )
 
     @staticmethod

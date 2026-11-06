@@ -78,7 +78,9 @@ vocabulary for reviewed named characteristics such as Plasma, Viral, MULTI
 and AP+DA. They are linked from exact Weapon profiles and show their canonical
 Ammunition, Trait, General Rule or source-section origins. They are searchable
 standalone Glossary entries, not new official Ammunition types or independent
-sources of mechanics.
+sources of mechanics. Reviewed source-cited Weapon examples link through the
+same canonical Weapon routes; an unavailable example retains its exact source
+section as readable text rather than a broken link.
 
 Other finite vocabularies may use the same model when a player-facing catalog would add little
 value. Do not promote a vocabulary to a top-level domain merely because it has typed identities.

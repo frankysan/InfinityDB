@@ -505,7 +505,7 @@ class ApiHandler:
             self.glossary_catalog,
             self.legacy_armies,
         )
-        self.catalog_rules = CatalogRules(rules_database)
+        self.catalog_rules = CatalogRules(rules_database, database=database)
         self.symbol_catalog = SymbolCatalog()
         self.army_overview_summaries = load_army_overview_copy()
         self.fireteam_rules_reference = fireteam_reference(rules_database)

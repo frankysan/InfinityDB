@@ -10,11 +10,13 @@ from pathlib import Path
 from socketserver import ThreadingMixIn
 from threading import Thread
 from typing import Any
+from unittest.mock import patch
 from urllib.request import urlopen
 from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
 import pytest
 
+from infinity_db.weapon_properties import WeaponProperties
 from infinity_db.web import create_app
 from tools.browser_test_metrics import launch_timed_chromium
 from tools.browser_wsgi_transport import route_browser_page
@@ -87,6 +89,124 @@ CASES = (
     ("d-charges", "weapon:d-charges", {"CC Mode", "Demolition Mode"}, {70, 186}),
     ("disco-baller", "weapon:disco-baller", {None, "Disco Ball"}, {71, 186}),
 )
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+def test_weapon_property_origins_reach_sources_in_normal_browser(
+    origin: str, chrome: Any, width: int,
+) -> None:
+    examples = {
+        "plasma": "plasma-sniper-rifle",
+        "viral": "viral-cc-weapon",
+        "breaker": "breaker-marksman-rifle",
+        "k1": "k1-combi-rifle",
+        "multi": "multi-rifle",
+        "ap-da": "feuerbach",
+        "ap-exp": "ap-exp-cc-weapon",
+        "ap-shock": "silenced-pistol",
+        "monofilament": "monofilament-mine",
+        "silenced": "silenced-pistol",
+        "n-em": "e-m-cc-weapon",
+    }
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{origin}/weapons/breaker-marksman-rifle", wait_until="domcontentloaded")
+        property_link = page.locator(
+            '.weapon-profile a[href="/glossary#weapon-property-breaker"]'
+        ).first
+        property_link.wait_for(state="visible", timeout=30000)
+        property_link.focus()
+        property_link.press("Enter")
+        page.wait_for_url(f"{origin}/glossary#weapon-property-breaker", timeout=30000)
+        page.locator("#weapon-property-breaker").wait_for(state="visible", timeout=30000)
+
+        for property_slug, weapon_slug in examples.items():
+            entry = page.locator(f"#weapon-property-{property_slug}")
+            assert entry.count() == 1, (property_slug, width)
+            assert entry.locator(f'a[href="/weapons/{weapon_slug}"]').count() == 1
+        ap_t2 = page.locator("#weapon-property-ap-t2")
+        assert ap_t2.count() == 1
+        assert "p. 67" in ap_t2.inner_text()
+        assert "p. 177: AP+T2 CC Weapon Chart" in ap_t2.inner_text()
+        assert ap_t2.locator('a[href="/ammunition/ap"]').count() == 1
+        assert ap_t2.locator('a[href="/ammunition/t2"]').count() == 1
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), width
+
+        example = page.locator(
+            '#weapon-property-breaker a[href="/weapons/breaker-marksman-rifle"]'
+        )
+        example.focus()
+        example.press("Enter")
+        page.wait_for_url(f"{origin}/weapons/breaker-marksman-rifle", timeout=30000)
+        citation = page.locator(
+            "#rule-weapon-breaker-marksman-rifle .rules-source-citations"
+        )
+        citation.wait_for(state="visible", timeout=30000)
+        source = citation.locator("a").filter(has_text="N5 Core Rules v5.3, p. 180")
+        assert source.count() == 1
+        assert source.get_attribute("href") == (
+            "https://experience.corvusbelli.com/en/infinity/resources"
+        )
+
+        page.goto(f"{origin}/weapons/ap-t2-cc-weapon", wait_until="domcontentloaded")
+        property_link = page.locator(
+            '.weapon-profile a[href="/glossary#weapon-property-ap-t2"]'
+        ).first
+        property_link.wait_for(state="visible", timeout=30000)
+        property_link.focus()
+        property_link.press("Enter")
+        page.wait_for_url(f"{origin}/glossary#weapon-property-ap-t2", timeout=30000)
+        page.locator("#weapon-property-ap-t2").wait_for(state="visible", timeout=30000)
+        assert "p. 177: AP+T2 CC Weapon Chart" in page.locator(
+            "#weapon-property-ap-t2"
+        ).inner_text()
+        assert not errors, (width, errors)
+    finally:
+        page.close()
+
+
+def test_unroutable_weapon_property_example_shows_source_section_in_browser(
+    origin: str, chrome: Any,
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+    rules = app.rules_database
+    assert rules is not None
+    composed_record = rules.composed_record
+
+    def unroutable_example(record_id: str, **kwargs: Any) -> Any:
+        record = composed_record(record_id, **kwargs)
+        if record_id == "weapon:breaker-marksman-rifle" and record is not None:
+            return {**record, "army_links": [{"entity": "weapon", "id": "missing-weapon-slug"}]}
+        return record
+
+    with patch.object(rules, "composed_record", side_effect=unroutable_example):
+        app.api.glossary_catalog._weapon_properties = WeaponProperties(
+            rules, database=app.database
+        )
+
+    page = chrome.browser.new_page(viewport={"width": 390, "height": 900})
+    route_browser_page(page, app, origin)
+    try:
+        page.goto(f"{origin}/glossary#weapon-property-breaker", wait_until="domcontentloaded")
+        entry = page.locator("#weapon-property-breaker")
+        entry.wait_for(state="visible", timeout=30000)
+        assert (
+            "Weaponry (reviewed profile example): N5.3 p. 180: Breaker Marksman Rifle"
+            in entry.locator(".glossary-property-origins").inner_text()
+        )
+        assert entry.locator('a[href="/weapons/breaker-marksman-rifle"]').count() == 0
+        assert entry.locator('a[href="/weapons/missing-weapon-slug"]').count() == 0
+        assert entry.locator('a[href="/ammunition/ap"]').count() == 1
+    finally:
+        page.close()
 
 
 @pytest.mark.parametrize("width", [1440, 390])
@@ -1112,8 +1232,4 @@ def test_armed_turret_curated_object_profile_keeps_source_conflict_visible(
         ), width
     finally:
         page.close()
-
-
-
-
 

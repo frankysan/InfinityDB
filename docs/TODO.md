@@ -210,9 +210,12 @@ bounded rule-citation/route check; final release acceptance remains open.
   The [read-only current citation check](testing.md#current-n5-citation-minimum-v1s-082)
   now reports **495/495** Core/Hacking/FAQ records with at least one
   declared applicable current source (zero metadata gaps); its focused
-  regression tests are awaiting VR-0125. Next: verify the separate
-  Weapon Property origin references and existing normal-browser
-  reachability, repairing only actionable gaps. The full cumulative
+  regressions passed on the pinned Windows revision. The separate
+  [Weapon Property origin review](v1.0-source-coverage-audit.md#v1s-082-weapon-property-citation-and-route-review-2026-11-06)
+  identified and corrected missing example links and chart locators;
+  VD-0090-0093 have been designed; VR-0126 still owns stale-slug,
+  regression and browser acceptance. Then finish the applicable maintained-reference
+  reachability review. The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are
   optional post-1.0 research, not release blockers.

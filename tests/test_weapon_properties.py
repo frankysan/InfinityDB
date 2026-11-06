@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import copy
 import json
+import shutil
+import sqlite3
 from pathlib import Path
+from typing import Any
+from unittest.mock import patch
+from urllib.parse import urlencode
 from wsgiref.util import setup_testing_defaults
 
 import pytest
@@ -16,6 +21,7 @@ from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.weapon_properties import WeaponProperties, load_weapon_properties
 from infinity_db.web.app import create_app
+from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_PATH = ROOT / "data/generated/infinity.db"
@@ -119,6 +125,8 @@ def test_weapon_property_profiles_are_exact_and_mode_scoped() -> None:
     lambda d: d["properties"][0].update({"unexpected": 1}),
     lambda d: d["properties"][0]["origins"][0].update({"role": ""}),
     lambda d: d["properties"][0]["origins"][0].update({"domain": "Weapon Traits"}),
+    lambda d: d["properties"][0]["origins"][-1].update({"sourceSection": ""}),
+    lambda d: d["properties"][0]["origins"][-1].update({"sourceSection": None}),
     lambda d: d["properties"][1]["profiles"][0].update({"weaponId": True}),
     lambda d: d["properties"][0]["profiles"].append(
         copy.deepcopy(d["properties"][0]["profiles"][0])
@@ -166,6 +174,226 @@ def test_weapon_properties_are_searchable_and_linked_from_weapon_api() -> None:
     assert all("ammunition_composition" not in p for p in plasma_weapon["profiles"])
     assert all(p["weapon_properties"][0]["id"] == "weapon-property:plasma"
                for p in plasma_weapon["profiles"])
+
+
+def test_weapon_property_reviewed_examples_have_current_citations_and_routes() -> None:
+    examples = {
+        "plasma": ("plasma-sniper-rifle", 185),
+        "viral": ("viral-cc-weapon", 177),
+        "breaker": ("breaker-marksman-rifle", 180),
+        "k1": ("k1-combi-rifle", 183),
+        "multi": ("multi-rifle", 183),
+        "ap-da": ("feuerbach", 186),
+        "ap-exp": ("ap-exp-cc-weapon", 177),
+        "ap-shock": ("silenced-pistol", 182),
+        "monofilament": ("monofilament-mine", 181),
+        "silenced": ("silenced-pistol", 182),
+        "n-em": ("e-m-cc-weapon", 177),
+    }
+    database, rules, properties = _services()
+    app = create_app(ARMY_PATH, rules_database_path=RULES_PATH)
+
+    def request(path: str) -> dict[str, Any]:
+        status, _, body = wsgi_response(app, f"http://example.test{path}")
+        assert status == 200, path
+        return json.loads(body)
+
+    configured = {item["id"]: item for item in load_weapon_properties()}
+    entries = {item["id"]: item for item in properties.entries()}
+    assert set(configured) == set(examples) | {"ap-t2"}
+    assert set(entries) == {f"weapon-property:{slug}" for slug in configured}
+    glossary = {item["id"]: item for item in request("/api/glossary")["items"]}
+
+    for slug, configured_item in configured.items():
+        identifier = f"weapon-property:{slug}"
+        item = entries[identifier]
+        assert glossary[identifier]["origins"] == item["origins"]
+        assert glossary[identifier]["href"] == f"/glossary#weapon-property-{slug}"
+        search = request("/api/search?" + urlencode({"q": configured_item["name"]}))
+        assert any(
+            result["href"] == glossary[identifier]["href"]
+            and result["domain"] == "Weapon Property"
+            for result in search["items"]
+        ), identifier
+
+        if slug == "ap-t2":
+            source = next(
+                origin["sourceSection"] for origin in item["origins"]
+                if origin["role"] == "combination-rule"
+            )
+            assert "N5.3 p. 67" in source and "p. 177: AP+T2" in source
+            weapon_slug = "ap-t2-cc-weapon"
+        else:
+            weapon_slug, page = examples[slug]
+            record_id = f"weapon:{weapon_slug}"
+            example = next(
+                origin for origin in item["origins"]
+                if origin["role"] == "reviewed-profile-example"
+            )
+            assert example["recordId"] == record_id
+            assert f"p. {page}" in example["sourceSection"]
+            assert example["public_reference"] == {"catalog": "weapons", "id": weapon_slug}
+            record = rules.composed_record(record_id, include_army_links=True)
+            assert record is not None
+            application_id = database.application_domain_id("weapons", weapon_slug)
+            assert application_id is not None
+            assert application_id == database.application_domain_id(
+                "weapons", record["army_links"][0]["id"]
+            )
+            assert any(
+                citation["source_id"] == "n5-core-v5.3-pdf"
+                and citation["source_version"] == "5.3"
+                and citation["page"] == page
+                and citation["source_url"]
+                for citation in record["citations"]
+            ), identifier
+
+        weapon = request(f"/api/weapons/{weapon_slug}")
+        assert any(
+            prop["id"] == identifier
+            for profile in weapon["profiles"]
+            for prop in profile.get("weapon_properties", [])
+        ), identifier
+        if slug != "ap-t2":
+            rule = next(rule for rule in weapon["rules"] if rule["id"] == record_id)
+            assert any(
+                citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == page
+                for citation in rule["citations"]
+            ), identifier
+
+
+def test_weapon_property_example_resolves_numeric_army_links(tmp_path: Path) -> None:
+    rules_path = tmp_path / "rules.db"
+    shutil.copyfile(RULES_PATH, rules_path)
+    with sqlite3.connect(rules_path) as connection:
+        result = connection.execute(
+            "UPDATE record_army_links SET external_id = ? "
+            "WHERE record_id = ? AND entity = ?",
+            ("225", "weapon:breaker-marksman-rifle", "weapon"),
+        )
+        assert result.rowcount == 1
+
+    database = Database(ARMY_PATH)
+    rules = RulesDatabase(rules_path)
+    origin = next(
+        origin
+        for item in WeaponProperties(rules, database=database).entries()
+        if item["id"] == "weapon-property:breaker"
+        for origin in item["origins"]
+        if origin["role"] == "reviewed-profile-example"
+    )
+    expected = {"catalog": "weapons", "id": "breaker-marksman-rifle"}
+    assert origin["public_reference"] == expected
+
+    app = create_app(ARMY_PATH, rules_database_path=rules_path)
+    status, _, body = wsgi_response(app, "http://example.test/api/glossary")
+    assert status == 200
+    entry = next(
+        item for item in json.loads(body)["items"] if item["id"] == "weapon-property:breaker"
+    )
+    assert next(
+        item for item in entry["origins"] if item["role"] == "reviewed-profile-example"
+    )["public_reference"] == expected
+    status, _, body = wsgi_response(
+        app, "http://example.test/api/weapons/breaker-marksman-rifle"
+    )
+    assert status == 200
+    entry = json.loads(body)["profiles"][0]["weapon_properties"][0]
+    assert next(
+        item for item in entry["origins"] if item["role"] == "reviewed-profile-example"
+    )["public_reference"] == expected
+
+    with sqlite3.connect(rules_path) as connection:
+        connection.execute(
+            "UPDATE record_army_links SET external_id = ? "
+            "WHERE record_id = ? AND entity = ?",
+            ("999999", "weapon:breaker-marksman-rifle", "weapon"),
+        )
+    origin = next(
+        origin
+        for item in WeaponProperties(rules, database=database).entries()
+        if item["id"] == "weapon-property:breaker"
+        for origin in item["origins"]
+        if origin["role"] == "reviewed-profile-example"
+    )
+    assert "public_reference" not in origin
+    assert origin["sourceSection"] == "N5.3 p. 180: Breaker Marksman Rifle"
+
+
+@pytest.mark.parametrize("valid_ref", ["breaker-marksman-rifle", "225"])
+def test_weapon_property_example_filters_stale_weapon_slug(
+    tmp_path: Path, valid_ref: str,
+) -> None:
+    rules_path = tmp_path / "rules.db"
+    shutil.copyfile(RULES_PATH, rules_path)
+    with sqlite3.connect(rules_path) as connection:
+        result = connection.execute(
+            "UPDATE record_army_links SET external_id = ? "
+            "WHERE record_id = ? AND entity = ?",
+            ("missing-weapon-slug", "weapon:breaker-marksman-rifle", "weapon"),
+        )
+        assert result.rowcount == 1
+
+    database = Database(ARMY_PATH)
+    rules = RulesDatabase(rules_path)
+
+    def example_origin() -> dict[str, Any]:
+        return next(
+            origin
+            for entry in WeaponProperties(rules, database=database).entries()
+            if entry["id"] == "weapon-property:breaker"
+            for origin in entry["origins"]
+            if origin["role"] == "reviewed-profile-example"
+        )
+
+    example = example_origin()
+    assert "public_reference" not in example
+    assert example["sourceSection"] == "N5.3 p. 180: Breaker Marksman Rifle"
+
+    with sqlite3.connect(rules_path) as connection:
+        result = connection.execute(
+            "INSERT INTO record_army_links "
+            "(collection_id, record_id, position, entity, external_id) "
+            "SELECT collection_id, record_id, 1, entity, ? FROM record_army_links "
+            "WHERE record_id = ? AND entity = ? AND position = 0",
+            (valid_ref, "weapon:breaker-marksman-rifle", "weapon"),
+        )
+        assert result.rowcount == 1
+    assert example_origin()["public_reference"] == {
+        "catalog": "weapons", "id": "breaker-marksman-rifle"
+    }
+
+
+def test_weapon_property_example_falls_back_when_record_is_missing() -> None:
+    database, rules, _ = _services()
+    composed_record = rules.composed_record
+
+    def missing_example(record_id: str, **kwargs):
+        if record_id == "weapon:breaker-marksman-rifle":
+            return None
+        return composed_record(record_id, **kwargs)
+
+    with patch.object(rules, "composed_record", side_effect=missing_example):
+        entries = WeaponProperties(rules, database=database).entries()
+    assert len(entries) == 12
+    breaker = next(item for item in entries if item["id"] == "weapon-property:breaker")
+    example = next(
+        origin for origin in breaker["origins"] if origin["role"] == "reviewed-profile-example"
+    )
+    assert example == {
+        "domain": "Weaponry",
+        "sourceSection": "N5.3 p. 180: Breaker Marksman Rifle",
+        "role": "reviewed-profile-example",
+    }
+
+    def missing_required(record_id: str, **kwargs):
+        if record_id == "ammunition:ap":
+            return None
+        return composed_record(record_id, **kwargs)
+
+    with patch.object(rules, "composed_record", side_effect=missing_required):
+        entries = WeaponProperties(rules, database=database).entries()
+    assert all(item["id"] != "weapon-property:breaker" for item in entries)
 
 
 def test_every_reviewed_property_source_profile_still_matches_army() -> None:
@@ -267,7 +495,7 @@ def test_n_em_property_reuses_both_rules_without_inferred_rolls() -> None:
     )
     assert [origin["recordId"] for origin in property_entry["origins"]
             if "recordId" in origin] == [
-        "ammunition:normal", "ammunition:em", "rule:saving-rolls"
+        "ammunition:normal", "ammunition:em", "rule:saving-rolls", "weapon:e-m-cc-weapon"
     ]
     assert any("p. 67" in origin.get("sourceSection", "")
                for origin in property_entry["origins"])

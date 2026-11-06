@@ -22,6 +22,12 @@
           "domain": "Weaponry",
           "sourceSection": "N5.3 p. 67: Combined Saving Roll",
           "role": "specific-rule"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:plasma-sniper-rifle",
+          "sourceSection": "N5.3 p. 185: Plasma Sniper Rifle",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -125,6 +131,12 @@
           "domain": "Skills",
           "recordId": "skill:vulnerability",
           "role": "name-dependent-exception"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:viral-cc-weapon",
+          "sourceSection": "N5.3 p. 177: Viral CC Weapon",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -249,8 +261,14 @@
         },
         {
           "domain": "Weapon Chart",
-          "sourceSection": "N5.3 Weapon Chart: Breaker weapons",
+          "sourceSection": "N5.3 p. 180: Breaker Marksman Rifle Weapon Chart",
           "role": "saving-attribute"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:breaker-marksman-rifle",
+          "sourceSection": "N5.3 p. 180: Breaker Marksman Rifle",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -316,6 +334,12 @@
           "domain": "Weapon Traits",
           "recordId": "trait:arm-0",
           "role": "saving-attribute"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:k1-combi-rifle",
+          "sourceSection": "N5.3 p. 183: K1 Combi Rifle",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -366,7 +390,7 @@
       "origins": [
         {
           "domain": "Weapon Chart",
-          "sourceSection": "N5.3 Weapon Chart: MULTI firing modes",
+          "sourceSection": "N5.3 p. 183: MULTI Rifle firing modes",
           "role": "firing-mode"
         },
         {
@@ -388,6 +412,12 @@
           "domain": "Ammunition",
           "recordId": "ammunition:exp",
           "role": "mode-option"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:multi-rifle",
+          "sourceSection": "N5.3 p. 183: MULTI Rifle",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -654,8 +684,14 @@
         },
         {
           "domain": "Ammunition",
-          "sourceSection": "N5.3 Combined Ammunition; Wiki oldid=3000",
+          "sourceSection": "N5.3 p. 67: Combined Ammunition; Wiki oldid=3000",
           "role": "combination-rule"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:feuerbach",
+          "sourceSection": "N5.3 p. 186: Feuerbach",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -703,8 +739,14 @@
         },
         {
           "domain": "Ammunition",
-          "sourceSection": "N5.3 Combined Ammunition; Wiki oldid=3000",
+          "sourceSection": "N5.3 p. 67: Combined Ammunition; Wiki oldid=3000",
           "role": "combination-rule"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:ap-exp-cc-weapon",
+          "sourceSection": "N5.3 p. 177: AP+EXP CC Weapon",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -807,8 +849,14 @@
         },
         {
           "domain": "Ammunition",
-          "sourceSection": "N5.3 Combined Ammunition; Wiki oldid=3000",
+          "sourceSection": "N5.3 p. 67: Combined Ammunition; Wiki oldid=3000",
           "role": "combination-rule"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:silenced-pistol",
+          "sourceSection": "N5.3 p. 182: Silenced Pistol",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -881,7 +929,7 @@
         },
         {
           "domain": "Ammunition",
-          "sourceSection": "N5.3 Combined Ammunition; Wiki oldid=3000",
+          "sourceSection": "N5.3 p. 67: Combined Ammunition; p. 177: AP+T2 CC Weapon Chart; Wiki oldid=3000",
           "role": "combination-rule"
         }
       ],
@@ -928,8 +976,14 @@
         },
         {
           "domain": "Weaponry",
-          "sourceSection": "N5.3 Weapon Chart: Monofilament CC Weapon and Monofilament Mine; Immunity (ARM) Example 2 pp.95-96",
+          "sourceSection": "N5.3 pp. 177, 181: Monofilament CC Weapon and Mine; Immunity (ARM) Example 2 pp. 95-96",
           "role": "source-profile"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:monofilament-mine",
+          "sourceSection": "N5.3 p. 181: Monofilament Mine",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -990,6 +1044,12 @@
           "domain": "Weaponry",
           "sourceSection": "N5.3 p.175 Silent (X); Weapon Chart p.182 Silenced Pistol",
           "role": "source-profile"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:silenced-pistol",
+          "sourceSection": "N5.3 p. 182: Silenced Pistol",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [
@@ -1031,6 +1091,12 @@
           "domain": "Weaponry",
           "sourceSection": "N5.3 p. 67: Combined Ammunition N+E/M example; p. 177: E/M CC Weapon chart",
           "role": "printed-example"
+        },
+        {
+          "domain": "Weaponry",
+          "recordId": "weapon:e-m-cc-weapon",
+          "sourceSection": "N5.3 p. 177: E/M CC Weapon",
+          "role": "reviewed-profile-example"
         }
       ],
       "profiles": [

@@ -5,14 +5,21 @@ from __future__ import annotations
 import json
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from infinity_army_data.project_resources import maintained_config_path
-from infinity_db.domain_references import rule_record_public_reference
+from infinity_db.domain_references import public_slug_for_reference, rule_record_public_reference
 from infinity_db.rules_database import RulesDatabase
 
+if TYPE_CHECKING:
+    from infinity_db.database.repository import Database
+
 DEFAULT_PROPERTIES_PATH = maintained_config_path("catalogs", "weapon-properties.json")
-_ORIGIN_KEYS = ({"domain", "role", "recordId"}, {"domain", "role", "sourceSection"})
+_ORIGIN_KEYS = (
+    {"domain", "role", "recordId"},
+    {"domain", "role", "sourceSection"},
+    {"domain", "role", "recordId", "sourceSection"},
+)
 _CANONICAL_DOMAINS = {
     "ammunition": "Ammunition",
     "trait": "Weapon Traits",
@@ -31,6 +38,27 @@ _PROFILE_FIELDS = (
     ("ammunition", "ammunition"), ("saving", "saving"),
     ("saving_num", "savingNum"), ("traits", "traits"),
 )
+
+
+def _origin_public_reference(
+    database: Database | None, record: dict[str, Any],
+) -> dict[str, str] | None:
+    if database is None or record.get("kind") != "weapon":
+        return rule_record_public_reference(database, record)
+    links = []
+    for link in record.get("army_links", []):
+        source_id = link.get("id")
+        if (
+            link.get("entity") != "weapon"
+            or (type(source_id) is not int and not isinstance(source_id, str))
+        ):
+            continue
+        if isinstance(source_id, str) and source_id.isdigit():
+            source_id = int(source_id)
+        slug = public_slug_for_reference(database, "weapons", source_id)
+        if slug is not None:
+            links.append({**link, "id": slug})
+    return rule_record_public_reference(database, {**record, "army_links": links})
 
 
 def load_weapon_properties(path: Path = DEFAULT_PROPERTIES_PATH) -> list[dict[str, Any]]:
@@ -117,6 +145,7 @@ class WeaponProperties:
 
     def __init__(
         self, rules_database: RulesDatabase, path: Path = DEFAULT_PROPERTIES_PATH,
+        *, database: Database | None = None,
     ) -> None:
         self._entries: list[dict[str, Any]] = []
         self._profiles: dict[
@@ -128,12 +157,18 @@ class WeaponProperties:
             for origin in entry["origins"]:
                 resolved = origin.copy()
                 if record_id := origin.get("recordId"):
-                    record = rules_database.composed_record(record_id)
+                    record = rules_database.composed_record(
+                        record_id, include_army_links=True
+                    )
                     if record is None:
-                        # Synthetic/partial rules databases cannot publish broken links.
-                        complete = False
-                        break
-                    reference = rule_record_public_reference(None, record)
+                        if "sourceSection" not in origin:
+                            # Synthetic/partial rules databases cannot publish broken links.
+                            complete = False
+                            break
+                        resolved.pop("recordId")
+                        origins.append(resolved)
+                        continue
+                    reference = _origin_public_reference(database, record)
                     resolved["name"] = record["name"]
                     if reference is not None:
                         resolved["public_reference"] = reference

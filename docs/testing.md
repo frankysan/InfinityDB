@@ -531,8 +531,11 @@ Weapon Property origin projections, optional N4 Reinforcements and
 ITS-only collections remain **outside this individual audit**, not
 automatically accepted; check them under their owning scope. Source-byte
 identity, interpretation and browser acceptance remain independent.
-New failure/selection regression tests are designed under VD-0089 and
-deferred to VR-0125; a CLI smoke is not a deferred test pass.
+On Windows at `781818bd482c73a650446d94a13b1edc870cac34`, the three
+VD-0089 selectors covering source/version selection, live collections
+and historical-only gaps passed **9/9 tests**, with no skips. This
+completes VR-0125's local execution; it does not establish semantic or
+browser acceptance.
 
 ### Validation batch planning
 

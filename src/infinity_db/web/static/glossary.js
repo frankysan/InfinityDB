@@ -78,7 +78,7 @@ function entryNode(item) {
         link.textContent = origin.name;
         origins.append(link);
       } else {
-        origins.append(origin.name || origin.sourceSection);
+        origins.append(origin.sourceSection || origin.name);
       }
     }
     article.append(origins);

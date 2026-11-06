@@ -361,8 +361,11 @@ notation rather than synthesizing runtime combat effects.
 It does not redefine Ammunition, Traits, source Army `properties` (Traits), or
 weapon-specific rules. Each entry has a player-readable explanation and an
 explicit list of canonical rule-record origins (with their role and domain),
-or an exact official source section when there is no standalone canonical
-rules record. Reviewed memberships pin Weapon source ID, exact source name,
+exact official source sections, or both. Reviewed Weapon examples link to
+their canonical source-cited Weapon references; when an example record or
+its route is unavailable, its maintained source section remains visible
+without a fabricated link. The AP+T2 Property has a printed chart locator
+rather than a standalone curated Weapon example. Reviewed memberships pin Weapon source ID, exact source name,
 mode, Ammunition source ID/name, Saving Roll fields, and source Traits.
 The runtime projection only attaches a Property to a profile matching that
 whole signature; weapon names and punctuation are never parsed to grant

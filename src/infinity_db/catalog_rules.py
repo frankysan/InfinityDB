@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
 from infinity_db.weapon_combined_saving_rolls import WeaponCombinedSavingRolls
 from infinity_db.weapon_properties import WeaponProperties
+
+if TYPE_CHECKING:
+    from infinity_db.database.repository import Database
 
 DECLARATION_KIND = "declaration-category"
 
@@ -44,7 +47,9 @@ def _source_label(category: dict[str, Any]) -> str | None:
 class CatalogRules:
     """Enrich Army catalog items with curated rule records when available."""
 
-    def __init__(self, rules_database: RulesDatabase | None) -> None:
+    def __init__(
+        self, rules_database: RulesDatabase | None, *, database: Database | None = None,
+    ) -> None:
         self.rules_database = rules_database
         self._category_indexes: dict[
             str, dict[ArmyLinkRef, list[dict[str, Any]]]
@@ -57,7 +62,8 @@ class CatalogRules:
             WeaponCombinedSavingRolls() if rules_database is not None else None
         )
         self._weapon_properties = (
-            WeaponProperties(rules_database) if rules_database is not None else None
+            WeaponProperties(rules_database, database=database)
+            if rules_database is not None else None
         )
         self._ammunition_references = (
             WeaponAmmunitionReferences(rules_database)

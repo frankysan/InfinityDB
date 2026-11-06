@@ -64,7 +64,9 @@ class _Resolver:
                 if self._properties is None:
                     self._properties = {
                         entry["id"]: entry
-                        for entry in WeaponProperties(self.rules_database).entries()
+                        for entry in WeaponProperties(
+                            self.rules_database, database=self.database
+                        ).entries()
                     }
                 property_entry = self._properties.get(token["target"])
                 if property_entry is None:

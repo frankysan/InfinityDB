@@ -55,8 +55,10 @@ are not retroactively relabeled.
 - Browse reviewed deployed-object profiles and their source links independently of the
   carrying Weapon or Equipment; disputed and unavailable attributes remain visible.
 - Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties
-  such as Plasma, Viral, MULTI and combined Ammunition. Shared Weapon rules are also
-  discoverable through the Glossary. Smoke and Eclipse cards show when placement
+  such as Plasma, Viral, MULTI and combined Ammunition. Property origins link to
+  source-cited Weapon examples where available, with exact chart pages retained
+  otherwise. Shared Weapon rules are also discoverable through the Glossary.
+  Smoke and Eclipse cards show when placement
   opposes Attacks and how Visors affect that opposition.
 - Dated FAQ clarifications now appear beside the rules and scenarios they affect,
   keeping their source versions and scenario restrictions visible.
@@ -268,8 +270,10 @@ are not retroactively relabeled.
   and exceptions. Breaker Marksman Rifle is searchable even without current Unit usage.
 - **Data processing + Web backend + Web frontend:** Add searchable, linked Weapon Properties
   with previews and their originating rules, including Plasma, Viral, Breaker, K1, MULTI,
-  Monofilament, Silenced, four AP combinations and N+E/M. Expandable Ammunition explanations
-  on Weapon profiles retain each mode's own Saving Rolls and Traits.
+  Monofilament, Silenced, four AP combinations and N+E/M. Origins link to reviewed,
+  source-cited Weapon examples where available and retain explicit chart locators.
+  Expandable Ammunition explanations on Weapon profiles retain each mode's own
+  Saving Rolls and Traits.
 - **Data processing + Web backend + Web frontend:** Add linked references for the Order
   Expenditure Sequence, Coordinated Orders, Guts Rolls, Face to Face and Saving Rolls,
   Special Dice, Hacking Area, Firewall, Supportware, Modifiers Explained and Mixed
