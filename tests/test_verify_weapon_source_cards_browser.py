@@ -209,6 +209,47 @@ def test_unroutable_weapon_property_example_shows_source_section_in_browser(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize(
+    ("slug", "name", "source_page"),
+    (("cube", "Cube", 121), ("tinbot", "TinBot", 127)),
+)
+def test_equipment_glossary_reaches_cited_detail_with_keyboard(
+    origin: str, chrome: Any, width: int, slug: str, name: str, source_page: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{origin}/glossary", wait_until="domcontentloaded")
+        page.locator("#glossary-list .glossary-entry").first.wait_for(
+            state="visible", timeout=30000
+        )
+        page.locator("#glossary-search").fill(name)
+        entry = page.locator(f"#equipment-{slug}")
+        entry.wait_for(state="visible", timeout=30000)
+        assert entry.locator(".glossary-domain").inner_text() == "Equipment"
+        link = entry.locator(f'header a[href="/equipment/{slug}"]')
+        assert link.count() == 1
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(f"{origin}/equipment/{slug}", timeout=30000)
+        card = page.locator(f"#rule-equipment-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        citation = card.locator(".rules-source-citations a").filter(
+            has_text=f"N5 Core Rules v5.3, p. {source_page}"
+        )
+        assert citation.count() == 1
+        assert citation.get_attribute("href") == (
+            "https://experience.corvusbelli.com/en/infinity/resources"
+        )
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        assert not errors, (width, slug, errors)
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390])
 @pytest.mark.parametrize(("slug", "rule_id", "modes", "pages"), CASES)
 def test_pinned_weapon_modes_rules_links_and_citations(
@@ -1232,4 +1273,3 @@ def test_armed_turret_curated_object_profile_keeps_source_conflict_visible(
         ), width
     finally:
         page.close()
-

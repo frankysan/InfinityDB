@@ -1436,7 +1436,7 @@ def test_weapon_glossary_uses_opt_in_army_links_for_routable_definitions(
     database = _reference_database(tmp_path)
 
     # The bulk query remains lightweight by default. The Glossary opts in
-    # only for weapon entries so their canonical Army host can be resolved.
+    # for Weapon and Equipment entries to resolve their canonical hosts.
     original = rules.composed_records_by_kind("weapon")
     assert not any(record.get("army_links") for record in original)
     routed = rules.composed_records_by_kind("weapon", include_army_links=True)
@@ -1461,6 +1461,130 @@ def test_weapon_glossary_uses_opt_in_army_links_for_routable_definitions(
     assert "weapon:pt-endgame" not in by_id
     assert all(entry["href"].startswith("/weapons/") for entry in entries)
     assert all(not entry["embedded"] for entry in entries)
+
+
+def test_equipment_glossary_source_cited_routes_cover_current_concepts() -> None:
+    root = Path(__file__).parents[1]
+    rules = RulesDatabase(root / "data/generated/rules.db")
+    app = create_app(
+        root / "data/generated/infinity.db", rules_database_path=rules.path
+    )
+    records = rules.composed_records_by_kind("equipment", include_army_links=True)
+    expected = {
+        record["id"]: record
+        for record in records
+        if (record.get("variant_semantics") or {}).get("inheritance") != "source"
+    }
+    variants = {record["id"] for record in records} - set(expected)
+    assert len(expected) == 31
+    status, body = _published_get(app, "/api/glossary")
+    assert status == "200 OK"
+    items = [item for item in json.loads(body)["items"] if item["kind"] == "equipment"]
+    entries = {item["id"]: item for item in items}
+    assert len(items) == len(entries)
+    assert set(entries) == set(expected)
+    assert not variants.intersection(entries)
+    assert entries["equipment:cube"]["href"] == "/equipment/cube"
+    assert entries["equipment:cube-2"]["href"] == "/equipment/cube-2"
+    assert entries["equipment:tinbot"]["href"] == "/equipment/tinbot"
+    assert entries["equipment:firewall"]["href"] == "/equipment/firewall"
+
+    fields = ("source_id", "source_version", "page", "member", "section", "heading")
+    for identifier, entry in entries.items():
+        record = expected[identifier]
+        assert entry["description"] == record["summary"]
+        assert entry["domain"] == "Equipment"
+        assert entry["embedded"] is False
+        status, body = _published_get(app, "/api" + entry["href"])
+        assert status == "200 OK", identifier
+        card = next(row for row in json.loads(body)["rules"] if row["id"] == identifier)
+        assert card["summary"] == record["summary"]
+        assert card["citations"]
+        assert {
+            tuple(citation.get(field) for field in fields)
+            for citation in card["citations"]
+        } == {
+            tuple(citation.get(field) for field in fields)
+            for citation in record["citations"]
+        }, identifier
+
+
+@pytest.mark.parametrize("valid_ref", ["hacking-device", "100"])
+def test_validated_public_reference_filters_stale_equipment_links(
+    tmp_path: Path, valid_ref: str,
+) -> None:
+    database = _reference_database(tmp_path)
+    record = {
+        "kind": "equipment",
+        "id": "equipment:hacking-device",
+        "army_links": [
+            {"entity": "equipment", "id": "missing-device"},
+            {"entity": "equipment", "id": valid_ref},
+        ],
+    }
+    assert rule_record_public_reference(database, record) == {
+        "catalog": "equipment", "id": "missing-device"
+    }
+    assert rule_record_public_reference(database, record, validate_army_links=True) == {
+        "catalog": "equipment", "id": "hacking-device"
+    }
+    record["army_links"].pop()
+    assert rule_record_public_reference(database, record, validate_army_links=True) is None
+
+    cube = {
+        "kind": "equipment",
+        "id": "equipment:cube",
+        "army_links": [
+            {"entity": "equipment", "id": "missing-device"},
+            {"entity": "equipment", "id": "cube"},
+        ],
+    }
+    assert rule_record_public_reference(database, cube, validate_army_links=True) is None
+    assert rule_record_public_reference(
+        database, cube, validate_army_links=True,
+        additional_route_slugs=frozenset({"cube"}),
+    ) == {"catalog": "equipment", "id": "cube"}
+
+
+def test_equipment_glossary_omits_stale_routes_but_keeps_encoded_equipment(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    database = _reference_database(tmp_path)
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    with sqlite3.connect(rules_path) as connection:
+        result = connection.execute(
+            "UPDATE record_army_links SET external_id = ? "
+            "WHERE record_id = ? AND entity = ?",
+            ("missing-device", "equipment:hacking-device", "equipment"),
+        )
+        assert result.rowcount == 1
+    rules = RulesDatabase(rules_path)
+    entries = {
+        item["id"]: item for item in GlossaryCatalog(database, rules).entries()
+        if item["kind"] == "equipment"
+    }
+    assert "equipment:hacking-device" not in entries
+    assert entries["equipment:cube"]["href"] == "/equipment/cube"
+    assert entries["equipment:cube-2"]["href"] == "/equipment/cube-2"
+    assert entries["equipment:firewall"]["href"] == "/equipment/firewall"
+    assert "equipment:tinbot-firewall" not in entries
+
+    with sqlite3.connect(rules_path) as connection:
+        result = connection.execute(
+            "INSERT INTO record_army_links "
+            "(collection_id, record_id, position, entity, external_id) "
+            "SELECT collection_id, record_id, 1, entity, ? FROM record_army_links "
+            "WHERE record_id = ? AND entity = ? AND position = 0",
+            ("100", "equipment:hacking-device", "equipment"),
+        )
+        assert result.rowcount == 1
+    entries = {
+        item["id"]: item for item in GlossaryCatalog(database, rules).entries()
+        if item["kind"] == "equipment"
+    }
+    assert entries["equipment:hacking-device"]["href"] == "/equipment/hacking-device"
 
 
 def test_numeric_army_skill_links_resolve_to_public_slugs(tmp_path: Path) -> None:

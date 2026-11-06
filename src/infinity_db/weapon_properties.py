@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from infinity_army_data.project_resources import maintained_config_path
-from infinity_db.domain_references import public_slug_for_reference, rule_record_public_reference
+from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import RulesDatabase
 
 if TYPE_CHECKING:
@@ -38,27 +38,6 @@ _PROFILE_FIELDS = (
     ("ammunition", "ammunition"), ("saving", "saving"),
     ("saving_num", "savingNum"), ("traits", "traits"),
 )
-
-
-def _origin_public_reference(
-    database: Database | None, record: dict[str, Any],
-) -> dict[str, str] | None:
-    if database is None or record.get("kind") != "weapon":
-        return rule_record_public_reference(database, record)
-    links = []
-    for link in record.get("army_links", []):
-        source_id = link.get("id")
-        if (
-            link.get("entity") != "weapon"
-            or (type(source_id) is not int and not isinstance(source_id, str))
-        ):
-            continue
-        if isinstance(source_id, str) and source_id.isdigit():
-            source_id = int(source_id)
-        slug = public_slug_for_reference(database, "weapons", source_id)
-        if slug is not None:
-            links.append({**link, "id": slug})
-    return rule_record_public_reference(database, {**record, "army_links": links})
 
 
 def load_weapon_properties(path: Path = DEFAULT_PROPERTIES_PATH) -> list[dict[str, Any]]:
@@ -168,7 +147,10 @@ class WeaponProperties:
                         resolved.pop("recordId")
                         origins.append(resolved)
                         continue
-                    reference = _origin_public_reference(database, record)
+                    reference = rule_record_public_reference(
+                        database, record,
+                        validate_army_links=(record.get("kind") == "weapon"),
+                    )
                     resolved["name"] = record["name"]
                     if reference is not None:
                         resolved["public_reference"] = reference

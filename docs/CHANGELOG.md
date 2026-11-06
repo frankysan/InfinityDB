@@ -54,6 +54,8 @@ are not retroactively relabeled.
   Coup de Grâce, multiple-Trooper attack conditions and Template targeting.
 - Browse reviewed deployed-object profiles and their source links independently of the
   carrying Weapon or Equipment; disputed and unavailable attributes remain visible.
+- Find source-cited Equipment such as Cubes and TinBots in the Glossary, with links
+  to their existing Equipment reference cards.
 - Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties
   such as Plasma, Viral, MULTI and combined Ammunition. Property origins link to
   source-cited Weapon examples where available, with exact chart pages retained
@@ -268,6 +270,9 @@ are not retroactively relabeled.
   effects through shared Ammunition and Trait rules. D-Charges, Disco Baller, SymbioBomb,
   Pitcher, Mine Dispenser, Marksman Rifles and Flamethrowers retain their distinct profiles
   and exceptions. Breaker Marksman Rifle is searchable even without current Unit usage.
+- **Web backend + Web frontend:** Include current Equipment concepts in the federated
+  Glossary and link their canonical detail pages, without publishing source variants
+  or unavailable Army routes as duplicate or broken entries.
 - **Data processing + Web backend + Web frontend:** Add searchable, linked Weapon Properties
   with previews and their originating rules, including Plasma, Viral, Breaker, K1, MULTI,
   Monofilament, Silenced, four AP combinations and N+E/M. Origins link to reviewed,

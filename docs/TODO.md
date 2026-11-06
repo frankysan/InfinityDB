@@ -214,7 +214,10 @@ bounded rule-citation/route check; final release acceptance remains open.
   [Weapon Property origin review](v1.0-source-coverage-audit.md#v1s-082-weapon-property-citation-and-route-review-2026-11-06)
   identified and corrected missing example links and chart locators;
   VR-0126 passed its focused source, stale-slug and browser regressions.
-  Next finish the applicable maintained-reference reachability review.
+  The maintained-reference reachability review found and corrected 30 canonical
+  Equipment definitions absent from the federated Glossary despite working
+  source-card routes; VD-0094/0095 were designed and VR-0127 owns verification.
+  Then finish the applicable maintained-reference reachability review.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are

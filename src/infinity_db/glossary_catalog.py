@@ -11,6 +11,7 @@ from infinity_db.application_domains import (
 )
 from infinity_db.database.repository import Database, accent_insensitive_key
 from infinity_db.domain_references import rule_record_public_reference
+from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.weapon_properties import WeaponProperties
 
@@ -43,18 +44,30 @@ class GlossaryCatalog:
         if self.rules_database is None:
             return []
         entries: list[dict[str, Any]] = []
+        equipment_slugs = frozenset(
+            item["slug"]
+            for item in EquipmentCatalog(self.database, self.rules_database).list_equipment()
+            if isinstance(item.get("slug"), str)
+        )
         for domain in APPLICATION_DOMAINS:
             if not domain.published or not domain.glossary:
                 continue
             for kind in domain.record_kinds:
                 for record in self.rules_database.composed_records_by_kind(
-                    kind, include_army_links=(kind == "weapon")
+                    kind, include_army_links=(kind in {"equipment", "weapon"})
                 ):
                     if not record_matches_domain(domain, record):
                         continue
                     if (record.get("variant_semantics") or {}).get("inheritance") == "source":
                         continue
-                    reference = rule_record_public_reference(self.database, record)
+                    reference = rule_record_public_reference(
+                        self.database,
+                        record,
+                        validate_army_links=(kind == "equipment"),
+                        additional_route_slugs=(
+                            equipment_slugs if kind == "equipment" else frozenset()
+                        ),
+                    )
                     href = self._href(reference)
                     if href is None:
                         # A route-backed concept without a valid public identity should not

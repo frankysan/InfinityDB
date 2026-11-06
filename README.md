@@ -78,9 +78,9 @@ its application metrics.
   with reverse Unit usage links where that relationship applies. Search and filter state
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
-  embedded Attributes, scoped Game terms and searchable Weapon Properties (such as Viral,
-  Plasma and combined Ammunition). Weapon Properties link to their underlying canonical
-  rules and reviewed, source-cited Weapon examples instead of redefining the effects.
+  canonical Equipment, embedded Attributes, scoped Game terms and searchable Weapon Properties
+  (such as Viral, Plasma and combined Ammunition). Weapon Properties link to their underlying
+  canonical rules and reviewed, source-cited Weapon examples instead of redefining the effects.
 - Label definitions include deployment, targeting, modifier and fixed-result
   qualifications, with Assignable's English/Spanish timing difference disclosed.
 - Trait help explains Disposable exhaustion, Non-Reloadable cancellation,

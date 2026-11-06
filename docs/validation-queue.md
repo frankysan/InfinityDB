@@ -136,6 +136,32 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
+- [ ] VR-0127 (2026-11-06; ready-to-run): Verify Equipment Glossary
+  publication and source-card navigation on the committed implementation
+  and design revision. Immediate local inspection found 31 canonical
+  Equipment detail routes with current source cards, but only one
+  Equipment Glossary entry before the change; the new projection exposed
+  31/31 routable source cards. Dependent designs VD-0094/0095 were
+  statically reviewed without executing tests. Run:
+  `tests/test_application_rule_references.py` selectors
+  `test_equipment_glossary_source_cited_routes_cover_current_concepts`,
+  `test_validated_public_reference_filters_stale_equipment_links`,
+  `test_equipment_glossary_omits_stale_routes_but_keeps_encoded_equipment`,
+  `test_weapon_glossary_uses_opt_in_army_links_for_routable_definitions`
+  and `test_numeric_army_skill_links_resolve_to_public_slugs`;
+  `tests/test_web.py` selectors
+  `test_glossary_projects_canonical_rules_and_embedded_attributes`,
+  `test_curated_weapon_families_are_discoverable_in_glossary` and
+  `test_cube_profile_characteristic_resolves_to_canonical_equipment`;
+  all of `tests/test_weapon_properties.py`;
+  `tests/test_verify_weapon_source_cards_browser.py` selectors
+  `test_equipment_glossary_reaches_cited_detail_with_keyboard`,
+  `test_weapon_property_origins_reach_sources_in_normal_browser` and
+  `test_unroutable_weapon_property_example_shows_source_section_in_browser`;
+  and `tests/test_verify_scenario_faq_browser.py::test_unpublished_tinbot_source_variant_is_not_a_fake_public_route`.
+  Use the matching development databases, Chromium at 1440/390/320 px,
+  and pinned Windows or Linux execution. Required cases may not skip.
+
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -152,8 +178,8 @@ retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0094`; active obligations are listed above.
-- Execution: `VR-0127`; active obligations are listed above.
+- Design: `VD-0096`; active obligations are listed above.
+- Execution: `VR-0128`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

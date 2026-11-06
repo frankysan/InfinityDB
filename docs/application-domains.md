@@ -350,6 +350,11 @@ The projection:
 - renders maintained-text tokens through the same semantic-reference layer used by owning detail
   surfaces.
 
+Equipment entries resolve Army-backed, presentation-encoded and curated-only routes
+through their owning catalog and source cards. Source-specific variants remain with
+their owning Equipment rather than becoming duplicate Glossary identities. Entries
+without a route in the current publication are not published as broken links.
+
 Profile notation help is a contextual consumer of this framework, not a competing glossary dataset.
 Attribute labels on Unit details reuse the same canonical `attribute:*` definitions and Glossary
 anchors. Source-backed `term:*` records provide the corresponding embedded terminology layer for

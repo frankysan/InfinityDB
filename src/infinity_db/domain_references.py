@@ -37,12 +37,18 @@ def public_slug_for_reference(
 def rule_record_public_reference(
     database: Database | None,
     record: dict[str, Any],
+    *,
+    validate_army_links: bool = False,
+    additional_route_slugs: frozenset[str] = frozenset(),
 ) -> dict[str, str] | None:
     """Return the player-facing reference for one rules-relation endpoint.
 
     Route-backed domains use their normal catalog/detail URL contract. Embedded
     vocabularies intentionally have no detail route, so their canonical public
-    destination is the corresponding Glossary entry.
+    destination is the corresponding Glossary entry. When requested and a
+    database is available, validate Army links and select canonical slugs from
+    that snapshot rather than publishing stale source references. An owning
+    catalog may also supply its published non-Army route slugs.
     """
 
     kind = record.get("kind")
@@ -80,6 +86,28 @@ def rule_record_public_reference(
             for link in record.get("army_links", [])
             if link.get("entity") == entity
         ]
+        if validate_army_links and database is not None:
+            resolved_links = []
+            for link in army_links:
+                raw_ref = link.get("id")
+                if type(raw_ref) is int or (
+                    isinstance(raw_ref, str) and raw_ref.isdigit()
+                ):
+                    item_ref = int(raw_ref)
+                elif isinstance(raw_ref, str) and raw_ref:
+                    item_ref = raw_ref
+                else:
+                    continue
+                slug = public_slug_for_reference(database, catalog, item_ref)
+                if (
+                    slug is None
+                    and isinstance(item_ref, str)
+                    and item_ref in additional_route_slugs
+                ):
+                    slug = item_ref
+                if slug is not None:
+                    resolved_links.append({**link, "id": slug})
+            army_links = resolved_links
         # A family shared by several Army Weapons needs a link to the rule
         # card, not just to the first Weapon's profile table. Until there is
         # a dedicated family route, the first linked Weapon hosts that card.
