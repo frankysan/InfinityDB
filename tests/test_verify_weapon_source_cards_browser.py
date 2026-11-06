@@ -228,7 +228,7 @@ def test_equipment_glossary_reaches_cited_detail_with_keyboard(
         page.locator("#glossary-search").fill(name)
         entry = page.locator(f"#equipment-{slug}")
         entry.wait_for(state="visible", timeout=30000)
-        assert entry.locator(".glossary-domain").inner_text() == "Equipment"
+        assert entry.locator(".glossary-domain").inner_text().casefold() == "equipment"
         link = entry.locator(f'header a[href="/equipment/{slug}"]')
         assert link.count() == 1
         assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")

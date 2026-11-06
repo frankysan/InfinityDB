@@ -161,6 +161,12 @@ selector and other dependencies in its VR item.
   and `tests/test_verify_scenario_faq_browser.py::test_unpublished_tinbot_source_variant_is_not_a_fake_public_route`.
   Use the matching development databases, Chromium at 1440/390/320 px,
   and pinned Windows or Linux execution. Required cases may not skip.
+  The first Windows run at `519e307891995f8763797674a5d6971f19bde32f`
+  passed 42 checks and failed the six new browser cases because the badge
+  renders with uppercase CSS. The assertion was corrected to compare its
+  visible label case-insensitively; rerun all six browser cases on the
+  correction commit before retirement. The other passing checks remain
+  reusable only while their implementation and inputs are unchanged.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
