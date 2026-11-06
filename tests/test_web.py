@@ -5075,11 +5075,12 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert status == 200
     label = json.loads(body)
     assert label["name"] == "Non-Reloadable"
-    reference = next(
-        token for token in label["description_tokens"] if token["type"] == "reference"
-    )
-    assert reference["target"] == "state:unloaded"
-    assert reference["public_reference"] == {"catalog": "states", "id": "unloaded"}
+    references = {
+        token["target"]: token["public_reference"]
+        for token in label["description_tokens"] if token["type"] == "reference"
+    }
+    assert references["state:unloaded"] == {"catalog": "states", "id": "unloaded"}
+    assert references["trait:disposable-x"] == {"catalog": "traits", "id": "disposable-x"}
 
     status, _, body = request(rules_app, "/api/labels/cc-attack")
     assert status == 200

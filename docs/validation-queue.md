@@ -164,6 +164,12 @@ selector and other dependencies in its VR item.
   `tests/test_web.py::test_reference_catalog_pages_and_rules_backed_apis_are_served`.
   Intended host: pinned `linux-dev`, required assets and pinned
   English/Spanish/N5.2 PDFs. The source tests must not skip for acceptance.
+  Due now for CI repair: Source run 42194464117 exposed an old API assertion
+  that selected the first semantic reference instead of the Unloaded target.
+  The corrected assertion verifies both Unloaded and Disposable destinations;
+  Windows immediate CI regression passed 1/1 with 808/808 SVGs. Execute the
+  complete selector group on the corrected committed revision before resuming
+  ordinary implementation.
   Immediate publication-integrity checks passed: deterministic v9 double export,
   exact twelve-Label change set, unchanged other stored rule fields/schema and
   Restrictions, maintained-text coverage, and guarded matched three-artifact
