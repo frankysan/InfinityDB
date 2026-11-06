@@ -490,6 +490,26 @@ unless the release owner specifically needs an exhaustive failure census.
 A full run remains mandatory for the final release gate and independently
 specified CI/preflight gates. No policy here waives them.
 
+**2026-11-06 V1S-082 focused-first VR closure:** At clean committed
+`f349ddcb656a81a3bbe2a31070e9c2761b32431b`, the pinned Linux
+`linux-dev` job `linux-dev:a6e7bce46e664b8da5baeb3864431370`
+passed **48/48 selected tests**, zero skips, with **808/808** SVGs.
+This single impact set covered VR-0118 Hackable API/browser, VR-0121
+development-status and backlog, VR-0122 Isolated rule/API/browser and
+summary layout, VR-0123 pilot page identity and current locator counts,
+and VR-0124 MOV anchor/TinBot source-169 variant and negative-route
+browser cases. On Windows, job `0a8f3dbdccef4a539058b0190e3981ca`
+passed **3/3** pinned bilingual PDF/Isolated source cases and job
+`c5bb998bb2c744a7b19471568a723afc` passed **24/24** local
+provider/status, TinBot source-extras/catalog and variant publication
+cases, all with zero skips. Linux matched deployed-object and
+variant-usage `--check` both passed; the read-only online status query
+resolved workers and exact-SHA GitHub runs. **VR-0118, VR-0121,
+VR-0122, VR-0123 and VR-0124 local execution are satisfied** on this
+revision. The full-suite V1S-090, exact-SHA hosted Source matrix and
+frozen release-candidate gates remain separate; the earlier failed
+full suite at `94103ef4` is not claimed green.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not

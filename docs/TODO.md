@@ -202,14 +202,17 @@ bounded rule-citation/route check; final release acceptance remains open.
   [coverage audit](v1.0-source-coverage-audit.md) and
   [optimization plan](v1.0-coverage-workflow-plan.md), not v1.0 exit criteria.
   The known Isolated/Loss-of-Lieutenant defect and MOV/TinBot navigation
-  gaps have focused corrections/tests. Existing VR-0118/0121/0122/0123/0124
-  must be reconciled **against their actual focused selectors and matched
-  inputs**, without automatically requiring a full suite; V1S-090 retains
-  the independent final cumulative release gate. The earlier Linux
-  cumulative failure and successful focused repair are
-  [recorded](v1.0-source-coverage-audit.md#v1s-082-vr-drain-movtinbot-browser-checks-and-isolated-repair-2026-11-06).
-  SRC-002/006/020/021/034 and additional source-first/whole-record
-  investigations are optional post-1.0 research, not release blockers.
+  gaps have corrected, matched publications and normal-browser tests.
+  **VR-0118/0121/0122/0123/0124 are complete** on the shared pinned,
+  focused Linux and Windows evidence
+  ([test results](testing.md#focused-first-vr-execution)); their earlier
+  failure and repair are [recorded](v1.0-source-coverage-audit.md#v1s-082-vr-drain-movtinbot-browser-checks-and-isolated-repair-2026-11-06).
+  Next: audit the existing maintained identities for at least one
+  **applicable current source citation**, verify existing normal-browser
+  reachability, and repair only actionable gaps. The full cumulative
+  V1S-090 gate and hosted release checks remain independent. SRC-002/006/
+  020/021/034 and further source-first/whole-record investigations are
+  optional post-1.0 research, not release blockers.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of **already known** material source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
