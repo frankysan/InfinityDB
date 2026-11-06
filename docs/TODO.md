@@ -192,12 +192,10 @@ source-to-browser gap review; final release acceptance remains open.
   The [coverage audit](v1.0-source-coverage-audit.md) records accepted bounded
   glossary/Label corrections and the remaining source inventory. The
   [Trait definition review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-trait-definition-conditions-2026-11-06)
-  is implemented with source/API/browser execution pending under VR-0115;
-  complete that acceptance when due and continue the wider inventory.
-  The [Attribute definition review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-attribute-definitions-and-dash-prerequisites-2026-11-06)
-  adds dash prerequisites and the SWC support-weapon qualification; source/API/browser
-  acceptance remains in VR-0117. Continue the broader source inventory after
-  reconciling these bounded changes.
+  and [Attribute definition review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-attribute-definitions-and-dash-prerequisites-2026-11-06)
+  passed their bounded source/API/browser and cumulative checks under retired
+  VR-0115/0117. Continue the wider source inventory; these results do not approve
+  the frozen release candidate.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched

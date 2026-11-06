@@ -71,8 +71,12 @@ byte-identical; comparison of the complete schema and all **16 SQLite tables**
 allowed only the 14 declared `sources.local_path` changes. Both dependent
 publications retained their content with updated source fingerprints, using
 rollback-protected replacement. The documentation stage passed (Markdownlint,
-41-file local link check and static backlog integrity). Broader regression
-execution remains open as VR-0116 in the [validation queue](validation-queue.md).
+41-file local link check and static backlog integrity).
+Broader source-dependent regressions passed without skips on Windows under
+retired VR-0116; the pinned Linux full-assets suite also passed. Linux's missing
+source-PDF cases remain skips and were checked independently on Windows for this
+bounded obligation. See the [cross-host local acceptance](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-attribute-definitions-and-dash-prerequisites-2026-11-06).
+Hosted CI and final source-wide acceptance remain separate.
 
 ## PDF revision-difference intake (2026-11-06)
 

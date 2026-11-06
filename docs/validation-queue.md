@@ -122,36 +122,6 @@ IDs here and link the owning task instead of duplicating its description.
 
 No pending design obligations.
 
-VD-0075/0076 were retired after static review without execution. Three pinned
-source cases, one authored/export/API case and three ordinary browser cases
-cover Attribute dash prerequisites and Support Weapons Cost. VR-0117 retains
-their exact selectors and execution obligation.
-
-VD-0072/0073/0074 were retired after static review of three pinned-source cases,
-five curated/export/API cases and fifteen ordinary-browser cases, without
-executing tests. VR-0115 retains their selectors and existing-regression reruns.
-
-VD-0069/0070/0071 were retired after static review of the source/vocabulary,
-API and 36-case ordinary-browser designs without executing tests. Their
-execution was subsequently accepted under VR-0114, as recorded below.
-
-VD-0066/0067/0068 were retired following static design review without
-execution; their three selector groups were subsequently accepted on the
-pinned Linux revision under VR-0113 (see below).
-
-VD-0062 was retired after static review without execution; its curated-export,
-Glossary API, and responsive browser selectors were executed and accepted under
-VR-0110, as recorded in the
-[coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-trooper-glossary-2026-11-05).
-
-VD-0059/0060/0061 were retired after
-static review without execution; their docs-stage, JSON, synthetic Git
-ancestry and CI regressions passed under VR-0107/0108 on pinned Linux
-`bf0821af`. Earlier VD-0053–VD-0058 passed on `0bac3369`, and
-VD-0050–VD-0052 on `e957c43e`. VR-0109's existing Node harness selector
-passed on committed Windows/Linux `34282616` and was retired. Hosted
-CI/release acceptance remains independent.
-
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
 existing coverage, risk, linked VR ID, and resulting test selector and
@@ -161,101 +131,7 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-- [ ] VR-0117 (2026-11-06; ready-to-run): Attribute dash prerequisite and
-  Support Weapons Cost reference corrections. Work: V1S-082; revision:
-  implementation commit containing this entry; risk: reference accuracy.
-  Design: VD-0075/0076 completed without execution. Immediate provenance gates: pinned bilingual N5.3 and
-  historical English N5.2 p. 9; semantic links; schema-preserving deterministic
-  v9 export limited to the two summaries/review dates and matched publications.
-  Deferred: `tests/test_application_rule_references.py::test_attribute_dash_and_swc_source_clauses`,
-  `tests/test_application_rule_references.py::test_attribute_dash_and_swc_export_and_api`,
-  and `tests/test_verify_scenario_faq_browser.py::test_attribute_dash_and_swc_normal_browser`
-  at 1440/390/320 px, plus cumulative reference regressions.
-  Intended hosts: verified Windows PDF bytes and pinned `linux-dev` for
-  API/browser/cumulative acceptance. Source availability is independently checked.
-  Windows execution: 115 cases passed without skips, including all seven new
-  source/API/browser cases and four source-review gates. Changed-module Ruff,
-  Pyright and the docs stage passed. Cumulative Linux acceptance remains open.
-
-- [ ] VR-0116 (2026-11-06; ready-to-run): Renamed local PDF references and
-  expanded revision inventory. Work: operator-requested source maintenance;
-  revision: implementation commit containing this entry; risk: provenance.
-  Design: existing source/hash, rules-export and publication coverage; no new
-  behavior or missing assertion identified. Immediate: verify all selected
-  PDF paths/pages/hashes; deterministic double v9 export; complete SQLite
-  schema/table comparison allowing only declared source-path substitutions;
-  unchanged deployed-object and variant-usage payloads apart from dependent
-  fingerprints; rollback-protected matched publication and docs checks.
-  Outcome: all 14 declarations matched paths/pages/hashes; both v9 exports
-  were byte-identical and all 16 tables matched apart from 14 locator cells.
-  Both dependent publications matched; documentation stage and diff checks passed.
-  Follow-through: Windows sweep at `3ed01ea9` exposed the Spanish filename
-  discriminator, two optional-facts assertions and a stale locator total.
-  All 66 cases in the two repaired modules then passed without skips; Ruff
-  passed. Current Linux staging lacks the renamed PDFs, so source checks use
-  verified Windows bytes. Broader execution and hosted acceptance remain open;
-  see the [Trait follow-through](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-trait-definition-conditions-2026-11-06).
-  Deferred: `tests/test_curated.py`, `tests/test_audit_1_0_reference_inputs.py`,
-  `tests/test_report_reference_baseline.py`,
-  `tests/test_audit_reinforcements_applicability.py`,
-  `tests/test_silent_immunity_source_scope.py`,
-  `tests/test_restriction_storage_candidate.py`, and cumulative source/API
-  regressions for mechanically updated PDF locators.
-  Intended host: pinned `linux-dev`, after explicitly activating renamed PDFs
-  from Syncthing staging; present source bytes must pass their hash checks.
-  Additional historical revisions are inventoried, not semantically accepted.
-  Initial Linux full run at `3ed01ea9` reported 5,238 passed, 237 skipped and
-  seven failed: three repaired assertions and four missing-source prerequisites.
-  The four review gates now declare their PDF prerequisite and passed on Windows
-  with the actual pinned bytes. Re-run the corrected committed state on Linux;
-  absent source checks remain covered separately on Windows.
-
-- [ ] VR-0115 (2026-11-06; ready-to-run): Five N5.3 Trait definition
-  corrections. Work: V1S-082; revision: implementation commit containing this
-  entry; risk: source/reference parity. Design: VD-0072/0073/0074 completed
-  without execution. Immediate publication-integrity gates passed: pinned
-  source hashes, unchanged v9 schema/Restrictions and other rule fields,
-  deterministic double export,
-  semantic-link coverage and rollback-protected matched release publications.
-  Deferred: `tests/test_silent_immunity_source_scope.py` (includes
-  `test_v1s082_trait_glossary_source_clauses` and
-  `test_v1s082_trait_definitions_export_and_api`),
-  `tests/test_verify_scenario_faq_browser.py::test_v1s082_traits_normal_browser`,
-  `tests/test_rules_database.py::test_rea023_deployable_placement_geometry_and_exception_owners`,
-  `tests/test_deployable_trigger_cross_rules.py`, and publication-pair checks.
-  These retain the existing Silent/Immunity, Disposable and Deployable
-  conditions. Intended host: pinned `linux-dev` with required assets;
-  historical source checks may require Windows where N5.2 is available.
-  Record actual hosts and no uncovered source/browser skips.
-  The initial Windows sweep ran the fifteen browser cases and source checks;
-  four validation-test defects were repaired with 66/66 focused Windows cases
-  passing. Current cumulative/hosted acceptance remains pending as above.
-
-VR-0114 was accepted at `8c2600de350195ab7f69782a07e9bbb92ab52db7`: 51/51
-Linux API/export/browser checks and 3/3 Windows pinned-source checks passed,
-with required 808/808 assets. The Windows run covers the historical N5.2 PDF
-missing on Linux. Exact selectors, jobs and earlier failure dispositions are
-recorded in the [Label review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-label-definitions-2026-11-06).
-
-VR-0113 was accepted on 2026-11-06 against `af806f6016e9c1ae38bf567dc0db6aba5380f28c`
-using Linux job `linux-dev:299fff7559554529b55ac0f80d3b0dc7`:
-**21 passed, zero skipped/failed** with 808/808 published/browser SVGs.
-Five curated/source assertions, one Glossary API assertion and fifteen
-Chromium cases (five entries at 1440/390/320 px) passed; source/asset
-and release-pair publication gates are recorded in the
-[coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-remaining-p-173-glossary-terms-2026-11-06).
-The independently required full suite, hosted CI and frozen-candidate
-release gates remain separate.
-
-The most recent pinned Linux full-assets acceptance, including the 2026-11-04
-queue drain, is recorded in
-[testing.md](testing.md#parallel-windows-development-and-linux-validation).
-The active queue does not duplicate completed evidence: Git history retains
-the retired VD/VR entries. Hosted Source checks (including macOS and
-cross-platform deterministic outputs), Installed wheel, Deployment smoke
-and final release acceptance are still independently required under
-[CI policy](ci.md) and [V1S-093](TODO.md#final-10-acceptance);
-**an empty VR queue does not certify those gates**.
+No pending deferred execution.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
