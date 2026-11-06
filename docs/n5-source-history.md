@@ -74,6 +74,97 @@ rollback-protected replacement. The documentation stage passed (Markdownlint,
 41-file local link check and static backlog integrity). Broader regression
 execution remains open as VR-0116 in the [validation queue](validation-queue.md).
 
+## PDF revision-difference intake (2026-11-06)
+
+**Project domain:** Data processing
+
+The new, read-only `tools.audit_pdf_revision_deltas` compares **11 adjacent
+revision pairs**: four N5 core transitions in **each** of English and Spanish,
+FAQ v0.0 to v0.1 in each language, and ITS Season 18 English 2026.09.01 to
+2026.09.11. It requires exact bytes matching the existing ignored
+`local/pdf-revision-inventory.json` hashes, excludes cover pages, and compares
+normalized extracted tokens using nine-token windows. Results are in
+`local/audits/pdf-deltas-2026-11-06.json` (ignored). The report is a
+**candidate-triage index**, not a line-by-line certified change log: tables,
+diagrams, column order, typography, bilingual translations and scenario
+applicability require human inspection. Layout shifts produce false positives,
+and matches cannot establish semantic equivalence.
+
+### Reviewed revisions and historical correction
+
+- **N5 core v1 -> v1.1:** Both languages show extensive content changes; Jump,
+  Climbing Plus and Speedball are prominent extraction candidates. They require
+  scoped older-versus-newer semantic comparison before identifying any missing
+  current-rule correction.
+- **N5 core v1.1 -> v5.1.1:** Small, concentrated differences include the
+  Climbing Plus diagram/example in both languages and the Spanish WildParrot
+  Disposable value. On physical PDF p. 74, **Spanish v1.1 lists
+  `Desechable (3)`**, whereas English v1.1 lists **Disposable (1)**; Spanish
+  v5.1.1 changes to **`Desechable (1)`**, aligning with English v5.1.1.
+  This is a **historically corrected bilingual profile discrepancy**; it does
+  not justify a new current-source SRC entry or retroactive edits to preserved
+  v1.1 evidence. The revised Climbing Plus diagrams warrant visual geometry
+  inspection before declaring what gameplay correction they make.
+- **N5 core v5.1.1 -> v5.2:** Both languages contain broad changes and page
+  reflow. The automated report identifies candidates, **not** a reviewed
+  exhaustive version changelog or newly confirmed contradiction.
+- **N5 core v5.2 -> v5.3:** The change signatures in both languages include
+  Infinity Spec-Ops/SpecBall and numerous amended mechanics. Current N5.3
+  selection and the reviewed 26 English plus Spanish-specific update subjects
+  remain governed by the [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md);
+  these token diffs do not reclassify existing SRC entries or prove review
+  coverage of every changed clause.
+- **FAQ v0.0 -> v0.1:** Added text in each language is consistent with the
+  previously recorded **nine new, 20 carried-forward** answers. The maintained
+  [FAQ question/scope inventory](faq-v0.1-scope-inventory.md) remains the
+  semantic authority. Existing Haris, Stealth and Deployable bilingual
+  questions (SRC-008/025/026) remain open; no duplicate intake was created.
+
+### ITS 18 hotfix: three confirmed scenario changes
+
+The **2026-09-24** official [English September hotfix
+announcement](https://infinityuniverse.com/en/news/its18-hotfix-september)
+and [Spanish announcement](https://infinityuniverse.com/es/news/its18-hotfix-september)
+identify **The Dig, Double Bind and Crossing Lines**. Direct examination of
+both local English PDFs and the later Spanish PDF confirms these versioned
+changes, rather than merely the 132-to-142-page reflow:
+
+- **Crossing Lines:** English 2026.09.01 physical p. 64 excludes only Secure
+  HVT; 2026.09.11 pp. 65–66 explicitly excludes HVT deployment **and** the
+  Classified Deck. Spanish 2026.09.11 pp. 65–66 agrees.
+- **Double Bind:** English 2026.09.01 pp. 71–72 states at most one Antenna may
+  be destroyed per turn. English 2026.09.11 pp. 74–75 additionally nullifies
+  damage to any other Antenna in that turn and permits Engineer/GizmoKit
+  targeting; Spanish 2026.09.11 pp. 74–75 corroborates both. The announcement
+  also names Main Objective choice timing; that clause needs separate
+  old/new bilingual acceptance before migration.
+- **The Dig:** English 2026.09.01 pp. 74–77 uses activated Consoles, permits
+  Hyperthermal Tech only outside 8-inch spacing limits and has the earlier
+  analysis/neutralization sequence. English 2026.09.11 pp. 78–80 instead
+  scores own Player Tokens on Consoles, reduces both placement spacings to
+  **4 inches for 150-point games**, uses the **Analyze Hyperthermal Tech**
+  Skill, replaces an opponent's Console token and requires the player's own
+  token on a Tech for Neutralize. Spanish 2026.09.11 pp. 78–80 agrees
+  (10 cm / 20 cm distances).
+
+The later ITS covers say **2026.09.11**, but the PDFs' September 24 creation
+metadata and official September 24 hotfix announcement are separate provenance
+facts; do not invent an effective date for each clause. The currently
+published **Battleground pilot** still deliberately pins
+`its-18@2026.09.01`. No updated source declarations, citations, scenarios,
+runtime interpretations or database artifacts were promoted in this audit.
+The [post-1.0 ITS library backlog](TODO.md#its-scenarios-and-game-tools)
+owns bilingual .11 adoption, version-specific published scenario/citation
+reconciliation and any full-season review.
+
+**Disposition:** Confirmed historical supersession and a later ITS hotfix are
+**not automatically simultaneous-source contradictions**. No new unresolved
+source conflict was sufficiently substantiated to allocate SRC-034, and none
+of SRC-001–033 was closed. A complete bilingual N5 rule-by-rule, FAQ replay,
+ITS season-wide semantic or diagram-only audit remains outside the automated
+triage; new player-relevant disagreements go to
+[the canonical clarification register](official-source-clarifications.md).
+
 ## Official N5 publication index
 
 The following dated Corvus Belli English-language posts were identified from the

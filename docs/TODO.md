@@ -629,6 +629,16 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
     a prior event must see its matching scenario, objectives, extras, and FAQ
     rulings rather than a mixture of seasons. Retain a curated, human-reviewed
     change log/diff rather than relying on raw PDF text diffing.
+  - [ ] Reconcile the official September 24 ITS 18 hotfix in the pinned
+    English/Spanish 2026.09.11 PDFs against English 2026.09.01: verify all
+    changes to The Dig, Double Bind and Crossing Lines (including objective
+    selection, token ownership, 150-point spacing and Engineer/GizmoKit);
+    select effective-date/version identities, migrate affected citations and
+    audit the published Battleground pilot without silently rewriting historical
+    2026.09.01 play. The initial [bilingual PDF delta
+    intake](n5-source-history.md#pdf-revision-difference-intake-2026-11-06)
+    is evidence triage, not semantic acceptance. This is **post-1.0**, not
+    a core-rule release blocker.
   The official Army app/site remains authoritative for list legality;
   InfinityDB labels its snapshot/date and does not claim tournament validation.
   - [ ] Publish ITS-only FAQ clarifications after verifying each exact
@@ -642,8 +652,10 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   list/detail coverage backed by versioned seasonal data; retain the already
   published Season 18 Battleground pilot without treating it as a 1.0 gate.
   - [ ] Curate the remaining Season 18 mission identities and complete
-    source-backed definitions under `its-18@2026.09.01`; extend typed
-    geometry, scoring and card/classified choices only where the mission
+    source-backed definitions under the reviewed selected 2026.09.11 hotfix
+    identity once its source promotion is accepted; retain
+    `its-18@2026.09.01` for historically scoped results. Extend typed
+    geometry, scoring and card/classified choices only where each mission
     needs them. Unpublished missions must fail closed.
   - [ ] Capture structured, cited scenario facts: objectives and scoring, game
     rounds/end conditions, force/point/SWC/table/deployment configuration,
