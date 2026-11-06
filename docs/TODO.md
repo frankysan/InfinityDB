@@ -205,11 +205,12 @@ source-to-browser gap review; final release acceptance remains open.
   A fixed [35-record pilot](v1.0-coverage-workflow-plan.md#p1--tracked-disposition-and-source-evidence-contract)
   spans 10 cohorts and three source-first probes; its read-only work packet reports
   127 citation occurrences, 123 exact locators and 96 distinct source pages.
-  The source-only pilot has now screened **12/35** records at selected-clause
+  The source-only pilot has now screened **15/35** records at selected-clause
   scope, with **0/35 whole-record or current-revision browser approvals**.
   The Doctor/Engineer batch records the unresolved bilingual contact-condition
-  discrepancy **SRC-034**. These results remain screening evidence, not completed
-  semantic or browser acceptance.
+  discrepancy **SRC-034**. The weapon-profile batch rechecked existing
+  **SRC-020** and **SRC-021** without resolving either conflict. These results
+  remain screening evidence, not completed semantic or browser acceptance.
   Next: continue measured source/normal-browser review of the fixed sample,
   reconcile SRC-034 without inventing a rule, then design fingerprinted
   signed-off dispositions using observed evidence reuse.
