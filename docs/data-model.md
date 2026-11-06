@@ -919,7 +919,7 @@ not a generic BS Attack or Active Turn modifier. The closed
 curated validator rejects altered extra IDs, raw signatures,
 modifier values, kinds and scopes.
 
-The guarded `tools.stage_neurocinetics_burst` migration pinned the
+The completed one-use Neurocinetics migration pinned the
 source/Army/PDF inputs, staged a deterministic v9 rules export,
 verified 17 unchanged deployed objects, and promoted the matching
 rules/publication fingerprints with an ignored rollback backup.
@@ -963,8 +963,8 @@ and `excluded: true`. It does **not** override a different
 qualifying Skill. The pre-existing Specialist Troops filter
 continues to use the Army variant label; this migration only
 publishes matching structured semantics for future consumers.
-The guarded `tools.stage_chain_of_command_non_specialist`
-migration matched the curated source, Army and PDF fingerprints,
+The completed one-use Chain of Command migration matched the curated
+source, Army and PDF fingerprints,
 promoted the synchronized rules/publication artifacts, retained
 rollback copies, and verified that 17 published deployed objects
 remain unchanged. The source audit has **18 unresolved Skill IDs**,
@@ -984,8 +984,8 @@ WIP-based BS Attack. The single `reviewed-extra` effect is
 and `count: 1`. It is not an increase to the source chart's
 B or a general BS Attack modifier. The previously Wiki-only
 curated record now additionally cites both N5.3 pages.
-`tools.stage_forward_observer_special_die` guarded the
-single-record change, verified exact Army/PDF inputs,
+The completed one-use Forward Observer migration guarded the
+single-record change and verified exact Army/PDF inputs,
 promoted matched rules/publication outputs, retained rollback
 copies, and preserved all 17 deployed objects. The audit
 reports **17 unresolved Skill IDs**. Additional mutation

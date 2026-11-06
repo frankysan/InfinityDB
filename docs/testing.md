@@ -3094,14 +3094,13 @@ option-specific source-109 `8/TEXT:+1B` signatures and their two
 Unit identities across four Army contexts, in both the tracked and
 fresh rules export. `tests/test_curated.py` rejects unsupported
 IDs, kind, source type, value and non-Reactive-Turn scopes.
-`tools.stage_neurocinetics_burst --output-dir local/<unique-stage>`
-creates an ignored staged v9 `rules.db` and matched deployed-object
-publication without mutating tracked artifacts;
-`--promote-staged` rechecks input hashes/HEAD and preserves rollback
-copies. The published pair retains all 17 reviewed objects, and
-the source inventory moves from 21 to **20 unresolved Skill IDs**.
-This is metadata publication and does not establish a Unit-usage
-index, attack resolution, full browser signoff or release acceptance.
+The completed one-use migration staged and promoted a matched v9
+`rules.db`/deployed-object publication pair, rechecked source hashes
+and retained rollback copies. All 17 reviewed objects remained unchanged;
+the source inventory then reported **20 unresolved Skill IDs**.
+The retired script remains recoverable in Git history. This metadata
+publication did not establish a Unit-usage index, attack resolution,
+full browser signoff or release acceptance.
 
 **Discover (+3/+6/ReRoll) source promotion (2026-11-02):**
 Pinned source `131` has 43 direct occurrences, exclusively
@@ -3143,17 +3142,14 @@ signatures. The `reviewed-extra` effect is strictly an item
 count scoped to deployment; it does not modify Disposable uses.
 The focused `test_minelayer_two_deployment_count_matches_pinned_source`
 pins all 15 Army contexts and the promoted rules database.
-The script `tools.stage_minelayer_count --output-dir local/<unique-name>`
-stages the matched rules/publication pair under ignored `local/`;
-`--promote-staged` revalidates hashes and retains rollback copies.
-All 17 published deployed objects remain unchanged, and the
-variant audit drops to **19 unresolved Skill IDs**. The older
-generic `--refresh-variant-semantics-v9` path requires schema
-`user_version=9` and rejects this newer checkout; use the
-dedicated guarded migration for this change. Focused regression,
-database, publication and rules-build validation were run
-immediately. Additional mutation cases and cumulative test-suite
-execution are deferred in `docs/validation-queue.md`.
+The completed one-use guarded migration staged and promoted a matched
+rules/publication pair, checked source hashes and retained rollback copies
+under ignored `local/`. All 17 deployed objects remained unchanged; the
+variant audit then reported **19 unresolved Skill IDs**. The retired
+script remains in Git history. The older generic v9 refresh was
+incompatible with the newer schema. Focused regression, database,
+publication, rules-build, mutation and cumulative test validation
+were completed in November 2026.
 
 **Chain of Command Non Specialist publication (2026-11-01):**
 The source audit identifies exactly 11 source-26 `375/TEXT:Non Specialist`
@@ -3164,14 +3160,13 @@ Command-derived Specialist Troop qualification. The targeted
 source-inventory regression pins all 11 occurrences and the typed
 rules database; `test_specialist_candidates_ignore_non_specialist_chain_but_keep_other_skills`
 protects the existing independent-qualifier behavior.
-`tools.stage_chain_of_command_non_specialist --output-dir local/<unique-name>`
-stages guarded matching rules/publication artifacts;
-`--promote-staged` verifies input hashes and retains rollback
-copies. No deployed-object record was changed (17 unchanged).
-Focused source, rules-map, Specialist filter, publication and
-rules-build tests passed; source audit count is **18 unresolved
-Skill IDs**. Mutation/edge-case tests and cumulative suite
-execution are deferred in `docs/validation-queue.md`.
+The completed one-use guarded promotion staged a matched
+rules/publication pair, verified input hashes and retained rollback
+copies. No deployed-object record changed (17 unchanged).
+Focused source, rules-map, Specialist filter, publication and rules-build
+tests passed; the audit then reported **18 unresolved Skill IDs**.
+Mutation/edge-case and cumulative checks also passed in November 2026.
+The retired script remains recoverable from Git history.
 
 **Forward Observer (+1SD) source promotion (2026-11-01):**
 The pinned raw Army audit confirms two profile-level
@@ -3182,15 +3177,13 @@ Forward Observer occurrences. The curated exact effect is one
 not additional Burst or Disposable uses; newly added N5.3
 citations on pp. 75 and 92 establish its rule scope.
 The source-variant regression and rules-database mapping
-test pass. `tools.stage_forward_observer_special_die`
-stages a fingerprint-verified matched rules/publication
-pair beneath ignored `local/`; `--promote-staged` verifies
-and retains rollback backups. The reviewed 17 deployed
-objects are identical before/after promotion and the
-audit now lists **17 unresolved Skill IDs**.
-Additional rejection/derived-index tests and cumulative
-full-suite verification were subsequently completed on 2026-11-01;
-the fulfilled VD/VR entries have been retired from the active queue.
+test pass. The completed one-use guarded promotion staged and verified a matched
+rules/publication pair, retained rollback backups under ignored
+`local/`, and left all 17 reviewed deployed objects unchanged.
+The audit then reported **17 unresolved Skill IDs**. Additional
+rejection/derived-index tests and cumulative full-suite verification
+passed on 2026-11-01; the fulfilled VD/VR entries were retired.
+The migration script remains recoverable from Git history.
 
 **Phased regression design pass (2026-11-01):**
 `tests/test_curated.py` now contains exact-source mutation matrices
