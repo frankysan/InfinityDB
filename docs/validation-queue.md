@@ -200,19 +200,22 @@ selector and other dependencies in its VR item.
 - [ ] VR-0123 (2026-11-06; ready-to-run): V1S-082 P0 pilot page-identity
   reporting. Work: V1S-082; revision: implementation and test-design change
   (pin exact SHA for execution); risk: misleading page-open reuse estimates
-  from snapshot-wide Wiki source IDs. Immediate: source-page identity
-  classification, fail-closed summary fields, CLI wording and documentation
-  updated; Ruff passed on the changed Python files, Pyright passed with 0
-  errors/warnings/information, docs passed (44 Markdown files and link/backlog
-  checks), and read-only pilot CLI/JSON checks passed. Output: 35 records,
-  10 cohorts, 129 citation occurrences, 125 locators, 95 known source-page
-  identities and 9 unresolved locators across two Wiki snapshot IDs; total
-  page count and reuse estimate are null. V1S selection and `git diff --check`
-  passed. No tests or reviewer-time/source-open measurements were run.
-  Design: VD-0085 completed and retired without executing tests. Deferred:
+  from snapshot-wide Wiki source IDs. Immediate: exact curated archive
+  `member` values are preserved and used for page identity; missing/ambiguous
+  values remain unresolved. Ruff passed on the changed Python files, Pyright
+  passed with 0 errors/warnings/information, docs passed (44 Markdown files
+  and link/backlog checks), and read-only pilot CLI/JSON inspection passed.
+  Output: 35 records, 10 cohorts, 129 citation occurrences, 125 locators,
+  104 page identities, 0 unresolved locators and 25 page-reuse candidates;
+  zero approvals and empty measurement fields. V1S selection and
+  `git diff --check` passed. No tests or reviewer-time/source-open measurements
+  were run.
+  Design: VD-0085/0086 completed and retired without executing tests. Deferred:
   `tests/test_report_reference_baseline.py::test_source_page_identity_requires_addressable_locator`
   and
-  `tests/test_report_reference_baseline.py::test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved`.
+  `tests/test_report_reference_baseline.py::test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved`
+  and
+  `tests/test_report_reference_baseline.py::test_v1s082_pilot_suppresses_page_metrics_when_wiki_member_is_missing`.
   Intended hosts: Windows and pinned `linux-dev`. No tests run during VD.
 
 A VR entry records its ID/date/status (`awaiting-design`,
@@ -228,7 +231,7 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0086`; active obligations are listed above.
+- Design: `VD-0087`; active obligations are listed above.
 - Execution: `VR-0124`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that

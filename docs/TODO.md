@@ -205,11 +205,13 @@ source-to-browser gap review; final release acceptance remains open.
   A fixed [35-record pilot](v1.0-coverage-workflow-plan.md#p1--tracked-disposition-and-source-evidence-contract)
   spans 10 cohorts and three source-first probes; its read-only work packet reports
   129 citation occurrences, 125 exact source/page/heading locators and 97
-  `(sourceId, page)` buckets. The 97 buckets are not distinct pages: the planner
-  finds 95 known source-page identities and 9 unresolved page-identity locators
-  under two snapshot-wide Wiki IDs, and suppresses the total-page and page-open
-  reuse figures while identities are incomplete. These locator counts are not
-  measured review time or actual source opens.
+  `(sourceId, page)` buckets. The 97 buckets are not distinct pages: 9
+  page-less Wiki locators carry explicit archive `member` identities, giving
+  104 known source pages. The planner preserves those members and reports 25
+  citation-occurrence page-reuse candidates; it suppresses page totals and the
+  reuse estimate if any identity is missing or ambiguous. Neither locator
+  count nor candidate reuse is measured review time, actual source opens or
+  saved work.
   The source-only pilot has now screened **35/35 distinct identities** at
   selected-clause scope across 39 record-cohort screen events, with **0/35
   whole-record or current-revision browser approvals**. The Trait cohort

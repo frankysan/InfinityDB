@@ -13,6 +13,7 @@ from unittest.mock import patch
 import pytest
 
 from infinity_army_data.merge import load_sources
+from infinity_db.curated import load_curated_document
 from tools.report_reference_baseline import (
     _NESTED_SOURCE_FIELDS,
     FROZEN_DECLARATION_COMMIT,
@@ -156,6 +157,9 @@ def test_source_page_identity_requires_addressable_locator() -> None:
     assert _source_page_identity("wiki-hacking-oldid-12345", None) == (
         "wiki-hacking-oldid-12345", "revision",
     )
+    assert _source_page_identity(
+        "wiki-en-20260926-200832", None, "Camouflaged_State",
+    ) == ("wiki-en-20260926-200832", "member:Camouflaged_State")
     assert _source_page_identity("wiki-en-20260926-200832", None) is None
     assert _source_page_identity("n5-rules-v5.3-en", True) is None
 
@@ -173,15 +177,17 @@ def test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved(
     assert summary["sourceApprovals"] == summary["browserApprovals"] == 0
     assert pilot["formatVersion"] == 2
     assert summary["uniqueSelectedSourceLocators"] <= summary["selectedSourceCitationOccurrences"]
-    assert summary["sourcePageIdentityComplete"] is False
-    assert summary["knownUniqueSourcePageIdentities"] == 95
-    assert summary["unresolvedSourcePageIdentityLocators"] == 9
-    assert summary["unresolvedSourcePageIdentitySources"] == [
-        "wiki-en-20260926-200832",
-        "wiki-es-20261009-211304",
-    ]
-    assert summary["uniqueSelectedSourcePages"] is None
-    assert summary["sourcePageOpensPotentiallyReusable"] is None
+    assert summary["sourcePageIdentityComplete"] is True
+    assert summary["knownUniqueSourcePageIdentities"] == 104
+    assert summary["unresolvedSourcePageIdentityLocators"] == 0
+    assert summary["unresolvedSourcePageIdentitySources"] == []
+    assert summary["uniqueSelectedSourcePages"] == 104
+    assert summary["sourcePageOpensPotentiallyReusable"] == 25
+    camouflaged = next(record for record in pilot["records"] if record["id"] == "state:camouflaged")
+    assert any(
+        citation.get("member") == "Camouflaged_State"
+        for citation in camouflaged["citations"]
+    )
     assert all(
         row["sourceDisposition"] == "pending-semantic-acceptance"
         and row["normalBrowserDisposition"] == "pending-browser-acceptance"
@@ -201,6 +207,39 @@ def test_v1s082_fixed_pilot_selection_is_valid_fail_closed_and_unapproved(
     changed.write_text(json.dumps(manifest), encoding="utf-8")
     with pytest.raises(ReferenceBaselineError, match="Missing/duplicate pilot record"):
         build_explanation_review_pilot(report, manifest_path=changed)
+
+
+def test_v1s082_pilot_suppresses_page_metrics_when_wiki_member_is_missing() -> None:
+    report = reconcile_explanation_inventory()
+    original_loader = load_curated_document
+    member_removed = False
+
+    def load_without_camouflage_member(source: Path) -> dict[str, Any]:
+        nonlocal member_removed
+        document = original_loader(source)
+        for record in document["records"]:
+            if record["id"] != "state:camouflaged":
+                continue
+            for citation in record["citations"]:
+                if (citation.get("sourceId") == "wiki-en-20260926-200832"
+                        and citation.get("member") == "Camouflaged_State"):
+                    citation.pop("member")
+                    member_removed = True
+        return document
+
+    with patch(
+        "infinity_db.curated.load_curated_document",
+        side_effect=load_without_camouflage_member,
+    ):
+        summary = build_explanation_review_pilot(report)["summary"]
+    assert member_removed
+    assert summary["sourcePageIdentityComplete"] is False
+    assert summary["unresolvedSourcePageIdentityLocators"] == 1
+    assert summary["unresolvedSourcePageIdentitySources"] == [
+        "wiki-en-20260926-200832",
+    ]
+    assert summary["uniqueSelectedSourcePages"] is None
+    assert summary["sourcePageOpensPotentiallyReusable"] is None
 
 
 def _reviewed_explanation_join_inputs() -> dict[str, Any]:

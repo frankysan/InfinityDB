@@ -1754,13 +1754,37 @@ def plan_explanation_review_batches(
 V1S082_PILOT_MANIFEST = PROJECT_ROOT / "config/validation/v1s082-review-pilot-v1.json"
 
 
-def _source_page_identity(source_id: str, page: Any) -> tuple[str, str] | None:
+def _source_page_identity(
+    source_id: str, page: Any, member: str | None = None,
+) -> tuple[str, str] | None:
     if type(page) is int and page > 0:
         return source_id, f"page:{page}"
     if (page is None and source_id.startswith("wiki-")
             and re.search(r"-oldid-[0-9]+$", source_id)):
         return source_id, "revision"
+    if page is None and source_id.startswith("wiki-") and member and member.strip():
+        return source_id, f"member:{member}"
     return None
+
+
+def _source_page_member(
+    curated_record: dict[str, Any], citation: dict[str, Any],
+) -> str | None:
+    source_id = citation["sourceId"]
+    if not source_id.startswith("wiki-"):
+        return None
+    members = [
+        row.get("member")
+        for row in curated_record["citations"]
+        if row.get("sourceId") == source_id
+        and row.get("page") == citation["page"]
+        and row.get("heading") == citation["heading"]
+    ]
+    if (not members
+            or any(not isinstance(member, str) or not member.strip() for member in members)
+            or len(set(members)) != 1):
+        return None
+    return members[0]
 
 
 def build_explanation_review_pilot(
@@ -1809,7 +1833,7 @@ def build_explanation_review_pilot(
     record_ids: set[str] = set()
     cohorts: set[str] = set()
     selected_rows: list[dict[str, Any]] = []
-    all_locators: set[tuple[str, str, str]] = set()
+    all_locators: set[tuple[str, str, str, str | None]] = set()
     all_source_pages: set[tuple[str, str]] = set()
     unresolved_source_page_locators: set[tuple[str, str, str]] = set()
     naive_locator_count = 0
@@ -1835,15 +1859,19 @@ def build_explanation_review_pilot(
             key = (citation["sourceId"], str(page), citation["heading"])
             if identifier not in sections.get(key, set()):
                 raise ReferenceBaselineError(f"Pilot source ownership mismatch: {identifier}")
-            source_locators.append({
+            member = _source_page_member(curated[identifier], citation)
+            source_locator = {
                 "sourceId": key[0], "page": key[1], "heading": key[2],
                 "otherRecordOwners": sorted(sections[key] - {identifier}),
                 "status": "citation-pointer-not-reviewed-clause",
-            })
+            }
+            if member is not None:
+                source_locator["member"] = member
+            source_locators.append(source_locator)
             repeated_shared += len(sections[key]) > 1
-            all_locators.add(key)
+            all_locators.add((*key, member))
             page_identity = _source_page_identity(
-                citation["sourceId"], citation["page"],
+                citation["sourceId"], citation["page"], member,
             )
             if page_identity is None:
                 unresolved_source_page_locators.add(key)
