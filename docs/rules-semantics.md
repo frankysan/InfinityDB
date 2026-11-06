@@ -226,6 +226,12 @@ Cube/Cube 2.0, Tactical Order, and Impetuous can also appear as Unit Profile
 icons, but they should not be collapsed into Training merely because they are
 displayed alongside other profile symbols.
 
+The Hackable Characteristic applies by default to HI, REM, TAG and VH Troopers
+unless otherwise stated, and to Hackers regardless of Troop Type. Both allied
+and enemy Troopers can be targeted by certain Hacking Programs; the Program's
+own targeting requirements still govern eligibility. This source-backed help
+is descriptive and does not infer eligibility from a partial Army profile.
+
 This taxonomy is useful for naming and grouping existing profile fields and
 symbols, for filter/help text, and for keeping game semantics separate from
 asset-storage categories.
@@ -233,7 +239,7 @@ asset-storage categories.
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Unit_Profile#Trooper_Characteristics>
-- PDF: Infinity N5 V5.3, printed page 8
+- PDF: Infinity N5 V5.3, English printed page 8; Spanish printed pages 8–9
 
 ### RS-BR-UP-004 — Troop Type and Trooper Classification are different axes
 

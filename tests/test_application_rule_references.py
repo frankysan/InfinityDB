@@ -346,6 +346,90 @@ def test_attribute_dash_and_swc_export_and_api(tmp_path: Path) -> None:
     assert contextual["summary"] == owners["rule:profile-help:attributes"]["summary"]
 
 
+@pytest.mark.parametrize("relative,pin,page,clauses", [
+    (
+        "data/pdf/rules/n5-rules-v5.3-en.pdf",
+        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+        8,
+        ("both allies and enemies", "hi, rem, tag, and vh troopers are",
+         "hackable unless otherwise stated", "hackers, regardless of troop type"),
+    ),
+    (
+        "data/pdf/rules/n5-rules-v5.3-es.pdf",
+        "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f",
+        9,
+        ("tanto aliados como enemigos", "salvo que se indique",
+         "tropas tipo ip, rem, tag y vh son hackeables",
+         "hackers, sin importar cuál sea su tipo de tropa"),
+    ),
+])
+def test_hackable_profile_help_pinned_source(
+    relative: str, pin: str, page: int, clauses: tuple[str, ...],
+    require_source_files: Callable[..., None],
+) -> None:
+    import pymupdf
+
+    source = Path(__file__).parents[1] / relative
+    require_source_files(source)
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == pin
+    with pymupdf.open(source) as pdf:
+        text = " ".join(str(pdf[page - 1].get_text("text")).casefold().split())
+    assert all(clause in text for clause in clauses)
+
+
+def test_hackable_profile_help_export_and_api(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data/curated/rules")
+    records = [
+        record for _, document in documents for record in document["records"]
+        if record["id"] == "rule:profile-help:hackable"
+    ]
+    assert len(records) == 1
+    authored = records[0]
+    assert authored["review"] == {"status": "reviewed", "reviewedOn": "2026-11-06"}
+    assert authored["citations"] == [
+        {"sourceId": "n5-core-v5.3-pdf", "page": 8,
+         "section": "Trooper Characteristics"},
+        {"sourceId": "n5-core-v5.3-es-pdf", "page": 9,
+         "section": "Características de las Tropas"},
+    ]
+    fresh = tmp_path / "hackable.db"
+    export_rules_database(documents, fresh)
+    for database_path in (fresh, root / "data/generated/rules.db"):
+        record = RulesDatabase(database_path).composed_record(authored["id"])
+        assert record is not None
+        assert record["summary"] == authored["summary"]
+        assert record["facts"] == authored["facts"]
+        assert {(citation["source_id"], citation["page"]) for citation in record["citations"]} == {
+            ("n5-core-v5.3-pdf", 8), ("n5-core-v5.3-es-pdf", 9),
+        }
+    app = create_app(root / "data/generated/infinity.db",
+                     rules_database_path=root / "data/generated/rules.db")
+    status, body = _published_get(app, "/api/unit-profile-help")
+    assert status == "200 OK"
+    contextual = next(
+        row for row in json.loads(body)["items"] if row["key"] == "hackable"
+    )
+    assert contextual["summary"] == authored["summary"]
+    assert all(phrase in contextual["summary"] for phrase in (
+        "HI, REM, TAG, and VH", "unless otherwise stated",
+        "regardless of Troop Type", "Allied and enemy",
+        "each Program's own target requirements",
+    ))
+    links = [token for token in contextual["summary_tokens"]
+             if token["type"] == "reference"]
+    assert {token["target"] for token in links} == {"skill:hacker"}
+    assert all(token["public_reference"] for token in links)
+    status, body = _published_get(app, "/api/glossary")
+    assert status == "200 OK"
+    published = next(
+        row for row in json.loads(body)["items"] if row["id"] == authored["id"]
+    )
+    assert published["description"] == authored["summary"]
+    assert published["href"] == "/glossary#rule-profile-help-hackable"
+    assert published["embedded"] is True
+
+
 def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules.db"

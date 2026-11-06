@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Hackable profile help now identifies default HI/REM/TAG/VH eligibility,
+  the Hacker exception regardless of Troop Type, and Hacking Program-specific
+  targeting of allies and enemies.
 - Attribute help explains how a dashed value limits Skill declarations and use;
   the SWC definition preserves its support-weapon context.
 - Label definitions now explain deployment limits, attack and hacking eligibility,
@@ -90,6 +93,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Complete bilingual N5.3
+  Hackable Unit Profile help with default Troop Types, the Hacker exception,
+  eligible allied/enemy targeting and a typed Hacker link, while retaining
+  individual Hacking Program target restrictions.
 - **Data processing:** Complete five Trait summaries with Deployable targetability,
   Disposable count/exhaustion and item scope, Non-Reloadable cancellation,
   Target (Attribute)'s no-Saving-Roll condition and Silent's conditional stacking.

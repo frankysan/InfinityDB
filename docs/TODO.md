@@ -195,7 +195,9 @@ source-to-browser gap review; final release acceptance remains open.
   and [Attribute definition review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-attribute-definitions-and-dash-prerequisites-2026-11-06)
   passed their bounded source/API/browser and cumulative checks under retired
   VR-0115/0117. Continue the wider source inventory; these results do not approve
-  the frozen release candidate.
+  the frozen release candidate. The [Hackable profile-help review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-hackable-profile-help-2026-11-06)
+  now publishes default Troop Type/Hacker conditions and per-Program target
+  scope; its source/API/browser execution remains under VR-0118.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched

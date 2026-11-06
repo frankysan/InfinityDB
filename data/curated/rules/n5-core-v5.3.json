@@ -25036,7 +25036,7 @@
             "id": "rule:profile-help:hackable",
             "kind": "rule",
             "name": "Hackable",
-            "summary": "Hackable is a Trooper Characteristic shown in the Unit Profile. Rules that affect Hackable targets use this characteristic to determine whether the target is eligible.",
+            "summary": "The Hackable Characteristic identifies Troopers who can be attacked or aided by certain Hacking Programs. HI, REM, TAG, and VH Troopers are Hackable unless otherwise stated; [[skill:hacker:plural|Hackers]] are Hackable regardless of Troop Type.\n\nAllied and enemy Troopers can target Hackable Troopers with certain Hacking Programs, subject to each Program's own target requirements.",
             "composition": {
                 "role": "definition"
             },
@@ -25056,11 +25056,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 8,
                     "section": "Trooper Characteristics"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 9,
+                    "section": "Características de las Tropas"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-11-06"
             }
         },
         {

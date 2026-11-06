@@ -609,6 +609,51 @@ def test_attribute_dash_and_swc_normal_browser(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_hackable_profile_help_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    failures: list[str] = []
+    responses: list[tuple[str, int]] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failures.append(request.url))
+    page.on("response", lambda response: responses.append((response.url, response.status)))
+    try:
+        response = page.goto(
+            f"{ORIGIN}/glossary?q=Hackable#rule-profile-help-hackable",
+            wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        entry = page.locator("#rule-profile-help-hackable")
+        entry.wait_for(state="visible", timeout=30000)
+        visible = " ".join(entry.locator(".glossary-description").inner_text().split())
+        assert all(clause in visible for clause in (
+            "HI, REM, TAG, and VH", "unless otherwise stated",
+            "Hackers", "regardless of Troop Type", "Allied and enemy",
+            "each Program's own target requirements",
+        )), (width, visible)
+        assert "[[" not in visible
+        assert not page.evaluate(
+            "() => document.documentElement.scrollWidth > innerWidth + 1"
+        ), width
+        link = entry.locator('a[href="/skills/hacker"]')
+        assert link.count() == 1
+        link.focus()
+        assert link.evaluate("node => document.activeElement === node")
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/skills/hacker", timeout=30000)
+        assert any(url.endswith("/api/glossary") and status == 200
+                   for url, status in responses), responses
+        assert not any(status >= 400 for _, status in responses), responses
+        assert not errors, errors
+        assert not failures, failures
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_trooper_term_normal_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

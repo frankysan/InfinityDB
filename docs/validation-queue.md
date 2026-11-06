@@ -131,7 +131,26 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-No pending deferred execution.
+- [ ] VR-0118 (2026-11-06; ready-to-run): N5.3 Hackable Unit Profile
+  help correction. Work: V1S-082; revision: implementation commit containing
+  the guarded v9 publication; risk: source and browser reference accuracy.
+  Design: VD-0077 (bilingual PDF clauses), VD-0078 (curated/stored/API and
+  typed link), VD-0079 (ordinary keyboard/browser 1440/390/320 px), all
+  statically reviewed and retired **without running tests**.
+  Immediate: exact English p. 8 / Spanish p. 9 PDF hashes, deterministic
+  double v9 export, 498 unrelated identities unchanged, schema/Restrictions
+  parity, matched deployed-object/variant-usage publications and guarded
+  rollback-safe promotion; both publication verifiers and semantic-link
+  audit passed. See the
+  [bounded review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-hackable-profile-help-2026-11-06).
+  Deferred: `tests/test_application_rule_references.py::test_hackable_profile_help_pinned_source`
+  (2 source cases), `tests/test_application_rule_references.py::test_hackable_profile_help_export_and_api`,
+  `tests/test_verify_scenario_faq_browser.py::test_hackable_profile_help_normal_browser`
+  (3 Chromium cases), cumulative application source/reference regressions.
+  Intended hosts: Windows for both verified PDF files; explicitly pinned
+  `linux-dev` for API/browser/cumulative acceptance with required assets.
+  No skip on the intended host counts as evidence. Hosted matrix and
+  frozen-candidate release gates remain independently required.
 
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
@@ -146,8 +165,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0077`; active obligations are listed above.
-- Execution: `VR-0118`; active obligations are listed above.
+- Design: `VD-0080`; active obligations are listed above.
+- Execution: `VR-0119`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
