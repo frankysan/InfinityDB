@@ -545,6 +545,7 @@ def test_tinbot_reference_only_variants_keep_unfiltered_classification(
             state="visible", timeout=30000,
         )
         page.wait_for_load_state("networkidle")
+        exact_usage = page.locator(".exact-variant-usage").all_inner_texts()
         page.locator('button[aria-controls="settings-menu"]').click()
         toggle = page.locator("#mercs-filter")
         with page.expect_response("**/api/visible-unit-ids*"):
@@ -558,7 +559,10 @@ def test_tinbot_reference_only_variants_keep_unfiltered_classification(
         assert page.locator("#rule-equipment-tinbot-albedo").count() == 1
         assert page.locator("#rule-equipment-tinbot-neurocinetics").count() == 1
         assert page.get_by_role("heading", name="Other variant references").count() == 1
-        assert page.locator("#item-content .usage-section-group").count() == 0
+        assert page.locator(
+            "#item-content .usage-section-group:not(.exact-variant-usage)"
+        ).count() == 0
+        assert page.locator(".exact-variant-usage").all_inner_texts() == exact_usage
         assert not errors, errors
     finally:
         page.close()

@@ -264,9 +264,10 @@ def test_equipment_reference_only_variants_reject_missing_related_record(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     rules = _rules_database(tmp_path)
+    catalog = CatalogRules(rules)
     monkeypatch.setattr(rules, "composed_record", lambda _record_id: None)
     with pytest.raises(ValueError, match="Unknown Equipment variant reference"):
-        CatalogRules(rules).enrich_catalog_item(
+        catalog.enrich_catalog_item(
             "equipment", {"id": 235, "slug": "tinbot", "variants": []},
         )
 

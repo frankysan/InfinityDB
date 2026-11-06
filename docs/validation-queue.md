@@ -151,7 +151,11 @@ is recorded. Failed or incomplete verification remains open.
   Immediate: targeted Ruff, Pyright (zero diagnostics), `node --check`
   and the repository docs stage passed for the implementation; targeted Ruff
   and Pyright passed for the designs. VD-0100 and VD-0101 were authored and
-  statically reviewed without executing tests. Deferred selectors:
+  statically reviewed without executing tests. The first Windows execution at
+  `b074f672` passed 31 and failed two test assertions: a mock intercepted
+  constructor lookups and a filter assertion incorrectly excluded the
+  intentionally independent exact-usage section. The revised tests below
+  require a complete rerun at a new pinned commit. Deferred selectors:
   - `tests/test_catalog_rules.py::test_catalog_rules_leave_army_item_raw_without_rules_database`
   - `tests/test_catalog_rules.py::test_catalog_rules_apply_curated_tinbot_family_and_named_variant_rules`
   - `tests/test_catalog_rules.py::test_equipment_reference_only_variants_follow_army_snapshot`
