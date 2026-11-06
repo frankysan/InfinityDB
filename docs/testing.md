@@ -431,18 +431,54 @@ integrity gates. The Linux full-suite parallel-development exception and
 explicit Git handoff are specified below, under
 [parallel Windows development and Linux validation](#parallel-windows-development-and-linux-validation).
 
-**Cost-aware check selection:** Before a due VR execution, identify its exact
-changed surface, regression selectors, required source/assets, host and pinned
-revision. Run the narrowest checks that discharge that obligation; batch
-compatible selectors in one asynchronous job and reconcile each VR separately.
-Reuse a completed run only when its exact revision, actual selected tests,
-required assets and skip outcomes cover the obligation. Do not rerun the same
-full suite per VR or after every bounded implementation slice merely as a
-precaution. Full suites, isolated preflight, cross-platform checks and hosted
-CI still run whenever their own risk/queue/release gates require them. Record
-actual job wall time and the dominant slow test/fixture from existing reports
-before proposing worker, Chromium or scheduler changes; do not treat test
-collection/setup time as proof of browser-launch cost.
+**Coherent implementation batches:** Prefer a bounded, reviewable group of
+related edits sharing an affected source family, behavior contract or
+publication artifact over a separate investigation/commit/checkpoint for each
+minor edit. Check the V1S selection gate and due VD/VR work before the batch;
+recheck at task boundaries and whenever a mandatory or age/threshold gate
+becomes due. Register each independently changed behavior's VR and each
+missing test-design requirement's VD; several files or assertions for one
+behavior do not require several VRs. Reconcile the owning TODO items and
+commit the coherent batch without mixing unrelated agents' edits. Batching
+never postpones an immediate safety gate, a due queue drain or a required
+V1S closeout; do not grow a batch merely to reach a validation threshold.
+
+### Validation batch planning
+
+After due VD prerequisites have been **designed and statically reviewed, not
+executed**, plan shared VR execution before starting any jobs:
+
+1. Inventory all **due**, ready-to-run VRs and their individual required
+   selectors, cumulative checks, intended revision, source/asset versions,
+   target host and runner options. Keep blocked or incomplete prerequisites
+   open; no dispatch can satisfy them.
+2. Partition by compatible **verified testing state**: one pinned commit
+   containing the intended implementation and test designs, host, source/asset
+   and ignored-publication identity, dependencies, and runner/browser options.
+   A newer revision does not automatically validate an older VR when its
+   affected behavior or artifacts changed. Separate Windows-only evidence,
+   different fixture/asset requirements and mutually incompatible options.
+3. For each compatible group, deduplicate the union of exact pytest selectors
+   and required cumulative checks, then launch **one** pinned asynchronous job
+   using the existing MCP pytest/runner interface. A full suite may cover the
+   group when independently required; do not expand a focused batch to a full
+   suite just to reduce the number of launches. Keep the per-VR selector and
+   prerequisite mapping in the existing queue and job evidence, not in a new
+   active register.
+4. Once the job terminates, verify exact HEAD, actual collected/selected tests,
+   exit status, skips and their reasons, fixture/asset coverage, and browser
+   evidence **for each VR separately**. Record the shared job ID and relevant
+   result against each VR; retire only satisfied entries. A partial pass,
+   skipped required case or mismatched SHA leaves that obligation open. Recount
+   and drain according to the canonical queue before unrelated implementation.
+
+For the first pilot, compare the planned number of per-VR jobs against actual
+shared launches, unique/repeated selectors, source/worker preparation time,
+wall time and any failures requiring reruns. Keep detailed timing under
+ignored `local/`; report a concise result at the VR closeout. Preserve all
+[CI](ci.md) and [release](releasing.md) gates independently. The queue owns
+whether work is due; this procedure changes only **dispatch grouping**, not
+its thresholds, drain ordering or individual acceptance requirements.
 
 **Parallel work while a test job runs:** An asynchronous test job does not
 require the agent to idle. Continue with read-only audits, source inspection,

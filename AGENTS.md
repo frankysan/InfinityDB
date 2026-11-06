@@ -64,7 +64,8 @@ The [active VD/VR queue](docs/validation-queue.md#queue-rules) is the sole
 authority for design/execution thresholds, drain order, due dates, linked
 dependencies, and retirement evidence. **Check it before ordinary
 implementation, at every task boundary, and at closeout**. Design due VD
-tests without running them; execute and reconcile due VR work separately.
+tests without running them; batch compatible VR executions while reconciling
+each due VR separately.
 Register concrete missing regression designs and each distinct changed
 behavior's deferred execution before reporting an implementation complete.
 Report counts, oldest due/blocked entry, and intended execution host.

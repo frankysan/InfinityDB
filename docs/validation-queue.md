@@ -44,10 +44,13 @@ IDs here and link the owning task instead of duplicating its description.
      complete **all open VD prerequisites** of those due VR entries,
      even when VD is below 3. A blocked VD leaves its dependent VR
      blocked; never bypass the prerequisite.
-  3. If **VR >= 5**, execute and reconcile **all open VR entries to zero**,
-     one at a time. Otherwise, process VR entries due by age or gate.
-     Shared full-suite results may satisfy several entries, but review
-     and retire each independently. **Dispatch is not completion**.
+  3. If **VR >= 5**, execute and reconcile **all open VR entries to zero**.
+     Otherwise, process VR entries due by age or gate. **Execution jobs may
+     be batched** across compatible due VRs, including focused selectors as
+     well as full-suite coverage; **reconcile and retire each VR individually**
+     against its own requirements. Grouping work does not defer a due VR,
+     waive a prerequisite or change any threshold. **Dispatch is not
+     completion**.
   4. Recount both queues and check overdue/gated entries. If VD >= 3 or
      VR >= 5, restart at step 1; otherwise resume ordinary implementation
      only after all individually due work is handled.
@@ -103,7 +106,8 @@ IDs here and link the owning task instead of duplicating its description.
   to actionable failures. A Linux run cannot verify later Windows
   edits. Git synchronization remains explicit, bounded and
   validation-triggered, never a background mirror.
-  Follow the [dispatch/retirement protocol](testing.md#parallel-windows-development-and-linux-validation).
+  Follow the [dispatch/retirement protocol](testing.md#parallel-windows-development-and-linux-validation)
+  and [validation batch procedure](testing.md#validation-batch-planning).
   A successful job applies only to its verified revision and coverage.
   At each pass boundary, report queue counts, due/blocked items and what
   was actually dispatched; do not equate green immediate tests with an
