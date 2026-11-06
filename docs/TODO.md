@@ -216,7 +216,7 @@ bounded rule-citation/route check; final release acceptance remains open.
   VR-0126 passed its focused source, stale-slug and browser regressions.
   The maintained-reference reachability review found and corrected 30 canonical
   Equipment definitions absent from the federated Glossary despite working
-  source-card routes; VD-0094/0095 were designed and VR-0127 owns verification.
+  source-card routes; VR-0127 passed the focused API and browser regressions.
   Then finish the applicable maintained-reference reachability review.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/

@@ -568,6 +568,40 @@ The `pytest -q -ra --infinitydb-skip-summary` selection covered:
 This closes VR-0126 for the reviewed Property change; it does not close
 V1S-082, the cumulative release gate or hosted CI.
 
+### V1S-082 Equipment Glossary navigation regression (VR-0127)
+
+The focused Windows run at `519e307891995f8763797674a5d6971f19bde32f`
+passed **42 tests** and failed the six new Equipment browser cases: the
+test expected title case while the existing badge displays uppercase through
+CSS. After correcting that assertion, all **6 browser cases passed** at
+`8fc03cb24cde2323b50c2566991b4d2da45df0b4`, with no skips. Only the test
+assertion and queue note changed between these revisions, so the first run's
+other results remain applicable. Both runs used the same development
+Army/rules SHA-256 pair recorded under VR-0126.
+
+The `pytest -q -ra --infinitydb-skip-summary` selection covered:
+
+- `tests/test_application_rule_references.py`:
+  `test_equipment_glossary_source_cited_routes_cover_current_concepts`,
+  `test_validated_public_reference_filters_stale_equipment_links`,
+  `test_equipment_glossary_omits_stale_routes_but_keeps_encoded_equipment`,
+  `test_weapon_glossary_uses_opt_in_army_links_for_routable_definitions`
+  and `test_numeric_army_skill_links_resolve_to_public_slugs`;
+- `tests/test_web.py`:
+  `test_glossary_projects_canonical_rules_and_embedded_attributes`,
+  `test_curated_weapon_families_are_discoverable_in_glossary` and
+  `test_cube_profile_characteristic_resolves_to_canonical_equipment`;
+- all of `tests/test_weapon_properties.py`;
+- `tests/test_verify_weapon_source_cards_browser.py`:
+  `test_equipment_glossary_reaches_cited_detail_with_keyboard` for Cube
+  and TinBot at 1440/390/320 px,
+  `test_weapon_property_origins_reach_sources_in_normal_browser` and
+  `test_unroutable_weapon_property_example_shows_source_section_in_browser`;
+- `tests/test_verify_scenario_faq_browser.py::test_unpublished_tinbot_source_variant_is_not_a_fake_public_route`.
+
+This closes VR-0127 for the Equipment Glossary change; V1S-082 and the
+independent hosted and final-candidate gates remain open.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not
