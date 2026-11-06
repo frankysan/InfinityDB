@@ -118,9 +118,17 @@ Sources:
 
 **Classification:** source-native.
 
-A Unit groups Troopers belonging to an Army. A Unit Profile supplies the data
-needed to use those Troopers, while the profile can expose multiple Trooper
-options with different combinations of Skills, Equipment, Weapons, and Cost.
+A Unit groups Troopers belonging to an Army. A Unit Profile represents the
+Troopers that form a Unit, gives each Trooper's numerical Attribute values, and
+lists their Characteristics, Special Skills, Equipment, and Armor. The English
+N5.3 glossary uses "Armor" for its final category; the Spanish N5.3 glossary
+uses "Armament". The English N5.2 glossary matches the English N5.3 wording.
+This is a source-language terminology difference; these glossary entries do
+not establish a separate gameplay effect.
+
+A Unit Profile supplies the data needed to use those Troopers, while the
+profile can expose multiple Trooper options with different combinations of
+Skills, Equipment, Weapons, and Cost.
 
 This gives InfinityDB a source-native vocabulary for distinguishing the Unit
 from the selectable/profile options represented beneath it. It should be used
@@ -129,8 +137,13 @@ calling every source row a distinct game Unit.
 
 Sources:
 
-- Wiki: <https://infinitythewiki.com/Unit_Profile>
-- PDF: Infinity N5 V5.3, printed page 8
+- English Wiki, oldid 3762 (2025-10-13):
+  <https://infinitythewiki.com/index.php?title=Unit+Profile&oldid=3762&redirect=no>
+- Spanish Wiki, oldid 3724 (2025-11-11):
+  <https://infinitythewiki.com/wiki-es/index.php?title=Perfil+de+Unidad&oldid=3724&redirect=no>
+- English N5.3 Core Rules, printed pages 8 and 173; Spanish N5.3 Core Rules,
+  printed pages 8 and 180
+- English N5.2 Core Rules, printed page 172
 
 ### RS-BR-UP-002 — Common Unit data versus option-specific data
 
@@ -149,8 +162,11 @@ should preserve that distinction.
 
 Sources:
 
-- Wiki: <https://infinitythewiki.com/Unit_Profile>
-- PDF: Infinity N5 V5.3, printed page 8
+- English Wiki, oldid 3762 (2025-10-13):
+  <https://infinitythewiki.com/index.php?title=Unit+Profile&oldid=3762&redirect=no>
+- Spanish Wiki, oldid 3724 (2025-11-11):
+  <https://infinitythewiki.com/wiki-es/index.php?title=Perfil+de+Unidad&oldid=3724&redirect=no>
+- English and Spanish N5.3 Core Rules, printed page 8
 
 ### RS-BR-UP-003 — Trooper Characteristics taxonomy
 

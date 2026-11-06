@@ -660,6 +660,56 @@ def test_peripheral_term_normal_browser(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_unit_profile_term_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    api_responses: list[tuple[str, int]] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on(
+        "response",
+        lambda response: api_responses.append((response.url, response.status))
+        if "/api/glossary" in response.url else None,
+    )
+    try:
+        response = page.goto(
+            f"{ORIGIN}/glossary?q=Armor#term-unit-profile",
+            wait_until="domcontentloaded",
+        )
+        assert response is not None and response.status == 200
+        entry = page.locator("#term-unit-profile")
+        entry.wait_for(state="visible", timeout=15000)
+        snapshot = entry.evaluate(
+            """node => ({
+                heading: node.querySelector("h3")?.textContent?.trim(),
+                text: node.querySelector(".glossary-description")?.innerText || "",
+                domain: node.querySelector(".glossary-domain")?.textContent?.trim(),
+                query: document.querySelector("#glossary-search")?.value,
+                overflow: document.documentElement.scrollWidth > innerWidth + 1,
+            })"""
+        )
+        assert snapshot["heading"] == "Unit Profile"
+        assert " ".join(snapshot["text"].split()) == (
+            "A Unit Profile represents the Troopers that form a Unit. It gives each "
+            "Trooper's numerical Attribute values and lists their Characteristics, "
+            "Special Skills, Equipment, and Armor. It also shows the Unit's Trooper "
+            "options, which can differ in Skills, Equipment, and Weapons."
+        )
+        assert snapshot["domain"] == "Game term"
+        assert snapshot["query"] == "Armor"
+        assert not snapshot["overflow"], width
+        assert any(
+            url.endswith("/api/glossary") and status == 200
+            for url, status in api_responses
+        ), api_responses
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
     ("route", "record_id", "page_numbers", "clauses", "related"),
     (

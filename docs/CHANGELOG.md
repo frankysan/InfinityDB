@@ -70,7 +70,8 @@ are not retroactively relabeled.
   term as a counts-as rule.
 - All canonical Trait pages offer official Wiki heading links. Glossary deep links
   and reference previews behave more reliably when moving between pages.
-- The Trooper Glossary entry explains Unit Profiles, Army Lists, Attributes,
+- The Unit Profile Glossary entry explains the Troopers in each Unit, their
+  profile data and options. The Trooper entry covers Army Lists, Attributes,
   Orders and Attacks; the Peripheral entry covers its Order and Army List
   limits, Controller activation and Cost accounting.
 - Rules references explain source disagreements alongside the supported interpretation,
@@ -88,6 +89,10 @@ are not retroactively relabeled.
 - **Data processing + Web backend + Web frontend:** Expand the N5.3 Peripheral
   Glossary definition with its Order and Army List limits, Controller activation
   and Cost accounting, retaining type-specific rules and the pinned citation.
+- **Data processing + Web backend + Web frontend:** Correct the Unit Profile
+  Glossary definition to describe the Troopers forming each Unit, their
+  numerical Attributes, listed characteristics and per-option choices, with
+  citations for the definition and profile structure.
 - **Data processing:** Expand the BS Attack and CC Attack references with
   declaration and range limits, friendly hits when shooting into close combat,
   Coup de Grâce exceptions, and separate Active/Reactive multi-Trooper conditions.

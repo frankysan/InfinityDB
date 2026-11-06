@@ -325,6 +325,21 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
     assert [
         (citation["source_id"], citation["page"]) for citation in trooper["citations"]
     ] == [("n5-core-v5.3-pdf", 173)]
+    unit_profile = next(record for record in terms if record["id"] == "term:unit-profile")
+    assert unit_profile["summary"] == (
+        "A Unit Profile represents the Troopers that form a Unit. It gives each "
+        "Trooper's numerical Attribute values and lists their Characteristics, "
+        "Special Skills, Equipment, and Armor. It also shows the Unit's Trooper "
+        "options, which can differ in Skills, Equipment, and Weapons."
+    )
+    assert unit_profile["facts"]["scope"] == "profile"
+    assert [
+        (citation["source_id"], citation["page"], citation["section"])
+        for citation in unit_profile["citations"]
+    ] == [
+        ("n5-core-v5.3-pdf", 173, "Terminology — Unit Profile"),
+        ("n5-core-v5.3-pdf", 8, "Unit Profile"),
+    ]
     peripheral = next(record for record in terms if record["id"] == "term:peripheral")
     assert peripheral["summary"] == (
         "A [[skill:peripheral|Peripheral]] is a special Trooper category. It cannot "

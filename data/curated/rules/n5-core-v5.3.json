@@ -2062,7 +2062,7 @@
             "id": "term:unit-profile",
             "kind": "term",
             "name": "Unit Profile",
-            "summary": "A Unit Profile is the rules data that defines a Trooper’s Attributes, Skills, Equipment, Weapons, and selectable options.",
+            "summary": "A Unit Profile represents the Troopers that form a Unit. It gives each Trooper's numerical Attribute values and lists their Characteristics, Special Skills, Equipment, and Armor. It also shows the Unit's Trooper options, which can differ in Skills, Equipment, and Weapons.",
             "composition": {
                 "role": "definition"
             },
@@ -2080,11 +2080,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 173,
                     "section": "Terminology — Unit Profile"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Unit Profile"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-29"
+                "reviewedOn": "2026-11-06"
             }
         },
         {

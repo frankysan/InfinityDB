@@ -5736,6 +5736,16 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         }
         for token in peripheral["description_tokens"]
     )
+    unit_profile = next(item for item in items if item["id"] == "term:unit-profile")
+    assert unit_profile["domain"] == "Game term"
+    assert unit_profile["href"] == "/glossary#term-unit-profile"
+    assert unit_profile["embedded"] is True
+    assert unit_profile["description"] == (
+        "A Unit Profile represents the Troopers that form a Unit. It gives each "
+        "Trooper's numerical Attribute values and lists their Characteristics, "
+        "Special Skills, Equipment, and Armor. It also shows the Unit's Trooper "
+        "options, which can differ in Skills, Equipment, and Weapons."
+    )
     movement = next(item for item in items if item["id"] == "attribute:mov")
     assert movement == {
         "id": "attribute:mov",
