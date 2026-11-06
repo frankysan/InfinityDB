@@ -80,6 +80,66 @@ an audit closes, move lasting contracts into the canonical owner above, record u
 outcomes in `CHANGELOG.md`, and let Git history preserve the detailed narrative. Keep a tracked audit
 only when it contains unique rationale that still guides active work.
 
+## One-use tool and audit lifecycle
+
+**Project domain:** Project infrastructure
+
+A one-use tool is a script written for a bounded migration, investigation, recovery or publication
+step rather than an ongoing supported command. An audit may likewise be a dated investigation or
+frozen acceptance record rather than maintained guidance. Names such as `stage_*`, `promote_*`
+and `audit_*` are **candidates for review**, not proof that a file is disposable. Do not classify
+reusable source validators, release gates or helpers as one-use solely from their names or age.
+
+**Plan retirement when creating one-use work.** State the purpose, owning TODO/source-review ID,
+expected artifacts/evidence, and the event after which the tool or report can be retired. Put
+one-off output, backup files and execution logs under ignored `local/`; avoid making permanent
+build, CI, runtime or release commands depend on them. Prefer extending an existing maintained
+tool over accumulating a new wrapper when the operation is expected to recur.
+
+**Review at bounded task closeout**, after successful publication/acceptance of the intended
+artifact, or during a deliberate repository-hygiene pass. Use this order:
+
+1. **Establish completion and provenance.** Identify the last purpose and exact input/output
+   revisions or source hashes where material; verify the corresponding acceptance, rollback or
+   release obligation is closed. An older successful stage does not retire a tool still needed
+   for an open migration, reproducible source comparison or release-matched publication.
+2. **Check consumers, not just direct imports.** Search the tracked tree for imports, module
+   invocations and command strings, tests/fixtures, CI workflows, scripts, package entry points,
+   generated-file recipes, agent skills, TODO items, source audits and documentation links.
+   Check indirect/shared helpers and externally documented operator procedures. If a dependency
+   or intended future invocation remains, retain or replace it before retiring the file.
+3. **Preserve lasting knowledge.** Transfer accepted semantics, source discrepancies, unresolved
+   decisions, reproducibility requirements and current procedures to their canonical owners.
+   Keep stable finding IDs and source-version/hash evidence that an open reconciliation relies on.
+   A large frozen baseline can remain tracked while it is needed for acceptance, but it must be
+   labeled historical rather than maintained current state.
+4. **Choose the smallest safe disposition:**
+   - **Retain** if the command/audit is active, a reusable validator, an imported helper, the
+     canonical generator, or necessary to satisfy an open release/validation/source gate.
+   - **Extract and replace** if a one-use entry point contains reusable logic: move that logic to
+     a maintained module, update its consumers/tests and then retire only the obsolete wrapper.
+   - **Move evidence to `local/provenance/`** if unique raw findings, private inputs, recovery
+     material or replay instructions justify a local copy. Record source revision, purpose and
+     limits of the evidence. Since `local/` is ignored, such copies are **not shared Git
+     provenance** and cannot be required by a clean checkout.
+   - **Delete from the tracked tree** if the work is complete, references are cleared and
+     its content is already recoverable from Git history or canonical records. Do not copy
+     every obsolete script into `local/` by default; that would create a second archive.
+5. **Close out atomically.** Remove or replace stale command examples, links and imports in
+   the same change. State the retired paths, disposition, acceptance/replacement evidence and
+   any local-only archive location in the commit message or canonical closeout. Run relevant
+   dependency tests and the `docs` stage (including link checks), inspect the full diff and
+   confirm the intended release/CI path does not depend on ignored material. Respect the
+   [VD/VR queue](validation-queue.md) for deferred test work; never equate retirement with
+   acceptance of an unrelated pending gate.
+
+A one-use audit **report** follows the same procedure: first reconcile its actionable findings
+with `TODO.md`, `official-source-clarifications.md` or other appropriate owners; then delete the
+superseded narrative or preserve only genuinely unique evidence. Audit findings are not closed
+merely because a newer report exists. Do not rewrite or discard immutable upstream snapshots,
+license/provenance obligations, or reviewed historical evidence required by the
+[data lifecycle](../data/README.md). Prefer explicit retention with a reason over uncertain loss.
+
 ## Planning and history
 
 - `TODO.md` — only work that is still unimplemented or intentionally deferred.
