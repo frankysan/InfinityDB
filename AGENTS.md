@@ -12,11 +12,16 @@ repository instructions and documentation take precedence if the local file
 conflicts with them. Promote a local preference into tracked project
 documentation only when the user explicitly wants it to become project policy.
 
-Before making substantial changes, read `docs/README.md` to identify the canonical
-document owner for the work, then read the relevant references. Most code changes need
-`docs/architecture.md`, `docs/data-model.md`, `docs/AI_CONTEXT.md`, and
-`docs/testing.md`; planning/release work also needs `docs/project-domains.md` and
-`docs/releasing.md`.
+Before making substantial changes, consult `docs/README.md` to identify the
+canonical owner, then inspect the affected source, tests and **relevant sections**
+of that owner's documentation. Use targeted searches/line ranges rather than
+rereading entire large documents or historical acceptance logs at every task
+boundary. Consult `docs/architecture.md` and `docs/data-model.md` for the
+invariants affected by a code/data change, `docs/testing.md` for applicable
+validation procedures, and `docs/project-domains.md` plus `docs/releasing.md`
+for planning/release decisions. `docs/AI_CONTEXT.md` is an optional navigation
+index, not an additional required full-document read. Broaden the reading scope
+when dependencies or changed contracts warrant it; never skip a relevant rule.
 
 For browser visual, layout, responsive, interaction, or player-facing copy changes, also read
 `docs/web-design-guidelines.md`; it defines the target UI vocabulary, language, and reusable

@@ -399,6 +399,19 @@ integrity gates. The Linux full-suite parallel-development exception and
 explicit Git handoff are specified below, under
 [parallel Windows development and Linux validation](#parallel-windows-development-and-linux-validation).
 
+**Cost-aware check selection:** Before a due VR execution, identify its exact
+changed surface, regression selectors, required source/assets, host and pinned
+revision. Run the narrowest checks that discharge that obligation; batch
+compatible selectors in one asynchronous job and reconcile each VR separately.
+Reuse a completed run only when its exact revision, actual selected tests,
+required assets and skip outcomes cover the obligation. Do not rerun the same
+full suite per VR or after every bounded implementation slice merely as a
+precaution. Full suites, isolated preflight, cross-platform checks and hosted
+CI still run whenever their own risk/queue/release gates require them. Record
+actual job wall time and the dominant slow test/fixture from existing reports
+before proposing worker, Chromium or scheduler changes; do not treat test
+collection/setup time as proof of browser-launch cost.
+
 **Parallel work while a test job runs:** An asynchronous test job does not
 require the agent to idle. Continue with read-only audits, source inspection,
 planning, issue triage and analysis, and poll the job as needed. Avoid any
