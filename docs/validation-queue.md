@@ -136,6 +136,23 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
+- [ ] VR-0125 (2026-11-06; ready-to-run): Current N5 per-record citation
+  minimum. Work: V1S-082; revision: the
+  `tools.report_reference_baseline --audit-current-citation-minimum`
+  implementation and test-design commit (pin exact SHA at execution).
+  Risk: a record may cite only a historical/unsupported publication while
+  the general curated nonempty-citation validator still passes.
+  Design: VD-0089 completed and statically reviewed without tests;
+  `tests/test_report_reference_baseline.py::test_current_citation_minimum_rejects_historical_or_unpinned_sources`
+  (version/source cases),
+  `tests/test_report_reference_baseline.py::test_current_citation_minimum_covers_live_n5_reference_collections`,
+  and `tests/test_report_reference_baseline.py::test_current_citation_minimum_reports_historical_only_record`.
+  Immediate read-only CLI smoke: 495/495 Core/Hacking/FAQ records have
+  declared current citations; no source semantics/browser scope accepted.
+  Ruff/Pyright on the reporter passed. Run the exact selectors on a
+  matching pinned Linux/Windows revision; required skips do not count.
+  No full suite is required for this isolated metadata check.
+
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -149,8 +166,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0089`; VD-0087/0088 were reviewed and retired without running tests.
-- Execution: `VR-0125`; active obligations are listed above.
+- Design: `VD-0090`; VD-0089 was reviewed and retired without running tests.
+- Execution: `VR-0126`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

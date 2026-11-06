@@ -510,6 +510,30 @@ revision. The full-suite V1S-090, exact-SHA hosted Source matrix and
 frozen release-candidate gates remain separate; the earlier failed
 full suite at `94103ef4` is not claimed green.
 
+### Current N5 citation minimum (V1S-082)
+
+The read-only reporter checks whether each maintained **current Core,
+Hacking and FAQ** reference record cites **at least one declared,
+version-appropriate current source**. It reuses the validated curated
+source/record declarations; it does not read source text, resolve cross-source
+differences, require multiple citations or approve browser routes.
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.report_reference_baseline --audit-current-citation-minimum
+```
+
+The standalone check exits nonzero for any missing applicable current
+citation, printing the exact collection/record/source IDs. An optional
+`--json-output local/...` saves the detail report. The 2026-11-06
+read-only smoke returned **495/495** across the three required current
+collections, with zero gaps, using declared version/source metadata.
+Weapon Property origin projections, optional N4 Reinforcements and
+ITS-only collections remain **outside this individual audit**, not
+automatically accepted; check them under their owning scope. Source-byte
+identity, interpretation and browser acceptance remain independent.
+New failure/selection regression tests are designed under VD-0089 and
+deferred to VR-0125; a CLI smoke is not a deferred test pass.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not

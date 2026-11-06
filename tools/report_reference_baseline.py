@@ -2961,6 +2961,116 @@ def render_explanation_reconciliation(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+CURRENT_CITATION_COLLECTIONS = (
+    "n5-core-v5.3",
+    "n5-hacking-programs-v5.3",
+    "n5-faq-v0.1",
+)
+
+
+def _is_current_rule_citation_source(
+    source: dict[str, Any], *, collection_id: str,
+) -> bool:
+    """Classify declared current N5 source *identity*, not semantic correctness."""
+    identifier = source.get("id")
+    version = source.get("version")
+    if not isinstance(identifier, str) or not isinstance(version, str):
+        return False
+    has_reference = bool(source.get("url")) or bool(
+        source.get("localPath") and source.get("sha256")
+    )
+    if not has_reference:
+        return False
+    if collection_id == "n5-faq-v0.1":
+        return identifier in {"n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf"} and (
+            version == "0.1"
+        )
+    if identifier in {"n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf"}:
+        return version == "5.3"
+    if identifier in {"n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf"}:
+        return version == "0.1"
+    if identifier == "its-season-18-en-pdf":
+        return version == "2026.09.01"
+    if source.get("kind") == "wiki":
+        if identifier in {
+            "wiki-en-20260926-200832", "wiki-es-20261009-211304",
+        }:
+            return bool(source.get("sha256")) and version.startswith("2026")
+        return version.startswith("N5.3")
+    return False
+
+
+def audit_current_rule_citation_minimum(
+    *,
+    root: Path = PROJECT_ROOT,
+) -> dict[str, Any]:
+    """Report current-source citation coverage for maintained N5 reference owners.
+
+    The authoritative curated loader already checks nonempty citations,
+    known source IDs, and locator shape. This additional read-only release
+    audit identifies records whose citations reference only noncurrent sources.
+    It does not inspect source text, adjudicate versions, or verify browser routes.
+    """
+    from infinity_db.curated import load_curated_document
+
+    by_collection = []
+    gaps = []
+    for collection_id in CURRENT_CITATION_COLLECTIONS:
+        path = root / "data/curated/rules" / f"{collection_id}.json"
+        document = load_curated_document(path)
+        collection = document["collection"]
+        if collection["id"] != collection_id or collection["status"] != "current":
+            raise ReferenceBaselineError(
+                f"Current citation collection changed: {collection_id}"
+            )
+        eligible = {
+            source["id"] for source in document["sources"]
+            if _is_current_rule_citation_source(
+                source, collection_id=collection_id,
+            )
+        }
+        if not eligible:
+            raise ReferenceBaselineError(
+                f"No declared current source identities: {collection_id}"
+            )
+        checked = 0
+        covered = 0
+        for record in document["records"]:
+            checked += 1
+            cited = {citation["sourceId"] for citation in record["citations"]}
+            if cited & eligible:
+                covered += 1
+            else:
+                gaps.append({
+                    "collection": collection_id,
+                    "recordId": record["id"],
+                    "citedSourceIds": sorted(cited),
+                })
+        by_collection.append({
+            "collection": collection_id,
+            "records": checked,
+            "withCurrentCitation": covered,
+            "withoutCurrentCitation": checked - covered,
+            "currentSourceIds": sorted(eligible),
+        })
+    return {
+        "format": "InfinityDB current citation minimum",
+        "formatVersion": 1,
+        "scope": "current-core-hacking-faq-records",
+        "evidence": "declared-version-and-locator-only-not-source-semantics-or-browser",
+        "totalRecords": sum(row["records"] for row in by_collection),
+        "withCurrentCitation": sum(row["withCurrentCitation"] for row in by_collection),
+        "withoutCurrentCitation": len(gaps),
+        "collections": by_collection,
+        "gaps": gaps,
+        "excludedScope": [
+            "optional-n4-origin-reinforcements",
+            "its-season-18-only",
+            "weapon-property-origin-projection",
+        ],
+    }
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=REPORT_FORMAT)
     parser.add_argument("--army-db", type=Path, default=PROJECT_ROOT / "data/generated/infinity.db")
@@ -2972,6 +3082,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
+    parser.add_argument(
+        "--audit-current-citation-minimum", action="store_true",
+        help="Check current Core/Hacking/FAQ records for at least one current source",
+    )
     parser.add_argument(
         "--review-batches-output", type=Path,
         help="Write a triage-only review batch plan under ignored local/",
@@ -3017,6 +3131,40 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Verify exact pinned English and Spanish Visibility Zone clauses",
     )
     args = parser.parse_args(argv)
+    if args.audit_current_citation_minimum:
+        if (
+            args.reconcile_explanation_inventory
+            or args.review_batches_output is not None
+            or args.review_pilot_output is not None
+            or args.join_reviewed_evidence
+            or args.reconcile_declarations
+            or args.verify_declaration_pdf is not None
+            or args.verify_numeric_army_archive is not None
+            or args.audit_conditional_declarations
+            or args.verify_conditional_pdf is not None
+            or args.audit_visibility_zones
+            or args.verify_visibility_pdfs
+            or args.markdown_output is not None
+            or args.army_archive is not None
+            or args.verify_server is not None
+        ):
+            parser.error("Current citation minimum is a standalone read-only audit")
+        minimum = audit_current_rule_citation_minimum()
+        if args.json_output is not None:
+            args.json_output.parent.mkdir(parents=True, exist_ok=True)
+            args.json_output.write_text(
+                json.dumps(minimum, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8", newline="\n",
+            )
+        print(
+            f"Current N5 citation minimum: {minimum['withCurrentCitation']}/"
+            f"{minimum['totalRecords']} records have a declared current source; "
+            f"{minimum['withoutCurrentCitation']} missing"
+        )
+        for gap in minimum["gaps"]:
+            print(f"  {gap['collection']} / {gap['recordId']}: "
+                  f"{', '.join(gap['citedSourceIds'])}")
+        return 1 if minimum["gaps"] else 0
     if args.reconcile_explanation_inventory:
         if args.verify_declaration_pdf is not None and not args.reconcile_declarations:
             parser.error("--verify-declaration-pdf requires --reconcile-declarations")

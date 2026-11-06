@@ -16,10 +16,12 @@ from infinity_army_data.merge import load_sources
 from infinity_db.curated import load_curated_document
 from tools.report_reference_baseline import (
     _NESTED_SOURCE_FIELDS,
+    CURRENT_CITATION_COLLECTIONS,
     FROZEN_DECLARATION_COMMIT,
     FROZEN_DECLARATION_SOURCE,
     ReferenceBaselineError,
     _artifact_evidence,
+    _is_current_rule_citation_source,
     _revision_oldid,
     _route_hint,
     _source_location,
@@ -31,6 +33,7 @@ from tools.report_reference_baseline import (
     _verify_published_profile_references,
     _verify_published_unit_options,
     audit_conditional_declaration_evidence,
+    audit_current_rule_citation_minimum,
     audit_numeric_army_replacement_variants,
     audit_visibility_zone_evidence,
     build_baseline,
@@ -49,6 +52,89 @@ from tools.report_reference_baseline import (
 ROOT = Path(__file__).resolve().parents[1]
 ARMY_DB = ROOT / "data/generated/infinity.db"
 RULES_DB = ROOT / "data/generated/rules.db"
+
+
+@pytest.mark.parametrize(
+    ("source", "collection_id", "expected"),
+    [
+        ({"id": "n5-core-v5.3-pdf", "version": "5.3",
+          "localPath": "rules.pdf", "sha256": "a" * 64}, "n5-core-v5.3", True),
+        ({"id": "n5-faq-v0.1-en-pdf", "version": "0.1",
+          "url": "https://example.org/faq"}, "n5-faq-v0.1", True),
+        ({"id": "n5-faq-v0.0-en-pdf", "version": "0.0",
+          "url": "https://example.org/faq-old"}, "n5-faq-v0.1", False),
+        ({"id": "wiki-traits-oldid-4110", "kind": "wiki",
+          "version": "N5.3 / oldid 4110",
+          "url": "https://example.org/wiki"}, "n5-core-v5.3", True),
+        ({"id": "reinforcements-annex-wiki-n4", "kind": "wiki",
+          "version": "N4 Annex / oldid 3614",
+          "url": "https://example.org/n4"}, "n5-core-v5.3", False),
+        ({"id": "wiki-en-20260926-200832", "kind": "wiki",
+          "version": "20260926-200832",
+          "url": "https://example.org/wiki"}, "n5-hacking-programs-v5.3", False),
+        ({"id": "wiki-en-20260926-200832", "kind": "wiki",
+          "version": "20260926-200832", "sha256": "a" * 64,
+          "url": "https://example.org/wiki"}, "n5-hacking-programs-v5.3", True),
+    ],
+)
+def test_current_citation_minimum_rejects_historical_or_unpinned_sources(
+    source: dict[str, Any], collection_id: str, expected: bool,
+) -> None:
+    assert _is_current_rule_citation_source(
+        source, collection_id=collection_id,
+    ) is expected
+
+
+def test_current_citation_minimum_covers_live_n5_reference_collections() -> None:
+    report = audit_current_rule_citation_minimum()
+    assert tuple(row["collection"] for row in report["collections"]) == (
+        CURRENT_CITATION_COLLECTIONS
+    )
+    assert all(row["records"] > 0 for row in report["collections"])
+    assert report["totalRecords"] == sum(
+        row["records"] for row in report["collections"]
+    )
+    assert report["withCurrentCitation"] == report["totalRecords"]
+    assert report["withoutCurrentCitation"] == 0
+    assert report["gaps"] == []
+    assert "weapon-property-origin-projection" in report["excludedScope"]
+
+
+def test_current_citation_minimum_reports_historical_only_record() -> None:
+    documents = []
+    for collection_id in CURRENT_CITATION_COLLECTIONS:
+        current_source = {
+            "id": "n5-faq-v0.1-en-pdf" if collection_id == "n5-faq-v0.1"
+            else "n5-core-v5.3-pdf",
+            "version": "0.1" if collection_id == "n5-faq-v0.1" else "5.3",
+            "url": "https://example.org/current",
+        }
+        documents.append({
+            "collection": {"id": collection_id, "status": "current"},
+            "sources": [
+                current_source,
+                {"id": "n5-faq-v0.0-en-pdf", "version": "0.0",
+                 "url": "https://example.org/historical"},
+            ],
+            "records": [{
+                "id": "rule:only-historical" if collection_id == "n5-faq-v0.1"
+                else f"rule:current-{collection_id}",
+                "citations": [{
+                    "sourceId": "n5-faq-v0.0-en-pdf" if collection_id == "n5-faq-v0.1"
+                    else current_source["id"],
+                }],
+            }],
+        })
+    with patch("infinity_db.curated.load_curated_document", side_effect=documents):
+        report = audit_current_rule_citation_minimum()
+    assert report["totalRecords"] == 3
+    assert report["withCurrentCitation"] == 2
+    assert report["withoutCurrentCitation"] == 1
+    assert report["gaps"] == [{
+        "collection": "n5-faq-v0.1",
+        "recordId": "rule:only-historical",
+        "citedSourceIds": ["n5-faq-v0.0-en-pdf"],
+    }]
 
 
 def test_frozen_explanation_inventory_reconciles_current_source_identities() -> None:
