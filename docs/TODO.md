@@ -196,8 +196,9 @@ source-to-browser gap review; final release acceptance remains open.
   records five published, source-reviewed glossary corrections
   (`term:deployable-equipment`, `term:deployable-weapon`, `term:target`,
   `term:hostile`, `term:neutral`) and a guarded three-artifact v9
-  refresh. Their newly designed curated/API/normal-browser acceptance is
-  pending under VR-0113. The broader source inventory remains open.
+  refresh. Their curated/API/15-case normal-browser regression passed on
+  the pinned Linux release pair under VR-0113. The broader source inventory
+  remains open.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched

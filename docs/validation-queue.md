@@ -151,15 +151,17 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-- [ ] **VR-0113** (2026-11-06; ready-to-run): Five
-  N5.3 p. 173 glossary-summary corrections and release-matched artifacts.
-  Work: V1S-082. Design: VD-0066/0067/0068 complete without execution;
-  revision: commit the matched implementation before Linux dispatch.
-  Immediate: guarded deterministic v9 rebuild, matched deployed-object
-  and variant-usage publication checks, unchanged 494 other rules and typed
-  Restrictions; Windows Ruff/Pyright pass. Deferred: new curated-export,
-  Glossary API and ordinary Chromium selectors at 1440/390/320, 808/808
-  assets on exact committed Linux SHA; no unexamined skips.
+No pending execution obligations.
+
+VR-0113 was accepted on 2026-11-06 against `af806f6016e9c1ae38bf567dc0db6aba5380f28c`
+using Linux job `linux-dev:299fff7559554529b55ac0f80d3b0dc7`:
+**21 passed, zero skipped/failed** with 808/808 published/browser SVGs.
+Five curated/source assertions, one Glossary API assertion and fifteen
+Chromium cases (five entries at 1440/390/320 px) passed; source/asset
+and release-pair publication gates are recorded in the
+[coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-remaining-p-173-glossary-terms-2026-11-06).
+The independently required full suite, hosted CI and frozen-candidate
+release gates remain separate.
 
 The most recent pinned Linux full-assets acceptance, including the 2026-11-04
 queue drain, is recorded in
