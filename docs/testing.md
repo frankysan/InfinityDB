@@ -36,6 +36,26 @@ The full suite, hosted matrix and frozen-release acceptance are independent;
 the earlier accidentally launched full-suite job was cancelled and is not
 acceptance. No new deferred test obligation remains for this safety slice.
 
+The merged CI-repair revision `fde845a8d8b0028ac80309f8cf58a56b4313645f`
+passed **110 tests, 5 optional skips, zero failures** on Windows (MCP job
+`aa95adf4118a4b6b9c10636b99bbf8cf`). It combined the four coordination modules
+above with `tests/test_deterministic_io.py` and
+`tests/test_report_reference_baseline.py`. Ruff and focused Pyright also passed.
+The newline-policy audit and exact bilingual Hackable-locator expectation now
+pass; the earlier run at `9a4731b4` failed those checks. The first isolated CI
+repair attempt had two setup failures, resolved by installing declared developer
+dependencies and building/verifying the ignored deployed-object publication;
+the subsequent standalone repair run passed 52 tests with 5 optional skips.
+
+This combined run also executed the exact VR-0119 and VR-0120 planner/pilot
+selectors and their baseline regressions without skips, so both entries are
+retired on this revision. Their assertions preserve zero semantic/browser
+approvals; VR-0118's source/API/browser acceptance remains open. The five optional
+skips do not accept absent source/archive coverage. Replacement hosted Source,
+wheel and deployment results remain independently required.
+
+## Local invocation
+
 Use the project virtual-environment interpreter when available:
 
 ```powershell
