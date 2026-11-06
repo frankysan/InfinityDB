@@ -234,13 +234,15 @@ source-to-browser gap review; final release acceptance remains open.
   encode the bilingual timing distinction and typed Lieutenant-to-rule link;
   a guarded v9 promotion changed exactly those records and verified matched
   publications.
-  VR-0122 still owns the unrun record/database/API/browser regressions, so this
-  does not add whole-record or current-revision browser approvals. The
+  VR-0122 has focused source/API/browser passes, but its first cumulative
+  run identified a summary-layout failure and brittle browser assertions.
+  The guarded paragraph-only repair is published; the corrected full
+  cumulative rerun remains pending. No whole-record acceptance follows. The
   [Terms, Attribute and Equipment screen](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-terms-attribute-and-equipment-2026-11-06)
   confirms the bilingual Firewall/TinBot and MOV clauses. Direct normal-browser
   assertions for the MOV glossary anchor and TinBot source-169 Firewall variant
-  usage are now authored but **unrun under VR-0124**; no new browser acceptance
-  is claimed. The
+  usage passed all six focused Chromium cases under VR-0124; matched
+  cumulative acceptance and individual VR closeout remain pending. The
   [remaining Core, Conditional Skills and Declaration Metadata screen](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-remaining-core-conditional-skills-and-declaration-metadata-2026-11-06)
   retains existing source scopes and leaves the Dodge PDF/Wiki modifier
   discrepancy **SRC-006** unresolved. These results remain screening evidence,
@@ -249,10 +251,12 @@ source-to-browser gap review; final release acceptance remains open.
   logged page-access events and wall time, but did not measure active effort or
   establish full-review savings. Its six unresolved scoped decisions and four
   browser observations are not whole-record or browser approvals.
-  Next: drain the five due VR obligations (including VR-0122 and new
-  VR-0124 browser assertions) against compatible pinned artifacts, then
-  reconcile **SRC-002**, **SRC-006**, **SRC-020**, **SRC-021** and **SRC-034**
-  without inventing rules. The P1 tracked
+  Next: rerun the cumulative Linux gate on the repaired matched artifacts
+  and reconcile all five due VR entries individually. The earlier failed
+  5,365-pass Linux run, exact repair and focused outcomes are
+  [recorded](v1.0-source-coverage-audit.md#v1s-082-vr-drain-movtinbot-browser-checks-and-isolated-repair-2026-11-06).
+  Then reconcile **SRC-002**, **SRC-006**, **SRC-020**, **SRC-021** and
+  **SRC-034** without inventing rules. The P1 tracked
   disposition schema and read-only fingerprint validator now have four
   source-specific scoped approvals across two Trait identities
   ([evidence](v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06)).

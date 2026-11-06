@@ -3959,6 +3959,30 @@ no browser approvals. Never import pilot/benchmark triage as approval.
 The phased validation queue
 remains authoritative for missing or deferred regressions.
 
+### Paragraph-only rules-summary refresh
+
+For a reviewed v9 summary that differs from its released record **only
+by paragraph whitespace**, use
+`tools.refresh_reference_summary_layout` rather than manually overwriting
+`rules.db`. The default command is a read-only double-export and matched
+publication integrity check; `--promote` replaces the rules database,
+deployed-object and variant-usage publications together under rollback
+protection. It rejects any change to other records, target facts,
+typed Restrictions, identities, or publication content other than the
+required fingerprints. Source-derived wording changes require their
+own reviewed migration; this tool cannot approve them.
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.refresh_reference_summary_layout rule:loss-of-lieutenant
+.\.venv\Scripts\python.exe -m tools.refresh_reference_summary_layout rule:loss-of-lieutenant --promote
+```
+
+The 2026-11-06 V1S-082 use of this gate retained 498 unchanged
+composed records and recovery copies under ignored `local/`. After
+promotion verify both dependent publications and run the required
+source/API/normal-browser regressions at the matched commit; the
+promoter's success is an artifact-integrity check, not a VR/CI pass.
+
 ### Frozen explanation-inventory reconciliation (V1-A08)
 
 The original October 9 [367-record explanation inventory](rules-explanation-audit-1.0-inventory.md)

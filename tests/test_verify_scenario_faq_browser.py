@@ -1493,7 +1493,7 @@ def test_isolated_lieutenant_loss_timing_normal_browser(
         card = page.locator("#rule-rule-loss-of-lieutenant")
         card.wait_for(state="visible", timeout=30000)
         visible = card.inner_text()
-        assert "At the beginning of the Lieutenant's next Active Turn" in visible
+        assert "at the beginning of the Lieutenant's next Active Turn" in visible
         assert "unless Isolated has been canceled before then" in visible
         assert (
             "Canceling Isolated after it has triggered this army-level situation does not "

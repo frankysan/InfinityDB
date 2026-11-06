@@ -296,8 +296,8 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         "selectedBrowserTestAnchors": 36,
         "currentIdentitiesWithLaterEvidence": 56,
         "wholeRecordApprovals": 0,
-        # Terrain and Trait review locators plus Hackable's Spanish p. 9 citation.
-        "pendingSourceSections": 828,
+        # Terrain, Trait, Hackable and Isolated Lieutenant bilingual locators.
+        "pendingSourceSections": 830,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}

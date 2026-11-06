@@ -21199,7 +21199,7 @@
             "id": "rule:loss-of-lieutenant",
             "kind": "rule",
             "name": "Loss of Lieutenant",
-            "summary": "An army-level situation caused by the absence of an operational deployed [[skill:lieutenant|Lieutenant]] or its presence in a [[term:null-state|Null State]]; an [[state:isolated|Isolated]] [[skill:lieutenant|Lieutenant]] triggers it at the beginning of its next Active Turn unless [[state:isolated|Isolated]] was canceled beforehand. An army in [[rule:army-retreat|Retreat!]] also enters [[rule:loss-of-lieutenant|Loss of Lieutenant]] automatically.",
+            "summary": "An army-level situation caused by the absence of an operational deployed [[skill:lieutenant|Lieutenant]] or its presence in a [[term:null-state|Null State]]; an [[state:isolated|Isolated]] [[skill:lieutenant|Lieutenant]] triggers it at the beginning of its next Active Turn unless [[state:isolated|Isolated]] was canceled beforehand.\n\nAn army in [[rule:army-retreat|Retreat!]] also enters [[rule:loss-of-lieutenant|Loss of Lieutenant]] automatically.",
             "composition": {
                 "role": "definition"
             },
