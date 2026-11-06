@@ -418,11 +418,13 @@ or secondary documentation.
 - **Design (VD):** author or revise tests and review selectors/fixtures
   statically. Do **not** execute any tests, including sanity or focused tests.
   Link the resulting selectors to the dependent VR.
-- **Execution (VR):** run the deferred focused, browser, integration and
-  cumulative checks against a pinned revision, and verify actual results and
-  source/asset coverage. Reuse shared runs where their revision and coverage
-  match; reconcile each VR separately. A dispatched, failed, blocked or
-  required-skipped job is not a passed verification.
+- **Execution (VR):** start with the smallest sufficient set of deferred
+  affected-behavior, cross-layer, browser and integrity tests on the pinned
+  revision. Run cumulative checks **only when independently required** by an
+  explicitly named risk/gate or the final release checklist, not because the
+  queue reached its execution threshold. Verify actual results, source/asset
+  coverage and skips; reuse compatible runs and reconcile each VR separately.
+  A dispatched, failed, blocked or required-skipped job is not a pass.
 
 A bounded change with successful immediate checks is **implemented, pending
 validation** while VD/VR obligations remain. The queue never waives hosted
@@ -443,6 +445,51 @@ commit the coherent batch without mixing unrelated agents' edits. Batching
 never postpones an immediate safety gate, a due queue drain or a required
 V1S closeout; do not grow a batch merely to reach a validation threshold.
 
+### Focused-first VR execution
+
+**Default: no full-suite run for an ordinary task or VD/VR drain.** A VD
+pass designs tests and executes none. When VR becomes due, run a **small,
+risk-based impact set first**; fix and rerun failures at that scope. Execute
+the complete suite only at an explicitly required cumulative/release gate
+(such as V1S-090), or when an identified cross-cutting change cannot be
+adequately bounded by focused tests. Record the exact reason before dispatch.
+The numeric VR threshold determines **when** to validate, not **how many**
+tests to run. A full-suite pass is not needed to close an ordinary VR when
+its applicable selectors and integrity checks have passed.
+
+Build the impact set from **all modified inputs and their consumers**, not
+only the new test files. Check broad contracts affected by each changed
+layer. For example, a curated rules summary, citations or `rules.db`
+publication must get the applicable tests for:
+
+- Curated schema, text formatting and long-summary layout
+  (`tests/test_curated.py`).
+- Current/frozen source-locator and record-count expectations
+  (`tests/test_report_reference_baseline.py`), especially when citations
+  or source metadata changed.
+- Stored rules, matched deployed-object/variant publications and API
+  parity (existing source/rules/database tests and publication `--check`
+  commands).
+- The affected normal-browser routes, citations and navigation at required
+  widths; existing shared route tests should accompany new selectors.
+
+An unchanged test module can still have a stale assertion after a source
+change. Conversely, a browser-only test addition does not require a new
+full source corpus review. List precise selectors for each affected layer;
+use existing test-section/module discovery when individual names are not
+known. Run the union once for compatible VRs, inspect the failures, and
+only widen to the **next relevant section** if the focused evidence reveals
+a wider problem. Do not launch a full suite in order to find out which
+focused tests should have been selected.
+
+**Full-suite dispatch decision:** before starting one, identify the
+separately required gate, its affected scope, prior focused green result,
+pinned commit/assets and whether an earlier equivalent full run is
+reusable. A known focused failure is repaired **before** any new full run
+unless the release owner specifically needs an exhaustive failure census.
+A full run remains mandatory for the final release gate and independently
+specified CI/preflight gates. No policy here waives them.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not
@@ -458,13 +505,13 @@ executed**, plan shared VR execution before starting any jobs:
    A newer revision does not automatically validate an older VR when its
    affected behavior or artifacts changed. Separate Windows-only evidence,
    different fixture/asset requirements and mutually incompatible options.
-3. For each compatible group, deduplicate the union of exact pytest selectors
-   and required cumulative checks, then launch **one** pinned asynchronous job
-   using the existing MCP pytest/runner interface. A full suite may cover the
-   group when independently required; do not expand a focused batch to a full
-   suite just to reduce the number of launches. Keep the per-VR selector and
-   prerequisite mapping in the existing queue and job evidence, not in a new
-   active register.
+3. For each compatible group, deduplicate the exact **impact-based focused
+   selectors** across all relevant layers and run them first in one pinned
+   asynchronous job. Triage any failure there before considering wider runs.
+   Only append a separately required cumulative gate if its independent
+   necessity and exact scope are documented; a shared VR batch alone does
+   not justify a full-suite launch. Keep per-VR selector/prerequisite
+   mappings in the existing queue and job evidence, not another register.
 4. Once the job terminates, verify exact HEAD, actual collected/selected tests,
    exit status, skips and their reasons, fixture/asset coverage, and browser
    evidence **for each VR separately**. Record the shared job ID and relevant
@@ -651,11 +698,12 @@ counts. A Linux result validates only the state it tested, never newer
 Windows changes or a different Linux checkout.
 
 A practical handoff is **complete VD design without tests -> enter VR drain
--> prepare the intended committed Linux revision -> verify ignored assets ->
-dispatch a pinned full-suite job -> continue independent Windows development
-while that full suite actually runs -> inspect results and resume VR draining**.
-Focused VR jobs remain part of the dedicated execution drain, without
-unrelated implementation. The no-mutation rule above still applies to
+-> prepare a pinned revision and relevant assets -> run the union of focused
+impact selectors -> resolve failures -> retire satisfied VRs**. Run a
+separate full Linux suite only for an explicitly due cumulative/release gate;
+then the narrow independent-Windows-development exception applies while that
+full suite actually runs. Focused VR jobs stay within the dedicated drain.
+The no-mutation rule above still applies to
 *the Linux test checkout and any shared inputs its jobs actually consume*;
 never edit that checkout or swap tracked databases during its test run.
 

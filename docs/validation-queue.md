@@ -45,12 +45,15 @@ IDs here and link the owning task instead of duplicating its description.
      even when VD is below 3. A blocked VD leaves its dependent VR
      blocked; never bypass the prerequisite.
   3. If **VR >= 5**, execute and reconcile **all open VR entries to zero**.
-     Otherwise, process VR entries due by age or gate. **Execution jobs may
-     be batched** across compatible due VRs, including focused selectors as
-     well as full-suite coverage; **reconcile and retire each VR individually**
-     against its own requirements. Grouping work does not defer a due VR,
-     waive a prerequisite or change any threshold. **Dispatch is not
-     completion**.
+     Otherwise, process VR entries due by age or gate. **Run the smallest
+     sufficient impact-based focused test set first.** Compatible VRs may
+     share the same pinned execution, but **each VR must be reconciled
+     individually** against its own requirements. The five-item threshold
+     never requires a full suite by itself: run one only for a separately
+     documented release/cumulative gate or cross-cutting risk that focused
+     tests cannot cover. Repair focused failures before widening tests.
+     Grouping work does not defer a due VR, waive a prerequisite or change
+     any threshold. **Dispatch is not completion**.
   4. Recount both queues and check overdue/gated entries. If VD >= 3 or
      VR >= 5, restart at step 1; otherwise resume ordinary implementation
      only after all individually due work is handled.
@@ -167,7 +170,8 @@ selector and other dependencies in its VR item.
   Deferred: `tests/test_application_rule_references.py::test_hackable_profile_help_pinned_source`
   (2 source cases), `tests/test_application_rule_references.py::test_hackable_profile_help_export_and_api`,
   `tests/test_verify_scenario_faq_browser.py::test_hackable_profile_help_normal_browser`
-  (3 Chromium cases), cumulative application source/reference regressions.
+  (3 Chromium cases), affected application source/reference regressions.
+  The independent full-suite gate remains V1S-090.
   Intended hosts: Windows for both verified PDF files; explicitly pinned
   `linux-dev` for API/browser/cumulative acceptance with required assets.
   No skip on the intended host counts as evidence. Hosted matrix and

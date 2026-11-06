@@ -28,7 +28,11 @@ For browser visual, layout, responsive, interaction, or player-facing copy chang
 design contract.
 
 The engineering principles in `docs/architecture.md` are authoritative for
-technical design decisions.
+technical design decisions. For v1.0, follow the
+[release citation gate](docs/releasing.md#version-10-data-completeness-gate):
+at least **one applicable current source** per in-scope rule and a usable
+browser reference; exhaustive source inventories and discrepancy hunts are
+not required.
 
 ## Tooling and validation
 
@@ -72,8 +76,10 @@ Report counts, oldest due/blocked entry, and intended execution host.
 Do not call unrun tests passed or claim a task accepted while its required
 validation is pending.
 
-The [testing guide](docs/testing.md#phased-development-and-validation)
-owns immediate safety-check exceptions, test selection and reports.
+The [testing guide](docs/testing.md#focused-first-vr-execution)
+requires risk-based **focused-first** test execution, including impacted
+cross-layer invariants, and owns immediate safety exceptions and reports.
+A VD/VR threshold alone does not require a full suite.
 Its [Linux dispatch protocol](docs/testing.md#parallel-windows-development-and-linux-validation)
 owns explicit safe Git preparation, pinned asynchronous test execution,
 input/artifact verification and the narrowly scoped Windows-development

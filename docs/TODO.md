@@ -182,88 +182,35 @@ is bounded to the development pair; final-input checks remain.
 **Parent:** [Final 1.0 acceptance](#final-10-acceptance).
 **Project domains:** Data processing, Web backend, Web frontend, Project infrastructure, Deployment
 
-The current input baseline is pinned and artifact-validated; its source inventory
-and remaining source/browser dispositions are recorded in the
-[coverage audit](v1.0-source-coverage-audit.md). V1S-082 owns the remaining
-source-to-browser gap review; final release acceptance remains open.
+The current input baseline is pinned and artifact-validated. The
+[coverage audit](v1.0-source-coverage-audit.md) retains historical source
+inventory research, but **1.0 requires at least one applicable current citation
+per in-scope rules reference and a usable normal-browser entry**, not exhaustive
+source-first coverage or resolution of source discrepancies. V1S-082 owns this
+bounded rule-citation/route check; final release acceptance remains open.
 
-- [ ] **V1S-082 (L, gate):** Resolve confirmed source-to-normal-browser
-  gaps and review all explicit omissions under the 1.0 definition.
-  The [coverage audit](v1.0-source-coverage-audit.md) records accepted bounded
-  glossary/Label corrections and the remaining source inventory. The
-  [Trait definition review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-trait-definition-conditions-2026-11-06)
-  and [Attribute definition review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-attribute-definitions-and-dash-prerequisites-2026-11-06)
-  passed their bounded source/API/browser and cumulative checks under retired
-  VR-0115/0117. Continue the wider source inventory; these results do not approve
-  the frozen release candidate. The [Hackable profile-help review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-hackable-profile-help-2026-11-06)
-  now publishes default Troop Type/Hacker conditions and per-Program target
-  scope; its source/API/browser execution remains under VR-0118.
-  The [coverage optimization plan](v1.0-coverage-workflow-plan.md) introduces a
-  read-only, source-family batch planner built on the existing identity/locator
-  inventory (currently 466 records / 830 source locators). Its output is triage
-  only; it does not retire any source or browser acceptance obligation.
-  A fixed [35-record pilot](v1.0-coverage-workflow-plan.md#p1--tracked-disposition-and-source-evidence-contract)
-  spans 10 cohorts and three source-first probes; its read-only work packet reports
-  129 citation occurrences, 125 exact source/page/heading locators and 97
-  `(sourceId, page)` buckets. The 97 buckets are not distinct pages: 9
-  page-less Wiki locators carry explicit archive `member` identities, giving
-  104 known source pages. The planner preserves those members and reports 25
-  citation-occurrence page-reuse candidates; it suppresses page totals and the
-  reuse estimate if any identity is missing or ambiguous. Neither locator
-  count nor candidate reuse is measured review time, actual source opens or
-  saved work. Including the three source-first probes yields a 26/132 (19.7%)
-  citation-occurrence ceiling under one-open-per-citation assumptions, still
-  not a measured effort reduction.
-  The source-only pilot has now screened **35/35 distinct identities** at
-  selected-clause scope across 39 record-cohort screen events, with **0/35
-  whole-record or current-revision browser approvals**. The Trait cohort
-  repeated four identities from the initial seven; the earlier 22/35 figure
-  after the State cohort counted those repeats as new identities and is
-  corrected in the audit to 18/35 distinct identities across 22 screen events.
-  The three source-first control-page probes were screened separately; their
-  scoped prose review found zero newly confirmed unowned concepts, not whole-
-  page acceptance.
-  The Doctor/Engineer batch records the unresolved bilingual contact-condition
-  discrepancy **SRC-034**. The weapon-profile batch rechecked existing
-  **SRC-020** and **SRC-021** without resolving either conflict. The Trait
-  cohort reuses unchanged records and prior bounded source/API/browser evidence;
-  **SRC-002** remains unresolved. The
-  [State cohort review](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-state-cohort-2026-11-06)
-  identified a missing Isolated/Loss-of-Lieutenant clause against agreeing
-  English/Spanish N5.3 sources. The three owning curated records now jointly
-  encode the bilingual timing distinction and typed Lieutenant-to-rule link;
-  a guarded v9 promotion changed exactly those records and verified matched
-  publications.
-  VR-0122 has focused source/API/browser passes, but its first cumulative
-  run identified a summary-layout failure and brittle browser assertions.
-  The guarded paragraph-only repair is published; the corrected full
-  cumulative rerun remains pending. No whole-record acceptance follows. The
-  [Terms, Attribute and Equipment screen](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-terms-attribute-and-equipment-2026-11-06)
-  confirms the bilingual Firewall/TinBot and MOV clauses. Direct normal-browser
-  assertions for the MOV glossary anchor and TinBot source-169 Firewall variant
-  usage passed all six focused Chromium cases under VR-0124; matched
-  cumulative acceptance and individual VR closeout remain pending. The
-  [remaining Core, Conditional Skills and Declaration Metadata screen](v1.0-source-coverage-audit.md#v1s-082-fixed-pilot-remaining-core-conditional-skills-and-declaration-metadata-2026-11-06)
-  retains existing source scopes and leaves the Dodge PDF/Wiki modifier
-  discrepancy **SRC-006** unresolved. These results remain screening evidence,
-  not completed semantic or browser acceptance; reviewer time was not measured
-  for that fixed screen. A separate [40-record mixed-screen benchmark](v1.0-source-coverage-audit.md#v1s-082-mixed-screen-benchmark-2026-11-06)
-  logged page-access events and wall time, but did not measure active effort or
-  establish full-review savings. Its six unresolved scoped decisions and four
-  browser observations are not whole-record or browser approvals.
-  Next: rerun the cumulative Linux gate on the repaired matched artifacts
-  and reconcile all five due VR entries individually. The earlier failed
-  5,365-pass Linux run, exact repair and focused outcomes are
+- [ ] **V1S-082 (M, gate):** Ensure **every maintained in-scope rule/reference
+  has at least one applicable current source citation** and a usable,
+  player-facing normal-browser entry. Check existing records/known dependencies
+  for absent or stale citations and broken/misleading routes, and fix confirmed
+  material errors. **Do not** scan all source pages for new concepts, require
+  every clause to be accepted, or investigate/resolve source discrepancies.
+  The [release definition](releasing.md#version-10-data-completeness-gate)
+  owns this boundary.
+  Earlier record/source/semantic pilots, the mixed-screen efficiency benchmark
+  and optional clause-disposition work remain historical research in the
+  [coverage audit](v1.0-source-coverage-audit.md) and
+  [optimization plan](v1.0-coverage-workflow-plan.md), not v1.0 exit criteria.
+  The known Isolated/Loss-of-Lieutenant defect and MOV/TinBot navigation
+  gaps have focused corrections/tests. Existing VR-0118/0121/0122/0123/0124
+  must be reconciled **against their actual focused selectors and matched
+  inputs**, without automatically requiring a full suite; V1S-090 retains
+  the independent final cumulative release gate. The earlier Linux
+  cumulative failure and successful focused repair are
   [recorded](v1.0-source-coverage-audit.md#v1s-082-vr-drain-movtinbot-browser-checks-and-isolated-repair-2026-11-06).
-  Then reconcile **SRC-002**, **SRC-006**, **SRC-020**, **SRC-021** and
-  **SRC-034** without inventing rules. The P1 tracked
-  disposition schema and read-only fingerprint validator now have four
-  source-specific scoped approvals across two Trait identities
-  ([evidence](v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06)).
-  Browser and whole-record acceptance remain open; extend evidence from
-  independent clause reviews, then benchmark equal-scope active repeated
-  effort with independent quality controls.
-- [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
+  SRC-002/006/020/021/034 and additional source-first/whole-record
+  investigations are optional post-1.0 research, not release blockers.
+- [ ] **V1S-083 (M, gate):** Verify disclosure of **already known** material source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
   Army/rules pair, FAQ parity, deployed objects and processed symbols.
@@ -272,7 +219,8 @@ source-to-browser gap review; final release acceptance remains open.
   [physical SQLite byte differences](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
   from logical equivalence.
 - [ ] **V1S-086 (M, gate):** Run final-candidate rule-fragment
-  and broader source-to-browser checks; identify uncovered routes.
+  and **maintained-reference-to-browser** checks; identify broken routes
+  or missing citations for existing in-scope rules, without a source-wide scan.
 - [ ] **V1S-087 (L, gate):** Run the 81-page local Unit matrix
   and exact-version hosted representative checks.
 - [ ] **V1S-088 (M, gate):** Repeat all 24 core-scenario
@@ -343,31 +291,29 @@ definitions are the foundation; the tasks below cover outstanding
 source clauses, semantics and release publication, not a rebuild
 of already-reviewed catalogs.
 
-- [ ] Close the remaining versioned N5.3 rules-reference and explanation
-  gaps by source section and semantic family. Reconcile the frozen
+- [ ] Verify each **maintained current rules-reference identity** has at
+  least one applicable current source citation and usable normal-browser
+  access, including known material conditional information actually
+  presented to players. The frozen
   [367-record clause inventory](rules-explanation-audit-1.0-inventory.md#audit-completion-gate)
-  with the current Core/Hacking catalog and later source/browser evidence;
-  historical D/S labels, cited pages and selected browser tests do not imply
-  full-record acceptance.
-  - [ ] Review remaining source clauses and material conditional declaration,
-    ARO and reactive-eligibility cases beyond the bounded
-    [V1S-030 sample](v1.0-source-coverage-audit.md#conditional-declaration-and-reactive-eligibility-follow-up-v1s-030-2026-11-04).
-    For each material interaction, verify conditions, baseline, modifiers,
-    exceptions, effect and uncertainty against
-    [the explanation standard](../data/curated/README.md#explaining-rules-interactions)
-    and its ordinary browser presentation. Do not infer a general legality
-    or combat-resolution engine.
+  is historical research, not an exhaustive 1.0 sign-off requirement.
+  - [ ] Correct **known inaccurate or uncited player-facing** declaration,
+    ARO and interaction summaries. For the interactions InfinityDB already
+    publishes, verify material conditions, effects and uncertainty against
+    [the explanation standard](../data/curated/README.md#explaining-rules-interactions).
+    A complete source-first inventory of every conditional clause is
+    **post-1.0**, not required to pass this gate.
   - [ ] Curate confirmed missing facts, links or explanations across Skills,
     Equipment, Weaponry, Ammunition, Traits, States, Fireteams and glossary
     terms. Preserve versioned source provenance and scoped application
     identities, and extend the validated fact vocabulary where required.
     Do not duplicate Hacking Program facts or create a separate
     scenario-only identity for a shared rule.
-  - [ ] Verify remaining Weapon Properties, special weapons, auxiliary
-    equipment/objects, mode-specific prose and unreviewed N5.3 Weaponry
-    clauses. Keep combined-effect relationships distinct from raw Traits
-    and source-specific discrepancies; selected examples are not a
-    whole-Weaponry audit.
+  - [ ] Verify current-source citations and necessary context for the
+    **already supported** Weapon Properties, special weapons, auxiliary
+    Equipment and mode-specific references. Address confirmed defects;
+    a source-wide review of unmodeled Weaponry clauses and source
+    discrepancies is post-1.0.
 - [ ] Reconcile reviewed base and combined Ammunition, Attribute Immunity,
   critical and State interactions against the final pinned Weapon/Rules
   publication. Preserve composition versus Combined Saving Rolls, conditional
@@ -445,7 +391,8 @@ Project infrastructure, Deployment
 
 - [ ] Complete **V1S-081–095** against the exact frozen source,
   database, generated-publication, static-asset and release-candidate
-  revisions. This includes full source/semantic/browser disposition,
+  revisions. This includes one current source citation per in-scope rule
+  and usable maintained-reference browser coverage,
   81-page Unit matrix, core scenario and FAQ gates, manual Silhouette
   and visual acceptance, all due VD/VR checks, full local/Linux checks,
   documentation audit, exact-SHA hosted CI, annotated tag, authorized
@@ -472,6 +419,14 @@ only when required to fix correctness, reproducibility, or release reliability.
   stable IDs and open implementation tasks only when needed.
   Unanswered questions do not block 1.0 when the player-facing
   uncertainty is accurately disclosed.
+- [ ] **Optional comprehensive source reconciliation:** Expand the historical
+  source-family planner and clause-disposition evidence only if useful after
+  1.0. Inventory additional official PDF/Wiki/Army source concepts and
+  language/revision discrepancies, review uncataloged clauses and decide
+  whether any discovered facts should enter the maintained reference.
+  This research and publisher follow-up are expressly **not v1.0 gates**;
+  retain existing reproducible source evidence without turning every
+  unreviewed page or unresolved SRC issue into a missing release feature.
 
 ### Source notation and rule references
 

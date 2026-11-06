@@ -14,12 +14,23 @@ and post-release verification.
 
 ## Version 1.0 data-completeness gate
 
-Version 1.0 represents the point where InfinityDB is **data-complete for normal
-Infinity gameplay**. Every player-relevant data point available from the supported
-Infinity sources that can reasonably be useful to a player must be represented in a
-maintained structured layer and accessible through the web application in a usable
-form. A specialized or final-form UI is not required when a basic presentation makes
-the information understandable and navigable.
+Version 1.0 represents the point where InfinityDB provides a **complete,
+usable current reference for normal Infinity gameplay** over its supported
+Army data, current rules catalog, FAQ and core scenarios. **Every in-scope
+rule or rules-reference concept must have at least one accurate citation to
+an applicable current source**, plus a maintained player-oriented explanation
+and a usable normal-browser entry or contextual route. A single source is
+sufficient; multiple languages, publications, revisions and clause-by-clause
+provenance are **not** required for each rule. A specialized or final-form UI
+is unnecessary when basic presentation is understandable and navigable.
+
+This is a **record-to-current-source citation and player-facing correctness
+gate**, not an exhaustive inventory of every clause, footnote, example or
+concept from every available PDF, Wiki revision or Army capture. Supported
+Army/profile data and known material gameplay defects still need their normal
+correctness and publication checks. Optional discovery of additional source
+content, exhaustive cross-source comparison and publisher reconciliation are
+post-1.0 research, not conditions for shipping 1.0.
 
 The current core-rules scenarios are part of the 1.0 requirement: they must have a
 maintained structured representation and a usable browsable presentation. The implemented bounded
@@ -39,12 +50,16 @@ conveniences, and unrelated architectural refactors likewise do not block 1.0.
 
 The 1.0 release gate requires:
 
-- [ ] Inventory player-relevant information from Infinity Army, supported official
-  rules PDFs, and the Infinity Wiki, and identify any in-scope information not yet
-  represented by InfinityDB.
-- [ ] Represent every identified in-scope data point in the database or another
-  explicitly defined maintained structured layer, including the relationships needed
-  to understand it without relying on undocumented source-ID conventions.
+- [ ] Verify the supported Army/profile dataset and enumerate the **maintained
+  current rules-reference records**, including general rules, Skills, Equipment,
+  weapons, States, Traits, glossary and concepts required by core scenarios.
+  Detect missing reference identities from **known application dependencies**,
+  not by exhaustive page-by-page scanning of all external sources.
+- [ ] Give each in-scope rule/reference identity **at least one** applicable,
+  current, inspectable source citation and a usable maintained representation.
+  A source/version mismatch or uncited record is a gap; a second or third
+  corroborating citation is optional. Preserve relationships needed for normal
+  comprehension without inventing unsupported gameplay effects.
 - [ ] Provide a usable web presentation for every represented in-scope data category;
   important information must not be available only through raw JSON, developer tools,
   database inspection, or undocumented routes.
@@ -56,11 +71,12 @@ The 1.0 release gate requires:
 - [ ] Import or curate useful explanatory rules knowledge for every referenced skill,
   equipment item, weapon trait, state, terminology entry, or other gameplay concept,
   using concise player-oriented summaries where direct reproduction is inappropriate.
-- [ ] Review material player-facing rules interactions for a concise explanation
-  of their scope, baseline rule, modifying rule, explicit exception (if any),
-  and conditional gameplay outcome, with citations and honest uncertainty.
-  A correct result or a relationship edge alone does not meet the
-  [curated interaction explanation standard](../data/curated/README.md#explaining-rules-interactions).
+- [ ] Ensure **interactions actually represented in the current application**
+  explain their material conditions and exceptions correctly, with at least one
+  applicable current citation where they assert a rules outcome. Preserve the
+  [curated interaction explanation standard](../data/curated/README.md#explaining-rules-interactions)
+  for authored interaction explanations; do not require discovering and
+  implementing every possible interaction from the source corpus.
 - [ ] Preserve rules/source provenance so users can identify the official material
   behind summaries or interpretations; distinguish InfinityDB summaries and
   abstractions from verbatim/source-native facts.
@@ -69,29 +85,31 @@ The 1.0 release gate requires:
   relevant rules alongside the entities that use them.
 - [ ] Represent empty, unavailable, and not-applicable values deliberately rather than
   silently omitting them where that could mislead users.
-- [ ] Complete a consistency audit across source snapshots, normalized databases,
-  canonical application data, APIs, and browser presentation. Known source quirks,
-  corrections, derivations, and material cross-source discrepancies must be explicit,
-  reproducible, and traceable.
+- [ ] Check the **selected supported-source-to-record-to-browser path** for
+  in-scope references and relevant generated artifacts. Verify cited source
+  versions, stored identities and normal routes, and keep already known
+  material limitations or contradictions honestly disclosed. Do not require
+  a source-wide omission inventory or cross-edition discrepancy hunt.
 - [ ] Resolve any known defect that materially misrepresents a player's unit, profile,
   weapon, skill, equipment, army relationship, or rule information.
 
-**Unresolved official rulings are not release blockers.** Open entries in the
+**Discovering or resolving official source discrepancies is not a 1.0
+requirement.** Open entries in the
 [SRC clarification register](official-source-clarifications.md) may remain
-unanswered at 1.0. A known discrepancy may remain open when users can clearly
-identify the relevant sources/versions, the nature of the disagreement, the
-value or interpretation InfinityDB presents, and its uncertainty or
-applicability limit. The release gate requires accurate, usable disclosure;
-it does not require an external publisher to issue an erratum or choose
-between conflicting publications. Missing or misleading disclosure and
-independently confirmed implementation errors remain release-blocking defects.
-Track requests for official corrections as non-blocking post-1.0 work in TODO.
+unanswered or uninvestigated. When a meaningful disagreement is *already
+known* and affects a published rule, disclose the selected current source,
+published interpretation and relevant uncertainty accurately; do not claim
+that sources agree. A known incorrect player-facing statement still needs
+correction. No publisher response, cross-language comparison, new source
+reconciliation, or comprehensive discrepancy inventory is required for 1.0.
+Keep such research and publisher requests as optional post-1.0 work.
 
-Immediately before 1.0, perform a final source-by-source completeness audit. Record
-where each discovered player-relevant information type is represented, verify every
-in-scope type has a usable web presentation and required rules context, review every
-deliberate omission, and confirm that no remaining backlog item represents missing
-player-relevant information required by this definition.
+Immediately before 1.0, audit the **current maintained rule/reference
+identities** for at least one applicable current citation each, accurate
+normal-browser reachability and known material defects. Confirm the supported
+Army dataset and core scenarios remain usable. Do **not** infer missing rules
+from unchecked source pages or require whole-source/whole-record semantic
+sign-offs, exhaustive omission disposition, or a new cross-publication study.
 
 ## 1. Confirm release scope
 
