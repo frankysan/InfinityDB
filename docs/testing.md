@@ -96,6 +96,38 @@ Use the project virtual-environment interpreter when available:
 
 On Linux/macOS use `.venv/bin/python` instead.
 
+## Read-only development status
+
+At a task boundary, use the small repository-local status command instead of
+manually repeating unrelated inventory and monitoring queries:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.dev_status
+.\.venv\Scripts\python.exe -m tools.dev_status --json
+```
+
+On Linux/macOS use `.venv/bin/python`. `--offline` skips both network/monitor
+lookups, returning local Git, V1S and VD/VR data only. This command **never
+writes Git state, selects or retires work, starts tests, synchronizes checkouts,
+or dispatches CI**. It reads current `docs/TODO.md` through the maintained
+V1S parser and reads the active queue/thresholds from
+`docs/validation-queue.md`. The reported next actionable V1S is only
+advisory; no active agent assignment is stored, and the explicit V1S selection
+gate still applies. A read-only report does not drain a due validation queue.
+
+When online, the command checks the existing Windows MCP monitor's loopback
+`/api/status` endpoint (default port 8766; override with `--monitor-port`).
+It shows active jobs for the primary InfinityDB checkout and distinct named
+agent worktrees, along with their workers and reported revisions. The monitor
+must be enabled in the gateway; an unreachable or stale provider is not proof
+that no tests are running. CI uses GitHub Actions run listings filtered to the
+**exact local HEAD**, for the repository identified by the GitHub origin.
+For restricted repositories, `GH_TOKEN` or `GITHUB_TOKEN` may authorize the
+read-only request. CI results are **run-level observations only**; a successful
+run does not replace inspection of required jobs, matrix legs, asset coverage
+or frozen-candidate acceptance. Absent/inaccessible workflows are explicitly
+unverified, not passed. No token value is printed.
+
 ## Profiles and stages
 
 The runner exposes seven stages:

@@ -38,6 +38,9 @@ Linux/macOS), not system Python. The [testing guide](docs/testing.md)
 owns `tools/run_checks.py` stages, profiles, asset policy, setup,
 test dispatch, reports and preflight requirements. Use its current
 commands rather than maintaining a second command reference here.
+Use the [read-only development status](docs/testing.md#read-only-development-status)
+for a compact task-boundary snapshot when useful; it does not replace the
+V1S selection gate, VD/VR rules or exact-SHA CI acceptance.
 
 ### Backlog work selection and closeout
 

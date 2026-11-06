@@ -120,7 +120,22 @@ IDs here and link the owning task instead of duplicating its description.
 
 ## Pending test design
 
-No pending design obligations.
+- [ ] VD-0082 (2026-11-06; needs-design): Read-only development-status local
+  parsing and V1S recommendation. Work: user-requested Project infrastructure
+  dev-status CLI; change: `tools/dev_status.py`; risk: incorrect task/queue
+  prioritization. Existing coverage: maintained V1S backlog parser tests;
+  linked execution: VR-0121. Design: add offline cases for valid/invalid
+  backlog, documented pauses, VD threshold exclusions for blocked items, VR
+  aging and malformed/duplicate active queue entries. No tests run during VD.
+- [ ] VD-0083 (2026-11-06; needs-design): Read-only MCP and exact-SHA GitHub
+  status reporting. Work: user-requested Project infrastructure dev-status
+  CLI; change: `tools/dev_status.py`; risk: stale/misleading CI or job state.
+  Existing coverage: MCP monitor contract and GitHub CI policy;
+  linked execution: VR-0121. Design: mock local monitor and GitHub responses
+  (including unavailable, stale/unverified, missing, skipped, failed, queued,
+  superseded and cross-checkout jobs), and verify SHA filtering, token
+  non-disclosure, timeouts and read-only behavior. No live CI dispatch or
+  tests during VD.
 
 A VD entry records its ID/date/status (`needs-design` or `blocked`),
 owning TODO work and revision, concrete missing assertion/edge case,
@@ -131,6 +146,17 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
+- [ ] VR-0121 (2026-11-06; awaiting-design): Read-only development-status
+  CLI reporting Git/V1S, VD/VR, MCP jobs and GitHub exact-SHA workflows.
+  Work: user-requested Project infrastructure status command; revision:
+  commit introducing `tools/dev_status.py` (pin exact SHA for VR execution);
+  risk: misleading acceptance or stale status.
+  Immediate: read-only local/online CLI smoke, Ruff, Pyright, docs and Git
+  diff checks; these are not deferred regression tests.
+  Design: VD-0082 and VD-0083. Deferred: `tests/test_dev_status.py`
+  local parser and mocked provider cases, plus selected existing V1S/parser
+  regressions on a pinned Windows and Linux revision. No running tests count
+  as accepted until the designed cases are executed and reconciled.
 - [ ] VR-0118 (2026-11-06; ready-to-run): N5.3 Hackable Unit Profile
   help correction. Work: V1S-082; revision: implementation commit containing
   the guarded v9 publication; risk: source and browser reference accuracy.
@@ -165,8 +191,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0082`; active obligations are listed above.
-- Execution: `VR-0121`; active obligations are listed above.
+- Design: `VD-0084`; active obligations are listed above.
+- Execution: `VR-0122`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
