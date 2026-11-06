@@ -322,12 +322,51 @@ def release(root: Path, agent: str, task: str, claim_id: str) -> dict:
 
 def _source_head(root: Path, expected_head: str) -> None:
     """Read origin's source tip without updating any local ref or FETCH_HEAD."""
+    if source_head(root) != expected_head:
+        raise GlobalClaimError("Remote source HEAD differs from expected primary HEAD")
+
+
+def source_head(root: Path) -> str:
+    """Inspect the source ref without fetching or changing source Git state."""
     output = _require(
         _git(root, "ls-remote", "--exit-code", "origin", "refs/heads/dev/v1.0.0"),
         "source HEAD lookup",
     )
-    if output.split() != [expected_head, "refs/heads/dev/v1.0.0"]:
-        raise GlobalClaimError("Remote source HEAD differs from expected primary HEAD")
+    fields = output.split()
+    if (len(fields) != 2 or not _SHA.fullmatch(fields[0])
+            or fields[1] != "refs/heads/dev/v1.0.0"):
+        raise GlobalClaimError("Invalid remote source HEAD response")
+    return fields[0]
+
+
+def _recover_integration(root: Path, inspection: dict) -> dict:
+    """CAS settlement used only after the local inspection/idle-job guard."""
+    def action(state: dict) -> dict:
+        lease = state["integration"]
+        if (
+            state["revision"] != inspection["global_revision"]
+            or not lease or lease["id"] != inspection["global_integration"]
+            or lease["owner"] != inspection["owner"]
+            or lease["expected_head"] != inspection["expected_head"]
+            or lease.get("operation") != inspection["global_operation"]
+            or inspection["global_claim"] not in state["claims"]
+        ):
+            raise GlobalClaimError("Recovery registry changed; inspect again")
+        _source_head(root, inspection["remote_source_head"])
+        operation = dict(lease.get("operation") or {
+            "id": uuid4().hex, "proposal_head": inspection["proposal_head"],
+            "task_claim": inspection["global_claim"],
+        })
+        operation.update(
+            phase="completed", outcome=inspection["outcome"],
+            recovered_utc=datetime.now(UTC).isoformat(timespec="seconds"),
+        )
+        state["version"] = 2
+        lease["operation"] = operation
+        return {"message": "chore: settle inspected integration operation",
+                "payload": {"operation": operation}}
+
+    return _operation(root, action, finish_integration=True)
 
 
 def begin_integration(

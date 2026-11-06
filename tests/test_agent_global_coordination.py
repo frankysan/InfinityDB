@@ -341,3 +341,252 @@ def test_independent_clones_cannot_begin_two_operations_at_same_revision(tmp_pat
     assert status(primary)["integration"]["operation"]["phase"] == "running"
     assert _git(primary, "rev-parse", "HEAD") == args["expected_head"]
     assert _git(other, "rev-parse", "HEAD") == args["expected_head"]
+
+
+def _interrupted_proposal(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str) -> tuple:
+    fixture = _proposal(tmp_path)
+    _, primary, _, workspace, task, args = fixture
+    original_git = local._git
+    original_begin = global_coordination.begin_integration
+    original_finish = global_coordination.finish_integration
+
+    def git(root, *command):
+        if "merge" in command:
+            raise subprocess.TimeoutExpired("git merge", 30)
+        return original_git(root, *command)
+
+    def begin(*positional, **keywords):
+        original_begin(*positional, **keywords)
+        raise subprocess.TimeoutExpired("git push", 45)
+
+    def finish(*positional, **keywords):
+        if mode == "lost-completion":
+            original_finish(*positional, **keywords)
+        raise subprocess.TimeoutExpired("git push", 45)
+
+    with monkeypatch.context() as patch:
+        if mode == "before-pin":
+            arguments = {**args, "global_revision": 1}
+        else:
+            arguments = args
+            if mode == "lost-pin":
+                patch.setattr(global_coordination, "begin_integration", begin)
+            elif mode == "before-merge":
+                patch.setattr(local, "_git", git)
+            else:
+                patch.setattr(global_coordination, "finish_integration", finish)
+        with pytest.raises((subprocess.TimeoutExpired, local.CoordinationError)):
+            local.integrate_proposal(workspace, "agent-a", "task-a", task["id"], **arguments)
+    if mode == "after-push":
+        _git(primary, "push", "origin", "dev/v1.0.0")
+    return fixture
+
+
+@pytest.mark.parametrize("mode", [
+    "before-pin", "lost-pin", "before-merge", "after-merge", "lost-completion", "after-push",
+])
+def test_inspected_recovery_settles_metadata_without_changing_git_or_releasing_claims(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str,
+) -> None:
+    origin, primary, other, workspace, task, args = _interrupted_proposal(
+        tmp_path, monkeypatch, mode,
+    )
+    identity = {key: value for key, value in args.items() if key != "global_revision"}
+    primary_head = _git(primary, "rev-parse", "HEAD")
+    remote_head = _git(origin, "rev-parse", "dev/v1.0.0")
+    local_before, global_before = local.status(primary), status(other)
+    inspected = local.inspect_integration(workspace, "agent-a", "task-a", task["id"], **identity)
+    assert local.status(primary) == local_before
+    assert status(other) == global_before
+    assert local.inspect_integration(
+        workspace, "agent-a", "task-a", task["id"], **identity,
+    )["inspection"] == inspected["inspection"]
+    recovered = local.recover_integration(
+        workspace, "agent-a", "task-a", task["id"], **identity,
+        inspection=inspected["inspection"], jobs_inspected=True,
+    )
+    expected = "not-integrated" if primary_head == args["expected_head"] else "integrated"
+    assert recovered["status"] == "recovered" and recovered["outcome"] == expected
+    assert recovered["reservations"] == "held"
+    assert _git(primary, "rev-parse", "HEAD") == primary_head
+    assert _git(workspace, "rev-parse", "HEAD") == args["proposal_head"]
+    assert _git(origin, "rev-parse", "dev/v1.0.0") == remote_head
+    assert _git(primary, "status", "--porcelain") == ""
+    assert local.status(primary)["claims"] == local_before["claims"]
+    assert status(other)["claims"] == global_before["claims"]
+    assert status(other)["integration"]["operation"]["outcome"] == expected
+    # Resolution does not itself give away task ownership; release stays explicit.
+    release_integration(primary, "integrator", args["global_integration_id"])
+    local.release_integration(primary, "integrator", args["integration_id"])
+    release(workspace, "agent-a", "task-a", args["global_claim_id"])
+    local.release(workspace, "agent-a", "task-a", task["id"])
+
+
+@pytest.mark.parametrize("change", [
+    "jobs-not-inspected", "wrong-receipt", "local-revision", "global-revision",
+    "dirty-primary", "dirty-index", "dirty-proposal", "proposal-head", "remote-source",
+    "unreachable", "wrong-owner",
+])
+def test_recovery_refuses_stale_or_uninspected_state_and_keeps_reservations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, change: str,
+) -> None:
+    _, primary, other, workspace, task, args = _interrupted_proposal(
+        tmp_path, monkeypatch, "before-pin",
+    )
+    identity = {key: value for key, value in args.items() if key != "global_revision"}
+    inspection = local.inspect_integration(
+        workspace, "agent-a", "task-a", task["id"], **identity,
+    )["inspection"]
+    jobs_inspected = change != "jobs-not-inspected"
+    if change == "wrong-receipt":
+        inspection = "0" * 64
+    elif change in ("local-revision", "global-revision"):
+        another = _agent(primary, "agent-b", "task-b", "windows")
+        if change == "local-revision":
+            local.claim(another, "agent-b", "task-b", ["src/b.py"])
+        else:
+            claim(another, "agent-b", "task-b", ["src/b.py"])
+    elif change in ("dirty-primary", "dirty-index", "dirty-proposal"):
+        target = workspace if change == "dirty-proposal" else primary
+        (target / "README.md").write_text("Concurrent edit\n", encoding="utf-8")
+        if change == "dirty-index":
+            _git(target, "add", "README.md")
+    elif change == "proposal-head":
+        _git(workspace, "commit", "--allow-empty", "-qm", "test: changed proposal")
+    elif change == "remote-source":
+        _git(other, "commit", "--allow-empty", "-qm", "test: changed remote source")
+        _git(other, "push", "origin", "dev/v1.0.0")
+    elif change == "unreachable":
+        _git(primary, "remote", "set-url", "origin", str(tmp_path / "missing.git"))
+    elif change == "wrong-owner":
+        identity["owner"] = "other"
+    with pytest.raises(local.CoordinationError):
+        local.recover_integration(
+            workspace, "agent-a", "task-a", task["id"], **identity,
+            inspection=inspection, jobs_inspected=jobs_inspected,
+        )
+    assert _git(primary, "rev-parse", "HEAD") == args["expected_head"]
+    assert local.status(primary)["integration"]["operation"]["phase"] == "running"
+    assert status(other)["integration"] is not None
+
+
+def test_two_recovery_requests_cannot_consume_the_same_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, primary, _, workspace, task, args = _interrupted_proposal(
+        tmp_path, monkeypatch, "before-pin",
+    )
+    identity = {key: value for key, value in args.items() if key != "global_revision"}
+    inspected = local.inspect_integration(workspace, "agent-a", "task-a", task["id"], **identity)
+    barrier = Barrier(2)
+
+    def recover():
+        barrier.wait(timeout=10)
+        try:
+            local.recover_integration(
+                workspace, "agent-a", "task-a", task["id"], **identity,
+                inspection=inspected["inspection"], jobs_inspected=True,
+            )
+        except local.CoordinationError:
+            return False
+        return True
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first, second = pool.submit(recover), pool.submit(recover)
+        assert sorted([first.result(timeout=60), second.result(timeout=60)]) == [False, True]
+    assert local.status(primary)["integration"]["operation"]["outcome"] == "not-integrated"
+
+
+@pytest.mark.parametrize("failure", ["lost-recovery-response", "local-save-failed"])
+def test_recovery_can_be_reinspected_after_its_own_ambiguous_result(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str,
+) -> None:
+    _, primary, other, workspace, task, args = _interrupted_proposal(
+        tmp_path, monkeypatch, "before-pin",
+    )
+    identity = {key: value for key, value in args.items() if key != "global_revision"}
+    inspected = local.inspect_integration(workspace, "agent-a", "task-a", task["id"], **identity)
+    original = global_coordination._recover_integration
+
+    def recover(*positional, **keywords):
+        original(*positional, **keywords)
+        raise subprocess.TimeoutExpired("git push", 45)
+
+    def save(*positional, **keywords):
+        raise OSError("Interrupted local state write")
+
+    with monkeypatch.context() as patch:
+        if failure == "lost-recovery-response":
+            patch.setattr(global_coordination, "_recover_integration", recover)
+        else:
+            patch.setattr(local, "_save", save)
+        with pytest.raises((subprocess.TimeoutExpired, OSError)):
+            local.recover_integration(
+                workspace, "agent-a", "task-a", task["id"], **identity,
+                inspection=inspected["inspection"], jobs_inspected=True,
+            )
+    assert local.status(primary)["integration"]["operation"]["phase"] == "running"
+    assert status(other)["integration"]["operation"]["outcome"] == "not-integrated"
+    fresh = local.inspect_integration(workspace, "agent-a", "task-a", task["id"], **identity)
+    assert fresh["inspection"] != inspected["inspection"]
+    assert local.recover_integration(
+        workspace, "agent-a", "task-a", task["id"], **identity,
+        inspection=fresh["inspection"], jobs_inspected=True,
+    )["outcome"] == "not-integrated"
+
+
+def test_recovery_cli_requires_idle_job_confirmation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    _, primary, _, workspace, task, args = _interrupted_proposal(
+        tmp_path, monkeypatch, "before-pin",
+    )
+    monkeypatch.chdir(workspace)
+    arguments = ["--agent", "agent-a", "--task", "task-a", "--claim-id", task["id"]]
+    for name, value in args.items():
+        if name != "global_revision":
+            arguments.extend(["--" + name.replace("_", "-"), value])
+    assert local.main(["inspect-integration", *arguments]) == 0
+    import json
+    inspection = json.loads(capsys.readouterr().out)["inspection"]
+    with pytest.raises(SystemExit) as rejected:
+        local.main(["recover-integration", *arguments, "--inspection", inspection])
+    assert rejected.value.code == 2
+    assert local.status(primary)["integration"]["operation"]["phase"] == "running"
+    assert local.main([
+        "recover-integration", *arguments, "--inspection", inspection, "--jobs-inspected",
+    ]) == 0
+
+
+def test_recovery_remote_cas_does_not_rebase_an_inspected_decision(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, primary, other, workspace, task, args = _interrupted_proposal(
+        tmp_path, monkeypatch, "before-pin",
+    )
+    another = _agent(other, "agent-b", "task-b", "devbox")
+    identity = {key: value for key, value in args.items() if key != "global_revision"}
+    inspected = local.inspect_integration(workspace, "agent-a", "task-a", task["id"], **identity)
+    original = global_coordination._recover_integration
+
+    def competing_update(root, report):
+        claim(another, "agent-b", "task-b", ["src/b.py"])
+        return original(root, report)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(global_coordination, "_recover_integration", competing_update)
+        with pytest.raises(local.CoordinationError, match="registry changed"):
+            local.recover_integration(
+                workspace, "agent-a", "task-a", task["id"], **identity,
+                inspection=inspected["inspection"], jobs_inspected=True,
+            )
+    assert local.status(primary)["integration"]["operation"]["phase"] == "running"
+    assert status(other)["integration"].get("operation") is None
+    assert len(status(other)["claims"]) == 2
+    fresh = local.inspect_integration(workspace, "agent-a", "task-a", task["id"], **identity)
+    assert fresh["inspection"] != inspected["inspection"]
+    assert local.recover_integration(
+        workspace, "agent-a", "task-a", task["id"], **identity,
+        inspection=fresh["inspection"], jobs_inspected=True,
+    )["outcome"] == "not-integrated"
+    assert len(status(other)["claims"]) == 2

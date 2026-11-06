@@ -157,7 +157,7 @@ reservation only after the operation and required follow-through are complete.
 This is a cooperative, *local* reservation, not an automatic lock over
 arbitrary `git` processes. If a process crashes, state remains reserved.
 **Stop** and investigate instead of deleting/reassigning the claim.
-Inspected recovery remains unimplemented. Global ownership is enforced for
+Bounded inspected integration recovery is described below. Global ownership is enforced for
 cooperating integration clients as described below; unrestricted Git writers
 remain outside that protection.
 
@@ -245,8 +245,8 @@ Use `release-integration --owner ... --claim-id ...` and
 `release --agent ... --task ... --claim-id ...` for the remote registry. An
 interruption, failed merge, unexpected checkout mutation or ambiguous remote
 result leaves reservations held. A running operation blocks release and new
-registry writes until inspected recovery; no timeout expires it. Recovery tooling
-is still pending. Never edit the registry manually just to unblock another task.
+registry writes until inspected recovery; no timeout expires it. Never edit the
+registry manually just to unblock another task.
 
 The local filesystem mutex covers the entire integration operation. The global
 running record covers cooperative cross-clone ownership transitions. Neither
@@ -332,6 +332,68 @@ because its own proposal passed tests. There is **no automatic cross-machine
 Git synchronization**. A cross-machine handoff requires explicitly authorized
 branch transfer or a reviewed patch, not silent copying of a checkout.
 
+## Inspected integration recovery
+
+`tools.agent_coordination` provides a bounded recovery path for an interrupted
+integration with its original identities and reservations still present. It
+does not recover abandoned task claims or transfer ownership between agents.
+The designated integration owner first inspects affected jobs through their
+actual execution interfaces, including MCP jobs and direct terminal processes,
+and confirms no writer or pinned validation job is using either checkout.
+An elapsed timeout is not evidence that a job stopped. Inspect both checkouts,
+their branches, HEADs, index, working files, remote source tip and both registries.
+
+From the original owned proposal checkout, request a read-only receipt:
+
+```powershell
+python -m tools.agent_coordination inspect-integration --agent chatgpt --task workspace-bootstrap --claim-id <local-task-id> --owner integrator --integration-id <local-integration-id> --expected-head <before-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id>
+```
+
+Review the returned local/global revisions, source HEADs, scope, changed paths,
+proposed outcome and `inspection` digest. The command refuses dirty or changed
+checkouts, mismatched identities/scopes, missing ownership, unavailable remote
+state and unrelated source revisions. It permits only an unchanged pre-integration
+primary, or the exact proposed commit already integrated. A published source tip
+equal to that exact proposal can reconcile an uncertain earlier source push;
+an unrelated newer tip requires separate investigation.
+
+After inspecting jobs and confirming they are idle, settle metadata explicitly:
+
+```powershell
+python -m tools.agent_coordination recover-integration --agent chatgpt --task workspace-bootstrap --claim-id <local-task-id> --owner integrator --integration-id <local-integration-id> --expected-head <before-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id> --inspection <reviewed-digest> --jobs-inspected
+```
+
+`--jobs-inspected` is the caller's explicit idle-job attestation; this portable
+CLI cannot discover every process or remote job, and does not represent that
+attestation as automated process verification. Recovery repeats the inspection
+under the local mutex and requires the same receipt, then uses a pinned remote
+metadata update. Changed local/global revisions, source state or receipt refuse
+the write. A second caller cannot consume the same receipt successfully.
+
+Recovery changes **only coordination metadata**. It reports `integrated` or
+`not-integrated`, marks the operation `completed` with that explicit `outcome`,
+and retains all task claims and both integration reservations. Here `completed`
+means the operation has been settled; read its outcome before claiming that Git
+integration happened. No fast-forward, push, reset, rebase, file restoration,
+claim release or ownership transfer is performed. After a verified integration,
+perform any still-required publication separately, then release reservations
+explicitly. For a non-integrated result, release the settled reservations before
+acquiring fresh ones for a reviewed retry; retain task claims while work continues.
+
+If the recovery's own remote response or local state write is interrupted,
+inspect again. A fresh receipt can reconcile matching completed remote metadata
+with an unresolved local operation. An unknown branch movement, lost task claim,
+missing reservation, dirty checkout or unavailable remote remains a blocker.
+Do not delete or rewrite state merely to unblock a second agent.
+
+For a disconnected owner or task transfer, first preserve the proposal and
+inspect jobs, both Git states, remote ancestry and claims. Record the intended
+successor, scope and exact handoff revision. The current owner may explicitly
+release its claims only after that inspection and handoff; the successor uses a
+new owned checkout and fresh claims. If the original owner cannot participate,
+stop for an explicitly delegated maintainer recovery. The tooling does not
+implement claim stealing, automatic expiry or absent-owner reassignment.
+
 ## Failure, recovery and current enforcement limits
 
 If the integration owner is interrupted, another agent must inspect primary
@@ -346,12 +408,13 @@ create/guard, the local-Git-store `tools.agent_coordination` claim/integration
 CLI and focused isolation/concurrency tests. These are usable without MCP.
 **Implemented:** global cross-host claim and integration reservations via a
 dedicated fast-forward-only Git ref, and mandatory dual-registry integration
-preflight with a durable version-2 running-operation guard. Bootstrap remains
+preflight with a durable version-2 running-operation guard, and inspected
+integration-metadata recovery with preserved reservations. Bootstrap remains
 an explicit one-time operation for each new origin.
 MCP named checkout recognition is implemented for local pytest and non-test
 checks; it is not the authority for direct-file agents. **Not yet implemented:**
-OS-level restrictions on arbitrary Git processes, claim takeover/recovery
-workflow, comprehensive MCP Git operation routing, worktree cleanup automation,
+OS-level restrictions on arbitrary Git processes, abandoned-task recovery and
+ownership transfer tooling, comprehensive MCP Git operation routing, worktree cleanup automation,
 and a consolidated status monitor. Existing Git hooks and advisory claims
 cannot prevent a fully privileged direct-shell agent from bypassing policy.
 Use independent workspaces and one designated integration owner throughout.
