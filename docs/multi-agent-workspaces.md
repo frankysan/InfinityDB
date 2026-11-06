@@ -167,6 +167,76 @@ Do not run two machine-local integration owners just because each machine
 reports its own reservation available. The Windows integration owner alone
 owns `dev/v1.0.0` until a global coordination service is implemented.
 
+## Cross-machine claims through a dedicated Git ref
+
+`tools.agent_global_coordination` adds a tool-independent global registry
+using the configured `origin` remote and the dedicated
+`refs/heads/coordination/agent-claims` Git ref. It records only normalized
+task IDs, machine/agent names, baselines and repository-relative path scopes;
+**never store credentials, absolute paths, private notes, or secrets**.
+Metadata on a public Git repository is itself public. Agents do not need MCP.
+
+An authorized Windows integration owner initializes this ref **once**, after
+the code is integrated and reviewed:
+
+```powershell
+python -m tools.agent_global_coordination bootstrap
+python -m tools.agent_global_coordination status
+```
+
+On **each machine's assigned agent worktree**, claim local and global scope
+before edits. Both commands require explicit invocation; neither fetches,
+merges or modifies the source checkout:
+
+```powershell
+python -m tools.agent_coordination claim --agent copilot --task v1s-082 --path src/
+python -m tools.agent_global_coordination claim --agent copilot --task v1s-082 --path src/
+python -m tools.agent_global_coordination check --agent copilot --task v1s-082 --claim-id <global-claim-id>
+```
+
+Record both claim IDs separately. Check the **local claim** as well; it verifies
+changed-file scope, while the global check verifies cross-machine ownership.
+If either claim fails, **do not edit**. Release any successfully created other
+claim deliberately after inspecting the checkout. Global claims reject
+duplicate tasks, overlapping directory/file scopes and integration-owned
+paths across independent Windows/Linux clones. Path comparisons are
+conservatively case-insensitive. The registry never expires ownership
+automatically, and is unavailable if `origin` cannot be reached.
+
+Before integration, the designated primary owner additionally reserves
+global integration ownership (alongside the local integration reservation):
+
+```powershell
+python -m tools.agent_global_coordination acquire-integration --owner integrator --expected-head <primary-sha>
+python -m tools.agent_global_coordination check-integration --owner integrator --claim-id <global-integration-id> --expected-head <primary-sha>
+```
+
+Only after both reservations are verified should the owner run the existing
+`integrate-proposal` process. The code currently checks the **local**
+reservation directly; checking the **global** reservation remains an explicit
+required preflight, not an automatic enforced dependency. Following checked
+publication, explicitly release both integration reservations and the agent's
+local/global task claims. Use `release-integration --owner ... --claim-id ...`
+and `release --agent ... --task ... --claim-id ...` for the remote registry.
+
+Each remote update creates an ordinary descendant commit in the metadata ref
+and pushes **without force**. Concurrent pushes that fail fast-forward are
+reconciled by fetching and validating the latest metadata revision, then
+retrying within a bounded limit. Those operations use a disposable Git
+repository; they do not switch branches, pull source files or touch the
+working tree's Git index. The code is tested against an independent shared
+bare remote. **Do not manually rebase, rewrite, or delete this coordination
+ref**, and do not treat a missing or unreachable ref as permission to ignore
+existing ownership. If a process fails after its remote update, inspect
+`status` from the independent machine before retrying or recovering.
+
+This remains **cooperative coordination**, not an OS permission boundary,
+branch protection, or prevention of arbitrary privileged Git commands.
+The Windows integration primary is authoritative by project policy; the
+remote ref does not cryptographically establish a user's identity. Read-only
+MCP status views may be added later, but direct-file agents must be able to
+use the CLI without the MCP gateway.
+
 ## Assignment and edit boundaries
 
 Before work begins, an integration coordinator assigns a distinct agent,
@@ -237,11 +307,13 @@ belongs only to its pinned revision and actual inputs.
 **Implemented:** this maintained contract, `tools.agent_workspaces`
 create/guard, the local-Git-store `tools.agent_coordination` claim/integration
 CLI and focused isolation/concurrency tests. These are usable without MCP.
-**Not yet implemented:** a durable cross-host
-task-claim service, independently enforceable integration lease, protected
-command gateway for arbitrary shell clients, automatic conflict checks,
-worktree lifecycle/cleanup automation, and MCP named-checkout routing for
-every runner/Git operation. Git hooks and advisory leases alone cannot
-prevent a fully privileged direct shell agent from bypassing policy.
-Use independent workspaces and one deliberately designated integration owner
-until those controls are implemented and tested.
+**Implemented but requiring registry initialization:** global cross-host
+claim and integration reservations via a dedicated fast-forward-only Git ref.
+MCP named checkout recognition is implemented for local pytest and non-test
+checks; it is not the authority for direct-file agents. **Not yet implemented:**
+mandatory global-claim preflight enforced by the local integration command,
+OS-level restrictions on arbitrary Git processes, claim takeover/recovery
+workflow, comprehensive MCP Git operation routing, worktree cleanup automation,
+and a consolidated status monitor. Existing Git hooks and advisory claims
+cannot prevent a fully privileged direct-shell agent from bypassing policy.
+Use independent workspaces and one designated integration owner throughout.

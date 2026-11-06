@@ -206,6 +206,7 @@
       "modules": [
         "test_activate_synced_assets",
         "test_agent_coordination",
+        "test_agent_global_coordination",
         "test_agent_workspaces",
         "test_analyze_test_host_resources",
         "test_benchmark_test_workers",
