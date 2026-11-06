@@ -4548,20 +4548,24 @@ acceptance. Hosted CI and final release-candidate gates are
 independent. The slowest reported test fixture setups reached
 294.70 s; no local full-suite timeout or test failure occurred.
 
-**TinBot: Neurocinetics publication boundary (2026-11-02):**
+**Historical TinBot: Neurocinetics publication boundary (2026-11-02;
+reference presentation superseded 2026-11-07):**
 The originally assumed `/equipment/tinbot-neurocinetics` inbound
 route is absent by design: reviewed source ID 188 is not among the
 four published TinBot source variants (169, 244, 247, 248). The
 curated record retains its `uses-effects-of` relation to
 `skill:neurocinetics`, but source-specific records without a
 published Army application identity do not receive standalone
-Equipment routes. A new browser regression
+Equipment routes. At that revision, a browser regression
 `test_unpublished_tinbot_source_variant_is_not_a_fake_public_route`
 at 1440/390/320 px checks normal catalog-to-parent navigation,
 absence of the invented variant card/link, keyboard access to the
 independent Skill route, no JS errors and horizontal fit. API
 and source-provenance tests enforce non-routability and exact
-source membership. Initial test iterations corrected assumptions
+source membership. The later
+[reference-only variant contract](data-model.md#declaration-categories-and-exact-source-variants)
+preserves that Army boundary while allowing cited definitions on the family
+page without claiming Unit availability. Initial test iterations corrected assumptions
 about the composed-record relation schema and the empty Army
 database fixture, not product defects. Final focused regression:
 **5 passed**. No frontend, rules-data or publication changes.

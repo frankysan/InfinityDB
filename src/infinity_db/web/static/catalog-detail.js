@@ -591,6 +591,16 @@ function hackingProgramsSection(programs) {
   return section;
 }
 
+function referenceOnlyVariantsSection(rules) {
+  const section = rulesReferenceSection(rules, "Other variant references");
+  const note = document.createElement("p");
+  note.className = "detail-copy";
+  note.textContent = "These variants are not listed for this Equipment in the current Army data. "
+    + "The references do not imply Unit availability.";
+  section.firstElementChild.after(note);
+  return section;
+}
+
 function render(item) {
   displayedItem = item;
   document.title = `${item.name} · InfinityDB`;
@@ -641,6 +651,8 @@ function render(item) {
     ...(context ? [context] : []),
     ...(levelEffects ? [levelEffects] : []),
     ...(variantRules.length ? [rulesReferenceSection(variantRules, "Variant rules")] : []),
+    ...(catalog === "equipment" && item.reference_only_variants?.length
+      ? [referenceOnlyVariantsSection(item.reference_only_variants)] : []),
     ...(catalog === "traits" && item.description && !item.rules?.length
       ? [traitDescription(item.description)] : []),
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),

@@ -116,6 +116,8 @@ its application metrics.
   source-declared faction membership.
 - Displays curated rules-reference information where available, including
   summaries, classifications, special weapon data, and source citations.
+  Equipment families distinguish reference-only variants from options in
+  the current Army data.
 - Supports centimetre/inch display preferences and a Developer mode for
   inspecting database IDs and other review information.
 - Supports published Army, Unit, Peripheral, Order, and Characteristic SVG symbols. Corvus

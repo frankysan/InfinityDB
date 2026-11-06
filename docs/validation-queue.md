@@ -134,6 +134,23 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
+- [ ] VD-0100 (2026-11-07; needs-design): Verify Equipment family
+  source-only variant projection from maintained `variant-of` relations,
+  including current source/citation and API token parity, deterministic
+  ordering, partial/absent Army variants, duplicate suppression and no
+  fabricated Unit usage or standalone route. Work: V1S-082; change:
+  `catalog_rules.py` and Equipment detail API; risk: medium. Existing
+  coverage: `tests/test_catalog_rules.py` and
+  `tests/test_application_rule_references.py`; linked execution: VR-0130.
+- [ ] VD-0101 (2026-11-07; needs-design): Verify normal Equipment-to-family
+  keyboard navigation and cited reference-only cards at 1440/390/320 px in
+  light/dark themes, with explicit absence-of-Army-availability disclosure,
+  links to related rules and unchanged real variant usage. Update the old
+  absent-card negative assertions without allowing fake standalone routes.
+  Work: V1S-082; change: Equipment detail browser; risk: medium. Existing
+  coverage: `tests/test_verify_scenario_faq_browser.py`; linked execution:
+  VR-0130.
+
 ## Pending deferred execution
 
 A VR entry records its ID/date/status (`awaiting-design`,
@@ -142,6 +159,16 @@ immediate focused checks and results, any required VD dependencies,
 deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
+
+- [ ] VR-0130 (2026-11-07; awaiting-design): Equipment family
+  reference-only variant presentation. Work: V1S-082; revision:
+  implementation and completed test-design commit to be pinned; risk: medium.
+  Immediate: targeted Ruff, Pyright (zero diagnostics), `node --check`
+  and the repository docs stage passed; no tests executed.
+  Design: VD-0100 and VD-0101. Deferred: designed source/API/browser
+  selectors plus existing TinBot, Equipment routing and exact-variant usage
+  regressions on the matched development Army/rules pair. Verify no required
+  skips, tested revision and source/artifact identities before retirement.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -154,8 +181,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0100`; active obligations are listed above.
-- Execution: `VR-0130`; active obligations are listed above.
+- Design: `VD-0102`; active obligations are listed above.
+- Execution: `VR-0131`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

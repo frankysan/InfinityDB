@@ -222,8 +222,13 @@ bounded rule-citation/route check; final release acceptance remains open.
   Embedded Glossary Attributes, Game terms and Unit Profile help now project
   their underlying definition citations, including contextual Unit Profile
   help; [VR-0129 passed](testing.md#v1s-082-embedded-glossary-source-visibility-vr-0129).
-  Next reconcile the two Fireteam-scoped Rule destinations and any other
-  remaining in-scope non-detail references.
+  The Fireteam-scoped Rules, Training/Order context and eight Core
+  scenario-scoped Rules have bounded source and browser evidence.
+  Two retained TinBot variant definitions lacked a normal reference despite
+  having no current Army occurrence; their family page now separates cited
+  reference-only definitions from Army options. **VR-0130** owns the
+  pending regression design/execution. Continue reconciling remaining
+  maintained references and routes before closing this gate.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are

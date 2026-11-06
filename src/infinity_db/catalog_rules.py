@@ -229,6 +229,36 @@ class CatalogRules:
             if variant_rules:
                 variant["rules"] = list(variant_rules.values())
 
+        if entity == "equipment":
+            attached_rule_ids = {
+                rule["id"]
+                for variant in result.get("variants", [])
+                for rule in variant.get("rules", [])
+            }
+            reference_only: dict[str, dict[str, Any]] = {}
+            for family in records:
+                for relation in family.get("display_relations", []):
+                    endpoint = relation["record"]
+                    record_id = endpoint["id"]
+                    if (
+                        relation["type"] != "variant-of"
+                        or relation["direction"] != "inbound"
+                        or endpoint["kind"] != "equipment"
+                        or record_id in attached_rule_ids
+                        or record_id in reference_only
+                    ):
+                        continue
+                    reference = rules_database.composed_record(record_id)
+                    if reference is None:
+                        raise ValueError(f"Unknown Equipment variant reference {record_id!r}")
+                    if (reference.get("variant_semantics") or {}).get("inheritance") == "source":
+                        reference_only[record_id] = reference
+            if reference_only:
+                result["reference_only_variants"] = sorted(
+                    reference_only.values(),
+                    key=lambda record: (record["name"].casefold(), record["id"]),
+                )
+
         ammunition_references = self._ammunition_references
         if entity == "weapon" and ammunition_references is not None:
             combined_saving_rolls = self._combined_saving_rolls

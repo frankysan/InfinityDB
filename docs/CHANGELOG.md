@@ -23,6 +23,8 @@ are not retroactively relabeled.
   close-combat modifiers and fixed results, with Assignable's English/Spanish
   timing difference shown explicitly. Label detail pages also show scoped
   vocabulary source locators.
+- Equipment families show cited reference-only variants separately from current
+  Army options, without implying that any Unit has them.
 - Trait definitions clarify targetability, spent Disposable uses and Unloaded,
   attribute-specific effects and Silent's stacking with other Dodge modifiers.
   The unresolved Silent/Immunity question remains visible.
@@ -282,6 +284,8 @@ are not retroactively relabeled.
 - **Web backend + Web frontend:** Include current Equipment concepts in the federated
   Glossary and link their canonical detail pages, without publishing source variants
   or unavailable Army routes as duplicate or broken entries.
+  Equipment family pages also distinguish source-cited reference-only variants
+  from the variants present in the current Army data.
 - **Data processing + Web backend + Web frontend:** Add searchable, linked Weapon Properties
   with previews and their originating rules, including Plasma, Viral, Breaker, K1, MULTI,
   Monofilament, Silenced, four AP combinations and N+E/M. Origins link to reviewed,
