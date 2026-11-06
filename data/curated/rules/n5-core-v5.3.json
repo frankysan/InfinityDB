@@ -1717,7 +1717,7 @@
             "id": "attribute:swc",
             "kind": "attribute",
             "name": "Support Weapons Cost (SWC)",
-            "summary": "Support Weapons Cost (SWC) is the Support Weapon Point cost paid when adding the Trooper to an Army List.",
+            "summary": "Support Weapons Cost (SWC) is the cost in Support Weapon Points for adding a Support Weapon to a Trooper of that Unit.",
             "composition": {
                 "role": "definition"
             },
@@ -1740,7 +1740,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-29"
+                "reviewedOn": "2026-11-06"
             }
         },
         {
@@ -24876,7 +24876,7 @@
             "id": "rule:profile-help:attributes",
             "kind": "rule",
             "name": "Attributes",
-            "summary": "Attributes are the values in the profile statline. A dash means the game element does not have that Attribute; VITA and STR are alternative durability Attributes, and a dash for MOV means the Trooper is stationary.",
+            "summary": "Attributes are the numeric values describing the basic capabilities of Troopers and game elements, used for Rolls and calculations that determine whether actions succeed.\n\nA dash means the profile lacks that Attribute: the Trooper cannot declare or use a Skill that requires it. [[attribute:vita|VITA]] and [[attribute:str|STR]] are alternative durability Attributes; a dash for [[attribute:mov|MOV]] means the Trooper is stationary.",
             "composition": {
                 "role": "definition"
             },
@@ -24900,7 +24900,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-11-06"
             }
         },
         {

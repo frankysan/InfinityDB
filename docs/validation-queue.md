@@ -122,6 +122,11 @@ IDs here and link the owning task instead of duplicating its description.
 
 No pending design obligations.
 
+VD-0075/0076 were retired after static review without execution. Three pinned
+source cases, one authored/export/API case and three ordinary browser cases
+cover Attribute dash prerequisites and Support Weapons Cost. VR-0117 retains
+their exact selectors and execution obligation.
+
 VD-0072/0073/0074 were retired after static review of three pinned-source cases,
 five curated/export/API cases and fifteen ordinary-browser cases, without
 executing tests. VR-0115 retains their selectors and existing-regression reruns.
@@ -156,6 +161,22 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
+- [ ] VR-0117 (2026-11-06; ready-to-run): Attribute dash prerequisite and
+  Support Weapons Cost reference corrections. Work: V1S-082; revision:
+  implementation commit containing this entry; risk: reference accuracy.
+  Design: VD-0075/0076 completed without execution. Immediate provenance gates: pinned bilingual N5.3 and
+  historical English N5.2 p. 9; semantic links; schema-preserving deterministic
+  v9 export limited to the two summaries/review dates and matched publications.
+  Deferred: `tests/test_application_rule_references.py::test_attribute_dash_and_swc_source_clauses`,
+  `tests/test_application_rule_references.py::test_attribute_dash_and_swc_export_and_api`,
+  and `tests/test_verify_scenario_faq_browser.py::test_attribute_dash_and_swc_normal_browser`
+  at 1440/390/320 px, plus cumulative reference regressions.
+  Intended hosts: verified Windows PDF bytes and pinned `linux-dev` for
+  API/browser/cumulative acceptance. Source availability is independently checked.
+  Windows execution: 115 cases passed without skips, including all seven new
+  source/API/browser cases and four source-review gates. Changed-module Ruff,
+  Pyright and the docs stage passed. Cumulative Linux acceptance remains open.
+
 - [ ] VR-0116 (2026-11-06; ready-to-run): Renamed local PDF references and
   expanded revision inventory. Work: operator-requested source maintenance;
   revision: implementation commit containing this entry; risk: provenance.
@@ -183,6 +204,11 @@ selector and other dependencies in its VR item.
   Intended host: pinned `linux-dev`, after explicitly activating renamed PDFs
   from Syncthing staging; present source bytes must pass their hash checks.
   Additional historical revisions are inventoried, not semantically accepted.
+  Initial Linux full run at `3ed01ea9` reported 5,238 passed, 237 skipped and
+  seven failed: three repaired assertions and four missing-source prerequisites.
+  The four review gates now declare their PDF prerequisite and passed on Windows
+  with the actual pinned bytes. Re-run the corrected committed state on Linux;
+  absent source checks remain covered separately on Windows.
 
 - [ ] VR-0115 (2026-11-06; ready-to-run): Five N5.3 Trait definition
   corrections. Work: V1S-082; revision: implementation commit containing this
@@ -244,8 +270,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0075`; active obligations are listed above.
-- Execution: `VR-0117`; active obligations are listed above.
+- Design: `VD-0077`; active obligations are listed above.
+- Execution: `VR-0118`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

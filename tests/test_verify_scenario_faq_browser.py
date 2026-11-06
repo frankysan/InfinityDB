@@ -551,6 +551,64 @@ def test_visibility_zone_terms_normal_browser(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+def test_attribute_dash_and_swc_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    failures: list[str] = []
+    responses: list[tuple[str, int]] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failures.append(request.url))
+    page.on("response", lambda response: responses.append((response.url, response.status)))
+    status, _, body = wsgi_response(release_scenario_app, "/api/glossary")
+    assert status == 200
+    api_entries = {item["id"]: item for item in json.loads(body)["items"]}
+    try:
+        response = page.goto(f"{ORIGIN}/units/1", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator(
+            '.profile-attributes-label a[href="/glossary#rule-profile-help-attributes"]'
+        ).first
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        assert link.evaluate("node => document.activeElement === node")
+        link.press("Enter")
+        page.wait_for_url(re.compile(r"/glossary(?:\?.*)?#rule-profile-help-attributes$"))
+        for identity, needle in (
+            ("rule:profile-help:attributes", "cannot declare or use a Skill that requires it"),
+            ("attribute:swc", "adding a Support Weapon to a Trooper of that Unit"),
+        ):
+            if identity == "attribute:swc":
+                page.locator("#glossary-search").fill("Support Weapons Cost")
+            entry = page.locator("#" + identity.replace(":", "-"))
+            entry.wait_for(state="visible", timeout=30000)
+            visible = " ".join(entry.locator(".glossary-description").inner_text().split())
+            tokens = api_entries[identity]["description_tokens"]
+            expected = "".join(
+                token.get("label", "") if token["type"] == "reference"
+                else token.get("text", "") for token in tokens
+            )
+            assert visible == " ".join(expected.split()), (identity, width)
+            assert needle in visible
+            assert "[[" not in visible
+            if identity == "rule:profile-help:attributes":
+                for slug in ("mov", "vita", "str"):
+                    assert entry.locator(f'a[href="/glossary#attribute-{slug}"]').count() == 1
+            assert not page.evaluate(
+                "() => document.documentElement.scrollWidth > innerWidth + 1"
+            ), (identity, width)
+        assert all(status < 400 for _, status in responses), responses
+        assert any("/api/unit-profile-help" in url for url, _ in responses)
+        assert any("/api/glossary" in url for url, _ in responses)
+        assert not errors, errors
+        assert not failures, failures
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_trooper_term_normal_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

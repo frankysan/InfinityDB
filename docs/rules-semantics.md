@@ -273,8 +273,11 @@ Sources:
 **Classification:** source-native.
 
 A dash in place of an Attribute value means that the game element does not have
-that Attribute. It cannot use a Skill that requires the absent Attribute. For
+that Attribute. It cannot declare or use a Skill that requires the absent Attribute. For
 MOV specifically, a dash means the Trooper is stationary and cannot move.
+
+The contextual Attributes help and its Glossary entry expose this prerequisite,
+with typed links to MOV and the alternative VITA/STR durability Attributes.
 
 Normalization, database storage, validation, and API serialization must not
 collapse this state into an ordinary unknown/missing value without retaining
@@ -394,6 +397,9 @@ SWC is specified per Unit Profile option according to its Weapons/Equipment and
 is constrained by the list's available SWC. A positive `+SWC` value has a
 special meaning: it adds SWC to the player's allowance and the option itself is
 considered to cost zero SWC.
+
+The embedded SWC definition retains printed p. 9's support-weapon context.
+Option costs and positive allowance modifications follow the Army List rules.
 
 InfinityDB should preserve Cost/points and SWC on the selectable Army occurrence
 rather than promoting them to invariant loadout payload facts. SWC also cannot be

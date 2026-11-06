@@ -418,9 +418,10 @@ def test_lieutenant_release_comparison_accepts_sqlite_layout_only_drift(
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
-def test_lieutenant_review_gate_verifies_published_matched_pair() -> None:
+def test_lieutenant_review_gate_verifies_published_matched_pair(require_source_files) -> None:
     from tools.review_lieutenant_variant import check_candidate
 
+    require_source_files(ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf")
     report = check_candidate()
     assert report["scope"] == "lieutenant-resource-v9-verified-published"
     assert report["qualifiedOccurrences"] == 83
@@ -538,9 +539,10 @@ def test_terrain_type_semantics_fail_closed_on_drift(mutation) -> None:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
-def test_terrain_review_gate_verifies_published_matched_pair() -> None:
+def test_terrain_review_gate_verifies_published_matched_pair(require_source_files) -> None:
     from tools.review_terrain_variant import check_candidate
 
+    require_source_files(ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf")
     report = check_candidate()
     assert report["scope"] == "terrain-v9-verified-published"
     assert report["qualifiedOccurrences"] == 1235
@@ -829,9 +831,10 @@ def test_combat_jump_reviewed_extras_reject_semantic_drift(mutate) -> None:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
-def test_combat_jump_review_gate_preserves_release_pair() -> None:
+def test_combat_jump_review_gate_preserves_release_pair(require_source_files) -> None:
     from tools.review_combat_jump_variant import check_candidate
 
+    require_source_files(ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf")
     report = check_candidate()
     assert report["qualifiedOccurrences"] == 121
     assert report["unqualifiedOccurrences"] == 90
@@ -3380,8 +3383,10 @@ def test_infiltration_ph_review_rejects_unapproved_values_and_type() -> None:
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
-def test_infiltration_ph_review_gate_preserves_matched_pair() -> None:
+def test_infiltration_ph_review_gate_preserves_matched_pair(require_source_files) -> None:
     from tools.review_infiltration_ph_variant import check_candidate
+
+    require_source_files(ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf")
     result = check_candidate()
     assert result["scope"] == "infiltration-ph-v9-verified-published"
     assert result["qualifiedPHOccurrences"] == 17

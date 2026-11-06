@@ -276,6 +276,76 @@ def test_attributes_are_current_canonical_embedded_records(tmp_path: Path) -> No
     assert movement["facts"]["abbreviation"] == "MOV"
 
 
+@pytest.mark.parametrize("relative,pin,language", [
+    ("data/pdf/rules/n5-rules-v5.3-en.pdf",
+     "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f", "en"),
+    ("data/pdf/rules/n5-rules-v5.3-es.pdf",
+     "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f", "es"),
+    ("data/pdf/rules/n5-rules-v5.2-en.pdf",
+     "643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b", "en"),
+])
+def test_attribute_dash_and_swc_source_clauses(
+    relative: str, pin: str, language: str, require_source_files: Callable[..., None],
+) -> None:
+    import pymupdf
+
+    path = Path(__file__).parents[1] / relative
+    require_source_files(path)
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == pin
+    with pymupdf.open(path) as document:
+        text = " ".join(str(document[8].get_text("text")).casefold().split())
+    if language == "es":
+        assert "no podrán declarar ni realizar ninguna habilidad" in text
+        assert "que requiera de dicho atributo" in text
+        assert "colocar un arma de apoyo a una tropa que pertenezca a esa unidad" in text
+    else:
+        assert "cannot declare or use any skill that requires that attribute" in text
+        assert "adding a support weapon to a trooper of that unit" in text
+
+
+def test_attribute_dash_and_swc_export_and_api(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data/curated/rules")
+    owners = {
+        record["id"]: record for _, document in documents for record in document["records"]
+        if record["id"] in {"rule:profile-help:attributes", "attribute:swc"}
+    }
+    assert len(owners) == 2
+    fresh = tmp_path / "attributes.db"
+    export_rules_database(documents, fresh)
+    for database in (RulesDatabase(fresh), RulesDatabase(root / "data/generated/rules.db")):
+        for identity, authored in owners.items():
+            stored = database.composed_record(identity)
+            assert stored is not None
+            assert stored["summary"] == authored["summary"]
+            assert stored.get("facts") == authored.get("facts")
+            assert authored["review"] == {"status": "reviewed", "reviewedOn": "2026-11-06"}
+            assert authored["citations"][0]["page"] == 9
+            assert authored["citations"][0]["sourceId"] == "n5-core-v5.3-pdf"
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=fresh)
+    status, body = _published_get(app, "/api/glossary")
+    assert status == "200 OK"
+    entries = {item["id"]: item for item in json.loads(body)["items"]}
+    for identity, authored in owners.items():
+        entry = entries[identity]
+        assert entry["description"] == authored["summary"]
+        assert entry["href"] == "/glossary#" + identity.replace(":", "-")
+        assert entry["embedded"] is True
+    help_entry = entries["rule:profile-help:attributes"]
+    assert "cannot declare or use a Skill that requires it" in help_entry["description"]
+    assert {token["target"] for token in help_entry["description_tokens"]
+            if token["type"] == "reference"} == {
+        "attribute:vita", "attribute:str", "attribute:mov",
+    }
+    assert "adding a Support Weapon to a Trooper of that Unit" in (
+        entries["attribute:swc"]["description"]
+    )
+    status, body = _published_get(app, "/api/unit-profile-help")
+    assert status == "200 OK"
+    contextual = next(item for item in json.loads(body)["items"] if item["key"] == "attributes")
+    assert contextual["summary"] == owners["rule:profile-help:attributes"]["summary"]
+
+
 def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules.db"

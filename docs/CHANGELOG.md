@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Attribute help explains how a dashed value limits Skill declarations and use;
+  the SWC definition preserves its support-weapon context.
 - Label definitions now explain deployment limits, attack and hacking eligibility,
   close-combat modifiers and fixed results, with Assignable's English/Spanish
   timing difference shown explicitly.
