@@ -122,12 +122,9 @@ IDs here and link the owning task instead of duplicating its description.
 
 No pending design obligations.
 
-VD-0066/0067/0068 were designed and statically reviewed on 2026-11-06,
-without executing tests. The release-paired curated/citation and Glossary
-API selectors are in `tests/test_application_rule_references.py` and
-`tests/test_web.py`; the 15-case 1440/390/320 px normal-browser selector
-is in `tests/test_verify_scenario_faq_browser.py`. All are awaiting
-execution under VR-0113; this is not a test pass.
+VD-0066/0067/0068 were retired following static design review without
+execution; their three selector groups were subsequently accepted on the
+pinned Linux revision under VR-0113 (see below).
 
 VD-0062 was retired after static review without execution; its curated-export,
 Glossary API, and responsive browser selectors were executed and accepted under

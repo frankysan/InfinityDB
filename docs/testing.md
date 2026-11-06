@@ -335,6 +335,23 @@ can also affect test timing and Chromium stability, so limit contention.
 
 ### Parallel Windows development and Linux validation
 
+**2026-11-06 full-assets glossary/provenance recovery acceptance:**
+The independent `linux-dev` worker tested exact revision
+`cbf0cde4ee93bec0dfc0b08ab482e9c27ee78857` in job
+`linux-dev:7dfbbc8091db4a12a63eeaf54a85b611`, using eight xdist
+workers, four persistent Chromium lanes, the split scenario FAQ suite and
+**808/808** required published/browser-referenced SVGs.
+**5,378 passed, 29 skipped, 0 failed, 2 Python 3.14 fork deprecation
+warnings** in 610.24 s pytest time (610.92 s runner).
+The prior full run at `fc353b8b` had 10 failed provenance validations;
+their corrected `summaryEvidence` review anchors passed independently
+on `7712190e` (10 passed, 2 skips), and the complete suite now passes on
+the subsequent exact Git revision. Skips include opt-in migration checks,
+local-only missing sources and Windows-only checks; they are **not**
+independent hosted/frozen-candidate acceptance. See the
+[source-coverage audit](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-remaining-p-173-glossary-terms-2026-11-06)
+for the evidence change and publication hashes.
+
 **2026-11-05 full-assets post-checker regression:**
 The independent `linux-dev` worker tested
 `702536feecc3d2dddfd854ecd8e51e38509509e1` with the complete
