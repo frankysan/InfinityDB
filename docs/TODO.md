@@ -547,6 +547,10 @@ only when required to fix correctness, reproducibility, or release reliability.
     non-destructive real claim/status round trip from an owned Linux development
     checkout. Preserve the independent interactive checkout and pinned test
     checkout; disposable-clone race tests do not satisfy this operational gate.
+    Blocked: the live Linux probe read version 2 and rejected a Windows-owned
+    scope, but its metadata push was rejected; authority: integration owner;
+    retry: after authorized remote write access/policy verification. The remote
+    registry and existing claims stayed unchanged.
   - [ ] Implement inspected abandoned-task recovery and ownership-transfer
     tooling, including disconnected owners, task reassignment and cross-machine
     handoff. Preserve the documented inspection/idle-job requirements; never
