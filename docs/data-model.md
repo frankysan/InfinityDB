@@ -3045,6 +3045,15 @@ gameplay Labels are distinct from the Wiki-only FAQs category. The
 include the visible Assignable bilingual timing caveat; no eligibility or effects
 calculation follows from this reference vocabulary.
 
+Trait summaries retain the separate source conditions behind Deployable
+targetability, Disposable use counts and item-specific exhaustion, Non-Reloadable
+cancellation and Target (Attribute)'s no-effect/no-Saving-Roll case. Silent keeps
+its attack, Zone of Control, Line of Fire and Face to Face qualifiers while
+stating how its MOD combines with other Dodge MODs; its unresolved Immunity
+disclosure remains in the existing facts. These are maintained reference
+explanations stored in `rules.db` and reused by the Trait API/detail card, with
+no new runtime state, calculator or relationship inference.
+
 ### Dated FAQ/errata layer (published reviewed subset)
 
 FAQ rulings use independent `faq-ruling:*` semantic identities. The base

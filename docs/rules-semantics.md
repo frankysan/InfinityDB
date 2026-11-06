@@ -1152,14 +1152,25 @@ Traits are not a uniform bag of booleans. Examples include:
 
 - `BS Weapon (PH)` / `BS Weapon (WIP)`, which substitute the Attribute used for
   BS rules;
-- `Disposable (X)` and `Silent (X)`, which carry parameters;
+- `Disposable (X)`, whose X gives the available uses, and `Silent (X)`, whose
+  parameter supplies the conditional Dodge MOD;
 - `Direct Template (...)` / `Impact Template (...)`, which identify a template;
 - `State`, which points to a Game State named by the profile;
-- `Target (Attribute)`, which selects VITA or STR;
+- `Target (Attribute)`, which selects VITA or STR: a target lacking the indicated
+  Attribute makes no Saving Roll because that Weapon/Equipment has no effect;
 - `Suppressive Fire (SF)`, which links a weapon to Suppressive Fire State/profile
   behavior;
 - `Deployable`, which changes the carrier/item relationship by creating an
-  independent game element.
+  independent game element that can itself be chosen as a target.
+
+Exhausting Disposable uses activates Unloaded. The English N5.3 definition
+explicitly applies it to the exhausted item when a Trooper carries several
+Disposable Weapons/Equipment; the Spanish paragraph mentions the Trooper
+without that extra item distinction. This is not evidence that all of a
+Trooper's other Weapons become unavailable. Non-Reloadable separately forbids
+both cancellation of Unloaded and recovery of the spent uses. The current
+summaries retain those clauses alongside existing Burst, shared-mode and
+Special Dice exceptions; this vocabulary does not calculate charges or game state.
 
 InfinityDB should continue using canonical Trait identities plus structured
 parameter/source semantics rather than flattening Trait text or reparsing it in
@@ -1179,6 +1190,13 @@ Sources:
 `Silent (X)` applies its bracketed MOD to Face to Face Dodge Rolls when the attack is
 declared inside the target's Zone of Control but outside LoF. The parameter value belongs
 to the Trait occurrence, while the affected declaration is the canonical Dodge Skill.
+That MOD stacks with other applicable Dodge MODs. The English N5.3 wording
+expressly requires a Face to Face Dodge; Spanish N5.3 omits that express
+qualifier. The English-facing reference preserves its narrower scope and
+continues to disclose the unresolved
+[Silent/Attribute-Immunity question](official-source-clarifications.md#src-002--silent-versus-attribute-immunity-bilingual-qualifier).
+Stacking does not settle that timing/Immunity question or extend the MOD to
+every reaction.
 
 InfinityDB therefore authors `imposes-modifiers-on` from Silent (X) toward Dodge.
 `rules.db` derives the inverse navigation so Dodge identifies Silent (X) as a possible

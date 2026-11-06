@@ -15,6 +15,9 @@ are not retroactively relabeled.
 - Label definitions now explain deployment limits, attack and hacking eligibility,
   close-combat modifiers and fixed results, with Assignable's English/Spanish
   timing difference shown explicitly.
+- Trait definitions clarify targetability, spent Disposable uses and Unloaded,
+  attribute-specific effects and Silent's stacking with other Dodge modifiers.
+  The unresolved Silent/Immunity question remains visible.
 - Page navigation now directs keyboard focus to the new content and announces
   the loaded page to assistive technologies without disturbing scroll restoration.
 - Find Narrow Gate and Wide Gate through search or Glossary, and browse the
@@ -85,6 +88,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing:** Complete five Trait summaries with Deployable targetability,
+  Disposable count/exhaustion and item scope, Non-Reloadable cancellation,
+  Target (Attribute)'s no-Saving-Roll condition and Silent's conditional stacking.
+  Preserve existing exceptions and unresolved bilingual/Immunity disclosures.
 - **Data processing:** Complete twelve Label definitions with their N5.3 conditions,
   exclusions and exceptions, including the five Null States and Private Information
   disclosure scope. Retain the original Wiki citation alongside the primary PDF

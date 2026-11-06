@@ -3396,7 +3396,7 @@
             "id": "trait:deployable",
             "kind": "trait",
             "name": "Deployable",
-            "summary": "A [[trait:deployable|Deployable]] Weapon or Equipment is placed as an independent battlefield element with its own profile and Attributes.\n\nIf it enters [[state:unconscious|Unconscious State]], it instead enters [[state:dead|Dead State]] immediately and is removed without requiring another Wound. A Deployable cannot activate other Deployable Weapons or Equipment.",
+            "summary": "A [[trait:deployable|Deployable]] Weapon or Equipment is placed as an independent battlefield element with its own profile and Attributes. It can be chosen as a target during the game.\n\nIf it enters [[state:unconscious|Unconscious State]], it instead enters [[state:dead|Dead State]] immediately and is removed without requiring another Wound. A Deployable cannot activate other Deployable Weapons or Equipment.",
             "composition": {
                 "role": "definition"
             },
@@ -3415,11 +3415,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 175,
                     "section": "Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 182,
+                    "section": "Posicionable"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-11-06"
             },
             "relations": [
                 {
@@ -3500,7 +3505,7 @@
             "id": "trait:disposable-x",
             "kind": "trait",
             "name": "Disposable (X)",
-            "summary": "Each declared use consumes one charge, including a failed or invalid declaration. Burst increases consume additional charges, capped by remaining uses; +1 SD does not spend an extra charge. Modes share charges. See [[rule:special-dice|Special Dice]] for allocation and discard timing.",
+            "summary": "Each declared use consumes one charge, including a failed or invalid declaration. Burst increases consume additional charges, capped by remaining uses; +1 SD does not spend an extra charge. Modes share charges. See [[rule:special-dice|Special Dice]] for allocation and discard timing.\n\nThe X in Disposable (X) gives the number of available uses. When all uses are spent, the Trooper enters [[state:unloaded|Unloaded State]]; if the Trooper carries several Disposable Weapons or Equipment, apply it to the exhausted item.",
             "composition": {
                 "role": "definition"
             },
@@ -3519,11 +3524,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 175,
                     "section": "Disposable (X)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 182,
+                    "section": "Desechable (X)"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-09"
+                "reviewedOn": "2026-11-06"
             },
             "facts": {
                 "sourceIdentity": {
@@ -3758,7 +3768,7 @@
             "id": "trait:non-reloadable",
             "kind": "trait",
             "name": "Non-Reloadable",
-            "summary": "Its expended Disposable uses cannot be regained.",
+            "summary": "A [[trait:disposable-x|Disposable]] Weapon or Equipment with this Trait cannot cancel [[state:unloaded|Unloaded State]], and its expended uses cannot be regained.",
             "composition": {
                 "role": "definition"
             },
@@ -3772,11 +3782,21 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Non-Reloadable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Non-Reloadable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 182,
+                    "section": "No Recargable"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-11-06"
             },
             "relations": [
                 {
@@ -3894,7 +3914,7 @@
             "id": "trait:silent-x",
             "kind": "trait",
             "name": "Silent (X)",
-            "summary": "When used inside the target's Zone of Control but outside LoF, applies its bracketed MOD to Face to Face [[skill:dodge]] Rolls.",
+            "summary": "When making an Attack inside the target's [[rule:zone-of-control|Zone of Control]] but outside LoF, applies its bracketed MOD to Face to Face [[skill:dodge]] Rolls.\n\nThis MOD stacks with other applicable [[skill:dodge|Dodge]] MODs.",
             "composition": {
                 "role": "definition"
             },
@@ -3936,7 +3956,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-31"
+                "reviewedOn": "2026-11-06"
             },
             "facts": {
                 "sourceIdentity": {
@@ -4060,7 +4080,7 @@
             "id": "trait:target-attribute",
             "kind": "trait",
             "name": "Target (Attribute)",
-            "summary": "Only affects targets with the indicated VITA or STR Attribute.",
+            "summary": "Only affects targets with the indicated [[attribute:vita|VITA]] or [[attribute:str|STR]] Attribute. A target lacking that Attribute makes no Saving Roll against this Weapon or Equipment because it has no effect on that target.",
             "composition": {
                 "role": "definition"
             },
@@ -4074,11 +4094,21 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Target (Attribute)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Target (Attribute)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 182,
+                    "section": "Objetivo (Atributo)"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-11-06"
             },
             "facts": {
                 "sourceIdentity": {

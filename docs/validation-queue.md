@@ -122,9 +122,13 @@ IDs here and link the owning task instead of duplicating its description.
 
 No pending design obligations.
 
+VD-0072/0073/0074 were retired after static review of three pinned-source cases,
+five curated/export/API cases and fifteen ordinary-browser cases, without
+executing tests. VR-0115 retains their selectors and existing-regression reruns.
+
 VD-0069/0070/0071 were retired after static review of the source/vocabulary,
-API and 36-case ordinary-browser designs without executing tests. VR-0114
-retains all resulting selectors and required source/asset prerequisites.
+API and 36-case ordinary-browser designs without executing tests. Their
+execution was subsequently accepted under VR-0114, as recorded below.
 
 VD-0066/0067/0068 were retired following static design review without
 execution; their three selector groups were subsequently accepted on the
@@ -152,38 +156,29 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-- [ ] VR-0114 (2026-11-06; ready-to-run): Twelve N5.3 Label definition
-  corrections and primary vocabulary citation. Work: V1S-082; revision:
-  implementation commit containing this entry; risk: source/publication parity.
-  Design: VD-0069/0070/0071 completed without execution. Deferred selectors:
-  `tests/test_application_rule_references.py::test_v1s082_label_review_pinned_sources`,
-  `::test_v1s082_label_vocabulary_primary_citation_and_export`,
-  `::test_v1s082_label_definition_api_qualifications`,
-  `::test_all_published_labels_preserve_curated_vocabulary_and_public_routes`;
-  `tests/test_verify_scenario_faq_browser.py::test_v1s082_labels_normal_browser`;
-  `tests/test_web.py::test_reference_catalog_pages_and_rules_backed_apis_are_served`.
-  Intended host: pinned `linux-dev`, required assets and pinned
-  English/Spanish/N5.2 PDFs. The source tests must not skip for acceptance.
-  Due now for CI repair: Source run 42194464117 exposed an old API assertion
-  that selected the first semantic reference instead of the Unloaded target.
-  The corrected assertion verifies both Unloaded and Disposable destinations;
-  Windows immediate CI regression passed 1/1 with 808/808 SVGs. Execute the
-  complete selector group on the corrected committed revision before resuming
-  ordinary implementation.
-  Linux `f2ec34ee` passed 15 API/export checks, but all 36 browser cases failed
-  a test-only heading assertion that included the shared decorative full stop.
-  The corrected test uses the existing browser verifier's first-text-node
-  heading contract and retains content/API, requests, keyboard and overflow
-  assertions. Linux passed the two N5.3 source cases; historical N5.2 was
-  unavailable there. All three pinned-source cases passed on Windows at
-  `f2ec34ee`, with zero source skips. Rerun the browser group on the repair.
-  Immediate Windows validation of the heading repair passed all 36 browser
-  cases with 808/808 assets (20.26 s pytest); pinned Linux rerun remains due.
-  Immediate publication-integrity checks passed: deterministic v9 double export,
-  exact twelve-Label change set, unchanged other stored rule fields/schema and
-  Restrictions, maintained-text coverage, and guarded matched three-artifact
-  promotion. Semantic/browser execution is pending. Broader source inventory,
-  hosted CI and frozen-candidate acceptance remain separate.
+- [ ] VR-0115 (2026-11-06; ready-to-run): Five N5.3 Trait definition
+  corrections. Work: V1S-082; revision: implementation commit containing this
+  entry; risk: source/reference parity. Design: VD-0072/0073/0074 completed
+  without execution. Immediate publication-integrity gates passed: pinned
+  source hashes, unchanged v9 schema/Restrictions and other rule fields,
+  deterministic double export,
+  semantic-link coverage and rollback-protected matched release publications.
+  Deferred: `tests/test_silent_immunity_source_scope.py` (includes
+  `test_v1s082_trait_glossary_source_clauses` and
+  `test_v1s082_trait_definitions_export_and_api`),
+  `tests/test_verify_scenario_faq_browser.py::test_v1s082_traits_normal_browser`,
+  `tests/test_rules_database.py::test_rea023_deployable_placement_geometry_and_exception_owners`,
+  `tests/test_deployable_trigger_cross_rules.py`, and publication-pair checks.
+  These retain the existing Silent/Immunity, Disposable and Deployable
+  conditions. Intended host: pinned `linux-dev` with required assets;
+  historical source checks may require Windows where N5.2 is available.
+  Record actual hosts and no uncovered source/browser skips.
+
+VR-0114 was accepted at `8c2600de350195ab7f69782a07e9bbb92ab52db7`: 51/51
+Linux API/export/browser checks and 3/3 Windows pinned-source checks passed,
+with required 808/808 assets. The Windows run covers the historical N5.2 PDF
+missing on Linux. Exact selectors, jobs and earlier failure dispositions are
+recorded in the [Label review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-label-definitions-2026-11-06).
 
 VR-0113 was accepted on 2026-11-06 against `af806f6016e9c1ae38bf567dc0db6aba5380f28c`
 using Linux job `linux-dev:299fff7559554529b55ac0f80d3b0dc7`:
@@ -218,8 +213,8 @@ summary above. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
 
-- Design: `VD-0072`; active obligations are listed above.
-- Execution: `VR-0115`; active obligations are listed above.
+- Design: `VD-0075`; active obligations are listed above.
+- Execution: `VR-0116`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

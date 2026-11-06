@@ -190,10 +190,10 @@ source-to-browser gap review; final release acceptance remains open.
 - [ ] **V1S-082 (L, gate):** Resolve confirmed source-to-normal-browser
   gaps and review all explicit omissions under the 1.0 definition.
   The [coverage audit](v1.0-source-coverage-audit.md) records accepted bounded
-  glossary corrections and the remaining source inventory. The
-  [Label definition review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-label-definitions-2026-11-06)
-  is implemented with source, API and normal-browser execution pending under
-  VR-0114; complete that acceptance when due and continue the wider inventory.
+  glossary/Label corrections and the remaining source inventory. The
+  [Trait definition review](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-trait-definition-conditions-2026-11-06)
+  is implemented with source/API/browser execution pending under VR-0115;
+  complete that acceptance when due and continue the wider inventory.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched

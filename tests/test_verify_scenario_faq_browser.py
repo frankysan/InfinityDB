@@ -867,6 +867,69 @@ def test_v1s082_labels_normal_browser(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("slug,clauses", (
+    ("deployable", ("chosen as a target", "without requiring another Wound")),
+    ("disposable-x", ("number of available uses", "When all uses are spent",
+                       "several Disposable", "exhausted item", "+1 SD")),
+    ("non-reloadable", ("Disposable", "cannot cancel", "expended uses cannot be regained")),
+    ("silent-x", ("making an Attack", "outside LoF", "Face to Face", "stacks")),
+    ("target-attribute", ("lacking that Attribute", "no Saving Roll", "no effect")),
+))
+def test_v1s082_traits_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    slug: str, clauses: tuple[str, ...],
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    failures: list[str] = []
+    responses: list[tuple[str, int]] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failures.append(request.url))
+    page.on("response", lambda response: responses.append((response.url, response.status)))
+    try:
+        response = page.goto(f"{ORIGIN}/traits", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator(f'#catalog-list a[href="/traits/{slug}"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        assert link.evaluate("node => document.activeElement === node")
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/traits/{slug}", timeout=30000)
+        card = page.locator(f"#rule-trait-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        visible = card.inner_text()
+        assert all(clause in visible for clause in clauses), (slug, width, visible)
+        assert "[[" not in visible
+        status, _, body = wsgi_response(release_scenario_app, f"/api/traits/{slug}")
+        assert status == 200
+        item = json.loads(body)
+        rule = next(r for r in item["rules"] if r["id"] == f"trait:{slug}")
+        assert page.locator("#item-name").evaluate(
+            "node => node.firstChild.textContent"
+        ) == item["name"]
+        for token in rule["summary_tokens"]:
+            if token["type"] == "reference":
+                assert token["label"] in visible
+        citations = card.locator(".rules-source-citations").inner_text()
+        assert "p. 175" in citations and "p. 182" in citations
+        if slug == "silent-x":
+            assert "Unresolved timing question" in visible
+            assert "Needs verification" in visible
+            assert "Spanish N5.3 p. 182" in visible
+        assert any(url.endswith(f"/api/traits/{slug}") and status == 200
+                   for url, status in responses), responses
+        assert not any(status >= 400 for _, status in responses), responses
+        assert not page.evaluate(
+            "() => document.documentElement.scrollWidth > innerWidth + 1"
+        ), (slug, width)
+        assert not errors, errors
+        assert not failures, failures
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
     ("route", "record_id", "page_numbers", "clauses", "related"),
     (

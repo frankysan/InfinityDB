@@ -83,6 +83,8 @@ its application metrics.
   rules instead of redefining the effects.
 - Label definitions include deployment, targeting, modifier and fixed-result
   qualifications, with Assignable's English/Spanish timing difference disclosed.
+- Trait help explains Disposable exhaustion, Non-Reloadable cancellation,
+  attribute-specific target effects and Silent's conditional Dodge modifiers.
 - Links to **Orders and AROs** from the home page and navigation, with searchable
   declarations by Order type and links to their rules and scenario context.
 - Shows eighteen suggested terrain combinations on Special Terrain, preserving

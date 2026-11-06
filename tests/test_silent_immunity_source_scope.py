@@ -127,3 +127,90 @@ def test_source_scope_is_visible_in_authored_stored_and_api_clarifications(
         assert len(cases["reviewedWeaponCases"]) == 5
         assert len(cases["reviewedSavingRollCases"]) == 2
         assert sum(len(group) for key, group in cases.items() if key.startswith("reviewed")) == 23
+
+
+@pytest.mark.parametrize("relative,pin,page", [
+    ("data/pdf/rules/n5-rules-v5-3-en.pdf", PINS["data/pdf/rules/n5-rules-v5-3-en.pdf"], 175),
+    ("data/pdf/rules/esp-n5-update-5-3.pdf", PINS["data/pdf/rules/esp-n5-update-5-3.pdf"], 182),
+    ("data/pdf/rules/n5-rules-v5-2-en.pdf",
+     "643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b", 174),
+])
+def test_v1s082_trait_glossary_source_clauses(
+    relative: str, pin: str, page: int, require_source_files,
+) -> None:
+    """The five additions retain their source conditions and language boundaries."""
+    path = ROOT / relative
+    require_source_files(path)
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == pin
+    with pymupdf.open(path) as pdf:
+        text = " ".join(str(pdf[page - 1].get_text("text")).casefold().split())
+    if "esp-" in relative:
+        assert "pueden ser designados como objetivo en juego" in text
+        assert "la tropa pasa a estado descargado" in text
+        assert "no pueden cancelar el estado descargado" in text
+        assert "no realizará tirada de salvación" in text
+        silent = text.split("silenciosa.", 1)[1].split("sin objetivo", 1)[0]
+        assert "adicional a otros mod aplicables a esquivar" in silent
+        assert "enfrentada" not in silent
+    else:
+        assert "they may be chosen as a target during the game" in text
+        assert "the trooper, or the item if the trooper has several disposable" in text
+        assert "number of uses for that weapon or equipment" in text
+        non_reloadable = text.split("non-reloadable.", 1)[1].split("perimeter.", 1)[0]
+        assert "unloaded state cannot be cancelled" in non_reloadable
+        assert "expended uses cannot be regained" in non_reloadable
+        silent = text.split("silent (x).", 1)[1].split("speculative attack", 1)[0]
+        assert "face to face dodge roll" in silent
+        assert "cumulative with other dodge mods" in silent
+        attribute = text.split("target (attribute).", 1)[1].split("targetless.", 1)[0]
+        assert "do not need to make the saving roll" in attribute
+        assert "has no effect on them" in attribute
+
+
+@pytest.mark.parametrize("record_id,clauses,targets", [
+    ("trait:deployable", ("chosen as a target", "without requiring another Wound"),
+     {"state:unconscious", "state:dead"}),
+    ("trait:disposable-x", ("number of available uses", "When all uses are spent",
+                            "several Disposable", "exhausted item", "+1 SD"),
+     {"state:unloaded", "rule:special-dice"}),
+    ("trait:non-reloadable", ("cannot cancel", "expended uses cannot be regained"),
+     {"state:unloaded", "trait:disposable-x"}),
+    ("trait:silent-x", ("making an Attack", "outside LoF", "Face to Face", "stacks"),
+     {"skill:dodge", "rule:zone-of-control"}),
+    ("trait:target-attribute", ("lacking that Attribute", "no Saving Roll", "no effect"),
+     {"attribute:vita", "attribute:str"}),
+])
+def test_v1s082_trait_definitions_export_and_api(
+    app: Any, record_id: str, clauses: tuple[str, ...], targets: set[str],
+) -> None:
+    authored = next(r for r in load_curated_document(CURATED)["records"] if r["id"] == record_id)
+    stored = RulesDatabase(RULES).composed_record(record_id)
+    assert stored is not None
+    assert stored["summary"] == authored["summary"]
+    assert stored.get("facts", {}) == authored.get("facts", {})
+    assert authored["review"] == {"status": "reviewed", "reviewedOn": "2026-11-06"}
+    environ: dict[str, Any] = {}
+    setup_testing_defaults(environ)
+    environ.update(PATH_INFO=f"/api/traits/{record_id.split(':', 1)[1]}", REQUEST_METHOD="GET")
+    statuses: list[str] = []
+
+    def respond(status: str, _headers: list, _exc: object = None) -> None:
+        statuses.append(status)
+
+    payload = json.loads(b"".join(app(environ, respond)))
+    assert statuses == ["200 OK"]
+    rule = next(r for r in payload["rules"] if r["id"] == record_id)
+    assert rule["summary"] == authored["summary"]
+    assert all(clause in rule["summary"] for clause in clauses)
+    assert targets <= {t["target"] for t in rule["summary_tokens"] if t["type"] == "reference"}
+    assert all(t.get("public_reference") for t in rule["summary_tokens"]
+               if t["type"] == "reference")
+    citations = {(c["source_id"], c.get("page")) for c in rule["citations"]}
+    assert {("n5-core-v5.3-pdf", 175), ("n5-core-v5.3-es-pdf", 182)} <= citations
+    if record_id == "trait:silent-x":
+        assert "scope-unclear" in " ".join(rule["facts"]["clarifications"])
+        assert "Unresolved timing question" in " ".join(rule["facts"]["clarifications"])
+        assert "Spanish N5.3 p. 182" in rule["facts"]["sourceNotes"][0]
+        assert "Face to Face" in rule["summary"]
+    if record_id == "trait:target-attribute":
+        assert rule["facts"]["sourceIdentity"] == {"prefixes": ["Target ("]}
