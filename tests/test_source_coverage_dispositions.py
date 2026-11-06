@@ -11,6 +11,7 @@ import pytest
 from tools.source_coverage_dispositions import (
     DEFAULT_MANIFEST,
     DispositionError,
+    current_evidence_inputs,
     validate_dispositions,
 )
 
@@ -71,13 +72,33 @@ def _approve(review: dict[str, Any]) -> dict[str, Any]:
     return review
 
 
-def test_tracked_disposition_manifest_starts_with_no_approvals() -> None:
+def test_tracked_disposition_manifest_pins_scoped_source_reviews_only() -> None:
     data = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
+    record_hashes, source_pins, citations = current_evidence_inputs()
     result = validate_dispositions(
-        data, record_hashes={}, source_pins={}, citations={},
+        data, record_hashes=record_hashes,
+        source_pins=source_pins, citations=citations,
     )
-    assert result["counts"]["reviews"] == 0
-    assert result["counts"]["semanticAccepted"] == 0
+    reviewed = {
+        (row["recordIds"][0], row["source"]["sourceId"])
+        for row in data["reviews"]
+    }
+    assert {
+        ("trait:deployable", "n5-core-v5.3-pdf"),
+        ("trait:deployable", "n5-core-v5.3-es-pdf"),
+        ("trait:target-attribute", "n5-core-v5.3-pdf"),
+        ("trait:target-attribute", "n5-core-v5.3-es-pdf"),
+    } <= reviewed
+    assert result["counts"]["semanticAccepted"] >= 4
+    assert result["counts"]["browserAccepted"] == 0
+    assert all(
+        row["browser"]["status"] == "pending"
+        for row in data["reviews"]
+        if row["id"] in {
+            "deployable-en-n53", "deployable-es-n53",
+            "target-attribute-en-n53", "target-attribute-es-n53",
+        }
+    )
     assert result["wholeRecordApprovalsIssued"] == 0
     assert result["sourceWideCompletenessApproved"] is False
 

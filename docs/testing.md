@@ -3935,7 +3935,7 @@ certify the complete rules corpus, select random outcomes or persist game state.
 
 ### Versioned source-clause dispositions (V1S-082 P1)
 
-The read-only validator checks the tracked, initially empty
+The read-only validator checks the tracked
 `config/validation/source-coverage-dispositions-v1.json` contract against
 current Core/Hacking curated records and declared source fingerprints:
 
@@ -3952,9 +3952,11 @@ matched database hashes, test selectors and unchanged source/test contract
 files. Missing/stale keys, duplicate clauses, bogus statuses, unaddressable
 sources and dependency cycles fail closed. A clean run validates **evidence
 shape and current pins only**, not reviewer correctness, source-wide omission
-detection, test execution or whole-record acceptance. Keep the manifest
-empty until individually supported reviews are signed off; never import
-historic pilot/benchmark triage as approval. The phased validation queue
+detection, test execution or whole-record acceptance. Only independently
+reviewed, versioned and pinned clauses belong in the manifest; the first
+two Trait identities have four source-language scoped dispositions, with
+no browser approvals. Never import pilot/benchmark triage as approval.
+The phased validation queue
 remains authoritative for missing or deferred regressions.
 
 ### Frozen explanation-inventory reconciliation (V1-A08)

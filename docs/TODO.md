@@ -252,10 +252,12 @@ source-to-browser gap review; final release acceptance remains open.
   normal-browser assertions for the MOV glossary anchor and TinBot source-169
   Firewall variant usage; and reconcile **SRC-002**, **SRC-006**, **SRC-020**,
   **SRC-021** and **SRC-034** without inventing rules. The P1 tracked
-  disposition schema and read-only fingerprint validator are implemented with
-  zero signed-off entries; populate them only from clause-scoped reviewed
-  source evidence, then run an equal-scope benchmark of active repeated
-  review effort with independent quality controls.
+  disposition schema and read-only fingerprint validator now have four
+  source-specific scoped approvals across two Trait identities
+  ([evidence](v1.0-source-coverage-audit.md#v1s-082-p1-source-clause-evidence-deployable-and-target-attribute-2026-11-06)).
+  Browser and whole-record acceptance remain open; extend evidence from
+  independent clause reviews, then benchmark equal-scope active repeated
+  effort with independent quality controls.
 - [ ] **V1S-083 (M, gate):** Verify disclosure of source conflicts
   and empty/unavailable/not-applicable semantics.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
