@@ -627,6 +627,29 @@ The pinned Wiki archive and N5.3 English/Spanish and N5.2 English PDFs were
 present and their required source checks passed. This closes VR-0128, not
 V1S-082, hosted CI or the frozen-candidate release gates.
 
+### V1S-082 embedded Glossary source visibility (VR-0129)
+
+The complete focused Windows run at `c247b4bad4ca1713dc40434121736c4dada77752`
+passed **50 tests with no skips**. An earlier run at
+`904893f0be384f33ee69e149e3597850d15b791a` passed 49 and failed one existing
+Glossary assertion because it did not include the new citation field. The
+corrected exact-shape assertions and the complete selection passed at the
+later revision. The dedicated MCP Linux worker was unavailable, so this is
+Windows evidence, not a Linux result.
+
+The 23 exact pytest selectors are preserved in the VR-0129 queue entry at
+the tested revision. The source/API checks compared ordered authored and
+exported citations for all 13 Attributes, 23 Game terms and 12 Unit Profile
+help definitions, including contextual API parity, empty sources, supplement
+scope and cache isolation. Chromium covered keyboard/source-link visibility
+at 1440/390/320 px in light and dark themes, unavailable and archived sources,
+and existing Label, Weapon Property and shared rules-card behavior. The run
+used development `infinity.db` SHA-256
+`8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
+and `rules.db` SHA-256
+`5bc1ef3c70d1d14ad5f043bd1ad6fe159c608e86755d0ec0ac9a8b99f8b052f8`.
+This closes VR-0129, not V1S-082, hosted CI or frozen-candidate acceptance.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not

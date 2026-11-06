@@ -143,56 +143,13 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0129 (2026-11-06; ready-to-run): Expose source citations on
-  embedded Glossary definitions and contextual Unit Profile help.
-  Work: V1S-082; revision: corrected test-expectation commit containing this entry;
-  risk: medium. No curated input or generated database changes. Development
-  `infinity.db` SHA-256 `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`;
-  `rules.db` SHA-256 `5bc1ef3c70d1d14ad5f043bd1ad6fe159c608e86755d0ec0ac9a8b99f8b052f8`.
-  Immediate: targeted Ruff and Pyright, JavaScript syntax, docs stage and
-  Git whitespace checks passed on the implementation worktree.
-  Design: VD-0098/0099 statically reviewed and retired without running tests;
-  targeted Ruff and Pyright passed for both test modules.
-  Deferred: `tests/test_application_rule_references.py` selectors
-  `test_embedded_glossary_and_profile_help_preserve_definition_citations`,
-  `test_embedded_glossary_handles_missing_sources_and_isolates_cache`,
-  `test_equipment_glossary_source_cited_routes_cover_current_concepts`,
-  `test_label_vocabulary_sources_reach_published_details` and
-  `test_label_vocabulary_sources_keep_collection_scope_and_missing_data`;
-  `tests/test_rules_database.py` selectors
-  `test_unit_profile_help_returns_reviewed_profile_notation_entries` and
-  `test_composed_records_attach_current_supplements_without_field_merging`;
-  `tests/test_web.py` selectors
-  `test_unit_profile_help_is_rules_backed_and_optional`,
-  `test_unit_profile_help_links_are_rendered_from_rules_data`,
-  `test_glossary_projects_canonical_rules_and_embedded_attributes`,
-  `test_curated_weapon_families_are_discoverable_in_glossary`,
-  `test_rules_summary_rendering_preserves_links_emphasis_and_source_notes`
-  and `test_detail_frontends_share_curated_rules_reference_renderer`;
-  `tests/test_verify_scenario_faq_browser.py` selectors
-  `test_embedded_sources_in_glossary_and_contextual_help`,
-  `test_embedded_sources_report_unavailable_and_archived_members`,
-  `test_attribute_dash_and_swc_normal_browser`,
-  `test_movement_attribute_glossary_anchor_normal_browser`,
-  `test_hackable_profile_help_normal_browser`,
-  `test_label_vocabulary_sources_in_normal_browser`,
-  `test_label_vocabulary_sources_unavailable_in_normal_browser` and
-  `test_reference_provenance_labels_remain_distinct_across_themes`;
-  `tests/test_verify_weapon_source_cards_browser.py` selectors
-  `test_weapon_property_origins_reach_sources_in_normal_browser` and
-  `test_unroutable_weapon_property_example_shows_source_section_in_browser`.
-  Preferred host: dedicated MCP Linux worker, with documented local fallback.
-  Outcome: first pinned Windows run at `904893f0be384f33ee69e149e3597850d15b791a`
-  passed 49 tests and failed `test_glossary_projects_canonical_rules_and_embedded_attributes`:
-  its exact response-shape assertions did not include the new citations.
-  Correct the assertions and rerun the complete selection on the new revision.
-
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
 summary above. The
 [VR-0126 Property regression](testing.md#v1s-082-weapon-property-source-and-browser-regression-vr-0126)
 and [VR-0127 Equipment regression](testing.md#v1s-082-equipment-glossary-navigation-regression-vr-0127)
 and [VR-0128 Label source visibility](testing.md#v1s-082-label-vocabulary-source-visibility-vr-0128)
+and [VR-0129 embedded source visibility](testing.md#v1s-082-embedded-glossary-source-visibility-vr-0129)
 passed on pinned Windows revisions. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
