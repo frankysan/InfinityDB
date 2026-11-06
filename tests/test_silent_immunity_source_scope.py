@@ -144,7 +144,7 @@ def test_v1s082_trait_glossary_source_clauses(
     assert hashlib.sha256(path.read_bytes()).hexdigest() == pin
     with pymupdf.open(path) as pdf:
         text = " ".join(str(pdf[page - 1].get_text("text")).casefold().split())
-    if "esp-" in relative:
+    if path.stem.endswith("-es"):
         assert "pueden ser designados como objetivo en juego" in text
         assert "la tropa pasa a estado descargado" in text
         assert "no pueden cancelar el estado descargado" in text
@@ -187,7 +187,7 @@ def test_v1s082_trait_definitions_export_and_api(
     stored = RulesDatabase(RULES).composed_record(record_id)
     assert stored is not None
     assert stored["summary"] == authored["summary"]
-    assert stored.get("facts", {}) == authored.get("facts", {})
+    assert stored.get("facts") == authored.get("facts")
     assert authored["review"] == {"status": "reviewed", "reviewedOn": "2026-11-06"}
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)

@@ -168,6 +168,12 @@ selector and other dependencies in its VR item.
   Outcome: all 14 declarations matched paths/pages/hashes; both v9 exports
   were byte-identical and all 16 tables matched apart from 14 locator cells.
   Both dependent publications matched; documentation stage and diff checks passed.
+  Follow-through: Windows sweep at `3ed01ea9` exposed the Spanish filename
+  discriminator, two optional-facts assertions and a stale locator total.
+  All 66 cases in the two repaired modules then passed without skips; Ruff
+  passed. Current Linux staging lacks the renamed PDFs, so source checks use
+  verified Windows bytes. Broader execution and hosted acceptance remain open;
+  see the [Trait follow-through](v1.0-source-coverage-audit.md#v1s-082-bounded-source-review-trait-definition-conditions-2026-11-06).
   Deferred: `tests/test_curated.py`, `tests/test_audit_1_0_reference_inputs.py`,
   `tests/test_report_reference_baseline.py`,
   `tests/test_audit_reinforcements_applicability.py`,
@@ -195,6 +201,9 @@ selector and other dependencies in its VR item.
   conditions. Intended host: pinned `linux-dev` with required assets;
   historical source checks may require Windows where N5.2 is available.
   Record actual hosts and no uncovered source/browser skips.
+  The initial Windows sweep ran the fifteen browser cases and source checks;
+  four validation-test defects were repaired with 66/66 focused Windows cases
+  passing. Current cumulative/hosted acceptance remains pending as above.
 
 VR-0114 was accepted at `8c2600de350195ab7f69782a07e9bbb92ab52db7`: 51/51
 Linux API/export/browser checks and 3/3 Windows pinned-source checks passed,

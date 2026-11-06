@@ -158,13 +158,31 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         "selectedBrowserTestAnchors": 36,
         "currentIdentitiesWithLaterEvidence": 56,
         "wholeRecordApprovals": 0,
-        # V1S-077 adds the explicit p. 145 terrain-suggestions source locator.
-        "pendingSourceSections": 821,
+        # V1S-077 adds one terrain locator; the Trait review adds six PDF locators.
+        "pendingSourceSections": 827,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}
     assert len(historical) == 367 and len(current) == 466
     assert current["rule:special-terrain"]["sourceLocatorCount"] == 2
+    trait_pdf_locators = {
+        (row["sourceId"], row["page"], row["heading"])
+        for row in report["sourceSections"]
+        if set(row["currentRecordIds"]) & {
+            "trait:deployable", "trait:disposable-x",
+            "trait:non-reloadable", "trait:target-attribute",
+        } and row["sourceId"] in {"n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf"}
+    }
+    assert trait_pdf_locators == {
+        ("n5-core-v5.3-pdf", "175", "Deployable"),
+        ("n5-core-v5.3-pdf", "175", "Disposable (X)"),
+        ("n5-core-v5.3-pdf", "175", "Non-Reloadable"),
+        ("n5-core-v5.3-pdf", "175", "Target (Attribute)"),
+        ("n5-core-v5.3-es-pdf", "182", "Posicionable"),
+        ("n5-core-v5.3-es-pdf", "182", "Desechable (X)"),
+        ("n5-core-v5.3-es-pdf", "182", "No Recargable"),
+        ("n5-core-v5.3-es-pdf", "182", "Objetivo (Atributo)"),
+    }
     assert {row["historicalTier"] for row in historical.values()} == {"D", "S"}
     assert all(row["fullRecordAcceptance"] == (
         "not-approved-by-identity-or-evidence-join"
