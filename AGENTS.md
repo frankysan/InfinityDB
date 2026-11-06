@@ -73,6 +73,17 @@ exception while a full Linux suite is **actually running**. Hosted
 [release acceptance](docs/releasing.md) remain independent. Never use a
 partial Linux run or job dispatch as permission to bypass a due drain.
 
+## Concurrent-agent workspace ownership
+
+For simultaneous MCP, IDE, terminal or human work, follow the
+[multi-agent workspace protocol](docs/multi-agent-workspaces.md). Development
+agents must edit and commit only in their assigned isolated checkout/branch;
+run its ownership guard before writes. The designated integration owner alone
+may change or push the shared `dev/v1.0.0` branch. This checkout-role rule
+overrides generic autonomous commit/push guidance below for agents that do
+not own integration. MCP is not required for this protocol, and a clean
+`git status` is not proof of exclusive ownership.
+
 ## Repository access and change delivery
 
 - Check whether the agent has authorized direct access to the current local
@@ -84,7 +95,8 @@ partial Linux run or job dispatch as permission to bypass a due drain.
   status, relevant files, and existing local instructions first. Treat that
   checkout as the source of truth; use remote Git services only for information
   that cannot be established locally or for explicitly requested remote work.
-- Edit and validate directly in the authorized working tree. Preserve unrelated
+- Edit and validate directly in the **assigned** working tree (an isolated
+  development checkout when other agents are active). Preserve unrelated
   tracked and untracked changes. Do not require a repository ZIP or produce an
   apply-yourself patch as the primary delivery when the files are already edited.
   Generate a Git-native patch only when requested or needed for transfer/review.
@@ -94,11 +106,13 @@ partial Linux run or job dispatch as permission to bypass a due drain.
   state from a stale archive or a remote branch alone.
 - After local edits, inspect the actual diff and status and run relevant
   focused checks. For InfinityDB's authorized autonomous workflow, stage
-  only reviewed task-related files, commit a coherent validated batch with
-  a lowercase conventional message and push it with ordinary fast-forward
-  Git after checking the branch and remote ancestry. Report each SHA and
-  exact validation outcomes, and proceed to the next clearly identifiable
-  open task rather than stopping solely for approval. Do not commit failed
+  only reviewed task-related files and commit a coherent validated batch with
+  a lowercase conventional message. **Development checkout owners hand off
+  their committed proposal; only the designated integration owner may safely
+  fast-forward push the shared development branch** after reviewing ancestry
+  and integrating accepted changes. Report each SHA and exact validation
+  outcomes, and proceed to the next clearly identifiable open task only when
+  the validation queue and workspace assignment permit it. Do not commit failed
   or uncertain changes as accepted, fold unrelated user edits into the
   commit, force-push, reset, rebase, deploy, or publish a release without
   separate authorization. A pushed revision is not automatically a

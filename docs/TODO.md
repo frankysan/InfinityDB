@@ -529,6 +529,26 @@ only when required to fix correctness, reproducibility, or release reliability.
   compatibility policy. Until then, preserve the current contract: canonical generated
   links prefer stable domain slugs while numeric routes remain accepted compatibility forms.
 
+### Concurrent-agent development safety
+
+**Project domain:** Project infrastructure
+
+- [ ] Complete tool-independent multi-agent workspace coordination, building on
+  the [initial checkout protocol](multi-agent-workspaces.md). This is approved
+  pre-release infrastructure safety work, **not a v1.0 completeness gate**.
+  - [ ] Add a durable, cross-client workspace/agent/task claim registry with
+    explicit assignment, ownership transfers and stale-owner recovery; do not
+    treat an expired claim as permission to overwrite a working tree.
+  - [ ] Provide exclusive integration ownership with baseline-SHA and changed-file
+    preflight checks that detect overlapping proposals, Git index changes and
+    unexpected branch movement before staging or committing.
+  - [ ] Extend MCP named-checkout discovery and bounded Git/test routing without
+    forcing direct-file agents to use MCP. Preserve the separate pinned Linux
+    validation checkout and explicit cross-host synchronization.
+  - [ ] Add read-only workspace/claim/integration status to the existing monitor;
+    validate refusal, interrupted operations and multi-agent races with
+    cross-platform tests before enabling unattended integration.
+
 ### Performance, storage, and build tooling
 
 - [ ] **Post-1.0 infrastructure research — deferred:** Continue the
