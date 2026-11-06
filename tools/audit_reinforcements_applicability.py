@@ -23,12 +23,12 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/reinforcements-n5-applicability-review.json"
 EXPECTED_REFERENCES = {
     "n5-core-v5.3-pdf": (
-        "N5", "5.3", "data/pdf/rules/n5-rules-v5-3-en.pdf",
+        "N5", "5.3", "data/pdf/rules/n5-rules-v5.3-en.pdf",
         6, "game-mode-name-not-procedure", "n5-core-v5.3.json",
     ),
     "its-season-18-en-pdf": (
         "N5-ITS", "2026.09.01",
-        "data/pdf/its/Its-rules-season-18-en.pdf", 27,
+        "data/pdf/its/its-18-rules-v2026.09.01-en.pdf", 27,
         "current-extra-refers-to-unversioned-annex",
         "n5-its-season-18-2026.09.01.json",
     ),

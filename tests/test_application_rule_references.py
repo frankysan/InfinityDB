@@ -743,13 +743,13 @@ def test_all_published_labels_preserve_curated_vocabulary_and_public_routes() ->
 @pytest.mark.parametrize(
     ("filename", "digest", "page", "clause"),
     (
-        ("n5-rules-v5-3-en.pdf",
+        ("n5-rules-v5.3-en.pdf",
          "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
          174, "When deploying its owner during the Deployment Phase"),
-        ("esp-n5-update-5-3.pdf",
+        ("n5-rules-v5.3-es.pdf",
          "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f",
          181, "Únicamente durante la Fase de Despliegue"),
-        ("n5-rules-v5-2-en.pdf",
+        ("n5-rules-v5.2-en.pdf",
          "643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b",
          173, "When deploying its owner during the Deployment Phase"),
     ),
@@ -767,7 +767,7 @@ def test_v1s082_label_review_pinned_sources(
     with pdf.open(path) as document:
         text = " ".join(document[page - 1].get_text().split())
     assert clause in text
-    if filename == "esp-n5-update-5-3.pdf":
+    if filename == "n5-rules-v5.3-es.pdf":
         assert "Los MOD que otorgue son combinables" in text
         assert "Turno Activo y Reactivo" in text
         assert "éste será fijo" in text
@@ -791,7 +791,7 @@ def test_v1s082_label_review_pinned_sources(
         assert source_names == {
             label["name"] for label in curated["labels"] if label["id"] != "faqs"
         }
-        if filename == "n5-rules-v5-3-en.pdf":
+        if filename == "n5-rules-v5.3-en.pdf":
             assert "Dead, Disconnected, Possessed, Sepsitorized, and Unconscious" in text
         else:
             assert "Sepsitorized" not in labels_text

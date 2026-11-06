@@ -16,7 +16,7 @@ from typing import Any
 from infinity_db.curated import load_curated_document
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+SOURCE = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 PUBLICATION = ROOT / "data/generated/deployed-objects.json"
 

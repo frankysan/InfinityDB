@@ -14,7 +14,7 @@ from infinity_db.web import create_app
 from tools.browser_wsgi_transport import route_browser_page, wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
-PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 WIKI = ROOT / "data/wiki/WIKI-en 20260926-200832.zip"
 WIKI_PIN = "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"

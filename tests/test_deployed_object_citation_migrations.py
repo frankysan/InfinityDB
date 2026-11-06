@@ -127,7 +127,7 @@ def test_preflight_rejects_lost_review_and_stale_or_published_citation() -> None
 
 def test_optional_pdf_check_uses_pinned_source_text() -> None:
     pytest.importorskip("pymupdf")
-    pdf = CURATED.parents[2] / "pdf/rules/n5-rules-v5-3-en.pdf"
+    pdf = CURATED.parents[2] / "pdf/rules/n5-rules-v5.3-en.pdf"
     if not pdf.is_file():
         pytest.skip("Locally pinned N5.3 English PDF unavailable")
     report = audit_citations(pdf_path=pdf)

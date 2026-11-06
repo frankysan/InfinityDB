@@ -28,8 +28,8 @@ def test_pinned_current_references_do_not_authorize_n4_procedures_as_n5(
         ROOT / path for path in (
             "data/pdf/rules/reinforcement-rules-en.pdf",
             "data/pdf/rules/reinforcement-rules-es.pdf",
-            "data/pdf/rules/n5-rules-v5-3-en.pdf",
-            "data/pdf/its/Its-rules-season-18-en.pdf",
+            "data/pdf/rules/n5-rules-v5.3-en.pdf",
+            "data/pdf/its/its-18-rules-v2026.09.01-en.pdf",
         )
     ))
     report = audit_applicability()

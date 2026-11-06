@@ -301,7 +301,7 @@ def test_post_inventory_equipment_distinguishes_source_variants_from_public_fire
 
 def test_post_inventory_ecm_and_firewall_clauses_match_pinned_n5_3_pdf() -> None:
     """Selected source clauses only, not full Equipment review or gameplay resolution."""
-    pdf = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    pdf = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     if not pdf.is_file():
         pytest.skip("Pinned N5.3 English PDF unavailable")
     pymupdf = pytest.importorskip("pymupdf")
@@ -339,7 +339,7 @@ def test_declaration_migration_review_matches_historical_owners_and_current_pdf(
         raise
     assert crosswalk["retiredCount"] == 17
     assert crosswalk["addedCount"] == 20
-    source = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    source = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     if source.is_file():
         pytest.importorskip("pymupdf")
     verified = verify_declaration_review(
@@ -444,8 +444,8 @@ def test_five_visibility_zone_terms_are_reviewed_post_inventory_additions() -> N
 
 def test_five_visibility_zone_terms_match_bilingual_pinned_pdfs() -> None:
     for relative in (
-        "data/pdf/rules/n5-rules-v5-3-en.pdf",
-        "data/pdf/rules/esp-n5-update-5-3.pdf",
+        "data/pdf/rules/n5-rules-v5.3-en.pdf",
+        "data/pdf/rules/n5-rules-v5.3-es.pdf",
     ):
         if not (ROOT / relative).is_file():
             pytest.skip(f"Pinned source unavailable: {relative}")
@@ -490,7 +490,7 @@ def test_five_visibility_zone_evidence_rejects_identity_clause_scope_and_pin_dri
         with pytest.raises(ReferenceBaselineError):
             audit_visibility_zone_evidence(manifest_path=path)
     changed = json.loads(json.dumps(original))
-    changed["sourcePins"]["data/pdf/rules/esp-n5-update-5-3.pdf"] = "0" * 64
+    changed["sourcePins"]["data/pdf/rules/n5-rules-v5.3-es.pdf"] = "0" * 64
     path = tmp_path / "bad-pin.json"
     path.write_text(json.dumps(changed), encoding="utf-8")
     with pytest.raises(ReferenceBaselineError, match="pin definitions"):
@@ -538,7 +538,7 @@ def test_conditional_declaration_crosswalk_validates_selected_source_evidence() 
 
 
 def test_conditional_declaration_crosswalk_checks_pinned_pdf_when_present() -> None:
-    source = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    source = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     if not source.is_file():
         pytest.skip("Pinned N5.3 source PDF is unavailable")
     pytest.importorskip("pymupdf")

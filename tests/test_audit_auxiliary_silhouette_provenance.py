@@ -95,8 +95,8 @@ def test_pinned_object_matrix_if_source_archives_available() -> None:
     pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
     inputs = [
-        root / "data/pdf/rules/n5-rules-v5-3-en.pdf",
-        root / "data/pdf/rules/esp-n5-update-5-3.pdf",
+        root / "data/pdf/rules/n5-rules-v5.3-en.pdf",
+        root / "data/pdf/rules/n5-rules-v5.3-es.pdf",
         root / "data/wiki/WIKI-en 20260926-200832.zip",
         root / "data/wiki/WIKI-es 20261009-211304.zip",
         root / "data/generated/infinity.db",

@@ -131,6 +131,11 @@ printed pages. Archived wiki sources bind to an
 exact timestamped ZIP/hash and citations use archive members; exact pinned wiki
 revisions remain URL-backed sources.
 
+The [local PDF revision inventory](../docs/n5-source-history.md#local-pdf-revision-inventory-2026-11-06)
+records available rules, FAQ and ITS revisions, their exact hashes and renamed
+locators. Additional local revisions are research evidence until explicitly
+reviewed and selected; they do not automatically replace cited publications.
+
 Official Corvus Belli news posts can provide **dated, supplementary publication-change
 and clarification evidence**, separate from the underlying rules, Army, FAQ, and ITS
 sources. The relevant N5.3 release announcement is

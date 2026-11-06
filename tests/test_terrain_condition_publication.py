@@ -18,7 +18,7 @@ from tools.promote_terrain_condition_reference import CITATIONS, verify_candidat
 
 ROOT = Path(__file__).resolve().parents[1]
 RULES = ROOT / "data/generated/rules.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 
 
 def _records() -> dict[str, Any]:

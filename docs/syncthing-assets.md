@@ -64,8 +64,8 @@ Activate an individual file explicitly; the command measures its SHA-256 but
 cannot independently establish original provenance:
 
 ```bash
-./.venv/bin/python -m tools.activate_synced_assets activate --file 'data/pdf/rules/n5-rules-v5-3-en.pdf'
-./.venv/bin/python -m tools.activate_synced_assets activate --file 'data/pdf/rules/n5-rules-v5-3-en.pdf' --mode symlink --apply
+./.venv/bin/python -m tools.activate_synced_assets activate --file 'data/pdf/rules/n5-rules-v5.3-en.pdf'
+./.venv/bin/python -m tools.activate_synced_assets activate --file 'data/pdf/rules/n5-rules-v5.3-en.pdf' --mode symlink --apply
 ```
 
 Paths in `--file` must be relative to the repository and restricted to

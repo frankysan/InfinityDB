@@ -27,7 +27,7 @@ from tools.stage_hacking_device_chart_citations import (
 ROOT = Path(__file__).resolve().parents[1]
 CURATED, RULES, PUBLICATION = (ROOT / name for name in STAGED_PATHS)
 ARMY = ROOT / "data/generated/infinity.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 DELIVERY = ROOT / "config/validation/deployed-object-delivery-reviews.json"
 CANDIDATES = ROOT / "config/validation/deployed-object-candidate-reviews.json"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"

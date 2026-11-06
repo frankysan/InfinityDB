@@ -30,7 +30,7 @@ RULES_DIR = CURATED.parent
 ARMY_DB = ROOT / "data/generated/infinity.db"
 DELIVERY = ROOT / "config/validation/deployed-object-delivery-reviews.json"
 CANDIDATES = ROOT / "config/validation/deployed-object-candidate-reviews.json"
-SOURCE_PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+SOURCE_PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 
 
 def canonical_json(data: dict[str, Any], *, indent: int) -> str:

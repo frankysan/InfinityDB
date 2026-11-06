@@ -441,7 +441,7 @@ def test_pinned_n53_pdf_chart_source_differences() -> None:
     from tools.audit_weapon_chart_profiles import audit_chart
 
     root = Path(__file__).resolve().parents[1]
-    pdf = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    pdf = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     if not pdf.is_file():
         pytest.skip("Ignored N5.3 PDF unavailable")
     pytest.importorskip("fitz")

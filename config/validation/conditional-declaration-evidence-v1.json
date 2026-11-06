@@ -2,7 +2,7 @@
   "format": "InfinityDB V1-A08 conditional declaration evidence crosswalk",
   "formatVersion": 1,
   "sourceId": "n5-core-v5.3-pdf",
-  "sourcePdf": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+  "sourcePdf": "data/pdf/rules/n5-rules-v5.3-en.pdf",
   "sourceSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
   "curatedCollection": "n5-core-v5.3",
   "disposition": "selected-clause-source-prose-and-test-anchor-not-full-record-approval",

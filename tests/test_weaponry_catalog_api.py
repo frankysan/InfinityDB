@@ -2058,8 +2058,8 @@ def test_ammunition_metadata_links_are_reviewed_base_types(
 def test_esx04_ap_t2_cc_row_in_bilingual_current_n53_charts() -> None:
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    english = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
-    spanish = root / "data/pdf/rules/esp-n5-update-5-3.pdf"
+    english = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+    spanish = root / "data/pdf/rules/n5-rules-v5.3-es.pdf"
     if not english.exists() or not spanish.exists():
         pytest.skip("Pinned bilingual N5.3 rulebook PDFs unavailable")
     with pdf.open(english) as book:
@@ -3162,7 +3162,7 @@ def test_modifiers_explained_pinned_page75_scope() -> None:
     pymupdf = pytest.importorskip("pymupdf")
 
     pdf = Path(__file__).resolve().parents[1] / (
-        "data/pdf/rules/n5-rules-v5-3-en.pdf"
+        "data/pdf/rules/n5-rules-v5.3-en.pdf"
     )
     if not pdf.exists():
         pytest.skip("Pinned official N5.3 PDF unavailable")

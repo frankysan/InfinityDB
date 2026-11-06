@@ -6074,7 +6074,7 @@ def test_visibility_zone_five_term_explanations_match_pinned_n5_3_source() -> No
 
     pdf = pytest.importorskip("pymupdf")
     root = Path(__file__).resolve().parents[1]
-    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    source = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     if not source.exists():
         pytest.skip("Pinned English N5.3 PDF unavailable")
     review = json.loads(

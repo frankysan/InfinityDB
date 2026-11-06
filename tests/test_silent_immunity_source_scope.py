@@ -23,9 +23,9 @@ CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 ARMY = ROOT / "data/generated/infinity.db"
 RULES = ROOT / "data/generated/rules.db"
 PINS = {
-    "data/pdf/rules/n5-rules-v5-3-en.pdf":
+    "data/pdf/rules/n5-rules-v5.3-en.pdf":
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
-    "data/pdf/rules/esp-n5-update-5-3.pdf":
+    "data/pdf/rules/n5-rules-v5.3-es.pdf":
         "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f",
 }
 
@@ -60,11 +60,11 @@ def test_pinned_clauses_separate_timings_and_preserve_bilingual_wording(
 
 
 @pytest.mark.parametrize("name,pin", [
-    ("n5-faqs-v0-0-en.pdf",
+    ("n5-faq-v0.0-en.pdf",
      "a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043"),
-    ("n5-faqs-v0-1-en.pdf",
+    ("n5-faq-v0.1-en.pdf",
      "7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa"),
-    ("esp-faqs-n5-v0-1.pdf",
+    ("n5-faq-v0.1-es.pdf",
      "7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a"),
 ])
 def test_supplied_faq_identity_and_selected_term_inventory(
@@ -130,9 +130,9 @@ def test_source_scope_is_visible_in_authored_stored_and_api_clarifications(
 
 
 @pytest.mark.parametrize("relative,pin,page", [
-    ("data/pdf/rules/n5-rules-v5-3-en.pdf", PINS["data/pdf/rules/n5-rules-v5-3-en.pdf"], 175),
-    ("data/pdf/rules/esp-n5-update-5-3.pdf", PINS["data/pdf/rules/esp-n5-update-5-3.pdf"], 182),
-    ("data/pdf/rules/n5-rules-v5-2-en.pdf",
+    ("data/pdf/rules/n5-rules-v5.3-en.pdf", PINS["data/pdf/rules/n5-rules-v5.3-en.pdf"], 175),
+    ("data/pdf/rules/n5-rules-v5.3-es.pdf", PINS["data/pdf/rules/n5-rules-v5.3-es.pdf"], 182),
+    ("data/pdf/rules/n5-rules-v5.2-en.pdf",
      "643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b", 174),
 ])
 def test_v1s082_trait_glossary_source_clauses(

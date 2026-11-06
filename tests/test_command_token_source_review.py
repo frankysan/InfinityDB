@@ -17,7 +17,7 @@ from infinity_db.web import create_app
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules.db"
-SOURCE = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+SOURCE = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 SOURCE_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
 # Pinned Command Module mode and restriction evidence, not an executable engine.

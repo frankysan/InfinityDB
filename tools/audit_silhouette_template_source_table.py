@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/silhouette-template-source-table.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RENDERER = ROOT / "src/infinity_db/web/static/silhouette-diagrams.js"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 
 # Exact source table from N5.3 English p. 18, in printed order.
 PINNED = (

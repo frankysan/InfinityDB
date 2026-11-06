@@ -272,7 +272,7 @@ def promote_hacking_device_chart_citations(
         or _sha256(root / "data/generated/infinity.db") != report["armySha256"]
     ):
         raise ValueError("Curated or Army source changed after staging")
-    pdf = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    pdf = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     if not pdf.is_file() or _sha256(pdf) != report["verifiedPdfSha256"]:
         raise ValueError("Verified N5.3 PDF fingerprint changed")
     keys = ("curated", "rulesDatabase", "deployedObjects")

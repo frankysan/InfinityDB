@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/hacking-device-program-source-chart.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
 PROGRAMS = ROOT / "data/curated/rules/n5-hacking-programs-v5.3.json"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 
 # Ordered exactly as the printed four-row English N5.3 device chart.
 PINNED = (

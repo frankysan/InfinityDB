@@ -2337,9 +2337,9 @@ def audit_visibility_zone_evidence(
         import pymupdf
 
         expected_pins = {
-            "data/pdf/rules/n5-rules-v5-3-en.pdf":
+            "data/pdf/rules/n5-rules-v5.3-en.pdf":
                 "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
-            "data/pdf/rules/esp-n5-update-5-3.pdf":
+            "data/pdf/rules/n5-rules-v5.3-es.pdf":
                 "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f",
         }
         if manifest.get("sourcePins") != expected_pins:

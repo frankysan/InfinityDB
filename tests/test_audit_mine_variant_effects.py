@@ -156,7 +156,7 @@ def test_variant_source_effects_and_geometry_are_pinned(
     pdf = pytest.importorskip("pymupdf")
     from tools.audit_weaponry_family_clauses import _normalized_text
 
-    source = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    source = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     if not source.exists():
         pytest.skip("Pinned N5.3 PDF unavailable")
     assert hashlib.sha256(source.read_bytes()).hexdigest() == (

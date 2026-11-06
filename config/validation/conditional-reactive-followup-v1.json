@@ -4,7 +4,7 @@
   "scope": "selected-follow-up-examples-not-global-aro-legality-or-whole-record-acceptance",
   "source": {
     "id": "n5-core-v5.3-pdf",
-    "path": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+    "path": "data/pdf/rules/n5-rules-v5.3-en.pdf",
     "sha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
   },
   "reviewedOn": "2026-11-04",

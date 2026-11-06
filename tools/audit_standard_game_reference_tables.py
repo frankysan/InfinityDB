@@ -17,7 +17,7 @@ from infinity_db.curated import load_curated_document
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "config/validation/standard-game-reference-tables.json"
 CURATED = ROOT / "data/curated/rules/n5-core-v5.3.json"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 
 # Reviewed directly from N5.3 English printed pp. 146-147.
 PINNED = (

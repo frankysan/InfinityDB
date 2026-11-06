@@ -19,7 +19,7 @@ from tools.promote_movement_reference import CITATIONS, verify_candidate
 
 ROOT = Path(__file__).resolve().parents[1]
 RULES = ROOT / "data/generated/rules.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 
 
 def _records() -> dict[str, Any]:

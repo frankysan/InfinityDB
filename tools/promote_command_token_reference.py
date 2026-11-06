@@ -32,7 +32,7 @@ ARMY = Path("data/generated/infinity.db")
 CURATED = Path("data/curated/rules/n5-core-v5.3.json")
 DELIVERY = Path("config/validation/deployed-object-delivery-reviews.json")
 CANDIDATES = Path("config/validation/deployed-object-candidate-reviews.json")
-PDF = Path("data/pdf/rules/n5-rules-v5-3-en.pdf")
+PDF = Path("data/pdf/rules/n5-rules-v5.3-en.pdf")
 SOURCE_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 IDENTITY = "rule:command-tokens"
 

@@ -17,8 +17,8 @@ belong in `rules-research.md`.
 ## Audited source baseline
 
 The initial systematic rules audit completed on 2026-09-21. It reviewed the N5
-V5.3 core rules (`data/pdf/rules/n5-rules-v5-3-en.pdf`), N5 FAQ v0.1
-(`data/pdf/faq/n5-faqs-v0-1-en.pdf`), the pinned English Wiki snapshot
+V5.3 core rules (`data/pdf/rules/n5-rules-v5.3-en.pdf`), N5 FAQ v0.1
+(`data/pdf/faq/n5-faq-v0.1-en.pdf`), the pinned English Wiki snapshot
 `wiki-en-20260918-130233`, the official Reinforcements Extra as a separate annex
 scope, and relevant ITS/FAQ material without silently merging season/scenario
 content into core rules.
@@ -2502,7 +2502,7 @@ pp. 59-60;
 [Spanish N4 rules](https://downloads.corvusbelli.com/infinity/rules/infinity-rules-es.pdf),
 p. 59;
 [Spanish N5.3 wiki](https://infinitythewiki.com/es/Combate_Cuantr%C3%B3nico_(Hackeo)),
-and pinned `data/pdf/rules/esp-n5-update-5-3.pdf`, p. 54;
+and pinned `data/pdf/rules/n5-rules-v5.3-es.pdf`, p. 54;
 [N4 FAQ v1.1.1](https://downloads.corvusbelli.com/infinity/faq/n4-faq-en-v1-1-1.pdf);
 [Hacker](https://infinitythewiki.com/Hacker);
 [Quantronic Combat](https://infinitythewiki.com/Quantronic_Combat_(Hacking));
@@ -4408,8 +4408,8 @@ discrepancy is not silently erased. It is not an overlap waiver: maintained
 exclusive score ranges must remain unambiguous.
 
 Sources: English N5 Core Rules v5.3 (2026-08-10), printed page 149
-(`data/pdf/rules/n5-rules-v5-3-en.pdf`); official Spanish N5.3,
-`data/pdf/rules/esp-n5-update-5-3.pdf`, printed page 153 (Anexos /
+(`data/pdf/rules/n5-rules-v5.3-en.pdf`); official Spanish N5.3,
+`data/pdf/rules/n5-rules-v5.3-es.pdf`, printed page 153 (Anexos /
 Aniquilación). The pilot's setup, Killing definition, and end conditions
 are cited to English printed page 150.
 The 1.0 review verifies all six source scoring bands (killed enemy Army Points
@@ -4468,7 +4468,7 @@ historical success. Hack Consoles is restricted to qualifying Specialists in
 Silhouette contact, with repeatable Normal WIP rolls (+3 for Hackers), and
 Doctors/Engineers cannot delegate Specialist tasks to Peripherals.
 
-Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 150–152. Domination's
+Source: `data/pdf/rules/n5-rules-v5.3-en.pdf`, N5 v5.3 printed pages 150–152. Domination's
 objectives, control rules, Consoles, and Hack Consoles are on page 151; Specialist eligibility
 and the Peripheral restriction are on page 152.
 
@@ -4509,7 +4509,7 @@ condition and the Tactical Phase minimum-VP check (ending at the Player
 Turn's end) stay distinct. No game-state tracker or unconditional effect
 relationship is implied by these mission-local rules.
 
-Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 153–154. Page 153 owns
+Source: `data/pdf/rules/n5-rules-v5.3-en.pdf`, N5 v5.3 printed pages 153–154. Page 153 owns
 objectives, placement prose, pickup, carrying, control, and the deployment-contact restriction;
 page 154 owns Specialist eligibility, the Peripheral restriction, and end conditions.
 
@@ -4535,7 +4535,7 @@ Zone prohibition. These overlays remain Firefight-local; canonical Lieutenant an
 facts are unchanged. The scenario finishes after the third Game Round or at the end of a Player
 Turn following an all-Null Tactical Phase check, without a minimum-VP chart.
 
-Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed page 155 (objectives, game-size
+Source: `data/pdf/rules/n5-rules-v5.3-en.pdf`, N5 v5.3 printed page 155 (objectives, game-size
 chart, special rules, Specialist eligibility, and endings) and page 156 (deployment diagrams).
 
 ## Quick Reference Charts
@@ -4960,7 +4960,7 @@ Sources:
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
 - Official N4 annex: <https://downloads.corvusbelli.com/infinity/rules/reinforcement-rules-en.pdf>
 - PDF cross-reference: Infinity N5 V5.3, printed page 6
-- Current optional-mode cross-reference: `data/pdf/its/Its-rules-season-18-en.pdf`,
+- Current optional-mode cross-reference: `data/pdf/its/its-18-rules-v2026.09.01-en.pdf`,
   version 2026.09.01, printed page 27 (Reinforcements Extra)
 
 ### RS-RF-SECTION-001 — Reinforcement eligibility is Army-List section/occurrence context
@@ -5533,8 +5533,8 @@ the Spanish example was intended to match English silently;
 retain this discrepancy for further source review.
 
 Sources: N5 FAQ v0.1 English and Spanish,
-`data/pdf/faq/n5-faqs-v0-1-en.pdf` and
-`data/pdf/faq/esp-faqs-n5-v0-1.pdf`; comparison to the
+`data/pdf/faq/n5-faq-v0.1-en.pdf` and
+`data/pdf/faq/n5-faq-v0.1-es.pdf`; comparison to the
 pinned English v0.0 PDF under `data/pdf/faq/`.
 
 ### RS-FAQ-V00-003 — Original FAQ identity persists through v0.1 republication
@@ -5602,9 +5602,9 @@ Remaining original v0.0 and ITS-specific questions are not covered
 by this batch; ITS rulings require their own scenario/season scopes.
 
 Sources: pinned FAQ PDFs
-`data/pdf/faq/n5-faqs-v0-0-en.pdf`,
-`data/pdf/faq/n5-faqs-v0-1-en.pdf`, and
-`data/pdf/faq/esp-faqs-n5-v0-1.pdf`;
+`data/pdf/faq/n5-faq-v0.0-en.pdf`,
+`data/pdf/faq/n5-faq-v0.1-en.pdf`, and
+`data/pdf/faq/n5-faq-v0.1-es.pdf`;
 source chronology in `docs/n5-source-history.md`.
 
 ### RS-FAQ-V00-004 — Further general FAQ carry-forwards and scope boundaries

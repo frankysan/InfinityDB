@@ -15,7 +15,7 @@ import pytest
 from tools.audit_weaponry_family_clauses import _normalized_text
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+SOURCE = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PINNED_PDF_SHA256 = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 
 
@@ -397,7 +397,7 @@ def test_fired_deployable_faq_covers_both_launchers(
     page: int, excerpt: str,
 ) -> None:
     pdf = pytest.importorskip("pymupdf")
-    faq = ROOT / "data/pdf/faq/n5-faqs-v0-1-en.pdf"
+    faq = ROOT / "data/pdf/faq/n5-faq-v0.1-en.pdf"
     if not faq.exists():
         pytest.skip("Pinned N5 FAQ v0.1 unavailable")
     assert hashlib.sha256(faq.read_bytes()).hexdigest() == (

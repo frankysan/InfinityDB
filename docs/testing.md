@@ -1374,7 +1374,7 @@ usage index remains unimplemented.
 **2026-11-03 General rules and game-table source/browser review (V1S-023 retired):**
 At Windows `73ab29a3b9d5bbbabe682879e69cf2298020bc12`,
 the pinned English N5.3 PDF and
-`tools.audit_standard_game_reference_tables --pdf data/pdf/rules/n5-rules-v5-3-en.pdf`
+`tools.audit_standard_game_reference_tables --pdf data/pdf/rules/n5-rules-v5.3-en.pdf`
 reverified the six exact Retreat! thresholds (150–400 Army Points),
 25% session-state basis and non-mandatory table sizes from printed
 pp. 146–147. Focused table/source tests passed **4/4**.
@@ -3984,7 +3984,7 @@ owners from historical Git commit `c5400ab1`. This explicitly requires
 the historical Git object; a shallow clone without that commit fails closed
 rather than inventing a replacement. With the pinned N5.3 source PDF
 available, also pass
-`--verify-declaration-pdf data/pdf/rules/n5-rules-v5-3-en.pdf`.
+`--verify-declaration-pdf data/pdf/rules/n5-rules-v5.3-en.pdf`.
 The maintained source review lives in
 `config/validation/declaration-inventory-migration-v1.json` and checks all
 **17 retired** category identities against their historical owners and
@@ -3997,7 +3997,7 @@ permissions, individual variants and full normal-browser explanation
 acceptance remain separate work. Generate ignored review evidence with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --reconcile-declarations --verify-declaration-pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json-output local/audits/v1-declaration-migration-reviewed.json --markdown-output local/audits/v1-declaration-migration-reviewed.md
+.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --reconcile-declarations --verify-declaration-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-declaration-migration-reviewed.json --markdown-output local/audits/v1-declaration-migration-reviewed.md
 ```
 
 For the **three numerical Army replacement Skills**, a separate
@@ -4036,7 +4036,7 @@ and the selected printed clause text. Reproduce its ignored JSON/Markdown
 evidence with:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --audit-conditional-declarations --verify-conditional-pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json-output local/audits/v1-conditional-declaration-evidence.json --markdown-output local/audits/v1-conditional-declaration-evidence.md
+.venv\Scripts\python.exe -m tools.report_reference_baseline --reconcile-explanation-inventory --audit-conditional-declarations --verify-conditional-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json-output local/audits/v1-conditional-declaration-evidence.json --markdown-output local/audits/v1-conditional-declaration-evidence.md
 ```
 
 The ten entries cover Order declaration/Resolution timing, Look Out!,
@@ -4563,7 +4563,7 @@ the ignored `local/` workspace:
 
 ```powershell
 .venv\Scripts\python.exe -m infinity_db build-rules --output local/audits/1.0-rules-current.db
-.venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5-3-en.pdf" --faq-pdf "data/pdf/faq/n5-faqs-v0-1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
+.venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5.3-en.pdf" --faq-pdf "data/pdf/faq/n5-faq-v0.1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
 All 12 PDF source declarations now carry maintained SHA-256 pins for six
@@ -4691,7 +4691,7 @@ shipped generated databases. It fails closed if the nine maintained review
 identities or the PDF/Wiki payload hashes no longer match.
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
+.\.venv\Scripts\python.exe -m tools.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
 ```
 
 This compares **Traits**, not all weapon-profile values or rules prose; the
@@ -4715,7 +4715,7 @@ offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
 normal CI and tests do not need that optional dependency. Run from the repository root:
 
 ```powershell
-.venv\Scripts\python.exe tools/audit_weapon_chart_profiles.py --core-pdf data/pdf/rules/n5-rules-v5-3-en.pdf --army-db data/generated/infinity.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
+.venv\Scripts\python.exe tools/audit_weapon_chart_profiles.py --core-pdf data/pdf/rules/n5-rules-v5.3-en.pdf --army-db data/generated/infinity.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
 ```
 
 The output includes the source PDF SHA-256, raw compared fields, range-band
@@ -4744,7 +4744,7 @@ all input hashes. It requires the locally retained source archives, PyMuPDF,
 and the generated Army database (none are added to Git):
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5-3-en.pdf --pdf-es data/pdf/rules/esp-n5-update-5-3.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/infinity.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
+.venv\Scripts\python.exe -m tools.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5.3-en.pdf --pdf-es data/pdf/rules/n5-rules-v5.3-es.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/infinity.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
 ```
 
 The output reports source values, **not** a gameplay ruling or permission to
@@ -5125,7 +5125,7 @@ a deployed object, or an additional Program identity.
 
 ```powershell
 .venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart
-.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+.venv\Scripts\python.exe -m tools.audit_hacking_device_program_source_chart --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 The four devices grant **4 / 6 / 2 / 4** Programs, respectively
@@ -5166,7 +5166,7 @@ From the repository root, after committing the staging tool/tests
 and with unchanged curated source and Army database:
 
 ```powershell
-& .\.venv\Scripts\python.exe -m tools.stage_hacking_device_chart_citations --output-dir local/hacking-device-citations-n53 --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
+& .\.venv\Scripts\python.exe -m tools.stage_hacking_device_chart_citations --output-dir local/hacking-device-citations-n53 --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
 ```
 
 The command refuses an existing staging directory and writes
@@ -5322,7 +5322,7 @@ Equipment, Unit carrier or deployed-object identities.
 
 ```powershell
 .venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --json
-.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --archive "data/raw/JSON 20260929-114335.zip" --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+.venv\Scripts\python.exe -m tools.audit_hacking_program_statistics_chart --archive "data/raw/JSON 20260929-114335.zip" --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 The offline default checks the exact source rows against the published
@@ -5382,7 +5382,7 @@ missing or insufficiently scoped typed relationships:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --json
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 The optional PDF check requires PyMuPDF, verifies the pinned source SHA-256
@@ -5410,7 +5410,7 @@ plain text. The JSON must match the deterministic source projection
 byte-for-byte:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+.venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --check-publication --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 .venv\Scripts\python.exe -m tools.audit_restrictions_source_chart --output local/restrictions-reference-staged.json
 ```
 
@@ -5575,7 +5575,7 @@ eight fixed dimensions in the browser's
 
 ```powershell
 .venv\Scripts\python.exe -m tools.audit_silhouette_template_source_table
-.venv\Scripts\python.exe -m tools.audit_silhouette_template_source_table --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+.venv\Scripts\python.exe -m tools.audit_silhouette_template_source_table --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 **S0** has a fixed 25 mm base and 3 mm height. **SX** is the
@@ -5610,7 +5610,7 @@ pp. 146–147. Audit the same Army Points keys across both source tables:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.audit_game_mode_source_table
-.venv\Scripts\python.exe -m tools.audit_game_mode_source_table --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+.venv\Scripts\python.exe -m tools.audit_game_mode_source_table --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 The read-only manifest
@@ -5653,7 +5653,7 @@ layout. Review the read-only inventory with:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.audit_standard_game_reference_tables
-.venv\Scripts\python.exe -m tools.audit_standard_game_reference_tables --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+.venv\Scripts\python.exe -m tools.audit_standard_game_reference_tables --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 The audit pins six Army Points rows in
@@ -5692,7 +5692,7 @@ Types or deployed Weapon/Equipment profiles. Audit the source boundary with:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps
-.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps --pdf data/pdf/rules/n5-rules-v5-3-en.pdf --json
+.venv\Scripts\python.exe -m tools.audit_terrain_scenery_source_gaps --pdf data/pdf/rules/n5-rules-v5.3-en.pdf --json
 ```
 
 The audit pins **five Terrain Types** (Aquatic, Desert, Mountain, Jungle,
@@ -5732,7 +5732,7 @@ Silhouette X/Prone restriction, without creating extra object identities.
 The original one-time staging and promotion procedure was:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.stage_terrain_scenery_references --output-dir local/terrain-scenery-references-n53 --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
+.venv\Scripts\python.exe -m tools.stage_terrain_scenery_references --output-dir local/terrain-scenery-references-n53 --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
 ```
 
 The original staging and three-file promotion are complete. The first
@@ -5829,7 +5829,7 @@ their coordinated post-migration state with:
 
 ```powershell
 .venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations
-.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations --json --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
+.venv\Scripts\python.exe -m tools.audit_deployed_object_citation_migrations --json --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
 ```
 
 The read-only preflight verifies all three manifests and all 14 exact
@@ -5846,7 +5846,7 @@ requires the 14 citations to be pending and is not rerunnable from
 the already migrated working tree:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.stage_deployed_object_citation_migration --output-dir local/citation-migration-n53 --pdf data/pdf/rules/n5-rules-v5-3-en.pdf
+.venv\Scripts\python.exe -m tools.stage_deployed_object_citation_migration --output-dir local/citation-migration-n53 --pdf data/pdf/rules/n5-rules-v5.3-en.pdf
 ```
 
 The exclusive staging directory contains a citation-only edit to the
@@ -6029,7 +6029,7 @@ named curated Weapon definitions, without treating a missing dedicated Weapon
 record as proof that no gameplay rule representation exists.
 
 ```powershell
-python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
+python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5.3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
 ```
 
 The supplied N5 v5.3 PDF yields 145 literal Trait-list matches, 15 reviewed

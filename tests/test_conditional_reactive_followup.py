@@ -60,7 +60,7 @@ def _review_rows(manifest: dict[str, Any]) -> list[dict[str, Any]]:
         )
         or manifest.get("source") != {
             "id": "n5-core-v5.3-pdf",
-            "path": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+            "path": "data/pdf/rules/n5-rules-v5.3-en.pdf",
             "sha256": PIN,
         }
     ):

@@ -21,7 +21,7 @@ from infinity_db.web import create_app
 ROOT = Path(__file__).resolve().parents[1]
 ARMY = ROOT / "data/generated/infinity.db"
 RULES = ROOT / "data/generated/rules.db"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 PIN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 EXPECTED = {
     "sourceAmmunitionId": 30,

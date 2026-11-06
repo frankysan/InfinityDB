@@ -778,7 +778,7 @@ before ingestion.
             "title": "N5 Core Rules",
             "version": "5.3",
             "publishedDate": "2026-08-10",
-            "localPath": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+            "localPath": "data/pdf/rules/n5-rules-v5.3-en.pdf",
             "url": "https://experience.corvusbelli.com/en/infinity/resources",
             "pageCount": 196,
             "authority": "primary"

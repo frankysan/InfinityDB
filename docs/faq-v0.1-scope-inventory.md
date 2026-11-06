@@ -3,7 +3,7 @@
 **Project domain:** Data processing
 
 **Reviewed:** 2026-10-29. **Scope:** the locally pinned English N5 FAQ
-v0.1, `data/pdf/faq/n5-faqs-v0-1-en.pdf` (five file pages, printed
+v0.1, `data/pdf/faq/n5-faq-v0.1-en.pdf` (five file pages, printed
 pages 1–4), compared with the maintained
 `data/curated/rules/n5-faq-v0.1.json`. This is a source-section
 inventory and applicability decision queue, **not** a new gameplay

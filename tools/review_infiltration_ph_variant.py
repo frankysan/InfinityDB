@@ -49,7 +49,7 @@ def check_candidate(root: Path = ROOT) -> dict[str, Any]:
     army, raw = generated / "infinity.db", generated / "infinity.raw.db"
     rules, objects = generated / "rules.db", generated / "deployed-objects.json"
     curated = root / "data/curated/rules/n5-core-v5.3.json"
-    pdf = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    pdf = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     manifest = root / "config/validation/weaponry-family-clauses.json"
     if _sha(pdf) != json.loads(manifest.read_text(encoding="utf-8"))["corePdfSha256"]:
         raise ValueError("N5.3 Infiltration PDF pin differs")

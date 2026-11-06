@@ -1905,7 +1905,7 @@ describe Upgrades only as custom software listed with
 the Hacker or Device. However, the official
 [Spanish N5.3 Hacking page](https://infinitythewiki.com/es/Combate_Cuantr%C3%B3nico_(Hackeo))
 and the pinned Spanish N5.3 PDF
-(`data/pdf/rules/esp-n5-update-5-3.pdf`, p. 54) are
+(`data/pdf/rules/n5-rules-v5.3-es.pdf`, p. 54) are
 **more explicit**: an Upgrade is a specific program
 *unavailable to standard Hacking Devices* **or** one
 that *complements them*. The same distinction appears

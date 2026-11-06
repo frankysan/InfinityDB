@@ -102,7 +102,7 @@ def test_p74_cross_check_never_collapses_family_or_creates_carriers() -> None:
 
 def test_pinned_p74_table_reconciles_existing_reference_without_new_objects() -> None:
     pytest.importorskip("fitz")
-    pdf = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    pdf = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     army_db = ROOT / "data/generated/infinity.db"
     if not pdf.is_file() or not army_db.is_file():
         pytest.skip("Pinned local PDF or Army database unavailable")

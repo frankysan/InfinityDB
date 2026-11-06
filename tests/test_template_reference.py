@@ -22,7 +22,7 @@ from test_verify_ammunition_publication_browser import browser as browser
 
 
 def test_template_conditions_match_pinned_pdf_wiki_and_faq(require_source_files) -> None:
-    faq = ROOT / "data/pdf/faq/n5-faqs-v0-1-en.pdf"
+    faq = ROOT / "data/pdf/faq/n5-faq-v0.1-en.pdf"
     require_source_files(PDF, WIKI, faq)
     pages = pdf_pages((43, 44, 45, 46, 47, 49))
     for page, phrases in {

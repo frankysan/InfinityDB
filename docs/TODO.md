@@ -241,6 +241,10 @@ V1S-081–085 rather than independent acceptance ledgers.
   unreviewed clause or deliberate exclusion. Re-run the
   [source-evidence tools](testing.md#10-source-evidence-baseline) and strict
   interaction-catalog scope check on the frozen pair.
+  Review the newly available [PDF revisions](n5-source-history.md#local-pdf-revision-inventory-2026-11-06),
+  including ITS 18 version 2026.09.11 in both languages, before selecting the
+  final ITS input; compare content and migrate affected citations explicitly.
+  Current citations remain pinned to 2026.09.01.
 - [ ] Finish official N5 change-post reconciliation, explicitly including the
   N5.3 post, Spanish-only cases, all 20 Army-update subjects and nine added
   FAQ rulings. Compare announcements with pinned primary sources; close the

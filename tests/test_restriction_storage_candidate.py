@@ -50,7 +50,7 @@ def test_english_core_pdf_pin_survives_curated_export(tmp_path: Path) -> None:
             "SELECT collection_id, sha256 FROM sources WHERE id = ?", (chart["sourceId"],),
         ))
     assert stored == pins
-    pdf = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    pdf = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
     if pdf.exists():
         assert hashlib.sha256(pdf.read_bytes()).hexdigest() == chart["sourcePdfSha256"]
 

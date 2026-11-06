@@ -32,7 +32,7 @@ PUBLISHED_OBJECTS = ROOT / STAGED_PATHS[2]
 ARMY = ROOT / "data/generated/infinity.db"
 DELIVERY = ROOT / "config/validation/deployed-object-delivery-reviews.json"
 CANDIDATES = ROOT / "config/validation/deployed-object-candidate-reviews.json"
-PDF = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+PDF = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
 EXPECTED = {
     "equipment:deactivator",
     "equipment:gizmokit",

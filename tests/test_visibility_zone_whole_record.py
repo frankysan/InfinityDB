@@ -24,8 +24,8 @@ MANIFEST = ROOT / "config/validation/visibility-zone-whole-record-v1.json"
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules.db"
 ARMY = ROOT / "data/generated/infinity.db"
-EN = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
-ES = ROOT / "data/pdf/rules/esp-n5-update-5-3.pdf"
+EN = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+ES = ROOT / "data/pdf/rules/n5-rules-v5.3-es.pdf"
 PINS = {
     "english": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
     "spanish": "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f",

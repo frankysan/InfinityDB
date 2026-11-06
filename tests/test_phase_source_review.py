@@ -17,8 +17,8 @@ from infinity_db.rules_database import RulesDatabase
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "data/curated/rules/n5-core-v5.3.json"
 RULES = ROOT / "data/generated/rules.db"
-EN = ROOT / "data/pdf/rules/n5-rules-v5-3-en.pdf"
-ES = ROOT / "data/pdf/rules/esp-n5-update-5-3.pdf"
+EN = ROOT / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+ES = ROOT / "data/pdf/rules/n5-rules-v5.3-es.pdf"
 SHA_EN = "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
 SHA_ES = "7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f"
 

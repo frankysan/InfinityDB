@@ -7,6 +7,73 @@ research, not a claim that each historical change has been incorporated or verif
 The currently selected, versioned sources remain the primary evidence for current
 rules and profile values. Never turn a dated announcement into a silent rules override.
 
+## Local PDF revision inventory (2026-11-06)
+
+The operator renamed the local PDFs and supplied additional revisions. The
+following inventory records measured **file pages and SHA-256**, not acquisition
+dates, complete content reviews or verified publication chronology. Version and
+language labels follow the supplied filenames; the v5.1.1/v5.2/v5.3 and FAQ
+covers also expose their versions as text. The v1/v1.1 cover text is empty, so
+those filename labels have not been independently authenticated here. The local
+`sources.txt` is an operator index, not a preserved authoritative release record.
+PDF creation metadata must not be treated as publication time.
+
+All paths below are under `data/pdf/`. Earlier dated availability statements in
+this document and the frozen audit register describe their examination date:
+**bilingual v5.1.1 and Spanish v5.2 bytes are now available**. Their arrival
+enables historical comparisons; it does not establish any wording transition or
+close a source-wide review. No external source was downloaded in this update.
+
+| Local file | File pages | Exact SHA-256 |
+| --- | --- | --- |
+| `rules/n5-rules-v1-en.pdf` | 191 | `58d6f85e180884f33d8365c13373c6502a436b68e126d528fd44f7af8fec6d8f` |
+| `rules/n5-rules-v1-es.pdf` | 198 | `0c2ddea1f511e7e73948886dcc85bbbf5f2559be0889d709a200cf530ecc373f` |
+| `rules/n5-rules-v1.1-en.pdf` | 192 | `d4d69c9bac3dff58965312edc56a48f16d5ef65e24a1006f5033b6563bd6a4ec` |
+| `rules/n5-rules-v1.1-es.pdf` | 199 | `75d91ad9bf17750941a12526373f4b781a01075af03de283c562204cb9804516` |
+| `rules/n5-rules-v5.1.1-en.pdf` | 192 | `d84d3be493403fae4cdfc928fe7fae069384cc8249e828a0cae73d16bab6467c` |
+| `rules/n5-rules-v5.1.1-es.pdf` | 199 | `deb05dad454bee95e41804090d2ffd0cb6bab2653fdfb0d2671b353f35052139` |
+| `rules/n5-rules-v5.2-en.pdf` | 194 | `643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b` |
+| `rules/n5-rules-v5.2-es.pdf` | 202 | `9604185cd5777ccc40d4eefa3f5c3d07243e90e4f8e457afb6d0296067680e5c` |
+| `rules/n5-rules-v5.3-en.pdf` | 196 | `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f` |
+| `rules/n5-rules-v5.3-es.pdf` | 204 | `7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f` |
+| `faq/n5-faq-v0.0-en.pdf` | 4 | `a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043` |
+| `faq/n5-faq-v0.0-es.pdf` | 4 | `615f91953634749a7a196f1f0ee3ea36add81ede5243e092bfdb000bc86ead11` |
+| `faq/n5-faq-v0.1-en.pdf` | 5 | `7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa` |
+| `faq/n5-faq-v0.1-es.pdf` | 5 | `7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a` |
+| `its/its-18-rules-v2026.09.01-en.pdf` | 132 | `9e16874924112e62d51acf78d622f5c0cf6196064cc36f003b515de9dc448baf` |
+| `its/its-18-rules-v2026.09.11-en.pdf` | 142 | `d1700f7f7ebb6c6bd8c2fbfad927c9eee864d170108941032a37f7673c82597f` |
+| `its/its-18-rules-v2026.09.11-es.pdf` | 147 | `df7398f8bc99927dc30c86cf5625cb08f8f38db9f3bbba685223c9c4981fa94d` |
+
+The two unchanged N4 Reinforcements PDFs remain separately inventoried under
+[Locally available Reinforcements PDFs](#locally-available-reinforcements-pdfs).
+The seven filename substitutions preserve the selected source identities:
+
+| Former filename | Current filename |
+| --- | --- |
+| `n5-rules-v5-3-en.pdf` | `n5-rules-v5.3-en.pdf` |
+| `esp-n5-update-5-3.pdf` | `n5-rules-v5.3-es.pdf` |
+| `n5-rules-v5-2-en.pdf` | `n5-rules-v5.2-en.pdf` |
+| `n5-faqs-v0-1-en.pdf` | `n5-faq-v0.1-en.pdf` |
+| `esp-faqs-n5-v0-1.pdf` | `n5-faq-v0.1-es.pdf` |
+| `n5-faqs-v0-0-en.pdf` | `n5-faq-v0.0-en.pdf` |
+| `Its-rules-season-18-en.pdf` | `its-18-rules-v2026.09.01-en.pdf` |
+
+The six already selected PDF identities still match their maintained byte pins.
+Existing citations continue to use ITS **2026.09.01**, including its 132-page
+layout. The additional **2026.09.11** English/Spanish covers explicitly state
+that version and September 11 update date; their PDF creation metadata is
+September 24. These are separate events. The newer files are research inputs,
+pending a content/citation review before changing the selected ITS revision.
+
+The locator migration verified all **14 curated PDF declarations** against
+their paths, page counts and existing hashes. Two independent v9 exports were
+byte-identical; comparison of the complete schema and all **16 SQLite tables**
+allowed only the 14 declared `sources.local_path` changes. Both dependent
+publications retained their content with updated source fingerprints, using
+rollback-protected replacement. The documentation stage passed (Markdownlint,
+41-file local link check and static backlog integrity). Broader regression
+execution remains open as VR-0116 in the [validation queue](validation-queue.md).
+
 ## Official N5 publication index
 
 The following dated Corvus Belli English-language posts were identified from the
@@ -419,16 +486,16 @@ full-suite and CI gates are still outstanding.
 The 1.0 current-reference review selects these **existing local inputs**;
 no source was downloaded or silently updated in this pass:
 
-- **Core rules (primary):** English `data/pdf/rules/n5-rules-v5-3-en.pdf`
-  and Spanish `data/pdf/rules/esp-n5-update-5-3.pdf`, both identified
+- **Core rules (primary):** English `data/pdf/rules/n5-rules-v5.3-en.pdf`
+  and Spanish `data/pdf/rules/n5-rules-v5.3-es.pdf`, both identified
   by their covers as **N5 v5.3**. Exact byte pins and page counts are
   recorded in the [English core identity](#reviewed-english-n53-core-pdf-identity)
   and [remaining PDF identities](#remaining-reviewed-pdf-identities).
   N5 v5.2 English remains comparison evidence, not current authority.
 - **FAQ (primary within applicability):** English
-  `data/pdf/faq/n5-faqs-v0-1-en.pdf` and Spanish
-  `data/pdf/faq/esp-faqs-n5-v0-1.pdf` (both cover v0.1).
-  English `data/pdf/faq/n5-faqs-v0-0-en.pdf` is pinned historical
+  `data/pdf/faq/n5-faq-v0.1-en.pdf` and Spanish
+  `data/pdf/faq/n5-faq-v0.1-es.pdf` (both cover v0.1).
+  English `data/pdf/faq/n5-faq-v0.0-en.pdf` is pinned historical
   comparison material, not a second current FAQ. All three byte pins
   are in the PDF register and the
   [question-level scope inventory](faq-v0.1-scope-inventory.md).
@@ -459,7 +526,7 @@ no source was downloaded or silently updated in this pass:
   applicability; neither provides verified N5-native annex authority.
   Optional legacy reference and SRC-030 remain separately governed.
 - **Supplementary current-season scope:** The existing
-  `data/pdf/its/Its-rules-season-18-en.pdf` has cover version
+  `data/pdf/its/its-18-rules-v2026.09.01-en.pdf` has cover version
   `2026.09.01` and a pinned hash in the PDF register. Its ITS-only
   provisions do not broaden the 1.0 core-reference gate.
 
@@ -541,7 +608,7 @@ separate scoped claim; never treat ITS-only changes as core N5 rules.
 ## Reviewed English N5.3 core PDF identity
 
 **Local verification, 2026-10-30:** The supplied
-`data/pdf/rules/n5-rules-v5-3-en.pdf` identifies N5 v5.3 on its cover and
+`data/pdf/rules/n5-rules-v5.3-en.pdf` identifies N5 v5.3 on its cover and
 contains 196 file pages. Its SHA-256 is
 `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`,
 matching the previously reviewed Restrictions source manifest.
@@ -643,7 +710,7 @@ it neither refreshes official online authority nor adopts N4 procedures in N5.
 Publication dates remain unestablished. See [validation](testing.md#10-source-evidence-baseline).
 
 **ITS Season 18 applicability check, 2026-10-28:** The locally archived official
-`data/pdf/its/Its-rules-season-18-en.pdf` identifies itself as version
+`data/pdf/its/its-18-rules-v2026.09.01-en.pdf` identifies itself as version
 **2026.09.01**, last updated September 1, 2026 (file page 1). Its printed
 page **27** explicitly offers **Reinforcements** as an optional Tournament
 Extra and refers readers to the **Reinforcements Annex**. This is positive
@@ -688,7 +755,7 @@ legacy procedures to N5-native authority. Do not call the Extra obsolete.
 
 **Scope:** Martial Arts, Booty and MetaChemistry only; this is a completed
 source comparison, not a general N5 history-completeness claim. The English
-N5.3 rules PDF (`data/pdf/rules/n5-rules-v5-3-en.pdf`, SHA-256
+N5.3 rules PDF (`data/pdf/rules/n5-rules-v5.3-en.pdf`, SHA-256
 `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`)
 is the current core-rules baseline. The independently retained English Wiki
 revision archive is `data/wiki/WIKI-en-history 20260928-165727.zip`
@@ -738,11 +805,11 @@ itself was revised on the FAQ's publication date.
 
 The general Deployment repositioning ruling appears in **N5 FAQ v0.0**
 (version-associated update anchor 2025-10-15; exact PDF publication day unverified;
-English PDF `data/pdf/faq/n5-faqs-v0-0-en.pdf`,
+English PDF `data/pdf/faq/n5-faq-v0.0-en.pdf`,
 SHA-256 `a04c5eb43e7acd7272c794a3e7d4bb5fe2595ec04463778eb73c741feef5d043`)
 and is carried forward without a substantive change to the ruling in
 **N5 FAQ v0.1** (selected from 2026-09-01; English PDF
-`data/pdf/faq/n5-faqs-v0-1-en.pdf`, SHA-256
+`data/pdf/faq/n5-faq-v0.1-en.pdf`, SHA-256
 `7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa`).
 Both cite **printed p. 1, file page 2**. The rule constrains repositioning
 after a Roll or measurement of the affected game elements, with the

@@ -1360,7 +1360,7 @@ The maintained source-scope inventory is
 `config/validation/conditional-declaration-evidence-v1.json`, verified
 by `tools.report_reference_baseline --reconcile-explanation-inventory
 --audit-conditional-declarations --verify-conditional-pdf
-data/pdf/rules/n5-rules-v5-3-en.pdf`. Its PDF hash, citations, selected
+data/pdf/rules/n5-rules-v5.3-en.pdf`. Its PDF hash, citations, selected
 clauses and test anchors fail closed on drift. The player-facing
 Order Expenditure Sequence and Look Out! pages passed six new
 Chromium checks at 1440, 390 and 320 px, including citations,

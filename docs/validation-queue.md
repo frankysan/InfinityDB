@@ -156,6 +156,28 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
+- [ ] VR-0116 (2026-11-06; ready-to-run): Renamed local PDF references and
+  expanded revision inventory. Work: operator-requested source maintenance;
+  revision: implementation commit containing this entry; risk: provenance.
+  Design: existing source/hash, rules-export and publication coverage; no new
+  behavior or missing assertion identified. Immediate: verify all selected
+  PDF paths/pages/hashes; deterministic double v9 export; complete SQLite
+  schema/table comparison allowing only declared source-path substitutions;
+  unchanged deployed-object and variant-usage payloads apart from dependent
+  fingerprints; rollback-protected matched publication and docs checks.
+  Outcome: all 14 declarations matched paths/pages/hashes; both v9 exports
+  were byte-identical and all 16 tables matched apart from 14 locator cells.
+  Both dependent publications matched; documentation stage and diff checks passed.
+  Deferred: `tests/test_curated.py`, `tests/test_audit_1_0_reference_inputs.py`,
+  `tests/test_report_reference_baseline.py`,
+  `tests/test_audit_reinforcements_applicability.py`,
+  `tests/test_silent_immunity_source_scope.py`,
+  `tests/test_restriction_storage_candidate.py`, and cumulative source/API
+  regressions for mechanically updated PDF locators.
+  Intended host: pinned `linux-dev`, after explicitly activating renamed PDFs
+  from Syncthing staging; present source bytes must pass their hash checks.
+  Additional historical revisions are inventoried, not semantically accepted.
+
 - [ ] VR-0115 (2026-11-06; ready-to-run): Five N5.3 Trait definition
   corrections. Work: V1S-082; revision: implementation commit containing this
   entry; risk: source/reference parity. Design: VD-0072/0073/0074 completed
@@ -214,7 +236,7 @@ summary above. Hosted CI and final release gates retain separate owners.
 ## Next unused IDs
 
 - Design: `VD-0075`; active obligations are listed above.
-- Execution: `VR-0116`; active obligations are listed above.
+- Execution: `VR-0117`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
