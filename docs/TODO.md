@@ -213,9 +213,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   regressions passed on the pinned Windows revision. The separate
   [Weapon Property origin review](v1.0-source-coverage-audit.md#v1s-082-weapon-property-citation-and-route-review-2026-11-06)
   identified and corrected missing example links and chart locators;
-  VD-0090-0093 have been designed; VR-0126 still owns stale-slug,
-  regression and browser acceptance. Then finish the applicable maintained-reference
-  reachability review. The full cumulative
+  VR-0126 passed its focused source, stale-slug and browser regressions.
+  Next finish the applicable maintained-reference reachability review.
+  The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are
   optional post-1.0 research, not release blockers.

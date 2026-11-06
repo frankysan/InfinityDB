@@ -537,6 +537,37 @@ and historical-only gaps passed **9/9 tests**, with no skips. This
 completes VR-0125's local execution; it does not establish semantic or
 browser acceptance.
 
+### V1S-082 Weapon Property source and browser regression (VR-0126)
+
+The focused Windows run at `6359a67f9c7068b7cb34f7fa6bb2dd1baf9c21df`
+passed **43 tests, with no skips**. It used the development `infinity.db`
+SHA-256 `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
+and `rules.db` SHA-256
+`5bc1ef3c70d1d14ad5f043bd1ad6fe159c608e86755d0ec0ac9a8b99f8b052f8`.
+The English and Spanish N5.3 PDF SHA-256 values were respectively
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f` and
+`7f564c864c6f26d6b218a0477c8afeba99da5c56e1a5369bb259f423689bb28f`.
+
+The `pytest -q -ra --infinitydb-skip-summary` selection covered:
+
+- all of `tests/test_weapon_properties.py`;
+- `tests/test_weaponry_catalog_api.py`:
+  `test_esx04_ap_t2_cc_row_in_bilingual_current_n53_charts`,
+  `test_esx04_ap_t2_cc_profile_matches_pinned_weapon_row` and
+  `test_reviewed_breaker_and_viral_source_profiles_use_shared_rules`;
+- `tests/test_ammunition_publication_parity.py`:
+  `test_pinned_combination_source_evidence_is_independent_of_army_map` and
+  `test_all_reviewed_ammunition_sources_reach_canonical_and_weapon_publication`;
+- `tests/test_verify_weapon_source_cards_browser.py`:
+  `test_weapon_property_origins_reach_sources_in_normal_browser` at
+  1440/390/320 px and
+  `test_unroutable_weapon_property_example_shows_source_section_in_browser`;
+- `tests/test_verify_scenario_faq_browser.py::test_esx04_ap_t2_cc_weapon_property_is_visible_in_browser`
+  and `tests/test_catalog_rules.py::test_catalog_rules_leave_army_item_raw_without_rules_database`.
+
+This closes VR-0126 for the reviewed Property change; it does not close
+V1S-082, the cumulative release gate or hosted CI.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not

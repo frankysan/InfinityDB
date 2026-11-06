@@ -136,37 +136,6 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-- [ ] VR-0126 (2026-11-06; ready-to-run): Weapon Property current
-  citation origins and source-cited example navigation. Work: V1S-082;
-  revision: implementation and test-design commit (pin exact SHA at
-  execution); development Army/rules SHA-256 identities are recorded in
-  the [source review](v1.0-source-coverage-audit.md#v1s-082-weapon-property-citation-and-route-review-2026-11-06).
-  Immediate provenance/integrity inspection: pinned N5.3 English PDF pages
-  and 12/12 configured Property publications checked; Ruff and Pyright
-  passed. The pre-change Breaker browser observation is not acceptance.
-  Design: VD-0090/0091/0092 statically reviewed without execution:
-  `tests/test_weapon_properties.py::test_weapon_property_reviewed_examples_have_current_citations_and_routes`;
-  `tests/test_weapon_properties.py::test_weapon_property_example_resolves_numeric_army_links`;
-  `tests/test_weapon_properties.py::test_weapon_property_example_filters_stale_weapon_slug`;
-  `tests/test_weapon_properties.py::test_weapon_property_example_falls_back_when_record_is_missing`;
-  `tests/test_verify_weapon_source_cards_browser.py::test_weapon_property_origins_reach_sources_in_normal_browser`;
-  `tests/test_verify_weapon_source_cards_browser.py::test_unroutable_weapon_property_example_shows_source_section_in_browser`.
-  VD-0093's stale-slug design also checks both a later valid slug and a
-  later valid numeric candidate; the browser fallback uses a stale slug.
-  Deferred: all of `tests/test_weapon_properties.py`; the two designed
-  browser selectors above; `tests/test_weaponry_catalog_api.py` selectors
-  `test_esx04_ap_t2_cc_row_in_bilingual_current_n53_charts`,
-  `test_esx04_ap_t2_cc_profile_matches_pinned_weapon_row` and
-  `test_reviewed_breaker_and_viral_source_profiles_use_shared_rules`;
-  `tests/test_ammunition_publication_parity.py` selectors
-  `test_pinned_combination_source_evidence_is_independent_of_army_map` and
-  `test_all_reviewed_ammunition_sources_reach_canonical_and_weapon_publication`;
-  `tests/test_verify_scenario_faq_browser.py::test_esx04_ap_t2_cc_weapon_property_is_visible_in_browser`;
-  and `tests/test_catalog_rules.py::test_catalog_rules_leave_army_item_raw_without_rules_database`.
-  Use the matching development databases and pinned PDFs, with Chromium at
-  1440/390/320 px; required cases may not skip. Linux is preferred when
-  available, with pinned Windows execution permitted for local sources.
-
 A VR entry records its ID/date/status (`awaiting-design`,
 `ready-to-run` or `blocked`), the implementation revision/artifact,
 immediate focused checks and results, any required VD dependencies,
@@ -176,7 +145,10 @@ is recorded. Failed or incomplete verification remains open.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
-summary above. Hosted CI and final release gates retain separate owners.
+summary above. The
+[VR-0126 Property regression](testing.md#v1s-082-weapon-property-source-and-browser-regression-vr-0126)
+passed on the pinned Windows revision. Hosted CI and final release gates
+retain separate owners.
 
 ## Next unused IDs
 
