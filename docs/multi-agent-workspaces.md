@@ -135,7 +135,7 @@ checkout through Git's common directory:
 
 ```powershell
 python -m tools.agent_coordination acquire-integration --primary --owner integrator --expected-head <primary-sha>
-python -m tools.agent_coordination integrate-proposal --agent chatgpt --task workspace-bootstrap --claim-id <task-claim-id> --owner integrator --integration-id <integration-claim-id> --expected-head <primary-sha> --proposal-head <proposal-sha>
+python -m tools.agent_coordination integrate-proposal --agent chatgpt --task workspace-bootstrap --claim-id <task-claim-id> --owner integrator --integration-id <integration-claim-id> --expected-head <primary-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id> --global-revision <reviewed-registry-revision>
 python -m tools.agent_coordination release-integration --primary --owner integrator --claim-id <integration-claim-id>
 ```
 
@@ -157,15 +157,17 @@ reservation only after the operation and required follow-through are complete.
 This is a cooperative, *local* reservation, not an automatic lock over
 arbitrary `git` processes. If a process crashes, state remains reserved.
 **Stop** and investigate instead of deleting/reassigning the claim.
-Recovery and a globally enforceable cross-host authority remain unimplemented.
+Bounded inspected integration recovery is described below. Global ownership is enforced for
+cooperating integration clients as described below; unrestricted Git writers
+remain outside that protection.
 
 **Important limitation:** The local coordinator cannot detect a concurrent
 claim on the independent Linux clone or stop an unrestricted external Git
-client. Cross-host assignments still require the integration owner to arbitrate
-manually; this is **not** complete Phase 2 integration-leadership enforcement.
+client. Cross-host assignments require the global registry below; local claims
+alone do not establish cross-host integration ownership.
 Do not run two machine-local integration owners just because each machine
 reports its own reservation available. The Windows integration owner alone
-owns `dev/v1.0.0` until a global coordination service is implemented.
+owns `dev/v1.0.0`; the global registry does not designate a second owner.
 
 ## Cross-machine claims through a dedicated Git ref
 
@@ -211,13 +213,48 @@ python -m tools.agent_global_coordination acquire-integration --owner integrator
 python -m tools.agent_global_coordination check-integration --owner integrator --claim-id <global-integration-id> --expected-head <primary-sha>
 ```
 
-Only after both reservations are verified should the owner run the existing
-`integrate-proposal` process. The code currently checks the **local**
-reservation directly; checking the **global** reservation remains an explicit
-required preflight, not an automatic enforced dependency. Following checked
-publication, explicitly release both integration reservations and the agent's
-local/global task claims. Use `release-integration --owner ... --claim-id ...`
-and `release --agent ... --task ... --claim-id ...` for the remote registry.
+Read `status` after acquiring both reservations and pass that exact global
+revision, global task ID and global integration ID to `integrate-proposal`.
+There is no local-only integration fallback. The command checks both task
+identities, equal normalized file scopes, changed paths, local primary HEAD,
+exact proposal SHA and origin's `dev/v1.0.0` tip. Stale registry revisions,
+missing claims and unavailable registry/source refs refuse integration.
+
+Before the fast-forward, a non-forced metadata update records a unique running
+operation pinned to the task claim and proposal. This is stronger than a
+read-only preflight: while it is running, cooperating clients refuse **all
+registry mutations**, including task or leadership release. Competing begins
+cannot both commit against the reviewed registry revision. Read-only status
+remains available. Both checkouts are rechecked after network preflight and
+after integration; local success is then recorded as completed. Neither source
+publication nor reservation release is automatic.
+
+The first operation upgrades both registries to **version 2**. The designated
+integration owner schedules this transition and publishes the updated primary.
+Older version-1 clients deliberately reject version 2 instead of silently
+ignoring the running-operation guard; their coordination writes pause while
+existing claims stay held. Each owner must inspect its checkout and explicitly
+merge the published primary revision into its own branch before its next
+coordination write. No other source checkout is upgraded or synchronized
+automatically. Until updated, an older checkout cannot use its bundled
+coordination CLI against either registry.
+
+On success, publish using the separately reviewed fast-forward protocol, then
+explicitly release both integration reservations before releasing task claims.
+Use `release-integration --owner ... --claim-id ...` and
+`release --agent ... --task ... --claim-id ...` for the remote registry. An
+interruption, failed merge, unexpected checkout mutation or ambiguous remote
+result leaves reservations held. A running operation blocks release and new
+registry writes until inspected recovery; no timeout expires it. Never edit the
+registry manually just to unblock another task.
+
+The local filesystem mutex covers the entire integration operation. The global
+running record covers cooperative cross-clone ownership transitions. Neither
+is a lock on arbitrary Git commands or on a server-side source ref: a privileged
+writer can still move the source branch after a check. Remote HEAD is checked
+before pinning and after local integration; a detected race retains unresolved
+ownership rather than rolling back or reporting acceptance. This is cooperative
+serialization, **not** an authenticated or enforceable cross-host transaction.
 
 Each remote update creates an ordinary descendant commit in the metadata ref
 and pushes **without force**. Concurrent pushes that fail fast-forward are
@@ -295,6 +332,68 @@ because its own proposal passed tests. There is **no automatic cross-machine
 Git synchronization**. A cross-machine handoff requires explicitly authorized
 branch transfer or a reviewed patch, not silent copying of a checkout.
 
+## Inspected integration recovery
+
+`tools.agent_coordination` provides a bounded recovery path for an interrupted
+integration with its original identities and reservations still present. It
+does not recover abandoned task claims or transfer ownership between agents.
+The designated integration owner first inspects affected jobs through their
+actual execution interfaces, including MCP jobs and direct terminal processes,
+and confirms no writer or pinned validation job is using either checkout.
+An elapsed timeout is not evidence that a job stopped. Inspect both checkouts,
+their branches, HEADs, index, working files, remote source tip and both registries.
+
+From the original owned proposal checkout, request a read-only receipt:
+
+```powershell
+python -m tools.agent_coordination inspect-integration --agent chatgpt --task workspace-bootstrap --claim-id <local-task-id> --owner integrator --integration-id <local-integration-id> --expected-head <before-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id>
+```
+
+Review the returned local/global revisions, source HEADs, scope, changed paths,
+proposed outcome and `inspection` digest. The command refuses dirty or changed
+checkouts, mismatched identities/scopes, missing ownership, unavailable remote
+state and unrelated source revisions. It permits only an unchanged pre-integration
+primary, or the exact proposed commit already integrated. A published source tip
+equal to that exact proposal can reconcile an uncertain earlier source push;
+an unrelated newer tip requires separate investigation.
+
+After inspecting jobs and confirming they are idle, settle metadata explicitly:
+
+```powershell
+python -m tools.agent_coordination recover-integration --agent chatgpt --task workspace-bootstrap --claim-id <local-task-id> --owner integrator --integration-id <local-integration-id> --expected-head <before-sha> --proposal-head <proposal-sha> --global-claim-id <global-task-id> --global-integration-id <global-integration-id> --inspection <reviewed-digest> --jobs-inspected
+```
+
+`--jobs-inspected` is the caller's explicit idle-job attestation; this portable
+CLI cannot discover every process or remote job, and does not represent that
+attestation as automated process verification. Recovery repeats the inspection
+under the local mutex and requires the same receipt, then uses a pinned remote
+metadata update. Changed local/global revisions, source state or receipt refuse
+the write. A second caller cannot consume the same receipt successfully.
+
+Recovery changes **only coordination metadata**. It reports `integrated` or
+`not-integrated`, marks the operation `completed` with that explicit `outcome`,
+and retains all task claims and both integration reservations. Here `completed`
+means the operation has been settled; read its outcome before claiming that Git
+integration happened. No fast-forward, push, reset, rebase, file restoration,
+claim release or ownership transfer is performed. After a verified integration,
+perform any still-required publication separately, then release reservations
+explicitly. For a non-integrated result, release the settled reservations before
+acquiring fresh ones for a reviewed retry; retain task claims while work continues.
+
+If the recovery's own remote response or local state write is interrupted,
+inspect again. A fresh receipt can reconcile matching completed remote metadata
+with an unresolved local operation. An unknown branch movement, lost task claim,
+missing reservation, dirty checkout or unavailable remote remains a blocker.
+Do not delete or rewrite state merely to unblock a second agent.
+
+For a disconnected owner or task transfer, first preserve the proposal and
+inspect jobs, both Git states, remote ancestry and claims. Record the intended
+successor, scope and exact handoff revision. The current owner may explicitly
+release its claims only after that inspection and handoff; the successor uses a
+new owned checkout and fresh claims. If the original owner cannot participate,
+stop for an explicitly delegated maintainer recovery. The tooling does not
+implement claim stealing, automatic expiry or absent-owner reassignment.
+
 ## Failure, recovery and current enforcement limits
 
 If the integration owner is interrupted, another agent must inspect primary
@@ -307,13 +406,15 @@ belongs only to its pinned revision and actual inputs.
 **Implemented:** this maintained contract, `tools.agent_workspaces`
 create/guard, the local-Git-store `tools.agent_coordination` claim/integration
 CLI and focused isolation/concurrency tests. These are usable without MCP.
-**Implemented but requiring registry initialization:** global cross-host
-claim and integration reservations via a dedicated fast-forward-only Git ref.
+**Implemented:** global cross-host claim and integration reservations via a
+dedicated fast-forward-only Git ref, and mandatory dual-registry integration
+preflight with a durable version-2 running-operation guard, and inspected
+integration-metadata recovery with preserved reservations. Bootstrap remains
+an explicit one-time operation for each new origin.
 MCP named checkout recognition is implemented for local pytest and non-test
 checks; it is not the authority for direct-file agents. **Not yet implemented:**
-mandatory global-claim preflight enforced by the local integration command,
-OS-level restrictions on arbitrary Git processes, claim takeover/recovery
-workflow, comprehensive MCP Git operation routing, worktree cleanup automation,
+OS-level restrictions on arbitrary Git processes, abandoned-task recovery and
+ownership transfer tooling, comprehensive MCP Git operation routing, worktree cleanup automation,
 and a consolidated status monitor. Existing Git hooks and advisory claims
 cannot prevent a fully privileged direct-shell agent from bypassing policy.
 Use independent workspaces and one designated integration owner throughout.

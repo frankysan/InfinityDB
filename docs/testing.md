@@ -11,6 +11,68 @@ The type-check stage explicitly passes the runner's interpreter to Pyright for d
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
 
+## Agent coordination safety acceptance
+
+**2026-11-06, Project infrastructure:** proposal
+`1ced58c7b57e27b583476c5ab9450463ec710669` passed **58 tests on Windows**
+(asynchronous MCP job `2a806d44540045258054d4179ec27e2a`) and **58 on Linux**
+in an isolated temporary environment. Both selected
+`tests/test_agent_coordination.py`, `tests/test_agent_global_coordination.py`,
+`tests/test_agent_workspaces.py` and `tests/test_test_sections.py`.
+The Linux transfer archive was verified against SHA-256
+`5a26ed259389fe1d7dc2c5007b00bd25efe6e9c5b9cd824c3351173cd5d237a2`;
+the existing Linux checkouts were untouched. These immediate Git-integrity
+checks cover independent-clone races, stale ownership/revisions, scope drift,
+remote unavailability, checkout changes during preflight and interrupted or
+ambiguous operations. Ruff, focused Pyright, the complete documentation stage
+and staged backlog closeout passed. The guarded real-primary fast-forward
+completed with both reservations held and global registry revision 12.
+
+This evidence accepts the bounded cooperative integration guard, including
+version-2 refusal by legacy clients. Inspected recovery, real cross-host
+operational acceptance and protection against unrestricted Git clients remain
+separate limitations in the [workspace protocol](multi-agent-workspaces.md).
+The full suite, hosted matrix and frozen-release acceptance are independent;
+the earlier accidentally launched full-suite job was cancelled and is not
+acceptance. No new deferred test obligation remains for this safety slice.
+
+The merged CI-repair revision `fde845a8d8b0028ac80309f8cf58a56b4313645f`
+passed **110 tests, 5 optional skips, zero failures** on Windows (MCP job
+`aa95adf4118a4b6b9c10636b99bbf8cf`). It combined the four coordination modules
+above with `tests/test_deterministic_io.py` and
+`tests/test_report_reference_baseline.py`. Ruff and focused Pyright also passed.
+The newline-policy audit and exact bilingual Hackable-locator expectation now
+pass; the earlier run at `9a4731b4` failed those checks. The first isolated CI
+repair attempt had two setup failures, resolved by installing declared developer
+dependencies and building/verifying the ignored deployed-object publication;
+the subsequent standalone repair run passed 52 tests with 5 optional skips.
+
+This combined run also executed the exact VR-0119 and VR-0120 planner/pilot
+selectors and their baseline regressions without skips, so both entries are
+retired on this revision. Their assertions preserve zero semantic/browser
+approvals; VR-0118's source/API/browser acceptance remains open. The five optional
+skips do not accept absent source/archive coverage. Replacement hosted Source,
+wheel and deployment results remain independently required.
+
+Bounded inspected integration recovery at
+`2188aaa1ab4b0bd3ac2d45a2764af6c010a1fc8e` passed **79 Windows tests** in MCP
+job `75dd86f4848b471786a729c6ec637043`, followed by the final remote-CAS race
+test in job `23c1331c16f2443d9baa48386a5a0941` (**1 passed**). The complete
+**80-test** selection then passed on isolated Linux; its input archive SHA-256
+was `f253133b5c0eb389da0e78d1917d63375cd781b5847c9a754a57ad79b8aab629`.
+Both coordinator source files were unchanged between the Windows runs; the
+second run adds the competing-write assertion. Recovery cases cover unchanged
+and already-integrated/published source, lost pin/completion/recovery responses,
+failed local persistence, stale receipts/revisions, dirty files/indexes, missing
+idle-job confirmation and competing callers. Every case preserves source Git
+state and held ownership until explicit release. Ruff, focused Pyright, docs
+and backlog checks passed; the real guarded fast-forward completed at global
+registry revision 23. These are immediate Git-integrity checks, with no deferred
+regression obligation for this bounded recovery slice. Abandoned-task transfer,
+live cross-host operation and this revision's hosted matrix remain separate.
+
+## Local invocation
+
 Use the project virtual-environment interpreter when available:
 
 ```powershell

@@ -11,6 +11,7 @@ from threading import Barrier
 
 import pytest
 
+from tools import agent_global_coordination as global_coordination
 from tools.agent_coordination import (
     CoordinationError,
     _common_dir,
@@ -18,13 +19,46 @@ from tools.agent_coordination import (
     check,
     check_integration,
     claim,
-    integrate_proposal,
     primary_for_agent,
     release,
-    release_integration,
     status,
 )
+from tools.agent_coordination import (
+    integrate_proposal as _integrate_proposal,
+)
+from tools.agent_coordination import (
+    release_integration as _release_integration,
+)
 from tools.agent_workspaces import create
+
+
+def integrate_proposal(root: Path, agent: str, task: str, claim_id: str, **kwargs) -> dict:
+    """Exercise existing local scenarios with real required global ownership."""
+    primary = primary_for_agent(root)
+    snapshot = global_coordination.status(root)
+    entry = next((item for item in snapshot["claims"] if item["task"] == task), None)
+    if entry is None:
+        local = next(item for item in status(root)["claims"] if item["id"] == claim_id)
+        entry = global_coordination.claim(root, agent, task, local["scope"])
+    lease = snapshot["integration"]
+    if lease is None:
+        lease = global_coordination.acquire_integration(
+            primary, kwargs["owner"], kwargs["expected_head"],
+        )
+    return _integrate_proposal(
+        root, agent, task, claim_id, **kwargs,
+        global_claim_id=entry["id"], global_integration_id=lease["id"],
+        global_revision=global_coordination.status(root)["revision"],
+    )
+
+
+def release_integration(root: Path, owner: str, claim_id: str) -> dict:
+    lease = global_coordination.status(root)["integration"]
+    if lease is not None:
+        global_coordination.release_integration(root, owner, lease["id"])
+        # Source publication is a separate, explicit test-fixture step.
+        _git(root, "push", "origin", "dev/v1.0.0")
+    return _release_integration(root, owner, claim_id)
 
 
 def _git(root: Path, *args: str) -> str:
@@ -49,6 +83,10 @@ def _repo(tmp_path: Path) -> tuple[Path, str]:
     (root / "src/a.py").write_text("VALUE = 1\n", encoding="utf-8")
     _git(root, "add", ".")
     _git(root, "commit", "-qm", "test: initial revision")
+    origin = tmp_path / "origin.git"
+    _git(root, "clone", "--bare", str(root), str(origin))
+    _git(root, "remote", "add", "origin", str(origin))
+    global_coordination.bootstrap(root)
     return root, _git(root, "rev-parse", "HEAD")
 
 
