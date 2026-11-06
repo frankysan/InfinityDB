@@ -175,7 +175,11 @@ is recorded. Failed or incomplete verification remains open.
   `test_v1s082_labels_normal_browser`.
   The Wiki archive, English/Spanish PDF pins and Chrome are required for their
   applicable selectors. Preferred host: `linux-dev`; use documented Windows
-  fallback if unavailable. Outcome: awaiting execution on the pinned revision.
+  fallback if unavailable. The first Windows execution at
+  `819ec5a4b2bb0e8571f32014db9e81ef7b34b495` stopped after **2 passed,
+  1 failed** because a synthetic Label-only collection retained unrelated
+  scenario components. The fixture was corrected; the focused set must be
+  rerun on the next pinned revision.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing

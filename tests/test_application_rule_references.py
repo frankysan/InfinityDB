@@ -979,6 +979,7 @@ def test_label_vocabulary_sources_keep_collection_scope_and_missing_data(
     )
     secondary = deepcopy(core)
     secondary.pop("scenarioCollection", None)
+    secondary.pop("scenarioComponents", None)
     secondary["collection"] = {
         **secondary["collection"], "id": "test-label-secondary",
         "title": "Secondary Label collection",
