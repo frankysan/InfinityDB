@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any
 
 from infinity_db.application_domains import (
@@ -73,19 +74,20 @@ class GlossaryCatalog:
                         # A route-backed concept without a valid public identity should not
                         # gain a parallel Glossary-only identity by accident.
                         continue
-                    entries.append(
-                        {
-                            "id": record["id"],
-                            "kind": kind,
-                            "domain": domain.singular_name,
-                            "domain_slug": domain.slug,
-                            "name": record["name"],
-                            "description": record["summary"],
-                            "aliases": list(record.get("aliases", [])),
-                            "href": href,
-                            "embedded": domain.level == "embedded",
-                        }
-                    )
+                    entry = {
+                        "id": record["id"],
+                        "kind": kind,
+                        "domain": domain.singular_name,
+                        "domain_slug": domain.slug,
+                        "name": record["name"],
+                        "description": record["summary"],
+                        "aliases": list(record.get("aliases", [])),
+                        "href": href,
+                        "embedded": domain.level == "embedded",
+                    }
+                    if entry["embedded"]:
+                        entry["citations"] = record["citations"]
+                    entries.append(entry)
         return entries
 
     def _profile_help_entries(self) -> list[dict[str, Any]]:
@@ -120,6 +122,7 @@ class GlossaryCatalog:
                     "aliases": aliases_by_key.get(str(item["key"]), []),
                     "href": f"/glossary#{identifier.replace(':', '-')}",
                     "embedded": True,
+                    "citations": item["citations"],
                 }
             )
         return entries
@@ -195,7 +198,13 @@ class GlossaryCatalog:
                     item["id"],
                 ),
             )
-        return [dict(item, aliases=list(item["aliases"])) for item in self._entries_cache]
+        entries = []
+        for item in self._entries_cache:
+            entry = dict(item, aliases=list(item["aliases"]))
+            if "citations" in item:
+                entry["citations"] = deepcopy(item["citations"])
+            entries.append(entry)
+        return entries
 
     def embedded_entries(self) -> list[dict[str, Any]]:
         """Return embedded concepts for global search without duplicating catalogs."""

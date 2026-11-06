@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Embedded Attribute, Game-term and Unit Profile Glossary entries now show their
+  source citations; Unit Profile notation help also shows sources in context.
 - Hackable profile help now identifies default HI/REM/TAG/VH eligibility,
   the Hacker exception regardless of Troop Type, and Hacking Program-specific
   targeting of allies and enemies.
@@ -101,6 +103,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Web backend + Web frontend:** Show ordered definition citations on
+  embedded Attribute, Game-term and Unit Profile Glossary entries and in
+  contextual Unit Profile notation help, preserving source locations.
 - **Web backend + Web frontend:** Show Label vocabulary source locators on
   detail pages, distinguishing vocabulary-wide sources from coverage of an
   individual Label.

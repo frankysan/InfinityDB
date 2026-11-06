@@ -1935,6 +1935,7 @@ class RulesDatabase:
                     "name": record["name"],
                     "summary": record["summary"],
                     "order": int(facts["order"]),
+                    "citations": record["citations"],
                 }
             )
         return sorted(items, key=lambda item: (item["order"], item["key"]))

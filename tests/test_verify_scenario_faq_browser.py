@@ -669,6 +669,144 @@ def test_attribute_dash_and_swc_normal_browser(
 
 
 @pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+def test_embedded_sources_in_glossary_and_contextual_help(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}')")
+    errors: list[str] = []
+    failures: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failures.append(request.url))
+    status, _, body = wsgi_response(release_scenario_app, "/api/glossary")
+    assert status == 200
+    entries = {item["id"]: item for item in json.loads(body)["items"]}
+    identifiers = ("attribute:mov", "term:unit-profile", "rule:profile-help:attributes")
+    assert len(entries["term:unit-profile"]["citations"]) == 2
+    try:
+        response = page.goto(f"{ORIGIN}/units/1", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        summary = page.locator("#profile-notation-help > summary")
+        summary.wait_for(state="visible", timeout=30000)
+        summary.focus()
+        summary.press("Enter")
+        contextual = page.locator("#profile-help-attributes .rules-source-citations")
+        contextual.wait_for(state="visible", timeout=30000)
+        assert "p. 9" in contextual.inner_text()
+        assert "(Attributes)" in contextual.inner_text()
+        contextual_link = contextual.locator("a").first
+        assert contextual_link.get_attribute("href") == (
+            entries["rule:profile-help:attributes"]["citations"][0]["source_url"]
+        )
+
+        link = page.locator(
+            '.profile-attributes-label a[href="/glossary#rule-profile-help-attributes"]'
+        ).first
+        link.focus()
+        link.press("Enter")
+        page.wait_for_url(re.compile(r"/glossary(?:\?.*)?#rule-profile-help-attributes$"))
+        page.wait_for_function(
+            "() => document.activeElement?.id === 'rule-profile-help-attributes'"
+        )
+        assert page.locator("html").get_attribute("data-theme") == theme
+        for identifier in identifiers:
+            entry = page.locator("#" + identifier.replace(":", "-"))
+            citations = entry.locator(".rules-source-citations")
+            citations.wait_for(state="visible", timeout=30000)
+            rendered_links = citations.locator("a")
+            expected = entries[identifier]["citations"]
+            assert rendered_links.count() == sum(bool(item["source_url"]) for item in expected)
+            for index, citation in enumerate(expected):
+                source = rendered_links.nth(index)
+                assert source.get_attribute("href") == citation["source_url"]
+                assert source.get_attribute("target") == "_blank"
+                assert source.get_attribute("rel") == "noopener noreferrer"
+                text = source.inner_text()
+                assert citation["source_title"] in text
+                if citation["source_version"].lower() not in citation["source_title"].lower():
+                    assert f"v{citation['source_version']}" in text
+                if citation["page"]:
+                    assert f"p. {citation['page']}" in text
+                if citation["section"]:
+                    assert citation["section"] in text
+                source.focus()
+                page.keyboard.press("Shift+Tab")
+                page.keyboard.press("Tab")
+                assert source.evaluate("node => document.activeElement === node")
+            assert not page.evaluate(
+                "() => document.documentElement.scrollWidth > innerWidth + 1"
+            ), (identifier, width, theme)
+        assert not errors, (width, theme, errors)
+        assert not failures, (width, theme, failures)
+    finally:
+        page.close()
+
+
+def test_embedded_sources_report_unavailable_and_archived_members(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+) -> None:
+    page = chrome.new_page(viewport={"width": 320, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+
+    def partial_sources(route: Any) -> None:
+        status, _, body = wsgi_response(release_scenario_app, route.request.url)
+        assert status == 200
+        payload = json.loads(body)
+        for item in payload["items"]:
+            if item["id"] in {"attribute:mov", "rule:profile-help:attributes"}:
+                item["citations"] = []
+            if item["id"] == "term:trooper":
+                item["citations"] = [{
+                    "source_id": "archived-example",
+                    "source_title": "Archived example",
+                    "source_version": "1",
+                    "source_url": None,
+                    "page": None,
+                    "member": "Reviewed_Member",
+                    "heading": "Reviewed heading",
+                    "section": "Specific section",
+                }]
+        route.fulfill(status=status, content_type="application/json", body=json.dumps(payload))
+
+    page.route("**/api/glossary*", partial_sources)
+    page.route("**/api/unit-profile-help*", partial_sources)
+    try:
+        page.goto(f"{ORIGIN}/units/1", wait_until="domcontentloaded")
+        summary = page.locator("#profile-notation-help > summary")
+        summary.wait_for(state="visible", timeout=30000)
+        summary.click()
+        contextual = page.locator("#profile-help-attributes .rules-source-citations")
+        contextual.wait_for(state="visible", timeout=30000)
+        assert contextual.inner_text() == "Sources: Unavailable."
+        assert contextual.locator("a").count() == 0
+
+        page.goto(f"{ORIGIN}/glossary#attribute-mov", wait_until="domcontentloaded")
+        for identity in ("attribute-mov", "rule-profile-help-attributes"):
+            citations = page.locator(f"#{identity} .rules-source-citations")
+            citations.wait_for(state="visible", timeout=30000)
+            assert citations.inner_text() == "Sources: Unavailable."
+            assert citations.locator("a").count() == 0
+        archive = page.locator("#term-trooper .rules-source-citations")
+        archive.wait_for(state="visible", timeout=30000)
+        assert "Archived example v1" in archive.inner_text()
+        assert "Reviewed heading" in archive.inner_text()
+        assert "Specific section" in archive.inner_text()
+        assert "archived member Reviewed_Member" in archive.inner_text()
+        assert "link opens source site" not in archive.inner_text()
+        assert archive.locator("a").count() == 0
+        assert not page.evaluate(
+            "() => document.documentElement.scrollWidth > innerWidth + 1"
+        )
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
 def test_movement_attribute_glossary_anchor_normal_browser(
     release_scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:

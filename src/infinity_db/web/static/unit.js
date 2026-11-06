@@ -1,5 +1,6 @@
 import { getUnit, getUnitProfileHelp } from "./api.js";
 import { maintainedTextFragment } from "./maintained-text.js";
+import { rulesCitationList } from "./rules-reference.js";
 import { silhouetteValuePreview } from "./silhouette-diagrams.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
@@ -236,6 +237,11 @@ function renderProfileNotationHelp(items) {
     const copy = document.createElement("p");
     copy.append(maintainedTextFragment(item.summary_tokens, item.summary));
     entry.append(heading, copy);
+    if (Array.isArray(item.citations)) {
+      entry.append(rulesCitationList(item.citations, {
+        discloseArchive: true, includeLocationDetails: true,
+      }));
+    }
     grid.append(entry);
   }
   body.append(grid);

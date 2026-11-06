@@ -1,7 +1,7 @@
 import { getArmies, getCatalogItem } from "./api.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { appendMaintainedText } from "./maintained-text.js";
-import { rulesCitationNode, rulesReferenceSection } from "./rules-reference.js";
+import { rulesCitationList, rulesReferenceSection } from "./rules-reference.js";
 import { shareStateHref } from "./share-state.js";
 
 const { catalog, singular, summaryHeading } = document.body.dataset;
@@ -31,26 +31,9 @@ function definitionSection(item) {
   );
   section.append(heading, copy);
   if (Array.isArray(item.vocabulary_sources)) {
-    const sources = document.createElement("p");
-    sources.className = "detail-source rules-source-citations";
-    const label = document.createElement("strong");
-    label.className = "rules-provenance-label";
-    label.textContent = "Label vocabulary sources: ";
-    sources.append(label);
-    if (!item.vocabulary_sources.length) {
-      sources.append("Unavailable.");
-    } else {
-      for (const [index, citation] of item.vocabulary_sources.entries()) {
-        if (index) sources.append(" · ");
-        sources.append(rulesCitationNode(citation));
-        if (citation.member) {
-          sources.append(` (archived member ${citation.member}`);
-          if (citation.source_url) sources.append("; link opens source site");
-          sources.append(")");
-        }
-      }
-    }
-    section.append(sources);
+    section.append(rulesCitationList(item.vocabulary_sources, {
+      label: "Label vocabulary sources: ", discloseArchive: true,
+    }));
     if (item.vocabulary_sources.length) {
       const scope = document.createElement("p");
       scope.className = "detail-source";

@@ -1197,6 +1197,10 @@ h1>span {
   line-height: 1.6;
 }
 
+.profile-help-entry .rules-source-citations {
+  margin-top: var(--space-2);
+}
+
 .profile-help-link {
   color: inherit;
   text-decoration-line: underline;

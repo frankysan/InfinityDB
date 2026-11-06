@@ -4,7 +4,7 @@ import { immunityCaseRows } from "./immunity-cases.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { tableViewport } from "./view-components.js";
 
-function citationLabel(citation) {
+function citationLabel(citation, { includeLocationDetails = false } = {}) {
   const source = citation.source_title || citation.source_id || "Source";
   const version = citation.source_version && !source.toLowerCase().includes(
     citation.source_version.toLowerCase()
@@ -12,11 +12,15 @@ function citationLabel(citation) {
   const location = citation.page
     ? `p. ${citation.page}`
     : citation.heading || citation.member || citation.section || "";
-  return `${source}${version}${location ? `, ${location}` : ""}`;
+  const details = includeLocationDetails
+    ? [...new Set([citation.heading, citation.section].filter((value) => value && value !== location))]
+    : [];
+  return `${source}${version}${location ? `, ${location}` : ""}`
+    + (details.length ? ` (${details.join("; ")})` : "");
 }
 
-export function rulesCitationNode(citation) {
-  const label = citationLabel(citation);
+export function rulesCitationNode(citation, options = {}) {
+  const label = citationLabel(citation, options);
   if (!citation.source_url) return document.createTextNode(label);
   const link = document.createElement("a");
   link.href = citation.source_url;
@@ -24,6 +28,31 @@ export function rulesCitationNode(citation) {
   link.rel = "noopener noreferrer";
   link.textContent = label;
   return link;
+}
+
+export function rulesCitationList(citations, {
+  label = "Sources: ", discloseArchive = false, includeLocationDetails = false,
+} = {}) {
+  const paragraph = document.createElement("p");
+  paragraph.className = "detail-source rules-source-citations";
+  const heading = document.createElement("strong");
+  heading.className = "rules-provenance-label";
+  heading.textContent = label;
+  paragraph.append(heading);
+  if (!citations.length) {
+    paragraph.append("Unavailable.");
+  } else {
+    for (const [index, citation] of citations.entries()) {
+      if (index) paragraph.append(" · ");
+      paragraph.append(rulesCitationNode(citation, { includeLocationDetails }));
+      if (discloseArchive && citation.member) {
+        paragraph.append(` (archived member ${citation.member}`);
+        if (citation.source_url) paragraph.append("; link opens source site");
+        paragraph.append(")");
+      }
+    }
+  }
+  return paragraph;
 }
 
 function applicabilityText(rule) {
@@ -457,17 +486,7 @@ function appendRuleDetails(
   }
 
   if (rule.citations?.length) {
-    const citations = document.createElement("p");
-    citations.className = "detail-source rules-source-citations";
-    const label = document.createElement("strong");
-    label.className = "rules-provenance-label";
-    label.textContent = "Sources: ";
-    citations.append(label);
-    for (const [index, citation] of rule.citations.entries()) {
-      if (index) citations.append(" · ");
-      citations.append(rulesCitationNode(citation));
-    }
-    container.append(citations);
+    container.append(rulesCitationList(rule.citations));
   }
 }
 

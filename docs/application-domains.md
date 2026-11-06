@@ -348,6 +348,8 @@ The projection:
 - preserves typed concept identity and owning domain so identical surface text is not merged;
 - links browsable concepts to their owning detail surfaces;
 - presents embedded-only definitions at stable Glossary anchors without inventing detail routes;
+- exposes the underlying definition's ordered source citations for embedded Attributes, Game terms
+  and Unit Profile help, or explicitly says when those sources are unavailable;
 - keeps aliases on the canonical concept rather than creating duplicate entries; and
 - renders maintained-text tokens through the same semantic-reference layer used by owning detail
   surfaces.
@@ -358,6 +360,8 @@ their owning Equipment rather than becoming duplicate Glossary identities. Entri
 without a route in the current publication are not published as broken links.
 
 Profile notation help is a contextual consumer of this framework, not a competing glossary dataset.
+It exposes the same definition citations on Unit details and through the Glossary; archived-member
+links identify the reviewed member while clarifying when the link opens the source site.
 Attribute labels on Unit details reuse the same canonical `attribute:*` definitions and Glossary
 anchors. Source-backed `term:*` records provide the corresponding embedded terminology layer for
 concepts that do not warrant dedicated pages; search and Glossary preserve their Game-term identity

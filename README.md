@@ -81,6 +81,8 @@ its application metrics.
   canonical Equipment, embedded Attributes, scoped Game terms and searchable Weapon Properties
   (such as Viral, Plasma and combined Ammunition). Weapon Properties link to their underlying
   canonical rules and reviewed, source-cited Weapon examples instead of redefining the effects.
+  Embedded Attribute, Game-term and Unit Profile help entries show their source citations in the
+  Glossary; Unit Profile notation help also shows them in context.
 - Label definitions include deployment, targeting, modifier and fixed-result
   qualifications, with Assignable's English/Spanish timing difference disclosed.
   Detail pages show the vocabulary's source locators and their scope.

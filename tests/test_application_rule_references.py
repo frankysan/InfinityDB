@@ -10,6 +10,7 @@ from contextlib import closing
 from copy import deepcopy
 from functools import partial
 from pathlib import Path
+from typing import Any
 from wsgiref.util import setup_testing_defaults
 
 import pytest
@@ -1673,6 +1674,142 @@ def test_equipment_glossary_source_cited_routes_cover_current_concepts() -> None
             tuple(citation.get(field) for field in fields)
             for citation in record["citations"]
         }, identifier
+
+
+def test_embedded_glossary_and_profile_help_preserve_definition_citations() -> None:
+    root = Path(__file__).parents[1]
+    rules = RulesDatabase(root / "data/generated/rules.db")
+    core = next(
+        document for _, document in load_curated_directory(root / "data/curated")
+        if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    sources = {source["id"]: source for source in core["sources"]}
+    authored = {record["id"]: record for record in core["records"]}
+    records = {
+        record["id"]: record
+        for kind in ("attribute", "term", "rule")
+        for record in rules.composed_records_by_kind(kind)
+        if kind != "rule" or record.get("facts", {}).get("category") == "unit-profile-help"
+    }
+    assert {
+        kind: sum(record["kind"] == kind for record in records.values())
+        for kind in ("attribute", "term", "rule")
+    } == {"attribute": 13, "term": 23, "rule": 12}
+
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules.path)
+    status, body = _published_get(app, "/api/glossary")
+    assert status == "200 OK"
+    glossary = {item["id"]: item for item in json.loads(body)["items"]}
+    status, body = _published_get(app, "/api/unit-profile-help")
+    assert status == "200 OK"
+    help_payload = json.loads(body)
+    contextual = {
+        item["id"]: item for item in help_payload["items"] + help_payload["attributes"]
+    }
+    assert set(contextual) == {
+        identifier for identifier, record in records.items()
+        if record["kind"] in {"attribute", "rule"}
+    }
+
+    for identifier, record in records.items():
+        expected = []
+        for citation in authored[identifier]["citations"]:
+            source = sources[citation["sourceId"]]
+            expected.append({
+                "source_id": source["id"],
+                "source_title": source["title"],
+                "source_version": source["version"],
+                "source_url": source.get("url"),
+                "page": citation.get("page"),
+                "member": citation.get("member"),
+                "heading": citation.get("heading"),
+                "section": citation.get("section"),
+            })
+        assert expected, identifier
+        assert record["citations"] == expected, identifier
+        entry = glossary[identifier]
+        assert entry["embedded"] is True
+        assert entry["description"] == record["summary"]
+        assert entry["href"] == f"/glossary#{identifier.replace(':', '-')}"
+        assert entry["citations"] == expected, identifier
+        if identifier in contextual:
+            assert contextual[identifier]["citations"] == expected, identifier
+
+    property_entry = next(item for item in glossary.values() if item["kind"] == "weapon-property")
+    assert property_entry["embedded"] is True
+    assert property_entry["origins"]
+    assert "citations" not in property_entry
+    assert "citations" not in glossary["equipment:cube"]
+
+
+def test_embedded_glossary_handles_missing_sources_and_isolates_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    missing = ("attribute:mov", "term:trooper", "rule:profile-help:attributes")
+    with sqlite3.connect(rules_path) as connection:
+        for identifier in missing:
+            deleted = connection.execute(
+                "DELETE FROM record_citations WHERE record_id = ?", (identifier,)
+            )
+            assert deleted.rowcount > 0
+
+    rules = RulesDatabase(rules_path)
+    original = rules.composed_records_by_kind
+
+    def with_supplement(
+        kind: str, *, scenario_id: str | None = None, include_army_links: bool = False,
+    ) -> list[dict[str, Any]]:
+        records = original(
+            kind, scenario_id=scenario_id, include_army_links=include_army_links
+        )
+        if kind == "attribute":
+            record = next(item for item in records if item["id"] == "attribute:cc")
+            record["supplements"] = [{
+                "citations": [{"source_id": "supplement-only", "page": 999}],
+            }]
+        if kind == "rule":
+            record = next(
+                item for item in records if item["id"] == "rule:profile-help:attributes"
+            )
+            record["supplements"] = [{
+                "citations": [{"source_id": "supplement-only", "page": 999}],
+            }]
+        return records
+
+    monkeypatch.setattr(rules, "composed_records_by_kind", with_supplement)
+    database = _reference_database(tmp_path)
+    catalog = GlossaryCatalog(database, rules)
+    entries = {item["id"]: item for item in catalog.entries()}
+    for identifier in missing:
+        assert entries[identifier]["citations"] == []
+
+    definition = next(
+        record for record in original("attribute") if record["id"] == "attribute:cc"
+    )
+    expected = deepcopy(definition["citations"])
+    assert entries["attribute:cc"]["citations"] == expected
+    assert all(citation["source_id"] != "supplement-only" for citation in expected)
+    entries["attribute:cc"]["citations"][0]["section"] = "mutated"
+    entries["attribute:cc"]["citations"].append({"source_id": "injected"})
+    entries["attribute:cc"]["aliases"].append("injected")
+    fresh = {item["id"]: item for item in catalog.embedded_entries()}
+    assert fresh["attribute:cc"]["citations"] == expected
+    assert "injected" not in fresh["attribute:cc"]["aliases"]
+
+    app = create_app(database.path, rules_database_path=rules_path)
+    status, body = _published_get(app, "/api/glossary")
+    assert status == "200 OK"
+    api_entries = {item["id"]: item for item in json.loads(body)["items"]}
+    assert all(api_entries[identifier]["citations"] == [] for identifier in missing)
+    status, body = _published_get(app, "/api/unit-profile-help")
+    assert status == "200 OK"
+    payload = json.loads(body)
+    contextual = {item["id"]: item for item in payload["items"] + payload["attributes"]}
+    assert contextual["attribute:mov"]["citations"] == []
+    assert contextual["rule:profile-help:attributes"]["citations"] == []
 
 
 @pytest.mark.parametrize("valid_ref", ["hacking-device", "100"])

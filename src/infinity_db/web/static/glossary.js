@@ -1,5 +1,6 @@
 import { getGlossary } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
+import { rulesCitationList } from "./rules-reference.js";
 import { silhouetteReferenceSet } from "./silhouette-diagrams.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { createPanelSwitcher } from "./view-components.js";
@@ -61,6 +62,12 @@ function entryNode(item) {
   description.className = "glossary-description";
   appendMaintainedText(description, item.description_tokens, item.description);
   article.append(header, description);
+
+  if (item.embedded && Array.isArray(item.citations)) {
+    article.append(rulesCitationList(item.citations, {
+      discloseArchive: true, includeLocationDetails: true,
+    }));
+  }
 
   if (Array.isArray(item.origins) && item.origins.length) {
     const origins = document.createElement("p");
