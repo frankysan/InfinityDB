@@ -5730,6 +5730,15 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     status, _, body = request(rules_app, "/api/glossary")
     assert status == 200
     items = json.loads(body)["items"]
+    rules = RulesDatabase(rules_path)
+    definition_citations = {
+        record["id"]: record["citations"]
+        for kind in ("attribute", "term", "rule")
+        for record in rules.composed_records_by_kind(kind)
+    }
+    assert all(definition_citations[identifier] for identifier in (
+        "attribute:mov", "rule:profile-help:troop-type", "term:fto", "term:marker",
+    ))
     trooper = next(item for item in items if item["id"] == "term:trooper")
     assert trooper["domain"] == "Game term"
     assert trooper["href"] == "/glossary#term-trooper"
@@ -5815,6 +5824,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "aliases": [],
         "href": "/glossary#attribute-mov",
         "embedded": True,
+        "citations": definition_citations["attribute:mov"],
         "description_tokens": [
             {
                 "type": "text",
@@ -5843,6 +5853,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "aliases": ["Type"],
         "href": "/glossary#rule-profile-help-troop-type",
         "embedded": True,
+        "citations": definition_citations["rule:profile-help:troop-type"],
         "description_tokens": [
             {
                 "type": "text",
@@ -5871,6 +5882,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "aliases": ["FTO", "Fireteam Option"],
         "href": "/glossary#term-fto",
         "embedded": True,
+        "citations": definition_citations["term:fto"],
         "description_tokens": [
             {
                 "type": "text",
@@ -5898,6 +5910,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "aliases": [],
         "href": "/glossary#term-marker",
         "embedded": True,
+        "citations": definition_citations["term:marker"],
         "description_tokens": [
             {
                 "type": "text",

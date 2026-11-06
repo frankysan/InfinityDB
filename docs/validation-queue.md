@@ -145,7 +145,7 @@ is recorded. Failed or incomplete verification remains open.
 
 - [ ] VR-0129 (2026-11-06; ready-to-run): Expose source citations on
   embedded Glossary definitions and contextual Unit Profile help.
-  Work: V1S-082; revision: commit containing this entry and designed tests;
+  Work: V1S-082; revision: corrected test-expectation commit containing this entry;
   risk: medium. No curated input or generated database changes. Development
   `infinity.db` SHA-256 `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`;
   `rules.db` SHA-256 `5bc1ef3c70d1d14ad5f043bd1ad6fe159c608e86755d0ec0ac9a8b99f8b052f8`.
@@ -182,7 +182,10 @@ is recorded. Failed or incomplete verification remains open.
   `test_weapon_property_origins_reach_sources_in_normal_browser` and
   `test_unroutable_weapon_property_example_shows_source_section_in_browser`.
   Preferred host: dedicated MCP Linux worker, with documented local fallback.
-  Outcome: pending.
+  Outcome: first pinned Windows run at `904893f0be384f33ee69e149e3597850d15b791a`
+  passed 49 tests and failed `test_glossary_projects_canonical_rules_and_embedded_attributes`:
+  its exact response-shape assertions did not include the new citations.
+  Correct the assertions and rerun the complete selection on the new revision.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
