@@ -144,25 +144,7 @@ selector and other dependencies in its VR item.
 
 ## Pending deferred execution
 
-### VR-0112 — Unit Profile Glossary content (2026-11-06)
-
-- **Status:** ready-to-run
-- **Owner:** V1S-082; Data processing, Web backend, Web frontend
-- **Implementation revision:** pin the committed revision before dispatch;
-  the matched v9 rules database and variant-usage artifact hashes are
-  recorded in the source-coverage audit.
-- **Design:** VD-0064 and VD-0065 completed static review without execution.
-- **Immediate checks:** source PDFs and archived Wiki revisions were inspected;
-  no tests were run during design.
-- **Selectors:**
-  - `tests/test_application_rule_references.py::test_game_terms_are_current_canonical_embedded_records`
-  - `tests/test_web.py::test_glossary_projects_canonical_rules_and_embedded_attributes`
-  - `tests/test_verify_scenario_faq_browser.py::test_unit_profile_term_normal_browser`
-- **Acceptance:** run on `linux-dev` against the pinned committed revision.
-  The browser selector searches for `Armor` and covers 1440/390/320 px,
-  successful `/api/glossary` response, expected heading/domain/definition,
-  no page errors, and no horizontal overflow. Require the complete 808/808
-  published/browser-referenced asset set and no unexpected skips.
+No pending execution obligations.
 
 The most recent pinned Linux full-assets acceptance, including the 2026-11-04
 queue drain, is recorded in
