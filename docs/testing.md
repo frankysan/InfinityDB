@@ -5458,6 +5458,58 @@ exact-version hosted representative gate remains open under V1S-087 until
 a suitable candidate is actually served; see the next section. Cumulative
 V1S-090 and the exact-SHA hosted CI/release gates are separate. VD/VR is empty.
 
+### Pre-candidate frozen-artifact readiness (2026-11-07)
+
+**Project domains:** Web backend, Web frontend, Deployment
+
+Read-only preparation at `25871751a73c437ed9067a67e40d396c33ab4bc9`
+(`dev/v1.0.0`, clean) confirms the tracked Army/rules pair and
+published browser assets are suitable for a **development preview**:
+
+- `tools.verify_deployment_assets`: PASS, **808/808** published SVGs
+  and browser references; both runtime databases and source-bound
+  reference publications validated.
+- `tools.build_deployed_object_publication --check`,
+  `tools.build_variant_usage --check-publication`, and
+  `tools.build_weapon_profile_publication --check`: all PASS.
+  No release artifacts were rebuilt or overwritten.
+- `tests/test_verify_release_candidate_browser.py::test_release_gate_runs_real_local_chromium_when_available`:
+  **1/1** PASS with real Chrome and a temporary local WSGI server,
+  checking the exact artifact/static/version preflight, representative
+  Unit DOM and postflight. This is **local integration**, not hosted
+  V1S-087 acceptance.
+
+From the same clean Windows checkout, open a local inspection preview
+with the existing CLI (do **not** point the inspector at the older
+public 0.10.1 deployment):
+
+```powershell
+.\.venv\Scripts\python.exe -m infinity_db serve --host 127.0.0.1 --port 8000
+```
+
+Inspect `http://127.0.0.1:8000/`,
+`http://127.0.0.1:8000/glossary#attribute-s`, and a Unit detail
+showing a Silhouette preview (for example `/units/dragoes`).
+Use browser responsive mode for desktop/320/390 px preliminary checks;
+**real-device touch sign-off** still requires an operator-controlled
+trusted-LAN preview and records the device/browser, exact SHA and result.
+Never expose the development server to an untrusted interface by default.
+Stop the local preview with Ctrl+C.
+
+**Not yet an exact-version 1.0 candidate:** this checkout's package and
+API versions remain `0.10.1` (and the source-checkout display may show
+`+dev`), as required until release metadata is prepared. The
+`INFINITY_DB_DISPLAY_VERSION` presentation override is **not** a
+substitute for a version-matched `/api/version`. V1S-080/089 human
+acceptance and V1S-087 served `1.0.0` checks remain open. Before the
+first true hosted candidate, explicitly reconcile the sequencing:
+V1S-087 requires a 1.0 candidate, but V1S-092 currently postpones the
+version bump until V1S-087/090 are complete. Prepare an *unpublished*
+candidate metadata step (or an equivalent separately authorized
+candidate checkout), and keep final release-note/annotation promotion
+dependent on accepted release evidence. Do not silently weaken the
+exact-version gate or tag/deploy the preview.
+
 ### Hosted Unit release-candidate acceptance
 
 For **deployed release-candidate acceptance**, use the separate

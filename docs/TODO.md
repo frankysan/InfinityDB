@@ -206,6 +206,8 @@ checks retain their separately numbered gates.
 - [ ] **V1S-087 (L, gate):** Accept the exact-version hosted Unit
   representative checks. The [frozen-pair local 81-page Unit matrix](testing.md#frozen-pair-81-page-unit-matrix-v1s-087-local-portion)
   passed on `a5846dc` (five matrix groups, zero skips).
+  The [development-preview artifact preflight](testing.md#pre-candidate-frozen-artifact-readiness-2026-11-07)
+  passed at `25871751`; it does not certify a hosted 1.0.0 candidate.
   Blocked: Hosted exact-version checks require an actually served 1.0.0
   candidate matched to the release pair and static assets;
   authority: release owner; retry: after the release candidate is prepared
@@ -235,6 +237,9 @@ clarifies its virtual-environment commands and the shipped theme requirement.
 
 - [ ] **V1S-092 (M, gate):** Finalize Unreleased notes,
   release metadata and version after completeness acceptance.
+  Sequencing issue: V1S-087 first requires a served 1.0.0 candidate;
+  reconcile an untagged candidate-version preparation checkpoint before
+  requiring final release metadata. Do not promote or tag this preview.
   Blocked: final version and release notes require accepted candidate completeness;
   authority: release owner; retry: when V1S-080, V1S-087, V1S-089 and V1S-090 pass.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
