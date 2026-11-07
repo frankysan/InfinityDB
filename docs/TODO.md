@@ -236,16 +236,10 @@ passed; independent touch/human, cumulative and hosted gates remain open.
   A live-host rollback rehearsal is not required.
 - [ ] **V1S-095 (M, gate):** Verify the deployed exact source/runtime
   pair, release version, static assets and representative browser paths.
-- [ ] **V1S-097 (M, gate):** Promote the cross-browser Playwright
-  compatibility matrix to a mandatory v1.0 release check. The initial
-  portable critical-journey cohort passed all four engines and platforms at
-  `6892e7e`. The required workflow and version-aware exact-SHA release
-  evidence implementation is prepared; acceptance still requires a fully
-  successful hosted run of the promoted non-optional workflow. The broader
-  Chromium/Unit/scenario suites stay separate, as do final release gates.
-  Priority: Cross-browser compatibility pilot requested for v1.0;
-  authority: release owner; revisit: return to V1S-041 after pilot wiring
-  and initial cross-engine baseline investigation.
+The [mandatory cross-browser compatibility release gate](ci.md#cross-browser-release-compatibility-gate)
+passed all four hosted jobs on the development acceptance revision
+`b5ca8823d3bad593ac000298a244d36aea494480` (56/56 tests).
+Final candidate exact-SHA acceptance remains independently required.
 
 ### Source inventory and gap batches
 
@@ -391,7 +385,7 @@ Historical replay and publisher rulings are not 1.0 prerequisites.
 **Project domains:** Data processing, Web backend, Web frontend,
 Project infrastructure, Deployment
 
-- [ ] Complete **V1S-087, V1S-089–095 and V1S-097** and outstanding earlier browser gates
+- [ ] Complete **V1S-087 and V1S-089–095** and outstanding earlier browser gates
   against the exact frozen source,
   database, generated-publication, static-asset and release-candidate
   revisions. This includes one current source citation per in-scope rule

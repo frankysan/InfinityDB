@@ -77,9 +77,16 @@ not a real-device Safari/iOS test.
 at `6892e7e6094288b6c7eb1cc51abe0b3fb6b6ac84` passed **56/56**
 across [run 42366303864](https://github.com/frankysan/InfinityDB/actions/runs/42366303864)
 after clean-checkout deployed-object setup, WebKit request-cancellation
-readiness and the Windows socket listen-backlog correction. The promoted
-required-gate revision and exact-SHA CI acceptance must pass separately;
-a previous reporting-only run cannot approve the promoted release gate.
+readiness and the Windows socket listen-backlog correction. The **mandatory**
+workflow then passed **56/56 without skips** at
+`b5ca8823d3bad593ac000298a244d36aea494480` in
+[run 42367296713](https://github.com/frankysan/InfinityDB/actions/runs/42367296713):
+Chromium 156.0.8078.4 (10.24 s), Firefox 157.0 (13.85 s),
+macOS WebKit 27.2 (53.55 s) and Edge 157.0.4341.42 (24.28 s).
+The 16 focused release-evidence regression tests passed on Windows, as did
+Ruff, Pyright and documentation checks. This accepts V1S-097 as a development
+release-gate implementation, **not** as final 1.0 candidate/tag/hosted evidence;
+the exact eventual release SHA must still pass all four jobs.
 
 ## Agent CI monitoring and repair
 
