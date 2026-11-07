@@ -210,9 +210,12 @@ is accepted; cumulative and final hosted CI/deployment gates remain open.
 
 - [ ] **V1S-090 (L, gate):** Drain due VD/VR work and run the full
   local/Linux, source, docs, preflight and applicable full-asset checks.
-  Manual and served-candidate prerequisites are accepted. Reconcile the
-  focused Source CI test-contract repairs and require cumulative evidence
-  on the resulting revision; keep required source/asset skips explicit.
+  Manual and served-candidate prerequisites are accepted. The
+  [initial cumulative attempt and focused browser repair](testing.md#cumulative-candidate-regression-repair-v1s-090)
+  require replacement full source and isolated preflight execution on
+  the repaired revision, with activated pinned PDFs. Use the complete
+  Windows docs stage while Linux lacks Markdownlint; retain exact host,
+  source/asset coverage and skip evidence.
 
 The **V1S-091** tracked documentation audit passed Markdownlint (44 files),
 local path/heading checks (43 files), maintained command-module inspection and

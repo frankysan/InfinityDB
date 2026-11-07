@@ -3514,13 +3514,19 @@ def test_supplies_faq_is_visible_and_does_not_leak_to_other_scenarios(
                 continue
             assert rulings.count() == 1, (width, slug, rulings.all_inner_texts())
             assert expected in rulings.first.locator("h3").inner_text()
-            assert "FAQ v0.1" in page.locator(
-                "#scenario-content .faq-rulings .detail-source"
-            ).first.inner_text()
+            source = rulings.first.locator(".faq-publication-source")
+            assert source.locator(".rules-provenance-label").inner_text().strip() == "Sources:"
+            assert "N5 FAQs" in source.inner_text() and "v0.1" in source.inner_text()
+            assert source.locator("a").count() == 1
+            assert page.locator(
+                "#scenario-content .faq-rulings > .detail-source"
+            ).count() == 0
             assert page.locator("#scenario-content .faq-rulings").is_visible()
             if slug == "supplies":
                 assert "cannot enter Marker State" in rulings.first.inner_text()
-                assert "FAQ clarification" in rulings.first.inner_text()
+                assert page.locator(
+                    "#scenario-content .faq-rulings > h2"
+                ).inner_text() == "FAQ clarifications"
                 assert rulings.first.locator(".detail-source a").count() >= 1
                 assert page.locator(
                     "#scenario-content .developer-only .faq-ruling"

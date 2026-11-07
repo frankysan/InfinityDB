@@ -5737,6 +5737,42 @@ rules or generated artifact changed. This focused result does not close
 the cumulative gate or accept the failed hosted revision; replacement
 exact-SHA Source and deterministic-output evidence remains required.
 
+### Cumulative candidate regression repair (V1S-090)
+
+**Project domain:** Project infrastructure
+
+Hosted Source checks, including every OS/Python job and cross-platform
+deterministic outputs, passed on `3284c7c2a9d3d5a50d987f68f8260dc864808ffa`.
+Wheel, deployment smoke and all four cross-browser jobs also passed on
+that revision. This remains development-candidate CI evidence, not an
+eventual main/tag acceptance.
+
+The independent Linux full-profile attempt on that revision
+(`linux-dev:8cdafaccabe24b0382c274c71f31a864`) reported **9 failed,
+5,613 passed, 263 skipped** in 791.14 s pytest time. Lint, type, Army build,
+rules build and the source-occupancy gate passed; docs failed because the
+worker lacked the installed Markdownlint dependency, and preflight was
+correctly skipped after the earlier failures. Most extra skips came from
+unactivated ignored PDF inputs, not passing source checks. The complete
+report is retained under ignored `local/candidates/`.
+
+The failures were stale browser test contracts after the accepted UI
+changes: three scenario FAQ cases expected duplicate source metadata and
+an old per-card badge; six variant-publication cases attempted to open
+Developer Mode-only occurrence lists while Developer Mode was off.
+The repaired checks retain one linked FAQ source, the FAQ section identity,
+scenario isolation, hidden/visible/hidden occurrence behavior, keyboard
+disclosure, exact Unit links, overflow and JavaScript/request assertions.
+As an immediate required cumulative-gate repair, Windows passed **12/12**
+affected cases: the nine-case variant-publication module and three scenario
+FAQ cases. No application, rules or release-publication bytes changed.
+
+Before replacement Linux execution, activate the already staged pinned
+rule/FAQ PDFs and verify their source guards. The complete Windows docs
+stage supplies documentation acceptance while the Linux Markdownlint
+installation is unavailable. Require replacement full source and isolated
+preflight results; the failed full-profile attempt does not close V1S-090.
+
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:

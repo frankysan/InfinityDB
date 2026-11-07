@@ -197,10 +197,10 @@ def _browser_catalog_case(
 
 @pytest.mark.parametrize("catalog", ("skills", "equipment"))
 @pytest.mark.parametrize("width", (1440, 390, 320))
-def test_variant_usage_normal_browser_matches_real_source_groups(
+def test_variant_usage_developer_browser_matches_real_source_groups(
     published_pair: dict[str, Any], catalog: str, width: int,
 ) -> None:
-    """Ordinary pages must expose all exact groups attached to their own rule IDs."""
+    """Normal routes expose exact source groups only through Developer Mode."""
     sync_api = pytest.importorskip("playwright.sync_api")
     app = published_pair["app"]
     slug, expected_count = _browser_catalog_case(published_pair, catalog)
@@ -234,11 +234,29 @@ def test_variant_usage_normal_browser_matches_real_source_groups(
                 assert groups.count() == expected_count, (
                     catalog, slug, width, expected_count, groups.count()
                 )
-                groups.first.locator("summary").click()
+                usage = page.locator(".exact-variant-usage")
+                assert usage.is_hidden(), (catalog, slug, width)
+                settings = page.locator('button[aria-controls="settings-menu"]')
+                settings.click()
+                toggle = page.locator("#developer-mode-toggle")
+                toggle.set_checked(True)
+                settings.click()
+                usage.wait_for(state="visible")
+                summary = groups.first.locator("summary")
+                summary.focus()
+                summary.press("Enter")
                 links = groups.first.locator('a[href^="/units/"]')
                 links.first.wait_for(state="visible", timeout=15000)
                 href = links.first.get_attribute("href")
                 assert href and "/units/" in href and "s=" in href
+                settings.click()
+                toggle.set_checked(False)
+                settings.click()
+                assert usage.is_hidden(), (catalog, slug, width)
+                settings.click()
+                toggle.set_checked(True)
+                settings.click()
+                links.first.wait_for(state="visible", timeout=15000)
                 links.first.click()
                 page.wait_for_url(re.compile(r".*/units/[a-z0-9-]+.*"))
                 page.locator("#unit-content").wait_for(state="visible", timeout=15000)
