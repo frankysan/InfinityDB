@@ -2,10 +2,16 @@
 
 **Project domain:** Project infrastructure
 
-`tools/run_checks.py` is the canonical local validation entry point. It keeps pytest, Ruff,
-Markdownlint, offline documentation link checks, Pyright, Army database-build validation,
-rules-database validation, asset policy,
-worker selection, and optional reporting under one command contract.
+This document owns **local check procedures, focused test selection, phased
+execution and retained dated validation evidence**. The older 1.0 acceptance
+entries below apply to their stated revisions and artifacts; they are not
+current TODO items or proof of post-deployment success. Hosted workflow
+requirements belong in [CI](ci.md), release approval and production
+verification in [releasing](releasing.md).
+
+`tools/run_checks.py` is the canonical local entry point for pytest, Ruff,
+Markdownlint, offline link checks, Pyright, database-build verification,
+asset policy, worker selection and optional reporting.
 
 The type-check stage explicitly passes the runner's interpreter to Pyright for dependency
 resolution, so invoking the virtual-environment Python works without first activating that
@@ -193,9 +199,11 @@ build step is part of the application's runtime or packaging.
 
 ## V1S backlog checks
 
-The static V1S register check is part of the regular `docs` stage. For each
-autonomous numbered task, first run the explicit selection check. It examines
-every earlier open ID across workstreams and fails unexplained skips:
+The static V1S register check is part of the regular `docs` stage. The
+completed 1.0 development register currently has **zero active V1S entries**;
+do not run a task-selection command with a null ID. Only if a numbered task is
+reopened, run the following selection check. It examines every earlier open ID
+across workstreams and fails unexplained skips:
 
 ```powershell
 $taskId = (.\.venv\Scripts\python.exe -m tools.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable
@@ -1579,7 +1587,8 @@ warnings remained. Skips include opt-in publication work, absent ignored
 historical PDFs and a local migration report; they are not source acceptance.
 This verifies the Linux obligations for VR-0052 through VR-0058 at that
 revision. The separate hosted Source acceptance for the cleaned-up
-historical-evidence export remains open under V1S-093; this result does
+historical-evidence export remains open under the
+[transferred V1S-093 release gate](releasing.md#development-freeze-and-release-only-handoff); this result does
 not cover subsequent movement-reference or clean-export evidence changes.
 
 The later pinned movement/geometry batch at
@@ -1614,8 +1623,9 @@ edited, uncommitted V1S-033E browser test was part of this run.
 The reviewed, locally complete queue entries are retired under the
 strict drain policy; **hosted Source checks, macOS, cross-platform
 byte determinism, Installed wheel, Deployment smoke, and final
-source/browser release acceptance remain open** under V1S-093 and
-the mandatory `docs/ci.md`/`docs/releasing.md` gates.
+source/browser release acceptance remain open** under the
+[transferred V1S-093 release gate](releasing.md#development-freeze-and-release-only-handoff)
+and the mandatory `docs/ci.md`/`docs/releasing.md` checks.
 
 **2026-11-04 V1S-033E browser closeout:** The previously uncommitted
 combined browser test was reviewed in VD-0007 (no tests during design),

@@ -643,8 +643,9 @@ Each source row has an exact Army ID and name with ordered display/link segments
 Reviewed Combined Ammunition entries additionally require `components`, an ordered
 list of typed base `ammunition:*` IDs matching the linked segments exactly, separated
 only by `+`. This source projection is not a curated effect relationship, nor is
-Saving Roll notation parsed to infer composition. See `docs/data-model.md` for the
-current runtime boundary and remaining 1.0 work.
+Saving Roll notation parsed to infer composition. See
+[the data model](../../docs/data-model.md) for the current runtime and
+publication boundary.
 
 Authoring policy for Weapons: reuse canonical `ammunition:*` summaries
 and their citations via exact profile mappings, rather than repeating
@@ -653,9 +654,9 @@ Weapon text for source-specific attack modes, applicable Saving Roll fields,
 Traits, requirements, and genuinely conditional exceptions. The runtime
 projects shared component summaries as `ammunition_effects`, but does not
 adjudicate combinations or allow the lack of an individual Weapon definition
-to certify complete behavior. The 1.0 Weapon triage keeps such cases pending
-under shared-effects and exception review instead of treating every absent
-Weapon paragraph as a confirmed gameplay fact gap.
+to certify complete behavior. The 1.0 Weapon review uses explicit
+shared-effects and exception dispositions; absence of a separate Weapon
+paragraph alone is not a confirmed gameplay gap.
 
 `weapon-shared-effect-reviews.json` records explicit source-reviewed cases that
 require **no separate Weapon-specific text**. Each decision identifies the
@@ -856,8 +857,10 @@ authorize correcting genuinely ambiguous source values.
 
 Shared prose participates in the full semantic maintained-text syntax, target, and reviewed-link
 audits, including objective/ending payloads in the component library. No plain-reference exception
-is broadened for the new model. Rebuild `rules.db` with the current rules builder after migrating
-to format v23; current rules schema/compatibility is 8/10.
+is broadened for the new model. The rules builder consumes curated format v23.
+Its base schema/compatibility is 8/10; the reviewed 1.0 tracked release database uses the supported v9/11
+restriction-publication extension. Verify the matched tracked artifact rather
+than assuming a fresh base export has identical release bytes.
 
 Embedded `term` records own source-backed Game terminology that does not warrant a standalone
 catalog/detail route. They require `facts.scope` with a stable slug such as `game-element`,

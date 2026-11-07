@@ -22,8 +22,9 @@ Use these documents when deciding how the project works now:
 - `data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
   lifecycle.
 - `data/curated/README.md` — authored/curated data schemas and review contracts.
-- `testing.md` — local validation entry points, phased validation policy, test slices,
-  asset modes, reports, and benchmark tooling.
+- `testing.md` — local validation commands, test selectors, worker and asset
+  policies, plus dated 1.0 acceptance results. Historical runs are evidence for
+  their pinned inputs, not current-release approval.
 - [multi-agent-workspaces.md](multi-agent-workspaces.md) — optional coordination, enabled only
   by explicit user request; its checkout roles, claims and serialized integration apply within
   that requested scope, rather than to ordinary development by default.
@@ -63,7 +64,8 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   baseline evidence with subsequent source, browser, artifact and local candidate
   acceptance records. It preserves the reviewed 1.0 input scope without implying
   exhaustive whole-source coverage. Historical snapshots in this file are not
-  current task status; `TODO.md` owns any remaining release handoff or follow-up.
+  current task status; `releasing.md` owns release handoff and `TODO.md`
+  owns post-1.0 development.
 - [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
   source/interaction assessment with implementation follow-ups and remaining
   source conflicts. Its linked inventory, N5.3 reconciliation and source manifest
@@ -161,6 +163,19 @@ or deferred work. Implementation alone does not complete a task whose required
 validation remains in the [validation queue](validation-queue.md). A bounded task
 can close while a separate, explicitly owned final release gate remains open;
 do not relabel unfinished descendants as separate gates merely to close a parent.
+
+**Freeze before merging a release candidate:** The active development TODO
+must be reconciled before the final planned merge. Keep merge approval,
+exact-main-SHA hosted CI, tagging, authorized deployment and post-deployment
+verification in the canonical [release checklist](releasing.md), not as open
+development tasks whose later retirement requires a second merge. When an
+existing V1S entry concerns only those external release operations, transfer
+it explicitly to the runbook with its former ID, exact remaining obligation,
+approval dependency and evidence requirement; cite the IDs and this handoff
+in the transfer commit. **Transfer is not completion** and never waives a
+release gate. CI or deployment failures requiring tracked fixes reopen
+development and require a corrected release candidate instead of pretending
+the earlier merge is final.
 
 When correcting or extending an existing task, reopen it and every checked
 ancestor **before** editing its scope or adding subtasks. If genuinely new scope

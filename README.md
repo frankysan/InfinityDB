@@ -11,14 +11,9 @@ considerations, and the [deployment guide](docs/deployment.md) for updates.
 
 ## Guiding principles
 
-- **Accuracy:** use official data sources and preserve uncertainty when the
-  source is incomplete or ambiguous.
-- **Flexibility:** make Infinity data easier to browse and understand while
-  keeping the application simple, fast, and customizable.
-- **Transparency:** keep InfinityDB open source and clearly distinguish project
-  code from third-party data, quoted text, and graphical assets.
-- **Privacy:** collect only the aggregate operational information needed to run
-  and improve the service; do not build visitor profiles or persistent tracking.
+InfinityDB prioritizes official-source accuracy, transparent provenance,
+privacy, and flexible reference lookup. The authoritative principles and
+subsystem boundaries are in the [architecture](docs/architecture.md#guiding-principles).
 
 ## Privacy policy
 
@@ -43,14 +38,6 @@ identifiers, or use advertising trackers, fingerprinting, or per-user analytics.
   bookmarkable or shareable may be encoded in the URL, so it can also appear in your
   browser history or in a link you choose to share. InfinityDB does not retain those
   query/search values in its aggregate metrics.
-
-**Post-1.0 design direction:** Scenario creation and other user-authored tools
-will not require server-side saved content, accounts, or a share-link registry.
-Sharing will use self-contained URLs where practical, with file export/import
-for larger content. Authoring should work with a local, offline InfinityDB
-installation. Shared URLs and exported files are visible to their recipients;
-this direction is not a promise of secret or encrypted links. Existing browser
-settings persistence remains a separate, opt-in preference feature.
 
 This policy describes InfinityDB's application-level collection and retention. Hosting
 and network infrastructure necessarily processes connection metadata to deliver HTTP
@@ -148,49 +135,18 @@ are documented in [architecture](docs/architecture.md).
 
 ## Project domains
 
-Engineering work is classified into six project domains so ownership stays clear
-across planning, architecture, release notes, and implementation:
-
-- **Acquisition:** download/source-snapshot and asset/archive tooling.
-- **Data processing:** curation, validation, normalization, and generated databases.
-- **Deployment:** hosted packaging, server operation, migration, and monitoring.
-- **Web backend:** server-side application, queries, routes, and API behavior.
-- **Web frontend:** browser UI, interaction, accessibility, and visual presentation.
-- **Project infrastructure:** CI, shared checks, packaging/release tooling, developer
-  workflow, and documentation conventions.
-
-See [project domains](docs/project-domains.md) for the canonical boundaries and the
-documentation-label convention.
+Engineering changes are classified by the six ownership areas defined in
+[project domains](docs/project-domains.md). This is separate from player-facing
+[application domains](docs/application-domains.md).
 
 ## Release progression
 
-**Project domain:** Project infrastructure
-
-InfinityDB reached its current 1.0 reference baseline through these releases:
-
-- **0.7.x — Rules & context:** enriched existing catalog/application data with concise
-  rules summaries, official references, classifications, and reviewed semantic
-  relationships.
-- **0.8.x — Connected game structure:** exposed first-class relationships such as Fireteams,
-  Peripherals/Controllers, linked profiles/includes, selection/dependency constraints,
-  Reinforcement parentage, and useful cross-army navigation.
-- **0.9.x — Complete & discover:** closed the remaining application-data presentation
-  gaps and made the result searchable, navigable, and understandable.
-- **0.10.x — Stabilize & harden:** completed the application consistency and scenario
-  architecture reviews, frontend/theme work, and release/operations hardening.
-- **0.10.1 — Interim reference consistency (released 2026-10-10):**
-  published the core Scenarios, Ammunition and rules-reference improvements,
-  with stabilization fixes. See the [release notes](docs/CHANGELOG.md#0101---2026-10-10).
-- **1.0.0 — Current N5.3 reference (2026-11-07):** delivered the in-scope
-  current-source citation and browser reference baseline, dated FAQ,
-  deployed-object and exact-variant references, four core scenarios and the
-  optional ITS Season 18 Battleground pilot. The wider ITS library and
-  tournament tooling remain outside this baseline.
-
-In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
-0.9 closed application gaps → 0.10 hardened and polished → 1.0 completed the reference.**
-The [release process](docs/releasing.md) preserves the 1.0 completeness contract;
-future work is in the [post-1.0 backlog](docs/TODO.md#post-10--maintenance-and-product-expansion).
+InfinityDB **1.0.0** is the N5.3 current-reference release, following the
+0.6–0.10 series. It includes current-source rules citations, four core
+scenarios, reviewed FAQ and deployed objects, and exact-variant usage
+references. See the [changelog](docs/CHANGELOG.md) for the complete version
+history and the [post-1.0 backlog](docs/TODO.md#post-10--maintenance-and-product-expansion)
+for work outside this baseline.
 
 ## Requirements and setup
 
@@ -348,45 +304,19 @@ prevents replacement.
 
 ## Linux deployment
 
-The supported Docker Compose deployment packages the application, the tracked runtime
-databases, and the tracked processed symbol publication from one release tag into an immutable
-application image. Retained aggregate metrics run separately in an immutable-root
-`metrics-history` service with one bounded writable SQLite volume; no writable metrics state is
-mounted into the web-facing application container. Raw Army/wiki/PDF/source-symbol archives are
-not required on the server.
+The supported Docker Compose deployment packages the application, matched
+tracked runtime databases and processed graphical assets into an immutable
+release image; no raw Army/wiki/PDF archives are needed on the server.
 
 ```sh
 sh ./scripts/install-or-update.sh
 ```
 
-The installer fetches release tags, hands off to the installer shipped by the target release,
-checks out that release, validates the tracked `infinity.db`, `rules.db`, and
-`symbol-publication.json` contract, then builds and verifies the exact image that will be
-activated. Database generation remains a development/release workflow rather than a deployment
-step. Upgrading an existing 0.8.0 server to 0.8.1 requires the one-time bootstrap documented in
-[Linux deployment](docs/deployment.md); do not invoke the 0.8.0 installer directly for that
-transition.
-
-For a deployment test on the server that must not be reachable from the LAN, use
-`sh ./scripts/deploy-local-test.sh`. It runs as a separate Compose project on
-`127.0.0.1:8080` by default, including an isolated metrics-history volume, and does not prune
-production rollback images. `sh ./scripts/stop-local-test.sh` preserves that test history; add
-`--purge` for a deliberate clean-slate local stack.
-
-Retained aggregate history can be inspected from the collector SQLite store with
-`tools/metrics_history.py periods`, `report`, and `compare`. Reports can select or aggregate by ISO
-week, InfinityDB version, and snapshot revision and expose only the bounded status/route/histogram
-dimensions already collected; no historical HTTP endpoint or request-level log is added. See the
-[Linux deployment guide](docs/deployment.md) for command examples and percentile semantics.
-
-Place the supplied production Caddy service behind a public TLS reverse proxy.
-Deployment validation fails if required databases or graphical assets are missing or
-inconsistent.
-
-See the [Linux deployment guide](docs/deployment.md) for prerequisites, updates,
-rollback, and operational commands. Use the
-[server migration guide](docs/server-migration.md) when transferring an existing
-installation to another host.
+The installer selects a published release tag and validates its bundled
+artifacts before activation. For prerequisites, rollback, the special
+0.8.0-to-0.8.1 transition, metrics and isolated testing, see
+[Linux deployment](docs/deployment.md). Host migration is documented in the
+[server migration guide](docs/server-migration.md).
 
 ## Project layout
 
@@ -415,86 +345,28 @@ image_overrides/            # Local authoritative symbol overrides, ignored by G
 
 ## Development checks
 
-Use `tools/run_checks.py` as the standard development entry point:
+Use the project virtual environment and the canonical
+[testing guide](docs/testing.md) for profiles, test selection, asset modes,
+preflight and worker instructions. Common checks from the repository root:
 
 ```powershell
-# Full code checks: pytest, Ruff, then Pyright
-python tools/run_checks.py --profile code
-
-# Data/build validation
-python tools/run_checks.py --profile data
-
-# Markdownlint dependencies (one-time/when package-lock.json changes)
-npm ci --ignore-scripts --no-audit --no-fund
-
-# Markdown documentation checks
-python tools/run_checks.py --stage docs
-
-# All stages (including Markdownlint and isolated CI preflight)
-# Preflight may download Python packages; it skips if an earlier stage fails
-python tools/run_checks.py --all
-
-# CI preflight: staged src/ files and configured wheel data, without rerunning pytest
-python tools/ci_preflight.py --skip-pytest
-
-# Before committing: indexed lint/artifacts/tests/types and installed-wheel smoke
-# Creates a fresh virtual environment and may download Python packages
-python tools/run_checks.py --stage preflight
-
-# Targeted checks
-python tools/run_checks.py --stage test tests/test_availability.py
-python tools/run_checks.py --stage lint src/infinity_army_data/availability.py tests/test_availability.py
-
-# Maintained local test slices
-python tools/run_checks.py --stage test --test-section model
-python tools/run_checks.py --stage test --test-section web
-
-# Keep a timestamped local report
-python tools/run_checks.py --profile code --report
+.\.venv\Scripts\python.exe tools/run_checks.py --profile code
+.\.venv\Scripts\python.exe tools/run_checks.py --stage docs
+.\.venv\Scripts\python.exe tools/run_checks.py --all
 ```
 
-Test stages use `pytest-xdist` automatic worker selection by default. Use a
-fixed worker count when needed, or force serial execution for debugging:
-
-```powershell
-python tools/run_checks.py --stage test --test-workers 4
-python tools/run_checks.py --stage test --test-workers 0
-```
-
-See [development checks](docs/testing.md) for worker-selection guidance,
-Git-index preflight behavior and the current test-runner contract.
-Preflight checks the **staged index**, not unstaged tracked modifications,
-and complements the separate [installed-wheel CI check](docs/ci.md#installed-wheel-smoke).
-
-Requested stages continue after a failure by default; add `--fail-fast` to stop
-at the first failure. See [development checks](docs/testing.md) for stage and
-profile definitions, asset modes, reports, and exit codes.
+The documentation stage requires pinned npm dependencies installed via
+`npm ci --ignore-scripts --no-audit --no-fund`. See
+[CI](docs/ci.md) for hosted acceptance and [releasing](docs/releasing.md)
+for release gates.
 
 ## Technical documentation
 
-Start with the [documentation map](docs/README.md), which identifies the canonical owner for each
-kind of project information. The main current-state references are:
-
-- [Architecture](docs/architecture.md) — system boundaries, engineering principles, and durable
-  cross-layer contracts.
-- [Data model](docs/data-model.md) — source/application semantics, identities, persistence, and
-  query invariants.
-- [Application domains](docs/application-domains.md) — player-facing domain ownership and
-  publication capabilities.
-- [Web design guidelines](docs/web-design-guidelines.md) — browser surfaces, tables, controls,
-  responsive behavior, accessibility, typography, and theming.
-- [Project domains](docs/project-domains.md) — engineering ownership labels.
-- [Data storage and provenance](data/README.md) and
-  [curated data contracts](data/curated/README.md).
-- [Rules semantics](docs/rules-semantics.md), [rules research](docs/rules-research.md), and the
-  generated [rules interaction checklist](docs/rules-interaction-checklist.md).
-- [Development checks](docs/testing.md) and [continuous integration](docs/ci.md).
-- [Release process](docs/releasing.md), [Linux deployment](docs/deployment.md), and
-  [server migration](docs/server-migration.md).
-- [Backlog](docs/TODO.md) and [changelog](docs/CHANGELOG.md).
-
-Completed audit/closeout narratives are retained by Git history rather than kept as parallel
-current-state references unless they contain unique rationale that still guides active work.
+The [documentation map](docs/README.md) identifies the authoritative owners
+for architecture, data models, application domains, UI conventions, source
+provenance, tests, CI, release operations, deployment and research evidence.
+For work planning use the [post-1.0 backlog](docs/TODO.md); for published
+outcomes use the [changelog](docs/CHANGELOG.md).
 
 ## LLM code disclosure
 

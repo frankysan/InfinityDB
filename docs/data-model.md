@@ -8,7 +8,12 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-Unless explicitly marked otherwise, statements below describe the current repository model.
+Unless explicitly marked otherwise, statements below describe the 1.0
+repository model. **Dated source-variant review notes** record the findings
+and state of an earlier migration step, not the present implementation status;
+the maintained publication, API and browser contracts take precedence.
+Release/CI status belongs to [releasing](releasing.md) and [CI](ci.md),
+not this data-model specification.
 
 ## Pipeline and persistent artifacts
 
@@ -801,8 +806,9 @@ payload and occurrence relationships, not a second source of Skill definitions,
 a loadout builder, or a record of randomized game results. The verified exact
 source-row projection has an API and normal Skill/Equipment browser consumers;
 its byte-exact release publication is tracked and is required in current images.
-See [the candidate boundary](#current-read-only-variant-candidate) and
-`docs/TODO.md` for frozen-candidate and hosted release acceptance.
+The ignored candidate and tracked publication have separate contracts
+below. Exact-SHA hosted release acceptance belongs in
+[releasing](releasing.md#5-land-the-release-commit-verify-hosted-ci-and-tag).
 
 **Rule identity and variant identity.** The primary grouping key is the
 published canonical rules identity (for example `skill:martial-arts`),
@@ -813,6 +819,13 @@ source-scoped restrictions. The typed signature is deterministic and
 source-bound; distinct modifiers such as `+1 SD` and `+1B` cannot be merged.
 A shared family does not imply that all of its variants are equivalent. Retain
 the source catalog ID, raw variant/extras and rule citations as provenance.
+
+#### Dated source-variant reviews (pre-publication evidence)
+
+The following source-specific reviews preserve exact IDs, qualifiers, evidence
+and local promotion history. References to a usage index being absent describe
+the **dated review step**, not version 1.0: the current exact-variant index is
+published as specified above and in the later API contract.
 
 **Reviewed Discover (+3/+6/ReRoll), promoted (2026-11-02):**
 Pinned Army Skill source `131` has 43 direct occurrences, all with
@@ -2348,7 +2361,7 @@ join semantics, not new public routes. Validate duplicate-source, reused
 payload, repeated-row, cross-Army, shared-family/different-Level,
 profile-versus-loadout and unresolved-variant fixtures before publishing.
 
-#### Current read-only variant candidate
+#### Local build candidate (not the release artifact)
 
 **Project domain:** Data processing
 
@@ -2435,142 +2448,32 @@ browser link; `unit_option` rows without verified Army compatibility remain
 unlinked, with an explicit notice. These are not source-inferred Army memberships.
 When the publication is missing, the catalog detail flag is `false` and browsers
 do not request the unavailable endpoint or present an empty index as proof of no
-usage. V1S-065's focused browser regression and V1S-066's full source-pair,
-canonical owner, and normal-browser acceptance are verified on the pinned
-2026-11-05 development inputs. Final release-candidate and hosted acceptance
-remain separate; a matching tracked publication is packaged into the release
-image, while an independent raw archive remains development-only.
+usage. The dated V1S-065/066 browser and source-pair checks verified the matching
+publication on pinned development inputs. The tracked read model is packaged
+in the 1.0 release image; the raw archive remains development-only. Exact-SHA
+hosted and production acceptance are separate
+[release gates](releasing.md#development-freeze-and-release-only-handoff).
 
-#### V1S-062 — finalized identity, ordering and ownership contract (2026-11-05)
+#### Source-row identity and counting contract
 
-**Contract boundary:** this makes the existing design executable for
-V1S-063–066, but **does not implement** a projection, endpoint, cache,
-route or new release artifact. All identities below are scoped to a
-verified Army snapshot and matching curated rules release; never
-interpret an ID or cached index from another input pair.
+Each exact-variant source row is keyed by
+`(catalog, owner_kind, occurrence_id)`, with explicit source- and
+application-identity paths;
+numeric source IDs are not standalone public identifiers. Preserve typed
+ordered extras, their full source signature and each profile, loadout or
+shared Unit-option owner. Only reviewed exact signatures enter a variant
+group; family-only or unsupported rows must not be counted as exact usage.
 
-1. **One source fact, one source-row identity.** Use
-   `(catalog, owner_kind, occurrence_id)` as the source-row key,
-   with `owner_kind = profile | option | unit_option` and catalog
-   `skills | equipment`. Validate the row's full parent foreign
-   key: `(army_id, unit_id, group_id, profile_id)` for profiles,
-   `(army_id, unit_id, group_id, option_id)` for Army loadouts,
-   or `(unit_id, option_id)` for shared Unit options. Store the
-   numeric source catalog ID, its display and source position,
-   quantity, raw field, **ordered** extra tuples
-   `(extra_position, extra_id, extra_type, raw_value)`, and the
-   owner-path key. A raw occurrence ID alone is not a stable
-   public identifier and is not assumed unique across owner
-   tables or future snapshots.
-2. **Exact reviewed variant, not a loose display label.**
-   Resolve `(catalog, source_item_id)` through the pinned
-   `application_catalog_sources`, then the reviewed rules
-   catalog mapping. The semantic key contains the canonical
-   rules record/family and **all** source-reviewed variant
-   dimensions (Level, named source variant, typed MOD or
-   replacement, effect scope and typed occurrence parameters).
-   Serialize typed fields canonically with explicit kind names
-   and value types; `+1 SD`, `+1B`, `PH=18` and
-   `ReRoll` must never collapse to a shared numeric/string
-   label. Preserve source IDs, ordered raw extras, and citations
-   alongside the key as evidence. Merge different source IDs
-   into one variant only through an explicit reviewed
-   equivalence; matching display names alone cannot merge.
-   A nonempty unreviewed or partly matched extra signature
-   **excludes that source row from the exact-variant result**,
-   even when another extra on the row is reviewed.
-   Reviewed family membership may be reported separately,
-   expressly labelled family-only; it must not inflate
-   a variant-specific total.
-3. **Owner scope and concrete Army membership.** A profile
-   row attaches only to its matching source profile; an
-   option row only to its source loadout. A `unit_option`
-   is a shared Unit choice and is **not** an extra direct
-   profile Skill or an automatic Army-wide field:
-   attribute it to an application Army only after checking
-   `army_units`, `application_army_sources`,
-   `logical_unit_sources` and its actual compatible
-   Unit-option context. The raw `army_id` is a source
-   list, not interchangeable with an application Army ID.
-   Attach a reused profile/loadout payload through
-   `profile_payload_occurrences` or
-   `loadout_payload_occurrences`, retaining every
-   source path, Army-specific AVA/Points/SWC and
-   profile/group/option identity; never turn shared
-   payload IDs or hashes into source ownership.
-4. **Include and Peripheral provenance is not direct
-   possession.** The `profile_occurrence_includes`,
-   `loadout_occurrence_includes` and
-   `unit_option_include_targets` tables give contextual
-   include edges to a target loadout payload; retain the
-   parent source context, include position/quantity,
-   target payload and separately evidenced chain. Detect
-   cycles, duplicate paths and missing/ambiguous targets;
-   report only validated, explicitly labelled derived
-   membership. Do not add a target's direct occurrence
-   to the source owner or create a selectable standalone
-   loadout from an included payload. Controller/Peripheral
-   links come from the separately reviewed
-   `application_peripheral_*` relationships; do not copy
-   the Peripheral's Skills or Equipment to its Controller
-   or extrapolate TinBot Fireteam sharing as new direct
-   source occurrences.
-5. **Deterministic ordering and counting.** Sort public
-   groups by published rules identity and canonical typed
-   variant signature; within a group sort by application
-   Army identity, logical Unit identity, source Army/Unit,
-   owner kind, group, source profile/loadout position,
-   relationship display/source position and source-row
-   identity as the last tie breaker. Source extra order
-   remains `extra_position`, never incidental SQLite
-   fetch order. Counts are **set cardinalities**:
-   distinct logical Unit globally, distinct
-   `(application_army_id, logical_unit_id)` per Army,
-   and distinct normalized profile/loadout context per
-   owner kind and typed variant (using the existing
-   logical-Unit-scoped payload hash). The raw
-   relationship-row total is exposed separately as
-   provenance, not as a player-facing Unit count;
-   multiple Army source copies and repeated same-variant
-   rows do not inflate the grouped totals. The context
-   result retains each original source path for drilldown.
-6. **Publication and negative acceptance.** Build only
-   from the exact accepted `infinity.db`,
-   `infinity.raw.db`, `rules.db`, reviewed source
-   mappings and matched archive identity; record
-   fingerprints/revisions with the projection. A
-   stale pair, unsupported source mapping, unknown
-   variant, unresolved scoped qualifier, missing
-   owner, invalid Include graph or ambiguous source
-   link fails closed or appears in a separate
-   diagnostic count, never as a fabricated variant
-   membership. For V1S-063 tests, cover direct
-   profile/option/shared Unit-option ownership,
-   exact multi-extra order and reviewed-combination
-   matching, identical payloads across Armies,
-   duplicate rows/positions, same-family different
-   Levels, a 2W Doctor source-only qualifier,
-   source-47 bare Infiltration `ReRoll`, Include
-   repetition/cycles, Peripheral controller versus
-   owned Skills, no direct usage for uninstantiated
-   TinBot variants, and snapshot/stale rules-pair
-   mismatch. V1S-064 checks stable API ordering
-   and fail-closed filters; V1S-065–066 check
-   actual normal-player links and source-to-browser
-   parity without inventing route shapes here.
-
-**Review disposition:** normalized row keys and extra-order fields
-are grounded in `src/infinity_db/database/schema.py`; reuse/
-dedup follows `profile_payloads.py`,
-`loadout_payloads.py` and the explicit source-to-logical
-Unit tables. Existing source audit
-`tools.audit_source_variant_inputs` proves these are
-usable source relationships, but no Unit-use projection
-or new automated acceptance suite is claimed by
-this design-only decision. V1S-063 owns implementing
-and testing the accepted contract; any schema
-extension must preserve existing persisted data and
-public identifier compatibility.
+Use set cardinalities for distinct logical Units, Army/Unit pairs and
+profile/loadout contexts, with relationship-row counts reported separately
+as provenance. Include traversal and Peripheral access describe context,
+**not direct Skill or Equipment possession**. Shared Unit options without
+verified compatible Army contexts remain source-only. Deterministic ordering,
+source-pair fingerprints, fail-closed exclusions, and the published API/
+browser contract are specified in the implemented sections above and
+[variant-source evidence](v1.0-source-coverage-audit.md#variant-usage-candidate-foundation-v1s-063-2026-11-05).
+The dated V1S-062 design-only workplan is retained in Git history, not
+presented as unfinished implementation.
 
 **Lieutenant occurrence-resource review (2026-11-03):** N5.3 English
 p. 99 explicitly distinguishes `+1 Command Token` (one additional
@@ -3317,8 +3220,8 @@ printed PH Attribute; and `Explosion` triggers a **single-use**, user-
 exempt PS 8 Normal circular Direct Template Attack after the landing
 location is resolved (N5.3 printed p. 89). This is static, typed source
 metadata; it neither rolls dice nor places models or computes the
-attack during play. Only the six reviewed signatures may enter the
-future cross-Army usage index, with full source-owner context retained.
+attack during play. Only these reviewed signatures can contribute to the published
+exact-variant usage index, with full source-owner context retained.
 
 ### Typed relations
 
