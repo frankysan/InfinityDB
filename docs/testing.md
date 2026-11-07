@@ -1206,9 +1206,11 @@ The release owner reported slow Glossary loading on development preview
 `2df92f9`. The immutable Glossary API now shares one maintained-text
 resolver across entries and caches the resolved payload across requests.
 It preserves citations, link tokens, search and URL fragment semantics.
-This removes repeated reference lookups, but no controlled before/after
-cold-load timing is available; a manual responsiveness retest is still
-needed on the new commit after restarting the preview.
+This removes repeated reference lookups. After restarting the preview on
+`f4a47167fa5b257dd94f10fc738f1f91009ea8ff`, the release owner
+reported **noticeably faster initial Glossary loading and subsequent
+refreshes** (2026-11-07). This is qualitative manual confirmation, not a
+controlled before/after benchmark or hosted performance acceptance.
 
 On Unit details, Reinforcement relationships now require Developer Mode.
 The ordinary view retains Army availability and roster navigation.
