@@ -5574,19 +5574,59 @@ trusted-LAN preview and records the device/browser, exact SHA and result.
 Never expose the development server to an untrusted interface by default.
 Stop the local preview with Ctrl+C.
 
-**Not yet an exact-version 1.0 candidate:** this checkout's package and
-API versions remain `0.10.1` (and the source-checkout display may show
-`+dev`), as required until release metadata is prepared. The
-`INFINITY_DB_DISPLAY_VERSION` presentation override is **not** a
-substitute for a version-matched `/api/version`. V1S-080/089 human
-acceptance and V1S-087 served `1.0.0` checks remain open. Before the
-first true hosted candidate, explicitly reconcile the sequencing:
-V1S-087 requires a 1.0 candidate, but V1S-092 currently postpones the
-version bump until V1S-087/090 are complete. Prepare an *unpublished*
-candidate metadata step (or an equivalent separately authorized
-candidate checkout), and keep final release-note/annotation promotion
-dependent on accepted release evidence. Do not silently weaken the
-exact-version gate or tag/deploy the preview.
+**Historical pre-candidate boundary:** on the recorded `25871751`
+development preview, package and API versions were still `0.10.1`.
+The `INFINITY_DB_DISPLAY_VERSION` presentation override cannot replace
+an exact-version `/api/version` check. The untagged 1.0.0 candidate
+metadata step below resolves this sequencing dependency without promoting
+the public release.
+
+### Untagged 1.0.0 candidate version checkpoint (2026-11-07)
+
+**Project domains:** Project infrastructure, Web backend, Web frontend
+
+On the validated development implementation after `2be87f69`, release
+preparation sets **both** `pyproject.toml` and
+`src/infinity_army_data/__init__.py` to `1.0.0`. In a source checkout,
+the footer may display `1.0.0+dev`; the real `/api/version` endpoint
+and wheel metadata instead use **exactly `1.0.0`**, not a presentation
+override. All changes remain **untagged** on `dev/v1.0.0`, with the public
+release and `docs/CHANGELOG.md` still at **0.10.1** and **Unreleased**.
+
+Focused local release-preparation checks passed:
+
+- `tests/test_version.py`: **6/6**, zero skips, consistent Python and
+  package metadata (job `04a2dac565a748b3bd5a342c516a3e4c`).
+- `tests/test_verify_release_candidate_browser.py::test_release_gate_runs_real_local_chromium_when_available`:
+  **1/1**, real Chrome against a temporary local WSGI application, with
+  before/after version, runtime snapshot and static revision checks
+  (job `0ac21a8c183a49d1b73a0b547e8fd20a`).
+- `tests/test_web.py::test_browser_version_check_uses_an_uncached_server_version`:
+  **1/1** (job `b58f04f617934e61b4f52dddc53fe829`).
+- `tests/test_release_notes.py::test_checked_in_changelog_parses_current_and_historical_releases`:
+  **1/1** (job `282836b03bdf427082a479fbf34f301a`).
+- The exact-candidate verifier rejects a mismatched version or static
+  fingerprint before browser execution (**2/2**, job
+  `962e136716db4ea581dd8590bc0edb0f`); runtime snapshot identity
+  remains consistent for attached, absent or independent Weapon-profile
+  publication layouts (**3/3**, job
+  `d8ca9b287e4944eb9634f853d43aab13`).
+- Read-only `tools.verify_deployment_assets`: **808/808** processed
+  SVGs and runtime/reference publications source-matched; tracked
+  `tools.build_variant_usage --check-publication` and
+  `tools.build_weapon_profile_publication --check`: both PASS.
+  Tracked databases and published data were **not rebuilt or modified**.
+
+This is **local preparation evidence**, not hosted V1S-087 or human
+V1S-080/089 acceptance. To inspect the real candidate, restart the
+development server after this checkpoint and request
+`http://127.0.0.1:8000/api/version`; verify `version: "1.0.0"` and
+the current snapshot/static values. The release owner still needs to
+serve a candidate on an accessible, controlled origin and run the
+independent exact-version `tools.verify_release_candidate_browser` gate,
+then record final touch/visual sign-off on the *candidate SHA*. Final
+changelog promotion, V1S-090 cumulative testing, merge/tagging and
+deployment remain gated independently.
 
 ### Hosted Unit release-candidate acceptance
 

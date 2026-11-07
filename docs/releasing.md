@@ -224,6 +224,20 @@ application parses it to render **What's changed**.
 Do not change the released version early merely to mark work in progress; development
 checkouts use the existing `+dev` display-version mechanism until release preparation.
 
+**1.0 untagged candidate checkpoint:** The exact-version hosted Unit gate
+(V1S-087) needs the real `/api/version` to report `1.0.0` before final
+release acceptance, while V1S-092 reserves final release-note/version
+promotion for after that acceptance. During explicit release-candidate
+preparation, it is therefore permissible to update **only** the
+`pyproject.toml` and `src/infinity_army_data/__init__.py` version pair
+to `1.0.0` on `dev/v1.0.0`, with an untagged and unreleased candidate
+status in the README/TODO. Verify both package metadata and `/api/version`,
+the pinned runtime pair, browser and static identity before serving a
+candidate. Keep the changelog headed `Unreleased`, the publicly released
+README version at `0.10.1`, and final metadata review under V1S-092.
+This checkpoint is **not** an approved final release, V1S-087 hosted
+acceptance, a Git tag, or deployment authorization.
+
 ## 4. Run local release validation
 
 - [ ] Rebuild and validate any release runtime database whose source/curated inputs changed,
