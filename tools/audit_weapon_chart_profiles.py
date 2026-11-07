@@ -81,6 +81,15 @@ def _cell(
     ).strip()
 
 
+def _chart_burst_anchors(words: list[tuple[float, float, str]]) -> list[tuple[float, str]]:
+    """Locate chart rows, including the early rows on N5.3 page 188."""
+    return sorted(
+        (y, word) for x, y, word in words
+        if 294 <= x <= 310 and 100 < y < 800
+        and re.fullmatch(r"(?:[1-9]|10|--)", word)
+    )
+
+
 def rows_from_words(words: list[tuple[float, float, str]], page_number: int
                     ) -> list[dict[str, Any]]:
     """Reassemble rows of the *specific* N5 v5.3 Weapon Chart layout.
@@ -90,12 +99,7 @@ def rows_from_words(words: list[tuple[float, float, str]], page_number: int
     the name window to the printed name column and 14.9 vertical points.
     Unreadable cells are left blank, never reconstructed by guessing.
     """
-    anchors = [
-        (y, word) for x, y, word in words
-        if 294 <= x <= 310 and 175 < y < 800
-        and re.fullmatch(r"(?:[1-9]|10|--)", word)
-    ]
-    anchors.sort()
+    anchors = _chart_burst_anchors(words)
     result: list[dict[str, Any]] = []
     for index, (y, _) in enumerate(anchors):
         low = max(y - 14.9, (anchors[index - 1][0] + y) / 2) if index else y - 14.9
@@ -440,11 +444,7 @@ def audit_chart(pdf: Path, army_db: Path) -> dict[str, Any]:
                 for w in doc[page - 1].get_text("words")
             ]
             page_rows = rows_from_words(words, page)
-            anchors = sorted(
-                y for x, y, word in words
-                if 294 <= x <= 310 and 175 < y < 800
-                and re.fullmatch(r"(?:[1-9]|10|--)", word)
-            )
+            anchors = [y for y, _ in _chart_burst_anchors(words)]
             if len(anchors) != len(page_rows):
                 raise WeaponChartAuditError("Weapon Chart row anchors are inconsistent")
             fills = [
@@ -493,7 +493,7 @@ def audit_chart(pdf: Path, army_db: Path) -> dict[str, Any]:
 def markdown_report(report: dict[str, Any]) -> str:
     result = report["comparison"]
     lines = [
-        "# 1.0 N5 v5.3 Weapon Chart — complete row alignment and range evidence",
+        "# 1.0 N5 v5.3 Weapon Chart — partial row alignment and range evidence",
         "",
         "**Partial evidence, not a completeness verdict.** Uses the official PDF pp. 176–188.",
         "No upstream source, Army metadata, or curated gameplay facts are modified.",

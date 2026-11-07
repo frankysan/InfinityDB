@@ -20,6 +20,7 @@ from typing import Any
 from tools.audit_weapon_chart_profiles import (
     PDF_PAGES,
     WeaponChartAuditError,
+    _chart_burst_anchors,
     _identity,
     _mode_identity,
     _sha256,
@@ -144,11 +145,7 @@ def _source_traits_by_chart_row(doc: Any) -> dict[tuple[int, str], str]:
             for word in doc[page_number - 1].get_text("words")
         ]
         chart_rows = rows_from_words(words, page_number)
-        anchors = sorted(
-            y for x, y, word in words
-            if 294 <= x <= 310 and 175 < y < 800
-            and re.fullmatch(r"(?:[1-9]|10|--)", word)
-        )
+        anchors = [y for y, _ in _chart_burst_anchors(words)]
         if len(chart_rows) != len(anchors):
             raise WeaponChartAuditError(f"Ambiguous row anchors on page {page_number}")
         for index, row in enumerate(chart_rows):

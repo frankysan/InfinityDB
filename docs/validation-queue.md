@@ -145,7 +145,24 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending deferred execution entries.
+- [ ] VR-0133 (2026-11-07; ready-to-run): Verify the shared Weapon Chart
+  row-anchor correction and its downstream profile/Trait evidence.
+  Work: V1S-082; revision: implementation commit to be pinned; risk:
+  inaccurate source coverage or cross-mode attribution.
+  Immediate: Ruff and documentation checks passed; source bytes and generated
+  databases are unchanged.
+  Design: VD-0105 was statically reviewed without executing tests. It adds
+  synthetic boundary/mode/trait-alignment and pinned-PDF assertions in
+  `tests/test_audit_weapon_chart_profiles.py` and
+  `tests/test_audit_weapon_traits_prose.py`.
+  Deferred: run those two modules plus
+  `tests/test_audit_weapon_definition_gaps.py` and
+  `tests/test_audit_wiki_weapon_chart_names.py`;
+  run the exact-hash local N5.3 PDF integration and inspect the resulting
+  profile/mode, field, range and Trait classifications. Reconcile any skips
+  and preserve candidate differences without changing gameplay data.
+  Intended host: pinned `linux-dev` when available; otherwise Windows with
+  the locally pinned PDF, reported separately from Linux and hosted CI.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -160,8 +177,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0105`; active obligations are listed above.
-- Execution: `VR-0133`; active obligations are listed above.
+- Design: `VD-0106`; active obligations are listed above.
+- Execution: `VR-0134`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

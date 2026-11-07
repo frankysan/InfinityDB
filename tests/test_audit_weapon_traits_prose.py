@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -37,6 +38,33 @@ def test_traits_cell_keeps_multiline_text_without_absorbing_next_row() -> None:
     assert _trait_cell(words, 324.8, 299.0, 345.0) == (
         "BIOWEAPON (DA+SHOCK), SILENT (-6)."
     )
+
+
+def test_pinned_pdf_keeps_early_profile_and_trait_rows_aligned() -> None:
+    from tools.audit_weapon_traits_prose import audit_traits_and_prose
+
+    root = Path(__file__).resolve().parents[1]
+    pdf = root / "data/pdf/rules/n5-rules-v5.3-en.pdf"
+    if not pdf.is_file():
+        pytest.skip("Ignored N5.3 PDF unavailable")
+    pytest.importorskip("fitz")
+    report = audit_traits_and_prose(
+        pdf, root / "data/generated/infinity.db", root / "data/generated/rules.db"
+    )
+    assert report["corePdfSha256"] == (
+        "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
+    )
+    assert report["traitRows"] == 173
+    early = {
+        (row["name"], row["mode"]): row for row in report["traits"]
+        if (row["name"], row["mode"]) in {
+            ("Suppressive Fire Mode Weapon", ""), ("Uragan MRL", "Blast Mode")
+        }
+    }
+    assert len(early) == 2
+    assert all(row["page"] == 188 and not row["status"].startswith("deferred")
+               for row in early.values())
+    assert early[("Uragan MRL", "Blast Mode")]["printedTraits"]
 
 
 

@@ -234,8 +234,18 @@ bounded rule-citation/route check; final release acceptance remains open.
   source variants and scenarios. The Pheroware Tactics family and Endgame
   locators were corrected to the actual N5.3 chart page;
   [VR-0131 passed](testing.md#v1s-082-pheroware-citation-regression-vr-0131)
-  its focused source-to-browser regressions on Windows. Reconcile further citation
-  applicability and known missing dependencies before closing this gate;
+  its focused source-to-browser regressions on Windows. The
+  [Wiki-only citation screen](v1.0-source-coverage-audit.md#v1s-082-wiki-only-direct-citation-screen-2026-11-07)
+  matched all 62 remaining direct-reference locators to captured articles
+  or sections. The [Army catalog dependency screen](v1.0-source-coverage-audit.md#v1s-082-army-catalog-dependency-screen-2026-11-07)
+  found cited Skill, Equipment, Trait and Ammunition targets. All 62
+  profile-only Weapons have fingerprinted, reviewed chart-page evidence,
+  but their normal browser pages do not expose that Weapon-specific source;
+  publish applicable profile citations without treating Ammunition citations
+  as evidence for Weapon statistics. The chart-audit extractor also missed
+  two early page-188 rows; its shared-anchor correction is pending
+  [VR-0133](validation-queue.md#pending-deferred-execution). Reconcile other
+  PDF-backed and contextual citation applicability and known missing dependencies before closing this gate;
   metadata and reachability alone do not prove that a locator supports its reference.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/

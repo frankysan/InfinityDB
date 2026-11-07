@@ -130,6 +130,50 @@ def test_wrapped_name_is_reconstructed_within_row_boundaries() -> None:
     assert rows[0]["ammunition"] == "AP+DA"
 
 
+def test_early_rows_share_profile_and_trait_anchors_without_mode_leaks(monkeypatch) -> None:
+    from tools import audit_weapon_traits_prose
+
+    words = [
+        (297.0, 99.0, "9"),
+        (24.0, 111.8, "SUPPRESSIVE"), (64.0, 111.8, "FIRE"),
+        (24.0, 121.4, "MODE"), (48.0, 121.4, "WEAPON"),
+        (297.0, 116.6, "1"), (470.0, 116.6, "FIRST"),
+        (24.0, 143.0, "URAGAN"), (60.0, 143.0, "MRL"),
+        (24.0, 152.6, "(Blast"), (50.0, 152.6, "Mode)"),
+        (297.0, 147.8, "3"), (470.0, 143.0, "BLAST"),
+        (470.0, 152.6, "TEMPLATE"),
+        (24.0, 174.2, "URAGAN"), (60.0, 174.2, "MRL"),
+        (24.0, 183.8, "(Hit"), (45.0, 183.8, "Mode)"),
+        (297.0, 179.0, "3"), (470.0, 179.0, "HIT"),
+        (297.0, 800.0, "9"),
+    ]
+    rows = rows_from_words(words, 188)
+    names = [row["name"] for row in rows]
+    assert names == [
+        "SUPPRESSIVE FIRE MODE WEAPON",
+        "URAGAN MRL (Blast Mode)",
+        "URAGAN MRL (Hit Mode)",
+    ]
+    assert [row["burst"] for row in rows] == ["1", "3", "3"]
+    assert [_printed_name_and_mode(name) for name in names[1:]] == [
+        ("URAGAN MRL", "Blast Mode"), ("URAGAN MRL", "Hit Mode")
+    ]
+
+    class Page:
+        def get_text(self, kind: str) -> list[tuple[float, float, float, float, str]]:
+            assert kind == "words"
+            return [(x, y, x + 1, y + 1, text) for x, y, text in words]
+
+    class Document:
+        def __getitem__(self, index: int) -> Page:
+            assert index == 187
+            return Page()
+
+    monkeypatch.setattr(audit_weapon_traits_prose, "PDF_PAGES", (188,))
+    traits = audit_weapon_traits_prose._source_traits_by_chart_row(Document())
+    assert [traits[(188, name)] for name in names] == ["FIRST", "BLAST TEMPLATE", "HIT"]
+
+
 def test_explicit_mode_disambiguates_repeated_weapon_name() -> None:
     source = _pdf_row("MULTI Red Fury (Anti-Materiel Mode)")
     primary = {**_army_row("MULTI Red Fury"), "mode": "Antimaterial Mode"}
@@ -450,17 +494,28 @@ def test_pinned_n53_pdf_chart_source_differences() -> None:
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )
     rows = report["comparison"]
-    assert (rows["chartRowsLocated"], rows["unambiguousRowsCompared"]) == (171, 171)
-    assert (rows["candidateDiscrepancies"], rows["rangeCandidates"]) == (1, 1)
+    assert (rows["chartRowsLocated"], rows["unambiguousRowsCompared"]) == (173, 173)
+    assert (rows["candidateDiscrepancies"], rows["rangeCandidates"]) == (2, 1)
     assert rows["deferredRows"] == 0
     assert len(report["auxiliaryProfiles"]) == 14
     differences = [row for row in rows["compared"] if row["differences"]]
     assert [(row["name"], row["mode"]) for row in differences] == [
-        ("Kobra Pistol", "CC Mode")
+        ("Kobra Pistol", "CC Mode"), ("Suppressive Fire Mode Weapon", "")
     ]
     assert differences[0]["differences"] == [
         {"field": "savingRolls", "pdf": "1", "army": "2"}
     ]
+    assert differences[1]["differences"] == [
+        {"field": "ammunition", "pdf": "*", "army": ""}
+    ]
+    uragan = {
+        row["mode"]: row for row in rows["compared"] if row["name"] == "Uragan MRL"
+    }
+    assert set(uragan) == {"Blast Mode", "Hit Mode"}
+    assert all(row["page"] == 188 and row["status"] == "fields-match"
+               for row in uragan.values())
+    assert all(row["rangeComparison"]["status"] == "bands-match"
+               for row in uragan.values())
     katyusha = next(row for row in rows["compared"] if row["name"] == "Katyusha MRL")
     assert katyusha["rangeComparison"]["pdf"][1:3] == ["3", "3"]
     assert katyusha["rangeComparison"]["army"][1:3] == ["+3", "+3"]
@@ -472,4 +527,3 @@ def test_pinned_n53_pdf_chart_source_differences() -> None:
         "AP Mine", "E/M Mine", "Monofilament Mine", "PARA Mine",
         "Shock Mine", "Viral Mine", "Dazer",
     }
-

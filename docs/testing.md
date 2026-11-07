@@ -5193,8 +5193,11 @@ The output includes the source PDF SHA-256, raw compared fields, range-band
 evidence, candidate discrepancies, and any unresolved chart rows. Saving Roll
 multipliers are interpreted together with the Saving Attribute: an Army
 `savingNum=1` with `saving=-` is non-operative and matches a printed `--`.
-The supplied v5.3 PDF yields 171/171 uniquely aligned rows, with 170 five-field
-matches and 170 range-band matches. Kobra Pistol CC Mode has a Saving Rolls
+At the 2026-11-05 review, the extractor uniquely aligned 171 detected rows, with
+170 five-field matches and 170 range-band matches. A later
+[early-row correction](v1.0-source-coverage-audit.md#v1s-082-weapon-chart-early-row-correction-2026-11-07)
+identified two omitted page-188 rows; refreshed execution is tracked under
+VR-0133. Kobra Pistol CC Mode has a Saving Rolls
 source discrepancy candidate (PDF 1, Army 2); Katyusha MRL prints unsigned `3`
 where Army has `+3`. The separate Disco Ball object's attributes match.
 The [V1S-070 source review](v1.0-source-coverage-audit.md#weapon-profile-and-multimode-chart-review-v1s-070-2026-11-05)
@@ -6505,7 +6508,10 @@ python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5.3-e
 
 The supplied N5 v5.3 PDF yields 145 literal Trait-list matches, 15 reviewed
 notation equivalents, two manually checked source-cell matches, and nine remaining
-membership/classification candidates across all 171 chart rows (zero deferrals).
+membership/classification candidates across 171 then-detected chart rows
+(zero deferrals). The later
+[early-row correction](v1.0-source-coverage-audit.md#v1s-082-weapon-chart-early-row-correction-2026-11-07)
+identified two omitted page-188 rows.
 `config/validation/weapon-trait-source-review.json` maintains the narrow spelling,
 State-notation, and compound footnote equivalences separately from gameplay data.
 The two verified source cells are keyed by printed name/page and can only be reused

@@ -120,8 +120,15 @@ isolated pytest pass was still progressing. The dependent deterministic-output
 comparison was skipped. At `cde06cb34f3e5a78a87f2043bad4f7f4a887cc14`,
 four focused Windows tests passed without skips for the matrix budgets,
 publication setup and retained full preflight. The dedicated MCP Linux
-worker was unavailable. A replacement hosted run and its required jobs
-remain separate acceptance evidence.
+worker was unavailable. Replacement commit
+`06e817972a2adade0f17259c672395d18a95419d` passed
+[Source run 42317983707](https://github.com/frankysan/InfinityDB/actions/runs/42317983707),
+including all four platform/Python jobs and cross-platform deterministic
+outputs. Its
+[installed-wheel run 42317983643](https://github.com/frankysan/InfinityDB/actions/runs/42317983643)
+and [deployment-smoke run 42317983693](https://github.com/frankysan/InfinityDB/actions/runs/42317983693)
+also passed. These outcomes apply only to that revision; final-candidate
+release acceptance remains separate.
 
 Every leg installs `.[dev,symbols]`, uses the controlled `tests/fixtures/deployment-smoke` Army
 source for build validation, and requires the tracked graphical publication. The primary Ubuntu
