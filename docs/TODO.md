@@ -170,10 +170,9 @@ is bounded to the development pair; final-input checks remain.
   passed **10/10** on `174bf8b2`, with zero skips; no browser defect was
   reproduced. This is **not human touch acceptance**, and the earlier
   V1S-079 NVDA/Chrome 7/7 walkthrough does not replace it.
-  Blocked: requires the release owner's manual touch/visual observations
-  on a genuinely release-matched candidate; authority: release owner;
-  retry: once the candidate is presented for manual inspection. Preserve
-  the frozen source pair; do not test the older public 0.10.1 deployment.
+  Preserve the frozen source pair; do not test the older public 0.10.1 deployment.
+  Blocked: manual touch/visual sign-off requires a release-matched candidate;
+  authority: release owner; retry: when the candidate is available for device inspection.
 
 #### Final frozen-candidate acceptance and release
 
