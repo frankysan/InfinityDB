@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import shutil
+from io import BytesIO
 from pathlib import Path
 from socketserver import ThreadingMixIn
 from threading import Thread
@@ -14,7 +17,7 @@ import pytest
 from infinity_db import __version__
 from infinity_db.web import create_app
 from infinity_db.web.presentation import STATIC_ASSET_REVISION
-from tools.report_reference_baseline import ReferenceBaselineError
+from tools.report_reference_baseline import ReferenceBaselineError, build_baseline
 from tools.verify_release_candidate_browser import (
     ReleaseCandidateError,
     local_revision,
@@ -38,6 +41,116 @@ def _browser_ok(origin: str, *, slugs: tuple[str, ...],
             for width in widths for slug in slugs
         ],
     }
+
+
+def _copy_runtime_pair(tmp_path: Path, *, include_profile: bool) -> tuple[Path, Path, Path]:
+    army, rules = tmp_path / "infinity.db", tmp_path / "rules.db"
+    profile = tmp_path / "weapon-profile-sources.json"
+    shutil.copyfile(ARMY_DB, army)
+    shutil.copyfile(RULES_DB, rules)
+    if include_profile:
+        shutil.copyfile(ARMY_DB.with_name(profile.name), profile)
+    return army, rules, profile
+
+
+@pytest.mark.parametrize("layout", ("attached", "absent", "independent-rules"))
+def test_release_identity_matches_runtime_publication_layouts(
+    tmp_path: Path, layout: str,
+) -> None:
+    army, rules, profile = _copy_runtime_pair(tmp_path, include_profile=layout != "absent")
+    if layout == "independent-rules":
+        other = tmp_path / "other"
+        other.mkdir()
+        independent_rules = other / rules.name
+        shutil.copyfile(rules, independent_rules)
+        rules = independent_rules
+
+    profile_sha = (
+        hashlib.sha256(profile.read_bytes()).hexdigest() if layout == "attached" else None
+    )
+    army_sha = hashlib.sha256(army.read_bytes()).hexdigest()
+    rules_sha = hashlib.sha256(rules.read_bytes()).hexdigest()
+    expected = hashlib.sha256(
+        f"{army_sha}:{rules_sha}:{profile_sha or 'none'}".encode()
+    ).hexdigest()
+
+    app = create_app(army, rules_database_path=rules)
+    report = build_baseline(army, rules)
+    assert report["weaponProfilePublicationSha256"] == profile_sha
+    assert report["runtimeSnapshotRevision"] == expected
+    assert app.snapshot_revision == expected
+    assert local_revision(army, rules) == expected
+
+
+def test_runtime_snapshot_without_rules_uses_absent_artifact_markers(tmp_path: Path) -> None:
+    army = tmp_path / "infinity.db"
+    shutil.copyfile(ARMY_DB, army)
+    army_sha = hashlib.sha256(army.read_bytes()).hexdigest()
+    expected = hashlib.sha256(f"{army_sha}:none:none".encode()).hexdigest()
+    assert create_app(army).snapshot_revision == expected
+
+
+class _VersionResponse(BytesIO):
+    status = 200
+
+
+def test_release_preflight_rejects_changed_weapon_profile_bytes(tmp_path: Path) -> None:
+    army, rules, profile = _copy_runtime_pair(tmp_path, include_profile=True)
+    previous_app = create_app(army, rules_database_path=rules)
+    previous_report = build_baseline(army, rules)
+
+    document = json.loads(profile.read_text(encoding="utf-8"))
+    profile.write_text(json.dumps(document, indent=2), encoding="utf-8", newline="\n")
+    changed_app = create_app(army, rules_database_path=rules)
+    changed_report = build_baseline(army, rules)
+    changed_sha = hashlib.sha256(profile.read_bytes()).hexdigest()
+    assert changed_report["weaponProfilePublicationSha256"] == changed_sha
+    assert changed_report["runtimeSnapshotRevision"] == changed_app.snapshot_revision
+    assert changed_app.snapshot_revision == local_revision(army, rules)
+    assert previous_report["runtimeSnapshotRevision"] == previous_app.snapshot_revision
+    assert previous_app.snapshot_revision != changed_app.snapshot_revision
+
+    payload = {
+        "snapshot_revision": previous_app.snapshot_revision,
+        "version": __version__,
+        "static_revision": STATIC_ASSET_REVISION,
+    }
+    browser = Mock()
+    with patch(
+        "tools.report_reference_baseline.urlopen",
+        return_value=_VersionResponse(json.dumps(payload).encode()),
+    ):
+        with pytest.raises(ReleaseCandidateError, match="snapshot preflight failed"):
+            verify_release_candidate(
+                "http://127.0.0.1:8000", expected_version=__version__,
+                army_db=army, rules_db=rules, browser_check=browser,
+            )
+    browser.assert_not_called()
+
+
+@pytest.mark.parametrize("failure", ("malformed", "stale"))
+def test_release_identity_rejects_invalid_attached_weapon_publication(
+    tmp_path: Path, failure: str,
+) -> None:
+    army, rules, profile = _copy_runtime_pair(tmp_path, include_profile=True)
+    if failure == "malformed":
+        profile.write_text("{", encoding="utf-8")
+    else:
+        document = json.loads(profile.read_text(encoding="utf-8"))
+        document["sourceSnapshot"]["rulesDatabaseSha256"] = "0" * 64
+        profile.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Weapon profile publication"):
+        create_app(army, rules_database_path=rules)
+    with pytest.raises(ReferenceBaselineError, match="Weapon-profile publication"):
+        build_baseline(army, rules)
+    browser = Mock()
+    with pytest.raises(ReleaseCandidateError, match="Weapon-profile publication"):
+        verify_release_candidate(
+            "http://127.0.0.1:8000", expected_version=__version__,
+            army_db=army, rules_db=rules, browser_check=browser,
+        )
+    browser.assert_not_called()
 
 
 def test_release_gate_accepts_exact_local_runtime_before_and_after_browser() -> None:

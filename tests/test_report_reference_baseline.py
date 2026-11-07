@@ -1006,9 +1006,13 @@ def test_baseline_reports_pinned_publication_without_claiming_completeness() -> 
     assert report["armySnapshot"]["archiveVerification"] == "not-supplied"
     assert len(report["armySnapshot"]["archiveSha256"]) == 64
     assert len(report["rulesPublication"]["publishedDatabaseSha256"]) == 64
+    profile_sha = hashlib.sha256(
+        ARMY_DB.with_name("weapon-profile-sources.json").read_bytes()
+    ).hexdigest()
+    assert report["weaponProfilePublicationSha256"] == profile_sha
     combined = (
         report["armySnapshot"]["publishedDatabaseSha256"] + ":"
-        + report["rulesPublication"]["publishedDatabaseSha256"]
+        + report["rulesPublication"]["publishedDatabaseSha256"] + ":" + profile_sha
     )
     assert report["runtimeSnapshotRevision"] == hashlib.sha256(
         combined.encode()
@@ -1883,9 +1887,9 @@ def test_baseline_cli_records_served_pair_in_json_and_markdown(tmp_path: Path) -
     assert saved["servedSnapshot"]["snapshotRevision"] == report[
         "runtimeSnapshotRevision"
     ]
-    assert "Served runtime: exact-database-pair-match" in markdown_path.read_text(
-        encoding="utf-8"
-    )
+    markdown = markdown_path.read_text(encoding="utf-8")
+    assert "Served runtime: exact-database-pair-match" in markdown
+    assert report["weaponProfilePublicationSha256"] in markdown
 
 
 def test_pinned_army_derived_relationships_have_live_published_targets() -> None:

@@ -4755,18 +4755,22 @@ python tools/report_reference_baseline.py --json-output reports/1.0-baseline.jso
 ```
 
 To ensure the **running development/release server** uses the exact Army and
-rules database bytes inventoried from this checkout, add
+rules database bytes and applicable Weapon-profile publication inventoried
+from this checkout, add
 `--verify-server http://127.0.0.1:8000` (substitute the actual server origin).
 The check queries the served `/api/version` response and requires its
 `snapshot_revision` to equal the SHA-256 of
-`"<Army database SHA-256>:<rules database SHA-256>"`, the runtime's
-existing snapshot identity. On mismatch it exits nonzero **before writing
+`"<Army database SHA-256>:<rules database SHA-256>:<Weapon-profile publication SHA-256 or none>"`,
+the runtime's snapshot identity. The baseline validates a co-located
+publication against the database pair before fingerprinting it; a missing
+or independently located publication contributes `none`. On mismatch it
+exits nonzero **before writing
 baseline outputs**; a successful run records `servedSnapshot` in JSON.
 The server option is opt-in and never starts, deploys, or modifies a server.
-It checks database-pair identity only: static assets, processed symbols,
-PDFs, Wiki revisions, browser correctness and full source completeness
-require their independent checks. Rerun against the final candidate
-and deployment, not only a local development server.
+It checks runtime identity, not static assets, processed symbols, PDF/Wiki
+bytes, browser correctness or full source completeness; these require
+independent checks. Rerun against the final candidate and deployment, not
+only a local development server.
 
 Optionally pass `--army-archive <path>` to verify the exact Army ZIP SHA-256 against
 the one embedded in `infinity.db`. With the pinned source ZIP available, the

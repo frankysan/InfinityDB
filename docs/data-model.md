@@ -118,8 +118,13 @@ citation was attached, not that no shared rule has a source. The browser
 shows the chart citation or an explicit unavailable notice when the
 publication is missing. This is a locator for the corresponding chart
 entry, not a claim that Army and print values agree or an Ammunition rule.
-The publication bytes participate in the API snapshot revision so cache
-validators change when reviewed locators change.
+The API snapshot revision is the SHA-256 of the colon-separated Army
+database, rules database and attached Weapon-profile publication SHA-256
+values. An unavailable rules database or publication contributes `none`;
+an independently located rules database does not attach a neighboring
+Weapon-profile publication. Release identity tools use the same validated
+attachment and revision calculation, so cache validators and exact-candidate
+checks change when reviewed locator bytes change.
 
 ### Deployed-object read-model and artifact-gated browser reference
 

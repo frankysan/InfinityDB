@@ -145,7 +145,33 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending execution entries.
+- [ ] VR-0136 (2026-11-07; ready-to-run): Verify runtime snapshot identity
+  parity and fail-closed release preflight after the hosted Source failures.
+  Work: V1S-082; implementation: commit containing this entry. VD-0110
+  designed independent digest, attached/absent/mixed pair, changed-byte
+  preflight, malformed/stale publication and no-rules assertions without
+  executing tests. The correctness-critical reproductions
+  `tests/test_report_reference_baseline.py::test_served_revision_matches_exact_inventoried_database_pair`
+  and `tests/test_verify_release_candidate_browser.py::test_release_gate_accepts_exact_local_runtime_before_and_after_browser`
+  failed on Windows at `9e7d9f92`, matching hosted Linux jobs; the immediate
+  repair rerun passed both on Windows. On a pinned revision, run the full
+  `tests/test_verify_release_candidate_browser.py` module and
+  `tests/test_report_reference_baseline.py` selectors
+  `test_baseline_reports_pinned_publication_without_claiming_completeness`,
+  `test_served_revision_matches_exact_inventoried_database_pair`,
+  `test_served_revision_rejects_stale_and_invalid_runtime`,
+  `test_baseline_cli_rejects_stale_server_before_writing_outputs` and
+  `test_baseline_cli_records_served_pair_in_json_and_markdown`, plus
+  `tests/test_web.py` selectors
+  `test_catalog_api_etag_revalidates_the_current_snapshot`,
+  `test_rebuilt_snapshot_changes_the_catalog_api_etag` and
+  `test_weapon_profile_publication_changes_snapshot_etag`, and
+  `tests/test_weaponry_catalog_api.py` selectors
+  `test_reviewed_profile_chart_citations_reach_exact_api_profiles`,
+  `test_missing_or_mixed_weapon_profile_publication_is_explicit` and
+  `test_stale_colocated_weapon_profile_publication_fails_startup`.
+  Pinned `linux-dev` preferred; Windows fallback if unavailable. Hosted Source
+  and final release gates remain separate.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -163,8 +189,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0110`; active obligations are listed above.
-- Execution: `VR-0136`; active obligations are listed above.
+- Design: `VD-0111`; active obligations are listed above.
+- Execution: `VR-0137`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

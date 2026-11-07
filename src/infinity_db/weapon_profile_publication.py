@@ -172,6 +172,20 @@ def load_weapon_profile_publication(
     return citations
 
 
+def load_runtime_weapon_profile_publication(
+    army_database: Path, rules_database: Path | None,
+) -> tuple[ProfileCitations | None, str | None]:
+    """Load and fingerprint only the publication attached to this runtime pair."""
+    if (
+        rules_database is not None
+        and rules_database.resolve().parent != army_database.resolve().parent
+    ):
+        return None, None
+    path = army_database.with_name("weapon-profile-sources.json")
+    citations = load_weapon_profile_publication(path, army_database, rules_database)
+    return citations, file_sha256(path) if citations is not None else None
+
+
 def attach_weapon_profile_citations(
     item: dict[str, Any], citations: ProfileCitations | None,
 ) -> None:

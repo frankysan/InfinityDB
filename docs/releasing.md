@@ -331,15 +331,16 @@ For releases that are deployed to the hosted InfinityDB instance:
 - [ ] Verify the deployed application reports the intended release version and source
   snapshot. For 1.0, use the opt-in
   `tools.report_reference_baseline --verify-server <server-origin>` check
-  against the exact retained candidate Army/rules databases to reject
-  stale or substituted database-pair publication. This check does not
-  validate symbol/PDF/Wiki inputs or rules completeness.
+  against the exact retained candidate Army/rules databases and applicable
+  Weapon-profile publication to reject stale or substituted runtime artifacts.
+  This check does not validate symbol/PDF/Wiki inputs or rules completeness.
 - [ ] Smoke-test the release's principal changed user-facing paths in the deployed
   application. For 1.0, run `tools.verify_release_candidate_browser` against
   the served candidate, explicitly specifying `--expected-version` and the
-  release-matched Army/rules database pair. It checks the exact database-pair
-  revision, release version and local static asset fingerprint **before and
-  after** representative Unit-detail Chromium checks, aborting on any mismatch.
+  release-matched Army/rules database pair and applicable Weapon-profile
+  publication. It checks the exact runtime revision, release version and local
+  static asset fingerprint **before and after** representative Unit-detail
+  Chromium checks, aborting on any mismatch.
   Retain its JSON report under ignored `local/audits/` only after success.
   The default hosted Unit check is seven Units at three widths (21 pages).
   The separate local 81-page matrix includes additional layouts, optional-unit

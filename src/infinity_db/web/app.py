@@ -14,11 +14,9 @@ from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.snapshot_revision import runtime_snapshot_revision
 from infinity_db.variant_usage_reference import load_variant_usage_publication
-from infinity_db.weapon_profile_publication import (
-    ProfileCitations,
-    load_weapon_profile_publication,
-)
+from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 from infinity_db.web.api_handler import ApiHandler
 from infinity_db.web.metrics import RequestMetrics
 from infinity_db.web.presentation import ASSETS, STATIC_ASSET_REVISION, PresentationHandler
@@ -34,7 +32,7 @@ _CONTENT_SECURITY_POLICY = (
 
 
 def _snapshot_revision(path: Path) -> str:
-    """Return a stable identifier for an immutable database snapshot."""
+    """Return a stable identifier for an immutable runtime artifact."""
 
     with path.open("rb") as database:
         return file_digest(database, "sha256").hexdigest()
@@ -81,12 +79,10 @@ class Application:
         rules_revision = (
             _snapshot_revision(self.rules_database.path)
             if self.rules_database is not None
-            else "none"
+            else None
         )
         self.variant_usage: dict[str, Any] | None = None
         self.variant_usage_revision: str | None = None
-        self.weapon_profile_citations: ProfileCitations | None = None
-        weapon_profile_revision = "none"
         # The publication belongs to a co-located *release database pair*.
         # An explicitly supplied rules database in another directory is an
         # independent test/development source, not the release rules.db.
@@ -116,22 +112,18 @@ class Application:
                 if self.variant_usage is not None
                 else None
             )
-            weapon_profile_path = self.database.path.with_name("weapon-profile-sources.json")
-            self.weapon_profile_citations = load_weapon_profile_publication(
-                weapon_profile_path, self.database.path, rules_path,
-            )
-            if self.weapon_profile_citations is not None:
-                weapon_profile_revision = _snapshot_revision(weapon_profile_path)
+        self.weapon_profile_citations, weapon_profile_revision = (
+            load_runtime_weapon_profile_publication(self.database.path, rules_path)
+        )
         if (
             rules_path is None
             or rules_path.resolve().parent != self.database.path.resolve().parent
         ):
             self.variant_usage = None
             self.variant_usage_revision = None
-        self.snapshot_revision = sha256(
-            f"{_snapshot_revision(self.database.path)}:{rules_revision}:"
-            f"{weapon_profile_revision}".encode()
-        ).hexdigest()
+        self.snapshot_revision = runtime_snapshot_revision(
+            _snapshot_revision(self.database.path), rules_revision, weapon_profile_revision,
+        )
         self.presentation = PresentationHandler(
             source_data_changed_on=self.source_data_changed_on,
             snapshot_downloaded_on=self.snapshot_downloaded_on,

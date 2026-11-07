@@ -256,6 +256,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   [VR-0135 passed](testing.md#v1s-082-reference-only-equipment-source-scope-vr-0135)
   source/API and browser checks on Windows. Metadata and reachability alone do
   not prove that a locator supports its reference.
+  Hosted Source checks exposed a release-identity mismatch between the runtime
+  and baseline/browser verification tools; the CI repair and its validation
+  are in progress.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are

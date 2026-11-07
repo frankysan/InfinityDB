@@ -27,6 +27,8 @@ from infinity_army_data.merge import SourceDocument, load_sources, merge_sources
 from infinity_db.application_domains import application_domain, semantic_record_domain
 from infinity_db.database.paths import raw_database_path
 from infinity_db.database.publication import validate_database_pair
+from infinity_db.snapshot_revision import runtime_snapshot_revision
+from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPORT_FORMAT = "InfinityDB 1.0 reference evidence baseline"
@@ -1037,17 +1039,23 @@ def build_baseline(
         except sqlite3.DatabaseError as exc:
             raise ReferenceBaselineError(f"Published catalog is unreadable: {exc}") from exc
 
-    # The runtime publishes SHA256("<army database sha>:<rules database sha>").
-    # Preserve the exact pair used by the release evidence, rather than merely
-    # comparing source archive or individual database hashes independently.
     army_sha = _sha256(army_database)
     rules_sha = _sha256(rules_database)
-    runtime_revision = hashlib.sha256(f"{army_sha}:{rules_sha}".encode()).hexdigest()
+    try:
+        _, weapon_profile_sha = load_runtime_weapon_profile_publication(
+            army_database, rules_database,
+        )
+    except (OSError, sqlite3.Error, ValueError) as exc:
+        raise ReferenceBaselineError(
+            f"Cannot verify runtime Weapon-profile publication: {exc}"
+        ) from exc
+    runtime_revision = runtime_snapshot_revision(army_sha, rules_sha, weapon_profile_sha)
     return {
         "format": REPORT_FORMAT,
         "formatVersion": REPORT_VERSION,
         "status": "initial-evidence-only-not-a-completeness-verdict",
         "runtimeSnapshotRevision": runtime_revision,
+        "weaponProfilePublicationSha256": weapon_profile_sha,
         "armySnapshot": {
             "archiveSha256": archive_sha,
             "publishedDatabaseSha256": army_sha,
@@ -1081,10 +1089,10 @@ def build_baseline(
 
 
 def verify_served_revision(report: dict[str, Any], base_url: str) -> dict[str, str]:
-    """Require the running server to publish exactly the inventoried database pair.
+    """Require the inventoried database pair and applicable Weapon publication.
 
-    This validates the immutable database bytes used by the app; it does not
-    verify external source artifacts, rules semantics, or browser rendering.
+    This does not verify external source artifacts, rules semantics, or browser
+    rendering.
     """
     parsed = urlsplit(base_url)
     if (
@@ -1116,7 +1124,7 @@ def verify_served_revision(report: dict[str, Any], base_url: str) -> dict[str, s
     expected = report["runtimeSnapshotRevision"]
     if not isinstance(actual, str) or actual != expected:
         raise ReferenceBaselineError(
-            f"Runtime snapshot revision does not match inventoried databases: "
+            f"Runtime snapshot revision does not match inventoried runtime artifacts: "
             f"expected {expected}, received {actual!r}"
         )
     return {
@@ -1244,8 +1252,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Published Army database SHA-256: `{snapshot['publishedDatabaseSha256']}`.",
         f"- Published rules database SHA-256: "
         f"`{report['rulesPublication']['publishedDatabaseSha256']}`.",
+        f"- Applicable Weapon-profile publication SHA-256: "
+        f"`{report['weaponProfilePublicationSha256'] or 'unavailable'}`.",
         f"- Combined runtime snapshot revision: `{report['runtimeSnapshotRevision']}` "
-        "(exact published Army + rules database bytes; not source completeness).",
+        "(database pair and applicable Weapon-profile publication; not source completeness).",
         *(
             [f"- Served runtime: {report['servedSnapshot']['status']} "
              f"at `{report['servedSnapshot']['versionUrl']}`."]

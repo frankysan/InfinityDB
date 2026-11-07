@@ -2,20 +2,23 @@
 """Fail-closed hosted Unit browser acceptance for an exact InfinityDB release candidate.
 
 Runs no deployment actions. The server must match the local candidate's
-immutable Army/rules database bytes, static asset fingerprint, and explicit
-release version before and after the browser checks.
+immutable Army/rules database bytes, applicable Weapon-profile publication,
+static asset fingerprint, and explicit release version before and after the
+browser checks.
 """
 
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
+import sqlite3
 import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
+from infinity_db.snapshot_revision import runtime_snapshot_revision
+from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 from infinity_db.web.presentation import STATIC_ASSET_REVISION
 from tools.report_reference_baseline import (
     PROJECT_ROOT,
@@ -35,13 +38,17 @@ class ReleaseCandidateError(ValueError):
 
 
 def local_revision(army_db: Path, rules_db: Path) -> str:
-    """Use the same byte-pair revision algorithm as the production runtime."""
+    """Use the same artifact revision and attachment rules as the runtime."""
     for database in (army_db, rules_db):
         if not database.is_file():
             raise ReleaseCandidateError(f"Missing release database: {database}")
-    return hashlib.sha256(
-        f"{_sha256(army_db)}:{_sha256(rules_db)}".encode()
-    ).hexdigest()
+    try:
+        _, weapon_profile_sha = load_runtime_weapon_profile_publication(army_db, rules_db)
+    except (OSError, sqlite3.Error, ValueError) as exc:
+        raise ReleaseCandidateError(
+            f"Cannot verify runtime Weapon-profile publication: {exc}"
+        ) from exc
+    return runtime_snapshot_revision(_sha256(army_db), _sha256(rules_db), weapon_profile_sha)
 
 
 def _check_served(

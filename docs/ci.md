@@ -195,6 +195,16 @@ identify the hosted cause. The separate installed-wheel and deployment
 smoke runs passed at `31125e18`. Diagnose any recurrence; replacement-SHA
 hosted results and final acceptance remain independent.
 
+**2026-11-07 runtime identity failure:** Source runs
+[42323715516](https://github.com/frankysan/InfinityDB/actions/runs/42323715516)
+at `e06982fa762d66cc9b530592863044cf148f4a60` and
+[42323999988](https://github.com/frankysan/InfinityDB/actions/runs/42323999988)
+at `e73a80985c04fdcfdd49ffa1924f9afc46e762e3` failed Linux jobs because
+the baseline and release-browser checks calculated only the database pair,
+while the runtime also fingerprints its Weapon-profile publication. The two
+failing selectors reproduced locally on Windows at `9e7d9f92` before repair.
+Hosted replacement-SHA and final acceptance remain separate.
+
 The development dependencies include PyMuPDF so PDF-aware test modules collect and
 research tools type-check in a clean environment. Official PDFs under `data/pdf/`
 remain ignored local evidence. Only tests requiring absent PDF bytes skip; data/API
