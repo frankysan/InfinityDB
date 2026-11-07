@@ -123,6 +123,14 @@ def _exercise(page: Any, origin: str, journey: str) -> None:
         )
         select = page.locator("#scenario-army-points")
         select.wait_for(state="visible")
+        # The initial 150-point request must finish before selecting 350.
+        # Otherwise WebKit legitimately cancels the earlier API request.
+        page.wait_for_function(
+            """() => document.querySelector('#scenario-content')?.hidden === false
+            && document.querySelector('.scenario-setup-card .scenario-facts dd')
+               ?.textContent?.trim() === '150'
+            && document.querySelector('svg.scenario-map') !== null"""
+        )
         select.select_option("350")
         page.wait_for_function(
             """() => document.querySelector('#scenario-content')?.hidden === false
