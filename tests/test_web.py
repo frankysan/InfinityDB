@@ -386,12 +386,11 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert b"<strong>What&#x27;s changed</strong>" in body
     assert b"Player-visible highlights are shown first" in body
     assert b'href="/changes" aria-current="page"' in body
-    assert b'id="changes-unreleased"' in body
-    assert b"<h2>Unreleased</h2>" in body
-    assert (
-        b"Weapon profiles now offer expandable Ammunition help and searchable Weapon Properties"
-        in body
-    )
+    assert b'id="changes-unreleased"' not in body
+    assert b'id="changes-1-0-0"' in body
+    assert b"<h2>Version 1.0.0</h2>" in body
+    assert b"Browse current N5.3 rules" in body
+    assert b'<time class="changes-release-date" datetime="2026-11-07">' in body
     assert b'id="changes-0-10-1"' in body
     assert b"<h2>Version 0.10.1</h2>" in body
     assert b'id="changes-0-10-0"' in body

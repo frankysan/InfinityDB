@@ -145,7 +145,20 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending execution entries.
+- [ ] VR-0143 (2026-11-07; ready-to-run): Mandatory V1S-092 package gate.
+  Verify the prepared 1.0.0 metadata in a clean index and installed package.
+  Work: [V1S-092](TODO.md#final-frozen-candidate-acceptance-and-release).
+  Change: README, CHANGELOG and release-history fixtures after `9ed21eb5`;
+  pin the committed metadata preparation with `expected_commit`.
+  Immediate: publication-integrity checks passed 25 metadata/version/HTTP
+  cases and six real Chrome cases (1440/390/320, light/dark, keyboard details,
+  history preservation, no overflow or JavaScript/request/HTTP errors).
+  Design: no missing design; maintained parser/version/rendering tests cover
+  the prepared release and empty-Unreleased behavior.
+  Deferred: `linux-dev` complete isolated preflight with required assets and
+  explicit skip summary. Verify indexed artifacts, all clean-export tests,
+  lint/type, wheel contents and normal/asset-free installed runtime. Review
+  skips against the accepted full-source/optional cohorts before retirement.
 
 The [V1S-083 disclosure and consumer batches](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
 passed on the recorded Linux/Windows states and close VR-0137. Hosted CI
@@ -169,7 +182,7 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 ## Next unused IDs
 
 - Design: `VD-0116`; active obligations are listed above.
-- Execution: `VR-0143`; active obligations are listed above.
+- Execution: `VR-0144`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

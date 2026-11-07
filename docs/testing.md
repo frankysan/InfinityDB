@@ -5773,6 +5773,28 @@ tracked tree or retained as a build/release dependency.
 This completes V1S-090 and VR-0142, with **VD 0 / VR 0**. Release-metadata
 edits must receive their affected validation before merge/tag preparation.
 
+### Prepared 1.0.0 release metadata (V1S-092)
+
+**Project domains:** Project infrastructure, Web frontend
+
+After cumulative acceptance, release preparation consolidates the prior
+Unreleased material into the dated **1.0.0 / 2026-11-07** section, with
+five player-summary bullets, user/operator detail and upgrade instructions.
+The bare Unreleased heading remains for future work and is omitted from
+What's changed. Historical sections from 0.10.1 onward are preserved exactly.
+README identifies the prepared version and the previously published release
+without asserting that the candidate is already published. Package/API
+versions remain consistently `1.0.0`; no release data or static assets changed.
+
+Immediate release-publication integrity checks passed **25/25** existing
+release-note, version and HTTP-history tests. A real Chrome check of the
+served preparation passed **6/6** cases at 1440/390/320 px in both themes,
+including version/date, summary and historical entries, keyboard expansion,
+all four detail categories, no horizontal overflow and no JavaScript,
+failed-request or HTTP errors. Screenshots and JSON are retained privately.
+The full Git-index/package check remains mandatory under VR-0143; these
+focused results alone do not complete V1S-092 or authorize merge/tagging.
+
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:

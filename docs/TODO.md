@@ -115,10 +115,10 @@ checks also passed. Publisher questions remain non-blocking when accurately disc
 
 - [ ] **V1S-092 (M, gate):** Finalize Unreleased notes,
   release metadata and version after completeness acceptance. The package/API
-  version is already `1.0.0`; consolidate the player/operator outcomes, prepare
-  the dated release section and README status, and verify affected metadata,
-  package and documentation checks before handoff. Merge/tag approval remains
-  separate under V1S-093.
+  version, dated release section and README preparation status are consistent
+  at `1.0.0`; focused metadata and real-browser checks passed. Complete the
+  [VR-0143](validation-queue.md) isolated-package check before retiring this
+  entry. Merge/tag approval remains separate under V1S-093.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
   exact-main-SHA hosted Source, wheel and deployment smoke evidence,
   optional full-assets and annotated tag. The recurring Windows scenario

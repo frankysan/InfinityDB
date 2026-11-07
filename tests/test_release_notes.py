@@ -15,19 +15,20 @@ from infinity_db.web.release_notes import (
 def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     releases = load_release_notes()
 
-    assert releases[0].version is None
-    assert releases[0].label == "Unreleased"
+    assert releases[0].version == "1.0.0"
+    assert releases[0].released_on == date(2026, 11, 7)
     assert releases[0].sections[0].heading == "Player summary"
-    assert any("Weapon profiles now offer" in item for item in releases[0].player_summary)
+    assert any("Browse current N5.3 rules" in item for item in releases[0].player_summary)
     assert [section.heading for section in releases[0].detail_sections] == [
-        "Added", "Changed", "Fixed",
+        "Added", "Changed", "Fixed", "Upgrade notes",
     ]
+    assert all(release.version is not None for release in releases)
 
-    current = releases[1]
-    assert current.version == "0.10.1"
-    assert current.released_on == date(2026, 10, 10)
-    assert any("scenarios" in item for item in current.player_summary)
-    assert [section.heading for section in current.detail_sections] == [
+    previous = releases[1]
+    assert previous.version == "0.10.1"
+    assert previous.released_on == date(2026, 10, 10)
+    assert any("scenarios" in item for item in previous.player_summary)
+    assert [section.heading for section in previous.detail_sections] == [
         "Added",
         "Changed",
         "Fixed",
