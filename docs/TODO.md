@@ -51,14 +51,16 @@ an ignored development candidate is not a release artifact.
 
 The [cumulative candidate acceptance](testing.md#cumulative-candidate-acceptance-v1s-090--vr-0142)
 closes local/source/browser and isolated-package validation on the frozen inputs.
-Final release metadata, exact-main-SHA CI, tagging and deployment remain below.
+The [prepared release metadata](testing.md#prepared-100-release-metadata-v1s-092)
+also passed its focused, browser and isolated-package checks. Merge approval,
+exact-main-SHA CI, tagging and deployment remain below.
 
 ### Development sequence
 
 Review and close the earliest actionable numbered V1S slice below after
 checking the [VD/VR queue](validation-queue.md). Source/inventory
 reconciliation precedes its dependent curation or projection; final
-release steps remain V1S-092–095. The
+release steps remain V1S-093–095. The
 [1.0 release definition](releasing.md#version-10-data-completeness-gate)
 determines scope. Do not make optional ITS tooling or publisher answers
 release blockers.
@@ -113,20 +115,16 @@ the [source-coverage audit](v1.0-source-coverage-audit.md) and
 retain their scope. Human notice/Silhouette and isolated Linux served-candidate
 checks also passed. Publisher questions remain non-blocking when accurately disclosed.
 
-- [ ] **V1S-092 (M, gate):** Finalize Unreleased notes,
-  release metadata and version after completeness acceptance. The package/API
-  version, dated release section and README preparation status are consistent
-  at `1.0.0`; focused metadata and real-browser checks passed. Complete the
-  [VR-0143](validation-queue.md) isolated-package check before retiring this
-  entry. Merge/tag approval remains separate under V1S-093.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
   exact-main-SHA hosted Source, wheel and deployment smoke evidence,
   optional full-assets and annotated tag. The recurring Windows scenario
   lifecycle timeout in [hosted Source](ci.md#v1s-git-aware-retirement-gate)
   remains unexplained; investigate recurrence rather than assuming a local
   pass proves hosted stability.
-  Blocked: an approved and locally accepted candidate is required before merge;
-  authority: release owner; retry: after V1S-092 and required local acceptance pass.
+  Blocked: local candidate and metadata acceptance passed, but merging and
+  tagging require separate release-owner approval;
+  authority: release owner; retry: after explicit approval to merge the reviewed
+  candidate, followed by exact-main-SHA hosted acceptance and tag approval.
 - [ ] **V1S-094 (L, external):** With explicit operator approval,
   deploy the tagged artifact and verify recovery assets exist.
   A live-host rollback rehearsal is not required.
@@ -165,8 +163,8 @@ questions and a live rules/legality engine are not extra 1.0 prerequisites.
 **Project domains:** Data processing, Web backend, Web frontend,
 Project infrastructure, Deployment
 
-- [ ] Complete **V1S-092–095**: finalize release metadata and its affected
-  checks, obtain exact-main-SHA hosted CI and the annotated tag, then perform
+- [ ] Complete **V1S-093–095**: obtain merge approval, exact-main-SHA hosted
+  CI and the annotated tag, then perform
   authorized deployment and post-deploy verification. Preserve accepted
   source/runtime/publication identities and reference/browser evidence;
   repeat affected gates when those inputs or consumers change. Use the

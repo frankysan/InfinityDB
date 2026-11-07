@@ -5792,8 +5792,24 @@ served preparation passed **6/6** cases at 1440/390/320 px in both themes,
 including version/date, summary and historical entries, keyboard expansion,
 all four detail categories, no horizontal overflow and no JavaScript,
 failed-request or HTTP errors. Screenshots and JSON are retained privately.
-The full Git-index/package check remains mandatory under VR-0143; these
-focused results alone do not complete V1S-092 or authorize merge/tagging.
+The complete Git-index/package gate passed on
+`a47a573d2afd6376dcc46abe9539e04177c6ca98`, `linux-dev` job
+`f267609976f24b6ab9673399744c7669`, in **335.22 s**. The clean export
+passed **4,604 tests with 1,283 skips** across all 5,887 indexed cases,
+with required **808/808** assets, indexed artifact verification, lint/type,
+wheel-content checks and normal/asset-free installed-wheel runtime. Both
+installed CLI entry points reported `1.0.0`. The 71 skip reasons match the
+previous isolated gate: private source/archive exclusions, optional browser
+dependencies, opt-in cohorts, historical migration/Git evidence and one
+Windows-only case. The cumulative full-source suite and independent cohorts
+above retain that coverage; skipped cases are not counted as passes.
+
+Complete Windows documentation checks passed (44 linted files, 43 link-checked
+files), with Ruff/Pyright clean. Post-execution inspection confirmed the pinned
+Linux SHA and a clean tracked tree. The full report, skip review and browser
+evidence remain under ignored `local/candidates/`. This completes V1S-092
+and VR-0143, with **VD 0 / VR 0**. Merge approval, exact-main-SHA hosted CI,
+tagging and deployment remain independent release gates.
 
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
