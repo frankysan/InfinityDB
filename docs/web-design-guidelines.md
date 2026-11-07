@@ -248,6 +248,9 @@ one large surface. Preserve stable anchors and source-linked detail disclosures.
 Reference matrices such as Orders & AROs should fill their available reading
 column rather than shrink to the width of a short category name.
 
+A cited rules card should not repeat the publication/version and game
+scope as a separate applicability line immediately before `Sources:`.
+Keep the scope line for uncited cards where it adds necessary context.
 Dated FAQ cards should have one compact `Sources:` citation row, using the
 same link and version/page formatting as normal rules cards. Do not print a
 second, repeated publication/date line above the group. Keep archival source

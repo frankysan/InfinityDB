@@ -134,7 +134,20 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
-No pending design entries.
+- [ ] VD-0115 (2026-11-07; needs-design): Review the shared
+  `rulesReferenceSection` regression for a cited rules card with no
+  redundant collection/game line and an uncited card retaining
+  applicability; confirm the Citation link and source metadata remain
+  unchanged. Review the 1440/390/320 px, light/dark FAQ geometry
+  assertion for at least 16 px between a FAQ group and its next visible
+  Unit-use/disclosure section (including a hidden Developer Mode
+  intermediate sibling).
+  Work: [Reference card layout and FAQ citations](TODO.md#implemented-foundations-and-remaining-scope);
+  change: `rules-reference.js`, `page-overrides.css`; risk: low.
+  Existing modified selectors: `tests/rules_text_render_harness.mjs`,
+  `tests/test_web.py::test_detail_frontends_share_curated_rules_reference_renderer`, and
+  `tests/test_verify_scenario_faq_browser.py::test_faq_single_source_line_and_card_separation`.
+  Design only; linked execution: **VR-0141**.
 
 ## Pending deferred execution
 
@@ -190,6 +203,17 @@ is recorded. Failed or incomplete verification remains open.
   in both themes where applicable. Check the JavaScript DOM harness and
   unchanged FAQ temporal/source-selection API gates. Outcome: pending.
 
+- [ ] VR-0141 (2026-11-07; awaiting-design): Verify suppression
+  of redundant applicability text when a rules card already cites its
+  source, continued scope display for uncited cards, and 24 px FAQ
+  bottom margin before Unit-use disclosures.
+  Work: [Reference card layout and FAQ citations](TODO.md#implemented-foundations-and-remaining-scope);
+  revision: post-`25a2280` follow-up (pin final SHA); risk: low.
+  Design: **VD-0115**. Deferred: shared JS rules-card Node DOM
+  harness; focused rules-reference frontend assertion and 1440/390/320 px
+  light/dark FAQ separation test. No browser/Node tests executed in
+  implementation. Outcome: pending.
+
 The [V1S-083 disclosure and consumer batches](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
 passed on the recorded Linux/Windows states and close VR-0137. Hosted CI
 and final release gates remain separate.
@@ -211,8 +235,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0115`; active obligations are listed above.
-- Execution: `VR-0141`; active obligations are listed above.
+- Design: `VD-0116`; active obligations are listed above.
+- Execution: `VR-0142`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

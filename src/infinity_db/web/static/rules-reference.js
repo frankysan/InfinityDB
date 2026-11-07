@@ -482,7 +482,8 @@ function appendRuleDetails(
     container.append(paragraph);
   }
 
-  const applicability = includeApplicability ? applicabilityText(rule) : "";
+  const applicability = includeApplicability && !rule.citations?.length
+    ? applicabilityText(rule) : "";
   if (applicability) {
     const context = document.createElement("p");
     context.className = "detail-source";

@@ -702,7 +702,18 @@ def test_faq_single_source_line_and_card_separation(
         assert group.locator(":scope > .detail-source").count() == 0
         assert group.evaluate(
             "(node) => parseFloat(getComputedStyle(node).marginTop) >= 24"
+            " && parseFloat(getComputedStyle(node).marginBottom) >= 24"
         )
+        assert group.evaluate(
+            """(node) => {
+              let next = node.nextElementSibling;
+              while (next && getComputedStyle(next).display === 'none') {
+                next = next.nextElementSibling;
+              }
+              return !next ||
+                next.getBoundingClientRect().top - node.getBoundingClientRect().bottom >= 16;
+            }"""
+        ), (route, width, theme)
         cards = group.locator(".faq-dated-clarification")
         assert cards.count() >= minimum_cards
         for i in range(cards.count()):

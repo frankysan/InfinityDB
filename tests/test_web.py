@@ -7269,7 +7269,7 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     ) < body.rindex(b'appendImmunityCases(container, rule)')
     assert body.index(
         b"appendMaintainedText(paragraph, paragraphTokens)"
-    ) < body.index(b"const applicability = includeApplicability ? applicabilityText(rule)")
+    ) < body.index(b"const applicability = includeApplicability && !rule.citations?.length")
     assert b"includeApplicability = true" in body
     assert b"detail-fact-heading" in body
     assert b'heading.textContent = "Related rules"' in body

@@ -112,7 +112,12 @@ assert.ok(redundant.textContent.includes("Supply Boxes"));
 assert.ok(redundant.textContent.includes("Only Models, not Markers"));
 assert.ok(redundant.textContent.includes("Reviewed in the N5.3 core scenario."));
 assert.ok(redundant.textContent.includes("Sources: N5.3, p. 153"));
-assert.ok(redundant.textContent.includes("N5 Core Scenarios"));
+assert.ok(!redundant.textContent.includes("N5 Core Scenarios"));
+const uncited = rulesReferenceSection([{
+  ...placeholder,
+  citations: [],
+}]).children.find((node) => node.tag === "article");
+assert.ok(uncited.textContent.includes("N5 Core Scenarios · N5"));
 const cited = redundant.children.find((node) => node.className === "detail-source rules-source-citations");
 assert.ok(cited);
 assert.equal(cited.children[0].textContent, "Sources: ");

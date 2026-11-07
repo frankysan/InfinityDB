@@ -71,6 +71,9 @@ an ignored development candidate is not a release artifact.
   than a separate dated section preface and repeated provenance prose.
   Preserve provenance in the API and source-conflict disclosures; focused
   visual/browser evidence is queued under [VR-0140](validation-queue.md).
+  A follow-up removes the duplicate applicability line from cited rule
+  cards and adds clearance after FAQ cards before Unit-use disclosures;
+  verification is tracked under [VD-0115 / VR-0141](validation-queue.md).
 
 ### Development sequence
 
