@@ -12,6 +12,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Pheroware Tactics and PT: Endgame now cite the correct N5.3 Weapon Chart page.
 - Embedded Attribute, Game-term and Unit Profile Glossary entries now show their
   source citations; Unit Profile notation help also shows sources in context.
 - Hackable profile help now identifies default HI/REM/TAG/VH eligibility,
@@ -348,6 +349,8 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing:** Correct the Pheroware Tactics family and Endgame
+  source locators to the N5.3 Weapon Chart on p. 182.
 - **Deployment:** Keep aggregate metrics-history collection working when
   reviewed variant-usage requests appear, without retaining query values.
 - **Data processing:** Correct Repeater and Supportware source-page links and add

@@ -134,7 +134,25 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
-No pending design entries.
+- [ ] VD-0102 (2026-11-07; needs-design): Assert the Pheroware family and
+  Endgame source locators are exactly N5.3 p. 182, not p. 181, in curated input,
+  a fresh rules export and the tracked v9 database; preserve distinct variant
+  ownership and detect a stale publication.
+  Work: [V1S-082](TODO.md#final-10-acceptance); change: Pheroware citation
+  correction and matched artifact promotion; risk: medium.
+  Existing coverage: `tests/test_weaponry_catalog_api.py::test_pt_endgame_rules_apply_only_to_the_endgame_source_variant`
+  currently expects the incorrect p. 181; linked execution: VR-0131.
+  Outcome: revise/add focused selectors and inspect them without running tests.
+
+- [ ] VD-0103 (2026-11-07; needs-design): Assert the normal Pheroware Weapon
+  page renders the correct p. 182 family and Endgame source cards, not p. 181,
+  on desktop and narrow viewports in light and dark themes without granting
+  Endgame's variant rule to Eraser or Mirrorball.
+  Work: [V1S-082](TODO.md#final-10-acceptance); change: Pheroware citation
+  correction; risk: medium.
+  Existing coverage: `tests/test_verify_weapon_source_cards_browser.py`;
+  linked execution: VR-0131.
+  Outcome: add a focused browser selector and inspect it without running tests.
 
 ## Pending deferred execution
 
@@ -145,7 +163,19 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending execution entries.
+- [ ] VR-0131 (2026-11-07; awaiting-design): Verify corrected Pheroware
+  family and Endgame citations from curated input through the matched rules,
+  deployed-object and exact-variant publications, API and normal browser.
+  Work: [V1S-082](TODO.md#final-10-acceptance); revision: pending implementation
+  and design commits; risk: medium.
+  Immediate: source PDF identity and printed pages checked; guarded matched
+  artifact promotion and `tools.build_deployed_object_publication --check`,
+  `tools.build_variant_usage --check-publication`, and
+  `tools.verify_deployment_assets --skip-svg` passed on Windows.
+  Design: VD-0102, VD-0103.
+  Deferred: new source/export/API/browser selectors; existing Weapon variant,
+  current citation-baseline and matched-publication integrity checks.
+  Outcome: pending a pinned focused execution.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -159,8 +189,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0102`; active obligations are listed above.
-- Execution: `VR-0131`; active obligations are listed above.
+- Design: `VD-0104`; active obligations are listed above.
+- Execution: `VR-0132`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

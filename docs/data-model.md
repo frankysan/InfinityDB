@@ -2749,19 +2749,19 @@ filtering, backward-compatible Skills/Equipment responses, and
 unchanged legacy relations. The application also accepts the original
 v8 snapshot as a rollback source.
 
-**Current development release pair (2026-11-04):**
+**Current development release artifacts (2026-11-07):**
 
-The guarded staging workflow verified the pinned official PDF, curated
-review hashes, original v8 pair, complete 14-condition model and
-generated publication before promotion. The **v9/compatibility-11**
-rules database SHA-256 is
-`b28b4093e08c15da2466ad59bba544c82f5118e5109c7d11e78d00957a8a582a`;
+The guarded staging workflow preserved the **v9/compatibility-11** schema,
+all 14 reviewed Restrictions and all 17 deployed objects. The rules
+database SHA-256 is
+`0fcf537fcca2b148541d9ad136003d939f0c0ecbe1e79136fca1bb6fd622714b`;
 its matching deployed-object publication SHA-256 is
-`d1f0241a6918a9c4e46890c2f9323b44d7401970f04e8404321eb23086c16c28`.
-All 17 reviewed objects were included. The original v8 pair remains
-available in ignored local recovery storage. These hashes identify the
-current development artifacts; local promotion does not establish hosted
-or deployed acceptance.
+`ac0b7997dc46523294aa23c24e1d8b121dea432af6e86316379b7ff9cf1208b9`,
+and the exact-variant usage publication SHA-256 is
+`d14dbb8dbf337d0a14c00646cf82a42f0af453f01b370c45ddf6bd64d6342c41`.
+The original v8 pair remains available in ignored local recovery storage.
+These hashes identify development artifacts; local promotion does not
+establish hosted or deployed acceptance.
 
 **Legacy relationship consumer review:** the reviewed Motorcycle →
 Jump and Irregular → Lieutenant graph edges are retained as

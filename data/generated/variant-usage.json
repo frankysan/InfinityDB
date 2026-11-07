@@ -5,9 +5,9 @@
   "sourceSnapshot": {
     "armyArchiveSha256": "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75",
     "armyDatabaseSha256": "8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8",
-    "deployedObjectPublicationSha256": "8424278c5538c136f0bae7aaa98a363a28363d0877d0dc19d05f9546a9caf428",
+    "deployedObjectPublicationSha256": "ac0b7997dc46523294aa23c24e1d8b121dea432af6e86316379b7ff9cf1208b9",
     "exportPairSha256": "babe75c00a818eee4828f2b16a70b13f6aa8fa352a5d0ec3d7c4e9309982e122",
-    "rulesDatabaseSha256": "5bc1ef3c70d1d14ad5f043bd1ad6fe159c608e86755d0ec0ac9a8b99f8b052f8"
+    "rulesDatabaseSha256": "0fcf537fcca2b148541d9ad136003d939f0c0ecbe1e79136fca1bb6fd622714b"
   },
   "variants": [
     {
