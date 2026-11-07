@@ -198,10 +198,10 @@ final-input checks and release acceptance below remain required.
 The [release-pair rebuild and publication checks](v1.0-source-coverage-audit.md#v1s-084-release-pair-rebuild-and-publication-verification-2026-11-07)
 are accepted on the pinned inputs; remaining gates follow below.
 
-- [ ] **V1S-085 (M, gate):** Run source occupancy, archive,
-  strict interaction, baseline and reproducibility gates; distinguish
-  [physical SQLite byte differences](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
-  from logical equivalence.
+The [frozen-pair source gates](v1.0-source-coverage-audit.md#v1s-085-frozen-pair-source-gate-acceptance-2026-11-07)
+are accepted, with the Linux physical-byte difference explicitly distinguished
+from logical equality. Final browser, cumulative and hosted gates remain open.
+
 - [ ] **V1S-086 (M, gate):** Run final-candidate rule-fragment
   and **maintained-reference-to-browser** checks; identify broken routes
   or missing citations for existing in-scope rules, without a source-wide scan.
@@ -236,26 +236,24 @@ are accepted on the pinned inputs; remaining gates follow below.
 The [source-coverage audit](v1.0-source-coverage-audit.md) owns reviewed
 dispositions, source identities and confirmed omissions. These tasks cover
 maintained references and known material defects; exhaustive source-first
-inventory is optional research, not a 1.0 prerequisite. The final-input freeze
-and complete release checks remain V1S-081–085.
+inventory is optional research, not a 1.0 prerequisite. The source/rebuild
+gates are accepted on the pinned pair; final browser and release gates remain.
 
-- [ ] Run the remaining frozen-pair source occupancy, archive and strict
-  interaction checks under V1S-085, followed by maintained-reference and
-  browser checks under V1S-086–088. Correct confirmed material errors or
+- [ ] Run the final maintained-reference and browser checks under
+  V1S-086–088. Correct confirmed material errors or
   missing citations without treating source conflicts, unreviewed clauses
   or deliberate exclusions as defects. Re-run the
-  [source-evidence tools](testing.md#10-source-evidence-baseline) and strict
-  interaction-catalog scope check on the frozen pair.
+  [source-evidence tools](testing.md#10-source-evidence-baseline) only if an
+  affected input changes; the pinned-pair gates passed under V1S-085.
   The rebuilt pair preserves its selected inputs. The reviewed
   [ITS hotfix](n5-source-history.md#its-18-hotfix-three-confirmed-scenario-changes)
   and .09.11 adoption remain under the post-1.0 ITS backlog; the optional
   Battleground pilot deliberately retains 2026.09.01.
-- [ ] Reconcile the final `data/curated/rules-interactions/reviews.json` and
-  `catalog-scope.json` with all current in-scope identities and cited
-  exceptions, retaining historical review decisions without treating them
-  as whole-record approval. Final citation and browser acceptance belong to
-  the [completeness gate](releasing.md#version-10-data-completeness-gate),
-  without requiring exhaustive source-clause approval.
+
+The strict interaction gate uses `catalog-scope-1.0.0.json`; the older
+`catalog-scope.json` and review dates retain historical provenance rather
+than whole-record approval. Final citation and browser acceptance follow the
+[completeness gate](releasing.md#version-10-data-completeness-gate).
 
 The [bounded source/relationship findings](n5-source-history.md) and
 [ranked gap batches](v1.0-source-coverage-audit.md#ranked-confirmed-gaps-and-evidence-batches-v1s-022-2026-11-03)
@@ -375,7 +373,7 @@ of already-reviewed catalogs.
 **Project domains:** Data processing, Web backend, Web frontend,
 Project infrastructure, Deployment
 
-- [ ] Complete **V1S-085–095** and the earlier deferred browser gates
+- [ ] Complete **V1S-086–095** and the earlier deferred browser gates
   against the exact frozen source,
   database, generated-publication, static-asset and release-candidate
   revisions. This includes one current source citation per in-scope rule

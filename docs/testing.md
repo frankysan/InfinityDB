@@ -510,6 +510,77 @@ revision. The full-suite V1S-090, exact-SHA hosted Source matrix and
 frozen release-candidate gates remain separate; the earlier failed
 full suite at `94103ef4` is not claimed green.
 
+### Frozen-pair source gates (V1S-085)
+
+**Project domains:** Data processing, Project infrastructure
+
+At `f1047cf4ee984e1b4ea15af79f2c52ac65497273`, the mandatory source
+gates passed against the unchanged V1S-084 release pair:
+
+- Source occupancy inspected **70 tables / 441 fields** using the matched
+  raw sibling. **0/39** potentially unrepresented fields were populated;
+  zero confirmed gap families and two existing scope decisions were retained.
+- `tools.report_reference_baseline --army-archive` verified the pinned
+  September 29 ZIP hash, all **58** source files, **4,137** Unit membership
+  occurrences, **4,748** groups, **5,020** profiles and **12,993** loadout
+  options, plus the published references, extras, Includes, Peripherals,
+  Characteristics, Orders and global options against their source rows.
+- `tools.audit_1_0_reference_inputs` matched the supplied English Core and
+  FAQ PDF bytes to their declarations, checked **116/116** exact Wiki
+  revisions, and verified **107** English plus **two** Spanish snapshot
+  reference headings. Archive acquisition dates remain separate from edits.
+- The current citation minimum remained **495/495**, zero metadata gaps;
+  the four scoped source-disposition fingerprints validated without granting
+  browser or whole-record approvals.
+- The strict **1.0** interaction scope matched the actual runtime catalogs:
+  **186/186 primary** (98 Skills, 31 Equipment, 33 Traits, 24 States) and
+  **221/221 supporting** identities complete, zero pending. The 518 authored
+  relations and 111 future interactions retain their existing scope.
+
+Use the **explicit 1.0 scope**, independently of the historical checklist:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_rules_interactions --catalog-scope data/curated/rules-interactions/catalog-scope-1.0.0.json --database data/generated/infinity.db --rules-database data/generated/rules.db --require-primary-release 1.0.0 --require-release 1.0.0
+.venv\Scripts\python.exe -m tools.audit_rules_interactions --check-output docs/rules-interaction-checklist.md
+```
+
+The default historical 0.7 scope intentionally has a different denominator
+and Commlink deferral. Passing it alone does not certify the 1.0 primary
+catalog. Its generated checklist check also passed; no ledger was rewritten.
+`tools.run_checks --stage rules --source-occupancy-gate` passed its occupancy,
+historical checklist/supporting review and temporary rules-build checks.
+
+The required-assets, two-worker Windows source regression batch passed
+**288 tests with zero skips**. Its exact modules were
+`test_audit_source_variant_inputs`, `test_other_source_variant_provenance`,
+`test_martial_arts_variant_provenance`, `test_audit_source_presentation`,
+`test_audit_1_0_reference_inputs`, `test_audit_rules_interactions`,
+`test_report_reference_baseline`, `test_rules_rebuild_logical_equality`,
+`test_source_coverage_dispositions` and `test_inspect_raw_archive`, all under
+`tests/`. It verified full source-only occurrences rather than accepting
+clean-CI skips for missing raw data. Required assets were **808/808** complete.
+
+Reproducibility reused V1S-084's two byte-identical Windows builds; its
+source and runtime code are unchanged. A further Windows rules rebuild with
+SQLite **3.50.4** matched the tracked bytes. An independent pinned Linux
+rebuild, job `linux-dev:5a17c2269ea64d46b4cf3021520f670b`, used SQLite
+**3.46.1**: all logical rows, table definitions and reported identity/schema
+pragmas matched, but **1,594 bytes** differed. Its hash was
+`94b5c460d836d84a512118af79acd508c84bf8f1c17244d8aca903166d62c3dd`,
+versus tracked
+`90d600a5b7b0425ee590ef90891481433e179d4e96f4a7b1dbf26edfde672ca9`.
+Both had 336 × 4096-byte pages. This is logical-equivalence evidence under
+the [cross-host policy](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04),
+not cross-host byte parity or permission to replace a shipped artifact.
+
+Ignored `local/v1s085-*` reports retain the baseline/input/occupancy evidence,
+rules stage, 288-test transcript and Linux comparison. No runtime, source,
+artifact or maintained-policy change was needed. V1S-085 is closed; these
+inventory/locator checks do not approve every clause or certify browser
+completeness. V1S-086 onward, full Linux/local validation, hosted byte-comparison
+and final release/human/operational gates remain independent. Nothing is deferred
+in VD/VR.
+
 ### Release-matched rebuild and publication acceptance (V1S-084)
 
 **Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
