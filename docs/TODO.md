@@ -200,29 +200,19 @@ The [V1S-086 maintained-reference and fragment browser acceptance](v1.0-source-c
 passed on the frozen pair. Subsequent final browser, cumulative and hosted
 checks retain their separately numbered gates.
 
-- [ ] **V1S-087 (L, gate):** Accept the exact-version hosted Unit
-  representative checks. The [frozen-pair local 81-page Unit matrix](testing.md#frozen-pair-81-page-unit-matrix-v1s-087-local-portion)
-  passed on `a5846dc` (five matrix groups, zero skips).
-  The [development-preview artifact preflight](testing.md#pre-candidate-frozen-artifact-readiness-2026-11-07)
-  passed at `25871751`. The [untagged candidate version checkpoint](testing.md#untagged-100-candidate-version-checkpoint-2026-11-07)
-  now prepares exact package/API version `1.0.0`, verifies the unchanged
-  paired runtime/static identity in a local Chromium integration test,
-  and leaves the public 0.10.1 release unchanged. Neither step certifies
-  a hosted candidate.
-  Blocked: Hosted exact-version checks require an actually served 1.0.0
-  candidate matched to the release pair and static assets;
-  authority: release owner; retry: after the release candidate is prepared
-  and hosted for verification.
+The [isolated Linux served-candidate acceptance](testing.md#isolated-linux-served-candidate-acceptance-v1s-087)
+passed the exact-version representative Unit checks. This accepts the
+staging candidate, not production deployment or final exact-SHA hosted CI.
 
 The [V1S-088 frozen-pair scenario and FAQ rerun](v1.0-source-coverage-audit.md#v1s-088-frozen-pair-scenario-and-faq-browser-acceptance-2026-11-07)
 passed. The [final candidate manual notice and Silhouette sign-off](testing.md#final-candidate-manual-notice-and-silhouette-acceptance-2026-11-07)
-is accepted; cumulative and hosted gates remain open.
+is accepted; cumulative and final hosted CI/deployment gates remain open.
 
 - [ ] **V1S-090 (L, gate):** Drain due VD/VR work and run the full
   local/Linux, source, docs, preflight and applicable full-asset checks.
-  Manual candidate checks are accepted. Blocked: exact-version hosted Unit
-  acceptance remains open; authority: release owner;
-  retry: when V1S-087 is accepted.
+  Manual and served-candidate prerequisites are accepted. Reconcile the
+  focused Source CI test-contract repairs and require cumulative evidence
+  on the resulting revision; keep required source/asset skips explicit.
 
 The **V1S-091** tracked documentation audit passed Markdownlint (44 files),
 local path/heading checks (43 files), maintained command-module inspection and
@@ -236,7 +226,7 @@ clarifies its virtual-environment commands and the shipped theme requirement.
   version checkpoint has been prepared for V1S-087. It does not finalize
   the Unreleased changelog, approve release metadata, merge or tag.
   Blocked: final version and release notes require accepted candidate completeness;
-  authority: release owner; retry: when V1S-087 and V1S-090 pass.
+  authority: release owner; retry: when V1S-090 passes.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
   exact-main-SHA hosted Source, wheel and deployment smoke evidence,
   optional full-assets and annotated tag. The recurring Windows scenario
@@ -385,7 +375,7 @@ Historical replay and publisher rulings are not 1.0 prerequisites.
 **Project domains:** Data processing, Web backend, Web frontend,
 Project infrastructure, Deployment
 
-- [ ] Complete **V1S-087 and V1S-090–095**
+- [ ] Complete **V1S-090–095**
   against the exact frozen source,
   database, generated-publication, static-asset and release-candidate
   revisions. This includes one current source citation per in-scope rule,

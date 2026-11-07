@@ -16,7 +16,8 @@ let code=fs.readFileSync(renderer,'utf8').replace(/^import .*;$/gm,'').replace(/
 vm.runInContext(code,context);
 const data=JSON.parse(fs.readFileSync(input,'utf8'));
 const skills=data.skills.map(skill=>context.rulesReferenceArticle(skill).textContent);
+const uncitedSkills=data.skills.map(skill=>context.rulesReferenceArticle({...skill,citations:[]}).textContent);
 const embeddedSkills=data.skills.map(skill=>context.rulesReferenceArticle(skill,{includeApplicability:false}).textContent);
 const specialist=context.rulesReferenceArticle(data.specialist).textContent;
 const embeddedSpecialist=context.rulesReferenceArticle(data.specialist,{includeApplicability:false}).textContent;
-console.log(JSON.stringify({skills,embeddedSkills,specialist,embeddedSpecialist}));
+console.log(JSON.stringify({skills,uncitedSkills,embeddedSkills,specialist,embeddedSpecialist}));

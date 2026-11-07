@@ -5682,6 +5682,61 @@ are not evidence of hosted release acceptance. The full local 81-page
 matrix remains a separate requirement; deployed representative checks
 do not imply full-catalog acceptance.
 
+### Isolated Linux served-candidate acceptance (V1S-087)
+
+**Project domains:** Project infrastructure, Web backend, Web frontend
+
+With explicit release-owner approval, a clean Git export of
+`d758e128a554f7cae6402599c30f898814df3888` was packaged as the
+`1.0.0` wheel and served from a separate Linux staging directory using
+Python **3.14.4** and Gunicorn **23.0.0**. Installation used only the
+verified bundled wheels. The service binds to loopback; Windows Chrome
+reached it through an SSH tunnel. Existing development checkouts and the
+public **0.10.1** service were not changed.
+
+`tools.verify_release_candidate_browser` passed **21/21** Unit cases
+(seven Units at 1440/390/320 px), with exact preflight and postflight:
+version `1.0.0`, static revision `4ae85967ab930786`, runtime snapshot
+`5e79f6ac1d6cfa74d1f5dee71f2f2730e4b6f6fea45572469ae65652ab10c0ef`.
+The clean export passed artifact verification for **808/808** SVGs,
+the paired databases and reference publications. All **1,032** compared
+wheel source members matched the clean exported files byte for byte.
+
+The first verifier attempt correctly rejected the Windows working-copy
+static fingerprint `c135d9dba2cf9b77`. Inspection proved that three
+fingerprinted files differed only by CRLF/LF line endings. Acceptance
+then used the retained **build-matched clean source**, including its
+`src` import path, rather than the editable Windows installation. No
+expected fingerprint or verifier assertion was overridden. When checking
+a packaged deployment, import the verifier's application modules from
+that same retained source or installed wheel; a working copy with different
+asset bytes is not a valid fingerprint baseline. Private JSON and byte
+comparison evidence remain under ignored `local/candidates/`.
+
+This closes V1S-087 together with the previously accepted local 81-page
+Unit matrix. Final cumulative V1S-090, exact-SHA hosted CI, release metadata,
+merge/tag and production/post-deployment acceptance remain separate.
+
+### Source CI contract repair before cumulative acceptance (2026-11-07)
+
+**Project domain:** Project infrastructure
+
+Source checks on `d758e128` exposed five repeatable test failures across
+Linux and macOS: the scenario renderer still expected a duplicate
+applicability caption on cited cards, and four browser-lane assertions
+incorrectly counted the separately dispatched cross-engine cohort.
+The scenario regression now verifies cited cards retain their Sources
+links without the duplicate caption, while uncited cards retain scenario
+applicability. Lane checks exclude the independent cross-engine cohort
+without changing Chromium scheduling or reducing the hosted matrix.
+
+As an immediate mandatory CI-repair check,
+`tests/test_browser_test_capacity.py tests/test_scenario_components.py`
+passed **41/41**, zero skips, on Windows in **7.07 s**. No application,
+rules or generated artifact changed. This focused result does not close
+the cumulative gate or accept the failed hosted revision; replacement
+exact-SHA Source and deterministic-output evidence remains required.
+
 An optional integration regression exercises the exact pinned ZIP
 when it exists locally and skips when it is absent. Example for
 the present input:

@@ -30,8 +30,11 @@ from tools.test_sections import load_test_sections
 
 def test_two_browser_lanes_cover_all_real_chromium_modules() -> None:
     browser_modules = set(load_test_sections()["browser"].modules)
-    # The verifier-contract module is pure mocks; it must never hold a slot.
-    browser_modules.remove("test_verify_rule_fragment_browser")
+    # Pure verifier mocks never hold a slot. The separately dispatched
+    # cross-engine cohort does not use the Chromium suite's lane admission.
+    browser_modules -= {
+        "test_verify_rule_fragment_browser", "test_cross_browser_compatibility",
+    }
     assert set(CHROMIUM_SCHEDULING_LANES) == browser_modules
     assert set(CHROMIUM_SCHEDULING_LANES.values()) == {"chromium-a", "chromium-b"}
     assert CHROMIUM_SCHEDULING_LANES["test_verify_unit_skill_presentation_browser"] != (
@@ -43,7 +46,9 @@ def test_two_browser_lanes_cover_all_real_chromium_modules() -> None:
 def test_experimental_browser_lanes_cover_all_modules_once(lanes: int) -> None:
     groups = browser_lane_groups(lanes)
     browser_modules = set(load_test_sections()["browser"].modules)
-    browser_modules.remove("test_verify_rule_fragment_browser")
+    browser_modules -= {
+        "test_verify_rule_fragment_browser", "test_cross_browser_compatibility",
+    }
     assert set(groups) == browser_modules
     assert set(groups.values()) == {
         f"chromium-{chr(ord('a') + i)}" for i in range(lanes)
