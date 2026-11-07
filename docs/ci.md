@@ -199,11 +199,12 @@ hosted results and final acceptance remain independent.
 [42323715516](https://github.com/frankysan/InfinityDB/actions/runs/42323715516)
 at `e06982fa762d66cc9b530592863044cf148f4a60` and
 [42323999988](https://github.com/frankysan/InfinityDB/actions/runs/42323999988)
-at `e73a80985c04fdcfdd49ffa1924f9afc46e762e3` failed both Linux and macOS
-jobs because the baseline and release-browser checks calculated only the
-database pair, while the runtime also fingerprints its Weapon-profile
-publication. The same two selectors reproduced locally on Windows at
-`9e7d9f92` before repair. The shared identity repair passed its
+at `e73a80985c04fdcfdd49ffa1924f9afc46e762e3` failed all four
+platform/Python jobs on the same two selectors; dependent deterministic-output
+jobs were skipped. The baseline and release-browser checks calculated only
+the database pair, while the runtime also fingerprints its Weapon-profile
+publication. The failures reproduced locally on Windows at `9e7d9f92` before
+repair. The shared identity repair passed its
 [28-test Windows batch](testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
 at `1d1ec4a1aea3e0987e9f54e0ff65780b780da421`. Hosted replacement-SHA and
 final acceptance remain separate.

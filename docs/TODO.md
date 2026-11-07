@@ -254,6 +254,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   The [Hacking and FAQ recheck](v1.0-source-coverage-audit.md#v1s-082-hacking-and-faq-current-citation-recheck-2026-11-07)
   matched all 12 Program name locators and all 29 selected FAQ citations to
   their current published identities.
+  The [contextual variant recheck](v1.0-source-coverage-audit.md#v1s-082-contextual-variant-locator-recheck-2026-11-07)
+  matched all 20 existing variant families on cited pages and checked their
+  seven explicit effect targets for current citation presence.
   The TinBot reference-only cards now disclose that their family citations
   need not establish each named combination;
   [VR-0135 passed](testing.md#v1s-082-reference-only-equipment-source-scope-vr-0135)
