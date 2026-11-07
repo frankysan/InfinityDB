@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from copy import deepcopy
 from typing import Any
 
@@ -188,6 +189,19 @@ def maintained_text_tokens(
     if rules_database is None:
         return None
     return _Resolver(database, rules_database, scenario_id).tokens(value)
+
+
+def maintained_text_tokens_batch(
+    database: Database,
+    rules_database: RulesDatabase | None,
+    values: Iterable[str],
+) -> list[list[dict[str, Any]] | None]:
+    """Resolve a collection using one cache for repeated rule/property references."""
+
+    if rules_database is None:
+        return [None for _ in values]
+    resolver = _Resolver(database, rules_database)
+    return [resolver.tokens(value) for value in values]
 
 
 def enrich_maintained_text_references(

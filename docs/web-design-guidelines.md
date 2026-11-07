@@ -239,6 +239,9 @@ Stable geometry is especially important for side-by-side comparison and repeated
 Player-facing information should dominate the normal view. Provenance, internal identifiers, source diagnostics, and developer metadata should remain available without distorting the ordinary layout.
 
 Developer mode should add technical depth rather than redefine the primary presentation.
+On Unit detail pages, source-defined **Reinforcement relationships** and
+technical Army/faction membership diagnostics belong in Developer Mode;
+normal profile availability and ordinary Army/Unit navigation remain public.
 
 The accuracy and independence notice is a **floating, viewport-bottom
 section** in the shared page shell, rather than an ordinary footer row.

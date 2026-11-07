@@ -781,8 +781,7 @@ function renderArmyRelationships(unit, armies) {
   if (!reinforcementRelations.length && !declaredFactions.length) return null;
 
   const section = document.createElement("section");
-  section.className = "detail-group army-relationships";
-  if (!reinforcementRelations.length) section.classList.add("developer-only");
+  section.className = "detail-group army-relationships developer-only";
   const title = heading(
     reinforcementRelations.length ? "Reinforcement relationships" : "Army relationships",
   );

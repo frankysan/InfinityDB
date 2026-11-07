@@ -99,6 +99,8 @@ are not retroactively relabeled.
   term as a counts-as rule.
 - All canonical Trait pages offer official Wiki heading links. Glossary deep links
   and reference previews behave more reliably when moving between pages.
+- Glossary definitions load with less repeated processing; technical Reinforcement
+  relationships on Unit pages are shown only when Developer Mode is enabled.
 - The Unit Profile Glossary entry explains the Troopers in each Unit, their
   profile data and options. The Trooper entry covers Army Lists, Attributes,
   Orders and Attacks; the Peripheral entry covers its Order and Army List

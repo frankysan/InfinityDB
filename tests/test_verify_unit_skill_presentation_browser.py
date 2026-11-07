@@ -246,8 +246,8 @@ def _relationship_cohort(database_path: Path) -> tuple[str, ...]:
 
 
 @pytest.mark.usefixtures("chromium_test_slot")
-def test_reinforcement_parentage_is_visible_without_developer_mode() -> None:
-    """A real Reinforcement Unit must link to its source-backed parent Army."""
+def test_reinforcement_parentage_is_developer_mode_only() -> None:
+    """Source-backed parentage is hidden until Developer Mode is enabled."""
     playwright_api = pytest.importorskip("playwright.sync_api")
     sync_playwright = playwright_api.sync_playwright
 
@@ -330,6 +330,16 @@ def test_reinforcement_parentage_is_visible_without_developer_mode() -> None:
                                 f"failed_requests={failed_requests}"
                             ) from exc
                         section = page.locator(".army-relationships")
+                        assert section.is_hidden(), (slug, width)
+                        page.evaluate(
+                            "sessionStorage.setItem('infinity-db-developer-mode', 'true')"
+                        )
+                        page.reload(wait_until="domcontentloaded")
+                        page.locator("#unit-content").wait_for(
+                            state="visible", timeout=60000,
+                        )
+                        assert page.locator("html").get_attribute("data-developer-mode") == "true"
+                        section = page.locator(".army-relationships")
                         assert section.is_visible(), (slug, width)
                         assert "Reinforcement relationships" in section.inner_text()
                         public_list = section.locator(".army-relationship-surface > ul")
@@ -343,7 +353,7 @@ def test_reinforcement_parentage_is_visible_without_developer_mode() -> None:
                                 "(links) => links.map(link => link.getAttribute('href'))"
                             )
                         )
-                        assert not section.locator(".developer-only").first.is_visible()
+                        assert section.locator(".developer-only").first.is_visible()
                     finally:
                         page.close()
             finally:

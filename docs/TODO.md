@@ -168,8 +168,10 @@ is bounded to the development pair; final-input checks remain.
   acceptance for the accuracy notice and navigation on 320/390 px screens
   in light/dark themes. The [frozen-pair automated notice gate](testing.md#v1s-080-frozen-pair-automated-notice-acceptance)
   passed **10/10** on `174bf8b2`, with zero skips; no browser defect was
-  reproduced. This is **not human touch acceptance**, and the earlier
-  V1S-079 NVDA/Chrome 7/7 walkthrough does not replace it.
+  reproduced. The owner subsequently reported **5/5 real manual
+  checks passed** on development preview `2df92f9`, including actual touch;
+  the final release-matched candidate still needs recorded sign-off.
+  The earlier V1S-079 NVDA/Chrome 7/7 walkthrough remains separate.
   Preserve the frozen source pair; do not test the older public 0.10.1 deployment.
   Blocked: manual touch/visual sign-off requires a release-matched candidate;
   authority: release owner; retry: when the candidate is available for device inspection.
@@ -220,6 +222,8 @@ passed; independent touch/human, cumulative and hosted gates remain open.
   hover/keyboard/touch/theme/narrow-width and human visual sign-off.
   The [source/geometry preflight](testing.md#v1s-089-silhouette-manual-visual-acceptance-preflight)
   passed **4/4** on `2f4f4686`, including the pinned N5.3 PDF.
+  The owner reported **6/6 visual and real-touch checks passed** on
+  development preview `2df92f9`. Final candidate sign-off is still open.
   Blocked: human preview interaction and proportional SVG visual inspection
   remain unapproved; authority: release owner; retry: once the candidate
   is available for real-device and desktop visual inspection.

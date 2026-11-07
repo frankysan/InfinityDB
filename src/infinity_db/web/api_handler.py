@@ -38,6 +38,7 @@ from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.maintained_text_references import (
     enrich_maintained_text_references,
     maintained_text_tokens,
+    maintained_text_tokens_batch,
 )
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
@@ -497,6 +498,7 @@ class ApiHandler:
         self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
         self.scenario_catalog = ScenarioCatalog(rules_database)
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
+        self._glossary_items_cache: list[dict[str, Any]] | None = None
         self.legacy_armies = load_legacy_armies()
         self.search_catalog = SearchCatalog(
             database,
@@ -686,12 +688,16 @@ class ApiHandler:
         elif path == "/api/glossary":
             cache_control = API_CACHE_CONTROL
             try:
-                items = self.glossary_catalog.entries()
-                for item in items:
-                    item["description_tokens"] = maintained_text_tokens(
-                        self.database, self.rules_database, item["description"]
+                if self._glossary_items_cache is None:
+                    items = self.glossary_catalog.entries()
+                    tokens = maintained_text_tokens_batch(
+                        self.database, self.rules_database,
+                        (item["description"] for item in items),
                     )
-                payload = {"items": items}
+                    for item, description_tokens in zip(items, tokens, strict=True):
+                        item["description_tokens"] = description_tokens
+                    self._glossary_items_cache = items
+                payload = {"items": self._glossary_items_cache}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Glossary")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

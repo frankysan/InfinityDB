@@ -1198,6 +1198,24 @@ Markdownlint, link checks and `git diff --check` passed before commit.
 This closes the **local** Phase 2/3 deferred-execution entries; Phase 4
 integration, hosted CI and final release acceptance remain independent.
 
+### Glossary load and Unit relationship visibility (2026-11-07)
+
+**Project domains:** Web backend, Web frontend
+
+The release owner reported slow Glossary loading on development preview
+`2df92f9`. The immutable Glossary API now shares one maintained-text
+resolver across entries and caches the resolved payload across requests.
+It preserves citations, link tokens, search and URL fragment semantics.
+This removes repeated reference lookups, but no controlled before/after
+cold-load timing is available; a manual responsiveness retest is still
+needed on the new commit after restarting the preview.
+
+On Unit details, Reinforcement relationships now require Developer Mode.
+The ordinary view retains Army availability and roster navigation.
+Targeted source/DOM regressions check the Glossary response, existing
+deep links at 1440/390/320 px, and both Developer Mode visibility
+states. This is separate from formal version-matched release acceptance.
+
 ### V1S-080 frozen-pair automated notice acceptance
 
 **Project domains:** Web frontend, Project infrastructure
@@ -1222,7 +1240,16 @@ Back/Forward. Check no horizontal overflow or visual occlusion. Record
 device/browser, candidate SHA and the outcome. Browser-emulated touch is
 valuable regression evidence but is not a human/real-device sign-off.
 The earlier V1S-079 NVDA walkthrough is a separate acceptance.
-Until this review, V1S-080 remains open and documented as blocked.
+
+**2026-11-07 development-preview walkthrough:** The release owner reported
+**5/5 manual notice checks passed** at
+`2df92f95faaebd435b9f9a943929cffb1d8f7c5e`: both themes at
+320/390 px, mouse/keyboard collapse and reopen, operable collapsed
+control, Back/Forward state continuity, and **actual-device touch**.
+The preview started and the checkout SHA was confirmed (2/2 preparation
+checks); specific device/browser version was not provided in the result.
+These are accepted as observations of that development revision, **not**
+final exact-version v1.0 candidate sign-off. V1S-080 remains open.
 
 **2026-11-05 V1S-079 human assistive-technology acceptance:**
 The release owner reported **7/7 manual screen-reader checks passed** using the
@@ -6653,6 +6680,16 @@ text-only exceptions. It **does not** constitute rendered visual approval.
    absence of clipping/horizontal page overflow and usable
    focus/touch targets. Record candidate SHA, device/browser,
    results and any screenshot-backed defect.
+
+**2026-11-07 development-preview walkthrough:** The release owner reported
+**6/6 manual Silhouette checks passed** at
+`2df92f95faaebd435b9f9a943929cffb1d8f7c5e`: proportional
+S1–S8 and readable captions, no invented S0/SX diagrams, mouse
+hover and keyboard focus open/close, **actual-device touch** open/close,
+and both themes at 320/390 px without clipping or horizontal overflow.
+The specific device/browser version was not supplied in the result.
+This is human evidence for the development preview, **not** final
+version-matched v1.0 candidate acceptance; V1S-089 remains open.
 
 Do not use the older public release as proof of the pending v1.0
 candidate's visual acceptance. Human sign-off is still required.

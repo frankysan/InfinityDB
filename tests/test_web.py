@@ -2255,12 +2255,12 @@ def test_player_unit_tooltips_and_filter_context_use_game_language(app: Callable
     assert b"preview_tokens: item.summary_tokens" in unit_script
     assert b"copy.textContent = item.summary" not in unit_script
 
-    # Reinforcement parentage is public, but broad faction memberships
-    # and technical selection relationships remain developer-only.
+    # Reinforcement parentage and faction membership are developer-only;
+    # ordinary Unit availability and player-facing roster links remain public.
     army_block = unit_script.split(b"function renderArmyRelationships(", 1)[1].split(
         b"\nfunction ", 1
     )[0]
-    assert b'if (!reinforcementRelations.length) section.classList.add("developer-only")' in (
+    assert b'section.className = "detail-group army-relationships developer-only"' in (
         army_block
     )
     assert b'diagnostic.className = "developer-only"' in army_block
@@ -4483,10 +4483,7 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     assert status == 200
     assert b"function renderArmyRelationships(unit, armies)" in unit_js
     assert b'"Reinforcement relationships" : "Army relationships"' in unit_js
-    assert b'section.className = "detail-group army-relationships";' in unit_js
-    assert b'if (!reinforcementRelations.length) section.classList.add("developer-only")' in (
-        unit_js
-    )
+    assert b'section.className = "detail-group army-relationships developer-only";' in unit_js
     assert b'diagnostic.className = "developer-only";' in unit_js
     assert b'link.href = shareStateHref("/units", "units", { army_id: identifier });' in unit_js
     assert (
@@ -5725,6 +5722,32 @@ def test_specialist_troops_general_rule_is_searchable_with_scenario_context(
         ("Firefight", "/scenarios/firefight"),
         ("Supplies", "/scenarios/supplies"),
     ]
+
+
+def test_glossary_frozen_pair_reuses_resolved_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A repeat Glossary request must not recompute every source-linked description."""
+    root = Path(__file__).parents[1]
+    rules_app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+    status, _, original = request(rules_app, "/api/glossary")
+    assert status == 200
+    entries = json.loads(original)["items"]
+    assert len(entries) > 100
+    assert any(
+        token.get("target") == "skill:peripheral"
+        for entry in entries if entry["id"] == "term:peripheral"
+        for token in entry["description_tokens"]
+    )
+
+    def no_second_build() -> None:
+        raise AssertionError("Glossary entries were rebuilt on a repeat request")
+
+    monkeypatch.setattr(rules_app.api.glossary_catalog, "entries", no_second_build)
+    status, _, repeated = request(rules_app, "/api/glossary")
+    assert status == 200
+    assert repeated == original
 
 
 def test_glossary_projects_canonical_rules_and_embedded_attributes(
