@@ -2,9 +2,11 @@
 
 **Project domain:** Project infrastructure
 
-This document owns the hosted validation contract. Local stage/profile semantics belong in
-`docs/testing.md`; release acceptance belongs in `docs/releasing.md`; unfinished CI/operations work
-belongs in `docs/TODO.md`.
+This document owns hosted CI workflows, gate behavior, failure handling and
+validation evidence. Local check stages belong in `docs/testing.md`; release
+approvals, exact-SHA acceptance, tagging and deployment belong in
+`docs/releasing.md`. `docs/TODO.md` tracks implementation work, not
+release-only operations.
 
 Required CI is intentionally hermetic with respect to Corvus Belli services and developer-local raw
 inputs. A clean checkout must be able to validate source behavior, deterministic generated output,

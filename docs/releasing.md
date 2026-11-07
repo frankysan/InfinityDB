@@ -4,9 +4,11 @@
 
 This document is the canonical release checklist for InfinityDB. **Every release**
 must pass this checklist unless a step is explicitly inapplicable to that release.
-Active version-specific implementation/release blockers belong in `docs/TODO.md`;
-they extend this process rather than replacing it. Long-lived acceptance definitions,
-such as the version-1.0 completeness gate below, remain in this document.
+Unfinished **implementation** work belongs in `docs/TODO.md`; release-only
+approvals, exact-SHA hosted evidence, tagging, deployment and verification belong
+in this checklist. The version-1.0 completeness definition remains here as a
+durable acceptance contract. The runbook records release obligations without
+making a second TODO-cleanup merge necessary.
 
 A release is not ready merely because its implementation checks pass. The release
 gate includes repository state, documentation, release metadata, hosted validation,
@@ -216,23 +218,14 @@ application parses it to render **What's changed**.
 - [ ] Update the package/application version consistently in `pyproject.toml` and
   `src/infinity_army_data/__init__.py`.
 - [ ] Update the current-release statement in `README.md`.
-- [ ] Keep release-metadata preparation distinct from publication: the README may identify the
-  prepared version, but must not claim an unpublished candidate has already been released. Active
-  candidate status belongs in `docs/TODO.md`; tag creation follows exact-commit hosted validation.
+- [ ] Freeze the README/changelog for the target released version before the final
+  planned merge. The text describes the version being shipped; publication
+  evidence remains the tag, exact-SHA CI and production verification in this
+  checklist. Do not create a second merge merely to rewrite the TODO.
 - [ ] Re-run the documentation audit checks affected by those release-metadata edits.
 
 Do not change the released version early merely to mark work in progress; development
 checkouts use the existing `+dev` display-version mechanism until release preparation.
-
-**Historical 1.0 candidate checkpoint:** Before the 1.0 release metadata was
-finalized, the exact-version Unit gate (V1S-087) required `/api/version` to
-report `1.0.0` while the public README still identified 0.10.1 as the
-released version. The version pair in `pyproject.toml` and
-`src/infinity_army_data/__init__.py` was promoted first on `dev/v1.0.0`;
-release-note and README promotion followed in V1S-092. This exception
-explains the pre-publication test evidence and is **not** a general instruction
-to leave the current README on an older version. Merge, tag, deployment and
-exact-SHA hosted acceptance remain separate release steps.
 
 ## 4. Run local release validation
 

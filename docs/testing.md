@@ -2,10 +2,16 @@
 
 **Project domain:** Project infrastructure
 
-`tools/run_checks.py` is the canonical local validation entry point. It keeps pytest, Ruff,
-Markdownlint, offline documentation link checks, Pyright, Army database-build validation,
-rules-database validation, asset policy,
-worker selection, and optional reporting under one command contract.
+This document owns **local check procedures, focused test selection, phased
+execution and retained dated validation evidence**. The older 1.0 acceptance
+entries below apply to their stated revisions and artifacts; they are not
+current TODO items or proof of post-deployment success. Hosted workflow
+requirements belong in [CI](ci.md), release approval and production
+verification in [releasing](releasing.md).
+
+`tools/run_checks.py` is the canonical local entry point for pytest, Ruff,
+Markdownlint, offline link checks, Pyright, database-build verification,
+asset policy, worker selection and optional reporting.
 
 The type-check stage explicitly passes the runner's interpreter to Pyright for dependency
 resolution, so invoking the virtual-environment Python works without first activating that
@@ -193,9 +199,11 @@ build step is part of the application's runtime or packaging.
 
 ## V1S backlog checks
 
-The static V1S register check is part of the regular `docs` stage. For each
-autonomous numbered task, first run the explicit selection check. It examines
-every earlier open ID across workstreams and fails unexplained skips:
+The static V1S register check is part of the regular `docs` stage. The
+completed 1.0 development register currently has **zero active V1S entries**;
+do not run a task-selection command with a null ID. Only if a numbered task is
+reopened, run the following selection check. It examines every earlier open ID
+across workstreams and fails unexplained skips:
 
 ```powershell
 $taskId = (.\.venv\Scripts\python.exe -m tools.dev_status --offline --json | ConvertFrom-Json).backlog.next_actionable

@@ -22,8 +22,9 @@ Use these documents when deciding how the project works now:
 - `data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
   lifecycle.
 - `data/curated/README.md` — authored/curated data schemas and review contracts.
-- `testing.md` — local validation entry points, phased validation policy, test slices,
-  asset modes, reports, and benchmark tooling.
+- `testing.md` — local validation commands, test selectors, worker and asset
+  policies, plus dated 1.0 acceptance results. Historical runs are evidence for
+  their pinned inputs, not current-release approval.
 - [multi-agent-workspaces.md](multi-agent-workspaces.md) — optional coordination, enabled only
   by explicit user request; its checkout roles, claims and serialized integration apply within
   that requested scope, rather than to ordinary development by default.
@@ -63,7 +64,8 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
   baseline evidence with subsequent source, browser, artifact and local candidate
   acceptance records. It preserves the reviewed 1.0 input scope without implying
   exhaustive whole-source coverage. Historical snapshots in this file are not
-  current task status; `TODO.md` owns any remaining release handoff or follow-up.
+  current task status; `releasing.md` owns release handoff and `TODO.md`
+  owns post-1.0 development.
 - [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
   source/interaction assessment with implementation follow-ups and remaining
   source conflicts. Its linked inventory, N5.3 reconciliation and source manifest
