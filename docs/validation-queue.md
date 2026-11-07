@@ -145,7 +145,22 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending deferred execution entries.
+- [ ] VR-0135 (2026-11-07; ready-to-run): Verify reference-only Equipment
+  source-scope disclosure, exact citation sections and unchanged parent/variant
+  routing in ordinary browsers. Work: V1S-082; implementation: commit
+  containing this entry. VD-0109 designed the browser scope/section and API
+  locator assertions without running tests. Select
+  `tests/test_application_rule_references.py::test_tinbot_reference_only_variants_preserve_citations_and_routes`,
+  the three `test_equipment_reference_only_variants_*` tests in
+  `tests/test_catalog_rules.py`, and
+  `tests/test_verify_scenario_faq_browser.py` tests
+  `test_tinbot_reference_only_variants_normal_browser`,
+  `test_tinbot_reference_only_variants_keep_unfiltered_classification`,
+  `test_unpublished_tinbot_source_variant_is_not_a_fake_public_route` and
+  `test_tinbot_firewall_source_169_usage_normal_browser`.
+  The normal-browser source-scope cases require 1440/390/320 px in light
+  and dark themes. Pinned `linux-dev` preferred; Windows fallback if unavailable.
+  No gameplay or source-data change.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -162,8 +177,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0109`; active obligations are listed above.
-- Execution: `VR-0135`; active obligations are listed above.
+- Design: `VD-0110`; active obligations are listed above.
+- Execution: `VR-0136`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

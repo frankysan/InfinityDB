@@ -1701,6 +1701,7 @@ def test_tinbot_reference_only_variants_preserve_citations_and_routes() -> None:
             citation["source_id"] == "n5-core-v5.3-pdf"
             and citation["source_version"] == "5.3"
             and citation["page"] == 127
+            and citation["section"] == "TinBot"
             and citation["source_url"]
             for citation in record["citations"]
         )

@@ -27,7 +27,8 @@ are not retroactively relabeled.
   timing difference shown explicitly. Label detail pages also show scoped
   vocabulary source locators.
 - Equipment families show cited reference-only variants separately from current
-  Army options, without implying that any Unit has them.
+  Army options, without implying that any Unit has them; family-source scope is
+  identified where a citation need not establish each named combination.
 - Trait definitions clarify targetability, spent Disposable uses and Unloaded,
   attribute-specific effects and Silent's stacking with other Dodge modifiers.
   The unresolved Silent/Immunity question remains visible.

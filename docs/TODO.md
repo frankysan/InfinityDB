@@ -251,7 +251,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   The [PDF-only locator screen](v1.0-source-coverage-audit.md#v1s-082-pdf-only-reference-locator-screen-2026-11-07)
   matched 145 existing identities or aliases to cited pages and checked
   parent context for 13 others; it is not a clause-by-clause review.
-  Metadata and reachability alone do not prove that a locator supports its reference.
+  The TinBot reference-only cards now disclose that their family citations
+  need not establish each named combination; browser validation remains open
+  as VR-0135. Metadata and reachability alone do not prove that a locator supports its reference.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are

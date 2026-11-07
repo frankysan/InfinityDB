@@ -598,11 +598,14 @@ function hackingProgramsSection(programs) {
 }
 
 function referenceOnlyVariantsSection(rules) {
-  const section = rulesReferenceSection(rules, "Other variant references");
+  const section = rulesReferenceSection(rules, "Other variant references", {
+    includeLocationDetails: true,
+  });
   const note = document.createElement("p");
   note.className = "detail-copy";
   note.textContent = "These variants are not listed for this Equipment in the current Army data. "
-    + "The references do not imply Unit availability.";
+    + "The references do not imply Unit availability. Family sources may describe the parent "
+    + "Equipment rather than confirm every named combination.";
   section.firstElementChild.after(note);
   return section;
 }

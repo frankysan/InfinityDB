@@ -479,15 +479,19 @@ def test_tinbot_reference_only_variants_normal_browser(
         assert page.locator("html").get_attribute("data-theme") == theme
         assert section.locator(":scope > .detail-copy").inner_text() == (
             "These variants are not listed for this Equipment in the current Army data. "
-            "The references do not imply Unit availability."
+            "The references do not imply Unit availability. Family sources may describe "
+            "the parent Equipment rather than confirm every named combination."
         )
+        parent_citations = page.locator("#rule-equipment-tinbot .rules-source-citations")
+        assert "p. 127" in parent_citations.inner_text()
+        assert "p. 127 (TinBot)" not in parent_citations.inner_text()
         for slug, (href, _) in expected.items():
             record = references[f"equipment:tinbot-{slug}"]
             card = section.locator(f"#rule-equipment-tinbot-{slug}")
             assert card.locator("h3").inner_text() == record["name"]
             assert "[[" not in card.inner_text()
             citations = card.locator(".rules-source-citations")
-            assert "p. 127" in citations.inner_text()
+            assert "p. 127 (TinBot)" in citations.inner_text()
             links = citations.locator("a")
             sources = [citation for citation in record["citations"] if citation["source_url"]]
             assert links.count() == len(sources) >= 1

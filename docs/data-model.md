@@ -3283,7 +3283,8 @@ For Equipment families, the detail API also exposes current, source-specific
 `reference_only_variants`. These are composed rules with their own citations,
 not additions to `variants`, Unit usage, or standalone Equipment routes. The
 browser labels them separately as references absent from that family's current
-Army options. Their membership is derived from maintained relations and the
+Army options, shows available citation sections, and notes that family sources
+need not establish every named combination. Their membership is derived from maintained relations and the
 unfiltered family response, not from browser filters or inferred roster legality.
 
 The N5.3 Combat Jump source-35 occurrence review keeps each of six

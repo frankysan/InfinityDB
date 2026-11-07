@@ -420,7 +420,12 @@ function hasRedundantRuleSummary(rule) {
 function appendRuleDetails(
   container,
   rule,
-  { includeBadges = true, includeApplicability = true, beforeRelations = [] } = {},
+  {
+    includeBadges = true,
+    includeApplicability = true,
+    beforeRelations = [],
+    includeLocationDetails = false,
+  } = {},
 ) {
   for (const paragraphTokens of (
     hasRedundantRuleSummary(rule) ? [] : summaryParagraphs(rule.summary_tokens, rule.summary)
@@ -486,7 +491,7 @@ function appendRuleDetails(
   }
 
   if (rule.citations?.length) {
-    container.append(rulesCitationList(rule.citations));
+    container.append(rulesCitationList(rule.citations, { includeLocationDetails }));
   }
 }
 
@@ -575,6 +580,7 @@ export function rulesReferenceArticle(
     headerContent = [],
     beforeRelations = [],
     includeApplicability = true,
+    includeLocationDetails = false,
   } = {},
 ) {
   const article = document.createElement("article");
@@ -596,6 +602,7 @@ export function rulesReferenceArticle(
     includeBadges: false,
     includeApplicability,
     beforeRelations,
+    includeLocationDetails,
   });
 
   for (const supplement of rule.supplements || []) {
@@ -604,18 +611,22 @@ export function rulesReferenceArticle(
     const supplementTitle = document.createElement("h4");
     supplementTitle.textContent = "Additional rules";
     supplemental.append(supplementTitle);
-    appendRuleDetails(supplemental, supplement, { includeApplicability });
+    appendRuleDetails(supplemental, supplement, { includeApplicability, includeLocationDetails });
     article.append(supplemental);
   }
   return article;
 }
 
-export function rulesReferenceSection(rules, headingText = "Rules reference") {
+export function rulesReferenceSection(
+  rules, headingText = "Rules reference", { includeLocationDetails = false } = {},
+) {
   const section = document.createElement("section");
   section.className = "detail-group rules-reference";
   const heading = document.createElement("h2");
   heading.className = "detail-heading";
   heading.textContent = headingText;
-  section.append(heading, ...rules.map((rule) => rulesReferenceArticle(rule)));
+  section.append(heading, ...rules.map((rule) => rulesReferenceArticle(
+    rule, { includeLocationDetails },
+  )));
   return section;
 }
