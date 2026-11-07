@@ -182,6 +182,19 @@ stability fix was later committed as `34282616`, with separate focused
 Windows/Linux regression acceptance. Evidence-presence checks cannot
 substitute for semantic closeout review.
 
+**2026-11-07 recurring Windows lifecycle timeout:** At
+`31125e18a04b6040b8d14ff45acc2455b43b816b`,
+[Source run 42320834173](https://github.com/frankysan/InfinityDB/actions/runs/42320834173)
+passed both Ubuntu jobs and macOS, but the Windows job timed out waiting
+15 seconds for the scenario navigation Node process. The dependent
+cross-platform determinism job was skipped. The prior deterministic-exit
+change therefore did not eliminate this intermittent failure. On a later
+Windows checkout, both scenario lifecycle/selection tests passed and
+40 two-worker Node invocations completed, but these local results do not
+identify the hosted cause. The separate installed-wheel and deployment
+smoke runs passed at `31125e18`. Diagnose any recurrence; replacement-SHA
+hosted results and final acceptance remain independent.
+
 The development dependencies include PyMuPDF so PDF-aware test modules collect and
 research tools type-check in a clean environment. Official PDFs under `data/pdf/`
 remain ignored local evidence. Only tests requiring absent PDF bytes skip; data/API

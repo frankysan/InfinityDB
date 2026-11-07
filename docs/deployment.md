@@ -4,10 +4,10 @@
 
 InfinityDB is deployed as an immutable Docker image containing the web application,
 tracked processed graphical assets, the release-matched `infinity.db` and `rules.db`
-snapshots, generated `deployed-objects.json` and the tracked exact-variant
-`variant-usage.json` publication. Caddy listens on HTTP and proxies traffic to the application, which is not
-exposed directly on the host. Put Caddy behind an external TLS reverse proxy for public
-HTTPS.
+snapshots, generated `deployed-objects.json`, and the tracked exact-variant
+`variant-usage.json` and Weapon-profile `weapon-profile-sources.json` publications.
+Caddy listens on HTTP and proxies traffic to the application, which is not exposed
+directly on the host. Put Caddy behind an external TLS reverse proxy for public HTTPS.
 
 Corvus Belli has explicitly permitted InfinityDB to use and redistribute the graphical
 assets used by this non-commercial community project. By project policy, the generated runtime

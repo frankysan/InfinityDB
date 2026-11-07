@@ -99,8 +99,9 @@ InfinityDB deliberately separates four kinds of repository data:
 - `data/curated/` contains human-reviewed source-derived knowledge and rules-reference content.
 - `data/manifests/` contains publication/provenance state; the tracked symbol publication manifest
   is a release contract, while acquisition/build manifests are normally local generated evidence.
-- `data/generated/` contains generated artifacts. `infinity.db` and `rules.db` are deterministic,
-  tracked runtime release artifacts; intermediate JSON and `infinity.raw.db` remain rebuildable
+- `data/generated/` contains generated artifacts. `infinity.db`, `rules.db`, `variant-usage.json`,
+  and `weapon-profile-sources.json` are tracked runtime release artifacts. The deployed-object JSON
+  is regenerated for deployment; other intermediate JSON and `infinity.raw.db` remain rebuildable
   development outputs.
 
 Runtime code must not reach back into raw archives or working-tree curation to reinterpret an

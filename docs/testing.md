@@ -736,6 +736,43 @@ Ruff, targeted Pyright and documentation checks passed. The dedicated MCP
 Linux worker was unavailable; Windows evidence does not establish Linux,
 hosted CI or final-candidate acceptance.
 
+### V1S-082 Weapon-profile citation regression (VR-0134)
+
+At clean revision `244b43b6695fe2b20bb73e2d138556ae5b030fa2`, the complete
+focused Windows batch passed **169 tests, zero skips**. Its exact source,
+API, cache, deployment and browser selectors are recorded in the VR-0134
+entry at that revision; `tests/test_test_sections.py` was also included.
+The first collection found the new test module unregistered; after its
+registration, the initial batch exposed eight outdated deployment-smoke
+fixtures. Those were corrected, including negative current/rollback image
+probe cases, before the complete batch was rerun on the revision above.
+
+The local pinned English N5.3 PDF SHA-256 was
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`;
+its extraction matched all **69** published profile/mode/page tuples for
+**62** reviewed Weapons. The known Katyusha printed `3` versus Army `+3`
+range difference remains disclosed, not interpreted as a gameplay ruling.
+The Army and rules database SHA-256 values were respectively
+`8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
+and `0fcf537fcca2b148541d9ad136003d939f0c0ecbe1e79136fca1bb6fd622714b`;
+the exact Weapon-profile publication SHA-256 was
+`4dd30a8c6f7ccd823a3de378ccde57c0a84dc63f8d6989a761e86165d33d1395`.
+Its deterministic rebuild check and deployment-asset check passed; the
+latter's initial run skipped SVG verification. A subsequent full deployment
+check passed **808/808** published and browser-referenced SVGs. The Windows
+determinism-manifest builder reproduced the publication hash above; its
+cross-platform comparison remains a hosted check.
+
+The complete affected Weapon API and web modules also passed **527 tests**
+without skips, across the normal and full-asset selections.
+
+Chrome `156.0.8078.81` exercised **22** real-browser cases, including all
+1440/390/320 px light/dark citation combinations, mode separation,
+keyboard source navigation, and explicit unavailable behavior. The
+dedicated MCP Linux worker was unavailable, so these results do not claim
+Linux, actual Docker-image, hosted CI or final-candidate acceptance.
+VR-0134 is closed locally; V1S-082 retains its remaining bounded checks.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not

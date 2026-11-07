@@ -241,8 +241,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   found cited Skill, Equipment, Trait and Ammunition targets. All 62
   profile-only Weapons have fingerprinted, reviewed chart-page evidence,
   and a matched profile/mode citation publication now projects those locators
-  separately from Ammunition rules; its source/API/browser validation remains
-  open as VR-0134. The chart-audit extractor also missed
+  separately from Ammunition rules;
+  [VR-0134 passed](testing.md#v1s-082-weapon-profile-citation-regression-vr-0134)
+  source, API and browser checks on Windows. The chart-audit extractor also missed
   two early page-188 rows; its shared-anchor correction passed
   [VR-0133](testing.md#v1s-082-weapon-chart-early-row-regression-vr-0133)
   on Windows. Reconcile other
@@ -277,7 +278,10 @@ bounded rule-citation/route check; final release acceptance remains open.
   release metadata and version after completeness acceptance.
 - [ ] **V1S-093 (L, gate):** Merge the approved candidate, obtain
   exact-main-SHA hosted Source, wheel and deployment smoke evidence,
-  optional full-assets and annotated tag.
+  optional full-assets and annotated tag. The recurring Windows scenario
+  lifecycle timeout in [hosted Source](ci.md#v1s-git-aware-retirement-gate)
+  remains unexplained; investigate recurrence rather than assuming a local
+  pass proves hosted stability.
 - [ ] **V1S-094 (L, external):** With explicit operator approval,
   deploy the tagged artifact and verify recovery assets exist.
   A live-host rollback rehearsal is not required.

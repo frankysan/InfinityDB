@@ -145,46 +145,7 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0134 (2026-11-07; ready-to-run): Verify the reviewed Weapon-profile
-  citation publication, release integration, exact API/mode projection and
-  ordinary-browser rendering on one committed source pair.
-  Work: V1S-082; revision: commit containing this entry, pinned at execution;
-  artifacts: Army `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`,
-  rules `0fcf537fcca2b148541d9ad136003d939f0c0ecbe1e79136fca1bb6fd622714b`,
-  PDF `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`,
-  publication `4dd30a8c6f7ccd823a3de378ccde57c0a84dc63f8d6989a761e86165d33d1395`.
-  Risk: high provenance and cross-layer identity.
-  Immediate: `python -m tools.build_weapon_profile_publication --check`
-  and `python tools\verify_deployment_assets.py --skip-svg` passed on Windows;
-  focused Ruff and Pyright passed. These artifact-integrity gates do not
-  replace API/browser regression execution.
-  Design: VD-0106/0107/0108 completed by static review and Ruff/Pyright;
-  no tests run during design. Deferred selectors:
-  `tests/test_weapon_profile_publication.py`,
-  `tests/test_audit_weapon_definition_gaps.py`,
-  `tests/test_audit_weapon_chart_profiles.py`,
-  `tests/test_verify_deployment_assets.py`,
-  `tests/test_deployment_scripts.py`,
-  `tests/test_runtime_import_boundary.py`,
-  `tests/test_weaponry_catalog_api.py` tests
-  `test_reviewed_profile_chart_citations_reach_exact_api_profiles`,
-  `test_chart_citations_preserve_numeric_slug_and_mode_parity`,
-  `test_missing_or_mixed_weapon_profile_publication_is_explicit`,
-  `test_stale_colocated_weapon_profile_publication_fails_startup`,
-  `test_unreviewed_profile_does_not_inherit_chart_or_ammunition_citation`,
-  and `test_named_mines_preserve_distinct_army_profiles`;
-  `tests/test_web.py` tests
-  `test_weapon_profile_publication_changes_snapshot_etag`,
-  `test_catalog_api_etag_revalidates_the_current_snapshot` and
-  `test_rebuilt_snapshot_changes_the_catalog_api_etag`;
-  `tests/test_verify_weapon_source_cards_browser.py` tests
-  `test_reviewed_weapon_chart_sources_reach_exact_modes_in_browser`,
-  `test_missing_weapon_chart_publication_is_visible_in_browser`,
-  `test_multi_weapon_modes_stay_separate_in_normal_browser` and
-  `test_weapon_property_origins_reach_sources_in_normal_browser`.
-  The pinned PDF is required for the local source-to-locator selector;
-  Chromium and all 1440/390/320px light/dark cases are required.
-  Execution host: pinned `linux-dev` preferred, Windows fallback if unavailable.
+No pending deferred execution entries.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -196,6 +157,7 @@ and [VR-0129 embedded source visibility](testing.md#v1s-082-embedded-glossary-so
 and [VR-0130 reference-only Equipment variants](testing.md#v1s-082-reference-only-equipment-variants-vr-0130)
 and [VR-0131 Pheroware citations](testing.md#v1s-082-pheroware-citation-regression-vr-0131)
 and [VR-0133 Weapon Chart rows](testing.md#v1s-082-weapon-chart-early-row-regression-vr-0133)
+and [VR-0134 Weapon-profile citations](testing.md#v1s-082-weapon-profile-citation-regression-vr-0134)
 passed on pinned Windows revisions. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs
