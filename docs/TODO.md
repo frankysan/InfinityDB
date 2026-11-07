@@ -216,8 +216,16 @@ passed; independent touch/human, cumulative and hosted gates remain open.
 
 - [ ] **V1S-089 (M, gate):** Obtain manual Silhouette
   hover/keyboard/touch/theme/narrow-width and human visual sign-off.
+  The [source/geometry preflight](testing.md#v1s-089-silhouette-manual-visual-acceptance-preflight)
+  passed **4/4** on `2f4f4686`, including the pinned N5.3 PDF.
+  Blocked: human preview interaction and proportional SVG visual inspection
+  remain unapproved; authority: release owner; retry: once the candidate
+  is available for real-device and desktop visual inspection.
 - [ ] **V1S-090 (L, gate):** Drain due VD/VR work and run the full
   local/Linux, source, docs, preflight and applicable full-asset checks.
+  Blocked: final cumulative gate should run only after upstream candidate
+  acceptance and human/manual checks are reconciled; authority: release owner;
+  retry: when V1S-080, V1S-087 and V1S-089 prerequisites are accepted.
 - [ ] **V1S-091 (L, gate):** Audit the complete tracked Markdown
   corpus, links, commands, contracts and browser copy.
 - [ ] **V1S-092 (M, gate):** Finalize Unreleased notes,

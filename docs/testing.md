@@ -6570,6 +6570,44 @@ diagram component and SVG delivery.
 `tests/test_silhouette_template_source_table.py` pins the source
 rows, browser geometry, negative drift cases, and local PDF evidence.
 
+### V1S-089 Silhouette manual visual acceptance preflight
+
+**Project domains:** Web frontend, Project infrastructure
+
+On the unchanged tracked source/database pair at
+`2f4f4686625e11dc5d760a02096237029d37e660`,
+`tests/test_silhouette_template_source_table.py` passed **4/4,
+zero skips** in 1.67 seconds (Windows job
+`cadfeb8a2f4a4fc4a1a05cbf94338553`).
+The source/geometry fixture verifies the pinned English N5.3 printed
+Silhouette table, the S1–S8 proportional SVG inputs and the S0/SX
+text-only exceptions. It **does not** constitute rendered visual approval.
+
+**Release-owner manual walkthrough (pending):**
+
+1. On the release-matched candidate, open the Glossary's Silhouette
+   Attribute (`S`) reference. Verify that S1–S8 templates and captions
+   are legible, correctly proportioned at one scale, and that S0/SX
+   remain explicitly described without substituted diagrams.
+2. On a Unit detail page displaying a numeric `S` attribute, hover
+   its Silhouette preview, then focus its trigger using Tab. Confirm
+   that the popover appears for mouse/keyboard, is readable, stays
+   within the viewport, and closes when focus leaves it.
+3. On a touch-capable device, tap that trigger to open the preview
+   and tap it again to close it. Verify the comparison with S2
+   and that no text, trigger or preview becomes inaccessible.
+4. Repeat the presentation at approximately **320 and 390 px** in
+   **light and dark** themes. Confirm visual scaling, contrast,
+   absence of clipping/horizontal page overflow and usable
+   focus/touch targets. Record candidate SHA, device/browser,
+   results and any screenshot-backed defect.
+
+Do not use the older public release as proof of the pending v1.0
+candidate's visual acceptance. Human sign-off is still required.
+The release-gate backlog item V1S-089 remains open and paused;
+the cumulative full suite under V1S-090 is not made due by
+this source preflight.
+
 ### N5.3 Game Modes versus general setup/reference tables
 
 The **Game Modes chart** (printed English N5.3 p. 6) is a separate
