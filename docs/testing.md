@@ -6454,8 +6454,10 @@ positive legality, Unit ownership, or restrictions beyond the finite
 source chart.
 
 The reviewed manifest is now projected into packaged
-`src/infinity_db/web/static/restrictions-reference.json`; the normal
-General Rules catalog loads this read model at `/rules#restrictions`.
+`src/infinity_db/web/static/restrictions-reference.json`; the standalone
+General Rules chart page loads this read model at `/rules/restrictions`.
+The `/rules` catalog links to it, and older `/rules#restriction-*`
+bookmarks redirect to the corresponding chart anchor.
 The display groups six source conditions and 14 linked, condition-scoped
 negative facts. Troop Type selectors without canonical references remain
 plain text. The JSON must match the deterministic source projection
@@ -6481,6 +6483,22 @@ Lieutenant and Prone State. It checks exact condition counts and
 anchor targets at all three viewports, follows the upward-Jump link
 back to its source row, and confirms the unrelated Dodge page does
 not show a spurious Restrictions section. The source regression also checks byte-exact publication parity.
+
+**2026-11-07 standalone-page relocation:** The original catalog-attached
+chart was moved to `/rules/restrictions`, with its own shell and padded
+reference surface. The `/rules` directory now links to the chart instead
+of fetching/rendering it below the listing. Contextual reverse links go
+directly to the dedicated page; old `/rules#restriction-*` fragment URLs
+are retained through a browser redirect. The source manifest, six
+subjects, fourteen conditions, and typed qualifications were not changed.
+At the implementation revision based on `9add9ae`, focused Windows
+checks `test_restrictions_reference_has_standalone_rules_page` and
+`test_restrictions_chart_normal_chromium_at_three_widths` both passed
+(**2/2, zero skips**). The Chromium test covers 1440/390/320 px,
+source rows, navigation from the catalog, linked seven-page context,
+original bookmarks, card inset and no horizontal overflow.
+Light/dark, soft-navigation and controlled failure-mode visual
+regressions remain deferred to VD-0113 / VR-0139.
 
 **Typed condition contract:** the source compiler in
 `src/infinity_db/restriction_conditions.py` covers all 14 negative

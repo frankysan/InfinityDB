@@ -86,7 +86,7 @@ are not retroactively relabeled.
   situation has begun.
 - Hacking Program pages explain when the source chart does not specify a Troop Type,
   instead of leaving the Target dash ambiguous about eligibility or effects.
-- General Rules now includes a linked N5.3 Restrictions chart, showing six
+- General Rules links to a dedicated N5.3 Restrictions chart page, showing six
   affected categories and their exact prohibitions, including conditions
   for mounted Motorcycles and Lieutenant selection. Related Skill,
   Equipment and State pages now link back to the applicable chart

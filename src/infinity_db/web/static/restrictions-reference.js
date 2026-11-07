@@ -45,7 +45,7 @@ export function restrictionsContextSection(data, recordIds) {
     item.dataset.scope = condition.scope;
     item.dataset.operationKind = condition.operation.kind;
     const anchor = document.createElement("a");
-    anchor.href = `/rules#restriction-${row.id}-${condition.action}`;
+    anchor.href = `/rules/restrictions#restriction-${row.id}-${condition.action}`;
     anchor.textContent = `${row.name}: ${condition.label}`;
     item.append(anchor);
     if (condition.note) item.append(` — ${condition.note}`);
@@ -70,7 +70,7 @@ export function restrictionsSection(data) {
   heading.className = "section-heading";
   const h2 = document.createElement("h2");
   h2.id = "restrictions-heading";
-  h2.textContent = "Restrictions chart";
+  h2.textContent = "Source-listed restrictions";
   heading.append(h2);
   const intro = document.createElement("p");
   intro.className = "detail-copy";

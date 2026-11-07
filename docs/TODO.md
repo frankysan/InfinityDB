@@ -55,6 +55,13 @@ an ignored development candidate is not a release artifact.
   desktop and narrow widths. CSS is updated; focused visual acceptance
   is deferred under [VD-0112 / VR-0138](validation-queue.md).
 
+- [ ] **Restrictions chart standalone page (Web frontend, non-gating):**
+  Accept the standalone `/rules/restrictions` reference, its link from
+  General Rules, complete source-scoped condition rows, legacy hash
+  compatibility, and responsive/theme navigation without clipping.
+  Existing Skill/Equipment/State contextual excerpts retain distinct
+  typed qualifiers; remaining checks belong to [VD-0113 / VR-0139](validation-queue.md).
+
 ### Development sequence
 
 Review and close the earliest actionable numbered V1S slice below after

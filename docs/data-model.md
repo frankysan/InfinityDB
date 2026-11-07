@@ -2667,8 +2667,8 @@ source-only manifest at
 subjects and 14 negative conditions are projected reproducibly to
 `src/infinity_db/web/static/restrictions-reference.json` by
 `tools.audit_restrictions_source_chart`. The packaged JSON is the
-runtime read model for the normal
-[General Rules Restrictions section](/rules#restrictions); the browser
+runtime read model for the dedicated
+[General Rules Restrictions chart](/rules/restrictions); the browser
 does not inspect maintained configuration or infer rules semantics.
 
 Each condition retains a source action and scope, player-readable

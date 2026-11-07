@@ -632,6 +632,43 @@ html:not([data-developer-mode="true"])
   color: inherit;
 }
 
+/* The source-scoped Restrictions chart is a standalone General Rules page. */
+#restrictions-content {
+  width: min(960px, 100%);
+}
+
+.restrictions-reference {
+  display: grid;
+  width: 100%;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.restrictions-reference > .section-heading {
+  padding: 0;
+}
+
+.restrictions-reference > p,
+.restrictions-subject > p,
+.restrictions-subject > .reference-usage-list {
+  margin: 0;
+}
+
+.restrictions-subject {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.restrictions-reference [id^="restriction-"] {
+  scroll-margin-top: 6rem;
+}
+
+@media (max-width: 700px) {
+  .restrictions-reference {
+    padding: var(--space-2);
+  }
+}
+
 /* Scenario browser */
 .scenario-catalog {
   width: min(1040px, 100%);

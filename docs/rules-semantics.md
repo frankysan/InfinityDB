@@ -4800,7 +4800,7 @@ source selectors for TAG, VH, and REM have no canonical Troop Type identity in
 the current rules registry. Existing `equipment:motorcycle`, `skill:aerial`,
 `training:irregular`, `skill:cautious-movement` and `skill:lieutenant`
 records retain related clauses. A complete conditional projection of
-the chart is now available at `/rules#restrictions`; it is generated
+the chart is now available at `/rules/restrictions`; it is generated
 from the source-review manifest, not inferred from the incomplete
 generic relation graph. Source-only Troop Type labels are displayed
 without fictitious canonical record links.

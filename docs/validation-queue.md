@@ -146,6 +146,17 @@ selector and other dependencies in its VR item.
   risk: low. Existing coverage: FAQ/source-browser DOM assertions, but no
   focused layout assertions. Linked execution: **VR-0138**.
 
+- [ ] VD-0113 (2026-11-07; needs-design): Complete a standalone
+  Restrictions chart navigation/visual regression. The existing source
+  Chromium cohort covers three widths, the six-row/fourteen-condition
+  rendering, exact links, and legacy hashes. Design additional light/dark
+  presentation and soft-navigation checks for the /rules listing-to-chart
+  link, source-row focus/scroll, readable card padding, error recovery,
+  and absent chart on unrelated rule pages.
+  Work: [Restrictions chart standalone page](TODO.md#implemented-foundations-and-remaining-scope);
+  change: `src/infinity_db/web/{presentation.py,routes.py,static/}`
+  after `9add9ae`; risk: moderate; linked execution: **VR-0139**.
+
 ## Pending deferred execution
 
 A VR entry records its ID/date/status (`awaiting-design`,
@@ -163,6 +174,17 @@ is recorded. Failed or incomplete verification remains open.
   Design: **VD-0112**. Deferred: newly designed focused desktop/mobile
   Playwright layout regression; rerun existing FAQ and exact-usage UI checks
   on the pinned implementation commit. Outcome: pending.
+
+- [ ] VR-0139 (2026-11-07; awaiting-design): Validate the standalone
+  /rules/restrictions page, backward-compatible hashes, source-scoped
+  reverse links, and responsive visual layout at its committed SHA.
+  Work: [Restrictions chart standalone page](TODO.md#implemented-foundations-and-remaining-scope);
+  revision: post-`9add9ae` change (record final SHA); risk: moderate.
+  Immediate: mandatory focused public-route navigation regression and
+  Python checks only; no full-suite release gate. Design: **VD-0113**.
+  Deferred: expanded soft-navigation/theme/error browser selector and
+  the existing N5.3 source-chart publication integrity checks.
+  Outcome: pending.
 
 The [V1S-083 disclosure and consumer batches](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
 passed on the recorded Linux/Windows states and close VR-0137. Hosted CI
@@ -185,8 +207,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0113`; active obligations are listed above.
-- Execution: `VR-0139`; active obligations are listed above.
+- Design: `VD-0114`; active obligations are listed above.
+- Execution: `VR-0140`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

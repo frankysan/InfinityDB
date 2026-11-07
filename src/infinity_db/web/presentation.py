@@ -79,6 +79,10 @@ ASSETS = {
         "restrictions-reference.js",
         "text/javascript; charset=utf-8",
     ),
+    "/static/restrictions-page.js": (
+        "restrictions-page.js",
+        "text/javascript; charset=utf-8",
+    ),
     "/static/restrictions-reference.json": (
         "restrictions-reference.json",
         "application/json; charset=utf-8",
@@ -341,6 +345,16 @@ _FIXED_PAGES = {
             detail_meta_description="View an Infinity N5 General Rules reference.",
             summary_heading="Rules reference",
         ),
+    ),
+    "/rules/restrictions": PageSpec(
+        "restrictions.html",
+        (
+            ("InfinityDB", "/"),
+            ("General Rules", "/rules"),
+            ("Restrictions chart", None),
+        ),
+        "Rules reference",
+        "rules",
     ),
     "/scenarios": PageSpec(
         "scenarios.html",

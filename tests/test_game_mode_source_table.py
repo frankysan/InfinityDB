@@ -515,7 +515,7 @@ def test_published_restrictions_reference_is_exact_source_projection() -> None:
     )["publishedReferenceSha256"]
 
 
-def test_restrictions_reference_is_served_from_normal_rules_catalog() -> None:
+def test_restrictions_reference_has_standalone_rules_page() -> None:
     from wsgiref.util import setup_testing_defaults
 
     from infinity_db.web import create_app
@@ -557,8 +557,15 @@ def test_restrictions_reference_is_served_from_normal_rules_catalog() -> None:
     assert b'data-catalog="rules"' in body
     status, _, script = get("/static/reference-catalog.js")
     assert status == 200
-    assert b'getRestrictionsReference(pageController.signal)' in script
-    assert b'anchor.href = "/rules#restrictions"' in script
+    assert b'anchor.href = "/rules/restrictions"' in script
+    assert b'getRestrictionsReference(pageController.signal)' not in script
+    status, _, body = get("/rules/restrictions")
+    assert status == 200
+    assert b"Restrictions chart" in body
+    assert b"/static/restrictions-page.js" in body
+    status, _, script = get("/static/restrictions-page.js")
+    assert status == 200
+    assert b'getRestrictionsReference(controller.signal)' in script
     status, _, script = get("/static/restrictions-reference.js")
     assert status == 200
     assert b'Other rules may also restrict' not in script
@@ -610,8 +617,15 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                     errors: list[str] = []
                     page.on("pageerror", lambda exc, sink=errors: sink.append(str(exc)))
                     page.goto(
-                        f"http://127.0.0.1:{server.server_port}/rules#restrictions",
+                        f"http://127.0.0.1:{server.server_port}/rules",
                         wait_until="domcontentloaded",
+                    )
+                    catalog_link = page.locator("a[href='/rules/restrictions']")
+                    assert catalog_link.is_visible()
+                    assert page.locator("#restrictions").count() == 0
+                    catalog_link.click()
+                    page.wait_for_url(
+                        f"http://127.0.0.1:{server.server_port}/rules/restrictions"
                     )
                     section = page.locator("#restrictions")
                     section.wait_for(state="visible", timeout=15000)
@@ -646,13 +660,32 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                         "#restrictions .detail-source a"
                         "[href='https://experience.corvusbelli.com/en/infinity/resources']"
                     ).count() == 1
-                    assert page.locator(
-                        "a[href='/rules#restrictions']"
-                    ).is_visible()
+                    assert page.locator("#restrictions-content").is_visible()
+                    assert page.locator("#restrictions-heading").is_visible()
+                    assert section.evaluate(
+                        "(node) => parseFloat(getComputedStyle(node).paddingLeft)"
+                    ) >= 16
                     assert not page.evaluate(
                         "() => document.documentElement.scrollWidth > innerWidth + 1"
                     ), width
                     assert errors == [], errors
+
+                    # Shared links from the previous catalog-attached chart must
+                    # retain their exact target on the standalone page.
+                    if width == 390:
+                        legacy = (
+                            f"http://127.0.0.1:{server.server_port}"
+                            "/rules#restriction-motorcycle-upward-jump"
+                        )
+                        page.goto(legacy, wait_until="domcontentloaded")
+                        page.wait_for_url(
+                            f"http://127.0.0.1:{server.server_port}"
+                            "/rules/restrictions#restriction-motorcycle-upward-jump",
+                            timeout=15000,
+                        )
+                        assert page.locator(
+                            "#restriction-motorcycle-upward-jump"
+                        ).is_visible()
 
                     reverse_cases = (
                         ("/equipment/motorcycle", "motorcycle", "upward-jump", 5),
@@ -672,7 +705,7 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                         context.wait_for(state="visible", timeout=15000)
                         assert context.locator("li").count() == count, (width, route)
                         anchor = context.locator(
-                            f"a[href='/rules#restriction-{subject}-{action}']"
+                            f"a[href='/rules/restrictions#restriction-{subject}-{action}']"
                         )
                         assert anchor.count() == 1, (width, route)
                         if route.endswith("/jump") and width == 390:
@@ -680,7 +713,7 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                             destination = page.locator("#restriction-motorcycle-upward-jump")
                             destination.wait_for(state="visible", timeout=15000)
                             assert page.url.endswith(
-                                "/rules#restriction-motorcycle-upward-jump"
+                                "/rules/restrictions#restriction-motorcycle-upward-jump"
                             )
                             assert destination.get_attribute(
                                 "data-scope"

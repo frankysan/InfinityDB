@@ -209,6 +209,17 @@ When a layout problem appears, first look for unnecessary width, spacing, wrappe
 
 An exception should exist because the information has different requirements, not because the current cascade makes the common structure inconvenient to reuse.
 
+### Standalone source charts and contextual links
+
+Full source tables, such as the N5.3 Restrictions chart, belong on their
+own navigable reference page (`/rules/restrictions`), linked from the
+relevant catalog. Do not append a full chart below an unrelated listing.
+On Skill, Equipment and State details, preserve concise, source-scoped
+condition links when they retain important qualifiers (for example,
+upward-only Jump or Lieutenant selection rather than Skill use).
+Those links lead to exact rows on the standalone page. The chart is
+a finite source reference, not a general action-legality evaluator.
+
 ### Specialist Troops filtering is contextual
 
 The Unit Explorer exposes an optional Specialist Troops selector with an

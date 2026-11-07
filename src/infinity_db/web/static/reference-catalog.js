@@ -1,5 +1,4 @@
-import { getCatalogItems, getRestrictionsReference } from "./api.js";
-import { restrictionsSection } from "./restrictions-reference.js";
+import { getCatalogItems } from "./api.js";
 import { readCatalogSearchQuery, replaceCatalogSearchQuery } from "./catalog-search-state.js";
 import { createPanelSwitcher } from "./view-components.js";
 
@@ -88,38 +87,17 @@ elements.search.value = readCatalogSearchQuery();
 replaceCatalogSearchQuery(elements.search.value);
 load();
 
-async function loadRestrictionsReference() {
-  if (catalog !== "rules") return;
-  try {
-    const data = await getRestrictionsReference(pageController.signal);
-    const section = restrictionsSection(data);
-    const listing = document.querySelector(".modifier-explorer");
-    listing.after(section);
-    const jump = document.createElement("p");
-    jump.className = "intro-copy";
-    const anchor = document.createElement("a");
-    anchor.href = "/rules#restrictions";
-    anchor.textContent = "View N5.3 Restrictions chart";
-    jump.append(anchor);
-    document.querySelector(".intro > div")?.append(jump);
-    if (window.location.hash.startsWith("#restriction")) {
-      let target;
-      try {
-        target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
-      } catch {
-        target = null;
-      }
-      if (target && section.contains(target)) {
-        requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
-      }
-    }
-  } catch (error) {
-    if (error.name === "AbortError") return;
-    const note = document.createElement("p");
-    note.className = "detail-copy";
-    note.textContent = "Restrictions chart unavailable. Other General Rules remain accessible.";
-    document.querySelector(".modifier-explorer")?.after(note);
-    console.error("Could not load Restrictions reference", error);
+if (catalog === "rules") {
+  const jump = document.createElement("p");
+  jump.className = "intro-copy";
+  const anchor = document.createElement("a");
+  anchor.href = "/rules/restrictions";
+  anchor.textContent = "View N5.3 Restrictions chart";
+  jump.append(anchor);
+  document.querySelector(".intro > div")?.append(jump);
+
+  // Preserve historical links shared before the chart gained its own page.
+  if (/^#restrictions?(?:-|$)/.test(window.location.hash)) {
+    window.location.replace(`/rules/restrictions${window.location.hash}`);
   }
 }
-loadRestrictionsReference();

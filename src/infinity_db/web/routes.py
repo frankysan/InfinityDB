@@ -80,6 +80,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/ammunition",
         "/labels",
         "/rules",
+        "/rules/restrictions",
         "/scenarios",
         "/skill-extras",
         "/fireteams",
