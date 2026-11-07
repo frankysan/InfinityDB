@@ -5324,6 +5324,60 @@ retain their broader source/API/browser checks.
 This is descriptive source concordance and presentation acceptance, not
 an executable profile-selection/legality rule or final hosted acceptance.
 
+### Frozen-pair scenario and FAQ rerun (V1S-088)
+
+**Project domains:** Data processing, Web backend, Web frontend
+
+At the unchanged frozen pair and app code revision
+`a5846dc95c5c0a36561a6a1372b05eed68a50314`, the focused two-worker
+Windows run of `tests/test_scenario_catalog.py`, `tests/test_scenario_api.py`,
+and `test_verify_scenario_faq_browser.py` selectors for
+`test_all_24_core_scenario_setups_render_source_backed_browser_contract`,
+`test_every_published_faq_has_a_normal_browser_entry_point` and
+`test_faq_browser_routes_cover_every_published_topic_association` passed
+**157/157**, **zero skips**, in 34.80 seconds (35.49 seconds runner time).
+This covers all **24** Core game-size configurations via catalog/API and
+**48** live browser selections (four scenarios × six sizes × two widths),
+plus every published **29-ruling** FAQ primary topic entry at 1440/390 px
+and the authored topic association inventory. The independent
+`tests/test_faq_ruling_references.py` run passed **79** with **one skipped**
+release-opt-in parity test in 29.21 seconds. That skipped test is **not**
+claimed to have passed in this run.
+
+The omitted opt-in is covered by the earlier **54/54 zero-skip**
+[V1S-084 release-pair acceptance](#release-matched-rebuild-and-publication-acceptance-v1s-084),
+which explicitly enabled `INFINITYDB_RELEASE_FAQ_PARITY=1` and tested the
+tracked rules database, all primary/secondary FAQ browser routes and Haris
+source-conflict disclosure. The database/publication/browser consumers remain
+unchanged; that separately pinned acceptance is **reused**, not presented as
+a rerun. V1S-085 already accepted the cited current source inputs.
+No new source scan, rules adjudication, schema, gameplay or runtime change
+was required. V1S-088 is closed for this frozen candidate. V1S-041/045/080,
+local cumulative V1S-090, human sign-off and hosted/deployed exact-version
+gates remain independent. VD/VR is empty.
+
+### Frozen-pair 81-page Unit matrix (V1S-087, local portion)
+
+**Project domains:** Web frontend, Project infrastructure
+
+On the unchanged frozen candidate checkout
+`a5846dc95c5c0a36561a6a1372b05eed68a50314`, the targeted local
+`tests/test_verify_unit_skill_presentation_browser.py::test_live_chromium_unit_detail_matrix_when_available`
+passed **5/5** parametrized groups, **zero skips**, in **66.75 s**
+(67.40 s check duration). The test's five groups constitute **81 browser
+page configurations**, covering default and rich Unit profiles, optional
+flag combinations, source-backed Spec-Ops/Reinforcement presentation and
+inches/centimeters at 1440/768/390/320 px where applicable. The test
+served the tracked paired databases locally in a temporary WSGI app and
+used real Chrome, without requiring a separate deployment. No code, data,
+publication or static assets were modified by this acceptance.
+
+This satisfies the **local matrix only**. It does not establish that a
+hosted 1.0.0 release candidate exists or matches the frozen pair. The
+exact-version hosted representative gate remains open under V1S-087 until
+a suitable candidate is actually served; see the next section. Cumulative
+V1S-090 and the exact-SHA hosted CI/release gates are separate. VD/VR is empty.
+
 ### Hosted Unit release-candidate acceptance
 
 For **deployed release-candidate acceptance**, use the separate

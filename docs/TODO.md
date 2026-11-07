@@ -113,8 +113,8 @@ not a 1.0 gate.
   ordinary browser on the frozen, release-matched source pair.
   Preserve N4-origin disclosure; do not assert roster legality or
   N5-native authority.
-  Deferred: Final release-paired acceptance depends on V1S-081/084/088;
-  authority: release owner; revisit: after those frozen-input gates pass.
+  Frozen-input prerequisite V1S-081/084/088 is satisfied; the final
+  ordinary-browser acceptance can now proceed.
 
 #### Four core scenarios
 
@@ -123,19 +123,20 @@ not a 1.0 gate.
 
 - [ ] **V1S-045 (M, gate):** Run final-input four-scenario
   keyboard/touch/theme/responsive, rapid-selection, empty/error
-  and navigation/race-recovery acceptance alongside V1S-088.
+  and navigation/race-recovery acceptance on the frozen candidate.
   Existing [bounded source/browser checks](v1.0-source-coverage-audit.md#core-scenario-scoped-skills-specialists-overlays-and-faq-v1s-044-2026-11-05)
   do not certify the frozen candidate.
-  Deferred: Final-input acceptance requires V1S-081/084 and runs with V1S-088;
-  authority: release owner; revisit: after the frozen candidate is ready.
+  Frozen-input prerequisites and V1S-088 are accepted; outstanding
+  keyboard/touch/theme/responsive and recovery checks remain here.
 
 #### FAQ and errata
 
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-Release-paired FAQ parity is accepted; the final scenario/FAQ acceptance
-repeat remains V1S-088.
+Release-paired FAQ parity and the final
+[V1S-088 scenario/FAQ acceptance](v1.0-source-coverage-audit.md#v1s-088-frozen-pair-scenario-and-faq-browser-acceptance-2026-11-07)
+are accepted. Hosted and deployed acceptance remain separate.
 
 #### Rule-variant usage index and Restrictions
 
@@ -173,9 +174,8 @@ is bounded to the development pair; final-input checks remain.
   320/390px viewport and notice expand/collapse verification; fix
   reproducible 1.0 defects. Development touch regressions passed;
   release-candidate manual/browser acceptance remains open.
-  Deferred: Final-candidate checks depend on frozen inputs and V1S-088 paired
-  acceptance; authority: release owner; revisit: after V1S-081/084/088 produce
-  the candidate.
+  Frozen-input and V1S-088 prerequisites are satisfied; final human/touch
+  candidate acceptance remains outstanding.
 
 #### Final frozen-candidate acceptance and release
 
@@ -206,10 +206,17 @@ The [V1S-086 maintained-reference and fragment browser acceptance](v1.0-source-c
 passed on the frozen pair. Subsequent final browser, cumulative and hosted
 checks retain their separately numbered gates.
 
-- [ ] **V1S-087 (L, gate):** Run the 81-page local Unit matrix
-  and exact-version hosted representative checks.
-- [ ] **V1S-088 (M, gate):** Repeat all 24 core-scenario
-  configurations and FAQ source/browser acceptance.
+- [ ] **V1S-087 (L, gate):** Accept the exact-version hosted Unit
+  representative checks. The [frozen-pair local 81-page Unit matrix](testing.md#frozen-pair-81-page-unit-matrix-v1s-087-local-portion)
+  passed on `a5846dc` (five matrix groups, zero skips).
+  Blocked: Hosted exact-version checks require an actually served 1.0.0
+  candidate matched to the release pair and static assets;
+  authority: release owner; retry: after the release candidate is prepared
+  and hosted for verification.
+
+The [V1S-088 frozen-pair scenario and FAQ rerun](v1.0-source-coverage-audit.md#v1s-088-frozen-pair-scenario-and-faq-browser-acceptance-2026-11-07)
+passed; independent touch/human, cumulative and hosted gates remain open.
+
 - [ ] **V1S-089 (M, gate):** Obtain manual Silhouette
   hover/keyboard/touch/theme/narrow-width and human visual sign-off.
 - [ ] **V1S-090 (L, gate):** Drain due VD/VR work and run the full
@@ -279,7 +286,7 @@ of already-reviewed catalogs.
   presented to players. The bounded development review is
   [accepted](v1.0-source-coverage-audit.md#v1s-082-bounded-citation-and-route-acceptance-2026-11-07);
   release-pair rebuilding and maintained-reference browser checks are accepted;
-  remaining scenario/FAQ checks are V1S-088. The frozen
+  the V1S-088 scenario/FAQ rerun is accepted. The frozen
   [367-record clause inventory](rules-explanation-audit-1.0-inventory.md#audit-completion-gate)
   is historical research, not an exhaustive 1.0 sign-off requirement.
   - [ ] Correct **known inaccurate or uncited player-facing** declaration,
@@ -315,18 +322,17 @@ of already-reviewed catalogs.
   source-to-storage-to-browser reconciliation and keyboard/touch/theme/
   narrow-width acceptance. Keep scenario-only concepts, spatial geometry,
   derived SVG, scoped FAQ and ordinary rules links consistent; use
-  **V1S-045/088** for frozen-candidate checks and
+  **V1S-045** for outstanding touch/keyboard/theme/recovery checks;
+  V1S-088 source/browser matrix is accepted. See
   [the scenario contract](data-model.md#scenario-model-implemented-core-and-future-extensions).
   A live scoring or match-state engine is not required.
 
-- [ ] **FAQ/errata:** Repeat the reviewed 29-ruling/48-topic source,
-  supersession, exclusion, applicability and normal-browser acceptance
-  on the final paired rules database under **V1S-088**. Release-artifact parity
-  and primary/secondary entry-point checks passed under V1S-084. Maintain
-  core-versus-ITS scope, provenance and conservative disputed-source
-  disclosure; historical season replay and external rulings are not
-  1.0 prerequisites. See the
-  [FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
+**FAQ/errata:** Final-pair 29-ruling/48-topic source, supersession,
+exclusion, applicability and browser acceptance passed under V1S-084/088.
+The [FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset)
+retains core-versus-ITS scope, source provenance and conservative
+conflict disclosure; hosted/deployed acceptance remains independent.
+Historical replay and publisher rulings are not 1.0 prerequisites.
 
 - [ ] **Rule-variant usage projection:** Accept the byte-exact tracked
   `variant-usage.json` artifact, its deployment/image guards and Skill/Equipment
@@ -375,7 +381,7 @@ of already-reviewed catalogs.
 **Project domains:** Data processing, Web backend, Web frontend,
 Project infrastructure, Deployment
 
-- [ ] Complete **V1S-087–095** and the earlier deferred browser gates
+- [ ] Complete **V1S-087 and V1S-089–095** and outstanding earlier browser gates
   against the exact frozen source,
   database, generated-publication, static-asset and release-candidate
   revisions. This includes one current source citation per in-scope rule
