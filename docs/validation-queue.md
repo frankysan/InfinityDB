@@ -145,39 +145,7 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0131 (2026-11-07; ready-to-run): Verify corrected Pheroware
-  family and Endgame citations from curated input through the matched rules,
-  deployed-object and exact-variant publications, API and normal browser.
-  Work: [V1S-082](TODO.md#final-10-acceptance); implementation:
-  `e7a69113817b2ba376a0c1add60dc3542ef830c5`; initial design:
-  `25a81d68449d24ef9b821dae1ab2c6db32244b80`; risk: medium.
-  Immediate: source PDF identity and printed pages checked; guarded matched
-  artifact promotion and `tools.build_deployed_object_publication --check`,
-  `tools.build_variant_usage --check-publication`, and
-  `tools.verify_deployment_assets --skip-svg` passed on Windows.
-  Design: VD-0102 and VD-0103 statically reviewed and retired without running
-  tests; the exact selectors below carry their source, export, API and
-  responsive/theme browser assertions.
-  The first nine-selector Windows run at the initial design passed 25 tests
-  with no skips. Three additional frozen-inventory selectors passed two and
-  exposed a stale `pendingSourceSections` expectation (830 versus 829 after
-  removal of the invalid Endgame locator); the corrected expectation and exact
-  Pheroware locator assertions require a complete rerun.
-  Deferred: `tests/test_weaponry_catalog_api.py::test_pheroware_chart_heading_matches_pinned_n53_pdf`,
-  `tests/test_weaponry_catalog_api.py::test_pheroware_citations_match_curated_fresh_and_published_rules`,
-  `tests/test_weaponry_catalog_api.py::test_pt_endgame_rules_apply_only_to_the_endgame_source_variant`,
-  `tests/test_curated.py::test_checked_in_n5_collection_is_valid`,
-  `tests/test_rules_database.py::test_weapon_source_notes_remain_distinct_from_gameplay_summary`,
-  `tests/test_report_reference_baseline.py::test_current_citation_minimum_covers_live_n5_reference_collections`,
-  `tests/test_report_reference_baseline.py::test_frozen_explanation_inventory_reconciles_current_source_identities`,
-  `tests/test_report_reference_baseline.py::test_explanation_review_planner_is_complete_deterministic_and_pending`,
-  `tests/test_report_reference_baseline.py::test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers`,
-  `tests/test_variant_usage.py::test_variant_usage_publication_rejects_stale_release_artifacts`,
-  `tests/test_verify_weapon_source_cards_browser.py::test_pheroware_chart_citations_and_variant_scope_in_normal_browser`,
-  `tests/test_verify_weapon_source_cards_browser.py::test_pinned_weapon_modes_rules_links_and_citations`,
-  plus the matched publication checks above on the tested revision. Require
-  the pinned English N5.3 PDF, Chromium, full assets and zero skips.
-  Outcome: pending a pinned focused execution.
+No pending deferred execution entries.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -187,6 +155,7 @@ and [VR-0127 Equipment regression](testing.md#v1s-082-equipment-glossary-navigat
 and [VR-0128 Label source visibility](testing.md#v1s-082-label-vocabulary-source-visibility-vr-0128)
 and [VR-0129 embedded source visibility](testing.md#v1s-082-embedded-glossary-source-visibility-vr-0129)
 and [VR-0130 reference-only Equipment variants](testing.md#v1s-082-reference-only-equipment-variants-vr-0130)
+and [VR-0131 Pheroware citations](testing.md#v1s-082-pheroware-citation-regression-vr-0131)
 passed on pinned Windows revisions. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs

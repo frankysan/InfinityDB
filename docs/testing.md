@@ -679,6 +679,36 @@ and the exact-usage publication SHA-256 was
 `5393b6ddfd9b3feb43f7977a8d50f2e4a601351ee89f944f0af3c3ad67a4120f`.
 This closes VR-0130, not V1S-082, hosted CI or frozen-candidate acceptance.
 
+### V1S-082 Pheroware citation regression (VR-0131)
+
+The complete focused Windows run at `6b63200fcf7c807d3cc87aa40a203876383ad3da`
+passed **28 tests with no skips**, using Chromium `156.0.8078.81` and the
+pinned English N5.3 PDF. Full deployment verification passed for **808/808**
+published and browser-referenced SVGs. Both the deployed-object and
+exact-variant publication rebuild checks also passed. The dedicated MCP
+Linux worker was unavailable; this is Windows evidence, not Linux acceptance.
+
+The 12 exact pytest selectors are preserved in the VR-0131 queue entry at
+the tested revision. They checked the chart heading on p. 182, citation
+parity between curated, fresh-export and published rules, Endgame's
+source-variant ownership, API behavior and the frozen inventory. Chromium
+checked normal catalog keyboard navigation and cited family and Endgame
+cards at 1440/390/320 px in light and dark themes. The first nine-selector
+run passed 25 tests; three later inventory selectors exposed a stale
+pending-source-section count after removal of the invalid locator. The
+baseline was corrected from 830 to 829 and the complete selection passed at
+the revision above.
+
+The development `infinity.db` SHA-256 was
+`8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
+and `rules.db` SHA-256 was
+`0fcf537fcca2b148541d9ad136003d939f0c0ecbe1e79136fca1bb6fd622714b`.
+The matched deployed-object publication SHA-256 was
+`ac0b7997dc46523294aa23c24e1d8b121dea432af6e86316379b7ff9cf1208b9`
+and the exact-variant usage publication SHA-256 was
+`d14dbb8dbf337d0a14c00646cf82a42f0af453f01b370c45ddf6bd64d6342c41`.
+This closes VR-0131, not V1S-082, hosted CI or frozen-candidate acceptance.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not

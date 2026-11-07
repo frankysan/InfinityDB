@@ -232,8 +232,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   [routing census](v1.0-source-coverage-audit.md#v1s-082-maintained-reference-routing-census-2026-11-07)
   checked 317 direct cited cards, 48 embedded entries and contextual
   source variants and scenarios. The Pheroware Tactics family and Endgame
-  locators were corrected to the actual N5.3 chart page; their source-to-browser
-  regression remains in the validation queue. Reconcile further citation
+  locators were corrected to the actual N5.3 chart page;
+  [VR-0131 passed](testing.md#v1s-082-pheroware-citation-regression-vr-0131)
+  its focused source-to-browser regressions on Windows. Reconcile further citation
   applicability and known missing dependencies before closing this gate;
   metadata and reachability alone do not prove that a locator supports its reference.
   The full cumulative
