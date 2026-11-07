@@ -773,6 +773,29 @@ dedicated MCP Linux worker was unavailable, so these results do not claim
 Linux, actual Docker-image, hosted CI or final-candidate acceptance.
 VR-0134 is closed locally; V1S-082 retains its remaining bounded checks.
 
+### V1S-082 reference-only Equipment source scope (VR-0135)
+
+At clean revision `9189d41805751e7f486475cc1cd08f849332cbbe`, the focused
+Windows batch passed **19 tests, zero skips**. Its exact source/API, catalog,
+filter and browser selectors are in the VR-0135 entry at that revision; two
+existing Weapon-source browser cases were also run to check shared citation
+rendering. Chrome `156.0.8078.81` exercised **15** real-browser cases. These
+included reference-only family citation sections and scope disclosure, keyboard
+and source links, unchanged parent citations, non-availability and filter
+behavior, and no overflow or page errors at 1440/390/320 px in light and dark
+themes.
+
+The Army and rules database SHA-256 values were respectively
+`8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
+and `0fcf537fcca2b148541d9ad136003d939f0c0ecbe1e79136fca1bb6fd622714b`.
+The deployed-object, exact-variant usage and Weapon-profile publications
+were respectively
+`ac0b7997dc46523294aa23c24e1d8b121dea432af6e86316379b7ff9cf1208b9`,
+`d14dbb8dbf337d0a14c00646cf82a42f0af453f01b370c45ddf6bd64d6342c41`
+and `4dd30a8c6f7ccd823a3de378ccde57c0a84dc63f8d6989a761e86165d33d1395`.
+The dedicated MCP Linux worker was unavailable; this closes VR-0135 locally,
+not V1S-082, hosted CI or final-candidate acceptance.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not

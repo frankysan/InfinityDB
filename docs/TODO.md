@@ -252,8 +252,10 @@ bounded rule-citation/route check; final release acceptance remains open.
   matched 145 existing identities or aliases to cited pages and checked
   parent context for 13 others; it is not a clause-by-clause review.
   The TinBot reference-only cards now disclose that their family citations
-  need not establish each named combination; browser validation remains open
-  as VR-0135. Metadata and reachability alone do not prove that a locator supports its reference.
+  need not establish each named combination;
+  [VR-0135 passed](testing.md#v1s-082-reference-only-equipment-source-scope-vr-0135)
+  source/API and browser checks on Windows. Metadata and reachability alone do
+  not prove that a locator supports its reference.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are
