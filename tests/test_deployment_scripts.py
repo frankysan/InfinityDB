@@ -458,6 +458,39 @@ def test_source_ci_builds_ignored_release_publication_before_tests() -> None:
     assert "python tools/run_checks.py" in workflow
 
 
+def test_source_ci_matrix_time_budgets_include_isolated_preflight() -> None:
+    workflow = _read(".github/workflows/source-checks.yml")
+    job = workflow.split("  source-checks:", 1)[1].split("    steps:", 1)[0]
+    matrix = job.split("      matrix:", 1)[1].split("    runs-on:", 1)[0]
+    legs: dict[tuple[str, str], tuple[str, int]] = {}
+    for block in matrix.split("          - os: ")[1:]:
+        os_name, *lines = block.splitlines()
+        fields: dict[str, str] = {}
+        for line in lines:
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            key, value = stripped.split(":", 1)
+            assert key not in fields
+            fields[key] = value.strip().strip('"')
+        identity = (os_name.strip(), fields["label"])
+        assert identity not in legs
+        legs[identity] = (fields["check_args"], int(fields["timeout_minutes"]))
+
+    standard_checks = "--stage test --stage build --stage rules"
+    assert legs == {
+        ("ubuntu-latest", "3.11"): ("--all", 30),
+        ("windows-latest", "3.11"): (standard_checks, 30),
+        ("macos-latest", "3.11"): (standard_checks, 15),
+        ("ubuntu-latest", "3.14"): (standard_checks, 15),
+    }
+    assert "timeout-minutes: ${{ matrix.timeout_minutes }}" in job
+    source_checks = workflow.split("- name: Run source checks", 1)[1].split(
+        "- name: Report deterministic-output toolchain", 1
+    )[0]
+    assert "python tools/run_checks.py ${{ matrix.check_args }}" in source_checks
+
+
 def test_wheel_packages_all_registered_static_assets() -> None:
     """Any asset in the live HTTP registry must survive wheel installation.
 
