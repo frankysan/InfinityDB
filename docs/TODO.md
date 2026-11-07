@@ -134,8 +134,8 @@ not a 1.0 gate.
 **Parent:** [Rules and reference completeness](#rules-and-reference-completeness).
 **Project domains:** Data processing, Web backend, Web frontend
 
-No independently open FAQ slice precedes the final V1S-084/088
-release-matched acceptance.
+Release-paired FAQ parity is accepted; the final scenario/FAQ acceptance
+repeat remains V1S-088.
 
 #### Rule-variant usage index and Restrictions
 
@@ -195,8 +195,9 @@ The [known-conflict and unavailable-value disclosure review](v1.0-source-coverag
 is accepted on development inputs. Publisher questions remain open;
 final-input checks and release acceptance below remain required.
 
-- [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
-  Army/rules pair, FAQ parity, deployed objects and processed symbols.
+The [release-pair rebuild and publication checks](v1.0-source-coverage-audit.md#v1s-084-release-pair-rebuild-and-publication-verification-2026-11-07)
+are accepted on the pinned inputs; remaining gates follow below.
+
 - [ ] **V1S-085 (M, gate):** Run source occupancy, archive,
   strict interaction, baseline and reproducibility gates; distinguish
   [physical SQLite byte differences](v1.0-source-coverage-audit.md#cross-host-rules-rebuild-comparison-v1s-032-validation-2026-11-04)
@@ -238,24 +239,17 @@ maintained references and known material defects; exhaustive source-first
 inventory is optional research, not a 1.0 prerequisite. The final-input freeze
 and complete release checks remain V1S-081–085.
 
-- [ ] Reconcile the final pinned Army, N5.3 Rules, Wiki, FAQ, annex, scenario and
-  symbol inputs with the maintained in-scope references and their ordinary
-  browser routes. Correct confirmed material errors and missing citations;
-  distinguish them from source conflicts, unreviewed clauses or deliberate
-  exclusions. Re-run the
+- [ ] Run the remaining frozen-pair source occupancy, archive and strict
+  interaction checks under V1S-085, followed by maintained-reference and
+  browser checks under V1S-086–088. Correct confirmed material errors or
+  missing citations without treating source conflicts, unreviewed clauses
+  or deliberate exclusions as defects. Re-run the
   [source-evidence tools](testing.md#10-source-evidence-baseline) and strict
   interaction-catalog scope check on the frozen pair.
-  Review the newly available [PDF revisions](n5-source-history.md#local-pdf-revision-inventory-2026-11-06),
-  including ITS 18 version 2026.09.11 in both languages, before selecting the
-  final ITS input; compare content and migrate affected citations explicitly.
-  Current citations remain pinned to 2026.09.01.
-- [ ] Recheck known material N5 change-post, Army-update and FAQ issues
-  if the final V1S-084 publication changes a selected input or affected
-  reference. The current-input citation and disclosure reviews are accepted;
-  do not invent historical deltas. The broader
-  [reconciliation inventory](rules-explanation-audit-1.0-n5.3-reconciliation.md#current-reconciliation-inventory-2026-10-29)
-  and unresolved publisher questions in the [SRC register](official-source-clarifications.md)
-  remain optional investigations rather than independent 1.0 blockers.
+  The rebuilt pair preserves its selected inputs. The reviewed
+  [ITS hotfix](n5-source-history.md#its-18-hotfix-three-confirmed-scenario-changes)
+  and .09.11 adoption remain under the post-1.0 ITS backlog; the optional
+  Battleground pilot deliberately retains 2026.09.01.
 - [ ] Reconcile the final `data/curated/rules-interactions/reviews.json` and
   `catalog-scope.json` with all current in-scope identities and cited
   exceptions, retaining historical review decisions without treating them
@@ -285,7 +279,7 @@ of already-reviewed catalogs.
   normal-browser access, including known material conditional information
   presented to players. The bounded development review is
   [accepted](v1.0-source-coverage-audit.md#v1s-082-bounded-citation-and-route-acceptance-2026-11-07);
-  final-input checks remain V1S-084/086/088. The frozen
+  release-pair rebuilding is accepted; remaining checks are V1S-086/088. The frozen
   [367-record clause inventory](rules-explanation-audit-1.0-inventory.md#audit-completion-gate)
   is historical research, not an exhaustive 1.0 sign-off requirement.
   - [ ] Correct **known inaccurate or uncited player-facing** declaration,
@@ -327,7 +321,8 @@ of already-reviewed catalogs.
 
 - [ ] **FAQ/errata:** Repeat the reviewed 29-ruling/48-topic source,
   supersession, exclusion, applicability and normal-browser acceptance
-  on the final paired rules database under **V1S-084/088**. Maintain
+  on the final paired rules database under **V1S-088**. Release-artifact parity
+  and primary/secondary entry-point checks passed under V1S-084. Maintain
   core-versus-ITS scope, provenance and conservative disputed-source
   disclosure; historical season replay and external rulings are not
   1.0 prerequisites. See the
@@ -380,7 +375,8 @@ of already-reviewed catalogs.
 **Project domains:** Data processing, Web backend, Web frontend,
 Project infrastructure, Deployment
 
-- [ ] Complete **V1S-081–095** against the exact frozen source,
+- [ ] Complete **V1S-085–095** and the earlier deferred browser gates
+  against the exact frozen source,
   database, generated-publication, static-asset and release-candidate
   revisions. This includes one current source citation per in-scope rule
   and usable maintained-reference browser coverage,

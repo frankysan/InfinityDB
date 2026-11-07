@@ -510,6 +510,62 @@ revision. The full-suite V1S-090, exact-SHA hosted Source matrix and
 frozen release-candidate gates remain separate; the earlier failed
 full suite at `94103ef4` is not claimed green.
 
+### Release-matched rebuild and publication acceptance (V1S-084)
+
+**Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
+
+At `f1f53563ba6b7358fc8bd514a833a2571abb1437`, two independent Windows
+Army builds consumed the pinned `JSON 20260929-114335.zip` archive
+(SHA-256 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`).
+Both used lossless reconstruction verification and the ordinary
+`infinity-db build <archive> --compact --output-dir <local staging directory>`
+pipeline. Each merged 58 source files, passed all **73** normalization checks
+and matched the maintained **116-warning** source-anomaly baseline.
+
+The rules database was rebuilt twice through the release-aware v9 exporter,
+preserving Restrictions and compatibility. Each stage independently rebuilt
+deployed objects, exact-variant usage and Weapon-profile citations from its
+own Army/raw/rules pair. In **both stages**, all six files were byte-identical
+to the active artifacts: `infinity.db`, `infinity.raw.db`, `rules.db`,
+`deployed-objects.json`, `variant-usage.json` and `weapon-profile-sources.json`.
+Database health required and validated the raw sibling; each staged app loaded
+the matched publications. The complete processed symbol set and its source
+binding passed against each staged pair: **808/808** published and
+browser-referenced SVGs. No active artifact needed replacement, and their
+hashes remained unchanged after acceptance. The
+[data-model artifact record](data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted)
+owns the published fingerprints.
+
+With `INFINITYDB_RELEASE_FAQ_PARITY=1`, a two-worker Windows batch using
+`tools.run_checks --stage test --assets required` passed **54 tests with zero
+skips**. The exact selector union was:
+
+- `tests/test_faq_ruling_references.py::test_tracked_faq_database_matches_current_curated_release_projection`;
+- `tests/test_verify_scenario_faq_browser.py::test_release_faq_primary_entry_points_use_tracked_database`;
+- `tests/test_verify_scenario_faq_browser.py::test_release_faq_secondary_entry_points_use_tracked_database`;
+- `tests/test_verify_scenario_faq_browser.py::test_release_faq_haris_conflict_uses_tracked_database`;
+- `tests/test_verify_deployed_object_publication_browser.py`;
+- `tests/test_deployed_object_publication.py::test_pinned_publication_is_deterministic_and_source_complete`;
+- `tests/test_verify_deployment_assets.py`;
+- `tests/test_weapon_profile_publication.py`.
+
+This verifies all **29** current FAQ records and their source/citation facts,
+168 topic/context projections, **48** ordinary browser topic associations at
+1440/390 px, and the actual Haris source-conflict disclosure on the tracked
+pair. Deployed-object checks cover all **17** references and their missing,
+unreported and disputed values, delivery navigation and 1440/390/320 px.
+The paired publication retains **151** variant groups and **62** reviewed
+profile-only Weapon identities with **69** exact modes. Drift, missing-artifact
+and mismatched-source cases remain fail-closed.
+
+Ignored evidence is retained in `local/v1s084-rebuild-verification.json`,
+the two `local/v1s084-first` / `local/v1s084-second` staging directories and
+`local/v1s084-windows-acceptance.txt`. No source acquisition, schema, gameplay,
+artifact or asset change was needed. This closes V1S-084 on the pinned pair;
+source occupancy/strict/reproducibility gates, final browser matrices,
+cumulative Linux/local validation, hosted CI and release/human/operational
+acceptance retain their independent owners. No VD/VR work is deferred.
+
 ### Known-source disclosure acceptance (V1S-083 / VR-0137)
 
 **Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
