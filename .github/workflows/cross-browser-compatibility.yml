@@ -1,15 +1,11 @@
-name: Cross-browser compatibility (pilot)
+name: Cross-browser compatibility
 
 on:
   pull_request:
-  # Collect the first pilot baseline without running it on every dev commit.
+  # The final main SHA must have a complete independent browser matrix.
   push:
     branches:
-      - dev/v1.0.0
-    paths:
-      - .github/workflows/cross-browser-compatibility.yml
-      - tests/test_cross_browser_compatibility.py
-      - tools/run_cross_browser_compatibility.py
+      - main
   workflow_dispatch:
 
 permissions:
@@ -17,10 +13,7 @@ permissions:
 
 jobs:
   compatibility:
-    # Reporting-only until the cohort has stable, reviewed platform baselines.
-    # Promotion to a required release check is tracked by V1S-097.
-    name: ${{ matrix.os }} / ${{ matrix.engine }} (non-blocking)
-    continue-on-error: true
+    name: ${{ matrix.os }} / ${{ matrix.engine }}
     strategy:
       fail-fast: false
       matrix:

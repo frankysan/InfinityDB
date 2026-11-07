@@ -38,6 +38,14 @@ def _run(
     }
 
 
+@pytest.mark.parametrize(
+    ("tag", "required"),
+    [("v0.10.1", False), ("v1.0.0", True), ("v1.0.0-rc.1", True), ("v1rc1", True)],
+)
+def test_browser_matrix_is_required_for_v1_or_later_tags(tag: str, required: bool) -> None:
+    assert release_ci.requires_cross_browser(tag) is required
+
+
 def test_workflow_runs_url_uses_exact_workflow_file_and_commit() -> None:
     url = release_ci.workflow_runs_url(REPOSITORY, "source-checks.yml", COMMIT)
 
@@ -155,6 +163,107 @@ def test_collect_release_evidence_can_require_optional_full_asset_run(monkeypatc
     assert len(requested) == 4
 
 
+def _browser_jobs(run_id: int = 200) -> list[dict[str, object]]:
+    return [
+        {
+            "id": 201 + index,
+            "run_id": run_id,
+            "name": name,
+            "status": "completed",
+            "conclusion": "success",
+            "html_url": f"https://github.com/{REPOSITORY}/actions/jobs/{201 + index}",
+        }
+        for index, name in enumerate(release_ci.CROSS_BROWSER_JOBS)
+    ]
+
+
+def test_cross_browser_job_validation_fails_closed() -> None:
+    jobs = _browser_jobs()
+    expected = release_ci.verify_cross_browser_jobs(
+        {"jobs": jobs, "total_count": 4}, run_id=200
+    )
+    assert [job["name"] for job in expected] == list(release_ci.CROSS_BROWSER_JOBS)
+
+    for changed in (
+        jobs[:-1],
+        [*jobs[:-1], dict(jobs[-1], conclusion="failure")],
+        [*jobs[:-1], dict(jobs[-1], conclusion="skipped")],
+        [*jobs[:-1], dict(jobs[-1], status="in_progress")],
+        [*jobs[:-1], dict(jobs[-1], name=jobs[0]["name"])],
+        [*jobs[:-1], dict(jobs[-1], run_id=999)],
+    ):
+        with pytest.raises(release_ci.ReleaseEvidenceError):
+            release_ci.verify_cross_browser_jobs(
+                {"jobs": changed, "total_count": len(changed)}, run_id=200
+            )
+    with pytest.raises(release_ci.ReleaseEvidenceError, match="incomplete"):
+        release_ci.verify_cross_browser_jobs(
+            {"jobs": jobs, "total_count": 5}, run_id=200
+        )
+
+
+def test_collect_release_evidence_requires_cross_browser_job_matrix(monkeypatch) -> None:
+    requested: list[str] = []
+    requirements = release_ci.REQUIRED_WORKFLOWS + (release_ci.CROSS_BROWSER_WORKFLOW,)
+
+    def fake_request(url: str, *, token: str | None) -> dict[str, object]:
+        requested.append(url)
+        if "/jobs?" in url:
+            assert url == release_ci.cross_browser_jobs_url(REPOSITORY, 200)
+            return {"jobs": _browser_jobs(), "total_count": 4}
+        requirement = next(item for item in requirements if item.filename in url)
+        return {
+            "workflow_runs": [
+                _run(requirement, run_id=200 if requirement == release_ci.CROSS_BROWSER_WORKFLOW
+                     else 100 + len(requested))
+            ],
+        }
+
+    monkeypatch.setattr(release_ci, "_request_json", fake_request)
+    evidence = release_ci.collect_release_evidence(
+        REPOSITORY, COMMIT, include_cross_browser=True
+    )
+    assert len(requested) == 5
+    browser = evidence["workflows"][-1]
+    assert browser["workflow"] == "Cross-browser compatibility"
+    assert len(browser["jobs"]) == 4
+    assert all(job["conclusion"] == "success" for job in browser["jobs"])
+
+
+def test_v1_tag_message_requires_browser_matrix_evidence() -> None:
+    workflows = []
+    for index, requirement in enumerate(release_ci.REQUIRED_WORKFLOWS):
+        workflows.append({
+            "workflow": requirement.name,
+            "run_number": index + 1,
+            "run_attempt": 1,
+            "conclusion": "success",
+            "url": f"https://github.com/{REPOSITORY}/actions/runs/{index + 1}",
+        })
+    evidence = {"repository": REPOSITORY, "commit_sha": COMMIT, "workflows": workflows}
+    with pytest.raises(release_ci.ReleaseEvidenceError, match="Cross-browser compatibility"):
+        release_ci.render_tag_message("v1.0.0", evidence)
+
+    browser = {
+        "workflow": release_ci.CROSS_BROWSER_WORKFLOW.name,
+        "run_id": 200,
+        "run_number": 10,
+        "run_attempt": 1,
+        "conclusion": "success",
+        "url": f"https://github.com/{REPOSITORY}/actions/runs/200",
+        "jobs": release_ci.verify_cross_browser_jobs(
+            {"jobs": _browser_jobs(), "total_count": 4}, run_id=200
+        ),
+    }
+    evidence["workflows"].append(browser)
+    assert "- Cross-browser compatibility: success" in release_ci.render_tag_message(
+        "v1.0.0", evidence
+    )
+    browser["jobs"] = browser["jobs"][:-1]
+    with pytest.raises(release_ci.ReleaseEvidenceError):
+        release_ci.render_tag_message("v1.0.0", evidence)
+
+
 def test_render_tag_message_records_run_identity_and_urls() -> None:
     workflows = []
     for index, requirement in enumerate(release_ci.REQUIRED_WORKFLOWS, start=1):
@@ -242,6 +351,22 @@ def test_main_writes_json_and_annotated_tag_message(
     assert json.loads(json_output.read_text(encoding="utf-8")) == evidence
     assert tag_output.read_text(encoding="utf-8").startswith("InfinityDB v0.10.0\n")
     assert "3 required workflows" in capsys.readouterr().out
+
+
+def test_v1_cli_automatically_requires_cross_browser(monkeypatch, tmp_path: Path, capsys) -> None:
+    def fake_collect(*args, **kwargs):
+        assert kwargs["include_cross_browser"] is True
+        raise release_ci.ReleaseEvidenceError("Missing required Cross-browser compatibility")
+
+    monkeypatch.setattr(release_ci, "collect_release_evidence", fake_collect)
+    result = release_ci.main([
+        "--repository", REPOSITORY, "--commit", COMMIT, "--tag", "v1.0.0",
+        "--json-output", str(tmp_path / "evidence.json"),
+        "--tag-message-output", str(tmp_path / "tag.txt"),
+    ])
+    assert result == 1
+    assert "Cross-browser compatibility" in capsys.readouterr().err
+    assert not (tmp_path / "evidence.json").exists()
 
 
 def test_main_rejects_invalid_release_commit_without_traceback(capsys) -> None:

@@ -34,37 +34,52 @@ a local deferral or a green worker run is not a CI exemption.
 6. **Keep extended external checks explicit.** Optional network/acquisition/performance workflows
    must not make an otherwise valid source commit fail because an external service is unavailable.
 
-## Cross-browser release compatibility pilot (V1S-097)
+## Cross-browser release compatibility gate
 
-The [dedicated reporting-only workflow](../.github/workflows/cross-browser-compatibility.yml)
-uses one shared Python Playwright critical-journey cohort rather than repeating
-all Chromium browser tests across every engine. Its four separate jobs are:
-Ubuntu/Chromium, Ubuntu/Firefox, macOS/WebKit and Windows/Microsoft Edge.
-It runs on pull requests, manual dispatch (once registered on the default
-branch), and development-branch pushes that change the pilot's workflow,
-tests or runner—not on every unrelated development commit. Each job installs **Playwright 1.64.1** and its matching selected browser,
-first generates and checks the deterministic ignored deployed-object
-publication required by the tracked variant-usage artifact, then serves
-the tracked Army/rules database pair using an ephemeral local WSGI server
-and executes 14 tests (seven journeys at 1440 and 390 px).
-The cohort covers soft navigation, citations, Weapon fragments, Unit details,
-Core scenario selection, FAQ cards, and notice keyboard/touch behavior.
-JUnit output and failure screenshots/Playwright traces are uploaded as
-short-lived CI artifacts; unavailable Playwright/browser binaries must fail
-rather than skip a selected pilot job. No official game-source download or
-remote InfinityDB server is required.
+The [Cross-browser compatibility workflow](../.github/workflows/cross-browser-compatibility.yml)
+is an independent, **mandatory v1.0 release gate**. It runs on pull
+requests, pushes to `main`, and manual dispatch once registered on the
+default branch. The four required jobs are Ubuntu/Chromium, Ubuntu/Firefox,
+macOS/WebKit and Windows/Microsoft Edge; all must complete successfully
+for the **same exact candidate SHA**. No job uses `continue-on-error`.
+Ordinary development pushes without a pull request do not launch this
+matrix by default. Configure repository branch protection/rulesets
+separately if these checks are to block PR merging; the release-evidence
+collector independently fails closed before tagging v1.0 or later.
 
-**Current status: pilot, not an accepted release gate.** Each job currently
-has `continue-on-error: true`; a green aggregate workflow cannot be used to
-assert all four cross-browser cases passed. Inspect every job conclusion and
-its JUnit/traces for the **same exact commit SHA**. After stable reviewed
-cross-engine results, remove `continue-on-error`, require all four jobs and
-add the new workflow to v1.0 exact-SHA release evidence/branch protection.
-The [open V1S-097 task](TODO.md#final-frozen-candidate-acceptance-and-release)
-tracks that enforcement step. The existing comprehensive Chromium and
-81-page Unit matrices, full source checks, deployed candidate acceptance,
-and manual Safari/iOS/touch sign-off stay independent. WebKit on macOS is
+Each job installs Python 3.11.9, **Playwright 1.64.1** and its selected browser,
+generates and checks the ignored deployed-object publication matched to
+the tracked rules/Army/variant artifacts, and serves the frozen database
+pair using an ephemeral WSGI server. One shared portable cohort runs
+**14 critical journeys** (seven at 1440 and 390 px) covering soft navigation,
+source citations, Weapon fragments, Unit detail, Core scenario selection,
+FAQ entry points and notice keyboard/touch behavior. Tests fail on missing
+browser executables, unhandled JavaScript/network errors or unavailable
+artifacts; the selected engine cannot silently skip. Each job uploads JUnit
+evidence and failure screenshot/trace artifacts, and the browser engine/version
+is logged. Playwright is pinned; branded Edge and rolling hosted images must
+still be identified by their recorded actual versions, not treated as frozen
+browser binaries. No external Army/PDF acquisition is needed.
+
+For **v1.0 and later**, `tools.prepare_release_ci_evidence` requires the
+Cross-browser compatibility workflow in addition to Source checks,
+Installed wheel smoke and Deployment smoke. It validates each of the
+**four exact job identities and successful terminal conclusions** from
+the latest GitHub Actions attempt. Missing, skipped, failed, incomplete or
+duplicated jobs and green aggregate workflow runs with failed matrix legs
+are **not accepted**. The annotated tag evidence includes the verified
+workflow run; structured JSON records all four jobs. This does not replace
+the comprehensive Chromium and 81-page Unit matrices, exact hosted
+candidate checks or human Safari/iOS/touch acceptance. macOS WebKit is
 not a real-device Safari/iOS test.
+
+**V1S-097 acceptance baseline:** the reporting-only four-platform pilot
+at `6892e7e6094288b6c7eb1cc51abe0b3fb6b6ac84` passed **56/56**
+across [run 42366303864](https://github.com/frankysan/InfinityDB/actions/runs/42366303864)
+after clean-checkout deployed-object setup, WebKit request-cancellation
+readiness and the Windows socket listen-backlog correction. The promoted
+required-gate revision and exact-SHA CI acceptance must pass separately;
+a previous reporting-only run cannot approve the promoted release gate.
 
 ## Agent CI monitoring and repair
 

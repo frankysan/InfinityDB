@@ -238,14 +238,11 @@ passed; independent touch/human, cumulative and hosted gates remain open.
   pair, release version, static assets and representative browser paths.
 - [ ] **V1S-097 (M, gate):** Promote the cross-browser Playwright
   compatibility matrix to a mandatory v1.0 release check. The initial
-  portable critical-journey cohort runs as reporting-only PR, path-filtered
-  development-push and manual CI on
-  Ubuntu Chromium, Ubuntu Firefox, macOS WebKit and Windows Edge. First
-  collect actual matrix results, diagnose engine-specific or intermittent
-  failures, pin accepted baseline versions, and then remove non-blocking
-  status and require successful exact-SHA release evidence. The broader
-  Chromium/Unit/scenario suites stay separate; a pilot result never counts
-  as final release acceptance.
+  portable critical-journey cohort passed all four engines and platforms at
+  `6892e7e`. The required workflow and version-aware exact-SHA release
+  evidence implementation is prepared; acceptance still requires a fully
+  successful hosted run of the promoted non-optional workflow. The broader
+  Chromium/Unit/scenario suites stay separate, as do final release gates.
   Priority: Cross-browser compatibility pilot requested for v1.0;
   authority: release owner; revisit: return to V1S-041 after pilot wiring
   and initial cross-engine baseline investigation.

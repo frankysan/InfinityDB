@@ -26,7 +26,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Cross-browser release pilot: {args.engine}", flush=True)
     result = subprocess.run(
         [
-            sys.executable, "-m", "pytest", "-q",
+            sys.executable, "-m", "pytest", "-q", "-s",
             "tests/test_cross_browser_compatibility.py",
             f"--junitxml={report.relative_to(ROOT).as_posix()}",
         ],

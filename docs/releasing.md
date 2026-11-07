@@ -284,12 +284,13 @@ deployment behavior.
   it on protected `main` through the normal pull-request workflow. The resulting `main` revision is
   the candidate release commit; if the repository uses a merge or squash commit, use that resulting
   commit rather than assuming the branch-head SHA is the release SHA.
-- [ ] For 1.0, after [V1S-097](TODO.md#final-frozen-candidate-acceptance-and-release)
-  promotes the cross-browser pilot, require all four Ubuntu Chromium/Firefox,
-  macOS WebKit and Windows Edge compatibility jobs green on the exact candidate
-  SHA. The current reporting-only workflow is **not** an accepted gate even
-  when its aggregate status is green. Retain JUnit/traces for failures and
-  preserve separate real-device/human sign-off.
+- [ ] For 1.0, require all four **Cross-browser compatibility** jobs
+  (Ubuntu Chromium/Firefox, macOS WebKit and Windows Edge) successful on the
+  exact candidate SHA. A green aggregate run cannot replace individual job
+  acceptance. The version-aware release-evidence collector verifies the four
+  terminal job conclusions before preparing the tag; a missing workflow,
+  skipped job or previous candidate's run blocks tagging. Retain JUnit and
+  failure traces, and preserve independent human/real-device sign-off.
 - [ ] Confirm the required hosted workflows are green for that exact candidate release commit,
   including the `Source checks` cross-platform deterministic-output comparison. `Source checks`,
   `Deployment smoke test`, and `Installed wheel smoke` provide the normal
@@ -309,7 +310,10 @@ deployment behavior.
   ```
 
   The command must verify successful `Source checks`, `Installed wheel smoke`, and
-  `Deployment smoke test` runs for that exact SHA. Add `--include-full-assets` when this release's
+  `Deployment smoke test` runs for that exact SHA. For tags **v1.0 or later**,
+  it also automatically requires the `Cross-browser compatibility` workflow and
+  its four successful matrix jobs; no optional flag can bypass this release gate.
+  Add `--include-full-assets` when this release's
   retained evidence should also require the optional checksum-pinned `Full-asset checks` workflow.
   If merge/squash created a different SHA from the pre-merge candidate, dispatch the optional
   workflow again for the final `main` SHA before collecting evidence.
@@ -323,7 +327,8 @@ deployment behavior.
   The annotation is the durable hosted-CI evidence record; a lightweight tag does not satisfy this
   release contract.
 - [ ] Push the tag, then verify that the remote annotated tag resolves to the intended commit and its
-  annotation contains the expected three hosted workflow records.
+  annotation contains the expected hosted workflow records (four for v1.0
+  and later, or five when optional Full-asset checks are included).
 
 A published release tag is immutable project history. Correct a material release
 error with a subsequent release rather than silently moving a published tag.

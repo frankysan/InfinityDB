@@ -445,7 +445,7 @@ commit the coherent batch without mixing unrelated agents' edits. Batching
 never postpones an immediate safety gate, a due queue drain or a required
 V1S closeout; do not grow a batch merely to reach a validation threshold.
 
-### Portable cross-browser critical-journey cohort (V1S-097 pilot)
+### Portable cross-browser critical-journey cohort (v1.0 gate)
 
 **Project domains:** Web frontend, Project infrastructure
 
@@ -458,10 +458,10 @@ libraries are installed with `--with-deps`). The helper runs the dedicated
 nonzero on failed/missing browser setup and writes JUnit and failure traces
 under ignored `local/cross-browser-compatibility/`. The ordinary source
 suite does not require Playwright and skips this opt-in module without an
-engine. The authoritative hosted matrix, pilot status and promotion rules
-are in [CI](ci.md#cross-browser-release-compatibility-pilot-v1s-097).
-Do not count a pilot run as the full release gate, nor multiply the 81-page
-Unit matrix over all browser engines.
+engine. The authoritative mandatory hosted matrix and exact-SHA evidence
+contract are in [CI](ci.md#cross-browser-release-compatibility-gate).
+A successful local cohort never replaces hosted acceptance, and the 81-page
+Unit matrix is not multiplied across browser engines.
 
 ### Focused-first VR execution
 
