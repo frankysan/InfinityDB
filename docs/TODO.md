@@ -257,8 +257,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   source/API and browser checks on Windows. Metadata and reachability alone do
   not prove that a locator supports its reference.
   Hosted Source checks exposed a release-identity mismatch between the runtime
-  and baseline/browser verification tools; the CI repair and its validation
-  are in progress.
+  and baseline/browser verification tools; the shared repair passed
+  [VR-0136](testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
+  on Windows. Replacement-SHA hosted acceptance remains open.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are

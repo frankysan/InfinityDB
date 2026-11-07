@@ -145,33 +145,7 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0136 (2026-11-07; ready-to-run): Verify runtime snapshot identity
-  parity and fail-closed release preflight after the hosted Source failures.
-  Work: V1S-082; implementation: commit containing this entry. VD-0110
-  designed independent digest, attached/absent/mixed pair, changed-byte
-  preflight, malformed/stale publication and no-rules assertions without
-  executing tests. The correctness-critical reproductions
-  `tests/test_report_reference_baseline.py::test_served_revision_matches_exact_inventoried_database_pair`
-  and `tests/test_verify_release_candidate_browser.py::test_release_gate_accepts_exact_local_runtime_before_and_after_browser`
-  failed on Windows at `9e7d9f92`, matching hosted Linux jobs; the immediate
-  repair rerun passed both on Windows. On a pinned revision, run the full
-  `tests/test_verify_release_candidate_browser.py` module and
-  `tests/test_report_reference_baseline.py` selectors
-  `test_baseline_reports_pinned_publication_without_claiming_completeness`,
-  `test_served_revision_matches_exact_inventoried_database_pair`,
-  `test_served_revision_rejects_stale_and_invalid_runtime`,
-  `test_baseline_cli_rejects_stale_server_before_writing_outputs` and
-  `test_baseline_cli_records_served_pair_in_json_and_markdown`, plus
-  `tests/test_web.py` selectors
-  `test_catalog_api_etag_revalidates_the_current_snapshot`,
-  `test_rebuilt_snapshot_changes_the_catalog_api_etag` and
-  `test_weapon_profile_publication_changes_snapshot_etag`, and
-  `tests/test_weaponry_catalog_api.py` selectors
-  `test_reviewed_profile_chart_citations_reach_exact_api_profiles`,
-  `test_missing_or_mixed_weapon_profile_publication_is_explicit` and
-  `test_stale_colocated_weapon_profile_publication_fails_startup`.
-  Pinned `linux-dev` preferred; Windows fallback if unavailable. Hosted Source
-  and final release gates remain separate.
+No pending execution entries.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -185,6 +159,7 @@ and [VR-0131 Pheroware citations](testing.md#v1s-082-pheroware-citation-regressi
 and [VR-0133 Weapon Chart rows](testing.md#v1s-082-weapon-chart-early-row-regression-vr-0133)
 and [VR-0134 Weapon-profile citations](testing.md#v1s-082-weapon-profile-citation-regression-vr-0134)
 and [VR-0135 Equipment source scope](testing.md#v1s-082-reference-only-equipment-source-scope-vr-0135)
+and [VR-0136 runtime snapshot identity](testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
 passed on pinned Windows revisions. Hosted CI and final release gates retain separate owners.
 
 ## Next unused IDs

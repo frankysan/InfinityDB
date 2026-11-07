@@ -796,6 +796,26 @@ and `4dd30a8c6f7ccd823a3de378ccde57c0a84dc63f8d6989a761e86165d33d1395`.
 The dedicated MCP Linux worker was unavailable; this closes VR-0135 locally,
 not V1S-082, hosted CI or final-candidate acceptance.
 
+### V1S-082 runtime snapshot identity repair (VR-0136)
+
+At clean revision `1d1ec4a1aea3e0987e9f54e0ff65780b780da421`, the focused
+Windows batch passed **28 tests, zero skips**. Its exact selectors are in
+the VR-0136 queue entry at that revision. The batch checked the independently
+calculated runtime identity for attached, absent and independently located
+Weapon-profile publications; changed publication bytes; malformed and stale
+attached publications; missing rules; baseline reporting; API cache validators;
+and preflight/postflight rejection before release-browser acceptance. Chrome
+`156.0.8078.81` also exercised the real local release-candidate browser gate.
+
+The Army and rules database SHA-256 values were respectively
+`8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
+and `0fcf537fcca2b148541d9ad136003d939f0c0ecbe1e79136fca1bb6fd622714b`;
+the Weapon-profile publication SHA-256 was
+`4dd30a8c6f7ccd823a3de378ccde57c0a84dc63f8d6989a761e86165d33d1395`.
+Both originally failing release-identity selectors passed in this batch.
+The dedicated MCP Linux worker was unavailable; this closes VR-0136 locally,
+not hosted CI or final-candidate acceptance.
+
 ### Validation batch planning
 
 After due VD prerequisites have been **designed and statically reviewed, not
