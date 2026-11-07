@@ -5,11 +5,9 @@ Equipment, Skills, Weapons, core Scenarios, and relationships across Armies. It 
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Prepared release version: **1.0.0**. **0.10.1** (2026-10-10) was the
-latest published release when this candidate was prepared. See the
-[release process](docs/releasing.md) and
-[current milestone](docs/TODO.md#current-milestone) for publication and
-remaining acceptance.
+Current release: **1.0.0** (2026-11-07). See the
+[release notes](docs/CHANGELOG.md#100---2026-11-07) for changes and upgrade
+considerations, and the [deployment guide](docs/deployment.md) for updates.
 
 ## Guiding principles
 
@@ -98,6 +96,10 @@ its application metrics.
 - Includes linked N5.3 movement and geometry references for routes, supporting
   surfaces, visibility, Cover, zones, Coherency and replacement positioning, with
   Move's declaration requirements and Silhouette diagrams.
+- Presents dated N5 FAQ clarifications alongside the affected rules and scenarios,
+  with concise citations and disclosed source disagreements. The **Deployed objects**
+  reference presents 17 reviewed objects in individual cards, retaining disputed
+  or unknown attributes and verified delivery/Unit-use context.
 - Includes a browsable **Scenarios** reference with four N5.3 Core missions
   and a separately selectable ITS Season 18 Battleground pilot. Explicit
   Army Points selection, structured setup/objectives/scoring, scenario Rules
@@ -127,7 +129,9 @@ its application metrics.
   card show their corresponding N5 Weapon Chart page when the matching
   source publication is available.
 - Supports centimetre/inch display preferences and a Developer mode for
-  inspecting database IDs and other review information.
+  inspecting database IDs, exact reviewed Skill/Equipment source occurrences,
+  and source-scoped Restrictions links. The complete Restrictions chart has
+  its own public reference page at `/rules/restrictions`.
 - Supports published Army, Unit, Peripheral, Order, and Characteristic SVG symbols. Corvus
   Belli has explicitly permitted InfinityDB to use and redistribute the graphical
   assets used by this non-commercial community project, including processed SVGs
@@ -158,11 +162,11 @@ across planning, architecture, release notes, and implementation:
 See [project domains](docs/project-domains.md) for the canonical boundaries and the
 documentation-label convention.
 
-## Roadmap to 1.0
+## Release progression
 
 **Project domain:** Project infrastructure
 
-The current direction is deliberately incremental:
+InfinityDB reached its current 1.0 reference baseline through these releases:
 
 - **0.7.x — Rules & context:** enriched existing catalog/application data with concise
   rules summaries, official references, classifications, and reviewed semantic
@@ -177,17 +181,16 @@ The current direction is deliberately incremental:
 - **0.10.1 — Interim reference consistency (released 2026-10-10):**
   published the core Scenarios, Ammunition and rules-reference improvements,
   with stabilization fixes. See the [release notes](docs/CHANGELOG.md#0101---2026-10-10).
-- **1.0.0 — Player data-complete (current milestone):** complete remaining
-  in-scope source-to-browser coverage and final scenario acceptance.
-  Incomplete cross-surface interaction tests from 0.10.1 now belong to
-  [1.0 final acceptance](docs/TODO.md#final-10-acceptance).
-  The published ITS Season 18 Battleground pilot demonstrates the shared scenario
-  model; the remaining ITS library and tournament tooling stay post-1.0.
+- **1.0.0 — Current N5.3 reference (2026-11-07):** delivered the in-scope
+  current-source citation and browser reference baseline, dated FAQ,
+  deployed-object and exact-variant references, four core scenarios and the
+  optional ITS Season 18 Battleground pilot. The wider ITS library and
+  tournament tooling remain outside this baseline.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
-0.9 closed application gaps → 0.10 hardened and polished → 1.0 completes the reference.**
-Exact minor-release scope may move as audits discover dependencies; the durable 1.0 gate is
-defined in [release process](docs/releasing.md).
+0.9 closed application gaps → 0.10 hardened and polished → 1.0 completed the reference.**
+The [release process](docs/releasing.md) preserves the 1.0 completeness contract;
+future work is in the [post-1.0 backlog](docs/TODO.md#post-10--maintenance-and-product-expansion).
 
 ## Requirements and setup
 
@@ -323,7 +326,7 @@ infinity-db build-rules --output local/rules-standalone.db
 
 `build-rules` defaults to `data/curated/rules/`. Its standard output
 remains the v8-compatible format for standalone use. The tracked
-1.0-development rules release database uses the reviewed v9
+1.0 rules release database uses the reviewed v9
 conditional Restrictions table and must be built as a coordinated
 release pair with `data/generated/deployed-objects.json`; see
 [the migration and recovery contract](docs/data-model.md#restriction-persistence-and-version-aware-api-v9-locally-promoted).

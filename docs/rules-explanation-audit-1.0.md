@@ -13,9 +13,9 @@ were changed **by that assessment**. Follow-up entries below document
 subsequent implementation and acceptance work.
 
 **Snapshot scope:** Findings and totals describe the examined commits above, not the
-current release candidate. Later implementation notes record selected corrections;
-the original findings remain evidence for the still-open 1.0 review. Current release
-status and remaining acceptance belong in [the backlog](TODO.md#current-milestone).
+current 1.0 reference. Later implementation notes record selected corrections;
+the original findings are historical evidence, not open 1.0 release tasks.
+Any remaining release operations belong in [the backlog](TODO.md#current-milestone).
 
 **Reading this frozen audit:** The executive summary, proposed batches and
 statement of potential blockers below describe the **2026-10-09 baseline**, not

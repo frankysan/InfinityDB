@@ -2932,8 +2932,8 @@ list/session configuration; raw `loadout_options.disabled` and `minis`
 flags have no established immutable player-reference interpretation.
 Neither decision authorizes silently dropping those source fields.
 
-Before 1.0 release acceptance, rerun the audit against the **release-matched
-`infinity.db` and `infinity.raw.db` pair** using the opt-in
+For release-matched source rebuilds, rerun the audit against the matching
+`infinity.db` and `infinity.raw.db` pair using the opt-in
 `--source-occupancy-gate` through the normal checks runner; see
 [release validation](releasing.md#4-run-local-release-validation).
 It fails if raw evidence is missing, the database pair is inconsistent,

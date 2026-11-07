@@ -10,7 +10,7 @@ provenance under `data/manifests/`.
 ## Current curated data
 
 - `rules/` contains validated rules-reference collections, including the
-  source-verified `n5-faq-v0.1.json` FAQ pilot, consumed by
+  dated, source-verified `n5-faq-v0.1.json` clarifications, consumed by
   `infinity-db build-rules`.
 - `identities/` contains reviewed source-derived presentation and historical identity
   relationships consumed by the Army build/runtime surfaces that own them.

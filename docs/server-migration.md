@@ -2,10 +2,13 @@
 
 **Project domain:** Deployment
 
-A released InfinityDB checkout is now self-contained for runtime deployment. The tracked Git
-revision supplies the application, `infinity.db`, `rules.db`, processed SVG publication, and
-`symbol-publication.json`. Raw Army/wiki/PDF/source-symbol archives and terminal symbol build state
-are development/rebuild inputs, not server deployment requirements.
+A released InfinityDB checkout is self-contained for runtime deployment. The tracked Git
+revision supplies the application, `infinity.db`, `rules.db`, exact-variant
+`variant-usage.json`, Weapon-profile `weapon-profile-sources.json`, processed SVGs
+and `symbol-publication.json`. Deployment deterministically generates the matching
+ignored `deployed-objects.json` from tracked release inputs. Raw Army/wiki/PDF/source-symbol
+archives and terminal symbol build state are development/rebuild inputs, not server
+deployment requirements.
 
 ## Exact runtime migration
 

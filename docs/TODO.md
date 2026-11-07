@@ -1,9 +1,9 @@
 # InfinityDB backlog
 
-This is the working implementation backlog. Every unchecked item belongs to exactly
-one release bucket: **1.0.0** or **post-1.0**.
-The buckets are planning commitments, not a promise that a minor release cannot move a
-low-risk item earlier or defer a non-gating item when evidence changes.
+This is the working backlog. Open items are either **1.0.0 release-handoff
+operations** or **post-1.0** development. The remaining 1.0 entries track
+publication/verification, not unfinished player-reference features. Future
+milestones may move non-gating work as evidence changes.
 
 This file does not define current application behavior. Current behavior belongs in
 the relevant reference documentation; lasting design direction belongs in
@@ -24,20 +24,22 @@ when all contained work shares the same owner.
 
 **Project domain:** Project infrastructure
 
-Released version: **0.10.1**; current development: **1.0.0**.
-The [changelog](CHANGELOG.md) owns release history,
-[testing](testing.md) owns verification procedures and
-[releasing](releasing.md) owns the final acceptance definition.
-Bounded development checks do not approve the frozen candidate.
-Core N5 scenarios remain in scope; optional ITS, user-data,
-performance experiments and native clients are post-1.0.
+Current product baseline: **1.0.0**. The [changelog](CHANGELOG.md) owns
+release history; [testing](testing.md) owns verification procedures; and
+[releasing](releasing.md) owns release acceptance. This development branch
+still tracks the final merge, exact-SHA CI, tag, deployment and post-deployment
+checks under V1S-093–095. Their pending state must not be mistaken for an
+unimplemented 1.0 player feature or for evidence that production has already
+been verified. Optional ITS expansion, user-data tools, performance experiments
+and native clients are post-1.0.
 
-## 1.0.0 — current-reference completeness gate
+## 1.0.0 — release handoff and verification
 
-Close material source-to-browser reference gaps and verify the complete
-current-data release against the [1.0 definition](releasing.md#version-10-data-completeness-gate).
+The player-reference completeness work is incorporated into the 1.0 baseline.
+Only the remaining release operations below are open against the
+[1.0 definition](releasing.md#version-10-data-completeness-gate).
 
-### Implemented foundations and remaining scope
+### Delivered baseline and outstanding release evidence
 
 **Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
 
@@ -67,8 +69,8 @@ release blockers.
 
 ### Pre-planned 1.0 execution slices
 
-The numbered V1S register is the actionable decomposition of the
-1.0 parent outcomes below, not a second release definition.
+The remaining numbered V1S entries are the actionable release handoff,
+not a second reference-feature backlog or release definition.
 The original 2026-11-03 sizing and retired ID history remain in Git.
 S/M/L are relative bounded/small multi-step/larger acceptance slices,
 not time estimates. A source-reviewed no-change is a valid closeout;
@@ -348,8 +350,8 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 - [ ] **Post-1.0 infrastructure research — deferred:** Continue the
   [Chromium lifecycle and concurrency investigation](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)
-  after v1.0 ships. The v1.0 instrumentation gates (VR-0023/24) are
-  complete; Linux uses its validated four-slot profile, Windows retains
+  as maintenance research beyond the 1.0 baseline. The v1.0 instrumentation
+  gates (VR-0023/24) are complete; Linux uses its validated four-slot profile, Windows retains
   two slots, and clean CI is unchanged. Raw captures stay in ignored
   `local/benchmarks/`.
   - [ ] Diagnose intermittent full-load Windows Glossary and Spec-Ops

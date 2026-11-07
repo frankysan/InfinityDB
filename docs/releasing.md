@@ -110,8 +110,8 @@ correction. No publisher response, cross-language comparison, new source
 reconciliation, or comprehensive discrepancy inventory is required for 1.0.
 Keep such research and publisher requests as optional post-1.0 work.
 
-Immediately before 1.0, audit the **current maintained rule/reference
-identities** for at least one applicable current citation each, accurate
+The 1.0 baseline audit covers **current maintained rule/reference
+identities** with at least one applicable current citation each, accurate
 normal-browser reachability and known material defects. Confirm the supported
 Army dataset and core scenarios remain usable. Do **not** infer missing rules
 from unchecked source pages or require whole-source/whole-record semantic
@@ -224,19 +224,15 @@ application parses it to render **What's changed**.
 Do not change the released version early merely to mark work in progress; development
 checkouts use the existing `+dev` display-version mechanism until release preparation.
 
-**1.0 untagged candidate checkpoint:** The exact-version hosted Unit gate
-(V1S-087) needs the real `/api/version` to report `1.0.0` before final
-release acceptance, while V1S-092 reserves final release-note/version
-promotion for after that acceptance. During explicit release-candidate
-preparation, it is therefore permissible to update **only** the
-`pyproject.toml` and `src/infinity_army_data/__init__.py` version pair
-to `1.0.0` on `dev/v1.0.0`, with an untagged and unreleased candidate
-status in the README/TODO. Verify both package metadata and `/api/version`,
-the pinned runtime pair, browser and static identity before serving a
-candidate. Keep the changelog headed `Unreleased`, the publicly released
-README version at `0.10.1`, and final metadata review under V1S-092.
-This checkpoint is **not** an approved final release, V1S-087 hosted
-acceptance, a Git tag, or deployment authorization.
+**Historical 1.0 candidate checkpoint:** Before the 1.0 release metadata was
+finalized, the exact-version Unit gate (V1S-087) required `/api/version` to
+report `1.0.0` while the public README still identified 0.10.1 as the
+released version. The version pair in `pyproject.toml` and
+`src/infinity_army_data/__init__.py` was promoted first on `dev/v1.0.0`;
+release-note and README promotion followed in V1S-092. This exception
+explains the pre-publication test evidence and is **not** a general instruction
+to leave the current README on an older version. Merge, tag, deployment and
+exact-SHA hosted acceptance remain separate release steps.
 
 ## 4. Run local release validation
 

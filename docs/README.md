@@ -60,18 +60,17 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
 - `n5-source-history.md` — N5 official update-post index, historical Army evidence, and
   cross-source reconciliation procedure; an index, not a verified completeness ledger.
 - [v1.0-source-coverage-audit.md](v1.0-source-coverage-audit.md) — dated 2026-10-31
-  baseline evidence with subsequent reconciliations for v1.0 source omissions,
-  audit/test findings and acceptance gaps. It preserves the current-input triage
-  and explains why catalog/page-citation counts do not certify whole-source
-  coverage. Retain while unresolved findings guide active work; `TODO.md` owns
-  their open tasks, not this assessment.
+  baseline evidence with subsequent source, browser, artifact and local candidate
+  acceptance records. It preserves the reviewed 1.0 input scope without implying
+  exhaustive whole-source coverage. Historical snapshots in this file are not
+  current task status; `TODO.md` owns any remaining release handoff or follow-up.
 - [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — dated
   source/interaction assessment with implementation follow-ups and remaining
   source conflicts. Its linked inventory, N5.3 reconciliation and source manifest
   retain unique finding IDs, exact source hashes/revisions and unresolved
   publication discrepancies; they remain **frozen baseline evidence**, not a
-  current defects list or proof of 1.0 completion. Keep these linked appendices
-  until the final source reconciliation and citation migration is accepted;
+  current defects list or a requirement for exhaustive post-1.0 source review.
+  Keep unique source/provenance evidence while it supports unresolved questions;
   use `TODO.md` for current work and `rules-semantics.md` for reviewed meaning.
 - `rules-interaction-checklist.md` — generated cross-release interaction-review ledger. Regenerate
   it with `tools/audit_rules_interactions.py`; do not edit it manually. Its release labels record the

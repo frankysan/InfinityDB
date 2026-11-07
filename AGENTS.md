@@ -28,7 +28,7 @@ For browser visual, layout, responsive, interaction, or player-facing copy chang
 design contract.
 
 The engineering principles in `docs/architecture.md` are authoritative for
-technical design decisions. For v1.0, follow the
+technical design decisions. Preserve the v1.0 reference baseline defined by the
 [release citation gate](docs/releasing.md#version-10-data-completeness-gate):
 at least **one applicable current source** per in-scope rule and a usable
 browser reference; exhaustive source inventories and discrepancy hunts are
