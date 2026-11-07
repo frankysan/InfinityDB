@@ -43,8 +43,10 @@ Ubuntu/Chromium, Ubuntu/Firefox, macOS/WebKit and Windows/Microsoft Edge.
 It runs on pull requests, manual dispatch (once registered on the default
 branch), and development-branch pushes that change the pilot's workflow,
 tests or runner—not on every unrelated development commit. Each job installs **Playwright 1.64.1** and its matching selected browser,
-serves the tracked Army/rules database pair using an ephemeral local WSGI
-server, and executes 14 tests (seven journeys at 1440 and 390 px).
+first generates and checks the deterministic ignored deployed-object
+publication required by the tracked variant-usage artifact, then serves
+the tracked Army/rules database pair using an ephemeral local WSGI server
+and executes 14 tests (seven journeys at 1440 and 390 px).
 The cohort covers soft navigation, citations, Weapon fragments, Unit details,
 Core scenario selection, FAQ cards, and notice keyboard/touch behavior.
 JUnit output and failure screenshots/Playwright traces are uploaded as
