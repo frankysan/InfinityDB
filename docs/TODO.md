@@ -49,28 +49,14 @@ references, scoped Reinforcements and exact-variant usage API/browser paths.
 The usage publication is still conditional on a verified matched artifact;
 an ignored development candidate is not a release artifact.
 
-- [ ] **Skill detail spacing (Web frontend, non-gating):** Confirm that FAQ
-  clarification cards have consistent padding and Exact reviewed source
-  occurrences have separation before/after the section, in both themes at
-  desktop and narrow widths with Developer Mode enabled. Exact reviewed
-  source occurrences are now Developer Mode-only; normal-mode absence and
-  developer-mode visibility are included in [VR-0138](validation-queue.md).
-
-- [ ] **Restrictions chart standalone page (Web frontend, non-gating):**
-  Accept the standalone `/rules/restrictions` reference, its link from
-  General Rules, complete source-scoped condition rows, legacy hash
-  compatibility, and responsive/theme navigation without clipping.
-  Existing Skill/Equipment/State contextual excerpts retain distinct
-  typed qualifiers in Developer Mode only. The standalone chart remains
-  public; visibility checks belong to [VR-0139](validation-queue.md).
-
-- [ ] **Reference card layout and FAQ citations (Web frontend, non-gating):**
-  Review individual Deployed object cards, full-width Orders & AROs tables,
-  and consistent spacing between Equipment detail, FAQ and usage sections.
-  FAQ cards now share the ordinary linked `Sources:` presentation rather
-  than a separate dated section preface and repeated provenance prose.
-  Preserve provenance in the API and source-conflict disclosures; focused
-  visual/browser evidence is queued under [VR-0140](validation-queue.md).
+The [focused UI and citation acceptance](testing.md#focused-ui-regression-drain-vr-0138-0141-2026-11-07)
+passed **51/51** tests with zero skips on the frozen development pair:
+FAQ spacing and developer-only occurrence lists (VR-0138), the standalone
+Restrictions chart and contextual links (VR-0139), Deployed objects,
+Orders & AROs and source-backed FAQ cards (VR-0140), and the redundant
+source-scope/FAQ-disclosure spacing fix (VR-0141). The four VR entries
+are retired; final release-matched visual and cumulative gates remain
+separate.
   A follow-up removes the duplicate applicability line from cited rule
   cards and adds clearance after FAQ cards before Unit-use disclosures;
   verification is tracked under [VD-0115 / VR-0141](validation-queue.md).

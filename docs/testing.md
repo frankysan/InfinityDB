@@ -1218,6 +1218,55 @@ Targeted source/DOM regressions check the Glossary response, existing
 deep links at 1440/390/320 px, and both Developer Mode visibility
 states. This is separate from formal version-matched release acceptance.
 
+### Focused UI regression drain VR-0138-0141 (2026-11-07)
+
+**Project domains:** Web frontend, Web backend, Project infrastructure
+
+On Windows Chromium with the tracked frozen Army/rules database pair and
+application implementation at
+`87a0db1e6f4ab621b97b41436e0bff90207c31c6`, **51/51 unique
+focused pytest cases passed, zero skips**. The test-only corrections below
+were applied in the working tree before the successful runs and committed
+with this evidence. No runtime/database/source-publication change was
+required during validation.
+
+- **VR-0138 — 9/9:** `test_skill_faq_card_padding_and_developer_occurrence_geometry`
+  **6/6** (`9592a22e9a054e50a150e2932776b375`, 7.10 s) and
+  `test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`
+  **3/3** (`ac0ba8c6f486450b9bb2a04eb93d4308`, 8.76 s).
+  Three widths, two themes, FAQ inset and spacing, hidden/visible/hidden
+  developer-only source occurrences, keyboard disclosures and exact Unit links.
+- **VR-0139 — 3/3:** `test_restrictions_chart_normal_chromium_at_three_widths`
+  **1/1** (`eeb1c39721d245e98b364b778642c30e`, 12.05 s), and
+  `test_published_restrictions_reference_is_exact_source_projection` and
+  `test_restrictions_reference_has_standalone_rules_page` **2/2**.
+  Exact six-row/fourteen-condition publication, responsive/themes,
+  legacy fragments, Back/Forward, contextual Developer Mode links
+  and controlled source failure.
+- **VR-0140 — 37/37:** Deployed object card/attributes/navigation **1/1**;
+  Orders & AROs full-width/table/filter/overflow **4/4**; FAQ single-source
+  card geometry **12/12**; Fireteam source-conflict disclosure **2/2**;
+  ordinary browser additional/primary FAQ topic associations **6/6**
+  and **8/8**; movement/dated FAQ browser **3/3**; selected source
+  and date-retaining FAQ API contract **1/1**.
+- **VR-0141 — 14/14, with 12 shared VR-0140 cases:** Node rules-card
+  renderer and static frontend contract **2/2**; shared FAQ
+  single-source/disclosure-separation browser cohort **12/12**.
+  Cited cards no longer duplicate the version/scope caption, but
+  uncited cards retain applicability. The `Sources:` citation link
+  remains, and FAQ cards have clearance before Unit-use disclosures.
+
+The first regression runs failed on **test assumptions**, corrected
+before all-green runs: source label trailing whitespace, narrow-screen
+Settings overlay intercepting an attempted disclosure click, a
+paragraph's internal padding being mistaken for border-box position,
+and asynchronous Back navigation tested before DOM detachment.
+No confirmed application defect or gameplay/source change resulted.
+No broad test suite was run: V1S-090 remains an independent cumulative
+release gate. This evidence closes **VD-0115** (test design) and
+**VR-0138, VR-0139, VR-0140, VR-0141** (test execution), not the
+manual, hosted or version-matched v1.0 acceptance gates.
+
 ### V1S-080 frozen-pair automated notice acceptance
 
 **Project domains:** Web frontend, Project infrastructure

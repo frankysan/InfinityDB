@@ -6431,11 +6431,13 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                     page.locator('button[aria-controls="settings-menu"]').click()
                     toggle = page.locator("#developer-mode-toggle")
                     toggle.set_checked(True)
+                    page.locator('button[aria-controls="settings-menu"]').click()
                     usage.wait_for(state="visible", timeout=30000)
                     assert "Only complete, source-reviewed variants" in usage.inner_text()
                     group = usage.locator(".exact-variant-group")
                     assert group.count() == 1
-                    group.locator("summary").click()
+                    group.locator("summary").focus()
+                    group.locator("summary").press("Enter")
                     group.locator("tr[data-owner-kind]").first.wait_for(
                         state="visible", timeout=30000,
                     )
@@ -6450,11 +6452,14 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                         arg=previous_group, timeout=30000,
                     )
                     assert usage.count() == 1
+                    page.locator('button[aria-controls="settings-menu"]').click()
                     toggle.set_checked(False)
                     assert usage.is_hidden(), (catalog, width)
                     toggle.set_checked(True)
+                    page.locator('button[aria-controls="settings-menu"]').click()
                     usage.wait_for(state="visible", timeout=30000)
-                    group.locator("summary").click()
+                    group.locator("summary").focus()
+                    group.locator("summary").press("Enter")
                     group.locator("tr[data-owner-kind]").first.wait_for(
                         state="visible", timeout=30000,
                     )
@@ -6466,7 +6471,8 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                     assert page.evaluate(
                         "() => document.documentElement.scrollWidth <= innerWidth + 1"
                     ), width
-                    links.first.click()
+                    links.first.focus()
+                    links.first.press("Enter")
                     page.wait_for_url(re.compile(r".*/units/ranger-prototype\?.*#profile-group-.*"))
                     page.locator(f'#{anchor}').wait_for(state="visible", timeout=30000)
                     assert page.locator(f'#{anchor}').evaluate(

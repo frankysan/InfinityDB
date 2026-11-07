@@ -641,7 +641,9 @@ def test_restrictions_chart_normal_chromium_at_three_widths(
                         ), (width, theme)
                     page.go_back(wait_until="domcontentloaded")
                     assert page.url.endswith("/rules")
-                    assert page.locator("#restrictions").count() == 0
+                    page.locator("#restrictions").wait_for(
+                        state="detached", timeout=15000,
+                    )
                     page.go_forward(wait_until="domcontentloaded")
                     section.wait_for(state="visible", timeout=15000)
                     assert page.locator("#restrictions .restrictions-subject").count() == 6

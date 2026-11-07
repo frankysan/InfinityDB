@@ -648,7 +648,7 @@ def test_skill_faq_card_padding_and_developer_occurrence_geometry(
             assert box["x"] >= card_box["x"] + 12, selector
             assert box["x"] + box["width"] <= card_box["x"] + card_box["width"] - 12
         source = card.locator(".faq-publication-source")
-        assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+        assert source.locator(".rules-provenance-label").inner_text().strip() == "Sources:"
         assert source.locator("a").count() == 1
         assert group.locator(":scope > .detail-source").count() == 0
 
@@ -658,17 +658,21 @@ def test_skill_faq_card_padding_and_developer_occurrence_geometry(
         page.locator('button[aria-controls="settings-menu"]').click()
         toggle = page.locator("#developer-mode-toggle")
         toggle.set_checked(True)
+        page.locator('button[aria-controls="settings-menu"]').click()
         usage.wait_for(state="visible", timeout=30000)
         assert usage.evaluate(
             "(node) => parseFloat(getComputedStyle(node).marginTop) >= 24"
             " && parseFloat(getComputedStyle(node).marginBottom) >= 24"
         )
         disclosure = usage.locator(".exact-variant-group").first
-        disclosure.locator("summary").click()
+        summary = disclosure.locator("summary")
+        summary.focus()
+        summary.press("Enter")
         assert disclosure.evaluate("(node) => node.open")
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         ), (width, theme)
+        page.locator('button[aria-controls="settings-menu"]').click()
         toggle.set_checked(False)
         assert usage.is_hidden()
         assert not errors, (width, theme, errors)
@@ -720,7 +724,7 @@ def test_faq_single_source_line_and_card_separation(
             card = cards.nth(i)
             source = card.locator(".faq-publication-source")
             assert source.count() == 1
-            assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+            assert source.locator(".rules-provenance-label").inner_text().strip() == "Sources:"
             assert source.locator("a").count() == 1
             assert "date anchor" not in source.inner_text()
             assert card.evaluate(
@@ -3296,7 +3300,7 @@ def test_reference_provenance_labels_remain_distinct_across_themes(
         faq = page.locator("#scenario-content .faq-dated-clarification")
         faq.wait_for(state="visible", timeout=60000)
         source = faq.locator(".faq-publication-source")
-        assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+        assert source.locator(".rules-provenance-label").inner_text().strip() == "Sources:"
         assert "English v0.1" in source.inner_text()
         assert page.locator("#scenario-content .faq-rulings > .detail-source").count() == 0
         assert page.evaluate(
@@ -3584,7 +3588,7 @@ def test_fireteam_faq_discloses_real_source_conflict_not_language_omission(
         haris = ruling_card("faq-ruling:fireteam-type-after-member-loss")
         assert "three-member HARIS" in haris.locator(".detail-copy").inner_text()
         selected = haris.locator(".faq-publication-source")
-        assert selected.locator(".rules-provenance-label").inner_text() == "Sources:"
+        assert selected.locator(".rules-provenance-label").inner_text().strip() == "Sources:"
         assert "English v0.1" in selected.inner_text()
         assert "p. 3" in selected.inner_text()
         assert selected.locator("a").count() == 1
@@ -3814,7 +3818,7 @@ def test_every_additional_faq_topic_link_is_visible_from_its_normal_page(
                 card = heading.locator("xpath=..")
                 assert record["facts"]["answer"] in card.inner_text()
                 source = card.locator(".faq-publication-source")
-                assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+                assert source.locator(".rules-provenance-label").inner_text().strip() == "Sources:"
                 assert "English v0.1" in source.inner_text()
                 assert f"p. {record['facts']['selectedCitation']['page']}" in (
                     source.inner_text()
@@ -3868,7 +3872,7 @@ def test_every_published_faq_has_a_normal_browser_entry_point(
                 card = heading.locator("xpath=..")
                 assert record["facts"]["answer"] in card.inner_text()
                 source = card.locator(".faq-publication-source")
-                assert source.locator(".rules-provenance-label").inner_text() == "Sources:"
+                assert source.locator(".rules-provenance-label").inner_text().strip() == "Sources:"
                 assert "English v0.1" in source.inner_text()
                 assert f"p. {record['facts']['selectedCitation']['page']}" in source.inner_text()
                 assert source.locator("a").count() >= 1

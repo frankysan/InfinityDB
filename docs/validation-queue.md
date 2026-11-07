@@ -134,20 +134,7 @@ static design-review outcome. Do not record a test result in VD. Retire
 the entry when its design review is complete; retain the unrun test
 selector and other dependencies in its VR item.
 
-- [ ] VD-0115 (2026-11-07; needs-design): Review the shared
-  `rulesReferenceSection` regression for a cited rules card with no
-  redundant collection/game line and an uncited card retaining
-  applicability; confirm the Citation link and source metadata remain
-  unchanged. Review the 1440/390/320 px, light/dark FAQ geometry
-  assertion for at least 16 px between a FAQ group and its next visible
-  Unit-use/disclosure section (including a hidden Developer Mode
-  intermediate sibling).
-  Work: [Reference card layout and FAQ citations](TODO.md#implemented-foundations-and-remaining-scope);
-  change: `rules-reference.js`, `page-overrides.css`; risk: low.
-  Existing modified selectors: `tests/rules_text_render_harness.mjs`,
-  `tests/test_web.py::test_detail_frontends_share_curated_rules_reference_renderer`, and
-  `tests/test_verify_scenario_faq_browser.py::test_faq_single_source_line_and_card_separation`.
-  Design only; linked execution: **VR-0141**.
+No pending design entries.
 
 ## Pending deferred execution
 
@@ -158,61 +145,7 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-- [ ] VR-0138 (2026-11-07; ready-to-run): Verify the Skill-detail
-  FAQ/occurrences spacing and Developer Mode-only exact source usage.
-  Work: [Skill detail spacing](TODO.md#implemented-foundations-and-remaining-scope);
-  revision: CSS base `9add9ae`, visibility base `3551d09`, plus this
-  focused UI batch (pin final SHA before execution); risk: low.
-  Design: **VD-0112 completed**, selectors statically reviewed with
-  Ruff and Pyright green; no browser tests executed.
-  Deferred: `tests/test_verify_scenario_faq_browser.py::test_skill_faq_card_padding_and_developer_occurrence_geometry`
-  (1440/390/320 px, both themes, card inset and 24 px source-occurrence
-  clearance) and
-  `tests/test_web.py::test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups`
-  (Skill/Equipment hidden-visible-hidden and original Unit links).
-  Outcome: pending.
-
-- [ ] VR-0139 (2026-11-07; ready-to-run): Validate standalone
-  /rules/restrictions, backward-compatible anchors, typed contextual links,
-  responsive theme/layout and controlled source failure.
-  Work: [Restrictions chart standalone page](TODO.md#implemented-foundations-and-remaining-scope);
-  revision: `877d308` chart, `3551d09` contextual visibility and this
-  test-design batch (pin final SHA before execution); risk: moderate.
-  Design: **VD-0113 completed**, Ruff and Pyright static checks green.
-  Existing dedicated-page and 3-width core navigation passed on
-  `877d308`, but **not the subsequently changed assertions**.
-  Deferred: `tests/test_game_mode_source_table.py::test_restrictions_chart_normal_chromium_at_three_widths`
-  (desktop/390/320, light/dark, Back/Forward, hash links, seven owner
-  contexts hidden by default and shown in Developer Mode, controlled 503),
-  plus `test_restrictions_reference_has_standalone_rules_page` and
-  source-publication integrity. Outcome: pending.
-
-- [ ] VR-0140 (2026-11-07; ready-to-run): Validate individual Deployed
-  object cards, full-width Orders & AROs sections, and single linked FAQ
-  `Sources:` lines with readable spacing and intact source discrepancies.
-  Work: [Reference card layout and FAQ citations](TODO.md#implemented-foundations-and-remaining-scope);
-  revision: this UI batch from `3551d09` (pin SHA before execution);
-  risk: moderate. Design: **VD-0114 completed**; Ruff and Pyright static
-  checks green, no implementation-time browser tests run.
-  Deferred: focused
-  `tests/test_verify_deployed_object_publication_browser.py::test_chromium_reviewed_attributes_delivery_navigation_and_missing_values`,
-  `tests/test_verify_orders_aros_browser.py::test_orders_aros_page_renders_and_filters_without_overflow`,
-  `tests/test_verify_scenario_faq_browser.py::test_faq_single_source_line_and_card_separation`,
-  `tests/test_verify_scenario_faq_browser.py::test_fireteam_faq_discloses_real_source_conflict_not_language_omission`,
-  and affected FAQ source/browser and movement cases, at 1440/390/320
-  in both themes where applicable. Check the JavaScript DOM harness and
-  unchanged FAQ temporal/source-selection API gates. Outcome: pending.
-
-- [ ] VR-0141 (2026-11-07; awaiting-design): Verify suppression
-  of redundant applicability text when a rules card already cites its
-  source, continued scope display for uncited cards, and 24 px FAQ
-  bottom margin before Unit-use disclosures.
-  Work: [Reference card layout and FAQ citations](TODO.md#implemented-foundations-and-remaining-scope);
-  revision: post-`25a2280` follow-up (pin final SHA); risk: low.
-  Design: **VD-0115**. Deferred: shared JS rules-card Node DOM
-  harness; focused rules-reference frontend assertion and 1440/390/320 px
-  light/dark FAQ separation test. No browser/Node tests executed in
-  implementation. Outcome: pending.
+No pending execution entries.
 
 The [V1S-083 disclosure and consumer batches](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
 passed on the recorded Linux/Windows states and close VR-0137. Hosted CI

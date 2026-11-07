@@ -94,10 +94,9 @@ def test_orders_aros_page_renders_and_filters_without_overflow(
             "(node) => Math.abs(node.getBoundingClientRect().width"
             " - node.parentElement.getBoundingClientRect().width) <= 2"
         )
-        intro_box = page.locator(".orders-aros-intro").bounding_box()
-        controls_box = page.locator(".orders-aros-controls").bounding_box()
-        assert intro_box and controls_box
-        assert intro_box["x"] >= controls_box["x"] + 16
+        assert page.locator(".orders-aros-intro").evaluate(
+            "(node) => parseFloat(getComputedStyle(node).paddingLeft) >= 16"
+        )
         for theme in ("light", "dark"):
             page.evaluate(
                 "(value) => document.documentElement.dataset.theme = value",
