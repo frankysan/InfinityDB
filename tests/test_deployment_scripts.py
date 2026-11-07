@@ -375,6 +375,14 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
         restrictions = {
             "available": False, "evaluationSupported": False, "items": [],
         }
+    profile_citations = (
+        [{"source_id": "n5-core-v5.3-pdf", "page": 183}]
+        if restrictions_version == 9 else []
+    )
+    rifle = {
+        "profile_citations_available": restrictions_version == 9,
+        "profiles": [{"profile_citations": profile_citations}],
+    }
     payloads = {
         "/api/restrictions": restrictions,
         "/api/armies": {
@@ -388,6 +396,7 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
             "items": [{} for _ in range(17)],
             "unresolved_deliveries": [{}],
         },
+        "/api/weapons/rifle": rifle,
         "/api/version": {"version": "0.10.0", "snapshot_revision": "fixture"},
     }
 
@@ -404,11 +413,28 @@ def test_container_smoke_validates_canonical_notes_in_both_release_states(
     script = _read("scripts/verify-container-image.sh")
     runtime_probe = script.split('docker exec "$container" python -c \'\n', 1)[1]
     runtime_probe = runtime_probe.split("\n'", 1)[0]
+    code = compile(runtime_probe, "verify-container-image.sh", "exec")
     if matching_content:
-        exec(compile(runtime_probe, "verify-container-image.sh", "exec"), {})
+        exec(code, {})
+        rifle["profile_citations_available"] = restrictions_version != 9
+        with pytest.raises(SystemExit, match="wrong Weapon Chart publication status"):
+            exec(code, {})
+        rifle["profile_citations_available"] = restrictions_version == 9
+        if restrictions_version == 9:
+            for citation in (
+                {"source_id": "n5-core-v5.3-pdf", "page": 184},
+                {"source_id": "incorrect-source", "page": 183},
+            ):
+                profile_citations[:] = [citation]
+                with pytest.raises(SystemExit, match="lost its reviewed Weapon Chart citation"):
+                    exec(code, {})
+        else:
+            profile_citations.append({"source_id": "n5-core-v5.3-pdf", "page": 183})
+            with pytest.raises(SystemExit, match="incorrectly retained a v9 citation"):
+                exec(code, {})
     else:
         with pytest.raises(SystemExit, match="canonical changelog"):
-            exec(compile(runtime_probe, "verify-container-image.sh", "exec"), {})
+            exec(code, {})
 
 
 def test_installed_wheel_smoke_runs_database_health_check() -> None:
