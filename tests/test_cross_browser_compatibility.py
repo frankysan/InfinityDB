@@ -34,6 +34,9 @@ pytestmark = pytest.mark.skipif(
 
 class _ThreadedServer(ThreadingMixIn, WSGIServer):
     daemon_threads = True
+    # Catalog navigation starts several concurrent API requests. The stock
+    # WSGIServer backlog of five can reject a connection on Windows/Edge.
+    request_queue_size = 32
 
 
 class _QuietHandler(WSGIRequestHandler):
