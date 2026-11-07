@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Rules cards explain unresolved Army qualifiers, FAQ question-scope differences
+  and Engineer's bilingual contact discrepancy without inventing extra effects.
 - Reviewed Weapon profiles without separate rules cards now link to their
   corresponding N5.3 Weapon Chart pages, including individual modes.
 - Pheroware Tactics and PT: Endgame now cite the correct N5.3 Weapon Chart page.

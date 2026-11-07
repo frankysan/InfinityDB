@@ -116,6 +116,8 @@ its application metrics.
   source-declared faction membership.
 - Displays curated rules-reference information where available, including
   summaries, classifications, special weapon data, and source citations.
+  Normal rules cards disclose known source disagreements and unresolved Army
+  qualifiers without assigning unverified effects.
   Equipment families distinguish reference-only variants from options in
   the current Army data and identify family-source citation scope. Reviewed
   Weapon profiles without a separate rules

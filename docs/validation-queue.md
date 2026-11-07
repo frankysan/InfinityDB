@@ -145,7 +145,20 @@ deferred test selectors/gates, and the final execution outcome.
 Retire it once required checks pass on the intended state and the outcome
 is recorded. Failed or incomplete verification remains open.
 
-No pending execution entries.
+- [ ] VR-0137 (2026-11-07; ready-to-run): Publish known-source uncertainty
+  notes on nine canonical reference owners through existing source-context cards.
+  Work: TODO.md V1S-083; revision: proposed disclosure publication; risk: medium.
+  Immediate: deterministic v9 staging passed; Restrictions, 490 other records
+  and Army values preserved. Three dependent publications changed only in pins.
+  Design: VD-0111 complete by static review, no tests run. Selectors:
+  `tests/test_verify_scenario_faq_browser.py::test_known_source_disclosures_in_release_api`
+  and `::test_known_source_disclosures_normal_browser` cover ten disclosures
+  on nine owners, all widths/themes, citations, keyboard catalog entry,
+  Developer Mode off, interpretation limits and errors/requests/overflow.
+  Deferred: those selectors; existing exact-owner
+  and negative-typing regressions for SRC-001/027/028/029/032/033; citation
+  minimum and affected publication checks. Due before V1S-083 acceptance.
+  Intended host: linux-dev; Windows fallback if worker is unavailable.
 
 The five-item November 4 drain was verified at
 `1d0d5c196b87983737981b8b8244321b552527a4`; see the linked testing
@@ -164,8 +177,8 @@ passed on pinned Windows revisions. Hosted CI and final release gates retain sep
 
 ## Next unused IDs
 
-- Design: `VD-0111`; active obligations are listed above.
-- Execution: `VR-0137`; active obligations are listed above.
+- Design: `VD-0112`; active obligations are listed above.
+- Execution: `VR-0138`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

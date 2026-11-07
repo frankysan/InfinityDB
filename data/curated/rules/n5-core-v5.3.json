@@ -3420,18 +3420,33 @@
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 182,
                     "section": "Posicionable"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 1,
+                    "section": "Fired Deployable vertical placement"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-es-pdf",
+                    "page": 2,
+                    "section": "Deployable placement question scope"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-11-06"
+                "reviewedOn": "2026-11-07"
             },
             "relations": [
                 {
                     "type": "enables-use-of",
                     "recordId": "skill:place-deployable"
                 }
-            ]
+            ],
+            "facts": {
+                "sourceNotes": [
+                    "**FAQ question scope (SRC-026):** English FAQ v0.1 p. 1 asks about firing a Deployable onto a vertical surface; Spanish v0.1 p. 2 asks about placing Deployables. Both answers reject that placement. This reference retains the selected English firing context without treating the broader Spanish question as a new general placement rule or a contradictory answer."
+                ]
+            }
         },
         {
             "id": "trait:direct-template",
@@ -10604,7 +10619,8 @@
             },
             "facts": {
                 "sourceNotes": [
-                    "**Target allegiance review (REA-038):** The English N5.3 p. 90 and both captured English/Spanish Wiki Skill requirements omit a general Allied-only gate for direct use. That absence does not itself verify a blanket permission to treat enemy, Neutral, Hostile or scenario targets. Enemy contact normally brings [[state:engaged|Engaged State]] if neither Trooper is Immobilized or Null; contact with a [[state:unconscious|Unconscious]] or Immobilized enemy does not necessarily trigger that condition, but legality of non-Allied treatment still depends on applicable target/scenario rules. No scoped current N5 ruling has established universal eligibility."
+                    "**Target allegiance review (REA-038):** The English N5.3 p. 90 and both captured English/Spanish Wiki Skill requirements omit a general Allied-only gate for direct use. That absence does not itself verify a blanket permission to treat enemy, Neutral, Hostile or scenario targets. Enemy contact normally brings [[state:engaged|Engaged State]] if neither Trooper is Immobilized or Null; contact with a [[state:unconscious|Unconscious]] or Immobilized enemy does not necessarily trigger that condition, but legality of non-Allied treatment still depends on applicable target/scenario rules. No scoped current N5 ruling has established universal eligibility.",
+                    "**Unresolved Army reroll notation (SRC-029):** Some imported options list ReRoll -3, while the current N5.3 Skill defines ReRoll WIP=X. The signed -3 does not establish a replacement [[attribute:wip|WIP]] value or the scope of a MOD. This reference retains the literal qualifier without converting it into a fixed WIP, a general WIP MOD or an additional reroll."
                 ],
                 "category": "special-skill",
                 "typeIds": [
@@ -10692,7 +10708,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-09"
+                "reviewedOn": "2026-11-07"
             },
             "relations": [
                 {
@@ -10728,7 +10744,9 @@
             },
             "facts": {
                 "sourceNotes": [
-                    "**Target allegiance review (REA-038):** The English N5.3 p. 91 and both captured English/Spanish Wiki Skill requirements omit a general Allied-only gate for direct use. That absence does not itself verify a blanket permission to treat enemy, Neutral, Hostile or scenario targets. Enemy contact normally brings [[state:engaged|Engaged State]] if neither Trooper is Immobilized or Null; contact with a [[state:unconscious|Unconscious]] or Immobilized enemy does not necessarily trigger that condition, but legality of non-Allied treatment still depends on applicable target/scenario rules. No scoped current N5 ruling has established universal eligibility."
+                    "**Target allegiance review (REA-038):** The English N5.3 p. 91 and both captured English/Spanish Wiki Skill requirements omit a general Allied-only gate for direct use. That absence does not itself verify a blanket permission to treat enemy, Neutral, Hostile or scenario targets. Enemy contact normally brings [[state:engaged|Engaged State]] if neither Trooper is Immobilized or Null; contact with a [[state:unconscious|Unconscious]] or Immobilized enemy does not necessarily trigger that condition, but legality of non-Allied treatment still depends on applicable target/scenario rules. No scoped current N5 ruling has established universal eligibility.",
+                    "**Unresolved Army reroll notation (SRC-029):** Some imported profiles list ReRoll -3, while the current N5.3 Skill defines ReRoll WIP=X. The signed -3 does not establish a replacement [[attribute:wip|WIP]] value or the scope of a MOD. This reference retains the literal qualifier without converting it into a fixed WIP, a general WIP MOD or an additional reroll.",
+                    "**Bilingual contact requirement (SRC-034):** English N5.3 p. 91 requires Silhouette contact; Spanish N5.3 p. 98 omits that requirement. The captured English and Spanish Wiki definitions include contact. This reference keeps the English-backed requirement; the Spanish omission remains unresolved and does not establish permission for remote use."
                 ],
                 "category": "special-skill",
                 "typeIds": [
@@ -10800,11 +10818,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 15,
                     "section": "Simultaneous Effects: Engineer and Riotstopper"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 98,
+                    "section": "Ingeniero — omitted contact requirement (SRC-034)"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-09"
+                "reviewedOn": "2026-11-07"
             },
             "relations": [
                 {
@@ -12131,6 +12154,9 @@
                     "**Several Troopers, Active Turn:** when at least two Troopers are in Silhouette contact with the target and one is activated, select one Trooper or [[term:peripheral|Peripheral]] activated by the Order to make the [[skill:cc-attack|CC Attack]]. It gains +1 Burst for each ally or [[term:peripheral|Peripheral]] in contact with that target who is neither in [[term:null-state|a Null State]] nor Immobilized.",
                     "**Several Troopers, Reactive Turn:** select only one Trooper or [[term:peripheral|Peripheral]] in Silhouette contact with the target to make the [[skill:cc-attack|CC Attack]] [[trait:aro|ARO]]. It gains +1 Burst for each ally or [[term:peripheral|Peripheral]] in contact with that target who is neither in [[term:null-state|a Null State]] nor Immobilized and has not declared [[skill:dodge|Dodge]], [[skill:idle|Idle]], or [[skill:reset|Reset]]. These situational bonuses do not change the weapon's stored profile.",
                     "**Contact with an ally in close combat:** a Trooper touching an allied Model in [[state:engaged|Engaged State]] may declare only [[skill:cc-attack|CC Attack]], [[skill:dodge|Dodge]], or another Skill permitted in close combat. This contact does not permit [[skill:doctor|Doctor]] or [[skill:engineer|Engineer]] on that ally while this condition applies."
+                ],
+                "sourceNotes": [
+                    "**Unresolved Army Damage notation (SRC-032):** The Reinforcement profiles for Shona Carano and Chaksa Auxiliars retain [[skill:cc-attack|CC Attack]] (+1 Dam). The current N5.3 sources do not establish how that legacy qualifier maps to Possibility of Survival (PS) or Wounds. No increase or decrease to PS, extra Wound or global attack modifier is inferred."
                 ]
             },
             "labelIds": [
@@ -12171,7 +12197,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-11-04"
+                "reviewedOn": "2026-11-07"
             },
             "variantSemantics": {
                 "inheritance": "family"
@@ -13215,6 +13241,9 @@
                     "**[[trait:deployable|Deployables]] still trigger:** A [[skill:stealth|Stealth]] Trooper declares [[skill:move|Move]] outside enemy LoF. That declaration does not grant a nearby enemy Trooper without [[skill:sixth-sense|Sixth Sense]] or [[skill:combat-instinct|Combat Instinct]] a [[trait:aro|ARO]] merely for being in [[trait:zone-of-control-zc|Zone of Control]]. However, an enemy Mine whose Trigger Area covers the movement still checks its own triggering rules; Stealth does **not** switch off [[trait:deployable|Deployable]] Weapons or Equipment. Valid Mine triggering still requires its own Template, target, and allied-safety conditions.",
                     "**Mixed-activation example:** A [[skill:peripheral|Peripheral]] and its Controller activate in one Order. The Controller uses [[skill:stealth|Stealth]] while declaring [[skill:move|Move]] outside enemy LoF; the other activated Trooper independently generates a [[trait:aro|ARO]]. The enemy may choose the Stealth user as its target, but that reaction becomes [[skill:idle|Idle]] if the Stealth user only declares Skills that do not grant it a reaction. If the Stealth user declares another Skill that does grant a [[trait:aro|ARO]], the enemy may react normally. A [[trait:aro|ARO]] generated by a different active Trooper is not by itself an exception to Stealth.",
                     "**Stealth in Marker form:** A Trooper using [[skill:stealth|Stealth]] while represented by a Marker must announce that it is using the optional Automatic Skill. Such effects that alter Trooper activation or restrict reactions are declared when used in Marker form; the Marker does not silently gain an unannounced Stealth benefit."
+                ],
+                "sourceNotes": [
+                    "**FAQ question scope (SRC-025):** The selected English FAQ v0.1 p. 2 asks about multiple activations generally; Spanish v0.1 p. 2 specifies a user outside the reactive Trooper's [[trait:zone-of-control-zc|Zone of Control]] or Hacking Area. Both answers make the [[trait:aro|ARO]] [[skill:idle|Idle]] if the user declares no ARO-enabling Skill. The different question contexts do not establish a contradictory answer or new permission inside those areas."
                 ]
             },
             "armyLinks": [
@@ -13251,7 +13280,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-11-07"
             },
             "relations": [
                 {
@@ -17408,6 +17437,9 @@
             "facts": {
                 "effects": [
                     "Allows the use of [[hacking-program:carbonite]], [[hacking-program:cybermask]], [[hacking-program:oblivion]], [[hacking-program:spotlight]], [[hacking-program:total-control]], and [[hacking-program:white-noise]] Hacking Programs."
+                ],
+                "sourceNotes": [
+                    "**Unresolved Army Upgrade scope (SRC-001):** The Charontid options list UPGRADE: SR-1 without naming a Program. The current source does not establish which Programs this qualifier modifies. The literal Army notation is retained; no all-Programs Saving Roll reduction is inferred."
                 ]
             },
             "armyLinks": [
@@ -17429,7 +17461,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-11-07"
             },
             "variantSemantics": {
                 "inheritance": "family",
@@ -18389,6 +18421,9 @@
                 "restrictions": [
                     "Infiltration cannot be used to deploy inside the enemy Deployment Zone.",
                     "After a failed Infiltration Roll, the attempted deployment cannot remain in Marker or [[state:hidden-deployment]]."
+                ],
+                "sourceNotes": [
+                    "**Unresolved bare Army reroll (SRC-033):** Some Bandit and Dasyus profiles list ReRoll without the PH=X parameter of the N5.3 [[skill:infiltration|Infiltration]] reroll. The generic reroll wording does not establish which interpretation governs these occurrences. No replacement [[attribute:ph|PH]] value or precedence is inferred; the separately reviewed fixed-PH variants retain their stated values."
                 ]
             },
             "armyLinks": [
@@ -18410,7 +18445,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-11-07"
             },
             "variantSemantics": {
                 "inheritance": "family",
@@ -20063,6 +20098,9 @@
                 ],
                 "clarifications": [
                     "For the shared [[rule:guts-roll|Guts Roll]], this Skill's automatic pass is obligatory; the optional [[attribute:wip|WIP]] Roll allows applying the failed-Guts movement on success."
+                ],
+                "sourceNotes": [
+                    "**Unresolved Army qualifier (SRC-028):** The Confessor Heavy Spec-Ops profile lists [[skill:religious-troop|Religious Troop]] (Total) beside unqualified [[skill:terrain|Terrain]]. Other source profiles suggest that Total may have been attached to the wrong entry, but no official correction is established. The literal assignments are retained without granting an additional effect or transferring the qualifier to [[skill:terrain|Terrain]]."
                 ]
             },
             "labelIds": [
@@ -20082,7 +20120,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-11-07"
             },
             "variantSemantics": {
                 "inheritance": "family"
@@ -22735,6 +22773,9 @@
                 ],
                 "clarifications": [
                     "These MODs apply to the shared [[rule:guts-roll|Guts Roll]]; modifiers from multiple Journalists are not cumulative."
+                ],
+                "sourceNotes": [
+                    "**Unresolved Army qualifier (SRC-027):** One Tohaa Diplomatic Delegate option lists [[skill:journalist|Journalist]] (+3). The current N5.3 definition does not establish an additional profile-specific effect for that qualifier. The ordinary Guts and campaign bonuses remain those stated above; the extra does not establish another bonus or an objective-roll modifier."
                 ]
             },
             "labelIds": [
@@ -22754,7 +22795,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-11-07"
             },
             "variantSemantics": {
                 "inheritance": "family"

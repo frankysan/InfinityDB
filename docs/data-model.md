@@ -2780,11 +2780,15 @@ v8 snapshot as a rollback source.
 The guarded staging workflow preserved the **v9/compatibility-11** schema,
 all 14 reviewed Restrictions and all 17 deployed objects. The rules
 database SHA-256 is
-`0fcf537fcca2b148541d9ad136003d939f0c0ecbe1e79136fca1bb6fd622714b`;
+`90d600a5b7b0425ee590ef90891481433e179d4e96f4a7b1dbf26edfde672ca9`;
 its matching deployed-object publication SHA-256 is
-`ac0b7997dc46523294aa23c24e1d8b121dea432af6e86316379b7ff9cf1208b9`,
+`7d0a9facf49ed0734b6eff794ebe7f4f5b25837cd1265a86a9b4d2d5dcac7c9e`,
 and the exact-variant usage publication SHA-256 is
-`d14dbb8dbf337d0a14c00646cf82a42f0af453f01b370c45ddf6bd64d6342c41`.
+`f78a602c1c197105812c566c283eb81a03541c929cacdb86ead5601deb3856cd`.
+The matched Weapon-profile citation publication SHA-256 is
+`ad3123832c5d777d91739ed6897182f6191ba1985f094f72114d49969ad86db1`.
+The V1S-083 source-context publication changed nine reference owners,
+preserving the other 490 records and all dependent payloads apart from pins.
 The original v8 pair remains available in ignored local recovery storage.
 These hashes identify development artifacts; local promotion does not
 establish hosted or deployed acceptance.
@@ -3101,6 +3105,17 @@ original publication identity/version/date/page, exact applicability by
 rules revision plus effective date and optional ITS season revision/scenarios,
 selected official citation with editorial selection reason, explicit
 conflicting citations and predecessor `supersedes` IDs.
+
+Known differences in FAQ question scope may also be explained on the owning
+base reference through `facts.sourceNotes`, without changing the selected FAQ
+answer or classifying consistent answers as conflicting. The Stealth and
+Deployable references retain their respective English-selected contexts and
+describe the narrower or broader Spanish question separately. The same source
+context mechanism discloses unresolved Army qualifiers on Hacking Device Plus,
+Journalist, Religious Troop, Doctor/Engineer, CC Attack and Infiltration.
+These notes do not create typed effects or change source-owned occurrence
+parameters. Engineer's bilingual contact note retains the English-backed
+requirement while identifying the omission on Spanish N5.3 p. 98.
 
 **Source precedence is applicability-first, not newest-first.** Core
 definitions remain authoritative baseline material. Only a ruling explicitly

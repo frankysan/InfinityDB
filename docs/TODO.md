@@ -193,6 +193,9 @@ records the evidence. Final release acceptance remains open.
 
 - [ ] **V1S-083 (M, gate):** Verify disclosure of **already known** material source conflicts
   and empty/unavailable/not-applicable semantics.
+  The known Army qualifier, FAQ question-scope and Engineer contact notes are
+  published; VR-0137 must verify their source/API/browser path and the existing
+  conflict/empty-value regressions before this gate can close.
 - [ ] **V1S-084 (M, gate):** Rebuild and verify the release-matched
   Army/rules pair, FAQ parity, deployed objects and processed symbols.
 - [ ] **V1S-085 (M, gate):** Run source occupancy, archive,

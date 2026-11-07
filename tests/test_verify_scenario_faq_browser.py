@@ -23,6 +23,99 @@ from tools.verify_unit_skill_presentation_browser import (
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "http://infinitydb-browser.test"
+
+KNOWN_DISCLOSURES = (
+    ("equipment", "hacking-device-plus", "SRC-001", ("SR-1", "no all-Programs")),
+    ("skill", "journalist", "SRC-027", ("(+3)", "objective-roll modifier")),
+    ("skill", "religious-troop", "SRC-028", ("(Total)", "no official correction")),
+    ("skill", "doctor", "SRC-029", ("ReRoll -3", "without converting")),
+    ("skill", "engineer", "SRC-029", ("ReRoll -3", "without converting")),
+    ("skill", "engineer", "SRC-034", ("p. 91", "p. 98", "omits", "remote use")),
+    ("skill", "cc-attack", "SRC-032", ("(+1 Dam)", "No increase or decrease to PS")),
+    ("skill", "infiltration", "SRC-033", ("PH=X", "No replacement", "precedence")),
+    ("skill", "stealth", "SRC-025", ("outside", "not establish", "new permission")),
+    ("trait", "deployable", "SRC-026", ("firing", "placing", "contradictory answer")),
+)
+
+
+@pytest.mark.parametrize(("kind", "slug", "issue", "limits"), KNOWN_DISCLOSURES)
+def test_known_source_disclosures_in_release_api(
+    release_scenario_app: Callable[..., Any],
+    kind: str, slug: str, issue: str, limits: tuple[str, ...],
+) -> None:
+    """Keep source uncertainty inspectable on the shipped reference, with citations."""
+    domain = "equipment" if kind == "equipment" else f"{kind}s"
+    status, _, body = wsgi_response(release_scenario_app, f"/api/{domain}/{slug}")
+    assert status == 200
+    rule = next(r for r in json.loads(body)["rules"] if r["id"] == f"{kind}:{slug}")
+    note = next(note for note in rule["facts"]["sourceNotes"] if issue in note)
+    assert all(limit in note for limit in limits), note
+    assert rule["citations"]
+    if issue == "SRC-034":
+        assert "The user must be in Silhouette contact with the target." in (
+            rule["facts"]["requirements"]
+        )
+        assert any(c["source_id"] == "n5-core-v5.3-es-pdf" and c["page"] == 98
+                   for c in rule["citations"])
+    if issue in {"SRC-025", "SRC-026"}:
+        assert {"n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf"} <= {
+            c["source_id"] for c in rule["citations"]
+        }
+
+
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("theme", ("light", "dark"))
+@pytest.mark.parametrize(("kind", "slug", "issue", "limits"), KNOWN_DISCLOSURES)
+def test_known_source_disclosures_normal_browser(
+    release_scenario_app: Callable[..., Any], chrome: Any,
+    width: int, theme: str, kind: str, slug: str, issue: str,
+    limits: tuple[str, ...],
+) -> None:
+    """Disclose uncertainty through keyboard catalog navigation in normal mode."""
+    domain = "equipment" if kind == "equipment" else f"{kind}s"
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(
+        f"sessionStorage.setItem('infinity-db-theme', '{theme}');"
+        "sessionStorage.setItem('infinity-db-developer-mode', 'false');"
+    )
+    errors: list[str] = []
+    failures: list[str] = []
+    responses: list[tuple[str, int]] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("requestfailed", lambda request: failures.append(request.url))
+    page.on("response", lambda response: responses.append((response.url, response.status)))
+    try:
+        response = page.goto(f"{ORIGIN}/{domain}", wait_until="domcontentloaded")
+        assert response is not None and response.status == 200
+        link = page.locator(f'#catalog-list a[href="/{domain}/{slug}"]')
+        link.wait_for(state="visible", timeout=30000)
+        link.focus()
+        assert link.evaluate("node => document.activeElement === node")
+        link.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/{domain}/{slug}", timeout=30000)
+        card = page.locator(f"#rule-{kind}-{slug}")
+        card.wait_for(state="visible", timeout=30000)
+        note = card.locator(".rules-source-note").filter(has_text=issue)
+        assert note.count() == 1
+        assert note.is_visible()
+        content = note.inner_text()
+        assert "Source context:" in content
+        assert all(limit in content for limit in limits), content
+        assert "[[" not in content
+        assert card.locator(".rules-source-citations").inner_text().strip()
+        assert any(url.endswith(f"/api/{domain}/{slug}") and status == 200
+                   for url, status in responses), responses
+        assert not any(status >= 400 for _, status in responses), responses
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        ), (kind, slug, width, theme)
+        assert not errors, errors
+        assert not failures, failures
+    finally:
+        page.close()
+
+
 @pytest.fixture(scope="module")
 def scenario_app(tmp_path_factory: pytest.TempPathFactory) -> Callable[..., Any]:
     """Use freshly exported curated rules; the checked-in rules DB may lag."""
