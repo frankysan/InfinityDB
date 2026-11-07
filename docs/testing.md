@@ -510,6 +510,35 @@ revision. The full-suite V1S-090, exact-SHA hosted Source matrix and
 frozen release-candidate gates remain separate; the earlier failed
 full suite at `94103ef4` is not claimed green.
 
+### Final maintained-reference and fragment browser acceptance (V1S-086)
+
+**Project domains:** Web backend, Web frontend, Project infrastructure
+
+On the unchanged frozen source/database pair at `3c8b16018f914fc1ee69fe769216a7c9e8eb47c2`,
+`tools.run_checks --stage test --assets required --test-workers 2` passed
+**77/77 tests with zero skips** across `test_public_relation_destinations`,
+`test_application_rule_references` and `test_verify_rule_fragment_browser`.
+All **808/808** processed SVGs were required. Published cross-domain API/page
+destinations, Glossary references, Weapon local fragments and cited context
+were covered without a new source-wide inventory. The previously accepted
+[V1S-082 routing census](v1.0-source-coverage-audit.md#v1s-082-maintained-reference-routing-census-2026-11-07)
+and [V1S-083 disclosure regressions](#known-source-disclosure-acceptance-v1s-083--vr-0137)
+remain applicable to the unchanged published data and browser consumers.
+
+The Weapon fragment verifier gained a `--self-host` mode for the tracked
+Army/rules pair, removing the need for a separately running development server.
+Its new ephemeral-server regression and existing unit tests passed **12/12**.
+A separate real Chromium invocation of
+`tools.verify_rule_fragment_browser --self-host` passed **69/69** checks at
+1440/390/320 px in 248 seconds, following soft-navigation, source-backed
+rule cards, Glossary-to-Weapon fragments and fresh deep links. The full
+JSON report is under ignored `local/audits/v1s086-rule-fragments.json`.
+Ruff, Pyright (0 errors/warnings) and the complete docs stage passed.
+The later output-only progress indicator does not change browser assertions.
+No source, database, publication or gameplay behavior was changed.
+V1S-087–095, deferred manual gates, cumulative V1S-090, and exact-SHA hosted
+CI remain independent. There are no open VD/VR entries.
+
 ### Frozen-pair source gates (V1S-085)
 
 **Project domains:** Data processing, Project infrastructure
@@ -4065,12 +4094,15 @@ Chromium fragment navigation at 1.0 acceptance.
 
 ### Weapon fragment Chromium verifier
 
-With the development app running, execute this optional full-width and
-mobile-width browser check from the repository root:
+For the frozen local candidate, serve the tracked database pair in an ephemeral
+WSGI app and run the full-width and mobile-width Chromium check:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_rule_fragment_browser --base-url http://127.0.0.1:8000 --output local/audits/weapon-rule-fragments-browser.json
+.\.venv\Scripts\python.exe -m tools.verify_rule_fragment_browser --self-host --output local/audits/weapon-rule-fragments-browser.json
 ```
+
+For an existing development or deployed server, use `--base-url URL`
+without `--self-host`. The self-hosted mode shuts down its server after the run.
 
 The verifier discovers candidate Weapon pages with local rule references
 from the *served* Weapon catalog/details APIs and discovers Weapon rule

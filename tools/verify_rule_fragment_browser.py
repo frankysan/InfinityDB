@@ -11,8 +11,13 @@ import argparse
 import importlib
 import json
 from pathlib import Path
+from socketserver import ThreadingMixIn
+from threading import Thread
 from typing import Any
 from urllib.parse import quote, urlsplit
+from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
+
+from infinity_db.web import create_app
 
 WIDTHS = (1440, 390, 320)
 
@@ -312,6 +317,8 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                         except Exception as exc:
                             _record_failure(entry, page, exc, errors, network_errors)
                         results.append(entry)
+                        if len(results) % 5 == 0:
+                            print(f"Weapon fragments: {len(results)} checked", flush=True)
 
                     for href in links:
                         entry = {"width": width, "source": "glossary", "href": href}
@@ -334,6 +341,8 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
                         except Exception as exc:
                             _record_failure(entry, page, exc, errors, network_errors)
                         results.append(entry)
+                        if len(results) % 5 == 0:
+                            print(f"Weapon fragments: {len(results)} checked", flush=True)
                 finally:
                     context.close()
         finally:
@@ -349,13 +358,48 @@ def verify(base_url: str, *, headed: bool = False) -> dict[str, Any]:
     }
 
 
+def verify_local(*, headed: bool = False) -> dict[str, Any]:
+    """Verify the pinned published databases using an ephemeral local app."""
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+
+    class ThreadedServer(ThreadingMixIn, WSGIServer):
+        daemon_threads = True
+
+    class QuietHandler(WSGIRequestHandler):
+        def log_message(self, format: str, *args: object) -> None:
+            pass
+
+    server = make_server(
+        "127.0.0.1", 0, app,
+        server_class=ThreadedServer, handler_class=QuietHandler,
+    )
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        return verify(f"http://127.0.0.1:{server.server_port}", headed=headed)
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--headed", action="store_true")
+    parser.add_argument("--self-host", action="store_true")
     args = parser.parse_args(argv)
-    report = verify(args.base_url, headed=args.headed)
+    if args.self_host and args.base_url != "http://127.0.0.1:8000":
+        parser.error("--self-host cannot be combined with --base-url")
+    report = (
+        verify_local(headed=args.headed) if args.self_host
+        else verify(args.base_url, headed=args.headed)
+    )
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(

@@ -5,6 +5,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock, patch
+from urllib.request import urlopen
 
 import pytest
 
@@ -15,8 +16,22 @@ from tools.verify_rule_fragment_browser import (
     _record_failed_request,
     glossary_links,
     local_fragments,
+    verify_local,
     weapon_candidates,
 )
+
+
+def test_self_host_serves_the_tracked_candidate_on_an_ephemeral_port() -> None:
+    def probe(base: str, *, headed: bool) -> dict[str, Any]:
+        assert not headed
+        assert base.startswith("http://127.0.0.1:")
+        for path in ("/weapons", "/api/glossary"):
+            with urlopen(base + path, timeout=10) as response:
+                assert response.status == 200
+        return {"total": 1, "passed": 1}
+
+    with patch("tools.verify_rule_fragment_browser.verify", side_effect=probe):
+        assert verify_local() == {"total": 1, "passed": 1}
 
 
 class _Response:

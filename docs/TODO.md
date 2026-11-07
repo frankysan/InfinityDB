@@ -202,9 +202,10 @@ The [frozen-pair source gates](v1.0-source-coverage-audit.md#v1s-085-frozen-pair
 are accepted, with the Linux physical-byte difference explicitly distinguished
 from logical equality. Final browser, cumulative and hosted gates remain open.
 
-- [ ] **V1S-086 (M, gate):** Run final-candidate rule-fragment
-  and **maintained-reference-to-browser** checks; identify broken routes
-  or missing citations for existing in-scope rules, without a source-wide scan.
+The [V1S-086 maintained-reference and fragment browser acceptance](v1.0-source-coverage-audit.md#v1s-086-final-maintained-reference-and-fragment-browser-acceptance-2026-11-07)
+passed on the frozen pair. Subsequent final browser, cumulative and hosted
+checks retain their separately numbered gates.
+
 - [ ] **V1S-087 (L, gate):** Run the 81-page local Unit matrix
   and exact-version hosted representative checks.
 - [ ] **V1S-088 (M, gate):** Repeat all 24 core-scenario
@@ -239,8 +240,8 @@ maintained references and known material defects; exhaustive source-first
 inventory is optional research, not a 1.0 prerequisite. The source/rebuild
 gates are accepted on the pinned pair; final browser and release gates remain.
 
-- [ ] Run the final maintained-reference and browser checks under
-  V1S-086–088. Correct confirmed material errors or
+- [ ] Run the remaining final Unit/scenario browser checks under
+  V1S-087–088. Correct confirmed material errors or
   missing citations without treating source conflicts, unreviewed clauses
   or deliberate exclusions as defects. Re-run the
   [source-evidence tools](testing.md#10-source-evidence-baseline) only if an
@@ -277,7 +278,8 @@ of already-reviewed catalogs.
   normal-browser access, including known material conditional information
   presented to players. The bounded development review is
   [accepted](v1.0-source-coverage-audit.md#v1s-082-bounded-citation-and-route-acceptance-2026-11-07);
-  release-pair rebuilding is accepted; remaining checks are V1S-086/088. The frozen
+  release-pair rebuilding and maintained-reference browser checks are accepted;
+  remaining scenario/FAQ checks are V1S-088. The frozen
   [367-record clause inventory](rules-explanation-audit-1.0-inventory.md#audit-completion-gate)
   is historical research, not an exhaustive 1.0 sign-off requirement.
   - [ ] Correct **known inaccurate or uncited player-facing** declaration,
@@ -373,7 +375,7 @@ of already-reviewed catalogs.
 **Project domains:** Data processing, Web backend, Web frontend,
 Project infrastructure, Deployment
 
-- [ ] Complete **V1S-086–095** and the earlier deferred browser gates
+- [ ] Complete **V1S-087–095** and the earlier deferred browser gates
   against the exact frozen source,
   database, generated-publication, static-asset and release-candidate
   revisions. This includes one current source citation per in-scope rule
