@@ -10,6 +10,7 @@ import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.j
 import {
   gameplayVariantRules,
   levelEffectsSection,
+  rulesCitationList,
   rulesCitationNode,
   rulesReferenceSection,
 } from "./rules-reference.js";
@@ -358,7 +359,7 @@ function specialWeaponProfile(profile) {
   return card;
 }
 
-function weaponVariants(variants) {
+function weaponVariants(variants, profileCitationsAvailable = null) {
   const section = document.createElement("section");
   section.className = "weapon-variants";
   const rangeBands = canonicalWeaponRangeBands;
@@ -411,6 +412,11 @@ function weaponVariants(variants) {
       statTable.append(statBody);
       card.append(tableViewport(statTable));
       if (catalog === "weapons") {
+        if (profile.profile_citations?.length || profileCitationsAvailable === false) {
+          card.append(rulesCitationList(profile.profile_citations || [], {
+            label: "Weapon Chart: ",
+          }));
+        }
         const properties = weaponPropertyLinks(profile);
         if (properties) card.append(properties);
         const sharedEffects = weaponAmmunitionEffects(profile);
@@ -637,7 +643,7 @@ function render(item) {
   });
   const levelEffects = levelEffectsSection(item.rules);
   const profiles = catalog === "weapons" && item.weapon_variants?.length
-    ? weaponVariants(item.weapon_variants) : null;
+    ? weaponVariants(item.weapon_variants, item.profile_citations_available) : null;
   // Named Mines need their specific Weapon Chart profile before the long
   // shared family reference. Chest Mine does not use that family rule.
   const mineFamily = catalog === "weapons"

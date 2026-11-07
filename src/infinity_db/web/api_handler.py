@@ -61,6 +61,10 @@ from infinity_db.unit_slugs import (
     enrich_nested_unit_slugs,
     enrich_unit_items,
 )
+from infinity_db.weapon_profile_publication import (
+    ProfileCitations,
+    attach_weapon_profile_citations,
+)
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import (
     AMMUNITION_API_PATH,
@@ -469,6 +473,7 @@ class ApiHandler:
         deployed_objects: dict[str, Any] | None = None,
         variant_usage: dict[str, Any] | None = None,
         variant_usage_revision: str | None = None,
+        weapon_profile_citations: ProfileCitations | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
@@ -477,6 +482,7 @@ class ApiHandler:
         self.deployed_objects = deployed_objects
         self.variant_usage = variant_usage
         self.variant_usage_revision = variant_usage_revision
+        self.weapon_profile_citations = weapon_profile_citations
         self._deployed_by_id = (
             {obj["id"]: obj for obj in deployed_objects["objects"]}
             if deployed_objects is not None else {}
@@ -950,6 +956,7 @@ class ApiHandler:
                         self.database, self.rules_database, payload,
                         local_rule_ids=local_rule_ids,
                     )
+                    attach_weapon_profile_citations(payload, self.weapon_profile_citations)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

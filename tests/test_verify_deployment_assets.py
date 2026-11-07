@@ -111,6 +111,11 @@ def test_deployment_assets_require_complete_tracked_publication(
     # This test isolates symbol coverage; variant publication has separate
     # required-path and missing/stale-source regressions below.
     monkeypatch.setattr(deployment_assets, "verify_variant_release_publication", lambda *_: None)
+    weapon_checks = []
+    monkeypatch.setattr(
+        deployment_assets, "verify_weapon_profile_release_publication",
+        lambda *paths: weapon_checks.append(paths),
+    )
     validation = verify_deployment_assets(
         static,
         database_path=tmp_path / "infinity.db",
@@ -120,6 +125,7 @@ def test_deployment_assets_require_complete_tracked_publication(
 
     assert validation.complete
     assert validation.present_count == validation.expected_count
+    assert weapon_checks == [(tmp_path / "infinity.db", tmp_path / "rules.db")]
 
 
 def test_deployment_assets_reject_missing_published_svg(
@@ -194,6 +200,28 @@ def test_deployment_accepts_release_paired_variant_publication(
     )
 
 
+def test_deployment_checks_weapon_profile_publication_against_reviewed_inputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = []
+
+    def check(army: Path, rules: Path, reviews: Path, publication: Path) -> None:
+        calls.append((army, rules, reviews, publication))
+        raise ValueError("reviewed publication is missing")
+
+    monkeypatch.setattr(deployment_assets, "check_publication", check)
+    with pytest.raises(ValueError, match="reviewed publication is missing"):
+        deployment_assets.verify_weapon_profile_release_publication(
+            tmp_path / "infinity.db", tmp_path / "rules.db",
+        )
+    assert calls == [(
+        tmp_path / "infinity.db",
+        tmp_path / "rules.db",
+        deployment_assets.DEFAULT_REVIEWS,
+        tmp_path / "weapon-profile-sources.json",
+    )]
+
+
 def test_deployment_rejects_database_for_different_publication_snapshot(tmp_path: Path) -> None:
     smoke_database, _ = _build_fixture_database(tmp_path, "smoke")
     _, production_sha256 = _build_fixture_database(tmp_path, "production")
@@ -241,6 +269,9 @@ def test_svg_skip_still_checks_real_database_publication_binding(
     # tested variant-publication gate; it has no variant-usage source pair.
     monkeypatch.setattr(
         deployment_assets, "verify_variant_release_publication", lambda *_: None,
+    )
+    monkeypatch.setattr(
+        deployment_assets, "verify_weapon_profile_release_publication", lambda *_: None,
     )
     monkeypatch.setattr(deployment_assets, "validate_asset_set", lambda *_args, **_kwargs: (
         pytest.fail("SVG availability must not be checked in skip mode")

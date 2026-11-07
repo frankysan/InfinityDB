@@ -197,6 +197,17 @@ def test_source_review_acceptance_requires_explicit_matching_chart_and_links() -
         markdown_report(report)
     )
 
+    pinned = {1: {**accepted[1], "sourceSha256": chart["corePdfSha256"]}}
+    assert reconcile(
+        enrichment, chart, categories, "a" * 64,
+        shared_effect_coverage=coverage, reviewed_shared=pinned,
+    )["summary"]["reviewedSharedEffects"] == 1
+    with pytest.raises(WeaponGapTriageError, match="source conditions changed"):
+        reconcile(
+            enrichment, chart, categories, "a" * 64,
+            shared_effect_coverage=coverage,
+            reviewed_shared={1: {**accepted[1], "sourceSha256": "0" * 64}},
+        )
     with pytest.raises(WeaponGapTriageError, match="source conditions changed"):
         reconcile(
             enrichment, chart, categories, "a" * 64,

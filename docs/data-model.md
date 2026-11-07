@@ -103,6 +103,24 @@ condition or sentinel field is needed for the current profile model. Any future
 structured status must follow a source-reviewed distinction; display punctuation
 alone is not evidence for new semantics.
 
+For reviewed profile-only Weapons, the build materializes the corresponding
+Weapon Chart citations in `data/generated/weapon-profile-sources.json`. It
+pins both runtime databases, the reviewed decision file, the current primary
+PDF identity and its SHA-256, each Weapon's canonical identity and complete
+Army profile fingerprint, and every exact source ID/mode and chart page.
+The loader verifies the co-located database pair, current PDF metadata,
+profile fingerprints and complete mode sets without reading curation or raw
+sources. A present but mismatched publication fails startup; an absent or
+independently supplied mixed-pair publication exposes
+`profile_citations_available: false`. Each Weapon profile has a
+`profile_citations` list: an empty list means no reviewed profile-chart
+citation was attached, not that no shared rule has a source. The browser
+shows the chart citation or an explicit unavailable notice when the
+publication is missing. This is a locator for the corresponding chart
+entry, not a claim that Army and print values agree or an Ammunition rule.
+The publication bytes participate in the API snapshot revision so cache
+validators change when reviewed locators change.
+
 ### Deployed-object read-model and artifact-gated browser reference
 
 `infinity_db.deployed_object_reference.project_deployed_references` consumes
@@ -249,10 +267,13 @@ The Weapon source-review audit has a separate maintained decision file,
 `data/curated/weapon-shared-effect-reviews.json`, for individually verified
 Weapon profiles whose shared components and published Traits already suffice.
 Those approvals are pinned to full Army profile SHA-256 fingerprints and the
-official chart page. They are not inferred from the mere presence of an
-ammunition link, and a changed profile reopens review. Unreviewed and
+official PDF SHA-256 and chart page range. They are not inferred from the mere
+presence of an ammunition link, and a changed profile reopens review. Unreviewed and
 mode-specific Weapon behavior remains in the triage; explicitly reviewed
 shared-only identities do not require fabricated standalone rule records.
+The separate generated profile-citation publication materializes only
+the current profile-only decisions; later published family rules do not
+become synthetic profile rules.
 The first reviewed Ammunition effect pilot now lives on canonical `ammunition:*`
 records, not on Army mapping entries. The validated, non-executable
 `facts.ammunitionResolution` object can describe halving the applicable ARM/BTS

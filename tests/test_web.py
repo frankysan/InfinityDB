@@ -3759,6 +3759,27 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
     assert rebuilt_headers["etag"] != headers["etag"]
 
 
+def test_weapon_profile_publication_changes_snapshot_etag(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[1] / "data/generated"
+    for filename in ("infinity.db", "rules.db", "weapon-profile-sources.json"):
+        shutil.copyfile(root / filename, tmp_path / filename)
+    army, rules = tmp_path / "infinity.db", tmp_path / "rules.db"
+    first = create_app(army, rules_database_path=rules)
+    status, headers, body = request(first, "/api/weapons/rifle")
+    assert status == 200
+
+    artifact = tmp_path / "weapon-profile-sources.json"
+    document = json.loads(artifact.read_text(encoding="utf-8"))
+    artifact.write_text(json.dumps(document, indent=2), encoding="utf-8")
+    changed = create_app(army, rules_database_path=rules)
+    status, changed_headers, changed_body = request(
+        changed, "/api/weapons/rifle", request_headers={"If-None-Match": headers["etag"]},
+    )
+    assert status == 200
+    assert changed_body == body
+    assert changed_headers["etag"] != headers["etag"]
+
+
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
     status, unit_headers, unit_body = request(app, f"/static/units.js?v={STATIC_ASSET_VERSION}")
     assert status == 200

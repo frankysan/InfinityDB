@@ -13,3 +13,5 @@ data/generated/infinity.db binary
 data/generated/rules.db binary
 # Byte-exact derived publication, tied to the reviewed raw archive and runtime pair.
 data/generated/variant-usage.json binary
+# Byte-exact reviewed Weapon Chart publication paired to the release databases.
+data/generated/weapon-profile-sources.json binary

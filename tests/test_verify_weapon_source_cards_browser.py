@@ -169,6 +169,79 @@ def test_weapon_property_origins_reach_sources_in_normal_browser(
         page.close()
 
 
+@pytest.mark.parametrize("width", (1440, 390, 320))
+@pytest.mark.parametrize("color_scheme", ("light", "dark"))
+def test_reviewed_weapon_chart_sources_reach_exact_modes_in_browser(
+    origin: str, chrome: Any, width: int, color_scheme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900}, color_scheme=color_scheme)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.context.route(
+        "https://experience.corvusbelli.com/**",
+        lambda route: route.fulfill(status=200, content_type="text/plain", body="Source site"),
+    )
+    try:
+        page.goto(f"{origin}/weapons/uragan-mrl", wait_until="domcontentloaded")
+        cards = page.locator(".weapon-variant .weapon-profile")
+        cards.first.wait_for(state="visible", timeout=30000)
+        assert cards.count() == 2
+        assert {card.locator("h4").inner_text() for card in cards.all()} == {
+            "Blast Mode", "Hit Mode",
+        }
+        for card in cards.all():
+            citation = card.locator(".rules-source-citations").filter(has_text="Weapon Chart:")
+            assert citation.count() == 1
+            assert "N5 Core Rules v5.3, p. 188" in citation.inner_text()
+            link = citation.locator("a")
+            assert link.get_attribute("href") == (
+                "https://experience.corvusbelli.com/en/infinity/resources"
+            )
+            assert link.get_attribute("target") == "_blank"
+            assert link.get_attribute("rel") == "noopener noreferrer"
+
+        page.goto(f"{origin}/weapons/rifle", wait_until="domcontentloaded")
+        card = page.locator(".weapon-variant .weapon-profile").first
+        card.wait_for(state="visible", timeout=30000)
+        chart = card.locator(".rules-source-citations").filter(has_text="Weapon Chart:")
+        assert "N5 Core Rules v5.3, p. 183" in chart.inner_text()
+        ammunition = card.locator(".weapon-ammunition-effects")
+        ammunition.locator("summary").click()
+        assert ammunition.locator(".weapon-ammunition-effect .detail-source a").count() > 0
+        assert "Weapon Chart:" not in ammunition.inner_text()
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        link = chart.locator("a")
+        link.focus()
+        assert link.evaluate("(node) => document.activeElement === node")
+        with page.expect_popup() as popup_info:
+            link.press("Enter")
+        popup = popup_info.value
+        try:
+            popup.wait_for_load_state("domcontentloaded", timeout=30000)
+            assert popup.url == "https://experience.corvusbelli.com/en/infinity/resources"
+        finally:
+            popup.close()
+        assert not errors, (width, color_scheme, errors)
+    finally:
+        page.close()
+
+
+def test_missing_weapon_chart_publication_is_visible_in_browser(
+    origin: str, chrome: Any, weapon_app: Any,
+) -> None:
+    with patch.object(weapon_app.api, "weapon_profile_citations", None):
+        page = chrome.new_page(viewport={"width": 390, "height": 900})
+        try:
+            page.goto(f"{origin}/weapons/rifle", wait_until="domcontentloaded")
+            card = page.locator(".weapon-variant .weapon-profile").first
+            card.wait_for(state="visible", timeout=30000)
+            citation = card.locator(".rules-source-citations").filter(has_text="Weapon Chart:")
+            assert citation.inner_text() == "Weapon Chart: Unavailable."
+            assert citation.locator("a").count() == 0
+        finally:
+            page.close()
+
+
 def test_unroutable_weapon_property_example_shows_source_section_in_browser(
     origin: str, chrome: Any,
 ) -> None:

@@ -77,6 +77,7 @@ Every deploy requires these release-controlled files to be present in the checko
 data/generated/infinity.db
 data/generated/rules.db
 data/generated/variant-usage.json
+data/generated/weapon-profile-sources.json
 data/manifests/symbol-publication.json
 src/infinity_db/web/static/{armies,characteristics,orders,peripherals,units}/...
 ```
@@ -101,6 +102,14 @@ they validate the committed publication against the tracked databases and
 generated deployed-object bytes without regenerating it. Changes to either
 database or the deployed-object publication require rebuilding and committing
 matching variant JSON during release preparation.
+
+The tracked `weapon-profile-sources.json` is generated from the same
+database pair and reviewed Weapon decisions with
+`python -m tools.build_weapon_profile_publication`; `--check` compares the
+exact bytes and source pins. Deployment verification runs this check without
+the PDF or raw Army archive. Rebuild and commit the matched file whenever
+either database or its reviewed inputs change. The image verifies and
+serves it independently of the curated files.
 
 The Docker image explicitly configures both runtime database paths. Missing, invalid, or
 incompatible tracked databases or reference publications fail before activation. After building the image,

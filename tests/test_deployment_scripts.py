@@ -156,6 +156,31 @@ def test_variant_usage_publication_is_byte_exact_and_packaged_for_v9_release() -
     )
 
 
+def test_weapon_profile_citations_are_release_paired_and_packaged() -> None:
+    gitignore = _read(".gitignore")
+    attributes = _read(".gitattributes")
+    dockerignore = _read(".dockerignore")
+    dockerfile = _read("Dockerfile")
+    smoke = _read("scripts/verify-container-image.sh")
+    workflow = _read(".github/workflows/deployment-smoke.yml")
+    determinism = _read("tools/build_determinism_manifest.py")
+
+    assert "!data/generated/weapon-profile-sources.json" in gitignore
+    assert "data/generated/weapon-profile-sources.json binary" in attributes
+    assert "!data/generated/weapon-profile-sources.json" in dockerignore
+    assert (
+        "COPY --chown=appuser:appuser data/generated/weapon-profile-sources.json "
+        "/app/data/weapon-profile-sources.json"
+    ) in dockerfile
+    assert (ROOT / "data/generated/weapon-profile-sources.json").is_file()
+    assert 'expected_files.add("weapon-profile-sources.json")' in smoke
+    assert "load_weapon_profile_publication(" in smoke
+    assert "/api/weapons/rifle" in smoke
+    assert "RUN rm /app/data/weapon-profile-sources.json" in workflow
+    assert "tools.build_weapon_profile_publication" in determinism
+    assert "publication/weapon-profile-sources.json" in determinism
+
+
 def test_variant_usage_legacy_image_removes_v9_publication_before_smoke() -> None:
     workflow = _read(".github/workflows/deployment-smoke.yml")
     smoke = _read("scripts/verify-container-image.sh")

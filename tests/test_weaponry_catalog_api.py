@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,7 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_db.curated import load_curated_directory
+from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.web import create_app
 from tools.release_rules_export import export_release_rules
@@ -59,6 +61,120 @@ def _weapon_detail(
 
 def _weapon_rules(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {record["id"]: record for record in payload.get("rules", [])}
+
+
+def test_reviewed_profile_chart_citations_reach_exact_api_profiles(
+    weaponry_app: Callable,
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    publication = json.loads(
+        (root / "data/generated/weapon-profile-sources.json").read_text(encoding="utf-8")
+    )
+    database = Database(root / "data/generated/infinity.db")
+    source = publication["source"]
+    assert len(publication["weapons"]) == 62
+    for weapon in publication["weapons"]:
+        payload = _weapon_detail(weaponry_app, weapon["slug"])
+        original = database.get_catalog_item("weapons", weapon["id"])
+        assert original is not None
+        assert payload["id"] == weapon["id"]
+        assert payload["slug"] == weapon["slug"]
+        assert payload["profile_citations_available"] is True
+        expected = {
+            (profile["sourceId"], profile["mode"]): {
+                "source_id": source["id"],
+                "source_title": source["title"],
+                "source_version": source["version"],
+                "source_url": source["url"],
+                "source_sha256": source["sha256"],
+                "source_collection_id": source["collectionId"],
+                "page": profile["page"],
+            }
+            for profile in weapon["profiles"]
+        }
+        originals = {(profile["id"], profile["mode"]): profile for profile in original["profiles"]}
+        nested = [
+            profile for variant in payload["weapon_variants"] for profile in variant["profiles"]
+        ]
+        assert {
+            (profile["id"], profile["mode"]) for profile in payload["profiles"]
+        } == set(expected)
+        assert {(profile["id"], profile["mode"]) for profile in nested} == set(expected)
+        for profile in [*payload["profiles"], *nested]:
+            key = (profile["id"], profile["mode"])
+            assert profile["profile_citations"] == [expected[key]]
+            for field in (
+                "name", "mode", "ammunition", "burst", "damage", "saving",
+                "saving_num", "ranges", "traits",
+            ):
+                assert profile[field] == originals[key][field]
+            for effect in profile.get("ammunition_effects", []):
+                assert "profile_citations" not in effect
+                assert effect["citations"]
+
+
+@pytest.mark.parametrize("slug", ("rifle", "uragan-mrl", "multi-red-fury"))
+def test_chart_citations_preserve_numeric_slug_and_mode_parity(
+    weaponry_app: Callable, slug: str,
+) -> None:
+    by_slug = _weapon_detail(weaponry_app, slug)
+    by_id = _weapon_detail(weaponry_app, str(by_slug["id"]))
+    assert by_slug == by_id
+    citations = {
+        profile["mode"]: profile["profile_citations"][0]["page"]
+        for profile in by_slug["profiles"]
+    }
+    if slug == "rifle":
+        assert citations == {None: 183}
+    elif slug == "uragan-mrl":
+        assert citations == {"Blast Mode": 188, "Hit Mode": 188}
+    else:
+        assert citations == {"Antimaterial Mode": 183, "AP Mode": 183, "Shock Mode": 183}
+
+
+def test_missing_or_mixed_weapon_profile_publication_is_explicit(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[1]
+    army = root / "data/generated/infinity.db"
+    rules = root / "data/generated/rules.db"
+    local_army, local_rules = tmp_path / "infinity.db", tmp_path / "rules.db"
+    shutil.copyfile(army, local_army)
+    shutil.copyfile(rules, local_rules)
+    for app in (
+        create_app(local_army, rules_database_path=local_rules),
+        create_app(army, rules_database_path=local_rules),
+    ):
+        payload = _weapon_detail(app, "rifle")
+        assert payload["profile_citations_available"] is False
+        assert all(profile["profile_citations"] == [] for profile in payload["profiles"])
+        assert all(
+            profile["profile_citations"] == []
+            for variant in payload["weapon_variants"] for profile in variant["profiles"]
+        )
+
+
+def test_stale_colocated_weapon_profile_publication_fails_startup(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[1]
+    for filename in ("infinity.db", "rules.db"):
+        shutil.copyfile(root / "data/generated" / filename, tmp_path / filename)
+    document = json.loads(
+        (root / "data/generated/weapon-profile-sources.json").read_text(encoding="utf-8")
+    )
+    document["sourceSnapshot"]["rulesDatabaseSha256"] = "0" * 64
+    (tmp_path / "weapon-profile-sources.json").write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match release databases"):
+        create_app(tmp_path / "infinity.db", rules_database_path=tmp_path / "rules.db")
+
+
+def test_unreviewed_profile_does_not_inherit_chart_or_ammunition_citation(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "ap-mine")
+    assert payload["profile_citations_available"] is True
+    assert all(profile["profile_citations"] == [] for profile in payload["profiles"])
+    assert "weapon:mines" in _weapon_rules(payload)
+    assert any(effect["citations"] for effect in payload["profiles"][0]["ammunition_effects"])
 
 
 @pytest.mark.parametrize(

@@ -128,6 +128,8 @@ jobs:
           COPY --chown=appuser:appuser deployed-objects.json /app/data/deployed-objects.json
           # The v8 compatibility image deliberately exposes no v9-only usage index.
           RUN rm /app/data/variant-usage.json
+          # The reviewed Weapon Chart publication is paired to the v9 database.
+          RUN rm /app/data/weapon-profile-sources.json
           DOCKERFILE
           docker build --build-arg BASE_IMAGE=infinity-db:deployment-smoke --tag infinity-db:rollback-v8 local/restrictions-v8-ci
 

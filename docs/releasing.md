@@ -237,6 +237,10 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
   staging the exact bytes. Deployment/CI without raw inputs must validate the
   tracked variant publication against the released Army/rules/deployed-object
   fingerprints; a stale or absent publication blocks current-release packaging.
+  Also rebuild and `--check` the tracked
+  `data/generated/weapon-profile-sources.json` using
+  `tools.build_weapon_profile_publication`; its database, review and PDF
+  fingerprints must match before staging.
   With `INFINITYDB_RELEASE_FAQ_PARITY=1`, run the tracked-pair FAQ
   primary, secondary and conflict Chromium tests. Fresh-export browser
   tests alone do not verify the release database pair.

@@ -33,6 +33,7 @@ COPY --chown=appuser:appuser data/generated/infinity.db /app/data/infinity.db
 COPY --chown=appuser:appuser data/generated/rules.db /app/data/rules.db
 COPY --chown=appuser:appuser data/generated/deployed-objects.json /app/data/deployed-objects.json
 COPY --chown=appuser:appuser data/generated/variant-usage.json /app/data/variant-usage.json
+COPY --chown=appuser:appuser data/generated/weapon-profile-sources.json /app/data/weapon-profile-sources.json
 
 USER appuser
 EXPOSE 8000

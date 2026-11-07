@@ -38,6 +38,7 @@ data/generated/*
 !data/generated/infinity.db
 !data/generated/rules.db
 !data/generated/variant-usage.json
+!data/generated/weapon-profile-sources.json
 data/manifests/*
 !data/manifests/symbol-publication.json
 data/curated/*

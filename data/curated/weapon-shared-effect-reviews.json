@@ -2,6 +2,9 @@
   "format": "InfinityDB Weapon shared-effects source reviews",
   "version": 1,
   "sourceId": "n5-core-v5.3-pdf",
+  "sourceCollectionId": "n5-core-v5.3",
+  "sourceSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "chartPageRange": [176, 188],
   "reviews": [
     {
       "slug": "combi-rifle",

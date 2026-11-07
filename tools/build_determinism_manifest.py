@@ -67,6 +67,13 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
             "--output",
             str(generated / "rules.db"),
         )
+        _run(
+            project_root,
+            "-m",
+            "tools.build_weapon_profile_publication",
+            "--output",
+            str(generated / "weapon-profile-sources.json"),
+        )
 
         fixture_files = sorted(path for path in fixture.rglob("*") if path.is_file())
         snapshot = create_timestamped_archive(
@@ -94,6 +101,9 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
 
         artifacts["publication/symbol-publication.json"] = sha256_file(
             project_root / "data" / "manifests" / "symbol-publication.json"
+        )
+        artifacts["publication/weapon-profile-sources.json"] = sha256_file(
+            generated / "weapon-profile-sources.json"
         )
 
         return {

@@ -36,6 +36,7 @@ from infinity_db.database import Database
 from infinity_db.deployed_object_publication import load_deployed_object_publication
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.variant_usage_reference import load_variant_usage_publication
+from infinity_db.weapon_profile_publication import load_weapon_profile_publication
 
 expected_environment = {
     "INFINITY_DB_DATABASE": "/app/data/infinity.db",
@@ -59,6 +60,7 @@ restrictions = rules.restrictions_payload()
 expected_files = {"infinity.db", "rules.db", "deployed-objects.json"}
 if restrictions["available"]:
     expected_files.add("variant-usage.json")
+    expected_files.add("weapon-profile-sources.json")
 actual_files = {path.name for path in data_dir.iterdir()}
 if actual_files != expected_files:
     raise SystemExit(
@@ -93,6 +95,21 @@ if restrictions["available"] and (usage is None or not usage["variants"]):
     raise SystemExit("Release image is missing the reviewed exact-variant publication")
 if not restrictions["available"] and usage is not None:
     raise SystemExit("Legacy compatibility image unexpectedly published variant usage")
+weapon_sources = load_weapon_profile_publication(
+    data_dir / "weapon-profile-sources.json",
+    data_dir / "infinity.db",
+    data_dir / "rules.db",
+)
+if restrictions["available"]:
+    rifle = Database(data_dir / "infinity.db").get_catalog_item("weapons", "rifle")
+    if not weapon_sources or rifle is None:
+        raise SystemExit("Release image is missing reviewed Weapon Chart citations")
+    profile = rifle["profiles"][0]
+    citation = weapon_sources.get((rifle["id"], profile["id"], profile["mode"]))
+    if not citation or citation["source_id"] != "n5-core-v5.3-pdf" or citation["page"] != 183:
+        raise SystemExit("Release image has no matching Rifle Weapon Chart citation")
+elif weapon_sources is not None:
+    raise SystemExit("Legacy compatibility image unexpectedly published Weapon Chart citations")
 '
 
 if [ "$published_assets" -eq 1 ]; then
@@ -300,6 +317,20 @@ if restrictions.get("available"):
         raise SystemExit("/api/restrictions lost Lieutenant selection-only scope")
 elif restrictions.get("items") != []:
     raise SystemExit("/api/restrictions legacy snapshot must not imply permissions")
+
+with urlopen("http://127.0.0.1:8000/api/weapons/rifle", timeout=3) as response:
+    rifle = json.load(response)
+if rifle.get("profile_citations_available") is not restrictions.get("available"):
+    raise SystemExit("/api/weapons/rifle has the wrong Weapon Chart publication status")
+profile_sources = rifle["profiles"][0].get("profile_citations", [])
+if restrictions.get("available"):
+    if not any(
+        citation.get("source_id") == "n5-core-v5.3-pdf" and citation.get("page") == 183
+        for citation in profile_sources
+    ):
+        raise SystemExit("/api/weapons/rifle lost its reviewed Weapon Chart citation")
+elif profile_sources:
+    raise SystemExit("Legacy Weapon profile incorrectly retained a v9 citation")
 
 with urlopen("http://127.0.0.1:8000/api/version", timeout=3) as response:
     version = json.load(response)

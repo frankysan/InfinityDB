@@ -240,9 +240,9 @@ bounded rule-citation/route check; final release acceptance remains open.
   or sections. The [Army catalog dependency screen](v1.0-source-coverage-audit.md#v1s-082-army-catalog-dependency-screen-2026-11-07)
   found cited Skill, Equipment, Trait and Ammunition targets. All 62
   profile-only Weapons have fingerprinted, reviewed chart-page evidence,
-  but their normal browser pages do not expose that Weapon-specific source;
-  publish applicable profile citations without treating Ammunition citations
-  as evidence for Weapon statistics. The chart-audit extractor also missed
+  and a matched profile/mode citation publication now projects those locators
+  separately from Ammunition rules; its source/API/browser validation remains
+  open as VR-0134. The chart-audit extractor also missed
   two early page-188 rows; its shared-anchor correction passed
   [VR-0133](testing.md#v1s-082-weapon-chart-early-row-regression-vr-0133)
   on Windows. Reconcile other

@@ -19,6 +19,7 @@ from typing import Any
 from infinity_db.database.repository import Database
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
+from infinity_db.weapon_profile_publication import profile_sha256
 
 FORMAT = "InfinityDB 1.0 weapon definition gap triage"
 FORMAT_VERSION = 3
@@ -130,6 +131,10 @@ def reconcile(
                 if (
                     kind != "shared-effects-review"
                     or coverage is None
+                    or (
+                        "sourceSha256" in evidence
+                        and evidence["sourceSha256"] != pdf_sha
+                    )
                     or evidence["chartPage"] not in {r["page"] for r in row_candidates}
                     or any(r["differences"] for r in row_candidates)
                 ):
@@ -295,8 +300,18 @@ def load_shared_reviews(
         policy.get("format") != "InfinityDB Weapon shared-effects source reviews"
         or policy.get("version") != 1
         or policy.get("sourceId") != "n5-core-v5.3-pdf"
+        or policy.get("sourceCollectionId") != "n5-core-v5.3"
+        or not isinstance(policy.get("sourceSha256"), str)
+        or re.fullmatch(r"[0-9a-f]{64}", policy["sourceSha256"]) is None
     ):
         raise WeaponGapTriageError("Unsupported reviewed Weapon source policy")
+    page_range = policy.get("chartPageRange")
+    if (
+        not isinstance(page_range, list) or len(page_range) != 2
+        or any(type(page) is not int for page in page_range)
+        or not 1 <= page_range[0] <= page_range[1]
+    ):
+        raise WeaponGapTriageError("Reviewed Weapon source policy lacks its chart-page range")
     reviews = policy.get("reviews")
     if not isinstance(reviews, list):
         raise WeaponGapTriageError("Reviewed Weapon source policy lacks reviews")
@@ -319,7 +334,7 @@ def load_shared_reviews(
             or not isinstance(name, str) or not name
             or not isinstance(digest, str)
             or re.fullmatch(r"[0-9a-f]{64}", digest) is None
-            or not isinstance(page, int) or page <= 0
+            or type(page) is not int or not page_range[0] <= page <= page_range[1]
             or not isinstance(note, str) or not note.strip()
         ):
             raise WeaponGapTriageError(f"Incomplete reviewed Weapon entry: {name!r}")
@@ -346,15 +361,12 @@ def load_shared_reviews(
         if details is None:
             raise WeaponGapTriageError(f"Reviewed Weapon cannot be resolved: {name}")
         profiles = details["profiles"]
-        actual = hashlib.sha256(
-            json.dumps(
-                profiles, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
-            ).encode("utf-8")
-        ).hexdigest()
+        actual = profile_sha256(profiles)
         if actual != digest:
             raise WeaponGapTriageError(f"Reviewed Weapon profile changed: {name}")
         accepted[weapon_id] = {
             "sourceId": policy["sourceId"],
+            "sourceSha256": policy["sourceSha256"],
             "chartPage": page,
             "reviewedOn": review.get("reviewedOn"),
             "reason": note,

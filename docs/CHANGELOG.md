@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Reviewed Weapon profiles without separate rules cards now link to their
+  corresponding N5.3 Weapon Chart pages, including individual modes.
 - Pheroware Tactics and PT: Endgame now cite the correct N5.3 Weapon Chart page.
 - Embedded Attribute, Game-term and Unit Profile Glossary entries now show their
   source citations; Unit Profile notation help also shows sources in context.
@@ -106,6 +108,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Publish reviewed,
+  source-pinned Weapon Chart citations on exact Army profiles and modes,
+  separately from shared Ammunition rules.
 - **Web backend + Web frontend:** Show ordered definition citations on
   embedded Attribute, Game-term and Unit Profile Glossary entries and in
   contextual Unit Profile notation help, preserving source locations.

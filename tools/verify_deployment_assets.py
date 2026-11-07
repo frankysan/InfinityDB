@@ -20,11 +20,16 @@ try:
         AssetValidationError,
         validate_asset_set,
     )
+    from tools.build_weapon_profile_publication import DEFAULT_REVIEWS, check_publication
 except ImportError:  # pragma: no cover - direct script execution fallback
     from asset_validation import (  # type: ignore[no-redef]
         AssetSetValidation,
         AssetValidationError,
         validate_asset_set,
+    )
+    from build_weapon_profile_publication import (  # type: ignore[no-redef]
+        DEFAULT_REVIEWS,
+        check_publication,
     )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -73,6 +78,7 @@ def verify_deployment_assets(
 
     verify_runtime_artifacts(database_path, rules_database_path, publication_manifest_path)
     verify_variant_release_publication(database_path, rules_database_path)
+    verify_weapon_profile_release_publication(database_path, rules_database_path)
     return validation
 
 
@@ -99,6 +105,16 @@ def verify_variant_release_publication(
     )
     if publication is None or not publication["variants"]:
         raise DeploymentAssetError("Release-matched variant-usage.json is missing or empty")
+
+
+def verify_weapon_profile_release_publication(
+    database_path: Path, rules_database_path: Path,
+) -> None:
+    """Require the exact reviewed Weapon Chart publication before packaging."""
+    check_publication(
+        database_path, rules_database_path, DEFAULT_REVIEWS,
+        database_path.with_name("weapon-profile-sources.json"),
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -139,7 +155,8 @@ def main(argv: list[str] | None = None) -> int:
                 args.database, args.rules_database, args.publication_manifest,
             )
             verify_variant_release_publication(args.database, args.rules_database)
-            print("Runtime databases and variant publication valid; SVG validation skipped")
+            verify_weapon_profile_release_publication(args.database, args.rules_database)
+            print("Runtime databases and reference publications valid; SVG validation skipped")
             return 0
         validation = verify_deployment_assets(
             args.static_root,
@@ -161,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
         "Deployment release artifacts verified: "
         f"{validation.present_count}/{validation.expected_count} published SVGs; "
         f"{validation.browser_present_count}/{validation.browser_expected_count} "
-        "browser-referenced; runtime databases and variant publication source-matched"
+        "browser-referenced; runtime databases and reference publications source-matched"
     )
     return 0
 

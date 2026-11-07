@@ -57,9 +57,10 @@ provenance/state, and build outputs.
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the application `infinity.db`, development-only `infinity.raw.db`, and the
-  separate curated-rules `rules.db` and deterministic `deployed-objects.json`
-  and `variant-usage.json` reference publications. The two SQLite databases and
-  the **byte-exact variant-usage JSON** are tracked release artifacts;
+  separate curated-rules `rules.db` and deterministic `deployed-objects.json`,
+  `variant-usage.json`, and `weapon-profile-sources.json` reference publications.
+  The two SQLite databases and the **byte-exact variant-usage and Weapon-profile
+  JSON files** are tracked release artifacts;
   `deployed-objects.json` remains ignored and is regenerated from the pinned
   databases and reviewed source before Docker packaging. Variant usage requires
   the paired raw archive to regenerate, so a tagged/deployment checkout uses
@@ -71,11 +72,15 @@ Raw inputs, generated acquisition/build provenance, and intermediate outputs sta
 source control so machine-local snapshot state does not obscure code changes.
 For the private Linux worker, [Syncthing-staged development assets](../docs/syncthing-assets.md)
 defines the separate source staging and explicit, verified checkout activation procedure.
-The tracked SQLite databases and byte-exact variant-usage publication are release artifacts:
+The tracked SQLite databases and byte-exact reference publications are release artifacts:
 a tagged checkout includes what production serves. The variant JSON also pins the verified
 raw archive digest, which may differ between independent host rebuilds even when the
 logical export pair agrees. Never regenerate it on a deployment host or rewrite its bytes
-through line-ending conversion. Generated manifests remain local provenance records.
+through line-ending conversion. The Weapon-profile JSON is built from the tracked database
+pair and reviewed source decisions without raw archives; rebuild and commit it when either
+database or those decisions change. Its deployment check independently regenerates expected
+bytes and refuses a missing or stale publication. Generated manifests remain local
+provenance records.
 
 Generated Army database data is replaceable. Builds create temporary application
 and raw-archive siblings, validate both before publication, and bind them with the
