@@ -247,8 +247,11 @@ bounded rule-citation/route check; final release acceptance remains open.
   two early page-188 rows; its shared-anchor correction passed
   [VR-0133](testing.md#v1s-082-weapon-chart-early-row-regression-vr-0133)
   on Windows. Reconcile other
-  PDF-backed and contextual citation applicability and known missing dependencies before closing this gate;
-  metadata and reachability alone do not prove that a locator supports its reference.
+  PDF-backed and contextual citation applicability and known missing dependencies before closing this gate.
+  The [PDF-only locator screen](v1.0-source-coverage-audit.md#v1s-082-pdf-only-reference-locator-screen-2026-11-07)
+  matched 145 existing identities or aliases to cited pages and checked
+  parent context for 13 others; it is not a clause-by-clause review.
+  Metadata and reachability alone do not prove that a locator supports its reference.
   The full cumulative
   V1S-090 gate and hosted release checks remain independent. SRC-002/006/
   020/021/034 and further source-first/whole-record investigations are
